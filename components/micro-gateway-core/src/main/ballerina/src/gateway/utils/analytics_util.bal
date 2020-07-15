@@ -87,9 +87,9 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
     eventDto.metaClientType = metaInfo.toString();
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-        if (invocationContext.attributes.hasKey(ADDITIONAL_PROPS) &&
-        invocationContext.attributes[ADDITIONAL_PROPS] is string) {
-        eventDto.properties = <string>invocationContext.attributes[ADDITIONAL_PROPS];
+        if (invocationContext.attributes.hasKey(ADDITIONAL_ANALYTICS_PROPS) &&
+        invocationContext.attributes[ADDITIONAL_ANALYTICS_PROPS] is string) {
+        eventDto.properties = <string>invocationContext.attributes[ADDITIONAL_ANALYTICS_PROPS];
     }
     printDebug(KEY_ANALYTICS_FILTER, "Throttle Event DTO : " + eventDto.toString());
     return eventDto;
@@ -154,9 +154,9 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
     }
     metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
     eventDto.metaClientType = metaInfo.toString();
-    if (invocationContext.attributes.hasKey(ADDITIONAL_PROPS) &&
-        invocationContext.attributes[ADDITIONAL_PROPS] is string) {
-        eventDto.properties = <string>invocationContext.attributes[ADDITIONAL_PROPS];
+    if (invocationContext.attributes.hasKey(ADDITIONAL_ANALYTICS_PROPS) &&
+        invocationContext.attributes[ADDITIONAL_ANALYTICS_PROPS] is string) {
+        eventDto.properties = <string>invocationContext.attributes[ADDITIONAL_ANALYTICS_PROPS];
     }
     return eventDto;
 }

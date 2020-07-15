@@ -20,7 +20,7 @@ import ballerina/runtime;
 import ballerina/stringutils;
 
 
-public function getRequestReponseExecutionDataPayload(RequestResponseExecutionDTO requestResponseExecutionDTO, string amAnalyticsVertion) returns string {
+public function getRequestReponseExecutionDataPayload(RequestResponseExecutionDTO requestResponseExecutionDTO) returns string {
     printDebug(KEY_ANALYTICS_FILTER, "Request response execution DTO : " + requestResponseExecutionDTO.toString());
     string output =
     requestResponseExecutionDTO.applicationConsumerKey + OBJ +
@@ -53,7 +53,7 @@ public function getRequestReponseExecutionDataPayload(RequestResponseExecutionDT
     requestResponseExecutionDTO.gatewayType + OBJ +
     requestResponseExecutionDTO.label;
 
-    if (amAnalyticsVertion !== DEFAULT_AM_ANALYTICS_VERSION_300) {
+    if (amAnalyticsVersion != DEFAULT_AM_ANALYTICS_VERSION_300) {
         output = output + OBJ + requestResponseExecutionDTO.properties;
     }
     printDebug(KEY_ANALYTICS_FILTER, "Request response execution DTO string : " + output);
@@ -65,15 +65,15 @@ public function getMetaDataForRequestResponseExecutionData(RequestResponseExecut
     return metaData.toString();
 }
 
-function generateEventFromRequestResponseExecutionDTO(RequestResponseExecutionDTO requestResponseExecutionDTO, string amAnalyticsVertion) returns
+function generateEventFromRequestResponseExecutionDTO(RequestResponseExecutionDTO requestResponseExecutionDTO) returns
 EventDTO | error
 {
     EventDTO eventDTO = {};
-    eventDTO.streamId = "org.wso2.apimgt.statistics.request:" + amAnalyticsVertion;
+    eventDTO.streamId = "org.wso2.apimgt.statistics.request:" + amAnalyticsVersion;
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getMetaDataForRequestResponseExecutionData(requestResponseExecutionDTO);
     eventDTO.correlationData = "null";
-    eventDTO.payloadData = getRequestReponseExecutionDataPayload(requestResponseExecutionDTO, amAnalyticsVertion);
+    eventDTO.payloadData = getRequestReponseExecutionDataPayload(requestResponseExecutionDTO);
     return eventDTO;
 }
 
@@ -173,16 +173,13 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     if (invocationContext.attributes[DESTINATION] is string) {
         requestResponseExecutionDTO.destination = <string>invocationContext.attributes[DESTINATION];
     }
-
     //Set data which were set to context in the Request path
     if (context.attributes[APPLICATION_OWNER_PROPERTY] is string) {
         requestResponseExecutionDTO.applicationOwner = <string>context.attributes[APPLICATION_OWNER_PROPERTY];
     }
-    
     if (context.attributes[API_CREATOR_TENANT_DOMAIN_PROPERTY] is string) {
         requestResponseExecutionDTO.apiCreatorTenantDomain = <string>context.attributes[API_CREATOR_TENANT_DOMAIN_PROPERTY];
     }
-
     if (context.attributes[API_TIER_PROPERTY] is string) {
         requestResponseExecutionDTO.apiTier = <string>context.attributes[API_TIER_PROPERTY];
     }
@@ -200,11 +197,10 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     }
     requestResponseExecutionDTO.gatewayType = GATEWAY_TYPE;
     requestResponseExecutionDTO.label = GATEWAY_TYPE;
-
     requestResponseExecutionDTO.executionTime = generateExecutionTimeEvent(context);
-    if (invocationContext.attributes.hasKey(ADDITIONAL_PROPS) &&
-        invocationContext.attributes[ADDITIONAL_PROPS] is string) {
-        requestResponseExecutionDTO.properties = <string>invocationContext.attributes[ADDITIONAL_PROPS];
+    if (invocationContext.attributes.hasKey(ADDITIONAL_ANALYTICS_PROPS) &&
+        invocationContext.attributes[ADDITIONAL_ANALYTICS_PROPS] is string) {
+        requestResponseExecutionDTO.properties = <string>invocationContext.attributes[ADDITIONAL_ANALYTICS_PROPS];
     }
 
     return requestResponseExecutionDTO;

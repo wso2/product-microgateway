@@ -21,7 +21,7 @@ public function getFaultMetaData(FaultDTO dto) returns string {
     return dto.metaClientType;
 }
 
-public function getFaultPayloadData(FaultDTO dto, string amAnalyticsVersion) returns string {
+public function getFaultPayloadData(FaultDTO dto) returns string {
     printDebug(KEY_ANALYTICS_FILTER, "Generating fault data payload for " + amAnalyticsVersion);
     string resourceTemplate = OBJ;
     string applicationOwner = OBJ;
@@ -32,7 +32,7 @@ public function getFaultPayloadData(FaultDTO dto, string amAnalyticsVersion) ret
         applicationOwner = applicationOwner + dto.applicationOwner + OBJ;
     }
     // If analytics version is 3.1.0, append properties.
-    if (amAnalyticsVersion !== DEFAULT_AM_ANALYTICS_VERSION_300) {
+    if (amAnalyticsVersion != DEFAULT_AM_ANALYTICS_VERSION_300) {
             properties = OBJ + dto.properties;
     }
 
@@ -43,12 +43,12 @@ public function getFaultPayloadData(FaultDTO dto, string amAnalyticsVersion) ret
         dto.errorMessage + OBJ + dto.faultTime.toString() + properties;
 }
 
-public function getEventFromFaultData(FaultDTO dto, string amAnalyticsVersion) returns EventDTO | error {
+public function getEventFromFaultData(FaultDTO dto) returns EventDTO | error {
     EventDTO eventDTO = {};
     eventDTO.streamId = "org.wso2.apimgt.statistics.fault:" + amAnalyticsVersion;
     eventDTO.timeStamp = getCurrentTime();
     eventDTO.metaData = getFaultMetaData(dto);
     eventDTO.correlationData = "null";
-    eventDTO.payloadData = getFaultPayloadData(dto, amAnalyticsVersion);
+    eventDTO.payloadData = getFaultPayloadData(dto);
     return eventDTO;
 }

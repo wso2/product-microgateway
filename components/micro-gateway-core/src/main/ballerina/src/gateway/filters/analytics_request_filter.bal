@@ -20,7 +20,6 @@ import ballerina/runtime;
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
-        string amAnalyticsVersion = getAnalyticsVertion();
         printDebug(KEY_ANALYTICS_FILTER, "Analytics Version " + amAnalyticsVersion);
         if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
             printDebug(KEY_ANALYTICS_FILTER, "Skip all filter annotation set in the service. Skip the filter");
@@ -29,13 +28,12 @@ public type AnalyticsRequestFilter object {
         //Filter only if analytics is enabled.
         if (isAnalyticsEnabled || isGrpcAnalyticsEnabled) {
             context.attributes[PROTOCOL_PROPERTY] = caller.protocol;
-            doFilterRequest(request, context, amAnalyticsVersion);
+            doFilterRequest(request, context);
         }
         return true;
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        string amAnalyticsVersion = getAnalyticsVertion();
         printDebug(KEY_ANALYTICS_FILTER, "Analytics Version " + amAnalyticsVersion);
         if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
             printDebug(KEY_ANALYTICS_FILTER, "Skip all filter annotation set in the service. Skip the filter");
@@ -57,7 +55,7 @@ public type AnalyticsRequestFilter object {
                             printDebug(KEY_ANALYTICS_FILTER, "gRPC throttle stream message published.");
                         }
                         if (isAnalyticsEnabled) {
-                            EventDTO|error eventDTO  = trap getEventFromThrottleData(throttleAnalyticsEventDTO, amAnalyticsVersion);
+                            EventDTO|error eventDTO  = trap getEventFromThrottleData(throttleAnalyticsEventDTO);
                             if (eventDTO is EventDTO) {
                                 future<()> responseDataPublishFuture = start writeEventToFile(eventDTO);
                                 printDebug(KEY_ANALYTICS_FILTER, "File upload throttle stream data published." + eventDTO.streamId);
@@ -70,13 +68,13 @@ public type AnalyticsRequestFilter object {
                     }
                 } else {
                     if (!filterFailed) {
-                        doFilterAll(response, context, amAnalyticsVersion);
+                        doFilterAll(response, context);
                     }
                 }
             } else {
                 if (!filterFailed) {
                     context.attributes[THROTTLE_LATENCY] = 0;
-                    doFilterAll(response, context, amAnalyticsVersion);
+                    doFilterAll(response, context);
                 }
             }
         }
@@ -85,7 +83,7 @@ public type AnalyticsRequestFilter object {
 };
 
 
-function doFilterRequest(http:Request request, http:FilterContext context, string amAnalyticsVersion) {
+function doFilterRequest(http:Request request, http:FilterContext context) {
     printDebug(KEY_ANALYTICS_FILTER, "doFilterRequest Mehtod called");
     error? result = trap setRequestAttributesToContext(request, context);
     if (result is error) {
@@ -93,7 +91,7 @@ function doFilterRequest(http:Request request, http:FilterContext context, strin
     }
 }
 
-function doFilterFault(http:FilterContext context, string errorMessage, string amAnalyticsVersion) {
+function doFilterFault(http:FilterContext context, string errorMessage) {
     FaultDTO|error faultDTO = trap populateFaultAnalyticsDTO(context, errorMessage);
     if (faultDTO is FaultDTO) {
         printDebug(KEY_ANALYTICS_FILTER, "doFilterFault method called. Client type : " + faultDTO. metaClientType + " applicationName :" + faultDTO.applicationName);
@@ -104,7 +102,7 @@ function doFilterFault(http:FilterContext context, string errorMessage, string a
             future<()> faultDataPublishFuture = start dataToAnalytics(message);
             return;
         }
-        EventDTO|error eventDTO = trap getEventFromFaultData(faultDTO, amAnalyticsVersion);
+        EventDTO|error eventDTO = trap getEventFromFaultData(faultDTO);
         if (eventDTO is EventDTO) {
             if (isAnalyticsEnabled != false) {
                 printDebug(KEY_ANALYTICS_FILTER, "File Upload fault stream invoked for API : " + faultDTO.apiName);
@@ -118,7 +116,7 @@ function doFilterFault(http:FilterContext context, string errorMessage, string a
     }
 }
 
-function doFilterResponseData(http:Response response, http:FilterContext context, string amAnalyticsVersion) {
+function doFilterResponseData(http:Response response, http:FilterContext context) {
     printDebug(KEY_ANALYTICS_FILTER, "doFilterResponseData method called");
     //Response analytics data publishing
     RequestResponseExecutionDTO|error requestResponseExecutionDTO = trap generateRequestResponseExecutionDataEvent(response,
@@ -131,7 +129,7 @@ function doFilterResponseData(http:Response response, http:FilterContext context
         return;
     }
     if (requestResponseExecutionDTO is RequestResponseExecutionDTO) {
-        EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO, amAnalyticsVersion);
+        EventDTO|error event = trap generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
         if(event is EventDTO) {
             if (isAnalyticsEnabled) {
                 printDebug(KEY_ANALYTICS_FILTER, "File Upload eventRequestStream called for API : " + requestResponseExecutionDTO.apiName);
@@ -146,15 +144,15 @@ function doFilterResponseData(http:Response response, http:FilterContext context
 
 }
 
-function doFilterAll(http:Response response, http:FilterContext context, string amAnalyticsVersion) {
+function doFilterAll(http:Response response, http:FilterContext context) {
     var resp = runtime:getInvocationContext().attributes[ERROR_RESPONSE];
     printDebug(KEY_ANALYTICS_FILTER, "doFilterAll method resp value : "+ resp.toString());
     if (resp is ()) {
         printDebug(KEY_ANALYTICS_FILTER, "No any faulty analytics events to handle.");
-        doFilterResponseData(response, context, amAnalyticsVersion);
+        doFilterResponseData(response, context);
     } else if (resp is string) {
         printDebug(KEY_ANALYTICS_FILTER, "Error response value present and handling faulty analytics events");
-        doFilterFault(context, resp, amAnalyticsVersion);
+        doFilterFault(context, resp);
     }
 }
 

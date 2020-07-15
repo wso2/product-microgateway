@@ -48,6 +48,7 @@ string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PA
 string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
 string headerName = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CERT_HEADER_NAME, DEFAULT_MTSL_CONF_CERT_HEADER_NAME);
 boolean isClientCertificateValidationEnabled = getConfigBooleanValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_IS_CLIENT_CER_VALIDATION_ENABLED, true);
+string amAnalyticsVersion = getConfigValue(OLD_FILE_UPLOAD_ANALYTICS, APIM_ANALYTICS_VERSION, DEFAULT_AM_ANALYTICS_VERSION);
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
@@ -1118,21 +1119,4 @@ public function buildBasicAuthHeader(string username, string password) returns s
     string headerValue = basicKey.toBytes().toBase64();
 
     return BASIC_PREFIX_WITH_SPACE + headerValue;
-}
-
-# Get the supported analytics stream version for the configured value.
-#
-# + return - Returns the supported analytics version.
-# True if the version1 is greater than version2, false otherwise.
-public function getAnalyticsVertion() returns string {
-    string amAnalyticsVersion = getConfigValue(OLD_FILE_UPLOAD_ANALYTICS, APIM_ANALYTICS_VERSION,
-    DEFAULT_AM_ANALYTICS_VERSION);
-    // if configured version is 3.2.0, 3.1.0 or 3.0.0 return it.
-    if (amAnalyticsVersion == DEFAULT_AM_ANALYTICS_VERSION ||
-    amAnalyticsVersion == DEFAULT_AM_ANALYTICS_VERSION_300 ||
-    amAnalyticsVersion == DEFAULT_AM_ANALYTICS_VERSION_310) {
-        return amAnalyticsVersion;
-    }
-    // Otherwise, return the default version.
-    return DEFAULT_AM_ANALYTICS_VERSION;
 }
