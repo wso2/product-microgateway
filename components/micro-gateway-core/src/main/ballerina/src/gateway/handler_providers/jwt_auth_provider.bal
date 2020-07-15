@@ -24,6 +24,7 @@ import ballerina/stringutils;
 # + jwtValidatorConfig - JWT validator configurations
 # + inboundJwtAuthProvider - Reference to b7a inbound auth provider
 # + subscriptionValEnabled - Validate subscription
+# + consumerKeyClaim - The claim name in which the consumer key of the application present in the jwt.
 # + claims - JWT claim set
 # + className - Transformation class Name
 # + classLoaded - Class loaded or not
@@ -34,6 +35,7 @@ public type JwtAuthProvider object {
     public jwt:JwtValidatorConfig jwtValidatorConfig;
     public jwt:InboundJwtAuthProvider inboundJwtAuthProvider;
     public boolean subscriptionValEnabled;
+    public string consumerKeyClaim;
     public map<anydata>[] | error claims;
     public string className;
     public boolean classLoaded;
@@ -43,11 +45,12 @@ public type JwtAuthProvider object {
     #
     # + jwtValidatorConfig - JWT validator configurations
     # + subscriptionValEnabled - Validate subscription
-    public function __init(jwt:JwtValidatorConfig jwtValidatorConfig, boolean subscriptionValEnabled,
+    public function __init(jwt:JwtValidatorConfig jwtValidatorConfig, boolean subscriptionValEnabled, string consumerKeyClaim,
         map<anydata>[] | error claims, string className, boolean classLoaded) {
         self.jwtValidatorConfig = jwtValidatorConfig;
         self.inboundJwtAuthProvider = new (jwtValidatorConfig);
         self.subscriptionValEnabled = subscriptionValEnabled;
+        self.consumerKeyClaim = consumerKeyClaim;
         self.claims = claims;
         self.className = className;
         self.classLoaded = classLoaded;
@@ -56,6 +59,14 @@ public type JwtAuthProvider object {
     public function authenticate(string credential) returns @tainted (boolean | auth:Error) {
         //Start a span attaching to the system span.
         int | error | () spanIdAuth = startSpan(JWT_PROVIDER_AUTHENTICATE);
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        var errorCodeSetFromPreviousHandler = invocationContext.attributes[ERROR_CODE];
+        if (errorCodeSetFromPreviousHandler is int && errorCodeSetFromPreviousHandler != 900901) {
+            //If a previous jwt auth provider(or issuer) has set any error code than the 900901(invalid token code),
+            // that means jwt validation has been successful for a previous jwt issuer, but scope or subscription
+            // validation has failed. Hence we do not need to continue rest of the jwt auth providers.
+            return false;
+        }
         var handleVar = self.inboundJwtAuthProvider.authenticate(credential);
         map<anydata>[] | error claimsSet = self.claims;
         //finishing span
@@ -67,20 +78,21 @@ public type JwtAuthProvider object {
             }
             boolean isBlacklisted = false;
             string? jti = "";
-            runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+
             runtime:AuthenticationContext? authContext = invocationContext?.authenticationContext;
             if (authContext is runtime:AuthenticationContext) {
+                string? iss = self.jwtValidatorConfig?.issuer;
                 string? jwtToken = authContext?.authToken;
-                if (jwtToken is string) {
+                if (jwtToken is string && iss is string) {
+                    printDebug(KEY_JWT_AUTH_PROVIDER, "jwt authenticated from the issuer : " + iss);
                     boolean isGRPC = invocationContext.attributes.hasKey(IS_GRPC);
                     //Start a new child span for the span.
                     int | error | () spanIdCache = startSpan(JWT_CACHE);
-                    var cachedJwt = trap <jwt:InboundJwtCacheEntry>jwtCache.get(jwtToken);
+                    var jwtPayloadFromCache = trap <jwt:JwtPayload>self.jwtValidatorConfig.jwtCache.get(jwtToken);
                     //finishing span
                     finishSpan(JWT_CACHE, spanIdCache);
-                    if (cachedJwt is jwt:InboundJwtCacheEntry) {
+                    if (jwtPayloadFromCache is jwt:JwtPayload) {
                         printDebug(KEY_JWT_AUTH_PROVIDER, "jwt found from the jwt cache");
-                        jwt:JwtPayload jwtPayloadFromCache = cachedJwt.jwtPayload;
                         jti = jwtPayloadFromCache["jti"];
                         if (jti is string) {
                             printDebug(KEY_JWT_AUTH_PROVIDER, "jti claim found in the jwt");
@@ -122,10 +134,11 @@ public type JwtAuthProvider object {
                                 jwtToken = authContext?.authToken.toString();
                             }
                          }
-                        return validateSubscriptions(jwtToken, cachedJwt.jwtPayload, self.subscriptionValEnabled, isGRPC);
+                        return validateSubscriptions(jwtToken, jwtPayloadFromCache, self.subscriptionValEnabled,
+                                self.consumerKeyClaim, isGRPC, self.gatewayCache);
                     }
                     printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
-                    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken);
+                    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken, iss);
                     if (payload is jwt:JwtPayload) {
                         if(self.className != "" || (claimsSet is map<anydata>[] && claimsSet.length() > 0)) {
                             var jwtTokenClaimCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
@@ -142,7 +155,7 @@ public type JwtAuthProvider object {
                                 jwtToken = authContext?.authToken.toString();
                             }
                         }
-                        return validateSubscriptions(jwtToken, payload, self.subscriptionValEnabled, isGRPC);
+                        return validateSubscriptions(jwtToken, payload, self.subscriptionValEnabled, self.consumerKeyClaim, isGRPC, self.gatewayCache);
                     }
                 }
             }
@@ -154,32 +167,23 @@ public type JwtAuthProvider object {
     }
 };
 
-public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, boolean subscriptionValEnabled, boolean isGRPC)
-        returns @tainted (boolean | auth:Error) {
+public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, boolean subscriptionValEnabled,
+                            string consumerKeyClaim, boolean isGRPC, APIGatewayCache gatewayCache) returns @tainted (boolean | auth:Error) {
     boolean subscriptionValidated = false;
-    json subscribedAPIList = [];
     map<json>? customClaims = payload?.customClaims;
-    //get allowed apis
-    if (customClaims is map<json> && customClaims.hasKey(SUBSCRIBED_APIS)) {
-        printDebug(KEY_JWT_AUTH_PROVIDER, "subscribedAPIs claim found in the jwt.");
-        subscribedAPIList = customClaims.get(SUBSCRIBED_APIS);
-    }
-    if (subscribedAPIList is json[]) {
-        if (subscriptionValEnabled && subscribedAPIList.length() < 1) {
+
+    subscriptionValidated = isAllowedKey(jwtToken, payload, subscriptionValEnabled, consumerKeyClaim, gatewayCache);
+    if (subscriptionValidated || !subscriptionValEnabled || isGRPC) {
+        printDebug(KEY_JWT_AUTH_PROVIDER, "Subscriptions validated.");
+        return true;
+    } else {
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        var errorcode = invocationContext.attributes[ERROR_CODE];
+        if (errorcode is ()) {
             setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
-            return prepareError("SubscribedAPI list is empty.");
         }
-        subscriptionValidated = handleSubscribedAPIs(jwtToken, payload, subscribedAPIList, subscriptionValEnabled);
-        if (subscriptionValidated || !subscriptionValEnabled || isGRPC) {
-            printDebug(KEY_JWT_AUTH_PROVIDER, "Subscriptions validation passed.");
-            return true;
-        } else {
-            setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
-            return prepareError("Subscriptions validation failed.");
-        }
+        return prepareError("Subscriptions validation failed.");
     }
-    setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
-    return prepareError("Failed to decode the JWT.");
 }
 
 public function doMappingContext(runtime:InvocationContext invocationContext, string className,

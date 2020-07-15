@@ -56,7 +56,7 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
         ApplicationDTO application = new ApplicationDTO();
         application.setName("jwtApp");
         application.setTier("Unlimited");
-        application.setId((int) (Math.random() * 1000));
+        application.setId(2);
 
         //Register a production token with key validation info
         KeyValidationInfo info = new KeyValidationInfo();
@@ -65,6 +65,7 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
         info.setAuthorized(true);
         info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
         info.setSubscriptionTier("Unlimited");
+        info.setTokenType(TestConstant.KEY_TYPE_PRODUCTION);
         //Register a production token with key validation info
         prodToken = pub.getAndRegisterAccessToken(info);
 
@@ -74,6 +75,7 @@ public class APIInvokeWithOAuthTestCase extends BaseTestCase {
         infoSand.setApplication(application);
         infoSand.setAuthorized(true);
         infoSand.setKeyType(TestConstant.KEY_TYPE_SANDBOX);
+        infoSand.setTokenType(TestConstant.KEY_TYPE_SANDBOX);
         infoSand.setSubscriptionTier("Unlimited");
         sandToken = pub.getAndRegisterAccessToken(infoSand);
 

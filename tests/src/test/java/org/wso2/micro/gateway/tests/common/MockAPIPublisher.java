@@ -200,6 +200,18 @@ public class MockAPIPublisher {
         return subscriptionPolicies;
     }
 
+    public JSONObject getIntrospectionResponse(String token) throws IOException {
+        KeyValidationInfo info = tokenInfo.get(token);
+        String introspectResponse = IOUtils.toString(new FileInputStream(
+                getClass().getClassLoader().getResource("introspection-response.json").getPath()));
+        JSONObject introspectResponseJson = new JSONObject(introspectResponse);
+        if (info == null) {
+            return introspectResponseJson.getJSONObject("inactive");
+        }
+        String tokenType = info.getTokenType();
+        return introspectResponseJson.getJSONObject(tokenType);
+    }
+
     public void addApplicationPolicy(ApplicationPolicy applicationPolicy) {
         applicationPolicies.add(applicationPolicy);
     }

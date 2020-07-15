@@ -1,4 +1,4 @@
-// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -16,15 +16,21 @@
 
 import ballerina/http;
 
-http:Client etcdTokenRevocationEndpoint = new (revokedJwtServiceURL, {
+http:Client gatewayPilotEndpoint = new (
+getConfigValue(EVENT_HUB_INSTANCE_ID, EVENT_HUB_SERVER_URL, DEFAULT_PILOT_SERVER_URL),
+{
+    cache: {enabled: false},
     secureSocket: {
         trustStore: {
             path: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH),
             password: getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD)
         },
         verifyHostname: getConfigBooleanValue(HTTP_CLIENTS_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+
     },
     http1Settings : {
         proxy: getClientProxyForInternalServices()
     }
 });
+
+PilotDataProvider pilotDataProvider = new(gatewayPilotEndpoint);
