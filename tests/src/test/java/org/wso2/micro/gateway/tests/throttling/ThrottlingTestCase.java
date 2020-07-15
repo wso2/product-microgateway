@@ -100,6 +100,7 @@ public class ThrottlingTestCase extends BaseTestCase {
         info.setApplication(application);
         info.setAuthorized(true);
         info.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
+        info.setTokenType(TestConstant.TOKEN_TYPE_5_MIN_SUB);
         info.setSubscriptionTier(subscriptionPolicy.getPolicyName());
         token1 = pub.getAndRegisterAccessToken(info);
 
@@ -108,6 +109,7 @@ public class ThrottlingTestCase extends BaseTestCase {
         info2.setApplication(application2);
         info2.setAuthorized(true);
         info2.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
+        info2.setTokenType(TestConstant.TOKEN_TYPE_5_MIN_APP);
         info2.setSubscriptionTier("Unlimited");
         token2 = pub.getAndRegisterAccessToken(info2);
 
@@ -125,10 +127,12 @@ public class ThrottlingTestCase extends BaseTestCase {
         info3.setAuthorized(true);
         info3.setKeyType(TestConstant.KEY_TYPE_PRODUCTION);
         info3.setSubscriptionTier("SubPolicyNotExist");
+        info3.setTokenType(TestConstant.TOKEN_TYPE_INVALID_SUB_POLICY);
         noSubPolicyToken = pub.getAndRegisterAccessToken(info3);
 
         info3.setApplication(appWithNonExistPolicy);
-        info.setSubscriptionTier(subscriptionPolicy.getPolicyName());
+        info3.setSubscriptionTier(subscriptionPolicy.getPolicyName());
+        info3.setTokenType(TestConstant.TOKEN_TYPE_INVALID_APP_POLICY);
         noAppPolicyToken = pub.getAndRegisterAccessToken(info3);
 
         //generate apis with CLI and start the micro gateway server

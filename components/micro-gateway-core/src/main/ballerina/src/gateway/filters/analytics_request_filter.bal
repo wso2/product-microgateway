@@ -20,6 +20,7 @@ import ballerina/runtime;
 public type AnalyticsRequestFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request, http:FilterContext context) returns boolean {
+        printDebug(KEY_ANALYTICS_FILTER, "Analytics Version " + amAnalyticsVersion);
         if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
             printDebug(KEY_ANALYTICS_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;
@@ -33,6 +34,7 @@ public type AnalyticsRequestFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        printDebug(KEY_ANALYTICS_FILTER, "Analytics Version " + amAnalyticsVersion);
         if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
             printDebug(KEY_ANALYTICS_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;

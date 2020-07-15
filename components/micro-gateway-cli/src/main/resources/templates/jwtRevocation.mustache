@@ -1,11 +1,14 @@
-map<string> receivedRevokedTokenMap = gateway:getRevokedTokenMap();
+    map<string> receivedRevokedTokenMap = gateway:getRevokedTokenMap();
     boolean jmsListenerStarted = gateway:initiateTokenRevocationJmsListener();
 
+    string persistType = gateway:getConfigValue(gateway:PERSISTENT_MESSAGE_INSTANCE_ID,
+        gateway:PERSISTENT_MESSAGE_TYPE, gateway:DEFAULT_PERSISTENT_TYPE);
     boolean useDefault = gateway:getConfigBooleanValue(gateway:PERSISTENT_MESSAGE_INSTANCE_ID,
-        gateway:PERSISTENT_USE_DEFAULT, gateway:DEFAULT_PERSISTENT_USE_DEFAULT);
+            gateway:PERSISTENT_USE_DEFAULT, gateway:DEFAULT_PERSISTENT_USE_DEFAULT);
 
-    //TODO: Re enable this code once the compile errors are fixed
-    if (useDefault) {
+    if (persistType == "default") {
+        future<()> initJwtRetriveal = start gateway:registerRevokedJwtRetrievalTask();
+    } else if (persistType == "etcd" || useDefault ) {
         future<()> initETCDRetriveal = start gateway:etcdRevokedTokenRetrieverTask();
     } else {
         initiatePersistentRevokedTokenRetrieval(receivedRevokedTokenMap);
