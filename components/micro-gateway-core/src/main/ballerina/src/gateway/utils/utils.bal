@@ -48,7 +48,7 @@ string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PA
 string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD);
 string headerName = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CERT_HEADER_NAME, DEFAULT_MTSL_CONF_CERT_HEADER_NAME);
 boolean isClientCertificateValidationEnabled = getConfigBooleanValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_IS_CLIENT_CER_VALIDATION_ENABLED, true);
-string amAnalyticsVersion = getConfigValue(OLD_FILE_UPLOAD_ANALYTICS, APIM_ANALYTICS_VERSION, DEFAULT_AM_ANALYTICS_VERSION);
+string amAnalyticsVersion = getConfigValue(OLD_FILE_UPLOAD_ANALYTICS, APIM_ANALYTICS_STREAM_VERSION, DEFAULT_AM_ANALYTICS_VERSION);
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
