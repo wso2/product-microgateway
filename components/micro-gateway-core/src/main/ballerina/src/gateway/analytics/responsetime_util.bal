@@ -53,7 +53,7 @@ public function getRequestReponseExecutionDataPayload(RequestResponseExecutionDT
     requestResponseExecutionDTO.gatewayType + OBJ +
     requestResponseExecutionDTO.label;
 
-    if (amAnalyticsVertion !== DEFAULT_AM_ANALYTICS_VERSION) {
+    if (amAnalyticsVertion !== DEFAULT_AM_ANALYTICS_VERSION_300) {
         output = output + OBJ + requestResponseExecutionDTO.properties;
     }
     printDebug(KEY_ANALYTICS_FILTER, "Request response execution DTO string : " + output);
@@ -202,6 +202,10 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
     requestResponseExecutionDTO.label = GATEWAY_TYPE;
 
     requestResponseExecutionDTO.executionTime = generateExecutionTimeEvent(context);
+    if (invocationContext.attributes.hasKey(ADDITIONAL_PROPS) &&
+        invocationContext.attributes[ADDITIONAL_PROPS] is string) {
+        requestResponseExecutionDTO.properties = <string>invocationContext.attributes[ADDITIONAL_PROPS];
+    }
 
     return requestResponseExecutionDTO;
 }

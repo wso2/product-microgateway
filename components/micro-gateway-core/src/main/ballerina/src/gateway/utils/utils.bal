@@ -1125,24 +1125,14 @@ public function buildBasicAuthHeader(string username, string password) returns s
 # + return - Returns the supported analytics version.
 # True if the version1 is greater than version2, false otherwise.
 public function getAnalyticsVertion() returns string {
-    string amAnalyticsVersion = getConfigValue(OLD_FILE_UPLOAD_ANALYTICS, APIM_ANALYTICS_VERSION, DEFAULT_AM_ANALYTICS_VERSION);
-    string analyticsVersion = replaceAll(amAnalyticsVersion, "\\.", "");
-    string supportedVersion = DEFAULT_AM_ANALYTICS_VERSION;
-    // 3.0.0 or 3.1.0 case use the 3.0.0 stream.
-    if (amAnalyticsVersion == DEFAULT_AM_ANALYTICS_VERSION || amAnalyticsVersion == "3.1.0") {
-        return DEFAULT_AM_ANALYTICS_VERSION;
+    string amAnalyticsVersion = getConfigValue(OLD_FILE_UPLOAD_ANALYTICS, APIM_ANALYTICS_VERSION,
+    DEFAULT_AM_ANALYTICS_VERSION);
+    // if configured version is 3.2.0, 3.1.0 or 3.0.0 return it.
+    if (amAnalyticsVersion == DEFAULT_AM_ANALYTICS_VERSION ||
+    amAnalyticsVersion == DEFAULT_AM_ANALYTICS_VERSION_300 ||
+    amAnalyticsVersion == DEFAULT_AM_ANALYTICS_VERSION_310) {
+        return amAnalyticsVersion;
     }
-    // if not, set the default version as 3.1.0
-    string defaultVersion = replaceAll("3.1.0", "\\.", "");
-
-    int|error intVersion = 'int:fromString(analyticsVersion);
-    int|error intDefaultVersion = 'int:fromString(defaultVersion);
-    
-    if (intVersion is int && intDefaultVersion is int) {
-        if (intVersion > intDefaultVersion) {
-            return amAnalyticsVersion;
-        }
-    }
-    // Return the default version.
+    // Otherwise, return the default version.
     return DEFAULT_AM_ANALYTICS_VERSION;
 }

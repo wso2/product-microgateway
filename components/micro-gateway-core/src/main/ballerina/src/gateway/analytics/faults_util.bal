@@ -23,17 +23,24 @@ public function getFaultMetaData(FaultDTO dto) returns string {
 
 public function getFaultPayloadData(FaultDTO dto, string amAnalyticsVersion) returns string {
     printDebug(KEY_ANALYTICS_FILTER, "Generating fault data payload for " + amAnalyticsVersion);
-    string payloadData = dto.consumerKey + OBJ + dto.apiName + OBJ + dto.apiVersion + OBJ + dto.apiContext + OBJ +
-    dto.resourcePath + OBJ + dto.method + OBJ + dto.apiCreator + OBJ + dto.userName + OBJ + dto.userTenantDomain + OBJ +
-    dto.apiCreatorTenantDomain + OBJ + dto.hostName + OBJ + dto.applicationId + OBJ +
-    dto.applicationName + OBJ + dto.protocol + OBJ + dto.errorCode.toString() + OBJ + dto.errorMessage + OBJ +
-    dto.faultTime.toString();
-
-    if (amAnalyticsVersion !== DEFAULT_AM_ANALYTICS_VERSION) {
-        payloadData = payloadData + OBJ + dto.properties + OBJ + dto.apiResourceTemplate + OBJ +
-        dto.applicationOwner;
+    string resourceTemplate = OBJ;
+    string applicationOwner = OBJ;
+    string properties = "";
+    // If am analytics version is 3.2.0, append api resource template and application owner
+    if (amAnalyticsVersion == DEFAULT_AM_ANALYTICS_VERSION) {
+        resourceTemplate = resourceTemplate + dto.apiResourceTemplate + OBJ;
+        applicationOwner = applicationOwner + dto.applicationOwner + OBJ;
     }
-    return payloadData;
+    // If analytics version is 3.1.0, append properties.
+    if (amAnalyticsVersion !== DEFAULT_AM_ANALYTICS_VERSION_300) {
+            properties = OBJ + dto.properties;
+    }
+
+    return dto.consumerKey + OBJ + dto.apiName + OBJ + dto.apiVersion + OBJ + dto.apiContext + OBJ +
+        dto.resourcePath + resourceTemplate + dto.method + OBJ + dto.apiCreator + OBJ + dto.userName + OBJ +
+        dto.userTenantDomain + OBJ + dto.apiCreatorTenantDomain + OBJ + dto.hostName + OBJ + dto.applicationId + OBJ +
+        dto.applicationName + applicationOwner + dto.protocol + OBJ + dto.errorCode.toString() + OBJ +
+        dto.errorMessage + OBJ + dto.faultTime.toString() + properties;
 }
 
 public function getEventFromFaultData(FaultDTO dto, string amAnalyticsVersion) returns EventDTO | error {

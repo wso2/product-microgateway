@@ -122,6 +122,7 @@ public const string USER_IP_PROPERTY = "userIp";
 public const string REQUEST_TIME_PROPERTY = "requestTimestamp";
 public const string GATEWAY_TYPE_PROPERTY = "gatewayType";
 public const string GATEWAY_TYPE = "MICRO";
+public const string ADDITIONAL_PROPS = "ADDITIONAL_PROPS";
 
 public const string ERROR_RESPONSE = "error_response";
 public const string ERROR_RESPONSE_CODE = "error_response_code";
