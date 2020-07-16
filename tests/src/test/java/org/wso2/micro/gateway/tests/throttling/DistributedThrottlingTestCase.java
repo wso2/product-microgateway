@@ -32,7 +32,10 @@ import org.wso2.micro.gateway.tests.common.model.SubscriptionPolicy;
 import org.wso2.micro.gateway.tests.util.HttpClientRequest;
 import org.wso2.micro.gateway.tests.util.TestConstant;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +44,9 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
     private String jwtToken, jwtToken2, token1, token2, continueOnQuotaToken, noSubPolicyJWT, noAppPolicyJWT,
             noSubPolicyToken, noAppPolicyToken;
     private int responseCode;
+    private BinaryTestServer binaryTestServer1;
+    private BinaryTestServer binaryTestServer2;
+    private String project;
 
     @Override
     protected void init(String label, String project) throws Exception {
@@ -51,7 +57,7 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
     @BeforeClass
     private void start() throws Exception {
         String label = "apimTestLabel";
-        String project = "apimTestProject";
+        project = "apimTestProject";
         //get mock APIM Instance
         MockAPIPublisher pub = MockAPIPublisher.getInstance();
         API api = new API();
@@ -143,12 +149,35 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         info.setSubscriptionTier(subscriptionPolicy.getPolicyName());
         noAppPolicyToken = pub.getAndRegisterAccessToken(info3);
 
+
+        binaryTestServer1 = new BinaryTestServer();
+        binaryTestServer2 = new BinaryTestServer();
+
+        String streamDefinition = readFromInputStream(getClass().getClassLoader()
+                .getResourceAsStream("distributedThrottling/stream-definition.json"));
+        binaryTestServer1.addStreamDefinition(streamDefinition);
+        binaryTestServer2.addStreamDefinition(streamDefinition);
+        binaryTestServer1.startServer(9611, 9711);
+        binaryTestServer2.startServer(9612, 9712);
+
         //generate apis with CLI and start the micro gateway server
         init(label, project);
     }
 
+    private String readFromInputStream(InputStream inputStream)
+            throws IOException {
+        StringBuilder resultStringBuilder = new StringBuilder();
+        try (BufferedReader br
+                     = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                resultStringBuilder.append(line).append("\n");
+            }
+        }
+        return resultStringBuilder.toString();
+    }
 
-    @Test(description = "Test subscription throttling with a JWT token")
+    @Test(groups = {"standard-throttling-test"}, description = "Test subscription throttling with a JWT token")
     public void testSubscriptionThrottling() throws Exception {
         responseCode = invokeAndAssert2(jwtToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
         Assert.assertEquals(responseCode, 429, "Request should have throttled out with jwt token");
@@ -157,31 +186,125 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         TimeUnit.MINUTES.sleep(1);
         responseCode = invokeAPIForOnce(token1, getServiceURLHttp("/pizzashack/1.0.0/menu"));
         Assert.assertEquals(responseCode, 200, "Request should not have throttled out with oauth token after" +
-                "1 minute time gap" );
+                "1 minute time gap");
     }
 
-    @Test(description = "Test application throttling with a JWT token")
+    @Test(groups = {"standard-throttling-test"}, description = "Test application throttling with a JWT token")
     public void testApplicationThrottlingWithJwtToken() throws Exception {
         responseCode = invokeAndAssert2(jwtToken2, getServiceURLHttp("/pizzashack/1.0.0/menu"));
         Assert.assertEquals(responseCode, 429, "Request should have throttled out with jwt token");
     }
 
-    @Test(description = "Test application throttling with oauth2 token")
+    @Test(groups = {"standard-throttling-test"}, description = "Test application throttling with oauth2 token")
     public void testApplicationThrottlingWithOauth2Token() throws Exception {
         responseCode = invokeAndAssert2(token2, getServiceURLHttp("/pizzashack/1.0.0/menu"));
         Assert.assertEquals(responseCode, 429, "Request should have throttled out with oauth token");
     }
 
-//    @Test(description = "Test throttling with non auth mode")
+//    @Test(groups = { "standard-throttling-test" }, description = "Test throttling with non auth mode")
 //    public void testApplicationThrottlingInNonAuthMode() throws Exception {
 //        responseCode = invokeAndAssert2(null, getServiceURLHttp("/pizzashack/1.0.0/noauth"));
 //        Assert.assertEquals(responseCode, 429, "Request should have throttled out");
 //    }
 
-    @Test(description = "test subscription policy with stop on quota is false")
+    @Test(groups = {"standard-throttling-test"}, description = "test subscription policy with stop on quota is false")
     public void testSubscriptionThrottlingWithStopOnQuotaFalse() throws Exception {
         responseCode = invokeAndAssert2(continueOnQuotaToken, getServiceURLHttp("/pizzashack/1.0.0/menu"));
         Assert.assertEquals(responseCode, 200, "Request should not throttled out");
+    }
+
+    @Test(groups = {"binary-publishing-test"}, dependsOnGroups = {"standard-throttling-test"},
+            description = "test event publishing over binary connection with one TM")
+    public void testEventPublishingWithOneTM() throws Exception {
+        String configPath = "confs/throttle-test-binary-publishing-single-tm.conf";
+        restartServerSetup(configPath);
+        String url = getServiceURLHttp("/pizzashack/1.0.0/menu");
+        Map<String, String> headers = new HashMap<>();
+        String token = jwtToken;
+        if (token != null) {
+            headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
+        }
+        for (int i = 0; i < 20; i++) {
+            org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest.doGet(url, headers);
+            Assert.assertNotNull(response);
+        }
+        Thread.sleep(1000);
+        Assert.assertEquals(binaryTestServer1.getNumberOfEventsReceived(), 20, "Event count mismatch");
+    }
+
+    @Test(groups = {"binary-publishing-test"}, dependsOnGroups = {"standard-throttling-test"},
+            description = "test event publishing over binary connection with multiple TMs")
+    public void testEventPublishingMultipleTM() throws Exception {
+        String configPath = "confs/throttle-test-binary-publishing-multiple-tm.conf";
+        restartServerSetup(configPath);
+        String url = getServiceURLHttp("/pizzashack/1.0.0/menu");
+        Map<String, String> headers = new HashMap<>();
+        String token = jwtToken;
+        if (token != null) {
+            headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
+        }
+        for (int i = 0; i < 20; i++) {
+            org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest.doGet(url, headers);
+            Assert.assertNotNull(response);
+            Thread.sleep(10);
+        }
+        Thread.sleep(1000);
+        Assert.assertEquals(binaryTestServer1.getNumberOfEventsReceived(), 20, "Server 1 : Event count mismatch");
+        Assert.assertEquals(binaryTestServer2.getNumberOfEventsReceived(), 20, "Server 2 : Event count mismatch");
+    }
+
+    @Test(groups = {"binary-publishing-test"}, dependsOnGroups = {"standard-throttling-test"},
+            description = "test event publishing over binary connection with multiple TMs: Loadbalance")
+    public void testEventPublishingLoadBalance() throws Exception {
+        String configPath = "confs/throttle-test-binary-publishing-loadbalance-tm.conf";
+        restartServerSetup(configPath);
+        String url = getServiceURLHttp("/pizzashack/1.0.0/menu");
+        Map<String, String> headers = new HashMap<>();
+        String token = jwtToken;
+        if (token != null) {
+            headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
+        }
+        for (int i = 0; i < 20; i++) {
+            org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest.doGet(url, headers);
+            Assert.assertNotNull(response);
+        }
+        Thread.sleep(1000);
+        Assert.assertEquals(binaryTestServer1.getNumberOfEventsReceived(), 10, "Server 1 : Event count mismatch");
+        Assert.assertEquals(binaryTestServer2.getNumberOfEventsReceived(), 10, "Server 2 : Event count mismatch");
+    }
+
+    @Test(dependsOnGroups = {"binary-publishing-test", "standard-throttling-test"},
+            description = "test event publishing over binary connection with multiple TMs: Failover")
+    public void testEventPublishingFailover() throws Exception {
+        String configPath = "confs/throttle-test-binary-publishing-failover-tm.conf";
+        restartServerSetup(configPath);
+        String url = getServiceURLHttp("/pizzashack/1.0.0/menu");
+        Map<String, String> headers = new HashMap<>();
+        String token = jwtToken;
+        if (token != null) {
+            headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
+        }
+        for (int i = 0; i < 15; i++) {
+            org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest.doGet(url, headers);
+            Assert.assertNotNull(response);
+        }
+        Assert.assertEquals(binaryTestServer1.getNumberOfEventsReceived(), 15, "Server 1 : Event count mismatch");
+        Assert.assertEquals(binaryTestServer2.getNumberOfEventsReceived(), 0, "Server 2 : Event count mismatch");
+        Thread.sleep(1000);
+        binaryTestServer1.stopServer();
+        Thread.sleep(10000);
+        for (int i = 0; i < 15; i++) {
+            org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest.doGet(url, headers);
+            Assert.assertNotNull(response);
+        }
+        Assert.assertEquals(binaryTestServer2.getNumberOfEventsReceived(), 15, "Event count mismatch");
+    }
+
+    public void restartServerSetup(String configFilePath) throws Exception {
+        microGWServer.stopServer(false);
+        binaryTestServer1.resetReceivedEvents();
+        binaryTestServer2.resetReceivedEvents();
+        restartWithDifferentConfig(project, null, configFilePath);
     }
 
     public int invokeAPIForOnce(String token, String url) throws IOException {
@@ -217,15 +340,19 @@ public class DistributedThrottlingTestCase extends BaseTestCase {
         return responseCode;
     }
 
-    public void finalize() throws Exception {
+    public void localFinalize() throws Exception {
         mockHttpServer.stopIt();
+        binaryTestServer1.stopServer();
+        binaryTestServer2.stopServer();
         microGWServer.stopServer(false);
+        System.clearProperty("Security.KeyStore.Location");
+        System.clearProperty("Security.KeyStore.Password");
         MockAPIPublisher.getInstance().clear();
     }
 
     @AfterClass
     public void stop() throws Exception {
         //Stop all the mock servers
-        finalize();
+        localFinalize();
     }
 }

@@ -51,7 +51,12 @@ function processTMPublisherURLGroup () returns [string, string] {
 
     if (urlGroups is map<anydata>[] && urlGroups.length() > 0) {
         foreach map<anydata> urlGroup in urlGroups {
-
+            //if there is one URL is provided in the format of String, the warning messages needs to be avoided.
+            if (urlGroup[TM_BINARY_RECEIVER_URL] is string && urlGroup[TM_BINARY_AUTH_URL] is string) {
+                restructuredReceiverURL += "{" + <string> urlGroup[TM_BINARY_RECEIVER_URL] + "},";
+                restructuredAuthURL += "{" + <string> urlGroup[TM_BINARY_AUTH_URL] + "},";
+                continue;
+            }
             string urlType = "";
             if (urlGroup.hasKey(TM_BINARY_URL_GROUP_TYPE)) {
                 if (urlGroup[TM_BINARY_URL_GROUP_TYPE] is string) {
