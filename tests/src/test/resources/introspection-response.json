@@ -99,6 +99,15 @@
     "client_id":"INVALID_SUB_POLICY_CK",
     "username":"admin@carbon.super"
   },
+  "NO_CLIENT_ID": {
+    "nbf":9223372036854775807,
+    "scope":"am_application_scope default",
+    "active":true,
+    "token_type":"Bearer",
+    "exp":1593187742,
+    "iat":1593184142,
+    "username":"admin@carbon.super"
+  },
   "inactive": {
     "active": false
   }

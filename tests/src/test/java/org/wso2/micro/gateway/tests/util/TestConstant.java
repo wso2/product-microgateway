@@ -40,6 +40,7 @@ public class TestConstant {
     public static final String TOKEN_TYPE_5_MIN_APP = "5_MIN_APP_THROTTLING";
     public static final String TOKEN_TYPE_INVALID_APP_POLICY = "INVALID_APP_POLICY";
     public static final String TOKEN_TYPE_INVALID_SUB_POLICY = "INVALID_SUB_POLICY";
+    public static final String TOKEN_TYPE_NO_CLIENT_ID = "NO_CLIENT_ID";
 
     public static final int GATEWAY_LISTENER_HTTP_PORT = 9590;
     public static final int GATEWAY_LISTENER_HTTPS_PORT = 9595;
