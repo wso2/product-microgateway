@@ -33,15 +33,15 @@
     </test>
     <test name="micro-gw-services" preserve-order="true" parallel="false">
         <classes>
-            <!-- <class name="org.wso2.micro.gateway.tests.apikey.APIKeyTestCase" />
+            <class name="org.wso2.micro.gateway.tests.apikey.APIKeyTestCase" />
             <class name="org.wso2.micro.gateway.tests.jwtRevocation.JWTRevocationSupportTestCase" />
             <class name="org.wso2.micro.gateway.tests.security.MutualSSLTestCase" />
             <class name="org.wso2.micro.gateway.tests.http2.HTTP2RequestsWithHTTP1BackEndTestCase" />
             <class name="org.wso2.micro.gateway.tests.endpoints.AdvanceEndpointConfigTestCase" />
             <class name="org.wso2.micro.gateway.tests.security.DisableSecurityAndCustomAuthHeaderTestCase" />
             <class name="org.wso2.micro.gateway.tests.grpc.BasicGrpcTestCase" />
-            <class name="org.wso2.micro.gateway.tests.jwtTransformer.JwtTransformerTestCase"/> -->
-            <!-- <class name="org.wso2.micro.gateway.tests.jwtGenerator.JWTGenerationTestCase"/> -->
+            <class name="org.wso2.micro.gateway.tests.jwtTransformer.JwtTransformerTestCase"/>
+            <class name="org.wso2.micro.gateway.tests.jwtGenerator.JWTGenerationTestCase"/>
         </classes>
     </test>
 
@@ -49,12 +49,12 @@
         <classes>
             <!-- DistributedThrottlingTestCase should be the first since it starts message broker -->
             <class name="org.wso2.micro.gateway.tests.throttling.DistributedThrottlingTestCase"/>
-            <!-- <class name="org.wso2.micro.gateway.tests.security.APIInvokeWithOAuth2andBasicAuthTestCase"/>
+            <class name="org.wso2.micro.gateway.tests.security.APIInvokeWithOAuth2andBasicAuthTestCase"/>
             <class name="org.wso2.micro.gateway.tests.throttling.ThrottlingTestCase"/>
-            <class name="org.wso2.micro.gateway.tests.throttling.OpenApiThrottlingTestCase"/> -->
-<!--                        <class name="org.wso2.micro.gateway.tests.security.CookieAuthTestCase"/>-->
-            <!-- <class name="org.wso2.micro.gateway.tests.validation.ValidationTestCase"/>
-            <class name="org.wso2.micro.gateway.tests.interceptor.JavaInterceptorTestCase"/> -->
+            <class name="org.wso2.micro.gateway.tests.throttling.OpenApiThrottlingTestCase"/>
+            <!--                        <class name="org.wso2.micro.gateway.tests.security.CookieAuthTestCase"/>-->
+            <class name="org.wso2.micro.gateway.tests.validation.ValidationTestCase"/>
+            <class name="org.wso2.micro.gateway.tests.interceptor.JavaInterceptorTestCase"/>
         </classes>
     </test>
 </suite>
