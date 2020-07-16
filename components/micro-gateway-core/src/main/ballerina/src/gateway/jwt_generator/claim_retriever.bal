@@ -21,40 +21,27 @@ boolean claimRetrieveEnabled = true;
 
 # To retrieve claims via the user specific claim retrieve implementation.
 # 
-# + authContext - Authentication Context
-# + payload - jwt payload if it is handled via jwt auth provider
+# + userInfo - Authentication Context of the user, which is provided as input to the claim retriever Implementation
 # + return - ClaimListDTO if there are any claims added from the user specific implementation
-function retrieveClaims (AuthenticationContext authContext, jwt:JwtPayload? payload = ()) returns @tainted RetrievedUserClaimsListDTO ? {
+function retrieveClaims (UserAuthContextDTO? userInfo) returns @tainted RetrievedUserClaimsListDTO ? {
     //if claim retrieve variable is disabled, there is no need to run through the method.
     if (!claimRetrieveEnabled) {
         return;
     }
-    UserAuthContextDTO userInfo = {};
-    if(payload is jwt:JwtPayload) {
-        userInfo = generateAuthContextInfoFromJWT(authContext, payload);
-    } else {
-        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-        runtime:Principal? principal = invocationContext?.principal;
-        if (principal is runtime:Principal) {
-            userInfo = generateAuthContextInfoFromPrincipal(authContext, principal);
+    if (userInfo is UserAuthContextDTO) {
+        printDebug (CLAIM_RETRIEVER, "User Auth Context information provided to the claim retrieval implementation : " +
+                    userInfo.toString());
+        RetrievedUserClaimsListDTO? | error claimListDTO = trap retrieveClaimsFromImpl(userInfo);
+        if (claimListDTO is RetrievedUserClaimsListDTO ) {
+            printDebug (CLAIM_RETRIEVER, "Claims List received from the claim retrieval implementation : " +
+                        claimListDTO.toString());
+            return claimListDTO;
+        } else if (claimListDTO is ()) {
+            printDebug(CLAIM_RETRIEVER , "No user claims are received from the claim retrieval implementation");
         } else {
-            printDebug(CLAIM_RETRIEVER, "Claim retrieval implementation is not executed due to the unavailability " +
-                "of the principal component");
-            return;
+            printError(CLAIM_RETRIEVER , "Error while retrieving user claims from the claim retrieval implementation",
+                claimListDTO);
         }
-    }
-    printDebug (CLAIM_RETRIEVER, "User Auth Context information provided to the claim retrieval implementation : " +
-            userInfo.toString());
-    RetrievedUserClaimsListDTO? | error claimListDTO = trap retrieveClaimsFromImpl(userInfo);
-    if (claimListDTO is RetrievedUserClaimsListDTO ) {
-        printDebug (CLAIM_RETRIEVER, "Claims List received from the claim retrieval implementation : " +
-                    claimListDTO.toString());
-        return claimListDTO;
-    } else if (claimListDTO is ()) {
-        printDebug(CLAIM_RETRIEVER , "No user claims are received from the claim retrieval implementation");
-    } else {
-        printError(CLAIM_RETRIEVER , "Error while retrieving user claims from the claim retrieval implementation",
-            claimListDTO);
     }
 }
 

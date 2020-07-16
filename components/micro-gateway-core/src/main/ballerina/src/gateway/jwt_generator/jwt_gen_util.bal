@@ -144,6 +144,7 @@ function createMapFromRetrievedUserClaimsListDTO(AuthenticationContext authConte
                                                     returns @tainted ClaimsMapDTO {
     ClaimsMapDTO claimsMapDTO = {};
     CustomClaimsMapDTO customClaimsMapDTO = {};
+    UserAuthContextDTO? userInfo = ();
     if (payload is ()) {
         //if payload is empty, this is from oauth2 flow
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
@@ -157,6 +158,10 @@ function createMapFromRetrievedUserClaimsListDTO(AuthenticationContext authConte
                 }
                 customClaimsMapDTO["scope"] = concatenatedScope.trim();
             }
+            userInfo = generateAuthContextInfoFromPrincipal(authContext, principal);
+        } else {
+            printDebug(JWT_GEN_UTIL, "Claim retrieval implementation is not executed due to the unavailability " +
+                            "of the principal component");
         }
         claimsMapDTO.iss = getConfigValue(KM_CONF_INSTANCE_ID, KM_CONF_ISSUER, DEFAULT_KM_CONF_ISSUER);
     } else  {
@@ -173,10 +178,11 @@ function createMapFromRetrievedUserClaimsListDTO(AuthenticationContext authConte
                 }
             }
         }
+        userInfo = generateAuthContextInfoFromJWT(authContext, payload);
     }
-    //todo: change the function body in a more convenient way since runtime:principal is already taken.
+
     if (remoteUserClaimRetrievalEnabled) {
-        RetrievedUserClaimsListDTO ? claimsListDTO = retrieveClaims(authContext, payload);
+        RetrievedUserClaimsListDTO ? claimsListDTO = retrieveClaims(userInfo);
         if (claimsListDTO is RetrievedUserClaimsListDTO) {
             ClaimDTO[] claimList = claimsListDTO.list;
             foreach ClaimDTO claim in claimList {
