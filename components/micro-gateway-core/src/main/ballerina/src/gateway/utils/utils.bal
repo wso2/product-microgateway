@@ -383,7 +383,7 @@ public function getChallengeString(http:FilterContext context) returns string {
                  } else {
                      challengeString += " OAuth2 realm=\"WSO2 API Microgateway\"";
                  }
-             } else if (v == AUTH_SCHEME_BASIC) {
+             } else if (v == AUTH_SCHEME_BASIC_LOWERCASE) {
                  if(challengeString == "") {
                      challengeString = "Basic Auth realm=\"WSO2 API Microgateway\"";
                  } else {
