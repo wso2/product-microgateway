@@ -27,22 +27,11 @@ public type JWTAuthHandler object {
 
     public JwtAuthProvider jwtAuthProvider;
 
+    //todo: remove the redundant config reading at both handlers.
     private boolean enabledJWTGenerator = false;
     private boolean classLoaded = false;
-    private string generatorClass = "";
-    private string dialectURI = "";
-    private string signatureAlgorithm = "";
-    private string certificateAlias = "";
-    private string privateKeyAlias = "";
-    private int tokenExpiry = 0;
-    private any[] restrictedClaims = [];
-    private string keyStoreLocationUnresolved = "";
-    private string keyStorePassword = "";
-    private string tokenIssuer = "";
-    private any[] tokenAudience = [];
     private int skewTime = 0;
     private boolean enabledCaching = false;
-    private int cacheExpiry = 0;
 
     public function __init(JwtAuthProvider jwtAuthProvider) {
         self.jwtAuthProvider = jwtAuthProvider;
@@ -51,37 +40,6 @@ public type JWTAuthHandler object {
                                                             JWT_GENERATOR_ENABLED,
                                                             DEFAULT_JWT_GENERATOR_ENABLED);
         if (self.enabledJWTGenerator) {
-            self.generatorClass = getConfigValue(JWT_GENERATOR_ID,
-                                                    JWT_GENERATOR_IMPLEMENTATION,
-                                                    DEFAULT_JWT_GENERATOR_IMPLEMENTATION);
-            self.dialectURI = getConfigValue(JWT_GENERATOR_ID,
-                                                JWT_GENERATOR_DIALECT,
-                                                DEFAULT_JWT_GENERATOR_DIALECT);
-            self.signatureAlgorithm = getConfigValue(JWT_GENERATOR_ID,
-                                                        JWT_GENERATOR_SIGN_ALGO,
-                                                        DEFAULT_JWT_GENERATOR_SIGN_ALGO);
-            self.certificateAlias = getConfigValue(JWT_GENERATOR_ID,
-                                                        JWT_GENERATOR_CERTIFICATE_ALIAS,
-                                                        DEFAULT_JWT_GENERATOR_CERTIFICATE_ALIAS);
-            self.privateKeyAlias = getConfigValue(JWT_GENERATOR_ID,
-                                                    JWT_GENERATOR_PRIVATE_KEY_ALIAS,
-                                                    DEFAULT_JWT_GENERATOR_PRIVATE_KEY_ALIAS);
-            self.tokenExpiry = getConfigIntValue(JWT_GENERATOR_ID,
-                                                    JWT_GENERATOR_TOKEN_EXPIRY,
-                                                    DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY);
-            self.restrictedClaims = getConfigArrayValue(JWT_GENERATOR_ID,
-                                                        JWT_GENERATOR_RESTRICTED_CLAIMS);
-            self.keyStoreLocationUnresolved = getConfigValue(LISTENER_CONF_INSTANCE_ID,
-                                                                KEY_STORE_PATH,
-                                                                DEFAULT_KEY_STORE_PATH);
-            self.keyStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,
-                                                                    KEY_STORE_PASSWORD,
-                                                                    DEFAULT_KEY_STORE_PASSWORD);
-            self.tokenIssuer = getConfigValue(JWT_GENERATOR_ID,
-                                                JWT_GENERATOR_TOKEN_ISSUER,
-                                                DEFAULT_JWT_GENERATOR_TOKEN_ISSUER);
-            self.tokenAudience = getConfigArrayValue(JWT_GENERATOR_ID,
-                                                        JWT_GENERATOR_TOKEN_AUDIENCE);
             // provide backward compatibility for skew time
             self.skewTime = getConfigIntValue(SERVER_CONF_ID, 
                                                 SERVER_TIMESTAMP_SKEW, 
@@ -94,23 +52,8 @@ public type JWTAuthHandler object {
             self.enabledCaching = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID,
                                                             JWT_GENERATOR_TOKEN_CACHE_ENABLED,
                                                             DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);
-            self.cacheExpiry = getConfigIntValue(JWT_GENERATOR_CACHING_ID,
-                                                    JWT_GENERATOR_TOKEN_CACHE_EXPIRY,
-                                                    DEFAULT_TOKEN_CACHE_EXPIRY);
 
-            self.classLoaded = loadJWTGeneratorClass(self.generatorClass,
-                                                        self.dialectURI,
-                                                        self.signatureAlgorithm,
-                                                        self.keyStoreLocationUnresolved,
-                                                        self.keyStorePassword,
-                                                        self.certificateAlias,
-                                                        self.privateKeyAlias,
-                                                        self.tokenExpiry,
-                                                        self.restrictedClaims,
-                                                        self.enabledCaching,
-                                                        self.cacheExpiry,
-                                                        self.tokenIssuer,
-                                                        self.tokenAudience);
+            self.classLoaded = jwtGeneratorClassLoaded;
         }
     }
 

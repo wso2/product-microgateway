@@ -18,6 +18,9 @@ import ballerina/runtime;
 import ballerina/jwt;
 import ballerina/http;
 
+boolean jwtGeneratorClassLoaded = loadJWTGeneratorImpl();
+boolean claimRetrieverClassLoaded = loadClaimRetrieverImpl();
+
 # Setting backend JWT header when there is no JWT Token is present.
 #
 # + req - The `Request` instance.
@@ -142,4 +145,73 @@ function createAPIDetailsMap (runtime:InvocationContext invocationContext) retur
 
 function emptyStringIfUnknownValue (string value) returns string {
     return value != UNKNOWN_VALUE ? value : "";
+}
+
+public function loadJWTGeneratorImpl() returns boolean {
+    boolean enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID,
+                                                        JWT_GENERATOR_ENABLED,
+                                                        DEFAULT_JWT_GENERATOR_ENABLED);
+    if (enabledJWTGenerator) {
+        string generatorClass = getConfigValue(JWT_GENERATOR_ID,
+                                                JWT_GENERATOR_IMPLEMENTATION,
+                                                DEFAULT_JWT_GENERATOR_IMPLEMENTATION);
+        string dialectURI = getConfigValue(JWT_GENERATOR_ID,
+                                            JWT_GENERATOR_DIALECT,
+                                            DEFAULT_JWT_GENERATOR_DIALECT);
+        string signatureAlgorithm = getConfigValue(JWT_GENERATOR_ID,
+                                                    JWT_GENERATOR_SIGN_ALGO,
+                                                    DEFAULT_JWT_GENERATOR_SIGN_ALGO);
+        string certificateAlias = getConfigValue(JWT_GENERATOR_ID,
+                                                    JWT_GENERATOR_CERTIFICATE_ALIAS,
+                                                    DEFAULT_JWT_GENERATOR_CERTIFICATE_ALIAS);
+        string privateKeyAlias = getConfigValue(JWT_GENERATOR_ID,
+                                                JWT_GENERATOR_PRIVATE_KEY_ALIAS,
+                                                DEFAULT_JWT_GENERATOR_PRIVATE_KEY_ALIAS);
+        int tokenExpiry = getConfigIntValue(JWT_GENERATOR_ID,
+                                                JWT_GENERATOR_TOKEN_EXPIRY,
+                                                DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY);
+        any[] restrictedClaims = getConfigArrayValue(JWT_GENERATOR_ID,
+                                                    JWT_GENERATOR_RESTRICTED_CLAIMS);
+        string keyStoreLocationUnresolved = getConfigValue(LISTENER_CONF_INSTANCE_ID,
+                                                            KEY_STORE_PATH,
+                                                            DEFAULT_KEY_STORE_PATH);
+        string keyStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,
+                                                                KEY_STORE_PASSWORD,
+                                                                DEFAULT_KEY_STORE_PASSWORD);
+        string tokenIssuer = getConfigValue(JWT_GENERATOR_ID,
+                                            JWT_GENERATOR_TOKEN_ISSUER,
+                                            DEFAULT_JWT_GENERATOR_TOKEN_ISSUER);
+        any[] tokenAudience = getConfigArrayValue(JWT_GENERATOR_ID,
+                                                    JWT_GENERATOR_TOKEN_AUDIENCE);
+        // provide backward compatibility for skew time
+        int skewTime = getConfigIntValue(SERVER_CONF_ID,
+                                            SERVER_TIMESTAMP_SKEW,
+                                            DEFAULT_SERVER_TIMESTAMP_SKEW);
+        if (skewTime == DEFAULT_SERVER_TIMESTAMP_SKEW) {
+            skewTime = getConfigIntValue(KM_CONF_INSTANCE_ID,
+                                            TIMESTAMP_SKEW,
+                                            DEFAULT_TIMESTAMP_SKEW);
+        }
+        boolean enabledCaching = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID,
+                                                        JWT_GENERATOR_TOKEN_CACHE_ENABLED,
+                                                        DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);
+        int cacheExpiry = getConfigIntValue(JWT_GENERATOR_CACHING_ID,
+                                                JWT_GENERATOR_TOKEN_CACHE_EXPIRY,
+                                                DEFAULT_TOKEN_CACHE_EXPIRY);
+
+        return loadJWTGeneratorClass(generatorClass,
+                                    dialectURI,
+                                    signatureAlgorithm,
+                                    keyStoreLocationUnresolved,
+                                    keyStorePassword,
+                                    certificateAlias,
+                                    privateKeyAlias,
+                                    tokenExpiry,
+                                    restrictedClaims,
+                                    enabledCaching,
+                                    cacheExpiry,
+                                    tokenIssuer,
+                                    tokenAudience);
+    }
+    return false;
 }

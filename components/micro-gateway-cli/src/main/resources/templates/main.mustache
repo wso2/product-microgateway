@@ -29,7 +29,6 @@ public function main() {
     gateway:initThrottleDataPublisher();
     gateway:initGlobalThrottleDataPublisher();
     gateway:startObservabilityListener();
-    gateway:loadClaimRetrieverImpl();
 
     {{>jwtRevocation}}
     startupExtension();
