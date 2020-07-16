@@ -64,6 +64,7 @@ type ApplicationDataStore object {
 
     function loadAppplicationFromService(int appId) returns Application? {
         string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
+        string tenantDomain = getPilotAuthenticatedUserTenantDomain(self.pilotUsername);
         http:Request apiReq = new;
         apiReq.setHeader(AUTHORIZATION_HEADER, basicAuthHeader);
         string serviceContext = self.serviceContext + "?appId=" + appId.toString();
@@ -80,6 +81,7 @@ type ApplicationDataStore object {
                         name: list[0].name.toString(),
                         policyId: list[0].policy.toString(),
                         tokenType: list[0].tokenType.toString(),
+                        tenantDomain: tenantDomain,
                         groupIds: <json[]>list[0].groupIds,
                         attributes: <json[]>list[0].attributes
                     };

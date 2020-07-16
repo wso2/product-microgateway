@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/runtime;
+import ballerina/stringutils;
 
 function convertApplicationEventToApplicationDTO(json appEvent) returns Application {
     Application application = {
@@ -96,6 +97,7 @@ function validateSubscriptionFromDataStores(string token, string consumerKey, st
                 authenticationContext.applicationName = app.name;
                 authenticationContext.applicationTier = app.policyId;
                 authenticationContext.subscriber = app.owner;
+                authenticationContext.subscriberTenantDomain = app.tenantDomain;
 
                 if (api is ()) {
                     printDebug(KEY_PILOT_UTIL, "API : " + apiName + ":" + apiVersion + " is missing in the data store.");
@@ -157,4 +159,12 @@ function validateSubscriptionFromDataStores(string token, string consumerKey, st
         printDebug(KEY_PILOT_UTIL, "API envent hub is disabled. Can not fetch subscription data.");
     }
     return [authenticationContext,isAllowed];
+}
+
+public function getPilotAuthenticatedUserTenantDomain(string username) returns string {
+    string[] splittedUserName = stringutils:split(username, TENANT_DOMAIN_SEPERATOR);
+    if (splittedUserName.length() > 1 ) {
+        return splittedUserName[splittedUserName.length() -1];
+    }
+    return SUPER_TENANT_DOMAIN_NAME;
 }
