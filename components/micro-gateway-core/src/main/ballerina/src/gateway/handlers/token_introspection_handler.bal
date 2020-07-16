@@ -91,7 +91,7 @@ public type KeyValidationHandler object {
                 any clientId = claims[CLIENT_ID];
                 boolean isAllowed = false;
                 // If validateSubscription is true and clientID is present, do the subscription validation.
-                if (clientId != () && clientId is string && self.validateSubscriptions) {
+                if (clientId != () && clientId is string) {
                    [authenticationContext, isAllowed] =
                      validateSubscriptionFromDataStores(credential, clientId, apiName, apiVersion,
                      self.validateSubscriptions);
