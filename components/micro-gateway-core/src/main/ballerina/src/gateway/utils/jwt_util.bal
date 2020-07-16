@@ -149,7 +149,8 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
         int index = 0;
         while (index < l) {
             var subscription = subscribedAPIList[index];
-            if (subscription.name.toString() == apiName && subscription.'version.toString() == apiVersion) {
+            if (subscription.name.toString() == apiName && 
+            (subscription.'version.toString() == apiVersion || subscription.'version.toString() == "*")) {
                 // Successfully validated the API. Then set authenticated to true.
                 authenticationContext.authenticated = true;
                 if (isDebugEnabled) { 
@@ -183,6 +184,7 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
             index += 1;
         }
     }
+    printDebug(JWT_UTIL, "matching API is not found as subscribed API");
     if (isDebugEnabled) { 
         printDebug(JWT_UTIL, "Set username : " + authenticationContext.username + ", keytype : " 
         + authenticationContext.keyType + ", consumer key : " + authenticationContext.consumerKey 
