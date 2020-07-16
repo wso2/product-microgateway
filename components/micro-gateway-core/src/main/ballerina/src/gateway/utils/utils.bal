@@ -346,6 +346,7 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
 }
 
 # Default error response sender with json error response.
+# + context - The Filter Context
 # + response - http response object.
 public function sendErrorResponseFromInvocationContext(http:FilterContext context, http:Response response) {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
@@ -373,6 +374,9 @@ public function sendErrorResponseFromInvocationContext(http:FilterContext contex
     }
 }
 
+# Method to get the challenge string for WWW-Authenticate header.
+# + context - The filter context
+# + return - The challenge string based on the auth provider.
 public function getChallengeString(http:FilterContext context) returns string {
      runtime:InvocationContext invocationContext = runtime:getInvocationContext();
      string challengeString = invocationContext.attributes[CHALLENGE_STRING].toString();
