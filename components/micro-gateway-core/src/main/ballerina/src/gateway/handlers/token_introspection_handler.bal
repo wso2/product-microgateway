@@ -90,7 +90,14 @@ public type KeyValidationHandler object {
                 map<any>? claims = principal?.claims;
                 any clientId = claims[CLIENT_ID];
                 boolean isAllowed = false;
-                // If validateSubscription is true and clientID is present, do the subscription validation.
+                // If the client id is null and validate subscription is enabled, return auth failure error.
+                if (self.validateSubscriptions && clientId == ()) {
+                    setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
+                    printError(KEY_VALIDATION_HANDLER,"Subscription validation is enabled but the Client Id is not " +
+                    "received from the key manager during the introspection.");
+                    return isAllowed;
+                }
+                // If clientID is present, do the subscription validation from the data stores.
                 if (clientId != () && clientId is string) {
                    [authenticationContext, isAllowed] =
                      validateSubscriptionFromDataStores(credential, clientId, apiName, apiVersion,
