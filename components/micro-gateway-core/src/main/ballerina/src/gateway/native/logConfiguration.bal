@@ -22,6 +22,6 @@ public function initNativeImpLog4jConfig() {
 }
 
 public function jInitNativeImpLog4jConfig(handle isDebugEnabled) = @java:Method {
-    name: "initialize",
-    class: "org.wso2.micro.gateway.core.logging.Log4j2Configuration"
+    name: "modifyAfterInitialization",
+    class: "org.wso2.micro.gateway.core.logging.MgwLog4j2ConfigurationFactory"
 } external;
