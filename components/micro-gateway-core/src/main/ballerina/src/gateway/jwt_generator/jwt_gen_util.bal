@@ -43,30 +43,6 @@ public function setJWTHeader(jwt:JwtPayload payload,
 
 # Setting backend JWT header when there is no JWT Token is present.
 #
-# + req - The `Request` instance.
-# + authContext - Authentication Context
-# + cacheKey - key for the jwt generator cache
-# + enabledCaching - jwt generator caching enabled
-# + apiDetails - extracted api details for the current api
-# + return - Returns `true` if the token generation and setting the header completed successfully
-# or the `AuthenticationError` in case of an error.
-public function setJWTHeaderForOauth2(http:Request req,
-                                AuthenticationContext authContext,
-                                string cacheKey,
-                                boolean enabledCaching,
-                                map<string> apiDetails)
-                                returns @tainted boolean {
-
-    (handle|error) generatedToken = generateBackendJWTTokenForOauth(authContext, apiDetails);
-    if (generatedToken is error) {
-        return false;
-    } else {
-        return setGeneratedTokenAsHeader(req, cacheKey, enabledCaching, generatedToken);
-    }
-}
-
-# Setting backend JWT header when there is no JWT Token is present.
-#
 # + authContext - Authentication Context
 # + payload - The payload of the authentication token
 # + apiDetails - extracted api details for the current api

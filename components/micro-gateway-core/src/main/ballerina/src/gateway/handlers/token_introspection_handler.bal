@@ -100,14 +100,15 @@ public type KeyValidationHandler object {
                    invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                    invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                    if (isAllowed) {
-                       map<string> apiDetails = createAPIDetailsMap(invocationContext);
-                       string cacheKey = credential + apiName + apiVersion;
-                       boolean enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID, JWT_GENERATOR_ENABLED,
-                                                                    DEFAULT_JWT_GENERATOR_ENABLED);
-                       boolean tokenGenStatus = setJWTHeaderForOauth2(req, authenticationContext,
-                                                                    cacheKey, enabledJWTGenerator, apiDetails);
-                       if (!tokenGenStatus) {
-                           printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
+                       boolean enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID,
+                                                                            JWT_GENERATOR_ENABLED,
+                                                                            DEFAULT_JWT_GENERATOR_ENABLED);
+                       if (enabledJWTGenerator) {
+                           string cacheKey = credential + apiName + apiVersion;
+                           boolean tokenGenStatus = setJWTHeaderForOauth2(req, authenticationContext, cacheKey);
+                           if (!tokenGenStatus) {
+                               printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
+                           }
                        }
                    }
                    return isAllowed;    
@@ -116,15 +117,15 @@ public type KeyValidationHandler object {
                     invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                     invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                     if (authenticationResult) {
-                        map<string> apiDetails = createAPIDetailsMap(invocationContext);
-                        string cacheKey = credential + apiName + apiVersion;
                         boolean enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID,
                                                                              JWT_GENERATOR_ENABLED,
                                                                              DEFAULT_JWT_GENERATOR_ENABLED);
-                        boolean tokenGenStatus = setJWTHeaderForOauth2(req, authenticationContext, cacheKey,
-                                                        enabledJWTGenerator, apiDetails);
-                        if (!tokenGenStatus) {
-                            printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
+                        if (enabledJWTGenerator) {
+                            string cacheKey = credential + apiName + apiVersion;
+                            boolean tokenGenStatus = setJWTHeaderForOauth2(req, authenticationContext, cacheKey);
+                            if (!tokenGenStatus) {
+                                printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
+                            }
                         }
                     }
                     return authenticationResult;
@@ -136,3 +137,26 @@ public type KeyValidationHandler object {
         return false;
     }
 };
+
+# Setting backend JWT header when there is no JWT Token is present.
+#
+# + req - The `Request` instance.
+# + authContext - Authentication Context
+# + cacheKey - cache Key
+# + return - Returns `true` if the token generation and setting the header completed successfully
+# or the `AuthenticationError` in case of an error.
+public function setJWTHeaderForOauth2(http:Request req,
+                                AuthenticationContext authContext,
+                                string cacheKey)
+                                returns @tainted boolean {
+    map<string> apiDetails = createAPIDetailsMap(runtime:getInvocationContext());
+    boolean enabledCaching = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID,
+                                                   JWT_GENERATOR_TOKEN_CACHE_ENABLED,
+                                                   DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);
+    (handle|error) generatedToken = generateBackendJWTTokenForOauth(authContext, apiDetails);
+    if (generatedToken is error) {
+        return false;
+    } else {
+        return setGeneratedTokenAsHeader(req, cacheKey, enabledCaching, generatedToken);
+    }
+}
