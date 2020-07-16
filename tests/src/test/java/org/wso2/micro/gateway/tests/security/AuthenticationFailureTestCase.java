@@ -39,7 +39,7 @@ import java.util.Map;
  * Testing the pizza_shack api rest for authentication error messages
  */
 public class AuthenticationFailureTestCase extends BaseTestCase {
-    private String invalidSubscriptionToken, invalidScopeToken;
+    private String invalidSubscriptionToken, invalidScopeToken, noClientIdToken;
 
     @BeforeClass
     public void setup() throws Exception {
@@ -62,13 +62,20 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
                         .getPath()));
         KeyValidationInfo info = new KeyValidationInfo();
         info.setStringResponse(response);
+        info.setTokenType(TestConstant.TOKEN_TYPE_INVALID_SUBSCRIPTION);
         invalidSubscriptionToken = pub.getAndRegisterAccessToken(info);
 
         String response1 = IOUtils.toString(new FileInputStream(
                 getClass().getClassLoader().getResource("keyManager/unauthorized.xml").getPath()));
         KeyValidationInfo info1 = new KeyValidationInfo();
+        info1.setTokenType(TestConstant.TOKEN_TYPE_INVALID_SCOPES);
         info1.setStringResponse(response1);
         invalidScopeToken = pub.getAndRegisterAccessToken(info1);
+
+        KeyValidationInfo info2 = new KeyValidationInfo();
+        info2.setTokenType(TestConstant.TOKEN_TYPE_NO_CLIENT_ID);
+        info2.setStringResponse(response1);
+        noClientIdToken = pub.getAndRegisterAccessToken(info2);
 
         String configPath = "confs/mutualSSL-test.conf";
         super.init(label, project, configPath);
@@ -98,7 +105,7 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
     public void testWithInvalidScopes() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + invalidScopeToken);
-        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
+        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("pizzashack/1.0.0/menu_scope"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 403, "Response code mismatched");
         Assert.assertTrue(
@@ -114,6 +121,16 @@ public class AuthenticationFailureTestCase extends BaseTestCase {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 403, "Response code mismatched");
         Assert.assertTrue(response.getData().contains("Resource forbidden"));
+    }
+
+    @Test(description = "Test with no client id")
+    public void testWithNoClientId() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + noClientIdToken);
+        HttpResponse response = HttpClientRequest.doGet(getServiceURLHttp("pizzashack/1.0.0/menu"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), 500, "Response code mismatched");
+        Assert.assertTrue(response.getData().contains("Unclassified Authentication Failure"));
     }
 
 }

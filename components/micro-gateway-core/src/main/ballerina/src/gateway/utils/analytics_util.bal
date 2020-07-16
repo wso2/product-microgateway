@@ -38,6 +38,9 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
 
     map<json> metaInfo = {};
     eventDto.userTenantDomain = getTenantDomain(context);
+    if (context.attributes[API_METHOD_PROPERTY] is string) {
+        eventDto.apiMethod = <string>context.attributes[API_METHOD_PROPERTY];
+    } 
     eventDto.apiName = getApiName(context);
     eventDto.apiContext = getContext(context);
     eventDto.throttledTime = currentTimeMills;
@@ -75,9 +78,19 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
             eventDto.apiCreator = UNKNOWN_VALUE;
         }
     }
+    string resourceName = context.getResourceName();
+    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
+    if (httpResourceConfig is http:HttpResourceConfig) {
+        eventDto.apiResourceTemplate = httpResourceConfig.path;
+    }
 
     metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
     eventDto.metaClientType = metaInfo.toString();
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        if (invocationContext.attributes.hasKey(ADDITIONAL_ANALYTICS_PROPS) &&
+        invocationContext.attributes[ADDITIONAL_ANALYTICS_PROPS] is string) {
+        eventDto.properties = <string>invocationContext.attributes[ADDITIONAL_ANALYTICS_PROPS];
+    }
     printDebug(KEY_ANALYTICS_FILTER, "Throttle Event DTO : " + eventDto.toString());
     return eventDto;
 }
@@ -91,10 +104,12 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
 
     eventDto.apiContext = getContext(context);
     eventDto.apiName = getApiName(context);
-    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[context.attributes["ResourceName"].toString()];
+    string resourceName = context.getResourceName();
+    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
     if (httpResourceConfig is http:HttpResourceConfig) {
         var resource_Path = httpResourceConfig.path;
         eventDto.resourcePath = resource_Path;
+        eventDto.apiResourceTemplate = httpResourceConfig.path;
     }
     eventDto.method = <string>context.attributes[API_METHOD_PROPERTY];
     eventDto.errorCode = <int>runtime:getInvocationContext().attributes[ERROR_RESPONSE_CODE];
@@ -114,6 +129,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
         eventDto.applicationId = authContext.applicationId;
         eventDto.userTenantDomain = authContext.subscriberTenantDomain;
         eventDto.apiCreator = authContext.apiPublisher;
+        eventDto.applicationOwner = authContext.subscriber;
     } else {
         metaInfo["keyType"] = PRODUCTION_KEY_TYPE;
         eventDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
@@ -121,6 +137,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
         eventDto.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
+        eventDto.applicationOwner = END_USER_ANONYMOUS;
     }
 
     APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
@@ -135,8 +152,12 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
             eventDto.apiCreator = UNKNOWN_VALUE;
         }
     }
-metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
+    metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
     eventDto.metaClientType = metaInfo.toString();
+    if (invocationContext.attributes.hasKey(ADDITIONAL_ANALYTICS_PROPS) &&
+        invocationContext.attributes[ADDITIONAL_ANALYTICS_PROPS] is string) {
+        eventDto.properties = <string>invocationContext.attributes[ADDITIONAL_ANALYTICS_PROPS];
+    }
     return eventDto;
 }
 

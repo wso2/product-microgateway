@@ -1,0 +1,104 @@
+{
+  "count":2,
+  "list":[
+    {
+      "uuid":null,
+      "id":1,
+      "name":"DefaultApplication",
+      "subName":"admin",
+      "policy":"Unlimited",
+      "tokenType":"JWT",
+      "groupIds":[
+
+      ],
+      "attributes":[
+
+      ]
+    },
+    {
+      "uuid": null,
+      "id": 2,
+      "name": "newAPP",
+      "subName": "admin",
+      "policy": "10PerMin",
+      "tokenType": "OAUTH",
+      "groupIds": [
+      ],
+      "attributes": [
+      ]
+    },
+    {
+      "uuid": null,
+      "id": 3,
+      "name": "newAPP",
+      "subName": "admin",
+      "policy": "10MinAppPolicy",
+      "tokenType": "OAUTH",
+      "groupIds": [
+      ],
+      "attributes": [
+      ]
+    },
+    {
+      "uuid": null,
+      "id": 4,
+      "name": "newAPP",
+      "subName": "admin",
+      "policy": "Unlimited",
+      "tokenType": "OAUTH",
+      "groupIds": [
+      ],
+      "attributes": [
+      ]
+    },
+    {
+      "uuid": null,
+      "id": 5,
+      "name": "newAPP",
+      "subName": "admin",
+      "policy": "Unlimited",
+      "tokenType": "OAUTH",
+      "groupIds": [
+      ],
+      "attributes": [
+      ]
+    },
+    {
+      "uuid": null,
+      "id": 6,
+      "name": "newAPP",
+      "subName": "admin",
+      "policy": "5MinAppPolicy",
+      "tokenType": "OAUTH",
+      "groupIds": [
+      ],
+      "attributes": [
+      ]
+    },
+    {
+      "uuid": null,
+      "id": 7,
+      "name": "newAPP",
+      "subName": "admin",
+      "policy": "AppPolicyNotExist",
+      "tokenType": "OAUTH",
+      "groupIds": [
+      ],
+      "attributes": [
+      ]
+    },
+    {
+      "uuid": null,
+      "id": 8,
+      "name": "newAPP",
+      "subName": "admin",
+      "policy": "Unlimited",
+      "tokenType": "OAUTH",
+      "groupIds": [
+      ],
+      "attributes": [
+      ]
+    }
+  ],
+  "pagination":null
+}

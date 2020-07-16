@@ -1,0 +1,62 @@
+{
+  "count":1,
+  "list":[
+    {
+      "apiId":1,
+      "provider":"admin",
+      "name":"PizzaShackAPI",
+      "version":"1.0.0",
+      "context":"/pizzashack/1.0.0",
+      "policy":null,
+      "apiType":null,
+      "urlMappings":[
+        {
+          "authScheme":"Application & Application User",
+          "throttlingPolicy":"Unlimited",
+          "httpMethod":"POST",
+          "urlPattern":"/order",
+          "scopes":[
+
+          ]
+        },
+        {
+          "authScheme":"Application & Application User",
+          "throttlingPolicy":"Unlimited",
+          "httpMethod":"GET",
+          "urlPattern":"/menu",
+          "scopes":[
+
+          ]
+        },
+        {
+          "authScheme":"Application & Application User",
+          "throttlingPolicy":"Unlimited",
+          "httpMethod":"GET",
+          "urlPattern":"/order/{orderId}",
+          "scopes":[
+
+          ]
+        },
+        {
+          "authScheme":"Application & Application User",
+          "throttlingPolicy":"Unlimited",
+          "httpMethod":"PUT",
+          "urlPattern":"/order/{orderId}",
+          "scopes":[
+
+          ]
+        },
+        {
+          "authScheme":"Application & Application User",
+          "throttlingPolicy":"Unlimited",
+          "httpMethod":"DELETE",
+          "urlPattern":"/order/{orderId}",
+          "scopes":[
+
+          ]
+        }
+      ]
+    }
+  ],
+  "pagination":null
+}

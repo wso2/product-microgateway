@@ -45,13 +45,17 @@ public function generateExecutionTimeEvent(http:FilterContext context) returns E
 
     executionTimeDTO.securityLatency = getSecurityLatency(context);
     executionTimeDTO.eventTime = getCurrentTime();
-    executionTimeDTO.throttlingLatency = <int>context.attributes[THROTTLE_LATENCY];
+    if (context.attributes.hasKey(THROTTLE_LATENCY)) {
+         executionTimeDTO.throttlingLatency = <int>context.attributes[THROTTLE_LATENCY];
+    }
     executionTimeDTO.requestMediationLatency = 0;
     executionTimeDTO.otherLatency = 0;
     executionTimeDTO.responseMediationLatency = 0;
-    int timeRequestOut = <int>invocationContext.attributes[TS_REQUEST_OUT];
-    int timeResponseIn = <int>invocationContext.attributes[TS_RESPONSE_IN];
-    executionTimeDTO.backEndLatency = timeResponseIn - timeRequestOut;
+    if (invocationContext.attributes.hasKey(TS_REQUEST_OUT) && invocationContext.attributes.hasKey(TS_RESPONSE_IN)) {
+        int timeRequestOut = <int>invocationContext.attributes[TS_REQUEST_OUT];
+        int timeResponseIn = <int>invocationContext.attributes[TS_RESPONSE_IN];
+        executionTimeDTO.backEndLatency = timeResponseIn - timeRequestOut;
+    }
     printDebug(KEY_ANALYTICS_FILTER, "Execution time dto : " + executionTimeDTO.toString());
     return executionTimeDTO;
 }

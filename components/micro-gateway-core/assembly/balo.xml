@@ -29,5 +29,12 @@
                 <include>**</include>
             </includes>
         </fileSet>
+        <fileSet>
+            <directory>${user.home}/.ballerina/balo_cache</directory>
+            <outputDirectory>/balo_cache</outputDirectory>
+            <includes>
+                <include>**/java.jms/**</include>
+            </includes>
+        </fileSet>
     </fileSets>
 </assembly>

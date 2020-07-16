@@ -122,6 +122,7 @@ public const string USER_IP_PROPERTY = "userIp";
 public const string REQUEST_TIME_PROPERTY = "requestTimestamp";
 public const string GATEWAY_TYPE_PROPERTY = "gatewayType";
 public const string GATEWAY_TYPE = "MICRO";
+public const string ADDITIONAL_ANALYTICS_PROPS = "ADDITIONAL_ANALYTICS_PROPS";
 
 public const string ERROR_RESPONSE = "error_response";
 public const string ERROR_RESPONSE_CODE = "error_response_code";
@@ -168,6 +169,7 @@ public const string FILE_UPLOAD_TASK = "taskUploadFiles";
 public const string INITIAL_DELAY = "initialDelayInMillis";
 public const string DESTINATION = "destination";
 public const string FILE_UPLOAD_ENABLE = "enable";
+public const string APIM_ANALYTICS_STREAM_VERSION = "streamVersion";
 
 //gRPC analytics related constants
 public const string GRPC_ANALYTICS = "analytics.gRPCAnalytics";
@@ -263,6 +265,23 @@ public const string BLOCKING_CONDITION_FIXED_IP = "fixedIp";
 public const string BLOCKING_CONDITION_START_IP = "startingIp";
 public const string BLOCKING_CONDITION_END_IP = "endingIp";
 
+// Gateway notification event related constants
+public const string NOTIFICATION_EVENT_TYPE = "eventType";
+public const string NOTIFICATION_EVENT_TIMESTAMP = "timestamp";
+public const string NOTIFICATION_EVENT = "event";
+public const string API_CREATE_EVENT = "API_CREATE";
+public const string API_UPDATE_EVENT = "API_UPDATE";
+public const string APPLICATION_CREATE_EVENT = "APPLICATION_CREATE";
+public const string APPLICATION_UPDATE_EVENT = "APPLICATION_UPDATE";
+public const string APPLICATION_DELETE_EVENT = "APPLICATION_DELETE";
+public const string APPLICATION_REGISTRATION_CREATE_EVENT = "APPLICATION_REGISTRATION_CREATE";
+public const string POLICY_CREATE_EVENT = "POLICY_CREATE";
+public const string POLICY_UPDATE_EVENT = "POLICY_UPDATE";
+public const string POLICY_DELETE_EVENT = "POLICY_DELETE";
+public const string SUBSCRIPTIONS_CREATE_EVENT = "SUBSCRIPTIONS_CREATE";
+public const string SUBSCRIPTIONS_UPDATE_EVENT = "SUBSCRIPTIONS_UPDATE";
+public const string SUBSCRIPTIONS_DELETE_EVENT = "SUBSCRIPTIONS_DELETE";
+
 public const string LISTENER_CONF_INSTANCE_ID = "listenerConfig";
 public const string LISTENER_CONF_HOST = "host";
 public const string LISTENER_CONF_HTTP_PORT = "httpPort";
@@ -296,12 +315,13 @@ public const string JWT_INSTANCE_ID = "jwtTokenConfig";
 public const string ISSUER = "issuer";
 public const string AUDIENCE = "audience";
 public const string ISSUER_CLASSNAME = "claimMapperClassName";
+public const string CONSUMER_KEY_CLAIM = "consumerKeyClaim";
 public const string ISSUER_CLAIMS = "claims";
 public const string PRINCIPAL = "principal";
 public const string CERTIFICATE_ALIAS = "certificateAlias";
+public const string JWKS_URL = "jwksURL";
 public const string TRUST_STORE_PATH = "trustStorePath";
 public const string TRUST_STORE_PASSWORD = "trustStorePassword";
-public const string VALIDATE_SUBSCRIPTION = "validateSubscription";
 
 public const string API_KEY_INSTANCE_ID = "apikey.tokenConfigs";
 public const string API_KEY_ISSUER_ENABLED = "enabled";
@@ -393,14 +413,36 @@ public const string PERSISTENT_MESSAGE_INSTANCE_ID = "tokenRevocationConfig.pers
 public const string PERSISTENT_MESSAGE_ENABLED = "enablePersistentStorageRetrieval";
 public const string PERSISTENT_USE_DEFAULT = "useDefault";
 public const string PERSISTENT_MESSAGE_HOSTNAME = "hostname";
+public const string PERSISTENT_MESSAGE_ENDPOINT = "endpointURL";
 public const string PERSISTENT_MESSAGE_USERNAME = "username";
 public const string PERSISTENT_MESSAGE_PASSWORD = "password";
+public const string PERSISTENT_MESSAGE_TYPE = "type";
 public const string CONFIG_USER_SECTION = "b7a.users";
 public const string B7A_LOG = "b7a.log";
 public const string LOG_LEVEL = "level";
 public const string INFO = "INFO";
 public const string DEBUG = "DEBUG";
 public const string TRACE = "TRACE";
+
+// subscription validation configs
+public const string VALIDATE_SUBSCRIPTION = "validateSubscription";
+public const string KEY_SUBSCRIPTION_STORE = "SubscriptionDataStore";
+public const string KEY_API_STORE = "ApiDataStore";
+public const string KEY_KEYMAP_STORE = "KeyMappingDataStore";
+public const string KEY_APPLICATION_STORE = "ApplicationDataStore";
+public const string EVENT_HUB_INSTANCE_ID = "apim.eventHub";
+public const string EVENT_HUB_SERVER_URL = "serviceUrl";
+public const string EVENT_HUB_INT_CONTEXT = "internalDataContext";
+public const string EVENT_HUB_USERNAME = "username";
+public const string EVENT_HUB_PASSWORD = "password";
+public const string EVENT_HUB_TENANT_LIST = "listOfTenants";
+public const string EVENT_HUB_TENANT_HEADER = "xWSO2Tenant";
+public const string EVENT_HUB_LISTENER_ENDPOINTS = "eventListeningEndpoints";
+public const string ALL_TENANTS = "ALL";
+
+// security related configs
+public const string SECURITY_INSTANCE_ID = "security";
+public const string SECURITY_VALIDATE_SUBSCRIPTIONS = "validateSubscriptions";
 
 // end of config constants
 public const string IS_THROTTLED = "isThrottled";
@@ -443,8 +485,10 @@ const string KEY_BASIC_AUTH_FILTER = "BasicAuthFilter";
 public const string KEY_THROTTLE_UTIL = "ThrottleUtil";
 public const string KEY_GLOBAL_THROTTLE_EVENT_PUBLISHER = "GlobalThrottleEventPublisher";
 const string KEY_THROTTLE_EVENT_LISTENER = "ThrottleEventListener";
+const string KEY_NOTIFICATION_EVENT_LISTENER = "NotificationEventListener";
 const string KEY_TEMPLATE_RETIEVAL_TASK = "KeyTemplateRetrievalTask";
 const string KEY_BLOCKING_CONDITION_RETRIEVAL_TASK = "BlockingConditionRetrievalTask";
+const string REVOKED_JWT_RETIEVAL_TASK = "RevokedJwtRetrievalTask";
 const string KEY_GW_CACHE = "GatewayCache";
 const string KEY_UTILS = "Utils";
 const string KEY_OAUTH_PROVIDER = "OAuthAuthProvider";
@@ -457,6 +501,7 @@ const string KEY_JWT_AUTH_PROVIDER = "JWTAuthProvider";
 public const string KEY_GRPC_ANALYTICS = "gRPCAnalytics";
 const string API_KEY_UTIL = "APIKeyUtil";
 const string JWT_UTIL = "JWTUtil";
+const string KEY_PILOT_UTIL = "PilotUtil";
 const string API_KEY_PROVIDER = "APIKeyProvider";
 public const string TOKEN_SERVICE = "TokenService";
 public const string HEALTH_CHECK_SERVICE = "HealthCheckService";

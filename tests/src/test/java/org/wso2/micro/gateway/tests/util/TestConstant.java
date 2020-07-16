@@ -32,6 +32,16 @@ public class TestConstant {
     public static final String KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String KEY_TYPE_SANDBOX = "SANDBOX";
 
+    public static final String TOKEN_TYPE_INVALID_SCOPES = "INVALID_SCOPES";
+    public static final String TOKEN_TYPE_INVALID_SUBSCRIPTION = "INVALID_SUBSCRIPTION";
+    public static final String TOKEN_TYPE_SUBSCRIPTION_THROTTLING = "SUBSCRIPTION_THROTTLING";
+    public static final String TOKEN_TYPE_APPLICATION_THROTTLING = "APPLICATION_THROTTLING";
+    public static final String TOKEN_TYPE_5_MIN_SUB = "5_MIN_SUB_THROTTLING";
+    public static final String TOKEN_TYPE_5_MIN_APP = "5_MIN_APP_THROTTLING";
+    public static final String TOKEN_TYPE_INVALID_APP_POLICY = "INVALID_APP_POLICY";
+    public static final String TOKEN_TYPE_INVALID_SUB_POLICY = "INVALID_SUB_POLICY";
+    public static final String TOKEN_TYPE_NO_CLIENT_ID = "NO_CLIENT_ID";
+
     public static final int GATEWAY_LISTENER_HTTP_PORT = 9590;
     public static final int GATEWAY_LISTENER_HTTPS_PORT = 9595;
     public static final int GATEWAY_LISTENER_HTTPS_TOKEN_PORT = 9596;

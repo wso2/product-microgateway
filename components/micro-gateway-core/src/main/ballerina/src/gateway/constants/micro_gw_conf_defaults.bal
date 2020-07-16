@@ -37,9 +37,16 @@ public const string DEFAULT_KM_TOKEN_CONTEXT = "oauth2";
 public const int DEFAULT_TIMESTAMP_SKEW = 5000;
 public const boolean DEFAULT_EXTERNAL = false;
 
+public const boolean DEFAULT_VALIDATE_SUBSCRIPTIONS = false;
+
 public const boolean DEFAULT_KM_CONF_SECURITY_BASIC_ENABLED = true;
 public const string DEFAULT_USERNAME = "admin";
 public const string DEFAULT_PASSWORD = "admin";
+
+public const string DEFAULT_PILOT_SERVER_URL = "https://localhost:9443";
+public const string DEFAULT_PILOT_INT_CONTEXT = "/internal/data/v1/";
+public const string DEFAULT_PILOT_USERNAME = "admin";
+public const string DEFAULT_PILOT_PASSWORD = "admin";
 
 public const boolean DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED = false;
 public const string DEFAULT_KM_CONF_SECURITY_OAUTH2_CREDENTIAL_BEARER = "AUTH_HEADER_BEARER";
@@ -47,6 +54,7 @@ public const string DEFAULT_KM_CONF_SECURITY_OAUTH2 = "";
 
 public const string DEFAULT_JWT_ISSUER = "https://localhost:9443/oauth2/token";
 public const string DEFAULT_ISSUER_CLASSNAME = "DefaultJWTTransformer";
+public const string DEFAULT_CONSUMER_KEY_CLAIM = "aud";
 public const boolean DEFAULT_VALIDATE_SUBSCRIPTION = false;
 public const string DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
 public const string DEFAULT_CERTIFICATE_ALIAS = "wso2apim310";
@@ -64,7 +72,10 @@ public const int DEFAULT_INITIAL_DELAY_IN_MILLIS = 5000;
 public const string DEFAULT_UPLOADING_EP = "https://localhost:9444/analytics/v1.0/usage/upload-file";
 public const int DEFAULT_ROTATING_PERIOD_IN_MILLIS =  600000;
 public const boolean DEFAULT_TASK_UPLOAD_FILES_ENABLED = true;
-//constants for gRPC analytics 
+public const string DEFAULT_AM_ANALYTICS_VERSION = "3.2.0";
+public const string DEFAULT_AM_ANALYTICS_VERSION_300 = "3.0.0";
+public const string DEFAULT_AM_ANALYTICS_VERSION_310 = "3.1.0";
+//constants for gRPC analytics
 public const string DEFAULT_GRPC_ENDPOINT_URL = "https://localhost:9806";
 public const int DEFAULT_GRPC_RECONNECT_TIME_IN_MILLES = 6000;
 
@@ -147,7 +158,8 @@ public const int DEFAULT_TM_AGENT_SECURE_MIN_IDLE_TIME_IN_POOL = 5000;
 
 public const boolean DEFAULT_TOKEN_REVOCATION_ENABLED = false;
 public const string DEFAULT_REALTIME_JMS_CONNECTION_TOPIC = "tokenRevocation";
-public const boolean DEFAULT_PERSISTENT_USE_DEFAULT = true;
+public const boolean DEFAULT_PERSISTENT_USE_DEFAULT = false;
+public const string DEFAULT_PERSISTENT_TYPE = "default";
 public const string DEFAULT_PERSISTENT_MESSAGE_HOSTNAME = "https://127.0.0.1:2379/v2/keys/jti/";
 public const string DEFAULT_PERSISTENT_MESSAGE_USERNAME = "root";
 public const string DEFAULT_PERSISTENT_MESSAGE_PASSWORD = "root";

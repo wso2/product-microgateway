@@ -18,6 +18,7 @@ import ballerina/cache;
 import ballerina/runtime;
 
 // TODO: Refactor the cache
+map<cache:Cache> jwtCacheMap = {};
 int cacheExpiryTime = getConfigIntValue(CACHING_ID, TOKEN_CACHE_EXPIRY, DEFAULT_TOKEN_CACHE_EXPIRY);
 int cacheSize = getConfigIntValue(CACHING_ID, TOKEN_CACHE_CAPACITY, DEFAULT_TOKEN_CACHE_CAPACITY);
 float evictionFactor = getConfigFloatValue(CACHING_ID,
@@ -50,12 +51,16 @@ cache:CacheConfig jwtGenerationCacheConfig = {
 cache:Cache gatewayTokenCache = new (genericCacheConfig);
 cache:Cache gatewayKeyValidationCache = new (genericCacheConfig);
 cache:Cache invalidTokenCache = new (genericCacheConfig);
-cache:Cache jwtCache = new (genericCacheConfig);
+cache:Cache apiKeyCache = new (genericCacheConfig);
 cache:Cache introspectCache = new (genericCacheConfig);
 cache:Cache gatewayClaimsCache = new (genericCacheConfig);
+cache:Cache subscriptionCache = new (genericCacheConfig);
+cache:Cache invalidSubscriptionCache = new(genericCacheConfig);
 
 cache:Cache jwtGeneratorCache = new (jwtGenerationCacheConfig);
 cache:Cache mutualSslCertificateCache = new (genericCacheConfig);
+
+APIGatewayCache gatewayCacheObject = new;
 
 public type APIGatewayCache object {
 
@@ -170,4 +175,68 @@ public type APIGatewayCache object {
             return ();
         }
     }
+
+    public function addToSubcriptionCache(string subscriptionKey, AuthenticationContext authenticationContext) {
+        error? err = subscriptionCache.put(<@untainted>subscriptionKey, <@untainted>authenticationContext);
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while adding subscription key " +  subscriptionKey + " to the subscription cache", err);
+        }
+        printDebug(KEY_GW_CACHE, "Added subscription information to the subscription cache. key: " + subscriptionKey);
+    }
+
+    public function retrieveFromSubcriptionCache(string subscriptionKey) returns (AuthenticationContext | ()){
+        var authenticationContext = subscriptionCache.get(subscriptionKey);
+        if (authenticationContext is AuthenticationContext) {
+            return authenticationContext;
+        } else {
+            return ();
+        }
+    }
+
+    public function addToInvalidSubcriptionCache(string subscriptionKey, AuthenticationContext authenticationContext) {
+        error? err = invalidSubscriptionCache.put(<@untainted>subscriptionKey, <@untainted>authenticationContext);
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while adding subscription key " +  subscriptionKey + " to the subscription cache", err);
+        }
+        printDebug(KEY_GW_CACHE, "Added subscription information to the subscription cache. key: " + subscriptionKey);
+    }
+
+    public function retrieveFromInvalidSubcriptionCache(string subscriptionKey) returns (AuthenticationContext | ()){
+        var authenticationContext = invalidSubscriptionCache.get(subscriptionKey);
+        if (authenticationContext is AuthenticationContext) {
+            return authenticationContext;
+        } else {
+            return ();
+        }
+    }
+
+    public function removeFromInvalidSubcriptionCache(string subscriptionKey) {
+        error? err = invalidSubscriptionCache.invalidate(subscriptionKey);
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while removing subscription key from invalid subscription cache : " + subscriptionKey , err);
+        }
+        printDebug(KEY_GW_CACHE, "Removed from the invalid subscription cache. Subscription key: " + subscriptionKey);
+    }
+
+    public function removeAllFromInvalidSubcriptionCache() {
+        error? err = invalidSubscriptionCache.invalidateAll();
+        if (err is error) {
+            printError(KEY_GW_CACHE, "Error while invalidating all entries from invalid subscription cache" , err);
+        }
+        printDebug(KEY_GW_CACHE, "Removed all entries from the invalid subscription cache.");
+    }
+
+    public function getJWTCacheForProvider(string issuer) returns cache:Cache {
+        if (jwtCacheMap.hasKey(issuer)) {
+            return jwtCacheMap.get(issuer);
+        }
+        cache:Cache jwtCache = new (genericCacheConfig);
+        jwtCacheMap[issuer] = jwtCache;
+        return jwtCache;
+    }
 };
+
+public function getCacheObject() returns APIGatewayCache {
+    return gatewayCacheObject;
+}
+

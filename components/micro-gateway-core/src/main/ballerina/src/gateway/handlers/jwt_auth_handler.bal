@@ -148,14 +148,16 @@ public type JWTAuthHandler object {
         string credential = headerValue.substring(6, headerValue.length()).trim();
         var authenticationResult = self.jwtAuthProvider.authenticate(credential);
         if (authenticationResult is boolean) {
-            boolean backendJWTfromClaim = setBackendJwtHeader(credential, req);
+            string? iss = self.jwtAuthProvider.jwtValidatorConfig?.issuer;
+            boolean backendJWTfromClaim = setBackendJwtHeader(credential, req, iss);
             if (!backendJWTfromClaim) {
                 boolean generationStatus = generateAndSetBackendJwtHeader(credential,
                                                                             req,
                                                                             self.enabledJWTGenerator,
                                                                             self.classLoaded,
                                                                             self.skewTime,
-                                                                            self.enabledCaching);
+                                                                            self.enabledCaching,
+                                                                            iss);
                 if (!generationStatus) {
                     printError(KEY_JWT_AUTH_PROVIDER, "JWT Generation failed");
                 }
@@ -175,9 +177,10 @@ public type JWTAuthHandler object {
 #
 # + credential - Credential
 # + req - The `Request` instance.
+# + issuer - The jwt issuer who issued the token and comes in the iss claim.
 # + return - Returns boolean based on backend jwt setting.
-public function setBackendJwtHeader(string credential, http:Request req) returns @tainted boolean {
-    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential);
+public function setBackendJwtHeader(string credential, http:Request req, string? issuer) returns @tainted boolean {
+    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential, issuer);
     if (payload is jwt:JwtPayload) {
         map<json>? customClaims = payload?.customClaims;
         // validate backend jwt claim and set it to jwt header
@@ -220,7 +223,8 @@ public function getAPIDetails(jwt:JwtPayload payload, string apiName, string api
             int index = 0;
             while (index < l) {
                 var subscription = subscribedAPIList[index];
-                if (subscription.name.toString() == apiName && subscription.'version.toString() == apiVersion) {
+                if (subscription.name.toString() == apiName && 
+                (subscription.'version.toString() == apiVersion || subscription.'version.toString() == "*")) {
                     // API is found in the subscribed APIs
                     if (isDebugEnabled) {
                         printDebug(KEY_JWT_AUTH_PROVIDER, "Found the API in subscribed APIs:" + subscription.name.toString()
@@ -230,7 +234,7 @@ public function getAPIDetails(jwt:JwtPayload payload, string apiName, string api
                         apiDetails["apiName"] = subscription.name.toString();
                     }
                     if (subscription.'version is json) {
-                        apiDetails["apiVersion"] = subscription.'version.toString();
+                        apiDetails["apiVersion"] = apiVersion;
                     }
                     if (subscription.context is json) {
                         apiDetails["apiContext"] = subscription.context.toString();
@@ -260,6 +264,7 @@ public function getAPIDetails(jwt:JwtPayload payload, string apiName, string api
 # + classLoaded - whether the class is loaded successfully
 # + enabledCaching - jwt generator caching enabled
 # + skewTime - skew time to backend
+# + issuer - The jwt issuer who issued the token and comes in the iss claim.
 # + return - Returns `true` if the token generation and setting the header completed successfully
 # or the `AuthenticationError` in case of an error.
 public function generateAndSetBackendJwtHeader(string credential,
@@ -267,7 +272,8 @@ public function generateAndSetBackendJwtHeader(string credential,
                                                 boolean enabledJWTGenerator,
                                                 boolean classLoaded,
                                                 int skewTime,
-                                                boolean enabledCaching) returns @tainted boolean {
+                                                boolean enabledCaching,
+                                                string? issuer) returns @tainted boolean {
     if (enabledJWTGenerator) {
         if (classLoaded) {
             boolean status = false;
@@ -279,7 +285,7 @@ public function generateAndSetBackendJwtHeader(string credential,
                 apiVersion = apiConfig.apiVersion;
             }
             string cacheKey = credential + apiName + apiVersion;
-            (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential);
+            (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential, issuer);
             if (payload is jwt:JwtPayload) {
                 printDebug(KEY_JWT_AUTH_PROVIDER, "decoded token credential");
                 // get the subscribedAPI details
@@ -291,7 +297,7 @@ public function generateAndSetBackendJwtHeader(string credential,
                     if (cachedToken is string) {
                         printDebug(KEY_JWT_AUTH_PROVIDER, "Found in jwt generator cache");
                         printDebug(KEY_JWT_AUTH_PROVIDER, "Token: " + cachedToken);
-                        (jwt:JwtPayload | error) cachedPayload = getDecodedJWTPayload(cachedToken);
+                        (jwt:JwtPayload | error) cachedPayload = getDecodedJWTPayload(cachedToken, issuer);
                         if (cachedPayload is jwt:JwtPayload) {
                             int currentTime = getCurrentTime();
                             int? cachedTokenExpiry = cachedPayload?.exp;

@@ -31,6 +31,7 @@ public class KeyValidationInfo {
     private String subscriptionTier;
     private String stringResponse;
     private boolean responsePresent = false;
+    private String tokenType;
 
     public String getSubscriptionTier() {
         return subscriptionTier;
@@ -83,6 +84,14 @@ public class KeyValidationInfo {
     public void setStringResponse(String stringResponse) {
         responsePresent = true;
         this.stringResponse = stringResponse;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 
     public boolean isResponsePresent() {

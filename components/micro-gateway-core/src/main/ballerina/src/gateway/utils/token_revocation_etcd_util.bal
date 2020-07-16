@@ -40,7 +40,7 @@ public function etcdRevokedTokenLookup(string tokenKey) returns string {
     var response = etcdTokenRevocationEndpoint->get(tokenKey, message = req);
 
     if (response is http:Response) {
-        printError(KEY_TOKEN_REVOCATION_ETCD_UTIL, "Http Response object obtained");
+        printDebug(KEY_TOKEN_REVOCATION_ETCD_UTIL, "Http Response object obtained");
         var msg = response.getJsonPayload();
         if (msg is json) {
             json jsonPayload = msg;
@@ -108,8 +108,7 @@ public function etcdAllRevokedTokenLookup() returns map<string> {
 
 # One Time Etcd Query. Trigger function of etcd revoked tokens retrieval task
 public function etcdRevokedTokenRetrieverTask() {
-    boolean enabledPersistentMessage = getConfigBooleanValue(PERSISTENT_MESSAGE_INSTANCE_ID,
-        PERSISTENT_MESSAGE_ENABLED, DEFAULT_TOKEN_REVOCATION_ENABLED);
+
 
     if (enabledPersistentMessage) {
         printInfo(KEY_TOKEN_REVOCATION_ETCD_UTIL, "One time ETCD revoked token retriever task initiated");

@@ -51,6 +51,7 @@ public type RequestResponseExecutionDTO record {
     string label = "";
     string correlationId = "";
     boolean cacheHit = false;
+    string properties = "null"; //New 3.1.0
 };
 
 public type ExecutionTimeDTO record {
@@ -90,6 +91,9 @@ public type FaultDTO record {
     int errorCode = 0;
     string errorMessage = "";
     int faultTime = 0;
+    string properties = "null"; // New 3.1.0
+    string apiResourceTemplate = ""; // New 3.2.0
+    string applicationOwner = ""; // New 3.2.0
 };
 
 public type EventDTO record {
