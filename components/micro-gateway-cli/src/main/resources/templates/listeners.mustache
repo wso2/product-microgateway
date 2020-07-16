@@ -133,12 +133,11 @@ public function getFilters() returns (http:RequestFilter|http:ResponseFilter) []
     // Extension filter
     ExtensionFilter extensionFilter = new;
 
-    (http:RequestFilter|http:ResponseFilter)[] defaultFilters = [grpcFilter, preAuthnFilter, authorizationFilter,
+    (http:RequestFilter|http:ResponseFilter)[] allFilters = [grpcFilter, preAuthnFilter, authorizationFilter,
         validationRequestFilter, throttleFilter, analyticsFilter, validationResponseFilter, extensionFilter];
 
     (http:RequestFilter|http:ResponseFilter)[] customFilters = [];
     int[] customFilterIndexes = [];
-    (http:RequestFilter|http:ResponseFilter)[] allFilters = defaultFilters.slice(0,defaultFilters.length());
 {{#containerConfig.filters}}
     {{name}} {{variableName}} = new;
     customFilterIndexes[{{@index}}] = {{position}};
