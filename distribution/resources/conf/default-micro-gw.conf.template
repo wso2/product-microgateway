@@ -291,17 +291,6 @@
 
 # Throttling configurations
 [throttlingConfig]
-  # Configurations related to node local throttling.
-  [throttlingConfig.nodeLocal]
-    # Core number of threads in the thread pool.
-    processThreadPoolCoreSize = 200
-    # Maximum number of threads in the thread pool.
-    processThreadPoolMaximumSize = 1000
-    # Keep alive time of the threads in seconds
-    processThreadPoolKeepAliveTime = 200
-    # Throttle data cleanup task frequency in seconds.
-    cleanUpFrequency = 3600
-
   # Connect with the central traffic manager
   enabledGlobalTMEventPublishing = false
   # The message broker context factory
@@ -321,6 +310,16 @@
     serverUrl = "https://localhost:9443/internal/data/v1"
     username = "admin"
     password = "admin"
+  # Configurations related to node local throttling.
+  [throttlingConfig.nodeLocal]
+    # Core number of threads in the thread pool.
+    processThreadPoolCoreSize = 200
+    # Maximum number of threads in the thread pool.
+    processThreadPoolMaximumSize = 1000
+    # Keep alive time of the threads in seconds
+    processThreadPoolKeepAliveTime = 200
+    # Throttle data cleanup task frequency in seconds.
+    cleanUpFrequency = 3600
 
 
   # Throttling configurations related to event publishing using a binary connection
