@@ -35,7 +35,6 @@ public type RetrievedUserClaimsListDTO record {|
 # + iss - token issuer
 # + sub - subscription claim
 # + customClaims - custom claims
-# + token_type - token type : oauth2 or jwt
 public type ClaimsMapDTO record {
     string iss = "";
     string sub = "";
@@ -66,9 +65,9 @@ public type ApplicationClaimsMapDTO record {|
 # + token - token
 # + client_id - client ID
 # + username - username
-# + token_type - token type (jwt or oauth2)
+# + token_type - token type ('bearer jwt' or 'bearer opaque')
 # + customClaims - customClaims of the JWT or the information received from introspection response
-public type UserAuthContextDTO record {|
+public type UserClaimRetrieverContextDTO record {|
     string issuer = "";
     string token = "";
     string client_id = "";

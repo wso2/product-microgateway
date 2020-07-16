@@ -75,7 +75,7 @@ public function loadClaimRetrieverClass (string className, map<any> properties) 
     return jLoadClaimRetrieverClass (java:fromString(className), properties);
 }
 
-public function retrieveClaimsFromImpl (UserAuthContextDTO userInfo) returns RetrievedUserClaimsListDTO? {
+public function retrieveClaimsFromImpl (UserClaimRetrieverContextDTO userInfo) returns RetrievedUserClaimsListDTO? {
     return jRetrieveClaims(userInfo);
 }
 
@@ -172,7 +172,7 @@ function jLoadClaimRetrieverClass (handle className, map<any> configuration) ret
     class: "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorInvoker"
 } external;
 
-function jRetrieveClaims (UserAuthContextDTO userInfo) returns RetrievedUserClaimsListDTO? = @java:Method {
+function jRetrieveClaims (UserClaimRetrieverContextDTO userInfo) returns RetrievedUserClaimsListDTO? = @java:Method {
     name:"getRetrievedClaims",
     class: "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorInvoker"
 } external;

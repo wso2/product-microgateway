@@ -178,6 +178,7 @@ public type KeyValidationHandler object {
 # + authContext - Authentication Context
 # + cacheKey - cache Key
 # + enabledCaching - enabled backend jwt caching
+# + remoteUserClaimRetrievalEnabled - true if remoteUserClaimRetrieval is enabled
 # + issuer - Issuer of the Key Manager
 # + return - Returns `true` if the token generation and setting the header completed successfully
 # or the `AuthenticationError` in case of an error.
@@ -221,6 +222,7 @@ function generateBackendJWTTokenForOauth(AuthenticationContext authContext,
 # Generate the backend JWT token and set to the header of the outgoing request.
 #
 # + credential - Credential
+# + authContext - Authentication Context
 # + req - The `Request` instance.
 # + enabledJWTGenerator - state of jwt generator
 # + classLoaded - whether the class is loaded successfully

@@ -21,12 +21,12 @@ import ballerina/runtime;
 # 
 # + userInfo - Authentication Context of the user, which is provided as input to the claim retriever Implementation
 # + return - ClaimListDTO if there are any claims added from the user specific implementation
-function retrieveClaims (UserAuthContextDTO? userInfo) returns @tainted RetrievedUserClaimsListDTO ? {
+function retrieveClaims (UserClaimRetrieverContextDTO? userInfo) returns @tainted RetrievedUserClaimsListDTO ? {
     //if claim retrieve variable is disabled, there is no need to run through the method.
     if (!claimRetrieverClassLoaded) {
         return;
     }
-    if (userInfo is UserAuthContextDTO) {
+    if (userInfo is UserClaimRetrieverContextDTO) {
         printDebug (CLAIM_RETRIEVER, "User Auth Context information provided to the claim retrieval implementation : " +
                     userInfo.toString());
         RetrievedUserClaimsListDTO? | error claimListDTO = trap retrieveClaimsFromImpl(userInfo);
@@ -46,8 +46,7 @@ function retrieveClaims (UserAuthContextDTO? userInfo) returns @tainted Retrieve
 # To do the class loading operation for the user specific claim retriever implementation.
 # + return - true if claim retriever class loading is successful.
 public function loadClaimRetrieverImpl() returns boolean {
-    
-    //todo: bring a configuration if required
+
     if (!isConfigAvailable(JWT_GENERATOR__CLAIM_RETRIEVAL_INSTANCE_ID, JWT_GENERATOR_CLAIM_RETRIEVAL_IMPLEMENTATION)) {
         printDebug(CLAIM_RETRIEVER, "Claim Retrieval related class loading is disabled as the implementation is not provided." +  
                     "Hence claim retrieval is disabled");
@@ -74,12 +73,6 @@ public function loadClaimRetrieverImpl() returns boolean {
         claimRetrieverConfig[KM_SERVER_URL] = keyManagerURL;
     }
     return loadClaimRetrieverClass(claimRetrieverImplClassName, claimRetrieverConfig);
-    //if (claimRetrieveClassLoaded) {
-    //    printDebug(CLAIM_RETRIEVER, "JWT Claim Retriever Classloading is successful.");
-    //} else {
-    //    printError(CLAIM_RETRIEVER, "Claim Retriever classloading is failed. Hence claim retrieval process is disabled");
-    //    //If the classloading is failed, the configuration is set to disabled.
-    //}
 }
 
 # Populate the DTO required for the claim retrieval implementation from authContext and principal component.
@@ -87,11 +80,11 @@ public function loadClaimRetrieverImpl() returns boolean {
 # + authContext - Authentication Context
 # + principal - Principal component
 # + issuer - Issuer related to KeyManager
-# + return - populated UserAuthContextDTO
-function generateAuthContextInfoFromPrincipal(AuthenticationContext authContext, runtime:Principal principal,
+# + return - populated UserClaimRetrieverContextDTO
+function generateUserClaimRetrieverContextFromPrincipal(AuthenticationContext authContext, runtime:Principal principal,
                                             string? issuer)
-        returns UserAuthContextDTO {
-    UserAuthContextDTO userAuthContextDTO = {};
+        returns UserClaimRetrieverContextDTO {
+    UserClaimRetrieverContextDTO userAuthContextDTO = {};
     userAuthContextDTO.username = principal?.username ?: UNKNOWN_VALUE;
     userAuthContextDTO.token_type = "bearer opaque";
     userAuthContextDTO.issuer = issuer ?: UNKNOWN_VALUE;
@@ -112,10 +105,10 @@ function generateAuthContextInfoFromPrincipal(AuthenticationContext authContext,
 # 
 # + authContext - Authentication Context
 # + payload - JWT payload
-# + return - populated UserAuthContextDTO
-function generateAuthContextInfoFromJWT(AuthenticationContext authContext, jwt:JwtPayload payload)
-        returns UserAuthContextDTO {
-    UserAuthContextDTO userAuthContextDTO = {};
+# + return - populated UserClaimRetrieverContextDTO
+function generateUserClaimRetrieverContextFromJWT(AuthenticationContext authContext, jwt:JwtPayload payload)
+        returns UserClaimRetrieverContextDTO {
+    UserClaimRetrieverContextDTO userAuthContextDTO = {};
     userAuthContextDTO.username = authContext.username;
     userAuthContextDTO.token_type = "bearer jwt";
     userAuthContextDTO.issuer = payload?.iss ?: UNKNOWN_VALUE;

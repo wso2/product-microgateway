@@ -66,7 +66,7 @@ function createMapFromRetrievedUserClaimsListDTO(AuthenticationContext authConte
                                                     returns @tainted ClaimsMapDTO {
     ClaimsMapDTO claimsMapDTO = {};
     CustomClaimsMapDTO customClaimsMapDTO = {};
-    UserAuthContextDTO? userInfo = ();
+    UserClaimRetrieverContextDTO? userInfo = ();
     if (payload is ()) {
         //if payload is empty, this is from oauth2 flow
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
@@ -80,7 +80,7 @@ function createMapFromRetrievedUserClaimsListDTO(AuthenticationContext authConte
                 }
                 customClaimsMapDTO["scope"] = concatenatedScope.trim();
             }
-            userInfo = generateAuthContextInfoFromPrincipal(authContext, principal, issuer);
+            userInfo = generateUserClaimRetrieverContextFromPrincipal(authContext, principal, issuer);
         } else {
             printDebug(JWT_GEN_UTIL, "Claim retrieval implementation is not executed due to the unavailability " +
                             "of the principal component");
@@ -100,7 +100,7 @@ function createMapFromRetrievedUserClaimsListDTO(AuthenticationContext authConte
                 }
             }
         }
-        userInfo = generateAuthContextInfoFromJWT(authContext, payload);
+        userInfo = generateUserClaimRetrieverContextFromJWT(authContext, payload);
     }
 
     if (remoteUserClaimRetrievalEnabled) {
