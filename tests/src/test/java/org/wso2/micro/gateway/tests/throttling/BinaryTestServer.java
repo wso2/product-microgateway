@@ -9,6 +9,7 @@ import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionExc
 import org.wso2.carbon.databridge.commons.utils.EventDefinitionConverterUtils;
 import org.wso2.carbon.databridge.core.AgentCallback;
 import org.wso2.carbon.databridge.core.DataBridge;
+import org.wso2.carbon.databridge.core.conf.DataBridgeConfiguration;
 import org.wso2.carbon.databridge.core.definitionstore.InMemoryStreamDefinitionStore;
 import org.wso2.carbon.databridge.core.exception.DataBridgeException;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
@@ -26,20 +27,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Binary Test Server.
  */
 public class BinaryTestServer {
-    String configFileName;
     Logger log = LoggerFactory.getLogger(BinaryTestServer.class);
     BinaryDataReceiver binaryDataReceiver;
     InMemoryStreamDefinitionStore streamDefinitionStore;
     volatile int eventCount = 0;
     RestarterThread restarterThread;
-
-    public BinaryTestServer() {
-        this.configFileName = "databridge.config.yaml";
-    }
-
-    public BinaryTestServer(String configFileName) {
-        this.configFileName = configFileName;
-    }
 
     public void startTestServer() throws DataBridgeException, InterruptedException, IOException {
         BinaryTestServer binaryTestServer = new BinaryTestServer();
@@ -66,6 +58,24 @@ public class BinaryTestServer {
         return streamDefinitionStore;
     }
 
+    DataBridgeConfiguration dataBridgeConfiguration = new DataBridgeConfiguration() {
+        @Override
+        public String getKeyStoreLocation() {
+            return DataPublisherTestUtil.keyStorePath;
+        }
+
+        @Override
+        public String getKeyStorePassword() {
+            return DataPublisherTestUtil.keyStorePassword;
+        }
+
+        @Override
+        public int getMaxEventBufferCapacity() {
+            return 100000;
+        }
+    };
+
+
     public void startServer(int tcpPort, int securePort) throws DataBridgeException, IOException {
         DataPublisherTestUtil.setKeyStoreParams();
         streamDefinitionStore = getStreamDefinitionStore();
@@ -87,7 +97,7 @@ public class BinaryTestServer {
             public void destroyContext(AgentSession agentSession) {
 
             }
-        }, streamDefinitionStore, DataPublisherTestUtil.getDataBridgeConfigPath(configFileName));
+        }, streamDefinitionStore, dataBridgeConfiguration);
 
         BinaryDataReceiverConfiguration dataReceiverConfiguration = new BinaryDataReceiverConfiguration(securePort,
                 tcpPort);
