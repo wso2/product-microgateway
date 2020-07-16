@@ -50,6 +50,8 @@ public const string VALIDATE_KEY_SOAP_ACTION = "urn:validateKey";
 public const string KEY_VALIDATION_SERVICE_CONTEXT = "/services/APIKeyValidationService";
 public const string UTF_8 = "UTF-8";
 public const string INVALID_COOKIE = "Cookie is Invalid";
+public const string WWW_AUTHENTICATE = "WWW-Authenticate";
+public const string WWW_AUTHENTICATE_ERROR = ", error=\"invalid token\" , error_description=\"The access token expired\"";
 
 public const string X_FORWARD_FOR_HEADER = "X-FORWARDED-FOR";
 public const string KEY_VALIDATION_RESPONSE = "KEY_VALIDATION_RESPONSE";
@@ -123,6 +125,7 @@ public const string REQUEST_TIME_PROPERTY = "requestTimestamp";
 public const string GATEWAY_TYPE_PROPERTY = "gatewayType";
 public const string GATEWAY_TYPE = "MICRO";
 public const string ADDITIONAL_ANALYTICS_PROPS = "ADDITIONAL_ANALYTICS_PROPS";
+public const string CHALLENGE_STRING = "challengeString";
 
 public const string ERROR_RESPONSE = "error_response";
 public const string ERROR_RESPONSE_CODE = "error_response_code";

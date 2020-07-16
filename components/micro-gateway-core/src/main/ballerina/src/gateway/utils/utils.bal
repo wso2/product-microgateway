@@ -343,13 +343,18 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
 
 # Default error response sender with json error response.
 # + response - http response object.
-public function sendErrorResponseFromInvocationContext(http:Response response) {
-    runtime:InvocationContext context = runtime:getInvocationContext();
-    string errorDescription = <string>context.attributes[ERROR_DESCRIPTION];
-    string errorMessage = <string>context.attributes[ERROR_MESSAGE];
-    int errorCode = <int>context.attributes[ERROR_CODE];
-    response.statusCode = <int>context.attributes[HTTP_STATUS_CODE];
+public function sendErrorResponseFromInvocationContext(http:FilterContext context, http:Response response) {
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    string errorDescription = <string>invocationContext.attributes[ERROR_DESCRIPTION];
+    string errorMessage = <string>invocationContext.attributes[ERROR_MESSAGE];
+    int errorCode = <int>invocationContext.attributes[ERROR_CODE];
+    response.statusCode = <int>invocationContext.attributes[HTTP_STATUS_CODE];
     response.setContentType(APPLICATION_JSON);
+    //set WWW_AUTHENTICATE header to error response
+    if (response.statusCode == UNAUTHORIZED) {
+        string challengeString = getChallengeString(context);
+        response.setHeader(WWW_AUTHENTICATE, challengeString + WWW_AUTHENTICATE_ERROR);
+    }
     if (! context.attributes.hasKey(IS_GRPC)) {
         json payload = {
             fault: {
@@ -363,6 +368,32 @@ public function sendErrorResponseFromInvocationContext(http:Response response) {
         attachGrpcErrorHeaders (response, errorMessage);
     }
 }
+
+public function getChallengeString(http:FilterContext context) returns string {
+     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+     string challengeString = invocationContext.attributes[CHALLENGE_STRING].toString();
+     string[] authProviders = [];
+     APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
+     if (apiConfig is APIConfiguration) {
+         authProviders = apiConfig.authProviders;
+         foreach var v in authProviders {
+             if (v == AUTH_SCHEME_OAUTH2) {
+                 if(challengeString == "") {
+                     challengeString = "OAuth2 realm=\"WSO2 API Microgateway\"";
+                 } else {
+                     challengeString += " OAuth2 realm=\"WSO2 API Microgateway\"";
+                 }
+             } else if (v == AUTH_SCHEME_BASIC) {
+                 if(challengeString == "") {
+                     challengeString = "Basic Auth realm=\"WSO2 API Microgateway\"";
+                 } else {
+                     challengeString += " Basic Auth realm=\"WSO2 API Microgateway\"";
+                 }
+             }
+         }
+     }
+     return challengeString;
+ }
 
 public function getAuthorizationHeader(runtime:InvocationContext context) returns string {
     string serviceName = context.attributes[http:SERVICE_NAME].toString();

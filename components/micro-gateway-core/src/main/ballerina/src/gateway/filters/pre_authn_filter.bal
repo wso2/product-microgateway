@@ -62,7 +62,7 @@ public type PreAuthnFilter object {
             if (!invocationContext.attributes.hasKey(ERROR_CODE)) {
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
             }
-            sendErrorResponseFromInvocationContext(response);
+            sendErrorResponseFromInvocationContext(context, response);
         }
         return true;
     }
