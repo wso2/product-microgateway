@@ -47,6 +47,15 @@ type SubscriptionDataStore object {
 
     function addSubscription(Subscription sub) {
         string subKey = sub.appId.toString() + ":" + sub.apiId.toString();
+        if (self.subscriptions.hasKey(subKey)) {
+            int earlierTimestamp = self.subscriptions.get(subKey).timestamp ;
+            // When subscription added two events are received for ON_HOLD and UNBLOCKED. If these jms event are
+            //received in mixed up order then subscription validation will fail. Hence we need to ignore the events
+            //that are coming in wrong order based on the timestamp.
+            if (earlierTimestamp > 0 && earlierTimestamp > sub.timestamp) {
+                return;
+            }
+        }
         lock {
             self.subscriptions[subKey] = sub;
         }
