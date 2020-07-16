@@ -56,10 +56,12 @@ function setGeneratedTokenAsHeader(http:Request req,
 #
 # + authContext - Authentication Context
 # + remoteUserClaimRetrievalEnabled - true if remoteUserClaimRetrieval is enabled
+# + issuer - Issuer (for Opaque token flow)
 # + payload - For the jwt, payload of the decoded jwt
 # + return - ClaimsMapDTO
 function createMapFromRetrievedUserClaimsListDTO(AuthenticationContext authContext, 
-                                                    boolean remoteUserClaimRetrievalEnabled, 
+                                                    boolean remoteUserClaimRetrievalEnabled,
+                                                    string? issuer,
                                                     jwt:JwtPayload? payload = ())
                                                     returns @tainted ClaimsMapDTO {
     ClaimsMapDTO claimsMapDTO = {};
@@ -78,12 +80,12 @@ function createMapFromRetrievedUserClaimsListDTO(AuthenticationContext authConte
                 }
                 customClaimsMapDTO["scope"] = concatenatedScope.trim();
             }
-            userInfo = generateAuthContextInfoFromPrincipal(authContext, principal);
+            userInfo = generateAuthContextInfoFromPrincipal(authContext, principal, issuer);
         } else {
             printDebug(JWT_GEN_UTIL, "Claim retrieval implementation is not executed due to the unavailability " +
                             "of the principal component");
         }
-        claimsMapDTO.iss = getConfigValue(KM_CONF_INSTANCE_ID, KM_CONF_ISSUER, DEFAULT_KM_CONF_ISSUER);
+        claimsMapDTO.iss = issuer ?: UNKNOWN_VALUE;
     } else  {
         string? iss = payload?.iss;
         if (iss is string) {

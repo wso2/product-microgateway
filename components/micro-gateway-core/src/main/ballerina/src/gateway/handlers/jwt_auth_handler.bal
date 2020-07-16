@@ -252,7 +252,7 @@ public function generateAndSetBackendJwtHeader(string credential,
                                 int difference = (cachedTokenExpiry - currentTime);
                                 if (difference < skewTime) {
                                     printDebug(KEY_JWT_AUTH_PROVIDER, "JWT regenerated because of the skew time");
-                                    status = setJWTHeader(<@untainted>payload, req, cacheKey, enabledCaching, apiDetails, 
+                                    status = setJWTHeader(<@untainted>payload, req, cacheKey, enabledCaching, apiDetails,
                                                             remoteUserClaimRetrievalEnabled);
                                 } else {
                                     req.setHeader(jwtheaderName, cachedToken);
@@ -265,12 +265,12 @@ public function generateAndSetBackendJwtHeader(string credential,
                         }
                     } else {
                         printDebug(KEY_JWT_AUTH_PROVIDER, "Could not find in the jwt generator cache");
-                        status = setJWTHeader(<@untainted>payload, req, cacheKey, enabledCaching, apiDetails, 
+                        status = setJWTHeader(<@untainted>payload, req, cacheKey, enabledCaching, apiDetails,
                                             remoteUserClaimRetrievalEnabled);
                     }
                 } else {
                     printDebug(KEY_JWT_AUTH_PROVIDER, "JWT generator caching is disabled");
-                    status = setJWTHeader(<@untainted>payload, req, cacheKey, enabledCaching, apiDetails, 
+                    status = setJWTHeader(<@untainted>payload, req, cacheKey, enabledCaching, apiDetails,
                                             remoteUserClaimRetrievalEnabled);
                 }
             } else {
@@ -326,6 +326,7 @@ function generateBackendTokenForJWT(AuthenticationContext authContext, jwt:JwtPa
     } else {
         ClaimsMapDTO claimsMapDTO = createMapFromRetrievedUserClaimsListDTO(authContext,
                                                                             remoteUserClaimRetrievalEnabled,
+                                                                            (),
                                                                             payload);
         generatedToken = generateJWTTokenFromUserClaimsMap(claimsMapDTO, apiDetails);
     }

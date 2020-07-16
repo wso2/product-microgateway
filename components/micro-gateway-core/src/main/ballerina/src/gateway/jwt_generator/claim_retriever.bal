@@ -86,13 +86,15 @@ public function loadClaimRetrieverImpl() returns boolean {
 # 
 # + authContext - Authentication Context
 # + principal - Principal component
+# + issuer - Issuer related to KeyManager
 # + return - populated UserAuthContextDTO
-function generateAuthContextInfoFromPrincipal(AuthenticationContext authContext, runtime:Principal principal)
+function generateAuthContextInfoFromPrincipal(AuthenticationContext authContext, runtime:Principal principal,
+                                            string? issuer)
         returns UserAuthContextDTO {
     UserAuthContextDTO userAuthContextDTO = {};
     userAuthContextDTO.username = principal?.username ?: UNKNOWN_VALUE;
     userAuthContextDTO.token_type = "bearer opaque";
-    userAuthContextDTO.issuer = getConfigValue(KM_CONF_INSTANCE_ID, KM_CONF_ISSUER, DEFAULT_KM_CONF_ISSUER);
+    userAuthContextDTO.issuer = issuer ?: UNKNOWN_VALUE;
     userAuthContextDTO.token =  authContext.apiKey;
     map<any>? claims = principal?.claims;
     if (claims is map<any>) {

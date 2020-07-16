@@ -178,18 +178,21 @@ public type KeyValidationHandler object {
 # + authContext - Authentication Context
 # + cacheKey - cache Key
 # + enabledCaching - enabled backend jwt caching
+# + issuer - Issuer of the Key Manager
 # + return - Returns `true` if the token generation and setting the header completed successfully
 # or the `AuthenticationError` in case of an error.
 public function setJWTHeaderForOpaque(http:Request req,
                                 AuthenticationContext authContext,
                                 string cacheKey,
                                 boolean enabledCaching,
-                                boolean remoteUserClaimRetrievalEnabled)
+                                boolean remoteUserClaimRetrievalEnabled,
+                                string issuer)
                                 returns @tainted boolean {
     map<string> apiDetails = createAPIDetailsMap(runtime:getInvocationContext());
     (handle|error) generatedToken = generateBackendJWTTokenForOauth(authContext,
                                                                     apiDetails,
-                                                                    remoteUserClaimRetrievalEnabled);
+                                                                    remoteUserClaimRetrievalEnabled,
+                                                                    issuer);
     if (generatedToken is error) {
         return false;
     } else {
@@ -200,14 +203,16 @@ public function setJWTHeaderForOpaque(http:Request req,
 # Setting backend JWT header when there is no JWT Token is present.
 #
 # + apiDetails - extracted api details for the current api
+# + issuer - Issuer related to API Manager
 # + return - JWT Token
 # or the `AuthenticationError` in case of an error.
 function generateBackendJWTTokenForOauth(AuthenticationContext authContext,
                                         map<string> apiDetails,
-                                        boolean remoteUserClaimRetrievalEnabled) returns handle | error {
+                                        boolean remoteUserClaimRetrievalEnabled,
+                                        string issuer) returns handle | error {
     (handle|error) generatedToken;
 
-    ClaimsMapDTO claimsMapDTO = createMapFromRetrievedUserClaimsListDTO(authContext, remoteUserClaimRetrievalEnabled);
+    ClaimsMapDTO claimsMapDTO = createMapFromRetrievedUserClaimsListDTO(authContext, remoteUserClaimRetrievalEnabled, issuer);
     generatedToken = generateJWTTokenFromUserClaimsMap(claimsMapDTO, apiDetails);
     return generatedToken;
 }
@@ -232,7 +237,7 @@ public function generateAndSetBackendJwtHeaderOpaque(string credential,
                                                         boolean classLoaded,
                                                         int skewTime,
                                                         boolean enabledCaching,
-                                                        string? issuer,
+                                                        string issuer,
                                                         boolean remoteUserClaimRetrievalEnabled)
                                                         returns @tainted boolean {
     if (enabledJWTGenerator) {
@@ -263,7 +268,7 @@ public function generateAndSetBackendJwtHeaderOpaque(string credential,
                             if (difference < skewTime) {
                                 printDebug(KEY_JWT_AUTH_PROVIDER, "JWT regenerated because of the skew time");
                                 status = setJWTHeaderForOpaque(req, authContext, cacheKey, enabledCaching,
-                                                                remoteUserClaimRetrievalEnabled);
+                                                                remoteUserClaimRetrievalEnabled, issuer);
                             } else {
                                 req.setHeader(jwtheaderName, cachedToken);
                                 status = true;
@@ -276,12 +281,12 @@ public function generateAndSetBackendJwtHeaderOpaque(string credential,
                 } else {
                     printDebug(KEY_JWT_AUTH_PROVIDER, "Could not find in the jwt generator cache");
                     status = setJWTHeaderForOpaque(req, authContext, cacheKey, enabledCaching,
-                                                        remoteUserClaimRetrievalEnabled);
+                                                        remoteUserClaimRetrievalEnabled, issuer);
                 }
             } else {
                 printDebug(KEY_JWT_AUTH_PROVIDER, "JWT generator caching is disabled");
                     status = setJWTHeaderForOpaque(req, authContext, cacheKey, enabledCaching,
-                                                        remoteUserClaimRetrievalEnabled);
+                                                        remoteUserClaimRetrievalEnabled, issuer);
             }
 
             return status;

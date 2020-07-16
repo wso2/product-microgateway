@@ -190,9 +190,6 @@ public const int DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY = 900000;
 public const string DEFAULT_JWT_GENERATOR_TOKEN_ISSUER = "wso2.org/products/am";
 public const string DEFAULT_JWT_GENERATOR_IMPLEMENTATION = "org.wso2.micro.gateway.jwt.generator.MGWJWTGeneratorImpl";
 public const boolean DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED = true;
-public const string DEFAULT_JWT_GENERATOR_USERNAME = "admin";
-public const string DEFAULT_JWT_GENERATOR_PASSWORD = "admin";
-public const string DEFAULT_JWT_GENERATOR_USER_INFO_ENDPOINT = "https://localhost:9443/user-info/claims/generate";
 public const string DEFAULT_JWT_GENERATOR_CLAIM_RETRIEVAL_IMPLEMENTATION
                                                     = "org.wso2.micro.gateway.jwt.generator.DefaultMGWClaimRetriever";
 
