@@ -90,7 +90,6 @@ public type KeyValidationHandler object {
                 map<any>? claims = principal?.claims;
                 any clientId = claims[CLIENT_ID];
                 boolean isAllowed = false;
-                io:println("Client Id ------>>>>>> ", (clientId is () || (clientId is string && clientId == "")));
                 // If the client id is null and validate subscription is enabled, return auth failure error.
                 if (self.validateSubscriptions && (clientId is () || (clientId is string && clientId == ""))) {
                     setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
