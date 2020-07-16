@@ -376,14 +376,14 @@ public function getChallengeString(http:FilterContext context) returns string {
      APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
      if (apiConfig is APIConfiguration) {
          authProviders = apiConfig.authProviders;
-         foreach var v in authProviders {
-             if (v == AUTH_SCHEME_OAUTH2) {
+         foreach var authProvider in authProviders {
+             if (authProvider == AUTH_SCHEME_OAUTH2) {
                  if(challengeString == "") {
                      challengeString = "OAuth2 realm=\"WSO2 API Microgateway\"";
                  } else {
                      challengeString += " OAuth2 realm=\"WSO2 API Microgateway\"";
                  }
-             } else if (v == AUTH_SCHEME_BASIC_LOWERCASE) {
+             } else if (authProvider == AUTH_SCHEME_BASIC_LOWERCASE) {
                  if(challengeString == "") {
                      challengeString = "Basic Auth realm=\"WSO2 API Microgateway\"";
                  } else {
