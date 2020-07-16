@@ -344,3 +344,47 @@ public function generateAndSetBackendJwtHeader(string credential,
         return true;
     }
 }
+
+# Refactoring method for setting JWT header
+#
+# + payload - The payload of the authentication token
+# + req - The `Request` instance.
+# + cacheKey - key for the jwt generator cache
+# + enabledCaching - jwt generator caching enabled
+# + apiDetails - extracted api details for the current api
+# + remoteUserClaimRetrievalEnabled - true if remoteUserClaimRetrieval is enabled
+# + return - Returns `true` if the token generation and setting the header completed successfully
+# or the `AuthenticationError` in case of an error.
+public function setJWTHeader(jwt:JwtPayload payload,
+                                http:Request req,
+                                string cacheKey,
+                                boolean enabledCaching,
+                                map<string> apiDetails,
+                                boolean remoteUserClaimRetrievalEnabled)
+                                returns @tainted boolean {
+    AuthenticationContext authContext =
+        <AuthenticationContext> runtime:getInvocationContext().attributes[AUTHENTICATION_CONTEXT];
+    (handle|error) generatedToken = generateBackendTokenForJWT(authContext, payload, apiDetails, remoteUserClaimRetrievalEnabled);
+    return setGeneratedTokenAsHeader(req, cacheKey, enabledCaching, generatedToken);
+}
+
+# Setting backend JWT header when there is no JWT Token is present.
+#
+# + authContext - Authentication Context
+# + payload - The payload of the authentication token
+# + apiDetails - extracted api details for the current api
+# + return - JWT Token
+# or the `AuthenticationError` in case of an error.
+function generateBackendTokenForJWT(AuthenticationContext authContext, jwt:JwtPayload payload, map<string> apiDetails,
+                boolean remoteUserClaimRetrievalEnabled) returns handle | error {
+    (handle|error) generatedToken;
+    if (isSelfContainedToken(payload)) {
+        generatedToken = generateJWTToken(payload, apiDetails);
+    } else {
+        ClaimsMapDTO claimsMapDTO = createMapFromRetrievedUserClaimsListDTO(authContext,
+                                                                            remoteUserClaimRetrievalEnabled,
+                                                                            payload);
+        generatedToken = generateJWTTokenFromUserClaimsMap(claimsMapDTO, apiDetails);
+    }
+    return generatedToken;
+}

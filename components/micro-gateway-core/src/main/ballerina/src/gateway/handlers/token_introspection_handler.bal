@@ -30,11 +30,19 @@ public type KeyValidationHandler object {
     public OAuth2KeyValidationProvider oauth2KeyValidationProvider;
     public oauth2:InboundOAuth2Provider introspectProvider;
     private boolean validateSubscriptions;
+    private boolean enabledJWTGenerator;
+    private boolean enabledBackendJWTCaching;
 
     public function __init(OAuth2KeyValidationProvider oauth2KeyValidationProvider, oauth2:InboundOAuth2Provider introspectProvider) {
         self.oauth2KeyValidationProvider = oauth2KeyValidationProvider;
         self.introspectProvider = introspectProvider;
         self.validateSubscriptions = getConfigBooleanValue(SECURITY_INSTANCE_ID, SECURITY_VALIDATE_SUBSCRIPTIONS, DEFAULT_VALIDATE_SUBSCRIPTIONS);
+        self.enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID,
+                                                            JWT_GENERATOR_ENABLED,
+                                                            DEFAULT_JWT_GENERATOR_ENABLED);
+        self.enabledBackendJWTCaching =  getConfigBooleanValue(JWT_GENERATOR_CACHING_ID,
+                                                                JWT_GENERATOR_TOKEN_CACHE_ENABLED,
+                                                                DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);
     }
 
     # Checks if the request can be authenticated with the Bearer Auth header.
@@ -100,12 +108,10 @@ public type KeyValidationHandler object {
                    invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                    invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                    if (isAllowed) {
-                       boolean enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID,
-                                                                            JWT_GENERATOR_ENABLED,
-                                                                            DEFAULT_JWT_GENERATOR_ENABLED);
-                       if (enabledJWTGenerator) {
+                       if (self.enabledJWTGenerator) {
                            string cacheKey = credential + apiName + apiVersion;
-                           boolean tokenGenStatus = setJWTHeaderForOauth2(req, authenticationContext, cacheKey);
+                           boolean tokenGenStatus = setJWTHeaderForOauth2(req, authenticationContext, cacheKey,
+                                                                           self.enabledBackendJWTCaching);
                            if (!tokenGenStatus) {
                                printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
                            }
@@ -117,12 +123,10 @@ public type KeyValidationHandler object {
                     invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                     invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                     if (authenticationResult) {
-                        boolean enabledJWTGenerator = getConfigBooleanValue(JWT_GENERATOR_ID,
-                                                                             JWT_GENERATOR_ENABLED,
-                                                                             DEFAULT_JWT_GENERATOR_ENABLED);
-                        if (enabledJWTGenerator) {
+                        if (self.enabledJWTGenerator) {
                             string cacheKey = credential + apiName + apiVersion;
-                            boolean tokenGenStatus = setJWTHeaderForOauth2(req, authenticationContext, cacheKey);
+                            boolean tokenGenStatus = setJWTHeaderForOauth2(req, authenticationContext, cacheKey,
+                                                                            self.enabledBackendJWTCaching);
                             if (!tokenGenStatus) {
                                 printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
                             }
@@ -143,20 +147,34 @@ public type KeyValidationHandler object {
 # + req - The `Request` instance.
 # + authContext - Authentication Context
 # + cacheKey - cache Key
+# + enabledCaching - enabled backend jwt caching
 # + return - Returns `true` if the token generation and setting the header completed successfully
 # or the `AuthenticationError` in case of an error.
 public function setJWTHeaderForOauth2(http:Request req,
                                 AuthenticationContext authContext,
-                                string cacheKey)
+                                string cacheKey,
+                                boolean enabledCaching)
                                 returns @tainted boolean {
     map<string> apiDetails = createAPIDetailsMap(runtime:getInvocationContext());
-    boolean enabledCaching = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID,
-                                                   JWT_GENERATOR_TOKEN_CACHE_ENABLED,
-                                                   DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);
     (handle|error) generatedToken = generateBackendJWTTokenForOauth(authContext, apiDetails);
     if (generatedToken is error) {
         return false;
     } else {
         return setGeneratedTokenAsHeader(req, cacheKey, enabledCaching, generatedToken);
     }
+}
+
+# Setting backend JWT header when there is no JWT Token is present.
+#
+# + apiDetails - extracted api details for the current api
+# + return - JWT Token
+# or the `AuthenticationError` in case of an error.
+function generateBackendJWTTokenForOauth(AuthenticationContext authContext, map<string> apiDetails) returns handle | error {
+    (handle|error) generatedToken;
+    boolean remoteUserClaimRetrievalEnabled = getConfigBooleanValue(KM_CONF_INSTANCE_ID,
+                                                                    REMOTE_USER_CLAIM_RETRIEVAL_ENABLED,
+                                                                    DEFAULT_JWT_REMOTE_USER_CLAIM_RETRIEVAL_ENABLED);
+    ClaimsMapDTO claimsMapDTO = createMapFromRetrievedUserClaimsListDTO(authContext, remoteUserClaimRetrievalEnabled);
+    generatedToken = generateJWTTokenFromUserClaimsMap(claimsMapDTO, apiDetails);
+    return generatedToken;
 }
