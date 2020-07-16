@@ -137,7 +137,7 @@ function createAPIDetailsMap (runtime:InvocationContext invocationContext) retur
     if (apiConfig is APIConfiguration) {
         apiDetails["apiName"] = apiConfig.name;
         apiDetails["apiVersion"] = apiConfig.apiVersion;
-        apiDetails["apiTier"] = apiConfig.apiTier;
+        apiDetails["apiTier"] = (apiConfig.apiTier != "") ? apiConfig.apiTier : UNLIMITED_TIER;
         apiDetails["apiContext"] = <string> invocationContext.attributes[API_CONTEXT];
         apiDetails["apiPublisher"] = apiConfig.publisher;
         apiDetails["subscriberTenantDomain"] = authenticationContext.subscriberTenantDomain;

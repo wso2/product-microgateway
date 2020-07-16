@@ -30,7 +30,7 @@ import java.util.UUID;
  */
 public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
     private static final Logger logger = LogManager.getLogger(MGWJWTGeneratorImpl.class);
-    private static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_user";
+    private static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
 
     public MGWJWTGeneratorImpl(String dialectURI,
                                String signatureAlgorithm,
@@ -56,11 +56,6 @@ public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
         Map<String, Object> claims = new HashMap<>();
         HashMap<String, Object> customClaims = (HashMap<String, Object>) jwtInfo.get("customClaims");
         claims.put("iss", getTokenIssuer());
-        if (getTokenAudience().length == 1) {
-            claims.put("aud", getTokenAudience()[0]);
-        } else if (getTokenAudience().length != 0) {
-            claims.put("aud", arrayToJSONArray(getTokenAudience()));
-        }
         claims.put("jti", UUID.randomUUID().toString());
         claims.put("iat", (int) (currentTime / 1000));
         claims.put("exp", (int) (expireIn / 1000));
@@ -85,6 +80,9 @@ public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
             if (StringUtils.isNotEmpty((CharSequence) ((HashMap) customClaims.get("application")).get("tier"))) {
                 claims.put(dialect + "/applicationtier", ((HashMap) customClaims.get("application")).get("tier"));
             }
+        }
+        if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get("apiName"))) {
+            claims.put(dialect + "/apiName", getApiDetails().get("apiName"));
         }
         if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get("apiContext"))) {
             claims.put(dialect + "/apicontext", getApiDetails().get("apiContext"));
