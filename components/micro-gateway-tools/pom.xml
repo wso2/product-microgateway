@@ -4,7 +4,7 @@
     <parent>
         <artifactId>components</artifactId>
         <groupId>org.wso2.am.microgw</groupId>
-        <version>3.2.0-alpha2-SNAPSHOT</version>
+        <version>3.2.0-beta</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
