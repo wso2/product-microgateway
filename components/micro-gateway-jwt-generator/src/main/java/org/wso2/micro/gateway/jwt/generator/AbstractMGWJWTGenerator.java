@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *  Abstract class for generate JWT for backend claims.
+ * Abstract class for generate JWT for backend claims.
  */
 public abstract class AbstractMGWJWTGenerator {
     private static final Logger logger = LogManager.getLogger(AbstractMGWJWTGenerator.class);
@@ -377,6 +377,7 @@ public abstract class AbstractMGWJWTGenerator {
     }
 
     public abstract Map<String, Object> populateStandardClaims(Map<String, Object> jwtInfo);
+
     public abstract Map<String, Object> populateCustomClaims(Map<String, Object> jwtInfo,
                                                              ArrayList<String> restrictedClaims);
 }

@@ -156,7 +156,5 @@ function validateSubscriptionFromDataStores(string token, string consumerKey, st
     } else {
         printDebug(KEY_PILOT_UTIL, "API envent hub is disabled. Can not fetch subscription data.");
     }
-
-
     return [authenticationContext,isAllowed];
 }

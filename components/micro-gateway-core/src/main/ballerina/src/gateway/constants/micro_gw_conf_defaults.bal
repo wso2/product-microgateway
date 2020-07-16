@@ -36,6 +36,9 @@ public const string DEFAULT_KM_SERVER_URL = "https://localhost:9443";
 public const string DEFAULT_KM_TOKEN_CONTEXT = "oauth2";
 public const int DEFAULT_TIMESTAMP_SKEW = 5000;
 public const boolean DEFAULT_EXTERNAL = false;
+public const string DEFAULT_KM_CONF_ISSUER = "https://localhost:9443/oauth2/token";
+
+public const boolean DEFAULT_KM_REMOTE_USER_CLAIM_RETRIEVAL_ENABLED = false;
 
 public const boolean DEFAULT_VALIDATE_SUBSCRIPTIONS = false;
 
@@ -59,6 +62,7 @@ public const boolean DEFAULT_VALIDATE_SUBSCRIPTION = false;
 public const string DEFAULT_AUDIENCE = "http://org.wso2.apimgt/gateway";
 public const string DEFAULT_CERTIFICATE_ALIAS = "wso2apim310";
 public const string DEFAULT_JWT_HEADER_NAME = "X-JWT-Assertion";
+public const boolean DEFAULT_JWT_REMOTE_USER_CLAIM_RETRIEVAL_ENABLED = false;
 
 public const boolean DEFAULT_CACHING_ENABLED = true;
 public const int DEFAULT_TOKEN_CACHE_EXPIRY = 900000;
@@ -186,5 +190,10 @@ public const int DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY = 900000;
 public const string DEFAULT_JWT_GENERATOR_TOKEN_ISSUER = "wso2.org/products/am";
 public const string DEFAULT_JWT_GENERATOR_IMPLEMENTATION = "org.wso2.micro.gateway.jwt.generator.MGWJWTGeneratorImpl";
 public const boolean DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED = true;
+public const string DEFAULT_JWT_GENERATOR_CLAIM_RETRIEVAL_IMPLEMENTATION
+                                                    = "org.wso2.micro.gateway.jwt.generator.DefaultMGWClaimRetriever";
+
+public const string DEFAULT_APIM_CREDENTIALS_USERNAME = "admin";
+public const string DEFAULT_APIM_CREDENTIALS_PASSWORD = "admin";
 
 public const int DEFAULT_SERVER_TIMESTAMP_SKEW = -1;

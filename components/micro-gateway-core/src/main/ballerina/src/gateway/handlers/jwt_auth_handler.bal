@@ -27,22 +27,11 @@ public type JWTAuthHandler object {
 
     public JwtAuthProvider jwtAuthProvider;
 
+    //todo: remove the redundant config reading at both handlers.
     private boolean enabledJWTGenerator = false;
     private boolean classLoaded = false;
-    private string generatorClass = "";
-    private string dialectURI = "";
-    private string signatureAlgorithm = "";
-    private string certificateAlias = "";
-    private string privateKeyAlias = "";
-    private int tokenExpiry = 0;
-    private any[] restrictedClaims = [];
-    private string keyStoreLocationUnresolved = "";
-    private string keyStorePassword = "";
-    private string tokenIssuer = "";
-    private any[] tokenAudience = [];
     private int skewTime = 0;
     private boolean enabledCaching = false;
-    private int cacheExpiry = 0;
 
     public function __init(JwtAuthProvider jwtAuthProvider) {
         self.jwtAuthProvider = jwtAuthProvider;
@@ -51,37 +40,6 @@ public type JWTAuthHandler object {
                                                             JWT_GENERATOR_ENABLED,
                                                             DEFAULT_JWT_GENERATOR_ENABLED);
         if (self.enabledJWTGenerator) {
-            self.generatorClass = getConfigValue(JWT_GENERATOR_ID,
-                                                    JWT_GENERATOR_IMPLEMENTATION,
-                                                    DEFAULT_JWT_GENERATOR_IMPLEMENTATION);
-            self.dialectURI = getConfigValue(JWT_GENERATOR_ID,
-                                                JWT_GENERATOR_DIALECT,
-                                                DEFAULT_JWT_GENERATOR_DIALECT);
-            self.signatureAlgorithm = getConfigValue(JWT_GENERATOR_ID,
-                                                        JWT_GENERATOR_SIGN_ALGO,
-                                                        DEFAULT_JWT_GENERATOR_SIGN_ALGO);
-            self.certificateAlias = getConfigValue(JWT_GENERATOR_ID,
-                                                        JWT_GENERATOR_CERTIFICATE_ALIAS,
-                                                        DEFAULT_JWT_GENERATOR_CERTIFICATE_ALIAS);
-            self.privateKeyAlias = getConfigValue(JWT_GENERATOR_ID,
-                                                    JWT_GENERATOR_PRIVATE_KEY_ALIAS,
-                                                    DEFAULT_JWT_GENERATOR_PRIVATE_KEY_ALIAS);
-            self.tokenExpiry = getConfigIntValue(JWT_GENERATOR_ID,
-                                                    JWT_GENERATOR_TOKEN_EXPIRY,
-                                                    DEFAULT_JWT_GENERATOR_TOKEN_EXPIRY);
-            self.restrictedClaims = getConfigArrayValue(JWT_GENERATOR_ID,
-                                                        JWT_GENERATOR_RESTRICTED_CLAIMS);
-            self.keyStoreLocationUnresolved = getConfigValue(LISTENER_CONF_INSTANCE_ID,
-                                                                KEY_STORE_PATH,
-                                                                DEFAULT_KEY_STORE_PATH);
-            self.keyStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID,
-                                                                    KEY_STORE_PASSWORD,
-                                                                    DEFAULT_KEY_STORE_PASSWORD);
-            self.tokenIssuer = getConfigValue(JWT_GENERATOR_ID,
-                                                JWT_GENERATOR_TOKEN_ISSUER,
-                                                DEFAULT_JWT_GENERATOR_TOKEN_ISSUER);
-            self.tokenAudience = getConfigArrayValue(JWT_GENERATOR_ID,
-                                                        JWT_GENERATOR_TOKEN_AUDIENCE);
             // provide backward compatibility for skew time
             self.skewTime = getConfigIntValue(SERVER_CONF_ID, 
                                                 SERVER_TIMESTAMP_SKEW, 
@@ -94,26 +52,8 @@ public type JWTAuthHandler object {
             self.enabledCaching = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID,
                                                             JWT_GENERATOR_TOKEN_CACHE_ENABLED,
                                                             DEFAULT_JWT_GENERATOR_TOKEN_CACHE_ENABLED);
-            self.cacheExpiry = getConfigIntValue(JWT_GENERATOR_CACHING_ID,
-                                                    JWT_GENERATOR_TOKEN_CACHE_EXPIRY,
-                                                    DEFAULT_TOKEN_CACHE_EXPIRY);
 
-            self.classLoaded = loadJWTGeneratorClass(self.generatorClass,
-                                                        self.dialectURI,
-                                                        self.signatureAlgorithm,
-                                                        self.keyStoreLocationUnresolved,
-                                                        self.keyStorePassword,
-                                                        self.certificateAlias,
-                                                        self.privateKeyAlias,
-                                                        self.tokenExpiry,
-                                                        self.restrictedClaims,
-                                                        self.enabledCaching,
-                                                        self.cacheExpiry,
-                                                        self.tokenIssuer,
-                                                        self.tokenAudience);
-            if (!self.classLoaded) {
-                printError(KEY_JWT_AUTH_PROVIDER, "JWT Generator class loading failed.");
-            }
+            self.classLoaded = jwtGeneratorClassLoaded;
         }
     }
 
@@ -149,6 +89,7 @@ public type JWTAuthHandler object {
         var authenticationResult = self.jwtAuthProvider.authenticate(credential);
         if (authenticationResult is boolean) {
             string? iss = self.jwtAuthProvider.jwtValidatorConfig?.issuer;
+            boolean remoteUserClaimRetrievalEnabled = self.jwtAuthProvider.remoteUserClaimRetrievalEnabled;
             boolean backendJWTfromClaim = setBackendJwtHeader(credential, req, iss);
             if (!backendJWTfromClaim) {
                 boolean generationStatus = generateAndSetBackendJwtHeader(credential,
@@ -157,7 +98,8 @@ public type JWTAuthHandler object {
                                                                             self.classLoaded,
                                                                             self.skewTime,
                                                                             self.enabledCaching,
-                                                                            iss);
+                                                                            iss,
+                                                                            remoteUserClaimRetrievalEnabled);
                 if (!generationStatus) {
                     printError(KEY_JWT_AUTH_PROVIDER, "JWT Generation failed");
                 }
@@ -201,6 +143,9 @@ public function setBackendJwtHeader(string credential, http:Request req, string?
 # + apiVersion - version of the current API
 # + return - Returns map<string> with the extracted details.
 public function getAPIDetails(jwt:JwtPayload payload, string apiName, string apiVersion) returns map<string> {
+    if (!isSelfContainedToken(payload)) {
+        return createAPIDetailsMap(runtime:getInvocationContext());
+    }
     map<string> apiDetails = {
         apiName: "",
         apiContext: "",
@@ -265,6 +210,7 @@ public function getAPIDetails(jwt:JwtPayload payload, string apiName, string api
 # + enabledCaching - jwt generator caching enabled
 # + skewTime - skew time to backend
 # + issuer - The jwt issuer who issued the token and comes in the iss claim.
+# + remoteUserClaimRetrievalEnabled - true if remoteUserClaimRetrieval is enabled
 # + return - Returns `true` if the token generation and setting the header completed successfully
 # or the `AuthenticationError` in case of an error.
 public function generateAndSetBackendJwtHeader(string credential,
@@ -273,7 +219,8 @@ public function generateAndSetBackendJwtHeader(string credential,
                                                 boolean classLoaded,
                                                 int skewTime,
                                                 boolean enabledCaching,
-                                                string? issuer) returns @tainted boolean {
+                                                string? issuer,
+                                                boolean remoteUserClaimRetrievalEnabled) returns @tainted boolean {
     if (enabledJWTGenerator) {
         if (classLoaded) {
             boolean status = false;
@@ -306,7 +253,8 @@ public function generateAndSetBackendJwtHeader(string credential,
                                 int difference = (cachedTokenExpiry - currentTime);
                                 if (difference < skewTime) {
                                     printDebug(KEY_JWT_AUTH_PROVIDER, "JWT regenerated because of the skew time");
-                                    status = setJWTHeader(payload, req, cacheKey, enabledCaching, apiDetails);
+                                    status = setJWTHeader(<@untainted>payload, req, cacheKey, enabledCaching, apiDetails,
+                                                            remoteUserClaimRetrievalEnabled);
                                 } else {
                                     req.setHeader(jwtheaderName, cachedToken);
                                     status = true;
@@ -318,11 +266,13 @@ public function generateAndSetBackendJwtHeader(string credential,
                         }
                     } else {
                         printDebug(KEY_JWT_AUTH_PROVIDER, "Could not find in the jwt generator cache");
-                        status = setJWTHeader(payload, req, cacheKey, enabledCaching, apiDetails);
+                        status = setJWTHeader(<@untainted>payload, req, cacheKey, enabledCaching, apiDetails,
+                                            remoteUserClaimRetrievalEnabled);
                     }
                 } else {
                     printDebug(KEY_JWT_AUTH_PROVIDER, "JWT generator caching is disabled");
-                    status = setJWTHeader(payload, req, cacheKey, enabledCaching, apiDetails);
+                    status = setJWTHeader(<@untainted>payload, req, cacheKey, enabledCaching, apiDetails,
+                                            remoteUserClaimRetrievalEnabled);
                 }
             } else {
                 printDebug(KEY_JWT_AUTH_PROVIDER, "Failed to read JWT token");
@@ -346,30 +296,40 @@ public function generateAndSetBackendJwtHeader(string credential,
 # + cacheKey - key for the jwt generator cache
 # + enabledCaching - jwt generator caching enabled
 # + apiDetails - extracted api details for the current api
+# + remoteUserClaimRetrievalEnabled - true if remoteUserClaimRetrieval is enabled
 # + return - Returns `true` if the token generation and setting the header completed successfully
 # or the `AuthenticationError` in case of an error.
 public function setJWTHeader(jwt:JwtPayload payload,
                                 http:Request req,
                                 string cacheKey,
                                 boolean enabledCaching,
-                                map<string> apiDetails)
+                                map<string> apiDetails,
+                                boolean remoteUserClaimRetrievalEnabled)
                                 returns @tainted boolean {
-        (handle|error) generatedToken = generateJWTToken(payload, apiDetails);
-        if (generatedToken is error) {
-            printError(KEY_JWT_AUTH_PROVIDER, "Token not generated due to error", generatedToken);
-            return false;
-        }
-        printDebug(KEY_JWT_AUTH_PROVIDER, "Generated jwt token");
-        printDebug(KEY_JWT_AUTH_PROVIDER, "Token: " + generatedToken.toString());
+    AuthenticationContext authContext =
+        <AuthenticationContext> runtime:getInvocationContext().attributes[AUTHENTICATION_CONTEXT];
+    (handle|error) generatedToken = generateBackendTokenForJWT(authContext, payload, apiDetails, remoteUserClaimRetrievalEnabled);
+    return setGeneratedTokenAsHeader(req, cacheKey, enabledCaching, generatedToken);
+}
 
-        // add to cache if cache enabled
-        if (enabledCaching) {
-            error? err = jwtGeneratorCache.put(<@untainted>cacheKey, <@untainted>generatedToken.toString());
-            if (err is error) {
-                printError(KEY_JWT_AUTH_PROVIDER, "Error while adding entry to jwt generator cache", err);
-            }
-            printDebug(KEY_JWT_AUTH_PROVIDER, "Added to jwt generator token cache.");
-        }
-        req.setHeader(jwtheaderName, generatedToken.toString());
-        return true;
+# Setting backend JWT header when there is no JWT Token is present.
+#
+# + authContext - Authentication Context
+# + payload - The payload of the authentication token
+# + apiDetails - extracted api details for the current api
+# + return - JWT Token
+# or the `AuthenticationError` in case of an error.
+function generateBackendTokenForJWT(AuthenticationContext authContext, jwt:JwtPayload payload, map<string> apiDetails,
+                boolean remoteUserClaimRetrievalEnabled) returns handle | error {
+    (handle|error) generatedToken;
+    if (isSelfContainedToken(payload)) {
+        generatedToken = generateJWTToken(payload, apiDetails);
+    } else {
+        ClaimsMapDTO claimsMapDTO = createMapFromRetrievedUserClaimsListDTO(authContext,
+                                                                            remoteUserClaimRetrievalEnabled,
+                                                                            (),
+                                                                            payload);
+        generatedToken = generateJWTTokenFromUserClaimsMap(claimsMapDTO, apiDetails);
+    }
+    return generatedToken;
 }

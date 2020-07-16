@@ -248,6 +248,13 @@ function setSubsciberTenantDomain(AuthenticationContext authContext) {
     }
 }
 
+function isSelfContainedToken(jwt:JwtPayload payload) returns boolean {
+    if (payload.hasKey(APPLICATION)) {
+        return true;
+    }
+    return false;
+}
+
 function checkInvalidCacheAndCallService(string subscriptionKey) {
 
 }

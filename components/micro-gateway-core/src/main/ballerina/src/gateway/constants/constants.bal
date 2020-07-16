@@ -235,6 +235,7 @@ public const string NAME = "name";
 public const string VERSIONS = "versions";
 public const string VERSION = "version";
 public const string ALIAS_LIST = "aliasList";
+public const string KM_CONF_ISSUER = "issuer";
 
 public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
 public const string HTTP_CLIENTS_POOL_CONFIG_INSTANCE_ID = "httpClients.poolConfig";
@@ -322,6 +323,7 @@ public const string CERTIFICATE_ALIAS = "certificateAlias";
 public const string JWKS_URL = "jwksURL";
 public const string TRUST_STORE_PATH = "trustStorePath";
 public const string TRUST_STORE_PASSWORD = "trustStorePassword";
+public const string REMOTE_USER_CLAIM_RETRIEVAL_ENABLED = "remoteUserClaimRetrievalEnabled";
 
 public const string API_KEY_INSTANCE_ID = "apikey.tokenConfigs";
 public const string API_KEY_ISSUER_ENABLED = "enabled";
@@ -508,6 +510,8 @@ public const string HEALTH_CHECK_SERVICE = "HealthCheckService";
 public const string MAIN = "Main function";
 public const string OBSERVABILITY_UTIL = "ObservabilityUtil";
 public const string OBSERVABILITY_METRIC_LISTENER = "ObservabilityMetricListener";
+public const string CLAIM_RETRIEVER = "ClaimRetriever";
+public const string JWT_GEN_UTIL = "JwtGenUtil";
 
 public const int DEFAULT_LISTENER_TIMEOUT = 120000;//2 mins
 public const int DEFAULT_ETCD_TRIGGER_TIME = 10000;//10 seconds
@@ -569,6 +573,9 @@ public const string JWT_GENERATOR_RESTRICTED_CLAIMS = "restrictedClaims";
 public const string JWT_GENERATOR_TOKEN_ISSUER = "issuer";
 public const string JWT_GENERATOR_TOKEN_AUDIENCE = "audience";
 public const string JWT_GENERATOR_IMPLEMENTATION = "generatorImpl";
+public const string JWT_GENERATOR__CLAIM_RETRIEVAL_INSTANCE_ID = "jwtGeneratorConfig.claimRetrieval";
+public const string JWT_GENERATOR_CLAIM_RETRIEVAL_IMPLEMENTATION = "retrieverImpl";
+public const string JWT_GENERATOR_CLAIM_RETRIEVAL_CONFIGURATION = "jwtGeneratorConfig.claimRetrieval.configuration";
 
 // jwt generator caching mechanism
 public const string JWT_GENERATOR_CACHING_ID = "jwtGeneratorConfig.jwtGeneratorCaching";
@@ -580,3 +587,7 @@ public const string JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR = "tokenCacheEvict
 // server configurations
 public const string SERVER_CONF_ID = "server";
 public const string SERVER_TIMESTAMP_SKEW = "timestampSkew";
+
+public const string APIM_CREDENTIALS_INSTANCE_ID = "apim.credentials";
+public const string APIM_CREDENTIALS_USERNAME = "username";
+public const string APIM_CREDENTIALS_PASSWORD = "password";

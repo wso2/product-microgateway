@@ -54,6 +54,8 @@ public function loadJWTGeneratorClass(string className,
     handle jKeyStorePath = getKeystoreLocation(java:fromString(keyStorePathUnresolved));
     handle jKeyStorePassword = java:fromString(keyStorePassword);
     handle jTokenIssuer = java:fromString(tokenIssuer);
+
+    //to maintain backward compatibility
     return jLoadJWTGeneratorClass(jClassName,
                                     jDialectURI,
                                     jSignatureAlgorithm,
@@ -69,6 +71,14 @@ public function loadJWTGeneratorClass(string className,
                                     tokenAudience);
 }
 
+public function loadClaimRetrieverClass (string className, map<any> properties) returns boolean {
+    return jLoadClaimRetrieverClass (java:fromString(className), properties);
+}
+
+public function retrieveClaimsFromImpl (UserClaimRetrieverContextDTO userInfo) returns RetrievedUserClaimsListDTO? {
+    return jRetrieveClaims(userInfo);
+}
+
 # Invoke the interop function to resolves the keystore path
 #
 # + unresolvedPath - unresolved keystore path
@@ -77,7 +87,6 @@ public function getKeystoreLocation(handle unresolvedPath) returns handle {
     return jGetKeystoreLocation(unresolvedPath);
 }
 
-
 # Invoke the interop function to generate JWT token
 #
 # + jwtInfo - payload of the authentication token
@@ -85,6 +94,15 @@ public function getKeystoreLocation(handle unresolvedPath) returns handle {
 # + return - Returns the generated JWT token.
 public function generateJWTToken(jwt:JwtPayload jwtInfo, map<string> apiDetails) returns (handle | error) {
     return jGenerateJWTToken(jwtInfo, apiDetails);
+}
+
+# Invoke the interop function to generate JWT token
+#
+# + jwtInfo - payload of the authentication token
+# + apiDetails - details of the subscribed APIS
+# + return - Returns the generated JWT token.
+public function generateJWTTokenFromUserClaimsMap(ClaimsMapDTO jwtInfo, map<string> apiDetails) returns (handle | error) {
+    return jGenerateJWTTokenFromUserClaimsMap(jwtInfo, apiDetails);
 }
 
 # Interop function to create instance of JWTGenerator
@@ -136,5 +154,25 @@ public function jGetKeystoreLocation(handle unresolvedPath) returns handle = @ja
 # + return - Returns the generated JWT token.
 public function jGenerateJWTToken(jwt:JwtPayload jwtInfo, map<string> apiDetails) returns (handle | error) = @java:Method {
     name: "invokeGenerateToken",
+    class: "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorInvoker"
+} external;
+
+# Interop function to generate JWT token
+#
+# + jwtInfo - payload of the authentication token
+# + apiDetails - details of the subscribed APIS
+# + return - Returns the generated JWT token.
+public function jGenerateJWTTokenFromUserClaimsMap(ClaimsMapDTO jwtInfo, map<string> apiDetails) returns (handle | error) = @java:Method {
+    name: "invokeGenerateToken",
+    class: "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorInvoker"
+} external;
+
+function jLoadClaimRetrieverClass (handle className, map<any> configuration) returns boolean = @java:Method {
+    name:"loadClaimRetrieverClass",
+    class: "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorInvoker"
+} external;
+
+function jRetrieveClaims (UserClaimRetrieverContextDTO userInfo) returns RetrievedUserClaimsListDTO? = @java:Method {
+    name:"getRetrievedClaims",
     class: "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorInvoker"
 } external;
