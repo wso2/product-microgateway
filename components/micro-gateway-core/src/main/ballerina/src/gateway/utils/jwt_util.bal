@@ -179,7 +179,7 @@ public function handleSubscribedAPIs(string apiKeyToken, jwt:JwtPayload payload,
                     + authenticationContext.subscriberTenantDomain);
                 }
                 invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-                isAllowed = true;
+                return true;
             }
             index += 1;
         }

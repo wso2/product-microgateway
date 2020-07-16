@@ -105,9 +105,6 @@ public type PilotDataProvider object {
 
     public function addSubscription(Subscription sub) {
         self.subStore.addSubscription(sub);
-        //currently we are removing all the entries from the cache since revers lookup for subscription key
-        //can be expensive
-        self.removeFromInvalidSubsriptionCache();
     }
 
     public function removeSubscription(Subscription sub) {
@@ -115,7 +112,6 @@ public type PilotDataProvider object {
     }
 
     public function loadSubscriptionFromService(int apiId, int appId) returns @tainted Subscription? {
-        self.removeFromInvalidSubsriptionCache();
         return self.subStore.loadSubscriptionFromService(apiId, appId);
     }
 
@@ -139,9 +135,5 @@ public type PilotDataProvider object {
 
     public function loadAppplicationFromService(int appId) returns @tainted Application? {
         return self.appStore.loadAppplicationFromService(appId);
-    }
-
-    function removeFromInvalidSubsriptionCache() {
-        self.gatewayCache.removeAllFromInvalidSubcriptionCache();
     }
 };

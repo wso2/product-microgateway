@@ -75,7 +75,7 @@ public function startTokenRevocationSubscriberService() returns @tainted jms:Mes
             return session;
         } else {
             jms:Destination dest = check session->createTopic(tokenRevocationJMSTopic);
-            jms:MessageConsumer | error subscriberEndpoint = trap session->createDurableSubscriber(dest, "sub-2");
+            jms:MessageConsumer | error subscriberEndpoint = trap session->createConsumer(dest);
             if (subscriberEndpoint is error) {
                 printError(KEY_TOKEN_REVOCATION_JMS, "Error while creating the jms subscriber.", subscriberEndpoint);
             } else {

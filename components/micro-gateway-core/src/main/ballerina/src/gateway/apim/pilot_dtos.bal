@@ -16,11 +16,12 @@
 
 public type Subscription record {|
     int id;
-    int apiId = 1;
-    int appId = 1;
+    int apiId = -1;
+    int appId = -1;
     string policyId = "";
     string state = "";
     string tenantDomain = "carbon.super";
+    int timestamp = 0;
 |};
 
 public type Application record {|

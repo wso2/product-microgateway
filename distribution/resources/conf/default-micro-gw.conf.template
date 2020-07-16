@@ -150,9 +150,9 @@
     # The endpoint url of your persistent storage server (e.g.: <etcd-server-access-URL>/<service>/keys/jti/)
     endpointURL = "https://localhost:9443/internal/data/v1"
     # The username of your persistent storage server
-    username = "root"
+    username = "admin"
     # The password of your persistent storage server
-    password = "root"
+    password = "admin"
 
 # token cache configurations
 [caching]
@@ -469,7 +469,6 @@
   username="admin"
   password="admin"
   eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
-  listOfTenants = ["carbon.super"]
 
 # Token validation configuration
 [security]
