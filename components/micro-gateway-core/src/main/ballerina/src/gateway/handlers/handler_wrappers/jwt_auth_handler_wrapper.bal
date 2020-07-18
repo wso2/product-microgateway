@@ -25,9 +25,9 @@ public type JWTAuthHandlerWrapper object {
     public JwtAuthProvider jwtAuthProvider;
     JWTAuthHandler jwtAuthHandler;
 
-    public function __init(JwtAuthProvider jwtAuthProvider) {
+    public function __init(JwtAuthProvider jwtAuthProvider, boolean remoteUserClaimRetrievalEnabled) {
         self.jwtAuthProvider = jwtAuthProvider;
-        self.jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
+        self.jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider, remoteUserClaimRetrievalEnabled);
     }
 
     # Checks if the request can be authenticated with the Bearer Auth header.

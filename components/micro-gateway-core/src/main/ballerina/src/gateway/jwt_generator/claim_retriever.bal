@@ -47,32 +47,28 @@ function retrieveClaims (UserClaimRetrieverContextDTO? userInfo) returns @tainte
 # + return - true if claim retriever class loading is successful.
 public function loadClaimRetrieverImpl() returns boolean {
 
-    if (!isConfigAvailable(JWT_GENERATOR__CLAIM_RETRIEVAL_INSTANCE_ID, JWT_GENERATOR_CLAIM_RETRIEVAL_IMPLEMENTATION)) {
+    if (!isConfigAvailable(JWT_GENERATOR_CLAIM_RETRIEVAL_INSTANCE_ID, JWT_GENERATOR_CLAIM_RETRIEVAL_IMPLEMENTATION)) {
         printDebug(CLAIM_RETRIEVER, "Claim Retrieval related class loading is disabled as the implementation is not provided." +  
                     "Hence claim retrieval is disabled");
         return false;
     }
-
-    string claimRetrieverImplClassName = getConfigValue(JWT_GENERATOR__CLAIM_RETRIEVAL_INSTANCE_ID,
-                                                        JWT_GENERATOR_CLAIM_RETRIEVAL_IMPLEMENTATION,
-                                                        DEFAULT_JWT_GENERATOR_CLAIM_RETRIEVAL_IMPLEMENTATION);
-    map<any> claimRetrieverConfig = getConfigMapValue(JWT_GENERATOR_CLAIM_RETRIEVAL_CONFIGURATION);
+    GatewayConf gatewayConf = getGatewayConfInstance();
+    string claimRetrieverImplClassName = gatewayConf.jwtGeneratorConfig.claimRetrieval.retrieverImpl;
+    map<any> claimRetrieverConfig = gatewayConf.jwtGeneratorConfig.claimRetrieval.configuration;
+    string unresolvedTrustStorePath = gatewayConf.listenerConfig.trustStorePath;
+    string trustStorePassword = gatewayConf.listenerConfig.trustStorePassword;
 
     if (!claimRetrieverConfig.hasKey(APIM_CREDENTIALS_USERNAME)) {
-        string username = getConfigValue(APIM_CREDENTIALS_INSTANCE_ID, APIM_CREDENTIALS_USERNAME,
-                                        DEFAULT_APIM_CREDENTIALS_USERNAME);
-        claimRetrieverConfig[APIM_CREDENTIALS_USERNAME] = username;
+        claimRetrieverConfig[APIM_CREDENTIALS_USERNAME] = gatewayConf.apimCredentials.username;
     }
     if (!claimRetrieverConfig.hasKey(APIM_CREDENTIALS_PASSWORD)) {
-        string password = getConfigValue(APIM_CREDENTIALS_INSTANCE_ID, APIM_CREDENTIALS_PASSWORD,
-                                        DEFAULT_APIM_CREDENTIALS_PASSWORD);
-        claimRetrieverConfig[APIM_CREDENTIALS_PASSWORD] = password;
+        claimRetrieverConfig[APIM_CREDENTIALS_PASSWORD] = gatewayConf.apimCredentials.password;
     }
     if (!claimRetrieverConfig.hasKey(KM_SERVER_URL)) {
-        string keyManagerURL = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL);
-        claimRetrieverConfig[KM_SERVER_URL] = keyManagerURL;
+        claimRetrieverConfig[KM_SERVER_URL] = gatewayConf.getKeyManagerConf().serverUrl;
     }
-    return loadClaimRetrieverClass(claimRetrieverImplClassName, claimRetrieverConfig);
+    return loadClaimRetrieverClass(claimRetrieverImplClassName, unresolvedTrustStorePath, trustStorePassword,
+                                    claimRetrieverConfig);
 }
 
 # Populate the DTO required for the claim retrieval implementation from authContext and principal component.
@@ -82,12 +78,12 @@ public function loadClaimRetrieverImpl() returns boolean {
 # + issuer - Issuer related to KeyManager
 # + return - populated UserClaimRetrieverContextDTO
 function generateUserClaimRetrieverContextFromPrincipal(AuthenticationContext authContext, runtime:Principal principal,
-                                            string? issuer)
+                                            string issuer)
         returns UserClaimRetrieverContextDTO {
     UserClaimRetrieverContextDTO userAuthContextDTO = {};
     userAuthContextDTO.username = principal?.username ?: UNKNOWN_VALUE;
     userAuthContextDTO.token_type = "bearer opaque";
-    userAuthContextDTO.issuer = issuer ?: UNKNOWN_VALUE;
+    userAuthContextDTO.issuer = issuer;
     userAuthContextDTO.token =  authContext.apiKey;
     map<any>? claims = principal?.claims;
     if (claims is map<any>) {

@@ -76,9 +76,16 @@ public type AuthenticationContext record {
     string apiPublisher = UNKNOWN_VALUE;
 };
 
+//todo: update all the properties accordingly.
 public type KeyManagerConf record {
-    string serverUrl = "";
+    string serverUrl = getConfigValue(KM_CONF_INSTANCE_ID, KM_SERVER_URL, DEFAULT_KM_SERVER_URL);
     Credentials credentials?;
+    string tokenContext = getConfigValue(KM_CONF_INSTANCE_ID, KM_TOKEN_CONTEXT, DEFAULT_KM_TOKEN_CONTEXT);
+    string issuer = getConfigValue(KM_CONF_INSTANCE_ID, KM_CONF_ISSUER, DEFAULT_KM_CONF_ISSUER);
+    int timestampSkew = getConfigIntValue(KM_CONF_INSTANCE_ID, TIMESTAMP_SKEW, DEFAULT_TIMESTAMP_SKEW);
+    boolean remoteUserClaimRetrievalEnabled = getConfigBooleanValue(KM_CONF_INSTANCE_ID,
+                                                                    REMOTE_USER_CLAIM_RETRIEVAL_ENABLED,
+                                                                    DEFAULT_JWT_REMOTE_USER_CLAIM_RETRIEVAL_ENABLED);
 };
 
 public type Credentials record {

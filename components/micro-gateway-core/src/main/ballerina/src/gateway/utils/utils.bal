@@ -1023,12 +1023,12 @@ function readMultipleJWTIssuers(int timestampSkew) {
             }
             JwtAuthProvider jwtAuthProvider
                 = new (jwtValidatorConfig, getDefaultBooleanValue(jwtIssuer[VALIDATE_SUBSCRIPTION],
-                    globalValidateSubscriptionConfig), consumerKeyClaim, claims, className, classLoaded, remoteUserClaimRetrievalEnabled);
+                    globalValidateSubscriptionConfig), consumerKeyClaim, claims, className, classLoaded);
             JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
             if (isMetricsEnabled || isTracingEnabled) {
-                jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
+                jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider, remoteUserClaimRetrievalEnabled);
             } else {
-                jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
+                jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider, remoteUserClaimRetrievalEnabled);
             }
             jwtHandlers.push(jwtAuthHandler);
         }
@@ -1059,12 +1059,12 @@ function readMultipleJWTIssuers(int timestampSkew) {
                                                                     DEFAULT_JWT_REMOTE_USER_CLAIM_RETRIEVAL_ENABLED);
         JwtAuthProvider jwtAuthProvider
             = new (jwtValidatorConfig, getConfigBooleanValue(JWT_INSTANCE_ID, VALIDATE_SUBSCRIPTION,
-                globalValidateSubscriptionConfig), consumerKeyClaim, [] , "", false, remoteUserClaimRetrievalEnabled);
+                globalValidateSubscriptionConfig), consumerKeyClaim, [] , "", false);
         JWTAuthHandler | JWTAuthHandlerWrapper jwtAuthHandler;
         if (isMetricsEnabled || isTracingEnabled) {
-            jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider);
+            jwtAuthHandler = new JWTAuthHandlerWrapper(jwtAuthProvider, remoteUserClaimRetrievalEnabled);
         } else {
-            jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider);
+            jwtAuthHandler = new JWTAuthHandler(jwtAuthProvider, remoteUserClaimRetrievalEnabled);
         }
         jwtHandlers.push(jwtAuthHandler);
     }

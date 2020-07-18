@@ -13,6 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+import ballerina/jwt;
 
 # This represents a single key-value pair returned from the APIM.
 # + uri - claim
@@ -66,7 +67,7 @@ public type ApplicationClaimsMapDTO record {|
 # + client_id - client ID
 # + username - username
 # + token_type - token type ('bearer jwt' or 'bearer opaque')
-# + customClaims - customClaims of the JWT or the information received from introspection response
+# + customClaims - customClaims of the JWT or the information received from introspection response.
 public type UserClaimRetrieverContextDTO record {|
     string issuer = "";
     string token = "";
@@ -74,4 +75,15 @@ public type UserClaimRetrieverContextDTO record {|
     string username = "";
     string token_type = "";
     map<any> customClaims = {};
+|};
+
+# This DTO is used to pass the information required for the Jwt Info Map used in JWT generation implementation.
+# Payload property should remain null, if the user is authenticated via Opaque Token.
+# + issuer - Token issuer
+# + remoteUserClaimRetrievalEnabled - `true` If remote User Claim Retrieval is enabled.
+# + payload - decoded payload if the user is authenticated from a JWT token, else keep it as null.
+public type BackendJWTGenUserContextDTO record {|
+    string issuer;
+    boolean remoteUserClaimRetrievalEnabled = false;
+    jwt:JwtPayload? payload = ();
 |};

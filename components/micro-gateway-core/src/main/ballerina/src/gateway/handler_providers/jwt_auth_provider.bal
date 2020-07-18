@@ -29,7 +29,6 @@ import ballerina/stringutils;
 # + className - Transformation class Name
 # + classLoaded - Class loaded or not
 # + gatewayCache - the `APIGatewayCache instence`
-# + remoteUserClaimRetrievalEnabled - true if remoteUserClaimRetrieval is enabled for the issuer
 public type JwtAuthProvider object {
     *auth:InboundAuthProvider;
 
@@ -41,7 +40,6 @@ public type JwtAuthProvider object {
     public string className;
     public boolean classLoaded;
     public APIGatewayCache gatewayCache = new;
-    public boolean remoteUserClaimRetrievalEnabled = false;
 
     # Provides authentication based on the provided JWT token.
     #
@@ -49,7 +47,7 @@ public type JwtAuthProvider object {
     # + subscriptionValEnabled - Validate subscription
     # + remoteUserClaimRetrievalEnabled - true if the remote user claim retrieval is required
     public function __init(jwt:JwtValidatorConfig jwtValidatorConfig, boolean subscriptionValEnabled, string consumerKeyClaim,
-        map<anydata>[] | error claims, string className, boolean classLoaded, boolean remoteUserClaimRetrievalEnabled) {
+        map<anydata>[] | error claims, string className, boolean classLoaded) {
         self.jwtValidatorConfig = jwtValidatorConfig;
         self.inboundJwtAuthProvider = new (jwtValidatorConfig);
         self.subscriptionValEnabled = subscriptionValEnabled;
@@ -57,7 +55,6 @@ public type JwtAuthProvider object {
         self.claims = claims;
         self.className = className;
         self.classLoaded = classLoaded;
-        self.remoteUserClaimRetrievalEnabled = remoteUserClaimRetrievalEnabled;
     }
 
     public function authenticate(string credential) returns @tainted (boolean | auth:Error) {
