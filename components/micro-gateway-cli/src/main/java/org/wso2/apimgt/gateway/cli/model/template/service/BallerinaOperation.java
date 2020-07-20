@@ -97,7 +97,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
     @Override
     public BallerinaOperation buildContext(Operation operation, ExtendedAPI api) throws BallerinaServiceGenException,
-            CLICompileTimeException {
+            CLICompileTimeException, CLIRuntimeException {
         if (operation == null) {
             return getDefaultValue();
         }
@@ -129,6 +129,13 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
         //set resource level endpoint configuration
         setEpConfigDTO(operation);
+        //If production/sandbox endpoints for both API and Operation is not available, Error should be thrown.
+        if (api.getEndpointConfigRepresentation().getProdEndpointList() == null &&
+                api.getEndpointConfigRepresentation().getSandboxEndpointList() == null
+                && !hasProdEpConfig
+                && !hasSandEpConfig) {
+            throw new CLICompileTimeException("The endpoint Configuration is not provided for the operation.");
+        }
         Map<String, Object> exts = operation.getExtensions();
 
         if (exts != null) {
@@ -145,7 +152,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
                 responseInterceptor = resInterceptorContext.getInvokeStatement();
                 isJavaResponseInterceptor = BallerinaInterceptor.Type.JAVA == resInterceptorContext.getType();
             }
-
 
             Optional<Object> scopes = Optional.ofNullable(exts.get(X_SCOPE));
             scopes.ifPresent(value -> this.scope = "\"" + value.toString() + "\"");
