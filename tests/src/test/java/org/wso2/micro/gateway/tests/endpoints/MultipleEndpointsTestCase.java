@@ -76,7 +76,6 @@ public class MultipleEndpointsTestCase extends EndpointOverrideTestCase {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), ResponseConstants.storeInventoryResponse);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
-
     }
 
     @Test(description = "Test Invoking the load balanced endpoints in API level")
@@ -89,7 +88,19 @@ public class MultipleEndpointsTestCase extends EndpointOverrideTestCase {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), ResponseConstants.responseBody);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
+    }
 
+    @Test(description = "Test Invoking a resource where all the resources are assigned with endpoint." +
+            "(No API Level Endpoint is involved.")
+    public void testEndpointWithResourceEndpointsAlone() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        //test endpoint with token
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        org.wso2.micro.gateway.tests.util.HttpResponse response = HttpClientRequest
+                .doGet(getServiceURLHttp("petstore/v5/pet/findByStatus"), headers);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getData(), ResponseConstants.responseBodyV1);
+        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
     }
 
     @AfterClass
