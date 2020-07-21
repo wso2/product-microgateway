@@ -494,13 +494,21 @@ public class OpenAPICodegenUtils {
         } else if (servers != null) {
             endpointListRouteDTO = new EndpointListRouteDTO();
             for (Server server : servers) {
+                //When the openAPI is generated, it contains the server object by default with URL '/'. In that case,
+                //it is required to return null.
+                //If there are two server URLs, it means user has explicitly provided.
+                if (server.getUrl().equals("/")) {
+                    if (servers.size() == 1) {
+                        return null;
+                    }
+                }
                 //server url templating can have urls similar to 'https://{customerId}.saas-app.com:{port}/v2'
                 endpointListRouteDTO.addEndpoint(replaceOpenAPIServerTemplate(server));
             }
             try {
                 endpointListRouteDTO.validateEndpoints();
             } catch (CLICompileTimeException e) {
-                throw new CLICompileTimeException("The provided endpoint using the \"servers\" object " +
+                throw new CLICompileTimeException("The provided endpoint using the \"servers\" object, " +
                         "is invalid.\n\t-" + e.getTerminalMsg(), e);
             }
         }
@@ -1150,6 +1158,4 @@ public class OpenAPICodegenUtils {
         String basePath = extensions.get(OpenAPIConstants.BASEPATH).toString();
         return basePath.replace(OpenAPIConstants.VERSION_PLACEHOLDER, version);
     }
-
-
 }
