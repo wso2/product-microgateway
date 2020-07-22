@@ -454,7 +454,7 @@
   # JWT token generator implementation
   generatorImpl="org.wso2.micro.gateway.jwt.generator.MGWJWTGeneratorImpl"
   [jwtGeneratorConfig.claimRetrieval]
-      //todo: add the sample implementation to retrieve claims from API Manager
+      # //todo: add the sample implementation to retrieve claims from API Manager
       # User claim retriever implementation. This configuration is not applied by default.
       # User needs to mention the class explicitly
       retrieverImpl=""

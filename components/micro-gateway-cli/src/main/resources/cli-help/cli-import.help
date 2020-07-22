@@ -80,17 +80,6 @@ OPTIONS
        <Optional>
        Allow insecure server connections when using SSL
 
-    -b
-    --security
-       <Optional>
-       API security ('OAuth', 'BasicAuth' or 'OAuth,BasicAuth')
-       default value is OAuth
-
-    -d
-    --deployment-config
-       <Optional>
-       Deployment configuration file of the project for docker/kubernetes environments
-
 EXAMPLES
     Import multiple APIs using a label
     $ micro-gw import accounts-project -l accounts

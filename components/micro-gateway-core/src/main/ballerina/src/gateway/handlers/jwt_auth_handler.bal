@@ -143,7 +143,7 @@ public function setBackendJwtHeader(string credential, http:Request req, string?
 # + apiVersion - version of the current API
 # + return - Returns map<string> with the extracted details.
 public function getAPIDetails(jwt:JwtPayload payload, string apiName, string apiVersion) returns map<string> {
-    if (!isSelfContainedToken(payload)) {
+    if (!payload.hasKey(APPLICATION)) {
         return createAPIDetailsMap(runtime:getInvocationContext());
     }
     map<string> apiDetails = {
@@ -322,7 +322,7 @@ public function setJWTHeader(jwt:JwtPayload payload,
 function generateBackendTokenForJWT(AuthenticationContext authContext, jwt:JwtPayload payload, map<string> apiDetails,
                 boolean remoteUserClaimRetrievalEnabled) returns handle | error {
     (handle|error) generatedToken;
-    if (isSelfContainedToken(payload)) {
+    if (payload.hasKey(APPLICATION)) {
         generatedToken = generateJWTToken(payload, apiDetails);
     } else {
         ClaimsMapDTO claimsMapDTO = createMapFromRetrievedUserClaimsListDTO(authContext,
