@@ -196,8 +196,7 @@ public function doMappingContext(runtime:InvocationContext invocationContext, st
             runtime:AuthenticationContext authContext) returns @tainted (auth:Error)? {
     string payloadIssuer = jwtPayloadFromCache["iss"].toString();
     string payloadAudience = jwtPayloadFromCache["aud"].toString();
-    if( jwtValidatorConfig[ISSUER] ==  payloadIssuer &&
-        jwtValidatorConfig[AUDIENCE] ==  payloadAudience) {
+    if (jwtValidatorConfig[ISSUER] ==  payloadIssuer) {
         map<any>? customClaims = invocationContext[PRINCIPAL][ISSUER_CLAIMS];
         if (customClaims is map<any>) {
             if (claims is map<anydata>[] && claims.length() > 0) {
@@ -222,8 +221,8 @@ public function doMappingContext(runtime:InvocationContext invocationContext, st
                     return prepareError("Error occured while loading the custom method ");
                 }
             }
-            if (customClaims["scope"].toString() != "") {
-                var result = putScopeValue(customClaims["scope"], invocationContext);
+            if (customClaims.hasKey(SCOPE) && customClaims[SCOPE].toString() != "") {
+                var result = putScopeValue(customClaims[SCOPE], invocationContext);
                 if (result is auth:Error) {
                     return result;
                 }

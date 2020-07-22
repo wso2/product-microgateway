@@ -215,9 +215,6 @@ public abstract class AbstractMGWJWTGenerator {
             String assertion = base64UrlEncodedHeader + '.' + base64UrlEncodedBody;
             //get the assertion signed
             byte[] signedAssertion = signJWT(assertion);
-            if (logger.isDebugEnabled()) {
-                logger.debug("signed assertion value : " + new String(signedAssertion, Charset.defaultCharset()));
-            }
             String base64UrlEncodedAssertion = encode(signedAssertion);
             return base64UrlEncodedHeader + '.' + base64UrlEncodedBody + '.' + base64UrlEncodedAssertion;
         } else {
