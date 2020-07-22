@@ -116,7 +116,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://product-dist.ballerina.io/downloads/${ballerina.platform.version}/jballerina-${ballerina.platform.version}.zip</url>
+                            <url>https://dist.ballerina.io/downloads/${ballerina.platform.version}/jballerina-${ballerina.platform.version}.zip</url>
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}/ballerina</outputDirectory>
                         </configuration>
