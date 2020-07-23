@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/jwt;
 import ballerina/runtime;
 
 # To retrieve claims via the user specific claim retrieve implementation.
@@ -78,11 +77,16 @@ public function loadClaimRetrieverImpl() returns boolean {
 # + issuer - Issuer related to KeyManager
 # + return - populated UserClaimRetrieverContextDTO
 function generateUserClaimRetrieverContextFromPrincipal(AuthenticationContext authContext, runtime:Principal principal,
-                                            string issuer)
+                                            string issuer, boolean isJWT)
         returns UserClaimRetrieverContextDTO {
     UserClaimRetrieverContextDTO userAuthContextDTO = {};
     userAuthContextDTO.username = principal?.username ?: UNKNOWN_VALUE;
-    userAuthContextDTO.token_type = "bearer opaque";
+    if (isJWT) {
+        userAuthContextDTO.token_type = "bearer JWT";
+    } else {
+        userAuthContextDTO.token_type = "bearer opaque";
+    }
+
     userAuthContextDTO.issuer = issuer;
     userAuthContextDTO.token =  authContext.apiKey;
     map<any>? claims = principal?.claims;
@@ -96,27 +100,6 @@ function generateUserClaimRetrieverContextFromPrincipal(AuthenticationContext au
     }
     return userAuthContextDTO;
 }
-
-# Populate the DTO required for the claim retrieval implementation from authContext and principal component.
-# 
-# + authContext - Authentication Context
-# + payload - JWT payload
-# + return - populated UserClaimRetrieverContextDTO
-function generateUserClaimRetrieverContextFromJWT(AuthenticationContext authContext, jwt:JwtPayload payload)
-        returns UserClaimRetrieverContextDTO {
-    UserClaimRetrieverContextDTO userAuthContextDTO = {};
-    userAuthContextDTO.username = authContext.username;
-    userAuthContextDTO.token_type = "bearer jwt";
-    userAuthContextDTO.issuer = payload?.iss ?: UNKNOWN_VALUE;
-    userAuthContextDTO.client_id = authContext.consumerKey;
-    map<any>? claims = payload?.customClaims;
-    userAuthContextDTO.token =  authContext.apiKey;
-    if (claims is map<any> ) {
-        userAuthContextDTO.customClaims = claims;
-    }
-    return userAuthContextDTO;
-}
-
 
 function convertAnyToString(any variable) returns string{
     if (variable is string) {

@@ -60,53 +60,47 @@ function createMapFromRetrievedUserClaimsListDTO(BackendJWTGenUserContextDTO tok
                                                     returns @tainted ClaimsMapDTO {
     ClaimsMapDTO claimsMapDTO = {};
     CustomClaimsMapDTO customClaimsMapDTO = {};
-    UserClaimRetrieverContextDTO? userInfo = ();
 
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     AuthenticationContext authContext = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
     jwt:JwtPayload? payload = tokenContextDTO.payload;
-    if (payload is ()) {
-        //if payload is empty, Principal is used to populate scope variable
-        runtime:Principal? principal = invocationContext?.principal;
-        if (principal is runtime:Principal) {
-            string[]? scopes = principal?.scopes;
-            if (scopes is string[]) {
-                string concatenatedScope = "";
-                foreach string scope in scopes {
-                    concatenatedScope += scope + " ";
-                }
-                customClaimsMapDTO["scope"] = concatenatedScope.trim();
+
+    runtime:Principal? principal = invocationContext?.principal;
+    if (principal is runtime:Principal) {
+        string[]? scopes = principal?.scopes;
+        if (scopes is string[]) {
+            string concatenatedScope = "";
+            foreach string scope in scopes {
+                concatenatedScope += scope + " ";
             }
-            if (tokenContextDTO.remoteUserClaimRetrievalEnabled) {
-                userInfo = generateUserClaimRetrieverContextFromPrincipal(authContext, principal, tokenContextDTO.issuer);
-            }
-        } else {
-            printDebug(JWT_GEN_UTIL, "Claim retrieval implementation is not executed due to the unavailability " +
-                            "of the principal component");
+            customClaimsMapDTO["scope"] = concatenatedScope.trim();
         }
-    } else  {
-        map<json>? customClaims = payload?.customClaims;
-        if (customClaims is map<json>) {
+        map<any>? customClaims = principal?.claims;
+        if (customClaims is map<any>) {
             foreach var [key, value] in customClaims.entries() {
-                string | error claimValue = trap <string> value;
-                if (claimValue is string) {
-                    customClaimsMapDTO[key] = claimValue;
+                if (value is anydata) {
+                    customClaimsMapDTO[key] = value;
                 }
             }
         }
         if (tokenContextDTO.remoteUserClaimRetrievalEnabled) {
-            userInfo = generateUserClaimRetrieverContextFromJWT(authContext, payload);
-        }
-    }
-
-    if (userInfo is UserClaimRetrieverContextDTO) {
-        RetrievedUserClaimsListDTO ? claimsListDTO = retrieveClaims(userInfo);
-        if (claimsListDTO is RetrievedUserClaimsListDTO) {
-            ClaimDTO[] claimList = claimsListDTO.list;
-            foreach ClaimDTO claim in claimList {
-                customClaimsMapDTO[claim.uri] = claim.value;
+            UserClaimRetrieverContextDTO? userInfo = generateUserClaimRetrieverContextFromPrincipal(authContext,
+                                                                                                    principal,
+                                                                                                    tokenContextDTO.issuer,
+                                                                                                    tokenContextDTO.payload != ());
+            if (userInfo is UserClaimRetrieverContextDTO) {
+                RetrievedUserClaimsListDTO ? claimsListDTO = retrieveClaims(userInfo);
+                if (claimsListDTO is RetrievedUserClaimsListDTO) {
+                    ClaimDTO[] claimList = claimsListDTO.list;
+                    foreach ClaimDTO claim in claimList {
+                        customClaimsMapDTO[claim.uri] = claim.value;
+                    }
+                }
             }
         }
+    } else {
+        printDebug(JWT_GEN_UTIL, "Claim retrieval implementation is not executed due to the unavailability " +
+                        "of the principal component");
     }
 
     ApplicationClaimsMapDTO applicationClaimsMapDTO = {};
