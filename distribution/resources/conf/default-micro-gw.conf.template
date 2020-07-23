@@ -52,8 +52,6 @@
   serverUrl = "https://localhost:9443"
   # The token endpoint context of the Key Manager server
   tokenContext = "oauth2"
-  # External Key Manager
-  external = false
   # Remote User Claim Retrieval Enabled
   remoteUserClaimRetrievalEnabled = false
   # Basic security configurations
