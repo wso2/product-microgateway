@@ -97,8 +97,8 @@ public class CodeGenerator {
                             fileName.toString().endsWith(CliConstants.YAML_EXTENSION));
                 }).forEach(path -> {
                     try {
-                        OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
                         String openAPIContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+                        OpenAPI openAPI = new OpenAPIV3Parser().readContents(openAPIContent).getOpenAPI();
                         String openAPIAsJson = OpenAPICodegenUtils.getOpenAPIAsJson(openAPI, openAPIContent, path);
                         String openAPIContentAsJson = openAPIAsJson;
                         if (path.toString().endsWith(CliConstants.YAML_EXTENSION)) {
