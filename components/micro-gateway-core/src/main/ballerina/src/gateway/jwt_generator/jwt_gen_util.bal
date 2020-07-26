@@ -67,14 +67,6 @@ function createMapFromRetrievedUserClaimsListDTO(BackendJWTGenUserContextDTO tok
 
     runtime:Principal? principal = invocationContext?.principal;
     if (principal is runtime:Principal) {
-        string[]? scopes = principal?.scopes;
-        if (scopes is string[]) {
-            string concatenatedScope = "";
-            foreach string scope in scopes {
-                concatenatedScope += scope + " ";
-            }
-            customClaimsMapDTO["scope"] = concatenatedScope.trim();
-        }
         map<any>? customClaims = principal?.claims;
         if (customClaims is map<any>) {
             foreach var [key, value] in customClaims.entries() {
@@ -83,20 +75,27 @@ function createMapFromRetrievedUserClaimsListDTO(BackendJWTGenUserContextDTO tok
                 }
             }
         }
+        string[]? scopes = principal?.scopes;
+        if (scopes is string[]) {
+            string concatenatedScope = "";
+            foreach string scope in scopes {
+                concatenatedScope += scope + " ";
+            }
+            customClaimsMapDTO["scope"] = concatenatedScope.trim();
+        }
         if (tokenContextDTO.remoteUserClaimRetrievalEnabled) {
-            UserClaimRetrieverContextDTO? userInfo = generateUserClaimRetrieverContextFromPrincipal(authContext,
+            UserClaimRetrieverContextDTO userInfo = generateUserClaimRetrieverContextFromPrincipal(authContext,
                                                                                                     principal,
                                                                                                     tokenContextDTO.issuer,
                                                                                                     tokenContextDTO.payload != ());
-            if (userInfo is UserClaimRetrieverContextDTO) {
-                RetrievedUserClaimsListDTO ? claimsListDTO = retrieveClaims(userInfo);
-                if (claimsListDTO is RetrievedUserClaimsListDTO) {
-                    ClaimDTO[] claimList = claimsListDTO.list;
-                    foreach ClaimDTO claim in claimList {
-                        customClaimsMapDTO[claim.uri] = claim.value;
-                    }
+            RetrievedUserClaimsListDTO ? claimsListDTO = retrieveClaims(userInfo);
+            if (claimsListDTO is RetrievedUserClaimsListDTO) {
+                ClaimDTO[] claimList = claimsListDTO.list;
+                foreach ClaimDTO claim in claimList {
+                    customClaimsMapDTO[claim.uri] = claim.value;
                 }
             }
+
         }
     } else {
         printDebug(JWT_GEN_UTIL, "Claim retrieval implementation is not executed due to the unavailability " +
@@ -205,6 +204,7 @@ public function setJWTHeader(BackendJWTGenUserContextDTO tokenContextDTO,
     if (payload is jwt:JwtPayload) {
         if (isSelfContainedToken(payload)) {
             generatedToken = generateJWTToken(payload, apiDetails);
+            //todo: add claims from the principal
             return setGeneratedTokenAsHeader(req, cacheKey, enabledCaching, generatedToken);
         }
     }
@@ -242,6 +242,7 @@ function setJWTTokenWithCacheCheck(http:Request req,
         if (cachedToken is string) {
             printDebug(KEY_JWT_AUTH_PROVIDER, "Found in jwt generator cache");
             printDebug(KEY_JWT_AUTH_PROVIDER, "Token: " + cachedToken);
+            //todo: have an token cache for decoded Payload as cache does not contain this payload.
             (jwt:JwtPayload | error) cachedPayload = getDecodedJWTPayload(cachedToken, tokenContextDTO.issuer);
             if (cachedPayload is jwt:JwtPayload) {
                 int currentTime = getCurrentTime();
