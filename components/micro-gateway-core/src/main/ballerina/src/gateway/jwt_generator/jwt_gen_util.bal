@@ -35,18 +35,18 @@ function setGeneratedTokenAsHeader(http:Request req,
                                 returns @tainted boolean {
 
     if (generatedToken is error) {
-        printError(KEY_JWT_AUTH_PROVIDER, "Token not generated due to error", generatedToken);
+        printError(JWT_GEN_UTIL, "Token not generated due to error", generatedToken);
         return false;
     } else {
-        printDebug(KEY_JWT_AUTH_PROVIDER, "Generated jwt token");
-        printDebug(KEY_JWT_AUTH_PROVIDER, "Token: " + generatedToken.toString());
+        printDebug(JWT_GEN_UTIL, "Generated jwt token");
+        printDebug(JWT_GEN_UTIL, "Token: " + generatedToken.toString());
 
         if (enabledCaching) {
             error? err = jwtGeneratorCache.put(<@untainted>cacheKey, <@untainted>generatedToken.toString());
             if (err is error) {
-                printError(KEY_JWT_AUTH_PROVIDER, "Error while adding entry to jwt generator cache", err);
+                printError(JWT_GEN_UTIL, "Error while adding entry to jwt generator cache", err);
             }
-            printDebug(KEY_JWT_AUTH_PROVIDER, "Added to jwt generator token cache.");
+            printDebug(JWT_GEN_UTIL, "Added to jwt generator token cache.");
         }
         req.setHeader(jwtheaderName, generatedToken.toString());
         return true;
@@ -211,7 +211,7 @@ public function setJWTHeader(BackendJWTGenUserContextDTO tokenContextDTO,
     ClaimsMapDTO claimsMapDTO = createMapFromRetrievedUserClaimsListDTO(tokenContextDTO);
     generatedToken = generateJWTTokenFromUserClaimsMap(claimsMapDTO, apiDetails);
     if (generatedToken is error) {
-        printError(KEY_JWT_AUTH_PROVIDER, "Token not generated due to error", generatedToken);
+        printError(JWT_GEN_UTIL, "Token not generated due to error", generatedToken);
         return false;
     }
     return setGeneratedTokenAsHeader(req, cacheKey, enabledCaching, generatedToken);
@@ -238,37 +238,65 @@ function setJWTTokenWithCacheCheck(http:Request req,
     boolean status = false;
     if (enabledCaching) {
         var cachedToken = jwtGeneratorCache.get(cacheKey);
-        printDebug(KEY_JWT_AUTH_PROVIDER, "Key: " + cacheKey);
+        printDebug(JWT_GEN_UTIL, "Key: " + cacheKey);
         if (cachedToken is string) {
-            printDebug(KEY_JWT_AUTH_PROVIDER, "Found in jwt generator cache");
-            printDebug(KEY_JWT_AUTH_PROVIDER, "Token: " + cachedToken);
-            //todo: have an token cache for decoded Payload as cache does not contain this payload.
-            (jwt:JwtPayload | error) cachedPayload = getDecodedJWTPayload(cachedToken, tokenContextDTO.issuer);
-            if (cachedPayload is jwt:JwtPayload) {
-                int currentTime = getCurrentTime();
-                int? cachedTokenExpiry = cachedPayload?.exp;
-                if (cachedTokenExpiry is int) {
-                    cachedTokenExpiry = cachedTokenExpiry * 1000;
-                    int difference = (cachedTokenExpiry - currentTime);
-                    if (difference < skewTime) {
-                        printDebug(KEY_JWT_AUTH_PROVIDER, "JWT regenerated because of the skew time");
-                        status = setJWTHeader(tokenContextDTO, apiDetails, req, cacheKey, enabledCaching);
-                    } else {
-                        req.setHeader(jwtheaderName, cachedToken);
-                        status = true;
-                    }
+            printDebug(JWT_GEN_UTIL, "Found in jwt generator cache");
+            printDebug(JWT_GEN_UTIL, "Token: " + cachedToken);
+
+            int currentTime = getCurrentTime();
+            int? cachedTokenExpiry = getGeneratedTokenExpTimeFromCache(cacheKey, cachedToken);
+            if (cachedTokenExpiry is int) {
+                cachedTokenExpiry = cachedTokenExpiry * 1000;
+                int difference = (cachedTokenExpiry - currentTime);
+                if (difference < skewTime) {
+                    printDebug(JWT_GEN_UTIL, "JWT regenerated because of the skew time");
+                    status = setJWTHeader(tokenContextDTO, apiDetails, req, cacheKey, enabledCaching);
                 } else {
-                    printDebug(KEY_JWT_AUTH_PROVIDER, "Failed to read exp from cached token");
-                    return false;
+                    req.setHeader(jwtheaderName, cachedToken);
+                    status = true;
                 }
+            } else {
+                printDebug(JWT_GEN_UTIL, "Failed to read exp from cached token");
+                return false;
             }
         } else {
-            printDebug(KEY_JWT_AUTH_PROVIDER, "Could not find in the jwt generator cache");
+            printDebug(JWT_GEN_UTIL, "Could not find in the jwt generator cache");
             status = setJWTHeader(tokenContextDTO, apiDetails, req, cacheKey, enabledCaching);
         }
     } else {
-        printDebug(KEY_JWT_AUTH_PROVIDER, "JWT generator caching is disabled");
+        printDebug(JWT_GEN_UTIL, "JWT generator caching is disabled");
         status = setJWTHeader(tokenContextDTO, apiDetails, req, cacheKey, enabledCaching);
     }
     return status;
+}
+
+# Get the cached backend token's expiry time if it is available in the cache.
+# If not the cached token will be decoded and cached.
+# + cacheKey - cache Key (credential + apiName + apiVersion)
+# + jwtToken - cached JWT Token (Generated from the Microgateway)
+# + return - Expiry time of the generated token.
+function getGeneratedTokenExpTimeFromCache(string cacheKey, string jwtToken) returns @tainted int? {
+    var cachedTokenExpTime = jwtGeneratorExpTimeCache.get(cacheKey);
+    if (cachedTokenExpTime is int) {
+        printDebug(JWT_GEN_UTIL, "Generated token expiry time is found in cache.");
+        return cachedTokenExpTime;
+    } else {
+        //decode jwt
+        (jwt:JwtPayload | error) payload = decodeJWTPayload(jwtToken);
+        if (payload is jwt:JwtPayload) {
+            int? tokenExpiry = payload?.exp;
+            if (tokenExpiry is int) {
+                error? err = jwtGeneratorExpTimeCache.put(<@untainted>cacheKey, <@untainted>tokenExpiry);
+                if (err is error) {
+                    printError(JWT_GEN_UTIL, "Error while caching the generated token expiry time.");
+                    return tokenExpiry;
+                }
+                printDebug(JWT_GEN_UTIL, "Generated token expiry time is cached.");
+                return tokenExpiry;
+            } else {
+                printDebug(JWT_GEN_UTIL, "Generated token expiry time is not included in the cached token.");
+            }
+        }
+        return;
+    }
 }

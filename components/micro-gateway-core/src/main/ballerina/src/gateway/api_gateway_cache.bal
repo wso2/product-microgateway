@@ -56,6 +56,7 @@ cache:Cache introspectCache = new (genericCacheConfig);
 cache:Cache gatewayClaimsCache = new (genericCacheConfig);
 
 cache:Cache jwtGeneratorCache = new (jwtGenerationCacheConfig);
+cache:Cache jwtGeneratorExpTimeCache = new (jwtGenerationCacheConfig);
 cache:Cache mutualSslCertificateCache = new (genericCacheConfig);
 
 APIGatewayCache gatewayCacheObject = new;
