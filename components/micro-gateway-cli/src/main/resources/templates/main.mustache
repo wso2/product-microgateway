@@ -1,6 +1,5 @@
 import wso2/gateway;
 import ballerina/lang.'object;
-import ballerina/io;
 
 const string MAIN_MUSTACHE = "Main";
 public function main() {
@@ -44,13 +43,13 @@ type ObjectName object {
     }
     public function __start() returns error? {
         gateway:printDebug(MAIN_MUSTACHE, "Initializing throttling policies");
-        _ = start initThrottlePolicies();
+        initThrottlePolicies();
         gateway:printDebug(MAIN_MUSTACHE, "Initializing Notification JMS Listener");
         _ = start gateway:initiateNotificationJmsListener();
         gateway:printDebug(MAIN_MUSTACHE, "Initializing Throttle Data Publisher");
-        _ = start gateway:initThrottleDataPublisher();
+        gateway:initThrottleDataPublisher();
         gateway:printDebug(MAIN_MUSTACHE, "Initializing Global Throttle Data Publisher");
-        _ = start gateway:initGlobalThrottleDataPublisher();
+        gateway:initGlobalThrottleDataPublisher();
     }
     public function __gracefulStop() returns error? {
     }
