@@ -38,6 +38,7 @@ service messageServ = service {
         if (message is jms:MapMessage) {
             string? | error keyTemplateValue = message.getString(KEY_TEMPLATE_VALUE);
             string? | error throttleKey = message.getString(THROTTLE_KEY);
+            string? | error evaluatedConditions = message.getString(EVALUATED_CONDITIONS);
             int remainingQuota = 0;
             string? | error blockingKey = message.getString(BLOCKING_CONDITION_KEY);
             if (keyTemplateValue is string) {
@@ -48,6 +49,7 @@ service messageServ = service {
                 printDebug(KEY_THROTTLE_EVENT_LISTENER, "policy Key : " + throttleKey.toString() + " Throttle status : " +
                 throttleEnable.toString());
                 if (throttleEnable is boolean && expiryTime is int) {
+                    APICondition | error condition = extractAPIorResourceKey(throttleKey);
                     GlobalThrottleStreamDTO globalThrottleStreamDtoTM = {
                         policyKey: throttleKey,
                         resetTimestamp: expiryTime,

@@ -63,6 +63,7 @@ public const string POLICY_KEY = "policyKey";
 public const string KEY_TEMPLATE_VALUE = "keyTemplateValue";
 public const string KEY_TEMPLATE_STATE = "keyTemplateState";
 public const string KEY_TEMPLATE_ADD = "add";
+public const string EVALUATED_CONDITIONS = "evaluatedConditions";
 public const string RESOURCE_TIER_ANN_PACKAGE = "ballerina.gateway";
 public const string RESOURCE_TIER_ANN_NAME = "RateLimit";
 public const string RESOURCE_SECURITY_ANN_NAME = "Security";

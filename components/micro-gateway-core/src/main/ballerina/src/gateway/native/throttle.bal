@@ -61,6 +61,13 @@ public function isIpWithinRange(string ip, string startingIp, string endingIp) r
     return jIsIpWithinRange(ipHandle, startingIpHandle, endingIpHandle);
 }
 
+function extractAPIorResourceKey(string throttleKey) returns APICondition | error {
+    handle tKey = java:fromString(throttleKey);
+    string res =  jExtractAPIorResourceKey(tKey).toString();
+
+    return APICondition.constructFrom(<json>res.fromJsonString());
+}
+
 public function jIsResourceThrottled(handle resourceKey) returns boolean = @java:Method  {
     name: "isResourceThrottled",
     class: "org.wso2.micro.gateway.core.throttle.ThrottleDataReceiver"
@@ -100,5 +107,10 @@ public function jIpToBigInteger(handle ip) returns handle = @java:Method {
 
 public function jIsIpWithinRange(handle ip, handle startingIp, handle endingIp) returns boolean = @java:Method  {
     name: "isIpWithinRange",
+    class: "org.wso2.micro.gateway.core.throttle.global.ThrottleUtils"
+} external;
+
+public function jExtractAPIorResourceKey(handle throttleKey) returns handle = @java:Method {
+    name: "extractAPIorResourceKey",
     class: "org.wso2.micro.gateway.core.throttle.global.ThrottleUtils"
 } external;

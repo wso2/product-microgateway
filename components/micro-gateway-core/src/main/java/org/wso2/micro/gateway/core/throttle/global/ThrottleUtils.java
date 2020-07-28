@@ -22,6 +22,8 @@ import org.apache.logging.log4j.Logger;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utility methods used for global throttling scenarios.
@@ -29,6 +31,15 @@ import java.net.UnknownHostException;
 public class ThrottleUtils {
 
     private static final Logger log = LogManager.getLogger(ThrottleUtils.class);
+    private static final int API_PATTERN_GROUPS = 3;
+    private static final int API_PATTERN_CONDITION_INDEX = 2;
+    private static final int RESOURCE_PATTERN_GROUPS = 4;
+    private static final int RESOURCE_PATTERN_CONDITION_INDEX = 3;
+
+    // These patterns will be used to determine for which type of keys the throttling condition has occurred.
+    private static Pattern apiPattern = Pattern.compile("/.*/(.*):\\1_(condition_(\\d*)|default)");
+    private static Pattern resourcePattern = Pattern.compile("/.*/(.*)/\\1(.*)?:[A-Z]{0,6}_(condition_(\\d*)|default)");
+
     /**
      * This method provides the BigInteger string value for the given IP address.
      * This supports both IPv4 and IPv6 address.
@@ -61,5 +72,27 @@ public class ThrottleUtils {
         BigInteger startingIpNumber = new BigInteger(startingIP);
         BigInteger endingIpNumber = new BigInteger(endingIp);
         return (ipNumber.compareTo(startingIpNumber) > 0) && (ipNumber.compareTo(endingIpNumber) < 0);
+    }
+
+    public static String extractAPIorResourceKey(String throttleKey) {
+        Matcher m = resourcePattern.matcher(throttleKey);
+        if (m.matches()) {
+            if (m.groupCount() == RESOURCE_PATTERN_GROUPS) {
+                String condition = m.group(RESOURCE_PATTERN_CONDITION_INDEX);
+                String resourceKey = throttleKey.substring(0, throttleKey.indexOf("_" + condition));
+                return "{\"resourceKey\":\"" + resourceKey + "\", \"name\":\"" + condition + "\"}";
+            }
+        } else {
+            m = apiPattern.matcher(throttleKey);
+            if (m.matches()) {
+                if (m.groupCount() == API_PATTERN_GROUPS) {
+                    String condition = m.group(API_PATTERN_CONDITION_INDEX);
+                    String resourceKey = throttleKey.substring(0, throttleKey.indexOf("_" + condition));
+                    return "{\"resourceKey\":\"" + resourceKey + "\", \"name\":\"" + condition + "\"}";
+                }
+            }
+        }
+
+        return null;
     }
 }

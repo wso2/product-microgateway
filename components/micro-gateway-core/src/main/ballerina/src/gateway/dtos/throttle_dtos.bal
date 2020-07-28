@@ -105,3 +105,8 @@ public type IPRangeDTO record {
     string endingIpNumber;
     boolean invert = false;
 };
+
+public type APICondition record {
+    string name;
+    string resourceKey;
+};
