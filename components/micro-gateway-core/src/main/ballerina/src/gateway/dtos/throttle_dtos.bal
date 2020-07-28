@@ -106,6 +106,31 @@ public type IPRangeDTO record {
     boolean invert = false;
 };
 
+public type IPCondition record {
+    string specificIp = "";
+    string startingIp = "";
+    string endingIp = "";
+    boolean invert = false;
+};
+
+public type HeaderConditions record {
+    map<string> values = {};
+    boolean invert = false;
+};
+
+public type QueryParamConditions record {
+    map<string> values = {};
+    boolean invert = false;
+};
+
+public type ConditionDto record {
+    IPCondition? ipCondition = ();
+    IPCondition? ipRangeCondition = ();
+    HeaderConditions? headerConditions = ();
+    QueryParamConditions? queryParamConditions = ();
+    json jwtClaimConditions = {};
+};
+
 public type APICondition record {
     string name;
     string resourceKey;

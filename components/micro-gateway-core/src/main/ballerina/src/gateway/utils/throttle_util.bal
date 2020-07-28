@@ -14,11 +14,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/encoding;
 import ballerina/time;
 import ballerina/stringutils;
+import ballerina/lang.'string as strings;
 import ballerina/runtime;
 
 map<any> throttleDataMap = {};
+map<map<ConditionDto[]>> conditionDataMap = {};
 boolean isStreamsInitialized = false;
 
 boolean blockConditionExist = false;
@@ -131,8 +134,33 @@ public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns 
 public function putThrottleData(GlobalThrottleStreamDTO throttleEvent, string throttleKey) {
     throttleDataMap[throttleKey] = <@untainted>throttleEvent;
 }
+
 public function removeThrottleData(string key) {
     _ = throttleDataMap.remove(key);
+}
+
+public function putThrottledConditions(ConditionDto[] conditions, string resourceKey, string conditionKey) {
+    map<ConditionDto[]> conditionMapping = {};
+
+    if (conditionDataMap.hasKey(resourceKey)) {
+        conditionMapping = conditionDataMap.get(resourceKey);
+    } else {
+        conditionDataMap[resourceKey] = conditionMapping;
+    }
+
+    if (!conditionMapping.hasKey(conditionKey)) {
+        conditionMapping[conditionKey] = conditions;
+    }
+}
+
+public function removeThrottledConditions(string resourceKey, string conditionKey) {
+    if (conditionDataMap.hasKey(resourceKey)) {
+        map<ConditionDto[]> conditionMapping = conditionDataMap.get(resourceKey);
+        _ = conditionMapping.removeIfHasKey(conditionKey);
+        if (conditionMapping.length() == 0) {
+            _ = conditionDataMap.remove(resourceKey);
+        }
+    }
 }
 
 //check whether the throttle policy is available if in built throttling is used
@@ -241,3 +269,79 @@ function modifyIpWithNumericRanges(IPRangeDTO ipRange) {
     }
 }
 
+
+# Build a list of `ConditionDto`s from the provided base64 encoded condition list.
+#
+# + base64Conditions - A base64 encoded json string containing the list of conditions
+# evaluated by the throttle engine to take the throttle decision.
+# + return - A list of conditions evaluated during making the throttle decision. Incase of an
+# error during converting the conditions, empty `ConditionDto[]` will be returned
+function extractConditionDto(string base64Conditions) returns ConditionDto[] {
+    ConditionDto[] conditions = [];
+    byte[]|error base64Decoded = encoding:decodeBase64Url(base64Conditions);
+    if (base64Decoded is byte[]) {
+        string|error result = strings:fromBytes(base64Decoded);
+        if (result is error) {
+            printError(KEY_THROTTLE_UTIL, result.reason(), result);
+        }
+
+        string conditionsPayload = <string>result;
+        json[] | error jsonPayload = <json[]>conditionsPayload.fromJsonString();
+
+        if (jsonPayload is json[]) {
+            printDebug(KEY_THROTTLE_UTIL, "Decoded throttle conditions json :" + jsonPayload.toJsonString());
+
+            foreach json condition in jsonPayload {
+                ConditionDto conditionDto = {};
+                var jIpSpecific = condition.ipspecific;
+                var jIpRange = condition.iprange;
+                var jHeader = condition.header;
+                var jQuery = condition.queryparametertype;
+
+                // Build IP condition DTOs
+                if (jIpSpecific is json) {
+                    IPCondition ip = {
+                        specificIp: <string>jIpSpecific.specificIp,
+                        invert: <boolean>jIpSpecific.invert
+                    };
+                    conditionDto.ipCondition = ip;
+                } else if (jIpRange is json) {
+                    IPCondition ip = {
+                        startingIp: <string>jIpRange.startingIp,
+                        endingIp: <string>jIpRange.endingIp,
+                        invert: <boolean>jIpRange.invert
+                    };
+                    conditionDto.ipRangeCondition = ip;
+                }
+
+                // Build header condition DTOs
+                if (jHeader is json) {
+                    var header = HeaderConditions.constructFrom(jHeader);
+                    if (header is HeaderConditions) {
+                        conditionDto.headerConditions = header;
+                    } else {
+                        printError(KEY_THROTTLE_UTIL, "HeaderCondition is not in the expected format", header);
+                    }
+                }
+
+                // Build query param condition DTOs
+                if (jQuery is json) {
+                    var query = QueryParamConditions.constructFrom(jQuery);
+                    if (query is QueryParamConditions) {
+                        conditionDto.queryParamConditions = query;
+                    } else {
+                        printError(KEY_THROTTLE_UTIL, "QueryParamCondition is not in the expected format", query);
+                    }
+                }
+
+                conditions.push(conditionDto);
+            }
+        } else {
+            printError(KEY_THROTTLE_UTIL, "Couldn't build a valid json from the throttle conditions", jsonPayload);
+        }
+    } else {
+        printError(KEY_THROTTLE_UTIL, "Couldn't decode throttle conditions", base64Decoded);
+    }
+
+    return conditions;
+}

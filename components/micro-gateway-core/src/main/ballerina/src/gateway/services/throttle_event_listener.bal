@@ -56,12 +56,25 @@ service messageServ = service {
                         remainingQuota: remainingQuota,
                         isThrottled: throttleEnable
                     };
+
                     if (globalThrottleStreamDtoTM.isThrottled == true) {
                         printDebug(KEY_THROTTLE_EVENT_LISTENER, "Adding to throttledata map.");
                         putThrottleData(globalThrottleStreamDtoTM, throttleKey);
+
+                        if (condition is APICondition && evaluatedConditions is string) {
+                            string resourceKey = condition.resourceKey;
+                            string conditionKey = condition.name;
+                            ConditionDto[] conditions = extractConditionDto(evaluatedConditions);
+                            putThrottledConditions(conditions, resourceKey, conditionKey);
+                        }
                     } else {
                         printDebug(KEY_THROTTLE_EVENT_LISTENER, "Romoving from throttledata map.");
                         removeThrottleData(throttleKey);
+                        if (condition is APICondition) {
+                            string resourceKey = condition.resourceKey;
+                            string conditionKey = condition.name;
+                            removeThrottledConditions(resourceKey, conditionKey);
+                        }
                     }
                 } else {
                     printDebug(KEY_THROTTLE_EVENT_LISTENER, "Throlling configs values are wrong.");
