@@ -18,6 +18,13 @@ import ballerina/http;
 import ballerina/runtime;
 import ballerina/stringutils;
 
+boolean isHeaderConditionsEnabled = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, HEADER_CONDITIONS_ENABLED,
+    DEFAULT_HEADER_CONDITIONS_ENABLED);
+boolean isQueryConditionsEnabled = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, QUERY_CONDITIONS_ENABLED,
+    DEFAULT_QUERY_CONDITIONS_ENABLED);
+boolean isJwtConditionsEnabled = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, JWT_CONDITIONS_ENABLED,
+    DEFAULT_JWT_CONDITIONS_ENABLED);
+
 public type ThrottleFilter object {
     public map<json> deployedPolicies = {};
 
@@ -143,10 +150,10 @@ deployedPolicies) returns boolean {
 
     } else if (!isSecured) {
         string apiLevelPolicy = getAPITier(context.getServiceName(),"");
-        if(!checkAPILevelThrottled(caller, request, context, apiLevelPolicy, deployedPolicies, apiContext, apiVersion)) {
+        if (!checkAPILevelThrottled(caller, request, context, apiLevelPolicy, deployedPolicies, apiContext, apiVersion)) {
             return false;
         }
-        if(!checkResourceLevelThrottled(caller, request, context, resourceLevelPolicyName, deployedPolicies, resourceLevelThrottleKey)) {
+        if (!checkResourceLevelThrottled(caller, request, context, resourceLevelPolicyName, deployedPolicies, resourceLevelThrottleKey)) {
             return false;
         }
         printDebug(KEY_THROTTLE_FILTER, "Not a secured resource. Proceeding with Unauthenticated tier.");
@@ -580,13 +587,6 @@ function getAdditionalProperties(http:FilterContext context, http:Request req) r
     string clientIp = <string>context.attributes[REMOTE_ADDRESS];
     string[] ipParts = stringutils:split(clientIp, ":");
 
-    boolean isHeaderConditionsEnabled = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, HEADER_CONDITIONS_ENABLED,
-        DEFAULT_HEADER_CONDITIONS_ENABLED);
-    boolean isQueryConditionsEnabled = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, QUERY_CONDITIONS_ENABLED,
-        DEFAULT_QUERY_CONDITIONS_ENABLED);
-    boolean isJwtConditionsEnabled = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, JWT_CONDITIONS_ENABLED,
-        DEFAULT_JWT_CONDITIONS_ENABLED);
-
     if (ipParts.length() > 0) {
         // This means the IP is a ipv6
         propMap["ipv6"] = ipToBigInteger(clientIp);
@@ -614,4 +614,18 @@ function getAdditionalProperties(http:FilterContext context, http:Request req) r
     }
 
     return propMap;
+}
+
+function buildConditionalThrottleInfo(http:Caller caller, http:Request request) returns ConditionalThrottleInfo {
+    string clientIp = getClientIp(request, caller);
+
+    ConditionalThrottleInfo info = {
+        clientIp: clientIp,
+        request: request,
+        isHeaderConditionsEnabled: isHeaderConditionsEnabled,
+        isQueryConditionsEnabled: isQueryConditionsEnabled,
+        isJwtConditionsEnabled: isJwtConditionsEnabled
+    };
+
+    return info;
 }
