@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import ballerina/runtime;
+import ballerina/stringutils;
 
 public type ThrottleFilter object {
     public map<json> deployedPolicies = {};
@@ -422,7 +423,8 @@ function generateGlobalThrottleEvent(http:Request req, http:FilterContext contex
     requestStreamDTO.apiTenant = tenantDomain;
     requestStreamDTO.apiName = context.getServiceName();
     requestStreamDTO.appId = keyValidationDto.applicationId;
-    json properties = {};
+
+    map<json> properties = getAdditionalProperties(context, req);
     requestStreamDTO.properties = properties.toJsonString();
     return requestStreamDTO;
 }
@@ -565,4 +567,51 @@ function checkCustomThrottlePolicies(http:Caller caller, http:Request request, h
 
     }
     return true;
+}
+
+# Retrive additional property list required for throttling event published from MGW.
+#
+# + context - Used to retrieve filter level properties
+# + req - Used to retrieve request details such as headers and parameters
+# + return - `json` map containing all identified and valid throttling properties
+function getAdditionalProperties(http:FilterContext context, http:Request req) returns map<json> {
+    // Set IP address properties
+    map<json> propMap = {};
+    string clientIp = <string>context.attributes[REMOTE_ADDRESS];
+    string[] ipParts = stringutils:split(clientIp, ":");
+
+    boolean isHeaderConditionsEnabled = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, HEADER_CONDITIONS_ENABLED,
+        DEFAULT_HEADER_CONDITIONS_ENABLED);
+    boolean isQueryConditionsEnabled = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, QUERY_CONDITIONS_ENABLED,
+        DEFAULT_QUERY_CONDITIONS_ENABLED);
+    boolean isJwtConditionsEnabled = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, JWT_CONDITIONS_ENABLED,
+        DEFAULT_JWT_CONDITIONS_ENABLED);
+
+    if (ipParts.length() > 0) {
+        // This means the IP is a ipv6
+        propMap["ipv6"] = ipToBigInteger(clientIp);
+        propMap["ip"] = 0;
+    } else {
+        propMap["ip"] = ipToInt(clientIp);
+        propMap["ipv6"] = 0;
+    }
+
+    if (isHeaderConditionsEnabled) {
+        // Set request headers as properties
+        foreach string header in req.getHeaderNames() {
+            propMap[header] = req.getHeader(<@untained>  header);
+        }
+    }
+
+    if (isQueryConditionsEnabled) {
+        // Set query params as properties
+        map<string[]> params = req.getQueryParams();
+        foreach string param in params.keys() {
+            string[] paramValues = <string[]>params.get(param);
+            // Get only the last value of the list. This is to make the behavior similar to APIM
+            propMap[param] = paramValues[paramValues.length() - 1];
+        }
+    }
+
+    return propMap;
 }
