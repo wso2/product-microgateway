@@ -249,7 +249,11 @@ function setSubsciberTenantDomain(AuthenticationContext authContext) {
 }
 
 function isSelfContainedToken(jwt:JwtPayload payload) returns boolean {
-    return payload.hasKey(APPLICATION);
+    map<any>? claims = payload?.customClaims;
+    if (claims is map<any>) {
+        return claims.hasKey(APPLICATION);
+    }
+    return false;
 }
 
 function checkInvalidCacheAndCallService(string subscriptionKey) {

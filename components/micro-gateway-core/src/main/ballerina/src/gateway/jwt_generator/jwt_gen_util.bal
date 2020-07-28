@@ -203,8 +203,8 @@ public function setJWTHeader(BackendJWTGenUserContextDTO tokenContextDTO,
     jwt:JwtPayload? payload = tokenContextDTO.payload;
     if (payload is jwt:JwtPayload) {
         if (isSelfContainedToken(payload)) {
-            generatedToken = generateJWTToken(payload, apiDetails);
-            //todo: add claims from the principal
+            printDebug(JWT_GEN_UTIL, "JWT token generation is based on the provided self contained access token");
+            generatedToken = generateJWTToken(updateCustomClaimsUsingPrincipal(payload), apiDetails);
             return setGeneratedTokenAsHeader(req, cacheKey, enabledCaching, generatedToken);
         }
     }
@@ -299,4 +299,16 @@ function getGeneratedTokenExpTimeFromCache(string cacheKey, string jwtToken) ret
         }
         return;
     }
+}
+
+# To update the custom claims of jwt payload with principal's custom claims. This is required to pass the mapped claims.
+# + payload - JWT Payload
+# + return - modified payload with principal's claims
+function updateCustomClaimsUsingPrincipal(jwt:JwtPayload payload) returns jwt:JwtPayload {
+    runtime:Principal? principal = runtime:getInvocationContext()?.principal;
+    if (principal is runtime:Principal) {
+            map<any>? principalClaims = principal?.claims;
+            payload.customClaims = <(map<json>)> principalClaims;
+    }
+    return payload;
 }
