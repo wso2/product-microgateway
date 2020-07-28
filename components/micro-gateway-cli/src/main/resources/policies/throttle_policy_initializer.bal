@@ -1,8 +1,6 @@
 import ballerina/runtime;
 import wso2/gateway;
 
-future<()> ftr = start initThrottlePolicies();
-
 function initThrottlePolicies() {
     boolean globalThrottlingEnabled = gateway:initiateThrottlingJmsListener();
 

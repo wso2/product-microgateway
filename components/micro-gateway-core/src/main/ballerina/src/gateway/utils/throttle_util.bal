@@ -76,10 +76,10 @@ public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
 
 public function initializeThrottleSubscription() {
     isStreamsInitialized = true;
-    printDebug(KEY_THROTTLE_UTIL, "Successfully subscribed to global throttle stream.");
     if(enabledGlobalTMEventPublishing) {
         registerkeyTemplateRetrievalTask();
         registerBlockingConditionRetrievalTask();
+        printDebug(KEY_THROTTLE_UTIL, "Successfully subscribed to global throttle stream.");
     }
 }
 

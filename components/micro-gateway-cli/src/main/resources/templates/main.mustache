@@ -1,5 +1,8 @@
 import wso2/gateway;
+import ballerina/lang.'object;
+import ballerina/io;
 
+const string MAIN_MUSTACHE = "Main";
 public function main() {
     gateway:initNativeImpLog4jConfig();
     int totalResourceLength = 0;
@@ -24,10 +27,6 @@ public function main() {
     initInterceptorIndexes{{cut qualifiedServiceName " "}}();
     {{/each}}
     addTokenServicesFilterAnnotation();
-    initThrottlePolicies();
-    future<()> gatewayNotification = start gateway:initiateNotificationJmsListener();
-    gateway:initThrottleDataPublisher();
-    gateway:initGlobalThrottleDataPublisher();
     gateway:startObservabilityListener();
 
     {{>jwtRevocation}}
@@ -35,3 +34,27 @@ public function main() {
 
     future<()> callhome = start gateway:invokeCallHome();
 }
+
+listener ObjectName jmsListener = new(); // This will be your normal listeners like http listner...
+type ObjectName object {
+    *'object:Listener;
+    public function __attach(service s, string? name) returns error? {
+    }
+    public function __detach(service s) returns error? {
+    }
+    public function __start() returns error? {
+        gateway:printDebug(MAIN_MUSTACHE, "Initializing throttling policies");
+        _ = start initThrottlePolicies();
+        gateway:printDebug(MAIN_MUSTACHE, "Initializing Notification JMS Listener");
+        _ = start gateway:initiateNotificationJmsListener();
+        gateway:printDebug(MAIN_MUSTACHE, "Initializing Throttle Data Publisher");
+        _ = start gateway:initThrottleDataPublisher();
+        gateway:printDebug(MAIN_MUSTACHE, "Initializing Global Throttle Data Publisher");
+        _ = start gateway:initGlobalThrottleDataPublisher();
+    }
+    public function __gracefulStop() returns error? {
+    }
+    public function __immediateStop() returns error? {
+    }
+};
+
