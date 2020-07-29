@@ -473,12 +473,18 @@
   # timestamp skew in milliseconds which added when checking the token validity period
   timestampSkew = 5000
 
+# Configurations for retrieving API and subscription data from API Manager.
 [apim.eventHub]
+  # Enable/ Disable the feature
   enable = false
+  # The API Manager URL
   service_url = "https://localhost:9443"
+  # The internal data REST API context.
   internalDataContext="/internal/data/v1/"
+  # User name and password of the internal data api.
   username="admin"
   password="admin"
+  # The message broker connection URL.
   eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
 
 # API Manager default credentials
@@ -488,5 +494,5 @@ password = "admin"
 
 # Token validation configuration
 [security]
-  # Enable/ Disable subscription validation for tokens.
+  # Enable/ Disable subscription validation for opaque (reference) tokens.
   validateSubscriptions = false
