@@ -19,6 +19,7 @@ import ballerina/time;
 import ballerina/stringutils;
 import ballerina/lang.'string as strings;
 import ballerina/runtime;
+import ballerina/http;
 
 map<any> throttleDataMap = {};
 map<map<ConditionDto[]>> conditionDataMap = {};
@@ -36,10 +37,14 @@ public function isAnyBlockConditionExist() returns (boolean) {
 }
 
 //check whether throttle event is in the local map(request is throttled or not)
-public function isRequestThrottled(string key) returns [boolean, boolean] {
+public function isRequestThrottled(string key, ConditionalThrottleInfo? info) returns [boolean, boolean] {
     printDebug(KEY_THROTTLE_UTIL, "throttle data map : " + throttleDataMap.toString());
     printDebug(KEY_THROTTLE_UTIL, "throttle data key : " + key);
     boolean isThrottled = throttleDataMap.hasKey(key);
+    boolean hasThrottledCondition = conditionDataMap.hasKey(key);
+    printDebug(KEY_THROTTLE_UTIL, "hasThrottledCondition : " + hasThrottledCondition.toString());
+    printDebug(KEY_THROTTLE_UTIL, "conditional throttle info : " + info.toString());
+
     if (isThrottled) {
         GlobalThrottleStreamDTO dto = <GlobalThrottleStreamDTO>throttleDataMap[key];
         boolean stopOnQuota = dto.stopOnQuota;
@@ -94,8 +99,7 @@ public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
         if (throttleEvent.policyKey.length() > 0) {
             throttleDataMap[throttleEvent.policyKey] = throttleEvent;
         }
-    }
-    else {
+    } else {
         if (throttleEvent.policyKey.length() > 0) {
             _ = throttleDataMap.remove(throttleEvent.policyKey);
         }
@@ -344,4 +348,107 @@ function extractConditionDto(string base64Conditions) returns ConditionDto[] {
     }
 
     return conditions;
+}
+
+# Check if the request is throttled by an advanced throttle condition.
+# Such as IP, header, query param based conditions.
+#
+# + conditions - throttled conditions recieved from global throttle engine
+# + info - information required to derive conditional throttle status
+# + return - `true` if throttled by a condition, `false` otherwise
+function isThrottledByCondition(ConditionDto[] conditions, ConditionalThrottleInfo info) returns boolean {
+    boolean isThrottled = false;
+
+    foreach ConditionDto condition in conditions {
+        isThrottled = true;
+        HeaderConditions? headerConditions = condition.headerConditions;
+        IPCondition? ipCondition = condition.ipCondition;
+        IPCondition? ipRangeCondition = condition.ipRangeCondition;
+        QueryParamConditions? queryConditions = condition.queryParamConditions;
+
+        if (ipCondition is IPCondition) {
+            if (!isMatchingIp(info.clientIp, ipCondition)) {
+                isThrottled = false;
+            }
+        } else if (ipRangeCondition is IPCondition) {
+            if (!isWithinIpRange(info.clientIp, ipRangeCondition)) {
+                isThrottled = false;
+            }
+        }
+        if (info.isHeaderConditionsEnabled && (headerConditions is HeaderConditions)) {
+            if (!isHeaderPresent(info.request, headerConditions)) {
+                isThrottled = false;
+            }
+        }
+        if (info.isQueryConditionsEnabled && (queryConditions is QueryParamConditions)) {
+            if (!isQueryParamPresent(info.request, queryConditions)) {
+                isThrottled = false;
+            }
+        }
+
+        if (isThrottled) {
+            break;
+        }
+    }
+
+    return isThrottled;
+}
+
+function isMatchingIp(string clientIp, IPCondition ipCondition) returns boolean {
+    string longIp = ipToBigInteger(clientIp);
+    boolean isMatched = (longIp == ipCondition.specificIp);
+
+    if (ipCondition.invert) {
+        return !isMatched;
+    }
+
+    return isMatched;
+}
+
+function isWithinIpRange(string clientIp, IPCondition ipCondition) returns boolean {
+    boolean isMatched = isIpWithinRange(clientIp, ipCondition.startingIp, ipCondition.endingIp);
+
+    if (ipCondition.invert) {
+        return !isMatched;
+    }
+
+    return isMatched;
+}
+
+function isHeaderPresent(http:Request req, HeaderConditions conditions) returns boolean {
+    boolean status = true;
+
+    foreach var [name, value] in conditions.values.entries() {
+        if (req.hasHeader(name)) {
+            string headerVal = req.getHeader(name);
+            if (headerVal != "") {
+                status = status && isPatternMatched(value, headerVal);
+            } else {
+                status = false;
+                break;
+            }
+        }
+    }
+
+    status = conditions.invert ? !status : status;
+    return status;
+}
+
+function isQueryParamPresent(http:Request req, QueryParamConditions conditions) returns boolean {
+    boolean status = true;
+
+    foreach var [name, value] in conditions.values.entries() {
+        string? paramValue = req.getQueryParamValue(name);
+        if (paramValue is string) {
+            if (paramValue != "") {
+                status = status && isPatternMatched(value, paramValue);
+            } else {
+                status = false;
+                break;
+            }
+        }
+    }
+
+    status = conditions.invert ? !status : status;
+    return status;
 }

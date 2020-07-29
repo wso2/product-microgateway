@@ -246,7 +246,7 @@ function isSubscriptionLevelThrottled(AuthenticationContext keyValidationDto,
         boolean isThrottled = isSubLevelThrottled(subscriptionLevelThrottleKey);
         return [isThrottled, stopOnQuota];
     }
-    return isRequestThrottled(subscriptionLevelThrottleKey);
+    return isRequestThrottled(subscriptionLevelThrottleKey, ());
 }
 
 function isApplicationLevelThrottled(AuthenticationContext keyValidationDto, map<json>
@@ -261,11 +261,12 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto, map
     if (!enabledGlobalTMEventPublishing) {
         return isAppLevelThrottled(applicationLevelThrottleKey);
     }
-    [throttled, stopOnQuota] = isRequestThrottled(applicationLevelThrottleKey);
+    [throttled, stopOnQuota] = isRequestThrottled(applicationLevelThrottleKey, ());
     return throttled;
 }
 
-function isAPILevelThrottled(string apiContext, string? apiVersion) returns boolean {
+function isAPILevelThrottled(string apiContext, string? apiVersion, ConditionalThrottleInfo? info)
+        returns boolean {
     boolean throttled;
     boolean stopOnQuota;
     string apiThrottleKey = apiContext;
@@ -278,13 +279,13 @@ function isAPILevelThrottled(string apiContext, string? apiVersion) returns bool
     if (!enabledGlobalTMEventPublishing) {
         return isApiThrottled(apiThrottleKey);
     }
-    [throttled, stopOnQuota] = isRequestThrottled(apiThrottleKey);
+    [throttled, stopOnQuota] = isRequestThrottled(apiThrottleKey, info);
     return throttled;
 }
 
 
 function isResourceLevelThrottled(string? policy,
-        map<json> deployedPolicies, string resourceKey) returns (boolean) {
+        map<json> deployedPolicies, string resourceKey, ConditionalThrottleInfo? info) returns (boolean) {
     if (policy is string) {
         string resourceLevelThrottleKey = resourceKey;
         if (policy == UNLIMITED_TIER) {
@@ -299,7 +300,7 @@ function isResourceLevelThrottled(string? policy,
         if (!enabledGlobalTMEventPublishing) {
             return isResourceThrottled(resourceLevelThrottleKey);
         }
-        [throttled, stopOnQuota] = isRequestThrottled(resourceLevelThrottleKey);
+        [throttled, stopOnQuota] = isRequestThrottled(resourceLevelThrottleKey, info);
         return throttled;
     }
     return false;
@@ -316,7 +317,7 @@ function isUnauthenticateLevelThrottled(http:FilterContext context, string apiCo
     if (apiVersion is string) {
         throttleKey += ":" + apiVersion;
     }
-    return isRequestThrottled(throttleKey);
+    return isRequestThrottled(throttleKey, ());
 }
 
 function isRequestBlocked(http:Caller caller, http:Request request, http:FilterContext context,
@@ -493,7 +494,8 @@ function checkAPILevelThrottled(http:Caller caller, http:Request request, http:F
         return false;
     }
     printDebug(KEY_THROTTLE_FILTER, "Checking API level throttling-out.");
-    if (isAPILevelThrottled(apiContext, apiVersion)) {
+    ConditionalThrottleInfo info = buildConditionalThrottleInfo(caller, request);
+    if (isAPILevelThrottled(apiContext, apiVersion, info)) {
         printDebug(KEY_THROTTLE_FILTER, "API level throttled out. Sending throttled out response.");
         context.attributes[IS_THROTTLE_OUT] = true;
         context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED;
@@ -523,7 +525,8 @@ function checkResourceLevelThrottled(http:Caller caller, http:Request request, h
         }
     }
     printDebug(KEY_THROTTLE_FILTER, "Checking resource level throttling-out.");
-    if (isResourceLevelThrottled(resourceLevelPolicyName, deployedPolicies, resourceKey)) {
+    ConditionalThrottleInfo info = buildConditionalThrottleInfo(caller, request);
+    if (isResourceLevelThrottled(resourceLevelPolicyName, deployedPolicies, resourceKey, info)) {
         printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out. Sending throttled out response.");
         context.attributes[IS_THROTTLE_OUT] = true;
         context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
@@ -539,7 +542,7 @@ function checkResourceLevelThrottled(http:Caller caller, http:Request request, h
 
 function checkCustomThrottlePolicies(http:Caller caller, http:Request request, http:FilterContext context,
                         AuthenticationContext keyValidationDto, string apiContext, string? apiVersion,
-                        string resourceLevelThrottleKey, string tenantDomain, string clientIp)  returns boolean{
+                        string resourceLevelThrottleKey, string tenantDomain, string clientIp)  returns boolean {
 
     printDebug(KEY_THROTTLE_FILTER, "Checking custom throttlle policies");
     string userId = keyValidationDto.username;
@@ -561,7 +564,7 @@ function checkCustomThrottlePolicies(http:Caller caller, http:Request request, h
         printDebug(KEY_THROTTLE_FILTER, "Custom policy throttle key : " + modifiedKey);
         boolean isThrottled;
         boolean stopOnQuota;
-        [isThrottled, stopOnQuota] = isRequestThrottled(modifiedKey);
+        [isThrottled, stopOnQuota] = isRequestThrottled(modifiedKey, ());
         if(isThrottled) {
             printDebug(KEY_THROTTLE_FILTER, "Custom policy throttle out for key : " + modifiedKey + ". Sending throttled out response.");
             context.attributes[IS_THROTTLE_OUT] = true;

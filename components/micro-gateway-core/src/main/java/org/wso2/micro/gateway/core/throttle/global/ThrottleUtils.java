@@ -95,4 +95,10 @@ public class ThrottleUtils {
 
         return null;
     }
+
+    public static boolean isPatternMatched(String pattern, String match) {
+        Pattern p = Pattern.compile(pattern);
+        Matcher m = p.matcher(match);
+        return m.find();
+    }
 }
