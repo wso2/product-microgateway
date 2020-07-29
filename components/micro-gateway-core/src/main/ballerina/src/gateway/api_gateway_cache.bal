@@ -183,6 +183,26 @@ public type APIGatewayCache object {
         jwtCacheMap[issuer] = jwtCache;
         return jwtCache;
     }
+
+    public function getApiKeyCache() returns cache:Cache {
+        return apiKeyCache;
+    }
+
+    public function getIntrospectCache() returns cache:Cache {
+        return introspectCache;
+    }
+
+    public function getJwtGeneratorCache() returns cache:Cache {
+        return jwtGeneratorCache;
+    }
+
+    public function getGatewayClaimsCache() returns cache:Cache {
+        return gatewayClaimsCache;
+    }
+
+    public function getMutualSslCertificateCache() returns cache:Cache {
+        return mutualSslCertificateCache;
+    }
 };
 
 public function getCacheObject() returns APIGatewayCache {
