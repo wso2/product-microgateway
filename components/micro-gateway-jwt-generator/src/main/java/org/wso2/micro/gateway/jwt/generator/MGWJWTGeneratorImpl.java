@@ -82,7 +82,10 @@ public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
             }
         }
         if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get("apiName"))) {
-            claims.put(dialect + "/apiName", getApiDetails().get("apiName"));
+            claims.put(dialect + "/apiname", getApiDetails().get("apiName"));
+        }
+        if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get("subscriberTenantDomain"))) {
+            claims.put(dialect + "/enduserTenantDomain", getApiDetails().get("subscriberTenantDomain"));
         }
         if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get("apiContext"))) {
             claims.put(dialect + "/apicontext", getApiDetails().get("apiContext"));

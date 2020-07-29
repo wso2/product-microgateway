@@ -169,6 +169,21 @@
             <groupId>net.minidev</groupId>
             <artifactId>asm</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${fasterxml.jackson.databind.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${fasterxml.jackson.databind.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${fasterxml.jackson.databind.version}</version>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -272,10 +287,10 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib/dependencies/</outputDirectory>
                             <includeGroupIds>org.wso2.orbit.org.everit.json, org.json.wso2, com.nimbusds,
-                                net.minidev, org.apache.logging.log4j
+                                net.minidev, org.apache.logging.log4j, com.fasterxml.jackson.core
                             </includeGroupIds>
                             <includeArtifactIds>org.everit.json.schema, json, nimbus-jose-jwt, json-smart, asm,
-                                log4j-api, log4j-core
+                                log4j-api, log4j-core, jackson-databind, jackson-core, jackson-annotations
                             </includeArtifactIds>
                         </configuration>
                     </execution>
