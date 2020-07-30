@@ -320,7 +320,7 @@ public class CodeGenerator {
      * @param projectName name of the project being set up
      * @param apiDef      api definition string
      * @param overwrite   whether existing files overwrite or not
-     * @throws IOException                  when file operations fail
+     * @throws IOException when file operations fail
      */
     @SuppressWarnings("unused")
     public void generateGrpc(String projectName, String apiDef, boolean overwrite)
@@ -370,13 +370,13 @@ public class CodeGenerator {
      * Save the openAPI definition created from the services included in the .proto files.
      *
      * @param projectName projectName
-     * @param openAPI {@link OpenAPI} object corresponding to the gRPC service
+     * @param openAPI     {@link OpenAPI} object corresponding to the gRPC service
      */
     private void createProtoOpenAPIFile(String projectName, OpenAPI openAPI) {
-        String protoOpenAPIDirPath =  CmdUtils.getProjectTargetGenGrpcSrcOpenAPIsDirectory(projectName);
+        String protoOpenAPIDirPath = CmdUtils.getProjectTargetGenGrpcSrcOpenAPIsDirectory(projectName);
         String fileName = openAPI.getInfo().getTitle() + "_" +
                 openAPI.getInfo().getVersion().replace(".", "_") + CliConstants.YAML_EXTENSION;
-        String protoOpenAPIFilePath =  protoOpenAPIDirPath + File.separator + fileName;
+        String protoOpenAPIFilePath = protoOpenAPIDirPath + File.separator + fileName;
         try {
             CmdUtils.createFile(protoOpenAPIDirPath, fileName, true);
             CmdUtils.writeContent(Yaml.pretty(openAPI), new File(protoOpenAPIFilePath));

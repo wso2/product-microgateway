@@ -229,6 +229,7 @@ public const string ENABLED = "enabled";
 public const string CLIENT_ID = "clientId";
 public const string CLIENT_SECRET = "clientSecret";
 public const string SCOPES = "scopes";
+public const string SCOPE = "scope";
 public const string REFRESH_URL = "refreshUrl";
 public const string TOKEN_URL = "tokenUrl";
 public const string REFRESH_TOKEN = "refreshToken";

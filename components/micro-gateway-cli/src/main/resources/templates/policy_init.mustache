@@ -2,9 +2,8 @@ import wso2/gateway;
 
 
 function initThrottlePolicies() {
-    future<()> ftr = start gateway:initializeThrottleSubscription();
-    boolean globalThrottlingEnabled = gateway:initiateThrottlingJmsListener();
-
+    future<()> ftrThrottleSubscription = start gateway:initializeThrottleSubscription();
+   _ = start gateway:initiateThrottlingJmsListener();
 }
 
 function getDeployedPolicies() returns map<json> {

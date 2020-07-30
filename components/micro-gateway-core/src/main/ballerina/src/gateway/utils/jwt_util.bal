@@ -255,7 +255,3 @@ function isSelfContainedToken(jwt:JwtPayload payload) returns boolean {
     }
     return false;
 }
-
-function checkInvalidCacheAndCallService(string subscriptionKey) {
-
-}
