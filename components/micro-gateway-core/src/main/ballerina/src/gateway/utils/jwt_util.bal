@@ -210,20 +210,14 @@ public function getDecodedJWTPayloadOfAPIKey(string jwtToken) returns @tainted (
     }
 }
 
-public function getDecodedJWTPayload(string jwtToken, string? issuer) returns @tainted (jwt:JwtPayload | error) {
-    if (issuer is string) {
-        var cachedJwt = trap <jwt:InboundJwtCacheEntry>getCacheObject().getJWTCacheForProvider(issuer).get(jwtToken);
-        if (cachedJwt is jwt:InboundJwtCacheEntry) {
+public function getDecodedJWTPayload(jwt:JwtValidatorConfig jwtValidatorConfig, string jwtToken)
+                                    returns @tainted (jwt:JwtPayload | error) {
+        jwt:JwtPayload | error jwtPayloadFromCache = trap <jwt:JwtPayload>jwtValidatorConfig.jwtCache.get(jwtToken);
+        if (jwtPayloadFromCache is jwt:JwtPayload) {
             printDebug(JWT_UTIL, "jwt found from the jwt cache");
-            return cachedJwt.jwtPayload;
-        } else {
-            return decodeJWTPayload(jwtToken);
+            return jwtPayloadFromCache;
         }
-    } else {
-        //decode jwt
         return decodeJWTPayload(jwtToken);
-
-    }
 }
 
 function decodeJWTPayload(string jwtToken) returns @tainted (jwt:JwtPayload | error) {

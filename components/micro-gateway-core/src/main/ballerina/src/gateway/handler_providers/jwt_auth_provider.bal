@@ -139,7 +139,7 @@ public type JwtAuthProvider object {
                                 self.consumerKeyClaim, isGRPC, self.gatewayCache);
                     }
                     printDebug(KEY_JWT_AUTH_PROVIDER, "jwt not found in the jwt cache");
-                    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtToken, iss);
+                    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(self.jwtValidatorConfig, jwtToken);
                     if (payload is jwt:JwtPayload) {
                         if(self.className != "" || (claimsSet is map<anydata>[] && claimsSet.length() > 0)) {
                             var jwtTokenClaimCached = self.gatewayCache.retrieveClaimMappingCache(jwtToken);
