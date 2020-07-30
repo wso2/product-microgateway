@@ -246,7 +246,7 @@ function isSubscriptionLevelThrottled(AuthenticationContext keyValidationDto,
         boolean isThrottled = isSubLevelThrottled(subscriptionLevelThrottleKey);
         return [isThrottled, stopOnQuota];
     }
-    return isRequestThrottled(subscriptionLevelThrottleKey, ());
+    return isRequestThrottled(subscriptionLevelThrottleKey);
 }
 
 function isApplicationLevelThrottled(AuthenticationContext keyValidationDto, map<json>
@@ -261,7 +261,7 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto, map
     if (!enabledGlobalTMEventPublishing) {
         return isAppLevelThrottled(applicationLevelThrottleKey);
     }
-    [throttled, stopOnQuota] = isRequestThrottled(applicationLevelThrottleKey, ());
+    [throttled, stopOnQuota] = isRequestThrottled(applicationLevelThrottleKey);
     return throttled;
 }
 
@@ -273,13 +273,11 @@ function isAPILevelThrottled(string apiContext, string? apiVersion, ConditionalT
     if (apiVersion is string) {
         apiThrottleKey += ":" + apiVersion;
     }
-    if (enabledGlobalTMEventPublishing) {
-        apiThrottleKey += "_default";
-    }
+
     if (!enabledGlobalTMEventPublishing) {
         return isApiThrottled(apiThrottleKey);
     }
-    [throttled, stopOnQuota] = isRequestThrottled(apiThrottleKey, info);
+    [throttled, stopOnQuota] = isApiThrottledByTM(apiThrottleKey, info);
     return throttled;
 }
 
@@ -291,16 +289,12 @@ function isResourceLevelThrottled(string? policy,
         if (policy == UNLIMITED_TIER) {
             return false;
         }
-        if (enabledGlobalTMEventPublishing) {
-            resourceLevelThrottleKey += "_default";
-        }
-        printDebug(KEY_THROTTLE_FILTER, "Resource level throttle key : " + resourceLevelThrottleKey);
         boolean throttled;
         boolean stopOnQuota;
         if (!enabledGlobalTMEventPublishing) {
             return isResourceThrottled(resourceLevelThrottleKey);
         }
-        [throttled, stopOnQuota] = isRequestThrottled(resourceLevelThrottleKey, info);
+        [throttled, stopOnQuota] = isApiThrottledByTM(resourceLevelThrottleKey, info);
         return throttled;
     }
     return false;
@@ -317,7 +311,7 @@ function isUnauthenticateLevelThrottled(http:FilterContext context, string apiCo
     if (apiVersion is string) {
         throttleKey += ":" + apiVersion;
     }
-    return isRequestThrottled(throttleKey, ());
+    return isRequestThrottled(throttleKey);
 }
 
 function isRequestBlocked(http:Caller caller, http:Request request, http:FilterContext context,
@@ -564,7 +558,7 @@ function checkCustomThrottlePolicies(http:Caller caller, http:Request request, h
         printDebug(KEY_THROTTLE_FILTER, "Custom policy throttle key : " + modifiedKey);
         boolean isThrottled;
         boolean stopOnQuota;
-        [isThrottled, stopOnQuota] = isRequestThrottled(modifiedKey, ());
+        [isThrottled, stopOnQuota] = isRequestThrottled(modifiedKey);
         if(isThrottled) {
             printDebug(KEY_THROTTLE_FILTER, "Custom policy throttle out for key : " + modifiedKey + ". Sending throttled out response.");
             context.attributes[IS_THROTTLE_OUT] = true;
@@ -590,7 +584,7 @@ function getAdditionalProperties(http:FilterContext context, http:Request req) r
     string clientIp = <string>context.attributes[REMOTE_ADDRESS];
     string[] ipParts = stringutils:split(clientIp, ":");
 
-    if (ipParts.length() > 0) {
+    if (ipParts.length() > 1) {
         // This means the IP is a ipv6
         propMap["ipv6"] = ipToBigInteger(clientIp);
         propMap["ip"] = 0;

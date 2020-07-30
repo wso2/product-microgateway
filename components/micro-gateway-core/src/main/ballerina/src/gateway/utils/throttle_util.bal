@@ -37,13 +37,10 @@ public function isAnyBlockConditionExist() returns (boolean) {
 }
 
 //check whether throttle event is in the local map(request is throttled or not)
-public function isRequestThrottled(string key, ConditionalThrottleInfo? info) returns [boolean, boolean] {
+public function isRequestThrottled(string key) returns [boolean, boolean] {
     printDebug(KEY_THROTTLE_UTIL, "throttle data map : " + throttleDataMap.toString());
     printDebug(KEY_THROTTLE_UTIL, "throttle data key : " + key);
     boolean isThrottled = throttleDataMap.hasKey(key);
-    boolean hasThrottledCondition = conditionDataMap.hasKey(key);
-    printDebug(KEY_THROTTLE_UTIL, "hasThrottledCondition : " + hasThrottledCondition.toString());
-    printDebug(KEY_THROTTLE_UTIL, "conditional throttle info : " + info.toString());
 
     if (isThrottled) {
         GlobalThrottleStreamDTO dto = <GlobalThrottleStreamDTO>throttleDataMap[key];
@@ -67,6 +64,86 @@ public function isRequestThrottled(string key, ConditionalThrottleInfo? info) re
         return [isThrottled, stopOnQuota];
     }
     return [isThrottled, false];
+}
+
+# Decide whether request details provided in arguments is throttled or not by the global traffic manager.
+# This function is deinfed to evalute only API and Resource level throttling decisions recieved from the
+# traffic manager.
+#
+# + key - throttle key of the request
+# + info - request details required to make conditional throttle decisions
+# + return - [is request throttled, should stop on quota]
+public function isApiThrottledByTM(string key, ConditionalThrottleInfo? info) returns [boolean, boolean] {
+    printDebug(KEY_THROTTLE_UTIL, "throttle data map : " + throttleDataMap.toString());
+    printDebug(KEY_THROTTLE_UTIL, "throttle data key : " + key);
+    boolean isThrottled = false;
+    boolean stopOnQuota = false;
+
+    if (enabledGlobalTMEventPublishing == false) {
+        return [false, false];
+    }
+    boolean hasThrottledCondition = conditionDataMap.hasKey(key);
+    printDebug(KEY_THROTTLE_UTIL, "hasThrottledCondition : " + hasThrottledCondition.toString());
+
+    if (hasThrottledCondition && (info is ConditionalThrottleInfo)) {
+        // get the condition groups for provided throttleKey
+        map<ConditionDto[]> conditionGrps = conditionDataMap.get(key);
+        string? conditionKey = ();
+
+        // iterate through all available conditions and find if the current request
+        // attributes are eligible to be throttled by the available throttled conditions
+        foreach var [name, dto] in conditionGrps.entries() {
+            if (DEFAULT_THROTTLE_CONDITION != name) {
+                boolean isPipelineThrottled = isThrottledByCondition(dto, info);
+                if (isPipelineThrottled) {
+                    conditionKey = name;
+                    break;
+                }
+            }
+        }
+
+        if (conditionKey is () && conditionGrps.hasKey(DEFAULT_THROTTLE_CONDITION)) {
+            ConditionDto[] dto = conditionGrps.get(DEFAULT_THROTTLE_CONDITION);
+            boolean isPipelineThrottled = isThrottledByCondition(dto, info);
+            if (!isPipelineThrottled) {
+                conditionKey = DEFAULT_THROTTLE_CONDITION;
+
+            }
+        }
+
+        // if we detect the request is throttled by a condition. Then check the validity of throttle
+        // decision from the throttle event data available in the throttleDataMap
+        if (conditionKey is string) {
+            printDebug(KEY_THROTTLE_UTIL, "throttled with condition: " + conditionKey);
+            string combinedThrottleKey = key + "_" + conditionKey;
+
+            // if throttle data is not available for the combined key, conditional throttle decision
+            // is no longer valid
+            if (!throttleDataMap.hasKey(combinedThrottleKey)) {
+                return [false, false];
+            }
+            var dto = throttleDataMap.get(combinedThrottleKey);
+            if (dto is GlobalThrottleStreamDTO) {
+                int currentTime = time:currentTime().time;
+                int? resetTimestamp = dto.resetTimestamp;
+                stopOnQuota = true;
+                if (resetTimestamp is int) {
+                    if (resetTimestamp < currentTime) {
+                        _ = throttleDataMap.remove(key);
+                        _ = conditionDataMap.remove(key);
+                        return [false, stopOnQuota];
+                    }
+                    return [true, stopOnQuota];
+                } else {
+                    // if the resetTimestamp is not included, throttling is disabled
+                    printDebug(KEY_THROTTLE_UTIL, "throttle event for the throttle key:" + key +
+                        "does not contain expiry timestamp.");
+                    return [false, stopOnQuota];
+                }
+            }
+        }
+    }
+    return [false, false];
 }
 
 public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
@@ -305,14 +382,14 @@ function extractConditionDto(string base64Conditions) returns ConditionDto[] {
                 // Build IP condition DTOs
                 if (jIpSpecific is json) {
                     IPCondition ip = {
-                        specificIp: <string>jIpSpecific.specificIp,
+                        specificIp: jIpSpecific.specificIp.toString(),
                         invert: <boolean>jIpSpecific.invert
                     };
                     conditionDto.ipCondition = ip;
                 } else if (jIpRange is json) {
                     IPCondition ip = {
-                        startingIp: <string>jIpRange.startingIp,
-                        endingIp: <string>jIpRange.endingIp,
+                        startingIp: jIpRange.startingIp.toString(),
+                        endingIp: jIpRange.endingIp.toString(),
                         invert: <boolean>jIpRange.invert
                     };
                     conditionDto.ipRangeCondition = ip;

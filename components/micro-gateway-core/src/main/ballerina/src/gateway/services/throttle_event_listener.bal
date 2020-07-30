@@ -65,6 +65,7 @@ service messageServ = service {
                             string resourceKey = condition.resourceKey;
                             string conditionKey = condition.name;
                             ConditionDto[] conditions = extractConditionDto(evaluatedConditions);
+                            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Adding to conditiondata map.");
                             putThrottledConditions(conditions, resourceKey, conditionKey);
                         }
                     } else {
