@@ -23,6 +23,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>mgw-jwt-generator</artifactId>
+    <name>Micro Gateway - JWT Generator</name>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
