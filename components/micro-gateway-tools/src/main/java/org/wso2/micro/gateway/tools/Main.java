@@ -5,15 +5,14 @@ package org.wso2.micro.gateway.tools;
  */
 public class Main {
     public static void main(String[] args) {
-            String confFilePath = args [0];
-            String fileWritePath = args [1];
-            GetConfig getConfig = new GetConfig();
-            try {
-                getConfig.getConfigurations(confFilePath, fileWritePath);
-            } catch (Exception ex) {
-                // if some error occurs we are using printStackTrace as we have logged that error from the shell
-                ex.printStackTrace();
-                System.exit(1);
-            }
+        GetConfig getConfig = new GetConfig();
+
+        try {
+            getConfig.getConfigurations(args);
+        } catch (Exception ex) {
+            // if some error occurs we are using printStackTrace as we have logged that error from the shell
+            ex.printStackTrace();
+            System.exit(1);
+        }
     }
 }
