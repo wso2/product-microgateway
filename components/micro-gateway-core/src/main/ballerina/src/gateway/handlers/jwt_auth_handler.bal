@@ -86,10 +86,9 @@ public type JWTAuthHandler object {
         var authenticationResult = self.jwtAuthProvider.authenticate(credential);
         if (authenticationResult is boolean) {
             string issuer = self.jwtAuthProvider.jwtValidatorConfig?.issuer ?: DEFAULT_JWT_ISSUER;
-            boolean backendJWTfromClaim = setBackendJwtHeader(self.jwtAuthProvider.jwtValidatorConfig, credential, req);
+            boolean backendJWTfromClaim = setBackendJwtHeader(credential, req, issuer);
             if (!backendJWTfromClaim) {
-                boolean generationStatus = generateAndSetBackendJwtHeaderJWT(self.jwtAuthProvider.jwtValidatorConfig,
-                                                                            credential,
+                boolean generationStatus = generateAndSetBackendJwtHeaderJWT(credential,
                                                                             req,
                                                                             self.enabledJWTGenerator,
                                                                             self.classLoaded,
@@ -114,16 +113,12 @@ public type JWTAuthHandler object {
 
 # Check whether backendJwt claim is in the payload and set the header if avaialable.
 #
-# + jwtValidatorConfig - jwtValidatorConfig to access the jwtCache object
 # + credential - Credential
 # + req - The `Request` instance.
 # + issuer - The jwt issuer who issued the token and comes in the iss claim.
 # + return - Returns boolean based on backend jwt setting.
-public function setBackendJwtHeader(jwt:JwtValidatorConfig jwtValidatorConfig,
-                                    string credential,
-                                    http:Request req)
-                                    returns @tainted boolean {
-    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtValidatorConfig, credential);
+public function setBackendJwtHeader(string credential, http:Request req, string? issuer) returns @tainted boolean {
+    (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential, issuer);
     if (payload is jwt:JwtPayload) {
         map<json>? customClaims = payload?.customClaims;
         // validate backend jwt claim and set it to jwt header
@@ -204,7 +199,6 @@ public function getAPIDetails(jwt:JwtPayload payload, string apiName, string api
 
 # Generate the backend JWT token and set to the header of the outgoing request.
 #
-# + jwtValidatorConfig - jwtValidatorConfig to access the jwtCache object
 # + credential - Credential
 # + req - The `Request` instance.
 # + enabledJWTGenerator - state of jwt generator
@@ -215,8 +209,7 @@ public function getAPIDetails(jwt:JwtPayload payload, string apiName, string api
 # + remoteUserClaimRetrievalEnabled - true if remoteUserClaimRetrieval is enabled
 # + return - Returns `true` if the token generation and setting the header completed successfully
 # or the `AuthenticationError` in case of an error.
-public function generateAndSetBackendJwtHeaderJWT(jwt:JwtValidatorConfig jwtValidatorConfig,
-                                                string credential,
+public function generateAndSetBackendJwtHeaderJWT(string credential,
                                                 http:Request req,
                                                 boolean enabledJWTGenerator,
                                                 boolean classLoaded,
@@ -235,7 +228,7 @@ public function generateAndSetBackendJwtHeaderJWT(jwt:JwtValidatorConfig jwtVali
                 apiVersion = apiConfig.apiVersion;
             }
             string cacheKey = credential + apiName + apiVersion;
-            (jwt:JwtPayload | error) payload = getDecodedJWTPayload(jwtValidatorConfig, credential);
+            (jwt:JwtPayload | error) payload = getDecodedJWTPayload(credential, issuer);
             if (payload is jwt:JwtPayload) {
                 printDebug(KEY_JWT_AUTH_PROVIDER, "decoded token credential");
                 // get the subscribedAPI details
