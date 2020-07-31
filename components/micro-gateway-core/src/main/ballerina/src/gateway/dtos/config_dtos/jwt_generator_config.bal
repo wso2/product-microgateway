@@ -47,7 +47,7 @@ public type JWTGeneratorConfigDTO record {|
     JWTGeneratorConfig_claimRetrieval claimRetrieval = {};
 |};
 
-//todo: Check if it is required declare new default constants specifically for jwt generator cache
+//todo(VirajSalaka): Check if it is required declare new default constants specifically for jwt generator cache
 public type JWTGeneratorConfig_jwtGeneratorCaching record {|
     boolean tokenCacheEnable = getConfigBooleanValue(JWT_GENERATOR_CACHING_ID,
                                                     JWT_GENERATOR_TOKEN_CACHE_ENABLED,
@@ -64,7 +64,7 @@ public type JWTGeneratorConfig_jwtGeneratorCaching record {|
 |};
 
 public type JWTGeneratorConfig_claimRetrieval record {|
-    //todo: decide if we are going to keep an empty string instead
+    //todo(VirajSalaka): decide if we are going to keep an empty string instead
     string retrieverImpl = getConfigValue(JWT_GENERATOR_CLAIM_RETRIEVAL_INSTANCE_ID,
                                             JWT_GENERATOR_CLAIM_RETRIEVAL_IMPLEMENTATION,
                                             DEFAULT_JWT_GENERATOR_CLAIM_RETRIEVAL_IMPLEMENTATION);

@@ -130,7 +130,6 @@ public type KeyValidationHandler object {
                    if (isAllowed) {
                        boolean tokenGenStatus = generateAndSetBackendJwtHeader(credential,
                                                                            req,
-                                                                           authenticationContext,
                                                                            self.enabledJWTGenerator,
                                                                            self.classLoaded,
                                                                            self.skewTime,
@@ -150,7 +149,6 @@ public type KeyValidationHandler object {
                     if (authenticationResult) {
                         boolean tokenGenStatus = generateAndSetBackendJwtHeader(credential,
                                                                                 req,
-                                                                                authenticationContext,
                                                                                 self.enabledJWTGenerator,
                                                                                 self.classLoaded,
                                                                                 self.skewTime,

@@ -27,7 +27,7 @@ public type JWTAuthHandler object {
 
     public JwtAuthProvider jwtAuthProvider;
 
-    //todo: remove the redundant config reading at both handlers.
+    //todo(VirajSalaka): remove the redundant config reading at both handlers.
     private boolean enabledJWTGenerator = false;
     private boolean classLoaded = false;
     private int skewTime = 0;
@@ -88,11 +88,8 @@ public type JWTAuthHandler object {
             string issuer = self.jwtAuthProvider.jwtValidatorConfig?.issuer ?: DEFAULT_JWT_ISSUER;
             boolean backendJWTfromClaim = setBackendJwtHeader(credential, req, issuer);
             if (!backendJWTfromClaim) {
-                AuthenticationContext authContext =
-                                            <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
                 boolean generationStatus = generateAndSetBackendJwtHeader(credential,
                                                                             req,
-                                                                            authContext,
                                                                             self.enabledJWTGenerator,
                                                                             self.classLoaded,
                                                                             self.skewTime,

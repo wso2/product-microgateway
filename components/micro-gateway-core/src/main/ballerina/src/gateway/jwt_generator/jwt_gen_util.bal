@@ -288,7 +288,6 @@ function getGeneratedTokenExpTimeFromCache(string cacheKey, string jwtToken) ret
 # Generate the backend JWT token and set to the header of the outgoing request.
 #
 # + credential - Credential
-# + authContext - Authentication Context
 # + req - The `Request` instance.
 # + enabledJWTGenerator - state of jwt generator
 # + classLoaded - whether the class is loaded successfully
@@ -301,7 +300,6 @@ function getGeneratedTokenExpTimeFromCache(string cacheKey, string jwtToken) ret
 # or the `AuthenticationError` in case of an error.
 public function generateAndSetBackendJwtHeader(string credential,
                                                 http:Request req,
-                                                AuthenticationContext authContext,
                                                 boolean enabledJWTGenerator,
                                                 boolean classLoaded,
                                                 int skewTime,
