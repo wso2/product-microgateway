@@ -13,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-import ballerina/jwt;
 
 # This represents a single key-value pair returned from the APIM.
 # + uri - claim
@@ -81,9 +80,9 @@ public type UserClaimRetrieverContextDTO record {|
 # Payload property should remain null, if the user is authenticated via Opaque Token.
 # + issuer - Token issuer
 # + remoteUserClaimRetrievalEnabled - `true` If remote User Claim Retrieval is enabled.
-# + payload - decoded payload if the user is authenticated from a JWT token, else keep it as null.
+# + isJWT - `true`, if the JWT is used for the authentication
 public type BackendJWTGenUserContextDTO record {|
     string issuer;
     boolean remoteUserClaimRetrievalEnabled = false;
-    jwt:JwtPayload? payload = ();
+    boolean isJWT;
 |};

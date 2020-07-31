@@ -128,7 +128,7 @@ public type KeyValidationHandler object {
                    invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                    invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                    if (isAllowed) {
-                       boolean tokenGenStatus = generateAndSetBackendJwtHeaderOpaque (credential,
+                       boolean tokenGenStatus = generateAndSetBackendJwtHeader(credential,
                                                                            req,
                                                                            authenticationContext,
                                                                            self.enabledJWTGenerator,
@@ -136,7 +136,8 @@ public type KeyValidationHandler object {
                                                                            self.skewTime,
                                                                            self.enabledCaching,
                                                                            self.issuer,
-                                                                           self.remoteUserClaimRetrievalEnabled);
+                                                                           self.remoteUserClaimRetrievalEnabled,
+                                                                           false);
                        if (!tokenGenStatus) {
                            printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
                        }
@@ -147,15 +148,16 @@ public type KeyValidationHandler object {
                     invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
                     invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
                     if (authenticationResult) {
-                        boolean tokenGenStatus = generateAndSetBackendJwtHeaderOpaque (credential,
-                                                                            req,
-                                                                            authenticationContext,
-                                                                            self.enabledJWTGenerator,
-                                                                            self.classLoaded,
-                                                                            self.skewTime,
-                                                                            self.enabledCaching,
-                                                                            self.issuer,
-                                                                            self.remoteUserClaimRetrievalEnabled);
+                        boolean tokenGenStatus = generateAndSetBackendJwtHeader(credential,
+                                                                                req,
+                                                                                authenticationContext,
+                                                                                self.enabledJWTGenerator,
+                                                                                self.classLoaded,
+                                                                                self.skewTime,
+                                                                                self.enabledCaching,
+                                                                                self.issuer,
+                                                                                self.remoteUserClaimRetrievalEnabled,
+                                                                                false);
                         if (!tokenGenStatus) {
                             printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
                         }
@@ -169,54 +171,3 @@ public type KeyValidationHandler object {
         return false;
     }
 };
-
-# Generate the backend JWT token and set to the header of the outgoing request.
-#
-# + credential - Credential
-# + authContext - Authentication Context
-# + req - The `Request` instance.
-# + enabledJWTGenerator - state of jwt generator
-# + classLoaded - whether the class is loaded successfully
-# + enabledCaching - jwt generator caching enabled
-# + skewTime - skew time to backend
-# + issuer - The jwt issuer who issued the token and comes in the iss claim.
-# + remoteUserClaimRetrievalEnabled - true if remoteUserClaimRetrieval is enabled
-# + return - Returns `true` if the token generation and setting the header completed successfully
-# or the `AuthenticationError` in case of an error.
-public function generateAndSetBackendJwtHeaderOpaque(string credential,
-                                                        http:Request req,
-                                                        AuthenticationContext authContext,
-                                                        boolean enabledJWTGenerator,
-                                                        boolean classLoaded,
-                                                        int skewTime,
-                                                        boolean enabledCaching,
-                                                        string issuer,
-                                                        boolean remoteUserClaimRetrievalEnabled)
-                                                        returns @tainted boolean {
-    if (enabledJWTGenerator) {
-        if (classLoaded) {
-            boolean status = false;
-            string apiName = "";
-            string apiVersion = "";
-            APIConfiguration? apiConfig = apiConfigAnnotationMap[runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString()];
-            if (apiConfig is APIConfiguration) {
-                apiName = apiConfig.name;
-                apiVersion = apiConfig.apiVersion;
-            }
-            string cacheKey = credential + apiName + apiVersion;
-            map<string> apiDetails = createAPIDetailsMap();
-            BackendJWTGenUserContextDTO tokenContextDTO = {
-                    issuer : issuer,
-                    remoteUserClaimRetrievalEnabled : remoteUserClaimRetrievalEnabled
-            };
-            status = setJWTTokenWithCacheCheck(req, cacheKey, skewTime, enabledCaching, tokenContextDTO, apiDetails);
-            return status;
-        } else {
-            printDebug(KEY_JWT_AUTH_PROVIDER, "Class loading failed");
-            return false;
-        }
-    } else {
-        printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Generator is disabled");
-        return true;
-    }
-}

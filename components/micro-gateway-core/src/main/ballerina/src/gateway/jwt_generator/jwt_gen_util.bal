@@ -63,33 +63,25 @@ function createMapFromRetrievedUserClaimsListDTO(BackendJWTGenUserContextDTO tok
 
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
     AuthenticationContext authContext = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
-    jwt:JwtPayload? payload = tokenContextDTO.payload;
 
     runtime:Principal? principal = invocationContext?.principal;
     if (principal is runtime:Principal) {
         map<any>? customClaims = principal?.claims;
         if (customClaims is map<any>) {
             foreach var [key, value] in customClaims.entries() {
+                //To avoid casting problem. This is getting added later from the authentication context
+                if (key == APPLICATION) {
+                    continue;
+                }
                 if (value is anydata) {
                     customClaimsMapDTO[key] = value;
+                    //for the backward compatibility. Needs to preserve the jwtpayload record structure
+                    if (tokenContextDTO.isJWT &&
+                                    (key == "aud" || key == "jti" || key == "exp" || key == "nbf" || key == "iat")) {
+                        claimsMapDTO[key] = value;
+                    }
                 }
             }
-        }
-        if (tokenContextDTO.remoteUserClaimRetrievalEnabled) {
-            printDebug(JWT_GEN_UTIL, "Claim retrieval is enabled.");
-            UserClaimRetrieverContextDTO userInfo = generateUserClaimRetrieverContextFromPrincipal(authContext,
-                                                                                                    principal,
-                                                                                                    tokenContextDTO.issuer,
-                                                                                                    tokenContextDTO.payload != ());
-            RetrievedUserClaimsListDTO ? claimsListDTO = retrieveClaims(userInfo);
-            if (claimsListDTO is RetrievedUserClaimsListDTO) {
-                printDebug(JWT_GEN_UTIL, "Retrieved Claims from the custom claim retriever : " + claimsListDTO.toString());
-                ClaimDTO[] claimList = claimsListDTO.list;
-                foreach ClaimDTO claim in claimList {
-                    customClaimsMapDTO[claim.uri] = claim.value;
-                }
-            }
-
         }
     } else {
         printDebug(JWT_GEN_UTIL, "Claim retrieval implementation is not executed due to the unavailability " +
@@ -194,14 +186,6 @@ public function setJWTHeader(BackendJWTGenUserContextDTO tokenContextDTO,
                             boolean enabledCaching) returns @tainted boolean {
 
     (handle|error) generatedToken;
-    jwt:JwtPayload? payload = tokenContextDTO.payload;
-    if (payload is jwt:JwtPayload) {
-        if (isSelfContainedToken(payload)) {
-            printDebug(JWT_GEN_UTIL, "JWT token generation is based on the provided self contained access token");
-            generatedToken = generateJWTToken(updateCustomClaimsUsingPrincipal(payload), apiDetails);
-            return setGeneratedTokenAsHeader(req, cacheKey, enabledCaching, generatedToken);
-        }
-    }
     ClaimsMapDTO claimsMapDTO = createMapFromRetrievedUserClaimsListDTO(tokenContextDTO);
     generatedToken = generateJWTTokenFromUserClaimsMap(claimsMapDTO, apiDetails);
     if (generatedToken is error) {
@@ -217,19 +201,25 @@ public function setJWTHeader(BackendJWTGenUserContextDTO tokenContextDTO,
 # If the token is not picked from the cache, then it will be generated.
 #
 # + req - HTTP Request
-# + cacheKey - Cache key used for jwt generator cache
 # + enabledCaching - True if caching is enabled for backend JWT generation
 # + tokenContextDTO - User Context which is used to populate the information required for jwtGenerator Implementation
-# + apiDetails - API related information which is used to populate the information required for jwtGenerator Implementation
 # + return - Returns `true` if adding the JWT token to the request is successful.
 function setJWTTokenWithCacheCheck(http:Request req,
-                                    string cacheKey,
+                                    string credential,
                                     int skewTime,
                                     boolean enabledCaching,
-                                    BackendJWTGenUserContextDTO tokenContextDTO,
-                                    map<string> apiDetails)
+                                    BackendJWTGenUserContextDTO tokenContextDTO)
                                     returns @tainted boolean {
     boolean status = false;
+    string apiName = "";
+    string apiVersion = "";
+    APIConfiguration? apiConfig = apiConfigAnnotationMap[runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString()];
+    if (apiConfig is APIConfiguration) {
+        apiName = apiConfig.name;
+        apiVersion = apiConfig.apiVersion;
+    }
+    string cacheKey = credential + apiName + apiVersion;
+    map<string> apiDetails = createAPIDetailsMap();
     if (enabledCaching) {
         var cachedToken = jwtGeneratorCache.get(cacheKey);
         printDebug(JWT_GEN_UTIL, "Key: " + cacheKey);
@@ -295,14 +285,47 @@ function getGeneratedTokenExpTimeFromCache(string cacheKey, string jwtToken) ret
     }
 }
 
-# To update the custom claims of jwt payload with principal's custom claims. This is required to pass the mapped claims.
-# + payload - JWT Payload
-# + return - modified payload with principal's claims
-function updateCustomClaimsUsingPrincipal(jwt:JwtPayload payload) returns jwt:JwtPayload {
-    runtime:Principal? principal = runtime:getInvocationContext()?.principal;
-    if (principal is runtime:Principal) {
-            map<any>? principalClaims = principal?.claims;
-            payload.customClaims = <(map<json>)> principalClaims;
+# Generate the backend JWT token and set to the header of the outgoing request.
+#
+# + credential - Credential
+# + authContext - Authentication Context
+# + req - The `Request` instance.
+# + enabledJWTGenerator - state of jwt generator
+# + classLoaded - whether the class is loaded successfully
+# + enabledCaching - jwt generator caching enabled
+# + skewTime - skew time to backend
+# + issuer - The jwt issuer who issued the token and comes in the iss claim.
+# + remoteUserClaimRetrievalEnabled - true if remoteUserClaimRetrieval is enabled
+# + isJWT - `true` if the user is authenticated using jwt token
+# + return - Returns `true` if the token generation and setting the header completed successfully
+# or the `AuthenticationError` in case of an error.
+public function generateAndSetBackendJwtHeader(string credential,
+                                                http:Request req,
+                                                AuthenticationContext authContext,
+                                                boolean enabledJWTGenerator,
+                                                boolean classLoaded,
+                                                int skewTime,
+                                                boolean enabledCaching,
+                                                string issuer,
+                                                boolean remoteUserClaimRetrievalEnabled,
+                                                boolean isJWT)
+                                                returns @tainted boolean {
+    if (enabledJWTGenerator) {
+        if (classLoaded) {
+            boolean status = false;
+            BackendJWTGenUserContextDTO tokenContextDTO = {
+                    issuer : issuer,
+                    remoteUserClaimRetrievalEnabled : remoteUserClaimRetrievalEnabled,
+                    isJWT : isJWT
+            };
+            status = setJWTTokenWithCacheCheck(req, credential, skewTime, enabledCaching, tokenContextDTO);
+            return status;
+        } else {
+            printDebug(JWT_GEN_UTIL, "Class loading failed");
+            return false;
+        }
+    } else {
+        printDebug(JWT_GEN_UTIL, "JWT Generator is disabled");
+        return true;
     }
-    return payload;
 }
