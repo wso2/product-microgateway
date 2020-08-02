@@ -101,10 +101,16 @@ public type JwtAuthProvider object {
                         if (jti is string) {
                             printDebug(KEY_JWT_AUTH_PROVIDER, "jti claim found in the jwt");
                             printDebug(KEY_JWT_AUTH_PROVIDER, "Checking for the JTI in the gateway invalid revoked token map.");
-                            var status = retrieveFromRevokedTokenMap(jti);
-                            if (status is boolean) {
-                                if (status) {
+                            var statusJTI = retrieveFromRevokedTokenMap(jti);
+                            // To support APIM 3.1.0, check the signature in the revoked jwt map.
+                            printDebug(KEY_JWT_AUTH_PROVIDER, "Checking for the Signature in the gateway invalid revoked token map.");
+                            var statusSig = retrieveFromRevokedTokenMap(stringutils:split(credential, "\\.")[2]);
+                            if (statusJTI is boolean && statusSig is boolean) {
+                                if (statusJTI) {
                                     printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token found in the invalid token map.");
+                                    isRevoked = true;
+                                } else if (statusSig) {
+                                    printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Signature found in the invalid token map.");
                                     isRevoked = true;
                                 } else {
                                     printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token not found in the invalid token map.");
@@ -115,7 +121,7 @@ public type JwtAuthProvider object {
                                 isRevoked = false;
                             }
                             if (isRevoked) {
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Authentication Handler value for, is token black listed: " + isRevoked.toString());
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Authentication Handler value for, is token revoked : " + isRevoked.toString());
                                 printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Token is revoked");
                                 setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
                                 return false;

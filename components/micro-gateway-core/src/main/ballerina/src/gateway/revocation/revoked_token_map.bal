@@ -13,6 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+import ballerina/stringutils;
 
 map<string> revokedTokenMap = {};
 
@@ -22,7 +23,13 @@ public function getRevokedTokenMap() returns map<string> {
 
 public function addToRevokedTokenMap(map<string> revokedTokens) returns (boolean | ()) {
     foreach var [revokedTokenKey, revokedTokenValue] in revokedTokens.entries() {
-        revokedTokenMap[<string>revokedTokenKey] = <@untainted>revokedTokenValue;
+        string tokenKey = <string>revokedTokenKey;
+        // Support for APIM 3.1.0 jwt revocation scenario.
+        string[] jwtComponents = stringutils:split(tokenKey, "\\.");
+        if (jwtComponents.length() == 3) {
+            tokenKey = jwtComponents[2];
+        }
+        revokedTokenMap[tokenKey] = <@untainted>revokedTokenValue;
     }
     return true;
 }
