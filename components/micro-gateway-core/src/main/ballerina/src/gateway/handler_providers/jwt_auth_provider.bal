@@ -77,7 +77,7 @@ public type JwtAuthProvider object {
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
                 return handleVar;
             }
-            boolean isBlacklisted = false;
+            boolean isRevoked = false;
             string? jti = "";
 
             runtime:AuthenticationContext? authContext = invocationContext?.authenticationContext;
@@ -102,17 +102,17 @@ public type JwtAuthProvider object {
                             if (status is boolean) {
                                 if (status) {
                                     printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token found in the invalid token map.");
-                                    isBlacklisted = true;
+                                    isRevoked = true;
                                 } else {
                                     printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token not found in the invalid token map.");
-                                    isBlacklisted = false;
+                                    isRevoked = false;
                                 }
                             } else {
                                 printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token not found in the invalid token map.");
-                                isBlacklisted = false;
+                                isRevoked = false;
                             }
-                            if (isBlacklisted) {
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Authentication Handler value for, is token black listed: " + isBlacklisted.toString());
+                            if (isRevoked) {
+                                printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Authentication Handler value for, is token black listed: " + isRevoked.toString());
                                 printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Token is revoked");
                                 setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
                                 return false;
