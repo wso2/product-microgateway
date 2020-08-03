@@ -226,7 +226,9 @@ public class AgentConfiguration {
             String placeHolder = placeHolderMatcher.group(0);
             //to remove additional symbols
             String systemPropertyKey = placeHolder.substring(2, placeHolder.length() - 1);
-            return placeHolderMatcher.replaceFirst(System.getProperty(systemPropertyKey));
+            //To support windows path (replaces \ with \\ internally)
+            String replacement = Matcher.quoteReplacement(System.getProperty(systemPropertyKey));
+            return placeHolderMatcher.replaceFirst(replacement);
         }
         return mgwTrustStorePath;
     }
