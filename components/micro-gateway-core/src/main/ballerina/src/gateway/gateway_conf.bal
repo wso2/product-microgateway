@@ -14,11 +14,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-
-
 GatewayConf gatewayConf = new;
 public type GatewayConf object {
-    private KeyManagerConf keyManagerConf;
+    private KeyManagerConf keyManagerConf = {};
+    public JWTGeneratorConfigDTO jwtGeneratorConfig = {};
+    public ListenerConfigDTO listenerConfig = {};
+    public ApimCredentialsDTO apimCredentials = {};
 
     public function getGatewayConf() returns (GatewayConf) {
         return gatewayConf;
@@ -27,6 +28,7 @@ public type GatewayConf object {
     public function setKeyManagerConf(KeyManagerConf keyManagerConfig) {
         gatewayConf.keyManagerConf = keyManagerConfig;
     }
+
     public function getKeyManagerConf() returns (KeyManagerConf) {
         return gatewayConf.keyManagerConf;
     }

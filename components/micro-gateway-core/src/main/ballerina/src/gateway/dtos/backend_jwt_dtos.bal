@@ -66,7 +66,7 @@ public type ApplicationClaimsMapDTO record {|
 # + client_id - client ID
 # + username - username
 # + token_type - token type ('bearer jwt' or 'bearer opaque')
-# + customClaims - customClaims of the JWT or the information received from introspection response
+# + customClaims - customClaims of the JWT or the information received from introspection response.
 public type UserClaimRetrieverContextDTO record {|
     string issuer = "";
     string token = "";
@@ -74,4 +74,15 @@ public type UserClaimRetrieverContextDTO record {|
     string username = "";
     string token_type = "";
     map<any> customClaims = {};
+|};
+
+# This DTO is used to pass the information required for the Jwt Info Map used in JWT generation implementation.
+# Payload property should remain null, if the user is authenticated via Opaque Token.
+# + issuer - Token issuer
+# + remoteUserClaimRetrievalEnabled - `true` If remote User Claim Retrieval is enabled.
+# + isJWT - `true`, if the JWT is used for the authentication
+public type BackendJWTGenUserContextDTO record {|
+    string issuer;
+    boolean remoteUserClaimRetrievalEnabled = false;
+    boolean isJWT;
 |};

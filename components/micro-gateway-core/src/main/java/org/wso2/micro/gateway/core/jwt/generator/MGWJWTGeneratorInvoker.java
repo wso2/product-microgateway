@@ -83,12 +83,14 @@ public class MGWJWTGeneratorInvoker {
         return false;
     }
 
-    public static boolean loadClaimRetrieverClass(String className, BMap<String, Object> properties) {
+    public static boolean loadClaimRetrieverClass(String className, String trustStorePath, String trustStorePassword,
+                                                  BMap<String, Object> properties) {
         try {
             Class claimRetrieverClass = MGWJWTGeneratorInvoker.class.getClassLoader().loadClass(className);
-            Constructor classConstructor = claimRetrieverClass.getDeclaredConstructor(Map.class);
-            abstractMGWClaimRetriever = (AbstractMGWClaimRetriever) classConstructor.newInstance(
-                    convertBMapToMap(properties));
+            Constructor classConstructor = claimRetrieverClass.getDeclaredConstructor(String.class, String.class,
+                                                                                        Map.class);
+            abstractMGWClaimRetriever = (AbstractMGWClaimRetriever) classConstructor.newInstance(trustStorePath,
+                    trustStorePassword, convertBMapToMap(properties));
             return true;
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException |
                 InvocationTargetException | NoSuchMethodException e) {
@@ -100,6 +102,9 @@ public class MGWJWTGeneratorInvoker {
     public static BMap<String, Object> getRetrievedClaims(BMap<String, Object> authContext) {
         try {
             List<ClaimDTO> claimList = abstractMGWClaimRetriever.retrieveClaims(convertBMapToMap(authContext));
+            if (claimList == null) {
+                return null;
+            }
             BPackage packageId = new BPackage("wso2", "gateway", "3.1.0");
             BMap<String, Object> bMap = BValueCreator.createRecordValue(packageId, "RetrievedUserClaimsListDTO");
             bMap.put("count", claimList.size());

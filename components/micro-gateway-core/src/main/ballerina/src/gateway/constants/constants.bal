@@ -577,7 +577,7 @@ public const string JWT_GENERATOR_RESTRICTED_CLAIMS = "restrictedClaims";
 public const string JWT_GENERATOR_TOKEN_ISSUER = "issuer";
 public const string JWT_GENERATOR_TOKEN_AUDIENCE = "audience";
 public const string JWT_GENERATOR_IMPLEMENTATION = "generatorImpl";
-public const string JWT_GENERATOR__CLAIM_RETRIEVAL_INSTANCE_ID = "jwtGeneratorConfig.claimRetrieval";
+public const string JWT_GENERATOR_CLAIM_RETRIEVAL_INSTANCE_ID = "jwtGeneratorConfig.claimRetrieval";
 public const string JWT_GENERATOR_CLAIM_RETRIEVAL_IMPLEMENTATION = "retrieverImpl";
 public const string JWT_GENERATOR_CLAIM_RETRIEVAL_CONFIGURATION = "jwtGeneratorConfig.claimRetrieval.configuration";
 

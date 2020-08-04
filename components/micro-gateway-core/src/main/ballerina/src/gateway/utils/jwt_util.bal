@@ -247,10 +247,3 @@ function setSubsciberTenantDomain(AuthenticationContext authContext) {
         authContext.subscriberTenantDomain = SUPER_TENANT_DOMAIN_NAME;
     }
 }
-
-function isSelfContainedToken(jwt:JwtPayload payload) returns boolean {
-    if (payload.hasKey(APPLICATION)) {
-        return true;
-    }
-    return false;
-}

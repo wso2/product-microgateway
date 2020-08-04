@@ -71,8 +71,11 @@ public function loadJWTGeneratorClass(string className,
                                     tokenAudience);
 }
 
-public function loadClaimRetrieverClass (string className, map<any> properties) returns boolean {
-    return jLoadClaimRetrieverClass (java:fromString(className), properties);
+public function loadClaimRetrieverClass (string className, string unresolvedTrustStorePath, string trustStorePassword,
+                                        map<any> properties) returns boolean {
+    handle trustStorePath = jGetKeystoreLocation(java:fromString(unresolvedTrustStorePath));
+    return jLoadClaimRetrieverClass (java:fromString(className), trustStorePath,
+                                    java:fromString(trustStorePassword), properties);
 }
 
 public function retrieveClaimsFromImpl (UserClaimRetrieverContextDTO userInfo) returns RetrievedUserClaimsListDTO? {
@@ -167,7 +170,8 @@ public function jGenerateJWTTokenFromUserClaimsMap(ClaimsMapDTO jwtInfo, map<str
     class: "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorInvoker"
 } external;
 
-function jLoadClaimRetrieverClass (handle className, map<any> configuration) returns boolean = @java:Method {
+function jLoadClaimRetrieverClass (handle className, handle trustStorePath, handle trustStorePassword,
+                                    map<any> configuration) returns boolean = @java:Method {
     name:"loadClaimRetrieverClass",
     class: "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorInvoker"
 } external;

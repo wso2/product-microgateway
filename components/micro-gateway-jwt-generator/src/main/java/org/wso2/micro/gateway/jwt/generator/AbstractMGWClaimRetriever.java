@@ -23,9 +23,14 @@ import java.util.Map;
  * Abstract class for retrieve user claims from remote endpoint.
  */
 public abstract class AbstractMGWClaimRetriever {
+    private String trustStorePath;
+    private String trustStorePassword;
     private Map<String, String> configurationMap;
 
-    public AbstractMGWClaimRetriever(Map<String, String> configurationMap) {
+    public AbstractMGWClaimRetriever(String trustStorePath, String trustStorePassword,
+                                     Map<String, String> configurationMap) {
+        this.setTrustStorePath(trustStorePath);
+        this.setTrustStorePassword(trustStorePassword);
         this.configurationMap = configurationMap;
     }
 
@@ -43,5 +48,21 @@ public abstract class AbstractMGWClaimRetriever {
             return null;
         }
         return configurationMap.get(configurationKey);
+    }
+
+    public String getTrustStorePath() {
+        return trustStorePath;
+    }
+
+    public void setTrustStorePath(String trustStorePath) {
+        this.trustStorePath = trustStorePath;
+    }
+
+    public String getTrustStorePassword() {
+        return trustStorePassword;
+    }
+
+    public void setTrustStorePassword(String trustStorePassword) {
+        this.trustStorePassword = trustStorePassword;
     }
 }
