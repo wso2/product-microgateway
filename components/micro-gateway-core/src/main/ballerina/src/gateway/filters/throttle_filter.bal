@@ -17,6 +17,7 @@
 import ballerina/http;
 import ballerina/runtime;
 import ballerina/stringutils;
+import ballerina/jwt;
 
 boolean isHeaderConditionsEnabled = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, HEADER_CONDITIONS_ENABLED,
     DEFAULT_HEADER_CONDITIONS_ENABLED);
@@ -583,6 +584,9 @@ function getAdditionalProperties(http:FilterContext context, http:Request req) r
     map<json> propMap = {};
     string clientIp = <string>context.attributes[REMOTE_ADDRESS];
     string[] ipParts = stringutils:split(clientIp, ":");
+    boolean jwtGeneratorEnabled = getConfigBooleanValue(JWT_GENERATOR_ID,
+        JWT_GENERATOR_ENABLED,
+        DEFAULT_JWT_GENERATOR_ENABLED);
 
     if (ipParts.length() > 1) {
         // This means the IP is a ipv6
@@ -607,6 +611,26 @@ function getAdditionalProperties(http:FilterContext context, http:Request req) r
             string[] paramValues = <string[]>params.get(param);
             // Get only the last value of the list. This is to make the behavior similar to APIM
             propMap[param] = paramValues[paramValues.length() - 1];
+        }
+    }
+
+    if (isJwtConditionsEnabled && req.hasHeader(jwtheaderName)) {
+        // Set jwt claims as condition properties. This is set only if jwt header conditions are
+        // enabled and backend jwt header is available in the request headers.
+        printDebug(KEY_THROTTLE_FILTER, "setting jwt claims as condition properties");
+        string jwt = req.getHeader(jwtheaderName);
+        jwt:JwtPayload|error decoded = decodeJWTPayload(jwt);
+        if (decoded is jwt:JwtPayload) {
+            map<json>? customClaims = decoded["customClaims"];
+            foreach var [key, value] in decoded.entries() {
+                if (key == "customClaims" && customClaims is map<json>) {
+                    foreach var [claimName, claimValue] in customClaims.entries() {
+                        propMap[claimName] = <@untainted>claimValue;
+                    }
+                    continue;
+                }
+                propMap[key] = <@untainted>value;
+            }
         }
     }
 
