@@ -584,9 +584,7 @@ function getAdditionalProperties(http:FilterContext context, http:Request req) r
     map<json> propMap = {};
     string clientIp = <string>context.attributes[REMOTE_ADDRESS];
     string[] ipParts = stringutils:split(clientIp, ":");
-    boolean jwtGeneratorEnabled = getConfigBooleanValue(JWT_GENERATOR_ID,
-        JWT_GENERATOR_ENABLED,
-        DEFAULT_JWT_GENERATOR_ENABLED);
+    boolean jwtGeneratorEnabled = gatewayConf.jwtGeneratorConfig.jwtGeneratorEnabled;
 
     if (ipParts.length() > 1) {
         // This means the IP is a ipv6
@@ -599,6 +597,7 @@ function getAdditionalProperties(http:FilterContext context, http:Request req) r
 
     if (isHeaderConditionsEnabled) {
         // Set request headers as properties
+        printDebug(KEY_THROTTLE_FILTER, "setting request headers as condition properties");
         foreach string header in req.getHeaderNames() {
             propMap[header] = req.getHeader(<@untained>  header);
         }
@@ -606,6 +605,7 @@ function getAdditionalProperties(http:FilterContext context, http:Request req) r
 
     if (isQueryConditionsEnabled) {
         // Set query params as properties
+        printDebug(KEY_THROTTLE_FILTER, "setting request query params as condition properties");
         map<string[]> params = req.getQueryParams();
         foreach string param in params.keys() {
             string[] paramValues = <string[]>params.get(param);

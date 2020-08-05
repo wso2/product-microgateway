@@ -69,7 +69,7 @@ service messageServ = service {
                             putThrottledConditions(conditions, resourceKey, conditionKey);
                         }
                     } else {
-                        printDebug(KEY_THROTTLE_EVENT_LISTENER, "Romoving from throttledata map.");
+                        printDebug(KEY_THROTTLE_EVENT_LISTENER, "Removing from throttledata map.");
                         removeThrottleData(throttleKey);
                         if (condition is APICondition) {
                             string resourceKey = condition.resourceKey;

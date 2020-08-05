@@ -20,6 +20,7 @@ import ballerina/stringutils;
 import ballerina/lang.'string as strings;
 import ballerina/runtime;
 import ballerina/http;
+import ballerina/jwt;
 
 map<any> throttleDataMap = {};
 map<map<ConditionDto[]>> conditionDataMap = {};
@@ -378,6 +379,7 @@ function extractConditionDto(string base64Conditions) returns ConditionDto[] {
                 var jIpRange = condition.iprange;
                 var jHeader = condition.header;
                 var jQuery = condition.queryparametertype;
+                var jJwt = condition.jwtclaims;
 
                 // Build IP condition DTOs
                 if (jIpSpecific is json) {
@@ -415,6 +417,16 @@ function extractConditionDto(string base64Conditions) returns ConditionDto[] {
                     }
                 }
 
+                // Build jwt condition DTOs
+                if (jJwt is json) {
+                    var jwt = JwtConditions.constructFrom(jJwt);
+                    if (jwt is JwtConditions) {
+                        conditionDto.jwtClaimConditions = jwt;
+                    } else {
+                        printError(KEY_THROTTLE_UTIL, "JwtConditions is not in the expected format", jwt);
+                    }
+                }
+
                 conditions.push(conditionDto);
             }
         } else {
@@ -437,11 +449,15 @@ function isThrottledByCondition(ConditionDto[] conditions, ConditionalThrottleIn
     boolean isThrottled = false;
 
     foreach ConditionDto condition in conditions {
+        // We initially set throttled flag to true. Then we move onto evaluating all conditions and
+        // set the flag to false accordingly. This is done in this way to implement the `AND` logic
+        // between each condition inside a condition group.
         isThrottled = true;
-        HeaderConditions? headerConditions = condition.headerConditions;
-        IPCondition? ipCondition = condition.ipCondition;
-        IPCondition? ipRangeCondition = condition.ipRangeCondition;
-        QueryParamConditions? queryConditions = condition.queryParamConditions;
+        HeaderConditions? headerConditions = condition?.headerConditions;
+        IPCondition? ipCondition = condition?.ipCondition;
+        IPCondition? ipRangeCondition = condition?.ipRangeCondition;
+        QueryParamConditions? queryConditions = condition?.queryParamConditions;
+        JwtConditions? claimConditions = condition?.jwtClaimConditions;
 
         if (ipCondition is IPCondition) {
             if (!isMatchingIp(info.clientIp, ipCondition)) {
@@ -459,6 +475,11 @@ function isThrottledByCondition(ConditionDto[] conditions, ConditionalThrottleIn
         }
         if (info.isQueryConditionsEnabled && (queryConditions is QueryParamConditions)) {
             if (!isQueryParamPresent(info.request, queryConditions)) {
+                isThrottled = false;
+            }
+        }
+        if (info.isJwtConditionsEnabled && (claimConditions is JwtConditions)) {
+            if (!isClaimPresent(info.request, claimConditions)) {
                 isThrottled = false;
             }
         }
@@ -522,6 +543,31 @@ function isQueryParamPresent(http:Request req, QueryParamConditions conditions) 
             } else {
                 status = false;
                 break;
+            }
+        }
+    }
+
+    status = conditions.invert ? !status : status;
+    return status;
+}
+
+function isClaimPresent(http:Request req, QueryParamConditions conditions) returns boolean {
+    boolean status = true;
+    string? assertion = req.hasHeader(jwtheaderName) ? req.getHeader(jwtheaderName) : ();
+
+    if (assertion is string) {
+        jwt:JwtPayload | error decoded = decodeJWTPayload(assertion);
+        if (decoded is jwt:JwtPayload) {
+            foreach var [name, value] in conditions.values.entries() {
+                if (decoded.hasKey(name)) {
+                    printInfo("TEST", "present in decoded : " + decoded.get(name).toString());
+                    string claim = decoded.get(name).toString();
+                    status = status && isPatternMatched(value, claim);
+                } else {
+                    printInfo("TEST", "not present in decoded : " + decoded.toString());
+                    status = false;
+                    break;
+                }
             }
         }
     }

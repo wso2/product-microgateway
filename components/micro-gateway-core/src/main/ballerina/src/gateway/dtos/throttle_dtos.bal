@@ -124,12 +124,17 @@ public type QueryParamConditions record {
     boolean invert = false;
 };
 
+public type JwtConditions record {
+    map<string> values = {};
+    boolean invert = false;
+};
+
 public type ConditionDto record {
-    IPCondition? ipCondition = ();
-    IPCondition? ipRangeCondition = ();
-    HeaderConditions? headerConditions = ();
-    QueryParamConditions? queryParamConditions = ();
-    json jwtClaimConditions = {};
+    IPCondition ipCondition?;
+    IPCondition ipRangeCondition?;
+    HeaderConditions headerConditions?;
+    QueryParamConditions queryParamConditions?;
+    JwtConditions jwtClaimConditions?;
 };
 
 public type APICondition record {
