@@ -23,6 +23,8 @@ import org.wso2.callhome.utils.CallHomeInfo;
 import org.wso2.callhome.utils.Util;
 import org.wso2.micro.gateway.core.Constants;
 
+import java.util.regex.Matcher;
+
 /**
  * Invoke call home.
  */
@@ -51,7 +53,7 @@ public class Callhome {
      * @return runtime home location
      */
     private static String getRuntimeHome() {
-        return System.getProperty(Constants.RUNTIME_HOME_PATH);
+        return Matcher.quoteReplacement(System.getProperty(Constants.RUNTIME_HOME_PATH));
     }
 
     /**
@@ -61,8 +63,7 @@ public class Callhome {
      */
     public static String getTrustStoreLocation(String fullpath) {
         String homePathConst = "\\$\\{mgw-runtime.home}";
-        String homePath = System.getProperty(Constants.RUNTIME_HOME_PATH);
-        String correctPath = fullpath.replaceAll(homePathConst, homePath);
-        return correctPath;
+        String homePath = Matcher.quoteReplacement(System.getProperty(Constants.RUNTIME_HOME_PATH));
+        return fullpath.replaceAll(homePathConst, homePath);
     }
 }
