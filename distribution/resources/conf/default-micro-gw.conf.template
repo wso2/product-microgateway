@@ -52,6 +52,8 @@
   serverUrl = "https://localhost:9443"
   # The token endpoint context of the Key Manager server
   tokenContext = "oauth2"
+  # When Microgateway is used with older APIM versions for subscription validation by using KeyValidation service.
+  isLegacyKM = false
   # Remote User Claim Retrieval Enabled
   remoteUserClaimRetrievalEnabled = false
   # Basic security configurations
