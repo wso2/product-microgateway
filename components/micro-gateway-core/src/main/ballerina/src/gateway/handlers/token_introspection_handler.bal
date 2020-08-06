@@ -36,12 +36,14 @@ public type KeyValidationHandler object {
     private boolean enabledCaching = false;
     private string issuer = "";
     private boolean remoteUserClaimRetrievalEnabled = false;
+    private boolean isLegacyKM = false;
 
     public function __init(OAuth2KeyValidationProvider oauth2KeyValidationProvider, oauth2:InboundOAuth2Provider introspectProvider) {
         GatewayConf gatewayConf = getGatewayConfInstance();
         self.oauth2KeyValidationProvider = oauth2KeyValidationProvider;
         self.introspectProvider = introspectProvider;
         self.validateSubscriptions = getConfigBooleanValue(SECURITY_INSTANCE_ID, SECURITY_VALIDATE_SUBSCRIPTIONS, DEFAULT_VALIDATE_SUBSCRIPTIONS);
+        self.isLegacyKM = getConfigBooleanValue(KM_CONF_INSTANCE_ID, KM_CONF_IS_LEGACY_KM, DEFAULT_KM_CONF_IS_LEGACY_KM);
         self.issuer = gatewayConf.getKeyManagerConf().issuer;
         self.enabledJWTGenerator = gatewayConf.jwtGeneratorConfig.jwtGeneratorEnabled;
         if (self.enabledJWTGenerator) {
@@ -91,76 +93,102 @@ public type KeyValidationHandler object {
         string authHeaderName = getAuthorizationHeader(invocationContext);
         APIConfiguration? apiConfig = apiConfigAnnotationMap[<string>invocationContext.attributes[http:SERVICE_NAME]];
         boolean|auth:Error authenticationResult = false;
-        authenticationResult = self.introspectProvider.authenticate(credential);
-        if (authenticationResult is auth:Error) {
-            return prepareAuthenticationError("Failed to authenticate with introspect auth provider.", authenticationResult);
-        } else if (!authenticationResult) {
-            setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
-            return authenticationResult;
-        } else {
-            runtime:Principal? principal = invocationContext?.principal;
-            if (principal is runtime:Principal) {
-                AuthenticationContext authenticationContext = {};
-                authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
-                string apiName = "";
-                string apiVersion = "";
-
-                if (apiConfig is APIConfiguration) {
-                    apiName = apiConfig.name;
-                    apiVersion = apiConfig.apiVersion;
-                }
-                map<any>? claims = principal?.claims;
-                any clientId = claims[CLIENT_ID];
-                boolean isAllowed = false;
-                // If the client id is null and validate subscription is enabled, return auth failure error.
-                if (self.validateSubscriptions && (clientId is () || (clientId is string && clientId == ""))) {
-                    setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
-                    printError(KEY_VALIDATION_HANDLER,"Subscription validation is enabled but the Client Id is not " +
-                    "received from the key manager during the introspection.");
-                    return isAllowed;
-                }
-                // If clientID is present, do the subscription validation from the data stores.
-                if (clientId != () && clientId is string) {
-                   [authenticationContext, isAllowed] =
-                     validateSubscriptionFromDataStores(credential, clientId, apiName, apiVersion,
-                     self.validateSubscriptions);
-                   authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
-                   invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-                   invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
-                   if (isAllowed) {
-                       boolean tokenGenStatus = generateAndSetBackendJwtHeader(credential,
-                                                                           req,
-                                                                           self.enabledJWTGenerator,
-                                                                           self.classLoaded,
-                                                                           self.skewTime,
-                                                                           self.enabledCaching,
-                                                                           self.issuer,
-                                                                           self.remoteUserClaimRetrievalEnabled,
-                                                                           false);
-                       if (!tokenGenStatus) {
-                           printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
-                       }
-                   }
-                   return isAllowed;    
-                } else { // Otherwise return the introspection response.
-                    authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
-                    invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
-                    invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
-                    if (authenticationResult) {
-                        boolean tokenGenStatus = generateAndSetBackendJwtHeader(credential,
-                                                                                req,
-                                                                                self.enabledJWTGenerator,
-                                                                                self.classLoaded,
-                                                                                self.skewTime,
-                                                                                self.enabledCaching,
-                                                                                self.issuer,
-                                                                                self.remoteUserClaimRetrievalEnabled,
-                                                                                false);
-                        if (!tokenGenStatus) {
-                            printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
-                        }
+        if (self.isLegacyKM) {
+            // In legacy mode, use the KeyValidation service for token validation.
+            // This is used when API-M versions < 3.2 are being used to support backward compatibility
+            authenticationResult = self.oauth2KeyValidationProvider.authenticate(credential);
+            if (authenticationResult is auth:Error) {
+                return prepareAuthenticationError("Failed to authenticate with key validation service.", authenticationResult);
+            } else {
+                if (authenticationResult) {
+                    boolean tokenGenStatus = generateAndSetBackendJwtHeader(credential,
+                                                                                        req,
+                                                                                        self.enabledJWTGenerator,
+                                                                                        self.classLoaded,
+                                                                                        self.skewTime,
+                                                                                        self.enabledCaching,
+                                                                                        self.issuer,
+                                                                                        self.remoteUserClaimRetrievalEnabled,
+                                                                                        false);
+                    if (!tokenGenStatus) {
+                        printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
                     }
-                    return authenticationResult;
+                }
+                return authenticationResult;
+            }
+        } else {
+            // With any external key manager or APIM - 3.2.0, introspection endpoint is used to validate the token.
+            authenticationResult = self.introspectProvider.authenticate(credential);
+            if (authenticationResult is auth:Error) {
+                return prepareAuthenticationError("Failed to authenticate with introspect auth provider.", authenticationResult);
+            } else if (!authenticationResult) {
+                setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+                return authenticationResult;
+            } else {
+                runtime:Principal? principal = invocationContext?.principal;
+                if (principal is runtime:Principal) {
+                    AuthenticationContext authenticationContext = {};
+                    authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
+                    string apiName = "";
+                    string apiVersion = "";
+
+                    if (apiConfig is APIConfiguration) {
+                        apiName = apiConfig.name;
+                        apiVersion = apiConfig.apiVersion;
+                    }
+                    map<any>? claims = principal?.claims;
+                    any clientId = claims[CLIENT_ID];
+                    boolean isAllowed = false;
+                    // If the client id is null and validate subscription is enabled, return auth failure error.
+                    if (self.validateSubscriptions && (clientId is () || (clientId is string && clientId == ""))) {
+                        setErrorMessageToInvocationContext(API_AUTH_GENERAL_ERROR);
+                        printError(KEY_VALIDATION_HANDLER,"Subscription validation is enabled but the Client Id is not " +
+                        "received from the key manager during the introspection.");
+                        return isAllowed;
+                    }
+                    // If clientID is present, do the subscription validation from the data stores.
+                    if (clientId != () && clientId is string) {
+                       [authenticationContext, isAllowed] =
+                         validateSubscriptionFromDataStores(credential, clientId, apiName, apiVersion,
+                         self.validateSubscriptions);
+                       authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
+                       invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                       invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+                       if (isAllowed) {
+                           boolean tokenGenStatus = generateAndSetBackendJwtHeader(credential,
+                                                                               req,
+                                                                               self.enabledJWTGenerator,
+                                                                               self.classLoaded,
+                                                                               self.skewTime,
+                                                                               self.enabledCaching,
+                                                                               self.issuer,
+                                                                               self.remoteUserClaimRetrievalEnabled,
+                                                                               false);
+                           if (!tokenGenStatus) {
+                               printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
+                           }
+                       }
+                       return isAllowed;
+                    } else { // Otherwise return the introspection response.
+                        authenticationContext.username = principal?.username ?: USER_NAME_UNKNOWN;
+                        invocationContext.attributes[AUTHENTICATION_CONTEXT] = authenticationContext;
+                        invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
+                        if (authenticationResult) {
+                            boolean tokenGenStatus = generateAndSetBackendJwtHeader(credential,
+                                                                                    req,
+                                                                                    self.enabledJWTGenerator,
+                                                                                    self.classLoaded,
+                                                                                    self.skewTime,
+                                                                                    self.enabledCaching,
+                                                                                    self.issuer,
+                                                                                    self.remoteUserClaimRetrievalEnabled,
+                                                                                    false);
+                            if (!tokenGenStatus) {
+                                printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
+                            }
+                        }
+                        return authenticationResult;
+                    }
                 }
             }
         }

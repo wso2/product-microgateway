@@ -54,6 +54,7 @@ public const string DEFAULT_PILOT_PASSWORD = "admin";
 public const boolean DEFAULT_KM_CONF_SECURITY_OAUTH2_ENABLED = false;
 public const string DEFAULT_KM_CONF_SECURITY_OAUTH2_CREDENTIAL_BEARER = "AUTH_HEADER_BEARER";
 public const string DEFAULT_KM_CONF_SECURITY_OAUTH2 = "";
+public const boolean DEFAULT_KM_CONF_IS_LEGACY_KM = false;
 
 public const string DEFAULT_JWT_ISSUER = "https://localhost:9443/oauth2/token";
 public const string DEFAULT_ISSUER_CLASSNAME = "DefaultJWTTransformer";

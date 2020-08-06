@@ -219,6 +219,7 @@ public const string KM_SERVER_URL = "serverUrl";
 public const string KM_TOKEN_CONTEXT = "tokenContext";
 public const string TIMESTAMP_SKEW = "timestampSkew";
 public const string EXTERNAL = "external";
+public const string KM_CONF_IS_LEGACY_KM = "isLegacyKM";
 public const string KM_CONF_SECURITY_BASIC_INSTANCE_ID = "keymanager.security.basic";
 public const string KM_CONF_SECURITY_OAUTH2_INSTANCE_ID = "keymanager.security.oauth2";
 public const string KM_CONF_SECURITY_OAUTH2_CLIENT_CREDENTIAL_INSTANCE_ID = "keymanager.security.oauth2.clientCredential";
