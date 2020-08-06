@@ -103,19 +103,13 @@ public type JwtAuthProvider object {
                             printDebug(KEY_JWT_AUTH_PROVIDER, "Checking for the Signature in the gateway invalid revoked token map.");
                             var statusSig = retrieveFromRevokedTokenMap(stringutils:split(credential, "\\.")[2]);
                             if (statusJTI is boolean && statusSig is boolean) {
-                                if (statusJTI) {
-                                    printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token found in the invalid token map.");
-                                    isRevoked = true;
-                                } else if (statusSig) {
-                                    printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Signature found in the invalid token map.");
+                                if (statusJTI || statusSig) {
+                                    printDebug(KEY_JWT_AUTH_PROVIDER, "JTI or Signature found in the invalid token map.");
                                     isRevoked = true;
                                 } else {
-                                    printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token not found in the invalid token map.");
+                                    printDebug(KEY_JWT_AUTH_PROVIDER, "JTI or Signature not found in the invalid token map.");
                                     isRevoked = false;
                                 }
-                            } else {
-                                printDebug(KEY_JWT_AUTH_PROVIDER, "JTI token not found in the invalid token map.");
-                                isRevoked = false;
                             }
                             if (isRevoked) {
                                 printDebug(KEY_JWT_AUTH_PROVIDER, "JWT Authentication Handler value for, is token revoked : " + isRevoked.toString());
