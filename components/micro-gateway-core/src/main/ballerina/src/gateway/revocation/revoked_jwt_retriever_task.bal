@@ -86,9 +86,17 @@ service revokedJwtRetrievalService = service {
                 printDebug(REVOKED_JWT_RETIEVAL_TASK, "Revoked token list recieved: " + revokedJwts.toJsonString());
                 if (revokedJwts is json[]) {
                     foreach var revokedJwt in revokedJwts {
-                        string signature = revokedJwt.jwt_signature.toString();
-                        string expiryTime = revokedJwt.expiry_time.toString();
-                        revokedMap[signature] = expiryTime;
+                        json|error signature = revokedJwt.jwt_signature;
+                        // jwt_signature is jwtSignature in APIM 3.1.0
+                        if (signature is error) {
+                            signature = revokedJwt.jwtSignature;
+                        }
+                        json|error expiryTime = revokedJwt.expiry_time;
+                        // expiry_time is expiryTime in APIM 3.1.0
+                        if (expiryTime is error) {
+                            expiryTime = revokedJwt.expiryTime;
+                        }
+                        revokedMap[signature.toString()] = expiryTime.toString();
                     }
                     if (revokedMap.length() > 0) {
                         var status = addToRevokedTokenMap(revokedMap);

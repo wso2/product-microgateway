@@ -280,7 +280,7 @@ public class ImportCmd implements LauncherCmd {
             CmdUtils.saveSwaggerDefinitionForMultipleAPIs(projectName, apis,
                     !restVersion.startsWith(CliConstants.REST_API_V1_PREFIX));
         } catch (Exception e) {
-            throw new CLIInternalException("Exception occurred during codeGeneration process");
+            throw new CLIInternalException("Exception occurred during codeGeneration process", e);
         }
         //todo: check if the files has been changed using hash utils
 

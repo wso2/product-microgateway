@@ -26,6 +26,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.regex.Matcher;
 
 /**
  * This class is for load the keystore.
@@ -52,7 +53,7 @@ public class LoadKeyStore {
      */
     public static String getKeyStorePath(String fullPath) {
         String homePathConst = "\\$\\{mgw-runtime.home}";
-        String homePath = System.getProperty(Constants.RUNTIME_HOME_PATH);
+        String homePath = Matcher.quoteReplacement(System.getProperty(Constants.RUNTIME_HOME_PATH));
         return fullPath.replaceAll(homePathConst, homePath);
     }
 }

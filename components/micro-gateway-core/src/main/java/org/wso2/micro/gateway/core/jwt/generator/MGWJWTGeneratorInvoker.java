@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 /**
  * Class to dynamically invoke the jwt generators defined.
@@ -186,7 +187,7 @@ public class MGWJWTGeneratorInvoker {
      */
     public static String getKeyStorePath(String fullPath) {
         String homePathConst = "\\$\\{mgw-runtime.home}";
-        String homePath = System.getProperty(Constants.RUNTIME_HOME_PATH);
+        String homePath = Matcher.quoteReplacement(System.getProperty(Constants.RUNTIME_HOME_PATH));
         return fullPath.replaceAll(homePathConst, homePath);
     }
 }
