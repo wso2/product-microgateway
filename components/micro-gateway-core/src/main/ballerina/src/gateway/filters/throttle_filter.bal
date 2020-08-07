@@ -16,6 +16,15 @@
 
 import ballerina/http;
 import ballerina/runtime;
+import ballerina/stringutils;
+import ballerina/jwt;
+
+boolean isHeaderConditionsEnabled = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, HEADER_CONDITIONS_ENABLED,
+    DEFAULT_HEADER_CONDITIONS_ENABLED);
+boolean isQueryConditionsEnabled = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, QUERY_CONDITIONS_ENABLED,
+    DEFAULT_QUERY_CONDITIONS_ENABLED);
+boolean isJwtConditionsEnabled = getConfigBooleanValue(THROTTLE_CONF_INSTANCE_ID, JWT_CONDITIONS_ENABLED,
+    DEFAULT_JWT_CONDITIONS_ENABLED);
 
 public type ThrottleFilter object {
     public map<json> deployedPolicies = {};
@@ -142,10 +151,10 @@ deployedPolicies) returns boolean {
 
     } else if (!isSecured) {
         string apiLevelPolicy = getAPITier(context.getServiceName(),"");
-        if(!checkAPILevelThrottled(caller, request, context, apiLevelPolicy, deployedPolicies, apiContext, apiVersion)) {
+        if (!checkAPILevelThrottled(caller, request, context, apiLevelPolicy, deployedPolicies, apiContext, apiVersion)) {
             return false;
         }
-        if(!checkResourceLevelThrottled(caller, request, context, resourceLevelPolicyName, deployedPolicies, resourceLevelThrottleKey)) {
+        if (!checkResourceLevelThrottled(caller, request, context, resourceLevelPolicyName, deployedPolicies, resourceLevelThrottleKey)) {
             return false;
         }
         printDebug(KEY_THROTTLE_FILTER, "Not a secured resource. Proceeding with Unauthenticated tier.");
@@ -257,41 +266,36 @@ function isApplicationLevelThrottled(AuthenticationContext keyValidationDto, map
     return throttled;
 }
 
-function isAPILevelThrottled(string apiContext, string? apiVersion) returns boolean {
+function isAPILevelThrottled(string apiContext, string? apiVersion, ConditionalThrottleInfo? info)
+        returns boolean {
     boolean throttled;
     boolean stopOnQuota;
     string apiThrottleKey = apiContext;
     if (apiVersion is string) {
         apiThrottleKey += ":" + apiVersion;
     }
-    if (enabledGlobalTMEventPublishing) {
-        apiThrottleKey += "_default";
-    }
+
     if (!enabledGlobalTMEventPublishing) {
         return isApiThrottled(apiThrottleKey);
     }
-    [throttled, stopOnQuota] = isRequestThrottled(apiThrottleKey);
+    [throttled, stopOnQuota] = isApiThrottledByTM(apiThrottleKey, info);
     return throttled;
 }
 
 
 function isResourceLevelThrottled(string? policy,
-        map<json> deployedPolicies, string resourceKey) returns (boolean) {
+        map<json> deployedPolicies, string resourceKey, ConditionalThrottleInfo? info) returns (boolean) {
     if (policy is string) {
         string resourceLevelThrottleKey = resourceKey;
         if (policy == UNLIMITED_TIER) {
             return false;
         }
-        if (enabledGlobalTMEventPublishing) {
-            resourceLevelThrottleKey += "_default";
-        }
-        printDebug(KEY_THROTTLE_FILTER, "Resource level throttle key : " + resourceLevelThrottleKey);
         boolean throttled;
         boolean stopOnQuota;
         if (!enabledGlobalTMEventPublishing) {
             return isResourceThrottled(resourceLevelThrottleKey);
         }
-        [throttled, stopOnQuota] = isRequestThrottled(resourceLevelThrottleKey);
+        [throttled, stopOnQuota] = isApiThrottledByTM(resourceLevelThrottleKey, info);
         return throttled;
     }
     return false;
@@ -422,7 +426,8 @@ function generateGlobalThrottleEvent(http:Request req, http:FilterContext contex
     requestStreamDTO.apiTenant = tenantDomain;
     requestStreamDTO.apiName = context.getServiceName();
     requestStreamDTO.appId = keyValidationDto.applicationId;
-    json properties = {};
+
+    map<json> properties = getAdditionalProperties(context, req);
     requestStreamDTO.properties = properties.toJsonString();
     return requestStreamDTO;
 }
@@ -484,7 +489,8 @@ function checkAPILevelThrottled(http:Caller caller, http:Request request, http:F
         return false;
     }
     printDebug(KEY_THROTTLE_FILTER, "Checking API level throttling-out.");
-    if (isAPILevelThrottled(apiContext, apiVersion)) {
+    ConditionalThrottleInfo info = buildConditionalThrottleInfo(caller, request);
+    if (isAPILevelThrottled(apiContext, apiVersion, info)) {
         printDebug(KEY_THROTTLE_FILTER, "API level throttled out. Sending throttled out response.");
         context.attributes[IS_THROTTLE_OUT] = true;
         context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED;
@@ -514,7 +520,8 @@ function checkResourceLevelThrottled(http:Caller caller, http:Request request, h
         }
     }
     printDebug(KEY_THROTTLE_FILTER, "Checking resource level throttling-out.");
-    if (isResourceLevelThrottled(resourceLevelPolicyName, deployedPolicies, resourceKey)) {
+    ConditionalThrottleInfo info = buildConditionalThrottleInfo(caller, request);
+    if (isResourceLevelThrottled(resourceLevelPolicyName, deployedPolicies, resourceKey, info)) {
         printDebug(KEY_THROTTLE_FILTER, "Resource level throttled out. Sending throttled out response.");
         context.attributes[IS_THROTTLE_OUT] = true;
         context.attributes[THROTTLE_OUT_REASON] = THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
@@ -530,7 +537,7 @@ function checkResourceLevelThrottled(http:Caller caller, http:Request request, h
 
 function checkCustomThrottlePolicies(http:Caller caller, http:Request request, http:FilterContext context,
                         AuthenticationContext keyValidationDto, string apiContext, string? apiVersion,
-                        string resourceLevelThrottleKey, string tenantDomain, string clientIp)  returns boolean{
+                        string resourceLevelThrottleKey, string tenantDomain, string clientIp)  returns boolean {
 
     printDebug(KEY_THROTTLE_FILTER, "Checking custom throttlle policies");
     string userId = keyValidationDto.username;
@@ -565,4 +572,81 @@ function checkCustomThrottlePolicies(http:Caller caller, http:Request request, h
 
     }
     return true;
+}
+
+# Retrive additional property list required for throttling event published from MGW.
+#
+# + context - Used to retrieve filter level properties
+# + req - Used to retrieve request details such as headers and parameters
+# + return - `json` map containing all identified and valid throttling properties
+function getAdditionalProperties(http:FilterContext context, http:Request req) returns map<json> {
+    // Set IP address properties
+    map<json> propMap = {};
+    string clientIp = <string>context.attributes[REMOTE_ADDRESS];
+    string[] ipParts = stringutils:split(clientIp, ":");
+    boolean jwtGeneratorEnabled = gatewayConf.jwtGeneratorConfig.jwtGeneratorEnabled;
+
+    if (ipParts.length() > 1) {
+        // This means the IP is a ipv6
+        propMap["ipv6"] = ipToBigInteger(clientIp);
+        propMap["ip"] = 0;
+    } else {
+        propMap["ip"] = ipToInt(clientIp);
+        propMap["ipv6"] = 0;
+    }
+
+    if (isHeaderConditionsEnabled) {
+        // Set request headers as properties
+        printDebug(KEY_THROTTLE_FILTER, "setting request headers as condition properties");
+        foreach string header in req.getHeaderNames() {
+            propMap[header] = req.getHeader(<@untained>  header);
+        }
+    }
+
+    if (isQueryConditionsEnabled) {
+        // Set query params as properties
+        printDebug(KEY_THROTTLE_FILTER, "setting request query params as condition properties");
+        map<string[]> params = req.getQueryParams();
+        foreach string param in params.keys() {
+            string[] paramValues = <string[]>params.get(param);
+            // Get only the last value of the list. This is to make the behavior similar to APIM
+            propMap[param] = paramValues[paramValues.length() - 1];
+        }
+    }
+
+    if (isJwtConditionsEnabled && req.hasHeader(jwtheaderName)) {
+        // Set jwt claims as condition properties. This is set only if jwt header conditions are
+        // enabled and backend jwt header is available in the request headers.
+        printDebug(KEY_THROTTLE_FILTER, "setting jwt claims as condition properties");
+        string jwt = req.getHeader(jwtheaderName);
+        jwt:JwtPayload|error decoded = decodeJWTPayload(jwt);
+        if (decoded is jwt:JwtPayload) {
+            map<json>? customClaims = decoded["customClaims"];
+            foreach var [key, value] in decoded.entries() {
+                if (key == "customClaims" && customClaims is map<json>) {
+                    foreach var [claimName, claimValue] in customClaims.entries() {
+                        propMap[claimName] = <@untainted>claimValue;
+                    }
+                    continue;
+                }
+                propMap[key] = <@untainted>value;
+            }
+        }
+    }
+
+    return propMap;
+}
+
+function buildConditionalThrottleInfo(http:Caller caller, http:Request request) returns ConditionalThrottleInfo {
+    string clientIp = getClientIp(request, caller);
+
+    ConditionalThrottleInfo info = {
+        clientIp: clientIp,
+        request: request,
+        isHeaderConditionsEnabled: isHeaderConditionsEnabled,
+        isQueryConditionsEnabled: isQueryConditionsEnabled,
+        isJwtConditionsEnabled: isJwtConditionsEnabled
+    };
+
+    return info;
 }

@@ -14,11 +14,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/encoding;
 import ballerina/time;
 import ballerina/stringutils;
+import ballerina/lang.'string as strings;
 import ballerina/runtime;
+import ballerina/http;
+import ballerina/jwt;
 
 map<any> throttleDataMap = {};
+map<map<ConditionDto[]>> conditionDataMap = {};
 boolean isStreamsInitialized = false;
 
 boolean blockConditionExist = false;
@@ -37,6 +42,7 @@ public function isRequestThrottled(string key) returns [boolean, boolean] {
     printDebug(KEY_THROTTLE_UTIL, "throttle data map : " + throttleDataMap.toString());
     printDebug(KEY_THROTTLE_UTIL, "throttle data key : " + key);
     boolean isThrottled = throttleDataMap.hasKey(key);
+
     if (isThrottled) {
         GlobalThrottleStreamDTO dto = <GlobalThrottleStreamDTO>throttleDataMap[key];
         boolean stopOnQuota = dto.stopOnQuota;
@@ -59,6 +65,85 @@ public function isRequestThrottled(string key) returns [boolean, boolean] {
         return [isThrottled, stopOnQuota];
     }
     return [isThrottled, false];
+}
+
+# Decide whether request details provided in arguments is throttled or not by the global traffic manager.
+# This function is deinfed to evalute only API and Resource level throttling decisions recieved from the
+# traffic manager.
+#
+# + key - throttle key of the request
+# + info - request details required to make conditional throttle decisions
+# + return - [is request throttled, should stop on quota]
+public function isApiThrottledByTM(string key, ConditionalThrottleInfo? info) returns [boolean, boolean] {
+    printDebug(KEY_THROTTLE_UTIL, "throttle data map : " + throttleDataMap.toString());
+    printDebug(KEY_THROTTLE_UTIL, "throttle data key : " + key);
+    boolean isThrottled = false;
+    boolean stopOnQuota = false;
+
+    if (enabledGlobalTMEventPublishing == false) {
+        return [false, false];
+    }
+    boolean hasThrottledCondition = conditionDataMap.hasKey(key);
+    printDebug(KEY_THROTTLE_UTIL, "hasThrottledCondition : " + hasThrottledCondition.toString());
+
+    if (hasThrottledCondition && (info is ConditionalThrottleInfo)) {
+        // get the condition groups for provided throttleKey
+        map<ConditionDto[]> conditionGrps = conditionDataMap.get(key);
+        string? conditionKey = ();
+
+        // iterate through all available conditions and find if the current request
+        // attributes are eligible to be throttled by the available throttled conditions
+        foreach var [name, dto] in conditionGrps.entries() {
+            if (DEFAULT_THROTTLE_CONDITION != name) {
+                boolean isPipelineThrottled = isThrottledByCondition(dto, info);
+                if (isPipelineThrottled) {
+                    conditionKey = name;
+                    break;
+                }
+            }
+        }
+
+        if (conditionKey is () && conditionGrps.hasKey(DEFAULT_THROTTLE_CONDITION)) {
+            ConditionDto[] dto = conditionGrps.get(DEFAULT_THROTTLE_CONDITION);
+            boolean isPipelineThrottled = isThrottledByCondition(dto, info);
+            if (!isPipelineThrottled) {
+                conditionKey = DEFAULT_THROTTLE_CONDITION;
+            }
+        }
+
+        // if we detect the request is throttled by a condition. Then check the validity of throttle
+        // decision from the throttle event data available in the throttleDataMap
+        if (conditionKey is string) {
+            printDebug(KEY_THROTTLE_UTIL, "throttled with condition: " + conditionKey);
+            string combinedThrottleKey = key + "_" + conditionKey;
+
+            // if throttle data is not available for the combined key, conditional throttle decision
+            // is no longer valid
+            if (!throttleDataMap.hasKey(combinedThrottleKey)) {
+                return [false, false];
+            }
+            var dto = throttleDataMap.get(combinedThrottleKey);
+            if (dto is GlobalThrottleStreamDTO) {
+                int currentTime = time:currentTime().time;
+                int? resetTimestamp = dto.resetTimestamp;
+                stopOnQuota = true;
+                if (resetTimestamp is int) {
+                    if (resetTimestamp < currentTime) {
+                        _ = throttleDataMap.remove(combinedThrottleKey);
+                        _ = conditionDataMap.remove(key);
+                        return [false, stopOnQuota];
+                    }
+                    return [true, stopOnQuota];
+                } else {
+                    // if the resetTimestamp is not included, throttling is disabled
+                    printDebug(KEY_THROTTLE_UTIL, "throttle event for the throttle key:" + key +
+                        "does not contain expiry timestamp.");
+                    return [false, stopOnQuota];
+                }
+            }
+        }
+    }
+    return [false, false];
 }
 
 public function publishNonThrottleEvent(RequestStreamDTO throttleEvent) {
@@ -91,8 +176,7 @@ public function onReceiveThrottleEvent(GlobalThrottleStreamDTO throttleEvent) {
         if (throttleEvent.policyKey.length() > 0) {
             throttleDataMap[throttleEvent.policyKey] = throttleEvent;
         }
-    }
-    else {
+    } else {
         if (throttleEvent.policyKey.length() > 0) {
             _ = throttleDataMap.remove(throttleEvent.policyKey);
         }
@@ -131,8 +215,33 @@ public function getEventFromThrottleData(ThrottleAnalyticsEventDTO dto) returns 
 public function putThrottleData(GlobalThrottleStreamDTO throttleEvent, string throttleKey) {
     throttleDataMap[throttleKey] = <@untainted>throttleEvent;
 }
+
 public function removeThrottleData(string key) {
     _ = throttleDataMap.remove(key);
+}
+
+public function putThrottledConditions(ConditionDto[] conditions, string resourceKey, string conditionKey) {
+    map<ConditionDto[]> conditionMapping = {};
+
+    if (conditionDataMap.hasKey(resourceKey)) {
+        conditionMapping = conditionDataMap.get(resourceKey);
+    } else {
+        conditionDataMap[resourceKey] = conditionMapping;
+    }
+
+    if (!conditionMapping.hasKey(conditionKey)) {
+        conditionMapping[conditionKey] = conditions;
+    }
+}
+
+public function removeThrottledConditions(string resourceKey, string conditionKey) {
+    if (conditionDataMap.hasKey(resourceKey)) {
+        map<ConditionDto[]> conditionMapping = conditionDataMap.get(resourceKey);
+        _ = conditionMapping.removeIfHasKey(conditionKey);
+        if (conditionMapping.length() == 0) {
+            _ = conditionDataMap.remove(resourceKey);
+        }
+    }
 }
 
 //check whether the throttle policy is available if in built throttling is used
@@ -241,3 +350,229 @@ function modifyIpWithNumericRanges(IPRangeDTO ipRange) {
     }
 }
 
+
+# Build a list of `ConditionDto`s from the provided base64 encoded condition list.
+#
+# + base64Conditions - A base64 encoded json string containing the list of conditions
+# evaluated by the throttle engine to take the throttle decision.
+# + return - A list of conditions evaluated during making the throttle decision. Incase of an
+# error during converting the conditions, empty `ConditionDto[]` will be returned
+function extractConditionDto(string base64Conditions) returns ConditionDto[] {
+    ConditionDto[] conditions = [];
+    byte[]|error base64Decoded = encoding:decodeBase64Url(base64Conditions);
+    if (base64Decoded is byte[]) {
+        string|error result = strings:fromBytes(base64Decoded);
+        if (result is error) {
+            printError(KEY_THROTTLE_UTIL, result.reason(), result);
+        }
+
+        string conditionsPayload = <string>result;
+        json[] | error jsonPayload = <json[]>conditionsPayload.fromJsonString();
+
+        if (jsonPayload is json[]) {
+            printDebug(KEY_THROTTLE_UTIL, "Decoded throttle conditions json :" + jsonPayload.toJsonString());
+
+            foreach json condition in jsonPayload {
+                ConditionDto conditionDto = {};
+                var jIpSpecific = condition.ipspecific;
+                var jIpRange = condition.iprange;
+                var jHeader = condition.header;
+                var jQuery = condition.queryparametertype;
+                var jJwt = condition.jwtclaims;
+
+                // Build IP condition DTOs
+                if (jIpSpecific is json) {
+                    IPCondition ip = {
+                        specificIp: jIpSpecific.specificIp.toString(),
+                        invert: <boolean>jIpSpecific.invert
+                    };
+                    conditionDto.ipCondition = ip;
+                } else if (jIpRange is json) {
+                    IPCondition ip = {
+                        startingIp: jIpRange.startingIp.toString(),
+                        endingIp: jIpRange.endingIp.toString(),
+                        invert: <boolean>jIpRange.invert
+                    };
+                    conditionDto.ipRangeCondition = ip;
+                }
+
+                // Build header condition DTOs
+                if (jHeader is json) {
+                    var header = HeaderConditions.constructFrom(jHeader);
+                    if (header is HeaderConditions) {
+                        conditionDto.headerConditions = header;
+                    } else {
+                        printError(KEY_THROTTLE_UTIL, "HeaderCondition is not in the expected format", header);
+                    }
+                }
+
+                // Build query param condition DTOs
+                if (jQuery is json) {
+                    var query = QueryParamConditions.constructFrom(jQuery);
+                    if (query is QueryParamConditions) {
+                        conditionDto.queryParamConditions = query;
+                    } else {
+                        printError(KEY_THROTTLE_UTIL, "QueryParamCondition is not in the expected format", query);
+                    }
+                }
+
+                // Build jwt condition DTOs
+                if (jJwt is json) {
+                    var jwt = JwtConditions.constructFrom(jJwt);
+                    if (jwt is JwtConditions) {
+                        conditionDto.jwtClaimConditions = jwt;
+                    } else {
+                        printError(KEY_THROTTLE_UTIL, "JwtConditions is not in the expected format", jwt);
+                    }
+                }
+
+                conditions.push(conditionDto);
+            }
+        } else {
+            printError(KEY_THROTTLE_UTIL, "Couldn't build a valid json from the throttle conditions", jsonPayload);
+        }
+    } else {
+        printError(KEY_THROTTLE_UTIL, "Couldn't decode throttle conditions", base64Decoded);
+    }
+
+    return conditions;
+}
+
+# Check if the request is throttled by an advanced throttle condition.
+# Such as IP, header, query param based conditions.
+#
+# + conditions - throttled conditions recieved from global throttle engine
+# + info - information required to derive conditional throttle status
+# + return - `true` if throttled by a condition, `false` otherwise
+function isThrottledByCondition(ConditionDto[] conditions, ConditionalThrottleInfo info) returns boolean {
+    boolean isThrottled = false;
+
+    foreach ConditionDto condition in conditions {
+        // We initially set throttled flag to true. Then we move onto evaluating all conditions and
+        // set the flag to false accordingly. This is done in this way to implement the `AND` logic
+        // between each condition inside a condition group.
+        isThrottled = true;
+        HeaderConditions? headerConditions = condition?.headerConditions;
+        IPCondition? ipCondition = condition?.ipCondition;
+        IPCondition? ipRangeCondition = condition?.ipRangeCondition;
+        QueryParamConditions? queryConditions = condition?.queryParamConditions;
+        JwtConditions? claimConditions = condition?.jwtClaimConditions;
+
+        if (ipCondition is IPCondition) {
+            if (!isMatchingIp(info.clientIp, ipCondition)) {
+                isThrottled = false;
+            }
+        } else if (ipRangeCondition is IPCondition) {
+            if (!isWithinIpRange(info.clientIp, ipRangeCondition)) {
+                isThrottled = false;
+            }
+        }
+        if (info.isHeaderConditionsEnabled && (headerConditions is HeaderConditions)) {
+            if (!isHeaderPresent(info.request, headerConditions)) {
+                isThrottled = false;
+            }
+        }
+        if (info.isQueryConditionsEnabled && (queryConditions is QueryParamConditions)) {
+            if (!isQueryParamPresent(info.request, queryConditions)) {
+                isThrottled = false;
+            }
+        }
+        if (info.isJwtConditionsEnabled && (claimConditions is JwtConditions)) {
+            if (!isClaimPresent(info.request, claimConditions)) {
+                isThrottled = false;
+            }
+        }
+
+        if (isThrottled) {
+            break;
+        }
+    }
+
+    return isThrottled;
+}
+
+function isMatchingIp(string clientIp, IPCondition ipCondition) returns boolean {
+    string longIp = ipToBigInteger(clientIp);
+    boolean isMatched = (longIp == ipCondition.specificIp);
+
+    if (ipCondition.invert) {
+        return !isMatched;
+    }
+
+    return isMatched;
+}
+
+function isWithinIpRange(string clientIp, IPCondition ipCondition) returns boolean {
+    boolean isMatched = isIpWithinRange(clientIp, ipCondition.startingIp, ipCondition.endingIp);
+
+    if (ipCondition.invert) {
+        return !isMatched;
+    }
+
+    return isMatched;
+}
+
+function isHeaderPresent(http:Request req, HeaderConditions conditions) returns boolean {
+    boolean status = true;
+
+    foreach var [name, value] in conditions.values.entries() {
+        if (req.hasHeader(name)) {
+            string headerVal = req.getHeader(name);
+            if (headerVal != "") {
+                status = status && isPatternMatched(value, headerVal);
+            } else {
+                status = false;
+                break;
+            }
+        }
+    }
+
+    status = conditions.invert ? !status : status;
+    return status;
+}
+
+function isQueryParamPresent(http:Request req, QueryParamConditions conditions) returns boolean {
+    boolean status = true;
+
+    foreach var [name, value] in conditions.values.entries() {
+        string? paramValue = req.getQueryParamValue(name);
+        if (paramValue is string) {
+            if (paramValue != "") {
+                status = status && isPatternMatched(value, paramValue);
+            } else {
+                status = false;
+                break;
+            }
+        }
+    }
+
+    status = conditions.invert ? !status : status;
+    return status;
+}
+
+function isClaimPresent(http:Request req, JwtConditions conditions) returns boolean {
+    boolean status = true;
+    string? assertion = req.hasHeader(jwtheaderName) ? req.getHeader(jwtheaderName) : ();
+
+    if (assertion is string) {
+        jwt:JwtPayload | error decoded = decodeJWTPayload(assertion);
+        if (decoded is jwt:JwtPayload) {
+            foreach var [name, value] in conditions.values.entries() {
+                map<json>? customClaims = decoded["customClaims"];
+                if (decoded.hasKey(name)) {
+                    string claim = decoded.get(name).toString();
+                    status = status && isPatternMatched(value, claim);
+                } else if (customClaims is map<json> && customClaims.hasKey(name)) {
+                    string claim = customClaims.get(name).toString();
+                    status = status && isPatternMatched(value, claim);
+                } else {
+                    status = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    status = conditions.invert ? !status : status;
+    return status;
+}

@@ -38,6 +38,7 @@ service messageServ = service {
         if (message is jms:MapMessage) {
             string? | error keyTemplateValue = message.getString(KEY_TEMPLATE_VALUE);
             string? | error throttleKey = message.getString(THROTTLE_KEY);
+            string? | error evaluatedConditions = message.getString(EVALUATED_CONDITIONS);
             int remainingQuota = 0;
             string? | error blockingKey = message.getString(BLOCKING_CONDITION_KEY);
             if (keyTemplateValue is string) {
@@ -48,18 +49,34 @@ service messageServ = service {
                 printDebug(KEY_THROTTLE_EVENT_LISTENER, "policy Key : " + throttleKey.toString() + " Throttle status : " +
                 throttleEnable.toString());
                 if (throttleEnable is boolean && expiryTime is int) {
+                    APICondition | error condition = extractAPIorResourceKey(throttleKey);
                     GlobalThrottleStreamDTO globalThrottleStreamDtoTM = {
                         policyKey: throttleKey,
                         resetTimestamp: expiryTime,
                         remainingQuota: remainingQuota,
                         isThrottled: throttleEnable
                     };
+
                     if (globalThrottleStreamDtoTM.isThrottled == true) {
                         printDebug(KEY_THROTTLE_EVENT_LISTENER, "Adding to throttledata map.");
                         putThrottleData(globalThrottleStreamDtoTM, throttleKey);
+
+                        if (condition is APICondition && evaluatedConditions is string) {
+                            string resourceKey = condition.resourceKey;
+                            string conditionKey = condition.name;
+                            ConditionDto[] conditions = extractConditionDto(evaluatedConditions);
+                            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Adding to conditiondata map.");
+                            putThrottledConditions(conditions, resourceKey, conditionKey);
+                        }
                     } else {
-                        printDebug(KEY_THROTTLE_EVENT_LISTENER, "Romoving from throttledata map.");
+                        printDebug(KEY_THROTTLE_EVENT_LISTENER, "Removing from throttledata map.");
                         removeThrottleData(throttleKey);
+                        if (condition is APICondition) {
+                            string resourceKey = condition.resourceKey;
+                            string conditionKey = condition.name;
+                            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Removing from conditiondata map.");
+                            removeThrottledConditions(resourceKey, conditionKey);
+                        }
                     }
                 } else {
                     printDebug(KEY_THROTTLE_EVENT_LISTENER, "Throlling configs values are wrong.");

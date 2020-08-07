@@ -1166,3 +1166,29 @@ public function buildBasicAuthHeader(string username, string password) returns s
 
     return BASIC_PREFIX_WITH_SPACE + headerValue;
 }
+
+# Convert string IPv4 address to int representation.
+#
+# + ipAddress - IP address in string format
+#
+# + return - `ipAddress` in  int format. If provided string is not a proper IPv4,
+# `0` will be returned
+public function ipToInt(string ipAddress) returns int {
+    int ipInInt = 0;
+    string[] ipParts = stringutils:split(ipAddress, "\\.");
+
+    int i = 3;
+    while (i >= 0) {
+        var part = 'int:fromString(ipParts[3 - i]);
+        if (part is int) {
+            ipInInt |= part << (i * 8);
+        } else {
+            printError(KEY_UTILS, "Invalid IP: Can't convert " + ipAddress + " to int");
+            ipInInt = 0;
+            break;
+        }
+        i = i - 1;
+    }
+
+    return ipInInt;
+}

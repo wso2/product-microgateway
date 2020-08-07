@@ -1,3 +1,4 @@
+import ballerina/http;
 // Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
@@ -105,3 +106,46 @@ public type IPRangeDTO record {
     string endingIpNumber;
     boolean invert = false;
 };
+
+public type IPCondition record {
+    string specificIp = "";
+    string startingIp = "";
+    string endingIp = "";
+    boolean invert = false;
+};
+
+public type HeaderConditions record {
+    map<string> values = {};
+    boolean invert = false;
+};
+
+public type QueryParamConditions record {
+    map<string> values = {};
+    boolean invert = false;
+};
+
+public type JwtConditions record {
+    map<string> values = {};
+    boolean invert = false;
+};
+
+public type ConditionDto record {
+    IPCondition ipCondition?;
+    IPCondition ipRangeCondition?;
+    HeaderConditions headerConditions?;
+    QueryParamConditions queryParamConditions?;
+    JwtConditions jwtClaimConditions?;
+};
+
+public type APICondition record {
+    string name;
+    string resourceKey;
+};
+
+type ConditionalThrottleInfo record {|
+    string clientIp;
+    boolean isHeaderConditionsEnabled = false;
+    boolean isQueryConditionsEnabled = false;
+    boolean isJwtConditionsEnabled = false;
+    http:Request request;
+|};

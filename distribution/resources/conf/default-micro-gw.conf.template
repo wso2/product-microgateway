@@ -293,6 +293,12 @@
 [throttlingConfig]
   # Connect with the central traffic manager
   enabledGlobalTMEventPublishing = false
+  # Enable global advanced throttling based on request header conditions
+  enableHeaderConditions = false
+  # Enable global advanced throttling based on request query parameter conditions
+  enableQueryParamConditions = false
+  # Enable global advanced throttling based on jwt claim conditions
+  enableJwtClaimConditions = false
   # The message broker context factory
   jmsConnectioninitialContextFactory = "wso2mbInitialContextFactory"
   # The message broker connection URL
