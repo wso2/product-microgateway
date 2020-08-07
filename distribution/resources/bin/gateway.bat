@@ -79,12 +79,6 @@ CALL :buildBalArgs %*
 
 CALL :runTools %CONF_FILE% %CONF_OUT_FILE%
 
-IF "%b7a_observability_metrics_enabled%"=="true" (
-    SET IS_METRICS_ENABLED=T
-) ELSE (
-    CAll :isMetricsEnabled %*
-)
-
 IF EXIST %CONF_OUT_FILE% (
     IF "%IS_METRICS_ENABLED%"=="F" (
         FOR /F "delims=" %%i IN (%CONF_OUT_FILE%) DO (
@@ -195,7 +189,7 @@ REM arg0: command and other arguments to pass to tool library
         %JAVA_OPTS% ^
         -classpath %METRIC_CLASSPATH%
 
-    "%JAVA_HOME%\bin\java.exe" %JAVA_CMD% org.wso2.micro.gateway.tools.Main "%~1" "%~2"
+    "%JAVA_HOME%\bin\java.exe" %JAVA_CMD% org.wso2.micro.gateway.tools.Main "%~1" "%~2" %BAL_ARGS%
 
     EXIT /B %ERRORLEVEL%
 
@@ -225,29 +219,6 @@ REM We need to issolate the jar file path and wrap it with quotes
         SET BAL_ARGS=%BAL_ARGS% %first%
     )
     GOTO :buildBalArgs
-
-REM Find metrics is enabled or not via cmd args
-:isMetricsEnabled
-    SET first=%~1
-    IF "%first%"=="" EXIT /B 0
-    SET keyFound=F
-    IF "%first%"=="--b7a.observability.enabled" (
-        SET keyFound=T
-    ) ELSE "%first%"=="--b7a.observability.metrics.enabled" (
-        SET keyFound=T
-    )
-
-    IF "%keyFound%"=="T" (
-        IF "%~2"=="true" SET IS_METRICS_ENABLED=T
-        EXIT /B 0
-    )
-    IF "%first:~0,2%"=="--" (
-        SHIFT
-        SHIFT
-    ) ELSE (
-        SHIFT
-    )
-    GOTO :isMetricsEnabled
 
 REM add the system variable containing log4j properties file
 :setLog4jProperties

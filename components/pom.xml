@@ -25,7 +25,7 @@
     <artifactId>components</artifactId>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
-    <name>Micro Gateway Components</name>
+    <name>Micro Gateway - Components</name>
 
     <modules>
         <module>micro-gateway-interceptor</module>

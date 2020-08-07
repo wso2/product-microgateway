@@ -23,6 +23,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>mgw-jwt-transformer</artifactId>
+    <name>Micro Gateway - JWT Transformer</name>
     <dependencies>
         <dependency>
             <groupId>org.ballerinalang</groupId>
