@@ -519,12 +519,14 @@ function isHeaderPresent(http:Request req, HeaderConditions conditions) returns 
         if (req.hasHeader(name)) {
             string headerVal = req.getHeader(name);
             if (headerVal != "") {
+                // if throttled header is present and not empty in the current request, we do
+                // AND operation between each header condition to get the final status.
                 status = status && isPatternMatched(value, headerVal);
-            } else {
-                status = false;
-                break;
+                continue;
             }
         }
+        status = false;
+        break;
     }
 
     status = conditions.invert ? !status : status;
@@ -538,12 +540,14 @@ function isQueryParamPresent(http:Request req, QueryParamConditions conditions) 
         string? paramValue = req.getQueryParamValue(name);
         if (paramValue is string) {
             if (paramValue != "") {
+                // If throttled query param is found in the current request we perform an AND operation
+                // between all query param conditions for this throttle key
                 status = status && isPatternMatched(value, paramValue);
-            } else {
-                status = false;
-                break;
+                continue;
             }
         }
+        status = false;
+        break;
     }
 
     status = conditions.invert ? !status : status;
@@ -570,7 +574,12 @@ function isClaimPresent(http:Request req, JwtConditions conditions) returns bool
                     break;
                 }
             }
+        } else {
+            printError(KEY_THROTTLE_UTIL, "error while decoding jwt for current request");
+            status = false;
         }
+    } else {
+        status = false;
     }
 
     status = conditions.invert ? !status : status;
