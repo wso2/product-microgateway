@@ -57,13 +57,13 @@ public class GetConfig {
         String fileWritePath = args [1];
         Map<String, String> configs = new HashMap<>();
 
-        getConfigsFromArgs(args, configs);
+        extractConfigsFromArgs(args, configs);
         if (!isComplete(configs)) {
-            getConfigsFromEnv(configs);
+            extractConfigsFromEnv(configs);
         }
 
         if (!isComplete(configs)) {
-            getConfigsFromFile(confFilePath, configs);
+            extractConfigsFromFile(confFilePath, configs);
         }
 
         if (isComplete(configs)) {
@@ -71,7 +71,7 @@ public class GetConfig {
         }
     }
 
-    private Map<String, String> getConfigsFromFile(String confFilePath, Map<String, String> currentConfigs) {
+    private void extractConfigsFromFile(String confFilePath, Map<String, String> currentConfigs) {
         File configFile = new File (confFilePath);
         Toml toml = new Toml();
         toml.read(configFile);
@@ -86,11 +86,9 @@ public class GetConfig {
             currentConfigs.putIfAbsent(CONF_METRICS_ENABLED, isMetricsEnabled);
             currentConfigs.putIfAbsent(CONF_JMX_PORT, jmxPort);
         }
-
-        return currentConfigs;
     }
 
-    private Map<String, String> getConfigsFromEnv(Map<String, String> currentConfigs) {
+    private void extractConfigsFromEnv(Map<String, String> currentConfigs) {
         final String confMetricsEnabledEnv = "b7a_observability_metrics_enabled";
         final String confJmxPortEnv = "b7a_observability_metrics_prometheus_jmx_port";
         String isMetricsEnabled;
@@ -104,10 +102,9 @@ public class GetConfig {
         if (jmxPort != null) {
             currentConfigs.putIfAbsent(CONF_JMX_PORT, jmxPort);
         }
-        return currentConfigs;
     }
 
-    private Map<String, String> getConfigsFromArgs(String[] args, Map<String, String> currentConfigs) {
+    private void extractConfigsFromArgs(String[] args, Map<String, String> currentConfigs) {
         final String confMetricsEnabledArg = "--b7a.observability.metrics.enabled=";
         final String confJmxPortArg = "--b7a.observability.metrics.prometheus.jmx_port=";
         String isMetricsEnabled = null;
@@ -134,8 +131,6 @@ public class GetConfig {
                 break;
             }
         }
-
-        return currentConfigs;
     }
 
     private String getConfigValue (String config, String key) {
