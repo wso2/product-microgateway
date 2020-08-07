@@ -53,7 +53,7 @@
   # The token endpoint context of the Key Manager server
   tokenContext = "oauth2"
   # When Microgateway is used with older APIM versions for subscription validation by using KeyValidation service.
-  isLegacyKM = false
+  enableLegacyMode = false
   # Remote User Claim Retrieval Enabled
   remoteUserClaimRetrievalEnabled = false
   # Basic security configurations
