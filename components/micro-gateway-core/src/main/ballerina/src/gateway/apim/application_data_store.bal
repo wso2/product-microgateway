@@ -83,7 +83,7 @@ type ApplicationDataStore object {
                         tokenType: list[0].tokenType.toString(),
                         tenantDomain: tenantDomain,
                         groupIds: <json[]>list[0].groupIds,
-                        attributes: <json[]>list[0].attributes
+                        attributes: <map<json>>list[0].attributes
                     };
                     self.applications[appId.toString()] = <@untainted>app;
                     printDebug(KEY_APPLICATION_STORE, "Returned application from service is : " + app.toString());
@@ -118,7 +118,7 @@ type ApplicationDataStore object {
                         policyId: jsonApp.policy.toString(),
                         tokenType: jsonApp.tokenType.toString(),
                         groupIds: <json[]>jsonApp.groupIds,
-                        attributes: <json[]>jsonApp.attributes
+                        attributes: <map<json>>jsonApp.attributes
                     };
                     string appKey = app.id.toString();
                     self.applications[appKey] = app;
