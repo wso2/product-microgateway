@@ -168,6 +168,7 @@ public type OAuth2KeyValidationProvider object {
         if (authorized) {
             // set username
             invocationContext.principal.username = apiKeyValidationDto.endUserName;
+            invocationContext.principal.claims[CLIENT_ID] = apiKeyValidationDto.consumerKey;
         }
         return apiKeyValidationDto;
     }
