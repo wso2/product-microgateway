@@ -32,7 +32,7 @@ public type Application record {|
     string tokenType = "";
     string tenantDomain = "carbon.super";
     json[] groupIds?;
-    json[] attributes?;
+    map<json> attributes?;
 |};
 
 
