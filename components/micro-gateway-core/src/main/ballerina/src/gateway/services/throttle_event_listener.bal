@@ -74,6 +74,7 @@ service messageServ = service {
                         if (condition is APICondition) {
                             string resourceKey = condition.resourceKey;
                             string conditionKey = condition.name;
+                            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Removing from conditiondata map.");
                             removeThrottledConditions(resourceKey, conditionKey);
                         }
                     }

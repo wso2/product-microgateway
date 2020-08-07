@@ -108,7 +108,6 @@ public function isApiThrottledByTM(string key, ConditionalThrottleInfo? info) re
             boolean isPipelineThrottled = isThrottledByCondition(dto, info);
             if (!isPipelineThrottled) {
                 conditionKey = DEFAULT_THROTTLE_CONDITION;
-
             }
         }
 
@@ -130,7 +129,7 @@ public function isApiThrottledByTM(string key, ConditionalThrottleInfo? info) re
                 stopOnQuota = true;
                 if (resetTimestamp is int) {
                     if (resetTimestamp < currentTime) {
-                        _ = throttleDataMap.remove(key);
+                        _ = throttleDataMap.remove(combinedThrottleKey);
                         _ = conditionDataMap.remove(key);
                         return [false, stopOnQuota];
                     }
@@ -551,7 +550,7 @@ function isQueryParamPresent(http:Request req, QueryParamConditions conditions) 
     return status;
 }
 
-function isClaimPresent(http:Request req, QueryParamConditions conditions) returns boolean {
+function isClaimPresent(http:Request req, JwtConditions conditions) returns boolean {
     boolean status = true;
     string? assertion = req.hasHeader(jwtheaderName) ? req.getHeader(jwtheaderName) : ();
 
@@ -559,12 +558,14 @@ function isClaimPresent(http:Request req, QueryParamConditions conditions) retur
         jwt:JwtPayload | error decoded = decodeJWTPayload(assertion);
         if (decoded is jwt:JwtPayload) {
             foreach var [name, value] in conditions.values.entries() {
+                map<json>? customClaims = decoded["customClaims"];
                 if (decoded.hasKey(name)) {
-                    printInfo("TEST", "present in decoded : " + decoded.get(name).toString());
                     string claim = decoded.get(name).toString();
                     status = status && isPatternMatched(value, claim);
+                } else if (customClaims is map<json> && customClaims.hasKey(name)) {
+                    string claim = customClaims.get(name).toString();
+                    status = status && isPatternMatched(value, claim);
                 } else {
-                    printInfo("TEST", "not present in decoded : " + decoded.toString());
                     status = false;
                     break;
                 }
