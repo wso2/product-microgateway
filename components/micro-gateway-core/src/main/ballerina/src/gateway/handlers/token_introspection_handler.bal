@@ -99,23 +99,21 @@ public type KeyValidationHandler object {
             authenticationResult = self.oauth2KeyValidationProvider.authenticate(credential);
             if (authenticationResult is auth:Error) {
                 return prepareAuthenticationError("Failed to authenticate with key validation service.", authenticationResult);
-            } else {
-                if (authenticationResult) {
-                    boolean tokenGenStatus = generateAndSetBackendJwtHeader(credential,
-                                                                                        req,
-                                                                                        self.enabledJWTGenerator,
-                                                                                        self.classLoaded,
-                                                                                        self.skewTime,
-                                                                                        self.enabledCaching,
-                                                                                        self.issuer,
-                                                                                        self.remoteUserClaimRetrievalEnabled,
-                                                                                        false);
-                    if (!tokenGenStatus) {
-                        printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
-                    }
-                } else {
-                    setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+            } else if (authenticationResult) {
+                boolean tokenGenStatus = generateAndSetBackendJwtHeader(credential,
+                                                                                  req,
+                                                                                  self.enabledJWTGenerator,
+                                                                                  self.classLoaded,
+                                                                                  self.skewTime,
+                                                                                  self.enabledCaching,
+                                                                                  self.issuer,
+                                                                                  self.remoteUserClaimRetrievalEnabled,
+                                                                                  false);
+                if (!tokenGenStatus) {
+                    printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
                 }
+            } else {
+                setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
                 return authenticationResult;
             }
         } else {
