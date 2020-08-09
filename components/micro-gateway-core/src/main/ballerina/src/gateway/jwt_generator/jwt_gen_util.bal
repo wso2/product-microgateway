@@ -84,12 +84,13 @@ function createMapFromRetrievedUserClaimsListDTO(BackendJWTGenUserContextDTO tok
             }
         }
     } else {
-        printDebug(JWT_GEN_UTIL, "Claim retrieval implementation is not executed due to the unavailability " +
+        printDebug(JWT_GEN_UTIL, "claims from the principal is not added due to the unavailability " +
                         "of the principal component");
     }
 
     ApplicationClaimsMapDTO applicationClaimsMapDTO = {};
     applicationClaimsMapDTO.id = emptyStringIfUnknownValue(authContext.applicationId);
+    applicationClaimsMapDTO.uuid = emptyStringIfUnknownValue(authContext.applicationUuid);
     applicationClaimsMapDTO.owner = emptyStringIfUnknownValue(authContext.subscriber);
     applicationClaimsMapDTO.name = emptyStringIfUnknownValue(authContext.applicationName);
     applicationClaimsMapDTO.tier = emptyStringIfUnknownValue(authContext.applicationTier);

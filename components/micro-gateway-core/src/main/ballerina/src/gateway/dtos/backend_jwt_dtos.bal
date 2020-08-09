@@ -50,11 +50,13 @@ public type CustomClaimsMapDTO record {
 
 # This DTO is used to pass the claims related to application, when there is no self contained token is involved.
 # + id - application id
+# + uuid - application uuid
 # + owner - application owner
 # + name - application name
 # + tier - application tier
 public type ApplicationClaimsMapDTO record {|
     string id = "";
+    string uuid = "";
     string owner = "";
     string name = "";
     string tier = "";

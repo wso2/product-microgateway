@@ -76,6 +76,7 @@ type ApplicationDataStore object {
                 json[] list = <json[]>payload.list;
                 if (list.length() > 0 ) {
                     Application app = {
+                        uuid: list[0].uuid.toString(),
                         id: <int>list[0].id,
                         owner: list[0].subName.toString(),
                         name: list[0].name.toString(),
@@ -99,6 +100,7 @@ type ApplicationDataStore object {
     }
 
     private function fetchApplications() {
+        string tenantDomain = getPilotAuthenticatedUserTenantDomain(self.pilotUsername);
         string basicAuthHeader = buildBasicAuthHeader(self.pilotUsername, self.pilotPassword);
         http:Request appReq = new;
         appReq.setHeader(AUTHORIZATION_HEADER, basicAuthHeader);
@@ -112,11 +114,13 @@ type ApplicationDataStore object {
                 printDebug(KEY_APPLICATION_STORE, "Received valid application details");
                 foreach json jsonApp in list {
                     Application app = {
+                        uuid: jsonApp.uuid.toString(),
                         id: <int>jsonApp.id,
                         owner: jsonApp.subName.toString(),
                         name: jsonApp.name.toString(),
                         policyId: jsonApp.policy.toString(),
                         tokenType: jsonApp.tokenType.toString(),
+                        tenantDomain: tenantDomain,
                         groupIds: <json[]>jsonApp.groupIds,
                         attributes: <map<json>>jsonApp.attributes
                     };
