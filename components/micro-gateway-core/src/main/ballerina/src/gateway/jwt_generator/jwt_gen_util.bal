@@ -83,6 +83,23 @@ function createMapFromRetrievedUserClaimsListDTO(BackendJWTGenUserContextDTO tok
                 }
             }
         }
+        if (tokenContextDTO.remoteUserClaimRetrievalEnabled) {
+            printDebug(JWT_GEN_UTIL, "Claim retrieval is enabled.");
+            UserClaimRetrieverContextDTO userInfo = generateUserClaimRetrieverContextFromPrincipal(authContext,
+                                                                                                    principal,
+                                                                                                    tokenContextDTO.issuer,
+                                                                                                    tokenContextDTO.isJWT);
+            RetrievedUserClaimsListDTO ? claimsListDTO = retrieveClaims(userInfo);
+            if (claimsListDTO is RetrievedUserClaimsListDTO) {
+                printDebug(JWT_GEN_UTIL, "Retrieved Claims from the custom claim retriever : " + claimsListDTO.toString());
+                ClaimDTO[] claimList = claimsListDTO.list;
+                foreach ClaimDTO claim in claimList {
+                    customClaimsMapDTO[claim.uri] = claim.value;
+                }
+            }
+        } else {
+            printDebug(JWT_GEN_UTIL, "Claim retrieval is disabled.");
+        }
     } else {
         printDebug(JWT_GEN_UTIL, "claims from the principal is not added due to the unavailability " +
                         "of the principal component");
