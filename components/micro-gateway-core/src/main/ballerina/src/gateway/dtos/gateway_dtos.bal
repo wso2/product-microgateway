@@ -64,6 +64,7 @@ public type AuthenticationContext record {
     string apiKey = "";
     string keyType = PRODUCTION_KEY_TYPE;
     string callerToken?;
+    string applicationUuid = UNKNOWN_VALUE;
     string applicationId = UNKNOWN_VALUE;
     string applicationName = UNKNOWN_VALUE;
     string consumerKey = UNKNOWN_VALUE;

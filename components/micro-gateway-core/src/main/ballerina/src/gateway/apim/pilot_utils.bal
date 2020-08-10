@@ -20,6 +20,7 @@ import ballerina/stringutils;
 function convertApplicationEventToApplicationDTO(json appEvent) returns Application {
     Application application = {
         id : <int>appEvent.applicationId,
+        uuid: appEvent.uuid.toString(),
         name: appEvent.applicationName.toString(),
         tenantDomain : appEvent.tenantDomain.toString(),
         policyId : appEvent.applicationPolicy.toString(),
@@ -94,6 +95,7 @@ function validateSubscriptionFromDataStores(string token, string consumerKey, st
             }
             if (app is Application) {
                 authenticationContext.applicationId = app.id.toString();
+                authenticationContext.applicationUuid = app.uuid;
                 authenticationContext.applicationName = app.name;
                 authenticationContext.applicationTier = app.policyId;
                 authenticationContext.subscriber = app.owner;

@@ -25,6 +25,7 @@ public type Subscription record {|
 |};
 
 public type Application record {|
+    string uuid;
     int id;
     string name = "";
     string owner = "";

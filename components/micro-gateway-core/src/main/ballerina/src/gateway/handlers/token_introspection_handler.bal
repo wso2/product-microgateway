@@ -112,6 +112,7 @@ public type KeyValidationHandler object {
                 if (!tokenGenStatus) {
                     printError(KEY_AUTHN_FILTER, "Error while adding the Backend JWT header");
                 }
+                return authenticationResult;
             } else {
                 setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
                 return authenticationResult;

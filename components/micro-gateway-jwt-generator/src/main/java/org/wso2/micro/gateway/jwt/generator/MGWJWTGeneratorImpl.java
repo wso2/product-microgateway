@@ -71,6 +71,10 @@ public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
                 claims.put(dialect + "/applicationid", ((HashMap) customClaims.get("application")).get("id")
                         .toString());
             }
+            if (StringUtils.isNotEmpty(((HashMap) customClaims.get("application")).get("uuid").toString())) {
+                claims.put(dialect + "/applicationUUID", ((HashMap) customClaims.get("application")).get("uuid")
+                        .toString());
+            }
             if (StringUtils.isNotEmpty((CharSequence) ((HashMap) customClaims.get("application")).get("owner"))) {
                 claims.put(dialect + "/subscriber", ((HashMap) customClaims.get("application")).get("owner"));
             }

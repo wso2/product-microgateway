@@ -23,6 +23,8 @@ import ballerina/runtime;
 function retrieveClaims (UserClaimRetrieverContextDTO? userInfo) returns @tainted RetrievedUserClaimsListDTO ? {
     //if claim retrieve variable is disabled, there is no need to run through the method.
     if (!claimRetrieverClassLoaded) {
+        printDebug (CLAIM_RETRIEVER, "Claim Retriever class is not loaded. Hence remote claim retrieval " +
+                    "process is skipped");
         return;
     }
     if (userInfo is UserClaimRetrieverContextDTO) {
