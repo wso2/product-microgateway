@@ -486,7 +486,7 @@
   # Enable/ Disable the feature
   enable = false
   # The API Manager URL
-  service_url = "https://localhost:9443"
+  serviceUrl = "https://localhost:9443"
   # The internal data REST API context.
   internalDataContext="/internal/data/v1/"
   # User name and password of the internal data api.
