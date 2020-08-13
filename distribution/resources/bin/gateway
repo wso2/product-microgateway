@@ -167,6 +167,13 @@ if [ -e "$GW_HOME/bin/gateway.pid" ]; then
   PID=`cat "$GW_HOME"/bin/gateway.pid`
 fi
 
+# set the ballerina thread pool size
+if [ -z "${BALLERINA_MAX_POOL_SIZE+set}" ]; then
+  export BALLERINA_MAX_POOL_SIZE=100
+else
+  echo "Info: Ballerina thread pool size is set to ${BALLERINA_MAX_POOL_SIZE}"
+fi
+
 #To run the Java classes required for the identification of observability
 java_cmd_tools () {
   METRIC_CLASSPATH=""
