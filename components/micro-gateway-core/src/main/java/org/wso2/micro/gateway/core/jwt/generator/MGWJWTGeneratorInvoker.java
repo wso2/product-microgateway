@@ -106,7 +106,7 @@ public class MGWJWTGeneratorInvoker {
             if (claimList == null) {
                 return null;
             }
-            BPackage packageId = new BPackage("wso2", "gateway", "3.1.0");
+            BPackage packageId = new BPackage("wso2", "gateway", "3.2.0");
             BMap<String, Object> bMap = BValueCreator.createRecordValue(packageId, "RetrievedUserClaimsListDTO");
             bMap.put("count", claimList.size());
             BArray bArray = (BArray) bMap.get("list");

@@ -15,7 +15,7 @@ This section defines the step-by-step instructions to build an [Ubuntu](https://
    
 > By default, the Docker image will prepackage the General Availability (GA) release version of the relevant WSO2 product.
 
-NOTE : Please replace the '${MGW_VERSION}' with the relevant microgateway version. For ex: 3.1.0
+NOTE : Please replace the '${MGW_VERSION}' with the relevant microgateway version. For ex: 3.2.0
 
 ## Docker command usage references
 

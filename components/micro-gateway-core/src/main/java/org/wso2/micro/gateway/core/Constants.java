@@ -35,7 +35,7 @@ public class Constants {
     /**
      * gateway package version.
      */
-    public static final String PACKAGE_VERSION = "3.1.0";
+    public static final String PACKAGE_VERSION = "3.2.0";
 
     public static final String GATEWAY_VERSION = "MGW_VERSION";
 
