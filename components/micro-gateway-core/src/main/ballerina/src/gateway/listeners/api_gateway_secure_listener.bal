@@ -67,6 +67,7 @@ function initiateGatewaySecureConfigurations(http:ListenerConfiguration config) 
     http:ListenerSecureSocket secureSocket = {
         trustStore: trustStore,
         keyStore: keyStore,
+        protocol: protocol,
         sslVerifyClient: sslVerifyClient,
         ciphers: ciphers
     };
