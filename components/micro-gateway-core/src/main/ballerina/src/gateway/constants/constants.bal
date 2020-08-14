@@ -35,7 +35,7 @@ public const string SERVICE_ANN_NAME = "ServiceConfig";
 public const string API_ANN_NAME = "API";
 public const string FILTER_ANN_NAME = "Filters";
 public const string SKIP_FILTERS_ANN_NAME = "SkipFilters";
-public const string GATEWAY_ANN_PACKAGE = "wso2/gateway:3.1.0";
+public const string GATEWAY_ANN_PACKAGE = "wso2/gateway:3.2.0";
 
 public const string BASIC_PREFIX_WITH_SPACE = "Basic ";
 public const string AUTHORIZATION_HEADER = "Authorization";
