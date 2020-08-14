@@ -74,6 +74,8 @@ IF %ERRORLEVEL% NEQ 0 GOTO END
 CALL :validateExecutable %*
 IF %ERRORLEVEL% NEQ 0 GOTO END
 
+CALL :setBallerinaWorkerPoolSize
+
 SET EXEC_FILE=%~1
 CALL :buildBalArgs %*
 
@@ -202,6 +204,15 @@ REM Check JAVA availability
     IF NOT EXIST "%JAVA_HOME%\bin\java.exe" (
         ECHO ERROR: JAVA_HOME is invalid.
         EXIT /B 1
+    )
+    EXIT /B 0
+
+REM Set the ballerina thread pool size
+:setBallerinaWorkerPoolSize
+    IF "%BALLERINA_MAX_POOL_SIZE%"=="" (
+        SET BALLERINA_MAX_POOL_SIZE=100
+    ) else (
+        ECHO Info: Ballerina thread pool size is set to %BALLERINA_MAX_POOL_SIZE%
     )
     EXIT /B 0
 
