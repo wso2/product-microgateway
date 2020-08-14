@@ -207,7 +207,7 @@ REM Check JAVA availability
     )
     EXIT /B 0
 
-REM set the ballerina thread pool size
+REM Set the ballerina thread pool size
 :setBallerinaWorkerPoolSize
     IF "%BALLERINA_MAX_POOL_SIZE%"=="" (
         SET BALLERINA_MAX_POOL_SIZE=100
