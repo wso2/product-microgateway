@@ -68,6 +68,10 @@ public type JwtAuthProvider object {
             // validation has failed. Hence we do not need to continue rest of the jwt auth providers.
             return false;
         }
+        //In multiple issuer's scenario, 900901 code is already set if the token fails with the first JWT config
+        //Since the jwt is getting authenticated again, it is required to set this property to null value.
+        //Otherwise, this would fail to provide correct authorization failure message.
+        invocationContext.attributes[ERROR_CODE] = ();
         var handleVar = self.inboundJwtAuthProvider.authenticate(credential);
         map<anydata>[] | error claimsSet = self.claims;
         //finishing span
@@ -174,7 +178,10 @@ public function validateSubscriptions(string jwtToken, jwt:JwtPayload payload, b
     map<json>? customClaims = payload?.customClaims;
 
     subscriptionValidated = isAllowedKey(jwtToken, payload, subscriptionValEnabled, consumerKeyClaim, gatewayCache);
-    if (subscriptionValidated || !subscriptionValEnabled || isGRPC) {
+    if (!subscriptionValEnabled || isGRPC) {
+        printDebug(KEY_JWT_AUTH_PROVIDER, "Subscriptions validation is disabled.");
+        return true;
+    } else if (subscriptionValidated) {
         printDebug(KEY_JWT_AUTH_PROVIDER, "Subscriptions validated.");
         return true;
     } else {
