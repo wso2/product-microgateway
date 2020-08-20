@@ -54,6 +54,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private ExternalDocumentation externalDocs;
     private String operationId;
     private List<BallerinaParameter> parameters;
+    private List<BallerinaParameter> pathParameters;
     private String scope;
     private boolean isSecured = true;
     //to identify if the isSecured flag is set from the operation
@@ -111,6 +112,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.description = operation.getDescription();
         this.externalDocs = operation.getExternalDocs();
         this.parameters = new ArrayList<>();
+        this.pathParameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
         ApplicationSecurity appSecurity = OpenAPICodegenUtils.populateApplicationSecurity(api.getName(),
                 api.getVersion(), operation.getExtensions(), api.getMutualSSL());
@@ -190,6 +192,9 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
         if (operation.getParameters() != null) {
             for (Parameter parameter : operation.getParameters()) {
+                if ("path".equals(parameter.getIn())) {
+                    this.pathParameters.add(new BallerinaParameter().buildContext(parameter, api));
+                }
                 this.parameters.add(new BallerinaParameter().buildContext(parameter, api));
             }
         }
@@ -226,6 +231,10 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
 
     public List<BallerinaParameter> getParameters() {
         return parameters;
+    }
+
+    public List<BallerinaParameter> getPathParameters() {
+        return pathParameters;
     }
 
     public void setOperationId(String operationId) {
