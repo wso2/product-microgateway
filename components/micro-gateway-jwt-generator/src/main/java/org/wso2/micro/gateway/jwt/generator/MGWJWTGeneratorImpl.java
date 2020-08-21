@@ -61,7 +61,7 @@ public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
         claims.put("exp", (int) (expireIn / 1000));
         if (StringUtils.isNotEmpty((CharSequence) jwtInfo.get("sub"))) {
             claims.put("sub", jwtInfo.get("sub"));
-            claims.put(dialect + "/endUser", jwtInfo.get("sub"));
+            claims.put(dialect + "/enduser", jwtInfo.get("sub"));
         }
         if (StringUtils.isNotEmpty((CharSequence) customClaims.get("scopes"))) {
             claims.put("scopes", (customClaims.get("scopes")));
@@ -72,7 +72,7 @@ public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
                         .toString());
             }
             if (StringUtils.isNotEmpty(((HashMap) customClaims.get("application")).get("uuid").toString())) {
-                claims.put(dialect + "/applicationUUID", ((HashMap) customClaims.get("application")).get("uuid")
+                claims.put(dialect + "/applicationUUId", ((HashMap) customClaims.get("application")).get("uuid")
                         .toString());
             }
             if (StringUtils.isNotEmpty((CharSequence) ((HashMap) customClaims.get("application")).get("owner"))) {
