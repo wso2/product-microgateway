@@ -154,8 +154,12 @@ function validateSubscriptionFromDataStores(string token, string consumerKey, st
                 setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
             }
         } else {
-            printError(KEY_PILOT_UTIL, "Key mapping not found for consumer key : " + consumerKey);
-            setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
+            if (isValidateSubscription) {
+                printError(KEY_PILOT_UTIL, "Key mapping not found for consumer key : " + consumerKey);
+                setErrorMessageToInvocationContext(API_AUTH_FORBIDDEN);
+            } else {
+                printDebug(KEY_PILOT_UTIL, "Key mapping not found for consumer key : " + consumerKey);
+            }
         }
     } else {
         printDebug(KEY_PILOT_UTIL, "API Event hub is disabled. Can not fetch subscription data.");
