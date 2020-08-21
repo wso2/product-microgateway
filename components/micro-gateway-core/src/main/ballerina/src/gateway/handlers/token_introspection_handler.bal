@@ -93,13 +93,6 @@ public type KeyValidationHandler object {
         string authHeaderName = getAuthorizationHeader(invocationContext);
         APIConfiguration? apiConfig = apiConfigAnnotationMap[<string>invocationContext.attributes[http:SERVICE_NAME]];
         boolean|auth:Error authenticationResult = false;
-        var tokenStatus = retrieveFromRevokedTokenMap(credential);
-        if (tokenStatus is boolean && tokenStatus) {
-            printDebug(KEY_AUTHN_FILTER, "Token is found in the invalid token map.");
-            printDebug(KEY_AUTHN_FILTER, "Oauth Token has been revoked.");
-            setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
-            return false;
-        }
         if (self.isLegacyKM) {
             // In legacy mode, use the KeyValidation service for token validation.
             // This is used when API-M versions < 3.2 are being used to support backward compatibility
