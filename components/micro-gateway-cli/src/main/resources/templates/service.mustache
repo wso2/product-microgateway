@@ -112,8 +112,8 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
 
-        map<string> pathParams = { {{#parameters}}{{#equals in "path"}}
-            "{{name}}": <@untainted>{{name}}{{#unless @last}},{{/unless}} {{/equals}}{{/parameters}}
+        map<string> pathParams = { {{#pathParameters}}
+            "{{name}}": <@untainted>{{name}}{{#unless @last}},{{/unless}} {{/pathParameters}}
         };
         invocationContext.attributes["pathParams"] = pathParams;
 
