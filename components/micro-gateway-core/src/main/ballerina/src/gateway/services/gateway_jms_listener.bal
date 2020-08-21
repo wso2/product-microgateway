@@ -34,7 +34,7 @@ service gatewayNotificationService = service {
             string? | error event = message.getString(NOTIFICATION_EVENT);
 
             if (eventType is string && event is string) {
-                printInfo(KEY_NOTIFICATION_EVENT_LISTENER, "Recieved event with type : " + eventType + " and event : " + event);
+                printInfo(KEY_NOTIFICATION_EVENT_LISTENER, "Recieved event with type : " + eventType);
                 handleNotificationMessage(eventType, event);
             } else {
                 printError(KEY_NOTIFICATION_EVENT_LISTENER, "Error occurred while reading notification message.");
@@ -109,7 +109,7 @@ function handleNotificationMessage(string eventType, string encodedEvent ) {
     if (decodedEvent is  byte[]) {
         var decodedString = str:fromBytes(decodedEvent);
         if (decodedString is string) {
-            printInfo(KEY_NOTIFICATION_EVENT_LISTENER, "Decoded JMS notification : " + decodedString);
+            printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "Decoded JMS notification : " + decodedString);
             io:StringReader sr = new(decodedString, encoding = "UTF-8");
             json jsonEvent = checkpanic sr.readJson();
             printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "Decoded JMS json value : " + jsonEvent.toJsonString());

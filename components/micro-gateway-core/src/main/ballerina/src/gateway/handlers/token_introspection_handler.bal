@@ -121,7 +121,6 @@ public type KeyValidationHandler object {
                 }
                 return authenticationResult;
             } else {
-                setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
                 return authenticationResult;
             }
         } else {
