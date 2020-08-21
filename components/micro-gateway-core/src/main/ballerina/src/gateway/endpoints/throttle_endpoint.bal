@@ -40,7 +40,7 @@ public function initGlobalThrottleDataPublisher() {
     if(enabledGlobalTMEventPublishing && isBinaryPublisherEnabled()) {
         printDebug(KEY_THROTTLE_UTIL, "ThrottleEvents will be published via binary endpoint.");
         initBinaryThrottleDataPublisher();
-    } else {
+    } else if (enabledGlobalTMEventPublishing) {
         printDebug(KEY_THROTTLE_UTIL, "ThrottleEvents will be published via HTTPS endpoint.");
     }
 }
