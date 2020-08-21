@@ -20,7 +20,7 @@ import ballerina/task;
 boolean enabledPersistentMessage = getConfigBooleanValue(PERSISTENT_MESSAGE_INSTANCE_ID,
         PERSISTENT_MESSAGE_ENABLED, DEFAULT_TOKEN_REVOCATION_ENABLED);
 const int revokedJWTRetrievalRetries = 15;
-string revokedJwtServiceURL = getRerokedJwtPersistantEndpoint();
+string revokedJwtServiceURL = getRevokedJwtPersistantEndpoint();
 int jwtRetrievalRetriesCount = 0;
 const int retryIntervalInMillis = 15000;
 
@@ -44,7 +44,7 @@ task:Scheduler revokedJwtRetievalTimer = new ({
     initialDelayInMillis: 2000
 });
 
-function getRerokedJwtPersistantEndpoint() returns string {
+function getRevokedJwtPersistantEndpoint() returns string {
     string revokedJwtServiceURL = getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_HOSTNAME, "");
     if (revokedJwtServiceURL == "") {
         revokedJwtServiceURL = getConfigValue(PERSISTENT_MESSAGE_INSTANCE_ID, PERSISTENT_MESSAGE_ENDPOINT,
