@@ -34,7 +34,7 @@ service gatewayNotificationService = service {
             string? | error event = message.getString(NOTIFICATION_EVENT);
 
             if (eventType is string && event is string) {
-                printDebug(KEY_NOTIFICATION_EVENT_LISTENER, "Recieved event with type : " + eventType + " and event : " + event);
+                printInfo(KEY_NOTIFICATION_EVENT_LISTENER, "Recieved event with type : " + eventType + " and event : " + event);
                 handleNotificationMessage(eventType, event);
             } else {
                 printError(KEY_NOTIFICATION_EVENT_LISTENER, "Error occurred while reading notification message.");
