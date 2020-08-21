@@ -89,7 +89,6 @@ public class ProtoOpenAPI {
         PathItem pathItem = new PathItem();
         Operation operation = new Operation();
         operation.setOperationId(UUID.randomUUID().toString());
-        addOauth2SecurityRequirement(operation, scopes);
         if (StringUtils.isNotEmpty(throttlingTier)) {
             operation.addExtension(OpenAPIConstants.THROTTLING_TIER, throttlingTier);
         }
@@ -100,6 +99,9 @@ public class ProtoOpenAPI {
         }
         if (isAPIKeyEnabled) {
             addAPIKeySecurityRequirement(operation);
+        }
+        if (isOauth2Enabled) {
+            addOauth2SecurityRequirement(operation, scopes);
         }
         //For each path, the only available http method is "post" according to the grpc mapping.
         pathItem.setPost(operation);
