@@ -354,6 +354,7 @@ public const int UNPROCESSABLE_ENTITY = 422;
 
 // end of http codes
 const string PATH_SEPERATOR = "/";
+const string TENANT_DOMAIN_PREFIX = "/t/";
 
 //http2 constants
 public const string HTTP2_INSTANCE_ID = "http2";
