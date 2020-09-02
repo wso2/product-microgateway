@@ -187,7 +187,7 @@ public function getTenantDomain(http:FilterContext context) returns (string) {
     // todo: need to implement to get tenantDomain
     string apiContext = getContext(context);
     string[] splittedContext = split(apiContext, "/");
-    if (splittedContext.length() > 3) {
+    if (splittedContext.length() > 3 && apiContext.startsWith(TENANT_DOMAIN_PREFIX)) {
         // this check if basepath have /t/domain in
         return splittedContext[2];
     } else {
@@ -327,6 +327,7 @@ public function sendErrorResponse(http:Caller caller, http:Request request, http
 }
 
 # Default error response sender with json error response.
+# + context - filter context object.
 # + response - http response object.
 public function sendErrorResponseFromInvocationContext(http:FilterContext context, http:Response response) {
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
