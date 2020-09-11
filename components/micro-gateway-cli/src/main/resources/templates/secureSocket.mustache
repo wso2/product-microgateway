@@ -1,10 +1,20 @@
 ,
 secureSocket:{
+    keyStore: {
+       path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:KEY_STORE_PATH,
+           gateway:DEFAULT_KEY_STORE_PATH),
+       password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:KEY_STORE_PASSWORD, gateway:DEFAULT_KEY_STORE_PASSWORD)
+     },
     trustStore: {
-           path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:TRUST_STORE_PATH,
-               gateway:DEFAULT_TRUST_STORE_PATH),
-           password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:TRUST_STORE_PASSWORD, gateway:DEFAULT_TRUST_STORE_PASSWORD)
+       path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:TRUST_STORE_PATH,
+           gateway:DEFAULT_TRUST_STORE_PATH),
+       password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:TRUST_STORE_PASSWORD, gateway:DEFAULT_TRUST_STORE_PASSWORD)
      },
      disable: gateway:getConfigBooleanValue(gateway:HTTP_CLIENTS_INSTANCE_ID, gateway:HTTP_CLIENTS_DISABLE_SSL_VERIFICATION, false),
+     protocol: {
+         name: gateway:getConfigValue(gateway:MTSL_CONF_INSTANCE_ID, gateway:MTSL_CONF_PROTOCOL_NAME, gateway:DEFAULT_PROTOCOL_NAME),
+         versions: gateway:split(gateway:getConfigValue(gateway:MTSL_CONF_INSTANCE_ID, gateway:MTSL_CONF_PROTOCOL_VERSIONS, gateway:DEFAULT_PROTOCOL_VERSIONS), ",")
+     },
+     ciphers: gateway:split(gateway:getConfigValue(gateway:MTSL_CONF_INSTANCE_ID, gateway:MTSL_CONF_CIPHERS, gateway:DEFAULT_CIPHERS), ","),
      verifyHostname:gateway:getConfigBooleanValue(gateway:HTTP_CLIENTS_INSTANCE_ID, gateway:ENABLE_HOSTNAME_VERIFICATION, true)
 }
