@@ -67,6 +67,8 @@ public class SampleClaimRetriever extends AbstractMGWClaimRetriever {
         try {
             HttpsURLConnection urlConn = null;
             String userInfoEndpoint = serverUrl + "/keymanager-operations/user-info/claims/generate";
+            // Using `java.net.*` libs here to keep the simplicity and avoid the need of third party libs.
+            // You can any third party http libs to do the same differently if you prefer
             URL url = new URL(userInfoEndpoint);
             urlConn = (HttpsURLConnection) url.openConnection();
             urlConn.setSSLSocketFactory(sslSocketFactory);
