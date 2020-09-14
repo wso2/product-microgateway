@@ -17,16 +17,18 @@
 package envoyCodegen
 
 import (
-	v2 "github.com/envoyproxy/go-control-plane/envoy/api/v2"
-	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
-	envoy_api_v2_endpoint "github.com/envoyproxy/go-control-plane/envoy/api/v2/endpoint"
-	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
-	envoy_type_matcher "github.com/envoyproxy/go-control-plane/envoy/type/matcher"
-	"github.com/golang/protobuf/ptypes"
-	logger "github.com/wso2/micro-gw/internal/loggers"
-	"github.com/wso2/micro-gw/configs"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
+	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
+	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
+	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
+
 	swag_operator "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
+	logger "github.com/wso2/micro-gw/internal/loggers"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
+	"github.com/wso2/micro-gw/configs"
+
+	"github.com/golang/protobuf/ptypes"
 	"strings"
 	"time"
 )
@@ -47,23 +49,23 @@ import (
  * @return []*v2.Cluster  Sandbox clusters
  * @return []*core.Address  Sandbox endpoints
  */
-func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.Route, []*v2.Cluster, []*core.Address, []*v2route.Route, []*v2.Cluster, []*core.Address) {
+func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address, []*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
 	var (
-		routesProd           []*v2route.Route
-		clustersProd         []*v2.Cluster
+		routesProd           []*routev3.Route
+		clustersProd         []*clusterv3.Cluster
 		endpointProd         []apiDefinition.Endpoint
 		apiLevelEndpointProd []apiDefinition.Endpoint
-		apilevelClusterProd  v2.Cluster
+		apilevelClusterProd  clusterv3.Cluster
 		cluster_refProd      string
-		endpointsProd        []*core.Address
+		endpointsProd        []*corev3.Address
 
-		routesSand           []*v2route.Route
-		clustersSand         []*v2.Cluster
+		routesSand           []*routev3.Route
+		clustersSand         []*clusterv3.Cluster
 		endpointSand         []apiDefinition.Endpoint
 		apiLevelEndpointSand []apiDefinition.Endpoint
-		apilevelClusterSand  v2.Cluster
+		apilevelClusterSand  clusterv3.Cluster
 		cluster_refSand      string
-		endpointsSand        []*core.Address
+		endpointsSand        []*corev3.Address
 	)
 	//check API level sandbox endpoints availble
 	if swag_operator.IsEndpointsAvailable(mgwSwagger.GetSandEndpoints()) {
@@ -151,7 +153,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*v2route.R
  * @param address   Address which has host and port
  * @return v2.Cluster  Cluster instance
  */
-func createCluster(address core.Address, clusterName string) v2.Cluster {
+func createCluster(address corev3.Address, clusterName string) clusterv3.Cluster {
 	logger.LoggerOasparser.Debug("creating a cluster....")
 	conf, errReadConfig := configs.ReadConfigs()
 	if errReadConfig != nil {
@@ -159,20 +161,20 @@ func createCluster(address core.Address, clusterName string) v2.Cluster {
 	}
 
 	h := &address
-	cluster := v2.Cluster{
+	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
 		ConnectTimeout:       ptypes.DurationProto(conf.Envoy.ClusterTimeoutInSeconds* time.Second),
-		ClusterDiscoveryType: &v2.Cluster_Type{Type: v2.Cluster_STRICT_DNS},
-		DnsLookupFamily:      v2.Cluster_V4_ONLY,
-		LbPolicy:             v2.Cluster_ROUND_ROBIN,
-		LoadAssignment: &v2.ClusterLoadAssignment{
+		ClusterDiscoveryType: &clusterv3.Cluster_Type{Type: clusterv3.Cluster_STRICT_DNS},
+		DnsLookupFamily:      clusterv3.Cluster_V4_ONLY,
+		LbPolicy:             clusterv3.Cluster_ROUND_ROBIN,
+		LoadAssignment: &endpointv3.ClusterLoadAssignment{
 			ClusterName: clusterName,
-			Endpoints: []*envoy_api_v2_endpoint.LocalityLbEndpoints{
+			Endpoints: []*endpointv3.LocalityLbEndpoints{
 				{
-					LbEndpoints: []*envoy_api_v2_endpoint.LbEndpoint{
+					LbEndpoints: []*endpointv3.LbEndpoint{
 						{
-							HostIdentifier: &envoy_api_v2_endpoint.LbEndpoint_Endpoint{
-								Endpoint: &envoy_api_v2_endpoint.Endpoint{
+							HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
+								Endpoint: &endpointv3.Endpoint{
 									Address: h,
 								},
 							},
@@ -195,20 +197,20 @@ func createCluster(address core.Address, clusterName string) v2.Cluster {
  * @param clusterName  Name of the cluster
  * @return v2route.Route  Route instance
  */
-func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourcePath string, clusterName string) v2route.Route {
+func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourcePath string, clusterName string) routev3.Route {
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
-		route v2route.Route
-		action *v2route.Route_Route
-		match *v2route.RouteMatch
+		router routev3.Route
+		action *routev3.Route_Route
+		match *routev3.RouteMatch
 	)
 	routePath := GenerateRoutePaths(xWso2Basepath,endpoint.GetBasepath(), resourcePath)
 
-	match = &v2route.RouteMatch{
-		PathSpecifier: &v2route.RouteMatch_SafeRegex{
-			SafeRegex: &envoy_type_matcher.RegexMatcher{
-				EngineType: &envoy_type_matcher.RegexMatcher_GoogleRe2{
-					GoogleRe2: &envoy_type_matcher.RegexMatcher_GoogleRE2{
+	match = &routev3.RouteMatch{
+		PathSpecifier: &routev3.RouteMatch_SafeRegex{
+			SafeRegex: &envoy_type_matcherv3.RegexMatcher{
+				EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
+					GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
 						MaxProgramSize: nil,
 					},
 				},
@@ -217,16 +219,17 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 		},
 	}
 
+
 	if xWso2Basepath != "" {
-		action = &v2route.Route_Route{
-			Route: &v2route.RouteAction{
-				HostRewriteSpecifier: &v2route.RouteAction_HostRewrite{
-					HostRewrite: endpoint.GetHost(),
+		action = &routev3.Route_Route{
+			Route: &routev3.RouteAction{
+				HostRewriteSpecifier: &routev3.RouteAction_HostRewriteLiteral{
+					HostRewriteLiteral: endpoint.GetHost(),
 				},
-				RegexRewrite: &envoy_type_matcher.RegexMatchAndSubstitute{
-					Pattern: &envoy_type_matcher.RegexMatcher{
-						EngineType: &envoy_type_matcher.RegexMatcher_GoogleRe2{
-							GoogleRe2: &envoy_type_matcher.RegexMatcher_GoogleRE2{
+				RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
+					Pattern: &envoy_type_matcherv3.RegexMatcher{
+						EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
+							GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
 								MaxProgramSize: nil,
 							},
 						},
@@ -234,32 +237,33 @@ func createRoute(xWso2Basepath string,endpoint apiDefinition.Endpoint, resourceP
 					},
 					Substitution: endpoint.GetBasepath(),
 				},
-				ClusterSpecifier: &v2route.RouteAction_Cluster{
+				ClusterSpecifier: &routev3.RouteAction_Cluster{
 					Cluster: clusterName,
 				},
 			},
 		}
 	} else {
-		action =  &v2route.Route_Route{
-			Route: &v2route.RouteAction{
-				HostRewriteSpecifier: &v2route.RouteAction_HostRewrite{
-					HostRewrite: endpoint.GetHost(),
+		action =  &routev3.Route_Route{
+			Route: &routev3.RouteAction{
+				HostRewriteSpecifier: &routev3.RouteAction_HostRewriteLiteral{
+					HostRewriteLiteral: endpoint.GetHost(),
 				},
-				ClusterSpecifier: &v2route.RouteAction_Cluster{
+				ClusterSpecifier: &routev3.RouteAction_Cluster{
 					Cluster: clusterName,
 				},
 			},
 		}
 	}
 
-	route = v2route.Route{
+	router = routev3.Route{
+		Name: "routename",
 		Match: match,
 		Action: action,
 		Metadata: nil,
 	}
 
 	//fmt.Println(endpoint.GetHost(), routePath)
-	return route
+	return router
 }
 
 /**

@@ -17,12 +17,14 @@
 package envoyCodegen
 
 import (
-	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
-	envoyconfigfilterhttpextauthzv2 "github.com/envoyproxy/go-control-plane/envoy/config/filter/http/ext_authz/v2"
-	hcm "github.com/envoyproxy/go-control-plane/envoy/config/filter/network/http_connection_manager/v2"
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
+	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
+	routerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
-	"github.com/golang/protobuf/ptypes"
+
 	logger "github.com/wso2/micro-gw/internal/loggers"
+	"github.com/golang/protobuf/ptypes"
 )
 
 /**
@@ -30,11 +32,11 @@ import (
  *
  * @return []*hcm.HttpFilter  Http filter set as a array
  */
-func getHttpFilters() []*hcm.HttpFilter {
+func getHttpFilters() []*hcmv3.HttpFilter {
 	//extAauth := GetExtAauthzHttpFilter()
 	router := getRouterHttpFilter()
 
-	httpFilters := []*hcm.HttpFilter{
+	httpFilters := []*hcmv3.HttpFilter{
 		//&extAauth,
 		&router,
 	}
@@ -47,8 +49,34 @@ func getHttpFilters() []*hcm.HttpFilter {
  *
  * @return hcm.HttpFilter  Http filter instance
  */
-func getRouterHttpFilter() hcm.HttpFilter {
-	return hcm.HttpFilter{Name: wellknown.Router}
+func getRouterHttpFilter() hcmv3.HttpFilter {
+
+	routeFilterConf := routerv3.Router{
+		DynamicStats:             nil,
+		StartChildSpan:           false,
+		UpstreamLog:              nil,
+		SuppressEnvoyHeaders:     false,
+		StrictCheckHeaders:       nil,
+		RespectExpectedRqTimeout: false,
+		XXX_NoUnkeyedLiteral:     struct{}{},
+		XXX_unrecognized:         nil,
+		XXX_sizecache:            0,
+	}
+
+	routeFilterTypedConf, err := ptypes.MarshalAny(&routeFilterConf)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error marshaling route filter configs. ", err)
+	}
+
+	filter := hcmv3.HttpFilter{
+		Name:                 wellknown.Router,
+		ConfigType:           &hcmv3.HttpFilter_TypedConfig{TypedConfig: routeFilterTypedConf},
+		XXX_NoUnkeyedLiteral: struct{}{},
+		XXX_unrecognized:     nil,
+		XXX_sizecache:        0,
+	}
+
+	return filter
 }
 
 /**
@@ -56,16 +84,16 @@ func getRouterHttpFilter() hcm.HttpFilter {
  *
  * @return hcm.HttpFilter  Http filter instance
  */
-func getExtAauthzHttpFilter() hcm.HttpFilter {
-	extAuthzConfig := &envoyconfigfilterhttpextauthzv2.ExtAuthz{
-		WithRequestBody: &envoyconfigfilterhttpextauthzv2.BufferSettings{
+func getExtAauthzHttpFilter() hcmv3.HttpFilter {
+	extAuthzConfig := &ext_authv3.ExtAuthz{
+		WithRequestBody: &ext_authv3.BufferSettings{
 			MaxRequestBytes:     1024,
 			AllowPartialMessage: false,
 		},
-		Services: &envoyconfigfilterhttpextauthzv2.ExtAuthz_GrpcService{
-			GrpcService: &core.GrpcService{
-				TargetSpecifier: &core.GrpcService_EnvoyGrpc_{
-					EnvoyGrpc: &core.GrpcService_EnvoyGrpc{
+		Services: &ext_authv3.ExtAuthz_GrpcService{
+			GrpcService: &corev3.GrpcService{
+				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
+					EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{
 						ClusterName: "ext-authz",
 					},
 				},
@@ -76,9 +104,9 @@ func getExtAauthzHttpFilter() hcm.HttpFilter {
 	if err2 != nil {
 		logger.LoggerOasparser.Error(err2)
 	}
-	extAuthzFilter := hcm.HttpFilter{
+	extAuthzFilter := hcmv3.HttpFilter{
 		Name: "envoy.filters.http.ext_authz",
-		ConfigType: &hcm.HttpFilter_TypedConfig{
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{
 			TypedConfig: ext,
 		},
 	}

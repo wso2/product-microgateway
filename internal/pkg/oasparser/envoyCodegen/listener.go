@@ -17,17 +17,17 @@
 package envoyCodegen
 
 import (
-	v2 "github.com/envoyproxy/go-control-plane/envoy/api/v2"
-	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
-	listenerv2 "github.com/envoyproxy/go-control-plane/envoy/api/v2/listener"
-	v2route "github.com/envoyproxy/go-control-plane/envoy/api/v2/route"
-	envoy_config_filter_accesslog_v2 "github.com/envoyproxy/go-control-plane/envoy/config/filter/accesslog/v2"
-	hcm "github.com/envoyproxy/go-control-plane/envoy/config/filter/network/http_connection_manager/v2"
+	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
+	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	envoy_config_filter_accesslog_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/file/v3"
+	access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
+	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
-	"github.com/golang/protobuf/ptypes"
-	structpb "github.com/golang/protobuf/ptypes/struct"
-	"github.com/wso2/micro-gw/configs"
+
 	logger "github.com/wso2/micro-gw/internal/loggers"
+	"github.com/wso2/micro-gw/configs"
+	"github.com/golang/protobuf/ptypes"
 )
 
 /**
@@ -38,29 +38,29 @@ import (
  * @param vHostP  Virtual host
  * @return v2.Listener  V2 listener instance
  */
-func CreateListener(listenerName string, routeConfigName string, vHostP v2route.VirtualHost) v2.Listener {
+func CreateListener(listenerName string, routeConfigName string, vHostP routev3.VirtualHost) listenerv3.Listener {
 	conf, errReadConfig := configs.ReadConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}
 
-	listenerAddress := &core.Address_SocketAddress{
-		SocketAddress: &core.SocketAddress{
-			Protocol: core.SocketAddress_TCP,
+	listenerAddress := &corev3.Address_SocketAddress{
+		SocketAddress: &corev3.SocketAddress{
+			Protocol: corev3.SocketAddress_TCP,
 			Address:  conf.Envoy.ListenerAddress,
-			PortSpecifier: &core.SocketAddress_PortValue{
+			PortSpecifier: &corev3.SocketAddress_PortValue{
 				PortValue: conf.Envoy.ListenerPort,
 			},
 		},
 	}
 	listenerFilters := createListenerFilters(routeConfigName, vHostP)
 
-	listener := v2.Listener{
+	listener := listenerv3.Listener{
 		Name: listenerName,
-		Address: &core.Address{
+		Address: &corev3.Address{
 			Address: listenerAddress,
 		},
-		FilterChains: []*listenerv2.FilterChain{{
+		FilterChains: []*listenerv3.FilterChain{{
 			Filters: listenerFilters},
 		},
 	}
@@ -74,8 +74,8 @@ func CreateListener(listenerName string, routeConfigName string, vHostP v2route.
  * @param vHost  Virtual host
  * @return []*listenerv2.Filter  Listener filters as a array
  */
-func createListenerFilters(routeConfigName string, vHost v2route.VirtualHost) []*listenerv2.Filter {
-	var filters []*listenerv2.Filter
+func createListenerFilters(routeConfigName string, vHost routev3.VirtualHost) []*listenerv3.Filter {
+	var filters []*listenerv3.Filter
 
 	//set connection manager filter for production
 	managerP := createConectionManagerFilter(vHost, routeConfigName)
@@ -84,9 +84,9 @@ func createListenerFilters(routeConfigName string, vHost v2route.VirtualHost) []
 	if err != nil {
 		panic(err)
 	}
-	connectionManagerFilterP := listenerv2.Filter{
+	connectionManagerFilterP := listenerv3.Filter{
 		Name: wellknown.HTTPConnectionManager,
-		ConfigType: &listenerv2.Filter_TypedConfig{
+		ConfigType: &listenerv3.Filter_TypedConfig{
 			TypedConfig: pbst,
 		},
 	}
@@ -103,22 +103,22 @@ func createListenerFilters(routeConfigName string, vHost v2route.VirtualHost) []
  * @param routeConfigName   Name of the route config
  * @return *hcm.HttpConnectionManager  Reference for a connection manager instance
  */
-func createConectionManagerFilter(vHost v2route.VirtualHost, routeConfigName string) *hcm.HttpConnectionManager {
+func createConectionManagerFilter(vHost routev3.VirtualHost, routeConfigName string) *hcmv3.HttpConnectionManager {
 
 	httpFilters := getHttpFilters()
 	accessLogs := getAccessLogConfigs()
 
-	manager := &hcm.HttpConnectionManager{
-		CodecType:  hcm.HttpConnectionManager_AUTO,
+	manager := &hcmv3.HttpConnectionManager{
+		CodecType:  hcmv3.HttpConnectionManager_AUTO,
 		StatPrefix: "ingress_http",
-		RouteSpecifier: &hcm.HttpConnectionManager_RouteConfig{
-			RouteConfig: &v2.RouteConfiguration{
+		RouteSpecifier: &hcmv3.HttpConnectionManager_RouteConfig{
+			RouteConfig: &routev3.RouteConfiguration{
 				Name:         routeConfigName,
-				VirtualHosts: []*v2route.VirtualHost{&vHost},
+				VirtualHosts: []*routev3.VirtualHost{&vHost},
 			},
 		},
 		HttpFilters: httpFilters,
-		AccessLog: []*envoy_config_filter_accesslog_v2.AccessLog{&accessLogs},
+		AccessLog: []*access_logv3.AccessLog{&accessLogs},
 	}
 	return manager
 }
@@ -131,11 +131,11 @@ func createConectionManagerFilter(vHost v2route.VirtualHost, routeConfigName str
  * @return v2route.VirtualHost  Virtual host instance
  * @return error  Error
  */
-func CreateVirtualHost(vHost_Name string, routes []*v2route.Route) (v2route.VirtualHost, error) {
+func CreateVirtualHost(vHost_Name string, routes []*routev3.Route) (routev3.VirtualHost, error) {
 
 	vHost_Domains := []string{"*"}
 
-	virtual_host := v2route.VirtualHost{
+	virtual_host := routev3.VirtualHost{
 		Name:    vHost_Name,
 		Domains: vHost_Domains,
 		Routes:  routes,
@@ -150,12 +150,12 @@ func CreateVirtualHost(vHost_Name string, routes []*v2route.Route) (v2route.Virt
  * @param port  Port
  * @return core.Address  Endpoint as a core address
  */
-func createAddress(remoteHost string, port uint32) core.Address {
-	address := core.Address{Address: &core.Address_SocketAddress{
-		SocketAddress: &core.SocketAddress{
+func createAddress(remoteHost string, port uint32) corev3.Address {
+	address := corev3.Address{Address: &corev3.Address_SocketAddress{
+		SocketAddress: &corev3.SocketAddress{
 			Address:  remoteHost,
-			Protocol: core.SocketAddress_TCP,
-			PortSpecifier: &core.SocketAddress_PortValue{
+			Protocol: corev3.SocketAddress_TCP,
+			PortSpecifier: &corev3.SocketAddress_PortValue{
 				PortValue: uint32(port),
 			},
 		},
@@ -168,52 +168,40 @@ func createAddress(remoteHost string, port uint32) core.Address {
  *
  * @return envoy_config_filter_accesslog_v2.AccessLog  Access log config
  */
-func getAccessLogConfigs() envoy_config_filter_accesslog_v2.AccessLog {
-	logFormat := ""
-
-	logConfig := &structpb.Struct{
-		Fields: map[string]*structpb.Value{
-			"path": {
-				Kind: &structpb.Value_StringValue{
-					StringValue: "/tmp/envoy.access.log",
-				},
-			},
-		},
-	}
+func getAccessLogConfigs() access_logv3.AccessLog {
+	var logFormat *envoy_config_filter_accesslog_v3.FileAccessLog_Format
+	logpath := "/tmp/envoy.access.log"   //default access log path
 
 	logConf, errReadConfig := configs.ReadLogConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
 	} else {
-		logFormat = logConf.AccessLogs.Format
-	}
-
-	if logFormat != "" {
-		logConfig = &structpb.Struct{
-			Fields: map[string]*structpb.Value{
-				"path": {
-					Kind: &structpb.Value_StringValue{
-						StringValue: "/tmp/envoy.access.log",
-					},
-				},
-				"format": {
-					Kind: &structpb.Value_StringValue{
-						StringValue: logConf.AccessLogs.Format,
-					},
-				},
-			},
+		logFormat = &envoy_config_filter_accesslog_v3.FileAccessLog_Format{
+			Format:  logConf.AccessLogs.Format,
 		}
+		logpath = logConf.AccessLogs.LogFile
 	}
 
-	access_log := envoy_config_filter_accesslog_v2.AccessLog{
-		Name:                 "envoy.file_access_log",
-		ConfigType: &envoy_config_filter_accesslog_v2.AccessLog_Config{
-			Config: logConfig,
-		} ,
+	accessLogConf := &envoy_config_filter_accesslog_v3.FileAccessLog{
+		Path:   logpath,
+		AccessLogFormat: logFormat,
+	}
+
+	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error marsheling access log configs. ", err)
+	}
+
+	access_logs := access_logv3.AccessLog{
+		Name:                 "envoy.access_loggers.file",
+		Filter:               nil,
+		ConfigType:           &access_logv3.AccessLog_TypedConfig{
+			TypedConfig: accessLogTypedConf,
+		},
 		XXX_NoUnkeyedLiteral: struct{}{},
 		XXX_unrecognized:     nil,
 		XXX_sizecache:        0,
 	}
 
-	return access_log
+	return access_logs
 }
