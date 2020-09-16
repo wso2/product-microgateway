@@ -6,6 +6,7 @@ import org.wso2.micro.gateway.tools.model.Config;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class GetConfig {
             enabled = config.getB7a().getObservability().getMetrics().isEnabled();
             jmxPort = config.getB7a().getObservability().getMetrics().getPrometheus().getJmxPort();
             File txtConfigs = new File(fileWritePath);
-            try (PrintWriter writer = new PrintWriter(txtConfigs, "UTF-8")) {
+            try (PrintWriter writer = new PrintWriter(txtConfigs, StandardCharsets.UTF_8.name())) {
                 writer.println(enabled);
                 writer.println(jmxPort);
             }
