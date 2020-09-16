@@ -134,8 +134,9 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/store/order/1", exchange -> {
                 byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
-                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46aGVsbG8="))
+                if (exchange.getRequestHeaders().containsKey(Constants.AUTHORIZATION_HEADER) &&
+                        exchange.getRequestHeaders().get(Constants.AUTHORIZATION_HEADER).toString()
+                                .contains("Basic YWRtaW46aGVsbG8="))
                 {
                     response = ResponseConstants.storeInventoryResponse.getBytes();
                     exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
@@ -152,8 +153,9 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/user/john", exchange -> {
                 byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
-                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46aGVsbG8="))
+                if (exchange.getRequestHeaders().containsKey(Constants.AUTHORIZATION_HEADER) &&
+                        exchange.getRequestHeaders().get(Constants.AUTHORIZATION_HEADER).toString()
+                                .contains("Basic YWRtaW46aGVsbG8="))
                 {
                     response = ResponseConstants.userResponse.getBytes();
                     exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
@@ -220,8 +222,9 @@ public class MockBackEndServer extends Thread {
             String contextWithSecurity2 = "/v2Basic";
             httpServer.createContext(contextWithSecurity2 + "/pet/findByStatus", exchange -> {
                 byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
-                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
+                if (exchange.getRequestHeaders().containsKey(Constants.AUTHORIZATION_HEADER) &&
+                        exchange.getRequestHeaders().get(Constants.AUTHORIZATION_HEADER).toString()
+                                .contains("Basic YWRtaW46YWRtaW4="))
                 {
                     response = ResponseConstants.responseBody.getBytes();
                     exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
@@ -238,8 +241,9 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(contextWithSecurity2 + "/pet/", exchange -> {
                 byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
-                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
+                if (exchange.getRequestHeaders().containsKey(Constants.AUTHORIZATION_HEADER) &&
+                        exchange.getRequestHeaders().get(Constants.AUTHORIZATION_HEADER).toString()
+                                .contains("Basic YWRtaW46YWRtaW4="))
                 {
                     response = ResponseConstants.petByIdResponse.getBytes();
                     exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
@@ -256,8 +260,9 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(contextWithSecurity2 + "/pet/findByTags", exchange -> {
                 byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
-                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
+                if (exchange.getRequestHeaders().containsKey(Constants.AUTHORIZATION_HEADER) &&
+                        exchange.getRequestHeaders().get(Constants.AUTHORIZATION_HEADER).toString()
+                                .contains("Basic YWRtaW46YWRtaW4="))
                 {
                     response = ResponseConstants.petByIdResponse.getBytes();
                     exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
@@ -274,8 +279,9 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(contextWithSecurity2 + "/store/inventory", exchange -> {
                 byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
-                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
+                if (exchange.getRequestHeaders().containsKey(Constants.AUTHORIZATION_HEADER) &&
+                        exchange.getRequestHeaders().get(Constants.AUTHORIZATION_HEADER).toString()
+                                .contains("Basic YWRtaW46YWRtaW4="))
                 {
                     response = ResponseConstants.storeInventoryResponse.getBytes();
                     exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
@@ -293,8 +299,9 @@ public class MockBackEndServer extends Thread {
             String contextWithSecurity1 = "/v1Basic";
             httpServer.createContext(contextWithSecurity1 + "/pet/findByStatus", exchange -> {
                 byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
-                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
+                if (exchange.getRequestHeaders().containsKey(Constants.AUTHORIZATION_HEADER) &&
+                        exchange.getRequestHeaders().get(Constants.AUTHORIZATION_HEADER).toString()
+                                .contains("Basic YWRtaW46YWRtaW4="))
                 {
                     response = ResponseConstants.responseBodyV1.getBytes();
                     exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
@@ -311,8 +318,9 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(contextWithSecurity1 + "/pet/findByTags", exchange -> {
                 byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
-                        exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
+                if (exchange.getRequestHeaders().containsKey(Constants.AUTHORIZATION_HEADER) &&
+                        exchange.getRequestHeaders().get(Constants.AUTHORIZATION_HEADER).toString()
+                                .contains("Basic YWRtaW46YWRtaW4="))
                 {
                     response = ResponseConstants.petByIdResponseV1.getBytes();
                     exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
