@@ -1261,7 +1261,7 @@ public final class CmdUtils {
     private static Boolean setVerboseEnabled() {
         String value = System.getProperty("VERBOSE_ENABLED");
         //bat file provides T and shell script provides true
-        return value != null && (value.equals("T") || value.equalsIgnoreCase("true"));
+        return "T".equals(value) || value.equalsIgnoreCase("true");
     }
 
     /**
