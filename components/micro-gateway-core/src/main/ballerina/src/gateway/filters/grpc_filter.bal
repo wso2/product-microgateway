@@ -18,7 +18,6 @@ import ballerina/http;
 import ballerina/mime;
 import ballerina/runtime;
 
-//todo: verify https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
 map<string> httpGrpcStatusCodeMap = { "401" : "16", "403" : "7", "404" : "12", "429" : "8", "500" : "2" };
 map<string> httpGrpcErrorMsgMap = { "401" : "UnAuthenticated", "404" : "Unimplemeted", "500" : "Internal server error" };
 
@@ -79,7 +78,7 @@ public function attachGrpcErrorHeaders(http:Response response, string errorMsg) 
     string statusCode = response.statusCode.toString();
     string grpcStatus = httpGrpcStatusCodeMap[statusCode] ?: "";
     string grpcErrorMessage = errorMsg;
-    if (grpcStatus == ""){
+    if (grpcStatus == "") {
         response.setHeader(GRPC_STATUS_HEADER, "2");
         response.setHeader(GRPC_MESSAGE_HEADER, "Response is not recognized by the gateway.");
         return;
