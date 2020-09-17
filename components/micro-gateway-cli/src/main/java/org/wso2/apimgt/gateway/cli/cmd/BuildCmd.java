@@ -235,8 +235,11 @@ public class BuildCmd implements LauncherCmd {
             return true;
         }
         //allow the users to have proto definitions inside a directory if required
-        FileFilter dirFilter = (f) -> f.isDirectory();
+        FileFilter dirFilter = File::isDirectory;
         File[] subDirectories = file.listFiles(dirFilter);
+        if (subDirectories == null) {
+            return false;
+        }
         for (File dir : subDirectories) {
             return isProtosAvailable(dir.getAbsolutePath());
         }
