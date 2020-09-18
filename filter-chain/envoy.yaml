@@ -33,7 +33,7 @@ static_resources:
           http_filters:
           - name: envoy.ext_authz
             typed_config:
-              "@type": type.googleapis.com/envoy.config.filter.http.ext_authz.v2.ExtAuthz
+              "@type": type.googleapis.com/envoy.config.filter.http.ext_authz.v2.ExtAuthz 
               grpc_service:
                 envoy_grpc:
                   cluster_name: ext-authz
