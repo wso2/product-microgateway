@@ -23,9 +23,9 @@ import io.grpc.ServerBuilder;
 
 public class AuthServer {
 
-    public static void main( String[] args ) throws Exception
+    public static void main ( String[] args ) throws Exception
     {
-        // Create a new server to listen on port 8080
+        // Create a new server to listen on port 8081
         Server server = ServerBuilder.forPort(8081)
                 .addService(new ExtAuthService())
                 .build();

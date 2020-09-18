@@ -18,17 +18,17 @@
 
 package org.wso2.mgw.filterchain.gRPC.server;
 
+import com.google.rpc.Status;
 import io.envoyproxy.envoy.service.auth.v2.AuthorizationGrpc;
 import io.envoyproxy.envoy.service.auth.v2.CheckRequest;
 import io.envoyproxy.envoy.service.auth.v2.CheckResponse;
-import io.grpc.Status;
+import io.envoyproxy.envoy.service.auth.v2.OkHttpResponse;
 import io.grpc.stub.StreamObserver;
 
 public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
     @Override
-    public void check(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
-        super.check(request, responseObserver);
+    public void check (CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
 
         System.out.println("++++++++++hit+++++++++++++++");
 
@@ -38,7 +38,14 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         // jwt authentication should happens here
         //Status status = Status.OK;
         CheckResponse response = CheckResponse.newBuilder()
-                //.setOkResponse(status)
+                .setStatus(Status.newBuilder().build())
+                .setOkResponse(OkHttpResponse.newBuilder().build())
                 .build();
+
+        // Use responseObserver to send a single response back
+        responseObserver.onNext(response);
+
+        // When you are done, you must call onCompleted.
+        responseObserver.onCompleted();
     }
 }
