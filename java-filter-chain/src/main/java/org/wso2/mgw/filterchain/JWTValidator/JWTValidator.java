@@ -40,6 +40,7 @@ import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
 
 public class JWTValidator{
+    private static RSAPublicKey publicKey = readPublicKey();
     //validate JWT token
     public static boolean validateToken () {
         boolean valid = false;
@@ -90,8 +91,10 @@ public class JWTValidator{
     }
 
     public static boolean verifyTokenSignature(SignedJWT parsedJWTToken) {
-        RSAPublicKey publicKey = readPublicKey();
         boolean state =false;
+        if (publicKey == null) {
+            publicKey = readPublicKey();
+        }
         if (publicKey != null){
             JWSAlgorithm algorithm = parsedJWTToken.getHeader().getAlgorithm();
             if (algorithm != null && (JWSAlgorithm.RS256.equals(algorithm) || JWSAlgorithm.RS512.equals(algorithm) ||
@@ -108,7 +111,6 @@ public class JWTValidator{
     }
 
     public static RSAPublicKey readPublicKey() {
-        RSAPublicKey publicKey = null;
         try {
             String strKeyPEM = "";
             BufferedReader br = new BufferedReader(new FileReader("./src/main/java/wso2carbon.pem"));
