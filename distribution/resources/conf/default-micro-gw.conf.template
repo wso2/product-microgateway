@@ -200,7 +200,7 @@
   # Hostname verification
   verifyHostname=true
 
-[clientSSLConfig]
+[httpClients.sslConfig]
   # SSL Protocol to be used
   protocolName = "TLS"
   # List of ciphers to be used

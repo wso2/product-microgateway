@@ -277,7 +277,7 @@ public const string TRUST_STORE_PATH = "trustStorePath";
 public const string TRUST_STORE_PASSWORD = "trustStorePassword";
 public const string VALIDATE_SUBSCRIPTION = "validateSubscription";
 
-public const string CLIENT_SSL_CONF_INSTANCE_ID = "clientSSLConfig";
+public const string CLIENT_SSL_CONF_INSTANCE_ID = "httpClients.sslConfig";
 
 public const string API_KEY_INSTANCE_ID = "apikey.tokenConfigs";
 public const string API_KEY_ISSUER_ENABLED = "enabled";
