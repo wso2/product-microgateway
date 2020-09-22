@@ -1035,3 +1035,37 @@ public function setResourceScopesToPrincipal(http:HttpResourceConfig httpResourc
         }
     }
 }
+
+# Method to generate the secured client socket for mgw to backend communication.
+#
+# + return - The generated secure socket.
+#
+public function getClientSecureSocket() returns http:ClientSecureSocket {
+    string keyStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, KEY_STORE_PATH, DEFAULT_KEY_STORE_PATH);
+    string keyStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, KEY_STORE_PASSWORD, DEFAULT_KEY_STORE_PASSWORD);
+    string trustStorePath = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH);
+    string trustStorePassword = getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD,
+                                                                                        DEFAULT_TRUST_STORE_PASSWORD);
+    string protocolName = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_PROTOCOL_NAME, DEFAULT_PROTOCOL_NAME);
+    string protocolVersions = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_PROTOCOL_VERSIONS,
+                                                                                            DEFAULT_PROTOCOL_VERSIONS);
+    string ciphers = getConfigValue(MTSL_CONF_INSTANCE_ID, MTSL_CONF_CIPHERS, DEFAULT_CIPHERS);
+    http:ClientSecureSocket secureSocket = {
+            keyStore: {
+                path: getConfigValue(CLIENT_SSL_CONF_INSTANCE_ID, KEY_STORE_PATH, keyStorePath),
+                password: getConfigValue(CLIENT_SSL_CONF_INSTANCE_ID, KEY_STORE_PASSWORD, keyStorePassword)
+            },
+            trustStore: {
+                path: getConfigValue(CLIENT_SSL_CONF_INSTANCE_ID, TRUST_STORE_PATH, trustStorePath),
+                password: getConfigValue(HTTP_CLIENTS_INSTANCE_ID, TRUST_STORE_PASSWORD, trustStorePassword)
+            },
+            protocol: {
+                name: getConfigValue(CLIENT_SSL_CONF_INSTANCE_ID, MTSL_CONF_PROTOCOL_NAME, protocolName),
+                versions: split(getConfigValue(CLIENT_SSL_CONF_INSTANCE_ID, MTSL_CONF_PROTOCOL_VERSIONS,
+                protocolVersions), ",")
+            },
+            ciphers: split(getConfigValue(CLIENT_SSL_CONF_INSTANCE_ID, MTSL_CONF_CIPHERS, ciphers), ","),
+            verifyHostname: getConfigBooleanValue(CLIENT_SSL_CONF_INSTANCE_ID, ENABLE_HOSTNAME_VERIFICATION, true)
+        };
+        return secureSocket;
+}
