@@ -1,9 +1,2 @@
 ,
-secureSocket:{
-    trustStore: {
-           path: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:TRUST_STORE_PATH,
-               gateway:DEFAULT_TRUST_STORE_PATH),
-           password: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:TRUST_STORE_PASSWORD, gateway:DEFAULT_TRUST_STORE_PASSWORD)
-     },
-     verifyHostname:gateway:getConfigBooleanValue(gateway:HTTP_CLIENTS_INSTANCE_ID, gateway:ENABLE_HOSTNAME_VERIFICATION, true)
-}
+secureSocket: gateway:getClientSecureSocket()
