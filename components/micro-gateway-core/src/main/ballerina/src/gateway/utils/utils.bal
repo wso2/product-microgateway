@@ -1038,7 +1038,7 @@ public function setResourceScopesToPrincipal(http:HttpResourceConfig httpResourc
 
 # Method to generate the secured client socket for mgw to backend communication.
 #
-# + return http:ClientSecureSocket - The generated secure socket.
+# + return - The generated secure socket.
 #
 public function getClientSecureSocket() returns http:ClientSecureSocket {
     http:ClientSecureSocket secureSocket = {
