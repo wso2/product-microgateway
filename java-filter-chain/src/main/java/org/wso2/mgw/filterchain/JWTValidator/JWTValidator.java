@@ -33,14 +33,43 @@ import java.text.ParseException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 public class JWTValidator{
     private static RSAPublicKey publicKey = readPublicKey();
+    private static JWSVerifier jwsVerifier = new RSASSAVerifier(publicKey);
+    private static boolean enableCache = true;
+    private static LoadingCache<String, String> GatewayApiKeyCache =
+            CacheBuilder.newBuilder()
+                    .maximumSize(100)                                     // maximum 100 tokens can be cached
+                    .expireAfterAccess(30, TimeUnit.MINUTES)      // cache will expire after 30 minutes of access
+                    .build(new CacheLoader<String, String>() {            // build the cacheloader
+                        @Override
+                        public String load(String s) throws Exception {
+                            return JWTConstants.UNAVAILABLE ;
+                        }
+
+                    });
+    private static LoadingCache<String, String> InvalidGatewayApiKeyCache =
+            CacheBuilder.newBuilder()
+                    .maximumSize(100)                                     // maximum 100 tokens can be cached
+                    .expireAfterAccess(30, TimeUnit.MINUTES)      // cache will expire after 30 minutes of access
+                    .build(new CacheLoader<String, String>() {            // build the cacheloader
+                        @Override
+                        public String load(String s) throws Exception {
+                            return JWTConstants.UNAVAILABLE;
+                        }
+
+                    });
     //validate JWT token
     public static boolean validateToken () {
         boolean valid = false;
@@ -81,11 +110,38 @@ public class JWTValidator{
         JWTClaimsSet payload = null;
         SignedJWT parsedJWTToken;
         boolean isVerified = false;
-        try{
-            parsedJWTToken = (SignedJWT) JWTParser.parse(jwtToken);
-            isVerified = verifyTokenSignature(parsedJWTToken);
-        }catch (ParseException e) {
-            System.out.println("Invalid JWT token. Failed to decode the token.");
+        try {
+            if (enableCache) {
+                if(GatewayApiKeyCache.get(signature) != JWTConstants.UNAVAILABLE){
+                    System.out.println("Api Key retrieved from the Api Key cache.");
+                    isVerified = true;
+                } else if (InvalidGatewayApiKeyCache.get(signature) != JWTConstants.UNAVAILABLE){
+                    System.out.println("Api Key retrieved from the invalid Api Key cache.");
+                    isVerified = false;
+                } else {
+                    System.out.println("Token is not available in the cache.");
+                    try{
+                        parsedJWTToken = (SignedJWT) JWTParser.parse(jwtToken);
+                        isVerified = verifyTokenSignature(parsedJWTToken);
+                        if (isVerified){
+                            GatewayApiKeyCache.put(signature, JWTConstants.VALID);
+                        } else {
+                            InvalidGatewayApiKeyCache.put(signature, JWTConstants.INVALID);
+                        }
+                    }catch (ParseException e) {
+                        System.out.println("Invalid JWT token. Failed to decode the token.");
+                    }
+                }
+            } else {
+                try{
+                    parsedJWTToken = (SignedJWT) JWTParser.parse(jwtToken);
+                    isVerified = verifyTokenSignature(parsedJWTToken);
+                }catch (ParseException e) {
+                    System.out.println("Invalid JWT token. Failed to decode the token.");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
         }
         return isVerified;
     }
@@ -100,7 +156,6 @@ public class JWTValidator{
             if (algorithm != null && (JWSAlgorithm.RS256.equals(algorithm) || JWSAlgorithm.RS512.equals(algorithm) ||
                     JWSAlgorithm.RS384.equals(algorithm))) {
                 try{
-                    JWSVerifier jwsVerifier = new RSASSAVerifier(publicKey);
                     state = parsedJWTToken.verify(jwsVerifier);
                 } catch (JOSEException e) {
                     System.out.println(e);
