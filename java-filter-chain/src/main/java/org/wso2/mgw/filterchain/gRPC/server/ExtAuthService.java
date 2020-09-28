@@ -18,6 +18,7 @@
 
 package org.wso2.mgw.filterchain.gRPC.server;
 
+import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.envoyproxy.envoy.service.auth.v2.AuthorizationGrpc;
 import io.envoyproxy.envoy.service.auth.v2.CheckRequest;
@@ -30,15 +31,15 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
     @Override
     public void check (CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
 
-        System.out.println("++++++++++hit+++++++++++++++");
+        //System.out.println("++++++++++hit+++++++++++++++");
 
-        System.out.println(request);
+        //System.out.println(request);
 
         // use a builder to construct a new Protobuffer object
         // jwt authentication should happens here
         //Status status = Status.OK;
         CheckResponse response = CheckResponse.newBuilder()
-                .setStatus(Status.newBuilder().build())
+                .setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                 .setOkResponse(OkHttpResponse.newBuilder().build())
                 .build();
 
