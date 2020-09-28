@@ -47,7 +47,7 @@ import com.google.common.cache.LoadingCache;
 public class JWTValidator{
     private static RSAPublicKey publicKey = readPublicKey();
     private static JWSVerifier jwsVerifier = new RSASSAVerifier(publicKey);
-    private static boolean enableCache = true;
+    private static String enableCache = (String) System.getenv("ENVOY_GW_CACHE_ENABLE");
     private static LoadingCache<String, String> GatewayApiKeyCache =
             CacheBuilder.newBuilder()
                     .maximumSize(100)                                     // maximum 100 tokens can be cached
@@ -90,36 +90,35 @@ public class JWTValidator{
         String[] tokenContent = accessToken.split("\\.");
 
         if(tokenContent.length != 3){
-            System.out.println("Invalid JWT token received, token must have 3 parts");
+            //System.out.println("Invalid JWT token received, token must have 3 parts");
         }
         String signedContent = tokenContent[0] + "." + tokenContent[1];
         //System.out.println(signedContent);
         boolean isVerified = validateSignature(accessToken, tokenContent[2]);
         if(isVerified){
-            System.out.println("JWT Token is valid");
+            //System.out.println("JWT Token is valid");
         } else {
-            System.out.println("JWT Token is not valid");
+            //System.out.println("JWT Token is not valid");
         }
         return isVerified;
     }
 
     // validate the signature
     public static boolean validateSignature(String jwtToken, String signature){
-        System.out.println("Inside validateSignature");
         JWSHeader header;
         JWTClaimsSet payload = null;
         SignedJWT parsedJWTToken;
         boolean isVerified = false;
         try {
-            if (enableCache) {
+            if (enableCache.equals("true")) {
                 if(GatewayApiKeyCache.get(signature) != JWTConstants.UNAVAILABLE){
-                    System.out.println("Api Key retrieved from the Api Key cache.");
+                    //System.out.println("Api Key retrieved from the Api Key cache.");
                     isVerified = true;
                 } else if (InvalidGatewayApiKeyCache.get(signature) != JWTConstants.UNAVAILABLE){
-                    System.out.println("Api Key retrieved from the invalid Api Key cache.");
+                    //System.out.println("Api Key retrieved from the invalid Api Key cache.");
                     isVerified = false;
                 } else {
-                    System.out.println("Token is not available in the cache.");
+                    //System.out.println("Token is not available in the cache.");
                     try{
                         parsedJWTToken = (SignedJWT) JWTParser.parse(jwtToken);
                         isVerified = verifyTokenSignature(parsedJWTToken);
@@ -129,7 +128,7 @@ public class JWTValidator{
                             InvalidGatewayApiKeyCache.put(signature, JWTConstants.INVALID);
                         }
                     }catch (ParseException e) {
-                        System.out.println("Invalid JWT token. Failed to decode the token.");
+                        //System.out.println("Invalid JWT token. Failed to decode the token.");
                     }
                 }
             } else {
@@ -137,11 +136,11 @@ public class JWTValidator{
                     parsedJWTToken = (SignedJWT) JWTParser.parse(jwtToken);
                     isVerified = verifyTokenSignature(parsedJWTToken);
                 }catch (ParseException e) {
-                    System.out.println("Invalid JWT token. Failed to decode the token.");
+                    //System.out.println("Invalid JWT token. Failed to decode the token.");
                 }
             }
         } catch (Exception e) {
-            System.out.println(e);
+            //System.out.println(e);
         }
         return isVerified;
     }
@@ -158,7 +157,7 @@ public class JWTValidator{
                 try{
                     state = parsedJWTToken.verify(jwsVerifier);
                 } catch (JOSEException e) {
-                    System.out.println(e);
+                    //System.out.println(e);
                 }
             }
         }
@@ -182,7 +181,7 @@ public class JWTValidator{
             KeyFactory kf = KeyFactory.getInstance(JWTConstants.RSA);
             publicKey = (RSAPublicKey) kf.generatePublic(new X509EncodedKeySpec(encoded));
         } catch (IOException | NoSuchAlgorithmException |InvalidKeySpecException e) {
-            System.out.println(e);
+            //System.out.println(e);
         }
         return publicKey;
     }
