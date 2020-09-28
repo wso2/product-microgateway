@@ -106,7 +106,7 @@ func ReadFile(fileName string) ([]byte, error) {
 func ValidateToken(ctx context.Context, req *ext_authz.CheckRequest) (*ext_authz.CheckResponse, error) {
 
 	once.Do(func() {
-		caCert,_ = ReadFile("./artifacts/server.pem")
+		caCert,_ = ReadFile("/usr/local/artifacts/server.pem")
 		log.Info("read server.pem file once")
 
 		/* env variable can define as following
@@ -114,7 +114,7 @@ func ValidateToken(ctx context.Context, req *ext_authz.CheckRequest) (*ext_authz
 		ENVOY_GW_CACHE_ENABLE = false
 		*/
 		cacheEnvVar := os.Getenv("ENVOY_GW_CACHE_ENABLE")
-		log.Info("env variable",cacheEnvVar )
+		log.Info("ENVOY_GW_CACHE_ENABLE: ",cacheEnvVar )
 
 		if cacheEnvVar != "" {
 			isCacheEnabled, err = strconv.ParseBool(cacheEnvVar)
@@ -137,17 +137,18 @@ func ValidateToken(ctx context.Context, req *ext_authz.CheckRequest) (*ext_authz
 	for k := range requestAttributes {
 		if k == "authorization" {
 			jwtToken =  requestAttributes["authorization"]
+			break
 		}
 	}
 
 
 	if isCacheEnabled {
-		log.Info("cache is enabled")
+		//log.Info("cache is enabled")
 		tokenvalidity, found := jwtCache.Get(jwtToken)
 
 		if found {
 			auth = tokenvalidity.(bool)
-			log.Info("token found in cache")
+			//log.Info("token found in cache")
 
 		} else {
 			auth, _, _ = HandleJWT(false, caCert,jwtToken )

@@ -16,6 +16,7 @@ RUN go mod download
 
 # Copy the code into the container
 COPY . .
+COPY artifacts /usr/local/artifacts
 
 # Build the application
 RUN go build -o main .
@@ -29,6 +30,6 @@ RUN cp /build/main .
 # Export necessary port
 EXPOSE 8081
 
-# Command to run when starting the container
+ENV ENVOY_GW_CACHE_ENABLE=true   
 CMD ["/dist/main"]
 
