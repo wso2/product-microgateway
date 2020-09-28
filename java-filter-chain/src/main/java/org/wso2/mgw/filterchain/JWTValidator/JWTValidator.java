@@ -18,6 +18,8 @@
 
 package org.wso2.mgw.filterchain.JWTValidator;
 
+import com.google.rpc.Code;
+import com.google.rpc.Status;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
@@ -43,6 +45,9 @@ import com.nimbusds.jwt.SignedJWT;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import io.envoyproxy.envoy.service.auth.v2.CheckResponse;
+import io.envoyproxy.envoy.service.auth.v2.DeniedHttpResponse;
+import io.envoyproxy.envoy.service.auth.v2.OkHttpResponse;
 
 public class JWTValidator{
     private static RSAPublicKey publicKey = readPublicKey();
@@ -71,22 +76,36 @@ public class JWTValidator{
 
                     });
     //validate JWT token
-    public static boolean validateToken () {
+    public static CheckResponse validateToken (Map<String, String> headers) {
         boolean valid = false;
-        HashMap<String, String> request = new HashMap<String, String>();
-        request.put(JWTConstants.AUTHORIZATION, JWTConstants.JWT_TOKEN);
-        for (Map.Entry mapElement : request.entrySet()) {
+        CheckResponse response;
+        //Map<String, String> request = new HashMap<String, String>();
+        //request.put(JWTConstants.AUTHORIZATION, JWTConstants.JWT_TOKEN);
+        for (Map.Entry mapElement : headers.entrySet()) {
             String key = (String) mapElement.getKey();
-            if (key == JWTConstants.AUTHORIZATION) {
-                valid = HandleJWT(request);
+            if (key.equals(JWTConstants.AUTHORIZATION)) {
+                valid = HandleJWT(mapElement.getValue().toString());
                 break;
             }
         }
-        return valid;
+
+        if(valid) {
+            response = CheckResponse.newBuilder()
+                    .setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
+                    .setOkResponse(OkHttpResponse.newBuilder().build())
+                    .build();
+        } else {
+            response = CheckResponse.newBuilder()
+                    .setStatus(Status.newBuilder().setCode(Code.UNAUTHENTICATED_VALUE).build())
+                    .setDeniedResponse(DeniedHttpResponse.newBuilder().build())
+                    .build();
+        }
+
+        return response;
     }
     //handle JWT token
-    public static boolean HandleJWT(HashMap<String, String> requestAttributes){
-        String accessToken = requestAttributes.get(JWTConstants.AUTHORIZATION);
+    public static boolean HandleJWT(String accessToken){
+        //String accessToken = requestAttributes.get(JWTConstants.AUTHORIZATION);
         String[] tokenContent = accessToken.split("\\.");
 
         if(tokenContent.length != 3){
@@ -110,7 +129,7 @@ public class JWTValidator{
         SignedJWT parsedJWTToken;
         boolean isVerified = false;
         try {
-            if (enableCache.equals("true")) {
+            if (enableCache != null && enableCache.equals("true")) {
                 if(GatewayApiKeyCache.get(signature) != JWTConstants.UNAVAILABLE){
                     //System.out.println("Api Key retrieved from the Api Key cache.");
                     isVerified = true;
@@ -167,7 +186,7 @@ public class JWTValidator{
     public static RSAPublicKey readPublicKey() {
         try {
             String strKeyPEM = "";
-            BufferedReader br = new BufferedReader(new FileReader("./src/main/java/wso2carbon.pem"));
+            BufferedReader br = new BufferedReader(new FileReader("./src/main/java/org/wso2/mgw/filterchain/JWTValidator/wso2carbon.pem"));
             String line;
             while ((line = br.readLine()) != null) {
                 strKeyPEM += line + "\n";
