@@ -109,6 +109,10 @@ func ValidateToken(ctx context.Context, req *ext_authz.CheckRequest) (*ext_authz
 		caCert,_ = ReadFile("./artifacts/server.pem")
 		log.Info("read server.pem file once")
 
+		/* env variable can define as following
+		ENVOY_GW_CACHE_ENABLE = true
+		ENVOY_GW_CACHE_ENABLE = false
+		*/
 		cacheEnvVar := os.Getenv("ENVOY_GW_CACHE_ENABLE")
 		log.Info("env variable",cacheEnvVar )
 
