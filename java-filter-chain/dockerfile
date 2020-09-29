@@ -1,0 +1,14 @@
+FROM adoptopenjdk/maven-openjdk8
+
+COPY src /home/app/src
+COPY pom.xml /home/app
+RUN mvn -f /home/app/pom.xml clean package
+
+WORKDIR /home/app
+
+EXPOSE 8081
+
+ENV ENVOY_GW_CACHE_ENABLE=true
+
+CMD mvn compile
+CMD mvn exec:java -Dexec.mainClass="org.wso2.mgw.filterchain.gRPC.server.AuthServer"
