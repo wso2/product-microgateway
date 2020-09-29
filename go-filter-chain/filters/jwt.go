@@ -39,10 +39,10 @@ type TokenData struct {
 
 var (
 	Unknown = "__unknown__"
-	once sync.Once
 	once_1 sync.Once
 	caCert []byte
 	err error
+	errkey error
 	key *rsa.PublicKey
 	jwtCache = cache.New(5*time.Minute, 10*time.Minute)
 	UnauthorizedError = errors.New("Invalid access token")
@@ -50,6 +50,36 @@ var (
 	isCacheEnabled bool
 )
 
+func init() {
+
+	caCert,_ = ReadFile("/usr/local/artifacts/server.pem")
+	log.Info("read server.pem file once")
+
+	/* env variable can define as following
+	ENVOY_GW_CACHE_ENABLE = true
+	ENVOY_GW_CACHE_ENABLE = false
+	*/
+	cacheEnvVar := os.Getenv("ENVOY_GW_CACHE_ENABLE")
+	log.Info("ENVOY_GW_CACHE_ENABLE: ",cacheEnvVar )
+
+	if cacheEnvVar != "" {
+		isCacheEnabled, err = strconv.ParseBool(cacheEnvVar)
+
+
+		if err != nil {
+			//log.Error("Error reading cache env variable, err")
+			isCacheEnabled = false
+		}
+
+	} else {
+		isCacheEnabled = false
+	}
+
+
+	key, errkey = jwt.ParseRSAPublicKeyFromPEM(caCert)
+	log.Info("read public key once")
+
+}
 
 
 // handle JWT token
@@ -61,14 +91,14 @@ func HandleJWT(validateSubscription bool, publicCert []byte, token string) (bool
 	var tokenData TokenData
 
 	if len(tokenContent) != 3 {
-		log.Errorf("Invalid JWT token received, token must have 3 parts")
+		//log.Errorf("Invalid JWT token received, token must have 3 parts")
 		return false, tokenData, UnauthorizedError
 	}
 
 	signedContent := tokenContent[0] + "." + tokenContent[1]
-	err := validateSignature(publicCert, signedContent, tokenContent[2])
+	err := validateSignature(signedContent, tokenContent[2])
 	if err != nil {
-		log.Errorf("Error in validating the signature: %v", err)
+		//log.Errorf("Error in validating the signature: %v", err)
 		return false, tokenData, UnauthorizedError
 	}
 
@@ -76,15 +106,10 @@ func HandleJWT(validateSubscription bool, publicCert []byte, token string) (bool
 }
 
 // validate the signature
-func validateSignature(publicCert []byte, signedContent string, signature string) error {
+func validateSignature(signedContent string, signature string) error {
 
-	once_1.Do(func() {
-		key, err = jwt.ParseRSAPublicKeyFromPEM(publicCert)
-		log.Info("read public key once")
-	})
-
-	if err != nil {
-		log.Errorf("Error in parsing the public key: %v", err)
+	if errkey != nil {
+		//log.Errorf("Error in parsing the public key: %v", err)
 		return err
 	}
 
@@ -105,42 +130,9 @@ func ReadFile(fileName string) ([]byte, error) {
 
 func ValidateToken(ctx context.Context, req *ext_authz.CheckRequest) (*ext_authz.CheckResponse, error) {
 
-	once.Do(func() {
-		caCert,_ = ReadFile("/usr/local/artifacts/server.pem")
-		log.Info("read server.pem file once")
-
-		/* env variable can define as following
-		ENVOY_GW_CACHE_ENABLE = true
-		ENVOY_GW_CACHE_ENABLE = false
-		*/
-		cacheEnvVar := os.Getenv("ENVOY_GW_CACHE_ENABLE")
-		log.Info("ENVOY_GW_CACHE_ENABLE: ",cacheEnvVar )
-
-		if cacheEnvVar != "" {
-			isCacheEnabled, err = strconv.ParseBool(cacheEnvVar)
-
-
-			if err != nil {
-				log.Error("Error reading cache env variable, err")
-				isCacheEnabled = false
-			}
-
-		} else {
-			isCacheEnabled = false
-		}
-	})
-
 	auth := false
-	jwtToken := ""
-	requestAttributes := req.Attributes.Request.Http.Headers
-
-	for k := range requestAttributes {
-		if k == "authorization" {
-			jwtToken =  requestAttributes["authorization"]
-			break
-		}
-	}
-
+	headerAttributes := req.Attributes.Request.Http.Headers
+	jwtToken :=  headerAttributes["authorization"]
 
 	if isCacheEnabled {
 		//log.Info("cache is enabled")
