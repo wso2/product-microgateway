@@ -79,15 +79,11 @@ public class JWTValidator{
     public static CheckResponse validateToken (Map<String, String> headers) {
         boolean valid = false;
         CheckResponse response;
+
+        String token = headers.get(JWTConstants.AUTHORIZATION);
         //Map<String, String> request = new HashMap<String, String>();
         //request.put(JWTConstants.AUTHORIZATION, JWTConstants.JWT_TOKEN);
-        for (Map.Entry mapElement : headers.entrySet()) {
-            String key = (String) mapElement.getKey();
-            if (key.equals(JWTConstants.AUTHORIZATION)) {
-                valid = HandleJWT(mapElement.getValue().toString());
-                break;
-            }
-        }
+        valid = HandleJWT(token);
 
         if(valid) {
             response = CheckResponse.newBuilder()
