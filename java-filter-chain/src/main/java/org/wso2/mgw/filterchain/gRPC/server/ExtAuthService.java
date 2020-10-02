@@ -34,7 +34,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
         //System.out.println("++++++++++hit+++++++++++++++");
 
-        //System.out.println(request.getAttributes().getRequest().getHttp());
+
+        //System.out.println(request);
 
 
         // use a builder to construct a new Protobuffer object
