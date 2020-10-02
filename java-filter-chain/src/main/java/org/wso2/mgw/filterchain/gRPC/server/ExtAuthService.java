@@ -20,11 +20,12 @@ package org.wso2.mgw.filterchain.gRPC.server;
 
 import com.google.rpc.Code;
 import com.google.rpc.Status;
-import io.envoyproxy.envoy.service.auth.v2.AuthorizationGrpc;
-import io.envoyproxy.envoy.service.auth.v2.CheckRequest;
-import io.envoyproxy.envoy.service.auth.v2.CheckResponse;
-import io.envoyproxy.envoy.service.auth.v2.OkHttpResponse;
+import io.envoyproxy.envoy.service.auth.v2.*;
 import io.grpc.stub.StreamObserver;
+import org.wso2.mgw.filterchain.JWTValidator.JWTValidator;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
@@ -33,7 +34,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
         //System.out.println("++++++++++hit+++++++++++++++");
 
+
         //System.out.println(request);
+
 
         // use a builder to construct a new Protobuffer object
         // jwt authentication should happens here
@@ -43,8 +46,19 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 .setOkResponse(OkHttpResponse.newBuilder().build())
                 .build();
 
+
+        /*CheckResponse response1 = CheckResponse.newBuilder()
+                .setStatus(Status.newBuilder().setCode(Code.UNAUTHENTICATED_VALUE).build())
+                .setDeniedResponse(DeniedHttpResponse.newBuilder().build())
+                .build(); */
+
+        Map<String, String> headers = request.getAttributes().getRequest().getHttp().getHeadersMap();
+
+
         // Use responseObserver to send a single response back
-        responseObserver.onNext(response);
+        CheckResponse response1 = JWTValidator.validateToken(headers);
+        //System.out.println("this is response "+ response1);
+        responseObserver.onNext(response1);
 
         // When you are done, you must call onCompleted.
         responseObserver.onCompleted();
