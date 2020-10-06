@@ -10,6 +10,20 @@ services:
     ports:
       - "10000:10000"
       - "9000:9000"
+  pilot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:  
+      - ./resources/apis/test2.yaml:/go/src/controlPlane/resources/apis/test2.yaml
+    ports:
+      - "18000:18000" 
+  filterchain:
+    build: 
+      context: ./java-filter-chain
+      dockerfile: dockerfile
+    ports:
+      - "8081:8081"         
   # zipkin:
   #   image: openzipkin/zipkin
   #   expose:
