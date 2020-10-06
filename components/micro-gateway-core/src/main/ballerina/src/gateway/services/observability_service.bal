@@ -18,6 +18,7 @@ import ballerina/http;
 
 int bal_metric_port = getConfigIntValue(MICRO_GATEWAY_METRICS_PORTS, PORT, 9797);
 int jmx_metric_port = getConfigIntValue(MICRO_GATEWAY_METRICS_PORTS, JMX_PORT, 8080);
+boolean isMetrixServiceSecured = getConfigBooleanValue(MICRO_GATEWAY_METRICS, SECURED, true);
 
 http:Client balMetricEndpoint = new ("http://localhost:" + bal_metric_port.toString());
 http:Client jmxMetricEndpoint = new ("http://localhost:" + jmx_metric_port.toString());
@@ -27,7 +28,8 @@ service metric =
 @http:ServiceConfig {
     basePath: "/*",
     auth: {
-        scopes: ["observability"]
+        scopes: ["observability"],
+        enabled: isMetrixServiceSecured
     }
 }
 service {

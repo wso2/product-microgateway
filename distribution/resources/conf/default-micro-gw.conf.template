@@ -398,6 +398,8 @@
     enabled = false
     # Reporter name that reports the collected Metrics to the remote metrics server
     reporter = "prometheus"
+    # Enables/ Disables the metrics endpoint security.
+    secured = true
     # Prometheus to scrape the information
     [b7a.observability.metrics.prometheus]
       # port exposing api level metrics
