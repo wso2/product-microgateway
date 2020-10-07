@@ -18,7 +18,7 @@ import ballerina/http;
 
 int bal_metric_port = getConfigIntValue(MICRO_GATEWAY_METRICS_PORTS, PORT, 9797);
 int jmx_metric_port = getConfigIntValue(MICRO_GATEWAY_METRICS_PORTS, JMX_PORT, 8080);
-boolean isMetrixServiceSecured = getConfigBooleanValue(MICRO_GATEWAY_METRICS, SECURED, true);
+boolean isMetrixServiceSecured = getConfigBooleanValue(MICRO_GATEWAY_METRICS, ENABLE_AUTH, true);
 
 http:Client balMetricEndpoint = new ("http://localhost:" + bal_metric_port.toString());
 http:Client jmxMetricEndpoint = new ("http://localhost:" + jmx_metric_port.toString());
