@@ -24,9 +24,7 @@ services:
   filterchain:
     build: 
       context: ./java-filter-chain
-      dockerfile: Dockerfile.withMountedJar
-    volumes:
-      - ./java-filter-chain/target:/home/ubuntu
+      dockerfile: dockerfile
     ports:
       - "8081:8081"         
   # zipkin:

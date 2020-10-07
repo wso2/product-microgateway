@@ -12,7 +12,7 @@ x-wso2-basepath: /petstore/v2
 
 x-wso2-production-endpoints:
   urls:
-    - 'https://petstore.swagger.io/api/v3'
+    - 'http://www.mocky.io:80/v2/5185415ba171ea3a00704eed'
   type: "https"
 x-wso2-sandbox-endpoints:
   urls:
@@ -129,7 +129,7 @@ paths:
     get:
       x-wso2-production-endpoints:
         urls:
-          - 'http://0.0.0.0:5000/base'
+          - 'http://www.mocky.io:80/v2/5185415ba171ea3a00704eed'
         type: https
       tags:
         - "pet"
