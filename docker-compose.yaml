@@ -16,9 +16,10 @@ services:
   pilot:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.withMountedExecutable
     volumes:  
-      - ./resources/apis/test2.yaml:/go/src/controlPlane/resources/apis/test2.yaml
+      - ./resources/:/home/ubuntu/resources/
+      - ./micro-gw-ubuntu:/home/ubuntu/micro-gw-ubuntu
     ports:
       - "18000:18000" 
   filterchain:

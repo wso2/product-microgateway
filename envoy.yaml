@@ -22,14 +22,14 @@ node:
   id: test-id
 static_resources:
   clusters:
-    - connect_timeout: 1s
+    - name: xds_cluster
+      type: STRICT_DNS
+      connect_timeout: 1s
       hosts:
         - socket_address:
             address: 172.17.0.1
             port_value: 18000
       http2_protocol_options: {}
-      name: xds_cluster
-      type: STRICT_DNS
     - name: ext-authz
       type: static
       connect_timeout: 1s

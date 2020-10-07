@@ -24,8 +24,12 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
@@ -182,7 +186,10 @@ public class JWTValidator{
     public static RSAPublicKey readPublicKey() {
         try {
             String strKeyPEM = "";
-            BufferedReader br = new BufferedReader(new FileReader("./src/main/java/org/wso2/mgw/filterchain/JWTValidator/wso2carbon.pem"));
+            String fileName = "wso2carbon.pem";
+            InputStream inputStream = JWTValidator.class.getClassLoader().getResourceAsStream(fileName);
+            InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            BufferedReader br = new BufferedReader(streamReader);
             String line;
             while ((line = br.readLine()) != null) {
                 strKeyPEM += line + "\n";
