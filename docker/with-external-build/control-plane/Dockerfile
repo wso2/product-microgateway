@@ -16,6 +16,6 @@
 
 FROM ubuntu:20.04
 WORKDIR /home/ubuntu
-COPY micro-gw-ubuntu /home/ubuntu/micro-gw-ubuntu
+COPY target/micro-gw-ubuntu /home/ubuntu/micro-gw-ubuntu
 COPY resources resources
 CMD ["./micro-gw-ubuntu"]

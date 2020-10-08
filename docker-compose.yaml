@@ -9,27 +9,7 @@ services:
 #      - "8001"
     ports:
       - "10000:10000"
-      - "9000:9000"
-    links:
-      - pilot
-      - filterchain  
-  pilot:
-    build:
-      context: .
-      dockerfile: Dockerfile.withMountedExecutable
-    volumes:  
-      - ./resources/:/home/ubuntu/resources/
-      - ./micro-gw-ubuntu:/home/ubuntu/micro-gw-ubuntu
-    ports:
-      - "18000:18000" 
-  filterchain:
-    build: 
-      context: ./java-filter-chain
-      dockerfile: Dockerfile.withMountedJar
-    volumes:
-      - ./java-filter-chain/target:/home/ubuntu
-    ports:
-      - "8081:8081"         
+      - "9000:9000"      
   # zipkin:
   #   image: openzipkin/zipkin
   #   expose:

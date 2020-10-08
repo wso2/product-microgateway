@@ -3,7 +3,7 @@ services:
   envoy:
     image: envoyproxy/envoy:v1.14.1
     volumes:
-      - ./envoy.yaml:/etc/envoy/envoy.yaml
+      - ./../../envoy.yaml:/etc/envoy/envoy.yaml
 #    expose:
 #      - "80"
 #      - "8001"
@@ -15,16 +15,16 @@ services:
       - filterchain  
   pilot:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ./../../
+      dockerfile: docker/without-dependencies/control-plane/Dockerfile
     volumes:  
-      - ./resources/apis/test2.yaml:/go/src/controlPlane/resources/apis/test2.yaml
+      - ./../../resources/apis/test2.yaml:/go/src/controlPlane/resources/apis/test2.yaml
     ports:
       - "18000:18000" 
   filterchain:
     build: 
-      context: ./java-filter-chain
-      dockerfile: dockerfile
+      context: ./../../java-filter-chain
+      dockerfile: ../docker/without-dependencies/filter-chain/Dockerfile
     ports:
       - "8081:8081"         
   # zipkin:
