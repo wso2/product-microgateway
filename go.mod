@@ -9,7 +9,7 @@ require (
 	github.com/getkin/kin-openapi v0.8.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/spec v0.19.7
-	github.com/golang/protobuf v1.4.0
+	github.com/golang/protobuf v1.4.2
 	github.com/gorilla/mux v1.7.4
 	github.com/sirupsen/logrus v1.5.0
 	github.com/stretchr/testify v1.5.1

@@ -33,8 +33,7 @@ public class AuthServer {
         // Start the server
         server.start();
 
-        // Server threads are running in the background.
-        System.out.println("+++++++++++++++++++++++ gRPC server started ++++++++++++++++++++++++++++");
+        System.out.println("Sever started Listening in port : " + 8081);
         // Don't exit the main thread. Wait until server is terminated.
         server.awaitTermination();
     }

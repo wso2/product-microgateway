@@ -17,29 +17,26 @@
 package mgw
 
 import (
-	endpointservicev3 "github.com/envoyproxy/go-control-plane/envoy/service/endpoint/v3"
-	clusterservicev3 "github.com/envoyproxy/go-control-plane/envoy/service/cluster/v3"
-	routeservicev3 "github.com/envoyproxy/go-control-plane/envoy/service/route/v3"
-	listenerservicev3 "github.com/envoyproxy/go-control-plane/envoy/service/listener/v3"
-	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 
-	mgwconfig "github.com/wso2/micro-gw/configs/confTypes"
-	apiserver "github.com/wso2/micro-gw/internal/pkg/api"
-	logger "github.com/wso2/micro-gw/internal/loggers"
-	oasParser "github.com/wso2/micro-gw/internal/pkg/oasparser"
-	"github.com/wso2/micro-gw/configs"
-	"github.com/fsnotify/fsnotify"
-	"google.golang.org/grpc"
-	"os/signal"
-	"sync/atomic"
-	"net"
-	"os"
 	"context"
 	"flag"
 	"fmt"
+	"net"
+	"os"
+	"os/signal"
+	"sync/atomic"
+
+	"github.com/fsnotify/fsnotify"
+	"github.com/wso2/micro-gw/configs"
+	mgwconfig "github.com/wso2/micro-gw/configs/confTypes"
+	logger "github.com/wso2/micro-gw/internal/loggers"
+	apiserver "github.com/wso2/micro-gw/internal/pkg/api"
+	oasParser "github.com/wso2/micro-gw/internal/pkg/oasparser"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -57,7 +54,6 @@ var (
 	version int32
 
 	cache cachev3.SnapshotCache
-
 )
 
 const (
@@ -76,7 +72,6 @@ func init() {
 	flag.StringVar(&mode, "ads", Ads, "Management server type (ads, xds, rest)")
 }
 
-
 // IDHash uses ID field as the node hash.
 type IDHash struct{}
 
@@ -89,7 +84,6 @@ func (IDHash) ID(node *corev3.Node) string {
 }
 
 var _ cachev3.NodeHash = IDHash{}
-
 
 const grpcMaxConcurrentStreams = 1000000
 
@@ -112,12 +106,8 @@ func RunManagementServer(ctx context.Context, server xdsv3.Server, port uint) {
 
 	// register services
 	discoveryv3.RegisterAggregatedDiscoveryServiceServer(grpcServer, server)
-	endpointservicev3.RegisterEndpointDiscoveryServiceServer(grpcServer, server)
-	clusterservicev3.RegisterClusterDiscoveryServiceServer(grpcServer, server)
-	routeservicev3.RegisterRouteDiscoveryServiceServer(grpcServer, server)
-	listenerservicev3.RegisterListenerDiscoveryServiceServer(grpcServer, server)
 
-	logger.LoggerMgw.Info("port: ",port, " management server listening")
+	logger.LoggerMgw.Info("port: ", port, " management server listening")
 	//log.Fatalf("", Serve(lis))
 	//go func() {
 	go func() {
@@ -138,9 +128,11 @@ func RunManagementServer(ctx context.Context, server xdsv3.Server, port uint) {
  */
 func updateEnvoy(location string) {
 	var nodeId string
-	if len(cache.GetStatusKeys()) > 0 {
-		nodeId = cache.GetStatusKeys()[0]
-	}
+	//TODO: (VirajSalaka) Keep a hard coded value for the nodeID for the initial setup.
+	// if len(cache.GetStatusKeys()) > 0 {
+	// 	nodeId = cache.GetStatusKeys()[0]
+	// }
+	nodeId = "test-id"
 
 	listeners, clusters, routes, endpoints := oasParser.GetProductionSources(location)
 
@@ -182,7 +174,6 @@ func Run(conf *mgwconfig.Config) {
 	if errC != nil {
 		logger.LoggerMgw.Fatal("Error reading the log configs. ", err)
 	}
-
 
 	logger.LoggerMgw.Info("Starting control plane ....")
 

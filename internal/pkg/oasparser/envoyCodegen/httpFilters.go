@@ -18,13 +18,13 @@ package envoyCodegen
 
 import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
-	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	routerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
+	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
-	logger "github.com/wso2/micro-gw/internal/loggers"
 	"github.com/golang/protobuf/ptypes"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 )
 
 /**
@@ -33,11 +33,11 @@ import (
  * @return []*hcm.HttpFilter  Http filter set as a array
  */
 func getHttpFilters() []*hcmv3.HttpFilter {
-	//extAauth := GetExtAauthzHttpFilter()
+	extAauth := getExtAauthzHttpFilter()
 	router := getRouterHttpFilter()
 
 	httpFilters := []*hcmv3.HttpFilter{
-		//&extAauth,
+		&extAauth,
 		&router,
 	}
 
