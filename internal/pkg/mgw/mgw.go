@@ -17,10 +17,9 @@
 package mgw
 
 import (
-	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
-	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
+	"github.com/wso2/micro-gw/internal/pkg/api/restserver"
 
 	"context"
 	"flag"
@@ -28,14 +27,12 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"sync/atomic"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/wso2/micro-gw/configs"
-	mgwconfig "github.com/wso2/micro-gw/configs/confTypes"
+	"github.com/wso2/micro-gw/internal/configs"
+	mgwconfig "github.com/wso2/micro-gw/internal/configs/confTypes"
 	logger "github.com/wso2/micro-gw/internal/loggers"
-	apiserver "github.com/wso2/micro-gw/internal/pkg/api"
-	oasParser "github.com/wso2/micro-gw/internal/pkg/oasparser"
+	xds "github.com/wso2/micro-gw/internal/pkg/xds"
 	"google.golang.org/grpc"
 )
 
@@ -50,10 +47,6 @@ var (
 	alsPort     uint
 
 	mode string
-
-	version int32
-
-	cache cachev3.SnapshotCache
 )
 
 const (
@@ -71,19 +64,6 @@ func init() {
 	flag.UintVar(&alsPort, "als", 18090, "Accesslog server port")
 	flag.StringVar(&mode, "ads", Ads, "Management server type (ads, xds, rest)")
 }
-
-// IDHash uses ID field as the node hash.
-type IDHash struct{}
-
-// ID uses the node ID field
-func (IDHash) ID(node *corev3.Node) string {
-	if node == nil {
-		return "unknown"
-	}
-	return node.Id
-}
-
-var _ cachev3.NodeHash = IDHash{}
 
 const grpcMaxConcurrentStreams = 1000000
 
@@ -122,32 +102,6 @@ func RunManagementServer(ctx context.Context, server xdsv3.Server, port uint) {
 }
 
 /**
- * Recreate the envoy instances from swaggers.
- *
- * @param location   Swagger files location
- */
-func updateEnvoy(location string) {
-	var nodeId string
-	//TODO: (VirajSalaka) Keep a hard coded value for the nodeID for the initial setup.
-	// if len(cache.GetStatusKeys()) > 0 {
-	// 	nodeId = cache.GetStatusKeys()[0]
-	// }
-	nodeId = "test-id"
-
-	listeners, clusters, routes, endpoints := oasParser.GetProductionSources(location)
-
-	atomic.AddInt32(&version, 1)
-	logger.LoggerMgw.Infof(">>>>>>>>>>>>>>>>>>> creating snapshot Version " + fmt.Sprint(version))
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil)
-	snap.Consistent()
-
-	err := cache.SetSnapshot(nodeId, snap)
-	if err != nil {
-		logger.LoggerMgw.Error(err)
-	}
-}
-
-/**
  * Run the management grpc server.
  *
  * @param conf  Swagger files location
@@ -155,13 +109,8 @@ func updateEnvoy(location string) {
 func Run(conf *mgwconfig.Config) {
 	sig := make(chan os.Signal)
 	signal.Notify(sig, os.Interrupt)
-	watcher, _ := fsnotify.NewWatcher()
-	err := watcher.Add(conf.Apis.Location)
-
-	if err != nil {
-		logger.LoggerMgw.Fatal("Error reading the api definitions.", err)
-	}
-
+	xds.Init()
+	//TODO: (VirajSalaka) Support the REST API Configuration via flags only if it is a valid requirement
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -172,13 +121,11 @@ func Run(conf *mgwconfig.Config) {
 	errC := watcherLogConf.Add("resources/conf/log_config.toml")
 
 	if errC != nil {
-		logger.LoggerMgw.Fatal("Error reading the log configs. ", err)
+		logger.LoggerMgw.Fatal("Error reading the log configs. ", errC)
 	}
 
 	logger.LoggerMgw.Info("Starting control plane ....")
-
-	cache = cachev3.NewSnapshotCache(mode != Ads, IDHash{}, nil)
-
+	cache := xds.GetXdsCache()
 	srv := xdsv3.NewServer(ctx, cache, nil)
 
 	//als := &myals.AccessLogService{}
@@ -186,18 +133,11 @@ func Run(conf *mgwconfig.Config) {
 
 	// start the xDS server
 	RunManagementServer(ctx, srv, port)
-	go apiserver.Start(conf)
-
-	updateEnvoy(conf.Apis.Location)
+	//go apiserver.Start(conf)
+	go restserver.StartRestServer(conf)
 OUTER:
 	for {
 		select {
-		case c := <-watcher.Events:
-			switch c.Op.String() {
-			case "WRITE":
-				logger.LoggerMgw.Info("Loading updated swagger definition...")
-				updateEnvoy(conf.Apis.Location)
-			}
 		case l := <-watcherLogConf.Events:
 			switch l.Op.String() {
 			case "WRITE":

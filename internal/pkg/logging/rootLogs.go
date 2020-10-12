@@ -18,14 +18,14 @@ package logging
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/configs"
-	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 	"io"
 	"os"
 	"strings"
-)
 
+	"github.com/sirupsen/logrus"
+	"github.com/wso2/micro-gw/internal/configs"
+	lumberjack "gopkg.in/natefinch/lumberjack.v2"
+)
 
 type PlainFormatter struct {
 	TimestampFormat string
@@ -52,7 +52,7 @@ func init() {
  * @param filename   Log file name
  * @return *error Error
  */
-func initGlobalLogger(filename string) (error) {
+func initGlobalLogger(filename string) error {
 
 	// Create the log file if doesn't exist. And append to it if it already exists.
 	_, err := os.OpenFile(filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
@@ -150,7 +150,7 @@ func setLogRotation(filename string) io.Writer {
 			Filename:   filename,
 			MaxSize:    10, // megabytes
 			MaxBackups: 3,
-			MaxAge:     2,   //days
+			MaxAge:     2,    //days
 			Compress:   true, // disabled by default
 		}
 	}

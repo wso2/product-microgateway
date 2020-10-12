@@ -25,21 +25,22 @@ import (
  ********** Don't initiate loggers for sub packages ****************
 
 When you add a new logger instance add the related package name as a constant
- */
-
+*/
 
 const (
-	pkgApi = "github.com/wso2/micro-gw/internal/pkg/api"
-	pkgAuth = "github.com/wso2/micro-gw/internal/pkg/auth"
-	pkgMgw = "github.com/wso2/micro-gw/internal/pkg/mgw"
+	pkgApi       = "github.com/wso2/micro-gw/internal/pkg/api"
+	pkgAuth      = "github.com/wso2/micro-gw/internal/pkg/auth"
+	pkgMgw       = "github.com/wso2/micro-gw/internal/pkg/mgw"
 	pkgOasparser = "github.com/wso2/micro-gw/internal/pkg/oasparser"
+	pkgXds       = "github.com/wso2/micro-gw/internal/pkg/xds"
 )
 
 var (
-	LoggerApi          *logrus.Logger
-	LoggerAuth         *logrus.Logger
-	LoggerMgw          *logrus.Logger
-	LoggerOasparser    *logrus.Logger
+	LoggerApi       *logrus.Logger
+	LoggerAuth      *logrus.Logger
+	LoggerMgw       *logrus.Logger
+	LoggerOasparser *logrus.Logger
+	LoggerXds       *logrus.Logger
 )
 
 func init() {
@@ -56,5 +57,6 @@ func UpdateLoggers() {
 	LoggerAuth = logging.InitPackageLogger(pkgAuth)
 	LoggerMgw = logging.InitPackageLogger(pkgMgw)
 	LoggerOasparser = logging.InitPackageLogger(pkgOasparser)
+	LoggerXds = logging.InitPackageLogger(pkgXds)
 	logrus.Info("Updated loggers")
 }

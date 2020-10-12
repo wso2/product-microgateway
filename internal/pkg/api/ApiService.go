@@ -15,10 +15,13 @@
  *
  */
 
+//TODO: (VirajSalaka) Remove the code as unused.
 package api
 
 import (
+	"io/ioutil"
 	"net/http"
+
 	logger "github.com/wso2/micro-gw/internal/loggers"
 )
 
@@ -29,8 +32,15 @@ type RESTService struct{}
 // TODO: Implement. Simply copy the swagger content to the location defined in the configs or directly deploy the api.
 // Deploy API in microgateway.
 func (rest *RESTService) ApiPOST(w http.ResponseWriter, r *http.Request) {
-	logger.LoggerApi.Info(w, "Your API is added")
+	jsonByteArray, _ := ioutil.ReadAll(r.Body)
+	UnzipAndApplyZippedProject(jsonByteArray)
+	logger.LoggerApi.Info("Your API is added")
+}
 
+func (rest *RESTService) openAPIPOST(w http.ResponseWriter, r *http.Request) {
+	logger.LoggerApi.Info("Your API is added")
+	jsonByteArray, _ := ioutil.ReadAll(r.Body)
+	ApplyOpenAPIFile(jsonByteArray)
 }
 
 // Update deployed api

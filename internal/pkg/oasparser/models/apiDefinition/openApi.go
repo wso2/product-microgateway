@@ -20,12 +20,13 @@ package apiDefinition
 
 import (
 	"encoding/json"
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/wso2/micro-gw/configs"
-	logger "github.com/wso2/micro-gw/internal/loggers"
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/wso2/micro-gw/internal/configs"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 )
 
 /**
@@ -56,18 +57,18 @@ func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
  * Set swagger3 resource path details to mgwSwagger  Instance.
  *
  * @param path  Resource path
- * @param pathtype  Path type(Get, Post ... )
+ * @param method  Path type(Get, Post ... )
  * @param operation  Operation type
  * @return Resource  MgwSwagger resource instance
  */
-func setOperationOpenApi(path string, pathtype string, operation *openapi3.Operation) Resource {
+func setOperationOpenApi(path string, method string, operation *openapi3.Operation) Resource {
 	var resource Resource
 	if operation != nil {
 		resource = Resource{
-			path:     path,
-			pathtype: pathtype,
-			iD:       operation.OperationID,
-			summary:  operation.Summary,
+			path:        path,
+			method:      method,
+			iD:          operation.OperationID,
+			summary:     operation.Summary,
 			description: operation.Description,
 			//Schemes: operation.,
 			//tags: operation.Tags,
@@ -117,11 +118,11 @@ func SetResourcesOpenApi(openApi openapi3.Swagger) []Resource {
  * @return Endpoint  Endpoint instance
  */
 func getHostandBasepathandPort(rawUrl string) Endpoint {
-    var (
-    	basepath string
-		host string
-		port uint32
-    )
+	var (
+		basepath string
+		host     string
+		port     uint32
+	)
 	if !strings.Contains(rawUrl, "://") {
 		rawUrl = "http://" + rawUrl
 	}
@@ -177,7 +178,7 @@ func convertExtensibletoReadableFormat(vendorExtensible openapi3.ExtensionProps)
 	jsnRawExtensible := vendorExtensible.Extensions
 	b, err := json.Marshal(jsnRawExtensible)
 	if err != nil {
-		logger.LoggerOasparser.Error("Error marsheling vendor extenstions: ",err)
+		logger.LoggerOasparser.Error("Error marsheling vendor extenstions: ", err)
 	}
 
 	var extensible map[string]interface{}
@@ -186,4 +187,20 @@ func convertExtensibletoReadableFormat(vendorExtensible openapi3.ExtensionProps)
 		logger.LoggerOasparser.Error("Error unmarsheling vendor extenstions:", err)
 	}
 	return extensible
+}
+
+func GetXWso2Label(vendorExtensions openapi3.ExtensionProps) []string {
+	vendorExtensionsMap := convertExtensibletoReadableFormat(vendorExtensions)
+	var labelArray []string
+	if y, found := vendorExtensionsMap["x-wso2-label"]; found {
+		if val, ok := y.([]interface{}); ok {
+			for _, label := range val {
+				labelArray = append(labelArray, label.(string))
+			}
+			return labelArray
+		} else {
+			logger.LoggerOasparser.Errorln("Error while parsing the x-wso2-label")
+		}
+	}
+	return []string{"default"}
 }

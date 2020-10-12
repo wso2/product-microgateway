@@ -1,0 +1,132 @@
+---
+    swagger: "2.0"
+    info:
+      description: "This document specifies a **RESTful API** for WSO2 **API Manager**\
+        \ - Admin Portal.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.5.176/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml)\
+        \ of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n"
+      version: "v1.2"
+      title: "WSO2 API Manager - Admin"
+      contact:
+        name: "WSO2"
+        url: "http://wso2.com/products/api-manager/"
+        email: "architecture@wso2.com"
+      license:
+        name: "Apache 2.0"
+        url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+    host: "apis.wso2.com"
+    basePath: "/api/am/admin/v1"
+    schemes:
+    - "https"
+    consumes:
+    - "application/json"
+    produces:
+    - "application/json"
+    paths:
+      /import/api:
+        post:
+          tags:
+          - "API (Individual)"
+          summary: "Import an API"
+          description: "This operation can be used to import an API.\n"
+          consumes:
+          - "multipart/form-data"
+          parameters:
+          - name: "file"
+            in: "formData"
+            description: "Zip archive consisting on exported api configuration\n"
+            required: true
+            type: "file"
+            x-exportParamName: "File"
+          - name: "preserveProvider"
+            in: "query"
+            description: "Preserve Original Provider of the API. This is the user choice\
+              \ to keep or replace the API provider.\n"
+            required: false
+            type: "boolean"
+            x-exportParamName: "PreserveProvider"
+            x-optionalDataType: "Bool"
+          - name: "overwrite"
+            in: "query"
+            description: "Whether to update the API or not. This is used when updating\
+              \ already existing APIs.\n"
+            required: false
+            type: "boolean"
+            x-exportParamName: "Overwrite"
+            x-optionalDataType: "Bool"
+          responses:
+            "200":
+              description: "Created.\nAPI Imported Successfully.\n"
+            "403":
+              description: "Forbidden\nNot Authorized to import.\n"
+              schema:
+                $ref: "#/definitions/Error"
+            "404":
+              description: "Not Found.\nRequested API to update not found.\n"
+              schema:
+                $ref: "#/definitions/Error"
+            "409":
+              description: "Conflict.\nAPI to import already exists.\n"
+              schema:
+                $ref: "#/definitions/Error"
+            "500":
+              description: "Internal Server Error.\nError in importing API.\n"
+              schema:
+                $ref: "#/definitions/Error"
+          security:
+          - BasicAuth: []
+          x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization:\
+            \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v1/import/api?preserveProvider=false&overwrite=false"
+          x-wso2-request: "POST https://localhost:9443/api/am/admin/v1/import/apis\nAuthorization:\
+            \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n"
+          x-wso2-response: "HTTP/1.1 200 OK\nAPI imported successfully."
+    securityDefinitions:
+      BasicAuth:     # <-- arbitrary name for the security scheme
+        type: "basic"
+    definitions:
+      Error:
+        required:
+        - "code"
+        - "message"
+        properties:
+          code:
+            type: "integer"
+            format: "int64"
+            description: "Error code"
+          message:
+            type: "string"
+            description: "Error message."
+          description:
+            type: "string"
+            description: "A detail description about the error message.\n"
+          moreInfo:
+            type: "string"
+            description: "Preferably an url with more details about the error.\n"
+          error:
+            type: "array"
+            description: "If there are more than one error list them out.\nFor example,\
+              \ list out validation errors by each field.\n"
+            items:
+              $ref: "#/definitions/ErrorListItem"
+        title: "Error object returned with 4XX HTTP status"
+      ErrorListItem:
+        required:
+        - "code"
+        - "message"
+        properties:
+          code:
+            type: "string"
+            description: "Error code"
+          message:
+            type: "string"
+            description: "Description about individual errors occurred\n"
+        title: "Description of individual errors that may have occurred during a request."
+      Principal:
+        type: object
+        properties:
+          username:
+            type: string
+          tenant:
+            type: string
+          token:
+            type: string
+      

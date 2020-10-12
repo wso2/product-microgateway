@@ -19,9 +19,12 @@ package utills
 import (
 	"bytes"
 	"encoding/json"
+
+	//TODO: (VirajSalaka) remove outdated dependency
+	"unicode"
+
 	"github.com/ghodss/yaml"
 	logger "github.com/wso2/micro-gw/internal/loggers"
-	"unicode"
 )
 
 /**

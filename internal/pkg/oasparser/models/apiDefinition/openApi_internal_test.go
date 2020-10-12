@@ -19,23 +19,24 @@ package apiDefinition
 
 import (
 	"fmt"
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSetInfoOpenApi(t *testing.T) {
 	type setInfoTestItem struct {
-		input openapi3.Swagger
-		result MgwSwagger
+		input   openapi3.Swagger
+		result  MgwSwagger
 		message string
 	}
 	dataItems := []setInfoTestItem{
 		{
 			openapi3.Swagger{
 				OpenAPI: "openApi",
-				Info:    &openapi3.Info{
+				Info: &openapi3.Info{
 					Title:       "petsore",
 					Description: "Swagger definition",
 					Version:     "1.0",
@@ -43,29 +44,29 @@ func TestSetInfoOpenApi(t *testing.T) {
 			},
 
 			MgwSwagger{
-				swaggerVersion:   "openApi",
-				description:      "Swagger definition",
-				title:            "petsore",
-				version:          "1.0",
+				swaggerVersion: "openApi",
+				description:    "Swagger definition",
+				title:          "petsore",
+				version:        "1.0",
 			},
 			"usual case",
 		},
 		{
 			openapi3.Swagger{
 				OpenAPI: "openApi",
-				Info: nil,
+				Info:    nil,
 			},
 			MgwSwagger{
-				id:               "",
-				swaggerVersion:   "openApi",
-				description:      "",
-				title:            "",
-				version:          "",
+				id:             "",
+				swaggerVersion: "openApi",
+				description:    "",
+				title:          "",
+				version:        "",
 			},
 			"when info section is null",
 		},
 	}
-	for _, item := range dataItems{
+	for _, item := range dataItems {
 		var mgwSwagger MgwSwagger
 		mgwSwagger.SetInfoOpenApi(item.input)
 		assert.Equal(t, item.result, mgwSwagger, item.message)
@@ -74,11 +75,11 @@ func TestSetInfoOpenApi(t *testing.T) {
 
 func TestSetResourcesOpenApi(t *testing.T) {
 	type setResourcesTestItem struct {
-		input openapi3.Swagger
-		result []Resource
+		input   openapi3.Swagger
+		result  []Resource
 		message string
 	}
-	dataItems := []setResourcesTestItem {
+	dataItems := []setResourcesTestItem{
 		{
 			openapi3.Swagger{
 				Paths: nil,
@@ -100,17 +101,17 @@ func TestSetResourcesOpenApi(t *testing.T) {
 			},
 			[]Resource{
 				{
-					path: "/pet/{petId}",
-					pathtype: "get",
+					path:        "/pet/{petId}",
+					method:      "get",
 					description: "this retrieve data from id",
-					iD:  "petfindbyid",
-					summary: "pet find by id",
+					iD:          "petfindbyid",
+					summary:     "pet find by id",
 				},
 			},
 			"usual case",
 		},
 	}
-	for _, item := range dataItems{
+	for _, item := range dataItems {
 		resultResources := SetResourcesOpenApi(item.input)
 		assert.Equal(t, item.result, resultResources, item.message)
 	}
@@ -118,12 +119,12 @@ func TestSetResourcesOpenApi(t *testing.T) {
 
 func TestGetHostandBasepathandPort(t *testing.T) {
 	type setResourcesTestItem struct {
-		input string
-		result Endpoint
+		input   string
+		result  Endpoint
 		message string
 	}
 	fmt.Println(os.Getwd())
-	dataItems := []setResourcesTestItem {
+	dataItems := []setResourcesTestItem{
 		{
 			input: "https://petstore.io:8000/api/v2",
 			result: Endpoint{
@@ -140,7 +141,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 				Basepath: "/api/v2",
 				Port:     8000,
 			},
-			message: "when port is not provided",  //here should find a way to readi configs in tests
+			message: "when port is not provided", //here should find a way to readi configs in tests
 		},
 		{
 			input: "petstore.io:8000/api/v2",
@@ -152,7 +153,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 			message: "when protocol is not provided",
 		},
 	}
-	for _, item := range dataItems{
+	for _, item := range dataItems {
 		resultResources := getHostandBasepathandPort(item.input)
 		assert.Equal(t, item.result, resultResources, item.message)
 	}

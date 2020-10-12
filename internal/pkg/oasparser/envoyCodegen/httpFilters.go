@@ -40,10 +40,10 @@ func getHttpFilters() []*hcmv3.HttpFilter {
 		&extAauth,
 		&router,
 	}
-
 	return httpFilters
 }
 
+//TODO: (VirajSalaka) Configure Http Connection Manager
 /**
  * Get router http filter.
  *
@@ -79,6 +79,7 @@ func getRouterHttpFilter() hcmv3.HttpFilter {
 	return filter
 }
 
+//TODO: (VirajSalaka) Configure External Authz Filter
 /**
  * Get ExtAauthz http filter.
  *

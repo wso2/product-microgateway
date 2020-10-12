@@ -15,7 +15,31 @@
 # -----------------------------------------------------------------------
 
 FROM ubuntu:20.04
-WORKDIR /home/ubuntu
-COPY target/micro-gw-ubuntu /home/ubuntu/micro-gw-ubuntu
-COPY resources resources
+LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
+
+ENV LANG=C.UTF-8
+
+ARG USER=wso2
+ARG USER_ID=802
+ARG USER_GROUP=wso2
+ARG USER_GROUP_ID=802
+ARG USER_HOME=/home/${USER}
+
+ARG MOTD="\n\
+ Welcome to WSO2 Docker Resources \n\
+ --------------------------------- \n\
+ This Docker container comprises of a WSO2 product, running with its latest GA release \n\
+ which is under the Apache License, Version 2.0. \n\
+ Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"
+
+RUN \
+    groupadd --system -g ${USER_GROUP_ID} ${USER_GROUP} \
+    && useradd --system --create-home --home-dir ${USER_HOME} --no-log-init -g ${USER_GROUP_ID} -u ${USER_ID} ${USER} \
+    && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
+
+WORKDIR ${USER_HOME}
+USER ${USER}
+COPY target/micro-gw-ubuntu ${USER_HOME}/micro-gw-ubuntu
+COPY resources ${USER_HOME}/resources
+
 CMD ["./micro-gw-ubuntu"]

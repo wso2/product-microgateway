@@ -61,8 +61,12 @@ func NewReceiver() chan string {
 type Config struct {
 	// The server parameters.
 	Server struct {
-		IP   string
-		Port string
+		IP             string
+		Port           string
+		PublicKeyPath  string
+		PrivateKeyPath string
+		Username       string
+		Password       string
 	}
 
 	// TLS configuration

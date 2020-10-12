@@ -17,12 +17,12 @@
 package main
 
 import (
+	"os"
+
 	logger "github.com/sirupsen/logrus"
 	"github.com/wso2/micro-gw/cmd/microgateway"
 	_ "github.com/wso2/micro-gw/internal/pkg/logging"
-	"os"
 )
-
 
 func main() {
 
@@ -31,7 +31,5 @@ func main() {
 		file = os.Args[1]
 		logger.Debug(file)
 	}
-
 	microgateway.StartMicroGateway(os.Args)
-
 }

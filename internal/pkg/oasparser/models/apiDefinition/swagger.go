@@ -82,19 +82,19 @@ func SetResourcesSwagger(swagger2 spec.Swagger) []Resource {
  * Set swagger2 resource path details to mgwSwagger  Instance.
  *
  * @param path  Resource path
- * @param pathtype  Path type(Get, Post ... )
+ * @param method  Path type(Get, Post ... )
  * @param operation  Operation type
  * @return Resource  MgwSwagger resource instance
  */
-func setOperationSwagger(path string, pathtype string, operation *spec.Operation) Resource {
+func setOperationSwagger(path string, method string, operation *spec.Operation) Resource {
 	var resource Resource
 	if operation != nil {
 		resource = Resource{
-			path:             path,
-			pathtype:         pathtype,
-			iD:               operation.ID,
-			summary:          operation.Summary,
-			description:  operation.Description,
+			path:        path,
+			method:      method,
+			iD:          operation.ID,
+			summary:     operation.Summary,
+			description: operation.Description,
 			//schemes:          operation.Schemes,
 			//tags:             operation.Tags,
 			//security:         operation.Security,

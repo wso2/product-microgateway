@@ -19,7 +19,7 @@ dynamic_resources:
     resource_api_version: V3   
 node:
   cluster: service_greeter
-  id: test-id
+  id: default
 static_resources:
   clusters:
     - name: xds_cluster

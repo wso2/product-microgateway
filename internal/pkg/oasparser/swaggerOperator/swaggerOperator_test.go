@@ -17,20 +17,21 @@
 package swaggerOperator_test
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
-	"testing"
 )
 
 func TestGetMgwSwagger(t *testing.T) {
 	type getMgwSwaggerTestItem struct {
-		inputSwagger   string
-		resultApiProdEndpoints []apiDefinition.Endpoint
+		inputSwagger                string
+		resultApiProdEndpoints      []apiDefinition.Endpoint
 		resultResourceProdEndpoints []apiDefinition.Endpoint
-		message string
+		message                     string
 	}
-	dataItems := []getMgwSwaggerTestItem {
+	dataItems := []getMgwSwaggerTestItem{
 		{
 			inputSwagger: `{
 				"swagger": "2.0",
@@ -40,13 +41,13 @@ func TestGetMgwSwagger(t *testing.T) {
 							}`,
 			resultApiProdEndpoints: []apiDefinition.Endpoint{
 				{
-					Host: "petstore.io",
+					Host:     "petstore.io",
 					Basepath: "/api/v2",
-					Port: 80,
+					Port:     80,
 				},
 			},
 			resultResourceProdEndpoints: nil,
-			message: "api level endpoint provided as swagger 2 standard",
+			message:                     "api level endpoint provided as swagger 2 standard",
 		},
 		{
 			inputSwagger: `openapi: "3.0.0"
@@ -54,13 +55,13 @@ servers:
   - url: http://petstore.io:80/api/v2`,
 			resultApiProdEndpoints: []apiDefinition.Endpoint{
 				{
-					Host: "petstore.io",
+					Host:     "petstore.io",
 					Basepath: "/api/v2",
-					Port: 80,
+					Port:     80,
 				},
 			},
 			resultResourceProdEndpoints: nil,
-			message: "api level endpoint provided as openApi3 standard",
+			message:                     "api level endpoint provided as openApi3 standard",
 		},
 		{
 			inputSwagger: `{
@@ -77,13 +78,14 @@ servers:
                            }`,
 			resultApiProdEndpoints: []apiDefinition.Endpoint{
 				{
-					Host: "petstore.io",
+					Host:     "petstore.io",
 					Basepath: "/api/v2",
-					Port: 80,
+					Port:     80,
+					UrlType:  "https",
 				},
 			},
 			resultResourceProdEndpoints: nil,
-			message: "api level endpoint provided as x-wso2 format and swagger2 standard",
+			message:                     "api level endpoint provided as x-wso2 format and swagger2 standard",
 		},
 		{
 			inputSwagger: `openapi: "3.0.0"
@@ -96,18 +98,18 @@ x-wso2-production-endpoints:
   type: https`,
 			resultApiProdEndpoints: []apiDefinition.Endpoint{
 				{
-					Host: "petstorecorrect.swagger.io",
+					Host:     "petstorecorrect.swagger.io",
 					Basepath: "/api/v3",
-					Port: 90,
-					UrlType: "https",
+					Port:     90,
+					UrlType:  "https",
 				},
 			},
 			resultResourceProdEndpoints: nil,
-			message: "api level endpoint provided as x-wso2 format and openApi3 standard",
+			message:                     "api level endpoint provided as x-wso2 format and openApi3 standard",
 		},
 	}
 
-	for _, item := range dataItems{
+	for _, item := range dataItems {
 		resultMgwSagger := swaggerOperator.GetMgwSwagger([]byte(item.inputSwagger))
 
 		assert.Equal(t, item.resultApiProdEndpoints, resultMgwSagger.GetProdEndpoints(), item.message)

@@ -17,19 +17,20 @@
 package envoy
 
 import (
-	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
-	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
+	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 )
 
 type EnvoyNode struct {
-	listeners []types.Resource
-	clusters  []types.Resource
-	routes    []types.Resource
-	endpoints []types.Resource
+	listeners    []types.Resource
+	clusters     []types.Resource
+	routes       []types.Resource
+	endpoints    []types.Resource
+	routeConfigs []types.Resource
 }
 
 func (envoy *EnvoyNode) SetListener(listener *listenerv3.Listener) {
@@ -54,6 +55,10 @@ func (envoy *EnvoyNode) SetEndpoints(endpoints []*corev3.Address) {
 	}
 }
 
+func (envoy *EnvoyNode) SetRouteConfigs(routeConfig *routev3.RouteConfiguration) {
+	envoy.routeConfigs = []types.Resource{routeConfig}
+}
+
 func (envoy *EnvoyNode) GetSources() ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
-	return envoy.listeners, envoy.clusters, envoy.routes, envoy.endpoints
+	return envoy.listeners, envoy.clusters, envoy.routeConfigs, envoy.endpoints
 }

@@ -18,26 +18,27 @@
 package apiDefinition
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetXWso2Endpoints(t *testing.T) {
 	type getXWso2EndpointsTestItem struct {
 		inputVendorExtensible map[string]interface{}
-		inputEndpointType  string
-		result  []Endpoint
-		message string
+		inputEndpointType     string
+		result                []Endpoint
+		message               string
 	}
-	dataItems := []getXWso2EndpointsTestItem {
+	dataItems := []getXWso2EndpointsTestItem{
 		{
 			inputEndpointType: "x-wso2-production-endpoints",
-			inputVendorExtensible: map[string]interface{}{"x-wso2-production-endpoints":map[string]interface{}{
-				"type":"https", "urls":[]interface{}{"https://www.facebook.com:80"}}},
-			result: []Endpoint {
+			inputVendorExtensible: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
+				"type": "https", "urls": []interface{}{"https://www.facebook.com:80"}}},
+			result: []Endpoint{
 				{
-					Host: "www.facebook.com",
-					Port: 80,
+					Host:    "www.facebook.com",
+					Port:    80,
 					UrlType: "https",
 				},
 			},
@@ -45,14 +46,14 @@ func TestGetXWso2Endpoints(t *testing.T) {
 		},
 		{
 			inputEndpointType: "x-wso2-production-endpoints",
-			inputVendorExtensible: map[string]interface{}{"x-wso2-production-endpoints+++":map[string]interface{}{
-				"type":"https", "urls":[]interface{}{"https://www.facebook.com:80/base"}}},
-			result: nil,
+			inputVendorExtensible: map[string]interface{}{"x-wso2-production-endpoints+++": map[string]interface{}{
+				"type": "https", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
+			result:  nil,
 			message: "when having incorrect extenstion name",
 		},
 	}
-	for _, item := range dataItems{
-		resultResources := GetXWso2Endpoints(item.inputVendorExtensible,item.inputEndpointType)
+	for _, item := range dataItems {
+		resultResources := GetXWso2Endpoints(item.inputVendorExtensible, item.inputEndpointType)
 		assert.Equal(t, item.result, resultResources, item.message)
 	}
 }
@@ -60,22 +61,22 @@ func TestGetXWso2Endpoints(t *testing.T) {
 func TestGetXWso2Basepath(t *testing.T) {
 	type getXWso2BasepathTestItem struct {
 		inputVendorExtensible map[string]interface{}
-		result  string
-		message string
+		result                string
+		message               string
 	}
-	dataItems := []getXWso2BasepathTestItem {
+	dataItems := []getXWso2BasepathTestItem{
 		{
-			inputVendorExtensible: map[string]interface{}{"x-wso2-basepath": "/base"},
-			result: "/base",
-			message: "usual case",
+			inputVendorExtensible: map[string]interface{}{"x-wso2-basePath": "/base"},
+			result:                "/base",
+			message:               "usual case",
 		},
 		{
 			inputVendorExtensible: map[string]interface{}{"x-wso2-basepath+++": "/base"},
-			result: "",
-			message: "when having incorrect structure",
+			result:                "",
+			message:               "when having incorrect structure",
 		},
 	}
-	for _, item := range dataItems{
+	for _, item := range dataItems {
 		resultResources := GetXWso2Basepath(item.inputVendorExtensible)
 		assert.Equal(t, item.result, resultResources, item.message)
 	}
@@ -83,27 +84,27 @@ func TestGetXWso2Basepath(t *testing.T) {
 
 func TestSetXWso2PrdoductionEndpoint(t *testing.T) {
 	type setXWso2PrdoductionEndpointTestItem struct {
-		input MgwSwagger
+		input   MgwSwagger
 		result  MgwSwagger
 		message string
 	}
-	dataItems := []setXWso2PrdoductionEndpointTestItem {
+	dataItems := []setXWso2PrdoductionEndpointTestItem{
 		{
 			input: MgwSwagger{
-				vendorExtensible: map[string]interface{}{"x-wso2-production-endpoints":map[string]interface{}{
-					"type":"https", "urls":[]interface{}{"https://www.facebook.com:80/base"}}},
-				resources: []Resource {
+				vendorExtensible: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
+					"type": "https", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
+				resources: []Resource{
 					{
 						vendorExtensible: nil,
 					},
-			     },
-		    },
-		    result: MgwSwagger{
-				productionUrls: []Endpoint {
+				},
+			},
+			result: MgwSwagger{
+				productionUrls: []Endpoint{
 					{
-						Host: "www.facebook.com",
-						Port: 80,
-						UrlType: "https",
+						Host:     "www.facebook.com",
+						Port:     80,
+						UrlType:  "https",
 						Basepath: "/base",
 					},
 				},
@@ -117,31 +118,31 @@ func TestSetXWso2PrdoductionEndpoint(t *testing.T) {
 		},
 		{
 			input: MgwSwagger{
-				vendorExtensible: map[string]interface{}{"x-wso2-production-endpoints":map[string]interface{}{
-					"type":"https", "urls":[]interface{}{"https://www.facebook.com:80/base"}}},
-				resources: []Resource {
+				vendorExtensible: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
+					"type": "https", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
+				resources: []Resource{
 					{
-						vendorExtensible: map[string]interface{}{"x-wso2-production-endpoints":map[string]interface{}{
-							"type":"https", "urls":[]interface{}{"https://resource.endpoint:80/base"}}},
+						vendorExtensible: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
+							"type": "https", "urls": []interface{}{"https://resource.endpoint:80/base"}}},
 					},
 				},
 			},
 			result: MgwSwagger{
-				productionUrls: []Endpoint {
+				productionUrls: []Endpoint{
 					{
-						Host: "www.facebook.com",
-						Port: 80,
-						UrlType: "https",
+						Host:     "www.facebook.com",
+						Port:     80,
+						UrlType:  "https",
 						Basepath: "/base",
 					},
 				},
-				resources: []Resource {
+				resources: []Resource{
 					{
-						productionUrls: []Endpoint {
+						productionUrls: []Endpoint{
 							{
-								Host: "resource.endpoint",
-								Port: 80,
-								UrlType: "https",
+								Host:     "resource.endpoint",
+								Port:     80,
+								UrlType:  "https",
 								Basepath: "/base",
 							},
 						},
@@ -152,7 +153,7 @@ func TestSetXWso2PrdoductionEndpoint(t *testing.T) {
 		},
 	}
 
-	for _, item := range dataItems{
+	for _, item := range dataItems {
 		mgwSwag := item.input
 		mgwSwag.SetXWso2Extenstions()
 		assert.Equal(t, item.result.productionUrls, mgwSwag.productionUrls, item.message)

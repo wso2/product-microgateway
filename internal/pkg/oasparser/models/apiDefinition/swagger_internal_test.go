@@ -18,63 +18,64 @@
 package apiDefinition
 
 import (
+	"testing"
+
 	"github.com/go-openapi/spec"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestSetInfoSwagger(t *testing.T) {
 	type setInfoTestItem struct {
-		input spec.Swagger
-		result MgwSwagger
+		input   spec.Swagger
+		result  MgwSwagger
 		message string
 	}
 	dataItems := []setInfoTestItem{
 		{
 			spec.Swagger{
 				VendorExtensible: spec.VendorExtensible{},
-				SwaggerProps:     spec.SwaggerProps{
-					ID: "v1",
+				SwaggerProps: spec.SwaggerProps{
+					ID:      "v1",
 					Swagger: "swagger",
 					Info: &spec.Info{
-						InfoProps:        spec.InfoProps{
-							Description:    "Swagger definition",
-							Title:          "petsore",
-							Version:        "1.0",
+						InfoProps: spec.InfoProps{
+							Description: "Swagger definition",
+							Title:       "petsore",
+							Version:     "1.0",
 						},
 					},
 				},
 			},
-			
+
 			MgwSwagger{
-				id:               "v1",
-				swaggerVersion:   "swagger",
-				description:      "Swagger definition",
-				title:            "petsore",
-				version:          "1.0",
+				id:             "v1",
+				swaggerVersion: "swagger",
+				description:    "Swagger definition",
+				title:          "petsore",
+				version:        "1.0",
 			},
 			"usual case",
 		},
 		{
 			spec.Swagger{
 				VendorExtensible: spec.VendorExtensible{},
-				SwaggerProps:     spec.SwaggerProps{
-					ID: "",
+				SwaggerProps: spec.SwaggerProps{
+					ID:      "",
 					Swagger: "swagger",
-					Info: nil,
-					},
+					Info:    nil,
 				},
+			},
 			MgwSwagger{
-				id:               "",
-				swaggerVersion:   "swagger",
-				description:      "",
-				title:            "",
-				version:          "",
+				id:             "",
+				swaggerVersion: "swagger",
+				description:    "",
+				title:          "",
+				version:        "",
 			},
 			"when info section is null",
 		},
 	}
-	for _, item := range dataItems{
+	for _, item := range dataItems {
 		var mgwSwagger MgwSwagger
 		mgwSwagger.SetInfoSwagger(item.input)
 		assert.Equal(t, item.result, mgwSwagger, item.message)
@@ -83,14 +84,14 @@ func TestSetInfoSwagger(t *testing.T) {
 
 func TestSetResourcesSwagger(t *testing.T) {
 	type setResourcesTestItem struct {
-		input spec.Swagger
-		result []Resource
+		input   spec.Swagger
+		result  []Resource
 		message string
 	}
-	dataItems := []setResourcesTestItem {
+	dataItems := []setResourcesTestItem{
 		{
 			spec.Swagger{
-				SwaggerProps:     spec.SwaggerProps{
+				SwaggerProps: spec.SwaggerProps{
 					Paths: nil,
 				},
 			},
@@ -99,10 +100,10 @@ func TestSetResourcesSwagger(t *testing.T) {
 		},
 		{
 			spec.Swagger{
-				SwaggerProps:     spec.SwaggerProps{
+				SwaggerProps: spec.SwaggerProps{
 					Paths: &spec.Paths{
-						Paths:  map[string]spec.PathItem{"/pet/{petId}": {
-							PathItemProps:    spec.PathItemProps{
+						Paths: map[string]spec.PathItem{"/pet/{petId}": {
+							PathItemProps: spec.PathItemProps{
 								Get: &spec.Operation{
 									OperationProps: spec.OperationProps{
 										Description: "this retrieve data from id",
@@ -116,18 +117,18 @@ func TestSetResourcesSwagger(t *testing.T) {
 				},
 			},
 			[]Resource{
-					{
-						path: "/pet/{petId}",
-						pathtype: "get",
-						description: "this retrieve data from id",
-						iD:  "petfindbyid",
-						summary: "pet find by id",
-					},
+				{
+					path:        "/pet/{petId}",
+					method:      "get",
+					description: "this retrieve data from id",
+					iD:          "petfindbyid",
+					summary:     "pet find by id",
+				},
 			},
 			"usual case",
 		},
 	}
-	for _, item := range dataItems{
+	for _, item := range dataItems {
 		resultResources := SetResourcesSwagger(item.input)
 		assert.Equal(t, item.result, resultResources, item.message)
 	}

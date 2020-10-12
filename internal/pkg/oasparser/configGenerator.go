@@ -14,126 +14,130 @@
  *  limitations under the License.
  *
  */
+
 package oasparser
 
 //package envoy_config_generator
 
 import (
-
-	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 
-	swgger "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
 	enovoy "github.com/wso2/micro-gw/internal/pkg/oasparser/envoyCodegen"
-	logger "github.com/wso2/micro-gw/internal/loggers"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/envoy"
-
-	"strings"
+	swgger "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
 )
 
-/**
- * Get all production resources for envoy.
- *
- * @param location  Location of swagger files
- * @return []types.Resource Production listeners
- * @return []types.Resource Production clusters
- * @return []types.Resource Production routes
- * @return []types.Resource Production endpoints
- */
-func GetProductionSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
-	logger.LoggerOasparser.Debug("debug check....................")
-	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
-	if err != nil {
-		logger.LoggerOasparser.Fatal("Error Generating mgwSwagger struct:", err)
+// /**
+//  * Get all production resources for envoy from file.
+//  *
+//  * @param byte[]  swagger as byte array
+//  * @return []types.Resource Production listeners
+//  * @return []types.Resource Production clusters
+//  * @return []types.Resource Production routes
+//  * @return []types.Resource Production endpoints
+//  */
+// func GetProductionSourcesFromByteArray(byteArr []byte) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
+// 	logger.LoggerOasparser.Debug("debug check....................")
+// 	mgwSwaggers := swgger.GenerateMgwSwaggerFromByteArray(byteArr)
+// 	return getProductionSources(mgwSwaggers)
+// }
 
-	}
+// func getProductionSources(mgwSwaggers []apiDefinition.MgwSwagger) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
+// 	var (
+// 		routesP    []*routev3.Route
+// 		clustersP  []*clusterv3.Cluster
+// 		endpointsP []*corev3.Address
+// 	)
 
-	var (
-		routesP    []*routev3.Route
-		clustersP  []*clusterv3.Cluster
-		endpointsP []*corev3.Address
-	)
+// 	for _, swagger := range mgwSwaggers {
+// 		routes, clusters, endpoints, _, _, _ := enovoy.CreateRoutesWithClusters(swagger)
+// 		routesP = append(routesP, routes...)
+// 		clustersP = append(clustersP, clusters...)
+// 		endpointsP = append(endpointsP, endpoints...)
+// 	}
 
-	for _, swagger := range mgwSwaggers {
-		routes, clusters, endpoints, _, _, _ := enovoy.CreateRoutesWithClusters(swagger)
-		routesP = append(routesP, routes...)
-		clustersP = append(clustersP, clusters...)
-		endpointsP = append(endpointsP, endpoints...)
-	}
+// 	envoyNodeProd := new(envoy.EnvoyNode)
 
+// 	if len(mgwSwaggers) > 0 {
+// 		vHost_NameP := "default"
+// 		vHostP, _ := enovoy.CreateVirtualHost(vHost_NameP, routesP)
+// 		// listenerNameP := "listenerProd_1"
+// 		// routeConfigNameP := "routeProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
+// 		// listnerProd := enovoy.CreateListener(listenerNameP, routeConfigNameP, vHostP)
+// 		listnerProd := enovoy.CreateListenerWithRds("default")
+// 		routeConfigProd := enovoy.CreateRoutesConfigForRds(vHostP)
+
+// 		envoyNodeProd.SetListener(&listnerProd)
+// 		envoyNodeProd.SetClusters(clustersP)
+// 		envoyNodeProd.SetRoutes(routesP)
+// 		envoyNodeProd.SetEndpoints(endpointsP)
+// 		envoyNodeProd.SetRouteConfigs(&routeConfigProd)
+
+// 	} else {
+// 		logger.LoggerOasparser.Error("No Api definitions found")
+// 	}
+
+// 	logger.LoggerOasparser.Info(len(routesP), " routes are generated successfully")
+// 	logger.LoggerOasparser.Info(len(clustersP), " clusters are generated successfully")
+// 	logger.LoggerOasparser.Info(len(endpointsP), " endpoints are generated successfully")
+// 	return envoyNodeProd.GetSources()
+// }
+
+/*
+GetProductionRoutesClustersEndpoints is a method to generate and provide the routes, clusters and endpoints when the openAPI is provided.
+
+@param byte[]  openAPI json as a byte array
+@return []*routev3.Route Routes
+@return []*clusterv3.Cluster Clusters
+@return []*corev3.Address Endpoints
+*/
+func GetProductionRoutesClustersEndpoints(byteArr []byte) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
+	mgwSwagger := swgger.GetMgwSwagger(byteArr)
+	routes, clusters, endpoints, _, _, _ := enovoy.CreateRoutesWithClusters(mgwSwagger)
+	return routes, clusters, endpoints
+}
+
+/*
+GetProductionListenerAndRouteConfig is a method to generate and provide the listener and routesconfiguration configurations.
+
+@param []*routev3.Route Envoy routes array
+@return *listenerv3.Listener Envoy Listener
+@return *routev3.RouteConfiguration Envoy RouteConfiguration
+*/
+func GetProductionListenerAndRouteConfig(routes []*routev3.Route) (*listenerv3.Listener, *routev3.RouteConfiguration) {
+	listnerProd := enovoy.CreateListenerWithRds("default")
+	vHostName := "default"
+	vHostP, _ := enovoy.CreateVirtualHost(vHostName, routes)
+	routeConfigProd := enovoy.CreateRoutesConfigForRds(vHostP)
+
+	return &listnerProd, &routeConfigProd
+}
+
+func GetCacheResources(endpoints []*corev3.Address, clusters []*clusterv3.Cluster, listener *listenerv3.Listener,
+	routeConfig *routev3.RouteConfiguration) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
 	envoyNodeProd := new(envoy.EnvoyNode)
+	envoyNodeProd.SetListener(listener)
+	envoyNodeProd.SetClusters(clusters)
+	envoyNodeProd.SetEndpoints(endpoints)
+	envoyNodeProd.SetRouteConfigs(routeConfig)
 
-	if len(mgwSwaggers) > 0 {
-		vHost_NameP := "serviceProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-		vHostP, _ := enovoy.CreateVirtualHost(vHost_NameP, routesP)
-		listenerNameP := "listenerProd_1"
-		routeConfigNameP := "routeProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-		listnerProd := enovoy.CreateListener(listenerNameP, routeConfigNameP, vHostP)
-
-		envoyNodeProd.SetListener(&listnerProd)
-		envoyNodeProd.SetClusters(clustersP)
-		envoyNodeProd.SetRoutes(routesP)
-		envoyNodeProd.SetEndpoints(endpointsP)
-
-	} else {
-		logger.LoggerOasparser.Error("No Api definitions found")
-	}
-
-	logger.LoggerOasparser.Info(len(routesP), " routes are generated successfully")
-	logger.LoggerOasparser.Info(len(clustersP), " clusters are generated successfully")
-	logger.LoggerOasparser.Info(len(endpointsP), " endpoints are generated successfully")
 	return envoyNodeProd.GetSources()
 }
 
-/**
- * Get all sandbox resources for envoy.
- *
- * @param location  Location of swagger files
- * @return []types.Resource sandbox listeners
- * @return []types.Resource sandbox clusters
- * @return []types.Resource sandbox routes
- * @return []types.Resource sandbox endpoints
- */
-func GetSandboxSources(location string) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
-	mgwSwaggers, err := swgger.GenerateMgwSwagger(location)
-	if err != nil {
-		logger.LoggerOasparser.Fatal("Error Generating mgwSwagger struct:", err)
-	}
-	//fmt.Println(mgwSwagger)
-	var (
-		routesS    []*routev3.Route
-		clustersS  []*clusterv3.Cluster
-		endpointsS []*corev3.Address
-	)
+/*
+UpdateRoutesConfig is a method to update the existing routes configuration with the provided array of routes.
+All the already existing routes (within the routeConfiguration) will be removed.
 
-	for _, swagger := range mgwSwaggers {
-		_, _, _, routes, clusters, endpoints := enovoy.CreateRoutesWithClusters(swagger)
-		routesS = append(routes)
-		clustersS = append(clusters)
-		endpointsS = append(endpoints)
-	}
-
-	if routesS == nil {
-		return nil, nil, nil, nil
-	}
-	envoyNodeSand := new(envoy.EnvoyNode)
-
-	if len(mgwSwaggers) > 0 {
-		vHost_NameS := "serviceSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-		vHostS, _ := enovoy.CreateVirtualHost(vHost_NameS, routesS)
-		listenerNameS := "listenerSand_1"
-		routeConfigNameS := "routeSand_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-		listnerSand := enovoy.CreateListener(listenerNameS, routeConfigNameS, vHostS)
-
-		envoyNodeSand.SetListener(&listnerSand)
-		envoyNodeSand.SetClusters(clustersS)
-		envoyNodeSand.SetRoutes(routesS)
-		envoyNodeSand.SetEndpoints(endpointsS)
-	} else {
-		logger.LoggerOasparser.Error("No Api definitions found")
-	}
-
-	return envoyNodeSand.GetSources()
+@param *routev3.RouteConfiguration Envoy RouteConfiguration
+@param []*routev3.Route Envoy routes array
+*/
+func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, routes []*routev3.Route) {
+	vHostName := "default"
+	vHost, _ := enovoy.CreateVirtualHost(vHostName, routes)
+	routeConfig.VirtualHosts = []*routev3.VirtualHost{&vHost}
+	//return []types.Resource{routeConfig}
 }

@@ -18,53 +18,28 @@ package swaggerOperator
 
 import (
 	"encoding/json"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-openapi/spec"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
 	"github.com/wso2/micro-gw/internal/pkg/oasparser/utills"
-	logger "github.com/wso2/micro-gw/internal/loggers"
-	"io/ioutil"
-	"os"
 )
 
-/**
- * Generate mgw swagger instance.
- *
- * @param location   Swagger file location
- * @return []apiDefinition.MgwSwagger  Mgw swagger instances as a array
- * @return error  Error
- */
-func GenerateMgwSwagger(location string) ([]apiDefinition.MgwSwagger, error) {
-	var mgwSwaggers []apiDefinition.MgwSwagger
+// /**
+//  * Generate mgw swagger instance from File.
+//  *
+//  * @param location   Swagger file location
+//  * @return []apiDefinition.MgwSwagger  Mgw swagger instances as a array
+//  */
+// func GenerateMgwSwaggerFromByteArray(byteArray []byte) apiDefinition.MgwSwagger {
+// 	var mgwSwaggers []apiDefinition.MgwSwagger
+// 	//TODO: (VirajSalaka) return a single object instead of an array
+// 	mgwSwagger := GetMgwSwagger(byteArray)
+// 	mgwSwaggers = append(mgwSwaggers, mgwSwagger)
 
-	files, err := ioutil.ReadDir(location)
-	if err != nil {
-		logger.LoggerOasparser.Fatal("Error reading", location, "directory:", err)
-	}
-
-	for _, f := range files {
-
-		openApif, err := os.Open(location + f.Name())
-
-		// if we os.Open returns an error then handle it
-		if err != nil {
-			logger.LoggerOasparser.Fatal("Error opening a api yaml file:", err)
-		}
-		//fmt.Println("Successfully Opened open api file",f.Name())
-		logger.LoggerOasparser.Info("Successfully Opened open api file", f.Name())
-
-		// defer the closing of our jsonFile so that we can parse it later on
-		defer openApif.Close()
-
-		// read our opened jsonFile as a byte array.
-		jsn, _ := ioutil.ReadAll(openApif)
-
-		mgwSwagger := GetMgwSwagger(jsn)
-		mgwSwaggers = append(mgwSwaggers, mgwSwagger)
-
-	}
-	return mgwSwaggers, err
-}
+// 	return mgwSwaggers
+// }
 
 /**
  * Get mgw swagger instance.
@@ -80,7 +55,7 @@ func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
 		//log.Fatal("Error converting api file to json:", err)
 	}
 
-	swaggerVerison:= utills.FindSwaggerVersion(apiJsn)
+	swaggerVerison := utills.FindSwaggerVersion(apiJsn)
 
 	if swaggerVerison == "2" {
 		//map json to struct
@@ -88,7 +63,7 @@ func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
 		err = json.Unmarshal(apiJsn, &ApiData2)
 		if err != nil {
 			//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
-			logger.LoggerOasparser.Error("Error openAPI unmarsheliing",err)
+			logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
 		} else {
 			mgwSwagger.SetInfoSwagger(ApiData2)
 		}
@@ -101,7 +76,7 @@ func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
 
 		if err != nil {
 			//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
-			logger.LoggerOasparser.Error("Error openAPI unmarsheliing",err)
+			logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
 		} else {
 			mgwSwagger.SetInfoOpenApi(*ApiData3)
 		}
@@ -109,6 +84,54 @@ func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
 
 	mgwSwagger.SetXWso2Extenstions()
 	return mgwSwagger
+}
+
+func GetOpenAPIVersionAndJsonContent(apiContent []byte) (string, []byte, error) {
+	apiJsn, err := utills.ToJSON(apiContent)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error converting api file to json:", err)
+		return "", apiContent, err
+	}
+	swaggerVerison := utills.FindSwaggerVersion(apiJsn)
+	return swaggerVerison, apiJsn, nil
+}
+
+func GetOpenAPIV3Struct(openAPIJson []byte) (openapi3.Swagger, error) {
+	var apiData3 openapi3.Swagger
+
+	err := json.Unmarshal(openAPIJson, &apiData3)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
+		return apiData3, err
+	}
+	return apiData3, nil
+}
+
+func GetOpenAPIV2Struct(openAPIJson []byte) (spec.Swagger, error) {
+	var apiData2 spec.Swagger
+	err := json.Unmarshal(openAPIJson, &apiData2)
+	if err != nil {
+		//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
+		logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
+		return apiData2, err
+	}
+	return apiData2, nil
+}
+
+//TODO: (VirajSalaka) generalize this with openAPI3 getLabels method
+func GetXWso2Labels(vendorExtensionsMap map[string]interface{}) []string {
+	var labelArray []string
+	if y, found := vendorExtensionsMap["x-wso2-label"]; found {
+		if val, ok := y.([]interface{}); ok {
+			for _, label := range val {
+				labelArray = append(labelArray, label.(string))
+			}
+			return labelArray
+		} else {
+			logger.LoggerOasparser.Errorln("Error while parsing the x-wso2-label")
+		}
+	}
+	return []string{"default"}
 }
 
 /**

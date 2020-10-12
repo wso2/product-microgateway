@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   envoy:
-    image: envoyproxy/envoy:v1.14.1
+    image: envoyproxy/envoy:v1.16.0
     volumes:
       - ./../../envoy.yaml:/etc/envoy/envoy.yaml
 #    expose:
@@ -18,8 +18,8 @@ services:
       context: ./../../
       dockerfile: docker/with-external-build/control-plane/Dockerfile
     volumes:  
-      - ./../../resources/:/home/ubuntu/resources/
-      - ./../../target/micro-gw-ubuntu:/home/ubuntu/micro-gw-ubuntu
+      - ./../../resources/:/home/wso2/resources/
+      - ./../../target/micro-gw-ubuntu:/home/wso2/micro-gw-ubuntu
     ports:
       - "18000:18000" 
   filterchain:
@@ -27,7 +27,7 @@ services:
       context: ./../../
       dockerfile: docker/with-external-build/filter-chain/Dockerfile
     volumes:
-      - ./../../java-filter-chain/target:/home/ubuntu
+      - ./../../java-filter-chain/target:/home/wso2
     ports:
       - "8081:8081"         
   # zipkin:

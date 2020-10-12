@@ -17,10 +17,11 @@
 package logging
 
 import (
-	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/configs"
 	"io"
 	"os"
+
+	"github.com/sirupsen/logrus"
+	"github.com/wso2/micro-gw/internal/configs"
 )
 
 /**
@@ -33,17 +34,17 @@ func logLevelMapper(pkgLevel string) logrus.Level {
 	logLevel := DEFAULT_LOG_LEVEL
 	switch pkgLevel {
 	case LEVEL_WARN:
-		logLevel =  logrus.WarnLevel
+		logLevel = logrus.WarnLevel
 	case LEVEL_DEBUG:
-		logLevel =  logrus.DebugLevel
+		logLevel = logrus.DebugLevel
 	case LEVEL_ERROR:
-		logLevel =  logrus.ErrorLevel
+		logLevel = logrus.ErrorLevel
 	case LEVEL_INFO:
-		logLevel =  logrus.InfoLevel
+		logLevel = logrus.InfoLevel
 	case LEVEL_FATAL:
-		logLevel =  logrus.FatalLevel
+		logLevel = logrus.FatalLevel
 	case LEVEL_PANIC:
-		logLevel =  logrus.PanicLevel
+		logLevel = logrus.PanicLevel
 	}
 
 	return logLevel

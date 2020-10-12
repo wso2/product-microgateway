@@ -14,13 +14,16 @@
  *  limitations under the License.
  *
  */
+
+//TODO: (VirajSalaka) Remove the code as unused.
 package api
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/wso2/micro-gw/configs/confTypes"
-	logger "github.com/wso2/micro-gw/internal/loggers"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/wso2/micro-gw/internal/configs/confTypes"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 )
 
 type Server struct {
@@ -36,8 +39,10 @@ func Start(config *confTypes.Config) {
 
 	apiService := new(RESTService)
 	// API specific routs
+	//TODO: (VirajSalaka) follow ImportAPI swagger
 	apiRouter := router.PathPrefix("/api").Subrouter()
-	apiRouter.HandleFunc("/add", apiService.ApiPOST).Methods("POST")
+	apiRouter.HandleFunc("/addProject", apiService.ApiPOST).Methods("POST")
+	apiRouter.HandleFunc("/add", apiService.openAPIPOST).Methods("POST")
 	// TODO: Immplement
 	//Configuration specific routes
 	//configRouter := router.PathPrefix("/configs").Subrouter()

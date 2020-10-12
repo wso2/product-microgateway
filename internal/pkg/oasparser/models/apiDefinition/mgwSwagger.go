@@ -17,8 +17,8 @@
 package apiDefinition
 
 import (
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/constants"
 	logger "github.com/wso2/micro-gw/internal/loggers"
+	"github.com/wso2/micro-gw/internal/pkg/oasparser/constants"
 )
 
 type MgwSwagger struct {
@@ -34,6 +34,7 @@ type MgwSwagger struct {
 	xWso2Basepath    string
 }
 
+//TODO: (VirajSalaka) Endpoint array should be introduced to support load balance and failover endpoints (As per in current gateway)
 type Endpoint struct {
 	Host     string
 	Basepath string
@@ -99,14 +100,14 @@ func (swagger *MgwSwagger) SetXWso2Extenstions() {
  *
  */
 func (swagger *MgwSwagger) SetXWso2PrdoductionEndpoint() {
-	xwso2EndpointsApi := GetXWso2Endpoints(swagger.vendorExtensible,constants.PRODUCTION_ENDPOINTS)
+	xwso2EndpointsApi := GetXWso2Endpoints(swagger.vendorExtensible, constants.PRODUCTION_ENDPOINTS)
 	if xwso2EndpointsApi != nil && len(xwso2EndpointsApi) > 0 {
 		swagger.productionUrls = xwso2EndpointsApi
 	}
 
 	//resources
-	for i,resource := range swagger.resources {
-		xwso2EndpointsResource := GetXWso2Endpoints(resource.vendorExtensible,constants.PRODUCTION_ENDPOINTS)
+	for i, resource := range swagger.resources {
+		xwso2EndpointsResource := GetXWso2Endpoints(resource.vendorExtensible, constants.PRODUCTION_ENDPOINTS)
 		if xwso2EndpointsResource != nil {
 			swagger.resources[i].productionUrls = xwso2EndpointsResource
 		}
@@ -118,14 +119,14 @@ func (swagger *MgwSwagger) SetXWso2PrdoductionEndpoint() {
  *
  */
 func (swagger *MgwSwagger) SetXWso2SandboxEndpoint() {
-	xwso2EndpointsApi := GetXWso2Endpoints(swagger.vendorExtensible,constants.SANDBOX_ENDPOINTS)
+	xwso2EndpointsApi := GetXWso2Endpoints(swagger.vendorExtensible, constants.SANDBOX_ENDPOINTS)
 	if xwso2EndpointsApi != nil && len(xwso2EndpointsApi) > 0 {
 		swagger.sandboxUrls = xwso2EndpointsApi
 	}
 
 	//resources
-	for i,resource := range swagger.resources {
-		xwso2EndpointsResource := GetXWso2Endpoints(resource.vendorExtensible,constants.SANDBOX_ENDPOINTS)
+	for i, resource := range swagger.resources {
+		xwso2EndpointsResource := GetXWso2Endpoints(resource.vendorExtensible, constants.SANDBOX_ENDPOINTS)
 		if xwso2EndpointsResource != nil {
 			swagger.resources[i].sandboxUrls = xwso2EndpointsResource
 		}
@@ -140,22 +141,25 @@ func (swagger *MgwSwagger) SetXWso2SandboxEndpoint() {
  * @return []Endpoint  Endpoints as a array
  */
 func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType string) []Endpoint {
-	var Endpoints []Endpoint
-	var urlType string
+	var endpoints []Endpoint
 
+	//TODO: (VirajSalaka) x-wso2-production-endpoint 's type does not represent http/https, instead it indicates loadbalance and failover
 	if y, found := vendorExtensible[endpointType]; found {
 		if val, ok := y.(map[string]interface{}); ok {
-			for ind, val := range val {
-				if ind == "type" {
-					urlType = val.(string)
-				} else if ind == "urls" {
-					ainterface := val.([]interface{})
-					//urls := make([]string, len(ainterface))
-					for _, v := range ainterface {
-						endpoint := getHostandBasepathandPort(v.(string))
-						endpoint.UrlType = urlType
-						Endpoints = append(Endpoints, endpoint)
+			urlsProperty, ok := val["urls"]
+			if !ok {
+				// TODO: (VirajSalaka) Throw an error and catch from an upper layer where the API name is visible.
+				logger.LoggerOasparser.Error("urls property is not provided with the x-wso2-production-endpoints/" +
+					"x-wso2-sandbox-endpoints extension.")
+			} else {
+				castedUrlsInterface := urlsProperty.([]interface{})
+				for _, v := range castedUrlsInterface {
+					endpoint := getHostandBasepathandPort(v.(string))
+					endpointType, endpointTypeFound := val["type"]
+					if endpointTypeFound {
+						endpoint.UrlType = endpointType.(string)
 					}
+					endpoints = append(endpoints, endpoint)
 				}
 			}
 		} else {
@@ -166,7 +170,7 @@ func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 		return nil
 	}
 
-	return Endpoints
+	return endpoints
 }
 
 /**

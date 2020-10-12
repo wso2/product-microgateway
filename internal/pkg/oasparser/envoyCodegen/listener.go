@@ -17,17 +17,17 @@
 package envoyCodegen
 
 import (
+	access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
-	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	envoy_config_filter_accesslog_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/file/v3"
-	access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
-	logger "github.com/wso2/micro-gw/internal/loggers"
-	"github.com/wso2/micro-gw/configs"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/wso2/micro-gw/internal/configs"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 )
 
 /**
@@ -62,6 +62,83 @@ func CreateListener(listenerName string, routeConfigName string, vHostP routev3.
 		},
 		FilterChains: []*listenerv3.FilterChain{{
 			Filters: listenerFilters},
+		},
+	}
+	return listener
+}
+
+func CreateRoutesConfigForRds(vHost routev3.VirtualHost) routev3.RouteConfiguration {
+	//TODO: (VirajSalaka) Do we need a custom config here
+	rdsConfigName := "default"
+
+	routeConfiguration := routev3.RouteConfiguration{
+		Name:         rdsConfigName,
+		VirtualHosts: []*routev3.VirtualHost{&vHost},
+	}
+	return routeConfiguration
+}
+
+func CreateListenerWithRds(listenerName string) listenerv3.Listener {
+	//TODO: (VirajSalaka) avoid duplicate functions
+	httpFilters := getHttpFilters()
+	accessLogs := getAccessLogConfigs()
+	conf, errReadConfig := configs.ReadConfigs()
+	var filters []*listenerv3.Filter
+
+	if errReadConfig != nil {
+		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
+	}
+	//Implemented such that RDS is used
+	manager := &hcmv3.HttpConnectionManager{
+		CodecType:  hcmv3.HttpConnectionManager_AUTO,
+		StatPrefix: "ingress_http",
+		RouteSpecifier: &hcmv3.HttpConnectionManager_Rds{
+			Rds: &hcmv3.Rds{
+				//TODO: (VirajSalaka) Decide if we need this to be configurable in the first stage
+				RouteConfigName: "default",
+				ConfigSource: &corev3.ConfigSource{
+					ConfigSourceSpecifier: &corev3.ConfigSource_Ads{
+						Ads: &corev3.AggregatedConfigSource{},
+					},
+					ResourceApiVersion: corev3.ApiVersion_V3,
+				},
+			},
+		},
+		HttpFilters: httpFilters,
+		AccessLog:   []*access_logv3.AccessLog{&accessLogs},
+	}
+
+	pbst, err := ptypes.MarshalAny(manager)
+	if err != nil {
+		panic(err)
+	}
+	connectionManagerFilterP := listenerv3.Filter{
+		Name: wellknown.HTTPConnectionManager,
+		ConfigType: &listenerv3.Filter_TypedConfig{
+			TypedConfig: pbst,
+		},
+	}
+
+	//add filters
+	filters = append(filters, &connectionManagerFilterP)
+
+	listenerAddress := &corev3.Address_SocketAddress{
+		SocketAddress: &corev3.SocketAddress{
+			Protocol: corev3.SocketAddress_TCP,
+			Address:  conf.Envoy.ListenerAddress,
+			PortSpecifier: &corev3.SocketAddress_PortValue{
+				PortValue: conf.Envoy.ListenerPort,
+			},
+		},
+	}
+
+	listener := listenerv3.Listener{
+		Name: listenerName,
+		Address: &corev3.Address{
+			Address: listenerAddress,
+		},
+		FilterChains: []*listenerv3.FilterChain{{
+			Filters: filters},
 		},
 	}
 	return listener
@@ -118,7 +195,7 @@ func createConectionManagerFilter(vHost routev3.VirtualHost, routeConfigName str
 			},
 		},
 		HttpFilters: httpFilters,
-		AccessLog: []*access_logv3.AccessLog{&accessLogs},
+		AccessLog:   []*access_logv3.AccessLog{&accessLogs},
 	}
 	return manager
 }
@@ -128,7 +205,7 @@ func createConectionManagerFilter(vHost routev3.VirtualHost, routeConfigName str
  *
  * @param vHost_Name  Name for virtual host
  * @param routes   Routes of the virtual host
- * @return v2route.VirtualHost  Virtual host instance
+ * @return v3route.VirtualHost  Virtual host instance
  * @return error  Error
  */
 func CreateVirtualHost(vHost_Name string, routes []*routev3.Route) (routev3.VirtualHost, error) {
@@ -170,20 +247,20 @@ func createAddress(remoteHost string, port uint32) corev3.Address {
  */
 func getAccessLogConfigs() access_logv3.AccessLog {
 	var logFormat *envoy_config_filter_accesslog_v3.FileAccessLog_Format
-	logpath := "/tmp/envoy.access.log"   //default access log path
+	logpath := "/tmp/envoy.access.log" //default access log path
 
 	logConf, errReadConfig := configs.ReadLogConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
 	} else {
 		logFormat = &envoy_config_filter_accesslog_v3.FileAccessLog_Format{
-			Format:  logConf.AccessLogs.Format,
+			Format: logConf.AccessLogs.Format,
 		}
 		logpath = logConf.AccessLogs.LogFile
 	}
 
 	accessLogConf := &envoy_config_filter_accesslog_v3.FileAccessLog{
-		Path:   logpath,
+		Path:            logpath,
 		AccessLogFormat: logFormat,
 	}
 
@@ -193,9 +270,9 @@ func getAccessLogConfigs() access_logv3.AccessLog {
 	}
 
 	access_logs := access_logv3.AccessLog{
-		Name:                 "envoy.access_loggers.file",
-		Filter:               nil,
-		ConfigType:           &access_logv3.AccessLog_TypedConfig{
+		Name:   "envoy.access_loggers.file",
+		Filter: nil,
+		ConfigType: &access_logv3.AccessLog_TypedConfig{
 			TypedConfig: accessLogTypedConf,
 		},
 		XXX_NoUnkeyedLiteral: struct{}{},
