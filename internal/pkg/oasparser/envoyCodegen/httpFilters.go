@@ -21,6 +21,7 @@ import (
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	routerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
+	typev3 "github.com/envoyproxy/go-control-plane/envoy/type/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
 	"github.com/golang/protobuf/ptypes"
@@ -58,9 +59,6 @@ func getRouterHttpFilter() hcmv3.HttpFilter {
 		SuppressEnvoyHeaders:     false,
 		StrictCheckHeaders:       nil,
 		RespectExpectedRqTimeout: false,
-		XXX_NoUnkeyedLiteral:     struct{}{},
-		XXX_unrecognized:         nil,
-		XXX_sizecache:            0,
 	}
 
 	routeFilterTypedConf, err := ptypes.MarshalAny(&routeFilterConf)
@@ -69,11 +67,8 @@ func getRouterHttpFilter() hcmv3.HttpFilter {
 	}
 
 	filter := hcmv3.HttpFilter{
-		Name:                 wellknown.Router,
-		ConfigType:           &hcmv3.HttpFilter_TypedConfig{TypedConfig: routeFilterTypedConf},
-		XXX_NoUnkeyedLiteral: struct{}{},
-		XXX_unrecognized:     nil,
-		XXX_sizecache:        0,
+		Name:       wellknown.Router,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{TypedConfig: routeFilterTypedConf},
 	}
 
 	return filter
@@ -98,6 +93,11 @@ func getExtAauthzHttpFilter() hcmv3.HttpFilter {
 					},
 				},
 			},
+		},
+		//TODO: (VirajSalaka) Provide an error message or log (in envoy) to identify this network failure.
+		// When there is a connection issue or server failure, 500 status code is set.
+		StatusOnError: &typev3.HttpStatus{
+			Code: typev3.StatusCode_InternalServerError,
 		},
 	}
 	ext, err2 := ptypes.MarshalAny(extAuthzConfig)

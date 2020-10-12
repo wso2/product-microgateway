@@ -138,7 +138,7 @@ func updateEnvoy(location string) {
 
 	atomic.AddInt32(&version, 1)
 	logger.LoggerMgw.Infof(">>>>>>>>>>>>>>>>>>> creating snapshot Version " + fmt.Sprint(version))
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil)
 	snap.Consistent()
 
 	err := cache.SetSnapshot(nodeId, snap)

@@ -17,17 +17,17 @@
 package envoyCodegen
 
 import (
+	access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
-	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	envoy_config_filter_accesslog_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/file/v3"
-	access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
-	logger "github.com/wso2/micro-gw/internal/loggers"
-	"github.com/wso2/micro-gw/configs"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/wso2/micro-gw/configs"
+	logger "github.com/wso2/micro-gw/internal/loggers"
 )
 
 /**
@@ -118,7 +118,7 @@ func createConectionManagerFilter(vHost routev3.VirtualHost, routeConfigName str
 			},
 		},
 		HttpFilters: httpFilters,
-		AccessLog: []*access_logv3.AccessLog{&accessLogs},
+		AccessLog:   []*access_logv3.AccessLog{&accessLogs},
 	}
 	return manager
 }
@@ -170,20 +170,20 @@ func createAddress(remoteHost string, port uint32) corev3.Address {
  */
 func getAccessLogConfigs() access_logv3.AccessLog {
 	var logFormat *envoy_config_filter_accesslog_v3.FileAccessLog_Format
-	logpath := "/tmp/envoy.access.log"   //default access log path
+	logpath := "/tmp/envoy.access.log" //default access log path
 
 	logConf, errReadConfig := configs.ReadLogConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
 	} else {
 		logFormat = &envoy_config_filter_accesslog_v3.FileAccessLog_Format{
-			Format:  logConf.AccessLogs.Format,
+			Format: logConf.AccessLogs.Format,
 		}
 		logpath = logConf.AccessLogs.LogFile
 	}
 
 	accessLogConf := &envoy_config_filter_accesslog_v3.FileAccessLog{
-		Path:   logpath,
+		Path:            logpath,
 		AccessLogFormat: logFormat,
 	}
 
@@ -193,14 +193,11 @@ func getAccessLogConfigs() access_logv3.AccessLog {
 	}
 
 	access_logs := access_logv3.AccessLog{
-		Name:                 "envoy.access_loggers.file",
-		Filter:               nil,
-		ConfigType:           &access_logv3.AccessLog_TypedConfig{
+		Name:   "envoy.access_loggers.file",
+		Filter: nil,
+		ConfigType: &access_logv3.AccessLog_TypedConfig{
 			TypedConfig: accessLogTypedConf,
 		},
-		XXX_NoUnkeyedLiteral: struct{}{},
-		XXX_unrecognized:     nil,
-		XXX_sizecache:        0,
 	}
 
 	return access_logs
