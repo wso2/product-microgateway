@@ -27,12 +27,12 @@ static_resources:
       connect_timeout: 1s
       hosts:
         - socket_address:
-            address: 172.17.0.1
+            address: pilot
             port_value: 18000
       http2_protocol_options: {}
     - name: ext-authz
-      type: static
-      connect_timeout: 1s
+      type: STRICT_DNS
+      connect_timeout: 20s
       http2_protocol_options: {}
       load_assignment:
         cluster_name: ext-authz
@@ -41,5 +41,5 @@ static_resources:
           - endpoint:
               address:
                 socket_address:
-                  address: 172.17.0.1
+                  address: filterchain
                   port_value: 8081    

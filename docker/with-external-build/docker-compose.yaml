@@ -1,7 +1,9 @@
 version: "3.7"
 services:
-  envoy:
-    image: envoyproxy/envoy:v1.14.1
+  envoydev:
+    build:
+      context: ./../../
+      dockerfile: docker/with-external-build/envoy/Dockerfile
     volumes:
       - ./../../envoy.yaml:/etc/envoy/envoy.yaml
 #    expose:
@@ -12,7 +14,7 @@ services:
       - "9000:9000"
     links:
       - pilot
-      - filterchain  
+      - filterchain
   pilot:
     build:
       context: ./../../
@@ -23,13 +25,14 @@ services:
     ports:
       - "18000:18000" 
   filterchain:
-    build: 
+    build:
       context: ./../../
       dockerfile: docker/with-external-build/filter-chain/Dockerfile
     volumes:
-      - ./../../java-filter-chain/target:/home/ubuntu
+      - ./../../filter-core/target:/home/ubuntu
+      - ./../../resources/apis:/home/ubuntu/apis
     ports:
-      - "8081:8081"         
+      - "8081:8081"
   # zipkin:
   #   image: openzipkin/zipkin
   #   expose:
