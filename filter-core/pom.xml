@@ -67,15 +67,17 @@
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>${maven.spotbugs.version}</version>
                 <configuration>
-                    <onlyAnalyze>org.wso2.mgw.filterchain.*</onlyAnalyze>
+                    <onlyAnalyze>org.wso2.micro.gateway.filter.core.*</onlyAnalyze>
                     <effort>Max</effort>
                     <threshold>Low</threshold>
                     <xmlOutput>true</xmlOutput>
+                    <failOnError>true</failOnError>
+                    <spotbugsXmlOutputDirectory>${project.build.directory}/spotbugs</spotbugsXmlOutputDirectory>
                 </configuration>
                 <executions>
                     <execution>
                         <id>spot-bug-validate</id>
-                        <phase>validate</phase>
+                        <phase>compile</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
