@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM adoptopenjdk:8u222-b10-jdk-hotspot
+FROM adoptopenjdk:11.0.8_10-jre-hotspot-bionic
 
 COPY target/ /home/ubuntu/
-CMD ["java", "-jar", "/home/ubuntu/java-filter-chain-1.0-SNAPSHOT.jar"]
+CMD ["java", "-cp", "/home/ubuntu/*", "org.wso2.micro.gateway.filter.core.grpc.server.AuthServer"]

@@ -25,6 +25,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	logger "github.com/wso2/micro-gw/internal/loggers"
+	"time"
 )
 
 /**
@@ -97,6 +98,7 @@ func getExtAauthzHttpFilter() hcmv3.HttpFilter {
 						ClusterName: "ext-authz",
 					},
 				},
+				Timeout: ptypes.DurationProto(20* time.Second),
 			},
 		},
 	}

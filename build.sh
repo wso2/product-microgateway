@@ -15,7 +15,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-pushd java-filter-chain
+pushd filter-core
 mvn clean install
 popd
 

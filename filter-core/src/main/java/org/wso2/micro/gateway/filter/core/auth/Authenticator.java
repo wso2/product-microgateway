@@ -15,26 +15,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.micro.gateway.filter.core.auth;
 
-package org.wso2.mgw.filterchain.gRPC.server;
+import org.wso2.micro.gateway.filter.core.api.RequestContext;
 
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
+/**
+ * Defines the interface to implement an authenticator. This authenticator can be oauth2(opaque, jwt), MTLS, basic
+ * and etc.
+ */
+public interface Authenticator {
 
-public class AuthServer {
+    boolean canAuthenticate(RequestContext requestContext);
 
-    public static void main ( String[] args ) throws Exception
-    {
-        // Create a new server to listen on port 8081
-        Server server = ServerBuilder.forPort(8081)
-                .addService(new ExtAuthService())
-                .build();
-
-        // Start the server
-        server.start();
-
-        System.out.println("Sever started Listening in port : " + 8081);
-        // Don't exit the main thread. Wait until server is terminated.
-        server.awaitTermination();
-    }
+    boolean authenticate(RequestContext requestContext);
 }
