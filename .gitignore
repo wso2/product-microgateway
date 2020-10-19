@@ -40,4 +40,3 @@ vendor
 envoy-filters/bazel-*
 envoy-filters/.vscode
 envoy-filters/.idea
-envoy-filters/envoy
