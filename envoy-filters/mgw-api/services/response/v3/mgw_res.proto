@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package envoy.service.mgw_res.v3;
+
+import "envoy/config/core/v3/base.proto";
+import "envoy/type/v3/http_status.proto";
+
+import "google/rpc/status.proto";
+
+import "udpa/annotations/migrate.proto";
+import "udpa/annotations/status.proto";
+import "udpa/annotations/versioning.proto";
+import "validate/validate.proto";
+
+option java_package = "io.envoyproxy.envoy.service.mgw_res.v3";
+option java_outer_classname = "MgwResProto";
+option java_multiple_files = true;
+option java_generic_services = true;
+option (udpa.annotations.file_status).package_version_status = ACTIVE;
+
+// [#protodoc-title: MGWResponse Service ]
+
+// The mgw_resorization service request messages used by external mgw_resorization :ref:`network filter
+// <config_network_filters_ext_mgw_resz>` and :ref:`HTTP filter <config_http_filters_ext_mgw_resz>`.
+
+// A generic interface for performing mgw_resorization check on incoming
+// requests to a networked service.
+service MGWResponse {
+  // Performs mgw_resorization check based on the attributes associated with the
+  // incoming request, and returns status `OK` or not `OK`.
+  rpc Intercept(CheckRequest) returns (CheckResponse) {
+  }
+}
+
+message CheckRequest {
+  // The request attributes.
+  string backend_time = 1;
+}
+
+// Intended for gRPC and Network Authorization servers `only`.
+message CheckResponse {
+  // Status `OK` allows the request. Any other status indicates the request should be denied.
+  google.rpc.Status status = 1;
+}
