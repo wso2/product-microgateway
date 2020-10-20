@@ -22,14 +22,11 @@
 #include "common/runtime/runtime_protos.h"
 
 #include "mgw-source/filters/common/mgw/mgw.h"
-#include "mgw-source/filters/http/mgw/filter_config.h"
 
 namespace Envoy {
 namespace Extensions {
 namespace HttpFilters {
 namespace MGW {
-
-using FilterConfigSharedPtr = std::shared_ptr<FilterConfig>;
 
 /**
  * HTTP mgw filter. Depending on the route configuration, this filter calls the global
@@ -39,8 +36,8 @@ class Filter : public Logger::Loggable<Logger::Id::filter>,
                public Http::StreamEncoderFilter,
                public Filters::Common::MGW::ResponseCallbacks {
 public:
-  Filter(const FilterConfigSharedPtr& res_config, Filters::Common::MGW::ResClientPtr&& res_client)
-      : res_config_(res_config), res_client_(std::move(res_client)) {}
+  Filter(Filters::Common::MGW::ResClientPtr&& res_client, TimeSource& time_source)
+      : res_client_(std::move(res_client)), time_source_(time_source) {}
 
   // Http::StreamFilterBase
   void onDestroy() override;
@@ -70,13 +67,13 @@ private:
   // the filter chain should stop. Otherwise the filter chain can continue to the next filter.
   enum class ResponseFilterReturn { ContinueEncoding, StopEncoding };
   ResponseFilterReturn response_filter_return_{ResponseFilterReturn::ContinueEncoding};
-  FilterConfigSharedPtr res_config_;
   Filters::Common::MGW::ResClientPtr res_client_;
   Http::StreamEncoderFilterCallbacks* res_callbacks_{};
   State res_state_{State::NotStarted}; //state of response interceptor service
   // Used to identify if the response callback to onComplete() is synchronous (on the stack) or asynchronous.
   bool initiating_responce_call_{};
   envoy::service::mgw_res::v3::CheckRequest res_intercept_request_{};
+  TimeSource& time_source_;
 };
 
 } // namespace MGW

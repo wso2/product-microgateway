@@ -8,10 +8,9 @@ load(
 envoy_cc_library(
     name = "mgw",
     srcs = ["analytics.cc"],
-    hdrs = ["analytics.h", "filter_config.h"],
+    hdrs = ["analytics.h"],
     repository = "@envoy",
     deps = [
-        # ":filter_config",
         "@envoy//include/envoy/http:codes_interface",
         "@envoy//include/envoy/http:context_interface",
         "@envoy//include/envoy/stats:stats_macros",

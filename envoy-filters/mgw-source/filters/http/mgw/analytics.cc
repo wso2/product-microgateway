@@ -30,10 +30,16 @@ Http::FilterHeadersStatus Filter::encode100ContinueHeaders(Http::ResponseHeaderM
   return Http::FilterHeadersStatus::Continue;
 }
 
-Http::FilterHeadersStatus Filter::encodeHeaders(Http::ResponseHeaderMap& , bool) {
+Http::FilterHeadersStatus Filter::encodeHeaders(Http::ResponseHeaderMap& headers, bool) {
   Router::RouteConstSharedPtr route = res_callbacks_->route();
 
   // Initiate a call to the authorization server since we are not disabled.
+  res_intercept_request_.set_id(std::to_string(res_callbacks_->streamId()));
+  res_intercept_request_.set_backend_time(std::string(
+      headers.get(Http::LowerCaseString("x-envoy-upstream-service-time"))->value().getStringView()));
+  // Set the timestamp when the proxy receives the first byte of the request.
+  res_intercept_request_.mutable_time()->MergeFrom(Protobuf::util::TimeUtil::NanosecondsToTimestamp(
+      time_source_.monotonicTime().time_since_epoch().count()));
   initiateResponseInterceptCall();
 
   return response_filter_return_ == ResponseFilterReturn::StopEncoding

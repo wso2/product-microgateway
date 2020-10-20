@@ -6,6 +6,7 @@ import "envoy/config/core/v3/base.proto";
 import "envoy/type/v3/http_status.proto";
 
 import "google/rpc/status.proto";
+import "google/protobuf/timestamp.proto";
 
 import "udpa/annotations/migrate.proto";
 import "udpa/annotations/status.proto";
@@ -35,6 +36,10 @@ service MGWResponse {
 message CheckRequest {
   // The request attributes.
   string backend_time = 1;
+  // stream ID of the request.
+  string id = 2;
+  // The timestamp when the proxy receives the first byte of the request.
+  google.protobuf.Timestamp time = 3;
 }
 
 // Intended for gRPC and Network Authorization servers `only`.
