@@ -21,6 +21,7 @@ import org.wso2.micro.gateway.filter.core.Filter;
 import org.wso2.micro.gateway.filter.core.api.RequestContext;
 import org.wso2.micro.gateway.filter.core.api.config.APIConfig;
 import org.wso2.micro.gateway.filter.core.auth.jwt.JWTAuthenticator;
+import org.wso2.micro.gateway.filter.core.exception.APISecurityException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,13 +39,17 @@ public class AuthFilter implements Filter {
     }
 
     @Override public boolean handleRequest(RequestContext requestContext) {
-        for (Authenticator authenticator : authenticators) {
-            if (authenticator.canAuthenticate(requestContext)) {
-                boolean authenticate = authenticator.authenticate(requestContext);
-                if (authenticate) {
-                    return true;
+        try {
+            for (Authenticator authenticator : authenticators) {
+                if (authenticator.canAuthenticate(requestContext)) {
+                    AuthenticationContext authenticate = authenticator.authenticate(requestContext);
+                    if (authenticate.isAuthenticated()) {
+                        return true;
+                    }
                 }
             }
+        } catch (APISecurityException e) {
+            //TODO : handle or log the error
         }
         return false;
     }

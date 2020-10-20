@@ -91,7 +91,7 @@ func setOperationSwagger(path string, pathtype string, operation *spec.Operation
 	if operation != nil {
 		resource = Resource{
 			path:             path,
-			pathtype:         pathtype,
+			method:         pathtype,
 			iD:               operation.ID,
 			summary:          operation.Summary,
 			description:  operation.Description,

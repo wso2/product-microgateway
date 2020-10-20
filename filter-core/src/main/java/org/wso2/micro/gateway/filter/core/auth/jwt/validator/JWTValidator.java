@@ -25,14 +25,24 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
-import io.envoyproxy.envoy.service.auth.v2.CheckResponse;
+import com.nimbusds.jwt.util.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.filter.core.api.RequestContext;
+import org.wso2.micro.gateway.filter.core.auth.jwt.DefaultJWTTransformer;
+import org.wso2.micro.gateway.filter.core.auth.jwt.JWKSConfigurationDTO;
+import org.wso2.micro.gateway.filter.core.auth.jwt.JWTTransformer;
+import org.wso2.micro.gateway.filter.core.auth.jwt.JWTUtil;
+import org.wso2.micro.gateway.filter.core.auth.jwt.JWTValidationInfo;
+import org.wso2.micro.gateway.filter.core.auth.jwt.SignedJWTInfo;
+import org.wso2.micro.gateway.filter.core.auth.jwt.TokenIssuerDto;
+import org.wso2.micro.gateway.filter.core.constants.APIConstants;
+import org.wso2.micro.gateway.filter.core.exception.MGWException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -45,8 +55,10 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Base64;
-import java.util.Map;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -77,34 +89,144 @@ public class JWTValidator {
                 }
 
             });
+    TokenIssuerDto tokenIssuer;
+    JWTTransformer jwtTransformer;
+    private JWKSet jwkSet;
 
     public JWTValidator() {
-        publicKey = readPublicKey();
-        jwsVerifier = new RSASSAVerifier(publicKey);
+        loadTokenIssuerConfiguration();
     }
 
-    //validate JWT token
-    public boolean validateToken(RequestContext requestContext) {
-        boolean valid = false;
-        CheckResponse response;
-        Map<String, String> headers = requestContext.getHeaders();
-        String token = headers.get(JWTConstants.AUTHORIZATION);
-        valid = handleJWT(token);
+    public void loadTokenIssuerConfiguration() {
+        String issuer = "https://localhost:9443/oauth2/token"; //TODO: get the issuer
+        TokenIssuerDto tokenIssuerDto = new TokenIssuerDto(issuer);
+        tokenIssuerDto.setConsumerKeyClaim("azp");
+        tokenIssuerDto.setPublicKey(readPublicKey());
+        JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
+        jwksConfigurationDTO.setEnabled(false);
+        tokenIssuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
+        this.jwtTransformer = new DefaultJWTTransformer();
+        this.jwtTransformer.loadConfiguration(tokenIssuerDto);
+        this.tokenIssuer = tokenIssuerDto;
+//      JWTTransformer jwtTransformer = ServiceReferenceHolder.getInstance().getJWTTransformer(tokenIssuer.getIssuer());
+//        if (jwtTransformer != null) {
+//            this.jwtTransformer = jwtTransformer;
+//        } else {
+//            this.jwtTransformer = new DefaultJWTTransformer();
+//        }
+//        this.jwtTransformer.loadConfiguration(tokenIssuer);
+    }
 
-        if (!valid) {
-            requestContext.getProperties().put("code", "401");
-            requestContext.getProperties().put("error_code", "900901");
-            requestContext.getProperties().put("error_description", "Invalid credentials");
+    public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws MGWException {
+        JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
+        String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
+        if (StringUtils.isNotEmpty(issuer)) {
+            JWTValidationInfo validationInfo = validateToken(signedJWTInfo);
+            return validationInfo;
+        }
+        jwtValidationInfo.setValid(false);
+        jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_GENERAL_ERROR);
+        return jwtValidationInfo;
+    }
+
+    private JWTValidationInfo validateToken(SignedJWTInfo signedJWTInfo) throws MGWException {
+
+        JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
+        boolean state;
+        try {
+            state = validateSignature(signedJWTInfo.getSignedJWT());
+            if (state) {
+                JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
+                state = validateTokenExpiry(jwtClaimsSet);
+                if (state) {
+                    jwtValidationInfo.setConsumerKey(getConsumerKey(jwtClaimsSet));
+                    jwtValidationInfo.setScopes(getScopes(jwtClaimsSet));
+                    JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtClaimsSet);
+                    createJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
+                    jwtValidationInfo.setRawPayload(signedJWTInfo.getToken());
+                    return jwtValidationInfo;
+                } else {
+                    jwtValidationInfo.setValid(false);
+                    jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                    return jwtValidationInfo;
+                }
+            } else {
+                jwtValidationInfo.setValid(false);
+                jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                return jwtValidationInfo;
+            }
+        } catch (ParseException e) {
+            throw new MGWException("Error while parsing JWT", e);
+        }
+    }
+
+    protected boolean validateSignature(SignedJWT signedJWT) throws MGWException {
+
+        String certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
+        try {
+            String keyID = signedJWT.getHeader().getKeyID();
+            if (StringUtils.isNotEmpty(keyID)) {
+                if (tokenIssuer.getJwksConfigurationDTO().isEnabled() && StringUtils
+                        .isNotEmpty(tokenIssuer.getJwksConfigurationDTO().getUrl())) {
+                    // Check JWKSet Available in Cache
+                    if (jwkSet == null) {
+                        jwkSet = retrieveJWKSet();
+                    }
+                    if (jwkSet.getKeyByKeyId(keyID) == null) {
+                        jwkSet = retrieveJWKSet();
+                    }
+                    if (jwkSet.getKeyByKeyId(keyID) instanceof RSAKey) {
+                        RSAKey keyByKeyId = (RSAKey) jwkSet.getKeyByKeyId(keyID);
+                        RSAPublicKey rsaPublicKey = keyByKeyId.toRSAPublicKey();
+                        if (rsaPublicKey != null) {
+                            return JWTUtil.verifyTokenSignature(signedJWT, rsaPublicKey);
+                        }
+                    } else {
+                        throw new MGWException("Key Algorithm not supported");
+                    }
+                } else if (tokenIssuer.getCertificate() != null) {
+                    logger.debug("Retrieve certificate from Token issuer and validating");
+                    RSAPublicKey rsaPublicKey = tokenIssuer.getPublicKey();
+                    return JWTUtil.verifyTokenSignature(signedJWT, rsaPublicKey);
+                } else {
+                    return JWTUtil.verifyTokenSignature(signedJWT, keyID);
+                }
+            }
+            return JWTUtil.verifyTokenSignature(signedJWT, certificateAlias);
+        } catch (ParseException | JOSEException | IOException e) {
+            logger.error("Error while parsing JWT", e);
         }
 
-        return valid;
+        return true;
     }
 
-    //handle JWT token
-    private boolean handleJWT(String accessToken) {
-        String[] tokenContent = accessToken.split("\\.");
-        boolean isVerified = validateSignature(accessToken, tokenContent[2]);
-        return isVerified;
+    protected boolean validateTokenExpiry(JWTClaimsSet jwtClaimsSet) {
+
+        long timestampSkew = 5; //TODO : Read from config.
+        Date now = new Date();
+        Date exp = jwtClaimsSet.getExpirationTime();
+        return exp == null || DateUtils.isAfter(exp, now, timestampSkew);
+    }
+
+    private JWKSet retrieveJWKSet() throws IOException, ParseException {
+        String jwksInfo = JWTUtil.retrieveJWKSConfiguration(tokenIssuer.getJwksConfigurationDTO().getUrl());
+        jwkSet = JWKSet.parse(jwksInfo);
+        return jwkSet;
+    }
+
+    protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws MGWException {
+
+        return jwtTransformer.getTransformedConsumerKey(jwtClaimsSet);
+    }
+
+    protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws MGWException {
+
+        return jwtTransformer.getTransformedScopes(jwtClaimsSet);
+    }
+
+    protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) throws MGWException {
+
+        return jwtTransformer.transform(jwtClaimsSet);
     }
 
     // validate the signature
@@ -191,5 +313,22 @@ public class JWTValidator {
             logger.error(e);
         }
         return publicKey;
+    }
+
+
+    private void createJWTValidationInfoFromJWT(JWTValidationInfo jwtValidationInfo, JWTClaimsSet jwtClaimsSet)
+            throws ParseException {
+
+        jwtValidationInfo.setIssuer(jwtClaimsSet.getIssuer());
+        jwtValidationInfo.setValid(true);
+        jwtValidationInfo.setClaims(jwtClaimsSet.getClaims());
+        jwtValidationInfo.setExpiryTime(jwtClaimsSet.getExpirationTime().getTime());
+        jwtValidationInfo.setIssuedTime(jwtClaimsSet.getIssueTime().getTime());
+        jwtValidationInfo.setUser(jwtClaimsSet.getSubject());
+        jwtValidationInfo.setJti(jwtClaimsSet.getJWTID());
+        if (jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.SCOPE) != null) {
+            jwtValidationInfo.setScopes(Arrays.asList(jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.SCOPE)
+                    .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER)));
+        }
     }
 }

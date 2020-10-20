@@ -18,7 +18,7 @@ package apiDefinition
 
 type Resource struct {
 	path          string
-	pathtype            string
+	method         string
 	description      string
 	consumes         []string
 	schemes          []string
@@ -46,4 +46,8 @@ func (resource *Resource) GetPath() string {
 
 func (resource *Resource) GetId() string {
 	return resource.iD
+}
+
+func (resource *Resource) GetMethod() string {
+	return resource.method
 }

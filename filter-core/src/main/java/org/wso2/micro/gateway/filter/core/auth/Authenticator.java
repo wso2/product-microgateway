@@ -18,6 +18,7 @@
 package org.wso2.micro.gateway.filter.core.auth;
 
 import org.wso2.micro.gateway.filter.core.api.RequestContext;
+import org.wso2.micro.gateway.filter.core.exception.APISecurityException;
 
 /**
  * Defines the interface to implement an authenticator. This authenticator can be oauth2(opaque, jwt), MTLS, basic
@@ -27,5 +28,5 @@ public interface Authenticator {
 
     boolean canAuthenticate(RequestContext requestContext);
 
-    boolean authenticate(RequestContext requestContext);
+    AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException;
 }
