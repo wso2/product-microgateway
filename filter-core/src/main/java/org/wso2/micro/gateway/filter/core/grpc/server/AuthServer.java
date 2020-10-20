@@ -28,11 +28,19 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.filter.core.api.APIFactory;
+import org.wso2.micro.gateway.filter.core.common.CacheProvider;
+import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
+import org.wso2.micro.gateway.filter.core.subscription.SubscriptionDataHolder;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -59,9 +67,12 @@ public class AuthServer {
 
         // Start the server
         server.start();
+        loadTrustStore();
         logger.info("Sever started Listening in port : " + 8081);
         //TODO: Add API is only for testing this has to come via the rest API.
         addAPI();
+        CacheProvider.init();
+        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore("carbon.super");
 
         // Don't exit the main thread. Wait until server is terminated.
         server.awaitTermination();
@@ -80,6 +91,28 @@ public class AuthServer {
             });
         } catch (IOException e) {
             logger.error("Error while reading API files", e);
+        }
+    }
+
+    private static void loadTrustStore() {
+        String trustStorePassword = "wso2carbon";
+        String trustStoreLocation = "/Users/rajithroshan/Documents/APIM/product-microgateway/"
+                + "filter-core/src/main/resources/client-truststore.jks";
+        if (trustStoreLocation != null && trustStorePassword != null) {
+            try {
+                //TODO: Read truststore from file properly
+                InputStream inputStream = AuthServer.class.getClassLoader()
+                        .getResourceAsStream("client-truststore.jks");
+                KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                trustStore.load(inputStream, trustStorePassword.toCharArray());
+                //                CertificateReLoaderUtil.setLastUpdatedTimeStamp(trustStoreFile.lastModified());
+                //                CertificateReLoaderUtil.startCertificateReLoader();
+                ReferenceHolder.getInstance().setTrustStore(trustStore);
+            } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
+                logger.error("Error in loading trust store.", e);
+            }
+        } else {
+            logger.error("Error in loading trust store. Configurations are not set.");
         }
     }
 }

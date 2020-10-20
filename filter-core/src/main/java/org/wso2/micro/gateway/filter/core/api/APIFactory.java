@@ -19,7 +19,6 @@ package org.wso2.micro.gateway.filter.core.api;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.filter.core.api.config.APIConfig;
 import org.wso2.micro.gateway.filter.core.api.config.ResourceConfig;
 
 import java.util.List;
@@ -57,29 +56,22 @@ public class APIFactory {
         }
     }
 
-    public API getMatchedAPI(String requestPath, String method) {
+    public API getMatchedAPI(String basePath, String requestPath) {
         Optional<Map.Entry<String, API>> mapEntry = apiMap.entrySet().stream()
-                .filter(map -> requestPath.startsWith(map.getKey())).filter(apiEntry -> {
-                    ResourceConfig resourceConfigMatched = getMatchedResource(apiEntry.getValue(), requestPath, method);
-                    if (resourceConfigMatched != null) {
-                        return true;
-                    }
-                    return false;
-
-                }).findFirst();
+                .filter(map -> basePath.equals(map.getKey())).findFirst();
         if (mapEntry.isPresent()) {
             return mapEntry.get().getValue();
         }
-        logger.error("No matching API found for the path : " + requestPath + " and method : " + method);
+        logger.error("No matching API found for the  base path : " + basePath + " for the incoming request : "
+                + requestPath);
         return null;
     }
 
-    public ResourceConfig getMatchedResource(API api, String requestPath, String method) {
-        APIConfig apiConfig = api.getAPIConfig();
-        String resourcePath = requestPath.substring(apiConfig.getBasePath().length());
+    public ResourceConfig getMatchedResource(API api, String matchedResourcePath, String method) {
         List<ResourceConfig> resourceConfigList = api.getAPIConfig().getResources();
-        return resourceConfigList.stream().filter(resourceConfig -> resourceConfig.getPath().equals(resourcePath)).
-                filter(resourceConfig -> (method == null) || resourceConfig.getMethod()
-                        .equals(ResourceConfig.HttpMethods.valueOf(method))).findFirst().orElse(null);
+        return resourceConfigList.stream()
+                .filter(resourceConfig -> resourceConfig.getPath().equals(matchedResourcePath)).
+                        filter(resourceConfig -> (method == null) || resourceConfig.getMethod()
+                                .equals(ResourceConfig.HttpMethods.valueOf(method))).findFirst().orElse(null);
     }
 }
