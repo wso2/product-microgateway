@@ -544,6 +544,15 @@ function checkCustomThrottlePolicies(http:Caller caller, http:Request request, h
     string appTenant = keyValidationDto.subscriberTenantDomain;
     string apiTenant = tenantDomain;
     string appId = keyValidationDto.applicationId;
+    string[] propertyList = [];
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    if (invocationContext.attributes.hasKey("customProperty")) {
+        string customProperty = <string>invocationContext.attributes["customProperty"];
+        printDebug(KEY_THROTTLE_FILTER, "customProperty " +customProperty+  " found in the invocation context.");
+        propertyList = stringutils:split(customProperty, " ");
+    } else {
+        printDebug(KEY_THROTTLE_FILTER, "customProperty for throttling not found in the invocation context.");
+    }
 
     foreach KeyTemplate key in keyTemplateMap {
         string modifiedKey = replaceAll(key.value, "\\$resourceKey", resourceLevelThrottleKey);
@@ -556,6 +565,11 @@ function checkCustomThrottlePolicies(http:Caller caller, http:Request request, h
         modifiedKey = replaceAll(modifiedKey, "\\$apiTenant", apiTenant);
         modifiedKey = replaceAll(modifiedKey, "\\$appId", appId);
         modifiedKey = replaceAll(modifiedKey, "\\$clientIp", clientIp);
+        //Replace custom property values
+        foreach var property in propertyList {
+            string[] propertyPair = stringutils:split(property, "=");
+            modifiedKey = replaceAll(modifiedKey, "\\$customProperty."+propertyPair[0], propertyPair[1]);
+        }
         printDebug(KEY_THROTTLE_FILTER, "Custom policy throttle key : " + modifiedKey);
         boolean isThrottled;
         boolean stopOnQuota;
@@ -634,6 +648,19 @@ function getAdditionalProperties(http:FilterContext context, http:Request req) r
         }
     }
 
+    // Set custom throttling properties
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    if (invocationContext.attributes.hasKey("customProperty")) {
+        string customProperty = <string>invocationContext.attributes["customProperty"];
+        printDebug(KEY_THROTTLE_FILTER, "customProperty " + customProperty +  " found in the invocation context.");
+        string[] propertyList = stringutils:split(customProperty, " ");
+        foreach var property in propertyList {
+            string[] propertyPair = stringutils:split(property, "=");
+            propMap[propertyPair[0]] = <@untainted>propertyPair[1];
+        }
+    } else {
+        printDebug(KEY_THROTTLE_FILTER, "customProperty for throttling not found in the invocation context.");
+    }
     return propMap;
 }
 
