@@ -239,7 +239,8 @@
                                 <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-toolkit-${host.os}-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
                                 <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-${host.os}-${project.version}.zip" dest="${basedir}/../tests/target/micro-gwtmp" />
                                 <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${host.os}-${project.version}/bin/*" perm="+x" />
-                                <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${host.os}-${project.version}/lib/jdk8u202-b08-jre/bin/*" perm="+x" />
+                                <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-toolkit-${host.os}-${project.version}/lib/jdk8u265-b01-jre/bin/*" perm="+x" />
+                                <chmod file="${basedir}/../tests/target/micro-gwtmp/wso2am-micro-gw-${host.os}-${project.version}/lib/jdk8u265-b01-jre/bin/*" perm="+x" />
                             </target>
                         </configuration>
                         <goals>

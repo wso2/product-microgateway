@@ -54,7 +54,6 @@
         <dependency>
             <groupId>org.wso2.ballerina.jre.artifacts</groupId>
             <artifactId>ballerina-jre-artifacts</artifactId>
-            <version>${ballerina.jre.artifacts.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>

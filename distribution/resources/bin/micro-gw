@@ -142,7 +142,7 @@ if [[ -z "${MICROGW_HOME}" ]]; then
     export MICROGW_HOME=`cd "$PRGDIR/.." ; pwd`
 fi
 
-JAVA_PATH=$MICROGW_HOME/lib/jdk8u202-b08-jre
+JAVA_PATH=$MICROGW_HOME/lib/jdk8u265-b01-jre
 if [ -d "$JAVA_HOME" ]; then
   echo "JAVA_HOME: $JAVA_HOME"
 else

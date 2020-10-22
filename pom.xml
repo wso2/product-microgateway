@@ -611,7 +611,7 @@
         <maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
         <maven.exec.plugin.version>1.6.0</maven.exec.plugin.version>
         <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
-        <ballerina.jre.artifacts.version>2.0.0</ballerina.jre.artifacts.version>
+        <ballerina.jre.artifacts.version>2.0.1</ballerina.jre.artifacts.version>
         <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
         <maven.spotbugs.version>3.1.1</maven.spotbugs.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
