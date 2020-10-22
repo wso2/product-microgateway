@@ -75,11 +75,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.mina</groupId>
             <artifactId>mina-core</artifactId>
         </dependency>

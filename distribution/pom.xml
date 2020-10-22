@@ -50,7 +50,6 @@
         <dependency>
             <groupId>org.wso2.andes.wso2</groupId>
             <artifactId>andes-client</artifactId>
-            <version>${andes.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.ballerina.jre.artifacts</groupId>
@@ -90,12 +89,10 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>${jackson-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${jackson-core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.callhome</groupId>
