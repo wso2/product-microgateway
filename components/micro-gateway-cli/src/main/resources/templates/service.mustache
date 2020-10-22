@@ -245,6 +245,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
 
 
         if(clientResponse is http:Response) {
+            clientResponse.setHeader(gateway:SERVER_HEADER_NAME, gateway:getServerHeader());
             {{#if responseInterceptor}}
             if({{operationId}}_response_interceptor_index == -1) {
             {{^isJavaResponseInterceptor}}

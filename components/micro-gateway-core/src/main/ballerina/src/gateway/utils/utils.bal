@@ -43,6 +43,7 @@ http:InboundAuthHandler[] jwtHandlers = [];//all jwt issuer handlers
 // values read from configuration
 string authHeaderFromConfig = getConfigValue(AUTH_CONF_INSTANCE_ID, AUTH_HEADER_NAME, DEFAULT_AUTH_HEADER_NAME);
 string jwtheaderName = getConfigValue(JWT_CONFIG_INSTANCE_ID, JWT_HEADER, DEFAULT_JWT_HEADER_NAME);
+string serverHeader = getConfigValue(SERVER_CONF_ID, SERVER_HEADER, DEFAULT_SERVER_HEADER);
 
 public function populateAnnotationMaps(string serviceName, service s, string[] resourceArray) {
     foreach string resourceFunction in resourceArray {
@@ -1069,3 +1070,8 @@ public function getClientSecureSocket() returns http:ClientSecureSocket {
         };
         return secureSocket;
 }
+
+public function getServerHeader() returns string {
+    return serverHeader;
+}
+
