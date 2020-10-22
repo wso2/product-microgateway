@@ -25,7 +25,7 @@ DEFAULT_JMS_CONNECTION_PROVIDER_URL);
 string jmsConnectionPassword = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_PASSWORD, DEFAULT_JMS_CONNECTION_PASSWORD);
 string jmsConnectionUsername = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_USERNAME, DEFAULT_JMS_CONNECTION_USERNAME);
 
-map<string> keyTemplateMap = {};
+map<KeyTemplate> keyTemplateMap = {};
 map<string> blockConditionsMap = {};
 table<IPRangeDTO> IpBlockConditionsMap = table {
     {},
@@ -163,13 +163,22 @@ function handleKeyTemplateMessage(jms:MapMessage message, string keyTemplateValu
     string? | error keyTemplateState = message.getString(KEY_TEMPLATE_STATE);
     if (keyTemplateState is string) {
         printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template state : " + keyTemplateState.toString());
+        int timestamp = 0;
+        var msgTime = message.getJMSTimestamp();
+        if (msgTime is int) {
+            timestamp = <@untainted>msgTime;
+        }
+
         if (stringutils:equalsIgnoreCase(KEY_TEMPLATE_ADD, keyTemplateState)) {
-            keyTemplateMap[keyTemplateValue] = <@untainted>keyTemplateValue;
-            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue.toString() + " added to the map");
+            addKeyTemplate(<@untainted>keyTemplateValue, timestamp);
+            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue.toString() + " and timestamp: " +
+                timestamp.toString() + " added to the map");
         } else {
-            string removedValue = keyTemplateMap.remove(keyTemplateValue);
-            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue.toString() + " with value : " +
-            removedValue + " removed from the map");
+            KeyTemplate | () removedValue = removeKeyTemplate(keyTemplateValue, timestamp);
+            if (removedValue is KeyTemplate) {
+                printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue.toString() + " with value : " +
+                removedValue.toString() + " removed from the map");
+            }
         }
     }
 }
@@ -228,4 +237,29 @@ function handleBlockConditionMessage(jms:MapMessage m) {
         printDebug(KEY_THROTTLE_EVENT_LISTENER, "Blocking condition map : " + blockConditionsMap.toJsonString());
         printDebug(KEY_THROTTLE_EVENT_LISTENER, "Blocking IP condition map : " + IpBlockConditionsMap.toString());
     }
+}
+
+function removeKeyTemplate(string template, int timestamp) returns KeyTemplate | () {
+    if (!keyTemplateMap.hasKey(template)) {
+        return ();
+    }
+    int earlierTimestamp = keyTemplateMap.get(template).timestamp;
+
+    // When policy is redeployed add and remove jms messages can be received in outof order fashion.
+    // Validating the timestamp to avoid if the recieved msg order is `add -> remove`
+    if (earlierTimestamp >= timestamp) {
+        return ();
+    }
+    lock {
+        return keyTemplateMap.remove(template);
+    }
+}
+
+function addKeyTemplate(string template, int timestamp) {
+    KeyTemplate kt = {
+        value: template,
+        timestamp: timestamp
+    };
+
+    keyTemplateMap[template] = kt;
 }

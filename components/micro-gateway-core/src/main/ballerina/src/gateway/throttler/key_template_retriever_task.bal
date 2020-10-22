@@ -75,7 +75,7 @@ service keyTemplateRetrievalService = service {
                 if (keyTemplates is json[]) {
                     foreach var key in keyTemplates {
                         string keyTempalteValue = key.toString();
-                        keyTemplateMap[keyTempalteValue] = <@untainted>keyTempalteValue;
+                        addKeyTemplate(<@untainted>keyTempalteValue, 0);
                     }
                 }
                 printDebug(KEY_TEMPLATE_RETIEVAL_TASK, "Key template map : " + keyTemplateMap.toString());
