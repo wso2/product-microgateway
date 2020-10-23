@@ -17,6 +17,7 @@
 import ballerina/io;
 import ballerina/stringutils;
 import ballerina/java.jms;
+import ballerina/time;
 
 string jmsConnectionInitialContextFactory = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_INITIAL_CONTEXT_FACTORY,
 DEFAULT_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY);
@@ -41,6 +42,7 @@ service messageServ = service {
             string? | error evaluatedConditions = message.getString(EVALUATED_CONDITIONS);
             int remainingQuota = 0;
             string? | error blockingKey = message.getString(BLOCKING_CONDITION_KEY);
+
             if (keyTemplateValue is string) {
                 handleKeyTemplateMessage(message, keyTemplateValue);
             } else if (throttleKey is string) {
@@ -167,6 +169,10 @@ function handleKeyTemplateMessage(jms:MapMessage message, string keyTemplateValu
         var msgTime = message.getJMSTimestamp();
         if (msgTime is int) {
             timestamp = <@untainted>msgTime;
+        } else {
+            // This is an edge case where timestamp is not avail in the jms message. This can cause inconsistancies
+            // when a policy is redeployed/updated from the APIM side. Re-adding policy from APIM is the workaround.
+            timestamp = time:currentTime().time;
         }
 
         if (stringutils:equalsIgnoreCase(KEY_TEMPLATE_ADD, keyTemplateState)) {
