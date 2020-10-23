@@ -170,7 +170,7 @@ function handleKeyTemplateMessage(jms:MapMessage message, string keyTemplateValu
         if (msgTime is int) {
             timestamp = <@untainted>msgTime;
         } else {
-            // This is an edge case where timestamp is not avail in the jms message. This can cause inconsistancies
+            // This is an edge case where timestamp is not available in the jms message. This can cause inconsistencies
             // when a policy is redeployed/updated from the APIM side. Re-adding policy from APIM is the workaround.
             timestamp = time:currentTime().time;
         }
@@ -249,14 +249,12 @@ function removeKeyTemplate(string template, int timestamp) returns KeyTemplate |
     if (!keyTemplateMap.hasKey(template)) {
         return ();
     }
-    int earlierTimestamp = keyTemplateMap.get(template).timestamp;
-
-    // When policy is redeployed add and remove jms messages can be received in outof order fashion.
-    // Validating the timestamp to avoid if the recieved msg order is `add -> remove`
-    if (earlierTimestamp >= timestamp) {
-        return ();
-    }
     lock {
+        // When policy is redeployed add and remove jms messages can be received in outof order fashion.
+        // Validating the timestamp to avoid if the recieved msg order is `add -> remove`
+        if (keyTemplateMap.get(template).timestamp >= timestamp) {
+            return ();
+        }
         return keyTemplateMap.remove(template);
     }
 }
