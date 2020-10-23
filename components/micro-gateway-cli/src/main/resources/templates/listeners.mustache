@@ -42,6 +42,7 @@ listener gateway:APIGatewayListener apiListener = new(9090, serviceEndpointConfi
 listener http:Listener tokenListenerEndpoint = new (
     {{#if containerConfig.kubernetes.secureKubernetesIngress.enable}}
         9096, config = {
+        server: gateway:getConfigValue(gateway:SERVER_CONF_ID, gateway:SERVER_HEADER, gateway:DEFAULT_SERVER_HEADER),
         secureSocket: {
             keyStore: {
                 path:  {{#if containerConfig.kubernetes.secureKubernetesIngress.keyStorePath}}
@@ -58,6 +59,7 @@ listener http:Listener tokenListenerEndpoint = new (
         }
     {{else if containerConfig.kubernetes.kubernetesService.enable}}
         9096, config = {
+        server: gateway:getConfigValue(gateway:SERVER_CONF_ID, gateway:SERVER_HEADER, gateway:DEFAULT_SERVER_HEADER),
         host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, gateway:DEFAULT_CONF_HOST),
         secureSocket: {
             keyStore: {
@@ -69,6 +71,7 @@ listener http:Listener tokenListenerEndpoint = new (
         }
     {{else if containerConfig.kubernetes.kubernetesServiceToken.enable}}
             9096, config = {
+            server: gateway:getConfigValue(gateway:SERVER_CONF_ID, gateway:SERVER_HEADER, gateway:DEFAULT_SERVER_HEADER),
             host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, gateway:DEFAULT_CONF_HOST),
             secureSocket: {
                 keyStore: {
@@ -80,6 +83,7 @@ listener http:Listener tokenListenerEndpoint = new (
             }
     {{else}}
         gateway:getConfigIntValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:TOKEN_LISTENER_PORT, gateway:DEFAULT_TOKEN_LISTENER_PORT), config = {
+        server: gateway:getConfigValue(gateway:SERVER_CONF_ID, gateway:SERVER_HEADER, gateway:DEFAULT_SERVER_HEADER),
         host: gateway:getConfigValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:LISTENER_CONF_HOST, gateway:DEFAULT_CONF_HOST),
         secureSocket: {
             keyStore: {
