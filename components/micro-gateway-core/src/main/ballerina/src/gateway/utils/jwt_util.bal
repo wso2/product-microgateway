@@ -55,6 +55,13 @@ public function isAllowedKey(string token, jwt:JwtPayload payload, boolean isVal
         consumerKey = audiencePayload[0];
     }
     printDebug(JWT_UTIL,"Consumer key resolved : " + consumerKey);
+
+    //set key type
+    if (customClaims is map<json> && customClaims.hasKey(KEY_TYPE)) {
+        json keyType = customClaims.get(KEY_TYPE);
+        authenticationContext.keyType = keyType.toString();
+    }
+    invocationContext.attributes[KEY_TYPE_ATTR] = authenticationContext.keyType;
     if (apiConfig is APIConfiguration && consumerKey != "") {
         string apiName = apiConfig.name;
         string apiVersion = apiConfig.apiVersion;
