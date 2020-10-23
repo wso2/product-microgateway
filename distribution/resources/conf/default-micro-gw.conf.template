@@ -255,7 +255,20 @@
     waitTimeInMillis = 30000
     #Maximum active streams per connection. This only applies to HTTP/2.
     maxActiveStreamsPerConnection = 50
-
+  [httpClients.sslConfig]
+    # SSL Protocol to be used
+    protocolName = "TLS"
+    # List of ciphers to be used
+    ciphers="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256  ,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256, TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_DSS_WITH_AES_128_GCM_SHA256  ,TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
+    # SSL/TLS protocols to be enabled
+    protocolVersions = "TLSv1.2,TLSv1.1"
+    # Internal keystore
+    keyStorePath = "${mgw-runtime.home}/runtime/bre/security/ballerinaKeystore.p12"
+    keyStorePassword = "ballerina"
+    # Truststore
+    trustStorePath = "${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12"
+    trustStorePassword = "ballerina"
+    
 # Mutual SSL configuration
 [mutualSSLConfig]
   # SSL Protocol to be used
@@ -385,6 +398,8 @@
     enabled = false
     # Reporter name that reports the collected Metrics to the remote metrics server
     reporter = "prometheus"
+    # Enables/ Disables the metrics endpoint security.
+    enableAuth = true
     # Prometheus to scrape the information
     [b7a.observability.metrics.prometheus]
       # port exposing api level metrics

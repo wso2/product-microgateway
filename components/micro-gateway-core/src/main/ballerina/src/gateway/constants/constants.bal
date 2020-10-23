@@ -246,6 +246,7 @@ public const string KM_CONF_ISSUER = "issuer";
 
 public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
 public const string HTTP_CLIENTS_POOL_CONFIG_INSTANCE_ID = "httpClients.poolConfig";
+public const string CLIENT_SSL_CONF_INSTANCE_ID = "httpClients.sslConfig";
 public const string HTTP_CLIENTS_MAX_ACTIVE_CONNECTIONS = "maxActiveConnections";
 public const string HTTP_CLIENTS_MAX_IDLE_CONNECTIONS = "maxIdleConnections";
 public const string HTTP_CLIENTS_WAIT_TIME = "waitTimeInMillis";
