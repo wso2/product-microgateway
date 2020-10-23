@@ -25,6 +25,7 @@ public const string QUERY = "query";
 public const string API_KEY_IN = "in";
 public const string API_KEY_NAME = "name";
 public const string AUTH_HEADER = "Authorization";
+public const string SERVER_HEADER_NAME = "server";
 public const string AUTH_SCHEME_BASIC = "Basic";
 public const string AUTH_SCHEME_BEARER = "Bearer";
 public const string AUTH_SCHEME_BASIC_LOWERCASE = "basic";
@@ -597,6 +598,7 @@ public const string JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR = "tokenCacheEvict
 // server configurations
 public const string SERVER_CONF_ID = "server";
 public const string SERVER_TIMESTAMP_SKEW = "timestampSkew";
+public const string SERVER_HEADER = "header";
 
 public const string APIM_CREDENTIALS_INSTANCE_ID = "apim.credentials";
 public const string APIM_CREDENTIALS_USERNAME = "username";
