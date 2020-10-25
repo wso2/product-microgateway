@@ -17,6 +17,7 @@
 import ballerina/io;
 import ballerina/stringutils;
 import ballerina/java.jms;
+import ballerina/time;
 
 string jmsConnectionInitialContextFactory = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_INITIAL_CONTEXT_FACTORY,
 DEFAULT_JMS_CONNECTION_INITIAL_CONTEXT_FACTORY);
@@ -25,7 +26,7 @@ DEFAULT_JMS_CONNECTION_PROVIDER_URL);
 string jmsConnectionPassword = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_PASSWORD, DEFAULT_JMS_CONNECTION_PASSWORD);
 string jmsConnectionUsername = getConfigValue(THROTTLE_CONF_INSTANCE_ID, JMS_CONNECTION_USERNAME, DEFAULT_JMS_CONNECTION_USERNAME);
 
-map<string> keyTemplateMap = {};
+map<KeyTemplate> keyTemplateMap = {};
 map<string> blockConditionsMap = {};
 table<IPRangeDTO> IpBlockConditionsMap = table {
     {},
@@ -41,6 +42,7 @@ service messageServ = service {
             string? | error evaluatedConditions = message.getString(EVALUATED_CONDITIONS);
             int remainingQuota = 0;
             string? | error blockingKey = message.getString(BLOCKING_CONDITION_KEY);
+
             if (keyTemplateValue is string) {
                 handleKeyTemplateMessage(message, keyTemplateValue);
             } else if (throttleKey is string) {
@@ -163,13 +165,26 @@ function handleKeyTemplateMessage(jms:MapMessage message, string keyTemplateValu
     string? | error keyTemplateState = message.getString(KEY_TEMPLATE_STATE);
     if (keyTemplateState is string) {
         printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template state : " + keyTemplateState.toString());
-        if (stringutils:equalsIgnoreCase(KEY_TEMPLATE_ADD, keyTemplateState)) {
-            keyTemplateMap[keyTemplateValue] = <@untainted>keyTemplateValue;
-            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue.toString() + " added to the map");
+        int timestamp = 0;
+        var msgTime = message.getJMSTimestamp();
+        if (msgTime is int) {
+            timestamp = <@untainted>msgTime;
         } else {
-            string removedValue = keyTemplateMap.remove(keyTemplateValue);
-            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue.toString() + " with value : " +
-            removedValue + " removed from the map");
+            // This is an edge case where timestamp is not available in the jms message. This can cause inconsistencies
+            // when a policy is redeployed/updated from the APIM side. Re-adding policy from APIM is the workaround.
+            timestamp = time:currentTime().time;
+        }
+
+        if (stringutils:equalsIgnoreCase(KEY_TEMPLATE_ADD, keyTemplateState)) {
+            addKeyTemplate(<@untainted>keyTemplateValue, timestamp);
+            printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue.toString() + " and timestamp: " +
+                timestamp.toString() + " added to the map");
+        } else {
+            KeyTemplate | () removedValue = removeKeyTemplate(keyTemplateValue, timestamp);
+            if (removedValue is KeyTemplate) {
+                printDebug(KEY_THROTTLE_EVENT_LISTENER, "Key template key : " + keyTemplateValue.toString() + " with value : " +
+                removedValue.toString() + " removed from the map");
+            }
         }
     }
 }
@@ -228,4 +243,27 @@ function handleBlockConditionMessage(jms:MapMessage m) {
         printDebug(KEY_THROTTLE_EVENT_LISTENER, "Blocking condition map : " + blockConditionsMap.toJsonString());
         printDebug(KEY_THROTTLE_EVENT_LISTENER, "Blocking IP condition map : " + IpBlockConditionsMap.toString());
     }
+}
+
+function removeKeyTemplate(string template, int timestamp) returns KeyTemplate | () {
+    if (!keyTemplateMap.hasKey(template)) {
+        return ();
+    }
+    lock {
+        // When policy is redeployed add and remove jms messages can be received in outof order fashion.
+        // Validating the timestamp to avoid if the recieved msg order is `add -> remove`
+        if (keyTemplateMap.get(template).timestamp >= timestamp) {
+            return ();
+        }
+        return keyTemplateMap.remove(template);
+    }
+}
+
+function addKeyTemplate(string template, int timestamp) {
+    KeyTemplate kt = {
+        value: template,
+        timestamp: timestamp
+    };
+
+    keyTemplateMap[template] = kt;
 }

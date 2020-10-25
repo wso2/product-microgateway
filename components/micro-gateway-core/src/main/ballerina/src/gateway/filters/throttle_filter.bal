@@ -545,8 +545,8 @@ function checkCustomThrottlePolicies(http:Caller caller, http:Request request, h
     string apiTenant = tenantDomain;
     string appId = keyValidationDto.applicationId;
 
-    foreach string key in keyTemplateMap.keys() {
-        string modifiedKey = replaceAll(key, "\\$resourceKey", resourceLevelThrottleKey);
+    foreach KeyTemplate key in keyTemplateMap {
+        string modifiedKey = replaceAll(key.value, "\\$resourceKey", resourceLevelThrottleKey);
         modifiedKey = replaceAll(modifiedKey, "\\$userId", userId);
         modifiedKey = replaceAll(modifiedKey, "\\$apiContext", apiContext);
         if(apiVersion is string) {

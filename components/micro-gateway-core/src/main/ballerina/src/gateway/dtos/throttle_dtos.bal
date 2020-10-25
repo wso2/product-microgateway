@@ -149,3 +149,8 @@ type ConditionalThrottleInfo record {|
     boolean isJwtConditionsEnabled = false;
     http:Request request;
 |};
+
+public type KeyTemplate record {|
+    string value;
+    int timestamp = 0;
+|};
