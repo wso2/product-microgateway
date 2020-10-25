@@ -201,3 +201,4 @@ public const string DEFAULT_APIM_CREDENTIALS_USERNAME = "admin";
 public const string DEFAULT_APIM_CREDENTIALS_PASSWORD = "admin";
 
 public const int DEFAULT_SERVER_TIMESTAMP_SKEW = -1;
+public const string DEFAULT_SERVER_HEADER = "ballerina";
