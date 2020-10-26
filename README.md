@@ -59,7 +59,7 @@ Let's expose the publicly available [petstore service](https://petstore.swagger.
     <summary>Docker</summary>
 
     ```bash
-    micro-gw build petstore --docker-image petstore:v1 --docker-base-image wso2/wso2micro-gw:3.2.0
+    micro-gw build petstore --docker-image petstore:v1 --docker-base-image wso2/wso2micro-gw:3.2.1
     ```
     </details>
 
