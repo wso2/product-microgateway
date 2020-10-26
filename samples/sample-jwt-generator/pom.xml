@@ -29,7 +29,7 @@
         <dependency>
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>mgw-jwt-generator</artifactId>
-            <version>3.2.0</version>
+            <version>3.2.1</version>
         </dependency>
     </dependencies>
 
