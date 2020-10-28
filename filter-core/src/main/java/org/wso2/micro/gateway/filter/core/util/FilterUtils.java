@@ -31,9 +31,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.filter.core.auth.APIKeyValidationInfoDTO;
-import org.wso2.micro.gateway.filter.core.auth.AuthenticationContext;
-import org.wso2.micro.gateway.filter.core.auth.jwt.JWTValidationInfo;
+import org.wso2.micro.gateway.filter.core.dto.APIKeyValidationInfoDTO;
+import org.wso2.micro.gateway.filter.core.security.AuthenticationContext;
+import org.wso2.micro.gateway.filter.core.security.jwt.JWTValidationInfo;
 import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
 import org.wso2.micro.gateway.filter.core.constants.APIConstants;
 import org.wso2.micro.gateway.filter.core.exception.MGWException;
@@ -138,7 +138,8 @@ public class FilterUtils {
     private static SSLConnectionSocketFactory createSocketFactory() throws MGWException {
         SSLContext sslContext;
 
-        String keyStorePath = "/home/ubuntu/security"; ///TODO : Read from config
+//        String keyStorePath = "/home/ubuntu/security"; ///TODO : Read from config
+        String keyStorePath = "/Users/menakajayawardena/WSO2/git/microgateway/product-microgateway/filter-core/src/main/resources/client-truststore.jks"; ///TODO : Read from config
         String keyStorePassword = "wso2carbon"; //TODO : Read from config
         try {
             KeyStore trustStore = KeyStore.getInstance("JKS");

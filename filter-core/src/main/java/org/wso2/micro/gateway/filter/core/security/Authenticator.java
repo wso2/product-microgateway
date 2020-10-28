@@ -15,16 +15,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.micro.gateway.filter.core.security;
 
-package org.wso2.micro.gateway.filter.core.auth.jwt.validator;
+import org.wso2.micro.gateway.filter.core.api.RequestContext;
+import org.wso2.micro.gateway.filter.core.exception.APISecurityException;
 
 /**
- * Holds the constants related to JWT validation.
+ * Defines the interface to implement an authenticator. This authenticator can be oauth2(opaque, jwt), MTLS, basic
+ * and etc.
  */
-public class JWTConstants {
-    public static final String AUTHORIZATION = "authorization";
-    public static final String RSA = "RSA";
-    public static final String UNAVAILABLE = "Token is not available in cache";
-    public static final String VALID = "valid";
-    public static final String INVALID = "invalid";
+public interface Authenticator {
+
+    boolean canAuthenticate(RequestContext requestContext);
+
+    AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException;
 }

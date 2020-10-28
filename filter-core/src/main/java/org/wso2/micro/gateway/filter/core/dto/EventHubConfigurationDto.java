@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.filter.core.config;
+package org.wso2.micro.gateway.filter.core.dto;
 
 import java.util.Properties;
 

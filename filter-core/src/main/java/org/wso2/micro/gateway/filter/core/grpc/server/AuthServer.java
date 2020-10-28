@@ -31,6 +31,8 @@ import org.wso2.micro.gateway.filter.core.api.APIFactory;
 import org.wso2.micro.gateway.filter.core.common.CacheProvider;
 import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
 import org.wso2.micro.gateway.filter.core.subscription.SubscriptionDataHolder;
+import org.wso2.micro.gateway.filter.core.subscription.SubscriptionDataLoader;
+import org.wso2.micro.gateway.filter.core.subscription.SubscriptionDataLoaderImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +54,7 @@ import java.util.concurrent.TimeUnit;
 public class AuthServer {
 
     private static final Logger logger = LogManager.getLogger(AuthServer.class);
+    public static final String CONFIG_PATH_PROPERTY = "mgw-config-location";
 
     public static void main(String[] args) throws Exception {
         // Create a new server to listen on port 8081
@@ -71,7 +74,15 @@ public class AuthServer {
         logger.info("Sever started Listening in port : " + 8081);
         //TODO: Add API is only for testing this has to come via the rest API.
         addAPI();
+        SubscriptionDataLoader subscriptionDataLoader = new SubscriptionDataLoaderImpl();
         CacheProvider.init();
+        subscriptionDataLoader.loadAllAPIPolicies("carbon.super");
+        subscriptionDataLoader.loadAllApis("carbon.super");
+        subscriptionDataLoader.loadAllApplications("carbon.super");
+        subscriptionDataLoader.loadAllAppPolicies("carbon.super");
+        subscriptionDataLoader.loadAllKeyMappings("carbon.super");
+        subscriptionDataLoader.loadAllSubscriptionPolicies("carbon.super");
+        subscriptionDataLoader.loadAllSubscriptions("carbon.super");
         SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore("carbon.super");
 
         // Don't exit the main thread. Wait until server is terminated.
@@ -79,7 +90,7 @@ public class AuthServer {
     }
 
     private static void addAPI() {
-        String apiPath = "/home/ubuntu/apis/";
+        String apiPath = "/Users/menakajayawardena/WSO2/git/microgateway/product-microgateway/resources/apis";
         try {
             Files.walk(Paths.get(apiPath)).filter(path -> {
                 Path fileName = path.getFileName();
@@ -96,8 +107,7 @@ public class AuthServer {
 
     private static void loadTrustStore() {
         String trustStorePassword = "wso2carbon";
-        String trustStoreLocation = "/Users/rajithroshan/Documents/APIM/product-microgateway/"
-                + "filter-core/src/main/resources/client-truststore.jks";
+        String trustStoreLocation = "client-truststore.jks";
         if (trustStoreLocation != null && trustStorePassword != null) {
             try {
                 //TODO: Read truststore from file properly

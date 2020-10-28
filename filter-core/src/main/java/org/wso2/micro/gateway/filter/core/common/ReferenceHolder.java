@@ -18,7 +18,7 @@
 
 package org.wso2.micro.gateway.filter.core.common;
 
-import org.wso2.micro.gateway.filter.core.auth.KeyValidator;
+import org.wso2.micro.gateway.filter.core.security.KeyValidator;
 
 import java.security.KeyStore;
 import java.util.Map;

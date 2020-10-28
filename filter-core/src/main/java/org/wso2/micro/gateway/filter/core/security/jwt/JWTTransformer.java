@@ -16,9 +16,10 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.filter.core.auth.jwt;
+package org.wso2.micro.gateway.filter.core.security.jwt;
 
 import com.nimbusds.jwt.JWTClaimsSet;
+import org.wso2.micro.gateway.filter.core.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.filter.core.exception.MGWException;
 
 import java.util.List;

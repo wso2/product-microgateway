@@ -15,13 +15,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.filter.core.auth;
+package org.wso2.micro.gateway.filter.core.security;
 
 import org.wso2.micro.gateway.filter.core.Filter;
 import org.wso2.micro.gateway.filter.core.api.RequestContext;
 import org.wso2.micro.gateway.filter.core.api.config.APIConfig;
-import org.wso2.micro.gateway.filter.core.auth.jwt.JWTAuthenticator;
+import org.wso2.micro.gateway.filter.core.security.jwt.JWTAuthenticator;
 import org.wso2.micro.gateway.filter.core.exception.APISecurityException;
+import org.wso2.micro.gateway.filter.core.security.oauth.OAuthAuthenticator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,9 @@ public class AuthFilter implements Filter {
     @Override public void init(APIConfig apiConfig) {
         //TODO: Check security schema and add relevant authenticators .
         Authenticator jwtAuthenticator = new JWTAuthenticator();
+        Authenticator oAuthAuthenticator = new OAuthAuthenticator();
         authenticators.add(jwtAuthenticator);
+        authenticators.add(oAuthAuthenticator);
     }
 
     @Override public boolean handleRequest(RequestContext requestContext) {

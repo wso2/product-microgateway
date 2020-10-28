@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.filter.core.auth.jwt.validator;
+package org.wso2.micro.gateway.filter.core.security.jwt.validator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

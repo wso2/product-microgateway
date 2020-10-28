@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.filter.core.auth;
+package org.wso2.micro.gateway.filter.core.security;
 
 import net.minidev.json.JSONObject;
 

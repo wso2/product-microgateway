@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.filter.core.auth.jwt;
+package org.wso2.micro.gateway.filter.core.security.jwt;
 
 import com.google.common.cache.LoadingCache;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -25,12 +25,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.filter.core.api.RequestContext;
-import org.wso2.micro.gateway.filter.core.auth.APIKeyValidationInfoDTO;
-import org.wso2.micro.gateway.filter.core.auth.AuthenticationContext;
-import org.wso2.micro.gateway.filter.core.auth.Authenticator;
-import org.wso2.micro.gateway.filter.core.auth.TokenValidationContext;
-import org.wso2.micro.gateway.filter.core.auth.jwt.validator.JWTValidator;
-import org.wso2.micro.gateway.filter.core.auth.jwt.validator.RevokedJWTDataHolder;
+import org.wso2.micro.gateway.filter.core.dto.APIKeyValidationInfoDTO;
+import org.wso2.micro.gateway.filter.core.security.AuthenticationContext;
+import org.wso2.micro.gateway.filter.core.security.Authenticator;
+import org.wso2.micro.gateway.filter.core.security.TokenValidationContext;
+import org.wso2.micro.gateway.filter.core.security.jwt.validator.JWTValidator;
+import org.wso2.micro.gateway.filter.core.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.filter.core.common.CacheProvider;
 import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
 import org.wso2.micro.gateway.filter.core.constants.APISecurityConstants;
@@ -64,15 +64,19 @@ public class JWTAuthenticator implements Authenticator {
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
         String jwtToken = requestContext.getHeaders().get("authorization");
+        // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
+        if (jwtToken.split("\\s").length > 1) {
+            jwtToken = jwtToken.split("\\s")[1];
+        }
         String apiContext = requestContext.getMathedAPI().getAPIConfig().getBasePath();
         String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
         String matchingResource = requestContext.getMatchedResourcePath().getPath();
         String httpMethod = requestContext.getMatchedResourcePath().getMethod().toString();
-        SignedJWTInfo signedJWTInfo = null;
+        SignedJWTInfo signedJWTInfo;
         try {
             signedJWTInfo = getSignedJwt(jwtToken);
         } catch (ParseException | IllegalArgumentException e) {
-            log.debug("Not a JWT token. Failed to decode the token header.", e);
+            throw new SecurityException("Not a JWT token. Failed to decode the token header.", e);
         }
         String jti;
         JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
@@ -98,19 +102,19 @@ public class JWTAuthenticator implements Authenticator {
                 // Validate subscriptions
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
                   //TODO: enable subscription validation
-//                log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
-//                apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, jwtValidationInfo);
-//
-//                if (log.isDebugEnabled()) {
-//                    log.debug("Subscription validation via Key Manager. Status: " + apiKeyValidationInfoDTO
-//                            .isAuthorized());
-//                }
-//                if (!apiKeyValidationInfoDTO.isAuthorized()) {
-//                    log.debug("User is NOT authorized to access the Resource. API Subscription validation failed.");
-//                    throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
-//                            "User is NOT authorized to access the Resource. API Subscription validation failed.");
-//
-//                }
+                log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
+                apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, jwtValidationInfo);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Subscription validation via Key Manager. Status: " + apiKeyValidationInfoDTO
+                            .isAuthorized());
+                }
+                if (!apiKeyValidationInfoDTO.isAuthorized()) {
+                    log.debug("User is NOT authorized to access the Resource. API Subscription validation failed.");
+                    throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
+                            "User is NOT authorized to access the Resource. API Subscription validation failed.");
+
+                }
 //                // Validate scopes
                 validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, signedJWTInfo);
 

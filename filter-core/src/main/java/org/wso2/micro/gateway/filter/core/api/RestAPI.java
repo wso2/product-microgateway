@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.filter.core.Filter;
 import org.wso2.micro.gateway.filter.core.api.config.APIConfig;
 import org.wso2.micro.gateway.filter.core.api.config.ResourceConfig;
-import org.wso2.micro.gateway.filter.core.auth.AuthFilter;
+import org.wso2.micro.gateway.filter.core.security.AuthFilter;
 import org.wso2.micro.gateway.filter.core.constants.APIConstants;
 
 import java.net.URI;

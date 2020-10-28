@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.filter.core.auth.jwt;
+package org.wso2.micro.gateway.filter.core.dto;
 
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;

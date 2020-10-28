@@ -27,7 +27,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.filter.core.config.EventHubConfigurationDto;
+import org.wso2.micro.gateway.filter.core.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.filter.core.constants.APIConstants;
 import org.wso2.micro.gateway.filter.core.exception.DataLoadingException;
 import org.wso2.micro.gateway.filter.core.models.API;

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.filter.core.auth;
+package org.wso2.micro.gateway.filter.core.dto;
 
 import java.io.Serializable;
 import java.util.List;

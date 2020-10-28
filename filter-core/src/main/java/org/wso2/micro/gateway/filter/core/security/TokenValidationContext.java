@@ -16,7 +16,9 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.filter.core.auth;
+package org.wso2.micro.gateway.filter.core.security;
+
+import org.wso2.micro.gateway.filter.core.dto.APIKeyValidationInfoDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;

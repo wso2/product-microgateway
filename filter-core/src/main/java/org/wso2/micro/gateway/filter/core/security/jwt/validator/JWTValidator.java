@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.filter.core.auth.jwt.validator;
+package org.wso2.micro.gateway.filter.core.security.jwt.validator;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -34,13 +34,13 @@ import com.nimbusds.jwt.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.filter.core.auth.jwt.DefaultJWTTransformer;
-import org.wso2.micro.gateway.filter.core.auth.jwt.JWKSConfigurationDTO;
-import org.wso2.micro.gateway.filter.core.auth.jwt.JWTTransformer;
-import org.wso2.micro.gateway.filter.core.auth.jwt.JWTUtil;
-import org.wso2.micro.gateway.filter.core.auth.jwt.JWTValidationInfo;
-import org.wso2.micro.gateway.filter.core.auth.jwt.SignedJWTInfo;
-import org.wso2.micro.gateway.filter.core.auth.jwt.TokenIssuerDto;
+import org.wso2.micro.gateway.filter.core.security.jwt.DefaultJWTTransformer;
+import org.wso2.micro.gateway.filter.core.dto.JWKSConfigurationDTO;
+import org.wso2.micro.gateway.filter.core.security.jwt.JWTTransformer;
+import org.wso2.micro.gateway.filter.core.security.jwt.JWTUtil;
+import org.wso2.micro.gateway.filter.core.security.jwt.JWTValidationInfo;
+import org.wso2.micro.gateway.filter.core.security.jwt.SignedJWTInfo;
+import org.wso2.micro.gateway.filter.core.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.filter.core.constants.APIConstants;
 import org.wso2.micro.gateway.filter.core.exception.MGWException;
 
@@ -102,8 +102,11 @@ public class JWTValidator {
         TokenIssuerDto tokenIssuerDto = new TokenIssuerDto(issuer);
         tokenIssuerDto.setConsumerKeyClaim("azp");
         tokenIssuerDto.setPublicKey(readPublicKey());
+
+        // TODO : Get the jwks from the config
         JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
-        jwksConfigurationDTO.setEnabled(false);
+        jwksConfigurationDTO.setEnabled(true);
+        jwksConfigurationDTO.setUrl("https://localhost:9443/oauth2/jwks");
         tokenIssuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
         this.jwtTransformer = new DefaultJWTTransformer();
         this.jwtTransformer.loadConfiguration(tokenIssuerDto);
@@ -303,9 +306,9 @@ public class JWTValidator {
                 strKeyPEM += line + "\n";
             }
             br.close();
-            strKeyPEM = strKeyPEM.replace("-----BEGIN PUBLIC KEY-----\n", "");
+            strKeyPEM = strKeyPEM.replace(APIConstants.BEGIN_PUBLIC_KEY_STRING, "");
             strKeyPEM = strKeyPEM.replaceAll(System.lineSeparator(), "");
-            strKeyPEM = strKeyPEM.replace("-----END PUBLIC KEY-----", "");
+            strKeyPEM = strKeyPEM.replace(APIConstants.END_PUBLIC_KEY_STRING, "");
             byte[] encoded = Base64.getDecoder().decode(strKeyPEM);
             KeyFactory kf = KeyFactory.getInstance(JWTConstants.RSA);
             publicKey = (RSAPublicKey) kf.generatePublic(new X509EncodedKeySpec(encoded));

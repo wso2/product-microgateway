@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.filter.core.auth.jwt;
+package org.wso2.micro.gateway.filter.core.security.jwt;
 
 import java.io.Serializable;
 import java.util.ArrayList;

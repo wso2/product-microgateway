@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.filter.core.auth.jwt;
+package org.wso2.micro.gateway.filter.core.dto;
 
 /**
  * Holds the configurations related to jwks endpoint of a key manager.
