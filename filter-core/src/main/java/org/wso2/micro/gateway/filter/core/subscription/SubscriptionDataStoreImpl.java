@@ -101,7 +101,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.apiPolicyMap = new ConcurrentHashMap<>();
         this.subscriptionMap = new ConcurrentHashMap<>();
         //TODO: Enable data loading tasks
-        //initializeLoadingTasks();
+        initializeLoadingTasks();
     }
 
     @Override

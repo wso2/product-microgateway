@@ -18,6 +18,7 @@
 
 package org.wso2.micro.gateway.filter.core.common;
 
+import org.wso2.micro.gateway.filter.core.keymgt.KeyManagerDataService;
 import org.wso2.micro.gateway.filter.core.security.KeyValidator;
 
 import java.security.KeyStore;
@@ -32,6 +33,7 @@ public class ReferenceHolder {
 
     private Map<String, KeyValidator> keyValidationHandlerMap = new ConcurrentHashMap<>();
     private KeyStore trustStore;
+    private KeyManagerDataService keyManagerDataService;
 
     private ReferenceHolder() {
     }
@@ -56,5 +58,13 @@ public class ReferenceHolder {
         KeyValidator defaultKeyValidationHandler = new KeyValidator();
         keyValidationHandlerMap.put(tenantDomain, defaultKeyValidationHandler);
         return defaultKeyValidationHandler;
+    }
+
+    public void setKeyManagerDataService(KeyManagerDataService keyManagerDataService) {
+        this.keyManagerDataService = keyManagerDataService;
+    }
+
+    public KeyManagerDataService getKeyManagerDataService() {
+        return this.keyManagerDataService;
     }
 }

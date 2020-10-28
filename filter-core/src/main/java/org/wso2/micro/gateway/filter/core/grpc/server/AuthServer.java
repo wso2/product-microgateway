@@ -30,10 +30,15 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.filter.core.api.APIFactory;
 import org.wso2.micro.gateway.filter.core.common.CacheProvider;
 import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
+import org.wso2.micro.gateway.filter.core.keymgt.KeyManagerDataService;
+import org.wso2.micro.gateway.filter.core.keymgt.KeyManagerDataServiceImpl;
+import org.wso2.micro.gateway.filter.core.listener.GatewayJMSMessageListener;
 import org.wso2.micro.gateway.filter.core.subscription.SubscriptionDataHolder;
-import org.wso2.micro.gateway.filter.core.subscription.SubscriptionDataLoader;
-import org.wso2.micro.gateway.filter.core.subscription.SubscriptionDataLoaderImpl;
 
+import javax.jms.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -43,6 +48,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -71,18 +77,14 @@ public class AuthServer {
         // Start the server
         server.start();
         loadTrustStore();
+        KeyManagerDataService keyManagerDataService = new KeyManagerDataServiceImpl();
+        ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
         logger.info("Sever started Listening in port : " + 8081);
         //TODO: Add API is only for testing this has to come via the rest API.
         addAPI();
-        SubscriptionDataLoader subscriptionDataLoader = new SubscriptionDataLoaderImpl();
         CacheProvider.init();
-        subscriptionDataLoader.loadAllAPIPolicies("carbon.super");
-        subscriptionDataLoader.loadAllApis("carbon.super");
-        subscriptionDataLoader.loadAllApplications("carbon.super");
-        subscriptionDataLoader.loadAllAppPolicies("carbon.super");
-        subscriptionDataLoader.loadAllKeyMappings("carbon.super");
-        subscriptionDataLoader.loadAllSubscriptionPolicies("carbon.super");
-        subscriptionDataLoader.loadAllSubscriptions("carbon.super");
+        startGatewayJMSListener();
+        //TODO: Get the tenant domain from config
         SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore("carbon.super");
 
         // Don't exit the main thread. Wait until server is terminated.
@@ -106,6 +108,7 @@ public class AuthServer {
     }
 
     private static void loadTrustStore() {
+        // TODO: Get from config
         String trustStorePassword = "wso2carbon";
         String trustStoreLocation = "client-truststore.jks";
         if (trustStoreLocation != null && trustStorePassword != null) {
@@ -124,6 +127,54 @@ public class AuthServer {
         } else {
             logger.error("Error in loading trust store. Configurations are not set.");
         }
+    }
+
+    private static void startGatewayJMSListener() {
+        //TODO: Populate the connection factory url from config
+         String QPID_ICF = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
+         String CF_NAME_PREFIX = "connectionfactory.";
+         String CF_NAME = "qpidConnectionfactory";
+        String userName = "admin";
+        String password = "admin";
+        Runnable runnable = () -> {
+            try {
+                TopicConnection topicConnection;
+                TopicSession topicSession;
+                Properties properties = new Properties();
+                properties.put(Context.INITIAL_CONTEXT_FACTORY, QPID_ICF);
+                properties.put(CF_NAME_PREFIX + CF_NAME, getTCPConnectionURL(userName, password));
+                InitialContext context = new InitialContext(properties);
+                TopicConnectionFactory connFactory = (TopicConnectionFactory) context.lookup(CF_NAME);
+                topicConnection = connFactory.createTopicConnection();
+                topicConnection.start();
+                topicSession =
+                        topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
+                Topic gatewayJmsTopic = topicSession.createTopic("notification");
+                TopicSubscriber listener = topicSession.createSubscriber(gatewayJmsTopic);
+                GatewayJMSMessageListener gatewayJMSMessageListener = new GatewayJMSMessageListener();
+                listener.setMessageListener(gatewayJMSMessageListener);
+            } catch (NamingException e) {
+                e.printStackTrace();
+            } catch (JMSException e) {
+                e.printStackTrace();
+            }
+        };
+        Thread jmsThread = new Thread(runnable);
+        jmsThread.start();
+    }
+
+    private static String getTCPConnectionURL(String username, String password) {
+        // amqp://{username}:{password}@carbon/carbon?brokerlist='tcp://{hostname}:{port}'
+        String CARBON_CLIENT_ID = "carbon";
+        String CARBON_VIRTUAL_HOST_NAME = "carbon";
+        String CARBON_DEFAULT_HOSTNAME = "localhost";
+        String CARBON_DEFAULT_PORT = "5672";
+        return new StringBuffer()
+                .append("amqp://").append(username).append(":").append(password)
+                .append("@").append(CARBON_CLIENT_ID)
+                .append("/").append(CARBON_VIRTUAL_HOST_NAME)
+                .append("?brokerlist='tcp://").append(CARBON_DEFAULT_HOSTNAME).append(":").append(CARBON_DEFAULT_PORT).append("'")
+                .toString();
     }
 }
 
