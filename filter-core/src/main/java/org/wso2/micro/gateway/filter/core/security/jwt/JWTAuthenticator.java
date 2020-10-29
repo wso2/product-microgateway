@@ -123,7 +123,7 @@ public class JWTAuthenticator implements Authenticator {
 
                     }
                 }
-//                // Validate scopes
+                // Validate scopes
                 validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, signedJWTInfo);
 
                 log.debug("JWT authentication successful.");

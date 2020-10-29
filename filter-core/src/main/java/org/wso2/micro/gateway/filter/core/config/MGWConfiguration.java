@@ -30,12 +30,19 @@ import org.wso2.micro.gateway.filter.core.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.filter.core.exception.MGWException;
 import org.wso2.micro.gateway.filter.core.grpc.server.AuthServer;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +105,10 @@ public class MGWConfiguration {
             issuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
 
             String certificateAlias = (String) issuer.get(ConfigConstants.JWT_TOKEN_CERTIFICATE_ALIAS);
-            issuerDto.setCertificate(trustStore.getCertificate(certificateAlias));
+            if (trustStore.getCertificate(certificateAlias) != null) {
+                Certificate issuerCertificate = trustStore.getCertificate(certificateAlias);
+                issuerDto.setCertificate(issuerCertificate);
+            }
 
             issuerDto.setConsumerKeyClaim((String) issuer.get(ConfigConstants.JWT_TOKEN_CONSUMER_KEY_CLAIM));
             issuerDto.setValidateSubscriptions((boolean) issuer.get(ConfigConstants.JWT_TOKEN_VALIDATE_SUBSCRIPTIONS));
@@ -122,14 +132,11 @@ public class MGWConfiguration {
     }
 
     private void loadTrustStore() {
-        // TODO: Get from config
         String trustStoreLocation = configToml.getString(ConfigConstants.MGW_TRUST_STORE_LOCATION);
         String trustStorePassword = configToml.getString(ConfigConstants.MGW_TRUST_STORE_PASSWORD);;
         if (trustStoreLocation != null && trustStorePassword != null) {
             try {
-                //TODO: Read truststore from file properly
-                InputStream inputStream = MGWConfiguration.class.getClassLoader()
-                        .getResourceAsStream(trustStoreLocation);
+                InputStream inputStream = new FileInputStream(new File(trustStoreLocation));
                 trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
                 trustStore.load(inputStream, trustStorePassword.toCharArray());
             } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {

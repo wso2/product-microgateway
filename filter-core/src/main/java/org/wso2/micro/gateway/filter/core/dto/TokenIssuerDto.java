@@ -35,7 +35,6 @@ public class TokenIssuerDto {
     private String consumerKeyClaim;
     private String scopesClaim;
     private boolean validateSubscriptions;
-    private RSAPublicKey publicKey;
 
     public TokenIssuerDto(String issuer) {
 
@@ -124,14 +123,6 @@ public class TokenIssuerDto {
 
     public void setValidateSubscriptions(boolean validateSubscriptions) {
         this.validateSubscriptions = validateSubscriptions;
-    }
-
-    public RSAPublicKey getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(RSAPublicKey publicKey) {
-        this.publicKey = publicKey;
     }
 }
 

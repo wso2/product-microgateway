@@ -32,13 +32,15 @@ import java.util.List;
 public class AuthFilter implements Filter {
     private List<Authenticator> authenticators = new ArrayList<>();
 
-    @Override public void init(APIConfig apiConfig) {
+    @Override
+    public void init(APIConfig apiConfig) {
         //TODO: Check security schema and add relevant authenticators .
         Authenticator jwtAuthenticator = new JWTAuthenticator();
         authenticators.add(jwtAuthenticator);
     }
 
-    @Override public boolean handleRequest(RequestContext requestContext) {
+    @Override
+    public boolean handleRequest(RequestContext requestContext) {
         try {
             for (Authenticator authenticator : authenticators) {
                 if (authenticator.canAuthenticate(requestContext)) {
@@ -49,7 +51,9 @@ public class AuthFilter implements Filter {
                 }
             }
         } catch (APISecurityException e) {
-            //TODO : handle or log the error
+            requestContext.getProperties().put("code", e.getErrorCode());
+            requestContext.getProperties().put("error_code", e.getErrorCode());
+            requestContext.getProperties().put("error_description", e.getMessage());
         }
         return false;
     }

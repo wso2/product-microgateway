@@ -51,6 +51,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -114,8 +115,8 @@ public class JWTValidator {
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
         if (StringUtils.isNotEmpty(issuer) && tokenIssuers.containsKey(issuer)) {
             this.tokenIssuer = this.tokenIssuers.get(issuer);
-            JWTValidationInfo validationInfo = validateToken(signedJWTInfo);
-            return validationInfo;
+            this.jwtTransformer.loadConfiguration(tokenIssuer);
+            return validateToken(signedJWTInfo);
         }
         jwtValidationInfo.setValid(false);
         jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_GENERAL_ERROR);
@@ -177,9 +178,9 @@ public class JWTValidator {
                     } else {
                         throw new MGWException("Key Algorithm not supported");
                     }
-                } else if (tokenIssuer.getCertificate() != null) {
+                } else if (tokenIssuer.getCertificate() != null ) {
                     logger.debug("Retrieve certificate from Token issuer and validating");
-                    RSAPublicKey rsaPublicKey = tokenIssuer.getPublicKey();
+                    RSAPublicKey rsaPublicKey = (RSAPublicKey) tokenIssuer.getCertificate().getPublicKey();;
                     return JWTUtil.verifyTokenSignature(signedJWT, rsaPublicKey);
                 } else {
                     return JWTUtil.verifyTokenSignature(signedJWT, keyID);

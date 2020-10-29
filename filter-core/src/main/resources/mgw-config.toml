@@ -6,7 +6,7 @@ password = "wso2carbon"
 
 #Trust store configuration
 [truststore]
-location = "client-truststore.jks"
+location = "/Users/menakajayawardena/WSO2/git/microgateway/product-microgateway/filter-core/src/main/resources/client-truststore.jks"
 type = "jks"
 password = "wso2carbon"
 
@@ -20,7 +20,7 @@ password = "wso2carbon"
     # Validate subscribed APIs
     validateSubscription = false
     # The claim in which the consumer key of the application is coming
-    consumerKeyClaim = "aud"
+    consumerKeyClaim = "azp"
     #class name of JWT claims value mapper transformer if you need claims mapping.
     claimMapperClassName = "org.wso2.micro.gateway.jwtTransformer.DefaultJwtTransformer"
     # Remote User Claim Retrieval Enabled
