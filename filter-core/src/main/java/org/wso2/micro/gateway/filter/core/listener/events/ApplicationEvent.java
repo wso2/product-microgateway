@@ -37,7 +37,8 @@ public class ApplicationEvent extends Event {
 
     public ApplicationEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
                             int applicationId, String uuid, String applicationName, String tokenType,
-                            String applicationPolicy, String groupId, Map<String, String> attributes, String subscriber) {
+                            String applicationPolicy, String groupId, Map<String, String> attributes,
+                            String subscriber) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -72,8 +73,12 @@ public class ApplicationEvent extends Event {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ApplicationEvent)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ApplicationEvent)) {
+            return false;
+        }
         ApplicationEvent that = (ApplicationEvent) o;
         return getApplicationId() == that.getApplicationId() &&
                 getApplicationName().equals(that.getApplicationName()) &&
@@ -84,7 +89,8 @@ public class ApplicationEvent extends Event {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getApplicationId(), getApplicationName(), getTokenType(), getApplicationPolicy(), getGroupId());
+        return Objects.hash(getApplicationId(), getApplicationName(),
+                getTokenType(), getApplicationPolicy(), getGroupId());
     }
 
     public int getApplicationId() {

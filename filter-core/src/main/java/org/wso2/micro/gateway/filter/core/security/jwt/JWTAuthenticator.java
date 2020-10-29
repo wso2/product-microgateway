@@ -25,19 +25,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.filter.core.api.RequestContext;
+import org.wso2.micro.gateway.filter.core.common.CacheProvider;
+import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
 import org.wso2.micro.gateway.filter.core.config.MGWConfiguration;
+import org.wso2.micro.gateway.filter.core.constants.APISecurityConstants;
 import org.wso2.micro.gateway.filter.core.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.filter.core.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.filter.core.exception.APISecurityException;
+import org.wso2.micro.gateway.filter.core.exception.MGWException;
 import org.wso2.micro.gateway.filter.core.security.AuthenticationContext;
 import org.wso2.micro.gateway.filter.core.security.Authenticator;
 import org.wso2.micro.gateway.filter.core.security.TokenValidationContext;
 import org.wso2.micro.gateway.filter.core.security.jwt.validator.JWTValidator;
 import org.wso2.micro.gateway.filter.core.security.jwt.validator.RevokedJWTDataHolder;
-import org.wso2.micro.gateway.filter.core.common.CacheProvider;
-import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
-import org.wso2.micro.gateway.filter.core.constants.APISecurityConstants;
-import org.wso2.micro.gateway.filter.core.exception.APISecurityException;
-import org.wso2.micro.gateway.filter.core.exception.MGWException;
 import org.wso2.micro.gateway.filter.core.util.FilterUtils;
 
 import java.text.ParseException;
@@ -109,7 +109,8 @@ public class JWTAuthenticator implements Authenticator {
                   //TODO: enable subscription validation
                 if (issuerDto.isValidateSubscriptions()) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
+                        log.debug("Begin subscription validation via Key Manager: " +
+                                jwtValidationInfo.getKeyManager());
                     }
                     apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, jwtValidationInfo);
                     if (log.isDebugEnabled()) {

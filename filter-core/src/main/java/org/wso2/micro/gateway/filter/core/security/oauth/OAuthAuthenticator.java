@@ -60,15 +60,15 @@ public class OAuthAuthenticator implements Authenticator {
 //    protected APIKeyValidator keyValidator;
     protected JWTValidator jwtValidator;
 
-    private String KM_ENDPOINT = "https://localhost:9443/oauth2";
+    private String kmEndpoint = "https://localhost:9443/oauth2";
     private String securityHeader = HttpHeaders.AUTHORIZATION;
-    private String defaultAPIHeader="WSO2_AM_API_DEFAULT_VERSION";
+    private String defaultAPIHeader = "WSO2_AM_API_DEFAULT_VERSION";
     private String consumerKeyHeaderSegment = "Bearer";
     private String oauthHeaderSplitter = ",";
     private String consumerKeySegmentDelimiter = " ";
     private String securityContextHeader;
-    private boolean removeOAuthHeadersFromOutMessage=true;
-    private boolean removeDefaultAPIHeaderFromOutMessage=true;
+    private boolean removeOAuthHeadersFromOutMessage = true;
+    private boolean removeDefaultAPIHeaderFromOutMessage = true;
     private String clientDomainHeader = "referer";
     private String requestOrigin;
     private String remainingAuthHeader;
@@ -105,7 +105,7 @@ public class OAuthAuthenticator implements Authenticator {
             accessTokenInfo.setAccessToken(token);
             accessTokenInfo.setConsumerKey(introspectInfo.getClientId());
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new SecurityException(e);
         }
 
         return new AuthenticationContext();
@@ -187,15 +187,16 @@ public class OAuthAuthenticator implements Authenticator {
      * @throws IOException : If any error occurred during invoking the introspect endpoint.
      */
     private IntrospectInfo validateToken(String accessToken) throws IOException {
-        URL url = new URL(KM_ENDPOINT + "/introspect");
+        URL url = new URL(kmEndpoint + "/introspect");
         try (CloseableHttpClient httpClient = (CloseableHttpClient) FilterUtils.getHttpClient(url.getProtocol())) {
-            HttpPost introspectRequest = new HttpPost(KM_ENDPOINT + "/introspect");
+            HttpPost introspectRequest = new HttpPost(kmEndpoint + "/introspect");
             List<NameValuePair> params = new ArrayList<>();
             NameValuePair token = new BasicNameValuePair("token", accessToken);
             params.add(token);
             introspectRequest.setEntity(new UrlEncodedFormEntity(params));
             introspectRequest.setHeader("Content-type", "application/x-www-form-urlencoded");
-            introspectRequest.setHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString("admin:admin".getBytes()));
+            introspectRequest.setHeader("Authorization", "Basic " +
+                    Base64.getEncoder().encodeToString("admin:admin".getBytes()));
             try (CloseableHttpResponse response = httpClient.execute(introspectRequest)) {
                 if (response.getStatusLine().getStatusCode() == 200) {
                     HttpEntity entity = response.getEntity();

@@ -33,8 +33,9 @@ public class APIEvent extends Event {
     private String apiType;
     private String apiStatus;
 
-    public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, String apiName, int apiId,
-                    String apiVersion, String apiType, String apiContext, String apiProvider, String apiStatus) {
+    public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
+                    String apiName, int apiId, String apiVersion, String apiType, String apiContext,
+                    String apiProvider, String apiStatus) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -69,8 +70,12 @@ public class APIEvent extends Event {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof APIEvent)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof APIEvent)) {
+            return false;
+        }
         APIEvent apiEvent = (APIEvent) o;
         return getApiId() == apiEvent.getApiId() &&
                 getApiName().equals(apiEvent.getApiName()) &&

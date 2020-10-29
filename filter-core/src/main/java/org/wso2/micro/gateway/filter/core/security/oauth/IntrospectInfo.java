@@ -18,6 +18,9 @@ package org.wso2.micro.gateway.filter.core.security.oauth;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Class to hold the token introspection response.
+ */
 public class IntrospectInfo {
 
     @SerializedName("active")

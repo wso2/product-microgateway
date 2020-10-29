@@ -31,24 +31,20 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.filter.core.dto.APIKeyValidationInfoDTO;
-import org.wso2.micro.gateway.filter.core.security.AuthenticationContext;
-import org.wso2.micro.gateway.filter.core.security.jwt.JWTValidationInfo;
 import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
 import org.wso2.micro.gateway.filter.core.constants.APIConstants;
+import org.wso2.micro.gateway.filter.core.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.filter.core.exception.MGWException;
+import org.wso2.micro.gateway.filter.core.security.AuthenticationContext;
+import org.wso2.micro.gateway.filter.core.security.jwt.JWTValidationInfo;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 
 import javax.net.ssl.SSLContext;
-
 /**
  * Common set of utility methods used by the filter core component.
  */

@@ -22,32 +22,29 @@ import com.moandjiezana.toml.Toml;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
 import org.wso2.micro.gateway.filter.core.constants.ConfigConstants;
 import org.wso2.micro.gateway.filter.core.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.filter.core.dto.JWKSConfigurationDTO;
 import org.wso2.micro.gateway.filter.core.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.filter.core.exception.MGWException;
-import org.wso2.micro.gateway.filter.core.grpc.server.AuthServer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Configuration holder class for Microgateway
+ */
 public class MGWConfiguration {
 
     private static final Logger logger = LogManager.getLogger(MGWConfiguration.class);
@@ -100,7 +97,8 @@ public class MGWConfiguration {
             TokenIssuerDto issuerDto = new TokenIssuerDto((String) issuer.get(ConfigConstants.JWT_TOKEN_ISSUER));
 
             JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
-            jwksConfigurationDTO.setEnabled(StringUtils.isNotEmpty((String) issuer.get(ConfigConstants.JWT_TOKEN_JWKS_URL)));
+            jwksConfigurationDTO.setEnabled(StringUtils.isNotEmpty(
+                    (String) issuer.get(ConfigConstants.JWT_TOKEN_JWKS_URL)));
             jwksConfigurationDTO.setUrl((String) issuer.get(ConfigConstants.JWT_TOKEN_JWKS_URL));
             issuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
 

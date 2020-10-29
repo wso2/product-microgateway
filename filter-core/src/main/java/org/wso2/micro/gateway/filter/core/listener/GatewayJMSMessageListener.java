@@ -29,27 +29,45 @@ import org.wso2.micro.gateway.filter.core.constants.APIConstants.PolicyType;
 import org.wso2.micro.gateway.filter.core.constants.APIStatus;
 import org.wso2.micro.gateway.filter.core.constants.ConfigConstants;
 import org.wso2.micro.gateway.filter.core.dto.EventHubConfigurationDto;
-import org.wso2.micro.gateway.filter.core.listener.events.*;
+import org.wso2.micro.gateway.filter.core.listener.events.APIEvent;
+import org.wso2.micro.gateway.filter.core.listener.events.APIPolicyEvent;
+import org.wso2.micro.gateway.filter.core.listener.events.ApplicationEvent;
+import org.wso2.micro.gateway.filter.core.listener.events.ApplicationPolicyEvent;
+import org.wso2.micro.gateway.filter.core.listener.events.ApplicationRegistrationEvent;
+import org.wso2.micro.gateway.filter.core.listener.events.PolicyEvent;
+import org.wso2.micro.gateway.filter.core.listener.events.SubscriptionEvent;
+import org.wso2.micro.gateway.filter.core.listener.events.SubscriptionPolicyEvent;
 
-
-import javax.jms.*;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.jms.JMSException;
+import javax.jms.MapMessage;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.Topic;
+import javax.jms.TopicConnection;
+import javax.jms.TopicConnectionFactory;
+import javax.jms.TopicSession;
+import javax.jms.TopicSubscriber;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
+/**
+ * The JMS listener implementation
+ */
 public class GatewayJMSMessageListener implements MessageListener {
 
     private static final Log log = LogFactory.getLog(GatewayJMSMessageListener.class);
     private final boolean debugEnabled = log.isDebugEnabled();
 
     public static void init(EventHubConfigurationDto eventHubConfigurationDto) {
-        String QPID_ICF = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
-        String CF_NAME_PREFIX = "connectionfactory.";
-        String CF_NAME = "qpidConnectionfactory";
+        String initialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
+        String connectionFactoryNamePrefix = "connectionfactory.";
+        String connectionFactoryName = "qpidConnectionfactory";
         String eventReceiverURL = eventHubConfigurationDto.getEventHubReceiverConfiguration()
                 .getJmsConnectionParameters().getProperty(ConfigConstants.EVENT_HUB_EVENT_LISTENING_ENDPOINT);
         Runnable runnable = () -> {
@@ -57,10 +75,10 @@ public class GatewayJMSMessageListener implements MessageListener {
                 TopicConnection topicConnection;
                 TopicSession topicSession;
                 Properties properties = new Properties();
-                properties.put(Context.INITIAL_CONTEXT_FACTORY, QPID_ICF);
-                properties.put(CF_NAME_PREFIX + CF_NAME, eventReceiverURL);
+                properties.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
+                properties.put(connectionFactoryNamePrefix + connectionFactoryName, eventReceiverURL);
                 InitialContext context = new InitialContext(properties);
-                TopicConnectionFactory connFactory = (TopicConnectionFactory) context.lookup(CF_NAME);
+                TopicConnectionFactory connFactory = (TopicConnectionFactory) context.lookup(connectionFactoryName);
                 topicConnection = connFactory.createTopicConnection();
                 topicConnection.start();
                 topicSession =
@@ -178,7 +196,8 @@ public class GatewayJMSMessageListener implements MessageListener {
             } else if (event.getPolicyType() == PolicyType.SUBSCRIPTION) {
                 SubscriptionPolicyEvent policyEvent = new Gson().fromJson(eventJson, SubscriptionPolicyEvent.class);
                 if (updatePolicy) {
-                     ReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateSubscriptionPolicy(policyEvent);
+                     ReferenceHolder.getInstance().getKeyManagerDataService()
+                             .addOrUpdateSubscriptionPolicy(policyEvent);
                 } else if (deletePolicy) {
                      ReferenceHolder.getInstance().getKeyManagerDataService().removeSubscriptionPolicy(policyEvent);
                 }

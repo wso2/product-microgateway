@@ -371,7 +371,7 @@ public class KeyValidator {
                                                 SubscriptionDataStore datastore, String apiTenantDomain,
                                                 APIKeyValidationInfoDTO infoDTO, int tenantId) {
         // TODO Load using a single single rest api.
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Loading missing information in the datastore by invoking the Rest API");
         }
         try {
@@ -394,7 +394,7 @@ public class KeyValidator {
                 }
             }
             // check whether still api and keys are not found
-            if(api == null || key == null) {
+            if (api == null || key == null) {
                 // invalid request. nothing to do. return without any further processing
                 if (log.isDebugEnabled()) {
                     if (api == null) {
@@ -407,9 +407,9 @@ public class KeyValidator {
                 return;
             } else {
                 //go further and load missing objects
-                if(app == null) {
+                if (app == null) {
                     app = new SubscriptionDataLoaderImpl().getApplicationById(key.getApplicationId());
-                    if(app != null && app.getId() != null && app.getId() != 0) {
+                    if (app != null && app.getId() != null && app.getId() != 0) {
                         // load to the memory
                         log.debug("Loading Application to the in-memory datastore. applicationId = " + app.getId());
                         datastore.addOrUpdateApplication(app);
@@ -420,7 +420,7 @@ public class KeyValidator {
                 if (app != null) {
                     sub = new SubscriptionDataLoaderImpl().getSubscriptionById(Integer.toString(api.getApiId()),
                             Integer.toString(app.getId()));
-                    if(sub != null && !StringUtils.isEmpty(sub.getSubscriptionId())) {
+                    if (sub != null && !StringUtils.isEmpty(sub.getSubscriptionId())) {
                         // load to the memory
                         log.debug("Loading Subscription to the in-memory datastore.");
                         datastore.addOrUpdateSubscription(sub);

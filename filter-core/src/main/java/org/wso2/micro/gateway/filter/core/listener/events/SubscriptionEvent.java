@@ -32,7 +32,8 @@ public class SubscriptionEvent extends Event {
     private String subscriptionState;
 
     public SubscriptionEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
-                             int subscriptionId, int apiId, int applicationId, String policyId, String subscriptionState) {
+                             int subscriptionId, int apiId, int applicationId,
+                             String policyId, String subscriptionState) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -63,8 +64,12 @@ public class SubscriptionEvent extends Event {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SubscriptionEvent)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SubscriptionEvent)) {
+            return false;
+        }
         SubscriptionEvent that = (SubscriptionEvent) o;
         return getSubscriptionId() == that.getSubscriptionId() &&
                 getApplicationId() == that.getApplicationId() &&

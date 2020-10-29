@@ -35,14 +35,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
+import org.wso2.micro.gateway.filter.core.constants.APIConstants;
+import org.wso2.micro.gateway.filter.core.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.filter.core.exception.MGWException;
 import org.wso2.micro.gateway.filter.core.security.jwt.DefaultJWTTransformer;
 import org.wso2.micro.gateway.filter.core.security.jwt.JWTTransformer;
 import org.wso2.micro.gateway.filter.core.security.jwt.JWTUtil;
 import org.wso2.micro.gateway.filter.core.security.jwt.JWTValidationInfo;
 import org.wso2.micro.gateway.filter.core.security.jwt.SignedJWTInfo;
-import org.wso2.micro.gateway.filter.core.dto.TokenIssuerDto;
-import org.wso2.micro.gateway.filter.core.constants.APIConstants;
-import org.wso2.micro.gateway.filter.core.exception.MGWException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,12 +51,15 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -178,7 +181,7 @@ public class JWTValidator {
                     } else {
                         throw new MGWException("Key Algorithm not supported");
                     }
-                } else if (tokenIssuer.getCertificate() != null ) {
+                } else if (tokenIssuer.getCertificate() != null) {
                     logger.debug("Retrieve certificate from Token issuer and validating");
                     RSAPublicKey rsaPublicKey = (RSAPublicKey) tokenIssuer.getCertificate().getPublicKey();;
                     return JWTUtil.verifyTokenSignature(signedJWT, rsaPublicKey);

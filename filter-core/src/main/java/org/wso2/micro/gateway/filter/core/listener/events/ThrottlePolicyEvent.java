@@ -55,8 +55,12 @@ public class ThrottlePolicyEvent extends Event {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ThrottlePolicyEvent)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ThrottlePolicyEvent)) {
+            return false;
+        }
         ThrottlePolicyEvent that = (ThrottlePolicyEvent) o;
         return getPolicyId() == that.getPolicyId() &&
                 getPolicyName().equals(that.getPolicyName()) &&

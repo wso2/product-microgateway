@@ -19,7 +19,6 @@
 package org.wso2.micro.gateway.filter.core.dto;
 
 import java.security.cert.Certificate;
-import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.Map;
 

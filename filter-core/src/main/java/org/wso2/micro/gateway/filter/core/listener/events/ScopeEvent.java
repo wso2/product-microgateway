@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Scope Event to handle updates in Scopes.
  */
-public class ScopeEvent extends Event{
+public class ScopeEvent extends Event {
     private String name;
     private String displayName;
     private String description;

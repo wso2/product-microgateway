@@ -37,9 +37,10 @@ public class SubscriptionPolicyEvent extends PolicyEvent {
     private int graphQLMaxDepth;
     private int graphQLMaxComplexity;
 
-    public SubscriptionPolicyEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, int policyId,
-                                   String policyName, String quotaType, int rateLimitCount, String rateLimitTimeUnit,
-                                   boolean stopOnQuotaReach, int graphQLMaxDepth, int graphQLMaxComplexity) {
+    public SubscriptionPolicyEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
+                                   int policyId, String policyName, String quotaType, int rateLimitCount,
+                                   String rateLimitTimeUnit, boolean stopOnQuotaReach, int graphQLMaxDepth,
+                                   int graphQLMaxComplexity) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -77,8 +78,12 @@ public class SubscriptionPolicyEvent extends PolicyEvent {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SubscriptionPolicyEvent)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SubscriptionPolicyEvent)) {
+            return false;
+        }
         SubscriptionPolicyEvent that = (SubscriptionPolicyEvent) o;
         return getPolicyId() == that.getPolicyId() &&
                 getRateLimitCount() == that.getRateLimitCount() &&
@@ -88,12 +93,12 @@ public class SubscriptionPolicyEvent extends PolicyEvent {
                 getRateLimitTimeUnit().equals(that.getRateLimitTimeUnit()) &&
                 getGraphQLMaxDepth() == that.getGraphQLMaxDepth() &&
                 getGraphQLMaxComplexity() == that.getGraphQLMaxComplexity();
-
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPolicyId(), getPolicyName(), getQuotaType(), getRateLimitCount(), getRateLimitTimeUnit(), isStopOnQuotaReach(), getGraphQLMaxDepth(),getGraphQLMaxComplexity());
+        return Objects.hash(getPolicyId(), getPolicyName(), getQuotaType(), getRateLimitCount(),
+                getRateLimitTimeUnit(), isStopOnQuotaReach(), getGraphQLMaxDepth(), getGraphQLMaxComplexity());
     }
 
     public int getPolicyId() {
@@ -144,11 +149,19 @@ public class SubscriptionPolicyEvent extends PolicyEvent {
         this.stopOnQuotaReach = stopOnQuotaReach;
     }
 
-    public int getGraphQLMaxDepth() { return graphQLMaxDepth; }
+    public int getGraphQLMaxDepth() {
+        return graphQLMaxDepth;
+    }
 
-    public void setGraphQLMaxDepth(int graphQLMaxDepth) { this.graphQLMaxDepth = graphQLMaxDepth; }
+    public void setGraphQLMaxDepth(int graphQLMaxDepth) {
+        this.graphQLMaxDepth = graphQLMaxDepth;
+    }
 
-    public int getGraphQLMaxComplexity() { return graphQLMaxComplexity; }
+    public int getGraphQLMaxComplexity() {
+        return graphQLMaxComplexity;
+    }
 
-    public void setGraphQLMaxComplexity(int graphQLMaxComplexity) { this.graphQLMaxComplexity = graphQLMaxComplexity; }
+    public void setGraphQLMaxComplexity(int graphQLMaxComplexity) {
+        this.graphQLMaxComplexity = graphQLMaxComplexity;
+    }
 }

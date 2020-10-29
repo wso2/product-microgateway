@@ -31,8 +31,8 @@ public class ApplicationRegistrationEvent extends Event {
     private String keyType;
     private String keyManager;
 
-    public ApplicationRegistrationEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, int applicationId,
-                                        String consumerKey, String keyType, String keyManager) {
+    public ApplicationRegistrationEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
+                                        int applicationId, String consumerKey, String keyType, String keyManager) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -60,8 +60,12 @@ public class ApplicationRegistrationEvent extends Event {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ApplicationRegistrationEvent)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ApplicationRegistrationEvent)) {
+            return false;
+        }
         ApplicationRegistrationEvent that = (ApplicationRegistrationEvent) o;
         return getApplicationId() == that.getApplicationId() &&
                 getConsumerKey().equals(that.getConsumerKey()) &&

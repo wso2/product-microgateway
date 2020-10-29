@@ -21,6 +21,9 @@ package org.wso2.micro.gateway.filter.core.listener.events;
 
 import org.wso2.micro.gateway.filter.core.constants.APIConstants.PolicyType;
 
+/**
+ * Policy Event class
+ */
 public class PolicyEvent extends Event {
     protected PolicyType policyType;
 

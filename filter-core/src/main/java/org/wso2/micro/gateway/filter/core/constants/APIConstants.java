@@ -154,6 +154,9 @@ public class APIConstants {
         }
     }
 
+    /**
+     * Supported event types
+     */
     public enum EventType {
         API_CREATE,
         API_UPDATE,
@@ -174,12 +177,18 @@ public class APIConstants {
         SCOPE_DELETE
     }
 
+    /**
+     * Supported policy types
+     */
     public enum PolicyType {
         API,
         APPLICATION,
         SUBSCRIPTION
     }
 
+    /**
+     * Topic Names
+     */
     public static class TopicNames {
 
         //APIM default topic names

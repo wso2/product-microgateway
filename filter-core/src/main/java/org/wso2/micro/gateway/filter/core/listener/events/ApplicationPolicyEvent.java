@@ -61,8 +61,12 @@ public class ApplicationPolicyEvent extends PolicyEvent {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ApplicationPolicyEvent)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ApplicationPolicyEvent)) {
+            return false;
+        }
         ApplicationPolicyEvent that = (ApplicationPolicyEvent) o;
         return getPolicyId() == that.getPolicyId() &&
                 getPolicyName().equals(that.getPolicyName()) &&
