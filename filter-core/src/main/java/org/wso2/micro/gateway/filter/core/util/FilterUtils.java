@@ -137,13 +137,8 @@ public class FilterUtils {
 
     private static SSLConnectionSocketFactory createSocketFactory() throws MGWException {
         SSLContext sslContext;
-
-//        String keyStorePath = "/home/ubuntu/security"; ///TODO : Read from config
-        String keyStorePath = "/Users/menakajayawardena/WSO2/git/microgateway/product-microgateway/filter-core/src/main/resources/client-truststore.jks"; ///TODO : Read from config
-        String keyStorePassword = "wso2carbon"; //TODO : Read from config
         try {
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
+            KeyStore trustStore = ReferenceHolder.getInstance().getMGWConfiguration().getTrustStore();
             sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
 
             X509HostnameVerifier hostnameVerifier;
@@ -160,14 +155,10 @@ public class FilterUtils {
             return new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
         } catch (KeyStoreException e) {
             handleException("Failed to read from Key Store", e);
-        } catch (IOException e) {
-            handleException("Key Store not found in " + keyStorePath, e);
-        } catch (CertificateException e) {
-            handleException("Failed to read Certificate", e);
         } catch (NoSuchAlgorithmException e) {
-            handleException("Failed to load Key Store from " + keyStorePath, e);
+            handleException("Failed to initialize sslContext. ", e);
         } catch (KeyManagementException e) {
-            handleException("Failed to load key from" + keyStorePath, e);
+            handleException("Failed to initialize sslContext ", e);
         }
 
         return null;

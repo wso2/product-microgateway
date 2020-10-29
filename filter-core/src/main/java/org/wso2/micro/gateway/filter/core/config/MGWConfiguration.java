@@ -93,7 +93,7 @@ public class MGWConfiguration {
             TokenIssuerDto issuerDto = new TokenIssuerDto((String) issuer.get(ConfigConstants.JWT_TOKEN_ISSUER));
 
             JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
-            jwksConfigurationDTO.setEnabled(StringUtils.isEmpty((String) issuer.get(ConfigConstants.JWT_TOKEN_JWKS_URL)));
+            jwksConfigurationDTO.setEnabled(StringUtils.isNotEmpty((String) issuer.get(ConfigConstants.JWT_TOKEN_JWKS_URL)));
             jwksConfigurationDTO.setUrl((String) issuer.get(ConfigConstants.JWT_TOKEN_JWKS_URL));
             issuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
 

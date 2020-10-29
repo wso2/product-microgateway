@@ -76,6 +76,7 @@ public class AuthServer {
                 .workerEventLoopGroup(workerGroup).addService(new ExtAuthService())
                 .channelType(NioServerSocketChannel.class).executor(executor).build();
 
+        // Load configurations
         KeyManagerDataService keyManagerDataService = new KeyManagerDataServiceImpl();
         MGWConfiguration mgwConfiguration = new MGWConfiguration();
         ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);

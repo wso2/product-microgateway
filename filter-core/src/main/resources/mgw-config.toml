@@ -14,7 +14,7 @@ password = "wso2carbon"
 # Issuer 1
 [[jwtTokenConfig]]
     issuer = "https://localhost:9443/oauth2/token"
-    certificateAlias = "wso2apim310"
+    certificateAlias = "wso2carbon"
     # URL of the JWKs endpoint
     jwksURL = ""
     # Validate subscribed APIs
