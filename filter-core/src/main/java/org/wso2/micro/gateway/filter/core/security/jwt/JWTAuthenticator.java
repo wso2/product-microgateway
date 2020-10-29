@@ -25,7 +25,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.filter.core.api.RequestContext;
+import org.wso2.micro.gateway.filter.core.config.MGWConfiguration;
 import org.wso2.micro.gateway.filter.core.dto.APIKeyValidationInfoDTO;
+import org.wso2.micro.gateway.filter.core.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.filter.core.security.AuthenticationContext;
 import org.wso2.micro.gateway.filter.core.security.Authenticator;
 import org.wso2.micro.gateway.filter.core.security.TokenValidationContext;
@@ -70,6 +72,7 @@ public class JWTAuthenticator implements Authenticator {
         }
         String apiContext = requestContext.getMathedAPI().getAPIConfig().getBasePath();
         String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
+        apiContext = apiContext + "/" + apiVersion;
         String matchingResource = requestContext.getMatchedResourcePath().getPath();
         String httpMethod = requestContext.getMatchedResourcePath().getMethod().toString();
         SignedJWTInfo signedJWTInfo;
@@ -101,19 +104,24 @@ public class JWTAuthenticator implements Authenticator {
 
                 // Validate subscriptions
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+                MGWConfiguration configuration = ReferenceHolder.getInstance().getMGWConfiguration();
+                TokenIssuerDto issuerDto = configuration.getJWTIssuers().get(jwtValidationInfo.getIssuer());
                   //TODO: enable subscription validation
-                log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
-                apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, jwtValidationInfo);
+                if (issuerDto.isValidateSubscriptions()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Begin subscription validation via Key Manager: " + jwtValidationInfo.getKeyManager());
+                    }
+                    apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, jwtValidationInfo);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Subscription validation via Key Manager. Status: " + apiKeyValidationInfoDTO
+                                .isAuthorized());
+                    }
+                    if (!apiKeyValidationInfoDTO.isAuthorized()) {
+                        log.debug("User is NOT authorized to access the Resource. API Subscription validation failed.");
+                        throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
+                                "User is NOT authorized to access the Resource. API Subscription validation failed.");
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Subscription validation via Key Manager. Status: " + apiKeyValidationInfoDTO
-                            .isAuthorized());
-                }
-                if (!apiKeyValidationInfoDTO.isAuthorized()) {
-                    log.debug("User is NOT authorized to access the Resource. API Subscription validation failed.");
-                    throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
-                            "User is NOT authorized to access the Resource. API Subscription validation failed.");
-
+                    }
                 }
 //                // Validate scopes
                 validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, signedJWTInfo);

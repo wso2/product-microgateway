@@ -73,7 +73,7 @@ public class FilterUtils {
         Certificate publicCert = null;
         //Read the client-truststore.jks into a KeyStore
         try {
-            KeyStore trustStore = ReferenceHolder.getInstance().getTrustStore();
+            KeyStore trustStore = ReferenceHolder.getInstance().getMGWConfiguration().getTrustStore();
             if (trustStore != null) {
                 // Read public certificate from trust store
                 publicCert = trustStore.getCertificate(certAlias);

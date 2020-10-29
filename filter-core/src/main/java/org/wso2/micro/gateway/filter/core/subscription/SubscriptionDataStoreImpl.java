@@ -21,6 +21,7 @@ package org.wso2.micro.gateway.filter.core.subscription;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.filter.core.common.CacheableEntity;
+import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
 import org.wso2.micro.gateway.filter.core.constants.APIConstants;
 import org.wso2.micro.gateway.filter.core.exception.DataLoadingException;
 import org.wso2.micro.gateway.filter.core.exception.MGWException;
@@ -100,8 +101,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.appPolicyMap = new ConcurrentHashMap<>();
         this.apiPolicyMap = new ConcurrentHashMap<>();
         this.subscriptionMap = new ConcurrentHashMap<>();
-        //TODO: Enable data loading tasks
-        initializeLoadingTasks();
+        //TODO: Enable data loading tasks if event hub is enabled
+        if (ReferenceHolder.getInstance().getMGWConfiguration().getEventHubConfiguration().isEnabled()) {
+            initializeLoadingTasks();
+        }
     }
 
     @Override

@@ -134,6 +134,7 @@ public class KeyValidator {
                         }
                     }
                     if (!validate && urlMapping.getScopes().size() > 0) {
+                        scopesValidated = false;
                         break;
                     }
                 }

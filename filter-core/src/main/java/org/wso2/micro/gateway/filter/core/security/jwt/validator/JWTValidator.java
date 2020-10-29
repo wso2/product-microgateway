@@ -34,8 +34,8 @@ import com.nimbusds.jwt.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
 import org.wso2.micro.gateway.filter.core.security.jwt.DefaultJWTTransformer;
-import org.wso2.micro.gateway.filter.core.dto.JWKSConfigurationDTO;
 import org.wso2.micro.gateway.filter.core.security.jwt.JWTTransformer;
 import org.wso2.micro.gateway.filter.core.security.jwt.JWTUtil;
 import org.wso2.micro.gateway.filter.core.security.jwt.JWTValidationInfo;
@@ -55,10 +55,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -89,6 +86,7 @@ public class JWTValidator {
                 }
 
             });
+    Map<String, TokenIssuerDto> tokenIssuers;
     TokenIssuerDto tokenIssuer;
     JWTTransformer jwtTransformer;
     private JWKSet jwkSet;
@@ -98,19 +96,10 @@ public class JWTValidator {
     }
 
     public void loadTokenIssuerConfiguration() {
-        String issuer = "https://localhost:9443/oauth2/token"; //TODO: get the issuer
-        TokenIssuerDto tokenIssuerDto = new TokenIssuerDto(issuer);
-        tokenIssuerDto.setConsumerKeyClaim("azp");
-        tokenIssuerDto.setPublicKey(readPublicKey());
-
-        // TODO : Get the jwks from the config
-        JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
-        jwksConfigurationDTO.setEnabled(true);
-        jwksConfigurationDTO.setUrl("https://localhost:9443/oauth2/jwks");
-        tokenIssuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
+        tokenIssuers = ReferenceHolder.getInstance().getMGWConfiguration().getJWTIssuers();
         this.jwtTransformer = new DefaultJWTTransformer();
-        this.jwtTransformer.loadConfiguration(tokenIssuerDto);
-        this.tokenIssuer = tokenIssuerDto;
+//        this.jwtTransformer.loadConfiguration(tokenIssuerDto);
+//        this.tokenIssuer = tokenIssuerDto;
 //      JWTTransformer jwtTransformer = ServiceReferenceHolder.getInstance().getJWTTransformer(tokenIssuer.getIssuer());
 //        if (jwtTransformer != null) {
 //            this.jwtTransformer = jwtTransformer;
@@ -123,7 +112,8 @@ public class JWTValidator {
     public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws MGWException {
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
-        if (StringUtils.isNotEmpty(issuer)) {
+        if (StringUtils.isNotEmpty(issuer) && tokenIssuers.containsKey(issuer)) {
+            this.tokenIssuer = this.tokenIssuers.get(issuer);
             JWTValidationInfo validationInfo = validateToken(signedJWTInfo);
             return validationInfo;
         }

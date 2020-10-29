@@ -24,7 +24,7 @@ import java.util.Properties;
  * Holds the configurations related to connecting with APIM event hub node
  */
 public class EventHubConfigurationDto {
-    private boolean enabled = false;
+    private boolean enabled;
     private String serviceUrl;
     private int initDelay = 0;
     private String username;

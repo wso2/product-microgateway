@@ -27,17 +27,56 @@ import org.wso2.micro.gateway.filter.core.constants.APIConstants;
 import org.wso2.micro.gateway.filter.core.constants.APIConstants.EventType;
 import org.wso2.micro.gateway.filter.core.constants.APIConstants.PolicyType;
 import org.wso2.micro.gateway.filter.core.constants.APIStatus;
+import org.wso2.micro.gateway.filter.core.constants.ConfigConstants;
+import org.wso2.micro.gateway.filter.core.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.filter.core.listener.events.*;
 
+
 import javax.jms.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 public class GatewayJMSMessageListener implements MessageListener {
 
     private static final Log log = LogFactory.getLog(GatewayJMSMessageListener.class);
     private final boolean debugEnabled = log.isDebugEnabled();
+
+    public static void init(EventHubConfigurationDto eventHubConfigurationDto) {
+        String QPID_ICF = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
+        String CF_NAME_PREFIX = "connectionfactory.";
+        String CF_NAME = "qpidConnectionfactory";
+        String eventReceiverURL = eventHubConfigurationDto.getEventHubReceiverConfiguration()
+                .getJmsConnectionParameters().getProperty(ConfigConstants.EVENT_HUB_EVENT_LISTENING_ENDPOINT);
+        Runnable runnable = () -> {
+            try {
+                TopicConnection topicConnection;
+                TopicSession topicSession;
+                Properties properties = new Properties();
+                properties.put(Context.INITIAL_CONTEXT_FACTORY, QPID_ICF);
+                properties.put(CF_NAME_PREFIX + CF_NAME, eventReceiverURL);
+                InitialContext context = new InitialContext(properties);
+                TopicConnectionFactory connFactory = (TopicConnectionFactory) context.lookup(CF_NAME);
+                topicConnection = connFactory.createTopicConnection();
+                topicConnection.start();
+                topicSession =
+                        topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
+                Topic gatewayJmsTopic = topicSession.createTopic("notification");
+                TopicSubscriber listener = topicSession.createSubscriber(gatewayJmsTopic);
+                listener.setMessageListener(new GatewayJMSMessageListener());
+            } catch (NamingException | JMSException e) {
+                log.error("Error while initiating jms connection...", e);
+            }
+        };
+        Thread jmsThread = new Thread(runnable);
+        jmsThread.start();
+    }
+
+    private GatewayJMSMessageListener() {}
 
     public void onMessage(Message message) {
 

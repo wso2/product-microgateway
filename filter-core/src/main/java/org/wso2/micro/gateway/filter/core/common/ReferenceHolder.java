@@ -18,6 +18,7 @@
 
 package org.wso2.micro.gateway.filter.core.common;
 
+import org.wso2.micro.gateway.filter.core.config.MGWConfiguration;
 import org.wso2.micro.gateway.filter.core.keymgt.KeyManagerDataService;
 import org.wso2.micro.gateway.filter.core.security.KeyValidator;
 
@@ -31,23 +32,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ReferenceHolder {
     private static final ReferenceHolder instance = new ReferenceHolder();
 
-    private Map<String, KeyValidator> keyValidationHandlerMap = new ConcurrentHashMap<>();
-    private KeyStore trustStore;
+    private final Map<String, KeyValidator> keyValidationHandlerMap = new ConcurrentHashMap<>();
     private KeyManagerDataService keyManagerDataService;
+    private MGWConfiguration mgwConfiguration;
 
     private ReferenceHolder() {
     }
 
     public static ReferenceHolder getInstance() {
         return instance;
-    }
-
-    public KeyStore getTrustStore() {
-        return trustStore;
-    }
-
-    public void setTrustStore(KeyStore trustStore) {
-        this.trustStore = trustStore;
     }
 
     public KeyValidator getKeyValidationHandler(String tenantDomain) {
@@ -66,5 +59,13 @@ public class ReferenceHolder {
 
     public KeyManagerDataService getKeyManagerDataService() {
         return this.keyManagerDataService;
+    }
+
+    public MGWConfiguration getMGWConfiguration() {
+        return mgwConfiguration;
+    }
+
+    public void setMGWConfiguration(MGWConfiguration mgwConfiguration) {
+        this.mgwConfiguration = mgwConfiguration;
     }
 }
