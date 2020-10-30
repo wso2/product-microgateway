@@ -17,20 +17,21 @@
 package utills_test
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/utills"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/wso2/micro-gw/pkg/oasparser/utills"
 )
 
 func TestFindSwaggerVersion(t *testing.T) {
 
 	type findSwaggerVersionTestItem struct {
-		inputSwagger   string
-		result  string
-		message string
+		inputSwagger string
+		result       string
+		message      string
 	}
 
-	dataItems := []findSwaggerVersionTestItem {
+	dataItems := []findSwaggerVersionTestItem{
 		{
 			inputSwagger: `{
 				"swagger": "2.0",
@@ -38,8 +39,8 @@ func TestFindSwaggerVersion(t *testing.T) {
 				"basepath": "api/v2"
 							
 				}`,
-            result: "2",
-            message: "when swagger version is 2",
+			result:  "2",
+			message: "when swagger version is 2",
 		},
 		{
 			inputSwagger: `{
@@ -48,7 +49,7 @@ func TestFindSwaggerVersion(t *testing.T) {
 				"basepath": "api/v2"
 							
 				}`,
-			result: "3",
+			result:  "3",
 			message: "when openAPi version is 3",
 		},
 		{
@@ -57,14 +58,14 @@ func TestFindSwaggerVersion(t *testing.T) {
 				"basepath": "api/v2"
 							
 				}`,
-			result: "2",
+			result:  "2",
 			message: "when openAPi version is not provided",
 		},
 	}
 
-	for _, item := range dataItems{
+	for _, item := range dataItems {
 		apiJsn, _ := utills.ToJSON([]byte(item.inputSwagger))
-		resultswaggerVerison:= utills.FindSwaggerVersion(apiJsn)
+		resultswaggerVerison := utills.FindSwaggerVersion(apiJsn)
 
 		assert.Equal(t, item.result, resultswaggerVerison, item.message)
 	}

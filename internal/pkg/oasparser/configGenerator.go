@@ -26,9 +26,9 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 
-	enovoy "github.com/wso2/micro-gw/internal/pkg/oasparser/envoyCodegen"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/envoy"
-	swgger "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
+	enovoy "github.com/wso2/micro-gw/pkg/oasparser/envoyCodegen"
+	"github.com/wso2/micro-gw/pkg/oasparser/models/envoy"
+	swgger "github.com/wso2/micro-gw/pkg/oasparser/swaggerOperator"
 )
 
 // /**

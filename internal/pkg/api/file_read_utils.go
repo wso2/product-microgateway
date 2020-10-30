@@ -24,9 +24,9 @@ import (
 	"log"
 	"strings"
 
-	"github.com/wso2/micro-gw/internal/loggers"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/utills"
-	xds "github.com/wso2/micro-gw/internal/pkg/xds"
+	"github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/micro-gw/pkg/oasparser/utills"
+	xds "github.com/wso2/micro-gw/pkg/xds"
 )
 
 func UnzipAndApplyZippedProject(payload []byte) {

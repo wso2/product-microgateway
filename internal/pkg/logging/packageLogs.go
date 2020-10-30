@@ -21,7 +21,7 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/internal/configs"
+	"github.com/wso2/micro-gw/configs"
 )
 
 /**

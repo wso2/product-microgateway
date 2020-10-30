@@ -24,7 +24,7 @@ import (
 	"unicode"
 
 	"github.com/ghodss/yaml"
-	logger "github.com/wso2/micro-gw/internal/loggers"
+	logger "github.com/wso2/micro-gw/loggers"
 )
 
 /**

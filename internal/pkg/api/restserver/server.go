@@ -40,7 +40,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/net/netutil"
 
-	"github.com/wso2/micro-gw/internal/pkg/api/restserver/operations"
+	"github.com/wso2/micro-gw/pkg/api/restserver/operations"
 )
 
 const (

@@ -18,7 +18,7 @@ package loggers
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/internal/pkg/logging"
+	"github.com/wso2/micro-gw/pkg/logging"
 )
 
 /* loggers should be initiated only for the main packages

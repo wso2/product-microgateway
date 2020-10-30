@@ -31,12 +31,12 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 
 	keystore "github.com/pavel-v-chernykh/keystore-go/v3"
-	"github.com/wso2/micro-gw/internal/configs/confTypes"
-	logger "github.com/wso2/micro-gw/internal/loggers"
-	apiServer "github.com/wso2/micro-gw/internal/pkg/api"
-	"github.com/wso2/micro-gw/internal/pkg/api/models"
-	"github.com/wso2/micro-gw/internal/pkg/api/restserver/operations"
-	"github.com/wso2/micro-gw/internal/pkg/api/restserver/operations/api_individual"
+	"github.com/wso2/micro-gw/configs/confTypes"
+	logger "github.com/wso2/micro-gw/loggers"
+	apiServer "github.com/wso2/micro-gw/pkg/api"
+	"github.com/wso2/micro-gw/pkg/api/models"
+	"github.com/wso2/micro-gw/pkg/api/restserver/operations"
+	"github.com/wso2/micro-gw/pkg/api/restserver/operations/api_individual"
 )
 
 var (

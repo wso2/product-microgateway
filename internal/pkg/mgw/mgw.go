@@ -19,7 +19,7 @@ package mgw
 import (
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
-	"github.com/wso2/micro-gw/internal/pkg/api/restserver"
+	"github.com/wso2/micro-gw/pkg/api/restserver"
 
 	"context"
 	"flag"
@@ -29,10 +29,10 @@ import (
 	"os/signal"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/wso2/micro-gw/internal/configs"
-	mgwconfig "github.com/wso2/micro-gw/internal/configs/confTypes"
-	logger "github.com/wso2/micro-gw/internal/loggers"
-	xds "github.com/wso2/micro-gw/internal/pkg/xds"
+	"github.com/wso2/micro-gw/configs"
+	mgwconfig "github.com/wso2/micro-gw/configs/confTypes"
+	logger "github.com/wso2/micro-gw/loggers"
+	xds "github.com/wso2/micro-gw/pkg/xds"
 	"google.golang.org/grpc"
 )
 
@@ -118,7 +118,7 @@ func Run(conf *mgwconfig.Config) {
 
 	//log config watcher
 	watcherLogConf, _ := fsnotify.NewWatcher()
-	errC := watcherLogConf.Add("resources/conf/log_config.toml")
+	errC := watcherLogConf.Add("../resources/conf/log_config.toml")
 
 	if errC != nil {
 		logger.LoggerMgw.Fatal("Error reading the log configs. ", errC)

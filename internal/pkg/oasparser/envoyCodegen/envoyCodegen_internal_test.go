@@ -24,7 +24,7 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
+	"github.com/wso2/micro-gw/pkg/oasparser/models/apiDefinition"
 )
 
 //https://www.red-gate.com/simple-talk/dotnet/software-testing/go-unit-tests-tips-from-the-trenches/#Go_Unit_Tests

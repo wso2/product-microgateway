@@ -13,10 +13,10 @@ import (
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	openAPI3 "github.com/getkin/kin-openapi/openapi3"
 	openAPI2 "github.com/go-openapi/spec"
-	logger "github.com/wso2/micro-gw/internal/loggers"
-	oasParser "github.com/wso2/micro-gw/internal/pkg/oasparser"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
-	swaggerOperator "github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
+	logger "github.com/wso2/micro-gw/loggers"
+	oasParser "github.com/wso2/micro-gw/pkg/oasparser"
+	"github.com/wso2/micro-gw/pkg/oasparser/models/apiDefinition"
+	swaggerOperator "github.com/wso2/micro-gw/pkg/oasparser/swaggerOperator"
 )
 
 var (

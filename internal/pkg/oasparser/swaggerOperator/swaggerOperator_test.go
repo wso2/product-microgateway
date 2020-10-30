@@ -20,8 +20,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/models/apiDefinition"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/swaggerOperator"
+	"github.com/wso2/micro-gw/pkg/oasparser/models/apiDefinition"
+	"github.com/wso2/micro-gw/pkg/oasparser/swaggerOperator"
 )
 
 func TestGetMgwSwagger(t *testing.T) {

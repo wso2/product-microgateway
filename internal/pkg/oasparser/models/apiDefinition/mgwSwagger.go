@@ -17,8 +17,8 @@
 package apiDefinition
 
 import (
-	logger "github.com/wso2/micro-gw/internal/loggers"
-	"github.com/wso2/micro-gw/internal/pkg/oasparser/constants"
+	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/micro-gw/pkg/oasparser/constants"
 )
 
 type MgwSwagger struct {

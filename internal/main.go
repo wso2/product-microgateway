@@ -14,32 +14,22 @@
  *  limitations under the License.
  *
  */
-package microgateway
+package main
 
 import (
+	"os"
+
 	logger "github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/internal/configs"
-	"github.com/wso2/micro-gw/internal/pkg/mgw"
+	"github.com/wso2/micro-gw/cmd/microgateway"
+	_ "github.com/wso2/micro-gw/pkg/logging"
 )
 
-func initServer() error {
-	return nil
-}
+func main() {
 
-/**
- * Start the control plane.
- *
- */
-func StartMicroGateway(args []string) {
-
-	logger.Info("Starting Microgateway")
-	err := initServer()
-	if err != nil {
-		logger.Fatal("Error starting the control plane", err)
+	var file string
+	if len(os.Args) > 1 {
+		file = os.Args[1]
+		logger.Debug(file)
 	}
-	conf, errReadConfig := configs.ReadConfigs()
-	if errReadConfig != nil {
-		logger.Fatal("Error loading configuration. ", errReadConfig)
-	}
-	mgw.Run(conf)
+	microgateway.StartMicroGateway(os.Args)
 }

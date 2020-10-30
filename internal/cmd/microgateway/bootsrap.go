@@ -14,6 +14,32 @@
  *  limitations under the License.
  *
  */
-package api
+package microgateway
 
-type ConfigService struct{}
+import (
+	logger "github.com/sirupsen/logrus"
+	"github.com/wso2/micro-gw/configs"
+	"github.com/wso2/micro-gw/pkg/mgw"
+)
+
+func initServer() error {
+	return nil
+}
+
+/**
+ * Start the control plane.
+ *
+ */
+func StartMicroGateway(args []string) {
+
+	logger.Info("Starting Microgateway")
+	err := initServer()
+	if err != nil {
+		logger.Fatal("Error starting the control plane", err)
+	}
+	conf, errReadConfig := configs.ReadConfigs()
+	if errReadConfig != nil {
+		logger.Fatal("Error loading configuration. ", errReadConfig)
+	}
+	mgw.Run(conf)
+}
