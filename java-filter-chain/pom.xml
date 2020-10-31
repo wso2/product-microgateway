@@ -18,6 +18,7 @@
                 </configuration>
             </plugin>
             <plugin>
+                <!-- TODO: (VirajSalaka) Finalize whether keeping a shaded jar is the best approach-->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.4</version>
@@ -46,6 +47,37 @@
                       <goal>shade</goal>
                     </goals>
                   </execution>
+                </executions>
+              </plugin>
+              <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.34.1</version>
+                <configuration>
+                  <images>
+                    <image>
+                        <alias>filter-chain</alias>
+                        <name>vsalaka/mg-filter-chain:0.0.2</name>
+                      <build>
+                        <contextDir>${project.basedir}/src/main/docker</contextDir>
+                        <args>
+                            <MGW_VERSION>1.0-SNAPSHOT</MGW_VERSION>
+                        </args>
+                        <assembly>
+                            <descriptorRef>artifact-with-dependencies</descriptorRef>
+                        </assembly>
+                      </build>
+                    </image>
+                  </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>docker-build</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
                 </executions>
               </plugin>
         </plugins>

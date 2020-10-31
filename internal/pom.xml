@@ -91,17 +91,13 @@
                 <configuration>
                   <images>
                     <image>
-                        <alias>filter-chain</alias>
+                        <alias>mg-control-plane</alias>
                         <name>vsalaka/mg-control-plane:0.0.2</name>
                       <build>
-                        <!-- <from>ubuntu:20.04</from> -->
                         <contextDir>${project.basedir}/src/main/docker</contextDir>
                         <assembly>
                             <descriptor>assembly.xml</descriptor>
                         </assembly>
-                        <cmd>
-                            <shell>tail -f /dev/null</shell>
-                        </cmd>
                       </build>
                     </image>
                   </images>
