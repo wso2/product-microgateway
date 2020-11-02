@@ -62,7 +62,4 @@ public interface KeyManagerDataService {
 
     void removeAPIPolicy(APIPolicyEvent policyEvent);
 
-//    void addScope(ScopeEvent event);
-//
-//    void deleteScope(ScopeEvent event);
 }
