@@ -173,7 +173,7 @@
                             <MG_USER_HOME>/home/wso2</MG_USER_HOME>
                         </args>
                         <assembly>
-                            <descriptorRef>artifact-with-dependencies</descriptorRef>
+                            <descriptor>${project.basedir}/src/main/docker/assembly.xml</descriptor>
                         </assembly>
                       </build>
                     </image>

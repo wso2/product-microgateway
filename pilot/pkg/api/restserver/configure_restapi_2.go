@@ -74,7 +74,6 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	}
 
 	api.APIIndividualPostImportAPIHandler = api_individual.PostImportAPIHandlerFunc(func(params api_individual.PostImportAPIParams, principal *models.Principal) middleware.Responder {
-
 		//TODO: (VirajSalaka) Error is not handled in the response.
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
 		apiServer.UnzipAndApplyZippedProject(jsonByteArray)

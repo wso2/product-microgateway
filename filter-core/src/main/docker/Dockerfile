@@ -39,12 +39,12 @@ ARG MOTD="\n\
 RUN \
     groupadd --system -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
     && useradd --system --create-home --home-dir ${MG_USER_HOME} --no-log-init -g ${MG_USER_GROUP_ID} -u ${MG_USER_ID} ${MG_USER} \
+    && mkdir ${MG_USER_HOME}/lib \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
 
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 
-# TODO: (VirajSalaka) Provide either a shell script or command to invoke properly
-COPY maven/ .
-
-CMD ["java", "-cp", "/home/wso2/*", "org.wso2.micro.gateway.filter.core.grpc.server.AuthServer"]
+COPY maven/ lib/
+# TODO: (VirajSalaka) Provide a shell script
+CMD ["java", "-cp", "lib/*", "org.wso2.micro.gateway.filter.core.grpc.server.AuthServer"]

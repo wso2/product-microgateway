@@ -22,7 +22,7 @@
 //  Schemes:
 //    https
 //  Host: apis.wso2.com
-//  BasePath: /api/am/admin/v1
+//  BasePath: /mgw/1.0
 //  Version: v1.2
 //  License: Apache 2.0 http://www.apache.org/licenses/LICENSE-2.0.html
 //  Contact: WSO2<architecture@wso2.com> http://wso2.com/products/api-manager/

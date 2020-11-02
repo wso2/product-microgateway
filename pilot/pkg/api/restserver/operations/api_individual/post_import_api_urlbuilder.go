@@ -61,7 +61,7 @@ func (o *PostImportAPIURL) Build() (*url.URL, error) {
 
 	_basePath := o._basePath
 	if _basePath == "" {
-		_basePath = "/api/am/admin/v1"
+		_basePath = "/mgw/1.0"
 	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
