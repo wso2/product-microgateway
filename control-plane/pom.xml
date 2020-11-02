@@ -16,12 +16,17 @@
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     
+    <parent>
+        <groupId>org.wso2.am.microgw</groupId>
+        <artifactId>micro-gateway-parent</artifactId>
+        <version>3.2.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>control-plane</artifactId>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2am.envoymicrogw</groupId>
-    <artifactId>envoymicrogw</artifactId>
-    <version>0.0.1</version>
-    <name>Envoy Control Plane</name>
     <packaging>pom</packaging>
+    <name>Control Plane</name>
 
     <profiles>
         <profile>
@@ -92,12 +97,20 @@
                   <images>
                     <image>
                         <alias>mg-control-plane</alias>
-                        <name>vsalaka/mg-control-plane:0.0.2</name>
+                        <name>vsalaka/mg-control-plane:${project.version}</name>
                       <build>
                         <contextDir>${project.basedir}/src/main/docker</contextDir>
                         <assembly>
                             <descriptor>assembly.xml</descriptor>
                         </assembly>
+                        <args>
+                            <!-- The Args in the dockerfile seems to overridden by plugin-->
+                            <MG_USER>wso2</MG_USER>
+                            <MG_USER_ID>802</MG_USER_ID>
+                            <MG_USER_GROUP>wso2</MG_USER_GROUP>
+                            <MG_USER_GROUP_ID>802</MG_USER_GROUP_ID>
+                            <MG_USER_HOME>/home/wso2</MG_USER_HOME>
+                        </args>
                       </build>
                     </image>
                   </images>

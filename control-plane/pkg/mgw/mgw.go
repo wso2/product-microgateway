@@ -118,7 +118,7 @@ func Run(conf *mgwconfig.Config) {
 
 	//log config watcher
 	watcherLogConf, _ := fsnotify.NewWatcher()
-	errC := watcherLogConf.Add("../resources/conf/log_config.toml")
+	errC := watcherLogConf.Add("conf/log_config.toml")
 
 	if errC != nil {
 		logger.LoggerMgw.Fatal("Error reading the log configs. ", errC)

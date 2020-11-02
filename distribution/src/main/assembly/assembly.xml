@@ -14,27 +14,31 @@
   ~ limitations under the License.
   -->
 
-  <assembly>
+<assembly>
     <includeBaseDirectory>false</includeBaseDirectory>
     <baseDirectory>/</baseDirectory>
     <id>control-plane</id>
     <formats>
-        <format>dir</format>
+        <format>zip</format>
     </formats>
     <fileSets>
         <fileSet>
             <directory>resources/certs</directory>
-            <outputDirectory>resources/certs</outputDirectory>
+            <outputDirectory>WSO2-Microgateway-${project.version}/resources/control-plane/certs</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>resources/conf</directory>
-            <outputDirectory>resources/conf</outputDirectory>
+            <outputDirectory>WSO2-Microgateway-${project.version}/resources/control-plane/conf</outputDirectory>
         </fileSet>
     </fileSets>
     <files>
         <file>
-            <source>target/micro-gw-ubuntu</source>
-            <outputDirectory></outputDirectory>
+            <source>resources/envoy.yaml</source>
+            <outputDirectory>WSO2-Microgateway-${project.version}/resources/envoy</outputDirectory>
+        </file>
+        <file>
+            <source>resources/docker-compose.yaml</source>
+            <outputDirectory>WSO2-Microgateway-${project.version}</outputDirectory>
         </file>
     </files>
 </assembly>

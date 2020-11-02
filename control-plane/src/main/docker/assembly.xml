@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<assembly>
+  <assembly>
     <includeBaseDirectory>false</includeBaseDirectory>
     <baseDirectory>/</baseDirectory>
     <id>control-plane</id>
@@ -23,8 +23,12 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>resources</directory>
-            <outputDirectory>resources</outputDirectory>
+            <directory>resources/certs</directory>
+            <outputDirectory>certs</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>resources/conf</directory>
+            <outputDirectory>conf</outputDirectory>
         </fileSet>
     </fileSets>
     <files>

@@ -19,11 +19,11 @@ LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
 
 ENV LANG=C.UTF-8
 
-ARG USER=wso2
-ARG USER_ID=802
-ARG USER_GROUP=wso2
-ARG USER_GROUP_ID=802
-ARG USER_HOME=/home/${USER}
+ARG MG_USER=wso2
+ARG MG_USER_ID=802
+ARG MG_USER_GROUP=wso2
+ARG MG_USER_GROUP_ID=802
+ARG MG_USER_HOME=/home/${MG_USER}
 
 ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\
@@ -33,14 +33,14 @@ ARG MOTD="\n\
  Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"
 
 RUN \
-    groupadd --system -g ${USER_GROUP_ID} ${USER_GROUP} \
-    && useradd --system --create-home --home-dir ${USER_HOME} --no-log-init -g ${USER_GROUP_ID} -u ${USER_ID} ${USER} \
+    groupadd --system -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
+    && useradd --system --create-home --home-dir ${MG_USER_HOME} --no-log-init -g ${MG_USER_GROUP_ID} -u ${MG_USER_ID} ${MG_USER} \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
 
-WORKDIR ${USER_HOME}
-USER ${USER}
-COPY maven/resources/certs certs
-COPY maven/resources/conf conf
+WORKDIR ${MG_USER_HOME}
+USER ${MG_USER}
+COPY maven/certs certs
+COPY maven/conf conf
 COPY maven/micro-gw-ubuntu micro-gw
 
 CMD ./micro-gw

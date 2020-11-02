@@ -1,0 +1,45 @@
+admin:
+  access_log_path: /dev/null
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9000
+dynamic_resources:
+  ads_config:
+    api_type: GRPC
+    transport_api_version: V3
+    grpc_services:
+      - envoy_grpc:
+          cluster_name: xds_cluster
+  cds_config: 
+    ads: {}
+    resource_api_version: V3
+  lds_config: 
+    ads: {}  
+    resource_api_version: V3   
+node:
+  cluster: service_greeter
+  id: default
+static_resources:
+  clusters:
+    - name: xds_cluster
+      type: STRICT_DNS
+      connect_timeout: 1s
+      hosts:
+        - socket_address:
+            address: 172.17.0.1
+            port_value: 18000
+      http2_protocol_options: {}
+    - name: ext-authz
+      type: static
+      connect_timeout: 1s
+      http2_protocol_options: {}
+      load_assignment:
+        cluster_name: ext-authz
+        endpoints:
+        - lb_endpoints:
+          - endpoint:
+              address:
+                socket_address:
+                  address: 172.17.0.1
+                  port_value: 8081    
