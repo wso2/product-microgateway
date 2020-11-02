@@ -23,18 +23,24 @@ var (
 	version int32
 
 	cache cachev3.SnapshotCache
-
-	openAPIV3Map     map[string]openAPI3.Swagger
-	openAPIV2Map     map[string]openAPI2.Swagger
-	openAPIEnvoyMap  map[string][]string
+	//OpenAPI Name:Version -> openAPI3 struct map
+	openAPIV3Map map[string]openAPI3.Swagger
+	//OpenAPI Name:Version -> openAPI2 struct map
+	openAPIV2Map map[string]openAPI2.Swagger
+	//OpenAPI Name:Version -> Envoy Label Array map
+	openAPIEnvoyMap map[string][]string
+	//OpenAPI Name:Version -> Envoy Routes map
 	openAPIRoutesMap map[string][]*routev3.Route
-	//openAPIListenersMap    map[string][]types.Resource
-	openAPIClustersMap     map[string][]*clusterv3.Cluster
-	openAPIEndpointsMap    map[string][]*corev3.Address
-	envoyUpdateVersionMap  map[string]int64
+	//OpenAPI Name:Version -> Envoy Clusters map
+	openAPIClustersMap map[string][]*clusterv3.Cluster
+	//OpenAPI Name:Version -> Envoy Endpoints map
+	openAPIEndpointsMap map[string][]*corev3.Address
+	//Envoy Label -> XDS version map
+	envoyUpdateVersionMap map[string]int64
+	//Envoy Label -> Listener Configuration map
 	envoyListenerConfigMap map[string]*listenerv3.Listener
-	envoyRouteConfigMap    map[string]*routev3.RouteConfiguration
-	//listenerEnvoyConfig   types.Resource
+	//Envoy Label -> Routes Configuration map
+	envoyRouteConfigMap map[string]*routev3.RouteConfiguration
 )
 
 // IDHash uses ID field as the node hash.
@@ -166,7 +172,8 @@ func mergeResourceArrays(resourceArrays [][]types.Resource) []types.Resource {
 }
 
 //by the time this method is called, openAPIEnvoy map is updated.
-//We are keeping old labels in a different label
+//Old labels refers to the previously assigned labels
+//New labels refers to the the updated labels
 func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 
 	//TODO: (VirajSalaka) check possible optimizations, Since the number of labels are low by design it should not be an issue
@@ -220,7 +227,7 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 		version = 1
 	}
 	//TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
-	//Will be updated once we moved to incremental XDS
+	//Will be updated once decide to move to incremental XDS
 	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil)
 	snap.Consistent()
 	err := cache.SetSnapshot(label, snap)
