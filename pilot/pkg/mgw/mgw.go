@@ -117,6 +117,7 @@ func Run(conf *mgwconfig.Config) {
 	defer cancel()
 
 	//log config watcher
+	//TODO: (VirajSalaka) Implement a rest endpoint to apply configurations
 	watcherLogConf, _ := fsnotify.NewWatcher()
 	errC := watcherLogConf.Add("conf/log_config.toml")
 

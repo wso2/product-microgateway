@@ -15,11 +15,12 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-pushd java-filter-chain
+pushd filter-core
 mvn clean install
 popd
 
-pushd control-plane
+pushd pilot
+rm -rf target/
 GOOS=linux GOARCH=amd64 go build -v -o target/micro-gw-ubuntu main.go
 popd 
 

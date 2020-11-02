@@ -53,16 +53,6 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	// configure the api here
 	api.ServeError = errors.ServeError
 
-	// Set your custom logger if needed. Default one is log.Printf
-	// Expected interface func(string, ...interface{})
-	//
-	// Example:
-	// api.Logger = log.Printf
-
-	// api.UseSwaggerUI()
-	// To continue using redoc as your UI, uncomment the following line
-	// api.UseRedoc()
-
 	api.JSONConsumer = runtime.JSONConsumer()
 	api.MultipartformConsumer = runtime.DiscardConsumer
 
@@ -71,9 +61,10 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	// Applies when the Authorization header is set with the Basic scheme
 	api.BasicAuthAuth = func(user string, pass string) (*models.Principal, error) {
 		if user != mgwConfig.Server.Username || pass != mgwConfig.Server.Password {
+			//TODO: (VirajSalaka) Introduce Constants
 			return nil, errors.New(401, "Credentials are invalid")
 		}
-		//TODO: implement authentication
+		//TODO: implement authentication principal
 		p := models.Principal{
 			Token:    "xxxx",
 			Tenant:   "xxxx",
@@ -82,13 +73,9 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		return &p, nil
 	}
 
-	// Set your custom authorizer if needed. Default one is security.Authorized()
-	// Expected interface runtime.Authorizer
-	//
-	// Example:
-	// api.APIAuthorizer = security.Authorized()
 	api.APIIndividualPostImportAPIHandler = api_individual.PostImportAPIHandlerFunc(func(params api_individual.PostImportAPIParams, principal *models.Principal) middleware.Responder {
 
+		//TODO: (VirajSalaka) Error is not handled in the response.
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
 		apiServer.UnzipAndApplyZippedProject(jsonByteArray)
 		return api_individual.NewPostImportAPIOK()
@@ -104,15 +91,12 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 // The TLS configuration before HTTPS server starts.
 func configureTLS(tlsConfig *tls.Config) {
 	// Make all necessary changes to the TLS configuration here.
-	//TODO: (VirajSalaka)
-	// certArray, _ =
+	//TODO: (VirajSalaka) Introduce PKCS12
 	tlsConfig.Certificates, _ = getCertificates(mgwConfig.Server.PublicKeyPath, mgwConfig.Server.PrivateKeyPath)
-	// tlsConfig.Certificates = getCertificatesFromByteArr(getPrivateKeyFile(), getPublicKeyFile())
 }
 
 func getCertificates(publicKeyPath, privateKeyPath string) ([]tls.Certificate, error) {
 	certificates := make([]tls.Certificate, 1)
-	//TODO: (VirajSalaka) make these paramters configurable
 	tlsCertificate := publicKeyPath
 	tlsCertificateKey := privateKeyPath
 	certificate, err := tls.LoadX509KeyPair(string(tlsCertificate), string(tlsCertificateKey))
@@ -121,10 +105,10 @@ func getCertificates(publicKeyPath, privateKeyPath string) ([]tls.Certificate, e
 		return certificates, err
 	}
 	certificates[0] = certificate
-
 	return certificates, nil
 }
 
+//TODO: (VirajSalaka) This is not removed at the moment. Finalize if this is going to be used in future
 func getCertificatesFromByteArr(keyPem, certPem []byte) []tls.Certificate {
 	certificates := make([]tls.Certificate, 1)
 	cert, err := tls.X509KeyPair(certPem, keyPem)

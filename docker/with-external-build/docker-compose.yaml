@@ -1,7 +1,10 @@
 version: "3.7"
+# TODO: (VirajSalaka) Fix all the related scripts since this is going to be maintained.
 services:
-  envoy:
-    image: envoyproxy/envoy:v1.16.0
+  envoydev:
+    build:
+      context: ./../../
+      dockerfile: docker/with-external-build/envoy/Dockerfile
     volumes:
       - ./../../envoy.yaml:/etc/envoy/envoy.yaml
 #    expose:
@@ -12,24 +15,25 @@ services:
       - "9000:9000"
     links:
       - pilot
-      - filterchain  
+      - filterchain
   pilot:
     build:
       context: ./../../
       dockerfile: docker/with-external-build/control-plane/Dockerfile
     volumes:  
-      - ./../../resources/:/home/wso2/resources/
-      - ./../../target/micro-gw-ubuntu:/home/wso2/micro-gw-ubuntu
+      - ./../../resources/:/home/ubuntu/resources/
+      - ./../../target/:/home/ubuntu/pilot/
     ports:
       - "18000:18000" 
   filterchain:
-    build: 
+    build:
       context: ./../../
       dockerfile: docker/with-external-build/filter-chain/Dockerfile
     volumes:
-      - ./../../java-filter-chain/target:/home/wso2
+      - ./../../filter-core/target:/home/ubuntu
+      - ./../../resources/apis:/home/ubuntu/apis
     ports:
-      - "8081:8081"         
+      - "8081:8081"
   # zipkin:
   #   image: openzipkin/zipkin
   #   expose:

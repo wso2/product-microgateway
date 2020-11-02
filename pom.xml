@@ -38,7 +38,7 @@
 
     <modules>
         <module>pilot</module>
-        <module>java-filter-chain</module>
+        <module>filter-core</module>
         <module>distribution</module>
     </modules>
 

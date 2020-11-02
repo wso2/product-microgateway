@@ -23,6 +23,8 @@ import (
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
+	"time"
+
 	"github.com/golang/protobuf/ptypes"
 	logger "github.com/wso2/micro-gw/loggers"
 )
@@ -98,6 +100,7 @@ func getExtAauthzHttpFilter() hcmv3.HttpFilter {
 						ClusterName: "ext-authz",
 					},
 				},
+				Timeout: ptypes.DurationProto(20 * time.Second),
 			},
 		},
 	}
