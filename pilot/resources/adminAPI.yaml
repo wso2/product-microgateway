@@ -14,7 +14,7 @@
         name: "Apache 2.0"
         url: "http://www.apache.org/licenses/LICENSE-2.0.html"
     host: "apis.wso2.com"
-    basePath: "/api/am/admin/v1"
+    basePath: "/mgw/1.0"
     schemes:
     - "https"
     consumes:

@@ -19,7 +19,9 @@ pushd java-filter-chain
 mvn clean install
 popd
 
+pushd control-plane
 GOOS=linux GOARCH=amd64 go build -v -o target/micro-gw-ubuntu main.go
+popd 
 
 cd docker/with-external-build
 docker-compose up

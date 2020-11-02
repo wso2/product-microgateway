@@ -37,7 +37,7 @@
     </parent>
 
     <modules>
-        <module>control-plane</module>
+        <module>pilot</module>
         <module>java-filter-chain</module>
         <module>distribution</module>
     </modules>

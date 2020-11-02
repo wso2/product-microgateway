@@ -23,11 +23,11 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>resources/certs</directory>
+            <directory>../resources/certs</directory>
             <outputDirectory>certs</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>resources/conf</directory>
+            <directory>../resources/conf</directory>
             <outputDirectory>conf</outputDirectory>
         </fileSet>
     </fileSets>

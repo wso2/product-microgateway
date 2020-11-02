@@ -23,21 +23,21 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>resources/certs</directory>
-            <outputDirectory>WSO2-Microgateway-${project.version}/resources/control-plane/certs</outputDirectory>
+            <directory>../resources/certs</directory>
+            <outputDirectory>WSO2-Microgateway-${project.version}/resources/pilot/certs</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>resources/conf</directory>
-            <outputDirectory>WSO2-Microgateway-${project.version}/resources/control-plane/conf</outputDirectory>
+            <directory>../resources/conf</directory>
+            <outputDirectory>WSO2-Microgateway-${project.version}/resources/pilot/conf</outputDirectory>
         </fileSet>
     </fileSets>
     <files>
         <file>
-            <source>resources/envoy.yaml</source>
-            <outputDirectory>WSO2-Microgateway-${project.version}/resources/envoy</outputDirectory>
+            <source>../resources/envoy.yaml</source>
+            <outputDirectory>WSO2-Microgateway-${project.version}/resources/proxy</outputDirectory>
         </file>
         <file>
-            <source>resources/docker-compose.yaml</source>
+            <source>../resources/docker-compose.yaml</source>
             <outputDirectory>WSO2-Microgateway-${project.version}</outputDirectory>
         </file>
     </files>

@@ -3,7 +3,7 @@ services:
   envoy:
     image: envoyproxy/envoy:v1.16.0
     volumes:
-      - ./resources/envoy/envoy.yaml:/etc/envoy/envoy.yaml
+      - ./resources/proxy/envoy.yaml:/etc/envoy/envoy.yaml
     ports:
       - "10000:10000"
       - "9000:9000"
@@ -13,8 +13,8 @@ services:
   pilot:
     image: vsalaka/mg-control-plane:3.2.1-SNAPSHOT
     volumes:  
-      - ./resources/control-plane/certs:/home/wso2/certs
-      - ./resources/control-plane/conf:/home/wso2/conf
+      - ./resources/pilot/certs:/home/wso2/certs
+      - ./resources/pilot/conf:/home/wso2/conf
     ports:
       - "18000:18000" 
   filterchain:

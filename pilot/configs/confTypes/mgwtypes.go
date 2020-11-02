@@ -69,28 +69,6 @@ type Config struct {
 		Password       string
 	}
 
-	// TLS configuration
-	TLS struct {
-		Enabled  bool
-		KeyStore string // Key store location
-		Alias    string // Alias of the private key
-		Password string // Key store alias
-	}
-
-	// Server admin user credentials.
-	Admin struct {
-		User struct {
-			UserName string
-			Password string
-		}
-	}
-
-	// Defines the swagger definition location. (For now,
-	// it is the individual file path. Should be improved to use with directory)
-	Apis struct {
-		Location string
-	}
-
 	//envoy proxy configuration
 	Envoy struct {
 		ListenerAddress         string

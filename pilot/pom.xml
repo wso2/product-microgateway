@@ -72,24 +72,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>distribution</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/main/assembly/assembly.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>0.34.1</version>
@@ -101,7 +83,7 @@
                       <build>
                         <contextDir>${project.basedir}/src/main/docker</contextDir>
                         <assembly>
-                            <descriptor>assembly.xml</descriptor>
+                            <descriptor>${project.basedir}/src/main/docker/assembly.xml</descriptor>
                         </assembly>
                         <args>
                             <!-- The Args in the dockerfile seems to overridden by plugin-->
