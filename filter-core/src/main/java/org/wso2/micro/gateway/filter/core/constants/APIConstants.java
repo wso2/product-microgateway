@@ -155,7 +155,7 @@ public class APIConstants {
     }
 
     /**
-     * Supported event types
+     * Supported event types.
      */
     public enum EventType {
         API_CREATE,
@@ -178,7 +178,7 @@ public class APIConstants {
     }
 
     /**
-     * Supported policy types
+     * Supported policy types.
      */
     public enum PolicyType {
         API,
@@ -187,7 +187,7 @@ public class APIConstants {
     }
 
     /**
-     * Topic Names
+     * Topic Names.
      */
     public static class TopicNames {
 

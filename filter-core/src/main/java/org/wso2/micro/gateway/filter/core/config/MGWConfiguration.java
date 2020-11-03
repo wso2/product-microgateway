@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Configuration holder class for Microgateway
+ * Configuration holder class for Microgateway.
  */
 public class MGWConfiguration {
 
@@ -160,6 +160,4 @@ public class MGWConfiguration {
     public KeyStore getTrustStore() {
         return trustStore;
     }
-
-
 }
