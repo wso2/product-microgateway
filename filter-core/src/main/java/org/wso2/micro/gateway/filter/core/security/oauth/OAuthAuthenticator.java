@@ -57,7 +57,6 @@ public class OAuthAuthenticator implements Authenticator {
     private static final Log log = LogFactory.getLog(OAuthAuthenticator.class);
     private List<String> keyManagerList;
 
-//    protected APIKeyValidator keyValidator;
     protected JWTValidator jwtValidator;
 
     private String kmEndpoint = "https://localhost:9443/oauth2";

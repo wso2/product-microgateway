@@ -89,7 +89,7 @@ public class AuthServer {
     }
 
     private static void addAPI() {
-        String apiPath = "/Users/menakajayawardena/WSO2/git/microgateway/product-microgateway/resources/apis";
+        String apiPath = "/home/ubuntu/apis/";
         try {
             Files.walk(Paths.get(apiPath)).filter(path -> {
                 Path fileName = path.getFileName();
@@ -104,4 +104,3 @@ public class AuthServer {
         }
     }
 }
-

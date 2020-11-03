@@ -21,7 +21,7 @@ package org.wso2.micro.gateway.filter.core.constants;
 /**
  * This class holds the constant keys related to the Microgateway Configurations which will be read from the config file
  * or dynamically configured via the control plane.
- * */
+ */
 public class ConfigConstants {
     // JWT Token Config
     public static final String JWT_TOKEN_CONFIG = "jwtTokenConfig";
@@ -46,6 +46,6 @@ public class ConfigConstants {
     public static final String MGW_KEY_STORE_TYPE = "keystore.type";
     public static final String MGW_KEY_STORE_PASSWORD = "keystore.password";
     public static final String MGW_TRUST_STORE_LOCATION = "truststore.location";
-    public static final String MGW_TRUST_STORE_TYPE = "truststore.location";
+    public static final String MGW_TRUST_STORE_TYPE = "truststore.type";
     public static final String MGW_TRUST_STORE_PASSWORD = "truststore.password";
 }

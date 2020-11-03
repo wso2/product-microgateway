@@ -1,10 +1,10 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -38,7 +38,7 @@ import org.wso2.micro.gateway.filter.core.subscription.SubscriptionDataHolder;
 import org.wso2.micro.gateway.filter.core.subscription.SubscriptionDataStore;
 
 /**
- * Key Manager Data Service Implementation
+ * Key Manager Data Service Implementation.
  */
 public class KeyManagerDataServiceImpl implements KeyManagerDataService {
 
@@ -271,43 +271,6 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         }
         store.removeApiPolicy(getAPIPolicyFromAPIPolicyEvent(event));
     }
-
-//    @Override
-//    public void addScope(ScopeEvent event) {
-//
-//        Scope scope = new Scope();
-//        scope.setName(event.getName());
-//        scope.setRoles(event.getRoles());
-//        scope.setDisplayName(event.getDisplayName());
-//        scope.setDescription(event.getDescription());
-//        scope.setTimeStamp(event.getTimeStamp());
-//        SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
-//                .getTenantSubscriptionStore(event.getTenantDomain());
-//        if (store == null) {
-//            if (log.isDebugEnabled()) {
-//                log.debug("Ignoring the event as the tenant " + event.getTenantDomain() + " is not loaded");
-//            }
-//            return;
-//        }
-//        store.addOrUpdateScope(scope);
-//    }
-//
-//    @Override
-//    public void deleteScope(ScopeEvent event) {
-//
-//        Scope scope = new Scope();
-//        scope.setName(event.getName());
-//        scope.setTimeStamp(event.getTimeStamp());
-//        SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
-//                .getTenantSubscriptionStore(event.getTenantDomain());
-//        if (store == null) {
-//            if (log.isDebugEnabled()) {
-//                log.debug("Ignoring the event as the tenant " + event.getTenantDomain() + " is not loaded");
-//            }
-//            return;
-//        }
-//        store.deleteScope(scope);
-//    }
 
     private ApplicationKeyMapping getApplicationKeyMappingFromApplicationRegistrationEvent(
             ApplicationRegistrationEvent event) {
