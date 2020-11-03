@@ -81,9 +81,9 @@
                         <alias>mg-control-plane</alias>
                         <name>vsalaka/mg-control-plane:${project.version}</name>
                       <build>
-                        <contextDir>${project.basedir}/src/main/docker</contextDir>
+                        <contextDir>${project.basedir}/src/main/resources</contextDir>
                         <assembly>
-                            <descriptor>${project.basedir}/src/main/docker/assembly.xml</descriptor>
+                            <descriptor>${project.basedir}/src/main/assembly/assembly.xml</descriptor>
                         </assembly>
                         <args>
                             <!-- The Args in the dockerfile seems to overridden by plugin-->

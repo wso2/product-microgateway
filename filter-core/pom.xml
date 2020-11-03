@@ -162,7 +162,7 @@
                         <alias>filter-core</alias>
                         <name>vsalaka/mg-filter-chain:${project.version}</name>
                       <build>
-                        <contextDir>${project.basedir}/src/main/docker</contextDir>
+                        <contextDir>${project.basedir}/src/main/resources</contextDir>
                         <args>
                             <MG_VERSION>${project.version}</MG_VERSION>
                             <!-- The Args in the dockerfile seems to overridden by plugin-->
@@ -173,7 +173,7 @@
                             <MG_USER_HOME>/home/wso2</MG_USER_HOME>
                         </args>
                         <assembly>
-                            <descriptor>${project.basedir}/src/main/docker/assembly.xml</descriptor>
+                            <descriptor>${project.basedir}/src/main/assembly/assembly.xml</descriptor>
                         </assembly>
                       </build>
                     </image>
