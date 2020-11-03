@@ -18,7 +18,6 @@
 
 package org.wso2.micro.gateway.filter.core.listener.events;
 
-
 import org.wso2.micro.gateway.filter.core.constants.APIConstants;
 
 import java.util.Objects;
