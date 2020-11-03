@@ -6,7 +6,7 @@ password = "wso2carbon"
 
 #Trust store configuration
 [truststore]
-location = "/Users/menakajayawardena/WSO2/git/microgateway/product-microgateway/filter-core/src/main/resources/client-truststore.jks"
+location = "/home/ubuntu/client-truststore.jks"
 type = "jks"
 password = "wso2carbon"
 
@@ -62,5 +62,4 @@ password = "wso2carbon"
     password="admin"
     # The message broker connection URL.
     eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
-
 
