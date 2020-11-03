@@ -11,7 +11,7 @@ services:
       - pilot
       - filterchain  
   pilot:
-    image: wso2am/mg-control-plane:3.2.1-SNAPSHOT
+    image: wso2am/pilot:3.2.1-SNAPSHOT
     volumes:  
       - ./resources/pilot/certs:/home/wso2/certs
       - ./resources/pilot/conf:/home/wso2/conf
