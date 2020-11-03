@@ -26,21 +26,6 @@ import (
 	"github.com/wso2/micro-gw/pkg/oasparser/utills"
 )
 
-// /**
-//  * Generate mgw swagger instance from File.
-//  *
-//  * @param location   Swagger file location
-//  * @return []apiDefinition.MgwSwagger  Mgw swagger instances as a array
-//  */
-// func GenerateMgwSwaggerFromByteArray(byteArray []byte) apiDefinition.MgwSwagger {
-// 	var mgwSwaggers []apiDefinition.MgwSwagger
-// 	//TODO: (VirajSalaka) return a single object instead of an array
-// 	mgwSwagger := GetMgwSwagger(byteArray)
-// 	mgwSwaggers = append(mgwSwaggers, mgwSwagger)
-
-// 	return mgwSwaggers
-// }
-
 /**
  * Get mgw swagger instance.
  *

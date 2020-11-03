@@ -112,7 +112,6 @@ func UpdateEnvoyByteArr(byteArr []byte) {
 		//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
 		newLabels = apiDefinition.GetXWso2Label(openAPIV3Struct.ExtensionProps)
 	} else {
-		//TODO: (VirajSalaka) add openAPI v2 support
 		openAPIV2Struct, err := swaggerOperator.GetOpenAPIV2Struct(jsonContent)
 		if err != nil {
 			logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
@@ -141,7 +140,7 @@ func UpdateEnvoyByteArr(byteArr []byte) {
 	//openAPIListenersMap[apiMapKey] = listeners
 	openAPIClustersMap[apiMapKey] = clusters
 	openAPIEndpointsMap[apiMapKey] = endpoints
-
+	//TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
 }
 

@@ -62,6 +62,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.BasicAuthAuth = func(user string, pass string) (*models.Principal, error) {
 		if user != mgwConfig.Server.Username || pass != mgwConfig.Server.Password {
 			//TODO: (VirajSalaka) Introduce Constants
+			logger.LoggerApi.Info("Credentials are invalid")
 			return nil, errors.New(401, "Credentials are invalid")
 		}
 		//TODO: implement authentication principal
@@ -70,13 +71,17 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 			Tenant:   "xxxx",
 			Username: user,
 		}
+		logger.LoggerApi.Debugf("Principal : %v", p)
 		return &p, nil
 	}
 
 	api.APIIndividualPostImportAPIHandler = api_individual.PostImportAPIHandlerFunc(func(params api_individual.PostImportAPIParams, principal *models.Principal) middleware.Responder {
 		//TODO: (VirajSalaka) Error is not handled in the response.
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
-		apiServer.UnzipAndApplyZippedProject(jsonByteArray)
+		err := apiServer.UnzipAndApplyZippedProject(jsonByteArray)
+		if err != nil {
+			return api_individual.NewPostImportAPIInternalServerError()
+		}
 		return api_individual.NewPostImportAPIOK()
 	})
 
@@ -100,7 +105,7 @@ func getCertificates(publicKeyPath, privateKeyPath string) ([]tls.Certificate, e
 	tlsCertificateKey := privateKeyPath
 	certificate, err := tls.LoadX509KeyPair(string(tlsCertificate), string(tlsCertificateKey))
 	if err != nil {
-		logger.LoggerMgw.Fatal("Error while loading the tls keypair.", err)
+		logger.LoggerApi.Fatal("Error while loading the tls keypair.", err)
 		return certificates, err
 	}
 	certificates[0] = certificate
@@ -142,7 +147,7 @@ func StartRestServer(config *confTypes.Config) {
 	mgwConfig = config
 	swaggerSpec, err := loads.Embedded(SwaggerJSON, FlatSwaggerJSON)
 	if err != nil {
-		log.Fatalln(err)
+		logger.LoggerApi.Fatal(err)
 	}
 
 	api := operations.NewRestapiAPI(swaggerSpec)
@@ -153,12 +158,12 @@ func StartRestServer(config *confTypes.Config) {
 	server.TLSHost = mgwConfig.Server.IP
 	port, err := strconv.Atoi(mgwConfig.Server.Port)
 	if err != nil {
-		log.Fatalf("The provided port value for the REST Api Server :%v is not an integer. %v", mgwConfig.Server.Port, err)
+		logger.LoggerApi.Fatalf("The provided port value for the REST Api Server :%v is not an integer. %v", mgwConfig.Server.Port, err)
 		return
 	}
 	server.TLSPort = port
 	if err := server.Serve(); err != nil {
-		log.Fatalln(err)
+		logger.LoggerApi.Fatal(err)
 	}
 
 }
@@ -168,18 +173,18 @@ func getPrivateKeyFile() []byte {
 	var privateKeyByteArr []byte
 	f, err := os.Open("/Users/viraj/Desktop/temp/wso2am-micro-gw-macos-3.2.0-alpha/runtime/bre/security/ballerinaKeystore.p12")
 	if err != nil {
-		log.Fatal(err)
+		logger.LoggerApi.Fatal(err)
 	}
 	defer f.Close()
 	keyStore, err := keystore.Decode(f, []byte("ballerina"))
 	if err != nil {
-		log.Fatal(err)
+		logger.LoggerApi.Fatal(err)
 	}
 	key, ok := keyStore["ballerina"]
 	if ok {
 		privateKey := key.(*keystore.PrivateKeyEntry)
 		privateKeyByteArr = privateKey.PrivateKey
-		logger.LoggerMgw.Infof("private key found \n%v", string(privateKeyByteArr))
+		logger.LoggerApi.Debugf("private key found \n%v", string(privateKeyByteArr))
 	}
 	return privateKeyByteArr
 }
@@ -194,13 +199,13 @@ func getPublicKeyFile() []byte {
 	defer f.Close()
 	keyStore, err := keystore.Decode(f, []byte("ballerina"))
 	if err != nil {
-		log.Fatal(err)
+		logger.LoggerApi.Fatal(err)
 	}
 	key, ok := keyStore["ballerina"]
 	if ok {
 		certEntry := key.(*keystore.TrustedCertificateEntry)
 		publicKeyByteArr = certEntry.Certificate.Content
-		logger.LoggerMgw.Infof("public key found \n%v", string(publicKeyByteArr))
+		logger.LoggerApi.Debugf("public key found \n%v", string(publicKeyByteArr))
 
 	}
 	return publicKeyByteArr

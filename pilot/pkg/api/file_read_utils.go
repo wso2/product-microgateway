@@ -29,12 +29,12 @@ import (
 	xds "github.com/wso2/micro-gw/pkg/xds"
 )
 
-func UnzipAndApplyZippedProject(payload []byte) {
+func UnzipAndApplyZippedProject(payload []byte) error {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 
 	if err != nil {
 		loggers.LoggerApi.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
-		return
+		return err
 	}
 
 	//TODO: (VirajSalaka) this won't support for distributed openAPI definition
@@ -52,12 +52,13 @@ func UnzipAndApplyZippedProject(payload []byte) {
 			apiJsn, conversionErr := utills.ToJSON(unzippedFileBytes)
 			if conversionErr != nil {
 				loggers.LoggerApi.Errorf("Error converting api file to json: %v", err.Error())
-				return
+				return conversionErr
 			} else {
 				xds.UpdateEnvoyByteArr(apiJsn)
 			}
 		}
 	}
+	return nil
 }
 
 //TODO: (VirajSalaka) Remove the code segment as it is not in use for the main flow.

@@ -31,62 +31,6 @@ import (
 	swgger "github.com/wso2/micro-gw/pkg/oasparser/swaggerOperator"
 )
 
-// /**
-//  * Get all production resources for envoy from file.
-//  *
-//  * @param byte[]  swagger as byte array
-//  * @return []types.Resource Production listeners
-//  * @return []types.Resource Production clusters
-//  * @return []types.Resource Production routes
-//  * @return []types.Resource Production endpoints
-//  */
-// func GetProductionSourcesFromByteArray(byteArr []byte) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
-// 	logger.LoggerOasparser.Debug("debug check....................")
-// 	mgwSwaggers := swgger.GenerateMgwSwaggerFromByteArray(byteArr)
-// 	return getProductionSources(mgwSwaggers)
-// }
-
-// func getProductionSources(mgwSwaggers []apiDefinition.MgwSwagger) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
-// 	var (
-// 		routesP    []*routev3.Route
-// 		clustersP  []*clusterv3.Cluster
-// 		endpointsP []*corev3.Address
-// 	)
-
-// 	for _, swagger := range mgwSwaggers {
-// 		routes, clusters, endpoints, _, _, _ := enovoy.CreateRoutesWithClusters(swagger)
-// 		routesP = append(routesP, routes...)
-// 		clustersP = append(clustersP, clusters...)
-// 		endpointsP = append(endpointsP, endpoints...)
-// 	}
-
-// 	envoyNodeProd := new(envoy.EnvoyNode)
-
-// 	if len(mgwSwaggers) > 0 {
-// 		vHost_NameP := "default"
-// 		vHostP, _ := enovoy.CreateVirtualHost(vHost_NameP, routesP)
-// 		// listenerNameP := "listenerProd_1"
-// 		// routeConfigNameP := "routeProd_" + strings.Replace(mgwSwaggers[0].GetTitle(), " ", "", -1) + mgwSwaggers[0].GetVersion()
-// 		// listnerProd := enovoy.CreateListener(listenerNameP, routeConfigNameP, vHostP)
-// 		listnerProd := enovoy.CreateListenerWithRds("default")
-// 		routeConfigProd := enovoy.CreateRoutesConfigForRds(vHostP)
-
-// 		envoyNodeProd.SetListener(&listnerProd)
-// 		envoyNodeProd.SetClusters(clustersP)
-// 		envoyNodeProd.SetRoutes(routesP)
-// 		envoyNodeProd.SetEndpoints(endpointsP)
-// 		envoyNodeProd.SetRouteConfigs(&routeConfigProd)
-
-// 	} else {
-// 		logger.LoggerOasparser.Error("No Api definitions found")
-// 	}
-
-// 	logger.LoggerOasparser.Info(len(routesP), " routes are generated successfully")
-// 	logger.LoggerOasparser.Info(len(clustersP), " clusters are generated successfully")
-// 	logger.LoggerOasparser.Info(len(endpointsP), " endpoints are generated successfully")
-// 	return envoyNodeProd.GetSources()
-// }
-
 /*
 GetProductionRoutesClustersEndpoints is a method to generate and provide the routes, clusters and endpoints when the openAPI is provided.
 

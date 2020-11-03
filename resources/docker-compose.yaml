@@ -17,6 +17,7 @@ services:
       - ./resources/pilot/conf:/home/wso2/conf
     ports:
       - "18000:18000" 
+      - "9095:9095"
   filterchain:
     image: vsalaka/mg-filter-chain:3.2.1-SNAPSHOT
     ports:
