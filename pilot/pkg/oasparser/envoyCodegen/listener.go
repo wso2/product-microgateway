@@ -23,6 +23,7 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	envoy_config_filter_accesslog_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/file/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
+	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
 	"github.com/golang/protobuf/ptypes"
@@ -55,13 +56,46 @@ func CreateListener(listenerName string, routeConfigName string, vHostP routev3.
 	}
 	listenerFilters := createListenerFilters(routeConfigName, vHostP)
 
+	tlsCert := tlsv3.TlsCertificate{
+		PrivateKey: &corev3.DataSource{
+			Specifier: &corev3.DataSource_Filename{
+				Filename: "/certs/tls/localhost.key",
+			},
+		},
+		CertificateChain: &corev3.DataSource{
+			Specifier: &corev3.DataSource_Filename{
+				Filename: "/certs/tls/localhost.pem",
+			},
+		},
+	}
+
+	//TODO: (VirajSalaka) Make it configurable via SDS
+	tlsFilter := &tlsv3.DownstreamTlsContext{
+		CommonTlsContext: &tlsv3.CommonTlsContext{
+			//TlsCertificateSdsSecretConfigs
+			TlsCertificates: []*tlsv3.TlsCertificate{&tlsCert},
+		},
+	}
+
+	marshalledTlsFilter, err := ptypes.MarshalAny(tlsFilter)
+	if err != nil {
+		panic(err)
+	}
+
 	listener := listenerv3.Listener{
 		Name: listenerName,
 		Address: &corev3.Address{
 			Address: listenerAddress,
 		},
 		FilterChains: []*listenerv3.FilterChain{{
-			Filters: listenerFilters},
+			Filters: listenerFilters,
+			TransportSocket: &corev3.TransportSocket{
+				Name: "envoy.transport_sockets.tls",
+				ConfigType: &corev3.TransportSocket_TypedConfig{
+					TypedConfig: marshalledTlsFilter,
+				},
+			},
+		},
 		},
 	}
 	return listener
@@ -132,15 +166,50 @@ func CreateListenerWithRds(listenerName string) listenerv3.Listener {
 		},
 	}
 
+	tlsCert := tlsv3.TlsCertificate{
+		PrivateKey: &corev3.DataSource{
+			Specifier: &corev3.DataSource_Filename{
+				Filename: "/certs/tls/localhost.key",
+			},
+		},
+		CertificateChain: &corev3.DataSource{
+			Specifier: &corev3.DataSource_Filename{
+				Filename: "/certs/tls/localhost.pem",
+			},
+		},
+	}
+
+	//TODO: (VirajSalaka) Make it configurable via SDS
+	tlsFilter := &tlsv3.DownstreamTlsContext{
+		CommonTlsContext: &tlsv3.CommonTlsContext{
+			//TlsCertificateSdsSecretConfigs
+			TlsCertificates: []*tlsv3.TlsCertificate{&tlsCert},
+		},
+	}
+
+	marshalledTlsFilter, err := ptypes.MarshalAny(tlsFilter)
+	if err != nil {
+		panic(err)
+	}
+
 	listener := listenerv3.Listener{
 		Name: listenerName,
 		Address: &corev3.Address{
 			Address: listenerAddress,
 		},
 		FilterChains: []*listenerv3.FilterChain{{
-			Filters: filters},
+			Filters: filters,
+			TransportSocket: &corev3.TransportSocket{
+				Name: "envoy.transport_sockets.tls",
+				ConfigType: &corev3.TransportSocket_TypedConfig{
+					TypedConfig: marshalledTlsFilter,
+				},
+			},
+		},
 		},
 	}
+	logger.LoggerOasparser.Errorf("Listener \n %\n", listener)
+	logger.LoggerXds.Errorf("Listener \n %\n", listener)
 	return listener
 }
 
@@ -149,7 +218,7 @@ func CreateListenerWithRds(listenerName string) listenerv3.Listener {
  *
  * @param routeConfigName   Name of the route config
  * @param vHost  Virtual host
- * @return []*listenerv2.Filter  Listener filters as a array
+ * @return []*listenerv3.Filter  Listener filters as a array
  */
 func createListenerFilters(routeConfigName string, vHost routev3.VirtualHost) []*listenerv3.Filter {
 	var filters []*listenerv3.Filter
