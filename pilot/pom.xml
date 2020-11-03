@@ -79,7 +79,7 @@
                   <images>
                     <image>
                         <alias>mg-control-plane</alias>
-                        <name>vsalaka/mg-control-plane:${project.version}</name>
+                        <name>wso2am/pilot:${project.version}</name>
                       <build>
                         <contextDir>${project.basedir}/src/main/resources</contextDir>
                         <assembly>
