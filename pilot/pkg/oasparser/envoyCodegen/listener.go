@@ -17,6 +17,8 @@
 package envoyCodegen
 
 import (
+	"io/ioutil"
+
 	access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
@@ -30,76 +32,6 @@ import (
 	"github.com/wso2/micro-gw/configs"
 	logger "github.com/wso2/micro-gw/loggers"
 )
-
-/**
- * Create a listener for envoy.
- *
- * @param listenerName   Name of the listener
- * @param routeConfigName   Name of the route config
- * @param vHostP  Virtual host
- * @return v2.Listener  V2 listener instance
- */
-func CreateListener(listenerName string, routeConfigName string, vHostP routev3.VirtualHost) listenerv3.Listener {
-	conf, errReadConfig := configs.ReadConfigs()
-	if errReadConfig != nil {
-		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
-	}
-
-	listenerAddress := &corev3.Address_SocketAddress{
-		SocketAddress: &corev3.SocketAddress{
-			Protocol: corev3.SocketAddress_TCP,
-			Address:  conf.Envoy.ListenerAddress,
-			PortSpecifier: &corev3.SocketAddress_PortValue{
-				PortValue: conf.Envoy.ListenerPort,
-			},
-		},
-	}
-	listenerFilters := createListenerFilters(routeConfigName, vHostP)
-
-	tlsCert := tlsv3.TlsCertificate{
-		PrivateKey: &corev3.DataSource{
-			Specifier: &corev3.DataSource_Filename{
-				Filename: "/certs/tls/localhost.key",
-			},
-		},
-		CertificateChain: &corev3.DataSource{
-			Specifier: &corev3.DataSource_Filename{
-				Filename: "/certs/tls/localhost.pem",
-			},
-		},
-	}
-
-	//TODO: (VirajSalaka) Make it configurable via SDS
-	tlsFilter := &tlsv3.DownstreamTlsContext{
-		CommonTlsContext: &tlsv3.CommonTlsContext{
-			//TlsCertificateSdsSecretConfigs
-			TlsCertificates: []*tlsv3.TlsCertificate{&tlsCert},
-		},
-	}
-
-	marshalledTlsFilter, err := ptypes.MarshalAny(tlsFilter)
-	if err != nil {
-		panic(err)
-	}
-
-	listener := listenerv3.Listener{
-		Name: listenerName,
-		Address: &corev3.Address{
-			Address: listenerAddress,
-		},
-		FilterChains: []*listenerv3.FilterChain{{
-			Filters: listenerFilters,
-			TransportSocket: &corev3.TransportSocket{
-				Name: "envoy.transport_sockets.tls",
-				ConfigType: &corev3.TransportSocket_TypedConfig{
-					TypedConfig: marshalledTlsFilter,
-				},
-			},
-		},
-		},
-	}
-	return listener
-}
 
 func CreateRoutesConfigForRds(vHost routev3.VirtualHost) routev3.RouteConfiguration {
 	//TODO: (VirajSalaka) Do we need a custom config here
@@ -165,20 +97,10 @@ func CreateListenerWithRds(listenerName string) listenerv3.Listener {
 			},
 		},
 	}
-
-	tlsCert := tlsv3.TlsCertificate{
-		PrivateKey: &corev3.DataSource{
-			Specifier: &corev3.DataSource_Filename{
-				Filename: "/certs/tls/localhost.key",
-			},
-		},
-		CertificateChain: &corev3.DataSource{
-			Specifier: &corev3.DataSource_Filename{
-				Filename: "/certs/tls/localhost.pem",
-			},
-		},
+	tlsCert, err := generateTlsCert(conf.Envoy.ListenerKeyPath, conf.Envoy.ListenerCertPath)
+	if err != nil {
+		panic(err)
 	}
-
 	//TODO: (VirajSalaka) Make it configurable via SDS
 	tlsFilter := &tlsv3.DownstreamTlsContext{
 		CommonTlsContext: &tlsv3.CommonTlsContext{
@@ -350,4 +272,53 @@ func getAccessLogConfigs() access_logv3.AccessLog {
 	}
 
 	return access_logs
+}
+
+//TODO: (VirajSalaka) Still the following method is not utilized as Sds is not implement. Keeping the Implementation for future reference
+func generateDefaultSdsSecretFromConfigfile(privateKeyPath string, pulicKeyPath string) (tlsv3.Secret, error) {
+	var secret tlsv3.Secret
+	tlsCert, err := generateTlsCert(privateKeyPath, pulicKeyPath)
+	if err != nil {
+		return secret, err
+	}
+	secret = tlsv3.Secret{
+		Name: "DefaultListenerSecret",
+		Type: &tlsv3.Secret_TlsCertificate{
+			TlsCertificate: &tlsCert,
+		},
+	}
+	return secret, nil
+}
+
+func generateTlsCert(privateKeyPath string, publicKeyPath string) (tlsv3.TlsCertificate, error) {
+	var tlsCert tlsv3.TlsCertificate
+	privateKeyByteArray, err := readFileAsByteArray(privateKeyPath)
+	if err != nil {
+		return tlsCert, err
+	}
+	publicKeyByteArray, err := readFileAsByteArray(publicKeyPath)
+	if err != nil {
+		return tlsCert, err
+	}
+	tlsCert = tlsv3.TlsCertificate{
+		PrivateKey: &corev3.DataSource{
+			Specifier: &corev3.DataSource_InlineBytes{
+				InlineBytes: privateKeyByteArray,
+			},
+		},
+		CertificateChain: &corev3.DataSource{
+			Specifier: &corev3.DataSource_InlineBytes{
+				InlineBytes: publicKeyByteArray,
+			},
+		},
+	}
+	return tlsCert, nil
+}
+
+func readFileAsByteArray(filepath string) ([]byte, error) {
+	content, readErr := ioutil.ReadFile(filepath)
+	if readErr != nil {
+		logger.LoggerOasparser.Errorf("Error reading File : %v ", filepath, readErr)
+	}
+	return content, readErr
 }

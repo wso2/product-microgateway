@@ -160,7 +160,7 @@
                   <images>
                     <image>
                         <alias>filter-core</alias>
-                        <name>vsalaka/mg-filter-chain:${project.version}</name>
+                        <name>wso2am/mg-filter-chain:${project.version}</name>
                       <build>
                         <contextDir>${project.basedir}/src/main/resources</contextDir>
                         <args>

@@ -12,5 +12,5 @@ listenerAddress = "0.0.0.0"
 listenerPort = 10000
 apiDefaultPort = 8080
 clusterTimeoutInSeconds = 20
-
-  
+listenerCertPath = "/home/wso2/certs/localhost.pem"
+listenerKeyPath = "/home/wso2/certs/localhost.key"

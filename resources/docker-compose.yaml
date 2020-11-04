@@ -4,7 +4,6 @@ services:
     image: envoyproxy/envoy:v1.16.0
     volumes:
       - ./resources/proxy/envoy.yaml:/etc/envoy/envoy.yaml
-      - ./resources/pilot/certs:/certs/tls
     ports:
       - "10000:10000"
       - "9000:9000"
@@ -20,6 +19,6 @@ services:
       - "18000:18000" 
       - "9095:9095"
   filterchain:
-    image: vsalaka/mg-filter-chain:3.2.1-SNAPSHOT
+    image: wso2am/mg-filter-chain:3.2.1-SNAPSHOT
     ports:
       - "8081:8081"   

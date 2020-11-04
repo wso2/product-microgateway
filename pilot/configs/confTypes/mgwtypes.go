@@ -75,5 +75,7 @@ type Config struct {
 		ListenerPort            uint32
 		ApiDefaultPort          uint32
 		ClusterTimeoutInSeconds time.Duration
+		ListenerCertPath        string
+		ListenerKeyPath         string
 	}
 }
