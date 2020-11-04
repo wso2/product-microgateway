@@ -19,6 +19,7 @@ package configs
 import (
 	"io/ioutil"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/BurntSushi/toml"
@@ -27,11 +28,17 @@ import (
 )
 
 var (
-	once_c     sync.Once
-	once_lc    sync.Once
-	configs    *config.Config
-	logConfigs *config.LogConfig
-	e          error
+	onceConfigRead    sync.Once
+	onceLogConfigRead sync.Once
+	onceGetMgwHome    sync.Once
+	configs           *config.Config
+	logConfigs        *config.LogConfig
+	mgwHome           string
+	e                 error
+)
+
+const (
+	mgwHomeEnvVariable = "MGW_HOME"
 )
 
 /**
@@ -41,9 +48,10 @@ var (
  * @return *error Error
  */
 func ReadConfigs() (*config.Config, error) {
-	once_c.Do(func() {
+	onceConfigRead.Do(func() {
 		configs = new(config.Config)
-		mgwHome, _ := os.Getwd()
+		getMgwHome()
+
 		// logger.Info("MGW_HOME: ", mgwHome)
 		_, err := os.Stat(mgwHome + "/conf/config.toml")
 		if err != nil {
@@ -66,9 +74,9 @@ func ReadConfigs() (*config.Config, error) {
  * @return *error Error
  */
 func ReadLogConfigs() (*config.LogConfig, error) {
-	once_lc.Do(func() {
+	onceLogConfigRead.Do(func() {
 		logConfigs = new(config.LogConfig)
-		mgwHome, _ := os.Getwd()
+		getMgwHome()
 		//TODO: (VirajSalaka) Provide path properly
 		_, err := os.Stat(mgwHome + "/conf/log_config.toml")
 		if err != nil {
@@ -90,5 +98,14 @@ func ReadLogConfigs() (*config.LogConfig, error) {
  *
  */
 func ClearLogConfigInstance() {
-	once_lc = sync.Once{}
+	onceLogConfigRead = sync.Once{}
+}
+
+func getMgwHome() {
+	onceGetMgwHome.Do(func() {
+		mgwHome = os.Getenv(mgwHomeEnvVariable)
+		if len(strings.TrimSpace(mgwHome)) == 0 {
+			mgwHome, _ = os.Getwd()
+		}
+	})
 }
