@@ -18,12 +18,15 @@
 package envoyCodegen
 
 import (
+	"io/ioutil"
 	"strings"
 	"testing"
 
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/micro-gw/configs"
+	mgwconfig "github.com/wso2/micro-gw/configs/confTypes"
 	"github.com/wso2/micro-gw/pkg/oasparser/models/apiDefinition"
 )
 
@@ -111,4 +114,55 @@ func TestCreateRoute(t *testing.T) {
 	assert.Equal(t, generatedRouteWithoutXWso2BasePath.Action, expctedRouteActionWithoutXWso2BasePath,
 		"Route generation mismatch when xWso2BasePath option is provided")
 
+}
+
+func TestCreateListener(t *testing.T) {
+	var listenerPort uint32
+	listenerPort = 10001
+	listenerAddress := "test.com"
+
+	config := new(mgwconfig.Config)
+	config.Envoy.ListenerPort = listenerPort
+	config.Envoy.ListenerAddress = listenerAddress
+	config.Envoy.ListenerTlsEnabled = true
+	config.Envoy.ListenerCertPath = configs.GetMgwHome() + "/certs/localhost.pem"
+	config.Envoy.ListenerKeyPath = configs.GetMgwHome() + "/certs/localhost.key"
+
+	tlsEnabledListener := createListener(config, "test-id")
+
+	assert.NotNil(t, tlsEnabledListener, "The TLS Enabled Listener configuration should not be null")
+
+	assert.NotNil(t, tlsEnabledListener.Address.GetSocketAddress().Address, "The socket address of the listener should not be null")
+	assert.Equal(t, tlsEnabledListener.Address.GetSocketAddress().Address, listenerAddress,
+		"The assigned socket address of the listener is incorrect")
+
+	assert.NotNil(t, tlsEnabledListener.Address.GetSocketAddress().GetPortValue(), "The socket's port value of the listener should not be null")
+	assert.Equal(t, tlsEnabledListener.Address.GetSocketAddress().GetPortValue(), listenerPort,
+		"The assigned socket port of the listener is incorrect")
+
+	assert.NotNil(t, tlsEnabledListener.FilterChains[0].TransportSocket, "Transport Socket configuration should not be null")
+
+	config.Envoy.ListenerTlsEnabled = false
+	tlsDisabledListener := createListener(config, "test-id")
+
+	assert.NotNil(t, tlsDisabledListener, "The TLS Enabled Listener configuration should not be null")
+	assert.Nil(t, tlsDisabledListener.FilterChains[0].TransportSocket, "Transport Socket configuration should be null")
+}
+
+func TestGenerateTlsCert(t *testing.T) {
+	publicKeyPath := configs.GetMgwHome() + "/certs/localhost.pem"
+	privateKeyPath := configs.GetMgwHome() + "/certs/localhost.key"
+
+	tlsCert, _ := generateTlsCert(privateKeyPath, publicKeyPath)
+
+	assert.NotNil(t, tlsCert, "TLS Certificate should not be null")
+
+	privateKeyByteArray, _ := ioutil.ReadFile(privateKeyPath)
+	publicKeyByteArray, _ := ioutil.ReadFile(publicKeyPath)
+
+	assert.NotNil(t, tlsCert.GetPrivateKey(), "Private Key should not be null in the TLS certificate")
+	assert.NotNil(t, tlsCert.GetCertificateChain(), "Certificate chain should not be null in the TLS certificate")
+
+	assert.Equal(t, tlsCert.GetPrivateKey().GetInlineBytes(), privateKeyByteArray, "Private Key Value mismatch in the TLS Certificate")
+	assert.Equal(t, tlsCert.GetCertificateChain().GetInlineBytes(), publicKeyByteArray, "Certificate Chain Value mismatch in the TLS Certificate")
 }

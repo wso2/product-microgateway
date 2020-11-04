@@ -30,6 +30,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/micro-gw/configs"
+	mgwconfig "github.com/wso2/micro-gw/configs/confTypes"
 	logger "github.com/wso2/micro-gw/loggers"
 )
 
@@ -45,16 +46,18 @@ func CreateRoutesConfigForRds(vHost routev3.VirtualHost) routev3.RouteConfigurat
 }
 
 func CreateListenerWithRds(listenerName string) listenerv3.Listener {
-	//TODO: (VirajSalaka) avoid duplicate functions
-	httpFilters := getHttpFilters()
-	accessLogs := getAccessLogConfigs()
 	conf, errReadConfig := configs.ReadConfigs()
-	var filters []*listenerv3.Filter
-
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}
-	//Implemented such that RDS is used
+	return createListener(conf, listenerName)
+}
+
+func createListener(conf *mgwconfig.Config, listenerName string) listenerv3.Listener {
+	httpFilters := getHttpFilters()
+	accessLogs := getAccessLogConfigs()
+	var filters []*listenerv3.Filter
+
 	manager := &hcmv3.HttpConnectionManager{
 		CodecType:  hcmv3.HttpConnectionManager_AUTO,
 		StatPrefix: "ingress_http",
@@ -137,7 +140,6 @@ func CreateListenerWithRds(listenerName string) listenerv3.Listener {
 		// At the moment, the listener as only one filter chain
 		listener.FilterChains[0].TransportSocket = transportSocket
 	}
-	logger.LoggerOasparser.Errorf("Listener \n %\n", listener)
 	return listener
 }
 
@@ -324,7 +326,7 @@ func generateTlsCert(privateKeyPath string, publicKeyPath string) (tlsv3.TlsCert
 func readFileAsByteArray(filepath string) ([]byte, error) {
 	content, readErr := ioutil.ReadFile(filepath)
 	if readErr != nil {
-		logger.LoggerOasparser.Errorf("Error reading File : %v ", filepath, readErr)
+		logger.LoggerOasparser.Errorf("Error reading File : %v , %v", filepath, readErr)
 	}
 	return content, readErr
 }

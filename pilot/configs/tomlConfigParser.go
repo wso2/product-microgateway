@@ -50,9 +50,7 @@ const (
 func ReadConfigs() (*config.Config, error) {
 	onceConfigRead.Do(func() {
 		configs = new(config.Config)
-		getMgwHome()
-
-		// logger.Info("MGW_HOME: ", mgwHome)
+		GetMgwHome()
 		_, err := os.Stat(mgwHome + "/conf/config.toml")
 		if err != nil {
 			logger.Fatal("Configuration file not found.", err)
@@ -76,8 +74,7 @@ func ReadConfigs() (*config.Config, error) {
 func ReadLogConfigs() (*config.LogConfig, error) {
 	onceLogConfigRead.Do(func() {
 		logConfigs = new(config.LogConfig)
-		getMgwHome()
-		//TODO: (VirajSalaka) Provide path properly
+		GetMgwHome()
 		_, err := os.Stat(mgwHome + "/conf/log_config.toml")
 		if err != nil {
 			logger.Fatal("Log configuration file not found.", err)
@@ -101,11 +98,18 @@ func ClearLogConfigInstance() {
 	onceLogConfigRead = sync.Once{}
 }
 
-func getMgwHome() {
+/**
+* Get the directory where the relevenat directory structure (including configuration, certificates etc.)
+* as Env variable.
+* If the env variable is not present, the directory from which the executable is triggered will be assigned.
+* This functionality is required to run the unit tests.
+ */
+func GetMgwHome() string {
 	onceGetMgwHome.Do(func() {
 		mgwHome = os.Getenv(mgwHomeEnvVariable)
 		if len(strings.TrimSpace(mgwHome)) == 0 {
 			mgwHome, _ = os.Getwd()
 		}
 	})
+	return mgwHome
 }
