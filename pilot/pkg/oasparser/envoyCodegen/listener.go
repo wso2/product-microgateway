@@ -97,22 +97,6 @@ func CreateListenerWithRds(listenerName string) listenerv3.Listener {
 			},
 		},
 	}
-	tlsCert, err := generateTlsCert(conf.Envoy.ListenerKeyPath, conf.Envoy.ListenerCertPath)
-	if err != nil {
-		panic(err)
-	}
-	//TODO: (VirajSalaka) Make it configurable via SDS
-	tlsFilter := &tlsv3.DownstreamTlsContext{
-		CommonTlsContext: &tlsv3.CommonTlsContext{
-			//TlsCertificateSdsSecretConfigs
-			TlsCertificates: []*tlsv3.TlsCertificate{&tlsCert},
-		},
-	}
-
-	marshalledTlsFilter, err := ptypes.MarshalAny(tlsFilter)
-	if err != nil {
-		panic(err)
-	}
 
 	listener := listenerv3.Listener{
 		Name: listenerName,
@@ -121,17 +105,39 @@ func CreateListenerWithRds(listenerName string) listenerv3.Listener {
 		},
 		FilterChains: []*listenerv3.FilterChain{{
 			Filters: filters,
-			TransportSocket: &corev3.TransportSocket{
-				Name: "envoy.transport_sockets.tls",
-				ConfigType: &corev3.TransportSocket_TypedConfig{
-					TypedConfig: marshalledTlsFilter,
-				},
-			},
 		},
 		},
 	}
+
+	if conf.Envoy.ListenerTlsEnabled {
+		tlsCert, err := generateTlsCert(conf.Envoy.ListenerKeyPath, conf.Envoy.ListenerCertPath)
+		if err != nil {
+			panic(err)
+		}
+		//TODO: (VirajSalaka) Make it configurable via SDS
+		tlsFilter := &tlsv3.DownstreamTlsContext{
+			CommonTlsContext: &tlsv3.CommonTlsContext{
+				//TlsCertificateSdsSecretConfigs
+				TlsCertificates: []*tlsv3.TlsCertificate{&tlsCert},
+			},
+		}
+
+		marshalledTlsFilter, err := ptypes.MarshalAny(tlsFilter)
+		if err != nil {
+			panic(err)
+		}
+
+		transportSocket := &corev3.TransportSocket{
+			Name: "envoy.transport_sockets.tls",
+			ConfigType: &corev3.TransportSocket_TypedConfig{
+				TypedConfig: marshalledTlsFilter,
+			},
+		}
+
+		// At the moment, the listener as only one filter chain
+		listener.FilterChains[0].TransportSocket = transportSocket
+	}
 	logger.LoggerOasparser.Errorf("Listener \n %\n", listener)
-	logger.LoggerXds.Errorf("Listener \n %\n", listener)
 	return listener
 }
 

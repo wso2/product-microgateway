@@ -77,5 +77,6 @@ type Config struct {
 		ClusterTimeoutInSeconds time.Duration
 		ListenerCertPath        string
 		ListenerKeyPath         string
+		ListenerTlsEnabled      bool
 	}
 }
