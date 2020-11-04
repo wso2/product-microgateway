@@ -15,10 +15,17 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-# TODO: (VirajSalaka) Run unit tests prior to the build
+export MGW_HOME=${PWD}/../resources
 GOOS=linux GOARCH=amd64 go build -v -o target/micro-gw-ubuntu main.go
 if [ $? -ne 0 ] 
 then
-  echo "FAILED"
+  echo "FAILED: Build failure"
+  exit 1
+fi  
+
+go test ./...
+if [ $? -ne 0 ] 
+then
+  echo "FAILED: Unit tests failure"
   exit 1
 fi  

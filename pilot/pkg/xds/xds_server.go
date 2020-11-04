@@ -104,7 +104,7 @@ func UpdateEnvoyByteArr(byteArr []byte) {
 		if ok {
 			if reflect.DeepEqual(openAPIV3Struct, existingOpenAPI) {
 				//Works as the openAPI already contains the label feature.
-				logger.LoggerXds.Info("No changes to apply for the OpenAPI key : %v", apiMapKey)
+				logger.LoggerXds.Infof("No changes to apply for the OpenAPI key : %v", apiMapKey)
 				return
 			}
 		}
@@ -121,7 +121,7 @@ func UpdateEnvoyByteArr(byteArr []byte) {
 		if ok {
 			if reflect.DeepEqual(openAPIV2Struct, existingOpenAPI) {
 				//Works as the openAPI already contains the label feature.
-				logger.LoggerXds.Info("No changes to apply for the OpenAPI key : %v", apiMapKey)
+				logger.LoggerXds.Infof("No changes to apply for the OpenAPI key : %v", apiMapKey)
 				return
 			}
 		}
