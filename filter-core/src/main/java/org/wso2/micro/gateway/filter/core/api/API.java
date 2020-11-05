@@ -17,6 +17,7 @@
  */
 package org.wso2.micro.gateway.filter.core.api;
 
+import io.envoyproxy.envoy.service.auth.v2.CheckRequest;
 import org.wso2.micro.gateway.filter.core.Filter;
 import org.wso2.micro.gateway.filter.core.api.config.APIConfig;
 
@@ -29,7 +30,7 @@ public interface API {
 
     List<Filter> getFilters();
 
-    String init(Object apiDefinition);
+    String init(CheckRequest request);
 
     ResponseObject process(RequestContext requestContext);
 

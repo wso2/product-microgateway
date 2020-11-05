@@ -25,7 +25,6 @@ import org.wso2.micro.gateway.filter.core.api.APIFactory;
 import org.wso2.micro.gateway.filter.core.api.RequestContext;
 import org.wso2.micro.gateway.filter.core.api.ResponseObject;
 import org.wso2.micro.gateway.filter.core.api.config.ResourceConfig;
-import org.wso2.micro.gateway.filter.core.constants.APIConstants;
 
 import java.util.Map;
 
@@ -35,10 +34,7 @@ import java.util.Map;
 public class RequestHandler {
 
     public ResponseObject process(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
-        String requestPath = request.getAttributes().getRequest().getHttp().getPath();
-        String basePath = request.getAttributes().getContextExtensionsMap().get(APIConstants.BASE_PATH_PARAM);
-
-        API matchedAPI = APIFactory.getInstance().getMatchedAPI(basePath, requestPath);
+        API matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
         RequestContext requestContext = buildRequestContext(matchedAPI, request);
         return matchedAPI.process(requestContext);
 
@@ -47,10 +43,11 @@ public class RequestHandler {
     private RequestContext buildRequestContext(API api, CheckRequest request) {
         String requestPath = request.getAttributes().getRequest().getHttp().getPath();
         String method = request.getAttributes().getRequest().getHttp().getMethod();
-        String matchedResource = request.getAttributes().getContextExtensionsMap().get(
-                APIConstants.RESOURCE_PATH_PARAMETER);
         Map<String, String> headers = request.getAttributes().getRequest().getHttp().getHeadersMap();
-        ResourceConfig resourceConfig = APIFactory.getInstance().getMatchedResource(api, matchedResource, method);
+
+        // When retrieving matched resource based on the check request, theres only one resource available in the
+        // apiConfig.resources. Therefore picking the first one.
+        ResourceConfig resourceConfig = api.getAPIConfig().getResources().get(0);
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api).headers(headers).build();
     }
