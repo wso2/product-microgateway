@@ -19,6 +19,7 @@ pushd filter-core
 mvn clean install
 popd
 
+rm -rf target/
 GOOS=linux GOARCH=amd64 go build -v -o target/micro-gw-ubuntu main.go
 
 cd docker/with-external-build

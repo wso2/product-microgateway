@@ -65,7 +65,7 @@ func setOperationOpenApi(path string, pathtype string, operation *openapi3.Opera
 	if operation != nil {
 		resource = Resource{
 			path:     path,
-			pathtype: pathtype,
+			method:   pathtype,
 			iD:       operation.OperationID,
 			summary:  operation.Summary,
 			description: operation.Description,

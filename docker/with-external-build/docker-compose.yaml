@@ -21,7 +21,7 @@ services:
       dockerfile: docker/with-external-build/control-plane/Dockerfile
     volumes:  
       - ./../../resources/:/home/ubuntu/resources/
-      - ./../../target/micro-gw-ubuntu:/home/ubuntu/micro-gw-ubuntu
+      - ./../../target/:/home/ubuntu/pilot/
     ports:
       - "18000:18000" 
   filterchain:
