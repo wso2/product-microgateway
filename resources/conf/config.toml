@@ -4,8 +4,8 @@ ip = "0.0.0.0"
 port = "9095"
 publicKeyPath = "/home/wso2/certs/localhost.pem"
 privateKeyPath = "/home/wso2/certs/localhost.key"
-username = "foo"
-password = "bar"
+username = "admin"
+password = "admin"
 
 [envoy]
 listenerAddress = "0.0.0.0"
