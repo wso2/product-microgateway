@@ -31,24 +31,20 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.filter.core.auth.APIKeyValidationInfoDTO;
-import org.wso2.micro.gateway.filter.core.auth.AuthenticationContext;
-import org.wso2.micro.gateway.filter.core.auth.jwt.JWTValidationInfo;
 import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
 import org.wso2.micro.gateway.filter.core.constants.APIConstants;
+import org.wso2.micro.gateway.filter.core.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.filter.core.exception.MGWException;
+import org.wso2.micro.gateway.filter.core.security.AuthenticationContext;
+import org.wso2.micro.gateway.filter.core.security.jwt.JWTValidationInfo;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 
 import javax.net.ssl.SSLContext;
-
 /**
  * Common set of utility methods used by the filter core component.
  */
@@ -73,7 +69,7 @@ public class FilterUtils {
         Certificate publicCert = null;
         //Read the client-truststore.jks into a KeyStore
         try {
-            KeyStore trustStore = ReferenceHolder.getInstance().getTrustStore();
+            KeyStore trustStore = ReferenceHolder.getInstance().getMGWConfiguration().getTrustStore();
             if (trustStore != null) {
                 // Read public certificate from trust store
                 publicCert = trustStore.getCertificate(certAlias);
@@ -137,12 +133,8 @@ public class FilterUtils {
 
     private static SSLConnectionSocketFactory createSocketFactory() throws MGWException {
         SSLContext sslContext;
-
-        String keyStorePath = "/home/ubuntu/security"; ///TODO : Read from config
-        String keyStorePassword = "wso2carbon"; //TODO : Read from config
         try {
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
+            KeyStore trustStore = ReferenceHolder.getInstance().getMGWConfiguration().getTrustStore();
             sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
 
             X509HostnameVerifier hostnameVerifier;
@@ -159,14 +151,10 @@ public class FilterUtils {
             return new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
         } catch (KeyStoreException e) {
             handleException("Failed to read from Key Store", e);
-        } catch (IOException e) {
-            handleException("Key Store not found in " + keyStorePath, e);
-        } catch (CertificateException e) {
-            handleException("Failed to read Certificate", e);
         } catch (NoSuchAlgorithmException e) {
-            handleException("Failed to load Key Store from " + keyStorePath, e);
+            handleException("Failed to initialize sslContext. ", e);
         } catch (KeyManagementException e) {
-            handleException("Failed to load key from" + keyStorePath, e);
+            handleException("Failed to initialize sslContext ", e);
         }
 
         return null;
