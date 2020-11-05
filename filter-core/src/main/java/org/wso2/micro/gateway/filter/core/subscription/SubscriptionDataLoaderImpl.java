@@ -27,6 +27,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
+import org.wso2.micro.gateway.filter.core.config.MGWConfiguration;
 import org.wso2.micro.gateway.filter.core.constants.APIConstants;
 import org.wso2.micro.gateway.filter.core.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.filter.core.exception.DataLoadingException;
@@ -65,15 +67,8 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     public static final String UTF8 = "UTF-8";
 
     public SubscriptionDataLoaderImpl() {
-
-//        this.eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
-//                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-//                .getEventHubConfigurationDto();
-        this.eventHubConfigurationDto = new EventHubConfigurationDto();
-        this.eventHubConfigurationDto.setServiceUrl("https://localhost:9443");
-        this.eventHubConfigurationDto.setEnabled(true);
-        this.eventHubConfigurationDto.setUsername("admin");
-        this.eventHubConfigurationDto.setPassword("admin".toCharArray());
+        MGWConfiguration config = ReferenceHolder.getInstance().getMGWConfiguration();
+        this.eventHubConfigurationDto = config.getEventHubConfiguration();
     }
 
     @Override

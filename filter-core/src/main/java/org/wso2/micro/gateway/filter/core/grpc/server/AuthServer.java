@@ -66,7 +66,7 @@ public class AuthServer {
 
         // Load configurations
         KeyManagerDataService keyManagerDataService = new KeyManagerDataServiceImpl();
-        MGWConfiguration mgwConfiguration = new MGWConfiguration();
+        MGWConfiguration mgwConfiguration = MGWConfiguration.getInstance();
         ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
         ReferenceHolder.getInstance().setMGWConfiguration(mgwConfiguration);
         //TODO: Add API is only for testing this has to come via the rest API.

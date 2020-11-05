@@ -55,7 +55,7 @@ public class MGWConfiguration {
     private static EventHubConfigurationDto eventHubConfiguration;
     private static KeyStore trustStore = null;
 
-    public MGWConfiguration() throws MGWException {
+    private MGWConfiguration() throws MGWException {
         try {
             init();
         } catch (KeyStoreException e) {
