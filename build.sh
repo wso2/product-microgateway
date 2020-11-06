@@ -15,12 +15,23 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
+function exit_with_error() {
+    echo "BUILD FAILURE!"
+    exit 1
+}
+
 pushd filter-core
 mvn clean install
+if [ $? -ne 0 ]; then
+    exit_with_error
+fi
 popd
 
 rm -rf target/
 GOOS=linux GOARCH=amd64 go build -v -o target/micro-gw-ubuntu main.go
+if [ $? -ne 0 ]; then
+    exit_with_error
+fi
 
 cd docker/with-external-build
 docker-compose up
