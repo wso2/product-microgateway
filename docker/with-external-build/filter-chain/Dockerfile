@@ -15,6 +15,9 @@
 # -----------------------------------------------------------------------
 
 FROM adoptopenjdk:11.0.8_10-jre-hotspot-bionic
+ENV JAVA_OPTS=""
+ENV FILTER_HOME="/home/ubuntu/mg"
 
 COPY resources/client-truststore.jks /home/ubuntu/mg/security/
-CMD ["java", "-cp", "/home/ubuntu/mg/lib/*", "org.wso2.micro.gateway.filter.core.grpc.server.AuthServer"]
+COPY filter-core/src/main/resources/* /home/ubuntu/mg/conf/
+CMD java $JAVA_OPTS -cp "/home/ubuntu/mg/lib/*" org.wso2.micro.gateway.filter.core.grpc.server.AuthServer
