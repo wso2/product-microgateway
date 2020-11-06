@@ -76,7 +76,8 @@ public class MGWConfiguration {
      * Initialize the configuration provider class by reading the Mgw Configuration file.
      */
     private void init() throws KeyStoreException {
-        InputStream configFile = MGWConfiguration.class.getClassLoader().getResourceAsStream("mgw-config.toml");
+        String configFilePath = System.getProperty("mgw.home") + "/conf/mgw-config.toml";
+        File configFile = new File (configFilePath);
         configToml = new Toml().read(configFile);
 
         //Load Client Trust Store

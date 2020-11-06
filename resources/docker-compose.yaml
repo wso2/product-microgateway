@@ -20,5 +20,8 @@ services:
       - "9095:9095"
   filterchain:
     image: wso2am/mg-filter-chain:3.2.1-SNAPSHOT
+    volumes:  
+      - ./resources/filter-core/security:/home/wso2/security
+      - ./resources/filter-core/conf:/home/wso2/conf
     ports:
       - "8081:8081"   

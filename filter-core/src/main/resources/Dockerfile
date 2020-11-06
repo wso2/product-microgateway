@@ -28,6 +28,7 @@ ARG MG_USER_HOME=/home/${MGW_USER}
 
 ARG MG_VERSION=1.0-SNAPSHOT
 ENV VERSION=${MG_VERSION}
+ENV HOME_DIR=${MG_USER_HOME}
 
 ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\
@@ -47,4 +48,4 @@ USER ${MG_USER}
 
 COPY maven/ lib/
 # TODO: (VirajSalaka) Provide a shell script
-CMD ["java", "-cp", "lib/*", "org.wso2.micro.gateway.filter.core.grpc.server.AuthServer"]
+CMD java -Dmgw.home=${HOME_DIR} -cp "lib/*" org.wso2.micro.gateway.filter.core.grpc.server.AuthServer

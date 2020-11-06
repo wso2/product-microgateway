@@ -1,0 +1,65 @@
+#Key Store Configuration
+[keystore]
+location = "wso2carbon.jks"
+type = "jks"
+password = "wso2carbon"
+
+#Trust store configuration
+[truststore]
+location = "/home/wso2/security/client-truststore.jks"
+type = "jks"
+password = "wso2carbon"
+
+# JWT token authorization configurations. You can provide multiple JWT issuers
+# Issuer 1
+[[jwtTokenConfig]]
+    issuer = "https://localhost:9443/oauth2/token"
+    certificateAlias = "wso2carbon"
+    # URL of the JWKs endpoint
+    jwksURL = ""
+    # Validate subscribed APIs
+    validateSubscription = false
+    # The claim in which the consumer key of the application is coming
+    consumerKeyClaim = "azp"
+    #class name of JWT claims value mapper transformer if you need claims mapping.
+    claimMapperClassName = "org.wso2.micro.gateway.jwtTransformer.DefaultJwtTransformer"
+    # Remote User Claim Retrieval Enabled
+    remoteUserClaimRetrievalEnabled = false
+    # The key of remote claims and the local claims if you need claims mapping.
+    [[jwtTokenConfig.claims]]
+        remoteClaim = "scp"
+        localClaim = "scope"
+    [[jwtTokenConfig.claims]]
+        remoteClaim = "FName"
+        localClaim = "firstName"
+# Issuer 2
+[[jwtTokenConfig]]
+    issuer = "https://host:port/issuer"
+    audience = "http://org.wso2.apimgt/gateway"
+    certificateAlias = "alias"
+    # Validate subscribed APIs
+    validateSubscription = false
+    #class name of JWT claims value mapper transformer if you need claims mapping.
+    claimMapperClassName = "org.wso2.micro.gateway.jwtTransformer.customJwtTransformer"
+    # Remote User Claim Retrieval Enabled
+    remoteUserClaimRetrievalEnabled = false
+    # The key of remote claims and the local claims if you need claims mapping.
+    [[jwtTokenConfig.claims]]
+        remoteClaim = "scps"
+        localClaim = "scope"
+    [[jwtTokenConfig.claims]]
+        remoteClaim = "FN"
+        localClaim = "firstName"
+
+# Configurations for retrieving API and subscription data from API Manager.
+[apim.eventHub]
+    # Enable/ Disable the feature
+    enable = true
+    # The API Manager URL
+    serviceUrl = "https://localhost:9443/internal/data/v1/"
+    # User name and password of the internal data api.
+    username="admin"
+    password="admin"
+    # The message broker connection URL.
+    eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
+

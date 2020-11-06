@@ -89,7 +89,7 @@ public class AuthServer {
     }
 
     private static void addAPI() {
-        String apiPath = "/home/ubuntu/apis/";
+        String apiPath = "/home/wso2/apis/";
         try {
             Files.walk(Paths.get(apiPath)).filter(path -> {
                 Path fileName = path.getFileName();
