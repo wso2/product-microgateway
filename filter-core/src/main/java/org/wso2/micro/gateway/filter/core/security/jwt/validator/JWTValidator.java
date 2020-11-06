@@ -18,17 +18,10 @@
 
 package org.wso2.micro.gateway.filter.core.security.jwt.validator;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,23 +37,13 @@ import org.wso2.micro.gateway.filter.core.security.jwt.JWTUtil;
 import org.wso2.micro.gateway.filter.core.security.jwt.JWTValidationInfo;
 import org.wso2.micro.gateway.filter.core.security.jwt.SignedJWTInfo;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Class responsible to validate jwt. This should validate the JWT signature, expiry time.
@@ -68,31 +51,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class JWTValidator {
     private static final Logger logger = LogManager.getLogger(JWTValidator.class);
-
-    private RSAPublicKey publicKey;
-    private JWSVerifier jwsVerifier;
-    private String enableCache = System.getenv("ENVOY_GW_CACHE_ENABLE");
-    private LoadingCache<String, String> gatewayApiKeyCache = CacheBuilder.newBuilder()
-            .maximumSize(100)                                     // maximum 100 tokens can be cached
-            .expireAfterAccess(30, TimeUnit.MINUTES)      // cache will expire after 30 minutes of access
-            .build(new CacheLoader<String, String>() {            // build the cacheloader
-                @Override public String load(String s) throws Exception {
-                    return JWTConstants.UNAVAILABLE;
-                }
-
-            });
-    private LoadingCache<String, String> invalidGatewayApiKeyCache = CacheBuilder.newBuilder()
-            .maximumSize(100)                                     // maximum 100 tokens can be cached
-            .expireAfterAccess(30, TimeUnit.MINUTES)      // cache will expire after 30 minutes of access
-            .build(new CacheLoader<String, String>() {            // build the cacheloader
-                @Override public String load(String s) throws Exception {
-                    return JWTConstants.UNAVAILABLE;
-                }
-
-            });
-    Map<String, TokenIssuerDto> tokenIssuers;
-    TokenIssuerDto tokenIssuer;
-    JWTTransformer jwtTransformer;
+    private Map<String, TokenIssuerDto> tokenIssuers;
+    private TokenIssuerDto tokenIssuer;
+    private JWTTransformer jwtTransformer;
     private JWKSet jwkSet;
 
     public JWTValidator() {
@@ -102,13 +63,6 @@ public class JWTValidator {
     public void loadTokenIssuerConfiguration() {
         tokenIssuers = ReferenceHolder.getInstance().getMGWConfiguration().getJWTIssuers();
         this.jwtTransformer = new DefaultJWTTransformer();
-//      JWTTransformer jwtTransformer = ServiceReferenceHolder.getInstance().getJWTTransformer(tokenIssuer.getIssuer());
-//        if (jwtTransformer != null) {
-//            this.jwtTransformer = jwtTransformer;
-//        } else {
-//            this.jwtTransformer = new DefaultJWTTransformer();
-//        }
-//        this.jwtTransformer.loadConfiguration(tokenIssuer);
     }
 
     public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws MGWException {
@@ -223,93 +177,6 @@ public class JWTValidator {
 
         return jwtTransformer.transform(jwtClaimsSet);
     }
-
-    // validate the signature
-    private boolean validateSignature(String jwtToken, String signature) {
-        JWSHeader header;
-        JWTClaimsSet payload = null;
-        SignedJWT parsedJWTToken;
-        boolean isVerified = false;
-        try {
-            if (enableCache != null && enableCache.equals("true")) {
-                if (gatewayApiKeyCache.get(signature) != JWTConstants.UNAVAILABLE) {
-                    logger.debug("Api Key retrieved from the Api Key cache.");
-                    isVerified = true;
-                } else if (invalidGatewayApiKeyCache.get(signature) != JWTConstants.UNAVAILABLE) {
-                    logger.debug("Api Key retrieved from the invalid Api Key cache.");
-                    isVerified = false;
-                } else {
-                    logger.debug("Token is not available in the cache.");
-                    try {
-                        parsedJWTToken = (SignedJWT) JWTParser.parse(jwtToken);
-                        isVerified = verifyTokenSignature(parsedJWTToken);
-                        if (isVerified) {
-                            gatewayApiKeyCache.put(signature, JWTConstants.VALID);
-                        } else {
-                            invalidGatewayApiKeyCache.put(signature, JWTConstants.INVALID);
-                        }
-                    } catch (ParseException e) {
-                        logger.error("Invalid JWT token. Failed to decode the token.", e);
-                    }
-                }
-            } else {
-                try {
-                    parsedJWTToken = (SignedJWT) JWTParser.parse(jwtToken);
-                    isVerified = verifyTokenSignature(parsedJWTToken);
-                } catch (ParseException e) {
-                    logger.error("Invalid JWT token. Failed to decode the token.", e);
-                }
-            }
-        } catch (Exception e) {
-            //TODO: Remove catching the exception class.
-            logger.error(e);
-        }
-        return isVerified;
-    }
-
-    private boolean verifyTokenSignature(SignedJWT parsedJWTToken) {
-        boolean state = false;
-        if (publicKey == null) {
-            publicKey = readPublicKey();
-        }
-        if (publicKey != null) {
-            JWSAlgorithm algorithm = parsedJWTToken.getHeader().getAlgorithm();
-            if (algorithm != null && (JWSAlgorithm.RS256.equals(algorithm) || JWSAlgorithm.RS512.equals(algorithm)
-                    || JWSAlgorithm.RS384.equals(algorithm))) {
-                try {
-                    state = parsedJWTToken.verify(jwsVerifier);
-                } catch (JOSEException e) {
-                    logger.error(e);
-                }
-            }
-        }
-        return state;
-    }
-
-    private RSAPublicKey readPublicKey() {
-        try {
-            String strKeyPEM = "";
-            String fileName = "wso2carbon.pem";
-            InputStream inputStream = JWTValidator.class.getClassLoader().getResourceAsStream(fileName);
-            InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-            BufferedReader br = new BufferedReader(streamReader);
-            String line;
-            while ((line = br.readLine()) != null) {
-                strKeyPEM += line + "\n";
-            }
-            br.close();
-            strKeyPEM = strKeyPEM.replace(APIConstants.BEGIN_PUBLIC_KEY_STRING, "");
-            strKeyPEM = strKeyPEM.replaceAll(System.lineSeparator(), "");
-            strKeyPEM = strKeyPEM.replace(APIConstants.END_PUBLIC_KEY_STRING, "");
-            byte[] encoded = Base64.getDecoder().decode(strKeyPEM);
-            KeyFactory kf = KeyFactory.getInstance(JWTConstants.RSA);
-            publicKey = (RSAPublicKey) kf.generatePublic(new X509EncodedKeySpec(encoded));
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-            logger.error(e);
-        }
-        return publicKey;
-    }
-
 
     private void createJWTValidationInfoFromJWT(JWTValidationInfo jwtValidationInfo, JWTClaimsSet jwtClaimsSet)
             throws ParseException {
