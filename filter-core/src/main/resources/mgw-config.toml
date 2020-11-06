@@ -6,7 +6,7 @@ password = "wso2carbon"
 
 #Trust store configuration
 [truststore]
-location = "/home/ubuntu/client-truststore.jks"
+location = "/home/ubuntu/mg/security/client-truststore.jks"
 type = "jks"
 password = "wso2carbon"
 
@@ -56,10 +56,9 @@ password = "wso2carbon"
     # Enable/ Disable the feature
     enable = true
     # The API Manager URL
-    serviceUrl = "https://localhost:9443/internal/data/v1/"
+    serviceUrl = "https://localhost:9443/"
     # User name and password of the internal data api.
     username="admin"
     password="admin"
     # The message broker connection URL.
     eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
-
