@@ -30,17 +30,16 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.filter.core.api.APIFactory;
 import org.wso2.micro.gateway.filter.core.common.CacheProvider;
 import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
+import org.wso2.micro.gateway.filter.core.config.MGWConfiguration;
+import org.wso2.micro.gateway.filter.core.keymgt.KeyManagerDataService;
+import org.wso2.micro.gateway.filter.core.keymgt.KeyManagerDataServiceImpl;
+import org.wso2.micro.gateway.filter.core.listener.GatewayJMSMessageListener;
 import org.wso2.micro.gateway.filter.core.subscription.SubscriptionDataHolder;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -65,13 +64,24 @@ public class AuthServer {
                 .workerEventLoopGroup(workerGroup).addService(new ExtAuthService())
                 .channelType(NioServerSocketChannel.class).executor(executor).build();
 
-        // Start the server
-        server.start();
-        loadTrustStore();
-        logger.info("Sever started Listening in port : " + 8081);
+        // Load configurations
+        KeyManagerDataService keyManagerDataService = new KeyManagerDataServiceImpl();
+        MGWConfiguration mgwConfiguration = new MGWConfiguration();
+        ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
+        ReferenceHolder.getInstance().setMGWConfiguration(mgwConfiguration);
         //TODO: Add API is only for testing this has to come via the rest API.
         addAPI();
         CacheProvider.init();
+
+        // Start the server
+        server.start();
+        logger.info("Sever started Listening in port : " + 8081);
+
+        if (mgwConfiguration.getEventHubConfiguration().isEnabled()) {
+            logger.info("Event Hub configuration enabled... Starting JMS listener...");
+            GatewayJMSMessageListener.init(mgwConfiguration.getEventHubConfiguration());
+        }
+        //TODO: Get the tenant domain from config
         SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore("carbon.super");
 
         // Don't exit the main thread. Wait until server is terminated.
@@ -93,27 +103,4 @@ public class AuthServer {
             logger.error("Error while reading API files", e);
         }
     }
-
-    private static void loadTrustStore() {
-        String trustStorePassword = "wso2carbon";
-        String trustStoreLocation = "/Users/rajithroshan/Documents/APIM/product-microgateway/"
-                + "filter-core/src/main/resources/client-truststore.jks";
-        if (trustStoreLocation != null && trustStorePassword != null) {
-            try {
-                //TODO: Read truststore from file properly
-                InputStream inputStream = AuthServer.class.getClassLoader()
-                        .getResourceAsStream("client-truststore.jks");
-                KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                trustStore.load(inputStream, trustStorePassword.toCharArray());
-                //                CertificateReLoaderUtil.setLastUpdatedTimeStamp(trustStoreFile.lastModified());
-                //                CertificateReLoaderUtil.startCertificateReLoader();
-                ReferenceHolder.getInstance().setTrustStore(trustStore);
-            } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
-                logger.error("Error in loading trust store.", e);
-            }
-        } else {
-            logger.error("Error in loading trust store. Configurations are not set.");
-        }
-    }
 }
-

@@ -51,6 +51,9 @@ public class APIConstants {
     public static final String BEGIN_PUBLIC_KEY_STRING = "-----BEGIN PUBLIC KEY-----\n";
     public static final String END_PUBLIC_KEY_STRING = "-----END PUBLIC KEY-----";
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
+    public static final String EVENT_TYPE = "eventType";
+    public static final String EVENT_TIMESTAMP = "timestamp";
+    public static final String EVENT_PAYLOAD = "event";
 
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
@@ -129,6 +132,7 @@ public class APIConstants {
         public static final String PERMITTED_REFERER = "permittedReferer";
         public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
         public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
+
     }
 
     /**
@@ -148,5 +152,50 @@ public class APIConstants {
         private SubscriptionValidationResources() {
 
         }
+    }
+
+    /**
+     * Supported event types.
+     */
+    public enum EventType {
+        API_CREATE,
+        API_UPDATE,
+        API_DELETE,
+        API_LIFECYCLE_CHANGE,
+        APPLICATION_CREATE,
+        APPLICATION_UPDATE,
+        APPLICATION_DELETE,
+        APPLICATION_REGISTRATION_CREATE,
+        POLICY_CREATE,
+        POLICY_UPDATE,
+        POLICY_DELETE,
+        SUBSCRIPTIONS_CREATE,
+        SUBSCRIPTIONS_UPDATE,
+        SUBSCRIPTIONS_DELETE,
+        SCOPE_CREATE,
+        SCOPE_UPDATE,
+        SCOPE_DELETE
+    }
+
+    /**
+     * Supported policy types.
+     */
+    public enum PolicyType {
+        API,
+        APPLICATION,
+        SUBSCRIPTION
+    }
+
+    /**
+     * Topic Names.
+     */
+    public static class TopicNames {
+
+        //APIM default topic names
+        public static final String TOPIC_THROTTLE_DATA = "throttleData";
+        public static final String TOPIC_TOKEN_REVOCATION = "tokenRevocation";
+        public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
+        public static final String TOPIC_KEY_MANAGER = "keyManager";
+        public static final String TOPIC_NOTIFICATION = "notification";
     }
 }
