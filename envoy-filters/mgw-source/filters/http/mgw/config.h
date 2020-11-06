@@ -20,7 +20,6 @@ public:
   MGWFilterConfig() : FactoryBase("envoy.filters.http.mgw") {}
 
 private:
-  static constexpr uint64_t DefaultTimeout = 200;
   Http::FilterFactoryCb createFilterFactoryFromProtoTyped(
       const envoy::extensions::filters::http::mgw::v3::MGW& proto_config,
       const std::string& stats_prefix, Server::Configuration::FactoryContext& context) override;

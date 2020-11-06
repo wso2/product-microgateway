@@ -15,8 +15,7 @@ namespace Extensions {
 namespace HttpFilters {
 namespace MGW {
 
-// TODO(amalimatharaarachchi) change hardcoded request body value
-Filter::Filter() : modified_body_("hello") {}
+Filter::Filter() {}
 
 // Http::StreamFilterBase
 void Filter::onDestroy() { ENVOY_LOG(debug, "filter destroyed"); }
@@ -60,12 +59,14 @@ void Filter::setDecoderFilterCallbacks(Http::StreamDecoderFilterCallbacks& callb
 Http::FilterHeadersStatus Filter::decodeHeaders(Http::RequestHeaderMap& headers, bool end_stream) {
   ENVOY_LOG(trace, "decodeHeaders with end_stream = {}", end_stream);
   req_headers_ = &headers;
-  // new_body = "ohyeah";
-  if (!end_stream) {
+  set_body_ = readMetadata(&req_callbacks_->streamInfo().dynamicMetadata());
+
+  if (!end_stream && set_body_) {
     return Http::FilterHeadersStatus::StopIteration;
   }
-
-  setBody();
+  if (set_body_) {
+    setPayload(modified_body_, req_callbacks_->decodingBuffer(), req_headers_);
+  }
   return Http::FilterHeadersStatus::Continue;
 }
 
@@ -73,31 +74,47 @@ Http::FilterDataStatus Filter::decodeData(Buffer::Instance& data, bool end_strea
 
   ENVOY_LOG(trace, "decodeData with data = {} , end_stream = {}", data.toString(), end_stream);
 
-  if (!end_stream) {
+  if (!end_stream && set_body_) {
     return Http::FilterDataStatus::StopIterationAndBuffer;
   }
 
-  setBody();
+  if (set_body_) {
+    setPayload(modified_body_, req_callbacks_->decodingBuffer(), req_headers_);
+  }
   return Http::FilterDataStatus::Continue;
 }
 
-void Filter::setBody() {
-  std::string modified_body = modified_body_;
-  Buffer::OwnedImpl body(modified_body);
-  const Buffer::Instance* decoding_buffer = req_callbacks_->decodingBuffer();
+void Filter::setPayload(std::string new_payload, const Buffer::Instance* decoding_buffer,
+                     Http::RequestHeaderMap* req_headers) {
+  ENVOY_LOG(debug, "Setting payload ...");
+  Buffer::OwnedImpl modified_body(new_payload);
 
   if (decoding_buffer == nullptr) {
-    const bool streaming_filter = false;
-    req_callbacks_->addDecodedData(body, streaming_filter);
+    req_callbacks_->addDecodedData(modified_body, false);
   } else {
-    req_callbacks_->modifyDecodingBuffer([&body](Buffer::Instance& data) {
+    req_callbacks_->modifyDecodingBuffer([&modified_body](Buffer::Instance& data) {
       data.drain(data.length());
-      data.move(body);
+      data.move(modified_body);
     });
   }
   // set new content length
   decoding_buffer = req_callbacks_->decodingBuffer();
-  req_headers_->setContentLength(decoding_buffer->length());
+  req_headers->setContentLength(decoding_buffer->length());
+  ENVOY_LOG(debug, "Payload successfully modified");
+}
+
+bool Filter::readMetadata(const envoy::config::core::v3::Metadata* metadata) {
+  std::string jsonJWTPayload;
+  std::string PayloadMetadataKey = "payload";
+  const auto* payload = &Config::Metadata::metadataValue(
+      metadata, HttpFilterNames::get().ExtAuthorization, PayloadMetadataKey);
+
+  if (payload != nullptr && (payload->kind_case() == ProtobufWkt::Value::kStringValue)) {
+    modified_body_ = payload->string_value();
+    ENVOY_LOG(debug, "Retrieved new payload from metadata successfully");
+    return true;
+  }
+  return false;
 }
 
 } // namespace MGW

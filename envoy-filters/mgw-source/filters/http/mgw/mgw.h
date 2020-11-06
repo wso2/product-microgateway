@@ -28,8 +28,7 @@ namespace MGW {
  * HTTP mgw filter. Depending on the route configuration, this filter calls the global
  * mgw service before allowing further filter iteration.
  */
-class Filter : public Logger::Loggable<Logger::Id::filter>,
-               public Http::StreamFilter {
+class Filter : public Logger::Loggable<Logger::Id::filter>, public Http::StreamFilter {
 public:
   Filter();
 
@@ -52,12 +51,26 @@ public:
   void setDecoderFilterCallbacks(Http::StreamDecoderFilterCallbacks& callbacks) override;
 
 private:
-    void setBody();
-    Http::StreamEncoderFilterCallbacks* res_callbacks_{};
-    Http::StreamDecoderFilterCallbacks* req_callbacks_{};
-    Http::RequestHeaderMap* req_headers_{};
-    std::string modified_body_;
-  };
+  /**
+   * Modifies the request payload
+   * @param new_payload new payload
+   * @param decoding_buffer buffer that contains the current payload
+   * @param req_headers request headers
+   */
+  void setPayload(std::string new_payload, const Buffer::Instance* decoding_buffer,
+               Http::RequestHeaderMap* req_headers);
+  /**
+   * Reads the metadata and get details
+   * @param metadata stream metadata
+   * @return bool whether requested data is present and processed successfully 
+   */
+  bool readMetadata(const envoy::config::core::v3::Metadata* metadata);
+  Http::StreamEncoderFilterCallbacks* res_callbacks_{};
+  Http::StreamDecoderFilterCallbacks* req_callbacks_{};
+  Http::RequestHeaderMap* req_headers_{};
+  std::string modified_body_;
+  bool set_body_;
+};
 
 } // namespace MGW
 } // namespace HttpFilters
