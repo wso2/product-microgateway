@@ -93,6 +93,7 @@ public class JWTValidator {
                     JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtClaimsSet);
                     createJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
                     jwtValidationInfo.setRawPayload(signedJWTInfo.getToken());
+                    jwtValidationInfo.setKeyManager(this.tokenIssuer.getName());
                     return jwtValidationInfo;
                 } else {
                     jwtValidationInfo.setValid(false);

@@ -108,6 +108,7 @@ public class MGWConfiguration {
                 issuerDto.setCertificate(issuerCertificate);
             }
 
+            issuerDto.setName((String) issuer.get(ConfigConstants.JWT_TOKEN_ISSUER_NAME));
             issuerDto.setConsumerKeyClaim((String) issuer.get(ConfigConstants.JWT_TOKEN_CONSUMER_KEY_CLAIM));
             issuerDto.setValidateSubscriptions((boolean) issuer.get(ConfigConstants.JWT_TOKEN_VALIDATE_SUBSCRIPTIONS));
             issuersMap.put((String) issuer.get(ConfigConstants.JWT_TOKEN_ISSUER), issuerDto);
