@@ -161,16 +161,13 @@ func GetXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 					}
 					endpoints = append(endpoints, endpoint)
 				}
+				return endpoints
 			}
 		} else {
-			logger.LoggerOasparser.Fatal("X-wso2 production endpoint is not having a correct map structure")
+			logger.LoggerOasparser.Fatal("x-wso2-production/sandbox-endpoints is not having a correct map structure")
 		}
-
-	} else {
-		return nil
 	}
-
-	return endpoints
+	return nil
 }
 
 /**

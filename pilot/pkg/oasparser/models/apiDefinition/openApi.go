@@ -25,7 +25,6 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/wso2/micro-gw/configs"
 	logger "github.com/wso2/micro-gw/loggers"
 )
 
@@ -124,28 +123,27 @@ func getHostandBasepathandPort(rawUrl string) Endpoint {
 		port     uint32
 	)
 	if !strings.Contains(rawUrl, "://") {
-		rawUrl = "http://" + rawUrl
+		rawUrl = "https://" + rawUrl
 	}
-	u, err := url.Parse(rawUrl)
+	parsedUrl, err := url.Parse(rawUrl)
 	if err != nil {
 		logger.LoggerOasparser.Fatal(err)
 	}
 
-	host = u.Hostname()
-	basepath = u.Path
-	if u.Port() != "" {
-		u32, err := strconv.ParseUint(u.Port(), 10, 32)
+	host = parsedUrl.Hostname()
+	basepath = parsedUrl.Path
+	if parsedUrl.Port() != "" {
+		u32, err := strconv.ParseUint(parsedUrl.Port(), 10, 32)
 		if err != nil {
 			logger.LoggerOasparser.Error("Error passing port value to mgwSwagger", err)
 		}
 		port = uint32(u32)
 	} else {
-		//read default port from configs
-		conf, errReadConfig := configs.ReadConfigs()
-		if errReadConfig != nil {
-			logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
+		if strings.HasPrefix(rawUrl, "https://") {
+			port = uint32(443)
+		} else {
+			port = uint32(80)
 		}
-		port = conf.Envoy.ApiDefaultPort
 	}
 	return Endpoint{Host: host, Basepath: basepath, Port: port}
 }

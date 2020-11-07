@@ -20,6 +20,7 @@ package apiDefinition
 
 import (
 	"github.com/go-openapi/spec"
+	logger "github.com/wso2/micro-gw/loggers"
 )
 
 /**
@@ -38,8 +39,24 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 	swagger.vendorExtensible = swagger2.VendorExtensible.Extensions
 	swagger.resources = SetResourcesSwagger(swagger2)
 
+	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
+	// https is prioritized over http. If it is ws or wss, the microgateway will print an error.
+	// If the schemes property is not mentioned at all, http will be assigned. (Only swagger 2 version has this property)
 	if swagger2.Host != "" {
-		endpoint := getHostandBasepathandPort(swagger2.Host + swagger2.BasePath)
+		urlScheme := ""
+		for _, scheme := range swagger2.Schemes {
+			if scheme == "https" {
+				urlScheme = "https://"
+				break
+			} else if scheme == "http" {
+				urlScheme = "http://"
+			} else {
+				//TODO: (VirajSalaka) Throw an error and stop processing
+				logger.LoggerOasparser.Errorf("The scheme : %v for the swagger definition %v:%v is not supported", scheme,
+					swagger2.Info.Title, swagger2.Info.Version)
+			}
+		}
+		endpoint := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
 		swagger.productionUrls = append(swagger.productionUrls, endpoint)
 	}
 }

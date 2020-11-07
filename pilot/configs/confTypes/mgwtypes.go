@@ -73,7 +73,6 @@ type Config struct {
 	Envoy struct {
 		ListenerAddress         string
 		ListenerPort            uint32
-		ApiDefaultPort          uint32
 		ClusterTimeoutInSeconds time.Duration
 		ListenerCertPath        string
 		ListenerKeyPath         string
