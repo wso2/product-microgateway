@@ -26,6 +26,7 @@ public class ConfigConstants {
     // JWT Token Config
     public static final String JWT_TOKEN_CONFIG = "jwtTokenConfig";
     public static final String JWT_TOKEN_ISSUER = "issuer";
+    public static final String JWT_TOKEN_ISSUER_NAME = "name";
     public static final String JWT_TOKEN_CERTIFICATE_ALIAS = "certificateAlias";
     public static final String JWT_TOKEN_JWKS_URL = "jwksURL";
     public static final String JWT_TOKEN_VALIDATE_SUBSCRIPTIONS = "validateSubscription";

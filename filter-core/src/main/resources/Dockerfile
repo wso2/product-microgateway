@@ -28,7 +28,6 @@ ARG MG_USER_HOME=/home/${MGW_USER}
 
 ARG MG_VERSION=1.0-SNAPSHOT
 ENV VERSION=${MG_VERSION}
-ENV HOME_DIR=${MG_USER_HOME}
 
 ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\
@@ -40,12 +39,15 @@ ARG MOTD="\n\
 RUN \
     groupadd --system -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
     && useradd --system --create-home --home-dir ${MG_USER_HOME} --no-log-init -g ${MG_USER_GROUP_ID} -u ${MG_USER_ID} ${MG_USER} \
-    && mkdir ${MG_USER_HOME}/lib \
+    && mkdir ${MG_USER_HOME}/lib && mkdir ${MG_USER_HOME}/mg/security \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
 
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 
+ENV FILTER_HOME=${MG_USER_HOME}
+
 COPY maven/ lib/
-# TODO: (VirajSalaka) Provide a shell script
-CMD java -Dmgw.home=${HOME_DIR} -cp "lib/*" org.wso2.micro.gateway.filter.core.grpc.server.AuthServer
+COPY maven/resources/conf conf
+COPY maven/resources/security mg/security
+CMD java -cp "lib/*" org.wso2.micro.gateway.filter.core.grpc.server.AuthServer

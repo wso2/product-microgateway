@@ -66,7 +66,7 @@ public class AuthServer {
 
         // Load configurations
         KeyManagerDataService keyManagerDataService = new KeyManagerDataServiceImpl();
-        MGWConfiguration mgwConfiguration = new MGWConfiguration();
+        MGWConfiguration mgwConfiguration = MGWConfiguration.getInstance();
         ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
         ReferenceHolder.getInstance().setMGWConfiguration(mgwConfiguration);
         //TODO: Add API is only for testing this has to come via the rest API.
@@ -89,7 +89,7 @@ public class AuthServer {
     }
 
     private static void addAPI() {
-        String apiPath = "/home/wso2/apis/";
+        String apiPath = "/home/ubuntu/mg/apis/";
         try {
             Files.walk(Paths.get(apiPath)).filter(path -> {
                 Path fileName = path.getFileName();
