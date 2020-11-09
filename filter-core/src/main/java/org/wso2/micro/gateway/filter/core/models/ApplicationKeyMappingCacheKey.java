@@ -29,14 +29,12 @@ public class ApplicationKeyMappingCacheKey {
     private String keyManager;
 
     public ApplicationKeyMappingCacheKey(String consumerKey, String keyManager) {
-
         this.consumerKey = consumerKey;
         this.keyManager = keyManager;
     }
 
     @Override
     public boolean equals(Object o) {
-
         if (this == o) {
             return true;
         }
@@ -50,7 +48,6 @@ public class ApplicationKeyMappingCacheKey {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(consumerKey, keyManager);
     }
 

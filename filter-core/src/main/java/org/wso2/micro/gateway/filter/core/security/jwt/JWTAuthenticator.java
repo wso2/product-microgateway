@@ -217,7 +217,7 @@ public class JWTAuthenticator implements Authenticator {
         String tenantDomain = "carbon.super"; //TODO : get correct tenant domain
 
         String consumerKey = jwtValidationInfo.getConsumerKey();
-        String keyManager = "default"; //TODO: get the correct key manager
+        String keyManager = jwtValidationInfo.getKeyManager();
         if (consumerKey != null && keyManager != null) {
             return ReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain)
                     .validateSubscription(apiContext, apiVersion, consumerKey, keyManager);

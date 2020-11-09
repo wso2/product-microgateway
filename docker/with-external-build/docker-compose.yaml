@@ -29,8 +29,9 @@ services:
       context: ./../../
       dockerfile: docker/with-external-build/filter-chain/Dockerfile
     volumes:
-      - ./../../filter-core/target:/home/ubuntu
-      - ./../../resources/apis:/home/ubuntu/apis
+      - ./../../filter-core/target:/home/ubuntu/mg/lib/
+      - ./../../filter-core/src/main/resources:/home/ubuntu/mg/conf/
+      - ./../../resources/apis:/home/ubuntu/mg/apis
     ports:
       - "8081:8081"
   # zipkin:

@@ -55,7 +55,7 @@ public class MGWConfiguration {
     private static EventHubConfigurationDto eventHubConfiguration;
     private static KeyStore trustStore = null;
 
-    public MGWConfiguration() throws MGWException {
+    private MGWConfiguration() throws MGWException {
         try {
             init();
         } catch (KeyStoreException e) {
@@ -76,9 +76,9 @@ public class MGWConfiguration {
      * Initialize the configuration provider class by reading the Mgw Configuration file.
      */
     private void init() throws KeyStoreException {
-        InputStream configFile = MGWConfiguration.class.getClassLoader().getResourceAsStream("mgw-config.toml");
-        configToml = new Toml().read(configFile);
-
+        String home = System.getenv("FILTER_HOME");
+        File file = new File(home + "/conf/filter.conf");
+        configToml = new Toml().read(file);
         //Load Client Trust Store
         loadTrustStore();
 
@@ -108,6 +108,7 @@ public class MGWConfiguration {
                 issuerDto.setCertificate(issuerCertificate);
             }
 
+            issuerDto.setName((String) issuer.get(ConfigConstants.JWT_TOKEN_ISSUER_NAME));
             issuerDto.setConsumerKeyClaim((String) issuer.get(ConfigConstants.JWT_TOKEN_CONSUMER_KEY_CLAIM));
             issuerDto.setValidateSubscriptions((boolean) issuer.get(ConfigConstants.JWT_TOKEN_VALIDATE_SUBSCRIPTIONS));
             issuersMap.put((String) issuer.get(ConfigConstants.JWT_TOKEN_ISSUER), issuerDto);

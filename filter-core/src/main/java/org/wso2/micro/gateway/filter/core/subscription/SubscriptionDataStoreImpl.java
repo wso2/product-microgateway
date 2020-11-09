@@ -115,7 +115,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager) {
-
         return applicationKeyMappingMap.get(new ApplicationKeyMappingCacheKey(key, keyManager));
     }
 

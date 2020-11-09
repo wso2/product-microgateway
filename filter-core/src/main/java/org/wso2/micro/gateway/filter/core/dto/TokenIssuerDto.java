@@ -27,6 +27,7 @@ import java.util.Map;
  */
 public class TokenIssuerDto {
     private String issuer;
+    private String name;
     private boolean disableDefaultClaimMapping = false;
     private Map<String, ClaimMappingDto> claimConfigurations = new HashMap<>();
     private JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
@@ -122,6 +123,14 @@ public class TokenIssuerDto {
 
     public void setValidateSubscriptions(boolean validateSubscriptions) {
         this.validateSubscriptions = validateSubscriptions;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
 
