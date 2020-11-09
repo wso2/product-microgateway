@@ -4,9 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.wso2.am.microgw</groupId>
+    <parent>
+        <groupId>org.wso2.am.microgw</groupId>
+        <artifactId>micro-gateway-parent</artifactId>
+        <version>3.2.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
     <artifactId>org.wso2.micro.gateway.filter.core</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <name>Micro Gateway - Filter Core</name>
 
     <url>https://wso2.org</url>
@@ -15,11 +20,6 @@
         <url>https://wso2.org/</url>
     </organization>
 
-    <parent>
-        <groupId>org.wso2</groupId>
-        <artifactId>wso2</artifactId>
-        <version>1</version>
-    </parent>
     <build>
         <plugins>
             <plugin>
@@ -98,7 +98,8 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.4</version>
                 <configuration>
-                    <minimizeJar>true</minimizeJar>
+                    <!-- TODO: (VirajSalaka) set to false because the andes client uses lo4j1.2 implementation -->
+                    <minimizeJar>false</minimizeJar>
                     <transformers>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                           <mainClass>org.wso2.micro.gateway.filter.core.grpc.server.AuthServer</mainClass>
@@ -152,6 +153,43 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.34.1</version>
+                <configuration>
+                  <images>
+                    <image>
+                        <alias>filter-core</alias>
+                        <name>wso2am/mg-filter-chain:${project.version}</name>
+                      <build>
+                        <contextDir>${project.basedir}/src/main/resources</contextDir>
+                        <args>
+                            <MG_VERSION>${project.version}</MG_VERSION>
+                            <!-- The Args in the dockerfile seems to overridden by plugin-->
+                            <MG_USER>wso2</MG_USER>
+                            <MG_USER_ID>802</MG_USER_ID>
+                            <MG_USER_GROUP>wso2</MG_USER_GROUP>
+                            <MG_USER_GROUP_ID>802</MG_USER_GROUP_ID>
+                            <MG_USER_HOME>/home/wso2</MG_USER_HOME>
+                        </args>
+                        <assembly>
+                            <descriptor>${project.basedir}/src/main/assembly/assembly.xml</descriptor>
+                        </assembly>
+                      </build>
+                    </image>
+                  </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>docker-build</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+              </plugin>
         </plugins>
     </build>
 

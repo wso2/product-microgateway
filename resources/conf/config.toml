@@ -1,25 +1,17 @@
 # The configuration file for mgw
 [server]
-ip = "localhost"
+ip = "0.0.0.0"
 port = "9095"
-
-[tls]
-enabled = false
-keystore = "security/wso2carbon.jks"
-alias = "wso2carbon"
-password = "wso2carbon"
-
-[admin.user]
+publicKeyPath = "/home/wso2/certs/localhost.pem"
+privateKeyPath = "/home/wso2/certs/localhost.key"
 username = "admin"
 password = "admin"
-
-[apis]
-location = "resources/apis/"
 
 [envoy]
 listenerAddress = "0.0.0.0"
 listenerPort = 10000
 apiDefaultPort = 8080
 clusterTimeoutInSeconds = 20
-
-  
+listenerTlsEnabled = true
+listenerCertPath = "/home/wso2/certs/localhost.pem"
+listenerKeyPath = "/home/wso2/certs/localhost.key"
