@@ -30,8 +30,6 @@ import (
 	"github.com/wso2/micro-gw/pkg/oasparser/models/apiDefinition"
 )
 
-//https://www.red-gate.com/simple-talk/dotnet/software-testing/go-unit-tests-tips-from-the-trenches/#Go_Unit_Tests
-
 func TestGenerateRoutePaths(t *testing.T) {
 
 	xWso2BasePath := "/xWso2BasePath"

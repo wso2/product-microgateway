@@ -73,7 +73,6 @@ public class ApplicationKeyMapping implements CacheableEntity<ApplicationKeyMapp
 
     @Override
     public ApplicationKeyMappingCacheKey getCacheKey() {
-
         return new ApplicationKeyMappingCacheKey(getConsumerKey(), getKeyManager());
     }
 

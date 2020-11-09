@@ -21,9 +21,9 @@ package org.wso2.micro.gateway.filter.core.common;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import org.wso2.micro.gateway.filter.core.auth.jwt.JWTValidationInfo;
-import org.wso2.micro.gateway.filter.core.auth.jwt.SignedJWTInfo;
-import org.wso2.micro.gateway.filter.core.auth.jwt.validator.JWTConstants;
+import org.wso2.micro.gateway.filter.core.security.jwt.JWTValidationInfo;
+import org.wso2.micro.gateway.filter.core.security.jwt.SignedJWTInfo;
+import org.wso2.micro.gateway.filter.core.security.jwt.validator.JWTConstants;
 
 import java.util.concurrent.TimeUnit;
 

@@ -23,8 +23,7 @@
     </formats>
     <fileSets>
         <fileSet>
-            <!-- TODO: (VirajSalaka) Still unused. But needs to keep the truststore in future implementations -->
-            <directory>src/main/resources</directory>
+            <directory>../resources/filter-core</directory>
             <outputDirectory>resources</outputDirectory>
         </fileSet>
         <fileSet>

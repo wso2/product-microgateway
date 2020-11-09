@@ -30,6 +30,10 @@
             <directory>../resources/conf</directory>
             <outputDirectory>WSO2-Microgateway-${project.version}/resources/pilot/conf</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>../resources/filter-core</directory>
+            <outputDirectory>WSO2-Microgateway-${project.version}/resources/filter-core</outputDirectory>
+        </fileSet>
     </fileSets>
     <files>
         <file>
