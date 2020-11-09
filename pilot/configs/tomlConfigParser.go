@@ -39,6 +39,10 @@ var (
 
 const (
 	mgwHomeEnvVariable = "MGW_HOME"
+	// RelativeConfigPath is the relative file path where the configuration file is.
+	RelativeConfigPath = "/conf/config.toml"
+	// RelativeLogConfigPath is the relative file path where the log configuration file is.
+	RelativeLogConfigPath = "/conf/log_config.toml"
 )
 
 /**
@@ -50,14 +54,12 @@ const (
 func ReadConfigs() (*config.Config, error) {
 	onceConfigRead.Do(func() {
 		configs = new(config.Config)
-		getMgwHome()
-
-		// logger.Info("MGW_HOME: ", mgwHome)
-		_, err := os.Stat(mgwHome + "/conf/config.toml")
+		GetMgwHome()
+		_, err := os.Stat(mgwHome + RelativeConfigPath)
 		if err != nil {
 			logger.Fatal("Configuration file not found.", err)
 		}
-		content, readErr := ioutil.ReadFile(mgwHome + "/conf/config.toml")
+		content, readErr := ioutil.ReadFile(mgwHome + RelativeConfigPath)
 		if readErr != nil {
 			logger.Fatal("Error reading configurations. ", readErr)
 		}
@@ -76,13 +78,12 @@ func ReadConfigs() (*config.Config, error) {
 func ReadLogConfigs() (*config.LogConfig, error) {
 	onceLogConfigRead.Do(func() {
 		logConfigs = new(config.LogConfig)
-		getMgwHome()
-		//TODO: (VirajSalaka) Provide path properly
-		_, err := os.Stat(mgwHome + "/conf/log_config.toml")
+		GetMgwHome()
+		_, err := os.Stat(mgwHome + RelativeLogConfigPath)
 		if err != nil {
 			logger.Fatal("Log configuration file not found.", err)
 		}
-		content, readErr := ioutil.ReadFile(mgwHome + "/conf/log_config.toml")
+		content, readErr := ioutil.ReadFile(mgwHome + RelativeLogConfigPath)
 		if readErr != nil {
 			logger.Fatal("Error reading log configurations. ", readErr)
 		}
@@ -101,11 +102,18 @@ func ClearLogConfigInstance() {
 	onceLogConfigRead = sync.Once{}
 }
 
-func getMgwHome() {
+/**
+* Get the directory where the relevenat directory structure (including configuration, certificates etc.)
+* as Env variable.
+* If the env variable is not present, the directory from which the executable is triggered will be assigned.
+* This functionality is required to run the unit tests.
+ */
+func GetMgwHome() string {
 	onceGetMgwHome.Do(func() {
 		mgwHome = os.Getenv(mgwHomeEnvVariable)
 		if len(strings.TrimSpace(mgwHome)) == 0 {
 			mgwHome, _ = os.Getwd()
 		}
 	})
+	return mgwHome
 }
