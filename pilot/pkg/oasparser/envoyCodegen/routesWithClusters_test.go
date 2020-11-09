@@ -17,11 +17,15 @@
 package envoyCodegen_test
 
 import (
+	"io/ioutil"
 	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/micro-gw/configs"
 	"github.com/wso2/micro-gw/pkg/oasparser/envoyCodegen"
+	enovoy "github.com/wso2/micro-gw/pkg/oasparser/envoyCodegen"
+	"github.com/wso2/micro-gw/pkg/oasparser/swaggerOperator"
 )
 
 func TestGenerateRegex(t *testing.T) {
@@ -90,4 +94,20 @@ func TestGenerateRegex(t *testing.T) {
 		assert.Equal(t, item.isMatched, resultIsMatching, item.message)
 		assert.Nil(t, err)
 	}
+}
+
+func TestCreateRoutesWithClusters(t *testing.T) {
+	//TODO: (VirajSalaka) Finalize if reading from a file and asserting is the correct approach for unit tests
+	openapiFilePath := configs.GetMgwHome() + "/../pilot/test-resources/envoycodegen/openapi.yaml"
+	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
+	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
+	mgwSwaggerForOpenapi := swaggerOperator.GetMgwSwagger(openapiByteArr)
+	_, clusters, _, _, _, _ := enovoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
+
+	assert.Equal(t, len(clusters), 1, "Number of production clusters created is incorrect.")
+	//TODO: (VirajSalaka) Test against path level endpoints
+	var prodClusterNames [1]string
+	prodClusterNames[0] = clusters[0].GetName()
+	assert.Contains(t, prodClusterNames, "clusterProd_SwaggerPetstore1.0.0", "API Level cluster name mismatch")
+
 }

@@ -60,9 +60,6 @@ func getRouterHttpFilter() hcmv3.HttpFilter {
 		SuppressEnvoyHeaders:     false,
 		StrictCheckHeaders:       nil,
 		RespectExpectedRqTimeout: false,
-		XXX_NoUnkeyedLiteral:     struct{}{},
-		XXX_unrecognized:         nil,
-		XXX_sizecache:            0,
 	}
 
 	routeFilterTypedConf, err := ptypes.MarshalAny(&routeFilterConf)
@@ -71,11 +68,8 @@ func getRouterHttpFilter() hcmv3.HttpFilter {
 	}
 
 	filter := hcmv3.HttpFilter{
-		Name:                 wellknown.Router,
-		ConfigType:           &hcmv3.HttpFilter_TypedConfig{TypedConfig: routeFilterTypedConf},
-		XXX_NoUnkeyedLiteral: struct{}{},
-		XXX_unrecognized:     nil,
-		XXX_sizecache:        0,
+		Name:       wellknown.Router,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{TypedConfig: routeFilterTypedConf},
 	}
 
 	return filter

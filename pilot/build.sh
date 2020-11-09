@@ -16,7 +16,8 @@
 # -----------------------------------------------------------------------
 
 export MGW_HOME=${PWD}/../resources
-go test ./...
+go clean -testcache
+go test ./... 
 if [ $? -ne 0 ] 
 then
   echo "FAILED: Unit tests failure"

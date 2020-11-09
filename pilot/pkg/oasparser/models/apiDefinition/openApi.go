@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/google/uuid"
 	logger "github.com/wso2/micro-gw/loggers"
 )
 
@@ -56,23 +57,24 @@ func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
  * Set swagger3 resource path details to mgwSwagger  Instance.
  *
  * @param path  Resource path
- * @param method  Path type(Get, Post ... )
- * @param operation  Operation type
+ * @param methods  Path types as an array (Get, Post ... )
+ * @param pathItem  PathItem entity
  * @return Resource  MgwSwagger resource instance
  */
-func setOperationOpenApi(path string, method string, operation *openapi3.Operation) Resource {
+func setOperationOpenApi(path string, methods []string, pathItem *openapi3.PathItem) Resource {
 	var resource Resource
-	if operation != nil {
+	if pathItem != nil {
 		resource = Resource{
-			path:        path,
-			method:      method,
-			iD:          operation.OperationID,
-			summary:     operation.Summary,
-			description: operation.Description,
+			path:    path,
+			methods: methods,
+			//TODO: (VirajSalaka) This will not solve the actual problem when incremental Xds is introduced (used for cluster names)
+			iD:          uuid.New().String(),
+			summary:     pathItem.Summary,
+			description: pathItem.Description,
 			//Schemes: operation.,
 			//tags: operation.Tags,
 			//Security: operation.Security.,
-			vendorExtensible: convertExtensibletoReadableFormat(operation.ExtensionProps)}
+			vendorExtensible: convertExtensibletoReadableFormat(pathItem.ExtensionProps)}
 	}
 	return resource
 }
@@ -87,26 +89,42 @@ func SetResourcesOpenApi(openApi openapi3.Swagger) []Resource {
 	var resources []Resource
 	if openApi.Paths != nil {
 		for path, pathItem := range openApi.Paths {
-			var resource Resource
+			var methodsArray []string
+			methodFound := false
 			if pathItem.Get != nil {
-				resource = setOperationOpenApi(path, "get", pathItem.Get)
-			} else if pathItem.Post != nil {
-				resource = setOperationOpenApi(path, "post", pathItem.Post)
-			} else if pathItem.Put != nil {
-				resource = setOperationOpenApi(path, "put", pathItem.Put)
-			} else if pathItem.Delete != nil {
-				resource = setOperationOpenApi(path, "delete", pathItem.Delete)
-			} else if pathItem.Head != nil {
-				resource = setOperationOpenApi(path, "head", pathItem.Head)
-			} else if pathItem.Patch != nil {
-				resource = setOperationOpenApi(path, "patch", pathItem.Patch)
-			} else {
-				//resource = setOperation(contxt,"get",pathItem.Get)
+				methodsArray = append(methodsArray, "GET")
+				methodFound = true
 			}
-			resources = append(resources, resource)
+			if pathItem.Post != nil {
+				methodsArray = append(methodsArray, "POST")
+				methodFound = true
+			}
+			if pathItem.Put != nil {
+				methodsArray = append(methodsArray, "PUT")
+				methodFound = true
+			}
+			if pathItem.Delete != nil {
+				methodsArray = append(methodsArray, "DELETE")
+				methodFound = true
+			}
+			if pathItem.Head != nil {
+				methodsArray = append(methodsArray, "HEAD")
+				methodFound = true
+			}
+			if pathItem.Patch != nil {
+				methodsArray = append(methodsArray, "HEAD")
+				methodFound = true
+			}
+			if pathItem.Options != nil {
+				methodsArray = append(methodsArray, "OPTIONS")
+				methodFound = true
+			}
+			if methodFound {
+				resource := setOperationOpenApi(path, methodsArray, pathItem)
+				resources = append(resources, resource)
+			}
 		}
 	}
-
 	return resources
 }
 
@@ -158,12 +176,9 @@ func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
 	if swagger3.Servers != nil {
 		if len(swagger3.Servers) > 0 && (swagger3.Servers[0].URL != "") {
 			return true
-		} else {
-			return false
 		}
-	} else {
-		return false
 	}
+	return false
 }
 
 /**

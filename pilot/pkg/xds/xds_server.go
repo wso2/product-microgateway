@@ -227,7 +227,7 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	}
 	//TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	//Will be updated once decide to move to incremental XDS
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil)
 	snap.Consistent()
 	err := cache.SetSnapshot(label, snap)
 	if err != nil {
