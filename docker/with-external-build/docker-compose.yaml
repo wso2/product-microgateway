@@ -1,4 +1,5 @@
 version: "3.7"
+# TODO: (VirajSalaka) Fix all the related scripts since this is going to be maintained.
 services:
   envoydev:
     build:

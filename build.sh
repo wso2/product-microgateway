@@ -15,6 +15,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
+# TODO: (VirajSalaka) Remove all the shell scripts relevant to this.
 function exit_with_error() {
     echo "BUILD FAILURE!"
     exit 1
@@ -27,6 +28,7 @@ if [ $? -ne 0 ]; then
 fi
 popd
 
+pushd pilot
 rm -rf target/
 GOOS=linux GOARCH=amd64 go build -v -o target/micro-gw-ubuntu main.go
 if [ $? -ne 0 ]; then
