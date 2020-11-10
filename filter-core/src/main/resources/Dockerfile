@@ -25,15 +25,16 @@ ARG MG_USER_ID=802
 ARG MG_USER_GROUP=wso2
 ARG MG_USER_GROUP_ID=802
 ARG MG_USER_HOME=/home/${MGW_USER}
-
 ARG MG_VERSION=1.0-SNAPSHOT
+
 ENV VERSION=${MG_VERSION}
+ENV JAVA_OPTS=""
+ENV FILTER_HOME=${MG_USER_HOME}
 
 ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\
  --------------------------------- \n\
- This Docker container comprises of a WSO2 product, running with its latest GA release \n\
- which is under the Apache License, Version 2.0. \n\
+ This Docker container comprises of a WSO2 product, which is under the Apache License, Version 2.0. \n\
  Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"
 
 RUN \
@@ -45,9 +46,8 @@ RUN \
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 
-ENV FILTER_HOME=${MG_USER_HOME}
 
 COPY maven/ lib/
 COPY maven/resources/conf conf
 COPY maven/resources/security mg/security
-CMD java -cp "lib/*" org.wso2.micro.gateway.filter.core.grpc.server.AuthServer
+CMD java $JAVA_OPTS -Dlog4j.configurationFile="${FILTER_HOME}/conf/log4j2.properties" -cp "lib/*" org.wso2.micro.gateway.filter.core.grpc.server.AuthServer
