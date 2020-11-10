@@ -280,7 +280,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
         String endPoint = APIConstants.SubscriptionValidationResources.APIS + "?context=" + context +
                 "&version=" + version;
-        API api = new API();
+        API api = null;
         String responseString;
         try {
             responseString = invokeService(endPoint, null);
@@ -304,7 +304,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
         String endPoint =
                 APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES + "?policyName=" + policyName;
-        SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
+        SubscriptionPolicy subscriptionPolicy = null;
         if (log.isDebugEnabled()) {
             log.debug("getSubscriptionPolicy for " + policyName + " for tenant " + tenantDomain);
         }
@@ -331,7 +331,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
         String endPoint =
                 APIConstants.SubscriptionValidationResources.APPLICATION_POLICIES + "?policyName=" + policyName;
-        ApplicationPolicy applicationPolicy = new ApplicationPolicy();
+        ApplicationPolicy applicationPolicy = null;
         if (log.isDebugEnabled()) {
             log.debug("getApplicationPolicy for " + policyName + " for tenant " + tenantDomain);
         }
@@ -356,7 +356,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     public ApiPolicy getAPIPolicy(String policyName, String tenantDomain) throws DataLoadingException {
 
         String endPoint = APIConstants.SubscriptionValidationResources.API_POLICIES + "?policyName=" + policyName;
-        ApiPolicy apiPolicy = new ApiPolicy();
+        ApiPolicy apiPolicy = null;
         String responseString;
         if (log.isDebugEnabled()) {
             log.debug("getAPIPolicy for " + policyName + " for tenant " + tenantDomain);
