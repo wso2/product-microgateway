@@ -8,6 +8,8 @@ servers:
   - url: http://apiLevelEndpoint
 paths:
   /pets:
+    servers:
+        - url: http://resourceLevelEndpoint
     get:
       summary: List all pets
       operationId: listPets
@@ -42,11 +44,6 @@ paths:
     post:
       summary: Create a pet
       operationId: createPets
-      servers:
-        - url: http://resourceLevelEndpoint
-      x-wso2-production-endpoints:
-        urls:
-        - http://resourceLevelEndpoint  
       tags:
         - pets
       responses:

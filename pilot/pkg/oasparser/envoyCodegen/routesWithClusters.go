@@ -47,11 +47,11 @@ import (
  * to the api level clusters.
  *
  * @param mgwSwagger  mgwSwagger instance
- * @return []*v2route.Route  Production routes
- * @return []*v2.Cluster  Production clusters
+ * @return []*v3route.Route  Production routes
+ * @return []*v3.Cluster  Production clusters
  * @return []*core.Address  Production endpoints
- * @return []*v2route.Route  Sandbox routes
- * @return []*v2.Cluster  Sandbox clusters
+ * @return []*v3route.Route  Sandbox routes
+ * @return []*v3.Cluster  Sandbox clusters
  * @return []*core.Address  Sandbox endpoints
  */
 func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address, []*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {

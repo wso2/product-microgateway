@@ -102,12 +102,30 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 	mgwSwaggerForOpenapi := swaggerOperator.GetMgwSwagger(openapiByteArr)
-	_, clusters, _, _, _, _ := enovoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
+	//TODO: (VirajSalaka) Test Sandbox endpoints
+	routes, clusters, _, _, _, _ := enovoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
 
-	assert.Equal(t, len(clusters), 1, "Number of production clusters created is incorrect.")
+	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
 	//TODO: (VirajSalaka) Test against path level endpoints
-	var prodClusterNames [1]string
-	prodClusterNames[0] = clusters[0].GetName()
-	assert.Contains(t, prodClusterNames, "clusterProd_SwaggerPetstore1.0.0", "API Level cluster name mismatch")
+	//As the first cluster is always related to API level cluster
+	apiLevelCluster := clusters[0]
+	pathLevelCluster := clusters[1]
+	assert.Equal(t, apiLevelCluster.GetName(), "clusterProd_SwaggerPetstore1.0.0", "API Level cluster name mismatch")
+	assert.Contains(t, pathLevelCluster.GetName(), "clusterProd_SwaggerPetstore1.0.0_", "Resource Level cluster name mismatch")
 
+	assert.Equal(t, 2, len(routes), "Created number of routes are incorrect.")
+	assert.Equal(t, "^/pets(\\?([^/]+))?$", routes[0].GetMatch().GetSafeRegex().Regex)
+	assert.Equal(t, "^/pets/([^/]+)(\\?([^/]+))?$", routes[1].GetMatch().GetSafeRegex().Regex)
+	routeRegexMatchesFound := false
+	for _, route := range routes {
+		if route.GetMatch().GetSafeRegex().Regex == "^/pets(\\?([^/]+))?$" {
+			routeRegexMatchesFound = true
+			assert.Equal(t, pathLevelCluster.GetName(), route.GetRoute().GetCluster(), "Path level cluster is not set correctly.")
+		}
+		if route.GetMatch().GetSafeRegex().Regex == "^/pets/([^/]+)(\\?([^/]+))?$" {
+			routeRegexMatchesFound = true
+			assert.Equal(t, apiLevelCluster.GetName(), route.GetRoute().GetCluster(), "API level cluster is not set correctly.")
+		}
+	}
+	assert.Equal(t, true, routeRegexMatchesFound, "Generated route regex is incorrect.")
 }
