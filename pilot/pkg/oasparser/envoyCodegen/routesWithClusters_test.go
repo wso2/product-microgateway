@@ -96,9 +96,28 @@ func TestGenerateRegex(t *testing.T) {
 	}
 }
 
-func TestCreateRoutesWithClusters(t *testing.T) {
+func TestCreateRoutesWithClustersForOpenAPIWithoutExtensions(t *testing.T) {
 	//TODO: (VirajSalaka) Finalize if reading from a file and asserting is the correct approach for unit tests
 	openapiFilePath := configs.GetMgwHome() + "/../pilot/test-resources/envoycodegen/openapi.yaml"
+	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
+	//TODO: (VirajSalaka) Additional tasks to test
+	//Extensions
+	//OpenAPI version 2
+}
+
+func TestCreateRoutesWithClustersForOpenAPIWithExtensionsOnly(t *testing.T) {
+	//When the openapi endpoints are only mentioned via the extensions
+	openapiFilePath := configs.GetMgwHome() + "/../pilot/test-resources/envoycodegen/openapi_with_extensions_only.yaml"
+	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
+}
+
+func TestCreateRoutesWithClustersForOpenAPIWithExtensionsServers(t *testing.T) {
+	//When the openapi endpoints provided by servers object are overriden via the extensions
+	openapiFilePath := configs.GetMgwHome() + "/../pilot/test-resources/envoycodegen/openapi_with_extensions_servers.yaml"
+	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
+}
+
+func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string) {
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 	mgwSwaggerForOpenapi := swaggerOperator.GetMgwSwagger(openapiByteArr)
@@ -113,9 +132,25 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 	assert.Equal(t, apiLevelCluster.GetName(), "clusterProd_SwaggerPetstore1.0.0", "API Level cluster name mismatch")
 	assert.Contains(t, pathLevelCluster.GetName(), "clusterProd_SwaggerPetstore1.0.0_", "Resource Level cluster name mismatch")
 
+	apiLevelClusterHost := apiLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+	apiLevelClusterPort := apiLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+	assert.NotEmpty(t, apiLevelClusterHost, "API Level Cluster's assigned host should not be null")
+	assert.Equal(t, "apiLevelEndpoint", apiLevelClusterHost, "API Level Cluster's assigned host is incorrect.")
+	assert.NotEmpty(t, apiLevelClusterPort, "API Level Cluster's assigned port should not be null")
+	assert.Equal(t, uint32(80), apiLevelClusterPort, "API Level Cluster's assigned host is incorrect.")
+
+	pathLevelClusterHost := pathLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+	pathLevelClusterPort := pathLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+	assert.NotEmpty(t, pathLevelClusterHost, "Path Level Cluster's assigned host should not be null")
+	assert.Equal(t, "resourceLevelEndpoint", pathLevelClusterHost, "Path Level Cluster's assigned host is incorrect.")
+	assert.NotEmpty(t, pathLevelClusterPort, "Path Level Cluster's assigned port should not be null")
+	assert.Equal(t, uint32(443), pathLevelClusterPort, "Path Level Cluster's assigned host is incorrect.")
+
 	assert.Equal(t, 2, len(routes), "Created number of routes are incorrect.")
-	assert.Equal(t, "^/pets(\\?([^/]+))?$", routes[0].GetMatch().GetSafeRegex().Regex)
-	assert.Equal(t, "^/pets/([^/]+)(\\?([^/]+))?$", routes[1].GetMatch().GetSafeRegex().Regex)
+	assert.Contains(t, []string{"^/pets(\\?([^/]+))?$", "^/pets/([^/]+)(\\?([^/]+))?$"}, routes[0].GetMatch().GetSafeRegex().Regex)
+	assert.Contains(t, []string{"^/pets(\\?([^/]+))?$", "^/pets/([^/]+)(\\?([^/]+))?$"}, routes[1].GetMatch().GetSafeRegex().Regex)
+	assert.NotEqual(t, routes[0].GetMatch().GetSafeRegex().Regex, routes[1].GetMatch().GetSafeRegex().Regex,
+		"The route regex for the two routes should not be the same")
 	routeRegexMatchesFound := false
 	//route entity creation is tested separately. In here, it checks the connection between the route and the cluster
 	for _, route := range routes {
@@ -129,7 +164,4 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 		}
 	}
 	assert.Equal(t, true, routeRegexMatchesFound, "Generated route regex is incorrect.")
-	//TODO: (VirajSalaka) Additional tasks to test
-	//Extensions
-	//OpenAPI version 2
 }

@@ -5,11 +5,17 @@ info:
   license:
     name: MIT
 servers:
-  - url: http://apiLevelEndpoint
+  - url: http://apiLevelEndpointServers
+x-wso2-production-endpoints:
+    urls:
+        - http://apiLevelEndpoint  
 paths:
   /pets:
+    x-wso2-production-endpoints:
+        urls:
+          - https://resourceLevelEndpoint
     servers:
-        - url: https://resourceLevelEndpoint
+        - url: https://resourceLevelEndpointServers
     get:
       summary: List all pets
       operationId: listPets
