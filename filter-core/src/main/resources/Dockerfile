@@ -48,6 +48,6 @@ USER ${MG_USER}
 
 
 COPY maven/ lib/
-COPY maven/resources/conf conf
-COPY maven/resources/security mg/security
+COPY maven/conf conf
+COPY maven/security mg/security
 CMD java $JAVA_OPTS -Dlog4j.configurationFile="${FILTER_HOME}/conf/log4j2.properties" -cp "lib/*" org.wso2.micro.gateway.filter.core.grpc.server.AuthServer

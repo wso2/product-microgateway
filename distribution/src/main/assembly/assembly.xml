@@ -28,7 +28,7 @@
         </fileSet>
         <fileSet>
             <directory>../resources/conf</directory>
-            <outputDirectory>WSO2-Microgateway-${project.version}/resources/pilot/conf</outputDirectory>
+            <outputDirectory>WSO2-Microgateway-${project.version}/resources/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../resources/filter-core</directory>
