@@ -260,6 +260,7 @@ func createRoute(xWso2Basepath string, version string, endpoint apiDefinition.En
 	}
 	var contextExtensions = make(map[string]string)
 	contextExtensions["path"] = resourcePath
+	//TODO: (VirajSalaka) This will be only assigned when
 	contextExtensions["basePath"] = xWso2Basepath
 	contextExtensions["method"] = strings.Join(resource.GetMethod(), " ")
 	contextExtensions["version"] = version

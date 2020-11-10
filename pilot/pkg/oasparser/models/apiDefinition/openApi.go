@@ -45,9 +45,9 @@ func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
 	swagger.vendorExtensible = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.resources = SetResourcesOpenApi(swagger3)
 
-	if IsServerUrlIsAvailable(swagger3) {
-		for i, _ := range swagger3.Servers {
-			endpoint := getHostandBasepathandPort(swagger3.Servers[i].URL)
+	if IsServerUrlIsAvailable(swagger3.Servers) {
+		for _, serverEntry := range swagger3.Servers {
+			endpoint := getHostandBasepathandPort(serverEntry.URL)
 			swagger.productionUrls = append(swagger.productionUrls, endpoint)
 		}
 	}
@@ -121,6 +121,12 @@ func SetResourcesOpenApi(openApi openapi3.Swagger) []Resource {
 			}
 			if methodFound {
 				resource := setOperationOpenApi(path, methodsArray, pathItem)
+				if IsServerUrlIsAvailable(pathItem.Servers) {
+					for _, serverEntry := range pathItem.Servers {
+						endpoint := getHostandBasepathandPort(serverEntry.URL)
+						resource.productionUrls = append(resource.productionUrls, endpoint)
+					}
+				}
 				resources = append(resources, resource)
 			}
 		}
@@ -169,12 +175,12 @@ func getHostandBasepathandPort(rawUrl string) Endpoint {
 /**
  * Check the availability od server url in openApi3
  *
- * @param swagger3  Swagger3 unmarshalled data
+ * @param servers  Swagger3 Servers object
  * @return bool  Bool value of availability
  */
-func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
-	if swagger3.Servers != nil {
-		if len(swagger3.Servers) > 0 && (swagger3.Servers[0].URL != "") {
+func IsServerUrlIsAvailable(servers openapi3.Servers) bool {
+	if servers != nil {
+		if len(servers) > 0 && (servers[0].URL != "") {
 			return true
 		}
 	}
