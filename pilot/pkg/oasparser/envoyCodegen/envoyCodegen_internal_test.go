@@ -64,8 +64,10 @@ func TestCreateRoute(t *testing.T) {
 		Port:     80,
 	}
 	version := "1.0"
-	resource := apiDefinition.CreateMinimalDummyResourceForTests("/resourcePath", "get", "resource_operation_id", []apiDefinition.Endpoint{},
-		[]apiDefinition.Endpoint{})
+	resourceWithGet := apiDefinition.CreateMinimalDummyResourceForTests("/resourcePath", []string{"GET"},
+		"resource_operation_id", []apiDefinition.Endpoint{}, []apiDefinition.Endpoint{})
+	resourceWithGetPost := apiDefinition.CreateMinimalDummyResourceForTests("/resourcePath", []string{"GET", "POST"},
+		"resource_operation_id", []apiDefinition.Endpoint{}, []apiDefinition.Endpoint{})
 	clusterName := "resource_operation_id"
 	hostRewriteSpecifier := &routev3.RouteAction_HostRewriteLiteral{
 		HostRewriteLiteral: "abc.com",
@@ -85,7 +87,7 @@ func TestCreateRoute(t *testing.T) {
 		Substitution: "/basepath",
 	}
 
-	expctedRouteActionWithXWso2BasePath := &routev3.Route_Route{
+	expectedRouteActionWithXWso2BasePath := &routev3.Route_Route{
 		Route: &routev3.RouteAction{
 			HostRewriteSpecifier: hostRewriteSpecifier,
 			RegexRewrite:         regexRewriteWithXWso2BasePath,
@@ -93,23 +95,28 @@ func TestCreateRoute(t *testing.T) {
 		},
 	}
 
-	expctedRouteActionWithoutXWso2BasePath := &routev3.Route_Route{
+	expectedRouteActionWithoutXWso2BasePath := &routev3.Route_Route{
 		Route: &routev3.RouteAction{
 			HostRewriteSpecifier: hostRewriteSpecifier,
 			ClusterSpecifier:     clusterSpecifier,
 		},
 	}
 
-	generatedRouteWithXWso2BasePath := createRoute(xWso2BasePath, version, endpoint, resource, clusterName)
+	generatedRouteWithXWso2BasePath := createRoute(xWso2BasePath, version, endpoint, resourceWithGet, clusterName)
 	assert.NotNil(t, generatedRouteWithXWso2BasePath, "Route should not be null")
-
-	assert.Equal(t, expctedRouteActionWithXWso2BasePath, generatedRouteWithXWso2BasePath.Action,
+	assert.Equal(t, expectedRouteActionWithXWso2BasePath, generatedRouteWithXWso2BasePath.Action,
 		"Route generation mismatch when xWso2BasePath option is provided")
+	assert.NotNil(t, generatedRouteWithXWso2BasePath.GetMatch().Headers, "Headers property should not be null")
+	assert.Equal(t, "^(GET)$", generatedRouteWithXWso2BasePath.GetMatch().Headers[0].GetSafeRegexMatch().Regex,
+		"Assigned HTTP Method Regex is incorrect when single method is available.")
 
-	generatedRouteWithoutXWso2BasePath := createRoute("", version, endpoint, resource, clusterName)
+	generatedRouteWithoutXWso2BasePath := createRoute("", version, endpoint, resourceWithGetPost, clusterName)
 	assert.NotNil(t, generatedRouteWithoutXWso2BasePath, "Route should not be null")
+	assert.NotNil(t, generatedRouteWithoutXWso2BasePath.GetMatch().Headers, "Headers property should not be null")
+	assert.Equal(t, "^(GET|POST)$", generatedRouteWithoutXWso2BasePath.GetMatch().Headers[0].GetSafeRegexMatch().Regex,
+		"Assigned HTTP Method Regex is incorrect when multiple methods are available.")
 
-	assert.Equal(t, expctedRouteActionWithoutXWso2BasePath, generatedRouteWithoutXWso2BasePath.Action,
+	assert.Equal(t, expectedRouteActionWithoutXWso2BasePath, generatedRouteWithoutXWso2BasePath.Action,
 		"Route generation mismatch when xWso2BasePath option is provided")
 
 }

@@ -117,6 +117,7 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 	assert.Equal(t, "^/pets(\\?([^/]+))?$", routes[0].GetMatch().GetSafeRegex().Regex)
 	assert.Equal(t, "^/pets/([^/]+)(\\?([^/]+))?$", routes[1].GetMatch().GetSafeRegex().Regex)
 	routeRegexMatchesFound := false
+	//route entity creation is tested separately. In here, it checks the connection between the route and the cluster
 	for _, route := range routes {
 		if route.GetMatch().GetSafeRegex().Regex == "^/pets(\\?([^/]+))?$" {
 			routeRegexMatchesFound = true
@@ -128,4 +129,7 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 		}
 	}
 	assert.Equal(t, true, routeRegexMatchesFound, "Generated route regex is incorrect.")
+	//TODO: (VirajSalaka) Additional tasks to test
+	//Extensions
+	//OpenAPI version 2
 }

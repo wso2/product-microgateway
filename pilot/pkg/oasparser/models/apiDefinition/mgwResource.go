@@ -69,10 +69,10 @@ func CreateDummyResourceForTests(path, method, description string, consumes, sch
 	}
 }
 
-func CreateMinimalDummyResourceForTests(path, method, id string, productionUrls, sandboxUrls []Endpoint) Resource {
+func CreateMinimalDummyResourceForTests(path string, methods []string, id string, productionUrls, sandboxUrls []Endpoint) Resource {
 	return Resource{
 		path:           path,
-		methods:        []string{method},
+		methods:        methods,
 		iD:             id,
 		productionUrls: productionUrls,
 		sandboxUrls:    sandboxUrls,
