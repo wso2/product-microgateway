@@ -219,7 +219,6 @@ func createRoute(xWso2Basepath string, version string, endpoint apiDefinition.En
 	)
 	headerMatcherArray := routev3.HeaderMatcher{
 		Name: ":method",
-		//TODO: (VirajSalaka) Decide if contains match or regex match is more appropriate
 		HeaderMatchSpecifier: &routev3.HeaderMatcher_SafeRegexMatch{
 			SafeRegexMatch: &envoy_type_matcherv3.RegexMatcher{
 				EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
@@ -260,8 +259,11 @@ func createRoute(xWso2Basepath string, version string, endpoint apiDefinition.En
 	}
 	var contextExtensions = make(map[string]string)
 	contextExtensions["path"] = resourcePath
-	//TODO: (VirajSalaka) This will be only assigned when
-	contextExtensions["basePath"] = xWso2Basepath
+	if xWso2Basepath != "" {
+		contextExtensions["basePath"] = xWso2Basepath
+	} else {
+		contextExtensions["basePath"] = endpoint.GetBasepath()
+	}
 	contextExtensions["method"] = strings.Join(resource.GetMethod(), " ")
 	contextExtensions["version"] = version
 

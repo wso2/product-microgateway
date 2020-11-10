@@ -97,11 +97,9 @@ func TestGenerateRegex(t *testing.T) {
 }
 
 func TestCreateRoutesWithClustersForOpenAPIWithoutExtensions(t *testing.T) {
-	//TODO: (VirajSalaka) Finalize if reading from a file and asserting is the correct approach for unit tests
 	openapiFilePath := configs.GetMgwHome() + "/../pilot/test-resources/envoycodegen/openapi.yaml"
 	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
 	//TODO: (VirajSalaka) Additional tasks to test
-	//Extensions
 	//OpenAPI version 2
 }
 
@@ -125,7 +123,6 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 	routes, clusters, _, _, _, _ := enovoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
 
 	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
-	//TODO: (VirajSalaka) Test against path level endpoints
 	//As the first cluster is always related to API level cluster
 	apiLevelCluster := clusters[0]
 	pathLevelCluster := clusters[1]
