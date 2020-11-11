@@ -45,7 +45,7 @@ password = "wso2carbon"
 # Configurations for retrieving API and subscription data from API Manager.
 [filter.eventHub]
     # Enable/ Disable the feature
-    enable = true
+    enable = false
     # The API Manager URL
     serviceUrl = "https://localhost:9443/"
     # User name and password of the internal data api.
