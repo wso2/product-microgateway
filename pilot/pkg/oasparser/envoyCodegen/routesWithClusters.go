@@ -97,6 +97,9 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*routev3.R
 		logger.LoggerOasparser.Warn("API level Producton endpoints are not defined")
 	}
 	for ind, resource := range mgwSwagger.GetResources() {
+		apiTitle := mgwSwagger.GetTitle()
+		apiVersion := mgwSwagger.GetVersion()
+		apiBasePath := mgwSwagger.GetXWso2Basepath()
 
 		//resource level check sandbox endpoints
 		if swag_operator.IsEndpointsAvailable(resource.GetSandEndpoints()) {
@@ -108,7 +111,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*routev3.R
 			cluster_refSand = clusterSand.GetName()
 
 			//sandbox endpoints
-			routeS := createRoute(mgwSwagger.GetXWso2Basepath(), mgwSwagger.GetVersion(), endpointSand[0], resource, cluster_refSand)
+			routeS := createRoute(apiTitle, apiBasePath, apiVersion, endpointSand[0], resource, cluster_refSand)
 			routesSand = append(routesSand, &routeS)
 			endpointsSand = append(endpointsSand, &addressSand)
 
@@ -118,7 +121,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*routev3.R
 			cluster_refSand = apilevelClusterSand.GetName()
 
 			//sandbox endpoints
-			routeS := createRoute(mgwSwagger.GetXWso2Basepath(), mgwSwagger.GetVersion(), endpointSand[0], resource, cluster_refSand)
+			routeS := createRoute(apiTitle, apiBasePath, apiVersion, endpointSand[0], resource, cluster_refSand)
 			routesSand = append(routesSand, &routeS)
 
 		}
@@ -134,7 +137,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*routev3.R
 			cluster_refProd = clusterProd.GetName()
 
 			//production endpoints
-			routeP := createRoute(mgwSwagger.GetXWso2Basepath(), mgwSwagger.GetVersion(), endpointProd[0], resource, cluster_refProd)
+			routeP := createRoute(apiTitle, apiBasePath, apiVersion, endpointProd[0], resource, cluster_refProd)
 			routesProd = append(routesProd, &routeP)
 			endpointsProd = append(endpointsProd, &addressProd)
 
@@ -145,7 +148,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*routev3.R
 
 			//production endpoints
 
-			routeP := createRoute(mgwSwagger.GetXWso2Basepath(), mgwSwagger.GetVersion(), endpointProd[0], resource, cluster_refProd)
+			routeP := createRoute(apiTitle, apiBasePath, apiVersion, endpointProd[0], resource, cluster_refProd)
 			routesProd = append(routesProd, &routeP)
 
 		} else {
@@ -199,13 +202,15 @@ func createCluster(address corev3.Address, clusterName string) clusterv3.Cluster
 /**
  * Create a route.
  *
+ * @param title	API title
  * @param xWso2Basepath   Xwso2 basepath
+ * @param version	API version
  * @param endpoint  Endpoint
  * @param resource  Microgateway API Resource
  * @param clusterName  Name of the cluster
  * @return v2route.Route  Route instance
  */
-func createRoute(xWso2Basepath string, version string, endpoint apiDefinition.Endpoint, resource apiDefinition.Resource, clusterName string) routev3.Route {
+func createRoute(title string, xWso2Basepath string, version string, endpoint apiDefinition.Endpoint, resource apiDefinition.Resource, clusterName string) routev3.Route {
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
 		router       routev3.Route
@@ -252,6 +257,7 @@ func createRoute(xWso2Basepath string, version string, endpoint apiDefinition.En
 	contextExtensions["basePath"] = xWso2Basepath
 	contextExtensions["method"] = resource.GetMethod()
 	contextExtensions["version"] = version
+	contextExtensions["name"] = title
 
 	perFilterConfig := extAuthService.ExtAuthzPerRoute{
 		Override: &extAuthService.ExtAuthzPerRoute_CheckSettings{

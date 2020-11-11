@@ -12,21 +12,21 @@ maven 3.6
 
 ## Quick Start Guide
 
-- sh remove-containers.sh (If it is the first time this is not required to run.
+- `sh remove-containers.sh` (If it is the first time this is not required to run.
 The purpose is to remove the already created docker containers. Otherwise the docker 
 maven plugin would fail to create the new docker images)
 
-- mvn clean install (make sure java-11 is set because the filter-chain pom contains
+- `mvn clean install` (make sure java-11 is set because the filter-chain pom contains
  java-11 as the source)
  
- - Once the mvn clean install is completed, navigate to distribution/target/.
- Then extract the zip file called WSO2-Microgateway-3.2.1-SNAPSHOT.zip
+ - Navigate to distribution/target/.
+ Then extract the zip file called wso2am-micro-gw-3.2.1-SNAPSHOT.zip
  
  - Then execute `docker-compose up` to run the setup. This will start an envoy container,
  filter-core container and piot container. The mounted configurations can be found from
  docker-compose directory.
  
- - The apictl is required to add APIs to the microgateway. https://github.com/wso2/product-apim-tooling/tree/envoy-gw
+ - The `apictl` is required to add APIs to the microgateway. https://github.com/wso2/product-apim-tooling/tree/envoy-gw
  Then you need initialize a project using apictl `init` command. (help command will guide)
  Then the certificate (resources/certs/localhost.pem) needs to be copied to `~/.wso2apictl/certs` 
  directory. And finally execute `apictl mg deploy ...` command. (help command will guide through it)
@@ -37,6 +37,8 @@ maven plugin would fail to create the new docker images)
     - configurations under `[envoy]` refer to the listener configurations related to envoy listener.
     Other than that the user can edit the `envoy.yaml` file located insider `<distribution>/resources/proxy`
     directory.
+ - For now, to access envoy API listener you must first use `apictl mg deploy` and deploy an API
+ - Use http**s** 10000 to access envoy API listener
  
  ### If the developer needs to build a separate component
  

@@ -76,9 +76,9 @@ public class MGWConfiguration {
      * Initialize the configuration provider class by reading the Mgw Configuration file.
      */
     private void init() throws KeyStoreException {
-        String home = System.getenv("FILTER_HOME");
-        File file = new File(home + "/conf/filter.conf");
-        configToml = new Toml().read(file);
+        String home = System.getenv(ConfigConstants.FILTER_HOME);
+        File file = new File(home + File.separator + ConfigConstants.CONF_DIR + File.separator + "config.toml");
+        configToml = new Toml().read(file).getTable(ConfigConstants.CONF_FILTER_TABLE);
         //Load Client Trust Store
         loadTrustStore();
 

@@ -15,3 +15,41 @@ clusterTimeoutInSeconds = 20
 listenerTlsEnabled = true
 listenerCertPath = "/home/wso2/certs/localhost.pem"
 listenerKeyPath = "/home/wso2/certs/localhost.key"
+
+[filter]
+#Key Store Configuration
+[filter.keystore]
+location = "wso2carbon.jks"
+type = "jks"
+password = "wso2carbon"
+
+#Trust store configuration
+[filter.truststore]
+location = "/home/wso2/mg/security/client-truststore.jks"
+type = "jks"
+password = "wso2carbon"
+
+# JWT token authorization configurations. You can provide multiple JWT issuers
+# Issuer 1
+[[filter.jwtTokenConfig]]
+    name="Resident Key Manager"
+    issuer = "https://localhost:9443/oauth2/token"
+    certificateAlias = "wso2carbon"
+    # URL of the JWKs endpoint
+    jwksURL = ""
+    # Validate subscribed APIs
+    validateSubscription = false
+    # The claim in which the consumer key of the application is coming
+    consumerKeyClaim = "azp"
+
+# Configurations for retrieving API and subscription data from API Manager.
+[filter.eventHub]
+    # Enable/ Disable the feature
+    enable = false
+    # The API Manager URL
+    serviceUrl = "https://localhost:9443/"
+    # User name and password of the internal data api.
+    username="admin"
+    password="admin"
+    # The message broker connection URL.
+    eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"

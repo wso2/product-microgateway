@@ -23,8 +23,12 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>../resources/filter-core</directory>
-            <outputDirectory>resources</outputDirectory>
+            <directory>../resources/filter-core/security</directory>
+            <outputDirectory>security</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>../resources/conf</directory>
+            <outputDirectory>conf</outputDirectory>
         </fileSet>
         <fileSet>
             <!-- TODO: (VirajSalaka) Another option is to use the dependencySet option -->

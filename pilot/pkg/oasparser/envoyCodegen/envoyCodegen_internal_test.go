@@ -57,6 +57,7 @@ func TestGenerateRoutePaths(t *testing.T) {
 func TestCreateRoute(t *testing.T) {
 	xWso2BasePath := "/xWso2BasePath"
 	basePath := "/basepath"
+	title := "WSO2"
 	endpoint := apiDefinition.Endpoint{
 		Host:     "abc.com",
 		Basepath: basePath,
@@ -100,13 +101,13 @@ func TestCreateRoute(t *testing.T) {
 		},
 	}
 
-	generatedRouteWithXWso2BasePath := createRoute(xWso2BasePath, version, endpoint, resource, clusterName)
+	generatedRouteWithXWso2BasePath := createRoute(title, xWso2BasePath, version, endpoint, resource, clusterName)
 	assert.NotNil(t, generatedRouteWithXWso2BasePath, "Route should not be null")
 
 	assert.Equal(t, generatedRouteWithXWso2BasePath.Action, expctedRouteActionWithXWso2BasePath,
 		"Route generation mismatch when xWso2BasePath option is provided")
 
-	generatedRouteWithoutXWso2BasePath := createRoute("", version, endpoint, resource, clusterName)
+	generatedRouteWithoutXWso2BasePath := createRoute(title, "", version, endpoint, resource, clusterName)
 	assert.NotNil(t, generatedRouteWithoutXWso2BasePath, "Route should not be null")
 
 	assert.Equal(t, generatedRouteWithoutXWso2BasePath.Action, expctedRouteActionWithoutXWso2BasePath,

@@ -32,7 +32,6 @@ services:
     volumes:
       - ./../../filter-core/target:/home/ubuntu/mg/lib/
       - ./../../filter-core/src/main/resources:/home/ubuntu/mg/conf/
-      - ./../../resources/apis:/home/ubuntu/mg/apis
     ports:
       - "8081:8081"
   # zipkin:
