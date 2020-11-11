@@ -22,6 +22,7 @@ import (
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/config/filter/http/ext_authz/v2"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
@@ -78,7 +79,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*routev3.R
 		apilevelAddressSand := createAddress(apiLevelEndpointSand[0].GetHost(), apiLevelEndpointSand[0].GetPort())
 		apiLevelClusterNameSand = strings.TrimSpace("clusterSand_" + strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) +
 			mgwSwagger.GetVersion())
-		apilevelClusterSand = createCluster(apilevelAddressSand, apiLevelClusterNameSand)
+		apilevelClusterSand = createCluster(apilevelAddressSand, apiLevelClusterNameSand, apiLevelEndpointSand[0].UrlType)
 		clustersSand = append(clustersSand, &apilevelClusterSand)
 		endpointsSand = append(endpointsSand, &apilevelAddressSand)
 	}
@@ -89,7 +90,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*routev3.R
 		apilevelAddressP := createAddress(apiLevelEndpointProd[0].GetHost(), apiLevelEndpointProd[0].GetPort())
 		apiLevelClusterNameProd = strings.TrimSpace("clusterProd_" + strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) +
 			mgwSwagger.GetVersion())
-		apilevelClusterProd = createCluster(apilevelAddressP, apiLevelClusterNameProd)
+		apilevelClusterProd = createCluster(apilevelAddressP, apiLevelClusterNameProd, apiLevelEndpointProd[0].UrlType)
 		clustersProd = append(clustersProd, &apilevelClusterProd)
 		endpointsProd = append(endpointsProd, &apilevelAddressP)
 
@@ -108,7 +109,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*routev3.R
 			//TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
 			clusterNameSand := strings.TrimSpace(apiLevelClusterNameSand + "_" + strings.Replace(resource.GetId(), " ", "", -1) +
 				"0")
-			clusterSand := createCluster(addressSand, clusterNameSand)
+			clusterSand := createCluster(addressSand, clusterNameSand, endpointSand[0].UrlType)
 			clustersSand = append(clustersSand, &clusterSand)
 			clusterRefSand := clusterSand.GetName()
 
@@ -135,7 +136,7 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*routev3.R
 			//TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
 			clusterNameProd := strings.TrimSpace(apiLevelClusterNameProd + "_" + strings.Replace(resource.GetId(), " ", "", -1) +
 				"0")
-			clusterProd := createCluster(addressProd, clusterNameProd)
+			clusterProd := createCluster(addressProd, clusterNameProd, endpointProd[0].UrlType)
 			clustersProd = append(clustersProd, &clusterProd)
 			clusterRefProd := clusterProd.GetName()
 
@@ -165,9 +166,10 @@ func CreateRoutesWithClusters(mgwSwagger apiDefinition.MgwSwagger) ([]*routev3.R
  * Create a cluster.
  *
  * @param address   Address which has host and port
- * @return v2.Cluster  Cluster instance
+ * @param urlType	https or http
+ * @return v3.Cluster  Cluster instance
  */
-func createCluster(address corev3.Address, clusterName string) clusterv3.Cluster {
+func createCluster(address corev3.Address, clusterName string, urlType string) clusterv3.Cluster {
 	logger.LoggerOasparser.Debug("creating a cluster....")
 	conf, errReadConfig := configs.ReadConfigs()
 	if errReadConfig != nil {
@@ -175,6 +177,7 @@ func createCluster(address corev3.Address, clusterName string) clusterv3.Cluster
 	}
 
 	h := &address
+
 	cluster := clusterv3.Cluster{
 		Name:                 clusterName,
 		ConnectTimeout:       ptypes.DurationProto(conf.Envoy.ClusterTimeoutInSeconds * time.Second),
@@ -197,6 +200,33 @@ func createCluster(address corev3.Address, clusterName string) clusterv3.Cluster
 				},
 			},
 		},
+	}
+	if strings.HasPrefix(urlType, "https") {
+		upstreamtlsContext := &tlsv3.UpstreamTlsContext{
+			CommonTlsContext: &tlsv3.CommonTlsContext{
+				ValidationContextType: &tlsv3.CommonTlsContext_ValidationContext{
+					ValidationContext: &tlsv3.CertificateValidationContext{
+						TrustedCa: &corev3.DataSource{
+							Specifier: &corev3.DataSource_Filename{
+								Filename: "/etc/ssl/certs/ca-certificates.crt",
+							},
+						},
+					},
+				},
+			},
+		}
+		marshalledTlsContext, err := ptypes.MarshalAny(upstreamtlsContext)
+		if err != nil {
+			logger.LoggerOasparser.Error("Internal Error while marshalling the upstream TLS Context.")
+		} else {
+			upstreamTransportSocket := &corev3.TransportSocket{
+				Name: "envoy.transport_sockets.tls",
+				ConfigType: &corev3.TransportSocket_TypedConfig{
+					TypedConfig: marshalledTlsContext,
+				},
+			}
+			cluster.TransportSocket = upstreamTransportSocket
+		}
 	}
 	return cluster
 }
