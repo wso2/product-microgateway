@@ -25,6 +25,7 @@ import org.wso2.micro.gateway.filter.core.api.APIFactory;
 import org.wso2.micro.gateway.filter.core.api.RequestContext;
 import org.wso2.micro.gateway.filter.core.api.ResponseObject;
 import org.wso2.micro.gateway.filter.core.api.config.ResourceConfig;
+import org.wso2.micro.gateway.filter.core.constants.APIConstants;
 
 import java.util.Map;
 
@@ -44,10 +45,9 @@ public class RequestHandler {
         String requestPath = request.getAttributes().getRequest().getHttp().getPath();
         String method = request.getAttributes().getRequest().getHttp().getMethod();
         Map<String, String> headers = request.getAttributes().getRequest().getHttp().getHeadersMap();
+        String res = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_RES_PATH_PARAM);
 
-        // When retrieving matched resource based on the check request, theres only one resource available in the
-        // apiConfig.resources. Therefore picking the first one.
-        ResourceConfig resourceConfig = api.getAPIConfig().getResources().get(0);
+        ResourceConfig resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api).headers(headers).build();
     }

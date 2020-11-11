@@ -81,15 +81,24 @@ public class RestAPI implements API {
      * @return resource configuration identified by the request
      */
     private List<ResourceConfig> extractResourceConfig(Map<String, String> attributes) {
+        // TODO: (Praminda) cover error cases
         String resPath = attributes.get(APIConstants.GW_RES_PATH_PARAM);
-        String resMethod = attributes.get(APIConstants.GW_RES_METHOD_PARAM);
+        String[] methods = attributes.get(APIConstants.GW_RES_METHOD_PARAM).split(" ");
         List<ResourceConfig> resources = new ArrayList<>(1);
 
+        for (String m : methods) {
+            resources.add(buildResource(resPath, m));
+        }
+
+        return resources;
+    }
+
+    private ResourceConfig buildResource(String resPath, String resMethod) {
         ResourceConfig resource = new ResourceConfig();
         resource.setPath(resPath);
         resource.setMethod(ResourceConfig.HttpMethods.valueOf(resMethod.toUpperCase()));
-        resources.add(resource);
-        return resources;
+
+        return resource;
     }
 
     private void initFilters() {

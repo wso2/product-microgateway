@@ -20,7 +20,9 @@ package org.wso2.micro.gateway.filter.core.api;
 import io.envoyproxy.envoy.service.auth.v2.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.filter.core.api.config.ResourceConfig;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -50,5 +52,13 @@ public class APIFactory {
         API api = new RestAPI();
         api.init(request);
         return api;
+    }
+
+    public ResourceConfig getMatchedResource(API api, String matchedResourcePath, String method) {
+        List<ResourceConfig> resourceConfigList = api.getAPIConfig().getResources();
+        return resourceConfigList.stream()
+                .filter(resourceConfig -> resourceConfig.getPath().equals(matchedResourcePath)).
+                        filter(resourceConfig -> (method == null) || resourceConfig.getMethod()
+                                .equals(ResourceConfig.HttpMethods.valueOf(method))).findFirst().orElse(null);
     }
 }
