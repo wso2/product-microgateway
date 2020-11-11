@@ -16,10 +16,9 @@
  */
 package apiDefinition
 
-//TODO: (VirajSalaka) Decide if it is required to have encapsulation.
 type Resource struct {
 	path             string
-	method           string
+	methods          []string
 	description      string
 	consumes         []string
 	schemes          []string
@@ -48,15 +47,15 @@ func (resource *Resource) GetId() string {
 	return resource.iD
 }
 
-func (resource *Resource) GetMethod() string {
-	return resource.method
+func (resource *Resource) GetMethod() []string {
+	return resource.methods
 }
 
 func CreateDummyResourceForTests(path, method, description string, consumes, schemes, tags []string, summary, id string,
 	productionUrls, sandboxUrls []Endpoint, security []map[string][]string, vendorExtensible map[string]interface{}) Resource {
 	return Resource{
 		path:             path,
-		method:           method,
+		methods:          []string{method},
 		description:      description,
 		consumes:         consumes,
 		schemes:          schemes,
@@ -70,10 +69,10 @@ func CreateDummyResourceForTests(path, method, description string, consumes, sch
 	}
 }
 
-func CreateMinimalDummyResourceForTests(path, method, id string, productionUrls, sandboxUrls []Endpoint) Resource {
+func CreateMinimalDummyResourceForTests(path string, methods []string, id string, productionUrls, sandboxUrls []Endpoint) Resource {
 	return Resource{
 		path:           path,
-		method:         method,
+		methods:        methods,
 		iD:             id,
 		productionUrls: productionUrls,
 		sandboxUrls:    sandboxUrls,

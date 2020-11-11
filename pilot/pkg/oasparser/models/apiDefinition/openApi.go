@@ -25,7 +25,7 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/wso2/micro-gw/configs"
+	"github.com/google/uuid"
 	logger "github.com/wso2/micro-gw/loggers"
 )
 
@@ -45,9 +45,9 @@ func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
 	swagger.vendorExtensible = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.resources = SetResourcesOpenApi(swagger3)
 
-	if IsServerUrlIsAvailable(swagger3) {
-		for i, _ := range swagger3.Servers {
-			endpoint := getHostandBasepathandPort(swagger3.Servers[i].URL)
+	if IsServerUrlIsAvailable(swagger3.Servers) {
+		for _, serverEntry := range swagger3.Servers {
+			endpoint := getHostandBasepathandPort(serverEntry.URL)
 			swagger.productionUrls = append(swagger.productionUrls, endpoint)
 		}
 	}
@@ -57,23 +57,24 @@ func (swagger *MgwSwagger) SetInfoOpenApi(swagger3 openapi3.Swagger) {
  * Set swagger3 resource path details to mgwSwagger  Instance.
  *
  * @param path  Resource path
- * @param method  Path type(Get, Post ... )
- * @param operation  Operation type
+ * @param methods  Path types as an array (Get, Post ... )
+ * @param pathItem  PathItem entity
  * @return Resource  MgwSwagger resource instance
  */
-func setOperationOpenApi(path string, method string, operation *openapi3.Operation) Resource {
+func setOperationOpenApi(path string, methods []string, pathItem *openapi3.PathItem) Resource {
 	var resource Resource
-	if operation != nil {
+	if pathItem != nil {
 		resource = Resource{
-			path:        path,
-			method:      method,
-			iD:          operation.OperationID,
-			summary:     operation.Summary,
-			description: operation.Description,
+			path:    path,
+			methods: methods,
+			//TODO: (VirajSalaka) This will not solve the actual problem when incremental Xds is introduced (used for cluster names)
+			iD:          uuid.New().String(),
+			summary:     pathItem.Summary,
+			description: pathItem.Description,
 			//Schemes: operation.,
 			//tags: operation.Tags,
 			//Security: operation.Security.,
-			vendorExtensible: convertExtensibletoReadableFormat(operation.ExtensionProps)}
+			vendorExtensible: convertExtensibletoReadableFormat(pathItem.ExtensionProps)}
 	}
 	return resource
 }
@@ -88,26 +89,48 @@ func SetResourcesOpenApi(openApi openapi3.Swagger) []Resource {
 	var resources []Resource
 	if openApi.Paths != nil {
 		for path, pathItem := range openApi.Paths {
-			var resource Resource
+			var methodsArray []string
+			methodFound := false
 			if pathItem.Get != nil {
-				resource = setOperationOpenApi(path, "get", pathItem.Get)
-			} else if pathItem.Post != nil {
-				resource = setOperationOpenApi(path, "post", pathItem.Post)
-			} else if pathItem.Put != nil {
-				resource = setOperationOpenApi(path, "put", pathItem.Put)
-			} else if pathItem.Delete != nil {
-				resource = setOperationOpenApi(path, "delete", pathItem.Delete)
-			} else if pathItem.Head != nil {
-				resource = setOperationOpenApi(path, "head", pathItem.Head)
-			} else if pathItem.Patch != nil {
-				resource = setOperationOpenApi(path, "patch", pathItem.Patch)
-			} else {
-				//resource = setOperation(contxt,"get",pathItem.Get)
+				methodsArray = append(methodsArray, "GET")
+				methodFound = true
 			}
-			resources = append(resources, resource)
+			if pathItem.Post != nil {
+				methodsArray = append(methodsArray, "POST")
+				methodFound = true
+			}
+			if pathItem.Put != nil {
+				methodsArray = append(methodsArray, "PUT")
+				methodFound = true
+			}
+			if pathItem.Delete != nil {
+				methodsArray = append(methodsArray, "DELETE")
+				methodFound = true
+			}
+			if pathItem.Head != nil {
+				methodsArray = append(methodsArray, "HEAD")
+				methodFound = true
+			}
+			if pathItem.Patch != nil {
+				methodsArray = append(methodsArray, "HEAD")
+				methodFound = true
+			}
+			if pathItem.Options != nil {
+				methodsArray = append(methodsArray, "OPTIONS")
+				methodFound = true
+			}
+			if methodFound {
+				resource := setOperationOpenApi(path, methodsArray, pathItem)
+				if IsServerUrlIsAvailable(pathItem.Servers) {
+					for _, serverEntry := range pathItem.Servers {
+						endpoint := getHostandBasepathandPort(serverEntry.URL)
+						resource.productionUrls = append(resource.productionUrls, endpoint)
+					}
+				}
+				resources = append(resources, resource)
+			}
 		}
 	}
-
 	return resources
 }
 
@@ -124,28 +147,27 @@ func getHostandBasepathandPort(rawUrl string) Endpoint {
 		port     uint32
 	)
 	if !strings.Contains(rawUrl, "://") {
-		rawUrl = "http://" + rawUrl
+		rawUrl = "https://" + rawUrl
 	}
-	u, err := url.Parse(rawUrl)
+	parsedUrl, err := url.Parse(rawUrl)
 	if err != nil {
 		logger.LoggerOasparser.Fatal(err)
 	}
 
-	host = u.Hostname()
-	basepath = u.Path
-	if u.Port() != "" {
-		u32, err := strconv.ParseUint(u.Port(), 10, 32)
+	host = parsedUrl.Hostname()
+	basepath = parsedUrl.Path
+	if parsedUrl.Port() != "" {
+		u32, err := strconv.ParseUint(parsedUrl.Port(), 10, 32)
 		if err != nil {
 			logger.LoggerOasparser.Error("Error passing port value to mgwSwagger", err)
 		}
 		port = uint32(u32)
 	} else {
-		//read default port from configs
-		conf, errReadConfig := configs.ReadConfigs()
-		if errReadConfig != nil {
-			logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
+		if strings.HasPrefix(rawUrl, "https://") {
+			port = uint32(443)
+		} else {
+			port = uint32(80)
 		}
-		port = conf.Envoy.ApiDefaultPort
 	}
 	return Endpoint{Host: host, Basepath: basepath, Port: port}
 }
@@ -153,19 +175,16 @@ func getHostandBasepathandPort(rawUrl string) Endpoint {
 /**
  * Check the availability od server url in openApi3
  *
- * @param swagger3  Swagger3 unmarshalled data
+ * @param servers  Swagger3 Servers object
  * @return bool  Bool value of availability
  */
-func IsServerUrlIsAvailable(swagger3 openapi3.Swagger) bool {
-	if swagger3.Servers != nil {
-		if len(swagger3.Servers) > 0 && (swagger3.Servers[0].URL != "") {
+func IsServerUrlIsAvailable(servers openapi3.Servers) bool {
+	if servers != nil {
+		if len(servers) > 0 && (servers[0].URL != "") {
 			return true
-		} else {
-			return false
 		}
-	} else {
-		return false
 	}
+	return false
 }
 
 /**

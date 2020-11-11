@@ -92,17 +92,17 @@ func TestSetResourcesOpenApi(t *testing.T) {
 				Paths: openapi3.Paths{
 					"/pet/{petId}": &openapi3.PathItem{
 						Get: &openapi3.Operation{
-							Summary:     "pet find by id",
-							Description: "this retrieve data from id",
 							OperationID: "petfindbyid",
 						},
+						Summary:     "pet find by id",
+						Description: "this retrieve data from id",
 					},
 				},
 			},
 			[]Resource{
 				{
 					path:        "/pet/{petId}",
-					method:      "get",
+					methods:     []string{"GET"},
 					description: "this retrieve data from id",
 					iD:          "petfindbyid",
 					summary:     "pet find by id",
@@ -113,7 +113,14 @@ func TestSetResourcesOpenApi(t *testing.T) {
 	}
 	for _, item := range dataItems {
 		resultResources := SetResourcesOpenApi(item.input)
-		assert.Equal(t, item.result, resultResources, item.message)
+		if item.result != nil {
+			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
+			assert.Equal(t, item.result[0].methods, resultResources[0].GetMethod(), item.message)
+			assert.Equal(t, item.result[0].description, resultResources[0].description, item.message)
+			assert.Equal(t, item.result[0].summary, resultResources[0].summary, item.message)
+		} else {
+			assert.Equal(t, item.result, resultResources, item.message)
+		}
 	}
 }
 

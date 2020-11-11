@@ -274,9 +274,6 @@ func getAccessLogConfigs() access_logv3.AccessLog {
 		ConfigType: &access_logv3.AccessLog_TypedConfig{
 			TypedConfig: accessLogTypedConf,
 		},
-		XXX_NoUnkeyedLiteral: struct{}{},
-		XXX_unrecognized:     nil,
-		XXX_sizecache:        0,
 	}
 
 	return access_logs

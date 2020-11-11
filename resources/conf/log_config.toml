@@ -1,6 +1,6 @@
 # The logging configuration file for control plane
 ######### root Level ########
-logfile = "resources/logs/controlPlane.log"
+logfile = "logs/pilot.log"
 logLevel = "INFO"
 
 [rotation]
@@ -14,7 +14,7 @@ Compress = true
 
 [[pkg]]
 name = "github.com/wso2/micro-gw/internal/pkg/mgw"
-logLevel = "DEBG"
+logLevel = "INFO"
 
 [[pkg]]
 name = "github.com/wso2/micro-gw/internal/pkg/oasparser"
