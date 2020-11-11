@@ -23,11 +23,8 @@ import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.channel.EventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.filter.core.api.APIFactory;
 import org.wso2.micro.gateway.filter.core.common.CacheProvider;
 import org.wso2.micro.gateway.filter.core.common.ReferenceHolder;
 import org.wso2.micro.gateway.filter.core.config.MGWConfiguration;
@@ -36,10 +33,6 @@ import org.wso2.micro.gateway.filter.core.keymgt.KeyManagerDataServiceImpl;
 import org.wso2.micro.gateway.filter.core.listener.GatewayJMSMessageListener;
 import org.wso2.micro.gateway.filter.core.subscription.SubscriptionDataHolder;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -69,8 +62,6 @@ public class AuthServer {
         MGWConfiguration mgwConfiguration = MGWConfiguration.getInstance();
         ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
         ReferenceHolder.getInstance().setMGWConfiguration(mgwConfiguration);
-        //TODO: Add API is only for testing this has to come via the rest API.
-        addAPI();
         CacheProvider.init();
 
         // Start the server
@@ -86,21 +77,5 @@ public class AuthServer {
 
         // Don't exit the main thread. Wait until server is terminated.
         server.awaitTermination();
-    }
-
-    private static void addAPI() {
-        String apiPath = "/home/ubuntu/mg/apis/";
-        try {
-            Files.walk(Paths.get(apiPath)).filter(path -> {
-                Path fileName = path.getFileName();
-                return fileName != null && (fileName.toString().endsWith(".yaml") || fileName.toString()
-                        .endsWith(".json"));
-            }).forEach(path -> {
-                OpenAPI openAPI = new OpenAPIV3Parser().read(path.toString());
-                APIFactory.getInstance().addAPI(openAPI, "http");
-            });
-        } catch (IOException e) {
-            logger.error("Error while reading API files", e);
-        }
     }
 }

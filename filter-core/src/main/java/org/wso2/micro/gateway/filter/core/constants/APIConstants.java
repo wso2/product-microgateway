@@ -26,8 +26,12 @@ public class APIConstants {
 
     //open API extensions
     public static final String X_WSO2_BASE_PATH = "x-wso2-basepath";
-    public static final String BASE_PATH_PARAM = "basePath";
-    public static final String RESOURCE_PATH_PARAMETER = "path";
+
+    public static final String GW_BASE_PATH_PARAM = "basePath";
+    public static final String GW_RES_PATH_PARAM = "path";
+    public static final String GW_RES_METHOD_PARAM = "method";
+    public static final String GW_VERSION_PARAM = "version";
+    public static final String GW_API_NAME_PARAM = "name";
 
 
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";

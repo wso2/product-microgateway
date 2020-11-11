@@ -17,13 +17,12 @@
  */
 package org.wso2.micro.gateway.filter.core.api;
 
+import io.envoyproxy.envoy.service.auth.v2.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.filter.core.api.config.ResourceConfig;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -48,23 +47,11 @@ public class APIFactory {
         return apiFactory;
     }
 
-    public void addAPI(Object apiDefinition, String type) {
-        if ("http".equals(type)) {
-            API api = new RestAPI();
-            String uniqueAPIContext = api.init(apiDefinition);
-            apiMap.putIfAbsent(uniqueAPIContext, api);
-        }
-    }
-
-    public API getMatchedAPI(String basePath, String requestPath) {
-        Optional<Map.Entry<String, API>> mapEntry = apiMap.entrySet().stream()
-                .filter(map -> basePath.equals(map.getKey())).findFirst();
-        if (mapEntry.isPresent()) {
-            return mapEntry.get().getValue();
-        }
-        logger.error("No matching API found for the  base path : " + basePath + " for the incoming request : "
-                + requestPath);
-        return null;
+    public API getMatchedAPI(CheckRequest request) {
+        // TODO: (Praminda) Change the init type depending on the api type param from gw
+        API api = new RestAPI();
+        api.init(request);
+        return api;
     }
 
     public ResourceConfig getMatchedResource(API api, String matchedResourcePath, String method) {

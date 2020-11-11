@@ -8,7 +8,7 @@ info:
 host: "petstore.swagger.io:8000"
 basePath: "/api/v3"
 
-x-wso2-basepath: /petstore/v2
+x-wso2-basePath: /petstore/v2
 
 x-wso2-production-endpoints:
   urls:

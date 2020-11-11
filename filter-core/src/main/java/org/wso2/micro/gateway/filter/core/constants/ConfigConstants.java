@@ -23,6 +23,9 @@ package org.wso2.micro.gateway.filter.core.constants;
  * or dynamically configured via the control plane.
  */
 public class ConfigConstants {
+    public static final String FILTER_HOME = "FILTER_HOME";
+    public static final String CONF_DIR = "conf";
+    public static final String CONF_FILTER_TABLE = "filter";
     // JWT Token Config
     public static final String JWT_TOKEN_CONFIG = "jwtTokenConfig";
     public static final String JWT_TOKEN_ISSUER = "issuer";
@@ -36,11 +39,11 @@ public class ConfigConstants {
     public static final String JWT_TOKEN_CLAIMS = "claims";
 
     // Event hub configuration
-    public static final String EVENT_HUB_ENABLE = "apim.eventHub.enable";
-    public static final String EVENT_HUB_SERVICE_URL = "apim.eventHub.serviceUrl";
-    public static final String EVENT_HUB_USERNAME = "apim.eventHub.username";
-    public static final String EVENT_HUB_PASSWORD = "apim.eventHub.password";
-    public static final String EVENT_HUB_EVENT_LISTENING_ENDPOINT = "apim.eventHub.eventListeningEndpoints";
+    public static final String EVENT_HUB_ENABLE = "eventHub.enable";
+    public static final String EVENT_HUB_SERVICE_URL = "eventHub.serviceUrl";
+    public static final String EVENT_HUB_USERNAME = "eventHub.username";
+    public static final String EVENT_HUB_PASSWORD = "eventHub.password";
+    public static final String EVENT_HUB_EVENT_LISTENING_ENDPOINT = "eventHub.eventListeningEndpoints";
 
     //KeyStore and Trust Store configuration
     public static final String MGW_KEY_STORE_LOCATION = "keystore.location";
