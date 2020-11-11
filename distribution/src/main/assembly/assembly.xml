@@ -37,13 +37,6 @@
     </fileSets>
     <files>
         <file>
-<<<<<<< HEAD
-=======
-            <source>../resources/envoy.yaml</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/proxy</outputDirectory>
-        </file>
-        <file>
->>>>>>> envoy-gw
             <source>../resources/docker-compose.yaml</source>
             <outputDirectory>wso2am-micro-gw-${project.version}</outputDirectory>
         </file>
