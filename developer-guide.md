@@ -20,7 +20,7 @@ maven plugin would fail to create the new docker images)
  java-11 as the source)
  
  - Navigate to distribution/target/.
- Then extract the zip file called wso2am-micro-gw-3.2.1-SNAPSHOT.zip
+ Then extract the zip file called wso2am-micro-gw-4.0.0-SNAPSHOT.zip
  
  - Then execute `docker-compose up` to run the setup. This will start an envoy container,
  filter-core container and piot container. The mounted configurations can be found from
