@@ -37,8 +37,8 @@
                 <configuration>
                   <images>
                     <image>
-                        <alias>wso2micro-gw-proxy</alias>
-                        <name>wso2am/wso2micro-gw-proxy:${project.version}</name>
+                        <alias>mg-proxy</alias>
+                        <name>wso2am/mg-proxy:${project.version}</name>
                       <build>
                         <contextDir>${project.basedir}/src/main/resources</contextDir>
                         <assembly>

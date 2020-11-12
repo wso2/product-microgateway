@@ -160,8 +160,8 @@
                 <configuration>
                   <images>
                     <image>
-                        <alias>filter-core</alias>
-                        <name>wso2am/mg-filter-chain:${project.version}</name>
+                        <alias>mg-enforcer</alias>
+                        <name>wso2am/mg-enforcer:${project.version}</name>
                       <build>
                         <contextDir>${project.basedir}/src/main/resources</contextDir>
                         <args>

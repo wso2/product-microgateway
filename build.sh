@@ -28,7 +28,7 @@ if [ $? -ne 0 ]; then
 fi
 popd
 
-pushd pilot
+pushd adapter
 rm -rf target/
 GOOS=linux GOARCH=amd64 go build -v -o target/micro-gw-ubuntu main.go
 if [ $? -ne 0 ]; then
