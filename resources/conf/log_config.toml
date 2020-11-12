@@ -1,6 +1,6 @@
 # The logging configuration file for control plane
 ######### root Level ########
-logfile = "logs/pilot.log"
+logfile = "logs/adapter.log"
 logLevel = "INFO"
 
 [rotation]

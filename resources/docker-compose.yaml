@@ -1,25 +1,25 @@
 version: "3.7"
 services:
-  envoy:
-    image: wso2am/wso2micro-gw-proxy:3.2.1-SNAPSHOT
+  proxy:
+    image: wso2am/mg-proxy:4.0.0-SNAPSHOT
     ports:
-      - "10000:10000"
+      - "9095:9095"
       - "9000:9000"
     links:
-      - pilot
-      - filterchain  
-  pilot:
-    image: wso2am/pilot:3.2.1-SNAPSHOT
+      - adapter
+      - enforcer
+  adapter:
+    image: wso2am/mg-adapter:4.0.0-SNAPSHOT
     volumes:  
-      - ./resources/pilot/certs:/home/wso2/certs
+      - ./resources/adapter/security:/home/wso2/security
       - ./resources/conf:/home/wso2/conf
     ports:
       - "18000:18000" 
-      - "9095:9095"
-  filterchain:
-    image: wso2am/mg-filter-chain:3.2.1-SNAPSHOT
+      - "9843:9843"
+  enforcer:
+    image: wso2am/mg-enforcer:4.0.0-SNAPSHOT
     volumes:  
-      - ./resources/filter-core/security:/home/wso2/mg/security
+      - ./resources/enforcer/security:/home/wso2/mg/security
       - ./resources/conf:/home/wso2/conf
     ports:
       - "8081:8081"   

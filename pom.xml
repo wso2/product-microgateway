@@ -21,7 +21,7 @@
     <groupId>org.wso2.am.microgw</groupId>
     <artifactId>micro-gateway-parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.2.1-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
     <name>Micro Gateway - Parent</name>
 
     <url>https://wso2.org</url>
@@ -37,8 +37,8 @@
     </parent>
 
     <modules>
-        <module>pilot</module>
-        <module>filter-core</module>
+        <module>adapter</module>
+        <module>enforcer</module>
         <module>proxy</module>
         <module>distribution</module>
     </modules>

@@ -20,7 +20,7 @@ maven plugin would fail to create the new docker images)
  java-11 as the source)
  
  - Navigate to distribution/target/.
- Then extract the zip file called wso2am-micro-gw-3.2.1-SNAPSHOT.zip
+ Then extract the zip file called wso2am-micro-gw-4.0.0-SNAPSHOT.zip
  
  - Then execute `docker-compose up` to run the setup. This will start an envoy container,
  filter-core container and piot container. The mounted configurations can be found from
@@ -38,7 +38,7 @@ maven plugin would fail to create the new docker images)
     Other than that the user can edit the `envoy.yaml` file located insider `<distribution>/resources/proxy`
     directory.
  - For now, to access envoy API listener you must first use `apictl mg deploy` and deploy an API
- - Use http**s** 10000 to access envoy API listener
+ - Use http**s** 9095 to access envoy API listener
  
  ### If the developer needs to build a separate component
  

@@ -19,15 +19,14 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>3.2.1-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>wso2am-micro-gw</artifactId>
     <packaging>pom</packaging>
-    <name>Micro Gateway - Distribution </name>
-    <description>WSO2 Micro Gateway Distribution</description>
+    <name>Micro Gateway - Distribution</name>
 
     <build>
         <plugins>
