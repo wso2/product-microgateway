@@ -3,7 +3,7 @@ services:
   proxy:
     image: wso2am/mg-proxy:4.0.0-SNAPSHOT
     ports:
-      - "10000:10000"
+      - "9095:9095"
       - "9000:9000"
     links:
       - adapter
@@ -15,7 +15,7 @@ services:
       - ./resources/conf:/home/wso2/conf
     ports:
       - "18000:18000" 
-      - "9095:9095"
+      - "9843:9843"
   enforcer:
     image: wso2am/mg-enforcer:4.0.0-SNAPSHOT
     volumes:  

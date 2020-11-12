@@ -62,7 +62,7 @@ docker ps | grep mg-
 Execute the following command to deploy the API in the microgateway
 
 ```
-apictl mg deploy --host https://localhost:9095 --file petstore  -u admin -p admin -k
+apictl mg deploy --host https://localhost:9843 --file petstore  -u admin -p admin -k
 ```
 
 The user credentials can be configured in the configurations of the `MG_HOME` distribution. `admin:admin` is the default accepted credentials by the 
@@ -135,7 +135,7 @@ Upon execution of this command, CLI tool deploy the API described with open API 
 ```
 Example
 
-	$ apictl mg deploy --host https://localhost:9095 --file petstore.zip  --username admin --password admin
+	$ apictl mg deploy --host https://localhost:9843 --file petstore.zip  --username admin --password admin
 
 
 #### Invoke API exposed via microgateway

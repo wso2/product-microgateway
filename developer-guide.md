@@ -38,7 +38,7 @@ maven plugin would fail to create the new docker images)
     Other than that the user can edit the `envoy.yaml` file located insider `<distribution>/resources/proxy`
     directory.
  - For now, to access envoy API listener you must first use `apictl mg deploy` and deploy an API
- - Use http**s** 10000 to access envoy API listener
+ - Use http**s** 9095 to access envoy API listener
  
  ### If the developer needs to build a separate component
  
