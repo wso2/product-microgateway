@@ -66,7 +66,7 @@ apictl mg deploy --host https://localhost:9843 --file petstore  -u admin -p admi
 ```
 
 The user credentials can be configured in the configurations of the `MG_HOME` distribution. `admin:admin` is the default accepted credentials by the 
-microgateway control plane..
+microgateway adapter..
 
 7. The next step would be to invoke the API using a REST tool. Since APIs on the Microgateway are by default secured. We need a valid token in order to invoke the API. 
 Use the following sample token accepted by the microgateway to access the API. Lets set the token to command line as a variable
@@ -89,10 +89,10 @@ curl -X GET "https://localhost:9095/v2/pet/1" -H "accept: application/json" -H "
 - **Proxy** : The client facing component of the Microgateway. The downstream request will reach the proxy component and it will route the request 
 to the desired destination.
 
-- **Filter Chain** : This component will intercept the request going through the proxy and applies security, rate limiting, publish analytics data and etc.
+- **Enforcer** : This component will intercept the request going through the proxy and applies security, rate limiting, publish analytics data and etc.
 Proxy will forward the request to this component in order to validate and to add additional QoS.
 
-- **Controller** : The component configures the proxy and the filter chain components dynamically during the runtime upon receiving an event for API 
+- **Adapter** : The component configures the proxy and the enforcer components dynamically during the runtime upon receiving an event for API
 creation or update.
 #### Architecture
 
@@ -124,13 +124,13 @@ Let's see how we can expose the [petstore swagger](samples/petstore_swagger3.yam
 
 ##### Deploy
 
-`$ apictl mg deploy --host <url_Of_ControlPlane> --file <file_path_of_project_initiated_from_apictl>  --username <Username> --password <Password> -k`
+`$ apictl mg deploy --host <url_of_adaptor> --file <file_path_of_project_initiated_from_apictl>  --username <Username> --password <Password> -k`
 
 Upon execution of this command, CLI tool deploy the API described with open API in the Microgateway.
 ```
- --host - Service url in which the Microgateway control plane is exposed.
+ --host - Service url in which the Microgateway adapter is exposed.
  --file - File path of the project intitiated from apictl tool.
- --username - A valid username in order to communicate with the control plane (ex: admin)
+ --username - A valid username in order to communicate with the adapter (ex: admin)
  --password - The password of the user.
 ```
 Example
