@@ -39,6 +39,7 @@
     <modules>
         <module>pilot</module>
         <module>filter-core</module>
+        <module>proxy</module>
         <module>distribution</module>
     </modules>
 

@@ -14,31 +14,17 @@
   ~ limitations under the License.
   -->
 
-<assembly>
+  <assembly>
     <includeBaseDirectory>false</includeBaseDirectory>
     <baseDirectory>/</baseDirectory>
     <id>control-plane</id>
     <formats>
-        <format>zip</format>
+        <format>dir</format>
     </formats>
-    <fileSets>
-        <fileSet>
-            <directory>../resources/certs</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/pilot/certs</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>../resources/conf</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>../resources/filter-core</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/filter-core</outputDirectory>
-        </fileSet>
-    </fileSets>
     <files>
         <file>
-            <source>../resources/docker-compose.yaml</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}</outputDirectory>
+            <source>../resources/envoy.yaml</source>
+            <outputDirectory></outputDirectory>
         </file>
     </files>
 </assembly>
