@@ -17,22 +17,22 @@
 <assembly>
     <includeBaseDirectory>false</includeBaseDirectory>
     <baseDirectory>/</baseDirectory>
-    <id>control-plane</id>
+    <id>distribution</id>
     <formats>
         <format>zip</format>
     </formats>
     <fileSets>
         <fileSet>
-            <directory>../resources/certs</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/pilot/certs</outputDirectory>
+            <directory>../resources/adapter</directory>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../resources/conf</directory>
             <outputDirectory>wso2am-micro-gw-${project.version}/resources/conf</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>../resources/filter-core</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/filter-core</outputDirectory>
+            <directory>../resources/enforcer</directory>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer</outputDirectory>
         </fileSet>
     </fileSets>
     <files>

@@ -2,8 +2,8 @@
 [server]
 ip = "0.0.0.0"
 port = "9095"
-publicKeyPath = "/home/wso2/certs/localhost.pem"
-privateKeyPath = "/home/wso2/certs/localhost.key"
+publicKeyPath = "/home/wso2/security/localhost.pem"
+privateKeyPath = "/home/wso2/security/localhost.key"
 username = "admin"
 password = "admin"
 
@@ -12,8 +12,8 @@ listenerAddress = "0.0.0.0"
 listenerPort = 10000
 clusterTimeoutInSeconds = 20
 listenerTlsEnabled = true
-listenerCertPath = "/home/wso2/certs/localhost.pem"
-listenerKeyPath = "/home/wso2/certs/localhost.key"
+listenerCertPath = "/home/wso2/security/localhost.pem"
+listenerKeyPath = "/home/wso2/security/localhost.key"
 
 [filter]
 #Key Store Configuration

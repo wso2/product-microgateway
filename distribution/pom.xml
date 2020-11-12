@@ -26,8 +26,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>wso2am-micro-gw</artifactId>
     <packaging>pom</packaging>
-    <name>Micro Gateway - Distribution </name>
-    <description>WSO2 Micro Gateway Distribution</description>
+    <name>Micro Gateway - Distribution</name>
 
     <build>
         <plugins>
