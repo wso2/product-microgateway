@@ -161,7 +161,7 @@
                   <images>
                     <image>
                         <alias>mg-enforcer</alias>
-                        <name>wso2am/mg-enforcer:${project.version}</name>
+                        <name>wso2/mg-enforcer:${project.version}</name>
                       <build>
                         <contextDir>${project.basedir}/src/main/resources</contextDir>
                         <args>
