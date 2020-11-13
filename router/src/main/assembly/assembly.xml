@@ -17,7 +17,7 @@
   <assembly>
     <includeBaseDirectory>false</includeBaseDirectory>
     <baseDirectory>/</baseDirectory>
-    <id>proxy</id>
+    <id>router</id>
     <formats>
         <format>dir</format>
     </formats>

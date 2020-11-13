@@ -86,13 +86,13 @@ curl -X GET "https://localhost:9095/v2/pet/1" -H "accept: application/json" -H "
 - **APICTL** : The APICTL is used to initiate Microgateway projects as well as to deploy APIs in to Microgateway. This is a developer tool used
  to deploy APIs into Microgateway
 
-- **Proxy** : The client facing component of the Microgateway. The downstream request will reach the proxy component and it will route the request 
+- **Router** : The client facing component of the Microgateway. The downstream request will reach the proxy component and it will route the request
 to the desired destination.
 
-- **Enforcer** : This component will intercept the request going through the proxy and applies security, rate limiting, publish analytics data and etc.
-Proxy will forward the request to this component in order to validate and to add additional QoS.
+- **Enforcer** : This component will intercept the request going through the Router and applies security, rate limiting, publish analytics data and etc.
+Router will forward the request to this component in order to validate and to add additional QoS.
 
-- **Adapter** : The component configures the proxy and the enforcer components dynamically during the runtime upon receiving an event for API
+- **Adapter** : The component configures the Router and the enforcer components dynamically during the runtime upon receiving an event for API
 creation or update.
 #### Architecture
 
