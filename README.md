@@ -40,7 +40,7 @@ export PATH=$PATH:<CLI_HOME>
 
 3. Let's create our first project with name "petstore" by adding the [open API definition](https://petstore.swagger.io/v2/swagger.json) of the petstore . You can do that by executing the following command using your command line tool.
 ```
-apictl init petstore -oas https://petstore.swagger.io/v2/swagger.json
+apictl init petstore --oas https://petstore.swagger.io/v2/swagger.json
 ```
 
 4. The project is now initialized. You should notice a directory with name "petstore" being created in the location 
