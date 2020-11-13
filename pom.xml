@@ -39,7 +39,7 @@
     <modules>
         <module>adapter</module>
         <module>enforcer</module>
-        <module>proxy</module>
+        <module>router</module>
         <module>distribution</module>
     </modules>
 
