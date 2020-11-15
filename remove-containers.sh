@@ -23,3 +23,6 @@ docker rm $(docker ps -a | grep wso2am/mg-enforcer:$micro_gw_version | awk '{pri
 
 docker kill $(docker ps -a | grep wso2am/mg-adapter:$micro_gw_version | awk '{print $1}')
 docker rm $(docker ps -a | grep wso2am/mg-adapter:$micro_gw_version | awk '{print $1}')
+
+docker kill $(docker ps -a | grep wso2am/mg-proxy:$micro_gw_version | awk '{print $1}')
+docker rm $(docker ps -a | grep wso2am/mg-proxy:$micro_gw_version | awk '{print $1}')
