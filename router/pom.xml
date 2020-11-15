@@ -23,10 +23,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>proxy</artifactId>
+    <artifactId>router</artifactId>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
-    <name>Micro Gateway - Proxy</name>
+    <name>Micro Gateway - Router</name>
 
     <build>
         <plugins>
@@ -37,8 +37,8 @@
                 <configuration>
                   <images>
                     <image>
-                        <alias>mg-proxy</alias>
-                        <name>wso2am/mg-proxy:${project.version}</name>
+                        <alias>mg-router</alias>
+                        <name>wso2/mg-router:${project.version}</name>
                       <build>
                         <contextDir>${project.basedir}/src/main/resources</contextDir>
                         <assembly>

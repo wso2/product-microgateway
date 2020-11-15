@@ -161,7 +161,7 @@
                   <images>
                     <image>
                         <alias>mg-enforcer</alias>
-                        <name>wso2am/mg-enforcer:${project.version}</name>
+                        <name>wso2/mg-enforcer:${project.version}</name>
                       <build>
                         <contextDir>${project.basedir}/src/main/resources</contextDir>
                         <args>
@@ -223,7 +223,7 @@
         <dependency>
             <groupId>net.minidev</groupId>
             <artifactId>json-smart</artifactId>
-            <version>1.0.6.3</version>
+            <version>${json.smart.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.com.nimbusds</groupId>
@@ -298,5 +298,6 @@
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <maven.checkstyle.version>8.18</maven.checkstyle.version>
         <maven.spotbugs.version>4.0.4</maven.spotbugs.version>
+        <json.smart.version>2.3</json.smart.version>
     </properties>
 </project>

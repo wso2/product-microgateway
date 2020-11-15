@@ -79,7 +79,7 @@
                   <images>
                     <image>
                         <alias>mg-adapter</alias>
-                        <name>wso2am/mg-adapter:${project.version}</name>
+                        <name>wso2/mg-adapter:${project.version}</name>
                       <build>
                         <contextDir>${project.basedir}/src/main/resources</contextDir>
                         <assembly>
