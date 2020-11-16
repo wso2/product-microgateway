@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>3.2.1-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>test-integration</artifactId>
-    <version>3.2.1-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
 
     <url>https://wso2.org</url>
     <organization>
@@ -29,42 +29,56 @@
                 <configuration>
                     <images>
                         <image>
-                            <name>envoyproxy/envoy:v1.16.0</name>
-                            <alias>envoy</alias>
+                            <alias>mg-router</alias>
+                            <name>wso2/mg-router:${project.version}</name>
                             <run>
                                 <ports>
-                                    <port>10000:10000</port>
+                                    <port>9095:9095</port>
                                     <port>9000:9000</port>
                                 </ports>
                                 <wait>
                                     <time>1000</time>
                                 </wait>
+                                <!--
                                 <links>
-                                    <link>pilot</link>
-                                    <link>filterchain</link>
+                                    <link>mg-adapter</link>
+                                    <link>mg-enforcer</link>
                                 </links>
+                                -->
                             </run>
                         </image>
                         <image>
-                            <name>wso2am/pilot:3.2.1-SNAPSHOT</name>
-                            <alias>pilot</alias>
+                            <alias>mg-adapter</alias>
+                            <name>wso2/mg-adapter:${project.version}</name>
                             <run>
                                 <ports>
                                     <port>18000:18000</port>
-                                    <port>9095:9095</port>
+                                    <port>9843:9843</port>
                                 </ports>
+                                <volumes>
+                                    <bind>
+                                        <volume>${basedir}/../test-integration/target/micro-gwtmp/wso2am-micro-gw-${project.version}/resources/adapter/security:/home/wso2/security</volume>
+                                        <volume>{basedir}/../test-integration/target/micro-gwtmp/wso2am-micro-gw-${project.version}/resources/conf:/home/wso2/conf</volume>
+                                    </bind>
+                                </volumes>
                                 <wait>
                                     <time>1000</time>
                                 </wait>
                             </run>
                         </image>
                         <image>
-                            <name>wso2am/mg-filter-chain:3.2.1-SNAPSHOT</name>
-                            <alias>filterchain</alias>
+                            <alias>mg-enforcer</alias>
+                            <name>wso2/mg-enforcer:${project.version}</name>
                             <run>
                                 <ports>
                                     <port>8081:8081</port>
                                 </ports>
+                                <volumes>
+                                    <bind>
+                                        <volume>${basedir}/../test-integration/target/micro-gwtmp/wso2am-micro-gw-${project.version}/resources/enforcer/security:/home/wso2/mg/security</volume>
+                                        <volume>{basedir}/../test-integration/target/micro-gwtmp/wso2am-micro-gw-${project.version}/resources/conf:/home/wso2/conf</volume>
+                                    </bind>
+                                </volumes>
                                 <wait>
                                     <time>1000</time>
                                 </wait>
@@ -92,29 +106,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven.surefire.plugin.version}</version>
-                <configuration>
-                    <systemPropertyVariables>
-                        <FILTER_HOME>
-                            ${basedir}/../test-integration/target/micro-gwtmp/WSO2-Microgateway-${project.version}/resources/filter-core
-                        </FILTER_HOME>
-                        <MGW_HOME>
-                            ${basedir}/../test-integration/target/micro-gwtmp/WSO2-Microgateway-${project.version}/resources/pilot
-                        </MGW_HOME>
-
-                        <project.build.directory>${project.build.directory}</project.build.directory>
-                        <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
-                        <javax.net.ssl.trustStore>${basedir}/resources/ballerinaTruststore.p12</javax.net.ssl.trustStore>
-                        <javax.net.ssl.trustStorePassword>ballerina</javax.net.ssl.trustStorePassword>
-                    </systemPropertyVariables>
-                    <suiteXmlFiles>
-                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
-                    </suiteXmlFiles>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
@@ -122,7 +113,7 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <target>
-                                <unzip src="${basedir}/../distribution/target/WSO2-Microgateway-${project.version}.zip" dest="${basedir}/../test-integration/target/micro-gwtmp" />
+                                <unzip src="${basedir}/../distribution/target/wso2am-micro-gw-${project.version}.zip" dest="${basedir}/../test-integration/target/micro-gwtmp" />
                             </target>
                         </configuration>
                         <goals>
@@ -130,11 +121,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.34.v20201102</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -150,10 +136,28 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <systemPropertyVariables>
+                        <FILTER_HOME>
+                            ${basedir}/../test-integration/target/micro-gwtmp/wso2am-micro-gw-${project.version}/resources/enforcer
+                        </FILTER_HOME>
+                        <MGW_HOME>
+                            ${basedir}/../test-integration/target/micro-gwtmp/wso2am-micro-gw-${project.version}/resources/adapter
+                        </MGW_HOME>
+
+                        <project.build.directory>${project.build.directory}</project.build.directory>
+                        <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
+                        <javax.net.ssl.trustStore>${basedir}/resources/ballerinaTruststore.p12</javax.net.ssl.trustStore>
+                        <javax.net.ssl.trustStorePassword>ballerina</javax.net.ssl.trustStorePassword>
+                    </systemPropertyVariables>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.4.34.v20201102</version>
             </plugin>
         </plugins>
     </build>
