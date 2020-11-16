@@ -14,90 +14,20 @@
  *  limitations under the License.
  *
  */
-package envoyCodegen_test
+package envoyconf_test
 
 import (
 	"io/ioutil"
-	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/micro-gw/configs"
-	"github.com/wso2/micro-gw/pkg/oasparser/envoyCodegen"
-	enovoy "github.com/wso2/micro-gw/pkg/oasparser/envoyCodegen"
-	"github.com/wso2/micro-gw/pkg/oasparser/swaggerOperator"
+	"github.com/wso2/micro-gw/config"
+	enovoy "github.com/wso2/micro-gw/pkg/oasparser/envoyconf"
+	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 )
 
-func TestGenerateRegex(t *testing.T) {
-
-	type generateRegexTestItem struct {
-		inputpath     string
-		userInputPath string
-		message       string
-		isMatched     bool
-	}
-	dataItems := []generateRegexTestItem{
-		{
-			inputpath:     "/v2/pet/{petId}",
-			userInputPath: "/v2/pet/5",
-			message:       "when path parameter is provided end of the path",
-			isMatched:     true,
-		},
-		{
-			inputpath:     "/v2/pet/{petId}/info",
-			userInputPath: "/v2/pet/5/info",
-			message:       "when path parameter is provided in the middle of the path",
-			isMatched:     true,
-		},
-		{
-			inputpath:     "/v2/pet/{petId}",
-			userInputPath: "/v2/pet/5",
-			message:       "when path parameter is provided end of the path",
-			isMatched:     true,
-		},
-		{
-			inputpath:     "/v2/pet/{petId}/tst/{petId}",
-			userInputPath: "/v2/pet/5/tst/3",
-			message:       "when multiple path parameter are provided",
-			isMatched:     true,
-		},
-		{
-			inputpath:     "/v2/pet/{petId}",
-			userInputPath: "/v2/pet/5/test",
-			message:       "when path parameter is provided end of the path and provide incorrect path",
-			isMatched:     false,
-		},
-		{
-			inputpath:     "/v2/pet/5",
-			userInputPath: "/v2/pett/5",
-			message:       "when provide a incorrect path",
-			isMatched:     false,
-		},
-		{
-			inputpath:     "/v2/pet/findById",
-			userInputPath: "/v2/pet/findById?status=availabe",
-			message:       "when query parameter is provided",
-			isMatched:     true,
-		},
-		{
-			inputpath:     "/v2/pet/findById",
-			userInputPath: "/v2/pet/findByIdstatus=availabe",
-			message:       "when query parameter is provided without ?",
-			isMatched:     false,
-		},
-	}
-
-	for _, item := range dataItems {
-		resultPattern := envoyCodegen.GenerateRegex(item.inputpath)
-		resultIsMatching, err := regexp.MatchString(resultPattern, item.userInputPath)
-
-		assert.Equal(t, item.isMatched, resultIsMatching, item.message)
-		assert.Nil(t, err)
-	}
-}
-
 func TestCreateRoutesWithClustersForOpenAPIWithoutExtensions(t *testing.T) {
-	openapiFilePath := configs.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi.yaml"
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi.yaml"
 	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
 	//TODO: (VirajSalaka) Additional tasks to test
 	//OpenAPI version 2
@@ -105,20 +35,20 @@ func TestCreateRoutesWithClustersForOpenAPIWithoutExtensions(t *testing.T) {
 
 func TestCreateRoutesWithClustersForOpenAPIWithExtensionsOnly(t *testing.T) {
 	//When the openapi endpoints are only mentioned via the extensions
-	openapiFilePath := configs.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_extensions_only.yaml"
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_extensions_only.yaml"
 	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
 }
 
 func TestCreateRoutesWithClustersForOpenAPIWithExtensionsServers(t *testing.T) {
 	//When the openapi endpoints provided by servers object are overriden via the extensions
-	openapiFilePath := configs.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_extensions_servers.yaml"
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_extensions_servers.yaml"
 	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
 }
 
 func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string) {
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
-	mgwSwaggerForOpenapi := swaggerOperator.GetMgwSwagger(openapiByteArr)
+	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
 	//TODO: (VirajSalaka) Test Sandbox endpoints
 	routes, clusters, _, _, _, _ := enovoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
 

@@ -14,34 +14,19 @@
  *  limitations under the License.
  *
  */
-package confTypes
 
-type pkg struct {
-	Name     string
-	LogLevel string
-}
+package model
 
-type accessLog struct {
-	LogFile string
-	Format string
-}
+// sub-property keys mentioned under x-wso2-production-endpoints
+const (
+	urls      string = "urls"
+	typeConst string = "type"
+)
 
-// The log configuration struct.
-type LogConfig struct {
-
-	Logfile string
-	LogLevel  string
-	// log rotation parameters.
-	Rotation struct {
-		IP   string
-		Port string
-		MaxSize  int // megabytes
-		MaxBackups  int
-		MaxAge  int    //days
-		Compress  bool
-	}
-
-	Pkg        []pkg
-	AccessLogs accessLog
-
-}
+//Constants for OpenAPI vendor extension keys
+const (
+	productionEndpoints string = "x-wso2-production-endpoints"
+	sandboxEndpoints    string = "x-wso2-sandbox-endpoints"
+	xWso2BasePath       string = "x-wso2-basePath"
+	xWso2Label          string = "x-wso2-label"
+)

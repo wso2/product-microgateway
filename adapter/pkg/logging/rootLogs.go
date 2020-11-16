@@ -14,6 +14,7 @@
  *  limitations under the License.
  *
  */
+
 package logging
 
 import (
@@ -23,17 +24,17 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/configs"
+	"github.com/wso2/micro-gw/config"
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
 
-type PlainFormatter struct {
+type plainFormatter struct {
 	TimestampFormat string
 	LevelDesc       []string
 }
 
 func init() {
-	logConf, errReadConfig := configs.ReadLogConfigs()
+	logConf, errReadConfig := config.ReadLogConfigs()
 	if errReadConfig != nil {
 		logrus.Error("Error loading log configuration. ", errReadConfig)
 	}
@@ -72,12 +73,12 @@ func initGlobalLogger(filename string) error {
 		logrus.SetOutput(multiWriter)
 	}
 
-	logConf, errReadConfig := configs.ReadLogConfigs()
+	logConf, errReadConfig := config.ReadLogConfigs()
 	if errReadConfig != nil {
 		logrus.Error("Error loading configuration. ", errReadConfig)
 		logrus.SetLevel(logLevelMapper(logConf.LogLevel))
 	} else {
-		logrus.SetLevel(DEFAULT_LOG_LEVEL)
+		logrus.SetLevel(defaultLogLevel)
 	}
 
 	return err
@@ -85,19 +86,19 @@ func initGlobalLogger(filename string) error {
 
 /**
  * Initiate the log formatter.
- * @return *PlainFormatter Reference for a Plain formatter instance
+ * @return *plainFormatter Reference for a Plain formatter instance
  */
-func loggerFromat() *PlainFormatter {
+func loggerFromat() *plainFormatter {
 
-	formatter := new(PlainFormatter)
+	formatter := new(plainFormatter)
 	formatter.TimestampFormat = "2006-01-02 15:04:05"
 	formatter.LevelDesc = []string{
-		LEVEL_PANIC,
-		LEVEL_FATAL,
-		LEVEL_ERROR,
-		LEVEL_WARN,
-		LEVEL_INFO,
-		LEVEL_DEBUG}
+		panicLevel,
+		fatalLevel,
+		errorLevel,
+		warnLevel,
+		infoLevel,
+		debugLevel}
 
 	return formatter
 }
@@ -120,7 +121,7 @@ func formatFilePath(path string) string {
  * @param entry   Log entry
  * @return io.Writer  File as a io.Writer instance along with log rotation
  */
-func (f *PlainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+func (f *plainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	timestamp := fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
 
 	return []byte(fmt.Sprintf("%s %s [%s:%d] - [%s] [-] %s\n",
@@ -140,7 +141,7 @@ func (f *PlainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
  * @return io.Writer  File as a io.Writer instance along with log rotation
  */
 func setLogRotation(filename string) io.Writer {
-	logConf, errReadConfig := configs.ReadLogConfigs()
+	logConf, errReadConfig := config.ReadLogConfigs()
 	var rotationWriter io.Writer
 
 	if errReadConfig != nil {

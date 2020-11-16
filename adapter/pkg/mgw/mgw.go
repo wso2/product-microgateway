@@ -14,6 +14,8 @@
  *  limitations under the License.
  *
  */
+
+// Package mgw contains the implementation to start the adapter
 package mgw
 
 import (
@@ -29,8 +31,7 @@ import (
 	"os/signal"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/wso2/micro-gw/configs"
-	mgwconfig "github.com/wso2/micro-gw/configs/confTypes"
+	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	xds "github.com/wso2/micro-gw/pkg/xds"
 	"google.golang.org/grpc"
@@ -50,10 +51,7 @@ var (
 )
 
 const (
-	XdsCluster = "xds_cluster"
-	Ads        = "ads"
-	Xds        = "xds"
-	Rest       = "rest"
+	ads = "ads"
 )
 
 func init() {
@@ -62,19 +60,12 @@ func init() {
 	flag.UintVar(&port, "port", 18000, "Management server port")
 	flag.UintVar(&gatewayPort, "gateway", 18001, "Management server port for HTTP gateway")
 	flag.UintVar(&alsPort, "als", 18090, "Accesslog server port")
-	flag.StringVar(&mode, "ads", Ads, "Management server type (ads, xds, rest)")
+	flag.StringVar(&mode, "ads", ads, "Management server type (ads, xds, rest)")
 }
 
 const grpcMaxConcurrentStreams = 1000000
 
-/**
- * This starts an xDS server at the given port.
- *
- * @param ctx   Context
- * @param server   Xds server instance
- * @param port   Management server port
- */
-func RunManagementServer(ctx context.Context, server xdsv3.Server, port uint) {
+func runManagementServer(server xdsv3.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
 	grpcServer := grpc.NewServer()
@@ -88,28 +79,17 @@ func RunManagementServer(ctx context.Context, server xdsv3.Server, port uint) {
 	discoveryv3.RegisterAggregatedDiscoveryServiceServer(grpcServer, server)
 
 	logger.LoggerMgw.Info("port: ", port, " management server listening")
-	//log.Fatalf("", Serve(lis))
-	//go func() {
 	go func() {
 		if err = grpcServer.Serve(lis); err != nil {
 			logger.LoggerMgw.Error(err)
 		}
 	}()
-	//<-ctx.Done()
-	//grpcServer.GracefulStop()
-	//}()
-
 }
 
-/**
- * Run the management grpc server.
- *
- * @param conf  Swagger files location
- */
-func Run(conf *mgwconfig.Config) {
+//Run starts the XDS server and Rest API server.
+func Run(conf *config.Config) {
 	sig := make(chan os.Signal)
 	signal.Notify(sig, os.Interrupt)
-	xds.Init()
 	//TODO: (VirajSalaka) Support the REST API Configuration via flags only if it is a valid requirement
 	flag.Parse()
 
@@ -129,12 +109,7 @@ func Run(conf *mgwconfig.Config) {
 	cache := xds.GetXdsCache()
 	srv := xdsv3.NewServer(ctx, cache, nil)
 
-	//als := &myals.AccessLogService{}
-	//go RunAccessLogServer(ctx, als, alsPort)
-
-	// start the xDS server
-	RunManagementServer(ctx, srv, port)
-	//go apiserver.Start(conf)
+	runManagementServer(srv, port)
 	go restserver.StartRestServer(conf)
 OUTER:
 	for {
@@ -143,7 +118,7 @@ OUTER:
 			switch l.Op.String() {
 			case "WRITE":
 				logger.LoggerMgw.Info("Loading updated log config file...")
-				configs.ClearLogConfigInstance()
+				config.ClearLogConfigInstance()
 				logger.UpdateLoggers()
 			}
 		case s := <-sig:

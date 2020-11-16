@@ -15,7 +15,7 @@
  *
  */
 
-package apiDefinition
+package model
 
 import (
 	"testing"
@@ -129,7 +129,7 @@ func TestSetResourcesSwagger(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources := SetResourcesSwagger(item.input)
+		resultResources := setResourcesSwagger(item.input)
 		if item.result != nil {
 			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
 			assert.Equal(t, item.result[0].methods, resultResources[0].GetMethod(), item.message)

@@ -14,11 +14,14 @@
  *  limitations under the License.
  *
  */
+
+//Package microgateway contains the adapter bootstrap implementation.
+//This includes loading configurations and starting the adapter.
 package microgateway
 
 import (
 	logger "github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/configs"
+	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/pkg/mgw"
 )
 
@@ -26,10 +29,8 @@ func initServer() error {
 	return nil
 }
 
-/**
- * Start the adapter.
- *
- */
+//StartMicroGateway reads the configuration files and then start the adapter components.
+//Commandline arguments needs to be provided as args
 func StartMicroGateway(args []string) {
 
 	logger.Info("Starting Microgateway")
@@ -37,7 +38,7 @@ func StartMicroGateway(args []string) {
 	if err != nil {
 		logger.Fatal("Error starting the adapter", err)
 	}
-	conf, errReadConfig := configs.ReadConfigs()
+	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
 		logger.Fatal("Error loading configuration. ", errReadConfig)
 	}

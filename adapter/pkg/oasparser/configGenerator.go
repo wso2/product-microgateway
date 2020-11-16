@@ -17,8 +17,6 @@
 
 package oasparser
 
-//package envoy_config_generator
-
 import (
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -26,62 +24,59 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 
-	enovoy "github.com/wso2/micro-gw/pkg/oasparser/envoyCodegen"
-	"github.com/wso2/micro-gw/pkg/oasparser/models/envoy"
-	swgger "github.com/wso2/micro-gw/pkg/oasparser/swaggerOperator"
+	enovoy "github.com/wso2/micro-gw/pkg/oasparser/envoyconf"
+	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 )
 
-/*
-GetProductionRoutesClustersEndpoints is a method to generate and provide the routes, clusters and endpoints when the openAPI is provided.
-
-@param byte[]  openAPI json as a byte array
-@return []*routev3.Route Routes
-@return []*clusterv3.Cluster Clusters
-@return []*corev3.Address Endpoints
-*/
+// GetProductionRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
+// when the openAPI Json is provided.
 func GetProductionRoutesClustersEndpoints(byteArr []byte) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
-	mgwSwagger := swgger.GetMgwSwagger(byteArr)
+	mgwSwagger := operator.GetMgwSwagger(byteArr)
 	routes, clusters, endpoints, _, _, _ := enovoy.CreateRoutesWithClusters(mgwSwagger)
 	return routes, clusters, endpoints
 }
 
-/*
-GetProductionListenerAndRouteConfig is a method to generate and provide the listener and routesconfiguration configurations.
-
-@param []*routev3.Route Envoy routes array
-@return *listenerv3.Listener Envoy Listener
-@return *routev3.RouteConfiguration Envoy RouteConfiguration
-*/
+// GetProductionListenerAndRouteConfig generates the listener and routesconfiguration configurations.
+//
+// The VirtualHost is named as "default".
+// The provided set of envoy routes will be assigned under the virtual host
+//
+// The RouteConfiguration is named as "default"
 func GetProductionListenerAndRouteConfig(routes []*routev3.Route) (*listenerv3.Listener, *routev3.RouteConfiguration) {
 	listnerProd := enovoy.CreateListenerWithRds("default")
 	vHostName := "default"
-	vHostP, _ := enovoy.CreateVirtualHost(vHostName, routes)
+	vHostP := enovoy.CreateVirtualHost(vHostName, routes)
 	routeConfigProd := enovoy.CreateRoutesConfigForRds(vHostP)
 
-	return &listnerProd, &routeConfigProd
+	return listnerProd, routeConfigProd
 }
 
-func GetCacheResources(endpoints []*corev3.Address, clusters []*clusterv3.Cluster, listener *listenerv3.Listener,
-	routeConfig *routev3.RouteConfiguration) ([]types.Resource, []types.Resource, []types.Resource, []types.Resource) {
-	envoyNodeProd := new(envoy.EnvoyNode)
-	envoyNodeProd.SetListener(listener)
-	envoyNodeProd.SetClusters(clusters)
-	envoyNodeProd.SetEndpoints(endpoints)
-	envoyNodeProd.SetRouteConfigs(routeConfig)
+// GetCacheResources converts the envoy endpoints, clusters, routes, and listener to
+// the resource type which is the format required for the Xds cache.
+//
+// The returned resources are listeners, clusters, routeConfigurations, endpoints
+func GetCacheResources(endpoints []*corev3.Address, clusters []*clusterv3.Cluster,
+	listener *listenerv3.Listener, routeConfig *routev3.RouteConfiguration) (
+	listenerRes []types.Resource, clusterRes []types.Resource, routeConfigRes []types.Resource,
+	endpointRes []types.Resource) {
 
-	return envoyNodeProd.GetSources()
+	listenerRes = []types.Resource{listener}
+	clusterRes = []types.Resource{}
+	routeConfigRes = []types.Resource{routeConfig}
+	endpointRes = []types.Resource{}
+	for _, cluster := range clusters {
+		clusterRes = append(clusterRes, cluster)
+	}
+	for _, endpoint := range endpoints {
+		endpointRes = append(endpointRes, endpoint)
+	}
+	return listenerRes, clusterRes, routeConfigRes, endpointRes
 }
 
-/*
-UpdateRoutesConfig is a method to update the existing routes configuration with the provided array of routes.
-All the already existing routes (within the routeConfiguration) will be removed.
-
-@param *routev3.RouteConfiguration Envoy RouteConfiguration
-@param []*routev3.Route Envoy routes array
-*/
+// UpdateRoutesConfig updates the existing routes configuration with the provided array of routes.
+//All the already existing routes (within the routeConfiguration) will be removed.
 func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, routes []*routev3.Route) {
 	vHostName := "default"
-	vHost, _ := enovoy.CreateVirtualHost(vHostName, routes)
-	routeConfig.VirtualHosts = []*routev3.VirtualHost{&vHost}
-	//return []types.Resource{routeConfig}
+	vHost := enovoy.CreateVirtualHost(vHostName, routes)
+	routeConfig.VirtualHosts = []*routev3.VirtualHost{vHost}
 }

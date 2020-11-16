@@ -15,8 +15,7 @@
  *
  */
 
-//swagger version 2
-package apiDefinition
+package model
 
 import (
 	"github.com/go-openapi/spec"
@@ -24,11 +23,16 @@ import (
 	logger "github.com/wso2/micro-gw/loggers"
 )
 
-/**
- * Set swagger2 data to mgwSwagger  Instance.
- *
- * @param swagger2  Swagger2 unmarshalled data
- */
+// SetInfoSwagger populates the MgwSwagger object with the properties within the openAPI v2
+// (swagger) definition.
+// The title, version, description, vendor extension map, endpoints based on host and schemes properties,
+// and pathItem level information are populated here.
+//
+// for each pathItem; vendor extensions, available http Methods,
+// are populated. Each resource corresponding to a pathItem, has the property called iD, which is a
+// UUID.
+//
+// No operation specific information is extracted.
 func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 	swagger.id = swagger2.ID
 	swagger.swaggerVersion = swagger2.Swagger
@@ -38,7 +42,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 		swagger.version = swagger2.Info.Version
 	}
 	swagger.vendorExtensible = swagger2.VendorExtensible.Extensions
-	swagger.resources = SetResourcesSwagger(swagger2)
+	swagger.resources = setResourcesSwagger(swagger2)
 
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
 	// https is prioritized over http. If it is ws or wss, the microgateway will print an error.
@@ -63,13 +67,8 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 	}
 }
 
-/**
- * Set swagger2 all resource to mgwSwagger resources.
- *
- * @param swagger2  Swagger2 unmarshalled data
- * @return []Resource  MgwSwagger resource array
- */
-func SetResourcesSwagger(swagger2 spec.Swagger) []Resource {
+// setResourcesSwagger sets swagger (openapi v2) paths as mgwSwagger resources.
+func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 	var resources []Resource
 	if swagger2.Paths != nil {
 		for path, pathItem := range swagger2.Paths.Paths {
@@ -109,18 +108,9 @@ func SetResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			}
 		}
 	}
-
 	return resources
 }
 
-/**
- * Set swagger2 resource path details to mgwSwagger  Instance.
- *
- * @param path  Resource path
- * @param method  Http methods array (Get, Post ... )
- * @param operation  Operation type
- * @return Resource  MgwSwagger resource instance
- */
 func setOperationSwagger(path string, methods []string, pathItem spec.PathItem) Resource {
 	var resource Resource
 	resource = Resource{

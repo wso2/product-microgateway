@@ -14,10 +14,33 @@
  *  limitations under the License.
  *
  */
-package constants
 
-const (
-	PRODUCTION_ENDPOINTS string = "x-wso2-production-endpoints"
-	SANDBOX_ENDPOINTS    string = "x-wso2-sandbox-endpoints"
-	XWSO2BASEPATH        string = "x-wso2-basePath"
-)
+package config
+
+type pkg struct {
+	Name     string
+	LogLevel string
+}
+
+type accessLog struct {
+	LogFile string
+	Format  string
+}
+
+//LogConfig represents the configurations related to adapter logs and envoy access logs.
+type LogConfig struct {
+	Logfile  string
+	LogLevel string
+	// log rotation parameters.
+	Rotation struct {
+		IP         string
+		Port       string
+		MaxSize    int // megabytes
+		MaxBackups int
+		MaxAge     int //days
+		Compress   bool
+	}
+
+	Pkg        []pkg
+	AccessLogs accessLog
+}

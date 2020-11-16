@@ -15,8 +15,8 @@ import (
 	openAPI2 "github.com/go-openapi/spec"
 	logger "github.com/wso2/micro-gw/loggers"
 	oasParser "github.com/wso2/micro-gw/pkg/oasparser"
-	"github.com/wso2/micro-gw/pkg/oasparser/models/apiDefinition"
-	swaggerOperator "github.com/wso2/micro-gw/pkg/oasparser/swaggerOperator"
+	"github.com/wso2/micro-gw/pkg/oasparser/model"
+	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 )
 
 var (
@@ -56,7 +56,7 @@ func (IDHash) ID(node *corev3.Node) string {
 
 var _ cachev3.NodeHash = IDHash{}
 
-func Init() {
+func init() {
 	cache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
 	openAPIV3Map = make(map[string]openAPI3.Swagger)
 	openAPIV2Map = make(map[string]openAPI2.Swagger)
@@ -70,16 +70,13 @@ func Init() {
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 }
 
+// GetXdsCache returns xds server cache.
 func GetXdsCache() cachev3.SnapshotCache {
 	return cache
 }
 
-/**
- * Recreate the envoy instances from swaggers byte array.
- *
- * @param []byte   Swagger file as byte array
- */
-func UpdateEnvoyByteArr(byteArr []byte) {
+// UpdateEnvoy updates the Xds Cache when OpenAPI Json content is provided
+func UpdateEnvoy(byteArr []byte) {
 	var apiMapKey string
 	var newLabels []string
 
@@ -88,14 +85,14 @@ func UpdateEnvoyByteArr(byteArr []byte) {
 	l.Lock()
 	defer l.Unlock()
 
-	openAPIVersion, jsonContent, err := swaggerOperator.GetOpenAPIVersionAndJsonContent(byteArr)
+	openAPIVersion, jsonContent, err := operator.GetOpenAPIVersionAndJSONContent(byteArr)
 	if err != nil {
 		logger.LoggerXds.Error("Error while retrieving the openAPI version and Json Content from byte Array.", err)
 		return
 	}
 	logger.LoggerXds.Debugf("OpenAPI version : %v", openAPIVersion)
 	if openAPIVersion == "3" {
-		openAPIV3Struct, err := swaggerOperator.GetOpenAPIV3Struct(jsonContent)
+		openAPIV3Struct, err := operator.GetOpenAPIV3Struct(jsonContent)
 		if err != nil {
 			logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
 		}
@@ -110,9 +107,9 @@ func UpdateEnvoyByteArr(byteArr []byte) {
 		}
 		openAPIV3Map[apiMapKey] = openAPIV3Struct
 		//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
-		newLabels = apiDefinition.GetXWso2Label(openAPIV3Struct.ExtensionProps)
+		newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
 	} else {
-		openAPIV2Struct, err := swaggerOperator.GetOpenAPIV2Struct(jsonContent)
+		openAPIV2Struct, err := operator.GetOpenAPIV2Struct(jsonContent)
 		if err != nil {
 			logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
 		}
@@ -125,7 +122,7 @@ func UpdateEnvoyByteArr(byteArr []byte) {
 				return
 			}
 		}
-		newLabels = swaggerOperator.GetXWso2Labels(openAPIV2Struct.Extensions)
+		newLabels = operator.GetXWso2Labels(openAPIV2Struct.Extensions)
 	}
 	logger.LoggerXds.Infof("Added/Updated the content under OpenAPI Key : %v", apiMapKey)
 	logger.LoggerXds.Debugf("Newly added labels for the OpenAPI Key : %v are %v", apiMapKey, newLabels)
@@ -220,7 +217,7 @@ func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) {
 	version, ok := envoyUpdateVersionMap[label]
 	if ok {
-		version += 1
+		version++
 	} else {
 		//TODO : (VirajSalaka) Fix control plane restart scenario : This is decided to be provided via the openapi file itself
 		version = 1

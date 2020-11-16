@@ -14,6 +14,8 @@
  *  limitations under the License.
  *
  */
+
+//Package logging holds the implementation for adapter logs.
 package logging
 
 import (
@@ -21,7 +23,7 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/configs"
+	"github.com/wso2/micro-gw/config"
 )
 
 /**
@@ -31,36 +33,31 @@ import (
  * @return logrus.Level Logrus log level
  */
 func logLevelMapper(pkgLevel string) logrus.Level {
-	logLevel := DEFAULT_LOG_LEVEL
+	logLevel := defaultLogLevel
 	switch pkgLevel {
-	case LEVEL_WARN:
+	case warnLevel:
 		logLevel = logrus.WarnLevel
-	case LEVEL_DEBUG:
+	case debugLevel:
 		logLevel = logrus.DebugLevel
-	case LEVEL_ERROR:
+	case errorLevel:
 		logLevel = logrus.ErrorLevel
-	case LEVEL_INFO:
+	case infoLevel:
 		logLevel = logrus.InfoLevel
-	case LEVEL_FATAL:
+	case fatalLevel:
 		logLevel = logrus.FatalLevel
-	case LEVEL_PANIC:
+	case panicLevel:
 		logLevel = logrus.PanicLevel
 	}
 
 	return logLevel
 }
 
-/**
- * Initialise the package loggers.
- * If the package log level is defined in the log_config.toml file, it override the
- * root log level.
- *
- * @param pkgName   Package name
- * @return *logrus.Logger Reference for the logger instance
- */
+// InitPackageLogger initialises the package loggers for given package name.
+// If the package log level is defined in the log_config.toml file, it override the
+// root log level.
 func InitPackageLogger(pkgName string) *logrus.Logger {
 
-	pkgLogLevel := DEFAULT_LOG_LEVEL //default log level
+	pkgLogLevel := defaultLogLevel //default log level
 	isPackegeLevelDefined := false
 
 	logger := logrus.New()
@@ -69,7 +66,7 @@ func InitPackageLogger(pkgName string) *logrus.Logger {
 	formatter := loggerFromat()
 	logger.SetFormatter(formatter)
 
-	logConf, errReadConfig := configs.ReadLogConfigs()
+	logConf, errReadConfig := config.ReadLogConfigs()
 	if errReadConfig != nil {
 		logger.Error("Error loading log configuration. ", errReadConfig)
 	}

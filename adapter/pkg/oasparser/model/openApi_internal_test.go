@@ -15,7 +15,7 @@
  *
  */
 
-package apiDefinition
+package model
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSetInfoOpenApi(t *testing.T) {
+func TestSetInfoOpenAPI(t *testing.T) {
 	type setInfoTestItem struct {
 		input   openapi3.Swagger
 		result  MgwSwagger
@@ -68,12 +68,12 @@ func TestSetInfoOpenApi(t *testing.T) {
 	}
 	for _, item := range dataItems {
 		var mgwSwagger MgwSwagger
-		mgwSwagger.SetInfoOpenApi(item.input)
+		mgwSwagger.SetInfoOpenAPI(item.input)
 		assert.Equal(t, item.result, mgwSwagger, item.message)
 	}
 }
 
-func TestSetResourcesOpenApi(t *testing.T) {
+func TestSetResourcesOpenAPI(t *testing.T) {
 	type setResourcesTestItem struct {
 		input   openapi3.Swagger
 		result  []Resource
@@ -112,7 +112,7 @@ func TestSetResourcesOpenApi(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources := SetResourcesOpenApi(item.input)
+		resultResources := setResourcesOpenAPI(item.input)
 		if item.result != nil {
 			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
 			assert.Equal(t, item.result[0].methods, resultResources[0].GetMethod(), item.message)
@@ -138,7 +138,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 				Host:     "petstore.io",
 				Basepath: "/api/v2",
 				Port:     8000,
-				UrlType:  "https",
+				URLType:  "https",
 			},
 			message: "all the details are provided in the endpoint",
 		},
@@ -148,7 +148,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 				Host:     "petstore.io",
 				Basepath: "/api/v2",
 				Port:     8000,
-				UrlType:  "https",
+				URLType:  "https",
 			},
 			message: "when port is not provided", //here should find a way to readi configs in tests
 		},
@@ -158,7 +158,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 				Host:     "petstore.io",
 				Basepath: "/api/v2",
 				Port:     8000,
-				UrlType:  "http",
+				URLType:  "http",
 			},
 			message: "when protocol is not provided",
 		},
