@@ -34,18 +34,6 @@ import (
 	logger "github.com/wso2/micro-gw/loggers"
 )
 
-const (
-	defaultRdsConfigName string = "default"
-)
-
-const (
-	httpConManagerStartPrefix string = "ingress_http"
-)
-
-const (
-	transportSocketName string = "envoy.transport_sockets.tls"
-)
-
 // CreateRoutesConfigForRds generates the default RouteConfiguration.
 // Only the provided virtual host will be assigned inside the configuration.
 // This is used to provide the configuration for RDS.
@@ -202,7 +190,7 @@ func createAddress(remoteHost string, port uint32) *corev3.Address {
 // getAccessLogConfigs provides access log configurations for envoy
 func getAccessLogConfigs() *access_logv3.AccessLog {
 	var logFormat *envoy_config_filter_accesslog_v3.FileAccessLog_Format
-	logpath := "/tmp/envoy.access.log" //default access log path
+	logpath := defaultAccessLogPath //default access log path
 
 	logConf, errReadConfig := config.ReadLogConfigs()
 	if errReadConfig != nil {
@@ -225,7 +213,7 @@ func getAccessLogConfigs() *access_logv3.AccessLog {
 	}
 
 	accessLogs := access_logv3.AccessLog{
-		Name:   "envoy.access_loggers.file",
+		Name:   accessLogName,
 		Filter: nil,
 		ConfigType: &access_logv3.AccessLog_TypedConfig{
 			TypedConfig: accessLogTypedConf,
@@ -243,7 +231,7 @@ func generateDefaultSdsSecretFromConfigfile(privateKeyPath string, pulicKeyPath 
 		return &secret, err
 	}
 	secret = tlsv3.Secret{
-		Name: "DefaultListenerSecret",
+		Name: defaultListenerSecretConfigName,
 		Type: &tlsv3.Secret_TlsCertificate{
 			TlsCertificate: tlsCert,
 		},

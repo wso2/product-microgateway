@@ -72,8 +72,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 	if len(mgwSwagger.GetSandEndpoints()) > 0 {
 		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
 		apilevelAddressSand := createAddress(apiLevelEndpointSand[0].Host, apiLevelEndpointSand[0].Port)
-		apiLevelClusterNameSand = strings.TrimSpace("clusterSand_" + strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) +
-			mgwSwagger.GetVersion())
+		apiLevelClusterNameSand = strings.TrimSpace(sandClustersConfigNamePrefix +
+			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
 		apilevelClusterSand = createCluster(apilevelAddressSand, apiLevelClusterNameSand, apiLevelEndpointSand[0].URLType)
 		clustersSand = append(clustersSand, apilevelClusterSand)
 		endpointsSand = append(endpointsSand, apilevelAddressSand)
@@ -83,8 +83,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 	if len(mgwSwagger.GetProdEndpoints()) > 0 {
 		apiLevelEndpointProd = mgwSwagger.GetProdEndpoints()
 		apilevelAddressP := createAddress(apiLevelEndpointProd[0].Host, apiLevelEndpointProd[0].Port)
-		apiLevelClusterNameProd = strings.TrimSpace("clusterProd_" + strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) +
-			mgwSwagger.GetVersion())
+		apiLevelClusterNameProd = strings.TrimSpace(prodClustersConfigNamePrefix +
+			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
 		apilevelClusterProd = createCluster(apilevelAddressP, apiLevelClusterNameProd, apiLevelEndpointProd[0].URLType)
 		clustersProd = append(clustersProd, apilevelClusterProd)
 		endpointsProd = append(endpointsProd, apilevelAddressP)
@@ -188,14 +188,14 @@ func createCluster(address *corev3.Address, clusterName string, urlType string) 
 			},
 		},
 	}
-	if strings.HasPrefix(urlType, "https") {
+	if strings.HasPrefix(urlType, httpsURLType) {
 		upstreamtlsContext := &tlsv3.UpstreamTlsContext{
 			CommonTlsContext: &tlsv3.CommonTlsContext{
 				ValidationContextType: &tlsv3.CommonTlsContext_ValidationContext{
 					ValidationContext: &tlsv3.CertificateValidationContext{
 						TrustedCa: &corev3.DataSource{
 							Specifier: &corev3.DataSource_Filename{
-								Filename: "/etc/ssl/certs/ca-certificates.crt",
+								Filename: defaultCACertPath,
 							},
 						},
 					},
@@ -207,7 +207,7 @@ func createCluster(address *corev3.Address, clusterName string, urlType string) 
 			logger.LoggerOasparser.Error("Internal Error while marshalling the upstream TLS Context.")
 		} else {
 			upstreamTransportSocket := &corev3.TransportSocket{
-				Name: "envoy.transport_sockets.tls",
+				Name: transportSocketName,
 				ConfigType: &corev3.TransportSocket_TypedConfig{
 					TypedConfig: marshalledTLSContext,
 				},
@@ -229,7 +229,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpoint mo
 		resourcePath string
 	)
 	headerMatcherArray := routev3.HeaderMatcher{
-		Name: ":method",
+		Name: httpMethodHeader,
 		HeaderMatchSpecifier: &routev3.HeaderMatcher_SafeRegexMatch{
 			SafeRegexMatch: &envoy_type_matcherv3.RegexMatcher{
 				EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{

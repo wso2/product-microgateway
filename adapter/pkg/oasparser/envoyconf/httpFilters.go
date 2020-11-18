@@ -32,14 +32,6 @@ import (
 	logger "github.com/wso2/micro-gw/loggers"
 )
 
-const (
-	extAuthzClusterName string = "ext-authz"
-)
-
-const (
-	extAuthzFilterName string = "envoy.filters.http.ext_authz"
-)
-
 // getHTTPFilters generates httpFilter configuration
 func getHTTPFilters() []*hcmv3.HttpFilter {
 	extAauth := getExtAuthzHTTPFilter()
