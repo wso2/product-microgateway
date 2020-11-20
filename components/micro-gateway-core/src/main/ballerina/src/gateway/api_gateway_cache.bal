@@ -204,6 +204,22 @@ public type APIGatewayCache object {
     public function getMutualSslCertificateCache() returns cache:Cache {
         return mutualSslCertificateCache;
     }
+
+    public function getGatewayTokenCache() returns cache:Cache {
+        return gatewayTokenCache;
+    }
+
+    public function getGatewayKeyValidationCache() returns cache:Cache {
+        return gatewayKeyValidationCache;
+    }
+
+    public function getInvalidTokenCache() returns cache:Cache {
+        return invalidTokenCache;
+    }
+
+    public function getJwtGeneratorExpTimeCache() returns cache:Cache {
+        return jwtGeneratorExpTimeCache;
+    }
 };
 
 public function getCacheObject() returns APIGatewayCache {
