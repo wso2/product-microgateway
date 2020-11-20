@@ -22,7 +22,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/micro-gw/config"
-	enovoy "github.com/wso2/micro-gw/pkg/oasparser/envoyconf"
+	envoy "github.com/wso2/micro-gw/pkg/oasparser/envoyconf"
 	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 )
 
@@ -50,7 +50,7 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
 	//TODO: (VirajSalaka) Test Sandbox endpoints
-	routes, clusters, _, _, _, _ := enovoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
+	routes, clusters, _, _, _, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
 
 	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
 	//As the first cluster is always related to API level cluster

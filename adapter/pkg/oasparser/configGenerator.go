@@ -24,7 +24,7 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 
-	enovoy "github.com/wso2/micro-gw/pkg/oasparser/envoyconf"
+	envoy "github.com/wso2/micro-gw/pkg/oasparser/envoyconf"
 	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 )
 
@@ -32,7 +32,7 @@ import (
 // when the openAPI Json is provided.
 func GetProductionRoutesClustersEndpoints(byteArr []byte) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
 	mgwSwagger := operator.GetMgwSwagger(byteArr)
-	routes, clusters, endpoints, _, _, _ := enovoy.CreateRoutesWithClusters(mgwSwagger)
+	routes, clusters, endpoints, _, _, _ := envoy.CreateRoutesWithClusters(mgwSwagger)
 	return routes, clusters, endpoints
 }
 
@@ -43,10 +43,10 @@ func GetProductionRoutesClustersEndpoints(byteArr []byte) ([]*routev3.Route, []*
 //
 // The RouteConfiguration is named as "default"
 func GetProductionListenerAndRouteConfig(routes []*routev3.Route) (*listenerv3.Listener, *routev3.RouteConfiguration) {
-	listnerProd := enovoy.CreateListenerWithRds("default")
+	listnerProd := envoy.CreateListenerWithRds("default")
 	vHostName := "default"
-	vHostP := enovoy.CreateVirtualHost(vHostName, routes)
-	routeConfigProd := enovoy.CreateRoutesConfigForRds(vHostP)
+	vHostP := envoy.CreateVirtualHost(vHostName, routes)
+	routeConfigProd := envoy.CreateRoutesConfigForRds(vHostP)
 
 	return listnerProd, routeConfigProd
 }
@@ -77,6 +77,6 @@ func GetCacheResources(endpoints []*corev3.Address, clusters []*clusterv3.Cluste
 //All the already existing routes (within the routeConfiguration) will be removed.
 func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, routes []*routev3.Route) {
 	vHostName := "default"
-	vHost := enovoy.CreateVirtualHost(vHostName, routes)
+	vHost := envoy.CreateVirtualHost(vHostName, routes)
 	routeConfig.VirtualHosts = []*routev3.VirtualHost{vHost}
 }
