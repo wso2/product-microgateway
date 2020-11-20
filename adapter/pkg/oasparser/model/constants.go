@@ -14,10 +14,19 @@
  *  limitations under the License.
  *
  */
-package constants
 
+package model
+
+// sub-property keys mentioned under x-wso2-production-endpoints
 const (
-	PRODUCTION_ENDPOINTS string = "x-wso2-production-endpoints"
-	SANDBOX_ENDPOINTS    string = "x-wso2-sandbox-endpoints"
-	XWSO2BASEPATH        string = "x-wso2-basePath"
+	urls      string = "urls"
+	typeConst string = "type"
+)
+
+// Constants for OpenAPI vendor extension keys
+const (
+	productionEndpoints string = "x-wso2-production-endpoints"
+	sandboxEndpoints    string = "x-wso2-sandbox-endpoints"
+	xWso2BasePath       string = "x-wso2-basePath"
+	xWso2Label          string = "x-wso2-label"
 )

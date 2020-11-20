@@ -15,7 +15,7 @@
  *
  */
 
-package apiDefinition
+package model
 
 import (
 	"testing"
@@ -39,7 +39,7 @@ func TestGetXWso2Endpoints(t *testing.T) {
 				{
 					Host:    "www.facebook.com",
 					Port:    80,
-					UrlType: "https",
+					URLType: "https",
 				},
 			},
 			message: "usual case",
@@ -53,7 +53,7 @@ func TestGetXWso2Endpoints(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources := GetXWso2Endpoints(item.inputVendorExtensible, item.inputEndpointType)
+		resultResources := getXWso2Endpoints(item.inputVendorExtensible, item.inputEndpointType)
 		assert.Equal(t, item.result, resultResources, item.message)
 	}
 }
@@ -77,7 +77,7 @@ func TestGetXWso2Basepath(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources := GetXWso2Basepath(item.inputVendorExtensible)
+		resultResources := getXWso2Basepath(item.inputVendorExtensible)
 		assert.Equal(t, item.result, resultResources, item.message)
 	}
 }
@@ -104,7 +104,7 @@ func TestSetXWso2PrdoductionEndpoint(t *testing.T) {
 					{
 						Host:     "www.facebook.com",
 						Port:     80,
-						UrlType:  "https",
+						URLType:  "https",
 						Basepath: "/base",
 					},
 				},
@@ -132,7 +132,7 @@ func TestSetXWso2PrdoductionEndpoint(t *testing.T) {
 					{
 						Host:     "www.facebook.com",
 						Port:     80,
-						UrlType:  "https",
+						URLType:  "https",
 						Basepath: "/base",
 					},
 				},
@@ -142,7 +142,7 @@ func TestSetXWso2PrdoductionEndpoint(t *testing.T) {
 							{
 								Host:     "resource.endpoint",
 								Port:     80,
-								UrlType:  "https",
+								URLType:  "https",
 								Basepath: "/base",
 							},
 						},

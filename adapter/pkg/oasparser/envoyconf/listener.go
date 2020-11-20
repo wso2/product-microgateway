@@ -14,7 +14,8 @@
  *  limitations under the License.
  *
  */
-package envoyCodegen
+
+package envoyconf
 
 import (
 	"io/ioutil"
@@ -27,44 +28,58 @@ import (
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
-
 	"github.com/golang/protobuf/ptypes"
-	"github.com/wso2/micro-gw/configs"
-	mgwconfig "github.com/wso2/micro-gw/configs/confTypes"
+
+	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 )
 
-func CreateRoutesConfigForRds(vHost routev3.VirtualHost) routev3.RouteConfiguration {
-	//TODO: (VirajSalaka) Do we need a custom config here
-	rdsConfigName := "default"
-
+// CreateRoutesConfigForRds generates the default RouteConfiguration.
+// Only the provided virtual host will be assigned inside the configuration.
+// This is used to provide the configuration for RDS.
+func CreateRoutesConfigForRds(vHost *routev3.VirtualHost) *routev3.RouteConfiguration {
+	rdsConfigName := defaultRdsConfigName
 	routeConfiguration := routev3.RouteConfiguration{
 		Name:         rdsConfigName,
-		VirtualHosts: []*routev3.VirtualHost{&vHost},
+		VirtualHosts: []*routev3.VirtualHost{vHost},
 	}
-	return routeConfiguration
+	return &routeConfiguration
 }
 
-func CreateListenerWithRds(listenerName string) listenerv3.Listener {
-	conf, errReadConfig := configs.ReadConfigs()
+// CreateListenerWithRds create a listener with the Route Configuration stated as
+// RDS. (routes are not assigned directly to the listener.) RouteConfiguration name
+// is assigned using its default value. Route Configuration would be resolved via
+// ADS.
+//
+// HTTPConnectionManager with HTTP Filters, Accesslog configuration, TransportSocket
+// Configuration is included within the implementation.
+//
+// Listener Address, Port Valuei is fetched from the configuration accordingly.
+//
+// If the TLSEnabled Configuration is provided, TransportSocket Configuration will
+// be applied. The relevant private keys and certificates are fetched from the filepath
+// mentioned in the adapter configuration. These certificate, key values are added
+// as inline records (base64 encoded).
+func CreateListenerWithRds(listenerName string) *listenerv3.Listener {
+	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}
 	return createListener(conf, listenerName)
 }
 
-func createListener(conf *mgwconfig.Config, listenerName string) listenerv3.Listener {
-	httpFilters := getHttpFilters()
+func createListener(conf *config.Config, listenerName string) *listenerv3.Listener {
+	httpFilters := getHTTPFilters()
 	accessLogs := getAccessLogConfigs()
 	var filters []*listenerv3.Filter
 
 	manager := &hcmv3.HttpConnectionManager{
 		CodecType:  hcmv3.HttpConnectionManager_AUTO,
-		StatPrefix: "ingress_http",
+		StatPrefix: httpConManagerStartPrefix,
 		RouteSpecifier: &hcmv3.HttpConnectionManager_Rds{
 			Rds: &hcmv3.Rds{
 				//TODO: (VirajSalaka) Decide if we need this to be configurable in the first stage
-				RouteConfigName: "default",
+				RouteConfigName: defaultRdsConfigName,
 				ConfigSource: &corev3.ConfigSource{
 					ConfigSourceSpecifier: &corev3.ConfigSource_Ads{
 						Ads: &corev3.AggregatedConfigSource{},
@@ -74,7 +89,7 @@ func createListener(conf *mgwconfig.Config, listenerName string) listenerv3.List
 			},
 		},
 		HttpFilters: httpFilters,
-		AccessLog:   []*access_logv3.AccessLog{&accessLogs},
+		AccessLog:   []*access_logv3.AccessLog{accessLogs},
 	}
 
 	pbst, err := ptypes.MarshalAny(manager)
@@ -88,13 +103,13 @@ func createListener(conf *mgwconfig.Config, listenerName string) listenerv3.List
 		},
 	}
 
-	//add filters
+	// add filters
 	filters = append(filters, &connectionManagerFilterP)
 
 	listenerAddress := &corev3.Address_SocketAddress{
 		SocketAddress: &corev3.SocketAddress{
 			Protocol: corev3.SocketAddress_TCP,
-			Address:  conf.Envoy.ListenerAddress,
+			Address:  conf.Envoy.ListenerHost,
 			PortSpecifier: &corev3.SocketAddress_PortValue{
 				PortValue: conf.Envoy.ListenerPort,
 			},
@@ -112,8 +127,8 @@ func createListener(conf *mgwconfig.Config, listenerName string) listenerv3.List
 		},
 	}
 
-	if conf.Envoy.ListenerTlsEnabled {
-		tlsCert, err := generateTlsCert(conf.Envoy.ListenerKeyPath, conf.Envoy.ListenerCertPath)
+	if conf.Envoy.ListenerTLSEnabled {
+		tlsCert, err := generateTLSCert(conf.Envoy.ListenerKeyPath, conf.Envoy.ListenerCertPath)
 		if err != nil {
 			panic(err)
 		}
@@ -121,112 +136,45 @@ func createListener(conf *mgwconfig.Config, listenerName string) listenerv3.List
 		tlsFilter := &tlsv3.DownstreamTlsContext{
 			CommonTlsContext: &tlsv3.CommonTlsContext{
 				//TlsCertificateSdsSecretConfigs
-				TlsCertificates: []*tlsv3.TlsCertificate{&tlsCert},
+				TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
 			},
 		}
 
-		marshalledTlsFilter, err := ptypes.MarshalAny(tlsFilter)
+		marshalledTLSFilter, err := ptypes.MarshalAny(tlsFilter)
 		if err != nil {
 			panic(err)
 		}
 
 		transportSocket := &corev3.TransportSocket{
-			Name: "envoy.transport_sockets.tls",
+			Name: transportSocketName,
 			ConfigType: &corev3.TransportSocket_TypedConfig{
-				TypedConfig: marshalledTlsFilter,
+				TypedConfig: marshalledTLSFilter,
 			},
 		}
 
 		// At the moment, the listener as only one filter chain
 		listener.FilterChains[0].TransportSocket = transportSocket
 	}
-	return listener
+	return &listener
 }
 
-/**
- * Create listener filters for envoy.
- *
- * @param routeConfigName   Name of the route config
- * @param vHost  Virtual host
- * @return []*listenerv3.Filter  Listener filters as a array
- */
-func createListenerFilters(routeConfigName string, vHost routev3.VirtualHost) []*listenerv3.Filter {
-	var filters []*listenerv3.Filter
+// CreateVirtualHost creates VirtualHost configuration for envoy which serves
+// request from any domain(*). The provided name will the reference for
+// VirtualHost configuration. The routes array will be included as the routes
+// for the created virtual host.
+func CreateVirtualHost(vHostName string, routes []*routev3.Route) *routev3.VirtualHost {
 
-	//set connection manager filter for production
-	managerP := createConectionManagerFilter(vHost, routeConfigName)
+	vHostDomains := []string{"*"}
 
-	pbst, err := ptypes.MarshalAny(managerP)
-	if err != nil {
-		panic(err)
-	}
-	connectionManagerFilterP := listenerv3.Filter{
-		Name: wellknown.HTTPConnectionManager,
-		ConfigType: &listenerv3.Filter_TypedConfig{
-			TypedConfig: pbst,
-		},
-	}
-
-	//add filters
-	filters = append(filters, &connectionManagerFilterP)
-	return filters
-}
-
-/**
- * Create connection manager filter.
- *
- * @param vHostP  Virtual host
- * @param routeConfigName   Name of the route config
- * @return *hcm.HttpConnectionManager  Reference for a connection manager instance
- */
-func createConectionManagerFilter(vHost routev3.VirtualHost, routeConfigName string) *hcmv3.HttpConnectionManager {
-
-	httpFilters := getHttpFilters()
-	accessLogs := getAccessLogConfigs()
-
-	manager := &hcmv3.HttpConnectionManager{
-		CodecType:  hcmv3.HttpConnectionManager_AUTO,
-		StatPrefix: "ingress_http",
-		RouteSpecifier: &hcmv3.HttpConnectionManager_RouteConfig{
-			RouteConfig: &routev3.RouteConfiguration{
-				Name:         routeConfigName,
-				VirtualHosts: []*routev3.VirtualHost{&vHost},
-			},
-		},
-		HttpFilters: httpFilters,
-		AccessLog:   []*access_logv3.AccessLog{&accessLogs},
-	}
-	return manager
-}
-
-/**
- * Create a virtual host for envoy listener.
- *
- * @param vHost_Name  Name for virtual host
- * @param routes   Routes of the virtual host
- * @return v3route.VirtualHost  Virtual host instance
- * @return error  Error
- */
-func CreateVirtualHost(vHost_Name string, routes []*routev3.Route) (routev3.VirtualHost, error) {
-
-	vHost_Domains := []string{"*"}
-
-	virtual_host := routev3.VirtualHost{
-		Name:    vHost_Name,
-		Domains: vHost_Domains,
+	virtualHost := routev3.VirtualHost{
+		Name:    vHostName,
+		Domains: vHostDomains,
 		Routes:  routes,
 	}
-	return virtual_host, nil
+	return &virtualHost
 }
 
-/**
- * Create a socket address.
- *
- * @param remoteHost  Host address or host ip
- * @param port  Port
- * @return core.Address  Endpoint as a core address
- */
-func createAddress(remoteHost string, port uint32) corev3.Address {
+func createAddress(remoteHost string, port uint32) *corev3.Address {
 	address := corev3.Address{Address: &corev3.Address_SocketAddress{
 		SocketAddress: &corev3.SocketAddress{
 			Address:  remoteHost,
@@ -236,19 +184,15 @@ func createAddress(remoteHost string, port uint32) corev3.Address {
 			},
 		},
 	}}
-	return address
+	return &address
 }
 
-/**
- * Get access log configs for envoy.
- *
- * @return envoy_config_filter_accesslog_v2.AccessLog  Access log config
- */
-func getAccessLogConfigs() access_logv3.AccessLog {
+// getAccessLogConfigs provides access log configurations for envoy
+func getAccessLogConfigs() *access_logv3.AccessLog {
 	var logFormat *envoy_config_filter_accesslog_v3.FileAccessLog_Format
-	logpath := "/tmp/envoy.access.log" //default access log path
+	logpath := defaultAccessLogPath //default access log path
 
-	logConf, errReadConfig := configs.ReadLogConfigs()
+	logConf, errReadConfig := config.ReadLogConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
 	} else {
@@ -268,42 +212,42 @@ func getAccessLogConfigs() access_logv3.AccessLog {
 		logger.LoggerOasparser.Error("Error marsheling access log configs. ", err)
 	}
 
-	access_logs := access_logv3.AccessLog{
-		Name:   "envoy.access_loggers.file",
+	accessLogs := access_logv3.AccessLog{
+		Name:   accessLogName,
 		Filter: nil,
 		ConfigType: &access_logv3.AccessLog_TypedConfig{
 			TypedConfig: accessLogTypedConf,
 		},
 	}
 
-	return access_logs
+	return &accessLogs
 }
 
 //TODO: (VirajSalaka) Still the following method is not utilized as Sds is not implement. Keeping the Implementation for future reference
-func generateDefaultSdsSecretFromConfigfile(privateKeyPath string, pulicKeyPath string) (tlsv3.Secret, error) {
+func generateDefaultSdsSecretFromConfigfile(privateKeyPath string, pulicKeyPath string) (*tlsv3.Secret, error) {
 	var secret tlsv3.Secret
-	tlsCert, err := generateTlsCert(privateKeyPath, pulicKeyPath)
+	tlsCert, err := generateTLSCert(privateKeyPath, pulicKeyPath)
 	if err != nil {
-		return secret, err
+		return &secret, err
 	}
 	secret = tlsv3.Secret{
-		Name: "DefaultListenerSecret",
+		Name: defaultListenerSecretConfigName,
 		Type: &tlsv3.Secret_TlsCertificate{
-			TlsCertificate: &tlsCert,
+			TlsCertificate: tlsCert,
 		},
 	}
-	return secret, nil
+	return &secret, nil
 }
 
-func generateTlsCert(privateKeyPath string, publicKeyPath string) (tlsv3.TlsCertificate, error) {
+func generateTLSCert(privateKeyPath string, publicKeyPath string) (*tlsv3.TlsCertificate, error) {
 	var tlsCert tlsv3.TlsCertificate
 	privateKeyByteArray, err := readFileAsByteArray(privateKeyPath)
 	if err != nil {
-		return tlsCert, err
+		return &tlsCert, err
 	}
 	publicKeyByteArray, err := readFileAsByteArray(publicKeyPath)
 	if err != nil {
-		return tlsCert, err
+		return &tlsCert, err
 	}
 	tlsCert = tlsv3.TlsCertificate{
 		PrivateKey: &corev3.DataSource{
@@ -317,7 +261,7 @@ func generateTlsCert(privateKeyPath string, publicKeyPath string) (tlsv3.TlsCert
 			},
 		},
 	}
-	return tlsCert, nil
+	return &tlsCert, nil
 }
 
 func readFileAsByteArray(filepath string) ([]byte, error) {

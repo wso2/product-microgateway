@@ -13,8 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 
+// Package restserver contains the server for the REST API implementation of the adapter
 package restserver
 
 import (
@@ -31,7 +31,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 
 	keystore "github.com/pavel-v-chernykh/keystore-go/v3"
-	"github.com/wso2/micro-gw/configs/confTypes"
+	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	apiServer "github.com/wso2/micro-gw/pkg/api"
 	"github.com/wso2/micro-gw/pkg/api/models"
@@ -40,7 +40,7 @@ import (
 )
 
 var (
-	mgwConfig *confTypes.Config
+	mgwConfig *config.Config
 )
 
 //go:generate swagger generate server --target ../../api --name Restapi --spec ../../../../resources/adminAPI.yaml --server-package restserver --principal models.Principal
@@ -61,24 +61,24 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	// Applies when the Authorization header is set with the Basic scheme
 	api.BasicAuthAuth = func(user string, pass string) (*models.Principal, error) {
 		if user != mgwConfig.Server.Username || pass != mgwConfig.Server.Password {
-			//TODO: (VirajSalaka) Introduce Constants
-			logger.LoggerApi.Info("Credentials are invalid")
+			// TODO: (VirajSalaka) Introduce Constants
+			logger.LoggerAPI.Info("Credentials are invalid")
 			return nil, errors.New(401, "Credentials are invalid")
 		}
-		//TODO: implement authentication principal
+		// TODO: implement authentication principal
 		p := models.Principal{
 			Token:    "xxxx",
 			Tenant:   "xxxx",
 			Username: user,
 		}
-		logger.LoggerApi.Debugf("Principal : %v", p)
+		logger.LoggerAPI.Debugf("Principal : %v", p)
 		return &p, nil
 	}
 
 	api.APIIndividualPostImportAPIHandler = api_individual.PostImportAPIHandlerFunc(func(params api_individual.PostImportAPIParams, principal *models.Principal) middleware.Responder {
-		//TODO: (VirajSalaka) Error is not handled in the response.
+		// TODO: (VirajSalaka) Error is not handled in the response.
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
-		err := apiServer.UnzipAndApplyZippedProject(jsonByteArray)
+		err := apiServer.ApplyAPIProject(jsonByteArray)
 		if err != nil {
 			return api_individual.NewPostImportAPIInternalServerError()
 		}
@@ -95,7 +95,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 // The TLS configuration before HTTPS server starts.
 func configureTLS(tlsConfig *tls.Config) {
 	// Make all necessary changes to the TLS configuration here.
-	//TODO: (VirajSalaka) Introduce PKCS12
+	// TODO: (VirajSalaka) Introduce PKCS12
 	tlsConfig.Certificates, _ = getCertificates(mgwConfig.Server.PublicKeyPath, mgwConfig.Server.PrivateKeyPath)
 }
 
@@ -105,14 +105,14 @@ func getCertificates(publicKeyPath, privateKeyPath string) ([]tls.Certificate, e
 	tlsCertificateKey := privateKeyPath
 	certificate, err := tls.LoadX509KeyPair(string(tlsCertificate), string(tlsCertificateKey))
 	if err != nil {
-		logger.LoggerApi.Fatal("Error while loading the tls keypair.", err)
+		logger.LoggerAPI.Fatal("Error while loading the tls keypair.", err)
 		return certificates, err
 	}
 	certificates[0] = certificate
 	return certificates, nil
 }
 
-//TODO: (VirajSalaka) This is not removed at the moment. Finalize if this is going to be used in future
+// TODO: (VirajSalaka) This is not removed at the moment. Finalize if this is going to be used in future
 func getCertificatesFromByteArr(keyPem, certPem []byte) []tls.Certificate {
 	certificates := make([]tls.Certificate, 1)
 	cert, err := tls.X509KeyPair(certPem, keyPem)
@@ -143,11 +143,12 @@ func setupGlobalMiddleware(handler http.Handler) http.Handler {
 	return handler
 }
 
-func StartRestServer(config *confTypes.Config) {
+// StartRestServer starts the listener which is used to fetch the requests sent from apictl.
+func StartRestServer(config *config.Config) {
 	mgwConfig = config
 	swaggerSpec, err := loads.Embedded(SwaggerJSON, FlatSwaggerJSON)
 	if err != nil {
-		logger.LoggerApi.Fatal(err)
+		logger.LoggerAPI.Fatal(err)
 	}
 
 	api := operations.NewRestapiAPI(swaggerSpec)
@@ -155,41 +156,41 @@ func StartRestServer(config *confTypes.Config) {
 	defer server.Shutdown()
 
 	server.ConfigureAPI()
-	server.TLSHost = mgwConfig.Server.IP
+	server.TLSHost = mgwConfig.Server.Host
 	port, err := strconv.Atoi(mgwConfig.Server.Port)
 	if err != nil {
-		logger.LoggerApi.Fatalf("The provided port value for the REST Api Server :%v is not an integer. %v", mgwConfig.Server.Port, err)
+		logger.LoggerAPI.Fatalf("The provided port value for the REST Api Server :%v is not an integer. %v", mgwConfig.Server.Port, err)
 		return
 	}
 	server.TLSPort = port
 	if err := server.Serve(); err != nil {
-		logger.LoggerApi.Fatal(err)
+		logger.LoggerAPI.Fatal(err)
 	}
 
 }
 
-//TODO: (VirajSalaka) Either remove the unused methods or change impl such that the code segment is used.
+// TODO: (VirajSalaka) Either remove the unused methods or change impl such that the code segment is used.
 func getPrivateKeyFile() []byte {
 	var privateKeyByteArr []byte
 	f, err := os.Open("/Users/viraj/Desktop/temp/wso2am-micro-gw-macos-3.2.0-alpha/runtime/bre/security/ballerinaKeystore.p12")
 	if err != nil {
-		logger.LoggerApi.Fatal(err)
+		logger.LoggerAPI.Fatal(err)
 	}
 	defer f.Close()
 	keyStore, err := keystore.Decode(f, []byte("ballerina"))
 	if err != nil {
-		logger.LoggerApi.Fatal(err)
+		logger.LoggerAPI.Fatal(err)
 	}
 	key, ok := keyStore["ballerina"]
 	if ok {
 		privateKey := key.(*keystore.PrivateKeyEntry)
 		privateKeyByteArr = privateKey.PrivateKey
-		logger.LoggerApi.Debugf("private key found \n%v", string(privateKeyByteArr))
+		logger.LoggerAPI.Debugf("private key found \n%v", string(privateKeyByteArr))
 	}
 	return privateKeyByteArr
 }
 
-//TODO: (VirajSalaka) Either remove the unused methods or change impl such that the code segment is used.
+// TODO: (VirajSalaka) Either remove the unused methods or change impl such that the code segment is used.
 func getPublicKeyFile() []byte {
 	var publicKeyByteArr []byte
 	f, err := os.Open("/Users/viraj/Desktop/temp/wso2am-micro-gw-macos-3.2.0-alpha/runtime/bre/security/ballerinaTruststore.p12")
@@ -199,13 +200,13 @@ func getPublicKeyFile() []byte {
 	defer f.Close()
 	keyStore, err := keystore.Decode(f, []byte("ballerina"))
 	if err != nil {
-		logger.LoggerApi.Fatal(err)
+		logger.LoggerAPI.Fatal(err)
 	}
 	key, ok := keyStore["ballerina"]
 	if ok {
 		certEntry := key.(*keystore.TrustedCertificateEntry)
 		publicKeyByteArr = certEntry.Certificate.Content
-		logger.LoggerApi.Debugf("public key found \n%v", string(publicKeyByteArr))
+		logger.LoggerAPI.Debugf("public key found \n%v", string(publicKeyByteArr))
 
 	}
 	return publicKeyByteArr

@@ -18,15 +18,25 @@
 export MGW_HOME=${PWD}/../resources
 go clean -testcache
 go test ./... 
-if [ $? -ne 0 ] 
-then
+if [ $? -ne 0 ]; then 
   echo "FAILED: Unit tests failure"
+  exit 1
+fi 
+
+golint -set_exit_status ./...
+if [ $? -ne 0 ]; then
+  echo "FAILED: golint Failure"
   exit 1
 fi  
 
+go vet -c=5 ./...
+if [ $? -ne 0 ]; then 
+  echo "FAILED: go vet Failure"
+  exit 1
+fi
+
 GOOS=linux GOARCH=amd64 go build -v -o target/micro-gw-ubuntu main.go
-if [ $? -ne 0 ] 
-then
+if [ $? -ne 0 ]; then 
   echo "FAILED: Build failure"
   exit 1
 fi  

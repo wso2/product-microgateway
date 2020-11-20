@@ -23,3 +23,6 @@ docker rm $(docker ps -a | grep wso2/mg-enforcer:$micro_gw_version | awk '{print
 
 docker kill $(docker ps -a | grep wso2/mg-adapter:$micro_gw_version | awk '{print $1}')
 docker rm $(docker ps -a | grep wso2/mg-adapter:$micro_gw_version | awk '{print $1}')
+
+docker kill $(docker ps -a | grep wso2/mg-router:$micro_gw_version | awk '{print $1}')
+docker rm $(docker ps -a | grep wso2/mg-router:$micro_gw_version | awk '{print $1}')

@@ -14,7 +14,8 @@
  *  limitations under the License.
  *
  */
-package confTypes
+
+package config
 
 type pkg struct {
 	Name     string
@@ -23,25 +24,23 @@ type pkg struct {
 
 type accessLog struct {
 	LogFile string
-	Format string
+	Format  string
 }
 
-// The log configuration struct.
+// LogConfig represents the configurations related to adapter logs and envoy access logs.
 type LogConfig struct {
-
-	Logfile string
-	LogLevel  string
+	Logfile  string
+	LogLevel string
 	// log rotation parameters.
 	Rotation struct {
-		IP   string
-		Port string
-		MaxSize  int // megabytes
-		MaxBackups  int
-		MaxAge  int    //days
-		Compress  bool
+		IP         string
+		Port       string
+		MaxSize    int // megabytes
+		MaxBackups int
+		MaxAge     int //days
+		Compress   bool
 	}
 
 	Pkg        []pkg
 	AccessLogs accessLog
-
 }

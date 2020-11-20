@@ -14,44 +14,38 @@
  *  limitations under the License.
  *
  */
-package envoyCodegen
+
+// Package envoyconf generates the envoyconfiguration for listeners, virtual hosts,
+// routes, clusters, and endpoints.
+package envoyconf
 
 import (
+	"time"
+
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	routerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
-	"time"
-
 	"github.com/golang/protobuf/ptypes"
 	logger "github.com/wso2/micro-gw/loggers"
 )
 
-/**
- * Append all the http filters.
- *
- * @return []*hcm.HttpFilter  Http filter set as a array
- */
-func getHttpFilters() []*hcmv3.HttpFilter {
-	extAauth := getExtAauthzHttpFilter()
-	router := getRouterHttpFilter()
+// getHTTPFilters generates httpFilter configuration
+func getHTTPFilters() []*hcmv3.HttpFilter {
+	extAauth := getExtAuthzHTTPFilter()
+	router := getRouterHTTPFilter()
 
 	httpFilters := []*hcmv3.HttpFilter{
-		&extAauth,
-		&router,
+		extAauth,
+		router,
 	}
 	return httpFilters
 }
 
-//TODO: (VirajSalaka) Configure Http Connection Manager
-/**
- * Get router http filter.
- *
- * @return hcm.HttpFilter  Http filter instance
- */
-func getRouterHttpFilter() hcmv3.HttpFilter {
+// getRouterHTTPFilter gets router http filter.
+func getRouterHTTPFilter() *hcmv3.HttpFilter {
 
 	routeFilterConf := routerv3.Router{
 		DynamicStats:             nil,
@@ -66,22 +60,15 @@ func getRouterHttpFilter() hcmv3.HttpFilter {
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marshaling route filter configs. ", err)
 	}
-
 	filter := hcmv3.HttpFilter{
 		Name:       wellknown.Router,
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{TypedConfig: routeFilterTypedConf},
 	}
-
-	return filter
+	return &filter
 }
 
-//TODO: (VirajSalaka) Configure External Authz Filter
-/**
- * Get ExtAauthz http filter.
- *
- * @return hcm.HttpFilter  Http filter instance
- */
-func getExtAauthzHttpFilter() hcmv3.HttpFilter {
+// getExtAuthzHTTPFilter gets ExtAauthz http filter.
+func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 	extAuthzConfig := &ext_authv3.ExtAuthz{
 		WithRequestBody: &ext_authv3.BufferSettings{
 			MaxRequestBytes:     1024,
@@ -91,7 +78,7 @@ func getExtAauthzHttpFilter() hcmv3.HttpFilter {
 			GrpcService: &corev3.GrpcService{
 				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
 					EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{
-						ClusterName: "ext-authz",
+						ClusterName: extAuthzClusterName,
 					},
 				},
 				Timeout: ptypes.DurationProto(20 * time.Second),
@@ -103,11 +90,10 @@ func getExtAauthzHttpFilter() hcmv3.HttpFilter {
 		logger.LoggerOasparser.Error(err2)
 	}
 	extAuthzFilter := hcmv3.HttpFilter{
-		Name: "envoy.filters.http.ext_authz",
+		Name: extAuthzFilterName,
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{
 			TypedConfig: ext,
 		},
 	}
-
-	return extAuthzFilter
+	return &extAuthzFilter
 }

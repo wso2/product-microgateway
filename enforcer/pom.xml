@@ -11,8 +11,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.wso2.micro.gateway.adapter</artifactId>
-    <name>Micro Gateway - Adapter</name>
+    <artifactId>org.wso2.micro.gateway.enforcer</artifactId>
+    <name>Micro Gateway - Enforcer</name>
 
     <url>https://wso2.org</url>
     <organization>

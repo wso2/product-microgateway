@@ -15,6 +15,7 @@
  *
  */
 
+// Package api contains the REST API implementation for the adapter
 package api
 
 import (
@@ -29,46 +30,47 @@ import (
 	xds "github.com/wso2/micro-gw/pkg/xds"
 )
 
-func UnzipAndApplyZippedProject(payload []byte) error {
+// ApplyAPIProject accepts an apictl project (as a byte array) and updates the xds servers based upon the
+// content.
+// The apictl project must be in zipped format. And all the extensions should be defined with in the openAPI
+// definition as only swagger.yaml is taken into consideration here.
+func ApplyAPIProject(payload []byte) error {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 
 	if err != nil {
-		loggers.LoggerApi.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
+		loggers.LoggerAPI.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
 		return err
 	}
 
-	//TODO: (VirajSalaka) this won't support for distributed openAPI definition
+	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
 	for _, file := range zipReader.File {
-		//TODO: (VirajSalaka) provide a proper regex to filter openAPI json
-		//TODO: (VirajSalaka) Consider if it is appropriate to extract the file and do the necessary modifications there.
-		//TODO: (VirajSalaka) support .yaml files
 		if strings.HasSuffix(file.Name, "Meta-information/swagger.yaml") {
-			loggers.LoggerApi.Debugf("openAPI file : %v", file.Name)
+			loggers.LoggerAPI.Debugf("openAPI file : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
-				loggers.LoggerApi.Errorf("Error occured while reading the openapi file. %v", err.Error())
+				loggers.LoggerAPI.Errorf("Error occured while reading the openapi file. %v", err.Error())
 				continue
 			}
 			apiJsn, conversionErr := utills.ToJSON(unzippedFileBytes)
 			if conversionErr != nil {
-				loggers.LoggerApi.Errorf("Error converting api file to json: %v", err.Error())
+				loggers.LoggerAPI.Errorf("Error converting api file to json: %v", err.Error())
 				return conversionErr
-			} else {
-				xds.UpdateEnvoyByteArr(apiJsn)
 			}
+			xds.UpdateEnvoy(apiJsn)
 		}
 	}
 	return nil
 }
 
-//TODO: (VirajSalaka) Remove the code segment as it is not in use for the main flow.
+// ApplyOpenAPIFile accepts an openapi definition as a bytearray and apply the changes to XDS servers.
+// TODO: (VirajSalaka) Remove the code segment as it is not in use for the main flow.
 func ApplyOpenAPIFile(payload []byte) {
 	apiJsn, err := utills.ToJSON(payload)
 	if err != nil {
 		log.Fatal("Error converting api file to json:", err)
 		return
 	}
-	xds.UpdateEnvoyByteArr(apiJsn)
+	xds.UpdateEnvoy(apiJsn)
 }
 
 func readZipFile(zf *zip.File) ([]byte, error) {

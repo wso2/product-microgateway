@@ -14,7 +14,11 @@
  *  limitations under the License.
  *
  */
-package swaggerOperator
+
+// Package operator converts the openAPI v3 and/or v2 content
+// To MgwSwagger objects which is the intermediate representation
+// maintained by the microgateway.
+package operator
 
 import (
 	"encoding/json"
@@ -22,56 +26,52 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-openapi/spec"
 	logger "github.com/wso2/micro-gw/loggers"
-	"github.com/wso2/micro-gw/pkg/oasparser/models/apiDefinition"
+	"github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/utills"
 )
 
-/**
- * Get mgw swagger instance.
- *
- * @param apiContent   Api content as a byte array
- * @return apiDefinition.MgwSwagger  Mgw swagger instance
- */
-func GetMgwSwagger(apiContent []byte) apiDefinition.MgwSwagger {
-	var mgwSwagger apiDefinition.MgwSwagger
+// GetMgwSwagger converts the openAPI v3 and v2 content
+// To MgwSwagger objects
+// TODO: (VirajSalaka) return the error and handle
+func GetMgwSwagger(apiContent []byte) model.MgwSwagger {
+	var mgwSwagger model.MgwSwagger
 
 	apiJsn, err := utills.ToJSON(apiContent)
 	if err != nil {
-		//log.Fatal("Error converting api file to json:", err)
+		logger.LoggerOasparser.Error("Error converting api file to json", err)
+		return mgwSwagger
 	}
-
 	swaggerVerison := utills.FindSwaggerVersion(apiJsn)
 
 	if swaggerVerison == "2" {
-		//map json to struct
-		var ApiData2 spec.Swagger
-		err = json.Unmarshal(apiJsn, &ApiData2)
+		// map json to struct
+		var apiData2 spec.Swagger
+		err = json.Unmarshal(apiJsn, &apiData2)
 		if err != nil {
-			//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
 			logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
 		} else {
-			mgwSwagger.SetInfoSwagger(ApiData2)
+			mgwSwagger.SetInfoSwagger(apiData2)
 		}
 
 	} else if swaggerVerison == "3" {
-		//map json to struct
-		var ApiData3 *openapi3.Swagger
+		// map json to struct
+		var apiData3 *openapi3.Swagger
 
-		err = json.Unmarshal(apiJsn, &ApiData3)
-
+		err = json.Unmarshal(apiJsn, &apiData3)
 		if err != nil {
-			//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
 			logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
 		} else {
-			mgwSwagger.SetInfoOpenApi(*ApiData3)
+			mgwSwagger.SetInfoOpenAPI(*apiData3)
 		}
 	}
-
 	mgwSwagger.SetXWso2Extenstions()
 	return mgwSwagger
 }
 
-func GetOpenAPIVersionAndJsonContent(apiContent []byte) (string, []byte, error) {
+// GetOpenAPIVersionAndJSONContent get the json content and openapi version
+// The input can be either json content or yaml content
+// TODO: (VirajSalaka) Use the MGWSwagger instead of this.
+func GetOpenAPIVersionAndJSONContent(apiContent []byte) (string, []byte, error) {
 	apiJsn, err := utills.ToJSON(apiContent)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error converting api file to json:", err)
@@ -81,6 +81,8 @@ func GetOpenAPIVersionAndJsonContent(apiContent []byte) (string, []byte, error) 
 	return swaggerVerison, apiJsn, nil
 }
 
+// GetOpenAPIV3Struct converts the json content to the openAPIv3 struct
+// TODO: (VirajSalaka) Use the MGWSwagger instead of this.
 func GetOpenAPIV3Struct(openAPIJson []byte) (openapi3.Swagger, error) {
 	var apiData3 openapi3.Swagger
 
@@ -92,18 +94,21 @@ func GetOpenAPIV3Struct(openAPIJson []byte) (openapi3.Swagger, error) {
 	return apiData3, nil
 }
 
+// GetOpenAPIV2Struct converts the json content to the openAPIv2 struct
+// TODO: (VirajSalaka) Use the MGWSwagger instead of this.
 func GetOpenAPIV2Struct(openAPIJson []byte) (spec.Swagger, error) {
 	var apiData2 spec.Swagger
 	err := json.Unmarshal(openAPIJson, &apiData2)
 	if err != nil {
-		//log.Fatal("Error openAPI unmarsheliing: %v\n", err)
 		logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
 		return apiData2, err
 	}
 	return apiData2, nil
 }
 
-//TODO: (VirajSalaka) generalize this with openAPI3 getLabels method
+// GetXWso2Labels returns the labels provided using x-wso2-label extension.
+// If extension does not exit it would return 'default'
+// TODO: (VirajSalaka) generalize this with openAPI3 getLabels method.
 func GetXWso2Labels(vendorExtensionsMap map[string]interface{}) []string {
 	var labelArray []string
 	if y, found := vendorExtensionsMap["x-wso2-label"]; found {
@@ -112,23 +117,8 @@ func GetXWso2Labels(vendorExtensionsMap map[string]interface{}) []string {
 				labelArray = append(labelArray, label.(string))
 			}
 			return labelArray
-		} else {
-			logger.LoggerOasparser.Errorln("Error while parsing the x-wso2-label")
 		}
+		logger.LoggerOasparser.Errorln("Error while parsing the x-wso2-label")
 	}
 	return []string{"default"}
-}
-
-/**
- * Check availability of endpoint.
- *
- * @param endpoints  Api endpoints array
- * @return bool Availability as a bool value
- */
-func IsEndpointsAvailable(endpoints []apiDefinition.Endpoint) bool {
-	if len(endpoints) > 0 {
-		return true
-	} else {
-		return false
-	}
 }

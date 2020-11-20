@@ -15,19 +15,19 @@
  *
  */
 
-package envoyCodegen
+package envoyconf
 
 import (
 	"io/ioutil"
+	"regexp"
 	"strings"
 	"testing"
 
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/micro-gw/configs"
-	mgwconfig "github.com/wso2/micro-gw/configs/confTypes"
-	"github.com/wso2/micro-gw/pkg/oasparser/models/apiDefinition"
+	mgwconfig "github.com/wso2/micro-gw/config"
+	"github.com/wso2/micro-gw/pkg/oasparser/model"
 )
 
 func TestGenerateRoutePaths(t *testing.T) {
@@ -37,7 +37,7 @@ func TestGenerateRoutePaths(t *testing.T) {
 	resourcePath := "/resource"
 
 	completeRoutePath := generateRoutePaths(xWso2BasePath, basePath, resourcePath)
-	//TODO: (VirajSalaka) check if it is possible to perform an equals operation instead of prefix
+	// TODO: (VirajSalaka) check if it is possible to perform an equals operation instead of prefix
 	if !strings.HasPrefix(completeRoutePath, "^/xWso2BasePath/resource") {
 		t.Error("The generated path should contain xWso2BasePath as a prefix if xWso2Basepath is available.")
 	}
@@ -58,17 +58,17 @@ func TestCreateRoute(t *testing.T) {
 	xWso2BasePath := "/xWso2BasePath"
 	basePath := "/basepath"
 	title := "WSO2"
-	endpoint := apiDefinition.Endpoint{
+	endpoint := model.Endpoint{
 		Host:     "abc.com",
 		Basepath: basePath,
-		UrlType:  "http",
+		URLType:  "http",
 		Port:     80,
 	}
 	version := "1.0"
-	resourceWithGet := apiDefinition.CreateMinimalDummyResourceForTests("/resourcePath", []string{"GET"},
-		"resource_operation_id", []apiDefinition.Endpoint{}, []apiDefinition.Endpoint{})
-	resourceWithGetPost := apiDefinition.CreateMinimalDummyResourceForTests("/resourcePath", []string{"GET", "POST"},
-		"resource_operation_id", []apiDefinition.Endpoint{}, []apiDefinition.Endpoint{})
+	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []string{"GET"},
+		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
+	resourceWithGetPost := model.CreateMinimalDummyResourceForTests("/resourcePath", []string{"GET", "POST"},
+		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 	clusterName := "resource_operation_id"
 	hostRewriteSpecifier := &routev3.RouteAction_HostRewriteLiteral{
 		HostRewriteLiteral: "abc.com",
@@ -129,10 +129,10 @@ func TestCreateListener(t *testing.T) {
 
 	config := new(mgwconfig.Config)
 	config.Envoy.ListenerPort = listenerPort
-	config.Envoy.ListenerAddress = listenerAddress
-	config.Envoy.ListenerTlsEnabled = true
-	config.Envoy.ListenerCertPath = configs.GetMgwHome() + "/adapter/security/localhost.pem"
-	config.Envoy.ListenerKeyPath = configs.GetMgwHome() + "/adapter/security/localhost.key"
+	config.Envoy.ListenerHost = listenerAddress
+	config.Envoy.ListenerTLSEnabled = true
+	config.Envoy.ListenerCertPath = mgwconfig.GetMgwHome() + "/adapter/security/localhost.pem"
+	config.Envoy.ListenerKeyPath = mgwconfig.GetMgwHome() + "/adapter/security/localhost.key"
 
 	tlsEnabledListener := createListener(config, "test-id")
 
@@ -148,18 +148,18 @@ func TestCreateListener(t *testing.T) {
 
 	assert.NotNil(t, tlsEnabledListener.FilterChains[0].TransportSocket, "Transport Socket configuration should not be null")
 
-	config.Envoy.ListenerTlsEnabled = false
+	config.Envoy.ListenerTLSEnabled = false
 	tlsDisabledListener := createListener(config, "test-id")
 
 	assert.NotNil(t, tlsDisabledListener, "The TLS Enabled Listener configuration should not be null")
 	assert.Nil(t, tlsDisabledListener.FilterChains[0].TransportSocket, "Transport Socket configuration should be null")
 }
 
-func TestGenerateTlsCert(t *testing.T) {
-	publicKeyPath := configs.GetMgwHome() + "/adapter/security/localhost.pem"
-	privateKeyPath := configs.GetMgwHome() + "/adapter/security/localhost.key"
+func TestGenerateTLSCert(t *testing.T) {
+	publicKeyPath := mgwconfig.GetMgwHome() + "/adapter/security/localhost.pem"
+	privateKeyPath := mgwconfig.GetMgwHome() + "/adapter/security/localhost.key"
 
-	tlsCert, _ := generateTlsCert(privateKeyPath, publicKeyPath)
+	tlsCert, _ := generateTLSCert(privateKeyPath, publicKeyPath)
 
 	assert.NotNil(t, tlsCert, "TLS Certificate should not be null")
 
@@ -171,4 +171,72 @@ func TestGenerateTlsCert(t *testing.T) {
 
 	assert.Equal(t, tlsCert.GetPrivateKey().GetInlineBytes(), privateKeyByteArray, "Private Key Value mismatch in the TLS Certificate")
 	assert.Equal(t, tlsCert.GetCertificateChain().GetInlineBytes(), publicKeyByteArray, "Certificate Chain Value mismatch in the TLS Certificate")
+}
+
+func TestGenerateRegex(t *testing.T) {
+
+	type generateRegexTestItem struct {
+		inputpath     string
+		userInputPath string
+		message       string
+		isMatched     bool
+	}
+	dataItems := []generateRegexTestItem{
+		{
+			inputpath:     "/v2/pet/{petId}",
+			userInputPath: "/v2/pet/5",
+			message:       "when path parameter is provided end of the path",
+			isMatched:     true,
+		},
+		{
+			inputpath:     "/v2/pet/{petId}/info",
+			userInputPath: "/v2/pet/5/info",
+			message:       "when path parameter is provided in the middle of the path",
+			isMatched:     true,
+		},
+		{
+			inputpath:     "/v2/pet/{petId}",
+			userInputPath: "/v2/pet/5",
+			message:       "when path parameter is provided end of the path",
+			isMatched:     true,
+		},
+		{
+			inputpath:     "/v2/pet/{petId}/tst/{petId}",
+			userInputPath: "/v2/pet/5/tst/3",
+			message:       "when multiple path parameter are provided",
+			isMatched:     true,
+		},
+		{
+			inputpath:     "/v2/pet/{petId}",
+			userInputPath: "/v2/pet/5/test",
+			message:       "when path parameter is provided end of the path and provide incorrect path",
+			isMatched:     false,
+		},
+		{
+			inputpath:     "/v2/pet/5",
+			userInputPath: "/v2/pett/5",
+			message:       "when provide a incorrect path",
+			isMatched:     false,
+		},
+		{
+			inputpath:     "/v2/pet/findById",
+			userInputPath: "/v2/pet/findById?status=availabe",
+			message:       "when query parameter is provided",
+			isMatched:     true,
+		},
+		{
+			inputpath:     "/v2/pet/findById",
+			userInputPath: "/v2/pet/findByIdstatus=availabe",
+			message:       "when query parameter is provided without ?",
+			isMatched:     false,
+		},
+	}
+
+	for _, item := range dataItems {
+		resultPattern := generateRegex(item.inputpath)
+		resultIsMatching, err := regexp.MatchString(resultPattern, item.userInputPath)
+
+		assert.Equal(t, item.isMatched, resultIsMatching, item.message)
+		assert.Nil(t, err)
+	}
 }

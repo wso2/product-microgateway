@@ -14,116 +14,46 @@
  *  limitations under the License.
  *
  */
-package envoyCodegen_test
+package envoyconf_test
 
 import (
 	"io/ioutil"
-	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/micro-gw/configs"
-	"github.com/wso2/micro-gw/pkg/oasparser/envoyCodegen"
-	enovoy "github.com/wso2/micro-gw/pkg/oasparser/envoyCodegen"
-	"github.com/wso2/micro-gw/pkg/oasparser/swaggerOperator"
+	"github.com/wso2/micro-gw/config"
+	envoy "github.com/wso2/micro-gw/pkg/oasparser/envoyconf"
+	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 )
 
-func TestGenerateRegex(t *testing.T) {
-
-	type generateRegexTestItem struct {
-		inputpath     string
-		userInputPath string
-		message       string
-		isMatched     bool
-	}
-	dataItems := []generateRegexTestItem{
-		{
-			inputpath:     "/v2/pet/{petId}",
-			userInputPath: "/v2/pet/5",
-			message:       "when path parameter is provided end of the path",
-			isMatched:     true,
-		},
-		{
-			inputpath:     "/v2/pet/{petId}/info",
-			userInputPath: "/v2/pet/5/info",
-			message:       "when path parameter is provided in the middle of the path",
-			isMatched:     true,
-		},
-		{
-			inputpath:     "/v2/pet/{petId}",
-			userInputPath: "/v2/pet/5",
-			message:       "when path parameter is provided end of the path",
-			isMatched:     true,
-		},
-		{
-			inputpath:     "/v2/pet/{petId}/tst/{petId}",
-			userInputPath: "/v2/pet/5/tst/3",
-			message:       "when multiple path parameter are provided",
-			isMatched:     true,
-		},
-		{
-			inputpath:     "/v2/pet/{petId}",
-			userInputPath: "/v2/pet/5/test",
-			message:       "when path parameter is provided end of the path and provide incorrect path",
-			isMatched:     false,
-		},
-		{
-			inputpath:     "/v2/pet/5",
-			userInputPath: "/v2/pett/5",
-			message:       "when provide a incorrect path",
-			isMatched:     false,
-		},
-		{
-			inputpath:     "/v2/pet/findById",
-			userInputPath: "/v2/pet/findById?status=availabe",
-			message:       "when query parameter is provided",
-			isMatched:     true,
-		},
-		{
-			inputpath:     "/v2/pet/findById",
-			userInputPath: "/v2/pet/findByIdstatus=availabe",
-			message:       "when query parameter is provided without ?",
-			isMatched:     false,
-		},
-	}
-
-	for _, item := range dataItems {
-		resultPattern := envoyCodegen.GenerateRegex(item.inputpath)
-		resultIsMatching, err := regexp.MatchString(resultPattern, item.userInputPath)
-
-		assert.Equal(t, item.isMatched, resultIsMatching, item.message)
-		assert.Nil(t, err)
-	}
-}
-
 func TestCreateRoutesWithClustersForOpenAPIWithoutExtensions(t *testing.T) {
-	openapiFilePath := configs.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi.yaml"
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi.yaml"
 	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
-	//TODO: (VirajSalaka) Additional tasks to test
-	//OpenAPI version 2
+	// TODO: (VirajSalaka) Additional tasks to test
+	// OpenAPI version 2
 }
 
 func TestCreateRoutesWithClustersForOpenAPIWithExtensionsOnly(t *testing.T) {
-	//When the openapi endpoints are only mentioned via the extensions
-	openapiFilePath := configs.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_extensions_only.yaml"
+	// When the openapi endpoints are only mentioned via the extensions
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_extensions_only.yaml"
 	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
 }
 
 func TestCreateRoutesWithClustersForOpenAPIWithExtensionsServers(t *testing.T) {
-	//When the openapi endpoints provided by servers object are overriden via the extensions
-	openapiFilePath := configs.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_extensions_servers.yaml"
+	// When the openapi endpoints provided by servers object are overriden via the extensions
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_extensions_servers.yaml"
 	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
 }
 
 func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string) {
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
-	mgwSwaggerForOpenapi := swaggerOperator.GetMgwSwagger(openapiByteArr)
-	//TODO: (VirajSalaka) Test Sandbox endpoints
-	routes, clusters, _, _, _, _ := enovoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
+	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
+	// TODO: (VirajSalaka) Test Sandbox endpoints
+	routes, clusters, _, _, _, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
 
 	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
-	//As the first cluster is always related to API level cluster
+	// As the first cluster is always related to API level cluster
 	apiLevelCluster := clusters[0]
 	pathLevelCluster := clusters[1]
 	assert.Equal(t, apiLevelCluster.GetName(), "clusterProd_SwaggerPetstore1.0.0", "API Level cluster name mismatch")
@@ -149,7 +79,7 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 	assert.NotEqual(t, routes[0].GetMatch().GetSafeRegex().Regex, routes[1].GetMatch().GetSafeRegex().Regex,
 		"The route regex for the two routes should not be the same")
 	routeRegexMatchesFound := false
-	//route entity creation is tested separately. In here, it checks the connection between the route and the cluster
+	// route entity creation is tested separately. In here, it checks the connection between the route and the cluster
 	for _, route := range routes {
 		if route.GetMatch().GetSafeRegex().Regex == "^/pets(\\?([^/]+))?$" {
 			routeRegexMatchesFound = true

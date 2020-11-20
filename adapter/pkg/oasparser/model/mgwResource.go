@@ -14,8 +14,19 @@
  *  limitations under the License.
  *
  */
-package apiDefinition
 
+// Package model contains the implementation of DTOs to convert OpenAPI/Swagger files
+// and create a common model which can represent both types.
+package model
+
+// Resource represents the object structure holding the information related to the
+// pathItem object in OpenAPI definition. This is the most granular level in which the
+// information can be stored as envoy architecture does not support having an operation level
+// granularity out of the box.
+//
+// Each resource can contain the path, the http methods that support, security schemas, production
+// endpoints, and sandbox endpoints. These values are populated from extensions/properties
+// mentioned under pathItem.
 type Resource struct {
 	path             string
 	methods          []string
@@ -31,28 +42,37 @@ type Resource struct {
 	vendorExtensible map[string]interface{}
 }
 
+// GetProdEndpoints returns the production endpoints array of a given resource.
 func (resource *Resource) GetProdEndpoints() []Endpoint {
 	return resource.productionUrls
 }
 
+// GetSandEndpoints returns the sandbox endpoints array of a given resource.
 func (resource *Resource) GetSandEndpoints() []Endpoint {
 	return resource.sandboxUrls
 }
 
+// GetPath returns the pathItem name (of openAPI definition) corresponding to a given resource
 func (resource *Resource) GetPath() string {
 	return resource.path
 }
 
-func (resource *Resource) GetId() string {
+// GetID returns the id of a given resource.
+// This is a randomly generated UUID
+func (resource *Resource) GetID() string {
 	return resource.iD
 }
 
+// GetMethod returns an array of http Methods which are explicitly defined under
+// a given resource.
 func (resource *Resource) GetMethod() []string {
 	return resource.methods
 }
 
-func CreateDummyResourceForTests(path, method, description string, consumes, schemes, tags []string, summary, id string,
-	productionUrls, sandboxUrls []Endpoint, security []map[string][]string, vendorExtensible map[string]interface{}) Resource {
+// CreateDummyResourceForTests create an resource object which could be used for unit tests.
+func CreateDummyResourceForTests(path, method, description string, consumes, schemes,
+	tags []string, summary, id string, productionUrls, sandboxUrls []Endpoint,
+	security []map[string][]string, vendorExtensible map[string]interface{}) Resource {
 	return Resource{
 		path:             path,
 		methods:          []string{method},
@@ -69,7 +89,10 @@ func CreateDummyResourceForTests(path, method, description string, consumes, sch
 	}
 }
 
-func CreateMinimalDummyResourceForTests(path string, methods []string, id string, productionUrls, sandboxUrls []Endpoint) Resource {
+// CreateMinimalDummyResourceForTests create a resource object with minimal required set of values
+// which could be used for unit tests.
+func CreateMinimalDummyResourceForTests(path string, methods []string, id string, productionUrls,
+	sandboxUrls []Endpoint) Resource {
 	return Resource{
 		path:           path,
 		methods:        methods,

@@ -14,21 +14,21 @@
  *  limitations under the License.
  *
  */
-package swaggerOperator_test
+package operator_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/micro-gw/pkg/oasparser/models/apiDefinition"
-	"github.com/wso2/micro-gw/pkg/oasparser/swaggerOperator"
+	"github.com/wso2/micro-gw/pkg/oasparser/model"
+	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 )
 
 func TestGetMgwSwagger(t *testing.T) {
 	type getMgwSwaggerTestItem struct {
 		inputSwagger                string
-		resultApiProdEndpoints      []apiDefinition.Endpoint
-		resultResourceProdEndpoints []apiDefinition.Endpoint
+		resultApiProdEndpoints      []model.Endpoint
+		resultResourceProdEndpoints []model.Endpoint
 		message                     string
 	}
 	dataItems := []getMgwSwaggerTestItem{
@@ -39,12 +39,12 @@ func TestGetMgwSwagger(t *testing.T) {
 				"basepath": "/api/v2"
 							
 							}`,
-			resultApiProdEndpoints: []apiDefinition.Endpoint{
+			resultApiProdEndpoints: []model.Endpoint{
 				{
 					Host:     "petstore.io",
 					Basepath: "/api/v2",
 					Port:     80,
-					UrlType:  "http",
+					URLType:  "http",
 				},
 			},
 			resultResourceProdEndpoints: nil,
@@ -54,12 +54,12 @@ func TestGetMgwSwagger(t *testing.T) {
 			inputSwagger: `openapi: "3.0.0"
 servers:
   - url: http://petstore.io:80/api/v2`,
-			resultApiProdEndpoints: []apiDefinition.Endpoint{
+			resultApiProdEndpoints: []model.Endpoint{
 				{
 					Host:     "petstore.io",
 					Basepath: "/api/v2",
 					Port:     80,
-					UrlType:  "http",
+					URLType:  "http",
 				},
 			},
 			resultResourceProdEndpoints: nil,
@@ -78,12 +78,12 @@ servers:
 				}
 							
                            }`,
-			resultApiProdEndpoints: []apiDefinition.Endpoint{
+			resultApiProdEndpoints: []model.Endpoint{
 				{
 					Host:     "petstore.io",
 					Basepath: "/api/v2",
 					Port:     80,
-					UrlType:  "https",
+					URLType:  "https",
 				},
 			},
 			resultResourceProdEndpoints: nil,
@@ -98,12 +98,12 @@ x-wso2-production-endpoints:
   urls:
     - 'https://petstorecorrect.swagger.io:90/api/v3'
   type: https`,
-			resultApiProdEndpoints: []apiDefinition.Endpoint{
+			resultApiProdEndpoints: []model.Endpoint{
 				{
 					Host:     "petstorecorrect.swagger.io",
 					Basepath: "/api/v3",
 					Port:     90,
-					UrlType:  "https",
+					URLType:  "https",
 				},
 			},
 			resultResourceProdEndpoints: nil,
@@ -112,7 +112,7 @@ x-wso2-production-endpoints:
 	}
 
 	for _, item := range dataItems {
-		resultMgwSagger := swaggerOperator.GetMgwSwagger([]byte(item.inputSwagger))
+		resultMgwSagger := operator.GetMgwSwagger([]byte(item.inputSwagger))
 
 		assert.Equal(t, item.resultApiProdEndpoints, resultMgwSagger.GetProdEndpoints(), item.message)
 		if resultMgwSagger.GetResources() != nil {
