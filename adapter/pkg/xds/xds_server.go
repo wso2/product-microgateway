@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-//Package xds contains the implementation for the xds server cache updates
+// Package xds contains the implementation for the xds server cache updates
 package xds
 
 import (
