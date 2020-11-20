@@ -23,7 +23,7 @@ const (
 	typeConst string = "type"
 )
 
-//Constants for OpenAPI vendor extension keys
+// Constants for OpenAPI vendor extension keys
 const (
 	productionEndpoints string = "x-wso2-production-endpoints"
 	sandboxEndpoints    string = "x-wso2-sandbox-endpoints"

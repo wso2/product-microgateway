@@ -22,7 +22,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	//TODO: (VirajSalaka) remove outdated dependency
+	// TODO: (VirajSalaka) remove outdated dependency
 	"unicode"
 
 	"github.com/ghodss/yaml"

@@ -68,7 +68,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 		apiLevelClusterNameSand string
 		endpointsSand           []*corev3.Address
 	)
-	//check API level sandbox endpoints availble
+	// check API level sandbox endpoints availble
 	if len(mgwSwagger.GetSandEndpoints()) > 0 {
 		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
 		apilevelAddressSand := createAddress(apiLevelEndpointSand[0].Host, apiLevelEndpointSand[0].Port)
@@ -79,7 +79,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 		endpointsSand = append(endpointsSand, apilevelAddressSand)
 	}
 
-	//check API level production endpoints available
+	// check API level production endpoints available
 	if len(mgwSwagger.GetProdEndpoints()) > 0 {
 		apiLevelEndpointProd = mgwSwagger.GetProdEndpoints()
 		apilevelAddressP := createAddress(apiLevelEndpointProd[0].Host, apiLevelEndpointProd[0].Port)
@@ -97,55 +97,55 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 		apiVersion := mgwSwagger.GetVersion()
 		apiBasePath := mgwSwagger.GetXWso2Basepath()
 
-		//resource level check sandbox endpoints
+		// resource level check sandbox endpoints
 		if len(resource.GetSandEndpoints()) > 0 {
 			endpointSand = resource.GetSandEndpoints()
 			addressSand := createAddress(endpointSand[0].Host, endpointSand[0].Port)
-			//TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
+			// TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
 			clusterNameSand := strings.TrimSpace(apiLevelClusterNameSand + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
 				"0")
 			clusterSand := createCluster(addressSand, clusterNameSand, endpointSand[0].URLType)
 			clustersSand = append(clustersSand, clusterSand)
 			clusterRefSand := clusterSand.GetName()
 
-			//sandbox endpoints
+			// sandbox endpoints
 			routeS := createRoute(apiTitle, apiBasePath, apiVersion, endpointSand[0], resource, clusterRefSand)
 			routesSand = append(routesSand, routeS)
 			endpointsSand = append(endpointsSand, addressSand)
 
-			//API level check
+			// API level check
 		} else if len(mgwSwagger.GetSandEndpoints()) > 0 {
 			endpointSand = apiLevelEndpointSand
 			clusterRefSand := apilevelClusterSand.GetName()
 
-			//sandbox endpoints
+			// sandbox endpoints
 			routeS := createRoute(apiTitle, apiBasePath, apiVersion, endpointSand[0], resource, clusterRefSand)
 			routesSand = append(routesSand, routeS)
 
 		}
 
-		//resource level check production endpoints
+		// resource level check production endpoints
 		if len(resource.GetProdEndpoints()) > 0 {
 			endpointProd = resource.GetProdEndpoints()
 			addressProd := createAddress(endpointProd[0].Host, endpointProd[0].Port)
-			//TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
+			// TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
 			clusterNameProd := strings.TrimSpace(apiLevelClusterNameProd + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
 				"0")
 			clusterProd := createCluster(addressProd, clusterNameProd, endpointProd[0].URLType)
 			clustersProd = append(clustersProd, clusterProd)
 			clusterRefProd := clusterProd.GetName()
 
-			//production endpoints
+			// production endpoints
 			routeP := createRoute(apiTitle, apiBasePath, apiVersion, endpointProd[0], resource, clusterRefProd)
 			routesProd = append(routesProd, routeP)
 			endpointsProd = append(endpointsProd, addressProd)
 
-			//API level check
+			// API level check
 		} else if len(mgwSwagger.GetProdEndpoints()) > 0 {
 			endpointProd = apiLevelEndpointProd
 			clusterRefProd := apilevelClusterProd.GetName()
 
-			//production endpoints
+			// production endpoints
 			routeP := createRoute(apiTitle, apiBasePath, apiVersion, endpointProd[0], resource, clusterRefProd)
 			routesProd = append(routesProd, routeP)
 
@@ -299,7 +299,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpoint mo
 		action = &routev3.Route_Route{
 			Route: &routev3.RouteAction{
 				HostRewriteSpecifier: hostRewriteSpecifier,
-				//TODO: (VirajSalaka) Provide prefix rewrite since it is simple
+				// TODO: (VirajSalaka) Provide prefix rewrite since it is simple
 				RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
 					Pattern: &envoy_type_matcherv3.RegexMatcher{
 						EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
@@ -337,14 +337,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpoint mo
 	return &router
 }
 
-/**
- * Generates route paths for the api resources.
- *
- * @param xWso2Basepath   Xwso2 basepath
- * @param basePath  Default basepath
- * @param resourcePath  Resource path
- * @return string  new route path
- */
+// generateRoutePaths generates route paths for the api resources.
 func generateRoutePaths(xWso2Basepath, basePath, resourcePath string) string {
 	prefix := ""
 	newPath := ""
@@ -353,7 +346,7 @@ func generateRoutePaths(xWso2Basepath, basePath, resourcePath string) string {
 
 	} else {
 		prefix = basepathConsistent(basePath)
-		//TODO: (VirajSalaka) Decide if it is possible to proceed without both basepath options
+		// TODO: (VirajSalaka) Decide if it is possible to proceed without both basepath options
 	}
 	fullpath := prefix + resourcePath
 	newPath = generateRegex(fullpath)
@@ -369,12 +362,12 @@ func basepathConsistent(basePath string) string {
 	return modifiedBasePath
 }
 
-//  generateRegex generates regex for the resources which have path paramaters
+// generateRegex generates regex for the resources which have path paramaters
 // such that the envoy configuration can use it as a route.
 // If path has path parameters ({id}), append a regex pattern (pathParaRegex).
 // To avoid query parameter issues, add a regex pattern ( endRegex) for end of all routes.
 // It takes the path value as an input and then returns the regex value.
-//TODO: (VirajSalaka) Improve regex specifically for strings, integers etc.
+// TODO: (VirajSalaka) Improve regex specifically for strings, integers etc.
 func generateRegex(fullpath string) string {
 	pathParaRegex := "([^/]+)"
 	endRegex := "(\\?([^/]+))?"

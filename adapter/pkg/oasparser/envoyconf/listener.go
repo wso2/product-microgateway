@@ -103,7 +103,7 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 		},
 	}
 
-	//add filters
+	// add filters
 	filters = append(filters, &connectionManagerFilterP)
 
 	listenerAddress := &corev3.Address_SocketAddress{

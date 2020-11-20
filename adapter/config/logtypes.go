@@ -27,7 +27,7 @@ type accessLog struct {
 	Format  string
 }
 
-//LogConfig represents the configurations related to adapter logs and envoy access logs.
+// LogConfig represents the configurations related to adapter logs and envoy access logs.
 type LogConfig struct {
 	Logfile  string
 	LogLevel string

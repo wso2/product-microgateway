@@ -131,7 +131,7 @@ func (swagger *MgwSwagger) setXWso2SandboxEndpoint() {
 		swagger.sandboxUrls = xWso2APIEndpoints
 	}
 
-	//resources
+	// resources
 	for i, resource := range swagger.resources {
 		xwso2ResourceEndpoints := getXWso2Endpoints(resource.vendorExtensible, sandboxEndpoints)
 		if xwso2ResourceEndpoints != nil {
@@ -144,7 +144,7 @@ func (swagger *MgwSwagger) setXWso2SandboxEndpoint() {
 func getXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType string) []Endpoint {
 	var endpoints []Endpoint
 
-	//TODO: (VirajSalaka) x-wso2-production-endpoint 's type does not represent http/https, instead it indicates loadbalance and failover
+	// TODO: (VirajSalaka) x-wso2-production-endpoint 's type does not represent http/https, instead it indicates loadbalance and failover
 	if y, found := vendorExtensible[endpointType]; found {
 		if val, ok := y.(map[string]interface{}); ok {
 			urlsProperty, ok := val[urls]

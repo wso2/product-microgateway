@@ -116,9 +116,9 @@ func setOperationSwagger(path string, methods []string, pathItem spec.PathItem) 
 	resource = Resource{
 		path:    path,
 		methods: methods,
-		//TODO: (VirajSalaka) This will not solve the actual problem when incremental Xds is introduced (used for cluster names)
+		// TODO: (VirajSalaka) This will not solve the actual problem when incremental Xds is introduced (used for cluster names)
 		iD: uuid.New().String(),
-		//PathItem object in swagger 2 specification does not contain summary and description properties
+		// PathItem object in swagger 2 specification does not contain summary and description properties
 		summary:     "",
 		description: "",
 		//schemes:          operation.Schemes,

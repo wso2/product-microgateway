@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//Package restserver contains the server for the REST API implementation of the adapter
+// Package restserver contains the server for the REST API implementation of the adapter
 package restserver
 
 import (
@@ -61,11 +61,11 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	// Applies when the Authorization header is set with the Basic scheme
 	api.BasicAuthAuth = func(user string, pass string) (*models.Principal, error) {
 		if user != mgwConfig.Server.Username || pass != mgwConfig.Server.Password {
-			//TODO: (VirajSalaka) Introduce Constants
+			// TODO: (VirajSalaka) Introduce Constants
 			logger.LoggerAPI.Info("Credentials are invalid")
 			return nil, errors.New(401, "Credentials are invalid")
 		}
-		//TODO: implement authentication principal
+		// TODO: implement authentication principal
 		p := models.Principal{
 			Token:    "xxxx",
 			Tenant:   "xxxx",
@@ -76,7 +76,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	}
 
 	api.APIIndividualPostImportAPIHandler = api_individual.PostImportAPIHandlerFunc(func(params api_individual.PostImportAPIParams, principal *models.Principal) middleware.Responder {
-		//TODO: (VirajSalaka) Error is not handled in the response.
+		// TODO: (VirajSalaka) Error is not handled in the response.
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
 		err := apiServer.ApplyAPIProject(jsonByteArray)
 		if err != nil {
@@ -95,7 +95,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 // The TLS configuration before HTTPS server starts.
 func configureTLS(tlsConfig *tls.Config) {
 	// Make all necessary changes to the TLS configuration here.
-	//TODO: (VirajSalaka) Introduce PKCS12
+	// TODO: (VirajSalaka) Introduce PKCS12
 	tlsConfig.Certificates, _ = getCertificates(mgwConfig.Server.PublicKeyPath, mgwConfig.Server.PrivateKeyPath)
 }
 
@@ -112,7 +112,7 @@ func getCertificates(publicKeyPath, privateKeyPath string) ([]tls.Certificate, e
 	return certificates, nil
 }
 
-//TODO: (VirajSalaka) This is not removed at the moment. Finalize if this is going to be used in future
+// TODO: (VirajSalaka) This is not removed at the moment. Finalize if this is going to be used in future
 func getCertificatesFromByteArr(keyPem, certPem []byte) []tls.Certificate {
 	certificates := make([]tls.Certificate, 1)
 	cert, err := tls.X509KeyPair(certPem, keyPem)
@@ -143,7 +143,7 @@ func setupGlobalMiddleware(handler http.Handler) http.Handler {
 	return handler
 }
 
-//StartRestServer starts the listener which is used to fetch the requests sent from apictl.
+// StartRestServer starts the listener which is used to fetch the requests sent from apictl.
 func StartRestServer(config *config.Config) {
 	mgwConfig = config
 	swaggerSpec, err := loads.Embedded(SwaggerJSON, FlatSwaggerJSON)
@@ -169,7 +169,7 @@ func StartRestServer(config *config.Config) {
 
 }
 
-//TODO: (VirajSalaka) Either remove the unused methods or change impl such that the code segment is used.
+// TODO: (VirajSalaka) Either remove the unused methods or change impl such that the code segment is used.
 func getPrivateKeyFile() []byte {
 	var privateKeyByteArr []byte
 	f, err := os.Open("/Users/viraj/Desktop/temp/wso2am-micro-gw-macos-3.2.0-alpha/runtime/bre/security/ballerinaKeystore.p12")
@@ -190,7 +190,7 @@ func getPrivateKeyFile() []byte {
 	return privateKeyByteArr
 }
 
-//TODO: (VirajSalaka) Either remove the unused methods or change impl such that the code segment is used.
+// TODO: (VirajSalaka) Either remove the unused methods or change impl such that the code segment is used.
 func getPublicKeyFile() []byte {
 	var publicKeyByteArr []byte
 	f, err := os.Open("/Users/viraj/Desktop/temp/wso2am-micro-gw-macos-3.2.0-alpha/runtime/bre/security/ballerinaTruststore.p12")

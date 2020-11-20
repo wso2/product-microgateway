@@ -1,3 +1,21 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+//Package xds contains the implementation for the xds server cache updates
 package xds
 
 import (
@@ -23,23 +41,23 @@ var (
 	version int32
 
 	cache cachev3.SnapshotCache
-	//OpenAPI Name:Version -> openAPI3 struct map
+	// OpenAPI Name:Version -> openAPI3 struct map
 	openAPIV3Map map[string]openAPI3.Swagger
-	//OpenAPI Name:Version -> openAPI2 struct map
+	// OpenAPI Name:Version -> openAPI2 struct map
 	openAPIV2Map map[string]openAPI2.Swagger
-	//OpenAPI Name:Version -> Envoy Label Array map
+	// OpenAPI Name:Version -> Envoy Label Array map
 	openAPIEnvoyMap map[string][]string
-	//OpenAPI Name:Version -> Envoy Routes map
+	// OpenAPI Name:Version -> Envoy Routes map
 	openAPIRoutesMap map[string][]*routev3.Route
-	//OpenAPI Name:Version -> Envoy Clusters map
+	// OpenAPI Name:Version -> Envoy Clusters map
 	openAPIClustersMap map[string][]*clusterv3.Cluster
-	//OpenAPI Name:Version -> Envoy Endpoints map
+	// OpenAPI Name:Version -> Envoy Endpoints map
 	openAPIEndpointsMap map[string][]*corev3.Address
-	//Envoy Label -> XDS version map
+	// Envoy Label -> XDS version map
 	envoyUpdateVersionMap map[string]int64
-	//Envoy Label -> Listener Configuration map
+	// Envoy Label -> Listener Configuration map
 	envoyListenerConfigMap map[string]*listenerv3.Listener
-	//Envoy Label -> Routes Configuration map
+	// Envoy Label -> Routes Configuration map
 	envoyRouteConfigMap map[string]*routev3.RouteConfiguration
 )
 
@@ -129,15 +147,15 @@ func UpdateEnvoy(byteArr []byte) {
 	oldLabels, _ := openAPIEnvoyMap[apiMapKey]
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiMapKey, oldLabels)
 	openAPIEnvoyMap[apiMapKey] = newLabels
-	//TODO: (VirajSalaka) Routes populated is wrong here. It has to follow https://github.com/envoyproxy/envoy/blob/v1.16.0/api/envoy/config/route/v3/route.proto
-	//TODO: (VirajSalaka) Can bring VHDS (Delta), but since the gateway would contain only one domain, it won't have much impact.
+	// TODO: (VirajSalaka) Routes populated is wrong here. It has to follow https://github.com/envoyproxy/envoy/blob/v1.16.0/api/envoy/config/route/v3/route.proto
+	// TODO: (VirajSalaka) Can bring VHDS (Delta), but since the gateway would contain only one domain, it won't have much impact.
 	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(byteArr)
-	//TODO: (VirajSalaka) Decide if the routes and listeners need their own map since it is not going to be changed based on API at the moment.
+	// TODO: (VirajSalaka) Decide if the routes and listeners need their own map since it is not going to be changed based on API at the moment.
 	openAPIRoutesMap[apiMapKey] = routes
-	//openAPIListenersMap[apiMapKey] = listeners
+	// openAPIListenersMap[apiMapKey] = listeners
 	openAPIClustersMap[apiMapKey] = clusters
 	openAPIEndpointsMap[apiMapKey] = endpoints
-	//TODO: (VirajSalaka) Fault tolerance mechanism implementation
+	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
 }
 
@@ -167,12 +185,12 @@ func mergeResourceArrays(resourceArrays [][]types.Resource) []types.Resource {
 	return compositeArray
 }
 
-//by the time this method is called, openAPIEnvoy map is updated.
-//Old labels refers to the previously assigned labels
-//New labels refers to the the updated labels
+// when this method is called, openAPIEnvoy map is updated.
+// Old labels refers to the previously assigned labels
+// New labels refers to the the updated labels
 func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 
-	//TODO: (VirajSalaka) check possible optimizations, Since the number of labels are low by design it should not be an issue
+	// TODO: (VirajSalaka) check possible optimizations, Since the number of labels are low by design it should not be an issue
 	for _, oldLabel := range oldLabels {
 		if !arrayContains(newLabels, oldLabel) {
 			listeners, clusters, routes, endpoints := generateEnvoyResoucesForLabel(oldLabel)
@@ -192,13 +210,13 @@ func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	var clusterArray []*clusterv3.Cluster
 	var routeArray []*routev3.Route
 	var endpointArray []*corev3.Address
-	//var listenerArrays [][]types.Resource
+	// var listenerArrays [][]types.Resource
 	for apiKey, labels := range openAPIEnvoyMap {
 		if arrayContains(labels, label) {
 			clusterArray = append(clusterArray, openAPIClustersMap[apiKey]...)
 			routeArray = append(routeArray, openAPIRoutesMap[apiKey]...)
 			endpointArray = append(endpointArray, openAPIEndpointsMap[apiKey]...)
-			//listenerArrays = append(listenerArrays, openAPIListenersMap[apiKey])
+			// listenerArrays = append(listenerArrays, openAPIListenersMap[apiKey])
 		}
 	}
 	listener, listenerFound := envoyListenerConfigMap[label]
@@ -208,7 +226,7 @@ func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 		envoyListenerConfigMap[label] = listener
 		envoyRouteConfigMap[label] = routesConfig
 	} else {
-		//If the routesConfig exists, the listener exists too
+		// If the routesConfig exists, the listener exists too
 		oasParser.UpdateRoutesConfig(routesConfig, routeArray)
 	}
 	return oasParser.GetCacheResources(endpointArray, clusterArray, listener, routesConfig)
@@ -219,11 +237,11 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	if ok {
 		version++
 	} else {
-		//TODO : (VirajSalaka) Fix control plane restart scenario : This is decided to be provided via the openapi file itself
+		// TODO : (VirajSalaka) Fix control plane restart scenario : This is decided to be provided via the openapi file itself
 		version = 1
 	}
-	//TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
-	//Will be updated once decide to move to incremental XDS
+	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
+	// Will be updated once decide to move to incremental XDS
 	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil)
 	snap.Consistent()
 	err := cache.SetSnapshot(label, snap)

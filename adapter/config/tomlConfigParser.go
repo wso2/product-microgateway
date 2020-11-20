@@ -15,9 +15,9 @@
  *
  */
 
-//Package config contains the implementation and data structures related to configurations and
-//configuration (log and adapter config) parsing. If a new configuration is introduced to the adapter
-//configuration file, the corresponding change needs to be added to the relevant data stucture as well.
+// Package config contains the implementation and data structures related to configurations and
+// configuration (log and adapter config) parsing. If a new configuration is introduced to the adapter
+// configuration file, the corresponding change needs to be added to the relevant data stucture as well.
 package config
 
 import (
@@ -49,14 +49,14 @@ const (
 	relativeLogConfigPath = "/conf/log_config.toml"
 )
 
-//ReadConfigs implements adapter configuration read operation. The read operation will happen only once, hence
-//the consistancy is ensured.
+// ReadConfigs implements adapter configuration read operation. The read operation will happen only once, hence
+// the consistancy is ensured.
 //
-//If the "MGW_HOME" variable is set, the configuration file location would be picked relative to the
-//variable's value ("/conf/config.toml"). otherwise, the "MGW_HOME" variable would be set to the directory
-//from where the executable is called from.
+// If the "MGW_HOME" variable is set, the configuration file location would be picked relative to the
+// variable's value ("/conf/config.toml"). otherwise, the "MGW_HOME" variable would be set to the directory
+// from where the executable is called from.
 //
-//Returns the configuration object mapped from the configuration file during the startup.
+// Returns the configuration object mapped from the configuration file during the startup.
 func ReadConfigs() (*Config, error) {
 	onceConfigRead.Do(func() {
 		adapterConfig = new(Config)
@@ -74,14 +74,14 @@ func ReadConfigs() (*Config, error) {
 	return adapterConfig, e
 }
 
-//ReadLogConfigs implements adapter/proxy log-configuration read operation.The read operation will happen only once, hence
-//the consistancy is ensured.
+// ReadLogConfigs implements adapter/proxy log-configuration read operation.The read operation will happen only once, hence
+// the consistancy is ensured.
 //
-//If the "MGW_HOME" variable is set, the log configuration file location would be picked relative to the
-//variable's value ("/conf/log_config.toml"). otherwise, the "MGW_HOME" variable would be set to the directory
-//from where the executable is called from.
+// If the "MGW_HOME" variable is set, the log configuration file location would be picked relative to the
+// variable's value ("/conf/log_config.toml"). otherwise, the "MGW_HOME" variable would be set to the directory
+// from where the executable is called from.
 //
-//Returns the log configuration object mapped from the configuration file during the startup.
+// Returns the log configuration object mapped from the configuration file during the startup.
 func ReadLogConfigs() (*LogConfig, error) {
 	onceLogConfigRead.Do(func() {
 		adapterLogConfig = new(LogConfig)
@@ -99,15 +99,15 @@ func ReadLogConfigs() (*LogConfig, error) {
 	return adapterLogConfig, e
 }
 
-//ClearLogConfigInstance removes the existing configuration.
-//Then the log configuration can be re-initialized.
+// ClearLogConfigInstance removes the existing configuration.
+// Then the log configuration can be re-initialized.
 func ClearLogConfigInstance() {
 	onceLogConfigRead = sync.Once{}
 }
 
-//GetMgwHome reads the MGW_HOME environmental variable and returns the value.
-//This represent the directory where the distribution is located.
-//If the env variable is not present, the directory from which the executable is triggered will be assigned.
+// GetMgwHome reads the MGW_HOME environmental variable and returns the value.
+// This represent the directory where the distribution is located.
+// If the env variable is not present, the directory from which the executable is triggered will be assigned.
 func GetMgwHome() string {
 	onceGetMgwHome.Do(func() {
 		mgwHome = os.Getenv(mgwHomeEnvVariable)

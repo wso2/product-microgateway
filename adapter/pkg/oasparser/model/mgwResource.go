@@ -15,8 +15,8 @@
  *
  */
 
-//Package model contains the implementation of DTOs to convert OpenAPI/Swagger files
-//and create a common model which can represent both types.
+// Package model contains the implementation of DTOs to convert OpenAPI/Swagger files
+// and create a common model which can represent both types.
 package model
 
 // Resource represents the object structure holding the information related to the

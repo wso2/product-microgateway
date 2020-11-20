@@ -32,7 +32,7 @@ import (
 
 // GetMgwSwagger converts the openAPI v3 and v2 content
 // To MgwSwagger objects
-//TODO: (VirajSalaka) return the error and handle
+// TODO: (VirajSalaka) return the error and handle
 func GetMgwSwagger(apiContent []byte) model.MgwSwagger {
 	var mgwSwagger model.MgwSwagger
 
@@ -44,7 +44,7 @@ func GetMgwSwagger(apiContent []byte) model.MgwSwagger {
 	swaggerVerison := utills.FindSwaggerVersion(apiJsn)
 
 	if swaggerVerison == "2" {
-		//map json to struct
+		// map json to struct
 		var apiData2 spec.Swagger
 		err = json.Unmarshal(apiJsn, &apiData2)
 		if err != nil {
@@ -54,7 +54,7 @@ func GetMgwSwagger(apiContent []byte) model.MgwSwagger {
 		}
 
 	} else if swaggerVerison == "3" {
-		//map json to struct
+		// map json to struct
 		var apiData3 *openapi3.Swagger
 
 		err = json.Unmarshal(apiJsn, &apiData3)
@@ -108,7 +108,7 @@ func GetOpenAPIV2Struct(openAPIJson []byte) (spec.Swagger, error) {
 
 // GetXWso2Labels returns the labels provided using x-wso2-label extension.
 // If extension does not exit it would return 'default'
-//TODO: (VirajSalaka) generalize this with openAPI3 getLabels method.
+// TODO: (VirajSalaka) generalize this with openAPI3 getLabels method.
 func GetXWso2Labels(vendorExtensionsMap map[string]interface{}) []string {
 	var labelArray []string
 	if y, found := vendorExtensionsMap["x-wso2-label"]; found {

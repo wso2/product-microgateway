@@ -62,7 +62,7 @@ func setPathInfoOpenAPI(path string, methods []string, pathItem *openapi3.PathIt
 		resource = Resource{
 			path:    path,
 			methods: methods,
-			//TODO: (VirajSalaka) This will not solve the actual problem when incremental Xds is introduced (used for cluster names)
+			// TODO: (VirajSalaka) This will not solve the actual problem when incremental Xds is introduced (used for cluster names)
 			iD:          uuid.New().String(),
 			summary:     pathItem.Summary,
 			description: pathItem.Description,

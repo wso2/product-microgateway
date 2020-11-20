@@ -15,8 +15,8 @@
  *
  */
 
-//Package microgateway contains the adapter bootstrap implementation.
-//This includes loading configurations and starting the adapter.
+// Package microgateway contains the adapter bootstrap implementation.
+// This includes loading configurations and starting the adapter.
 package microgateway
 
 import (
@@ -29,8 +29,8 @@ func initServer() error {
 	return nil
 }
 
-//StartMicroGateway reads the configuration files and then start the adapter components.
-//Commandline arguments needs to be provided as args
+// StartMicroGateway reads the configuration files and then start the adapter components.
+// Commandline arguments needs to be provided as args
 func StartMicroGateway(args []string) {
 
 	logger.Info("Starting Microgateway")

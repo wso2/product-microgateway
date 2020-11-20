@@ -86,18 +86,18 @@ func runManagementServer(server xdsv3.Server, port uint) {
 	}()
 }
 
-//Run starts the XDS server and Rest API server.
+// Run starts the XDS server and Rest API server.
 func Run(conf *config.Config) {
 	sig := make(chan os.Signal)
 	signal.Notify(sig, os.Interrupt)
-	//TODO: (VirajSalaka) Support the REST API Configuration via flags only if it is a valid requirement
+	// TODO: (VirajSalaka) Support the REST API Configuration via flags only if it is a valid requirement
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	//log config watcher
-	//TODO: (VirajSalaka) Implement a rest endpoint to apply configurations
+	// log config watcher
+	// TODO: (VirajSalaka) Implement a rest endpoint to apply configurations
 	watcherLogConf, _ := fsnotify.NewWatcher()
 	errC := watcherLogConf.Add("conf/log_config.toml")
 

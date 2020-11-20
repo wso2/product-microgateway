@@ -29,18 +29,18 @@ import (
 func TestCreateRoutesWithClustersForOpenAPIWithoutExtensions(t *testing.T) {
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi.yaml"
 	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
-	//TODO: (VirajSalaka) Additional tasks to test
-	//OpenAPI version 2
+	// TODO: (VirajSalaka) Additional tasks to test
+	// OpenAPI version 2
 }
 
 func TestCreateRoutesWithClustersForOpenAPIWithExtensionsOnly(t *testing.T) {
-	//When the openapi endpoints are only mentioned via the extensions
+	// When the openapi endpoints are only mentioned via the extensions
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_extensions_only.yaml"
 	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
 }
 
 func TestCreateRoutesWithClustersForOpenAPIWithExtensionsServers(t *testing.T) {
-	//When the openapi endpoints provided by servers object are overriden via the extensions
+	// When the openapi endpoints provided by servers object are overriden via the extensions
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_extensions_servers.yaml"
 	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
 }
@@ -49,11 +49,11 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
-	//TODO: (VirajSalaka) Test Sandbox endpoints
+	// TODO: (VirajSalaka) Test Sandbox endpoints
 	routes, clusters, _, _, _, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
 
 	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
-	//As the first cluster is always related to API level cluster
+	// As the first cluster is always related to API level cluster
 	apiLevelCluster := clusters[0]
 	pathLevelCluster := clusters[1]
 	assert.Equal(t, apiLevelCluster.GetName(), "clusterProd_SwaggerPetstore1.0.0", "API Level cluster name mismatch")
@@ -79,7 +79,7 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 	assert.NotEqual(t, routes[0].GetMatch().GetSafeRegex().Regex, routes[1].GetMatch().GetSafeRegex().Regex,
 		"The route regex for the two routes should not be the same")
 	routeRegexMatchesFound := false
-	//route entity creation is tested separately. In here, it checks the connection between the route and the cluster
+	// route entity creation is tested separately. In here, it checks the connection between the route and the cluster
 	for _, route := range routes {
 		if route.GetMatch().GetSafeRegex().Regex == "^/pets(\\?([^/]+))?$" {
 			routeRegexMatchesFound = true

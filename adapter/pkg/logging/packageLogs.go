@@ -15,7 +15,7 @@
  *
  */
 
-//Package logging holds the implementation for adapter logs.
+// Package logging holds the implementation for adapter logs.
 package logging
 
 import (
@@ -26,12 +26,6 @@ import (
 	"github.com/wso2/micro-gw/config"
 )
 
-/**
- * Map the log level strings to logrus log levels.
- *
- * @param pkgLevel   Package level as a string
- * @return logrus.Level Logrus log level
- */
 func logLevelMapper(pkgLevel string) logrus.Level {
 	logLevel := defaultLogLevel
 	switch pkgLevel {
@@ -63,7 +57,7 @@ func InitPackageLogger(pkgName string) *logrus.Logger {
 	logger := logrus.New()
 	logger.SetReportCaller(true)
 
-	formatter := loggerFromat()
+	formatter := loggerFormat()
 	logger.SetFormatter(formatter)
 
 	logConf, errReadConfig := config.ReadLogConfigs()
@@ -79,7 +73,7 @@ func InitPackageLogger(pkgName string) *logrus.Logger {
 		logger.Error("failed to open logfile", err)
 		logger.SetOutput(os.Stdout)
 	} else {
-		//log output set to stdout and file
+		// log output set to stdout and file
 		multiWriter := io.MultiWriter(os.Stdout, setLogRotation(logConf.Logfile))
 		logger.SetOutput(multiWriter)
 	}

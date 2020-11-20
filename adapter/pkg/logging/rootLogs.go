@@ -45,21 +45,16 @@ func init() {
 	}
 }
 
-/**
- * Initialise the global logger.
- * If the package root level is defined in the log_config.toml file, it is set.
- * otherwise log level is assigned to default lo level.
- *
- * @param filename   Log file name
- * @return *error Error
- */
+// initGlobalLogger initialises the global logger.
+// If the package root level is defined in the log_config.toml file, it is set.
+// otherwise log level is assigned to default lo level.
 func initGlobalLogger(filename string) error {
 
 	// Create the log file if doesn't exist. And append to it if it already exists.
 	_, err := os.OpenFile(filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 
 	logrus.SetReportCaller(true)
-	formatter := loggerFromat()
+	formatter := loggerFormat()
 	logrus.SetFormatter(formatter)
 
 	if err != nil {
@@ -68,7 +63,7 @@ func initGlobalLogger(filename string) error {
 		logrus.SetOutput(os.Stdout)
 
 	} else {
-		//log output set to stdout and file
+		// log output set to stdout and file
 		multiWriter := io.MultiWriter(os.Stdout, setLogRotation(filename))
 		logrus.SetOutput(multiWriter)
 	}
@@ -84,11 +79,8 @@ func initGlobalLogger(filename string) error {
 	return err
 }
 
-/**
- * Initiate the log formatter.
- * @return *plainFormatter Reference for a Plain formatter instance
- */
-func loggerFromat() *plainFormatter {
+// loggerFormat initiates the log formatter.
+func loggerFormat() *plainFormatter {
 
 	formatter := new(plainFormatter)
 	formatter.TimestampFormat = "2006-01-02 15:04:05"
@@ -103,24 +95,13 @@ func loggerFromat() *plainFormatter {
 	return formatter
 }
 
-/**
- * Retrieve only the last part from a path.
- *
- * @param path   Path
- * @return string Last part of the path
- */
+// formatFilePath retrieves only the last part from a path.
 func formatFilePath(path string) string {
 	arr := strings.Split(path, "/")
 	return arr[len(arr)-1]
 }
 
-/**
- * Set a custom format for loggers.
- * This method overrides the logrus library Format method.
- *
- * @param entry   Log entry
- * @return io.Writer  File as a io.Writer instance along with log rotation
- */
+// Format sets a custom format for loggers.
 func (f *plainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	timestamp := fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
 
@@ -132,14 +113,9 @@ func (f *plainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		formatFilePath(entry.Caller.Function), entry.Message)), nil
 }
 
-/**
- * Initiate the log rotation feature using lumberjack library.
- * All the rotation params reads for the configs and if it occurs
- * a error, all the params are set to the default values.
- *
- * @param filename   Name of the log file
- * @return io.Writer  File as a io.Writer instance along with log rotation
- */
+// setLogRotation initiates the log rotation feature using lumberjack library.
+// All the rotation params reads for the configs and if it occurs
+// a error, all the params are set to the default values.
 func setLogRotation(filename string) io.Writer {
 	logConf, errReadConfig := config.ReadLogConfigs()
 	var rotationWriter io.Writer

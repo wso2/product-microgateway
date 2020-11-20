@@ -74,7 +74,7 @@ func GetCacheResources(endpoints []*corev3.Address, clusters []*clusterv3.Cluste
 }
 
 // UpdateRoutesConfig updates the existing routes configuration with the provided array of routes.
-//All the already existing routes (within the routeConfiguration) will be removed.
+// All the already existing routes (within the routeConfiguration) will be removed.
 func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, routes []*routev3.Route) {
 	vHostName := "default"
 	vHost := envoy.CreateVirtualHost(vHostName, routes)

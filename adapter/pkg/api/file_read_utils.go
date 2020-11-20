@@ -15,7 +15,7 @@
  *
  */
 
-//Package api contains the REST API implementation for the adapter
+// Package api contains the REST API implementation for the adapter
 package api
 
 import (
@@ -42,7 +42,7 @@ func ApplyAPIProject(payload []byte) error {
 		return err
 	}
 
-	//TODO: (VirajSalaka) this won't support for distributed openAPI definition
+	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
 	for _, file := range zipReader.File {
 		if strings.HasSuffix(file.Name, "Meta-information/swagger.yaml") {
 			loggers.LoggerAPI.Debugf("openAPI file : %v", file.Name)
@@ -62,8 +62,8 @@ func ApplyAPIProject(payload []byte) error {
 	return nil
 }
 
-//ApplyOpenAPIFile accepts an openapi definition as a bytearray and apply the changes to XDS servers.
-//TODO: (VirajSalaka) Remove the code segment as it is not in use for the main flow.
+// ApplyOpenAPIFile accepts an openapi definition as a bytearray and apply the changes to XDS servers.
+// TODO: (VirajSalaka) Remove the code segment as it is not in use for the main flow.
 func ApplyOpenAPIFile(payload []byte) {
 	apiJsn, err := utills.ToJSON(payload)
 	if err != nil {

@@ -37,7 +37,7 @@ import (
 // message := <-receiver
 var once sync.Once
 
-//C represents the channel to identify modifications added to the configuration file
+// C represents the channel to identify modifications added to the configuration file
 // TODO: (VirajSalaka) remove this as unused.
 var (
 	C chan string // better to be interface{} type which could send any type of data.
@@ -59,27 +59,27 @@ func NewReceiver() chan string {
 	return C
 }
 
-//Config represents the adapter configuration.
-//It is created directly from the configuration toml file.
+// Config represents the adapter configuration.
+// It is created directly from the configuration toml file.
 type Config struct {
 
 	// Server represents the configuration related to rest API (to which the apictl requests)
 	Server struct {
-		//Host name of the server
+		// Host name of the server
 		Host string
-		//Port of the server
+		// Port of the server
 		Port string
-		//Public Certificate Path (For the https connection between adapter and apictl)
+		// Public Certificate Path (For the https connection between adapter and apictl)
 		PublicKeyPath string
-		//Private Key Path (For the https connection between adapter and apictl)
+		// Private Key Path (For the https connection between adapter and apictl)
 		PrivateKeyPath string
-		//Username credential
+		// Username credential
 		Username string
-		//Password credential
+		// Password credential
 		Password string
 	}
 
-	//Envoy Listener Component related configurations.
+	// Envoy Listener Component related configurations.
 	Envoy struct {
 		ListenerHost            string
 		ListenerPort            uint32
