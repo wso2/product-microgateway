@@ -27,6 +27,7 @@ import (
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
@@ -53,13 +54,14 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 	routesS []*routev3.Route, clustersS []*clusterv3.Cluster, addressesS []*corev3.Address) {
 	var (
 		routesProd              []*routev3.Route
-		clustersProd            []*clusterv3.Cluster
+		clusters                []*clusterv3.Cluster
 		endpointProd            []model.Endpoint
 		apiLevelEndpointProd    []model.Endpoint
 		apilevelClusterProd     *clusterv3.Cluster
 		apiLevelClusterNameProd string
-		endpointsProd           []*corev3.Address
+		endpoints               []*corev3.Address
 
+		//TODO: (VirajSalaka) Remove unused properties
 		routesSand              []*routev3.Route
 		clustersSand            []*clusterv3.Cluster
 		endpointSand            []model.Endpoint
@@ -68,16 +70,12 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 		apiLevelClusterNameSand string
 		endpointsSand           []*corev3.Address
 	)
-	// check API level sandbox endpoints availble
-	if len(mgwSwagger.GetSandEndpoints()) > 0 {
-		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
-		apilevelAddressSand := createAddress(apiLevelEndpointSand[0].Host, apiLevelEndpointSand[0].Port)
-		apiLevelClusterNameSand = strings.TrimSpace(sandClustersConfigNamePrefix +
-			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
-		apilevelClusterSand = createCluster(apilevelAddressSand, apiLevelClusterNameSand, apiLevelEndpointSand[0].URLType)
-		clustersSand = append(clustersSand, apilevelClusterSand)
-		endpointsSand = append(endpointsSand, apilevelAddressSand)
-	}
+	// To keep track of API Level production endpoint basePath
+	apiEndpointBasePath := ""
+
+	apiTitle := mgwSwagger.GetTitle()
+	apiVersion := mgwSwagger.GetVersion()
+	apiBasePath := mgwSwagger.GetXWso2Basepath()
 
 	// check API level production endpoints available
 	if len(mgwSwagger.GetProdEndpoints()) > 0 {
@@ -86,43 +84,39 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 		apiLevelClusterNameProd = strings.TrimSpace(prodClustersConfigNamePrefix +
 			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
 		apilevelClusterProd = createCluster(apilevelAddressP, apiLevelClusterNameProd, apiLevelEndpointProd[0].URLType)
-		clustersProd = append(clustersProd, apilevelClusterProd)
-		endpointsProd = append(endpointsProd, apilevelAddressP)
+		clusters = append(clusters, apilevelClusterProd)
+		endpoints = append(endpoints, apilevelAddressP)
+		apiEndpointBasePath = endpointProd[0].Basepath
 
 	} else {
 		logger.LoggerOasparser.Warn("API level Producton endpoints are not defined")
 	}
-	for _, resource := range mgwSwagger.GetResources() {
-		apiTitle := mgwSwagger.GetTitle()
-		apiVersion := mgwSwagger.GetVersion()
-		apiBasePath := mgwSwagger.GetXWso2Basepath()
 
-		// resource level check sandbox endpoints
-		if len(resource.GetSandEndpoints()) > 0 {
-			endpointSand = resource.GetSandEndpoints()
-			addressSand := createAddress(endpointSand[0].Host, endpointSand[0].Port)
-			// TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
-			clusterNameSand := strings.TrimSpace(apiLevelClusterNameSand + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
-				"0")
-			clusterSand := createCluster(addressSand, clusterNameSand, endpointSand[0].URLType)
-			clustersSand = append(clustersSand, clusterSand)
-			clusterRefSand := clusterSand.GetName()
-
-			// sandbox endpoints
-			routeS := createRoute(apiTitle, apiBasePath, apiVersion, endpointSand[0], resource, clusterRefSand)
-			routesSand = append(routesSand, routeS)
-			endpointsSand = append(endpointsSand, addressSand)
-
-			// API level check
-		} else if len(mgwSwagger.GetSandEndpoints()) > 0 {
-			endpointSand = apiLevelEndpointSand
-			clusterRefSand := apilevelClusterSand.GetName()
-
-			// sandbox endpoints
-			routeS := createRoute(apiTitle, apiBasePath, apiVersion, endpointSand[0], resource, clusterRefSand)
-			routesSand = append(routesSand, routeS)
-
+	// check API level sandbox endpoints availble
+	if len(mgwSwagger.GetSandEndpoints()) > 0 {
+		if apiEndpointBasePath != endpointSand[0].Basepath {
+			logger.LoggerOasparser.Warnf("Sandbox API level endpoint basepath is different compared to API level production endpoint "+
+				"for the resource %v:%v-%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion)
+		} else {
+			apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
+			apilevelAddressSand := createAddress(apiLevelEndpointSand[0].Host, apiLevelEndpointSand[0].Port)
+			apiLevelClusterNameSand = strings.TrimSpace(sandClustersConfigNamePrefix +
+				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
+			apilevelClusterSand = createCluster(apilevelAddressSand, apiLevelClusterNameSand, apiLevelEndpointSand[0].URLType)
+			clusters = append(clusters, apilevelClusterSand)
+			endpoints = append(endpoints, apilevelAddressSand)
 		}
+	}
+
+	for _, resource := range mgwSwagger.GetResources() {
+
+		clusterRefSand := ""
+		clusterRefProd := ""
+		// The upstream endpoint's basepath.
+		// The production endpoint's basepath is set. The developer has to stick
+		// into the same basePath when using the sandbox endpoint.
+		// TODO: (VirajSalaka) Finalize whether to proceed with this limitation.
+		endpointBasepath := ""
 
 		// resource level check production endpoints
 		if len(resource.GetProdEndpoints()) > 0 {
@@ -132,28 +126,61 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 			clusterNameProd := strings.TrimSpace(apiLevelClusterNameProd + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
 				"0")
 			clusterProd := createCluster(addressProd, clusterNameProd, endpointProd[0].URLType)
-			clustersProd = append(clustersProd, clusterProd)
-			clusterRefProd := clusterProd.GetName()
-
-			// production endpoints
-			routeP := createRoute(apiTitle, apiBasePath, apiVersion, endpointProd[0], resource, clusterRefProd)
-			routesProd = append(routesProd, routeP)
-			endpointsProd = append(endpointsProd, addressProd)
+			clusters = append(clusters, clusterProd)
+			clusterRefProd = clusterProd.GetName()
+			endpoints = append(endpoints, addressProd)
+			endpointBasepath = endpointProd[0].Basepath
 
 			// API level check
 		} else if len(mgwSwagger.GetProdEndpoints()) > 0 {
 			endpointProd = apiLevelEndpointProd
-			clusterRefProd := apilevelClusterProd.GetName()
-
-			// production endpoints
-			routeP := createRoute(apiTitle, apiBasePath, apiVersion, endpointProd[0], resource, clusterRefProd)
-			routesProd = append(routesProd, routeP)
+			clusterRefProd = apilevelClusterProd.GetName()
+			endpointBasepath = apiLevelEndpointProd[0].Basepath
 
 		} else {
-			logger.LoggerOasparser.Fatalf("Producton endpoints are not defined")
+			logger.LoggerOasparser.Warnf("Production environment endpoints are not available for the resource %v:%v-%v",
+				apiTitle, apiVersion, resource.GetPath)
 		}
+
+		// resource level check sandbox endpoints
+		if len(resource.GetSandEndpoints()) > 0 {
+			endpointSand = resource.GetSandEndpoints()
+			addressSand := createAddress(endpointSand[0].Host, endpointSand[0].Port)
+			// TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
+			clusterNameSand := strings.TrimSpace(apiLevelClusterNameSand + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
+				"0")
+			if endpointBasepath != endpointSand[0].Basepath {
+				logger.LoggerOasparser.Warnf("Sandbox endpoint basepath is different compared to production endpoint "+
+					"for the resource %v:%v-%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion, resource.GetPath)
+			} else {
+				// sandbox cluster is not created if the basepath component of the endpoint is different compared to production
+				// endpoints
+				clusterSand := createCluster(addressSand, clusterNameSand, endpointSand[0].URLType)
+				clusters = append(clusters, clusterSand)
+				endpoints = append(endpoints, addressSand)
+				clusterRefSand = clusterSand.GetName()
+			}
+
+			// API level check
+			// Due to endpoint basePath restriction, the apiLevelEndpointSand may not be initialized.
+		} else if len(mgwSwagger.GetSandEndpoints()) > 0 || apiLevelEndpointSand != nil {
+			endpointSand = apiLevelEndpointSand
+			if endpointBasepath != endpointSand[0].Basepath {
+				logger.LoggerOasparser.Warnf("Sandbox endpoint basepath of API is different compared to production endpoint "+
+					"for the resource %v:%v-%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion, resource.GetPath)
+			} else {
+				clusterRefSand = apilevelClusterSand.GetName()
+				endpointBasepath = endpointSand[0].Basepath
+			}
+		} else {
+			logger.LoggerOasparser.Debugf("Sandbox environment endpoints are not available for the resource %v:%v-%v",
+				apiTitle, apiVersion, resource.GetPath)
+		}
+
+		routeP := createRoute(apiTitle, apiBasePath, apiVersion, endpointBasepath, resource, clusterRefProd, clusterRefSand)
+		routesProd = append(routesProd, routeP)
 	}
-	return routesProd, clustersProd, endpointsProd, routesSand, clustersSand, endpointsSand
+	return routesProd, clusters, endpoints, routesSand, clustersSand, endpointsSand
 }
 
 // createCluster creates cluster configuration. AddressConfiguration, cluster name and
@@ -218,8 +245,8 @@ func createCluster(address *corev3.Address, clusterName string, urlType string) 
 	return &cluster
 }
 
-func createRoute(title string, xWso2Basepath string, version string, endpoint model.Endpoint,
-	resource model.Resource, clusterName string) *routev3.Route {
+func createRoute(title string, xWso2Basepath string, version string, endpointBasepath string, resource model.Resource, prodClusterName string, sandClusterName string) *routev3.Route {
+
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
 		router       routev3.Route
@@ -242,7 +269,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpoint mo
 		},
 	}
 	resourcePath = resource.GetPath()
-	routePath := generateRoutePaths(xWso2Basepath, endpoint.Basepath, resourcePath)
+	routePath := generateRoutePaths(xWso2Basepath, endpointBasepath, resourcePath)
 
 	match = &routev3.RouteMatch{
 		PathSpecifier: &routev3.RouteMatch_SafeRegex{
@@ -258,12 +285,14 @@ func createRoute(title string, xWso2Basepath string, version string, endpoint mo
 		Headers: []*routev3.HeaderMatcher{&headerMatcherArray},
 	}
 
-	hostRewriteSpecifier := &routev3.RouteAction_HostRewriteLiteral{
-		HostRewriteLiteral: endpoint.Host,
+	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
+		AutoHostRewrite: &wrapperspb.BoolValue{
+			Value: true,
+		},
 	}
 
-	clusterSpecifier := &routev3.RouteAction_Cluster{
-		Cluster: clusterName,
+	clusterSpecifier := &routev3.RouteAction_ClusterHeader{
+		ClusterHeader: "cluster-header",
 	}
 	decorator = &routev3.Decorator{
 		Operation: resourcePath,
@@ -273,11 +302,15 @@ func createRoute(title string, xWso2Basepath string, version string, endpoint mo
 	if xWso2Basepath != "" {
 		contextExtensions["basePath"] = xWso2Basepath
 	} else {
-		contextExtensions["basePath"] = endpoint.Basepath
+		contextExtensions["basePath"] = endpointBasepath
 	}
 	contextExtensions["method"] = strings.Join(resource.GetMethod(), " ")
 	contextExtensions["version"] = version
 	contextExtensions["name"] = title
+	// One of these values will be selected and added as the cluster-header http header
+	// from enhancer
+	contextExtensions["prodClusterName"] = prodClusterName
+	contextExtensions["sandClusterName"] = sandClusterName
 
 	perFilterConfig := extAuthService.ExtAuthzPerRoute{
 		Override: &extAuthService.ExtAuthzPerRoute_CheckSettings{
@@ -309,7 +342,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpoint mo
 						},
 						Regex: xWso2Basepath,
 					},
-					Substitution: endpoint.Basepath,
+					Substitution: endpointBasepath,
 				},
 				ClusterSpecifier: clusterSpecifier,
 			},
