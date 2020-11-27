@@ -1,0 +1,47 @@
+# --------------------------------------------------------------------
+# Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# -----------------------------------------------------------------------
+
+# Config map containing the certificate for adapter
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: adapter-pem-configmap
+data:
+  localhost.pem: |
+    -----BEGIN CERTIFICATE-----
+    MIIDxTCCAq2gAwIBAgIUDo1uBJOYP7iLms9ZxVCF1CRubWQwDQYJKoZIhvcNAQEL
+    BQAwcjELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMRYwFAYDVQQHDA1Nb3VudGFp
+    biBWaWV3MQ0wCwYDVQQKDARXU08yMQ0wCwYDVQQLDARXU08yMSAwHgYDVQQDDBdh
+    ZGFwdGVyLXNlcnZpY2UuZGVmYXVsdDAeFw0yMDExMjQxMzI0NTVaFw0yMzAyMDIx
+    MzI0NTVaMHIxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJDQTEWMBQGA1UEBwwNTW91
+    bnRhaW4gVmlldzENMAsGA1UECgwEV1NPMjENMAsGA1UECwwEV1NPMjEgMB4GA1UE
+    AwwXYWRhcHRlci1zZXJ2aWNlLmRlZmF1bHQwggEiMA0GCSqGSIb3DQEBAQUAA4IB
+    DwAwggEKAoIBAQCdt2OxUhfhqcesD+qNSEx15HQTltSD6geRmEP0MMBubcjGvmzR
+    oy7fW+tPuyZYbGC4f4EHdOG0fkAY+HA+nzoTWaSA6oayUOg9Fmyh03G7ADnyJDCH
+    uh1mMQzGvBU/hkNzkjgCpsBhYVigx4aPLOHRfGJI6LkP1kVmdnGYDlDduA2E02Bq
+    jac7A76W9aje0iThdApOYa/6T4Pj57nr2BvW6KaOkLNQ/f9cvn55m5Emh/CHHLU1
+    TY9SMKleU3egsy0cKgU/6/IqEZ0kTPEh7qNMhh6GkQl1iT7BM0bejZ9b9U1/kU2h
+    FKoEDcQGkqR9HAZH1iF53J63E0/0wdOpko4XAgMBAAGjUzBRMB0GA1UdDgQWBBSg
+    ySi1zWnzS9prHjvNgTDuGkULFTAfBgNVHSMEGDAWgBSgySi1zWnzS9prHjvNgTDu
+    GkULFTAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQB3e+orLj21
+    Lb2WO0kWl5WWQyhvVgHGTf/K4IkTsc7kZs4LwMZPaisuHeSBIFVn3DTSBdZhrzQC
+    A0BKWJr6qjLdUnXlhSYk1mhS8n37SYrUpXJI4lSBZltl0vlbOVYn1L5IDqdB1Gc+
+    xjahW3HssO4hVE7OkK7tVebeVtu2F3OfaLimg4gmhUTHMvZEULidQAjW2dqI0W4P
+    zTZbcv1q4cFgNZUOPnHoY35Ri0Hb6SngCtFWOCYP8svdtuhWBydWm6ly0MD8FqU9
+    RMb+Ce+ptFTvPQfOJ4n8qMJTNp0hbw9yMRxiZXWlT36FQ8iNwULtQXpRSVZzc84+
+    U///8FziQ713
+    -----END CERTIFICATE-----

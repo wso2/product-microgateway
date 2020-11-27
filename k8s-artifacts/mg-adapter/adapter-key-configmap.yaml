@@ -1,0 +1,52 @@
+# --------------------------------------------------------------------
+# Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# -----------------------------------------------------------------------
+
+# Config map containing the private key for adapter
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: adapter-key-configmap
+data:
+  localhost.key: |
+    -----BEGIN PRIVATE KEY-----
+    MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCdt2OxUhfhqces
+    D+qNSEx15HQTltSD6geRmEP0MMBubcjGvmzRoy7fW+tPuyZYbGC4f4EHdOG0fkAY
+    +HA+nzoTWaSA6oayUOg9Fmyh03G7ADnyJDCHuh1mMQzGvBU/hkNzkjgCpsBhYVig
+    x4aPLOHRfGJI6LkP1kVmdnGYDlDduA2E02Bqjac7A76W9aje0iThdApOYa/6T4Pj
+    57nr2BvW6KaOkLNQ/f9cvn55m5Emh/CHHLU1TY9SMKleU3egsy0cKgU/6/IqEZ0k
+    TPEh7qNMhh6GkQl1iT7BM0bejZ9b9U1/kU2hFKoEDcQGkqR9HAZH1iF53J63E0/0
+    wdOpko4XAgMBAAECggEAJ5eWCzmUjS3V1jfYpcb0itPi39gJWWQyqjYTOQXUCOS+
+    dkXvg2D3r1Kf69ALfD8YuLgpZ/nLf0gCR0J2ywGlzp2+Ui6Nyc3NvygV9TnjXxJb
+    eZHkLO5n2vONRYaJvvyxih22udOqj8ekPBhaiy61MaWL9smVS4h6u5IYShet7TqW
+    EY1b/z+1V3me8VJnRBKB5inokiICZBh2aS7fa1bAoYLEahlHAkEMRrjvK6kiLaMO
+    +pPBPX3GW7RgK5b8yepyEbloPe0bHjPJp0GYCCB0UhYIk/4xzBiFZ1HHluv1ezlR
+    kCqJCLB82VCNJTWvXcZW/t3lQmfe/vX/1MRl8h3egQKBgQDRaoy7EbhlaDSEZB1W
+    VGqfrEOqlW2ZmaWSulxvbAezl6Su//vDpjSMhP/8WpZVtFMHWSCclkOtdMonMa/4
+    r7xWTQWLuX5EG/Br6JbarIEPW2lOv7hk2pRsnZ4wM7GOuELNM8ghoUPLprjBteZE
+    RL0ifupE6mBojTmCXAzwW4K3hwKBgQDAzLtTLbRChVWxqCZNVggSvCHETet9asPL
+    qszSdoGcFyEE/NkC6DfzUCm4orgWDtmHzuYwoIw3+/sU0PhDXKd7L8/bkO0idTgJ
+    ibY5KawfsnX2ZbTDkOY7pB/Hq/ysYX2lToXetQo7Q2rxK9gvXm+e7UGw3LWjik9V
+    jTA1bL/48QKBgB9LrxBdy5LMCd0nIQM/xldqZQpfHmvv/EB7PUkhed0q8l98veE1
+    O3EshxztZL4WHrpgZXFBO4f2hidpU4T0rk6vX/7Lj8UZ78oQjkrLsNXcsVYlbKcV
+    y0yYGYXWk9hiTQlhja0I7prGpaG9T1Ywd5tqIBSAejvlrwx+OSjKZDSNAoGBAJta
+    XPdBNKcFWW+11mcqk4bFIVBUmRSOGwbZsgFEjFuCJ5ElTJgTFkJwra2hMERV4uKT
+    zNgSBep2mHLFj8Z3ulyAwjRiKzJA0c6dsL+O3KsN2g+ZFHchIuOb9B+obglY5S12
+    gFhb+MqYIGwEsEY7CiY9d1lT/uiwYgzFn7rsziOBAoGARlJhx2DsSTq5+60BDjNC
+    v0QPXycvEE3HkW22B5niPAZNS/M3aP2nBOEv+5fwEK8YOaU+7wLQfHqD04a+n1pC
+    +4cq7oOh7GwYG5sySlcxoDSsouLsNEoUG9XQ6Vy2YOVR0/bgeTBCqgGnuTgOMJ28
+    cV6H7rplwTllHfQ7DPCRE0o=
+    -----END PRIVATE KEY-----
