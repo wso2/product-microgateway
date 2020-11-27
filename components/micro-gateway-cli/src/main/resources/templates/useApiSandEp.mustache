@@ -6,4 +6,4 @@
 {{else}}
     clientResponse = {{qualifiedServiceName}}_sand->forward(urlPostfix, <@untainted>req);
 {{/if}}
-invocationContext.attributes["destination"] = gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_endpoint_0","{{{endpoints.0.endpointUrl}}}");
+{{#endpointConfig.sandEndpoints}}{{>analyticsDestination}}{{/endpointConfig.sandEndpoints}}
