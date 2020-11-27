@@ -232,7 +232,7 @@ REM add the system variable containing log4j properties file
     SET JAVA_ARGS=-Xms%JAVA_XMS_VALUE% -Xmx%JAVA_XMX_VALUE% -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath='%GW_HOME%\heap-dump.hprof'
     SET LOG4J_CONFIGURATION_FILE_LOCATION=%GW_HOME%\conf\log4j2.properties
     IF EXIST %LOG4J_CONFIGURATION_FILE_LOCATION% (
-        SET JAVA_ARGS=%JAVA_ARGS% -Dlog4j.configurationFile=%LOG4J_CONFIGURATION_FILE_LOCATION%
+        SET JAVA_ARGS=%JAVA_ARGS% '-Dlog4j.configurationFile=%LOG4J_CONFIGURATION_FILE_LOCATION%'
     ) ELSE (
         SET JAVA_ARGS=%JAVA_ARGS% '-Dlog4j.configurationFactory=org.wso2.micro.gateway.core.logging.MgwLog4j2ConfigurationFactory'
     )
