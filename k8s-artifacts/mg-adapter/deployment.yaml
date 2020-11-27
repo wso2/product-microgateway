@@ -52,6 +52,16 @@ spec:
           ports:
             - containerPort: 18000
             - containerPort: 9843
+          livenessProbe:
+            tcpSocket:
+              port: 9843
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: 9843
+            initialDelaySeconds: 8
+            periodSeconds: 5
       volumes:
         - name: adapter-key-vol
           configMap:

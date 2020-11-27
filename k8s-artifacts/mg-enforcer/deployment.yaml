@@ -47,6 +47,16 @@ spec:
           image: wso2/mg-enforcer:4.0.0-m1
           ports:
             - containerPort: 8081
+          livenessProbe:
+            tcpSocket:
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: 8081
+            initialDelaySeconds: 8
+            periodSeconds: 5
       volumes:
         - name: client-truststore-vol
           secret:
