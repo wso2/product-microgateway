@@ -40,6 +40,16 @@ spec:
           ports:
             - containerPort: 9000
             - containerPort: 9095
+          livenessProbe:
+            tcpSocket:
+              port: 9095
+            initialDelaySeconds: 600
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: 9095
+            initialDelaySeconds: 400
+            periodSeconds: 20
       volumes:
         - name: envoy-vol
           configMap:
