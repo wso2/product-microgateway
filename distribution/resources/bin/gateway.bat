@@ -112,7 +112,7 @@ IF EXIST %CONF_OUT_FILE% DEL /Q /F %CONF_OUT_FILE%
     SET usage_path=%GW_HOME%\api-usage-data
     CALL SET USAGE_DATA_PATH=%%usage_path:\=%separator%%%
 
-    CALL :setJavaArgs %*
+    CALL :setupAndRun %*
 
     GOTO END
 
