@@ -228,7 +228,7 @@ REM We need to issolate the jar file path and wrap it with quotes
     GOTO :buildBalArgs
 
 REM add the system variable containing log4j properties file
-:setJavaArgs
+:setupAndRun
     SET JAVA_ARGS=-Xms%JAVA_XMS_VALUE% -Xmx%JAVA_XMX_VALUE% -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath='%GW_HOME%\heap-dump.hprof'
     SET LOG4J_CONFIGURATION_FILE_LOCATION=%GW_HOME%\conf\log4j2.properties
     IF EXIST %LOG4J_CONFIGURATION_FILE_LOCATION% (
