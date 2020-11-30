@@ -31,7 +31,9 @@ spec:
       port: 9000
       targetPort: 9000
       protocol: TCP
+      nodePort: 30202
     - name: "9095"
       port: 9095
       targetPort: 9095
       protocol: TCP
+      nodePort: 30201

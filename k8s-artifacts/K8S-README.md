@@ -138,15 +138,28 @@ referred as `MG_HOME`.
       kubectl create configmap petstore-cm --from-file=swagger.json
       ```
 
+6. After that create an api.yaml file with API Custom Resource Definition (CRD) pointing to the created config map.
+```
+apiVersion: wso2.com/v1alpha2
+kind: API
+metadata:
+  name: petstore-api
+spec:
+  swaggerConfigMapName: petstore-cm
+```
+ - Apply the api.yaml file in the kubernetes cluster.
+   ```
+   kubectl apply -f api.yaml
+   ```
 
-6. The next step would be to invoke the API using a REST tool. Since APIs on the Microgateway are by default secured. We need a valid token in order to invoke the API. 
+7. The next step would be to invoke the API using a REST tool. Since APIs on the Microgateway are by default secured. We need a valid token in order to invoke the API. 
 Use the following sample token accepted by the microgateway to access the API. Lets set the token to command line as a variable
 
 ```
 TOKEN=eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNNV0kyTkRBelpHUXpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XSTBaV05tTkRjeE5HWXdZbU00WlRBM01XSTJOREF6WkdRek5HTTBaR1JsTmpKa09ERmtaRFJpT1RGa01XRmhNelUyWkdWbE5nX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ==.eyJhdWQiOiJBT2syNFF6WndRXzYyb2QyNDdXQnVtd0VFZndhIiwic3ViIjoiYWRtaW5AY2FyYm9uLnN1cGVyIiwibmJmIjoxNTk2MDA5NTU2LCJhenAiOiJBT2syNFF6WndRXzYyb2QyNDdXQnVtd0VFZndhIiwic2NvcGUiOiJhbV9hcHBsaWNhdGlvbl9zY29wZSBkZWZhdWx0IiwiaXNzIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6OTQ0My9vYXV0aDIvdG9rZW4iLCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsImV4cCI6MTYyNzU0NTU1NiwiaWF0IjoxNTk2MDA5NTU2LCJqdGkiOiIyN2ZkMWY4Ny01ZTI1LTQ1NjktYTJkYi04MDA3MTFlZTJjZWMifQ==.otDREOsUUmXuSbIVII7FR59HAWqtXh6WWCSX6NDylVIFfED3GbLkopo6rwCh2EX6yiP-vGTqX8sB9Zfn784cIfD3jz2hCZqOqNzSUrzamZrWui4hlYC6qt4YviMbR9LNtxxu7uQD7QMbpZQiJ5owslaASWQvFTJgBmss5t7cnurrfkatj5AkzVdKOTGxcZZPX8WrV_Mo2-rLbYMslgb2jCptgvi29VMPo9GlAFecoMsSwywL8sMyf7AJ3y4XW5Uzq7vDGxojDam7jI5W8uLVVolZPDstqqZYzxpPJ2hBFC_OZgWG3LqhUgsYNReDKKeWUIEieK7QPgjetOZ5Geb1mA==
 ``` 
 
-7. We can now invoke the API running on the microgateway using cURL as below.
+8. We can now invoke the API running on the microgateway using cURL as below.
 ```
 curl -X GET "https://<*Node IP*>:30201/v2/pet/1" -H "accept: application/json" -H "Authorization:Bearer $TOKEN" -k
 ```
@@ -163,10 +176,10 @@ Router will forward the request to this component in order to validate and to ad
 
 - **Adapter** : The component configures the Router and the enforcer components dynamically during the runtime upon receiving an event for API
 creation or update.
+
 #### Architecture
 
-The following diagram illustrates how the WSO2 API Microgateway expose micro services using Open API definition as well 
-as exposing APIs from [WSO2 API Manager](https://wso2.com/api-management/).
+The following diagram illustrates how the WSO2 API Microgateway expose micro services in kubernetes.
 
 ![Alt text](Architecture.png?raw=true "Title")
 

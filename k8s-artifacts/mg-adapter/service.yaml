@@ -31,7 +31,9 @@ spec:
       port: 18000
       targetPort: 18000
       protocol: TCP
+      nodePort: 30199
     - name: "9843"
       port: 9843
       targetPort: 9843
       protocol: TCP
+      nodePort: 30200
