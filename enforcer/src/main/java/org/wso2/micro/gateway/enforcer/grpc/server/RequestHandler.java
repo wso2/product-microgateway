@@ -17,8 +17,8 @@
  */
 package org.wso2.micro.gateway.enforcer.grpc.server;
 
-import io.envoyproxy.envoy.service.auth.v2.CheckRequest;
-import io.envoyproxy.envoy.service.auth.v2.CheckResponse;
+import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
+import io.envoyproxy.envoy.service.auth.v3.CheckResponse;
 import io.grpc.stub.StreamObserver;
 import org.wso2.micro.gateway.enforcer.api.API;
 import org.wso2.micro.gateway.enforcer.api.APIFactory;

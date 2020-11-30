@@ -20,14 +20,14 @@ package org.wso2.micro.gateway.enforcer.grpc.server;
 
 import com.google.rpc.Code;
 import com.google.rpc.Status;
-import io.envoyproxy.envoy.api.v2.core.HeaderValue;
-import io.envoyproxy.envoy.api.v2.core.HeaderValueOption;
-import io.envoyproxy.envoy.service.auth.v2.AuthorizationGrpc;
-import io.envoyproxy.envoy.service.auth.v2.CheckRequest;
-import io.envoyproxy.envoy.service.auth.v2.CheckResponse;
-import io.envoyproxy.envoy.service.auth.v2.DeniedHttpResponse;
-import io.envoyproxy.envoy.service.auth.v2.OkHttpResponse;
-import io.envoyproxy.envoy.type.HttpStatus;
+import io.envoyproxy.envoy.config.core.v3.HeaderValue;
+import io.envoyproxy.envoy.config.core.v3.HeaderValueOption;
+import io.envoyproxy.envoy.service.auth.v3.AuthorizationGrpc;
+import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
+import io.envoyproxy.envoy.service.auth.v3.CheckResponse;
+import io.envoyproxy.envoy.service.auth.v3.DeniedHttpResponse;
+import io.envoyproxy.envoy.service.auth.v3.OkHttpResponse;
+import io.envoyproxy.envoy.type.v3.HttpStatus;
 import io.grpc.stub.StreamObserver;
 import org.json.JSONObject;
 import org.wso2.micro.gateway.enforcer.api.ResponseObject;
@@ -63,7 +63,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .build();
             HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
             return CheckResponse.newBuilder()
-                    .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())).build())
+                    .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                     .setDeniedResponse(DeniedHttpResponse.newBuilder().setBody(responseJson.toString())
                             .addHeaders(headerValueOption).setStatus(status).build()).build();
         } else {
