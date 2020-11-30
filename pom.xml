@@ -41,7 +41,7 @@
         <module>enforcer</module>
         <module>router</module>
         <module>distribution</module>
-        <module>test-integration</module>
+        <module>test</module>
     </modules>
 
     <properties>
