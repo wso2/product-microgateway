@@ -67,8 +67,18 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .setDeniedResponse(DeniedHttpResponse.newBuilder().setBody(responseJson.toString())
                             .addHeaders(headerValueOption).setStatus(status).build()).build();
         } else {
-            return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
-                    .setOkResponse(OkHttpResponse.newBuilder().build()).build();
+            OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
+            responseObject.getHeaderMap().forEach((key, value) -> {
+                HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
+                        .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
+                        .build();
+                okResponseBuilder.addHeaders(headerValueOption);
+                }
+            );
+
+
+        return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
+                    .setOkResponse(okResponseBuilder.build()).build();
         }
     }
 

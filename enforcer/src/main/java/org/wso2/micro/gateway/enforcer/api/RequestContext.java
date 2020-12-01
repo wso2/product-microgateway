@@ -22,6 +22,7 @@ import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Holds the set of meta data related to current request flowing through the gateway. This context should be shared
@@ -56,7 +57,6 @@ public class RequestContext {
         private Map<String, String> headers;
         private String prodClusterHeader;
         private String sandClusterHeader;
-        private boolean clusterHeaderEnabled;
         private Map<String, Object> properties = new HashMap();
 
         public Builder(String requestPath) {
@@ -97,11 +97,6 @@ public class RequestContext {
             return this;
         }
 
-        public Builder enableClusterHeader(boolean value) {
-            this.clusterHeaderEnabled = value;
-            return this;
-        }
-
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
@@ -109,10 +104,14 @@ public class RequestContext {
             requestContext.requestMethod = this.requestMethod;
             requestContext.requestPath = this.requestPath;
             requestContext.headers = this.headers;
-            requestContext.clusterHeaderEnabled = this.clusterHeaderEnabled;
             requestContext.prodClusterHeader = this.prodClusterHeader;
             requestContext.sandClusterHeader = this.sandClusterHeader;
             requestContext.properties = this.properties;
+
+            // Adapter assigns header based routing only if both type of endpoints are present.
+            if (!StringUtils.isEmpty(prodClusterHeader) && !StringUtils.isEmpty(sandClusterHeader)) {
+                requestContext.clusterHeaderEnabled = true;
+            }
             return requestContext;
         }
     }
@@ -135,6 +134,13 @@ public class RequestContext {
 
     public Map<String, String> getHeaders() {
         return headers;
+    }
+
+    public void addHeader(String key, String value) {
+       if (headers != null) {
+           headers = new TreeMap<>();
+       }
+       headers.put(key, value);
     }
 
     public Map<String, Object> getProperties() {

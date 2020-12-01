@@ -61,11 +61,15 @@ public class RestAPI implements API {
         ResponseObject responseObject = new ResponseObject();
         if (executeFilterChain(requestContext)) {
             responseObject.setStatusCode(200);
+            if (requestContext.getHeaders() != null) {
+                responseObject.setHeaderMap(requestContext.getHeaders());
+            }
         } else {
             responseObject.setStatusCode(Integer.parseInt(requestContext.getProperties().get("code").toString()));
             responseObject.setErrorCode(requestContext.getProperties().get("error_code").toString());
             responseObject.setErrorDescription(requestContext.getProperties().get("error_description").toString());
         }
+
         return responseObject;
     }
 

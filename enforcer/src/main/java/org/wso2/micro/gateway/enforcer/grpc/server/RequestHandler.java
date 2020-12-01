@@ -51,12 +51,10 @@ public class RequestHandler {
                 .get(AdapterConstants.PROD_CLUSTER_HEADER_KEY);
         String sandCluster = request.getAttributes().getContextExtensionsMap()
                 .get(AdapterConstants.SAND_CLUSTER_HEADER_KEY);
-        boolean enableClusterHeader = Boolean.parseBoolean(request.getAttributes().getContextExtensionsMap()
-                .get(AdapterConstants.ENABLE_CLUSTER_HEADER));
 
         ResourceConfig resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api).headers(headers).prodClusterHeader(prodCluster).sandClusterHeader(sandCluster)
-                .enableClusterHeader(enableClusterHeader).build();
+                .build();
     }
 }

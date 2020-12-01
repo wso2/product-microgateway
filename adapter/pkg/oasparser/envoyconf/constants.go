@@ -21,10 +21,11 @@ const (
 )
 
 const (
-	extAuthzFilterName        string = "envoy.filters.http.ext_authz"
-	transportSocketName       string = "envoy.transport_sockets.tls"
-	accessLogName             string = "envoy.access_loggers.file"
-	httpConManagerStartPrefix string = "ingress_http"
+	extAuthzFilterName         string = "envoy.filters.http.ext_authz"
+	transportSocketName        string = "envoy.transport_sockets.tls"
+	accessLogName              string = "envoy.access_loggers.file"
+	httpConManagerStartPrefix  string = "ingress_http"
+	extAuthzPerRouteFilterName string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 )
 
 const (
