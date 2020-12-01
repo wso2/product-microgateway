@@ -16,3 +16,34 @@ services:
   #   - "9411"
   #   ports:
   #   - "9411:9411"
+version: "3.7"
+services:
+  router:
+    image: wso2/mg-router:4.0.0-m2-SNAPSHOT
+    ports:
+      - "9095:9095"
+      - "9000:9000"
+    links:
+      - adapter
+      - enforcer
+  adapter:
+    image: wso2/mg-adapter:4.0.0-m2-SNAPSHOT
+    volumes:  
+      - ./resources/adapter/security:/home/wso2/security
+      - ./resources/conf:/home/wso2/conf
+    ports:
+      - "18000:18000" 
+      - "9843:9843"
+  enforcer:
+    image: wso2/mg-enforcer:4.0.0-m2-SNAPSHOT
+    volumes:  
+      - ./resources/enforcer/security:/home/wso2/mg/security
+      - ./resources/conf:/home/wso2/conf
+    ports:
+      - "8081:8081"   
+  mockBackend:
+    image: wso2/mock-backend:latest
+    ports:
+      - "2380:2380"
+    links:
+      - router

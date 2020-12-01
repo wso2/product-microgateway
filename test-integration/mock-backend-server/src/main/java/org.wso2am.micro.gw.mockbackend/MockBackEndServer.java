@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2am.mocro.gw.mockbackend;
+package org.wso2am.micro.gw.mockbackend;
 
 
 import com.sun.net.httpserver.HttpServer;

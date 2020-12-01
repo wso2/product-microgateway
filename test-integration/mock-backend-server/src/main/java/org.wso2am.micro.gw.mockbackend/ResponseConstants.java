@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2am.mocro.gw.mockbackend;
+package org.wso2am.micro.gw.mockbackend;
 
 public class ResponseConstants {
 
@@ -76,7 +76,6 @@ public class ResponseConstants {
     public static final String  INVALID_RESPONSE = "{\"fault\":{\"code\":500, \"message\":\"Bad Response\", " +
             "\"description\":\"#/status: hello is not a valid enum value, \"}}";
 
-    public static final String INTERCEPT_JSON_RESPONSE = "\"{\"city\":\"chicago\",\"name\":\"jon doe\",\"age\":\"22\"}\"";
     public static final String ERROR_RESPONSE = "error:true";
 
     public static final String INVALID_JWT_RESPONSE ="\"{\"header\":\"not available\"}\"";

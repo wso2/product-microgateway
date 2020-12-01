@@ -26,15 +26,13 @@ import org.wso2am.micro.gw.tests.common.model.ApplicationDTO;
 import org.wso2am.micro.gw.tests.common.model.SubscribedApiDTO;
 import org.wso2am.micro.gw.tests.context.MgwServerInstance;
 import org.wso2am.micro.gw.tests.context.MicroGWTestException;
+import org.wso2am.micro.gw.tests.mockbackend.MockBackendServer;
 import org.wso2am.micro.gw.tests.util.*;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-
-
-
 
 
 public class BaseTestCase {
@@ -54,6 +52,11 @@ public class BaseTestCase {
         microGWServer.startMGW();
     }
 
+    public void startMockBackend()  {
+
+        MockBackendServer.generateMockBackendServerDockerImage();
+    }
+
     public void stopMGW() {
         microGWServer.stopMGW();
 
@@ -70,8 +73,8 @@ public class BaseTestCase {
                 .toString();
     }
 
-    protected static String getMockServiceURLHttp(String servicePath) throws MalformedURLException {
-        return new URL(new URL("https://localhost:" + TestConstant.MOCK_SERVER_PORT), servicePath).toString();
+    public static String getMockServiceURLHttp(String servicePath) throws MalformedURLException {
+        return new URL(new URL("http://localhost:" + TestConstant.MOCK_SERVER_PORT), servicePath).toString();
     }
 
     protected static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType, int validityPeriod)

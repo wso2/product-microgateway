@@ -45,21 +45,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0-M1</version>
-                <configuration>
-                    <systemPropertyVariables>
-                        <project.build.directory>${project.build.directory}</project.build.directory>
-                        <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
-                        <javax.net.ssl.trustStore>${basedir}/resources/keystore/cacerts</javax.net.ssl.trustStore>
-                    </systemPropertyVariables>
-                    <groups>org.wso2am.micro.gw.tests.IntegrationTest</groups>
-                </configuration>
-            </plugin>
-            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -91,7 +76,6 @@
             </resource>
         </resources>
     </build>
-
 
     <dependencies>
         <dependency>

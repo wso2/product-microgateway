@@ -38,13 +38,14 @@ public class JwtTestCase extends BaseTestCase {
 
     @BeforeSuite(description = "initialise the setup")
     void start() throws Exception {
+        super.startMockBackend();
         super.startMGW();
 
         //deploy the api
 
-        //todo create a zip file
+        //todo chashikajw create a zip file
         String apiZipfile = JwtTestCase.class.getClassLoader()
-                .getResource("apis/petstore.zip").getPath();
+                .getResource("apis/mockApiProj.zip").getPath();
 
         ApiDeployment.deployAPI(apiZipfile);
 
@@ -73,7 +74,7 @@ public class JwtTestCase extends BaseTestCase {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         HttpResponse response = HttpClientRequest.doGet(getServiceURLHttps(
-                "/v2/pet/3") , headers);
+                "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals("Response code mismatched", HttpStatus.SC_OK, response.getResponseCode());
@@ -87,7 +88,7 @@ public class JwtTestCase extends BaseTestCase {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + TestConstant.INVALID_JWT_TOKEN);
         HttpResponse response = HttpClientRequest.doGet(getServiceURLHttps(
-                "/v2/pet/3") , headers);
+                "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals("Response code mismatched",TestConstant.INVALID_CREDENTIALS_CODE,
@@ -101,7 +102,7 @@ public class JwtTestCase extends BaseTestCase {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + TestConstant.EXPIRED_JWT_TOKEN);
         HttpResponse response = HttpClientRequest.doGet(getServiceURLHttps(
-                "/v2/pet/3") , headers);
+                "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals("Response code mismatched", TestConstant.INVALID_CREDENTIALS_CODE,
