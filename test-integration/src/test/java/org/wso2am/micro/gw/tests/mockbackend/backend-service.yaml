@@ -1,6 +1,0 @@
-  mockBackend:
-    image: wso2/mg-mock-backend
-    ports:
-      - "2380:2380"
-    links:
-      - router

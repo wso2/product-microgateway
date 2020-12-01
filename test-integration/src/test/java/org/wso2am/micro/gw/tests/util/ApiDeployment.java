@@ -41,7 +41,7 @@ public class ApiDeployment {
         multipart.addFilePart("file", new File(apiZipFilePath));
         HttpResponse response = multipart.getResponse();
 
-        // todo
+        // todo (currently no way to test)
         TimeUnit.SECONDS.sleep(5);
         Assert.assertNotNull(response);
         Assert.assertEquals("Response code mismatched", HttpStatus.SC_SUCCESS, response.getResponseCode());

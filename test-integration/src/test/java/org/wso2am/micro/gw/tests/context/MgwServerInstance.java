@@ -19,9 +19,6 @@
 package org.wso2am.micro.gw.tests.context;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.wso2am.micro.gw.tests.mockbackend.MockBackendServer;
 import org.wso2am.micro.gw.tests.util.FileUtil;
@@ -30,13 +27,11 @@ import org.wso2am.micro.gw.tests.util.HttpResponse;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.wso2am.micro.gw.tests.common.BaseTestCase.getMockServiceURLHttp;
 
 
@@ -124,5 +119,4 @@ public class MgwServerInstance implements MgwServer {
             mySleep (5);
         }
     }
-
 }

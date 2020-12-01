@@ -9,7 +9,7 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-host: 'localhost:2380'
+host: 'mockBackend:2380'
 basePath: /v2
 tags:
   - name: pet
@@ -25,7 +25,6 @@ tags:
       description: Find out more about our store
       url: 'http://swagger.io'
 schemes:
-  - https
   - http
 paths:
   '/pet/{petId}/uploadImage':
@@ -581,7 +580,7 @@ securityDefinitions:
     in: header
   petstore_auth:
     type: oauth2
-    authorizationUrl: 'https://localhost:2380/oauth/authorize'
+    authorizationUrl: 'http://mockBackend:2380/oauth/authorize'
     flow: implicit
     scopes:
       'read:pets': read your pets

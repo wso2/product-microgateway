@@ -32,6 +32,8 @@ import org.wso2am.micro.gw.tests.util.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.wso2am.micro.gw.tests.util.ApiProjectGenerator.*;
+
 public class JwtTestCase extends BaseTestCase {
 
     protected String jwtTokenProd;
@@ -42,10 +44,8 @@ public class JwtTestCase extends BaseTestCase {
         super.startMGW();
 
         //deploy the api
-
-        //todo chashikajw create a zip file
-        String apiZipfile = JwtTestCase.class.getClassLoader()
-                .getResource("apis/mockApiProj.zip").getPath();
+        //api yaml file should put to the resources/apis/openApis folder
+        String apiZipfile = createApictlProjZip("mockApi.yaml");
 
         ApiDeployment.deployAPI(apiZipfile);
 
