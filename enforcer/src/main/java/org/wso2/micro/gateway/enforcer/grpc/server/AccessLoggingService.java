@@ -38,8 +38,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This is the gRPC server written to match with the envoy ext-authz filter proto file. Envoy proxy call this service.
- * This is the entry point to the filter chain process for a request.
+ * This is the gRPC streaming server written to match with the envoy grpc access logger filter proto file. Envoy proxy call this service.
+ * This will gather data required for analytics.
  */
 public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceImplBase {
 

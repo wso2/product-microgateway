@@ -24,7 +24,7 @@ import org.wso2.micro.gateway.enforcer.grpc.server.AccessLoggingService;
 
 
 /**
- * This is the filter handling the authentication for the requests flowing through the gateway.
+ * This is the filter is for Analytics.
  */
 public class AnalyticsFilter {
     private static final Logger logger = LogManager.getLogger(AnalyticsFilter.class);

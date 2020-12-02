@@ -1,3 +1,20 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package envoyconf
 
 import (
@@ -11,7 +28,7 @@ import (
 	"time"
 )
 
-// getAccessLogConfigs provides access log configurations for envoy
+// getAccessLogConfigs provides file access log configurations for envoy
 func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 	var logFormat *file_accesslogv3.FileAccessLog_Format
 	logpath := defaultAccessLogPath //default access log path
@@ -21,7 +38,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
 	} else {
 		logFormat = &file_accesslogv3.FileAccessLog_Format{
-			Format:logConf.AccessLogs.Format,
+			Format: logConf.AccessLogs.Format,
 		}
 		logpath = logConf.AccessLogs.LogFile
 	}
@@ -46,11 +63,10 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 	return &accessLog
 }
 
-// getAccessLogConfigs provides access log configurations for envoy
+// getAccessLogConfigs provides grpc access log configurations for envoy
 func getGRPCAccessLogConfigs() *config_access_logv3.AccessLog {
-	//accessLogConf := &grpc_accesslogv3.CommonGrpcAccessLogConfig{
 	accessLogConf := &grpc_accesslogv3.HttpGrpcAccessLogConfig{
-		CommonConfig : &grpc_accesslogv3.CommonGrpcAccessLogConfig{
+		CommonConfig: &grpc_accesslogv3.CommonGrpcAccessLogConfig{
 			TransportApiVersion: corev3.ApiVersion_V3,
 			LogName:             "mgw_access_logs",
 			GrpcService: &corev3.GrpcService{
@@ -78,11 +94,11 @@ func getGRPCAccessLogConfigs() *config_access_logv3.AccessLog {
 	return &accessLog
 }
 
-// getAccessLogConfigs provides access log configurations for envoy
+// getAccessLogs provides access logs for envoy
 func getAccessLogs() []*config_access_logv3.AccessLog {
 	// TODO (amalimatharaarachchi) read and enable according to analytics config
 	analytics := false
-	if (analytics) {
+	if analytics {
 		return []*config_access_logv3.AccessLog{getFileAccessLogConfigs(), getGRPCAccessLogConfigs()}
 	}
 	return []*config_access_logv3.AccessLog{getFileAccessLogConfigs()}
