@@ -42,4 +42,17 @@ static_resources:
               address:
                 socket_address:
                   address: host.docker.internal
-                  port_value: 8081    
+                  port_value: 8081
+    - name: access-logger
+      type: STRICT_DNS
+      connect_timeout: 200s
+      http2_protocol_options: {}
+      load_assignment:
+        cluster_name: access-logger
+        endpoints:
+        - lb_endpoints:
+          - endpoint:
+              address:
+                socket_address:
+                  address: host.docker.internal
+                  port_value: 18090

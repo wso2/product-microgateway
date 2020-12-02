@@ -65,7 +65,12 @@ public class AuthServer {
         ReferenceHolder.getInstance().setMGWConfiguration(mgwConfiguration);
 
         // Enable global filters
-        new AnalyticsFilter();
+        // TODO (amalimatharaarachchi) enable analytics according to config
+        boolean analytics = false;
+        if (analytics) {
+            logger.info("analytics filter enabled");
+            new AnalyticsFilter();
+        }
 
         CacheProvider.init();
 

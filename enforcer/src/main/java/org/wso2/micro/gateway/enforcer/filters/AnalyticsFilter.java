@@ -32,6 +32,7 @@ public class AnalyticsFilter {
     public AnalyticsFilter() {
         AccessLoggingService accessLoggingService = new AccessLoggingService();
         if (accessLoggingService.init(this)) {
+            logger.info("Analytics filter initiated");
             //start analytics publishing server
         } else {
             logger.warn("Analytics filter initiation failed due to access logger service failure");
