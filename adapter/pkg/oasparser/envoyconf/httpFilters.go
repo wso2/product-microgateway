@@ -74,6 +74,7 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 			MaxRequestBytes:     1024,
 			AllowPartialMessage: false,
 		},
+		ClearRouteCache: true,
 		Services: &ext_authv3.ExtAuthz_GrpcService{
 			GrpcService: &corev3.GrpcService{
 				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
