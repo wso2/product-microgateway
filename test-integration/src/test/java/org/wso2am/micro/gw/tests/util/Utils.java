@@ -16,14 +16,14 @@
  * under the License.
  */
 
-package org.wso2am.micro.gw.tests.context;
+package org.wso2am.micro.gw.tests.util;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
-import org.junit.Assert;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2am.micro.gw.tests.util.HttpClientRequest;
-import org.wso2am.micro.gw.tests.util.HttpResponse;
+import org.testng.Assert;
+import org.wso2am.micro.gw.tests.context.MicroGWTestException;
 
 
 import java.io.File;
@@ -32,8 +32,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -297,7 +295,7 @@ public class Utils {
     public static void assertResult(HttpResponse response, String responseData, int responseCode) {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), responseData);
-        Assert.assertEquals("Response code mismatched", response.getResponseCode(), responseCode);
+        Assert.assertEquals(responseCode, response.getResponseCode(), "Response code mismatched");
     }
 
     /**
@@ -310,6 +308,42 @@ public class Utils {
             Thread.sleep(delayTime);
         } catch (InterruptedException ex) {
             Assert.fail("thread sleep interrupted!");
+        }
+    }
+
+    /**
+     * Delay the program for a given time period
+     *
+     * @param sourceLocation file location.
+     * @param destLocation   copy destination.
+     *
+     * @throws    MicroGWTestException
+     */
+    public static void copyFile(String sourceLocation, String destLocation) throws MicroGWTestException {
+        File source = new File(sourceLocation);
+        File destination = new File(destLocation);
+        try {
+            FileUtils.copyFile(source, destination);
+        } catch (IOException e) {
+            throw new MicroGWTestException("error while copying config file. ");
+        }
+    }
+
+    /**
+     * Delay the program for a given time period
+     *
+     * @param sourceLocation folder location.
+     * @param destLocation   copy destination.
+     *
+     * @throws    MicroGWTestException
+     */
+    public static void copyDirectory(String sourceLocation, String destLocation) throws MicroGWTestException {
+        File source = new File(sourceLocation);
+        File destination = new File(destLocation);
+        try {
+            FileUtils.copyDirectory(source, destination);
+        } catch (IOException e) {
+            throw new MicroGWTestException("error while copying config file. ");
         }
     }
 }

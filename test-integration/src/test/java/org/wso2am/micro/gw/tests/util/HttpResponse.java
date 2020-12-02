@@ -72,4 +72,3 @@ public class HttpResponse {
         this.responseMessage = responseMessage;
     }
 }
-

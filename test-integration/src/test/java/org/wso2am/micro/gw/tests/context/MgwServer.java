@@ -18,13 +18,15 @@
 
 package org.wso2am.micro.gw.tests.context;
 
+import java.io.IOException;
+
 /**
  * Interface for test Server implementation.
  */
 public interface MgwServer {
 
-    public static void startMGW() throws MicroGWTestException {} ;
+    void startMGW() throws IOException, InterruptedException;
 
-    public static void stopMGW() {};
+    void stopMGW();
 
 }

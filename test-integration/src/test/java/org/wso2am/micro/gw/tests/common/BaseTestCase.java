@@ -34,29 +34,50 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 
-
+/**
+ * Base test class for mgw test cases.
+ */
 public class BaseTestCase {
 
     protected MgwServerInstance microGWServer;
 
-
-    public void startMGW() throws MicroGWTestException, IOException {
-
+    /**
+     * start the mgw docker environment and mock backend.
+     *
+     * @throws MicroGWTestException
+     * @throws IOException
+     */
+    public void startMGW() throws MicroGWTestException, IOException, InterruptedException {
+        initMockBackend();
         microGWServer = new MgwServerInstance();
         microGWServer.startMGW();
     }
 
-    public void startMGW(String confPath) throws MicroGWTestException, IOException {
-
+    /**
+     * start the mgw docker environment and mock backend.
+     *
+     * @param confPath       external conf.toml file location
+     *
+     * @throws MicroGWTestException
+     * @throws IOException
+     */
+    public void startMGW(String confPath) throws MicroGWTestException, IOException, InterruptedException {
+        initMockBackend();
         microGWServer = new MgwServerInstance(confPath);
         microGWServer.startMGW();
     }
 
-    public void startMockBackend()  {
+    /**
+     * initialize the mock backend server.
+     */
+    public void initMockBackend()  {
 
         MockBackendServer.generateMockBackendServerDockerImage();
     }
 
+    /**
+     * stop the mgw docker environment.
+     */
     public void stopMGW() {
         microGWServer.stopMGW();
 
@@ -77,8 +98,19 @@ public class BaseTestCase {
         return new URL(new URL("http://localhost:" + TestConstant.MOCK_SERVER_PORT), servicePath).toString();
     }
 
-    protected static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType, int validityPeriod)
-            throws Exception {
+    /**
+     * get a jwt token.
+     *
+     * @param api                 api
+     * @param applicationDTO      application dto
+     * @param tier                tier
+     * @param keyType             keytype
+     * @param validityPeriod      validityPeriod
+     *
+     * @throws Exception
+     */
+    protected static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType,
+                                   int validityPeriod) throws Exception {
         SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
         subscribedApiDTO.setContext(api.getContext() + "/" + api.getVersion());
         subscribedApiDTO.setName(api.getName());
@@ -92,5 +124,4 @@ public class BaseTestCase {
         jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(subscribedApiDTO)));
         return TokenUtil.getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod);
     }
-
 }

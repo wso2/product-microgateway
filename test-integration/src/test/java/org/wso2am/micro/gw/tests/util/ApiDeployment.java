@@ -29,8 +29,19 @@ import java.util.concurrent.TimeUnit;
 
 import static org.wso2am.micro.gw.tests.common.BaseTestCase.getImportAPIServiceURLHttps;
 
+/**
+ * Api deployment class for the mgw.
+ *
+ */
 public class ApiDeployment {
 
+    /**
+     * Get Mock backend server module root path.
+     *
+     * @param apiZipFilePath  path for the apictl project zip file
+     *
+     * @throws Exception
+     */
     public static void deployAPI(String apiZipFilePath) throws Exception {
 
         // Set header
@@ -41,7 +52,7 @@ public class ApiDeployment {
         multipart.addFilePart("file", new File(apiZipFilePath));
         HttpResponse response = multipart.getResponse();
 
-        // todo (currently no way to test)
+        // todo (currently no way to test the availability of the api routes, so wait 5 seconds)
         TimeUnit.SECONDS.sleep(5);
         Assert.assertNotNull(response);
         Assert.assertEquals("Response code mismatched", HttpStatus.SC_SUCCESS, response.getResponseCode());

@@ -21,9 +21,9 @@ package org.wso2am.micro.gw.tests.context;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.wso2am.micro.gw.tests.mockbackend.MockBackendServer;
-import org.wso2am.micro.gw.tests.util.FileUtil;
 import org.wso2am.micro.gw.tests.util.HttpClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
+import org.wso2am.micro.gw.tests.util.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,14 +34,21 @@ import java.util.concurrent.TimeUnit;
 
 import static org.wso2am.micro.gw.tests.common.BaseTestCase.getMockServiceURLHttp;
 
-
+/**
+ * Mgw server instance class.
+ */
 public class MgwServerInstance implements MgwServer {
 
 
     private DockerComposeContainer environment;
 
 
-
+    /**
+     * initialize a docker environment using docker compose.
+     *
+     * @throws IOException
+     * @throws MicroGWTestException
+     */
     public MgwServerInstance() throws IOException, MicroGWTestException {
         createTmpMgwSetup();
         File targetClassesDir = new File(MgwServerInstance.class.getProtectionDomain().getCodeSource().
@@ -53,14 +60,22 @@ public class MgwServerInstance implements MgwServer {
         environment = new DockerComposeContainer(new File(dockerCompsePath))
                 .withLocalCompose(true);
 
-
     }
+
+    /**
+     * initialize a docker environment using docker compose.
+     *
+     * @param confPath external conf.toml path
+     *
+     * @throws IOException
+     * @throws MicroGWTestException
+     */
     public MgwServerInstance(String confPath) throws IOException, MicroGWTestException {
         createTmpMgwSetup();
         File targetClassesDir = new File(MgwServerInstance.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());
         String mgwServerPath = targetClassesDir.getParentFile().toString() + File.separator + "server-tmp";
-        FileUtil.copyFile(confPath, mgwServerPath  +  File.separator + "resources"  +  File.separator +
+        Utils.copyFile(confPath, mgwServerPath  +  File.separator + "resources"  +  File.separator +
                 "conf" +  File.separator + "config.toml");
 
         String dockerCompsePath = mgwServerPath+  File.separator + "docker-compose.yaml";
@@ -71,17 +86,24 @@ public class MgwServerInstance implements MgwServer {
 
     }
 
-    public void startMGW() throws IOException {
+    @Override
+    public void startMGW() throws IOException, InterruptedException {
         environment.start();
         waitTillBackendIsAvailable();
 
     }
 
+    @Override
     public void stopMGW() {
         environment.stop();
     }
 
-
+    /**
+     * create a temporal mgw setup.
+     *
+     * @throws IOException
+     * @throws MicroGWTestException
+     */
     public static void createTmpMgwSetup() throws IOException, MicroGWTestException {
         File targetClassesDir = new File(MgwServerInstance.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());
@@ -89,20 +111,18 @@ public class MgwServerInstance implements MgwServer {
         final Properties properties = new Properties();
         properties.load(MgwServerInstance.class.getClassLoader().getResourceAsStream("project.properties"));
 
-        FileUtil.copyDirectory(targetDir + File.separator + "micro-gwtmp" +  File.separator +
+        Utils.copyDirectory(targetDir + File.separator + "micro-gwtmp" +  File.separator +
                 "wso2am-micro-gw-" + properties.getProperty("version"), targetDir +
                 File.separator + "server-tmp");
     }
 
-    public static void mySleep (int val) {
-        try {
-            TimeUnit.SECONDS.sleep(val);
-        } catch (InterruptedException e) {
-            //log.error("Thread interrupted");
-        }
-    }
-
-    public static void waitTillBackendIsAvailable() throws IOException {
+    /**
+     * wait till mock backend is available.
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public static void waitTillBackendIsAvailable() throws IOException, InterruptedException {
         Map<String, String> headers = new HashMap<String, String>();
         HttpResponse response;
 
@@ -116,7 +136,7 @@ public class MgwServerInstance implements MgwServer {
                     break;
                 }
             }
-            mySleep (5);
+            TimeUnit.SECONDS.sleep(5);
         }
     }
 }

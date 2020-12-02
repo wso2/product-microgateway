@@ -20,7 +20,6 @@ package org.wso2am.micro.gw.tests.util;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
@@ -232,4 +231,3 @@ public class HttpsClientRequest {
         return httpResponse;
     }
 }
-

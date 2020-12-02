@@ -18,6 +18,10 @@
 
 package org.wso2am.micro.gw.mockbackend;
 
+
+/**
+ * Response messages for the mock backend server.
+ */
 public class ResponseConstants {
 
     public static final String responseBody = "{\"id\":111111148, \"category\":{ \"id\":0, \"name\":\"ABCD\" }," +

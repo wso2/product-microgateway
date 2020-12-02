@@ -22,10 +22,20 @@ import org.wso2am.micro.gw.tests.context.MicroGWTestException;
 import java.io.*;
 import java.util.regex.Pattern;
 
+/**
+ * Apictl project generator class.
+ *
+ */
 public class ApiProjectGenerator {
 
-
-    public static String createApictlProjZip(String apiYamlName) throws IOException, MicroGWTestException {
+    /**
+     * Create apictl project zip file.
+     *
+     * @param apiYamlName  name of the api yaml file.
+     *
+     * @throws MicroGWTestException
+     */
+    public static String createApictlProjZip(String apiYamlName) throws MicroGWTestException {
 
         File targetClassesDir = new File(ApiProjectGenerator.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());
@@ -43,12 +53,10 @@ public class ApiProjectGenerator {
         createDirectory(apisZipPath + File.separator + "Image");
         createDirectory(apisZipPath + File.separator + "Docs");
 
-
-
-        String apiPath = targetDir + File.separator  + "test-classes" + File.separator + "apis" + File.separator+ "openApis"
-                + File.separator+ apiYamlName;
-        FileUtil.copyFile(apiPath, apisZipPath + File.separator +
-                "Meta-information" + File.separator + "swagger.yaml");
+        String apiPath = targetDir + File.separator  + "test-classes" + File.separator + "apis" + File.separator +
+                "openApis" + File.separator+ apiYamlName;
+        Utils.copyFile(apiPath, apisZipPath + File.separator + "Meta-information" + File.separator +
+                "swagger.yaml");
 
         ZipDir.createZipFile(apisZipPath);
         return apisZipPath + ".zip";

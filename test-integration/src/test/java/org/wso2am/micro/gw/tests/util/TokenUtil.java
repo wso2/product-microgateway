@@ -33,6 +33,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Util class for the token generation.
+ */
 public class TokenUtil {
 
     public static String getBasicJWT(ApplicationDTO applicationDTO, JSONObject jwtTokenInfo, String keyType, int validityPeriod)

@@ -18,13 +18,10 @@
 
 package org.wso2am.micro.gw.tests.mockbackend;
 
-import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
-import org.testng.annotations.BeforeSuite;
-import org.wso2am.micro.gw.tests.context.MgwServerInstance;
 import org.wso2am.micro.gw.tests.context.MicroGWTestException;
-import org.wso2am.micro.gw.tests.util.FileUtil;
+import org.wso2am.micro.gw.tests.util.Utils;
 import org.wso2am.micro.gw.tests.util.TestConstant;
 
 import java.io.*;
@@ -36,14 +33,19 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 import static org.rnorth.visibleassertions.VisibleAssertions.pass;
 
-
+/**
+ * Mock backend server class.
+ *
+ */
 public class MockBackendServer {
 
-
+    /**
+     * Generate the Mock backend server docker image.
+     *
+     */
     public static void generateMockBackendServerDockerImage() {
 
         ImageFromDockerfile image = new ImageFromDockerfile(TestConstant.MOCK_BACKEND_DOCKER_IMAGE, false)
@@ -52,6 +54,10 @@ public class MockBackendServer {
 
     }
 
+    /**
+     * Get Mock backend server module root path.
+     *
+     */
     public static String getMockBackendModuleRootPath() {
 
         File targetClassesDir = new File(MockBackendServer.class.getProtectionDomain().getCodeSource().
@@ -63,57 +69,15 @@ public class MockBackendServer {
         return mockBackendRoot;
     }
 
-    public static void main(String[] args) throws IOException {
-        File targetClassesDir = new File(MockBackendServer.class.getProtectionDomain().getCodeSource().
-                getLocation().getPath());
-        String targetDir = targetClassesDir.getParentFile().toString();
-        System.out.println(targetDir.substring(0, (targetDir.length() - "/target".length())) +
-                File.separator + "mock-backend-server/");
-        final Properties properties = new Properties();
-        properties.load(MgwServerInstance.class.getClassLoader().getResourceAsStream("project.properties"));
-
-
-        try {
-            String dcker = targetDir + File.separator + "micro-gwtmp" +  File.separator +
-                    "wso2am-micro-gw-" + properties.getProperty("version") +  File.separator +
-                    "docker-compose.yaml";
-
-            String backendService = "/home/chashika/Documents/wso2/Envoy/product-microgateway/test-integration/src/test/java/org/wso2am/micro/gw/tests/mockbackend/backend-service.yaml";
-
-            // Input files
-            List<Path> inputs = Arrays.asList(
-                    Paths.get(dcker),
-                    Paths.get(backendService)
-            );
-
-            // Output file
-            String tmpDockerCompose = targetClassesDir +   File.separator  + System.currentTimeMillis() + ".yaml";
-            File fileTmp = new File(tmpDockerCompose);
-            fileTmp.createNewFile();
-            Path output = Paths.get(tmpDockerCompose);
-
-
-
-            // Charset for read and write
-            Charset charset = StandardCharsets.UTF_8;
-
-            // Join files (lines)
-            for (Path path : inputs) {
-                List<String> lines = Files.readAllLines(path, charset);
-                Files.write(output, lines, charset, StandardOpenOption.CREATE,
-                        StandardOpenOption.APPEND);
-            }
-
-            FileUtil.copyFile(tmpDockerCompose,dcker);
-            fileTmp.delete();
-
-        }catch (IOException | MicroGWTestException e) {
-            //exception handling left as an exercise for the reader
-        }
-
-    }
-
-    public static void addMockBackendServiceToDockerCompose(String dockerCompsePath) throws IOException,
+    /**
+     * Get Mock backend server module root path.
+     *
+     * @param dockerComposePath  path for the mgw setup docker-compose file
+     *
+     * @throws IOException
+     * @throws MicroGWTestException
+     */
+    public static void addMockBackendServiceToDockerCompose(String dockerComposePath) throws IOException,
             MicroGWTestException {
 
         File targetClassesDir = new File(MockBackendServer.class.getProtectionDomain().getCodeSource().
@@ -124,7 +88,7 @@ public class MockBackendServer {
 
         // Input files
         List<Path> inputs = Arrays.asList(
-                Paths.get(dockerCompsePath),
+                Paths.get(dockerComposePath),
                 Paths.get(backendService)
         );
 
@@ -145,11 +109,15 @@ public class MockBackendServer {
                     StandardOpenOption.APPEND);
         }
 
-        FileUtil.copyFile(tmpDockerCompose,dockerCompsePath);
+        Utils.copyFile(tmpDockerCompose,dockerComposePath);
         fileTmp.delete();
     }
 
-
+    /**
+     * verify the created docker image.
+     *
+     * @param image  docker image.
+     */
     protected static void verifyImage(ImageFromDockerfile image) {
         GenericContainer container = new GenericContainer(image);
 
@@ -161,6 +129,4 @@ public class MockBackendServer {
             container.stop();
         }
     }
-
-
 }

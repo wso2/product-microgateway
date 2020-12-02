@@ -28,6 +28,9 @@ import java.util.UUID;
 
 import static org.wso2am.micro.gw.tests.util.TestConstant.LINE;
 
+/**
+ * This class can be used to send https post multipart request.
+ */
 public class HttpsPostMultipart {
     private final String boundary;
     private HttpsURLConnection conn;

@@ -20,7 +20,7 @@ package org.wso2am.micro.gw.tests.jwtValidator;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
@@ -34,13 +34,16 @@ import java.util.Map;
 
 import static org.wso2am.micro.gw.tests.util.ApiProjectGenerator.*;
 
+/**
+ * Jwt test cases.
+ *
+ */
 public class JwtTestCase extends BaseTestCase {
 
     protected String jwtTokenProd;
 
     @BeforeSuite(description = "initialise the setup")
     void start() throws Exception {
-        super.startMockBackend();
         super.startMGW();
 
         //deploy the api
@@ -68,7 +71,7 @@ public class JwtTestCase extends BaseTestCase {
 
 
     @Test(description = "Test to check the JWT auth working")
-    public void invokeJWTHeaderSuccessTest() throws Exception{
+    public void invokeJWTHeaderSuccessTest() throws Exception {
 
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
@@ -77,12 +80,12 @@ public class JwtTestCase extends BaseTestCase {
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals("Response code mismatched", HttpStatus.SC_OK, response.getResponseCode());
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
     }
 
 
     @Test(description = "Test to check the JWT auth validate invalida signature token")
-    public void invokeJWTHeaderInvalidTokenTest() throws Exception{
+    public void invokeJWTHeaderInvalidTokenTest() throws Exception {
 
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
@@ -91,12 +94,12 @@ public class JwtTestCase extends BaseTestCase {
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals("Response code mismatched",TestConstant.INVALID_CREDENTIALS_CODE,
-                response.getResponseCode());
+        Assert.assertEquals(response.getResponseCode(), TestConstant.INVALID_CREDENTIALS_CODE,
+                "Response code mismatched");
     }
 
     @Test(description = "Test to check the JWT auth validate expired token")
-    public void invokeJWTHeaderExpiredTokenTest() throws Exception{
+    public void invokeJWTHeaderExpiredTokenTest() throws Exception {
 
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
@@ -105,8 +108,7 @@ public class JwtTestCase extends BaseTestCase {
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals("Response code mismatched", TestConstant.INVALID_CREDENTIALS_CODE,
-                response.getResponseCode());
+        Assert.assertEquals(response.getResponseCode(), TestConstant.INVALID_CREDENTIALS_CODE,
+                "Response code mismatched");
     }
-
 }
