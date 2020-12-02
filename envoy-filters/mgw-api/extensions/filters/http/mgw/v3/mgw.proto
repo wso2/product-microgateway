@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package envoy.extensions.filters.http.mgw.v3;
+
+import "envoy/config/core/v3/base.proto";
+import "envoy/config/core/v3/grpc_service.proto";
+
+import "udpa/annotations/status.proto";
+import "udpa/annotations/versioning.proto";
+
+
+option java_outer_classname = "MgwProto";
+option java_multiple_files = true;
+option (udpa.annotations.file_status).package_version_status = ACTIVE;
+
+// [#protodoc-title: External Authorization]
+// External Authorization :ref:`configuration overview <config_http_filters_mgw>`.
+// [#extension: envoy.filters.http.mgw]
+
+message MGW {
+}
