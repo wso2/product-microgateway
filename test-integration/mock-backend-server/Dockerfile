@@ -14,15 +14,16 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM adoptopenjdk/maven-openjdk8
+#FROM adoptopenjdk/maven-openjdk8
+FROM adoptopenjdk:11.0.8_10-jre-hotspot-bionic
 
-COPY src /home/app/src
-COPY pom.xml /home/app
-# COPY target/mock-backend-server-4.0.0-m2-SNAPSHOT.jar /home/app
+#COPY src /home/app/src
+#COPY pom.xml /home/app
+COPY target/mock-backend-server-4.0.0-m2-SNAPSHOT.jar /home/app/
 
 WORKDIR /home/app
 
 EXPOSE 2380
 
-CMD mvn compile exec:java -Dexec.mainClass="org.wso2am.micro.gw.mockbackend.MockBackEndServer"
-# CMD java -jar mock-backend-server-4.0.0-m2-SNAPSHOT.jar
+#CMD mvn compile exec:java -Dexec.mainClass="org.wso2am.micro.gw.mockbackend.MockBackEndServer"
+CMD java -jar mock-backend-server-4.0.0-m2-SNAPSHOT.jar

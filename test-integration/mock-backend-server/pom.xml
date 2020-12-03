@@ -64,17 +64,4 @@
             <version>2.6</version>
         </dependency>
     </dependencies>
-
-    <properties>
-        <swagger.v3.parser.version>2.0.12</swagger.v3.parser.version>
-        <swagger.v3.models.version>2.0.8</swagger.v3.models.version>
-        <log4j.version>2.13.3</log4j.version>
-        <slf4j.version>1.7.21</slf4j.version>
-        <org.json.version>20180130</org.json.version>
-        <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
-        <maven.checkstyle.version>8.18</maven.checkstyle.version>
-        <maven.spotbugs.version>4.0.4</maven.spotbugs.version>
-        <json.smart.version>2.3</json.smart.version>
-    </properties>
-
 </project>

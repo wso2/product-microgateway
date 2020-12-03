@@ -29,6 +29,10 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 
+import static org.wso2am.micro.gw.mockbackend.Constants.CONTENT_TYPE;
+import static org.wso2am.micro.gw.mockbackend.Constants.CONTENT_TYPE_APPLICATION_JSON;
+import static org.wso2am.micro.gw.mockbackend.Constants.MOCK_BACKEND_SERVER_PORT;
+
 /**
  * Mock HTTP server for testing Open API tests.
  */
@@ -40,10 +44,11 @@ public class MockBackEndServer extends Thread {
     private static int backEndServerPort;
     private static boolean retryDone = false;
 
-    private static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
+
 
     public static void main(String[] args) {
-        backEndServerPort = 2380;
+        //backend port
+        backEndServerPort = MOCK_BACKEND_SERVER_PORT;
         MockBackEndServer mockBackEndServer = new MockBackEndServer(backEndServerPort);
         mockBackEndServer.start();
 
@@ -65,7 +70,7 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(context + "/pet/findByStatus", exchange -> {
 
                 byte[] response = ResponseConstants.responseBody.getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -74,7 +79,7 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(context + "/pet/", exchange -> {
 
                 byte[] response = ResponseConstants.getPetResponse.getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -83,7 +88,7 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(context + "/pet/findByTags", exchange -> {
 
                 byte[] response = ResponseConstants.petByIdResponse.getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -92,7 +97,7 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(context + "/store/inventory", exchange -> {
 
                 byte[] response = ResponseConstants.storeInventoryResponse.getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -101,7 +106,7 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(context + "/pet/3", exchange -> {
 
                 byte[] response = ResponseConstants.RESPONSE_VALID_JWT_TRANSFORMER.getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -113,12 +118,12 @@ public class MockBackEndServer extends Thread {
                         exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46aGVsbG8="))
                 {
                     response = ResponseConstants.storeInventoryResponse.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 } else {
                     response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
                 }
@@ -131,12 +136,12 @@ public class MockBackEndServer extends Thread {
                         exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46aGVsbG8="))
                 {
                     response = ResponseConstants.userResponse.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 } else {
                     response = ResponseConstants.AUTHZ_FAILURE_RESPONSE.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_FORBIDDEN, response.length);
                 }
@@ -147,7 +152,7 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(base + "/pet/findByStatus", exchange -> {
 
                 byte[] response = ResponseConstants.responseBodyV1.getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -158,7 +163,7 @@ public class MockBackEndServer extends Thread {
                 if(exchange.getRequestURI().getQuery().contains("value1=foo&value2=bar")) {
                     response = ResponseConstants.responseBodyV1.getBytes();
                 }
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -167,7 +172,7 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(base + "/pet/findByTags", exchange -> {
 
                 byte[] response = ResponseConstants.petByIdResponseV1.getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -176,7 +181,7 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(base + "/pet/2", exchange -> {
 
                 byte[] response = ResponseConstants.getPetResponse.getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -185,7 +190,7 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(base + "/pet/", exchange -> {
 
                 byte[] response = ResponseConstants.getPetResponse.getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -199,12 +204,12 @@ public class MockBackEndServer extends Thread {
                         exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
                 {
                     response = ResponseConstants.responseBody.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 } else {
                     response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
                 }
@@ -217,12 +222,12 @@ public class MockBackEndServer extends Thread {
                         exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
                 {
                     response = ResponseConstants.petByIdResponse.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 } else {
                     response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
                 }
@@ -235,12 +240,12 @@ public class MockBackEndServer extends Thread {
                         exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
                 {
                     response = ResponseConstants.petByIdResponse.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 } else {
                     response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
                 }
@@ -253,12 +258,12 @@ public class MockBackEndServer extends Thread {
                         exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
                 {
                     response = ResponseConstants.storeInventoryResponse.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 } else {
                     response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
                 }
@@ -272,12 +277,12 @@ public class MockBackEndServer extends Thread {
                         exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
                 {
                     response = ResponseConstants.responseBodyV1.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 } else {
                     response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
                 }
@@ -290,12 +295,12 @@ public class MockBackEndServer extends Thread {
                         exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46YWRtaW4="))
                 {
                     response = ResponseConstants.petByIdResponseV1.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 } else {
                     response = ResponseConstants.AUTHENTICATION_FAILURE_RESPONSE.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_UNAUTHORIZED, response.length);
                 }
@@ -305,7 +310,7 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(base + "/store/inventory", exchange -> {
 
                 byte[] response = ResponseConstants.storeInventoryResponse.getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -315,7 +320,7 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(contextV3 + "/pet/findByStatus", exchange -> {
 
                 byte[] response = ResponseConstants.responseBodyV1.getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -332,7 +337,7 @@ public class MockBackEndServer extends Thread {
                     os.write(buffer, 0, length);
                 }
                 byte [] response  = os.toByteArray();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK,response.length);
                 exchange.getResponseBody().write(response);
@@ -342,7 +347,7 @@ public class MockBackEndServer extends Thread {
 
                 InputStream is =  exchange.getRequestBody();
                 byte [] response = IOUtils.toByteArray(is);
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -355,7 +360,7 @@ public class MockBackEndServer extends Thread {
                     //log.error("Error while invoking timeout back end", e);
                 }
                 byte[] response = ResponseConstants.responseBodyV1.getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -364,7 +369,7 @@ public class MockBackEndServer extends Thread {
             httpServer.createContext(contextV3 + "/retry", exchange -> {
                 if (!retryDone) {
                     byte[] response = ResponseConstants.responseBodyV1.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_GATEWAY_TIMEOUT, 0);
                     exchange.getResponseBody().write(response);
@@ -372,7 +377,7 @@ public class MockBackEndServer extends Thread {
                     retryDone = true;
                 }
                 byte[] response = ResponseConstants.responseBodyV1.getBytes();
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -383,14 +388,14 @@ public class MockBackEndServer extends Thread {
                 if (exchange.getRequestURI().getQuery() != null && exchange.getRequestURI().getQuery()
                         .contains("cb=true")) {
                     byte[] response = ResponseConstants.ERROR_RESPONSE.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_INTERNAL_ERROR, 0);
                     exchange.getResponseBody().write(response);
                     exchange.close();
                 } else {
                     byte[] response = ResponseConstants.responseBodyV1.getBytes();
-                    exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                    exchange.getResponseHeaders().set(CONTENT_TYPE,
                             CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                     exchange.getResponseBody().write(response);
@@ -406,7 +411,7 @@ public class MockBackEndServer extends Thread {
                 } else {
                     response = ResponseConstants.INVALID_JWT_RESPONSE.getBytes();
                 }
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
@@ -421,7 +426,7 @@ public class MockBackEndServer extends Thread {
                 } else {
                     response = ResponseConstants.INVALID_JWT_RESPONSE.getBytes();
                 }
-                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                exchange.getResponseHeaders().set(CONTENT_TYPE,
                         CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);

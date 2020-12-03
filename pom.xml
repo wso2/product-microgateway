@@ -41,8 +41,8 @@
         <module>enforcer</module>
         <module>router</module>
         <module>distribution</module>
-        <module>test-integration</module>
         <module>test-integration/mock-backend-server</module>
+        <module>test-integration</module>
     </modules>
 
     <properties>

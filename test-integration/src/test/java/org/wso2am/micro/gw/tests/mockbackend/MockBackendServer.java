@@ -18,6 +18,9 @@
 
 package org.wso2am.micro.gw.tests.mockbackend;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.wso2am.micro.gw.tests.context.MicroGWTestException;
@@ -42,16 +45,21 @@ import static org.rnorth.visibleassertions.VisibleAssertions.pass;
  */
 public class MockBackendServer {
 
+    private static final Logger log = LoggerFactory.getLogger(MockBackendServer.class);
+
     /**
      * Generate the Mock backend server docker image.
      *
      */
     public static void generateMockBackendServerDockerImage() {
 
-        ImageFromDockerfile image = new ImageFromDockerfile(TestConstant.MOCK_BACKEND_DOCKER_IMAGE, false)
-                .withFileFromPath(".", Paths.get(getMockBackendModuleRootPath()));
-        verifyImage(image);
-
+        try {
+            ImageFromDockerfile image = new ImageFromDockerfile(TestConstant.MOCK_BACKEND_DOCKER_IMAGE, false)
+                    .withFileFromPath(".", Paths.get(getMockBackendModuleRootPath()));
+            verifyImage(image);
+        } catch (Exception e) {
+            log.error("Error occurs when creating " + TestConstant.MOCK_BACKEND_DOCKER_IMAGE+ "docker image");
+        }
     }
 
     /**
@@ -123,8 +131,7 @@ public class MockBackendServer {
 
         try {
             container.start();
-
-            pass("MockBackend docker image is created successfully");
+            pass(TestConstant.MOCK_BACKEND_DOCKER_IMAGE+ " docker image is created successfully");
         } finally {
             container.stop();
         }

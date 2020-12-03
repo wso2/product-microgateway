@@ -21,6 +21,8 @@ package org.wso2am.micro.gw.tests.common;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2am.micro.gw.tests.common.model.API;
 import org.wso2am.micro.gw.tests.common.model.ApplicationDTO;
 import org.wso2am.micro.gw.tests.common.model.SubscribedApiDTO;
@@ -39,6 +41,7 @@ import java.util.Arrays;
  */
 public class BaseTestCase {
 
+    private static final Logger log = LoggerFactory.getLogger(BaseTestCase.class);
     protected MgwServerInstance microGWServer;
 
     /**

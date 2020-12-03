@@ -19,6 +19,8 @@
 package org.wso2am.micro.gw.tests.context;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.wso2am.micro.gw.tests.mockbackend.MockBackendServer;
 import org.wso2am.micro.gw.tests.util.HttpClientRequest;
@@ -39,7 +41,7 @@ import static org.wso2am.micro.gw.tests.common.BaseTestCase.getMockServiceURLHtt
  */
 public class MgwServerInstance implements MgwServer {
 
-
+    private static final Logger log = LoggerFactory.getLogger(MgwServerInstance.class);
     private DockerComposeContainer environment;
 
 
@@ -83,12 +85,16 @@ public class MgwServerInstance implements MgwServer {
         environment = new DockerComposeContainer(new File(dockerCompsePath))
                 .withLocalCompose(true);
 
-
     }
 
     @Override
     public void startMGW() throws IOException, InterruptedException {
-        environment.start();
+        try {
+            environment.start();
+        } catch (Exception e) {
+            log.error("Error occurs when docker-compose up");
+        }
+
         waitTillBackendIsAvailable();
 
     }
