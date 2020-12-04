@@ -23,10 +23,6 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>src/main/resources/conf</directory>
-            <outputDirectory>conf</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>target</directory>
             <outputDirectory></outputDirectory>
             <includes>
