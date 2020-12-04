@@ -43,13 +43,13 @@ spec:
           livenessProbe:
             tcpSocket:
               port: 9095
-            initialDelaySeconds: 600
+            initialDelaySeconds: 120
             periodSeconds: 30
           readinessProbe:
             tcpSocket:
               port: 9095
-            initialDelaySeconds: 400
-            periodSeconds: 20
+            initialDelaySeconds: 60
+            periodSeconds: 5
       volumes:
         - name: envoy-vol
           configMap:
