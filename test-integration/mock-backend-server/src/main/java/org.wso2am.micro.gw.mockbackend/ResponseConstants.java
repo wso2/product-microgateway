@@ -27,15 +27,9 @@ public class ResponseConstants {
     public static final String responseBody = "{\"id\":111111148, \"category\":{ \"id\":0, \"name\":\"ABCD\" }," +
             " \"name\":\"doggieUpdated\", \"photoUrls\":[ \"SampleImage1.png\" ], \"tags\":[ { \"id\":0, " +
             "\"name\":\"TestTag1\" } ], \"status\":\"pending\"}";
-    public static final String responseBodyV1 = "{\"id\":222222222, \"category\":{ \"id\":1, \"name\":\"Test\" }," +
-            " \"name\":\"doggie\", \"photoUrls\":[ \"SampleImage1.png\" ], \"tags\":[ { \"id\":0, " +
-            "\"name\":\"TestTag1\" } ], \"status\":\"pending\"}";
     public static final String petByIdResponse = "{\"id\":2, \"category\":{\"id\":1, \"name\":\"John Doe\"}, " +
             "\"name\":\"shre\", \"photoUrls\":[\"ArrayItem1\"], \"tags\":[{\"id\":1, \"name\":\"TfNSW\"}]," +
             " \"status\":\"hello\"}";
-    public static final String petByIdResponseV1 = "{\"id\":2, \"category\":{\"id\":1, \"name\":\"John Doe\"}, " +
-            "\"name\":\"shre\", \"photoUrls\":[\"ArrayItem1\"], \"tags\":[{\"id\":1, \"name\":\"TfNSW\"}], " +
-            "\"status\":\"hello\"}";
     public static final String getPetResponse = "{\"id\":2, \"category\":{\"id\":1, \"name\":\"John Doe\"}," +
             " \"name\":\"shre\", \"photoUrls\":[\"ArrayItem1\"], \"tags\":[{\"id\":1, \"name\":\"TfNSW\"}]," +
             " \"status\":\"hello\"}";
@@ -48,13 +42,8 @@ public class ResponseConstants {
     public static final String AUTHENTICATION_FAILURE_RESPONSE = "{\"fault\":\"Authorization credentials are not " +
             "provided.\"}";
     public static final String AUTHZ_FAILURE_RESPONSE = "{\"fault\":\"Forbidden.\"}";
-    public static final String PER_RESOURCE_REQUEST_INTERCEPTOR_RESPONSE = "{\"Intercept\":{\"RequestCode\":" +
-            "\"e123\", \"message\":\"Successfully intercepted\", \"description\":\"Description\"}}";
+
 
     public static final String userResponse = "{ \"name\": \"john\" }";
 
-    public static final String ERROR_RESPONSE = "error:true";
-
-    public static final String INVALID_JWT_RESPONSE ="\"{\"header\":\"not available\"}\"";
-    public static final String VALID_JWT_RESPONSE ="\"{\"header\":\"available\"}\"";
 }

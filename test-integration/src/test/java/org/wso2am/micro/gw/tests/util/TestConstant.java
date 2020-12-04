@@ -22,8 +22,7 @@ package org.wso2am.micro.gw.tests.util;
  * Constants used in test cases.
  */
 public class TestConstant {
-    public static final String CONTENT_TYPE_TEXT_PLAIN = "text/plain";
-    public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
+
     public static final String CHARSET_NAME = "UTF-8";
     public static final String HTTP_METHOD_GET = "GET";
     public static final String HTTP_METHOD_POST = "POST";

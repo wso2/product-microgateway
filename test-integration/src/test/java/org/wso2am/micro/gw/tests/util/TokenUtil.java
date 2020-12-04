@@ -20,7 +20,6 @@ package org.wso2am.micro.gw.tests.util;
 
 import org.json.JSONObject;
 import org.wso2am.micro.gw.tests.common.model.ApplicationDTO;
-
 import java.io.FileInputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

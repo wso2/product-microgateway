@@ -19,7 +19,6 @@
 package org.wso2am.micro.gw.tests.util;
 
 
-
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;

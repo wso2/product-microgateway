@@ -19,14 +19,8 @@
 package org.wso2am.micro.gw.tests.mockbackend;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.wso2am.micro.gw.tests.context.MicroGWTestException;
 import org.wso2am.micro.gw.tests.util.Utils;
-import org.wso2am.micro.gw.tests.util.TestConstant;
-
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -37,45 +31,11 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.rnorth.visibleassertions.VisibleAssertions.pass;
-
 /**
  * Mock backend server class.
  *
  */
 public class MockBackendServer {
-
-    private static final Logger log = LoggerFactory.getLogger(MockBackendServer.class);
-
-    /**
-     * Generate the Mock backend server docker image.
-     *
-     */
-    public static void generateMockBackendServerDockerImage() {
-
-        try {
-            ImageFromDockerfile image = new ImageFromDockerfile(TestConstant.MOCK_BACKEND_DOCKER_IMAGE, false)
-                    .withFileFromPath(".", Paths.get(getMockBackendModuleRootPath()));
-            verifyImage(image);
-        } catch (Exception e) {
-            log.error("Error occurs when creating " + TestConstant.MOCK_BACKEND_DOCKER_IMAGE+ "docker image");
-        }
-    }
-
-    /**
-     * Get Mock backend server module root path.
-     *
-     */
-    public static String getMockBackendModuleRootPath() {
-
-        File targetClassesDir = new File(MockBackendServer.class.getProtectionDomain().getCodeSource().
-                getLocation().getPath());
-        String targetDir = targetClassesDir.getParentFile().toString();
-        String mockBackendRoot = targetDir.substring(0, (targetDir.length() - "/target".length())) +
-                File.separator + "mock-backend-server/";
-
-        return mockBackendRoot;
-    }
 
     /**
      * Get Mock backend server module root path.
@@ -91,8 +51,8 @@ public class MockBackendServer {
         File targetClassesDir = new File(MockBackendServer.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());
         String targetDir = targetClassesDir.getParentFile().toString();
-
-        String backendService = getMockBackendModuleRootPath() + "backend-service.yaml";
+        String backendService = MockBackendServer.class.getClassLoader()
+                .getResource("backend-service.yaml").getPath();
 
         // Input files
         List<Path> inputs = Arrays.asList(
@@ -101,7 +61,7 @@ public class MockBackendServer {
         );
 
         // Output file
-        String tmpDockerCompose = targetDir +   File.separator  + System.currentTimeMillis() + ".yaml";
+        String tmpDockerCompose = targetDir +  File.separator  + System.currentTimeMillis() + ".yaml";
         File fileTmp = new File(tmpDockerCompose);
         fileTmp.createNewFile();
         Path output = Paths.get(tmpDockerCompose);
@@ -119,21 +79,5 @@ public class MockBackendServer {
 
         Utils.copyFile(tmpDockerCompose,dockerComposePath);
         fileTmp.delete();
-    }
-
-    /**
-     * verify the created docker image.
-     *
-     * @param image  docker image.
-     */
-    protected static void verifyImage(ImageFromDockerfile image) {
-        GenericContainer container = new GenericContainer(image);
-
-        try {
-            container.start();
-            pass(TestConstant.MOCK_BACKEND_DOCKER_IMAGE+ " docker image is created successfully");
-        } finally {
-            container.stop();
-        }
     }
 }

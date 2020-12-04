@@ -24,7 +24,7 @@ import java.util.zip.*;
 import java.nio.file.attribute.*;
 
 /**
- * This Java program demonstrates how to compress a directory in ZIP format.
+ * To compress a directory in ZIP format.
  *
  */
 public class ZipDir extends SimpleFileVisitor<Path> {

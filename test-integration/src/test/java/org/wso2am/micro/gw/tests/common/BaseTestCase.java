@@ -21,14 +21,11 @@ package org.wso2am.micro.gw.tests.common;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2am.micro.gw.tests.common.model.API;
 import org.wso2am.micro.gw.tests.common.model.ApplicationDTO;
 import org.wso2am.micro.gw.tests.common.model.SubscribedApiDTO;
 import org.wso2am.micro.gw.tests.context.MgwServerInstance;
 import org.wso2am.micro.gw.tests.context.MicroGWTestException;
-import org.wso2am.micro.gw.tests.mockbackend.MockBackendServer;
 import org.wso2am.micro.gw.tests.util.*;
 
 import java.io.IOException;
@@ -41,7 +38,6 @@ import java.util.Arrays;
  */
 public class BaseTestCase {
 
-    private static final Logger log = LoggerFactory.getLogger(BaseTestCase.class);
     protected MgwServerInstance microGWServer;
 
     /**
@@ -51,7 +47,6 @@ public class BaseTestCase {
      * @throws IOException
      */
     public void startMGW() throws MicroGWTestException, IOException, InterruptedException {
-        initMockBackend();
         microGWServer = new MgwServerInstance();
         microGWServer.startMGW();
     }
@@ -65,17 +60,8 @@ public class BaseTestCase {
      * @throws IOException
      */
     public void startMGW(String confPath) throws MicroGWTestException, IOException, InterruptedException {
-        initMockBackend();
         microGWServer = new MgwServerInstance(confPath);
         microGWServer.startMGW();
-    }
-
-    /**
-     * initialize the mock backend server.
-     */
-    public void initMockBackend()  {
-
-        MockBackendServer.generateMockBackendServerDockerImage();
     }
 
     /**
@@ -85,7 +71,6 @@ public class BaseTestCase {
         microGWServer.stopMGW();
 
     }
-
 
     public static String getImportAPIServiceURLHttps(String servicePath) throws MalformedURLException {
         return new URL(new URL("https://localhost:" + TestConstant.ADAPTER_IMPORT_API_PORT), servicePath)
@@ -112,7 +97,7 @@ public class BaseTestCase {
      *
      * @throws Exception
      */
-    protected static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType,
+    public static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType,
                                    int validityPeriod) throws Exception {
         SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
         subscribedApiDTO.setContext(api.getContext() + "/" + api.getVersion());

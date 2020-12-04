@@ -39,12 +39,12 @@ public class HttpsClientRequest {
      * @return - HttpResponse from the end point
      * @throws IOException If an error occurs while sending the GET request
      */
-    public static HttpResponse doGet(String requestUrl, Map<String, String> headers, String serverHome)
+    public static HttpResponse doGet(String requestUrl, Map<String, String> headers)
             throws IOException {
         HttpsURLConnection conn = null;
         HttpResponse httpResponse;
         try {
-            conn = getURLConnection(requestUrl, serverHome);
+            conn = getURLConnection(requestUrl);
             //setting request headers
             for (Map.Entry<String, String> e : headers.entrySet()) {
                 conn.setRequestProperty(e.getKey(), e.getValue());
@@ -91,8 +91,8 @@ public class HttpsClientRequest {
      * @return - HttpResponse from the end point
      * @throws IOException If an error occurs while sending the GET request
      */
-    public static HttpResponse doGet(String requestUrl, String serverHome) throws IOException {
-        return doGet(requestUrl, new HashMap<String, String>(), serverHome);
+    public static HttpResponse doGet(String requestUrl) throws IOException {
+        return doGet(requestUrl, new HashMap<String, String>());
     }
 
     /**
@@ -109,7 +109,7 @@ public class HttpsClientRequest {
         HttpsURLConnection urlConnection = null;
         HttpResponse httpResponse;
         try {
-            urlConnection = getURLConnection(endpoint, serverHome);
+            urlConnection = getURLConnection(endpoint);
             //setting request headers
             for (Map.Entry<String, String> e : headers.entrySet()) {
                 urlConnection.setRequestProperty(e.getKey(), e.getValue());
@@ -162,7 +162,7 @@ public class HttpsClientRequest {
     }
 
 
-    private static HttpsURLConnection getURLConnection(String requestUrl, String serverHome)
+    private static HttpsURLConnection getURLConnection(String requestUrl)
             throws IOException {
         setSSlSystemProperties();
         URL url = new URL(requestUrl);
@@ -194,7 +194,7 @@ public class HttpsClientRequest {
      */
     static void setSSlSystemProperties() {
         String certificatesTrustStorePath = HttpsClientRequest.class.getClassLoader()
-                .getResource("keystore/cacerts").getPath();
+                .getResource("keystore/wso2carbon.jks").getPath();
         System.setProperty("javax.net.ssl.trustStore", certificatesTrustStorePath);
     }
 

@@ -28,5 +28,4 @@ public interface MgwServer {
     void startMGW() throws IOException, InterruptedException;
 
     void stopMGW();
-
 }

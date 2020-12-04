@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.wso2am.micro.gw.tests.util.TestConstant.LINE;
 
 /**
  * This class can be used to send http post multipart request.
@@ -46,9 +45,7 @@ public class HttpPostMultipart {
      * @param headers
      * @throws IOException
      */
-    public HttpPostMultipart(String requestURL, Map<String, String> headers, String trustStorepath) throws IOException {
-
-        HttpsClientRequest.setSSlSystemProperties();
+    public HttpPostMultipart(String requestURL, Map<String, String> headers) throws IOException {
 
         boundary = UUID.randomUUID().toString();
         URL url = new URL(requestURL);
@@ -83,11 +80,11 @@ public class HttpPostMultipart {
      * @param value field value
      */
     public void addFormField(String name, String value) {
-        writer.append("--" + boundary).append(LINE);
-        writer.append("Content-Disposition: form-data; name=\"" + name + "\"").append(LINE);
-        writer.append("Content-Type: text/plain; charset=" + TestConstant.CHARSET_NAME).append(LINE);
-        writer.append(LINE);
-        writer.append(value).append(LINE);
+        writer.append("--" + boundary).append(TestConstant.LINE);
+        writer.append("Content-Disposition: form-data; name=\"" + name + "\"").append(TestConstant.LINE);
+        writer.append("Content-Type: text/plain; charset=" + TestConstant.CHARSET_NAME).append(TestConstant.LINE);
+        writer.append(TestConstant.LINE);
+        writer.append(value).append(TestConstant.LINE);
         writer.flush();
     }
 
@@ -101,11 +98,12 @@ public class HttpPostMultipart {
     public void addFilePart(String fieldName, File uploadFile)
             throws IOException {
         String fileName = uploadFile.getName();
-        writer.append("--" + boundary).append(LINE);
-        writer.append("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + fileName + "\"").append(LINE);
-        writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(fileName)).append(LINE);
-        writer.append("Content-Transfer-Encoding: binary").append(LINE);
-        writer.append(LINE);
+        writer.append("--" + boundary).append(TestConstant.LINE);
+        writer.append("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + fileName + "\"").
+                append(TestConstant.LINE);
+        writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(fileName)).append(TestConstant.LINE);
+        writer.append("Content-Transfer-Encoding: binary").append(TestConstant.LINE);
+        writer.append(TestConstant.LINE);
         writer.flush();
 
         FileInputStream inputStream = new FileInputStream(uploadFile);
@@ -116,7 +114,7 @@ public class HttpPostMultipart {
         }
         outputStream.flush();
         inputStream.close();
-        writer.append(LINE);
+        writer.append(TestConstant.LINE);
         writer.flush();
     }
 
@@ -127,7 +125,7 @@ public class HttpPostMultipart {
      */
     public HttpResponse getResponse() throws IOException {
         writer.flush();
-        writer.append("--" + boundary + "--").append(LINE);
+        writer.append("--" + boundary + "--").append(TestConstant.LINE);
         writer.close();
 
         return HttpClientRequest.buildResponse(conn);

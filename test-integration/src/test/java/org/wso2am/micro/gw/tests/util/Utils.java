@@ -24,8 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.wso2am.micro.gw.tests.context.MicroGWTestException;
-
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

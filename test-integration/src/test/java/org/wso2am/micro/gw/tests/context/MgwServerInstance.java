@@ -22,6 +22,7 @@ import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
+import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.mockbackend.MockBackendServer;
 import org.wso2am.micro.gw.tests.util.HttpClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
@@ -33,8 +34,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-
-import static org.wso2am.micro.gw.tests.common.BaseTestCase.getMockServiceURLHttp;
 
 /**
  * Mgw server instance class.
@@ -96,7 +95,6 @@ public class MgwServerInstance implements MgwServer {
         }
 
         waitTillBackendIsAvailable();
-
     }
 
     @Override
@@ -105,7 +103,7 @@ public class MgwServerInstance implements MgwServer {
     }
 
     /**
-     * create a temporal mgw setup.
+     * This will create a separate mgw setup in the target directory to execute the tests.
      *
      * @throws IOException
      * @throws MicroGWTestException
@@ -134,7 +132,7 @@ public class MgwServerInstance implements MgwServer {
 
         int tries = 0;
         while (true){
-            response= HttpClientRequest.doGet(getMockServiceURLHttp(
+            response= HttpClientRequest.doGet(BaseTestCase.getMockServiceURLHttp(
                     "/v2/pet/3") , headers);
             tries += 1;
             if(response != null) {
