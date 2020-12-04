@@ -68,30 +68,30 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                             .addHeaders(headerValueOption).setStatus(status).build()).build();
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
-            responseObject.getHeaderMap().forEach((key, value) -> {
-                HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
-                        .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
-                        .build();
-                okResponseBuilder.addHeaders(headerValueOption);
-                }
-            );
-
-
-        return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
+            if (responseObject.getHeaderMap() != null) {
+                responseObject.getHeaderMap().forEach((key, value) -> {
+                            HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
+                                    .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
+                                    .build();
+                            okResponseBuilder.addHeaders(headerValueOption);
+                        }
+                );
+            }
+            return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                     .setOkResponse(okResponseBuilder.build()).build();
         }
     }
 
     private int getCode(int statusCode) {
         switch (statusCode) {
-        case 200:
-            return Code.OK_VALUE;
-        case 401:
-            return Code.UNAUTHENTICATED_VALUE;
-        case 403:
-            return Code.PERMISSION_DENIED_VALUE;
-        case 409:
-            return Code.RESOURCE_EXHAUSTED_VALUE;
+            case 200:
+                return Code.OK_VALUE;
+            case 401:
+                return Code.UNAUTHENTICATED_VALUE;
+            case 403:
+                return Code.PERMISSION_DENIED_VALUE;
+            case 409:
+                return Code.RESOURCE_EXHAUSTED_VALUE;
         }
         return Code.INTERNAL_VALUE;
     }

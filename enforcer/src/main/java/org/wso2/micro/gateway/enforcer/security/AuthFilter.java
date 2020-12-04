@@ -83,10 +83,12 @@ public class AuthFilter implements Filter {
         if (requestContext.isClusterHeaderEnabled()) {
             if (keyType.equalsIgnoreCase("PRODUCTION") &&
                     !StringUtils.isEmpty(requestContext.getProdClusterHeader())) {
-                requestContext.addHeader(AdapterConstants.CLUSTER_HEADER, requestContext.getProdClusterHeader());
+                requestContext.addResponseHeaders(AdapterConstants.CLUSTER_HEADER,
+                        requestContext.getProdClusterHeader());
             } else if (keyType.equalsIgnoreCase("SANDBOX") &&
                     !StringUtils.isEmpty(requestContext.getSandClusterHeader())) {
-                requestContext.addHeader(AdapterConstants.CLUSTER_HEADER, requestContext.getSandClusterHeader());
+                requestContext.addResponseHeaders(AdapterConstants.CLUSTER_HEADER,
+                        requestContext.getSandClusterHeader());
             } else {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid Token to access production/sandbox environment.");

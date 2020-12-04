@@ -61,8 +61,8 @@ public class RestAPI implements API {
         ResponseObject responseObject = new ResponseObject();
         if (executeFilterChain(requestContext)) {
             responseObject.setStatusCode(200);
-            if (requestContext.getHeaders() != null) {
-                responseObject.setHeaderMap(requestContext.getHeaders());
+            if (requestContext.getResponseHeaders() != null) {
+                responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
         } else {
             responseObject.setStatusCode(Integer.parseInt(requestContext.getProperties().get("code").toString()));

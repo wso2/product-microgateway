@@ -41,6 +41,8 @@ public class RequestContext {
     private String prodClusterHeader;
     private String sandClusterHeader;
     private boolean clusterHeaderEnabled = false;
+    //Denotes the specific headers which needs to be passed to response object
+    private Map<String, String> responseHeaders;
 
     private RequestContext() {
 
@@ -136,13 +138,6 @@ public class RequestContext {
         return headers;
     }
 
-    public void addHeader(String key, String value) {
-       if (headers != null) {
-           headers = new TreeMap<>();
-       }
-       headers.put(key, value);
-    }
-
     public Map<String, Object> getProperties() {
         return properties;
     }
@@ -151,7 +146,7 @@ public class RequestContext {
      * Returns the production cluster header value.
      * can be null if the openAPI has production endpoints alone.
      * In that case, no header should not be set.
-     * 
+     *
      * @return prod Cluster name header value
      */
     public String getProdClusterHeader() {
@@ -163,14 +158,43 @@ public class RequestContext {
      * can be null if the openAPI has production endpoints alone.
      * In that case, no header should not be set.
      * If this property is null and the keytype is sand box, the request should be blocked
-     * 
+     *
      * @return sand Cluster name header value
      */
     public String getSandClusterHeader() {
         return sandClusterHeader;
     }
 
+    /**
+     * Returns true if both sandbox cluster header and prod cluster header is
+     * available.
+     *
+     * @return true if cluster-header is enabled.
+     */
     public boolean isClusterHeaderEnabled() {
         return clusterHeaderEnabled;
+    }
+
+    /**
+     * If a certain header needs to be added to the response additionally from enforcer,
+     * those header-value pairs  should be defined here.
+     *
+     * @param key   header
+     * @param value headerValue
+     */
+    public void addResponseHeaders(String key, String value) {
+        if (responseHeaders == null) {
+            responseHeaders = new TreeMap<>();
+        }
+        responseHeaders.put(key, value);
+    }
+
+    /**
+     * Returns the introduced response headers.
+     *
+     * @return response headers
+     */
+    public Map<String, String> getResponseHeaders() {
+        return responseHeaders;
     }
 }
