@@ -28,8 +28,10 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+	"github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer"
 	openAPI3 "github.com/getkin/kin-openapi/openapi3"
 	openAPI2 "github.com/go-openapi/spec"
+	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	oasParser "github.com/wso2/micro-gw/pkg/oasparser"
 	"github.com/wso2/micro-gw/pkg/oasparser/model"
@@ -58,6 +60,9 @@ var (
 	envoyListenerConfigMap map[string]*listenerv3.Listener
 	// Envoy Label -> Routes Configuration map
 	envoyRouteConfigMap map[string]*routev3.RouteConfiguration
+
+	// Enforcer config XDS resource version map
+	enforcerConfigVersionMap map[string]int64
 )
 
 // IDHash uses ID field as the node hash.
@@ -85,6 +90,8 @@ func init() {
 	envoyUpdateVersionMap = make(map[string]int64)
 	envoyListenerConfigMap = make(map[string]*listenerv3.Listener)
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
+
+	enforcerConfigVersionMap = make(map[string]int64)
 }
 
 // GetXdsCache returns xds server cache.
@@ -231,6 +238,38 @@ func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	return oasParser.GetCacheResources(endpointArray, clusterArray, listener, routesConfig)
 }
 
+func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
+	issuers := []*enforcer.Issuer{}
+	for _, issuer := range config.Filter.JwtTokenConfig {
+		jwtConfig := &enforcer.Issuer{
+			CertificateAlias:     issuer.CertificateAlias,
+			ConsumerKeyClaim:     issuer.ConsumerKeyClaim,
+			Issuer:               issuer.Issuer,
+			Name:                 issuer.Name,
+			ValidateSubscription: issuer.ValidateSubscription,
+			JwksURL:              issuer.JwksURL,
+		}
+		issuers = append(issuers, jwtConfig)
+	}
+
+	return &enforcer.Config{
+		Truststore: &enforcer.CertStore{
+			Location: config.Filter.Truststore.Location,
+			Password: config.Filter.Truststore.Password,
+			Type:     config.Filter.Truststore.StoreType,
+		},
+		JwtTokenConfig: issuers,
+		Eventhub: &enforcer.EventHub{
+			Enabled:             config.Filter.EventHub.Enabled,
+			ServiceUrl:          config.Filter.EventHub.ServiceURL,
+			InternalDataContext: config.Filter.EventHub.InternalDataContext,
+			ListenerEndpoint:    config.Filter.EventHub.EventListeningEndpoints,
+			Username:            config.Filter.EventHub.Username,
+			Password:            config.Filter.EventHub.Password,
+		},
+	}
+}
+
 func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) {
 	version, ok := envoyUpdateVersionMap[label]
 	if ok {
@@ -241,7 +280,7 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	}
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	// Will be updated once decide to move to incremental XDS
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil, nil)
 	snap.Consistent()
 	err := cache.SetSnapshot(label, snap)
 	if err != nil {
@@ -249,4 +288,27 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	}
 	envoyUpdateVersionMap[label] = version
 	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+// UpdateEnforcerConfig Sets new update to the enforcer's configuration
+func UpdateEnforcerConfig(confiFile *config.Config) {
+	label := "enforcer"
+	configs := []types.Resource{generateEnforcerConfigs(confiFile)}
+	version, ok := enforcerConfigVersionMap[label]
+	if ok {
+		version++
+	} else {
+		version = 1
+	}
+
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs)
+	snap.Consistent()
+
+	err := cache.SetSnapshot(label, snap)
+	if err != nil {
+		logger.LoggerMgw.Error(err)
+	}
+
+	enforcerConfigVersionMap[label] = version
+	logger.LoggerMgw.Infof("New config cache update for the enforcer: " + label + " version: " + fmt.Sprint(version))
 }

@@ -88,4 +88,35 @@ type Config struct {
 		ListenerKeyPath         string
 		ListenerTLSEnabled      bool
 	}
+
+	Filter struct {
+		Keystore       keystore
+		Truststore     keystore
+		JwtTokenConfig []jwtTokenConfig
+		EventHub       eventHub
+	}
+}
+
+type keystore struct {
+	Location  string
+	StoreType string `toml:"type"`
+	Password  string
+}
+
+type jwtTokenConfig struct {
+	Name                 string
+	Issuer               string
+	CertificateAlias     string
+	JwksURL              string
+	ValidateSubscription bool
+	ConsumerKeyClaim     string
+}
+
+type eventHub struct {
+	Enabled                 bool
+	ServiceURL              string
+	Username                string
+	Password                string
+	InternalDataContext     string
+	EventListeningEndpoints string
 }

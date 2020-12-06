@@ -21,6 +21,7 @@ package mgw
 import (
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
+	configservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/config"
 	"github.com/wso2/micro-gw/pkg/api/restserver"
 
 	"context"
@@ -77,6 +78,7 @@ func runManagementServer(server xdsv3.Server, port uint) {
 
 	// register services
 	discoveryv3.RegisterAggregatedDiscoveryServiceServer(grpcServer, server)
+	configservice.RegisterConfigDiscoveryServiceServer(grpcServer, server)
 
 	logger.LoggerMgw.Info("port: ", port, " management server listening")
 	go func() {
@@ -110,6 +112,10 @@ func Run(conf *config.Config) {
 	srv := xdsv3.NewServer(ctx, cache, nil)
 
 	runManagementServer(srv, port)
+
+	// Set enforcer startup configs
+	xds.UpdateEnforcerConfig(conf)
+
 	go restserver.StartRestServer(conf)
 OUTER:
 	for {
