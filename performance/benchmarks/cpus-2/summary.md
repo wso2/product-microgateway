@@ -53,6 +53,21 @@ test parameters.
 | Throughput (Requests/sec) | The throughput measured in requests per second. |
 | Average Memory Footprint After Full GC (M) | The average memory consumed by the application after a full garbage collection event. |
 
+The following figures shows how the Throughput changes for different number of concurrent users with different backend delays
+![picture](plots/thrpt_0ms.png)
+
+The following figures shows how the Average Response Time changes for different number of concurrent users with different backend delays.
+![picture](plots/avgt_0ms.png)
+
+Let’s look at the 90th, 95th, and 99th Response Time percentiles. 
+This is useful to measure the percentage of requests that exceeded the response time value for a given percentile. 
+A percentile can also tell the percentage of requests completed below the particular response time value.
+![picture](plots/response_time_0ms.png)
+
+The GC Throughput was calculated for each test to check whether GC operations are not impacting the performance of the server. 
+The GC Throughput is the time percentage of the application, which was not busy with GC operations.
+![picture](plots/gc_0ms.png)
+
 The following is the summary of performance test results collected for the measurement period.
 
 |  Scenario Name | Heap Size | Concurrent Users | Message Size (Bytes) | Back-end Service Delay (ms) | Error % | Throughput (Requests/sec) | Average Response Time (ms) | Standard Deviation of Response Time (ms) | 99th Percentile of Response Time (ms) | WSO2 API Microgateway GC Throughput (%) | Average WSO2 API Microgateway Memory Footprint After Full GC (M) |

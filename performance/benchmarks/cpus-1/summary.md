@@ -41,6 +41,21 @@ To limit the cpu utilization, docker `--cpus` option is provided as 1.
 
 The jmeter is configured such that the maximum waiting time for receiving a response to be 20 seconds.
 
+The following figures shows how the Throughput changes for different number of concurrent users with different backend delays
+![picture](plots/thrpt_0ms.png)
+
+The following figures shows how the Average Response Time changes for different number of concurrent users with different backend delays.
+![picture](plots/avgt_0ms.png)
+
+Let’s look at the 90th, 95th, and 99th Response Time percentiles. 
+This is useful to measure the percentage of requests that exceeded the response time value for a given percentile. 
+A percentile can also tell the percentage of requests completed below the particular response time value.
+![picture](plots/response_time_0ms.png)
+
+The GC Throughput was calculated for each test to check whether GC operations are not impacting the performance of the server. 
+The GC Throughput is the time percentage of the application, which was not busy with GC operations.
+![picture](plots/gc_0ms.png)
+
 The following are the measurements collected from each performance test conducted for a given combination of
 test parameters.
 
