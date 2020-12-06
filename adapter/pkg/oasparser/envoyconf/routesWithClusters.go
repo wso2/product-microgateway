@@ -95,7 +95,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
 		if apiEndpointBasePath != apiLevelEndpointSand[0].Basepath {
 			logger.LoggerOasparser.Warnf("Sandbox API level endpoint basepath is different compared to API level production endpoint "+
-				"for the resource %v:%v-%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion)
+				"for the API %v:%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion)
 		} else {
 			apilevelAddressSand := createAddress(apiLevelEndpointSand[0].Host, apiLevelEndpointSand[0].Port)
 			apiLevelClusterNameSand = strings.TrimSpace(sandClustersConfigNamePrefix +
@@ -136,7 +136,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 
 		} else {
 			logger.LoggerOasparser.Warnf("Production environment endpoints are not available for the resource %v:%v-%v",
-				apiTitle, apiVersion, resource.GetPath)
+				apiTitle, apiVersion, resource.GetPath())
 		}
 
 		// resource level check sandbox endpoints
@@ -148,7 +148,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 				"0")
 			if endpointBasepath != endpointSand[0].Basepath {
 				logger.LoggerOasparser.Warnf("Sandbox endpoint basepath is different compared to production endpoint "+
-					"for the resource %v:%v-%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion, resource.GetPath)
+					"for the resource %v:%v-%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion, resource.GetPath())
 			} else {
 				// sandbox cluster is not created if the basepath component of the endpoint is different compared to production
 				// endpoints
@@ -164,14 +164,14 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 			endpointSand := apiLevelEndpointSand
 			if endpointBasepath != endpointSand[0].Basepath {
 				logger.LoggerOasparser.Warnf("Sandbox endpoint basepath of API is different compared to production endpoint "+
-					"for the resource %v:%v-%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion, resource.GetPath)
+					"for the resource %v:%v-%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion, resource.GetPath())
 			} else {
 				clusterRefSand = apilevelClusterSand.GetName()
 				endpointBasepath = endpointSand[0].Basepath
 			}
 		} else {
 			logger.LoggerOasparser.Debugf("Sandbox environment endpoints are not available for the resource %v:%v-%v",
-				apiTitle, apiVersion, resource.GetPath)
+				apiTitle, apiVersion, resource.GetPath())
 		}
 
 		routeP := createRoute(apiTitle, apiBasePath, apiVersion, endpointBasepath, resource, clusterRefProd, clusterRefSand)
@@ -242,6 +242,9 @@ func createCluster(address *corev3.Address, clusterName string, urlType string) 
 	return &cluster
 }
 
+// createRoute creates route elements for the route configurations. API title, xWso2Basepath, API version,
+// endpoint's basePath, resource Object (Microgateway's internal representation), production clusterName and
+// sandbox clusterName needs to be provided.
 func createRoute(title string, xWso2Basepath string, version string, endpointBasepath string,
 	resource model.Resource, prodClusterName string, sandClusterName string) *routev3.Route {
 

@@ -28,6 +28,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	mgwconfig "github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/pkg/oasparser/model"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func TestGenerateRoutePaths(t *testing.T) {
@@ -70,8 +71,10 @@ func TestCreateRoute(t *testing.T) {
 	resourceWithGetPost := model.CreateMinimalDummyResourceForTests("/resourcePath", []string{"GET", "POST"},
 		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 	clusterName := "resource_operation_id"
-	hostRewriteSpecifier := &routev3.RouteAction_HostRewriteLiteral{
-		HostRewriteLiteral: "abc.com",
+	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
+		AutoHostRewrite: &wrapperspb.BoolValue{
+			Value: true,
+		},
 	}
 	clusterSpecifier := &routev3.RouteAction_Cluster{
 		Cluster: "resource_operation_id",
@@ -103,15 +106,15 @@ func TestCreateRoute(t *testing.T) {
 		},
 	}
 
-	generatedRouteWithXWso2BasePath := createRoute(title, xWso2BasePath, version, endpoint, resourceWithGet, clusterName)
-	assert.NotNil(t, generatedRouteWithXWso2BasePath, "Route should not be null")
+	generatedRouteWithXWso2BasePath := createRoute(title, xWso2BasePath, version, endpoint.Basepath, resourceWithGet, clusterName, "")
+	assert.NotNil(t, generatedRouteWithXWso2BasePath, "Route should not be null.")
 	assert.Equal(t, expectedRouteActionWithXWso2BasePath, generatedRouteWithXWso2BasePath.Action,
-		"Route generation mismatch when xWso2BasePath option is provided")
+		"Route generation mismatch when xWso2BasePath option is provided.")
 	assert.NotNil(t, generatedRouteWithXWso2BasePath.GetMatch().Headers, "Headers property should not be null")
 	assert.Equal(t, "^(GET)$", generatedRouteWithXWso2BasePath.GetMatch().Headers[0].GetSafeRegexMatch().Regex,
 		"Assigned HTTP Method Regex is incorrect when single method is available.")
 
-	generatedRouteWithoutXWso2BasePath := createRoute(title, "", version, endpoint, resourceWithGetPost, clusterName)
+	generatedRouteWithoutXWso2BasePath := createRoute(title, "", version, endpoint.Basepath, resourceWithGetPost, clusterName, "")
 	assert.NotNil(t, generatedRouteWithoutXWso2BasePath, "Route should not be null")
 	assert.NotNil(t, generatedRouteWithoutXWso2BasePath.GetMatch().Headers, "Headers property should not be null")
 	assert.Equal(t, "^(GET|POST)$", generatedRouteWithoutXWso2BasePath.GetMatch().Headers[0].GetSafeRegexMatch().Regex,
