@@ -32,7 +32,9 @@ import (
 )
 
 func TestGenerateRoutePaths(t *testing.T) {
-
+	// Tested features
+	// 1. Route regex when xWso2BasePath is provided
+	// 2. Route regex when xWso2BasePath is empty
 	xWso2BasePath := "/xWso2BasePath"
 	basePath := "/basePath"
 	resourcePath := "/resource"
@@ -56,6 +58,11 @@ func TestGenerateRoutePaths(t *testing.T) {
 }
 
 func TestCreateRoute(t *testing.T) {
+	// Tested features
+	// 1. RouteAction (Substitution involved) when xWso2BasePath is provided
+	// 2. RouteAction (No substitution) config when xWso2BasePath is empty
+	// 3. If HostRewriteSpecifier is set to Auto rewrite
+	// 4. Method header regex matcher
 	xWso2BasePath := "/xWso2BasePath"
 	basePath := "/basepath"
 	title := "WSO2"
@@ -123,6 +130,70 @@ func TestCreateRoute(t *testing.T) {
 	assert.Equal(t, expectedRouteActionWithoutXWso2BasePath, generatedRouteWithoutXWso2BasePath.Action,
 		"Route generation mismatch when xWso2BasePath option is provided")
 
+}
+
+func TestCreateRouteClusterSpecifier(t *testing.T) {
+	// Tested features
+	// 1. If the cluster for route is defined correctly depending on prodution only, sandbox only or both.
+
+	// In this test case, the extAuthz context variables are not tested
+	prodClusterName := "prodCluster"
+	sandClusterName := "sandCluster"
+
+	xWso2BasePath := "/xWso2BasePath"
+	endpointBasePath := "/basepath"
+	title := "WSO2"
+	version := "1.0.0"
+
+	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []string{"GET"},
+		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
+
+	routeWithProdEp := createRoute(title, xWso2BasePath, version, endpointBasePath, resourceWithGet, prodClusterName, "")
+	assert.NotNil(t, routeWithProdEp, "Route should not be null")
+	assert.NotNil(t, routeWithProdEp.GetRoute().GetCluster(), "Route Cluster Name should not be null.")
+	assert.Empty(t, routeWithProdEp.GetRoute().GetClusterHeader(), "Route Cluster Header should be empty.")
+	assert.Equal(t, prodClusterName, routeWithProdEp.GetRoute().GetCluster(), "Route Cluster Name mismatch.")
+
+	routeWithSandEp := createRoute(title, xWso2BasePath, version, endpointBasePath, resourceWithGet, "", sandClusterName)
+	assert.NotNil(t, routeWithSandEp, "Route should not be null")
+	assert.NotNil(t, routeWithSandEp.GetRoute().GetCluster(), "Route Cluster Name should not be null.")
+	assert.Empty(t, routeWithSandEp.GetRoute().GetClusterHeader(), "Route Cluster Header should be empty.")
+	assert.Equal(t, sandClusterName, routeWithSandEp.GetRoute().GetCluster(), "Route Cluster Name mismatch.")
+
+	routeWithProdSandEp := createRoute(title, xWso2BasePath, version, endpointBasePath, resourceWithGet, prodClusterName,
+		sandClusterName)
+	assert.NotNil(t, routeWithProdSandEp, "Route should not be null")
+	assert.NotNil(t, routeWithProdSandEp.GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
+	assert.Empty(t, routeWithProdSandEp.GetRoute().GetCluster(), "Route Cluster Name should be empty.")
+	assert.Equal(t, clusterHeaderName, routeWithProdSandEp.GetRoute().GetClusterHeader(), "Route Cluster Name mismatch.")
+}
+
+func TestCreateRouteExtAuthzContext(t *testing.T) {
+	// Tested features
+	// 1. The context variables inside extAuthzPerRoute configuration including
+	// (prod/sand clustername, method regex, basePath, resourcePath, title, version)
+	prodClusterName := "prodCluster"
+	// sandClusterName := "sandCluster"
+
+	xWso2BasePath := "/xWso2BasePath"
+	endpointBasePath := "/basepath"
+	title := "WSO2"
+	version := "1.0.0"
+
+	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []string{"GET"},
+		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
+
+	routeWithProdEp := createRoute(title, xWso2BasePath, version, endpointBasePath, resourceWithGet, prodClusterName, "")
+	assert.NotNil(t, routeWithProdEp, "Route should not be null")
+	assert.NotNil(t, routeWithProdEp.GetTypedPerFilterConfig(), "TypedPerFilter config should not be null")
+	// TODO: (VirajSalaka) Fix the test case once ExtAuthz filter version is upgraded
+	// assert.NotEmpty(t, routeWithProdEp.GetTypedPerFilterConfig()["envoy.config.filter.http.ext_authz.v2.ExtAuthzPerRoute"],
+	// 	"ExtAuthzPerRouteConfig should not be empty")
+
+	// extAuthPerRouteConfig := &extAuthService.ExtAuthzPerRoute{}
+	// err := ptypes.UnmarshalAny(routeWithProdEp.GetTypedPerFilterConfig()["envoy.config.filter.http.ext_authz.v2.ExtAuthzPerRoute"],
+	// 	extAuthPerRouteConfig)
+	// assert.Nil(t, err, "Error while parsing ExtAuthzPerRouteConfig")
 }
 
 func TestCreateListener(t *testing.T) {

@@ -25,7 +25,6 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
-	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
@@ -359,7 +358,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpointBas
 	//TODO: (VirajSalaka) Introduce a separate function
 	if !(prodClusterName == "" || sandClusterName == "") {
 		headerBasedClusterSpecifier := &routev3.RouteAction_ClusterHeader{
-			ClusterHeader: "x-wso2-cluster-header",
+			ClusterHeader: clusterHeaderName,
 		}
 		action.Route.ClusterSpecifier = headerBasedClusterSpecifier
 		logger.LoggerOasparser.Debug("adding cluster header")
@@ -385,7 +384,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpointBas
 		Metadata:  nil,
 		Decorator: decorator,
 		TypedPerFilterConfig: map[string]*any.Any{
-			wellknown.HTTPExternalAuthorization: filter,
+			"envoy.config.filter.http.ext_authz.v2.ExtAuthzPerRoute": filter,
 		},
 	}
 	return &router

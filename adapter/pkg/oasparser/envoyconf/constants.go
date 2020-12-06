@@ -41,6 +41,11 @@ const (
 )
 
 const (
+	// clusterHeaderName denotes the constant used for header based routing decisions.
+	clusterHeaderName string = "x-wso2-cluster-header"
+)
+
+const (
 	httpsURLType     string = "https"
 	httpMethodHeader string = ":method"
 )
