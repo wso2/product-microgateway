@@ -33,7 +33,7 @@ public class ReferenceHolder {
 
     private final Map<String, KeyValidator> keyValidationHandlerMap = new ConcurrentHashMap<>();
     private KeyManagerDataService keyManagerDataService;
-    private MGWConfiguration mgwConfiguration;
+    private MGWConfiguration configuration;
 
     private ReferenceHolder() {
     }
@@ -60,11 +60,11 @@ public class ReferenceHolder {
         return this.keyManagerDataService;
     }
 
-    public MGWConfiguration getMGWConfiguration() {
-        return mgwConfiguration;
+    public MGWConfiguration getConfiguration() {
+        return configuration;
     }
 
-    public void setMGWConfiguration(MGWConfiguration mgwConfiguration) {
-        this.mgwConfiguration = mgwConfiguration;
+    public void setConfiguration(MGWConfiguration config) {
+        this.configuration = config;
     }
 }

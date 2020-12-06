@@ -70,7 +70,7 @@ public class FilterUtils {
         Certificate publicCert = null;
         //Read the client-truststore.jks into a KeyStore
         try {
-            KeyStore trustStore = ReferenceHolder.getInstance().getMGWConfiguration().getTrustStore();
+            KeyStore trustStore = ReferenceHolder.getInstance().getConfiguration().getTrustStore();
             if (trustStore != null) {
                 // Read public certificate from trust store
                 publicCert = trustStore.getCertificate(certAlias);
@@ -135,7 +135,7 @@ public class FilterUtils {
     private static SSLConnectionSocketFactory createSocketFactory() throws MGWException {
         SSLContext sslContext;
         try {
-            KeyStore trustStore = ReferenceHolder.getInstance().getMGWConfiguration().getTrustStore();
+            KeyStore trustStore = ReferenceHolder.getInstance().getConfiguration().getTrustStore();
             sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
 
             X509HostnameVerifier hostnameVerifier;

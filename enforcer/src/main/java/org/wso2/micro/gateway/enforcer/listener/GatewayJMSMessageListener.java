@@ -27,7 +27,7 @@ import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants.EventType;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants.PolicyType;
 import org.wso2.micro.gateway.enforcer.constants.APIStatus;
-import org.wso2.micro.gateway.enforcer.constants.ConfigConstants;
+import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.listener.events.APIEvent;
 import org.wso2.micro.gateway.enforcer.listener.events.APIPolicyEvent;
@@ -69,7 +69,7 @@ public class GatewayJMSMessageListener implements MessageListener {
         String connectionFactoryNamePrefix = "connectionfactory.";
         String connectionFactoryName = "qpidConnectionfactory";
         String eventReceiverURL = eventHubConfigurationDto.getEventHubReceiverConfiguration()
-                .getJmsConnectionParameters().getProperty(ConfigConstants.EVENT_HUB_EVENT_LISTENING_ENDPOINT);
+                .getJmsConnectionParameters().getProperty(Constants.EVENT_HUB_EVENT_LISTENING_ENDPOINT);
         Runnable runnable = () -> {
             try {
                 TopicConnection topicConnection;

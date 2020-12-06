@@ -67,7 +67,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     public static final String UTF8 = "UTF-8";
 
     public SubscriptionDataLoaderImpl() {
-        MGWConfiguration config = ReferenceHolder.getInstance().getMGWConfiguration();
+        MGWConfiguration config = ReferenceHolder.getInstance().getConfiguration();
         this.eventHubConfigurationDto = config.getEventHubConfiguration();
     }
 

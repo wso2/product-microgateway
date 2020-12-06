@@ -109,7 +109,7 @@ public class JWTAuthenticator implements Authenticator {
 
                 // Validate subscriptions
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
-                MGWConfiguration configuration = ReferenceHolder.getInstance().getMGWConfiguration();
+                MGWConfiguration configuration = ReferenceHolder.getInstance().getConfiguration();
                 TokenIssuerDto issuerDto = configuration.getJWTIssuers().get(validationInfo.getIssuer());
                   //TODO: enable subscription validation
                 if (issuerDto.isValidateSubscriptions()) {

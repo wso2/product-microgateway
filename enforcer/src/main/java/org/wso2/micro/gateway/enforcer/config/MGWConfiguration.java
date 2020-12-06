@@ -18,14 +18,18 @@
 
 package org.wso2.micro.gateway.enforcer.config;
 
-import com.moandjiezana.toml.Toml;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.constants.ConfigConstants;
+import org.wso2.gateway.discovery.config.enforcer.Config;
+import org.wso2.gateway.discovery.config.enforcer.EventHub;
+import org.wso2.gateway.discovery.config.enforcer.Issuer;
+import org.wso2.micro.gateway.enforcer.constants.Constants;
+import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.dto.JWKSConfigurationDTO;
 import org.wso2.micro.gateway.enforcer.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 
 import java.io.File;
@@ -50,7 +54,7 @@ public class MGWConfiguration {
     private static final Logger logger = LogManager.getLogger(MGWConfiguration.class);
 
     private static MGWConfiguration mgwConfiguration;
-    private static Toml configToml;
+    private static Config config;
     private static Map<String, TokenIssuerDto> issuersMap;
     private static EventHubConfigurationDto eventHubConfiguration;
     private static KeyStore trustStore = null;
@@ -75,10 +79,10 @@ public class MGWConfiguration {
     /**
      * Initialize the configuration provider class by reading the Mgw Configuration file.
      */
-    private void init() throws KeyStoreException {
-        String home = System.getenv(ConfigConstants.ENFORCER_HOME);
-        File file = new File(home + File.separator + ConfigConstants.CONF_DIR + File.separator + "config.toml");
-        configToml = new Toml().read(file).getTable(ConfigConstants.CONF_FILTER_TABLE);
+    private void init() throws KeyStoreException, DiscoveryException {
+        // TODO: praminda load the server details from init config
+        ConfigDiscoveryClient cds = new ConfigDiscoveryClient("adapter", 18000);
+        config = cds.requestInitConfig();
         //Load Client Trust Store
         loadTrustStore();
 
@@ -91,48 +95,46 @@ public class MGWConfiguration {
 
     private void populateJWTIssuerConfiguration() throws KeyStoreException {
         issuersMap = new HashMap<>();
-        List<Object> jwtIssuers = configToml.getList(ConfigConstants.JWT_TOKEN_CONFIG);
-        for (Object jwtIssuer : jwtIssuers) {
-            Map<String, Object> issuer = (Map<String, Object>) jwtIssuer;
-            TokenIssuerDto issuerDto = new TokenIssuerDto((String) issuer.get(ConfigConstants.JWT_TOKEN_ISSUER));
+        List<Issuer> jwtIssuers = config.getJwtTokenConfigList();
+        for (Issuer issuer : jwtIssuers) {
+            TokenIssuerDto issuerDto = new TokenIssuerDto(issuer.getIssuer());
 
             JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
-            jwksConfigurationDTO.setEnabled(StringUtils.isNotEmpty(
-                    (String) issuer.get(ConfigConstants.JWT_TOKEN_JWKS_URL)));
-            jwksConfigurationDTO.setUrl((String) issuer.get(ConfigConstants.JWT_TOKEN_JWKS_URL));
+            jwksConfigurationDTO.setEnabled(StringUtils.isNotEmpty(issuer.getJwksURL()));
+            jwksConfigurationDTO.setUrl(issuer.getJwksURL());
             issuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
 
-            String certificateAlias = (String) issuer.get(ConfigConstants.JWT_TOKEN_CERTIFICATE_ALIAS);
+            String certificateAlias = issuer.getCertificateAlias();
             if (trustStore.getCertificate(certificateAlias) != null) {
                 Certificate issuerCertificate = trustStore.getCertificate(certificateAlias);
                 issuerDto.setCertificate(issuerCertificate);
             }
 
-            issuerDto.setName((String) issuer.get(ConfigConstants.JWT_TOKEN_ISSUER_NAME));
-            issuerDto.setConsumerKeyClaim((String) issuer.get(ConfigConstants.JWT_TOKEN_CONSUMER_KEY_CLAIM));
-            issuerDto.setValidateSubscriptions((boolean) issuer.get(ConfigConstants.JWT_TOKEN_VALIDATE_SUBSCRIPTIONS));
-            issuersMap.put((String) issuer.get(ConfigConstants.JWT_TOKEN_ISSUER), issuerDto);
+            issuerDto.setName(issuer.getIssuer());
+            issuerDto.setConsumerKeyClaim(issuer.getConsumerKeyClaim());
+            issuerDto.setValidateSubscriptions(issuer.getValidateSubscription());
+            issuersMap.put(issuer.getIssuer(), issuerDto);
         }
     }
 
     private void populateEventHubConfiguration() {
+        EventHub eventHub = config.getEventhub();
         eventHubConfiguration = new EventHubConfigurationDto();
-        eventHubConfiguration.setEnabled(configToml.getBoolean(ConfigConstants.EVENT_HUB_ENABLE));
-        eventHubConfiguration.setServiceUrl(configToml.getString(ConfigConstants.EVENT_HUB_SERVICE_URL));
-        eventHubConfiguration.setUsername(configToml.getString(ConfigConstants.EVENT_HUB_USERNAME));
-        eventHubConfiguration.setPassword(configToml.getString(ConfigConstants.EVENT_HUB_PASSWORD).toCharArray());
+        eventHubConfiguration.setEnabled(eventHub.getEnabled());
+        eventHubConfiguration.setServiceUrl(eventHub.getServiceUrl());
+        eventHubConfiguration.setUsername(eventHub.getUsername());
+        eventHubConfiguration.setPassword(eventHub.getPassword().toCharArray());
         EventHubConfigurationDto.EventHubReceiverConfiguration receiverConfiguration =
                 new EventHubConfigurationDto.EventHubReceiverConfiguration();
         Properties properties = new Properties();
-        properties.setProperty(ConfigConstants.EVENT_HUB_EVENT_LISTENING_ENDPOINT,
-                configToml.getString(ConfigConstants.EVENT_HUB_EVENT_LISTENING_ENDPOINT));
+        properties.setProperty(Constants.EVENT_HUB_EVENT_LISTENING_ENDPOINT, eventHub.getListenerEndpoint());
         receiverConfiguration.setJmsConnectionParameters(properties);
         eventHubConfiguration.setEventHubReceiverConfiguration(receiverConfiguration);
     }
 
     private void loadTrustStore() {
-        String trustStoreLocation = configToml.getString(ConfigConstants.MGW_TRUST_STORE_LOCATION);
-        String trustStorePassword = configToml.getString(ConfigConstants.MGW_TRUST_STORE_PASSWORD);;
+        String trustStoreLocation = config.getTruststore().getLocation();
+        String trustStorePassword = config.getTruststore().getPassword();
         if (trustStoreLocation != null && trustStorePassword != null) {
             try {
                 InputStream inputStream = new FileInputStream(new File(trustStoreLocation));

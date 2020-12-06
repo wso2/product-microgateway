@@ -61,7 +61,7 @@ public class JWTValidator {
     }
 
     public void loadTokenIssuerConfiguration() {
-        tokenIssuers = ReferenceHolder.getInstance().getMGWConfiguration().getJWTIssuers();
+        tokenIssuers = ReferenceHolder.getInstance().getConfiguration().getJWTIssuers();
         this.jwtTransformer = new DefaultJWTTransformer();
     }
 

@@ -59,18 +59,18 @@ public class AuthServer {
 
         // Load configurations
         KeyManagerDataService keyManagerDataService = new KeyManagerDataServiceImpl();
-        MGWConfiguration mgwConfiguration = MGWConfiguration.getInstance();
+        MGWConfiguration configuration = MGWConfiguration.getInstance();
         ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
-        ReferenceHolder.getInstance().setMGWConfiguration(mgwConfiguration);
+        ReferenceHolder.getInstance().setConfiguration(configuration);
         CacheProvider.init();
 
         // Start the server
         server.start();
         logger.info("Sever started Listening in port : " + 8081);
 
-        if (mgwConfiguration.getEventHubConfiguration().isEnabled()) {
+        if (configuration.getEventHubConfiguration().isEnabled()) {
             logger.info("Event Hub configuration enabled... Starting JMS listener...");
-            GatewayJMSMessageListener.init(mgwConfiguration.getEventHubConfiguration());
+            GatewayJMSMessageListener.init(configuration.getEventHubConfiguration());
         }
         //TODO: Get the tenant domain from config
         SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore("carbon.super");
