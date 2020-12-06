@@ -37,6 +37,9 @@ The duration of each test is **900 seconds**. The warm-up period is **300 second
 The measurement results are collected after the warm-up period.
 
 A [**c5.xlarge** Amazon EC2 instance](https://aws.amazon.com/ec2/instance-types/) was used to install WSO2 API Microgateway.
+To limit the cpu utilization, docker `--cpus` option is provided as 1.
+
+The jmeter is configured such that the maximum waiting time for receiving a response to be 20 seconds.
 
 The following are the measurements collected from each performance test conducted for a given combination of
 test parameters.
