@@ -27,12 +27,12 @@ spec:
   selector:
     app: mg-router
   ports:
-    - name: "9000"
+    - name: "http-routeradmin"
       port: 9000
       targetPort: 9000
       protocol: TCP
       nodePort: 30202
-    - name: "9095"
+    - name: "https-router"
       port: 9095
       targetPort: 9095
       protocol: TCP

@@ -19,7 +19,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: config-toml-configmap
+  name: config-toml
 data:
   config.toml: |
     # The configuration file for mgw

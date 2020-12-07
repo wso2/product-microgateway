@@ -37,6 +37,14 @@ spec:
               subPath: envoy.yaml
               name: envoy-vol
           image: wso2/mg-router:4.0.0-m1
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
           ports:
             - containerPort: 9000
             - containerPort: 9095

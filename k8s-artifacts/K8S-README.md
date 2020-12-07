@@ -42,11 +42,9 @@ export PATH=$PATH:<CLI_HOME>
 3. Let's deploy the microgateway in kubernetes.
   - In kubernetes artifacts there are 3 separate folders for each component.
   - In each folder config maps, deployment and service are included.
-  - You can use the following commands to deploy each microgateway component in kubernetes.
+  - You can use the following command to deploy each microgateway component in kubernetes.
   ```
-  kubectl apply -f mg-adapter/
-  kubectl apply -f mg-enforcer/
-  kubectl apply -f mg-router/
+  kubectl apply -f mg-adapter/ -f mg-enforcer/ -f mg-router/
   ```
   - You can verify the deployments using the following commands.
   ```
@@ -109,9 +107,7 @@ referred as `MG_HOME`.
   - In each folder config maps, deployment and service are included.
   - You can use the following commands to deploy each microgateway component in kubernetes.
   ```
-  kubectl apply -f mg-adapter/
-  kubectl apply -f mg-enforcer/
-  kubectl apply -f mg-router/
+  kubectl apply -f mg-adapter/ -f mg-enforcer/ -f mg-router/
   ```
   - You can verify the deployments using the following commands.
   ```
@@ -163,26 +159,6 @@ TOKEN=eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNNV0kyTkRBelpHUX
 ```
 curl -X GET "https://<*Node IP*>:30201/v2/pet/1" -H "accept: application/json" -H "Authorization:Bearer $TOKEN" -k
 ```
-
-#### Microgateway Components
-- **APICTL** : The APICTL is used to initiate Microgateway projects as well as to deploy APIs in to Microgateway. This is a developer tool used
- to deploy APIs into Microgateway
-
-- **Router** : The client facing component of the Microgateway. The downstream request will reach the proxy component and it will route the request
-to the desired destination.
-
-- **Enforcer** : This component will intercept the request going through the Router and applies security, rate limiting, publish analytics data and etc.
-Router will forward the request to this component in order to validate and to add additional QoS.
-
-- **Adapter** : The component configures the Router and the enforcer components dynamically during the runtime upon receiving an event for API
-creation or update.
-
-#### Architecture
-
-The following diagram illustrates how the WSO2 API Microgateway expose micro services in kubernetes.
-
-![Alt text](Architecture.png?raw=true "Title")
-
 
 #### WSO2 API Microgateway APICTL commands
 

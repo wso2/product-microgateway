@@ -19,7 +19,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: log4j2-configmap
+  name: log4j2
 data:
   log4j2.properties: |
     appenders = MGW_CONSOLE, MGW_LOGFILE
