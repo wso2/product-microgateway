@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
+	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/micro-gw/config"
@@ -146,7 +147,8 @@ func TestCreateRoutesWithClustersProdSandEp(t *testing.T) {
 	apiLevelEndpointRoute := routes[1]
 
 	extAuthPerRouteConfigAPILevel := &extAuthService.ExtAuthzPerRoute{}
-	err = ptypes.UnmarshalAny(apiLevelEndpointRoute.TypedPerFilterConfig["envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"],
+	err = ptypes.UnmarshalAny(apiLevelEndpointRoute.
+		TypedPerFilterConfig[wellknown.HTTPExternalAuthorization],
 		extAuthPerRouteConfigAPILevel)
 	assert.Nil(t, err, "Error while parsing ExtAuthzPerRouteConfig")
 	assert.NotEmpty(t, extAuthPerRouteConfigAPILevel.GetCheckSettings(), "Check Settings per ext authz route should not be empty")
@@ -160,7 +162,8 @@ func TestCreateRoutesWithClustersProdSandEp(t *testing.T) {
 		"Sandbox Cluster mismatch in route ext authz context. (API Level Endpoints)")
 
 	extAuthPerRouteConfigPathLevel := &extAuthService.ExtAuthzPerRoute{}
-	err = ptypes.UnmarshalAny(resourceLevelEndpointRoute.TypedPerFilterConfig["envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"],
+	err = ptypes.UnmarshalAny(resourceLevelEndpointRoute.
+		TypedPerFilterConfig[wellknown.HTTPExternalAuthorization],
 		extAuthPerRouteConfigPathLevel)
 	assert.Nil(t, err, "Error while parsing ExtAuthzPerRouteConfig")
 	assert.NotEmpty(t, extAuthPerRouteConfigPathLevel.GetCheckSettings(), "Check Settings per ext authz route should not be empty")

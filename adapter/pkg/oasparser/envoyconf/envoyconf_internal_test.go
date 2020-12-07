@@ -26,6 +26,7 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
+	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/stretchr/testify/assert"
 	mgwconfig "github.com/wso2/micro-gw/config"
@@ -188,11 +189,11 @@ func TestCreateRouteExtAuthzContext(t *testing.T) {
 	routeWithProdEp := createRoute(title, xWso2BasePath, version, endpointBasePath, resourceWithGet, prodClusterName, sandClusterName)
 	assert.NotNil(t, routeWithProdEp, "Route should not be null")
 	assert.NotNil(t, routeWithProdEp.GetTypedPerFilterConfig(), "TypedPerFilter config should not be null")
-	assert.NotNil(t, routeWithProdEp.GetTypedPerFilterConfig()[extAuthzPerRouteName],
+	assert.NotNil(t, routeWithProdEp.GetTypedPerFilterConfig()[wellknown.HTTPExternalAuthorization],
 		"ExtAuthzPerRouteConfig should not be empty")
 
 	extAuthPerRouteConfig := &extAuthService.ExtAuthzPerRoute{}
-	err := ptypes.UnmarshalAny(routeWithProdEp.TypedPerFilterConfig[extAuthzPerRouteName],
+	err := ptypes.UnmarshalAny(routeWithProdEp.TypedPerFilterConfig[wellknown.HTTPExternalAuthorization],
 		extAuthPerRouteConfig)
 	assert.Nilf(t, err, "Error while parsing ExtAuthzPerRouteConfig %v", extAuthPerRouteConfig)
 	assert.NotEmpty(t, extAuthPerRouteConfig.GetCheckSettings(), "Check Settings per ext authz route should not be empty")

@@ -27,7 +27,7 @@ const (
 	fileAccessLogName         string = "envoy.access_loggers.file"
 	grpcAccessLogName         string = "envoy.http_grpc_access_log"
 	httpConManagerStartPrefix string = "ingress_http"
-	extAuthzPerRouteName      string = "envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
+	extAuthzPerRouteName      string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 )
 
 const (

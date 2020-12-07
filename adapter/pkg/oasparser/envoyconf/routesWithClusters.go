@@ -25,6 +25,7 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
+	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
@@ -380,7 +381,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpointBas
 		Metadata:  nil,
 		Decorator: decorator,
 		TypedPerFilterConfig: map[string]*any.Any{
-			extAuthzPerRouteName: filter,
+			wellknown.HTTPExternalAuthorization: filter,
 		},
 	}
 	return &router
