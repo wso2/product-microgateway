@@ -60,7 +60,7 @@ Http::FilterHeadersStatus Filter::decodeHeaders(Http::RequestHeaderMap& headers,
   // read metadata and check we need to modify the request body
   set_body_ = readMetadata(&req_callbacks_->streamInfo().dynamicMetadata());
   //if we do not modify the body we continue to other filters
-  if (!set_body) {
+  if (!set_body_) {
     return Http::FilterHeadersStatus::Continue;
   }
   // if stream is not ended, stop continueing to other filters and buffer. 
@@ -75,8 +75,8 @@ Http::FilterHeadersStatus Filter::decodeHeaders(Http::RequestHeaderMap& headers,
 Http::FilterDataStatus Filter::decodeData(Buffer::Instance& data, bool end_stream) {
 
   // if we do not modify the body we continue to other filters
-  if (!set_body) {
-    return Http::FilterHeadersStatus::Continue;
+  if (!set_body_) {
+    return Http::FilterDataStatus::Continue;
   }
 
   ENVOY_LOG(trace, "decodeData with data = {} , end_stream = {}", data.toString(), end_stream);
