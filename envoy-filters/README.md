@@ -1,9 +1,17 @@
 # Envoy filter example
 
 This project demonstrates the linking of additional HTTP filters with the Envoy binary.
-A new filter `sample` which adds a HTTP header is introduced.
-Integration tests demonstrating the filter's end-to-end behavior are
-also provided.
+A new filter `envoy.mgw` can be used to modify the downstream payload body. 
+
+The new filter works as follows.
+- Enable ext_authz and mgw filters.
+```
+  - name: envoy.mgw
+    typed_config:
+        "@type": type.googleapis.com/envoy.extensions.filters.http.mgw.v3.MGW
+```
+- External authorization service add modified payload in ok response's metadata under the key `payload`.
+- If payload key is found under the ext_auth metadata, then payload will be modified. 
 
 ## Building
 

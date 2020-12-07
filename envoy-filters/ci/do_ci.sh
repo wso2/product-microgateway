@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+# TODO (amalimatharaarachchi) Write a release build script.
 export PATH=/usr/lib/llvm-8/bin:$PATH
 export CC=clang
 export CXX=clang++
@@ -10,6 +11,7 @@ if [[ -f "${HOME:-/root}/.gitconfig" ]]; then
     mv "${HOME:-/root}/.gitconfig" "${HOME:-/root}/.gitconfig_save"
 fi
 
+# TODO (amalimatharaarachchi) This is not a optimised build. 
 function do_build () {
     bazel build --verbose_failures=true //:envoy
 }
