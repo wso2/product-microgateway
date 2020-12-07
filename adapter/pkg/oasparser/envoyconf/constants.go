@@ -27,7 +27,7 @@ const (
 	fileAccessLogName         string = "envoy.access_loggers.file"
 	grpcAccessLogName         string = "envoy.http_grpc_access_log"
 	httpConManagerStartPrefix string = "ingress_http"
-	extAuthzPerRouteName      string = "envoy.extensions.filters.http.ext_authz.v3.ExtAuthz"
+	extAuthzPerRouteName      string = "envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 )
 
 const (
@@ -40,6 +40,19 @@ const (
 const (
 	sandClustersConfigNamePrefix string = "clusterSand_"
 	prodClustersConfigNamePrefix string = "clusterProd_"
+)
+
+// Context Extensions which are set in ExtAuthzPerRoute Config
+// These values are shared between the adapter and enforcer, hence if it is required to change
+// these values, modifications should be done in the both adapter and enforcer.
+const (
+	pathContextExtension            string = "path"
+	basePathContextExtension        string = "basePath"
+	methodContextExtension          string = "method"
+	apiVersionContextExtension      string = "version"
+	apiNameContextExtension         string = "name"
+	prodClusterNameContextExtension string = "prodClusterName"
+	sandClusterNameContextExtension string = "sandClusterName"
 )
 
 const (

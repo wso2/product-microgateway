@@ -24,7 +24,9 @@ import (
 	"testing"
 
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/stretchr/testify/assert"
 	mgwconfig "github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/pkg/oasparser/model"
@@ -173,7 +175,7 @@ func TestCreateRouteExtAuthzContext(t *testing.T) {
 	// 1. The context variables inside extAuthzPerRoute configuration including
 	// (prod/sand clustername, method regex, basePath, resourcePath, title, version)
 	prodClusterName := "prodCluster"
-	// sandClusterName := "sandCluster"
+	sandClusterName := "sandCluster"
 
 	xWso2BasePath := "/xWso2BasePath"
 	endpointBasePath := "/basepath"
@@ -183,17 +185,29 @@ func TestCreateRouteExtAuthzContext(t *testing.T) {
 	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []string{"GET"},
 		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 
-	routeWithProdEp := createRoute(title, xWso2BasePath, version, endpointBasePath, resourceWithGet, prodClusterName, "")
+	routeWithProdEp := createRoute(title, xWso2BasePath, version, endpointBasePath, resourceWithGet, prodClusterName, sandClusterName)
 	assert.NotNil(t, routeWithProdEp, "Route should not be null")
 	assert.NotNil(t, routeWithProdEp.GetTypedPerFilterConfig(), "TypedPerFilter config should not be null")
-	// TODO: (VirajSalaka) Fix the test case once ExtAuthz filter version is upgraded
-	// assert.NotEmpty(t, routeWithProdEp.GetTypedPerFilterConfig()["envoy.config.filter.http.ext_authz.v2.ExtAuthzPerRoute"],
-	// 	"ExtAuthzPerRouteConfig should not be empty")
+	assert.NotNil(t, routeWithProdEp.GetTypedPerFilterConfig()[extAuthzPerRouteName],
+		"ExtAuthzPerRouteConfig should not be empty")
 
-	// extAuthPerRouteConfig := &extAuthService.ExtAuthzPerRoute{}
-	// err := ptypes.UnmarshalAny(routeWithProdEp.GetTypedPerFilterConfig()["envoy.config.filter.http.ext_authz.v2.ExtAuthzPerRoute"],
-	// 	extAuthPerRouteConfig)
-	// assert.Nil(t, err, "Error while parsing ExtAuthzPerRouteConfig")
+	extAuthPerRouteConfig := &extAuthService.ExtAuthzPerRoute{}
+	err := ptypes.UnmarshalAny(routeWithProdEp.TypedPerFilterConfig[extAuthzPerRouteName],
+		extAuthPerRouteConfig)
+	assert.Nilf(t, err, "Error while parsing ExtAuthzPerRouteConfig %v", extAuthPerRouteConfig)
+	assert.NotEmpty(t, extAuthPerRouteConfig.GetCheckSettings(), "Check Settings per ext authz route should not be empty")
+	assert.NotEmpty(t, extAuthPerRouteConfig.GetCheckSettings().ContextExtensions,
+		"ContextExtensions per ext authz route should not be empty")
+
+	contextExtensionMap := extAuthPerRouteConfig.GetCheckSettings().ContextExtensions
+	assert.Equal(t, title, contextExtensionMap[apiNameContextExtension], "Title mismatch in route ext authz context.")
+	assert.Equal(t, xWso2BasePath, contextExtensionMap[basePathContextExtension], "Basepath mismatch in route ext authz context.")
+	assert.Equal(t, version, contextExtensionMap[apiVersionContextExtension], "Version mismatch in route ext authz context.")
+	assert.Equal(t, "GET", contextExtensionMap[methodContextExtension], "Method mismatch in route ext authz context.")
+	assert.Equal(t, prodClusterName, contextExtensionMap[prodClusterNameContextExtension],
+		"Production Cluster mismatch in route ext authz context.")
+	assert.Equal(t, sandClusterName, contextExtensionMap[sandClusterNameContextExtension],
+		"Sandbox Cluster mismatch in route ext authz context.")
 }
 
 func TestCreateListener(t *testing.T) {

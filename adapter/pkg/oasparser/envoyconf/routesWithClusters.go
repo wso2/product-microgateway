@@ -293,15 +293,15 @@ func createRoute(title string, xWso2Basepath string, version string, endpointBas
 		Operation: resourcePath,
 	}
 	var contextExtensions = make(map[string]string)
-	contextExtensions["path"] = resourcePath
+	contextExtensions[pathContextExtension] = resourcePath
 	if xWso2Basepath != "" {
-		contextExtensions["basePath"] = xWso2Basepath
+		contextExtensions[basePathContextExtension] = xWso2Basepath
 	} else {
-		contextExtensions["basePath"] = endpointBasepath
+		contextExtensions[basePathContextExtension] = endpointBasepath
 	}
-	contextExtensions["method"] = strings.Join(resource.GetMethod(), " ")
-	contextExtensions["version"] = version
-	contextExtensions["name"] = title
+	contextExtensions[methodContextExtension] = strings.Join(resource.GetMethod(), " ")
+	contextExtensions[apiVersionContextExtension] = version
+	contextExtensions[apiNameContextExtension] = title
 	// One of these values will be selected and added as the cluster-header http header
 	// from enhancer
 	// Even if the routing is based on direct cluster, these properties needs to be populated
