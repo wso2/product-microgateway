@@ -78,7 +78,8 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 		// within ext-authz filter. Without this configuration, the API cannot have production
 		// and sandbox endpoints both at once as the cluster is set based on the header added
 		// from the ext-authz filter.
-		ClearRouteCache: true,
+		ClearRouteCache:     true,
+		TransportApiVersion: corev3.ApiVersion_V3,
 		Services: &ext_authv3.ExtAuthz_GrpcService{
 			GrpcService: &corev3.GrpcService{
 				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{

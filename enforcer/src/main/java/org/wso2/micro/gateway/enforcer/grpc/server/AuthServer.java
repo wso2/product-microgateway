@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
 import org.wso2.micro.gateway.enforcer.config.MGWConfiguration;
+import org.wso2.micro.gateway.enforcer.filters.AnalyticsFilter;
 import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerDataService;
 import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerDataServiceImpl;
 import org.wso2.micro.gateway.enforcer.listener.GatewayJMSMessageListener;
@@ -62,6 +63,15 @@ public class AuthServer {
         MGWConfiguration mgwConfiguration = MGWConfiguration.getInstance();
         ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
         ReferenceHolder.getInstance().setMGWConfiguration(mgwConfiguration);
+
+        // Enable global filters
+        // TODO (amalimatharaarachchi) enable analytics according to config
+        boolean analytics = false;
+        if (analytics) {
+            logger.info("analytics filter enabled");
+            new AnalyticsFilter();
+        }
+
         CacheProvider.init();
 
         // Start the server

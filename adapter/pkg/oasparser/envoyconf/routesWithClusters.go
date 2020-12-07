@@ -325,7 +325,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpointBas
 	b.SetDeterministic(true)
 	_ = b.Marshal(&perFilterConfig)
 	filter := &any.Any{
-		TypeUrl: extAuthzPerRouteFilterName,
+		TypeUrl: extAuthzPerRouteName,
 		Value:   b.Bytes(),
 	}
 
@@ -384,7 +384,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpointBas
 		Metadata:  nil,
 		Decorator: decorator,
 		TypedPerFilterConfig: map[string]*any.Any{
-			"envoy.config.filter.http.ext_authz.v2.ExtAuthzPerRoute": filter,
+			extAuthzPerRouteName: filter,
 		},
 	}
 	return &router
