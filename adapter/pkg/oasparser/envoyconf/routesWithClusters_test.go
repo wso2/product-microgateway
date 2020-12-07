@@ -49,8 +49,8 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
-	// TODO: (VirajSalaka) Test Sandbox endpoints
-	routes, clusters, _, _, _, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
+	// TODO: (VirajSalaka) Test Sandbox endpoints.
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
 
 	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
 	// As the first cluster is always related to API level cluster

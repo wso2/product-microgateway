@@ -49,23 +49,19 @@ import (
 // First set of routes, clusters, addresses represents the production endpoints related
 // configurations. Next set represents the sandbox endpoints related configurations.
 func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.Route,
-	clustersP []*clusterv3.Cluster, addressesP []*corev3.Address,
-	routesS []*routev3.Route, clustersS []*clusterv3.Cluster, addressesS []*corev3.Address) {
+	clustersP []*clusterv3.Cluster, addressesP []*corev3.Address) {
 	var (
-		routesProd              []*routev3.Route
-		clusters                []*clusterv3.Cluster
+		routesProd []*routev3.Route
+		clusters   []*clusterv3.Cluster
+		endpoints  []*corev3.Address
+
 		apiLevelEndpointProd    []model.Endpoint
 		apilevelClusterProd     *clusterv3.Cluster
 		apiLevelClusterNameProd string
-		endpoints               []*corev3.Address
 
-		//TODO: (VirajSalaka) Remove unused properties
-		routesSand              []*routev3.Route
-		clustersSand            []*clusterv3.Cluster
 		apiLevelEndpointSand    []model.Endpoint
 		apilevelClusterSand     *clusterv3.Cluster
 		apiLevelClusterNameSand string
-		endpointsSand           []*corev3.Address
 	)
 	// To keep track of API Level production endpoint basePath
 	apiEndpointBasePath := ""
@@ -176,7 +172,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 		routeP := createRoute(apiTitle, apiBasePath, apiVersion, endpointBasepath, resource, clusterRefProd, clusterRefSand)
 		routesProd = append(routesProd, routeP)
 	}
-	return routesProd, clusters, endpoints, routesSand, clustersSand, endpointsSand
+	return routesProd, clusters, endpoints
 }
 
 // createCluster creates cluster configuration. AddressConfiguration, cluster name and
