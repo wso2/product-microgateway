@@ -19,7 +19,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: logconfig-toml-configmap
+  name: logconfig-toml
 data:
   log_config.toml: |
     # The logging configuration file for control plane

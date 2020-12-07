@@ -27,7 +27,7 @@ spec:
   selector:
     app: mg-enforcer
   ports:
-    - name: "8081"
+    - name: "https-enforcerauthserver"
       port: 8081
       targetPort: 8081
       protocol: TCP

@@ -49,6 +49,14 @@ spec:
               subPath: log_config.toml
               name: logconfig-toml-vol
           image: wso2/mg-adapter:4.0.0-m1
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
           ports:
             - containerPort: 18000
             - containerPort: 9843
@@ -64,18 +72,24 @@ spec:
             periodSeconds: 5
       volumes:
         - name: adapter-key-vol
-          configMap:
-            name: adapter-key-configmap
+          secret:
+            secretName: adapter-key-secret
+            items:
+              - key: localhost.key
+                path: localhost.key
         - name: adapter-pem-vol
-          configMap:
-            name: adapter-pem-configmap
+          secret:
+            secretName: adapter-pem-secret
+            items:
+              - key: localhost.pem
+                path: localhost.pem
         - name: config-toml-vol
           configMap:
-            name: config-toml-configmap
+            name: config-toml
         - name: log4j2-vol
           configMap:
-            name: log4j2-configmap
+            name: log4j2
         - name: logconfig-toml-vol
           configMap:
-            name: logconfig-toml-configmap
+            name: logconfig-toml
       restartPolicy: Always
