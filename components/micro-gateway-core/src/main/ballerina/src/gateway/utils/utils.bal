@@ -83,11 +83,6 @@ public function getKeyValidationRequestObject(runtime:InvocationContext context,
     if (httpResourceConfig is http:HttpResourceConfig) {
         apiKeyValidationRequest.matchingResource = <string>httpResourceConfig.path;
         apiKeyValidationRequest.httpVerb = <string>httpResourceConfig.methods[0];
-        // we are explicitly setting the scopes to principal, because scope validation happens at key validation
-        //service. Doing scope validation again in ballerina authz filter causes authorization failure.
-        //So we trust the scope validation done by key validation service and forcefully make the ballerina
-        //authz scope validation successful.
-        setResourceScopesToPrincipal(httpResourceConfig, invocationContext, accessToken);
     }
     string apiContext = <string>httpServiceConfig.basePath;
     APIConfiguration? apiConfig = apiConfigAnnotationMap[serviceName];
@@ -1099,26 +1094,6 @@ public function getHandlers(string[] appSecurity) returns http:InboundAuthHandle
         handlers.push(authHandlersMap.get(API_KEY_HANDLER));
     }
     return handlers;
-}
-
-# This method is used to skip the scope validation done by the ballerina authorization filter. This is done because
-# at the moment there is no way to skip this filter. So we have to set the scopes define in the resource annotation and
-# set it to the principal, so ballerina authorization filter will pass. This is used in security mechanisms like api key
-# where concept of scope is not applicable.
-#
-# + httpResourceConfig - resource level annotation config.
-# + invocationContext - invocation context object.
-# + user - fuser name to be set to the principal.
-public function setResourceScopesToPrincipal(http:HttpResourceConfig httpResourceConfig,
-        runtime:InvocationContext invocationContext, string user) {
-    http:ResourceAuth? resourceLevelAuthAnn = httpResourceConfig?.auth;
-    if (resourceLevelAuthAnn is http:ResourceAuth) {
-        var resourceScopes = resourceLevelAuthAnn?.scopes;
-        if (resourceScopes is string[]) {
-            runtime:Principal principal = {username: user, scopes: resourceScopes};
-            invocationContext.principal = principal;
-        }
-    }
 }
 
 function setRequestDataToInvocationContext(http:HttpServiceConfig httpServiceConfig, http:HttpResourceConfig? httpResourceConfig) {

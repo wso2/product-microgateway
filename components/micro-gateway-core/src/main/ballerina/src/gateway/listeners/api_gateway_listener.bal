@@ -87,7 +87,8 @@ function initiateAuthenticationHandlers(http:ListenerConfiguration config) {
     http:ListenerAuth auth = {
          authHandlers: getAuthHandlers(), //set empty array
          mandateSecureSocket: false,
-         position: authFilterPosition
+         position: authFilterPosition,
+         enableAuthzFilter: false
     };
     config.auth = auth;
 }

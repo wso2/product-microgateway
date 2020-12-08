@@ -75,7 +75,8 @@ function initiateGatewaySecureConfigurations(http:ListenerConfiguration config) 
     //after the gateway cache objects are initialized.
     http:ListenerAuth auth = {
          authHandlers: getAuthHandlers(), //set empty array
-         position: authFilterPosition
+         position: authFilterPosition,
+         enableAuthzFilter: false
     };
     config.auth = auth;
     config.secureSocket = secureSocket;
