@@ -15,6 +15,16 @@ listenerTLSEnabled = true
 listenerCertPath = "/home/wso2/security/localhost.pem"
 listenerKeyPath = "/home/wso2/security/localhost.key"
 
+[envoy.upstream]
+[envoy.upstream.tls]
+minimumProtocolVersion = "TLS1_2"
+maximumProtocolVersion = "TLS1_2"
+ciphers = "ECDHE-RSA-AES128-SHA"  
+# the default endpoint certificates
+trustedCertificatesFilePath = "/etc/ssl/certs/ca-certificates.crt"
+clientCertPath = "/home/wso2/security/localhost.pem"
+clientKeyPath = "/home/wso2/security/localhost.key"
+
 [filter]
 #Key Store Configuration
 [filter.keystore]

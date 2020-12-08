@@ -209,19 +209,7 @@ func createCluster(address *corev3.Address, clusterName string, urlType string) 
 		},
 	}
 	if strings.HasPrefix(urlType, httpsURLType) {
-		upstreamtlsContext := &tlsv3.UpstreamTlsContext{
-			CommonTlsContext: &tlsv3.CommonTlsContext{
-				ValidationContextType: &tlsv3.CommonTlsContext_ValidationContext{
-					ValidationContext: &tlsv3.CertificateValidationContext{
-						TrustedCa: &corev3.DataSource{
-							Specifier: &corev3.DataSource_Filename{
-								Filename: defaultCACertPath,
-							},
-						},
-					},
-				},
-			},
-		}
+		upstreamtlsContext := createUpstreamTLSContext()
 		marshalledTLSContext, err := ptypes.MarshalAny(upstreamtlsContext)
 		if err != nil {
 			logger.LoggerOasparser.Error("Internal Error while marshalling the upstream TLS Context.")
@@ -236,6 +224,61 @@ func createCluster(address *corev3.Address, clusterName string, urlType string) 
 		}
 	}
 	return &cluster
+}
+
+func createUpstreamTLSContext() *tlsv3.UpstreamTlsContext {
+	conf, errReadConfig := config.ReadConfigs()
+	//TODO: (VirajSalaka) Error Handling
+	if errReadConfig != nil {
+		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
+		return nil
+	}
+	tlsCert, err := generateTLSCert(conf.Envoy.Upstream.TLS.PrivateKeyPath, conf.Envoy.Upstream.TLS.PublicCertPath)
+	if err != nil {
+		logger.LoggerOasparser.Fatal("Error while generating Upstream TLS certificate ", errReadConfig)
+		return nil
+	}
+	// Convert the cipher string to a string array
+	ciphersArray := strings.Split(conf.Envoy.Upstream.TLS.Ciphers, ",")
+	for i := range ciphersArray {
+		ciphersArray[i] = strings.TrimSpace(ciphersArray[i])
+	}
+
+	upstreamTLSContext := &tlsv3.UpstreamTlsContext{
+		CommonTlsContext: &tlsv3.CommonTlsContext{
+			TlsParams: &tlsv3.TlsParameters{
+				TlsMinimumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MinVersion),
+				TlsMaximumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MaxVersion),
+				CipherSuites:              ciphersArray,
+			},
+			TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
+			ValidationContextType: &tlsv3.CommonTlsContext_ValidationContext{
+				ValidationContext: &tlsv3.CertificateValidationContext{
+					TrustedCa: &corev3.DataSource{
+						Specifier: &corev3.DataSource_Filename{
+							Filename: conf.Envoy.Upstream.TLS.CACrtPath,
+						},
+					},
+				},
+			},
+		},
+	}
+	return upstreamTLSContext
+}
+
+func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol {
+	switch tlsVersion {
+	case "TLS1_0":
+		return tlsv3.TlsParameters_TLSv1_2
+	case "TLS1_1":
+		return tlsv3.TlsParameters_TLSv1_1
+	case "TLS1_2":
+		return tlsv3.TlsParameters_TLSv1_2
+	case "TLS1_3":
+		return tlsv3.TlsParameters_TLSv1_3
+	default:
+		return tlsv3.TlsParameters_TLS_AUTO
+	}
 }
 
 // createRoute creates route elements for the route configurations. API title, xWso2Basepath, API version,
