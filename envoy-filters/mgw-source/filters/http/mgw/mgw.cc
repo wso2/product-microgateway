@@ -47,6 +47,19 @@ void Filter::setEncoderFilterCallbacks(Http::StreamEncoderFilterCallbacks& callb
 
 // Http::StreamDecoderFilter
 Http::FilterTrailersStatus Filter::decodeTrailers(Http::RequestTrailerMap&) {
+  ENVOY_LOG(trace, "decodeTrailers");
+  // make sure to metadata were read at least once per request
+  if (!set_body_) {
+    // read metadata and check we need to modify the request body
+    set_body_ = readMetadata(&req_callbacks_->streamInfo().dynamicMetadata());
+  }
+  // if we do not modify the body we continue to other filters
+  if (!set_body_) {
+     return Http::FilterTrailersStatus::Continue;
+  }
+  // once the stream is complete, we modify the payload.
+  setPayload(modified_body_, req_callbacks_->decodingBuffer(), req_headers_);
+
   return Http::FilterTrailersStatus::Continue;
 }
 
@@ -57,30 +70,33 @@ void Filter::setDecoderFilterCallbacks(Http::StreamDecoderFilterCallbacks& callb
 Http::FilterHeadersStatus Filter::decodeHeaders(Http::RequestHeaderMap& headers, bool end_stream) {
   ENVOY_LOG(trace, "decodeHeaders with end_stream = {}", end_stream);
   req_headers_ = &headers;
-  // read metadata and check we need to modify the request body
-  set_body_ = readMetadata(&req_callbacks_->streamInfo().dynamicMetadata());
-  //if we do not modify the body we continue to other filters
+  if (!set_body_) {
+    // read metadata and check we need to modify the request body
+    set_body_ = readMetadata(&req_callbacks_->streamInfo().dynamicMetadata());
+  }
+  // if we do not modify the body we continue to other filters
   if (!set_body_) {
     return Http::FilterHeadersStatus::Continue;
   }
-  // if stream is not ended, stop continueing to other filters and buffer. 
+
   if (!end_stream) {
     return Http::FilterHeadersStatus::StopIteration;
   }
-  //once the stream is complete (end_stream == true), we modify the payload.
+  // once the stream is complete (end_stream == true), we modify the payload.
   setPayload(modified_body_, req_callbacks_->decodingBuffer(), req_headers_);
   return Http::FilterHeadersStatus::Continue;
 }
 
 Http::FilterDataStatus Filter::decodeData(Buffer::Instance& data, bool end_stream) {
-
+  ENVOY_LOG(trace, "decodeData with end_stream = {}", end_stream);
   // if we do not modify the body we continue to other filters
   if (!set_body_) {
     return Http::FilterDataStatus::Continue;
   }
 
-  ENVOY_LOG(trace, "decodeData with data = {} , end_stream = {}", data.toString(), end_stream);
-  // if stream is not ended, stop continueing to other filters and buffer.
+  // no need to keep buffer data since we are going to modify anyway.
+  data.drain(data.length());
+  // if stream is not ended, stop continuing to other filters and buffer.
   if (!end_stream) {
     return Http::FilterDataStatus::StopIterationAndBuffer;
   }
@@ -90,35 +106,34 @@ Http::FilterDataStatus Filter::decodeData(Buffer::Instance& data, bool end_strea
 }
 
 void Filter::setPayload(std::string new_payload, const Buffer::Instance* decoding_buffer,
-                     Http::RequestHeaderMap* req_headers) {
+                        Http::RequestHeaderMap* req_headers) {
   ENVOY_LOG(debug, "Modifying payload ...");
   // create a new buffer instance with new payload data.
   Buffer::OwnedImpl modified_body(new_payload);
 
-  //if we never got a payload from the downstream/ header only request.
+  // if we never got a payload from the downstream/ header only request.
   if (decoding_buffer == nullptr) {
-    // We are not streaming back this this payload data so we set streaming_filter = false.
+    // we are not streaming back this as it is already in memory. so we set streaming_filter = false.
     req_callbacks_->addDecodedData(modified_body, false);
-  }
-  else {
-    // Since we modifying the existing payload, we drain the data buffer and add new data.
+  } else {
+    // since we modifying the existing payload, we drain the data buffer and add new data.
     req_callbacks_->modifyDecodingBuffer([&modified_body](Buffer::Instance& data) {
       data.drain(data.length());
       data.move(modified_body);
     });
   }
-  // Since we modified the payload, need to set new content length.
+  // since we modified the payload, need to set new content length.
   decoding_buffer = req_callbacks_->decodingBuffer();
   req_headers->setContentLength(decoding_buffer->length());
   ENVOY_LOG(debug, "payload successfully modified");
 }
 
 bool Filter::readMetadata(const envoy::config::core::v3::Metadata* metadata) {
-  std::string jsonJWTPayload;
-  // We read metadata under ext_authz filter and if find a key "payload", 
+  // we read metadata under ext_authz filter and if find a key "payload",
   // then decide to modify the payload.
-  std::string PayloadMetadataKey = "payload";
-  // Reading metadata under external authorization
+  ENVOY_LOG(debug, "Reading metadata ...");
+  const std::string PayloadMetadataKey = "payload";
+  // reading metadata under external authorization
   const auto* payload = &Config::Metadata::metadataValue(
       metadata, HttpFilterNames::get().ExtAuthorization, PayloadMetadataKey);
 

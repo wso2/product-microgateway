@@ -16,12 +16,11 @@ namespace HttpFilters {
 namespace MGW {
 
 Http::FilterFactoryCb MGWFilterConfig::createFilterFactoryFromProtoTyped(
-    const envoy::extensions::filters::http::mgw::v3::MGW& ,
-    const std::string& , Server::Configuration::FactoryContext& ) {
+    const envoy::extensions::filters::http::mgw::v3::MGW&, const std::string&,
+    Server::Configuration::FactoryContext&) {
   Http::FilterFactoryCb callback;
   callback = [](Http::FilterChainFactoryCallbacks& callbacks) {
-    callbacks.addStreamFilter(Http::StreamFilterSharedPtr{
-        std::make_shared<Filter>()});
+    callbacks.addStreamFilter(Http::StreamFilterSharedPtr{std::make_shared<Filter>()});
   };
 
   return callback;
