@@ -34,7 +34,6 @@ const (
 	defaultRdsConfigName            string = "default"
 	defaultAccessLogPath            string = "/tmp/envoy.access.log"
 	defaultListenerSecretConfigName string = "DefaultListenerSecret"
-	defaultCACertPath               string = "/etc/ssl/certs/ca-certificates.crt"
 )
 
 const (

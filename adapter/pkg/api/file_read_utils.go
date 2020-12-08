@@ -22,7 +22,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"io/ioutil"
-	"log"
 	"strings"
 
 	"github.com/wso2/micro-gw/loggers"
@@ -36,6 +35,10 @@ import (
 // definition as only swagger.yaml is taken into consideration here.
 func ApplyAPIProject(payload []byte) error {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
+	var upstreamCerts []byte
+	newLineByteArray := []byte("\n")
+	var apiJsn []byte
+	var conversionErr error
 
 	if err != nil {
 		loggers.LoggerAPI.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
@@ -51,26 +54,25 @@ func ApplyAPIProject(payload []byte) error {
 				loggers.LoggerAPI.Errorf("Error occured while reading the openapi file. %v", err.Error())
 				continue
 			}
-			apiJsn, conversionErr := utills.ToJSON(unzippedFileBytes)
+			apiJsn, conversionErr = utills.ToJSON(unzippedFileBytes)
 			if conversionErr != nil {
 				loggers.LoggerAPI.Errorf("Error converting api file to json: %v", err.Error())
 				return conversionErr
 			}
-			xds.UpdateEnvoy(apiJsn)
+			//TODO: (VirajSalaka) introduce regex
+		} else if strings.Contains(file.Name, "/Endpoint-Certificates/") && strings.HasSuffix(file.Name, ".crt") {
+			//TODO: (VirajSalaka) Validate the content of cert files using regex
+			unzippedFileBytes, err := readZipFile(file)
+			if err != nil {
+				loggers.LoggerAPI.Errorf("Error occured while reading the endpoint certificate : %v, %v", file.Name, err.Error())
+				continue
+			}
+			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
+			upstreamCerts = append(upstreamCerts, newLineByteArray...)
 		}
 	}
+	xds.UpdateEnvoy(apiJsn, upstreamCerts)
 	return nil
-}
-
-// ApplyOpenAPIFile accepts an openapi definition as a bytearray and apply the changes to XDS servers.
-// TODO: (VirajSalaka) Remove the code segment as it is not in use for the main flow.
-func ApplyOpenAPIFile(payload []byte) {
-	apiJsn, err := utills.ToJSON(payload)
-	if err != nil {
-		log.Fatal("Error converting api file to json:", err)
-		return
-	}
-	xds.UpdateEnvoy(apiJsn)
 }
 
 func readZipFile(zf *zip.File) ([]byte, error) {

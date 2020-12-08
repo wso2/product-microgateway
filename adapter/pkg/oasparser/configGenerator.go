@@ -30,9 +30,10 @@ import (
 
 // GetProductionRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
 // when the openAPI Json is provided.
-func GetProductionRoutesClustersEndpoints(byteArr []byte) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
+func GetProductionRoutesClustersEndpoints(byteArr []byte, upstreamCerts []byte) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
 	mgwSwagger := operator.GetMgwSwagger(byteArr)
-	routes, clusters, endpoints := envoy.CreateRoutesWithClusters(mgwSwagger)
+	//TODO: (VirajSalaka) Decide if this needs to be added to the MgwSwagger
+	routes, clusters, endpoints := envoy.CreateRoutesWithClusters(mgwSwagger, upstreamCerts)
 	return routes, clusters, endpoints
 }
 
