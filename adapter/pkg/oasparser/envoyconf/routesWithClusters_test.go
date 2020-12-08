@@ -20,6 +20,7 @@ import (
 	"io/ioutil"
 	"testing"
 
+	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
@@ -143,8 +144,16 @@ func TestCreateRoutesWithClustersProdSandEp(t *testing.T) {
 	assert.NotEmpty(t, pathLevelSandClusterPort, "Path Level Sandbox Cluster's assigned port should not be null")
 	assert.Equal(t, uint32(443), pathLevelSandClusterPort, "Path Level Sandbox Cluster's assigned host is incorrect.")
 
-	resourceLevelEndpointRoute := routes[0]
-	apiLevelEndpointRoute := routes[1]
+	var resourceLevelEndpointRoute *routev3.Route
+	var apiLevelEndpointRoute *routev3.Route
+	// Fix Intermittent Failure
+	if routes[0].GetDecorator().GetOperation() == "/pets" {
+		resourceLevelEndpointRoute = routes[0]
+		apiLevelEndpointRoute = routes[1]
+	} else {
+		resourceLevelEndpointRoute = routes[1]
+		apiLevelEndpointRoute = routes[0]
+	}
 
 	extAuthPerRouteConfigAPILevel := &extAuthService.ExtAuthzPerRoute{}
 	err = ptypes.UnmarshalAny(apiLevelEndpointRoute.
