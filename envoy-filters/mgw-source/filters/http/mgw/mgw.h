@@ -58,11 +58,11 @@ private:
    * @param req_headers request headers
    */
   void setPayload(std::string new_payload, const Buffer::Instance* decoding_buffer,
-               Http::RequestHeaderMap* req_headers);
+                  Http::RequestHeaderMap* req_headers);
   /**
    * Reads the metadata and get details
    * @param metadata stream metadata
-   * @return bool whether requested data is present and processed successfully 
+   * @return bool whether requested data is present and processed successfully
    */
   bool readMetadata(const envoy::config::core::v3::Metadata* metadata);
   Http::StreamEncoderFilterCallbacks* res_callbacks_{};

@@ -14,8 +14,7 @@ namespace MGW {
 /**
  * Config registration for the external authorization filter. @see NamedHttpFilterConfigFactory.
  */
-class MGWFilterConfig
-    : public Common::FactoryBase<envoy::extensions::filters::http::mgw::v3::MGW> {
+class MGWFilterConfig : public Common::FactoryBase<envoy::extensions::filters::http::mgw::v3::MGW> {
 public:
   MGWFilterConfig() : FactoryBase("envoy.filters.http.mgw") {}
 
