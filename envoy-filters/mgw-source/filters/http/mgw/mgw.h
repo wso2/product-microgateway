@@ -70,6 +70,7 @@ private:
   Http::RequestHeaderMap* req_headers_{};
   std::string modified_body_;
   bool set_body_;
+  bool read_metadata_;
 };
 
 } // namespace MGW

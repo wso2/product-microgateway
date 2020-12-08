@@ -49,7 +49,7 @@ void Filter::setEncoderFilterCallbacks(Http::StreamEncoderFilterCallbacks& callb
 Http::FilterTrailersStatus Filter::decodeTrailers(Http::RequestTrailerMap&) {
   ENVOY_LOG(trace, "decodeTrailers");
   // make sure to metadata were read at least once per request
-  if (!set_body_) {
+  if (!read_metadata_) {
     // read metadata and check we need to modify the request body
     set_body_ = readMetadata(&req_callbacks_->streamInfo().dynamicMetadata());
   }
@@ -70,7 +70,7 @@ void Filter::setDecoderFilterCallbacks(Http::StreamDecoderFilterCallbacks& callb
 Http::FilterHeadersStatus Filter::decodeHeaders(Http::RequestHeaderMap& headers, bool end_stream) {
   ENVOY_LOG(trace, "decodeHeaders with end_stream = {}", end_stream);
   req_headers_ = &headers;
-  if (!set_body_) {
+  if (!read_metadata_) {
     // read metadata and check we need to modify the request body
     set_body_ = readMetadata(&req_callbacks_->streamInfo().dynamicMetadata());
   }
@@ -132,6 +132,8 @@ bool Filter::readMetadata(const envoy::config::core::v3::Metadata* metadata) {
   // we read metadata under ext_authz filter and if find a key "payload",
   // then decide to modify the payload.
   ENVOY_LOG(debug, "Reading metadata ...");
+  // this will be used to check if the metadata was read once per request. 
+  read_metadata_ = true;
   const std::string PayloadMetadataKey = "payload";
   // reading metadata under external authorization
   const auto* payload = &Config::Metadata::metadataValue(
