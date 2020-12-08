@@ -221,13 +221,16 @@ public type OAuth2KeyValidationProvider object {
 
     public function setScopesToPrincipalComponent(xml responseXml) {
             string[] scopes = [];
-            int i = 0;
+            int index = 0;
             // Iterate through scopes.
             foreach xml|string scope in responseXml/<apim:scopes>/* {
                 if (scope is xml) {
                     //Add scopes into a string array.
-                    scopes[i] = scope.toString();
-                    i = i + 1;
+                    scopes[index] = scope.toString();
+                    index = index + 1;
+                } else {
+                    string errorMessage = "Error occurred while adding scopes to the principal component: Expected xml found string";
+                    printDebug(KEY_OAUTH_PROVIDER, errorMessage);
                 }
             }
             if (scopes.length() != 0) {
