@@ -235,11 +235,7 @@ func createUpstreamTLSContext(upstreamCerts []byte) *tlsv3.UpstreamTlsContext {
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 		return nil
 	}
-	tlsCert, err := generateTLSCert(conf.Envoy.Upstream.TLS.PrivateKeyPath, conf.Envoy.Upstream.TLS.PublicCertPath)
-	if err != nil {
-		logger.LoggerOasparser.Fatal("Error while generating Upstream TLS certificate ", errReadConfig)
-		return nil
-	}
+	tlsCert := generateTLSCert(conf.Envoy.Upstream.TLS.PrivateKeyPath, conf.Envoy.Upstream.TLS.PublicCertPath)
 	// Convert the cipher string to a string array
 	ciphersArray := strings.Split(conf.Envoy.Upstream.TLS.Ciphers, ",")
 	for i := range ciphersArray {
@@ -281,7 +277,7 @@ func createUpstreamTLSContext(upstreamCerts []byte) *tlsv3.UpstreamTlsContext {
 func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol {
 	switch tlsVersion {
 	case "TLS1_0":
-		return tlsv3.TlsParameters_TLSv1_2
+		return tlsv3.TlsParameters_TLSv1_0
 	case "TLS1_1":
 		return tlsv3.TlsParameters_TLSv1_1
 	case "TLS1_2":

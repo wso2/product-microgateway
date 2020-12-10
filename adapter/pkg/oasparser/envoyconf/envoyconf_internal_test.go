@@ -18,16 +18,19 @@
 package envoyconf
 
 import (
+	"io/ioutil"
 	"regexp"
 	"strings"
 	"testing"
 
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
+	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/micro-gw/config"
 	mgwconfig "github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/pkg/oasparser/model"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -247,7 +250,7 @@ func TestGenerateTLSCert(t *testing.T) {
 	publicKeyPath := mgwconfig.GetMgwHome() + "/adapter/security/localhost.pem"
 	privateKeyPath := mgwconfig.GetMgwHome() + "/adapter/security/localhost.key"
 
-	tlsCert, _ := generateTLSCert(privateKeyPath, publicKeyPath)
+	tlsCert := generateTLSCert(privateKeyPath, publicKeyPath)
 
 	assert.NotNil(t, tlsCert, "TLS Certificate should not be null")
 
@@ -324,4 +327,41 @@ func TestGenerateRegex(t *testing.T) {
 		assert.Equal(t, item.isMatched, resultIsMatching, item.message)
 		assert.Nil(t, err)
 	}
+}
+
+func TestCreateUpstreamTLSContext(t *testing.T) {
+	certFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/certs/testcrt.crt"
+	certByteArr, err := ioutil.ReadFile(certFilePath)
+	assert.Nil(t, err, "Error while reading the certificate : "+certFilePath)
+	defaultMgwKeyPath := "/home/wso2/security/localhost.key"
+	defaultMgwCertPath := "/home/wso2/security/localhost.pem"
+	defaultCipherArray := "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA," +
+		" ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384," +
+		" ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"
+	defaultCACertPath := "/etc/ssl/certs/ca-certificates.crt"
+
+	tlsCert := generateTLSCert(defaultMgwKeyPath, defaultMgwCertPath)
+
+	upstreamTLSContextWithCerts := createUpstreamTLSContext(certByteArr)
+	upstreamTLSContextWithoutCerts := createUpstreamTLSContext(nil)
+
+	assert.NotEmpty(t, upstreamTLSContextWithCerts, "Upstream TLS Context should not be null when certs provided")
+	assert.NotEmpty(t, upstreamTLSContextWithCerts.CommonTlsContext, "CommonTLSContext should not be "+
+		"null when certs provided")
+	assert.NotEmpty(t, upstreamTLSContextWithCerts.CommonTlsContext.TlsParams, "TlsParams should not be "+
+		"null when certs provided")
+	// tested against default TLS Parameters
+	assert.Equal(t, tlsv3.TlsParameters_TLSv1_2, upstreamTLSContextWithCerts.CommonTlsContext.TlsParams.TlsMaximumProtocolVersion,
+		"TLS maximum parameter mismatch")
+	assert.Equal(t, tlsv3.TlsParameters_TLSv1_2, upstreamTLSContextWithCerts.CommonTlsContext.TlsParams.TlsMinimumProtocolVersion,
+		"TLS maximum parameter mismatch")
+
+	assert.Equal(t, defaultCipherArray, strings.Join(upstreamTLSContextWithCerts.CommonTlsContext.TlsParams.CipherSuites, ", "), "cipher suites mismatch")
+	// the microgateway's certificate will be provided all the time. (For mutualSSL when required)
+	assert.NotEmpty(t, upstreamTLSContextWithCerts.CommonTlsContext.TlsCertificates, "TLScerts should not be null")
+	assert.Equal(t, tlsCert, upstreamTLSContextWithCerts.CommonTlsContext.TlsCertificates[0], "TLScert mismatch")
+	assert.Equal(t, certByteArr, upstreamTLSContextWithCerts.CommonTlsContext.GetValidationContext().GetTrustedCa().GetInlineBytes(),
+		"validation context certificate mismatch")
+	assert.Equal(t, defaultCACertPath, upstreamTLSContextWithoutCerts.CommonTlsContext.GetValidationContext().GetTrustedCa().GetFilename(),
+		"validation context certificate filepath mismatch")
 }
