@@ -53,7 +53,7 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
 	// TODO: (VirajSalaka) Test Sandbox endpoints.
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil)
 
 	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
 	// As the first cluster is always related to API level cluster
@@ -107,7 +107,7 @@ func TestCreateRoutesWithClustersProdSandEp(t *testing.T) {
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi)
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil)
 
 	assert.Equal(t, 4, len(clusters), "Number of production clusters created is incorrect.")
 	assert.Equal(t, 2, len(routes), "Created number of routes are incorrect.")

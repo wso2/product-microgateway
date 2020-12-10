@@ -18,7 +18,6 @@
 package envoyconf
 
 import (
-	"io/ioutil"
 	"regexp"
 	"strings"
 	"testing"
@@ -252,14 +251,11 @@ func TestGenerateTLSCert(t *testing.T) {
 
 	assert.NotNil(t, tlsCert, "TLS Certificate should not be null")
 
-	privateKeyByteArray, _ := ioutil.ReadFile(privateKeyPath)
-	publicKeyByteArray, _ := ioutil.ReadFile(publicKeyPath)
-
 	assert.NotNil(t, tlsCert.GetPrivateKey(), "Private Key should not be null in the TLS certificate")
 	assert.NotNil(t, tlsCert.GetCertificateChain(), "Certificate chain should not be null in the TLS certificate")
 
-	assert.Equal(t, tlsCert.GetPrivateKey().GetInlineBytes(), privateKeyByteArray, "Private Key Value mismatch in the TLS Certificate")
-	assert.Equal(t, tlsCert.GetCertificateChain().GetInlineBytes(), publicKeyByteArray, "Certificate Chain Value mismatch in the TLS Certificate")
+	assert.Equal(t, tlsCert.GetPrivateKey().GetFilename(), privateKeyPath, "Private Key Value mismatch in the TLS Certificate")
+	assert.Equal(t, tlsCert.GetCertificateChain().GetFilename(), publicKeyPath, "Certificate Chain Value mismatch in the TLS Certificate")
 }
 
 func TestGenerateRegex(t *testing.T) {

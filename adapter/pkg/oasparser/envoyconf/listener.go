@@ -87,7 +87,7 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 			},
 		},
 		HttpFilters: httpFilters,
-		AccessLog:  accessLogs,
+		AccessLog:   accessLogs,
 	}
 
 	pbst, err := ptypes.MarshalAny(manager)
@@ -201,25 +201,19 @@ func generateDefaultSdsSecretFromConfigfile(privateKeyPath string, pulicKeyPath 
 	return &secret, nil
 }
 
+// generateTLSCert generates the TLS Certiificate with given private key filepath and the corresponding public Key filepath.
+// The files should be mounted to the router container unless the default cert is used.
 func generateTLSCert(privateKeyPath string, publicKeyPath string) (*tlsv3.TlsCertificate, error) {
 	var tlsCert tlsv3.TlsCertificate
-	privateKeyByteArray, err := readFileAsByteArray(privateKeyPath)
-	if err != nil {
-		return &tlsCert, err
-	}
-	publicKeyByteArray, err := readFileAsByteArray(publicKeyPath)
-	if err != nil {
-		return &tlsCert, err
-	}
 	tlsCert = tlsv3.TlsCertificate{
 		PrivateKey: &corev3.DataSource{
-			Specifier: &corev3.DataSource_InlineBytes{
-				InlineBytes: privateKeyByteArray,
+			Specifier: &corev3.DataSource_Filename{
+				Filename: privateKeyPath,
 			},
 		},
 		CertificateChain: &corev3.DataSource{
-			Specifier: &corev3.DataSource_InlineBytes{
-				InlineBytes: publicKeyByteArray,
+			Specifier: &corev3.DataSource_Filename{
+				Filename: publicKeyPath,
 			},
 		},
 	}
