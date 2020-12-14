@@ -194,7 +194,7 @@ public class HttpsClientRequest {
      */
     static void setSSlSystemProperties() {
         String certificatesTrustStorePath = HttpsClientRequest.class.getClassLoader()
-                .getResource("keystore/wso2carbon.jks").getPath();
+                .getResource("keystore/client-truststore.jks").getPath();
         System.setProperty("javax.net.ssl.trustStore", certificatesTrustStorePath);
     }
 
