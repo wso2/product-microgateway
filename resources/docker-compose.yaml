@@ -2,6 +2,8 @@ version: "3.7"
 services:
   router:
     image: wso2/mg-router:4.0.0-m2-SNAPSHOT
+    volumes:
+      - ./resources/router/security:/home/wso2/security
     ports:
       - "9095:9095"
       - "9000:9000"

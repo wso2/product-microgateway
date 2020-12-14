@@ -26,9 +26,11 @@
             <source>../resources/envoy.yaml</source>
             <outputDirectory></outputDirectory>
         </file>
-        <file>
-            <source>../resources/adapter/security</source>
-            <outputDirectory>security</outputDirectory>
-        </file>
     </files>
+    <fileSets>
+      <fileSet>
+          <directory>../resources/router/security</directory>
+          <outputDirectory>security</outputDirectory>
+      </fileSet>
+    </fileSets>
 </assembly>
