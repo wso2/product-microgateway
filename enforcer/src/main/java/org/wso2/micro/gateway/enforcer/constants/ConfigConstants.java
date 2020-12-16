@@ -25,7 +25,7 @@ package org.wso2.micro.gateway.enforcer.constants;
 public class ConfigConstants {
     public static final String ENFORCER_HOME = "ENFORCER_HOME";
     public static final String CONF_DIR = "conf";
-    public static final String CONF_FILTER_TABLE = "filter";
+    public static final String CONF_ENFORCER_TABLE = "enforcer";
     // JWT Token Config
     public static final String JWT_TOKEN_CONFIG = "jwtTokenConfig";
     public static final String JWT_TOKEN_ISSUER = "issuer";
