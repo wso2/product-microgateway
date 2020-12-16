@@ -19,7 +19,7 @@
 package org.wso2.micro.gateway.enforcer.security.jwt;
 
 import com.nimbusds.jwt.JWTClaimsSet;
-import org.wso2.micro.gateway.enforcer.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 
 import java.util.List;

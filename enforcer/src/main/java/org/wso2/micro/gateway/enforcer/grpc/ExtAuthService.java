@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.enforcer.grpc.server;
+package org.wso2.micro.gateway.enforcer.grpc;
 
 import com.google.rpc.Code;
 import com.google.rpc.Status;
@@ -31,6 +31,7 @@ import io.envoyproxy.envoy.type.HttpStatus;
 import io.grpc.stub.StreamObserver;
 import org.json.JSONObject;
 import org.wso2.micro.gateway.enforcer.api.ResponseObject;
+import org.wso2.micro.gateway.enforcer.server.RequestHandler;
 
 /**
  * This is the gRPC server written to match with the envoy ext-authz filter proto file. Envoy proxy call this service.

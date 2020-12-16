@@ -27,10 +27,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
-import org.wso2.micro.gateway.enforcer.config.MGWConfiguration;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
+import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
-import org.wso2.micro.gateway.enforcer.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.exception.DataLoadingException;
 import org.wso2.micro.gateway.enforcer.models.API;
 import org.wso2.micro.gateway.enforcer.models.APIList;
@@ -67,8 +67,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     public static final String UTF8 = "UTF-8";
 
     public SubscriptionDataLoaderImpl() {
-        MGWConfiguration config = ReferenceHolder.getInstance().getMGWConfiguration();
-        this.eventHubConfigurationDto = config.getEventHubConfiguration();
+        this.eventHubConfigurationDto = ConfigHolder.getInstance().getConfig().getEventHub();
     }
 
     @Override
@@ -383,7 +382,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         HttpGet method = new HttpGet(serviceURLStr + path);
 
         URL serviceURL = new URL(serviceURLStr + path);
-        byte[] credentials = getServiceCredentials(eventHubConfigurationDto);
+        byte[] credentials = getServiceCredentials();
         int servicePort = serviceURL.getPort();
         String serviceProtocol = serviceURL.getProtocol();
         method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
@@ -428,10 +427,10 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     }
 
-    private byte[] getServiceCredentials(EventHubConfigurationDto eventHubConfigurationDto) {
-
-        String username = eventHubConfigurationDto.getUsername();
-        String pw = eventHubConfigurationDto.getPassword();
+    private byte[] getServiceCredentials() {
+        CredentialDto apimCredentials = ConfigHolder.getInstance().getConfig().getApimCredentials();
+        String username = apimCredentials.getUsername();
+        char[] pw = apimCredentials.getPassword();
         return Base64.encodeBase64((username + APIConstants.DELEM_COLON + pw).getBytes(StandardCharsets.UTF_8));
     }
 

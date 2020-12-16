@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.enforcer.grpc.server;
+package org.wso2.micro.gateway.enforcer.server;
 
 import io.envoyproxy.envoy.service.auth.v2.CheckRequest;
 import io.envoyproxy.envoy.service.auth.v2.CheckResponse;

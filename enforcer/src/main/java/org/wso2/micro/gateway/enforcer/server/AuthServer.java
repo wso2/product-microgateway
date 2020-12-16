@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.enforcer.grpc.server;
+package org.wso2.micro.gateway.enforcer.server;
 
 import io.grpc.Server;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
@@ -27,15 +27,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
-import org.wso2.micro.gateway.enforcer.config.MGWConfiguration;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
+import org.wso2.micro.gateway.enforcer.grpc.ExtAuthService;
 import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerDataService;
 import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerDataServiceImpl;
 import org.wso2.micro.gateway.enforcer.listener.GatewayJMSMessageListener;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,36 +45,47 @@ public class AuthServer {
     private static final Logger logger = LogManager.getLogger(AuthServer.class);
 
     public static void main(String[] args) throws Exception {
-        // Create a new server to listen on port 8081
-        final EventLoopGroup bossGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
-        final EventLoopGroup workerGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors() * 2);
-        int blockingQueueLength = 1000;
-        final BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue(blockingQueueLength);
-        final Executor executor = new MGWThreadPoolExecutor(400, 500, 30, TimeUnit.SECONDS, blockingQueue);
-        Server server = NettyServerBuilder.forPort(8081).maxConcurrentCallsPerConnection(20)
-                .keepAliveTime(60, TimeUnit.SECONDS).maxInboundMessageSize(1000000000).bossEventLoopGroup(bossGroup)
-                .workerEventLoopGroup(workerGroup).addService(new ExtAuthService())
-                .channelType(NioServerSocketChannel.class).executor(executor).build();
 
         // Load configurations
+        ConfigHolder configHolder = ConfigHolder.getInstance();
         KeyManagerDataService keyManagerDataService = new KeyManagerDataServiceImpl();
-        MGWConfiguration mgwConfiguration = MGWConfiguration.getInstance();
         ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
-        ReferenceHolder.getInstance().setMGWConfiguration(mgwConfiguration);
+
+        // Create a new server to listen on port 8081
+        Server server = initServer();
+        //Initialise cache objects
         CacheProvider.init();
 
         // Start the server
         server.start();
         logger.info("Sever started Listening in port : " + 8081);
 
-        if (mgwConfiguration.getEventHubConfiguration().isEnabled()) {
+        if (configHolder.getConfig().getEventHub().isEnabled()) {
             logger.info("Event Hub configuration enabled... Starting JMS listener...");
-            GatewayJMSMessageListener.init(mgwConfiguration.getEventHubConfiguration());
+            GatewayJMSMessageListener.init(configHolder.getConfig().getEventHub());
         }
         //TODO: Get the tenant domain from config
         SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore("carbon.super");
 
         // Don't exit the main thread. Wait until server is terminated.
         server.awaitTermination();
+    }
+
+    private static Server initServer() {
+        final EventLoopGroup bossGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
+        final EventLoopGroup workerGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors() * 2);
+        AuthServiceConfigurationDto authServerConfig = ConfigHolder.getInstance().getConfig().getAuthService();
+        AuthServiceConfigurationDto.ThreadPoolConfig threadPoolConfig = authServerConfig.getThreadPool();
+        EnforcerWorkerPool enforcerWorkerPool = new EnforcerWorkerPool(threadPoolConfig.getCoreSize(),
+                threadPoolConfig.getMaxSize(), threadPoolConfig.getKeepAliveTime(), threadPoolConfig.getQueueSize(),
+                Constants.EXTERNAL_AUTHZ_THREAD_GROUP, Constants.EXTERNAL_AUTHZ_THREAD_ID);
+        Server server = NettyServerBuilder.forPort(authServerConfig.getPort())
+                .keepAliveTime(authServerConfig.getKeepAliveTime(), TimeUnit.SECONDS).bossEventLoopGroup(bossGroup)
+                .workerEventLoopGroup(workerGroup).addService(new ExtAuthService())
+                .maxInboundMessageSize(authServerConfig.getMaxMessageSize())
+                .maxInboundMetadataSize(authServerConfig.getMaxHeaderLimit()).channelType(NioServerSocketChannel.class)
+                .executor(enforcerWorkerPool.getExecutor()).build();
+
+        return server;
     }
 }
