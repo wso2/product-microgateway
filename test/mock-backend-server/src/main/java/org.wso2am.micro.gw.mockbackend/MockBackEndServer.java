@@ -19,6 +19,17 @@
 package org.wso2am.micro.gw.mockbackend;
 
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsParameters;
+import com.sun.net.httpserver.HttpsServer;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.InputStream;
+import java.security.KeyStore;
 import java.util.logging.Level;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -32,22 +43,31 @@ public class MockBackEndServer extends Thread {
     private static final Logger logger = Logger.getLogger(MockBackEndServer.class.getName());
     private HttpServer httpServer;
     private String backEndServerUrl;
-    private static int backEndServerPort;
+    private int backEndServerPort;
     private static boolean retryDone = false;
-
-
+    private boolean secured = false;
+    private boolean mtlsEnabled = false;
 
     public static void main(String[] args) {
-        //backend port
-        backEndServerPort = Constants.MOCK_BACKEND_SERVER_PORT;
-        MockBackEndServer mockBackEndServer = new MockBackEndServer(backEndServerPort);
+        MockBackEndServer mockBackEndServer = new MockBackEndServer(Constants.MOCK_BACKEND_SERVER_PORT);
+        MockBackEndServer securedMockBackEndServer = new MockBackEndServer(Constants.SECURED_MOCK_BACKEND_SERVER_PORT,
+                true, false);
+        MockBackEndServer mtlsMockBackEndServer = new MockBackEndServer(Constants.MTLS_MOCK_BACKEND_SERVER_PORT,
+                true, true);
         mockBackEndServer.start();
-
+        securedMockBackEndServer.start();
+        mtlsMockBackEndServer.start();
     }
 
     public MockBackEndServer(int port) {
 
         backEndServerPort = port;
+    }
+
+    public MockBackEndServer(int port, boolean isSecured, boolean mtlsEnabled) {
+        secured = isSecured;
+        backEndServerPort = port;
+        this.mtlsEnabled = mtlsEnabled;
     }
 
     public void run() {
@@ -56,7 +76,29 @@ public class MockBackEndServer extends Thread {
             throw new RuntimeException("Server port is not defined");
         }
         try {
-            httpServer = HttpServer.create(new InetSocketAddress(backEndServerPort), 0);
+            if (this.secured) {
+                httpServer = HttpsServer.create(new InetSocketAddress(backEndServerPort), 0);
+                ((HttpsServer)httpServer).setHttpsConfigurator(new HttpsConfigurator(getSslContext()) {
+                    public void configure(HttpsParameters params) {
+                        try {
+                            // initialise the SSL context
+                            SSLContext sslContext = SSLContext.getDefault();
+                            SSLEngine engine = sslContext.createSSLEngine();
+                            params.setNeedClientAuth(mtlsEnabled);
+                            params.setCipherSuites(engine.getEnabledCipherSuites());
+                            params.setProtocols(engine.getEnabledProtocols());
+                            // get the default parameters
+                            SSLParameters defaultSSLParameters = sslContext
+                                    .getDefaultSSLParameters();
+                            params.setSSLParameters(defaultSSLParameters);
+                        } catch (Exception ex) {
+                            logger.severe("Failed to create HTTPS port");
+                        }
+                    }
+                });
+            } else {
+                httpServer = HttpServer.create(new InetSocketAddress(backEndServerPort), 0);
+            }
             String context = "/v2";
             httpServer.createContext(context + "/pet/findByStatus", exchange -> {
 
@@ -149,7 +191,29 @@ public class MockBackEndServer extends Thread {
     }
 
     public void stopIt() {
-
         httpServer.stop(0);
+    }
+
+    private SSLContext getSslContext() throws Exception {
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        // initialise the keystore
+        char[] password = "wso2carbon".toCharArray();
+        KeyStore keyStore = KeyStore.getInstance("JKS");
+        InputStream keyStoreIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("wso2carbon.jks");
+        keyStore.load(keyStoreIS, password);
+        // setup the key manager factory
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+        kmf.init(keyStore, password);
+        // setup the trust manager factory
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+        KeyStore trustStore = KeyStore.getInstance("JKS");
+        InputStream trustStoreIS = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("client-truststore.jks");
+        trustStore.load(trustStoreIS, password);
+        tmf.init(trustStore);
+        // setup the HTTPS context and parameters
+        sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+        return sslContext;
     }
 }

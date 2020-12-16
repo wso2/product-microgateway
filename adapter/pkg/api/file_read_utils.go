@@ -59,9 +59,9 @@ func ApplyAPIProject(payload []byte) error {
 				loggers.LoggerAPI.Errorf("Error converting api file to json: %v", err.Error())
 				return conversionErr
 			}
-			//TODO: (VirajSalaka) introduce regex
-		} else if strings.Contains(file.Name, "/Endpoint-Certificates/") && strings.HasSuffix(file.Name, ".crt") {
-			//TODO: (VirajSalaka) Validate the content of cert files using regex
+		} else if strings.Contains(file.Name, "Endpoint-Certificates/") &&
+			(strings.HasSuffix(file.Name, ".crt") || strings.HasSuffix(file.Name, ".pem")) {
+			//TODO: (VirajSalaka) Validate the content of cert files
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error occured while reading the endpoint certificate : %v, %v", file.Name, err.Error())
