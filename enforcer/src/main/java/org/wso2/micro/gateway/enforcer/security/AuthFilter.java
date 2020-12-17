@@ -55,7 +55,8 @@ public class AuthFilter implements Filter {
                 }
             }
         } catch (APISecurityException e) {
-            requestContext.getProperties().put("code", e.getErrorCode());
+            //TODO: (VirajSalaka) provide the error code properly based on exception (401, 403, 429 etc)
+            requestContext.getProperties().put("code", "401");
             requestContext.getProperties().put("error_code", e.getErrorCode());
             requestContext.getProperties().put("error_description", e.getMessage());
         }
