@@ -54,9 +54,11 @@ public class MockBackEndServer extends Thread {
                 true, false);
         MockBackEndServer mtlsMockBackEndServer = new MockBackEndServer(Constants.MTLS_MOCK_BACKEND_SERVER_PORT,
                 true, true);
+        MockSandboxServer mockSandboxServer = new MockSandboxServer(Constants.MOCK_SANDBOX_SERVER);
         mockBackEndServer.start();
         securedMockBackEndServer.start();
         mtlsMockBackEndServer.start();
+        mockSandboxServer.start();
     }
 
     public MockBackEndServer(int port) {
@@ -102,7 +104,7 @@ public class MockBackEndServer extends Thread {
             String context = "/v2";
             httpServer.createContext(context + "/pet/findByStatus", exchange -> {
 
-                byte[] response = ResponseConstants.responseBody.getBytes();
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
                 exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
                         Constants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
@@ -111,7 +113,7 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/pet/", exchange -> {
 
-                byte[] response = ResponseConstants.getPetResponse.getBytes();
+                byte[] response = ResponseConstants.GET_PET_RESPONSE.getBytes();
                 exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
                         Constants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
@@ -120,7 +122,7 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/pet/findByTags", exchange -> {
 
-                byte[] response = ResponseConstants.petByIdResponse.getBytes();
+                byte[] response = ResponseConstants.PET_BY_ID_RESPONSE.getBytes();
                 exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
                         Constants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
@@ -129,7 +131,7 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/store/inventory", exchange -> {
 
-                byte[] response = ResponseConstants.storeInventoryResponse.getBytes();
+                byte[] response = ResponseConstants.STORE_INVENTORY_RESPONSE.getBytes();
                 exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
                         Constants.CONTENT_TYPE_APPLICATION_JSON);
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
@@ -150,7 +152,7 @@ public class MockBackEndServer extends Thread {
                 if(exchange.getRequestHeaders().containsKey("Authorization") &&
                         exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46aGVsbG8="))
                 {
-                    response = ResponseConstants.storeInventoryResponse.getBytes();
+                    response = ResponseConstants.STORE_INVENTORY_RESPONSE.getBytes();
                     exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
                             Constants.CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);

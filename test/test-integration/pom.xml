@@ -151,6 +151,12 @@
             <version>${testng.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.am.microgw</groupId>
+            <artifactId>mock-backend-server</artifactId>
+            <version>4.0.0-m2-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
