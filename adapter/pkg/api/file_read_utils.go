@@ -22,11 +22,21 @@ import (
 	"archive/zip"
 	"bytes"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/oasparser/utills"
 	xds "github.com/wso2/micro-gw/pkg/xds"
+)
+
+// API Controller related constants
+const (
+	openAPIDir      string = "Definitions"
+	openAPIFilename string = "swagger.yaml"
+	endpointCertDir string = "Endpoint-certificates"
+	crtExtension    string = ".crt"
+	pemExtension    string = ".pem"
 )
 
 // ApplyAPIProject accepts an apictl project (as a byte array) and updates the xds servers based upon the
@@ -47,7 +57,7 @@ func ApplyAPIProject(payload []byte) error {
 
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
 	for _, file := range zipReader.File {
-		if strings.HasSuffix(file.Name, "Meta-information/swagger.yaml") {
+		if strings.HasSuffix(file.Name, openAPIDir+string(os.PathSeparator)+openAPIFilename) {
 			loggers.LoggerAPI.Debugf("openAPI file : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
@@ -59,8 +69,8 @@ func ApplyAPIProject(payload []byte) error {
 				loggers.LoggerAPI.Errorf("Error converting api file to json: %v", err.Error())
 				return conversionErr
 			}
-		} else if strings.Contains(file.Name, "Endpoint-Certificates/") &&
-			(strings.HasSuffix(file.Name, ".crt") || strings.HasSuffix(file.Name, ".pem")) {
+		} else if strings.Contains(file.Name, endpointCertDir+string(os.PathSeparator)) &&
+			(strings.HasSuffix(file.Name, crtExtension) || strings.HasSuffix(file.Name, pemExtension)) {
 			//TODO: (VirajSalaka) Validate the content of cert files
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {

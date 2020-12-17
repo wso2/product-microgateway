@@ -21,7 +21,6 @@ package org.wso2am.micro.gw.tests.util;
 import org.wso2am.micro.gw.tests.context.MicroGWTestException;
 
 import java.io.File;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -30,6 +29,15 @@ import java.util.regex.Pattern;
  */
 public class ApiProjectGenerator {
 
+    private static final String definitions = "Definitions";
+    private static final String instruct = "instruct";
+    private static final String sequences = "Sequences";
+    private static final String libs = "libs";
+    private static final String interceptors = "Interceptors";
+    private static final String image = "Image";
+    private static final String docs = "Docs";
+    private static final String endpointCertificates = "Endpoint-certificates";
+    private static final String openAPIFile = "swagger.yaml";
     /**
      * Create apictl project zip file.
      *
@@ -56,26 +64,25 @@ public class ApiProjectGenerator {
         String targetDir = targetClassesDir.getParentFile().toString();
 
         String filename = apiYamlPath.split(Pattern.quote("."))[0];
-        String apisZipPath = Objects.requireNonNull(ApiProjectGenerator.class.getClassLoader()
-                .getResource("apis")).getPath() + File.separator + "apiProjects" + File.separator + filename;
+        String apisZipPath = ApiProjectGenerator.class.getClassLoader()
+                .getResource("apis").getPath() + File.separator + "apiProjects" + File.separator + filename;
         createDirectory(apisZipPath);
-        createDirectory(apisZipPath + File.separator + "Meta-information");
-        createDirectory(apisZipPath + File.separator + "instruct");
-        createDirectory(apisZipPath + File.separator + "Sequences");
-        createDirectory(apisZipPath + File.separator + "libs");
-        createDirectory(apisZipPath + File.separator + "Interceptors");
-        createDirectory(apisZipPath + File.separator + "Image");
-        createDirectory(apisZipPath + File.separator + "Docs");
-        createDirectory(apisZipPath + File.separator + "Endpoint-Certificates");
-        //TODO: (VirajSalaka) refactor the code.
-        String apiPath = targetDir + File.separator  + "test-classes" + File.separator + apiYamlPath;
+        createDirectory(apisZipPath + File.separator + definitions);
+        createDirectory(apisZipPath + File.separator + instruct);
+        createDirectory(apisZipPath + File.separator + sequences);
+        createDirectory(apisZipPath + File.separator + libs);
+        createDirectory(apisZipPath + File.separator + interceptors);
+        createDirectory(apisZipPath + File.separator + image);
+        createDirectory(apisZipPath + File.separator + docs);
+        createDirectory(apisZipPath + File.separator + endpointCertificates);
 
-        Utils.copyFile(apiPath, apisZipPath + File.separator + "Meta-information" + File.separator +
-                "swagger.yaml");
+        String apiPath = targetDir + File.separator  + "test-classes" + File.separator + apiYamlPath;
+        Utils.copyFile(apiPath, apisZipPath + File.separator + definitions + File.separator +
+                openAPIFile);
 
         if (certificatePath != null) {
             String certPath = targetDir + File.separator  + "test-classes" + File.separator + certificatePath;
-            Utils.copyFile(certPath, apisZipPath + File.separator + "Endpoint-Certificates" +
+            Utils.copyFile(certPath, apisZipPath + File.separator + endpointCertificates +
                     File.separator + "backend.crt");
         }
         ZipDir.createZipFile(apisZipPath);
