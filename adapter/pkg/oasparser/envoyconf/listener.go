@@ -20,9 +20,11 @@ package envoyconf
 import (
 	"io/ioutil"
 
+	access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	envoy_config_filter_accesslog_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/file/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
@@ -68,7 +70,7 @@ func CreateListenerWithRds(listenerName string) *listenerv3.Listener {
 
 func createListener(conf *config.Config, listenerName string) *listenerv3.Listener {
 	httpFilters := getHTTPFilters()
-	accessLogs := getAccessLogs()
+	accessLogs := getAccessLogConfigs()
 	var filters []*listenerv3.Filter
 
 	manager := &hcmv3.HttpConnectionManager{
@@ -87,7 +89,7 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 			},
 		},
 		HttpFilters: httpFilters,
-		AccessLog:   accessLogs,
+		AccessLog:   []*access_logv3.AccessLog{accessLogs},
 	}
 
 	pbst, err := ptypes.MarshalAny(manager)
@@ -180,6 +182,42 @@ func createAddress(remoteHost string, port uint32) *corev3.Address {
 		},
 	}}
 	return &address
+}
+
+// getAccessLogConfigs provides access log configurations for envoy
+func getAccessLogConfigs() *access_logv3.AccessLog {
+	var logFormat *envoy_config_filter_accesslog_v3.FileAccessLog_Format
+	logpath := defaultAccessLogPath //default access log path
+
+	logConf, errReadConfig := config.ReadLogConfigs()
+	if errReadConfig != nil {
+		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
+	} else {
+		logFormat = &envoy_config_filter_accesslog_v3.FileAccessLog_Format{
+			Format: logConf.AccessLogs.Format,
+		}
+		logpath = logConf.AccessLogs.LogFile
+	}
+
+	accessLogConf := &envoy_config_filter_accesslog_v3.FileAccessLog{
+		Path:            logpath,
+		AccessLogFormat: logFormat,
+	}
+
+	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
+	if err != nil {
+		logger.LoggerOasparser.Error("Error marsheling access log configs. ", err)
+	}
+
+	accessLogs := access_logv3.AccessLog{
+		Name:   accessLogName,
+		Filter: nil,
+		ConfigType: &access_logv3.AccessLog_TypedConfig{
+			TypedConfig: accessLogTypedConf,
+		},
+	}
+
+	return &accessLogs
 }
 
 //TODO: (VirajSalaka) Still the following method is not utilized as Sds is not implement. Keeping the Implementation for future reference
