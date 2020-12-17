@@ -29,7 +29,7 @@ public class TestConstant {
     public static final String HTTP_METHOD_PUT = "PUT";
     public static final String HTTP_METHOD_OPTIONS = "OPTIONS";
     public static final String HTTP_METHOD_HEAD = "HEAD";
-    public static final String ADAPTER_IMPORT_API_RESOURCE = "/mgw/1.0/import/api";
+    public static final String ADAPTER_IMPORT_API_RESOURCE = "/api/mgw/adapter/0.1/apis";
 
     public static final String KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String KEY_TYPE_SANDBOX = "SANDBOX";

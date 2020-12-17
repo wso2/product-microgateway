@@ -28,25 +28,25 @@ import (
 	"github.com/wso2/micro-gw/pkg/api/models"
 )
 
-// PostImportAPIHandlerFunc turns a function with the right signature into a post import API handler
-type PostImportAPIHandlerFunc func(PostImportAPIParams, *models.Principal) middleware.Responder
+// PostApisHandlerFunc turns a function with the right signature into a post apis handler
+type PostApisHandlerFunc func(PostApisParams, *models.Principal) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PostImportAPIHandlerFunc) Handle(params PostImportAPIParams, principal *models.Principal) middleware.Responder {
+func (fn PostApisHandlerFunc) Handle(params PostApisParams, principal *models.Principal) middleware.Responder {
 	return fn(params, principal)
 }
 
-// PostImportAPIHandler interface for that can handle valid post import API params
-type PostImportAPIHandler interface {
-	Handle(PostImportAPIParams, *models.Principal) middleware.Responder
+// PostApisHandler interface for that can handle valid post apis params
+type PostApisHandler interface {
+	Handle(PostApisParams, *models.Principal) middleware.Responder
 }
 
-// NewPostImportAPI creates a new http.Handler for the post import API operation
-func NewPostImportAPI(ctx *middleware.Context, handler PostImportAPIHandler) *PostImportAPI {
-	return &PostImportAPI{Context: ctx, Handler: handler}
+// NewPostApis creates a new http.Handler for the post apis operation
+func NewPostApis(ctx *middleware.Context, handler PostApisHandler) *PostApis {
+	return &PostApis{Context: ctx, Handler: handler}
 }
 
-/*PostImportAPI swagger:route POST /import/api API (Individual) postImportApi
+/*PostApis swagger:route POST /apis API (Individual) postApis
 
 Import an API
 
@@ -54,17 +54,17 @@ This operation can be used to import an API.
 
 
 */
-type PostImportAPI struct {
+type PostApis struct {
 	Context *middleware.Context
-	Handler PostImportAPIHandler
+	Handler PostApisHandler
 }
 
-func (o *PostImportAPI) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *PostApis) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		r = rCtx
 	}
-	var Params = NewPostImportAPIParams()
+	var Params = NewPostApisParams()
 
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {

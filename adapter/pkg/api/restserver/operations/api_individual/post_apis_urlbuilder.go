@@ -28,8 +28,8 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// PostImportAPIURL generates an URL for the post import API operation
-type PostImportAPIURL struct {
+// PostApisURL generates an URL for the post apis operation
+type PostApisURL struct {
 	Overwrite        *bool
 	PreserveProvider *bool
 
@@ -41,7 +41,7 @@ type PostImportAPIURL struct {
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *PostImportAPIURL) WithBasePath(bp string) *PostImportAPIURL {
+func (o *PostApisURL) WithBasePath(bp string) *PostApisURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -49,19 +49,19 @@ func (o *PostImportAPIURL) WithBasePath(bp string) *PostImportAPIURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *PostImportAPIURL) SetBasePath(bp string) {
+func (o *PostApisURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *PostImportAPIURL) Build() (*url.URL, error) {
+func (o *PostApisURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/import/api"
+	var _path = "/apis"
 
 	_basePath := o._basePath
 	if _basePath == "" {
-		_basePath = "/mgw/1.0"
+		_basePath = "/api/mgw/adapter/0.1"
 	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
@@ -89,7 +89,7 @@ func (o *PostImportAPIURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *PostImportAPIURL) Must(u *url.URL, err error) *url.URL {
+func (o *PostApisURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -100,17 +100,17 @@ func (o *PostImportAPIURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *PostImportAPIURL) String() string {
+func (o *PostApisURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *PostImportAPIURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *PostApisURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on PostImportAPIURL")
+		return nil, errors.New("scheme is required for a full url on PostApisURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on PostImportAPIURL")
+		return nil, errors.New("host is required for a full url on PostApisURL")
 	}
 
 	base, err := o.Build()
@@ -124,6 +124,6 @@ func (o *PostImportAPIURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *PostImportAPIURL) StringFull(scheme, host string) string {
+func (o *PostApisURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

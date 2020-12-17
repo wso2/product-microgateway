@@ -58,9 +58,9 @@ func init() {
     "version": "v1.2"
   },
   "host": "apis.wso2.com",
-  "basePath": "/mgw/1.0",
+  "basePath": "/api/mgw/adapter/0.1",
   "paths": {
-    "/import/api": {
+    "/apis": {
       "post": {
         "security": [
           {
@@ -234,9 +234,9 @@ func init() {
     "version": "v1.2"
   },
   "host": "apis.wso2.com",
-  "basePath": "/mgw/1.0",
+  "basePath": "/api/mgw/adapter/0.1",
   "paths": {
-    "/import/api": {
+    "/apis": {
       "post": {
         "security": [
           {
