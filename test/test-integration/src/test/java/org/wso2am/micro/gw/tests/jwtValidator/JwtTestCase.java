@@ -94,7 +94,7 @@ public class JwtTestCase extends BaseTestCase {
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), TestConstant.INVALID_CREDENTIALS_CODE,
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,
                 "Response code mismatched");
     }
 
@@ -108,7 +108,7 @@ public class JwtTestCase extends BaseTestCase {
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), TestConstant.INVALID_CREDENTIALS_CODE,
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,
                 "Response code mismatched");
     }
 }

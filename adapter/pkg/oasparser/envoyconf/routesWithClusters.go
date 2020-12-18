@@ -90,7 +90,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 	// check API level sandbox endpoints availble
 	if len(mgwSwagger.GetSandEndpoints()) > 0 {
 		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
-		if apiEndpointBasePath != apiLevelEndpointSand[0].Basepath {
+		if apiEndpointBasePath != apiLevelEndpointSand[0].Basepath && len(apiLevelEndpointProd) > 0 {
 			logger.LoggerOasparser.Warnf("Sandbox API level endpoint basepath is different compared to API level production endpoint "+
 				"for the API %v:%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion)
 		} else {
@@ -160,7 +160,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 			// Due to endpoint basePath restriction, the apiLevelEndpointSand may not be initialized.
 		} else if len(mgwSwagger.GetSandEndpoints()) > 0 || apiLevelEndpointSand != nil {
 			endpointSand := apiLevelEndpointSand
-			if endpointBasepath != endpointSand[0].Basepath {
+			if endpointBasepath != endpointSand[0].Basepath && clusterRefProd != "" {
 				logger.LoggerOasparser.Warnf("Sandbox endpoint basepath of API is different compared to production endpoint "+
 					"for the resource %v:%v-%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion, resource.GetPath())
 			} else {

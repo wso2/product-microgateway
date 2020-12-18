@@ -102,21 +102,21 @@ public class ProductionSandboxTestCase extends BaseTestCase {
     public void invokeSandboxEndpointOnly() throws Exception {
         Map<String, String> sandHeaders = new HashMap<String, String>();
         sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse sandResponse = HttpsClientRequest.doGet(getServiceURLHttps(
                 "/v2/sand/pet/findByStatus") , sandHeaders);
 
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
-        Assert.assertEquals(response.getData(), ResponseConstants.API_SANDBOX_RESPONSE,
+        Assert.assertNotNull(sandResponse, "Sandbox endpoint response should not be null");
+        Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertEquals(sandResponse.getData(), ResponseConstants.API_SANDBOX_RESPONSE,
                 "Response message mismatch.");
 
         Map<String, String> prodHeaders = new HashMap<String, String>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse prodRespone = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse prodResponse = HttpsClientRequest.doGet(getServiceURLHttps(
                 "/v2/sand/pet/findByStatus") , prodHeaders);
 
-        Assert.assertNotNull(prodRespone);
-        Assert.assertEquals(prodRespone.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
+        Assert.assertNotNull(prodResponse, "Production endoint response should not be null");
+        Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
     }
 
     @Test(description = "Invoke Production endpoint when production endpoints provided alone")
@@ -126,7 +126,7 @@ public class ProductionSandboxTestCase extends BaseTestCase {
         HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
                 "/v2/prod/pet/findByStatus") , headers);
 
-        Assert.assertNotNull(response);
+        Assert.assertNotNull(response, "Production endpoint response should not be null");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
         Assert.assertEquals(response.getData(), ResponseConstants.RESPONSE_BODY,
                 "Response message mismatch.");
@@ -136,7 +136,7 @@ public class ProductionSandboxTestCase extends BaseTestCase {
         HttpResponse sandResponse = HttpsClientRequest.doGet(getServiceURLHttps(
                 "/v2/prod/pet/findByStatus"), sandHeaders);
 
-        Assert.assertNotNull(sandResponse);
+        Assert.assertNotNull(sandResponse, "Sandbox endoint response should not be null");
         Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
     }
 
