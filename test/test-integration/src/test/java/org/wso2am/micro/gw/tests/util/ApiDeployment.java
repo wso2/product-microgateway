@@ -38,7 +38,7 @@ public class ApiDeployment {
     private static final Logger log = LoggerFactory.getLogger(ApiDeployment.class);
 
     /**
-     * Get Mock backend server module root path.
+     * Deploy api to adapter via adapter REST APIs.
      *
      * @param apiZipFilePath  path for the apictl project zip file
      *
