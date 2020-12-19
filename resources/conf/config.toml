@@ -52,3 +52,13 @@ password = "wso2carbon"
     password="admin"
     # The message broker connection URL.
     eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
+
+# Global config for consul service discovery
+[consul]
+address = "127.0.0.1:8500"
+scheme = "http"
+tokenFile = ""
+requestTimeout = 5 #seconds
+pollInterval = 5 #seconds
+# Whether consul health checks should be considered when updating envoy clusters
+healthChecksPassingOnly = true
