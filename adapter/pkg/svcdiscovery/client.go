@@ -8,10 +8,6 @@ import (
 )
 
 //todo import loggers,use loggers
-var (
-	healthChecksPassingOnly = true
-	//todo get healthChecksPassingOnly from global config
-)
 
 //QueryResult Data for a service instance
 type QueryResult struct {

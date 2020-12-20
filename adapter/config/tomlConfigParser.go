@@ -31,13 +31,15 @@ import (
 )
 
 var (
-	onceConfigRead    sync.Once
-	onceLogConfigRead sync.Once
-	onceGetMgwHome    sync.Once
-	adapterConfig     *Config
-	adapterLogConfig  *LogConfig
-	mgwHome           string
-	e                 error
+	onceConfigRead     sync.Once
+	onceLogConfigRead  sync.Once
+	onceGetMgwHome     sync.Once
+	onceConsulConfig   sync.Once
+	adapterConfig      *Config
+	adapterLogConfig   *LogConfig
+	consulGlobalConfig *Consul
+	mgwHome            string
+	e                  error
 )
 
 const (
@@ -47,6 +49,8 @@ const (
 	relativeConfigPath = "/conf/config.toml"
 	// RelativeLogConfigPath is the relative file path where the log configuration file is.
 	relativeLogConfigPath = "/conf/log_config.toml"
+	//consulConfigPath is the relative file path where the configuration file for consul is
+	consulConfigPath = "/conf/consul_config.toml"
 )
 
 // ReadConfigs implements adapter configuration read operation. The read operation will happen only once, hence
@@ -97,6 +101,24 @@ func ReadLogConfigs() (*LogConfig, error) {
 
 	})
 	return adapterLogConfig, e
+}
+
+func ReadConsulConfig() (*Consul, error) {
+	//todo remove fatal errors, make default config
+	onceConsulConfig.Do(func() {
+		consulGlobalConfig = new(Consul)
+		_, err := os.Stat(GetMgwHome() + consulConfigPath)
+		if err != nil {
+			logger.Fatal("Configuration file not found.", err)
+		}
+		content, readErr := ioutil.ReadFile(mgwHome + consulConfigPath)
+		if readErr != nil {
+			logger.Fatal("Error reading configurations. ", readErr)
+		}
+		_, e = toml.Decode(string(content), consulGlobalConfig)
+	})
+	logger.Println(consulGlobalConfig)
+	return consulGlobalConfig, e
 }
 
 // ClearLogConfigInstance removes the existing configuration.

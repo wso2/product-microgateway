@@ -4,14 +4,18 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/consul/api"
+	"github.com/wso2/micro-gw/config"
 	"time"
 )
 
 //todo get from config from global config
 //todo replace fmt with logger
 var (
-	RequestTimeout        = 5 * time.Second
-	RepeatInterval        = 5 * time.Second
+	conf                    *config.Consul
+	healthChecksPassingOnly bool
+	requestTimeout          time.Duration
+	pollInterval            time.Duration
+
 	ConsulWatcherInstance *consulWatcher
 	// Cluster Name -> consul syntax key
 	ClusterConsulKeyMap map[string]string
@@ -24,12 +28,19 @@ var (
 )
 
 func init() {
+	conf, _ = config.ReadConsulConfig()
+	healthChecksPassingOnly = conf.HealthChecksPassingOnly
+	requestTimeout = 5 * time.Second //time.Duration(rand.Int31n(int32(conf.RequestTimeout)))
+	pollInterval = 5 * time.Second   //time.Duration(rand.Int31n(int32(conf.PollInterval)))
+
 	ClusterConsulKeyMap = make(map[string]string)
 	ClusterConsulResultMap = make(map[string][]QueryResult)
 	ClusterConsulDoneChanMap = make(map[string]chan bool)
-	config := api.DefaultConfig()
-	config.Address = "169.254.1.1:8500"
-	cl, _ := api.NewClient(config)
+	con := api.DefaultConfig()
+	con.Address = conf.Address
+	con.Scheme = conf.Scheme
+	con.TokenFile = conf.TokenFile
+	cl, _ := api.NewClient(con)
 	he := cl.Health()
 	client := NewConsulClient(he)
 	ConsulWatcherInstance, _ = NewConsulWatcher(client)
@@ -49,7 +60,7 @@ func (c consulWatcher) Watch(query Query, doneChan <-chan bool) <-chan []QueryRe
 
 	//long lived go routine
 	go func() {
-		ticker := time.NewTicker(RepeatInterval)
+		ticker := time.NewTicker(pollInterval)
 		intervalChan := ticker.C
 
 		//cleanup when this go routine exits
@@ -63,7 +74,7 @@ func (c consulWatcher) Watch(query Query, doneChan <-chan bool) <-chan []QueryRe
 
 		//go c.client.GetUpstreams(context.Background(), query, resultChan) //eliminate the first 5 sec delay
 		for {
-			timeout := time.After(RequestTimeout)
+			timeout := time.After(requestTimeout)
 			ctx, cancel := context.WithCancel(context.Background())
 			select {
 			case <-doneChan:
