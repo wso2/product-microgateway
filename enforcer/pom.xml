@@ -33,7 +33,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${maven.checkstyle.plugin.version}</version>
                 <dependencies>
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
@@ -65,7 +64,6 @@
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>${maven.spotbugs.version}</version>
                 <configuration>
                     <onlyAnalyze>org.wso2.micro.gateway.filter.core.*</onlyAnalyze>
                     <effort>Max</effort>
@@ -83,7 +81,6 @@
                         </goals>
                     </execution>
                 </executions>
-
                 <dependencies>
                     <!-- overwrite dependency on spotbugs if you want to specify the version of spotbugs -->
                     <dependency>
@@ -96,15 +93,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
                 <configuration>
                     <!-- TODO: (VirajSalaka) set to false because the andes client uses lo4j1.2 implementation -->
                     <minimizeJar>false</minimizeJar>
                     <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                          <mainClass>org.wso2.micro.gateway.enforcer.grpc.server.AuthServer</mainClass>
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>org.wso2.micro.gateway.enforcer.grpc.server.AuthServer</mainClass>
                         </transformer>
-                      </transformers>
+                    </transformers>
                     <filters>
                         <filter>
                             <artifact>*:*</artifact>
@@ -123,14 +120,14 @@
                     </artifactSet>
                 </configuration>
                 <executions>
-                  <execution>
-                    <phase>package</phase>
-                    <goals>
-                      <goal>shade</goal>
-                    </goals>
-                  </execution>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
                 </executions>
-              </plugin>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -156,29 +153,28 @@
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.34.1</version>
                 <configuration>
-                  <images>
-                    <image>
-                        <alias>mg-enforcer</alias>
-                        <name>wso2/mg-enforcer:${project.version}</name>
-                      <build>
-                        <contextDir>${project.basedir}/src/main/resources</contextDir>
-                        <args>
-                            <MG_VERSION>${project.version}</MG_VERSION>
-                            <!-- The Args in the dockerfile seems to overridden by plugin-->
-                            <MG_USER>wso2</MG_USER>
-                            <MG_USER_ID>802</MG_USER_ID>
-                            <MG_USER_GROUP>wso2</MG_USER_GROUP>
-                            <MG_USER_GROUP_ID>802</MG_USER_GROUP_ID>
-                            <MG_USER_HOME>/home/wso2</MG_USER_HOME>
-                        </args>
-                        <assembly>
-                            <descriptor>${project.basedir}/src/main/assembly/assembly.xml</descriptor>
-                        </assembly>
-                      </build>
-                    </image>
-                  </images>
+                    <images>
+                        <image>
+                            <alias>mg-enforcer</alias>
+                            <name>wso2/mg-enforcer:${project.version}</name>
+                            <build>
+                                <contextDir>${project.basedir}/src/main/resources</contextDir>
+                                <args>
+                                    <MG_VERSION>${project.version}</MG_VERSION>
+                                    <!-- The Args in the dockerfile seems to overridden by plugin-->
+                                    <MG_USER>wso2</MG_USER>
+                                    <MG_USER_ID>802</MG_USER_ID>
+                                    <MG_USER_GROUP>wso2</MG_USER_GROUP>
+                                    <MG_USER_GROUP_ID>802</MG_USER_GROUP_ID>
+                                    <MG_USER_HOME>/home/wso2</MG_USER_HOME>
+                                </args>
+                                <assembly>
+                                    <descriptor>${project.basedir}/src/main/assembly/assembly.xml</descriptor>
+                                </assembly>
+                            </build>
+                        </image>
+                    </images>
                 </configuration>
                 <executions>
                     <execution>
@@ -189,7 +185,7 @@
                         </goals>
                     </execution>
                 </executions>
-              </plugin>
+            </plugin>
         </plugins>
     </build>
 
@@ -197,107 +193,76 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
-            <version>1.32.1</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
-            <version>1.32.1</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
-            <version>1.32.1</version>
         </dependency>
         <dependency> <!-- necessary for Java 9+ -->
             <groupId>org.apache.tomcat</groupId>
             <artifactId>annotations-api</artifactId>
-            <version>6.0.53</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.envoyproxy.controlplane</groupId>
             <artifactId>api</artifactId>
-            <version>0.1.23</version>
         </dependency>
         <dependency>
             <groupId>net.minidev</groupId>
             <artifactId>json-smart</artifactId>
-            <version>${json.smart.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>7.3.0.wso2v1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>27.0-jre</version>
         </dependency>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-models</artifactId>
-            <version>${swagger.v3.models.version}</version>
         </dependency>
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser</artifactId>
-            <version>${swagger.v3.parser.version}</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>${org.json.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.8.6</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.jms/jms -->
         <dependency>
             <groupId>org.wso2.andes.wso2</groupId>
             <artifactId>andes-client</artifactId>
-            <version>3.3.12</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-jms_1.1_spec</artifactId>
-            <version>1.1.1.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>com.moandjiezana.toml</groupId>
             <artifactId>toml4j</artifactId>
-            <version>0.7.2</version>
         </dependency>
     </dependencies>
-
-    <properties>
-        <swagger.v3.parser.version>2.0.12</swagger.v3.parser.version>
-        <swagger.v3.models.version>2.0.8</swagger.v3.models.version>
-        <log4j.version>2.13.3</log4j.version>
-        <slf4j.version>1.7.21</slf4j.version>
-        <org.json.version>20180130</org.json.version>
-        <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
-        <maven.checkstyle.version>8.18</maven.checkstyle.version>
-        <maven.spotbugs.version>4.0.4</maven.spotbugs.version>
-        <json.smart.version>2.3</json.smart.version>
-    </properties>
 </project>
