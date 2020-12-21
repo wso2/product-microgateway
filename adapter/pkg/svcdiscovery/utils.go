@@ -4,15 +4,16 @@ import (
 	"errors"
 	"net"
 	"net/url"
-	"regexp"
 	"strings"
 )
 
 const (
+	// ConsulBegin
 	ConsulBegin string = "consul:"
 )
 
-// Endpoint represents the structure of an endpoint.
+// DefaultHost host and port of the default host
+// Clusters are initialized with default host at the time of initialization of an api project
 type DefaultHost struct {
 	Host string
 	Port string
@@ -34,6 +35,7 @@ func parseList(str string) []string {
 	return s
 }
 
+//ParseConsulSyntax breaks the syntax string into query string and default host string
 func ParseConsulSyntax(value string) (string, string, error) {
 	//ConsulBegin:[dc1,dc2].namespace.serviceA.[tag1,tag2];http://abc.com:80
 	queryAndDefaultHost := strings.Split(value, ";")
@@ -43,10 +45,12 @@ func ParseConsulSyntax(value string) (string, string, error) {
 	return strings.TrimSpace(queryAndDefaultHost[0]), strings.TrimSpace(queryAndDefaultHost[1]), nil
 }
 
+//ParseQueryString parses the string into a QueryString struct
 func ParseQueryString(query string) (QueryString, error) {
+	//example-->
 	//consul:[dc1,dc2].namespace.serviceA.[tag1,tag2]
 	if !IsDiscoveryServiceEndpoint(query, ConsulBegin) {
-		return QueryString{}, errors.New("not a ConsulBegin service string")
+		return QueryString{}, errors.New("not a consul service string")
 	}
 	split := strings.Split(query, ":")
 	if len(split) != 2 {
@@ -74,10 +78,10 @@ func ParseQueryString(query string) (QueryString, error) {
 	return QueryString{}, errors.New("bad query syntax")
 }
 
-func cleanString(str string) string {
-	reg, _ := regexp.Compile("[^a-zA-Z0-9]+")
-	return reg.ReplaceAllString(str, "")
-}
+//func cleanString(str string) string {
+//	reg, _ := regexp.Compile("[^a-zA-Z0-9]+")
+//	return reg.ReplaceAllString(str, "")
+//}
 
 func getDefaultHost(str string) (DefaultHost, error) {
 	val, err1 := url.Parse(str)

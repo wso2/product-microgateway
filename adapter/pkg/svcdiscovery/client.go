@@ -7,16 +7,16 @@ import (
 	//logger "github.com/wso2/micro-gw/loggers"
 )
 
-//todo import loggers,use loggers
+//todo import loggers,use loggers instead of fmt.Println()
 
 //QueryResult Data for a service instance
 type QueryResult struct {
-	ServiceName string
-	DataCenter  string
+	//ServiceName string
+	//DataCenter  string
 	Address     string
 	ServicePort int
 	//ServiceTags []string
-	ModifyIndex uint64 //todo remove ModifyIndex, ServiceName, DataCenter
+	//ModifyIndex uint64 //todo remove ModifyIndex?
 }
 
 //QueryString query structure for a consul string syntax
@@ -33,24 +33,22 @@ type Query struct {
 	QueryOptions *api.QueryOptions
 }
 
-//consulClient wraps the official go ConsulBegin client
+//consulClient wraps the official go consul client
 type consulClient struct {
 	api *api.Health //Health checks + all other functionalities
 }
 
 type ConsulClient interface {
-	// all services
-	//Services(q *api.QueryOptions) (map[string][]string, *api.QueryMeta, error)
 	//GetUpstreams get all the upstreams that matches a query
 	GetUpstreams(ctx context.Context, query Query, resultChan chan []QueryResult)
-	//Service
+	//Service wraps the consul go client's method
 	Service(service string, tag string, passingOnly bool, q *api.QueryOptions) ([]*api.ServiceEntry, *api.QueryMeta, error)
-	//// todo consider mesh scenario,
+	//// todo consider mesh scenario : Connect(service, tag string, q *api.QueryOptions),
 	//Connect(service, tag string, q *api.QueryOptions) ([]*api.CatalogService, *api.QueryMeta, error)
 }
 
 //NewConsulClient constructor
-//todo add new constructor: gets config as a param
+//todo modify the constructor: receive config as a param
 func NewConsulClient(a *api.Health) *consulClient {
 	//logger.LoggerSvcDiscovery.Debugln("Consul client created")
 	return &consulClient{api: a}
@@ -65,30 +63,27 @@ func (c consulClient) GetUpstreams(ctx context.Context, query Query, resultChan 
 
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Recovered of from a panic client.go", r)
+			fmt.Println("Recovered of from a panic: ", r)
+			//panic: if the resultChan is closed
 		}
 	}()
 
 	var result []QueryResult
 	for _, dc := range query.QString.Datacenters {
-		qo := query.QueryOptions.WithContext(ctx) // returns a new obj with ctx
+		qo := query.QueryOptions.WithContext(ctx) // returns a new queryOptions obj with ctx
 		qo.Datacenter = dc
 		qo.Namespace = query.QString.Namespace
 		for _, tag := range query.QString.Tags {
 
 			res, _, err := c.Service(query.QString.ServiceName, tag, healthChecksPassingOnly, qo)
 			if err != nil {
-				//errors are not a big deal
-				//todo logger.LoggerSvcDiscovery.Info(err)
-				//fmt.Println(err)
+				//logger.LoggerSvcDiscovery.Info(err)
 			} else {
 				for _, r := range res {
 					res := QueryResult{
-						ServiceName: r.Service.Service,
-						DataCenter:  r.Node.Datacenter,
 						Address:     r.Node.Address,
 						ServicePort: r.Service.Port,
-						ModifyIndex: r.Node.ModifyIndex,
+						//ModifyIndex: r.Node.ModifyIndex,
 					}
 					result = append(result, res)
 				}
