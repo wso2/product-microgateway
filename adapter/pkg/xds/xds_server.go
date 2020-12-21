@@ -19,6 +19,9 @@ package xds
 
 import (
 	"fmt"
+	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
+	"github.com/hashicorp/consul/api"
+	"github.com/wso2/micro-gw/pkg/svcdiscovery"
 	"reflect"
 	"sync"
 
@@ -156,6 +159,7 @@ func UpdateEnvoy(byteArr []byte) {
 	openAPIEndpointsMap[apiMapKey] = endpoints
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
+	startConsulServiceDiscovery() //consul service discovery starting point
 }
 
 func arrayContains(a []string, x string) bool {
@@ -249,4 +253,126 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	}
 	envoyUpdateVersionMap[label] = version
 	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+func startConsulServiceDiscovery() {
+	//label := "default"
+	for apiKey, clusterList := range openAPIClustersMap {
+		logger.LoggerXds.Debugln("API key for consul service discovery: ", apiKey)
+		//logger.LoggerXds.Info(svcdiscovery.ClusterConsulKeyMap)
+		for _, cluster := range clusterList {
+			logger.LoggerXds.Info(cluster.Name)
+			if consulSyntax, ok := svcdiscovery.ClusterConsulKeyMap[cluster.Name]; ok {
+				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
+				if errConSyn != nil {
+					logger.LoggerXds.Error("consul syntax parse error ", errConSyn)
+					return
+				}
+				logger.LoggerXds.Info(query)
+				go getServiceDiscoveryData(query, cluster.Name, apiKey)
+			} else {
+				logger.LoggerXds.Info("svcdiscovery.ClusterConsulKeyMap[apiKey]; not ok")
+			}
+		}
+
+		//fmt.Println(route)
+	}
+
+}
+
+func getServiceDiscoveryData(query svcdiscovery.QueryString, clusterName string, apiKey string) {
+	qo := api.QueryOptions{}
+	q := svcdiscovery.Query{
+		QString:      query,
+		QueryOptions: &qo,
+	}
+	doneChan := make(chan bool)
+	svcdiscovery.ClusterConsulDoneChanMap[clusterName] = doneChan
+	resultChan := svcdiscovery.ConsulWatcherInstance.Watch(q, doneChan)
+	for {
+		select {
+		case queryResultsList, ok := <-resultChan:
+			if !ok { //ok==false --> result chan is closed
+				logger.LoggerXds.Info("closed the result channel for cluster name: ", clusterName)
+				return
+			}
+			//logger.LoggerXds.Info(queryResultsList)
+
+			//logger.LoggerXds.Info("map: ", svcdiscovery.ClusterConsulResultMap)
+			if val, ok := svcdiscovery.ClusterConsulResultMap[clusterName]; ok {
+				if !reflect.DeepEqual(val, queryResultsList) {
+					svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList
+					//update the envoy cluster
+					//todo handle the race condition: service discovery update + deploy the same API with a different label at the same time
+					updateRoute(apiKey, clusterName, queryResultsList)
+
+					//logger.LoggerXds.Info("Change detected for consul cluster ", clusterName)
+				} else {
+					//logger.LoggerXds.Info("No change in consul cluster ", clusterName)
+				}
+			} else {
+				logger.LoggerXds.Debugln("updating cluster from the consul service registry, removed the default host")
+				svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList
+				updateRoute(apiKey, clusterName, queryResultsList)
+			}
+		}
+	}
+
+}
+
+func updateRoute(apiKey string, clusterName string, queryResultsList []svcdiscovery.QueryResult) {
+	if clusterList, available := openAPIClustersMap[apiKey]; available {
+		for i, _ := range clusterList {
+			if clusterList[i].Name == clusterName {
+
+				var lbEndpointList []*endpointv3.LbEndpoint
+
+				for _, result := range queryResultsList {
+					address := &corev3.Address{Address: &corev3.Address_SocketAddress{
+						SocketAddress: &corev3.SocketAddress{
+							Address:  result.Address,
+							Protocol: corev3.SocketAddress_TCP,
+							PortSpecifier: &corev3.SocketAddress_PortValue{
+								PortValue: uint32(result.ServicePort),
+							},
+						},
+					}}
+
+					lbEndPoint := &endpointv3.LbEndpoint{
+						HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
+							Endpoint: &endpointv3.Endpoint{
+								Address: address,
+							},
+						},
+					}
+					lbEndpointList = append(lbEndpointList, lbEndPoint)
+				}
+
+				clusterList[i].LoadAssignment = &endpointv3.ClusterLoadAssignment{
+					ClusterName: clusterName,
+					Endpoints: []*endpointv3.LocalityLbEndpoints{
+						{
+							LbEndpoints: lbEndpointList,
+						},
+					},
+				}
+
+				//logger.LoggerXds.Info("CALLING SNAPSHOT.CONSISTENT............")
+				updateXDSRouteCacheForServiceDiscovery(apiKey)
+
+			}
+		}
+	}
+}
+
+func updateXDSRouteCacheForServiceDiscovery(apiKey string) {
+	for key, envoyLabelList := range openAPIEnvoyMap {
+		if key == apiKey {
+			for _, label := range envoyLabelList {
+				listeners, clusters, routes, endpoints := generateEnvoyResoucesForLabel(label)
+				updateXdsCache(label, endpoints, clusters, routes, listeners)
+				logger.LoggerXds.Info("Updated XDS cache by consul service discovery")
+			}
+		}
+	}
 }

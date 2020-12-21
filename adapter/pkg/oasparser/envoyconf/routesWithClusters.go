@@ -31,6 +31,7 @@ import (
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/oasparser/model"
+	"github.com/wso2/micro-gw/pkg/svcdiscovery"
 
 	"strings"
 	"time"
@@ -89,6 +90,12 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 		clustersProd = append(clustersProd, apilevelClusterProd)
 		endpointsProd = append(endpointsProd, apilevelAddressP)
 
+		//todo add to ClusterConsulKeyMap on Sand , Resource level as well
+		if apiLevelEndpointProd[0].ServiceDiscoveryString != "" {
+			svcdiscovery.ClusterConsulKeyMap[apiLevelClusterNameProd] = apiLevelEndpointProd[0].ServiceDiscoveryString
+			logger.LoggerOasparser.Info("Consul cluster added ", apiLevelClusterNameProd, " ",
+				apiLevelEndpointProd[0].ServiceDiscoveryString)
+		}
 	} else {
 		logger.LoggerOasparser.Warn("API level Producton endpoints are not defined")
 	}
