@@ -1,7 +1,4 @@
 http1Settings : {
     keepAlive: gateway:getKeepAliveValue(),
-    maxPipelinedRequests: gateway:getConfigIntValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:MAX_PIPELINED_REQUESTS, gateway:DEFAULT_MAX_PIPELINED_REQUESTS),
-    maxUriLength: gateway:getConfigIntValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:MAX_URI_LENGTH, gateway:DEFAULT_MAX_URI_LENGTH),
-    maxHeaderSize: gateway:getConfigIntValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:MAX_HEADER_SIZE, gateway:DEFAULT_MAX_HEADER_SIZE),
-    maxEntityBodySize: gateway:getConfigIntValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:MAX_ENTITY_BODY_SIZE, gateway:DEFAULT_MAX_ENTITY_BODY_SIZE)
+    maxPipelinedRequests: gateway:getConfigIntValue(gateway:LISTENER_CONF_INSTANCE_ID, gateway:MAX_PIPELINED_REQUESTS, gateway:DEFAULT_MAX_PIPELINED_REQUESTS)
 },
