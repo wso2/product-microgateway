@@ -21,8 +21,10 @@ package api
 import (
 	"archive/zip"
 	"bytes"
+	"errors"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/wso2/micro-gw/loggers"
@@ -71,11 +73,17 @@ func ApplyAPIProject(payload []byte) error {
 			}
 		} else if strings.Contains(file.Name, endpointCertDir+string(os.PathSeparator)) &&
 			(strings.HasSuffix(file.Name, crtExtension) || strings.HasSuffix(file.Name, pemExtension)) {
-			//TODO: (VirajSalaka) Validate the content of cert files
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error occured while reading the endpoint certificate : %v, %v", file.Name, err.Error())
 				continue
+			}
+			certContentPattern := `\-\-\-\-\-BEGIN\sCERTIFICATE\-\-\-\-\-((.|\n)*)\-\-\-\-\-END\sCERTIFICATE\-\-\-\-\-`
+			regex := regexp.MustCompile(certContentPattern)
+			if !regex.Match(unzippedFileBytes) {
+				loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", file.Name)
+				// TODO: (VirajSalaka) Create standard error handling mechanism
+				return errors.New("Certificate Validation Error")
 			}
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
