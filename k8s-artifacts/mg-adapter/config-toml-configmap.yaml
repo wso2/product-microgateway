@@ -1,0 +1,78 @@
+# --------------------------------------------------------------------
+# Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# -----------------------------------------------------------------------
+
+# Config map containing config.toml file for adapter
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-toml
+data:
+  config.toml: |
+    # The configuration file for mgw
+    [server]
+    ip = "0.0.0.0"
+    port = "9843"
+    publicKeyPath = "/home/wso2/security/localhost.pem"
+    privateKeyPath = "/home/wso2/security/localhost.key"
+    username = "admin"
+    password = "admin"
+
+    [envoy]
+    listenerAddress = "0.0.0.0"
+    listenerPort = 9095
+    clusterTimeoutInSeconds = 20
+    listenerTlsEnabled = true
+    listenerCertPath = "/home/wso2/security/localhost.pem"
+    listenerKeyPath = "/home/wso2/security/localhost.key"
+
+    [filter]
+    #Key Store Configuration
+    [filter.keystore]
+    location = "wso2carbon.jks"
+    type = "jks"
+    password = "wso2carbon"
+
+    #Trust store configuration
+    [filter.truststore]
+    location = "/home/wso2/mg/security/client-truststore.jks"
+    type = "jks"
+    password = "wso2carbon"
+
+    # JWT token authorization configurations. You can provide multiple JWT issuers
+    # Issuer 1
+    [[filter.jwtTokenConfig]]
+        name="Resident Key Manager"
+        issuer = "https://localhost:9443/oauth2/token"
+        certificateAlias = "wso2carbon"
+        # URL of the JWKs endpoint
+        jwksURL = ""
+        # Validate subscribed APIs
+        validateSubscription = false
+        # The claim in which the consumer key of the application is coming
+        consumerKeyClaim = "azp"
+
+    # Configurations for retrieving API and subscription data from API Manager.
+    [filter.eventHub]
+        # Enable/ Disable the feature
+        enable = false
+        # The API Manager URL
+        serviceUrl = "https://localhost:9443/"
+        # User name and password of the internal data api.
+        username="admin"
+        password="admin"
+        # The message broker connection URL.
+        eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
