@@ -2,5 +2,5 @@ http:FailoverClient {{qualifiedServiceName}}_{{endpointUrlType}} = new({
     targets: [
     {{#endpoints}}    {url: {{#if isEtcdEnabled}}gateway:etcdSetup("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}","{{name}}_{{endpointUrlType}}_{{@index}}_etcdKey","{{{endpointUrl}}}","{{etcdKey}}"){{else}}gateway:retrieveConfig("{{name}}_{{endpointUrlType}}_endpoint_{{@index}}", "{{{endpointUrl}}}"){{/if}} {{>secureSocket}} }{{#unless @last}},
     {{/unless}}{{/endpoints}}
-    ], {{>clientsHttp2}}{{>http2settings}}{{>caching}}{{>basicAuth}}{{>advanceEndpoint}}
+    ], {{>clientsHttp2}}{{>responseLimits}}{{>http2settings}}{{>caching}}{{>basicAuth}}{{>advanceEndpoint}}
 });

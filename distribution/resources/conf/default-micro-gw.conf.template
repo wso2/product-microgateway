@@ -27,7 +27,7 @@
   maxPipelinedRequests = 10
   # Maximum allowed length for a URI. Exceeding this limit will result in a `414 - URI Too Long` response.
   maxUriLength = 4096
-  # Maximum allowed size for headers. Exceeding this limit will result in a `413 - Payload Too Large` response.
+  # Maximum allowed size for headers. Exceeding this limit will result in a `431 - Request Header Fields Too Large response.
   maxHeaderSize = 8192
   # Maximum allowed size for the entity body. By default it is set to -1 which means there is no
   # restriction `maxEntityBodySize`, On the Exceeding this limit will result in a`413 - Payload Too Large` response.
@@ -268,7 +268,14 @@
     # Truststore
     trustStorePath = "${mgw-runtime.home}/runtime/bre/security/ballerinaTruststore.p12"
     trustStorePassword = "ballerina"
-    
+  [httpClients.responseLimits]
+    # Maximum allowed length for response status line(HTTP/1.1 200 OK). Exceeding this limit will result in a ClientError.
+    maxStatusLineLength = 4096
+    # Maximum allowed size for headers. Exceeding this limit will result in a ClientError.
+    maxHeaderSize = 8192
+    # Maximum allowed size for the entity body. By default it is set to -1 which means there is no restriction maxEntityBodySize, On the Exceeding this limit will result in a ClientError.
+    maxEntityBodySize = -1
+
 # Mutual SSL configuration
 [mutualSSLConfig]
   # SSL Protocol to be used

@@ -4,7 +4,7 @@ http:LoadBalanceClient|error reInitializedEndpoint = new({
                                                        {{/unless}}{{/endpoints}}
 
                                                    ],
-                                                   {{>clientsHttp2}}{{>caching}}{{>basicAuth}}{{>advanceEndpoint}} });
+                                                   {{>clientsHttp2}}{{>responseLimits}}{{>caching}}{{>basicAuth}}{{>advanceEndpoint}} });
 if(reInitializedEndpoint is http:LoadBalanceClient) {
 {{#equals endpointUrlType "prod"}}{{#if hasProdEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}{{/equals}}
 {{#equals endpointUrlType "sand"}}{{#if hasSandEpConfig}}{{operationId}}{{else}}{{qualifiedServiceName}}{{/if}}_{{endpointUrlType}}{{/equals}}

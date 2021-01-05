@@ -262,6 +262,10 @@ public const string HTTP_CLIENTS_PROXY_HOST = "host";
 public const string HTTP_CLIENTS_PROXY_PORT = "port";
 public const string HTTP_CLIENTS_PROXY_USERNAME = "username";
 public const string HTTP_CLIENTS_PROXY_PASSWORD = "password";
+public const string HTTP_CLIENTS_RESPONSE_LIMITS_CONFIG_INSTANCE_ID = "httpClients.responseLimits";
+public const string HTTP_CLIENTS_RESPONSE_MAX_STATUS_LINE_LENGTH  = "maxStatusLineLength";
+public const string HTTP_CLIENTS_RESPONSE_MAX_HEADER_SIZE = "maxHeaderSize";
+public const string HTTP_CLIENTS_RESPONSE_MAX_ENTITY_BODY_SIZE = "maxEntityBodySize";
 
 public const string BLOCKING_CONDITION_STATE = "state";
 public const string BLOCKING_CONDITION_KEY = "blockingCondition";
