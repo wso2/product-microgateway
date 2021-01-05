@@ -211,7 +211,7 @@ func createCluster(address *corev3.Address, clusterName string, urlType string, 
 		},
 	}
 	if strings.HasPrefix(urlType, httpsURLType) {
-		upstreamtlsContext := createUpstreamTLSContext(upstreamCerts)
+		upstreamtlsContext := createUpstreamTLSContext(upstreamCerts, address)
 		marshalledTLSContext, err := ptypes.MarshalAny(upstreamtlsContext)
 		if err != nil {
 			logger.LoggerOasparser.Error("Internal Error while marshalling the upstream TLS Context.")
@@ -228,7 +228,7 @@ func createCluster(address *corev3.Address, clusterName string, urlType string, 
 	return &cluster
 }
 
-func createUpstreamTLSContext(upstreamCerts []byte) *tlsv3.UpstreamTlsContext {
+func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tlsv3.UpstreamTlsContext {
 	conf, errReadConfig := config.ReadConfigs()
 	//TODO: (VirajSalaka) Error Handling
 	if errReadConfig != nil {
@@ -270,6 +270,18 @@ func createUpstreamTLSContext(upstreamCerts []byte) *tlsv3.UpstreamTlsContext {
 				},
 			},
 		},
+	}
+
+	if conf.Envoy.Upstream.TLS.VerifyHostName {
+		addressString := address.GetSocketAddress().GetAddress()
+		subjectAltNames := []*envoy_type_matcherv3.StringMatcher{
+			{
+				MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
+					Exact: addressString,
+				},
+			},
+		}
+		upstreamTLSContext.CommonTlsContext.GetValidationContext().MatchSubjectAltNames = subjectAltNames
 	}
 	return upstreamTLSContext
 }

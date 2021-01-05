@@ -98,6 +98,7 @@ type Config struct {
 				CACrtPath      string `toml:"trustedCertificatesFilePath"`
 				PrivateKeyPath string `toml:"clientKeyPath"`
 				PublicCertPath string `toml:"clientCertPath"`
+				VerifyHostName bool   `toml:"verifyHostName"`
 			}
 		}
 	}

@@ -23,6 +23,7 @@ import (
 	"strings"
 	"testing"
 
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
@@ -339,11 +340,19 @@ func TestCreateUpstreamTLSContext(t *testing.T) {
 		" ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384," +
 		" ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"
 	defaultCACertPath := "/etc/ssl/certs/ca-certificates.crt"
+	hostNameAddress := &corev3.Address{Address: &corev3.Address_SocketAddress{
+		SocketAddress: &corev3.SocketAddress{
+			Address:  "abc.com",
+			Protocol: corev3.SocketAddress_TCP,
+			PortSpecifier: &corev3.SocketAddress_PortValue{
+				PortValue: uint32(2384),
+			},
+		},
+	}}
 
 	tlsCert := generateTLSCert(defaultMgwKeyPath, defaultMgwCertPath)
-
-	upstreamTLSContextWithCerts := createUpstreamTLSContext(certByteArr)
-	upstreamTLSContextWithoutCerts := createUpstreamTLSContext(nil)
+	upstreamTLSContextWithCerts := createUpstreamTLSContext(certByteArr, hostNameAddress)
+	upstreamTLSContextWithoutCerts := createUpstreamTLSContext(nil, hostNameAddress)
 
 	assert.NotEmpty(t, upstreamTLSContextWithCerts, "Upstream TLS Context should not be null when certs provided")
 	assert.NotEmpty(t, upstreamTLSContextWithCerts.CommonTlsContext, "CommonTLSContext should not be "+
@@ -364,4 +373,8 @@ func TestCreateUpstreamTLSContext(t *testing.T) {
 		"validation context certificate mismatch")
 	assert.Equal(t, defaultCACertPath, upstreamTLSContextWithoutCerts.CommonTlsContext.GetValidationContext().GetTrustedCa().GetFilename(),
 		"validation context certificate filepath mismatch")
+	assert.NotEmpty(t, upstreamTLSContextWithCerts.CommonTlsContext.GetValidationContext().GetMatchSubjectAltNames(),
+		"Subject Alternative Names Should not be empty.")
+	assert.Equal(t, "abc.com", upstreamTLSContextWithCerts.CommonTlsContext.GetValidationContext().GetMatchSubjectAltNames()[0].GetExact(),
+		"Upstream SAN mismatch.")
 }

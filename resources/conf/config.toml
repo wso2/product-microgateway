@@ -24,6 +24,7 @@ ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECD
 trustedCertificatesFilePath = "/etc/ssl/certs/ca-certificates.crt"
 clientCertPath = "/home/wso2/security/localhost.pem"
 clientKeyPath = "/home/wso2/security/localhost.key"
+verifyHostName = true
 
 [filter]
 #Key Store Configuration
