@@ -241,20 +241,6 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 	for i := range ciphersArray {
 		ciphersArray[i] = strings.TrimSpace(ciphersArray[i])
 	}
-	var trustedCASrc *corev3.DataSource
-	if len(upstreamCerts) > 0 {
-		trustedCASrc = &corev3.DataSource{
-			Specifier: &corev3.DataSource_InlineBytes{
-				InlineBytes: upstreamCerts,
-			},
-		}
-	} else {
-		trustedCASrc = &corev3.DataSource{
-			Specifier: &corev3.DataSource_Filename{
-				Filename: conf.Envoy.Upstream.TLS.CACrtPath,
-			},
-		}
-	}
 
 	upstreamTLSContext := &tlsv3.UpstreamTlsContext{
 		CommonTlsContext: &tlsv3.CommonTlsContext{
@@ -264,15 +250,34 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 				CipherSuites:              ciphersArray,
 			},
 			TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
-			ValidationContextType: &tlsv3.CommonTlsContext_ValidationContext{
-				ValidationContext: &tlsv3.CertificateValidationContext{
-					TrustedCa: trustedCASrc,
-				},
-			},
 		},
 	}
 
-	if conf.Envoy.Upstream.TLS.VerifyHostName {
+	if !conf.Envoy.Upstream.TLS.DisableSSLVerification {
+		var trustedCASrc *corev3.DataSource
+
+		if len(upstreamCerts) > 0 {
+			trustedCASrc = &corev3.DataSource{
+				Specifier: &corev3.DataSource_InlineBytes{
+					InlineBytes: upstreamCerts,
+				},
+			}
+		} else {
+			trustedCASrc = &corev3.DataSource{
+				Specifier: &corev3.DataSource_Filename{
+					Filename: conf.Envoy.Upstream.TLS.CACrtPath,
+				},
+			}
+		}
+
+		upstreamTLSContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_ValidationContext{
+			ValidationContext: &tlsv3.CertificateValidationContext{
+				TrustedCa: trustedCASrc,
+			},
+		}
+	}
+
+	if conf.Envoy.Upstream.TLS.VerifyHostName && !conf.Envoy.Upstream.TLS.DisableSSLVerification {
 		addressString := address.GetSocketAddress().GetAddress()
 		subjectAltNames := []*envoy_type_matcherv3.StringMatcher{
 			{

@@ -25,6 +25,7 @@ trustedCertificatesFilePath = "/etc/ssl/certs/ca-certificates.crt"
 clientCertPath = "/home/wso2/security/mg.pem"
 clientKeyPath = "/home/wso2/security/mg.key"
 verifyHostName = true
+disableSslVerification = false
 
 [filter]
 #Key Store Configuration
