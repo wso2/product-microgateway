@@ -50,25 +50,26 @@ public class MockBackEndServer extends Thread {
 
     public static void main(String[] args) {
         MockBackEndServer mockBackEndServer = new MockBackEndServer(Constants.MOCK_BACKEND_SERVER_PORT);
-        MockBackEndServer securedMockBackEndServer = new MockBackEndServer(Constants.SECURED_MOCK_BACKEND_SERVER_PORT,
-                true, false);
-        MockBackEndServer mtlsMockBackEndServer = new MockBackEndServer(Constants.MTLS_MOCK_BACKEND_SERVER_PORT,
-                true, true);
-        MockSandboxServer mockSandboxServer = new MockSandboxServer(Constants.MOCK_SANDBOX_SERVER);
+        MockSandboxServer mockSandboxServer = new MockSandboxServer(Constants.MOCK_SANDBOX_SERVER_PORT);
         mockBackEndServer.start();
-        securedMockBackEndServer.start();
-        mtlsMockBackEndServer.start();
         mockSandboxServer.start();
+        if (args.length > 0 && args[0].equals("-tls-enabled")) {
+            MockBackEndServer securedMockBackEndServer = new MockBackEndServer(Constants.SECURED_MOCK_BACKEND_SERVER_PORT,
+                    true, false);
+            MockBackEndServer mtlsMockBackEndServer = new MockBackEndServer(Constants.MTLS_MOCK_BACKEND_SERVER_PORT,
+                    true, true);
+            securedMockBackEndServer.start();
+            mtlsMockBackEndServer.start();
+        }
     }
 
     public MockBackEndServer(int port) {
-
-        backEndServerPort = port;
+        this.backEndServerPort = port;
     }
 
     public MockBackEndServer(int port, boolean isSecured, boolean mtlsEnabled) {
-        secured = isSecured;
-        backEndServerPort = port;
+        this.secured = isSecured;
+        this.backEndServerPort = port;
         this.mtlsEnabled = mtlsEnabled;
     }
 

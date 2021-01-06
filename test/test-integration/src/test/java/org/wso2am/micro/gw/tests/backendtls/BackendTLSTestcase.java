@@ -41,7 +41,7 @@ public class BackendTLSTestcase extends BaseTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        super.startMGW();
+        super.startMGW(null, true);
 
         //deploy the api
         //api yaml file should put to the resources/apis/openApis folder
