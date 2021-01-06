@@ -83,12 +83,10 @@ public class AuthFilter implements Filter {
         // Header needs to be set only if the relevant cluster is available for the resource and the key type is
         // matched.
         if (requestContext.isClusterHeaderEnabled()) {
-            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION) &&
-                    !StringUtils.isEmpty(requestContext.getProdClusterHeader())) {
+            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
                 requestContext.addResponseHeaders(AdapterConstants.CLUSTER_HEADER,
                         requestContext.getProdClusterHeader());
-            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX) &&
-                    !StringUtils.isEmpty(requestContext.getSandClusterHeader())) {
+            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
                 requestContext.addResponseHeaders(AdapterConstants.CLUSTER_HEADER,
                         requestContext.getSandClusterHeader());
             } else {

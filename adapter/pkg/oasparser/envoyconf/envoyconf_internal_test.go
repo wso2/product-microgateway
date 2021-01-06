@@ -362,8 +362,8 @@ func TestCreateUpstreamTLSContext(t *testing.T) {
 	// tested against default TLS Parameters
 	assert.Equal(t, tlsv3.TlsParameters_TLSv1_2, upstreamTLSContextWithCerts.CommonTlsContext.TlsParams.TlsMaximumProtocolVersion,
 		"TLS maximum parameter mismatch")
-	assert.Equal(t, tlsv3.TlsParameters_TLSv1_2, upstreamTLSContextWithCerts.CommonTlsContext.TlsParams.TlsMinimumProtocolVersion,
-		"TLS maximum parameter mismatch")
+	assert.Equal(t, tlsv3.TlsParameters_TLSv1_1, upstreamTLSContextWithCerts.CommonTlsContext.TlsParams.TlsMinimumProtocolVersion,
+		"TLS minimum parameter mismatch")
 
 	assert.Equal(t, defaultCipherArray, strings.Join(upstreamTLSContextWithCerts.CommonTlsContext.TlsParams.CipherSuites, ", "), "cipher suites mismatch")
 	// the microgateway's certificate will be provided all the time. (For mutualSSL when required)

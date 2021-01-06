@@ -350,8 +350,6 @@ func createRoute(title string, xWso2Basepath string, version string, endpointBas
 			Value: true,
 		},
 	}
-	// var headerBasedClusterSpecifier *routev3.RouteAction_ClusterHeader
-	// var directClusterSpecifier *routev3.RouteAction_Cluster
 
 	decorator = &routev3.Decorator{
 		Operation: resourcePath,
@@ -415,8 +413,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpointBas
 		}
 	}
 
-	//TODO: (VirajSalaka) Introduce a separate function
-	if !(prodClusterName == "" || sandClusterName == "") {
+	if prodClusterName != "" && sandClusterName != "" {
 		headerBasedClusterSpecifier := &routev3.RouteAction_ClusterHeader{
 			ClusterHeader: clusterHeaderName,
 		}
