@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
 import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
@@ -76,37 +77,44 @@ public class AuthFilter implements Filter {
 
         String keyType = authContext.getKeyType();
         if (StringUtils.isEmpty(authContext.getKeyType())) {
-            keyType = "PRODUCTION";
+            keyType = APIConstants.API_KEY_TYPE_PRODUCTION;
         } 
 
         // Header needs to be set only if the relevant cluster is available for the resource and the key type is
         // matched.
         if (requestContext.isClusterHeaderEnabled()) {
-            if (keyType.equalsIgnoreCase("PRODUCTION") &&
+            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION) &&
                     !StringUtils.isEmpty(requestContext.getProdClusterHeader())) {
                 requestContext.addResponseHeaders(AdapterConstants.CLUSTER_HEADER,
                         requestContext.getProdClusterHeader());
-            } else if (keyType.equalsIgnoreCase("SANDBOX") &&
+            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX) &&
                     !StringUtils.isEmpty(requestContext.getSandClusterHeader())) {
                 requestContext.addResponseHeaders(AdapterConstants.CLUSTER_HEADER,
                         requestContext.getSandClusterHeader());
             } else {
+                if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Production key offered to the API with no production endpoint");
+                } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Sandbox key offered to the API with no sandbox endpoint");
+                }
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        "Invalid Token to access production/sandbox environment.");
+                        "Invalid key type.");
             }
         } else {
             // Even if the header flag is false, it is required to check if the relevant resource has a defined cluster
             // based on environment. 
             // If not it should provide authentication error.
             // Always at least one of the cluster header values should be set.
-            if (keyType.equalsIgnoreCase("PRODUCTION")
+            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)
                     && StringUtils.isEmpty(requestContext.getProdClusterHeader())) {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        "Invalid Token to access sandbox environment.");
-            } else if (keyType.equalsIgnoreCase("SANDBOX")
+                        "Production key offered to the API with no production endpoint");
+            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)
                     && StringUtils.isEmpty(requestContext.getSandClusterHeader())) {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        "Invalid Token to access production environment.");
+                        "Sandbox key offered to the API with no sandbox endpoint");
             }   
         }
     }

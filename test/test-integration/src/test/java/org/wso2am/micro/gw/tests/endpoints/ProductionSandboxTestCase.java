@@ -117,6 +117,8 @@ public class ProductionSandboxTestCase extends BaseTestCase {
 
         Assert.assertNotNull(prodResponse, "Production endoint response should not be null");
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
+        Assert.assertEquals(prodResponse.getData(), "{\"errorDescription\":\"Production " +
+                "key offered to the API with no production endpoint\",\"errorCode\":\"900901\"}");
     }
 
     @Test(description = "Invoke Production endpoint when production endpoints provided alone")
@@ -138,6 +140,8 @@ public class ProductionSandboxTestCase extends BaseTestCase {
 
         Assert.assertNotNull(sandResponse, "Sandbox endoint response should not be null");
         Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
+        Assert.assertEquals(sandResponse.getData(), "{\"errorDescription\":\"Sandbox " +
+                "key offered to the API with no sandbox endpoint\",\"errorCode\":\"900901\"}");
     }
 
 }
