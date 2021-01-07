@@ -430,7 +430,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     private byte[] getServiceCredentials() {
         CredentialDto apimCredentials = ConfigHolder.getInstance().getConfig().getApimCredentials();
         String username = apimCredentials.getUsername();
-        char[] pw = apimCredentials.getPassword();
+        char[] pw = apimCredentials.getPwd();
         return Base64.encodeBase64((username + APIConstants.DELEM_COLON + pw).getBytes(StandardCharsets.UTF_8));
     }
 
