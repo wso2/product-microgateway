@@ -140,6 +140,4 @@ public class ConfigHolder {
     public KeyStore getTrustStore() {
         return trustStore;
     }
-
-
 }

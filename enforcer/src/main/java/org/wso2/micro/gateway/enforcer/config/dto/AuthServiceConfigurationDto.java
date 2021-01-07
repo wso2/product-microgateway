@@ -110,6 +110,5 @@ public class AuthServiceConfigurationDto {
             this.queueSize = queueSize;
         }
     }
-
 }
 
