@@ -52,4 +52,8 @@ public class ConfigConstants {
     public static final String MGW_TRUST_STORE_LOCATION = "truststore.location";
     public static final String MGW_TRUST_STORE_TYPE = "truststore.type";
     public static final String MGW_TRUST_STORE_PASSWORD = "truststore.password";
+
+    //APIM credential configs
+    public static final String APIM_CREDENTIAL_USERNAME = "apimCredentials.username";
+    public static final String APIM_CREDENTIAL_PASSWORD = "apimCredentials.password";
 }

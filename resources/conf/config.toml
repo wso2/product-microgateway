@@ -67,4 +67,4 @@ password = "wso2carbon"
 
 [enforcer.apimCredentials]
     username="admin"
-    password=['a','d','m','i','n']
+    password="admin"

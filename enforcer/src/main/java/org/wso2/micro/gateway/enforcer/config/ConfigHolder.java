@@ -22,6 +22,7 @@ import com.moandjiezana.toml.Toml;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.ConfigConstants;
@@ -80,15 +81,26 @@ public class ConfigHolder {
         File file = new File(home + File.separator + ConfigConstants.CONF_DIR + File.separator + "config.toml");
         configToml = new Toml().read(file).getTable(ConfigConstants.CONF_ENFORCER_TABLE);
         config = configToml.to(EnforcerConfig.class);
+        readUnparsableConfigs();
+    }
+
+    /**
+     * {@link EnforcerConfig} object should match with the configurations defined, so that it automatically parse
+     * the config file to the object. This method has only to be used when there are exceptions in which we can't
+     * parse the config to object model using the toml parser.
+     */
+    private void readUnparsableConfigs() {
         //Load Client Trust Store
         loadTrustStore();
 
         // Read jwt token configuration
         populateJWTIssuerConfiguration();
 
+        //Read credentials used to connect with APIM services
+        populateAPIMCredentials();
     }
 
-    private void populateJWTIssuerConfiguration() throws KeyStoreException {
+    private void populateJWTIssuerConfiguration()  {
         List<Object> jwtIssuers = configToml.getList(ConfigConstants.JWT_TOKEN_CONFIG);
         for (Object jwtIssuer : jwtIssuers) {
             Map<String, Object> issuer = (Map<String, Object>) jwtIssuer;
@@ -101,9 +113,14 @@ public class ConfigHolder {
             issuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
 
             String certificateAlias = (String) issuer.get(ConfigConstants.JWT_TOKEN_CERTIFICATE_ALIAS);
-            if (trustStore.getCertificate(certificateAlias) != null) {
-                Certificate issuerCertificate = trustStore.getCertificate(certificateAlias);
-                issuerDto.setCertificate(issuerCertificate);
+            try {
+                if (trustStore.getCertificate(certificateAlias) != null) {
+                    Certificate issuerCertificate = trustStore.getCertificate(certificateAlias);
+                    issuerDto.setCertificate(issuerCertificate);
+                }
+            } catch (KeyStoreException e) {
+                logger.error("Error while loading certificate with alias " + certificateAlias + " from the trust store",
+                        e);
             }
 
             issuerDto.setName((String) issuer.get(ConfigConstants.JWT_TOKEN_ISSUER_NAME));
@@ -127,6 +144,13 @@ public class ConfigHolder {
         } else {
             logger.error("Error in loading trust store. Configurations are not set.");
         }
+    }
+
+    private void populateAPIMCredentials() {
+        String username = configToml.getString(ConfigConstants.APIM_CREDENTIAL_USERNAME);
+        String password = configToml.getString(ConfigConstants.APIM_CREDENTIAL_PASSWORD);
+        CredentialDto credentialDto = new CredentialDto(username, password.toCharArray());
+        config.setApimCredentials(credentialDto);
     }
 
     public EnforcerConfig getConfig() {

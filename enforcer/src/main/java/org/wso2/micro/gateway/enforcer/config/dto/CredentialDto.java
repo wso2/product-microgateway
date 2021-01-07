@@ -24,7 +24,12 @@ package org.wso2.micro.gateway.enforcer.config.dto;
 public class CredentialDto {
 
     String username;
-    char[] password;
+    char[] pwd;
+
+    public CredentialDto(String username, char[] pwd) {
+        this.username = username;
+        this.pwd = pwd;
+    }
 
     public String getUsername() {
         return username;
@@ -34,12 +39,12 @@ public class CredentialDto {
         this.username = username;
     }
 
-    public char[] getPassword() {
-        return password;
+    public char[] getPwd() {
+        return pwd;
     }
 
-    public void setPassword(char[] password) {
-        this.password = password;
+    public void setPwd(char[] pwd) {
+        this.pwd = pwd;
     }
 }
 
