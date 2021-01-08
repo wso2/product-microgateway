@@ -26,7 +26,6 @@ import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.ConfigConstants;
-import org.wso2.micro.gateway.enforcer.exception.MGWException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,7 +51,7 @@ public class ConfigHolder {
     EnforcerConfig config;
     private KeyStore trustStore = null;
 
-    private ConfigHolder() throws MGWException {
+    private ConfigHolder() {
         init();
     }
 
@@ -60,14 +59,9 @@ public class ConfigHolder {
         if (configHolder != null) {
             return configHolder;
         }
-        try {
-            configHolder = new ConfigHolder();
-        } catch (MGWException e) {
-            logger.error("Error while reading configuration", e);
-        }
+        configHolder = new ConfigHolder();
         return configHolder;
     }
-
 
     /**
      * Initialize the configuration provider class by reading the Mgw Configuration file.
@@ -160,6 +154,5 @@ public class ConfigHolder {
     public KeyStore getTrustStore() {
         return trustStore;
     }
-
 
 }
