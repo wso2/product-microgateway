@@ -97,9 +97,8 @@
                     <!-- TODO: (VirajSalaka) set to false because the andes client uses lo4j1.2 implementation -->
                     <minimizeJar>false</minimizeJar>
                     <transformers>
-                        <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>org.wso2.micro.gateway.enforcer.grpc.server.AuthServer</mainClass>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                          <mainClass>org.wso2.micro.gateway.enforcer.server.AuthServer</mainClass>
                         </transformer>
                     </transformers>
                     <filters>

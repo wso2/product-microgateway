@@ -16,7 +16,9 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.enforcer.dto;
+package org.wso2.micro.gateway.enforcer.config.dto;
+
+import org.wso2.micro.gateway.enforcer.dto.ClaimMappingDto;
 
 import java.security.cert.Certificate;
 import java.util.HashMap;

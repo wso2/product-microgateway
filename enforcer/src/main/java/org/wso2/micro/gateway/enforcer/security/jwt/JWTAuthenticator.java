@@ -29,11 +29,12 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
-import org.wso2.micro.gateway.enforcer.config.MGWConfiguration;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.config.EnforcerConfig;
+import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
 import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
-import org.wso2.micro.gateway.enforcer.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
@@ -109,8 +110,8 @@ public class JWTAuthenticator implements Authenticator {
 
                 // Validate subscriptions
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
-                MGWConfiguration configuration = ReferenceHolder.getInstance().getMGWConfiguration();
-                TokenIssuerDto issuerDto = configuration.getJWTIssuers().get(validationInfo.getIssuer());
+                EnforcerConfig configuration = ConfigHolder.getInstance().getConfig();
+                TokenIssuerDto issuerDto = configuration.getIssuersMap().get(validationInfo.getIssuer());
                   //TODO: enable subscription validation
                 if (issuerDto.isValidateSubscriptions()) {
 

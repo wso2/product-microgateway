@@ -19,10 +19,9 @@
 package org.wso2am.micro.gw.mockbackend;
 
 public class Constants {
-
     public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
     public static final String CONTENT_TYPE = "content-type";
-    public static final int MOCK_BACKEND_SERVER_PORT = 2380;
+    public static final int MOCK_BACKEND_SERVER_PORT = 2383;
     public static final int SECURED_MOCK_BACKEND_SERVER_PORT = 2381;
     public static final int MTLS_MOCK_BACKEND_SERVER_PORT = 2382;
     public static final int MOCK_SANDBOX_SERVER_PORT = 2390;

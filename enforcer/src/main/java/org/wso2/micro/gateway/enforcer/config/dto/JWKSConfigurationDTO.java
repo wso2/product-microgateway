@@ -15,20 +15,45 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.enforcer.grpc.server;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+package org.wso2.micro.gateway.enforcer.config.dto;
 
 /**
- * This is the thread pool executor class which runs the executor service threads. {@link ExtAuthService} runs using
- * this thread pool when requests are received.
+ * Holds the configurations related to jwks endpoint of a key manager.
  */
-public class MGWThreadPoolExecutor extends ThreadPoolExecutor {
+public class JWKSConfigurationDTO {
 
-    public MGWThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-            BlockingQueue<Runnable> workQueue) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
+    private String url;
+    private boolean enabled;
+
+    public String getUrl() {
+
+        return url;
+    }
+
+    public void setUrl(String url) {
+
+        this.url = url;
+    }
+
+    public boolean isEnabled() {
+
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+
+        this.enabled = enabled;
+    }
+
+    public JWKSConfigurationDTO(String url, boolean enabled) {
+
+        this.url = url;
+        this.enabled = enabled;
+    }
+
+    public JWKSConfigurationDTO() {
+
     }
 }
+

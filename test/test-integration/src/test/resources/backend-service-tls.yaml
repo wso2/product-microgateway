@@ -2,6 +2,6 @@
     image: wso2/mg-mock-backend:latest
     command: java -cp "lib/*" org.wso2am.micro.gw.mockbackend.MockBackEndServer -tls-enabled
     ports:
-      - "2380:2380"
+      - "2383:2383"
     links:
       - router

@@ -16,44 +16,13 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.enforcer.dto;
+package org.wso2.micro.gateway.enforcer.server;
 
 /**
- * Holds the configurations related to jwks endpoint of a key manager.
+ * Constants related to gRPC server component.
  */
-public class JWKSConfigurationDTO {
+public class Constants {
 
-    private String url;
-    private boolean enabled;
-
-    public String getUrl() {
-
-        return url;
-    }
-
-    public void setUrl(String url) {
-
-        this.url = url;
-    }
-
-    public boolean isEnabled() {
-
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-
-        this.enabled = enabled;
-    }
-
-    public JWKSConfigurationDTO(String url, boolean enabled) {
-
-        this.url = url;
-        this.enabled = enabled;
-    }
-
-    public JWKSConfigurationDTO() {
-
-    }
+    public static final String EXTERNAL_AUTHZ_THREAD_GROUP = "External Authentication Service Thread Group";
+    public static final String EXTERNAL_AUTHZ_THREAD_ID = "ExtAuthService";
 }
-

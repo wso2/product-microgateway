@@ -27,22 +27,35 @@ clientKeyPath = "/home/wso2/security/mg.key"
 verifyHostName = true
 disableSslVerification = false
 
-[filter]
+[enforcer]
+[enforcer.authService]
+  port = 8081
+  maxMessageSize = 1000000000
+  maxHeaderLimit = 8192
+  #keep alive time of the external authz connection
+  keepAliveTime = 600
+  [enforcer.authService.threadPool]
+    coreSize = 400
+    maxSize = 500
+    #keep alive time of threads in seconds
+    keepAliveTime = 600
+    queueSize = 1000
+
 #Key Store Configuration
-[filter.keystore]
+[enforcer.keystore]
 location = "wso2carbon.jks"
 type = "jks"
 password = "wso2carbon"
 
 #Trust store configuration
-[filter.truststore]
+[enforcer.truststore]
 location = "/home/wso2/mg/security/client-truststore.jks"
 type = "jks"
 password = "wso2carbon"
 
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1
-[[filter.jwtTokenConfig]]
+[[enforcer.jwtTokenConfig]]
     name="Resident Key Manager"
     issuer = "https://localhost:9443/oauth2/token"
     certificateAlias = "wso2carbon"
@@ -54,13 +67,16 @@ password = "wso2carbon"
     consumerKeyClaim = "azp"
 
 # Configurations for retrieving API and subscription data from API Manager.
-[filter.eventHub]
+[enforcer.eventHub]
     # Enable/ Disable the feature
     enable = false
     # The API Manager URL
     serviceUrl = "https://localhost:9443/"
     # User name and password of the internal data api.
+    [enforcer.eventHub.jmsConnectionParameters]
+        # The message broker connection URL.
+        eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
+
+[enforcer.apimCredentials]
     username="admin"
     password="admin"
-    # The message broker connection URL.
-    eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"

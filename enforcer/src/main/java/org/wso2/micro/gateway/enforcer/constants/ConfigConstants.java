@@ -25,7 +25,7 @@ package org.wso2.micro.gateway.enforcer.constants;
 public class ConfigConstants {
     public static final String ENFORCER_HOME = "ENFORCER_HOME";
     public static final String CONF_DIR = "conf";
-    public static final String CONF_FILTER_TABLE = "filter";
+    public static final String CONF_ENFORCER_TABLE = "enforcer";
     // JWT Token Config
     public static final String JWT_TOKEN_CONFIG = "jwtTokenConfig";
     public static final String JWT_TOKEN_ISSUER = "issuer";
@@ -52,4 +52,8 @@ public class ConfigConstants {
     public static final String MGW_TRUST_STORE_LOCATION = "truststore.location";
     public static final String MGW_TRUST_STORE_TYPE = "truststore.type";
     public static final String MGW_TRUST_STORE_PASSWORD = "truststore.password";
+
+    //APIM credential configs
+    public static final String APIM_CREDENTIAL_USERNAME = "apimCredentials.username";
+    public static final String APIM_CREDENTIAL_PASSWORD = "apimCredentials.password";
 }

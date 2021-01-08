@@ -1,6 +1,6 @@
   mockBackend:
     image: wso2/mg-mock-backend:latest
     ports:
-      - "2380:2380"
+      - "2383:2383"
     links:
       - router

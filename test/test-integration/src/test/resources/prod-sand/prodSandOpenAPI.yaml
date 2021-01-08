@@ -9,7 +9,7 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-host: 'mockBackend:2380'
+host: 'mockBackend:2383'
 basePath: /v2
 tags:
   - name: pet
@@ -21,7 +21,7 @@ schemes:
   - http
 x-wso2-production-endpoints:
   urls:
-    - http://mockBackend:2380/v2
+    - http://mockBackend:2383/v2
 x-wso2-sandbox-endpoints:
   urls:
     - http://mockBackend:2390/v2   

@@ -59,7 +59,7 @@ public class TestConstant {
 
     public static final int GATEWAY_LISTENER_HTTPS_PORT = 9095;
     public static final int ADAPTER_IMPORT_API_PORT = 9843;
-    public final static int MOCK_SERVER_PORT = 2380;
+    public final static int MOCK_SERVER_PORT = 2383;
 
     public static final int INVALID_CREDENTIALS_CODE = 900901;
 

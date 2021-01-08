@@ -18,7 +18,7 @@ FROM adoptopenjdk/openjdk11:jre-11.0.9_11.1-alpine
 
 WORKDIR /home/app
 
-EXPOSE 2380
+EXPOSE 23823
 
 COPY maven/ lib/
 
