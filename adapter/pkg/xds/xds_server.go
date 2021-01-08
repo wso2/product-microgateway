@@ -33,6 +33,7 @@ import (
 	logger "github.com/wso2/micro-gw/loggers"
 	oasParser "github.com/wso2/micro-gw/pkg/oasparser"
 	"github.com/wso2/micro-gw/pkg/oasparser/model"
+	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 )
 
@@ -93,7 +94,7 @@ func GetXdsCache() cachev3.SnapshotCache {
 }
 
 // UpdateEnvoy updates the Xds Cache when OpenAPI Json content is provided
-func UpdateEnvoy(byteArr []byte, upstreamCerts []byte) {
+func UpdateEnvoy(byteArr []byte, upstreamCerts []byte, apiType string) {
 	var apiMapKey string
 	var newLabels []string
 
@@ -102,45 +103,53 @@ func UpdateEnvoy(byteArr []byte, upstreamCerts []byte) {
 	l.Lock()
 	defer l.Unlock()
 
-	openAPIVersion, jsonContent, err := operator.GetOpenAPIVersionAndJSONContent(byteArr)
-	if err != nil {
-		logger.LoggerXds.Error("Error while retrieving the openAPI version and Json Content from byte Array.", err)
-		return
-	}
-	logger.LoggerXds.Debugf("OpenAPI version : %v", openAPIVersion)
-	if openAPIVersion == "3" {
-		openAPIV3Struct, err := operator.GetOpenAPIV3Struct(jsonContent)
+	if apiType == mgw.HTTP {
+		openAPIVersion, jsonContent, err := operator.GetOpenAPIVersionAndJSONContent(byteArr)
 		if err != nil {
-			logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
+			logger.LoggerXds.Error("Error while retrieving the openAPI version and Json Content from byte Array.", err)
+			return
 		}
-		apiMapKey = openAPIV3Struct.Info.Title + ":" + openAPIV3Struct.Info.Version
-		existingOpenAPI, ok := openAPIV3Map[apiMapKey]
-		if ok {
-			if reflect.DeepEqual(openAPIV3Struct, existingOpenAPI) {
-				//Works as the openAPI already contains the label feature.
-				logger.LoggerXds.Infof("No changes to apply for the OpenAPI key : %v", apiMapKey)
-				return
+		logger.LoggerXds.Debugf("OpenAPI version : %v", openAPIVersion)
+		if openAPIVersion == "3" {
+			openAPIV3Struct, err := operator.GetOpenAPIV3Struct(jsonContent)
+			if err != nil {
+				logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
 			}
+			apiMapKey = openAPIV3Struct.Info.Title + ":" + openAPIV3Struct.Info.Version
+			existingOpenAPI, ok := openAPIV3Map[apiMapKey]
+			if ok {
+				if reflect.DeepEqual(openAPIV3Struct, existingOpenAPI) {
+					//Works as the openAPI already contains the label feature.
+					logger.LoggerXds.Infof("No changes to apply for the OpenAPI key : %v", apiMapKey)
+					return
+				}
+			}
+			openAPIV3Map[apiMapKey] = openAPIV3Struct
+			//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
+			newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
+		} else {
+			openAPIV2Struct, err := operator.GetOpenAPIV2Struct(jsonContent)
+			if err != nil {
+				logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
+			}
+			apiMapKey = openAPIV2Struct.Info.Title + ":" + openAPIV2Struct.Info.Version
+			existingOpenAPI, ok := openAPIV2Map[apiMapKey]
+			if ok {
+				if reflect.DeepEqual(openAPIV2Struct, existingOpenAPI) {
+					//Works as the openAPI already contains the label feature.
+					logger.LoggerXds.Infof("No changes to apply for the OpenAPI key : %v", apiMapKey)
+					return
+				}
+			}
+			newLabels = operator.GetXWso2Labels(openAPIV2Struct.Extensions)
 		}
-		openAPIV3Map[apiMapKey] = openAPIV3Struct
-		//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
-		newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
+
+	} else if apiType == mgw.WS {
+		logger.LoggerXds.Infof("XDS Websocket : %v", apiType)
 	} else {
-		openAPIV2Struct, err := operator.GetOpenAPIV2Struct(jsonContent)
-		if err != nil {
-			logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
-		}
-		apiMapKey = openAPIV2Struct.Info.Title + ":" + openAPIV2Struct.Info.Version
-		existingOpenAPI, ok := openAPIV2Map[apiMapKey]
-		if ok {
-			if reflect.DeepEqual(openAPIV2Struct, existingOpenAPI) {
-				//Works as the openAPI already contains the label feature.
-				logger.LoggerXds.Infof("No changes to apply for the OpenAPI key : %v", apiMapKey)
-				return
-			}
-		}
-		newLabels = operator.GetXWso2Labels(openAPIV2Struct.Extensions)
+		logger.LoggerXds.Info("Error")
 	}
+
 	logger.LoggerXds.Infof("Added/Updated the content under OpenAPI Key : %v", apiMapKey)
 	logger.LoggerXds.Debugf("Newly added labels for the OpenAPI Key : %v are %v", apiMapKey, newLabels)
 	oldLabels, _ := openAPIEnvoyMap[apiMapKey]

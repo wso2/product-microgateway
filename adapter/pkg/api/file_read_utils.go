@@ -21,6 +21,7 @@ package api
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"os"
@@ -28,17 +29,19 @@ import (
 	"strings"
 
 	"github.com/wso2/micro-gw/loggers"
+	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/utills"
 	xds "github.com/wso2/micro-gw/pkg/xds"
 )
 
 // API Controller related constants
 const (
-	openAPIDir      string = "Definitions"
-	openAPIFilename string = "swagger.yaml"
-	endpointCertDir string = "Endpoint-certificates"
-	crtExtension    string = ".crt"
-	pemExtension    string = ".pem"
+	openAPIDir            string = "Definitions"
+	openAPIFilename       string = "swagger.yaml"
+	apiDefinitionFilename string = "api.yaml"
+	endpointCertDir       string = "Endpoint-certificates"
+	crtExtension          string = ".crt"
+	pemExtension          string = ".pem"
 )
 
 // ApplyAPIProject accepts an apictl project (as a byte array) and updates the xds servers based upon the
@@ -49,8 +52,10 @@ func ApplyAPIProject(payload []byte) error {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	var upstreamCerts []byte
 	newLineByteArray := []byte("\n")
+	var swaggwerJsn []byte
 	var apiJsn []byte
 	var conversionErr error
+	var apiType string
 
 	if err != nil {
 		loggers.LoggerAPI.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
@@ -59,6 +64,7 @@ func ApplyAPIProject(payload []byte) error {
 
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
 	for _, file := range zipReader.File {
+		loggers.LoggerAPI.Infof("fileName : %v", file)
 		if strings.HasSuffix(file.Name, openAPIDir+string(os.PathSeparator)+openAPIFilename) {
 			loggers.LoggerAPI.Debugf("openAPI file : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
@@ -66,11 +72,12 @@ func ApplyAPIProject(payload []byte) error {
 				loggers.LoggerAPI.Errorf("Error occured while reading the openapi file. %v", err.Error())
 				continue
 			}
-			apiJsn, conversionErr = utills.ToJSON(unzippedFileBytes)
+			swaggwerJsn, conversionErr = utills.ToJSON(unzippedFileBytes)
 			if conversionErr != nil {
-				loggers.LoggerAPI.Errorf("Error converting api file to json: %v", err.Error())
+				loggers.LoggerAPI.Errorf("Error converting api file to json: %v", conversionErr.Error())
 				return conversionErr
 			}
+			loggers.LoggerAPI.Infof("swaggerJsn : %v", swaggwerJsn)
 		} else if strings.Contains(file.Name, endpointCertDir+string(os.PathSeparator)) &&
 			(strings.HasSuffix(file.Name, crtExtension) || strings.HasSuffix(file.Name, pemExtension)) {
 			unzippedFileBytes, err := readZipFile(file)
@@ -87,9 +94,35 @@ func ApplyAPIProject(payload []byte) error {
 			}
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
+		} else if strings.Contains(file.Name, apiDefinitionFilename) {
+			loggers.LoggerAPI.Infof("fileName : %v", file.Name)
+			unzippedFileBytes, conversionErr := readZipFile(file)
+			if err != nil {
+				loggers.LoggerAPI.Errorf("Error occured while reading the api definition file : %v %v", file.Name, err.Error())
+				return conversionErr
+			}
+			apiJsn, conversionErr = utills.ToJSON(unzippedFileBytes)
+			if conversionErr != nil {
+				loggers.LoggerAPI.Errorf("Error occured converting api file to json: %v", conversionErr.Error())
+			}
+			loggers.LoggerAPI.Infof("apiJsn : %v", apiJsn)
+			apiType, err = getAPIType(apiJsn)
+			if err != nil {
+				loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
+				return err
+			}
+			loggers.LoggerAPI.Infof("Api type : %v", apiType)
+
 		}
 	}
-	xds.UpdateEnvoy(apiJsn, upstreamCerts)
+	switch apiType {
+	case mgw.HTTP:
+		xds.UpdateEnvoy(swaggwerJsn, upstreamCerts, apiType)
+	case mgw.WS:
+		xds.UpdateEnvoy(apiJsn, upstreamCerts, apiType)
+	default:
+		loggers.LoggerAPI.Infof("API type is not currently supported with WSO2 micro-gateway")
+	}
 	return nil
 }
 
@@ -100,4 +133,16 @@ func readZipFile(zf *zip.File) ([]byte, error) {
 	}
 	defer f.Close()
 	return ioutil.ReadAll(f)
+}
+
+func getAPIType(apiJsn []byte) (string, error) {
+	var apiDef map[string]interface{}
+	unmarshalErr := json.Unmarshal(apiJsn, &apiDef)
+	if unmarshalErr != nil {
+		loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml %v", unmarshalErr.Error())
+		return "", unmarshalErr
+	}
+	data := apiDef["data"].(map[string]interface{})
+	apiType := data["type"].(string)
+	return apiType, nil
 }
