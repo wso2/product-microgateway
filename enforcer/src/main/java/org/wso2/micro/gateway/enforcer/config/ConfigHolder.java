@@ -53,11 +53,7 @@ public class ConfigHolder {
     private KeyStore trustStore = null;
 
     private ConfigHolder() throws MGWException {
-        try {
-            init();
-        } catch (KeyStoreException e) {
-            throw new MGWException("Error while loading configuration from file", e);
-        }
+        init();
     }
 
     public static ConfigHolder getInstance() {
@@ -76,7 +72,7 @@ public class ConfigHolder {
     /**
      * Initialize the configuration provider class by reading the Mgw Configuration file.
      */
-    private void init() throws KeyStoreException {
+    private void init() {
         String home = System.getenv(ConfigConstants.ENFORCER_HOME);
         File file = new File(home + File.separator + ConfigConstants.CONF_DIR + File.separator + "config.toml");
         configToml = new Toml().read(file).getTable(ConfigConstants.CONF_ENFORCER_TABLE);

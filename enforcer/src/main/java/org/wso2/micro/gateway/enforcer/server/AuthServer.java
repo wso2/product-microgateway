@@ -35,6 +35,7 @@ import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerDataServiceImpl;
 import org.wso2.micro.gateway.enforcer.listener.GatewayJMSMessageListener;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -44,30 +45,42 @@ public class AuthServer {
 
     private static final Logger logger = LogManager.getLogger(AuthServer.class);
 
-    public static void main(String[] args) throws Exception {
-        // Load configurations
-        ConfigHolder configHolder = ConfigHolder.getInstance();
-        KeyManagerDataService keyManagerDataService = new KeyManagerDataServiceImpl();
-        ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
+    public static void main(String[] args) {
+        try {
+            // Load configurations
+            ConfigHolder configHolder = ConfigHolder.getInstance();
+            KeyManagerDataService keyManagerDataService = new KeyManagerDataServiceImpl();
+            ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
 
-        // Create a new server to listen on port 8081
-        Server server = initServer();
-        //Initialise cache objects
-        CacheProvider.init();
+            // Create a new server to listen on port 8081
+            Server server = initServer();
+            //Initialise cache objects
+            CacheProvider.init();
 
-        // Start the server
-        server.start();
-        logger.info("Sever started Listening in port : " + 8081);
+            // Start the server
+            server.start();
+            logger.info("Sever started Listening in port : " + 8081);
 
-        if (configHolder.getConfig().getEventHub().isEnabled()) {
-            logger.info("Event Hub configuration enabled... Starting JMS listener...");
-            GatewayJMSMessageListener.init(configHolder.getConfig().getEventHub());
+            if (configHolder.getConfig().getEventHub().isEnabled()) {
+                logger.info("Event Hub configuration enabled... Starting JMS listener...");
+                GatewayJMSMessageListener.init(configHolder.getConfig().getEventHub());
+            }
+            //TODO: Get the tenant domain from config
+            SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore("carbon.super");
+
+            // Don't exit the main thread. Wait until server is terminated.
+            server.awaitTermination();
+        } catch (IOException e) {
+            logger.error("Error while starting the enforcer gRPC server.", e);
+            System.exit(1);
+        } catch (InterruptedException e) {
+            logger.error("Enforcer server main thread interrupted.", e);
+            System.exit(1);
+        } catch (Exception ex) {
+            // printing the stack trace in case logger might not have been initialized
+            ex.printStackTrace();
+            System.exit(1);
         }
-        //TODO: Get the tenant domain from config
-        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore("carbon.super");
-
-        // Don't exit the main thread. Wait until server is terminated.
-        server.awaitTermination();
     }
 
     private static Server initServer() {
