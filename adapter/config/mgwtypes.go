@@ -87,5 +87,20 @@ type Config struct {
 		ListenerCertPath        string
 		ListenerKeyPath         string
 		ListenerTLSEnabled      bool
+
+		// Envoy Upstream Related Connfigurations
+		Upstream struct {
+			//UpstreamTLS related Configuration
+			TLS struct {
+				MinVersion             string `toml:"minimumProtocolVersion"`
+				MaxVersion             string `toml:"maximumProtocolVersion"`
+				Ciphers                string `toml:"ciphers"`
+				CACrtPath              string `toml:"trustedCertificatesFilePath"`
+				PrivateKeyPath         string `toml:"clientKeyPath"`
+				PublicCertPath         string `toml:"clientCertPath"`
+				VerifyHostName         bool   `toml:"verifyHostName"`
+				DisableSSLVerification bool   `toml:"disableSslVerification"`
+			}
+		}
 	}
 }

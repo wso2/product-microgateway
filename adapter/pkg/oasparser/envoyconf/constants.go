@@ -21,22 +21,40 @@ const (
 )
 
 const (
-	extAuthzFilterName string = "envoy.filters.http.ext_authz"
-	transportSocketName string = "envoy.transport_sockets.tls"
-	accessLogName       string = "envoy.access_loggers.file"
+	extAuthzFilterName        string = "envoy.filters.http.ext_authz"
+	transportSocketName       string = "envoy.transport_sockets.tls"
+	accessLogName             string = "envoy.access_loggers.file"
 	httpConManagerStartPrefix string = "ingress_http"
+	extAuthzPerRouteName      string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 )
 
 const (
 	defaultRdsConfigName            string = "default"
 	defaultAccessLogPath            string = "/tmp/envoy.access.log"
 	defaultListenerSecretConfigName string = "DefaultListenerSecret"
-	defaultCACertPath               string = "/etc/ssl/certs/ca-certificates.crt"
 )
 
 const (
 	sandClustersConfigNamePrefix string = "clusterSand_"
 	prodClustersConfigNamePrefix string = "clusterProd_"
+)
+
+// Context Extensions which are set in ExtAuthzPerRoute Config
+// These values are shared between the adapter and enforcer, hence if it is required to change
+// these values, modifications should be done in the both adapter and enforcer.
+const (
+	pathContextExtension            string = "path"
+	basePathContextExtension        string = "basePath"
+	methodContextExtension          string = "method"
+	apiVersionContextExtension      string = "version"
+	apiNameContextExtension         string = "name"
+	prodClusterNameContextExtension string = "prodClusterName"
+	sandClusterNameContextExtension string = "sandClusterName"
+)
+
+const (
+	// clusterHeaderName denotes the constant used for header based routing decisions.
+	clusterHeaderName string = "x-wso2-cluster-header"
 )
 
 const (

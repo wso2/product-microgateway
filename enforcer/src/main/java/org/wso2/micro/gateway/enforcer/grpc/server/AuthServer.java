@@ -62,6 +62,7 @@ public class AuthServer {
         MGWConfiguration mgwConfiguration = MGWConfiguration.getInstance();
         ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
         ReferenceHolder.getInstance().setMGWConfiguration(mgwConfiguration);
+
         CacheProvider.init();
 
         // Start the server

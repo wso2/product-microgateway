@@ -32,18 +32,18 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewPostImportAPIParams creates a new PostImportAPIParams object
+// NewPostApisParams creates a new PostApisParams object
 // no default values defined in spec.
-func NewPostImportAPIParams() PostImportAPIParams {
+func NewPostApisParams() PostApisParams {
 
-	return PostImportAPIParams{}
+	return PostApisParams{}
 }
 
-// PostImportAPIParams contains all the bound params for the post import API operation
+// PostApisParams contains all the bound params for the post apis operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters PostImportAPI
-type PostImportAPIParams struct {
+// swagger:parameters PostApis
+type PostApisParams struct {
 
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
@@ -69,8 +69,8 @@ type PostImportAPIParams struct {
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
 // for simple values it will use straight method calls.
 //
-// To ensure default values, the struct must have been initialized with NewPostImportAPIParams() beforehand.
-func (o *PostImportAPIParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
+// To ensure default values, the struct must have been initialized with NewPostApisParams() beforehand.
+func (o *PostApisParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
 
 	o.HTTPRequest = r
@@ -114,12 +114,12 @@ func (o *PostImportAPIParams) BindRequest(r *http.Request, route *middleware.Mat
 // bindFile binds file parameter File.
 //
 // The only supported validations on files are MinLength and MaxLength
-func (o *PostImportAPIParams) bindFile(file multipart.File, header *multipart.FileHeader) error {
+func (o *PostApisParams) bindFile(file multipart.File, header *multipart.FileHeader) error {
 	return nil
 }
 
 // bindOverwrite binds and validates parameter Overwrite from query.
-func (o *PostImportAPIParams) bindOverwrite(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *PostApisParams) bindOverwrite(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
@@ -141,7 +141,7 @@ func (o *PostImportAPIParams) bindOverwrite(rawData []string, hasKey bool, forma
 }
 
 // bindPreserveProvider binds and validates parameter PreserveProvider from query.
-func (o *PostImportAPIParams) bindPreserveProvider(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *PostApisParams) bindPreserveProvider(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]

@@ -19,6 +19,7 @@
 package org.wso2am.micro.gw.tests.context;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
@@ -51,15 +52,7 @@ public class MgwServerInstance implements MgwServer {
      * @throws MicroGWTestException
      */
     public MgwServerInstance() throws IOException, MicroGWTestException {
-        createTmpMgwSetup();
-        File targetClassesDir = new File(MgwServerInstance.class.getProtectionDomain().getCodeSource().
-                getLocation().getPath());
-        String mgwServerPath = targetClassesDir.getParentFile().toString() + File.separator + "server-tmp";
-
-        String dockerCompsePath = mgwServerPath+  File.separator + "docker-compose.yaml";
-        MockBackendServer.addMockBackendServiceToDockerCompose(dockerCompsePath);
-        environment = new DockerComposeContainer(new File(dockerCompsePath))
-                .withLocalCompose(true);
+        this(null, false);
 
     }
 
@@ -72,15 +65,29 @@ public class MgwServerInstance implements MgwServer {
      * @throws MicroGWTestException
      */
     public MgwServerInstance(String confPath) throws IOException, MicroGWTestException {
+        this(confPath, false);
+    }
+
+    /**
+     * initialize a docker environment using docker compose.
+     *
+     * @param confPath external conf.toml path
+     * @param tlsEnabled if the backend needs to have the tls enabled server additionally
+     *
+     * @throws IOException
+     * @throws MicroGWTestException
+     */
+    public MgwServerInstance(String confPath, boolean tlsEnabled) throws IOException, MicroGWTestException {
         createTmpMgwSetup();
         File targetClassesDir = new File(MgwServerInstance.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());
         String mgwServerPath = targetClassesDir.getParentFile().toString() + File.separator + "server-tmp";
-        Utils.copyFile(confPath, mgwServerPath  +  File.separator + "resources"  +  File.separator +
-                "conf" +  File.separator + "config.toml");
-
+        if (!StringUtils.isEmpty(confPath)) {
+            Utils.copyFile(confPath, mgwServerPath  +  File.separator + "resources"  +  File.separator +
+                    "conf" +  File.separator + "config.toml");
+        }
         String dockerCompsePath = mgwServerPath+  File.separator + "docker-compose.yaml";
-        MockBackendServer.addMockBackendServiceToDockerCompose(dockerCompsePath);
+        MockBackendServer.addMockBackendServiceToDockerCompose(dockerCompsePath, tlsEnabled);
         environment = new DockerComposeContainer(new File(dockerCompsePath))
                 .withLocalCompose(true);
 

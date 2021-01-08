@@ -8,7 +8,10 @@ host: petstore.swagger.io
 basePath: /v1
 x-wso2-production-endpoints:
   urls:
-    - http://apiLevelEndpoint
+    - http://apiLevelProdEndpoint
+x-wso2-sandbox-endpoints:
+  urls:
+    - http://apiLevelSandEndpoint    
 schemes:
   - http
 consumes:
@@ -17,6 +20,12 @@ produces:
   - application/json
 paths:
   /pets:
+    x-wso2-production-endpoints:
+      urls:
+        - https://resourceLevelProdEndpoint
+    x-wso2-sandbox-endpoints:
+      urls:
+        - https://resourceLevelSandEndpoint   
     get:
       summary: List all pets
       operationId: listPets
@@ -44,10 +53,7 @@ paths:
             $ref: '#/definitions/Error'
     post:
       summary: Create a pet
-      operationId: createPets
-      x-wso2-production-endpoints:
-        urls:
-          - http://resourceLevelEndpoint
+      operationId: createPets 
       tags:
         - pets
       responses:

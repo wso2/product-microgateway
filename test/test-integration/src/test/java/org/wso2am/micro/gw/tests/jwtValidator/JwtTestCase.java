@@ -44,7 +44,7 @@ public class JwtTestCase extends BaseTestCase {
 
         //deploy the api
         //api yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("mockApi.yaml");
+        String apiZipfile = ApiProjectGenerator.createApictlProjZip("/apis/openApis/mockApi.yaml");
 
         ApiDeployment.deployAPI(apiZipfile);
 
@@ -84,7 +84,6 @@ public class JwtTestCase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
     }
 
-
     @Test(description = "Test to check the JWT auth validate invalida signature token")
     public void invokeJWTHeaderInvalidTokenTest() throws Exception {
 
@@ -95,7 +94,7 @@ public class JwtTestCase extends BaseTestCase {
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), TestConstant.INVALID_CREDENTIALS_CODE,
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,
                 "Response code mismatched");
     }
 
@@ -109,7 +108,7 @@ public class JwtTestCase extends BaseTestCase {
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), TestConstant.INVALID_CREDENTIALS_CODE,
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,
                 "Response code mismatched");
     }
 }

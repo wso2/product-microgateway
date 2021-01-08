@@ -128,10 +128,7 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 	}
 
 	if conf.Envoy.ListenerTLSEnabled {
-		tlsCert, err := generateTLSCert(conf.Envoy.ListenerKeyPath, conf.Envoy.ListenerCertPath)
-		if err != nil {
-			panic(err)
-		}
+		tlsCert := generateTLSCert(conf.Envoy.ListenerKeyPath, conf.Envoy.ListenerCertPath)
 		//TODO: (VirajSalaka) Make it configurable via SDS
 		tlsFilter := &tlsv3.DownstreamTlsContext{
 			CommonTlsContext: &tlsv3.CommonTlsContext{
@@ -226,10 +223,7 @@ func getAccessLogConfigs() *access_logv3.AccessLog {
 //TODO: (VirajSalaka) Still the following method is not utilized as Sds is not implement. Keeping the Implementation for future reference
 func generateDefaultSdsSecretFromConfigfile(privateKeyPath string, pulicKeyPath string) (*tlsv3.Secret, error) {
 	var secret tlsv3.Secret
-	tlsCert, err := generateTLSCert(privateKeyPath, pulicKeyPath)
-	if err != nil {
-		return &secret, err
-	}
+	tlsCert := generateTLSCert(privateKeyPath, pulicKeyPath)
 	secret = tlsv3.Secret{
 		Name: defaultListenerSecretConfigName,
 		Type: &tlsv3.Secret_TlsCertificate{
@@ -239,29 +233,23 @@ func generateDefaultSdsSecretFromConfigfile(privateKeyPath string, pulicKeyPath 
 	return &secret, nil
 }
 
-func generateTLSCert(privateKeyPath string, publicKeyPath string) (*tlsv3.TlsCertificate, error) {
+// generateTLSCert generates the TLS Certiificate with given private key filepath and the corresponding public Key filepath.
+// The files should be mounted to the router container unless the default cert is used.
+func generateTLSCert(privateKeyPath string, publicKeyPath string) *tlsv3.TlsCertificate {
 	var tlsCert tlsv3.TlsCertificate
-	privateKeyByteArray, err := readFileAsByteArray(privateKeyPath)
-	if err != nil {
-		return &tlsCert, err
-	}
-	publicKeyByteArray, err := readFileAsByteArray(publicKeyPath)
-	if err != nil {
-		return &tlsCert, err
-	}
 	tlsCert = tlsv3.TlsCertificate{
 		PrivateKey: &corev3.DataSource{
-			Specifier: &corev3.DataSource_InlineBytes{
-				InlineBytes: privateKeyByteArray,
+			Specifier: &corev3.DataSource_Filename{
+				Filename: privateKeyPath,
 			},
 		},
 		CertificateChain: &corev3.DataSource{
-			Specifier: &corev3.DataSource_InlineBytes{
-				InlineBytes: publicKeyByteArray,
+			Specifier: &corev3.DataSource_Filename{
+				Filename: publicKeyPath,
 			},
 		},
 	}
-	return &tlsCert, nil
+	return &tlsCert
 }
 
 func readFileAsByteArray(filepath string) ([]byte, error) {
