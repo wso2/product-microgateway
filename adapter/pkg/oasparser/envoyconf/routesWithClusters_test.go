@@ -96,6 +96,7 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 	assert.Equal(t, true, routeRegexMatchesFound, "Generated route regex is incorrect.")
 }
 
+// TODO: (VirajSalaka) Fix the cause for the intermittent failure
 // func TestCreateRoutesWithClustersProdSandEp(t *testing.T) {
 // 	// Tested Features
 // 	// 1. Production Sandbox endpoint assignment for the routes.
