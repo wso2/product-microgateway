@@ -18,7 +18,6 @@
 
 package org.wso2.micro.gateway.enforcer.common;
 
-import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerDataService;
 import org.wso2.micro.gateway.enforcer.security.KeyValidator;
 
@@ -33,7 +32,6 @@ public class ReferenceHolder {
 
     private final Map<String, KeyValidator> keyValidationHandlerMap = new ConcurrentHashMap<>();
     private KeyManagerDataService keyManagerDataService;
-    private ConfigHolder configHolder;
 
     private ReferenceHolder() {
     }

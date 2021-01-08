@@ -19,7 +19,7 @@
 package org.wso2.micro.gateway.enforcer.config.dto;
 
 /**
- * Holds the configurations related to basic authentication when connecting with secured services
+ * Holds the configurations related to basic authentication when connecting with secured services.
  */
 public class CredentialDto {
 

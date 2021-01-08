@@ -21,7 +21,7 @@ package org.wso2.micro.gateway.enforcer.config.dto;
 import java.util.Properties;
 
 /**
- * Holds the configurations related to connecting with APIM event hub node
+ * Holds the configurations related to connecting with APIM event hub node.
  */
 public class EventHubConfigurationDto {
     private boolean enabled;
@@ -30,35 +30,28 @@ public class EventHubConfigurationDto {
     private Properties jmsConnectionParameters = new Properties();
 
     public boolean isEnabled() {
-
         return enabled;
     }
 
     public void setEnabled(boolean enabled) {
-
         this.enabled = enabled;
     }
 
     public String getServiceUrl() {
-
         return serviceUrl;
     }
 
     public void setServiceUrl(String serviceUrl) {
-
         this.serviceUrl = serviceUrl;
     }
 
     public int getInitDelay() {
-
         return initDelay;
     }
 
     public void setInitDelay(int initDelay) {
-
         this.initDelay = initDelay;
     }
-
 
     public Properties getJmsConnectionParameters() {
         return jmsConnectionParameters;

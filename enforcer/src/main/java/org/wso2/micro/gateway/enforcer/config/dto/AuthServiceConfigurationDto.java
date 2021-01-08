@@ -19,7 +19,7 @@
 package org.wso2.micro.gateway.enforcer.config.dto;
 
 /**
- * Holds the configurations related to gRPC netty server that implements the filter chain functionality
+ * Holds the configurations related to gRPC netty server that implements the filter chain functionality.
  */
 public class AuthServiceConfigurationDto {
 
@@ -70,7 +70,7 @@ public class AuthServiceConfigurationDto {
     }
 
     /**
-     * Holds the configurations related to threading of gRPC netty server
+     * Holds the configurations related to threading of gRPC netty server.
      */
     public class ThreadPoolConfig {
         private int coreSize;
