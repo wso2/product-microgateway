@@ -1,4 +1,3 @@
-#!/bin/bash
 # --------------------------------------------------------------------
 # Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
 #
@@ -15,33 +14,26 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-export MGW_HOME=${PWD}/../resources
-go clean -testcache
-go test ./... 
-if [ $? -ne 0 ]; then 
-  echo "FAILED: Unit tests failure"
-  exit 1
-fi
+# service for router
 
-golint -set_exit_status ./...
-if [ $? -ne 0 ]; then
-  echo "INFO: Trying to install golint"
-  go get -u golang.org/x/lint/golint
-  golint -set_exit_status ./...
-  if [ $? -ne 0 ]; then
-    echo "FAILED: golint Failure"
-    exit 1
-  fi
-fi
-
-go vet -c=5 ./...
-if [ $? -ne 0 ]; then 
-  echo "FAILED: go vet Failure"
-  exit 1
-fi
-
-GOOS=linux GOARCH=amd64 go build -v -o target/micro-gw-ubuntu main.go
-if [ $? -ne 0 ]; then 
-  echo "FAILED: Build failure"
-  exit 1
-fi  
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mg-router
+  name: router-service
+spec:
+  type: NodePort
+  selector:
+    app: mg-router
+  ports:
+    - name: "http-routeradmin"
+      port: 9000
+      targetPort: 9000
+      protocol: TCP
+      nodePort: 30202
+    - name: "https-router"
+      port: 9095
+      targetPort: 9095
+      protocol: TCP
+      nodePort: 30201

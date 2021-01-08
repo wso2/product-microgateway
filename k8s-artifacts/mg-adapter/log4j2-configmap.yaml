@@ -1,0 +1,68 @@
+# --------------------------------------------------------------------
+# Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# -----------------------------------------------------------------------
+
+# Config map containing the log4j2.properties file for adapter
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: log4j2
+data:
+  log4j2.properties: |
+    appenders = MGW_CONSOLE, MGW_LOGFILE
+
+    appender.MGW_CONSOLE.type = Console
+    appender.MGW_CONSOLE.name = MGW_CONSOLE
+    appender.MGW_CONSOLE.layout.type = PatternLayout
+    appender.MGW_CONSOLE.layout.pattern = [%d{DEFAULT}] %5p - %c{1} %m%n
+    appender.MGW_CONSOLE.filter.threshold.type = ThresholdFilter
+    appender.MGW_CONSOLE.filter.threshold.level = DEBUG
+
+    appender.MGW_LOGFILE.type = RollingFile
+    appender.MGW_LOGFILE.name = MGW_LOGFILE
+    appender.MGW_LOGFILE.fileName = logs/enforcer.log
+    appender.MGW_LOGFILE.filePattern = /logs/wso2MGW-%d{MM-dd-yyyy}.log
+    appender.MGW_LOGFILE.layout.type = PatternLayout
+    appender.MGW_LOGFILE.layout.pattern = [%d] %5p {%c} - [%m%ex%n]
+    appender.MGW_LOGFILE.policies.type = Policies
+    appender.MGW_LOGFILE.policies.time.type = TimeBasedTriggeringPolicy
+    appender.MGW_LOGFILE.policies.time.interval = 1
+    appender.MGW_LOGFILE.policies.time.modulate = true
+    appender.MGW_LOGFILE.policies.size.type = SizeBasedTriggeringPolicy
+    appender.MGW_LOGFILE.policies.size.size=10MB
+    appender.MGW_LOGFILE.strategy.type = DefaultRolloverStrategy
+    appender.MGW_LOGFILE.strategy.max = 20
+    appender.MGW_LOGFILE.filter.threshold.type = ThresholdFilter
+    appender.MGW_LOGFILE.filter.threshold.level = DEBUG
+
+
+    loggers = mgw-enforcer, io-swagger-v3
+    # Log to console and rolling file
+    logger.mgw-enforcer.name = org.wso2.micro.gateway.enforcer
+    logger.mgw-enforcer.level = INFO
+    logger.mgw-enforcer.additivity = false
+    logger.mgw-enforcer.appenderRef.rolling.ref = MGW_LOGFILE
+    logger.mgw-enforcer.appenderRef.console.ref = MGW_CONSOLE
+
+    logger.io-swagger-v3.name = io.swagger.v3.parser
+    logger.io-swagger-v3.level = ERROR
+    logger.io-swagger-v3.additivity = false
+    logger.io-swagger-v3.appenderRef.rolling.ref = MGW_LOGFILE
+    logger.io-swagger-v3.appenderRef.console.ref = MGW_CONSOLE
+
+    rootLogger.level = ERROR
+    rootLogger.appenderRef.MGW_CONSOLE.ref = MGW_CONSOLE
+    rootLogger.appenderRef.MGW_LOGFILE.ref = MGW_LOGFILE

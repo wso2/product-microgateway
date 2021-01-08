@@ -1,0 +1,69 @@
+# --------------------------------------------------------------------
+# Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# -----------------------------------------------------------------------
+
+# Config map containing the envoy.yaml file for router
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: envoy-configmap
+data:
+  envoy.yaml: |
+    admin:
+      access_log_path: /dev/null
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 9000
+    dynamic_resources:
+      ads_config:
+        api_type: GRPC
+        transport_api_version: V3
+        grpc_services:
+          - envoy_grpc:
+              cluster_name: xds_cluster
+      cds_config:
+        ads: {}
+        resource_api_version: V3
+      lds_config:
+        ads: {}
+        resource_api_version: V3
+    node:
+      cluster: service_greeter
+      id: default
+    static_resources:
+      clusters:
+        - name: xds_cluster
+          type: STRICT_DNS
+          connect_timeout: 1s
+          hosts:
+            - socket_address:
+                address: adapter-service
+                port_value: 18000
+          http2_protocol_options: {}
+        - name: ext-authz
+          type: STRICT_DNS
+          connect_timeout: 200s
+          http2_protocol_options: {}
+          load_assignment:
+            cluster_name: ext-authz
+            endpoints:
+            - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: enforcer-service
+                      port_value: 8081
