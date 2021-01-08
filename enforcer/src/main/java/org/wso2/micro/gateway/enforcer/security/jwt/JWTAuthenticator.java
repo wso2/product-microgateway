@@ -143,9 +143,13 @@ public class JWTAuthenticator implements Authenticator {
                 //                            .generateJWTInfoDto(jwtValidationInfo, apiKeyValidationInfoDTO, synCtx);
                 //                    endUserToken = generateAndRetrieveJWTToken(jti, jwtInfoDto);
                 //                }
-                return FilterUtils
-                        .generateAuthenticationContext(jti, validationInfo, apiKeyValidationInfoDTO, endUserToken,
-                                true);
+                AuthenticationContext authenticationContext = FilterUtils.generateAuthenticationContext(jti,
+                        validationInfo, apiKeyValidationInfoDTO, endUserToken, true);
+                //TODO: (VirajSalaka) Place the keytype population logic properly for self contained token
+                if (claims.getClaim("keytype") != null) {
+                    authenticationContext.setKeyType(claims.getClaim("keytype").toString());
+                }
+                return authenticationContext;
             } else {
                 requestContext.getProperties().put("code", "401");
                 requestContext.getProperties().put("error_code", "900901");

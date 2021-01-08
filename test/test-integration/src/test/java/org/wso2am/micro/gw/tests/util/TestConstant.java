@@ -29,7 +29,7 @@ public class TestConstant {
     public static final String HTTP_METHOD_PUT = "PUT";
     public static final String HTTP_METHOD_OPTIONS = "OPTIONS";
     public static final String HTTP_METHOD_HEAD = "HEAD";
-    public static final String ADAPTER_IMPORT_API_RESOURCE = "/mgw/1.0/import/api";
+    public static final String ADAPTER_IMPORT_API_RESOURCE = "/api/mgw/adapter/0.1/apis";
 
     public static final String KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String KEY_TYPE_SANDBOX = "SANDBOX";
@@ -59,7 +59,7 @@ public class TestConstant {
 
     public static final int GATEWAY_LISTENER_HTTPS_PORT = 9095;
     public static final int ADAPTER_IMPORT_API_PORT = 9843;
-    public final static int MOCK_SERVER_PORT = 2382;
+    public final static int MOCK_SERVER_PORT = 2383;
 
     public static final int INVALID_CREDENTIALS_CODE = 900901;
 

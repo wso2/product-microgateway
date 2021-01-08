@@ -61,8 +61,8 @@ func NewRestapiAPI(spec *loads.Document) *RestapiAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
-		APIIndividualPostImportAPIHandler: api_individual.PostImportAPIHandlerFunc(func(params api_individual.PostImportAPIParams, principal *models.Principal) middleware.Responder {
-			return middleware.NotImplemented("operation api_individual.PostImportAPI has not yet been implemented")
+		APIIndividualPostApisHandler: api_individual.PostApisHandlerFunc(func(params api_individual.PostApisParams, principal *models.Principal) middleware.Responder {
+			return middleware.NotImplemented("operation api_individual.PostApis has not yet been implemented")
 		}),
 
 		// Applies when the Authorization header is set with the Basic scheme
@@ -117,8 +117,8 @@ type RestapiAPI struct {
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
-	// APIIndividualPostImportAPIHandler sets the operation handler for the post import API operation
-	APIIndividualPostImportAPIHandler api_individual.PostImportAPIHandler
+	// APIIndividualPostApisHandler sets the operation handler for the post apis operation
+	APIIndividualPostApisHandler api_individual.PostApisHandler
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
 	ServeError func(http.ResponseWriter, *http.Request, error)
@@ -202,8 +202,8 @@ func (o *RestapiAPI) Validate() error {
 		unregistered = append(unregistered, "BasicAuthAuth")
 	}
 
-	if o.APIIndividualPostImportAPIHandler == nil {
-		unregistered = append(unregistered, "api_individual.PostImportAPIHandler")
+	if o.APIIndividualPostApisHandler == nil {
+		unregistered = append(unregistered, "api_individual.PostApisHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -308,7 +308,7 @@ func (o *RestapiAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/import/api"] = api_individual.NewPostImportAPI(o.context, o.APIIndividualPostImportAPIHandler)
+	o.handlers["POST"]["/apis"] = api_individual.NewPostApis(o.context, o.APIIndividualPostApisHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

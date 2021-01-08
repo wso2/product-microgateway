@@ -75,14 +75,15 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		return &p, nil
 	}
 
-	api.APIIndividualPostImportAPIHandler = api_individual.PostImportAPIHandlerFunc(func(params api_individual.PostImportAPIParams, principal *models.Principal) middleware.Responder {
+	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(params api_individual.PostApisParams,
+		principal *models.Principal) middleware.Responder {
 		// TODO: (VirajSalaka) Error is not handled in the response.
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
 		err := apiServer.ApplyAPIProject(jsonByteArray)
 		if err != nil {
-			return api_individual.NewPostImportAPIInternalServerError()
+			return api_individual.NewPostApisInternalServerError()
 		}
-		return api_individual.NewPostImportAPIOK()
+		return api_individual.NewPostApisOK()
 	})
 
 	api.PreServerShutdown = func() {}

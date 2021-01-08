@@ -93,7 +93,7 @@ func GetXdsCache() cachev3.SnapshotCache {
 }
 
 // UpdateEnvoy updates the Xds Cache when OpenAPI Json content is provided
-func UpdateEnvoy(byteArr []byte) {
+func UpdateEnvoy(byteArr []byte, upstreamCerts []byte) {
 	var apiMapKey string
 	var newLabels []string
 
@@ -146,9 +146,7 @@ func UpdateEnvoy(byteArr []byte) {
 	oldLabels, _ := openAPIEnvoyMap[apiMapKey]
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiMapKey, oldLabels)
 	openAPIEnvoyMap[apiMapKey] = newLabels
-	// TODO: (VirajSalaka) Routes populated is wrong here. It has to follow https://github.com/envoyproxy/envoy/blob/v1.16.0/api/envoy/config/route/v3/route.proto
-	// TODO: (VirajSalaka) Can bring VHDS (Delta), but since the gateway would contain only one domain, it won't have much impact.
-	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(byteArr)
+	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(byteArr, upstreamCerts)
 	// TODO: (VirajSalaka) Decide if the routes and listeners need their own map since it is not going to be changed based on API at the moment.
 	openAPIRoutesMap[apiMapKey] = routes
 	// openAPIListenersMap[apiMapKey] = listeners

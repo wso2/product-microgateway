@@ -21,13 +21,24 @@ package api
 import (
 	"archive/zip"
 	"bytes"
+	"errors"
 	"io/ioutil"
-	"log"
+	"os"
+	"regexp"
 	"strings"
 
 	"github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/oasparser/utills"
 	xds "github.com/wso2/micro-gw/pkg/xds"
+)
+
+// API Controller related constants
+const (
+	openAPIDir      string = "Definitions"
+	openAPIFilename string = "swagger.yaml"
+	endpointCertDir string = "Endpoint-certificates"
+	crtExtension    string = ".crt"
+	pemExtension    string = ".pem"
 )
 
 // ApplyAPIProject accepts an apictl project (as a byte array) and updates the xds servers based upon the
@@ -36,6 +47,10 @@ import (
 // definition as only swagger.yaml is taken into consideration here.
 func ApplyAPIProject(payload []byte) error {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
+	var upstreamCerts []byte
+	newLineByteArray := []byte("\n")
+	var apiJsn []byte
+	var conversionErr error
 
 	if err != nil {
 		loggers.LoggerAPI.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
@@ -44,33 +59,38 @@ func ApplyAPIProject(payload []byte) error {
 
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
 	for _, file := range zipReader.File {
-		if strings.HasSuffix(file.Name, "Meta-information/swagger.yaml") {
+		if strings.HasSuffix(file.Name, openAPIDir+string(os.PathSeparator)+openAPIFilename) {
 			loggers.LoggerAPI.Debugf("openAPI file : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error occured while reading the openapi file. %v", err.Error())
 				continue
 			}
-			apiJsn, conversionErr := utills.ToJSON(unzippedFileBytes)
+			apiJsn, conversionErr = utills.ToJSON(unzippedFileBytes)
 			if conversionErr != nil {
 				loggers.LoggerAPI.Errorf("Error converting api file to json: %v", err.Error())
 				return conversionErr
 			}
-			xds.UpdateEnvoy(apiJsn)
+		} else if strings.Contains(file.Name, endpointCertDir+string(os.PathSeparator)) &&
+			(strings.HasSuffix(file.Name, crtExtension) || strings.HasSuffix(file.Name, pemExtension)) {
+			unzippedFileBytes, err := readZipFile(file)
+			if err != nil {
+				loggers.LoggerAPI.Errorf("Error occured while reading the endpoint certificate : %v, %v", file.Name, err.Error())
+				continue
+			}
+			certContentPattern := `\-\-\-\-\-BEGIN\sCERTIFICATE\-\-\-\-\-((.|\n)*)\-\-\-\-\-END\sCERTIFICATE\-\-\-\-\-`
+			regex := regexp.MustCompile(certContentPattern)
+			if !regex.Match(unzippedFileBytes) {
+				loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", file.Name)
+				// TODO: (VirajSalaka) Create standard error handling mechanism
+				return errors.New("Certificate Validation Error")
+			}
+			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
+			upstreamCerts = append(upstreamCerts, newLineByteArray...)
 		}
 	}
+	xds.UpdateEnvoy(apiJsn, upstreamCerts)
 	return nil
-}
-
-// ApplyOpenAPIFile accepts an openapi definition as a bytearray and apply the changes to XDS servers.
-// TODO: (VirajSalaka) Remove the code segment as it is not in use for the main flow.
-func ApplyOpenAPIFile(payload []byte) {
-	apiJsn, err := utills.ToJSON(payload)
-	if err != nil {
-		log.Fatal("Error converting api file to json:", err)
-		return
-	}
-	xds.UpdateEnvoy(apiJsn)
 }
 
 func readZipFile(zf *zip.File) ([]byte, error) {

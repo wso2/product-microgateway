@@ -9,7 +9,7 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-host: 'mockBackend:2382'
+host: 'mockBackend:2383'
 basePath: /v2
 tags:
   - name: pet

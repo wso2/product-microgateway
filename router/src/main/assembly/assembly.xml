@@ -27,4 +27,10 @@
             <outputDirectory></outputDirectory>
         </file>
     </files>
+    <fileSets>
+      <fileSet>
+          <directory>../resources/router/security</directory>
+          <outputDirectory>security</outputDirectory>
+      </fileSet>
+    </fileSets>
 </assembly>

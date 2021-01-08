@@ -45,7 +45,6 @@ public class AuthServer {
     private static final Logger logger = LogManager.getLogger(AuthServer.class);
 
     public static void main(String[] args) throws Exception {
-
         // Load configurations
         ConfigHolder configHolder = ConfigHolder.getInstance();
         KeyManagerDataService keyManagerDataService = new KeyManagerDataServiceImpl();
