@@ -45,6 +45,8 @@ var (
 	openAPIV3Map map[string]openAPI3.Swagger
 	// OpenAPI Name:Version -> openAPI2 struct map
 	openAPIV2Map map[string]openAPI2.Swagger
+	// WebsocketAPI Name:Version -> MgwSwagger struct map
+	webSocketAPIMap map[string]mgw.MgwSwagger
 	// OpenAPI Name:Version -> Envoy Label Array map
 	openAPIEnvoyMap map[string][]string
 	// OpenAPI Name:Version -> Envoy Routes map
@@ -78,6 +80,7 @@ func init() {
 	cache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
 	openAPIV3Map = make(map[string]openAPI3.Swagger)
 	openAPIV2Map = make(map[string]openAPI2.Swagger)
+	webSocketAPIMap = make(map[string]mgw.MgwSwagger)
 	openAPIEnvoyMap = make(map[string][]string)
 	openAPIRoutesMap = make(map[string][]*routev3.Route)
 	openAPIClustersMap = make(map[string][]*clusterv3.Cluster)
@@ -145,7 +148,18 @@ func UpdateEnvoy(byteArr []byte, upstreamCerts []byte, apiType string) {
 		}
 
 	} else if apiType == mgw.WS {
-		logger.LoggerXds.Infof("XDS Websocket : %v", apiType)
+		mgwSwagger := operator.GetMgwSwaggerWebSocket(byteArr)
+		logger.LoggerXds.Infof("mgwSwagger : %v", mgwSwagger)
+		apiMapKey = mgwSwagger.GetTitle() + ":" + mgwSwagger.GetVersion()
+		existingWebSocketAPI, ok := webSocketAPIMap[apiMapKey]
+		if ok {
+			if reflect.DeepEqual(mgwSwagger, existingWebSocketAPI) {
+				logger.LoggerXds.Infof("No changes to apply for the WebSocketAPI with key: %v", apiMapKey)
+				return
+			}
+		}
+		webSocketAPIMap[apiMapKey] = mgwSwagger
+		newLabels = operator.GetXWso2LabelsWebSocket(mgwSwagger)
 	} else {
 		logger.LoggerXds.Info("Error")
 	}
@@ -155,7 +169,7 @@ func UpdateEnvoy(byteArr []byte, upstreamCerts []byte, apiType string) {
 	oldLabels, _ := openAPIEnvoyMap[apiMapKey]
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiMapKey, oldLabels)
 	openAPIEnvoyMap[apiMapKey] = newLabels
-	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(byteArr, upstreamCerts)
+	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(byteArr, upstreamCerts, apiType)
 	// TODO: (VirajSalaka) Decide if the routes and listeners need their own map since it is not going to be changed based on API at the moment.
 	openAPIRoutesMap[apiMapKey] = routes
 	// openAPIListenersMap[apiMapKey] = listeners
