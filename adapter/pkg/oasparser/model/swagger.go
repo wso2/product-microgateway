@@ -53,16 +53,20 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 			//TODO: (VirajSalaka) Introduce Constants
 			if scheme == "https" {
 				urlScheme = "https://"
+				swagger.protocol = "https"
 				break
 			} else if scheme == "http" {
 				urlScheme = "http://"
+				swagger.protocol = "http"
 			} else {
 				//TODO: (VirajSalaka) Throw an error and stop processing
 				logger.LoggerOasparser.Errorf("The scheme : %v for the swagger definition %v:%v is not supported", scheme,
 					swagger2.Info.Title, swagger2.Info.Version)
 			}
 		}
+		logger.LoggerOasparser.Infof("urlScheme : %v", urlScheme)
 		endpoint := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
+		logger.LoggerOasparser.Infof("endpoint : %v", endpoint)
 		swagger.productionUrls = append(swagger.productionUrls, endpoint)
 	}
 }
@@ -127,4 +131,38 @@ func setOperationSwagger(path string, methods []string, pathItem spec.PathItem) 
 		vendorExtensible: pathItem.VendorExtensible.Extensions,
 	}
 	return resource
+}
+
+/*
+SetInfoSwaggerWebSocket populates the mgwSwagger object for web sockets
+*/
+func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{}) {
+	data := apiData["data"].(map[string]interface{})
+	// UUID in the generated api.yaml file is considerd as swagger.id
+	swagger.id = data["id"].(string)
+	// Assigns a default value to swaggerVersion since swagger version is not related to web sockets.
+	swagger.swaggerVersion = "WS"
+	// name and version in api.yaml corresponds to title and version respectively.
+	swagger.title = data["name"].(string)
+	swagger.version = data["version"].(string)
+	// context value in api.yaml is assigned as xWso2Basepath
+	swagger.xWso2Basepath = data["context"].(string)
+	// productionURL & sandBoxURL values are extracted from endpointConfig nested json value in api.yaml
+	endpointConfig := data["endpointConfig"].(map[string]interface{})
+	sandboxEndpoints := endpointConfig["sandbox_endpoints"].(map[string]interface{})
+	productionEndpoints := endpointConfig["production_endpoints"].(map[string]interface{})
+	productionURL := productionEndpoints["url"].(string)
+	sandBoxURL := sandboxEndpoints["url"].(string)
+	// productionURL & sandBoxURL values are passed get their respective Endpoint objects
+	productionEndpoint := getHostandBasepathandPortWebSocket(productionURL)
+	sandBoxEndpoint := getHostandBasepathandPortWebSocket(sandBoxURL)
+	swagger.productionUrls = append(swagger.productionUrls, productionEndpoint)
+	swagger.sandboxUrls = append(swagger.sandboxUrls, sandBoxEndpoint)
+	// swagger protocol value assigned by refering to the production endpoint url type
+	if productionEndpoint.URLType == "ws" {
+		swagger.protocol = "ws"
+	} else if productionEndpoint.URLType == "wss" {
+		swagger.protocol = "wss"
+	}
+
 }
