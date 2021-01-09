@@ -210,7 +210,7 @@ func createCluster(address *corev3.Address, clusterName string, urlType string, 
 			},
 		},
 	}
-	if strings.HasPrefix(urlType, httpsURLType) {
+	if strings.HasPrefix(urlType, httpsURLType) || strings.HasPrefix(urlType, wssURLType) {
 		upstreamtlsContext := createUpstreamTLSContext(upstreamCerts, address)
 		marshalledTLSContext, err := ptypes.MarshalAny(upstreamtlsContext)
 		if err != nil {
