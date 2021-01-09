@@ -64,7 +64,6 @@ func ApplyAPIProject(payload []byte) error {
 
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
 	for _, file := range zipReader.File {
-		loggers.LoggerAPI.Infof("fileName : %v", file)
 		if strings.HasSuffix(file.Name, openAPIDir+string(os.PathSeparator)+openAPIFilename) {
 			loggers.LoggerAPI.Debugf("openAPI file : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
@@ -77,7 +76,6 @@ func ApplyAPIProject(payload []byte) error {
 				loggers.LoggerAPI.Errorf("Error converting api file to json: %v", conversionErr.Error())
 				return conversionErr
 			}
-			loggers.LoggerAPI.Infof("swaggerJsn : %v", swaggwerJsn)
 		} else if strings.Contains(file.Name, endpointCertDir+string(os.PathSeparator)) &&
 			(strings.HasSuffix(file.Name, crtExtension) || strings.HasSuffix(file.Name, pemExtension)) {
 			unzippedFileBytes, err := readZipFile(file)
@@ -105,7 +103,6 @@ func ApplyAPIProject(payload []byte) error {
 			if conversionErr != nil {
 				loggers.LoggerAPI.Errorf("Error occured converting api file to json: %v", conversionErr.Error())
 			}
-			loggers.LoggerAPI.Infof("apiJsn : %v", apiJsn)
 			apiType, err = getAPIType(apiJsn)
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
