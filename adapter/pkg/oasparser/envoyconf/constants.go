@@ -59,5 +59,6 @@ const (
 
 const (
 	httpsURLType     string = "https"
+	wssURLType       string = "wss"
 	httpMethodHeader string = ":method"
 )
