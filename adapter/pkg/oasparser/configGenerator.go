@@ -31,7 +31,7 @@ import (
 )
 
 // GetProductionRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
-// when the openAPI Json is provided.
+// when the openAPI Json is provided. For websockets apiJsn created from api.yaml file is considerd.
 func GetProductionRoutesClustersEndpoints(byteArr []byte, upstreamCerts []byte, apiType string) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
 	var mgwSwagger mgw.MgwSwagger
 	var routes []*routev3.Route
@@ -45,6 +45,7 @@ func GetProductionRoutesClustersEndpoints(byteArr []byte, upstreamCerts []byte, 
 		mgwSwagger = operator.GetMgwSwaggerWebSocket(byteArr)
 		routes, clusters, endpoints = envoy.CreateRouteWithClustersWebSocket(mgwSwagger, upstreamCerts)
 	} else {
+		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		loggers.LoggerOasparser.Errorf("API type not currently supported with WSO2 Micro-gateway")
 	}
 	loggers.LoggerOasparser.Infof("mgwSwagger : %v", mgwSwagger.GetProdEndpoints())

@@ -79,12 +79,18 @@ func CreateRouteWithClustersWebSocket(mgwSwagger model.MgwSwagger, upstreamCerts
 
 	if len(mgwSwagger.GetSandEndpoints()) > 0 {
 		endpointSand = mgwSwagger.GetSandEndpoints()
-		addressSand := createAddress(endpointSand[0].Host, endpointSand[0].Port)
-		clusterNameSand = strings.TrimSpace(sandClustersConfigNamePrefix +
-			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
-		clusterSand = createCluster(addressSand, clusterNameSand, endpointSand[0].URLType, upstreamCerts)
-		clusters = append(clusters, clusterSand)
-		endpoints = append(endpoints, addressSand)
+		if apiEndpointBasePath != endpointSand[0].Basepath && len(endpointProd) > 0 {
+			logger.LoggerOasparser.Warnf("Sandbox API level endpoint basepath is different compared to API level production endpoint "+
+				"for the API %v:%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion)
+		} else {
+			addressSand := createAddress(endpointSand[0].Host, endpointSand[0].Port)
+			clusterNameSand = strings.TrimSpace(sandClustersConfigNamePrefix +
+				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
+			clusterSand = createCluster(addressSand, clusterNameSand, endpointSand[0].URLType, upstreamCerts)
+			clusters = append(clusters, clusterSand)
+			endpoints = append(endpoints, addressSand)
+		}
+
 	}
 
 	route := createRouteWebSocket(apiTitle, apiBasePath, apiVersion, apiEndpointBasePath, clusterNameProd, clusterNameSand)
@@ -153,7 +159,7 @@ func createRouteWebSocket(title string, xWso2BasePath string, version string,
 	contextExtensions[apiVersionContextExtension] = version
 	contextExtensions[apiNameContextExtension] = title
 	// One of these values will be selected and added as the cluster-header http header
-	// from enhancer
+	// from enforcer
 	// Even if the routing is based on direct cluster, these properties needs to be populated
 	// to validate the key type component in the token.
 	contextExtensions["prodClusterName"] = prodClusterName
@@ -179,7 +185,7 @@ func createRouteWebSocket(title string, xWso2BasePath string, version string,
 		action = &routev3.Route_Route{
 			Route: &routev3.RouteAction{
 				HostRewriteSpecifier: hostRewriteSpecifier,
-				// TODO: (VirajSalaka) Provide prefix rewrite since it is simple
+				// TODO: (LahiruUdayanga) Consider adding prefixmatch to support websocket channels as wildcard.
 				RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
 					Pattern: &envoy_type_matcherv3.RegexMatcher{
 						EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{

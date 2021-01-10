@@ -47,7 +47,8 @@ const (
 // ApplyAPIProject accepts an apictl project (as a byte array) and updates the xds servers based upon the
 // content.
 // The apictl project must be in zipped format. And all the extensions should be defined with in the openAPI
-// definition as only swagger.yaml is taken into consideration here.
+// definition as only swagger.yaml is taken into consideration here. For websocket APIs api.yaml is taken into
+// consideration. API type is decided by the type field in the api.yaml file.
 func ApplyAPIProject(payload []byte) error {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	var upstreamCerts []byte
@@ -118,6 +119,10 @@ func ApplyAPIProject(payload []byte) error {
 	case mgw.WS:
 		xds.UpdateEnvoy(apiJsn, upstreamCerts, apiType)
 	default:
+		// If no api.yaml file is included in the zip folder , apiType defaults to HTTP to pass the APIDeployTestCase integration test.
+		// TODO : (LahiruUdayanga) Handle the default behaviour after when the APIDeployTestCase test is fixed.
+		apiType = mgw.HTTP
+		xds.UpdateEnvoy(swaggwerJsn, upstreamCerts, apiType)
 		loggers.LoggerAPI.Infof("API type is not currently supported with WSO2 micro-gateway")
 	}
 	return nil
@@ -139,6 +144,7 @@ func getAPIType(apiJsn []byte) (string, error) {
 		loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml %v", unmarshalErr.Error())
 		return "", unmarshalErr
 	}
+	// TODO : (LahiruUdayanga) Handle the differences between api.yaml from APIM and apictl.
 	data := apiDef["data"].(map[string]interface{})
 	apiType := data["type"].(string)
 	return apiType, nil

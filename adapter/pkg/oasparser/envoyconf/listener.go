@@ -78,6 +78,7 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 	manager := &hcmv3.HttpConnectionManager{
 		CodecType:  hcmv3.HttpConnectionManager_AUTO,
 		StatPrefix: httpConManagerStartPrefix,
+		// WebSocket upgrades enabled from the HCM
 		UpgradeConfigs: []*hcmv3.HttpConnectionManager_UpgradeConfig{{
 			UpgradeType: "websocket",
 			Enabled:     &wrappers.BoolValue{Value: true},
