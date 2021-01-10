@@ -48,7 +48,6 @@ func GetProductionRoutesClustersEndpoints(byteArr []byte, upstreamCerts []byte, 
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		loggers.LoggerOasparser.Errorf("API type not currently supported with WSO2 Micro-gateway")
 	}
-	loggers.LoggerOasparser.Infof("mgwSwagger : %v", mgwSwagger.GetProdEndpoints())
 	//TODO: (VirajSalaka) Decide if this needs to be added to the MgwSwagger
 
 	return routes, clusters, endpoints

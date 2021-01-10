@@ -42,6 +42,8 @@ const (
 	endpointCertDir       string = "Endpoint-certificates"
 	crtExtension          string = ".crt"
 	pemExtension          string = ".pem"
+	apiManagerGenerated   string = "api"
+	apictlGenerated       string = "HTTP"
 )
 
 // ApplyAPIProject accepts an apictl project (as a byte array) and updates the xds servers based upon the
@@ -94,7 +96,7 @@ func ApplyAPIProject(payload []byte) error {
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
 		} else if strings.Contains(file.Name, apiDefinitionFilename) {
-			loggers.LoggerAPI.Infof("fileName : %v", file.Name)
+			loggers.LoggerAPI.Debugf("fileName : %v", file.Name)
 			unzippedFileBytes, conversionErr := readZipFile(file)
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error occured while reading the api definition file : %v %v", file.Name, err.Error())
@@ -109,7 +111,6 @@ func ApplyAPIProject(payload []byte) error {
 				loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
 				return err
 			}
-			loggers.LoggerAPI.Infof("Api type : %v", apiType)
 
 		}
 	}
@@ -138,6 +139,7 @@ func readZipFile(zf *zip.File) ([]byte, error) {
 }
 
 func getAPIType(apiJsn []byte) (string, error) {
+	var apiType string
 	var apiDef map[string]interface{}
 	unmarshalErr := json.Unmarshal(apiJsn, &apiDef)
 	if unmarshalErr != nil {
@@ -145,7 +147,15 @@ func getAPIType(apiJsn []byte) (string, error) {
 		return "", unmarshalErr
 	}
 	// TODO : (LahiruUdayanga) Handle the differences between api.yaml from APIM and apictl.
-	data := apiDef["data"].(map[string]interface{})
-	apiType := data["type"].(string)
+	folderType := apiDef["type"].(string)
+	if folderType == apiManagerGenerated {
+		data := apiDef["data"].(map[string]interface{})
+		apiType = data["type"].(string)
+	} else if folderType == apictlGenerated {
+		apiType = apictlGenerated
+	} else {
+		loggers.LoggerAPI.Info("Unrecognized project format")
+	}
+
 	return apiType, nil
 }

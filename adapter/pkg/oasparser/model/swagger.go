@@ -64,9 +64,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 					swagger2.Info.Title, swagger2.Info.Version)
 			}
 		}
-		logger.LoggerOasparser.Infof("urlScheme : %v", urlScheme)
 		endpoint := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
-		logger.LoggerOasparser.Infof("endpoint : %v", endpoint)
 		swagger.productionUrls = append(swagger.productionUrls, endpoint)
 	}
 }
@@ -133,9 +131,7 @@ func setOperationSwagger(path string, methods []string, pathItem spec.PathItem) 
 	return resource
 }
 
-/*
-SetInfoSwaggerWebSocket populates the mgwSwagger object for web sockets
-*/
+//SetInfoSwaggerWebSocket populates the mgwSwagger object for web sockets
 func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{}) {
 	data := apiData["data"].(map[string]interface{})
 	// UUID in the generated api.yaml file is considerd as swagger.id
