@@ -133,6 +133,7 @@ func setOperationSwagger(path string, methods []string, pathItem spec.PathItem) 
 
 //SetInfoSwaggerWebSocket populates the mgwSwagger object for web sockets
 func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{}) {
+
 	data := apiData["data"].(map[string]interface{})
 	// UUID in the generated api.yaml file is considerd as swagger.id
 	swagger.id = data["id"].(string)
@@ -143,23 +144,27 @@ func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{
 	swagger.version = data["version"].(string)
 	// context value in api.yaml is assigned as xWso2Basepath
 	swagger.xWso2Basepath = data["context"].(string) + "/" + swagger.version
+
 	// productionURL & sandBoxURL values are extracted from endpointConfig nested json value in api.yaml
-	// TODO : (LahiruUdayanga) Handle the production and sandbox only scenarios after finalizing the user stories.
 	endpointConfig := data["endpointConfig"].(map[string]interface{})
-	sandboxEndpoints := endpointConfig["sandbox_endpoints"].(map[string]interface{})
-	productionEndpoints := endpointConfig["production_endpoints"].(map[string]interface{})
-	productionURL := productionEndpoints["url"].(string)
-	sandBoxURL := sandboxEndpoints["url"].(string)
-	// productionURL & sandBoxURL values are passed get their respective Endpoint objects
-	productionEndpoint := getHostandBasepathandPortWebSocket(productionURL)
-	sandBoxEndpoint := getHostandBasepathandPortWebSocket(sandBoxURL)
-	swagger.productionUrls = append(swagger.productionUrls, productionEndpoint)
-	swagger.sandboxUrls = append(swagger.sandboxUrls, sandBoxEndpoint)
-	// swagger protocol value assigned by refering to the production endpoint url type
-	if productionEndpoint.URLType == "ws" {
-		swagger.protocol = "ws"
-	} else if productionEndpoint.URLType == "wss" {
-		swagger.protocol = "wss"
+	if endpointConfig["sandbox_endpoints"] != nil {
+		sandboxEndpoints := endpointConfig["sandbox_endpoints"].(map[string]interface{})
+		sandBoxURL := sandboxEndpoints["url"].(string)
+		sandBoxEndpoint := getHostandBasepathandPortWebSocket(sandBoxURL)
+		swagger.sandboxUrls = append(swagger.sandboxUrls, sandBoxEndpoint)
+	}
+	if endpointConfig["production_endpoints"] != nil {
+		productionEndpoints := endpointConfig["production_endpoints"].(map[string]interface{})
+		productionURL := productionEndpoints["url"].(string)
+		productionEndpoint := getHostandBasepathandPortWebSocket(productionURL)
+		swagger.productionUrls = append(swagger.productionUrls, productionEndpoint)
+
+		// swagger protocol value assigned by refering to the production endpoint url type
+		if productionEndpoint.URLType == "ws" {
+			swagger.protocol = "ws"
+		} else if productionEndpoint.URLType == "wss" {
+			swagger.protocol = "wss"
+		}
 	}
 
 }
