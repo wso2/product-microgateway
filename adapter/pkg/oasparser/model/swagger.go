@@ -146,8 +146,9 @@ func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{
 	swagger.title = data["name"].(string)
 	swagger.version = data["version"].(string)
 	// context value in api.yaml is assigned as xWso2Basepath
-	swagger.xWso2Basepath = data["context"].(string)
+	swagger.xWso2Basepath = data["context"].(string) + "/" + swagger.version
 	// productionURL & sandBoxURL values are extracted from endpointConfig nested json value in api.yaml
+	// TODO : (LahiruUdayanga) Handle the production and sandbox only scenarios after finalizing the user stories.
 	endpointConfig := data["endpointConfig"].(map[string]interface{})
 	sandboxEndpoints := endpointConfig["sandbox_endpoints"].(map[string]interface{})
 	productionEndpoints := endpointConfig["production_endpoints"].(map[string]interface{})
