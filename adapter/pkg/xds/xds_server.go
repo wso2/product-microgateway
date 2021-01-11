@@ -149,7 +149,6 @@ func UpdateEnvoy(byteArr []byte, upstreamCerts []byte, apiType string) {
 
 	} else if apiType == mgw.WS {
 		mgwSwagger := operator.GetMgwSwaggerWebSocket(byteArr)
-		logger.LoggerXds.Infof("mgwSwagger : %v", mgwSwagger)
 		apiMapKey = mgwSwagger.GetTitle() + ":" + mgwSwagger.GetVersion()
 		existingWebSocketAPI, ok := webSocketAPIMap[apiMapKey]
 		if ok {
@@ -161,7 +160,9 @@ func UpdateEnvoy(byteArr []byte, upstreamCerts []byte, apiType string) {
 		webSocketAPIMap[apiMapKey] = mgwSwagger
 		newLabels = operator.GetXWso2LabelsWebSocket(mgwSwagger)
 	} else {
-		logger.LoggerXds.Info("Error")
+		// Unreachable else condition. Added in case apiType type check fails prior to this function
+		// due to any modifications to the code.
+		logger.LoggerXds.Info("API type is not cuurently supported by WSO2 micro-gateway")
 	}
 
 	logger.LoggerXds.Infof("Added/Updated the content under OpenAPI Key : %v", apiMapKey)

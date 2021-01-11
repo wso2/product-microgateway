@@ -230,7 +230,6 @@ func getHostandBasepathandPortWebSocket(rawURL string) Endpoint {
 	} else {
 		basepath = parsedURL.Path
 	}
-	logger.LoggerOasparser.Info(parsedURL)
 	if parsedURL.Port() != "" {
 		u32, err := strconv.ParseUint(parsedURL.Port(), 10, 32)
 		if err != nil {
