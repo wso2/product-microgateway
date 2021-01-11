@@ -18,8 +18,8 @@ Router and Adapter services are exposed as NodePort type in kubernetes. Enforcer
 
 - [Kubernetes v1.14 or above](https://Kubernetes.io/docs/setup/) <br>
 
-    - Minimum CPU : 6vCPU
-    - Minimum Memory : 6GB
+    - Minimum CPU : 2vCPU
+    - Minimum Memory : 2GB
     
 ### Deployment without WSO2 API Operator for kubernetes
 

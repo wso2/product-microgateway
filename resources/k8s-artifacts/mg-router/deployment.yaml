@@ -36,15 +36,21 @@ spec:
             - mountPath: /etc/envoy/envoy.yaml
               subPath: envoy.yaml
               name: envoy-vol
-          image: wso2/mg-router:4.0.0-m1
+            - mountPath: /home/wso2/security/mg.key
+              subPath: mg.key
+              name: router-tls-vol
+            - mountPath: /home/wso2/security/mg.pem
+              subPath: mg.pem
+              name: router-tls-vol
+          image: wso2/mg-router:4.0.0-m3
           imagePullPolicy: Always
           resources:
             requests:
-              memory: "1Gi"
-              cpu: "500m"
+              memory: "250MiB"
+              cpu: "250m"
             limits:
-              memory: "1Gi"
-              cpu: "1000m"
+              memory: "500MiB"
+              cpu: "500m"
           ports:
             - containerPort: 9000
             - containerPort: 9095
@@ -62,4 +68,12 @@ spec:
         - name: envoy-vol
           configMap:
             name: envoy-configmap
+        - name: router-tls-vol
+          secret:
+            secretName: router-tls-secret
+            items:
+              - key: mg.key
+                path: mg.key
+              - key: mg.pem
+                path: mg.pem
       restartPolicy: Always

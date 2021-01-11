@@ -14,25 +14,26 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-# Service for adapter
+# service for router
 
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: mg-adapter
-  name: adapter-service
+    app: mg-router
+  name: router-service
 spec:
   type: NodePort
   selector:
-    app: mg-adapter
+    app: mg-router
   ports:
-    - name: "http-adaptermanagementserver"
-      port: 18000
-      targetPort: 18000
+    - name: "http-routeradmin"
+      port: 9000
+      targetPort: 9000
       protocol: TCP
-    - name: "https-adapter"
-      port: 9843
-      targetPort: 9843
+      nodePort: 30202
+    - name: "https-router"
+      port: 9095
+      targetPort: 9095
       protocol: TCP
-      nodePort: 30200
+      nodePort: 30201
