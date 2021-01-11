@@ -30,6 +30,7 @@ import (
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/micro-gw/config"
 	mgwconfig "github.com/wso2/micro-gw/config"
@@ -104,11 +105,17 @@ func TestCreateRoute(t *testing.T) {
 		Substitution: "/basepath",
 	}
 
+	UpgradeConfigsDisabled := []*routev3.RouteAction_UpgradeConfig{{
+		UpgradeType: "websocket",
+		Enabled:     &wrappers.BoolValue{Value: false},
+	}}
+
 	expectedRouteActionWithXWso2BasePath := &routev3.Route_Route{
 		Route: &routev3.RouteAction{
 			HostRewriteSpecifier: hostRewriteSpecifier,
 			RegexRewrite:         regexRewriteWithXWso2BasePath,
 			ClusterSpecifier:     clusterSpecifier,
+			UpgradeConfigs:       UpgradeConfigsDisabled,
 		},
 	}
 

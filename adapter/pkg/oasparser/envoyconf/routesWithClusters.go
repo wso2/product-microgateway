@@ -27,6 +27,7 @@ import (
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/wso2/micro-gw/config"
@@ -408,6 +409,10 @@ func createRoute(title string, xWso2Basepath string, version string, endpointBas
 					},
 					Substitution: endpointBasepath,
 				},
+				UpgradeConfigs: []*routev3.RouteAction_UpgradeConfig{{
+					UpgradeType: "websocket",
+					Enabled:     &wrappers.BoolValue{Value: false},
+				}},
 			},
 		}
 	} else {
