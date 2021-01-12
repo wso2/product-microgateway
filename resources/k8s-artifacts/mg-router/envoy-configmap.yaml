@@ -56,7 +56,7 @@ data:
           http2_protocol_options: {}
         - name: ext-authz
           type: STRICT_DNS
-          connect_timeout: 200s
+          connect_timeout: 20s
           http2_protocol_options: {}
           load_assignment:
             cluster_name: ext-authz

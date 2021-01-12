@@ -14,81 +14,64 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-# Deployment for Adapter
+# Deployment for enforcer
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mg-adapter
+  name: mg-enforcer
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mg-adapter
+      app: mg-enforcer
   template:
     metadata:
       labels:
-        app: mg-adapter
+        app: mg-enforcer
     spec:
       containers:
-        - name: mg-adapter
+        - name: mg-enforcer
           volumeMounts:
-            - mountPath: /home/wso2/security/localhost.key
-              subPath: localhost.key
-              name: adapter-key-vol
-            - mountPath: /home/wso2/security/localhost.pem
-              subPath: localhost.pem
-              name: adapter-pem-vol
+            - mountPath: /home/wso2/mg/security/
+              name: client-truststore-vol
             - mountPath: /home/wso2/conf/config.toml
               subPath: config.toml
               name: config-toml-vol
-            - mountPath: /home/wso2/conf/log4j2.properties
-              subPath: log4j2.properties
-              name: log4j2-vol
             - mountPath: /home/wso2/conf/log_config.toml
               subPath: log_config.toml
               name: logconfig-toml-vol
-          image: wso2/mg-adapter:4.0.0-m1
+          image: wso2/mg-enforcer:4.0.0-m3
           imagePullPolicy: Always
           resources:
             requests:
-              memory: "1Gi"
-              cpu: "500m"
+              memory: "250MiB"
+              cpu: "250m"
             limits:
-              memory: "1Gi"
-              cpu: "1000m"
+              memory: "500MiB"
+              cpu: "500m"
           ports:
-            - containerPort: 18000
-            - containerPort: 9843
+            - containerPort: 8081
           livenessProbe:
             tcpSocket:
-              port: 9843
+              port: 8081
             initialDelaySeconds: 10
             periodSeconds: 30
           readinessProbe:
             tcpSocket:
-              port: 9843
+              port: 8081
             initialDelaySeconds: 8
             periodSeconds: 5
       volumes:
-        - name: adapter-key-vol
+        - name: client-truststore-vol
           secret:
-            secretName: adapter-key-secret
+            secretName: client-truststore-secret
             items:
-              - key: localhost.key
-                path: localhost.key
-        - name: adapter-pem-vol
-          secret:
-            secretName: adapter-pem-secret
-            items:
-              - key: localhost.pem
-                path: localhost.pem
+              - key: client-truststore.jks
+                path: client-truststore.jks
         - name: config-toml-vol
           configMap:
             name: config-toml
-        - name: log4j2-vol
-          configMap:
-            name: log4j2
         - name: logconfig-toml-vol
           configMap:
             name: logconfig-toml
