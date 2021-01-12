@@ -95,7 +95,7 @@ func ApplyAPIProject(payload []byte) error {
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
 		} else if strings.Contains(file.Name, apiDefinitionFilename) {
 			loggers.LoggerAPI.Debugf("fileName : %v", file.Name)
-			unzippedFileBytes, conversionErr := readZipFile(file)
+			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error occured while reading the api definition file : %v %v", file.Name, err.Error())
 				return err
