@@ -67,6 +67,18 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 	return &filter
 }
 
+// UpgradeFilters that are applied in websocket upgrade mode
+func getUpgradeFilters() []*hcmv3.HttpFilter {
+	extAauth := getExtAuthzHTTPFilter()
+	router := getRouterHTTPFilter()
+	// TODO : (LahiruUdayanga) Configure the custom C++ filter.
+	httpFilters := []*hcmv3.HttpFilter{
+		extAauth,
+		router,
+	}
+	return httpFilters
+}
+
 // getExtAuthzHTTPFilter gets ExtAauthz http filter.
 func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 	extAuthzConfig := &ext_authv3.ExtAuthz{

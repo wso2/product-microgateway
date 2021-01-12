@@ -27,6 +27,8 @@ import (
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
+	"github.com/golang/protobuf/ptypes/wrappers"
+	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/wso2/micro-gw/config"
@@ -70,6 +72,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 	apiTitle := mgwSwagger.GetTitle()
 	apiVersion := mgwSwagger.GetVersion()
 	apiBasePath := mgwSwagger.GetXWso2Basepath()
+	apiType := mgwSwagger.GetAPIType()
 
 	// check API level production endpoints available
 	if len(mgwSwagger.GetProdEndpoints()) > 0 {
@@ -172,8 +175,12 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 				apiTitle, apiVersion, resource.GetPath())
 		}
 
-		routeP := createRoute(apiTitle, apiBasePath, apiVersion, endpointBasepath, resource, clusterRefProd, clusterRefSand)
+		routeP := createRoute(apiTitle, apiType, apiBasePath, apiVersion, endpointBasepath, resource.GetPath(), resource.GetMethod(), clusterRefProd, clusterRefSand)
 		routesProd = append(routesProd, routeP)
+	}
+	if mgwSwagger.GetAPIType() == mgw.WS {
+		routesP := createRoute(apiTitle, apiType, apiBasePath, apiVersion, apiEndpointBasePath, "", []string{"GET"}, apilevelClusterProd.GetName(), apilevelClusterSand.GetName())
+		routesProd = append(routesProd, routesP)
 	}
 	return routesProd, clusters, endpoints
 }
@@ -210,7 +217,7 @@ func createCluster(address *corev3.Address, clusterName string, urlType string, 
 			},
 		},
 	}
-	if strings.HasPrefix(urlType, httpsURLType) {
+	if strings.HasPrefix(urlType, httpsURLType) || strings.HasPrefix(urlType, wssURLType) {
 		upstreamtlsContext := createUpstreamTLSContext(upstreamCerts, address)
 		marshalledTLSContext, err := ptypes.MarshalAny(upstreamtlsContext)
 		if err != nil {
@@ -309,8 +316,8 @@ func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol
 // createRoute creates route elements for the route configurations. API title, xWso2Basepath, API version,
 // endpoint's basePath, resource Object (Microgateway's internal representation), production clusterName and
 // sandbox clusterName needs to be provided.
-func createRoute(title string, xWso2Basepath string, version string, endpointBasepath string,
-	resource model.Resource, prodClusterName string, sandClusterName string) *routev3.Route {
+func createRoute(title string, apiType string, xWso2Basepath string, version string, endpointBasepath string,
+	resourcePathParam string, resourceMethods []string, prodClusterName string, sandClusterName string) *routev3.Route {
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
@@ -329,11 +336,11 @@ func createRoute(title string, xWso2Basepath string, version string, endpointBas
 						MaxProgramSize: nil,
 					},
 				},
-				Regex: "^(" + strings.Join(resource.GetMethod(), "|") + ")$",
+				Regex: "^(" + strings.Join(resourceMethods, "|") + ")$",
 			},
 		},
 	}
-	resourcePath = resource.GetPath()
+	resourcePath = resourcePathParam
 	routePath := generateRoutePaths(xWso2Basepath, endpointBasepath, resourcePath)
 
 	match = &routev3.RouteMatch{
@@ -355,10 +362,16 @@ func createRoute(title string, xWso2Basepath string, version string, endpointBas
 			Value: true,
 		},
 	}
-
-	decorator = &routev3.Decorator{
-		Operation: resourcePath,
+	if apiType == mgw.WS {
+		decorator = &routev3.Decorator{
+			Operation: endpointBasepath,
+		}
+	} else if apiType == mgw.HTTP {
+		decorator = &routev3.Decorator{
+			Operation: resourcePath,
+		}
 	}
+
 	var contextExtensions = make(map[string]string)
 	contextExtensions[pathContextExtension] = resourcePath
 	if xWso2Basepath != "" {
@@ -366,7 +379,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpointBas
 	} else {
 		contextExtensions[basePathContextExtension] = endpointBasepath
 	}
-	contextExtensions[methodContextExtension] = strings.Join(resource.GetMethod(), " ")
+	contextExtensions[methodContextExtension] = strings.Join(resourceMethods, " ")
 	contextExtensions[apiVersionContextExtension] = version
 	contextExtensions[apiNameContextExtension] = title
 	// One of these values will be selected and added as the cluster-header http header
@@ -408,6 +421,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpointBas
 					},
 					Substitution: endpointBasepath,
 				},
+				UpgradeConfigs: getUpgradeConfig(apiType),
 			},
 		}
 	} else {
@@ -502,4 +516,20 @@ func generateRegex(fullpath string) string {
 		newPath = "^" + fullpath + endRegex + "$"
 	}
 	return newPath
+}
+
+func getUpgradeConfig(apiType string) []*routev3.RouteAction_UpgradeConfig {
+	var upgradeConfig []*routev3.RouteAction_UpgradeConfig
+	if apiType == mgw.WS {
+		upgradeConfig = []*routev3.RouteAction_UpgradeConfig{{
+			UpgradeType: "websocket",
+			Enabled:     &wrappers.BoolValue{Value: true},
+		}}
+	} else {
+		upgradeConfig = []*routev3.RouteAction_UpgradeConfig{{
+			UpgradeType: "websocket",
+			Enabled:     &wrappers.BoolValue{Value: false},
+		}}
+	}
+	return upgradeConfig
 }

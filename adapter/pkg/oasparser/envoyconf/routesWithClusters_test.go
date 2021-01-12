@@ -17,7 +17,9 @@
 package envoyconf_test
 
 import (
+	"github.com/wso2/micro-gw/pkg/oasparser/utills"
 	"io/ioutil"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -43,6 +45,21 @@ func TestCreateRoutesWithClustersForOpenAPIWithExtensionsServers(t *testing.T) {
 	// When the openapi endpoints provided by servers object are overriden via the extensions
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_extensions_servers.yaml"
 	commonTestForCreateRoutesWithClusters(t, openapiFilePath)
+}
+
+func TestCreateRouteswithClustersWebsocketProdSand(t *testing.T) {
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api.yaml"
+	testCreateRoutesWithClustersWebsocket(t, apiYamlFilePath)
+}
+
+func TestCreateRouteswithClustersWebsocketProd(t *testing.T) {
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api_prod.yaml"
+	testCreateRoutesWithClustersWebsocket(t, apiYamlFilePath)
+}
+
+func TestCreateRouteswithClustersWebsocketSand(t *testing.T) {
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api_sand.yaml"
+	testCreateRoutesWithClustersWebsocket(t, apiYamlFilePath)
 }
 
 func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string) {
@@ -94,6 +111,75 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 		}
 	}
 	assert.Equal(t, true, routeRegexMatchesFound, "Generated route regex is incorrect.")
+}
+
+func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string) {
+	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
+	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
+	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
+	mgwSwagger := operator.GetMgwSwaggerWebSocket(apiJsn)
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil)
+
+	if strings.HasSuffix(apiYamlFilePath, "api.yaml") {
+		assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
+		productionCluster := clusters[0]
+		sandBoxCluster := clusters[1]
+		assert.Equal(t, productionCluster.GetName(), "clusterProd_EchoWebSocket1.0", "Production cluster name mismatch")
+		assert.Equal(t, sandBoxCluster.GetName(), "clusterSand_EchoWebSocket1.0", "Sandbox cluster name mismatch")
+
+		productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+		productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+
+		assert.Equal(t, productionClusterHost, "echo.websocket.org", "Production cluster host mismatch")
+		assert.Equal(t, productionClusterPort, uint32(80), "Production cluster port mismatch")
+
+		sandBoxClusterHost := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+		sandBoxClusterPort := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+
+		assert.Equal(t, sandBoxClusterHost, "echo.websocket.org", "Sandbox cluster host mismatch")
+		assert.Equal(t, sandBoxClusterPort, uint32(80), "Sandbox cluster port mismatch")
+
+		assert.Equal(t, 1, len(routes), "Number of routes incorrect")
+
+		route := routes[0].GetMatch().GetSafeRegex().Regex
+		assert.Equal(t, route, "^/echowebsocket/1.0(\\?([^/]+))?$", "route created mismatch")
+	}
+	if strings.HasSuffix(apiYamlFilePath, "api_prod.yaml") {
+		assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
+		productionCluster := clusters[0]
+		assert.Equal(t, productionCluster.GetName(), "clusterProd_prodws1.0", "Production cluster name mismatch")
+
+		productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+		productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+
+		assert.Equal(t, productionClusterHost, "echo.websocket.org", "Production cluster host mismatch")
+		assert.Equal(t, productionClusterPort, uint32(80), "Production cluster port mismatch")
+
+		assert.Equal(t, 1, len(routes), "Number of routes incorrect")
+
+		route := routes[0].GetMatch().GetSafeRegex().Regex
+		assert.Equal(t, route, "^/echowebsocketprod/1.0(\\?([^/]+))?$", "route created mismatch")
+
+	}
+	if strings.HasSuffix(apiYamlFilePath, "api_sand.yaml") {
+		assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
+		sandBoxCluster := clusters[0]
+		assert.Equal(t, sandBoxCluster.GetName(), "clusterSand_sandbox1.0", "Production cluster name mismatch")
+
+		sandBoxClusterHost := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
+		sandBoxClusterPort := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
+
+		assert.Equal(t, sandBoxClusterHost, "echo.websocket.org", "Production cluster host mismatch")
+		assert.Equal(t, sandBoxClusterPort, uint32(80), "Production cluster port mismatch")
+
+		assert.Equal(t, 1, len(routes), "Number of routes incorrect")
+
+		route := routes[0].GetMatch().GetSafeRegex().Regex
+		assert.Equal(t, route, "^/echowebsocketsand/1.0(\\?([^/]+))?$", "route created mismatch")
+
+	}
+
 }
 
 // TODO: (VirajSalaka) Fix the cause for the intermittent failure

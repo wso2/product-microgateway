@@ -25,13 +25,14 @@ import (
 // the root level of the openAPI definition. The pathItem level information is represented
 // by the resources array which contains the MgwResource entries.
 type MgwSwagger struct {
-	id               string
-	swaggerVersion   string
-	description      string
-	title            string
-	version          string
+	id          string
+	apiType     string
+	description string
+	title       string
+	version     string
+	// TODO - (VirajSalaka) rename to vendorExtensions
 	vendorExtensible map[string]interface{}
-	productionUrls   []Endpoint
+	productionUrls   []Endpoint //
 	sandboxUrls      []Endpoint
 	resources        []Resource
 	xWso2Basepath    string
@@ -56,9 +57,9 @@ type Endpoint struct {
 	Port uint32
 }
 
-// GetSwaggerVersion returns the openapi version
-func (swagger *MgwSwagger) GetSwaggerVersion() string {
-	return swagger.swaggerVersion
+// GetAPIType returns the openapi version
+func (swagger *MgwSwagger) GetAPIType() string {
+	return swagger.apiType
 }
 
 // GetVersion returns the API version
