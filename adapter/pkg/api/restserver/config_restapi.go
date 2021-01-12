@@ -60,9 +60,14 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 
 	// Applies when the Authorization header is set with the Basic scheme
 	api.BasicAuthAuth = func(user string, pass string) (*models.Principal, error) {
-		if user != mgwConfig.Server.Username || pass != mgwConfig.Server.Password {
-			// TODO: (VirajSalaka) Introduce Constants
-			logger.LoggerAPI.Info("Credentials are invalid")
+		authenticated := false
+		for _, regUser := range mgwConfig.Server.Users {
+			if user == regUser.Username && pass == regUser.Password {
+				authenticated = true
+			}
+		}
+		if !authenticated {
+			logger.LoggerAPI.Info("Credentials provided for deploy command are invalid")
 			return nil, errors.New(401, "Credentials are invalid")
 		}
 		// TODO: implement authentication principal

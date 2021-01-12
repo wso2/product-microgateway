@@ -73,10 +73,8 @@ type Config struct {
 		PublicKeyPath string
 		// Private Key Path (For the https connection between adapter and apictl)
 		PrivateKeyPath string
-		// Username credential
-		Username string
-		// Password credential
-		Password string
+		// APICTL Users
+		Users []APICtlUser `toml:"users"`
 	}
 
 	// Envoy Listener Component related configurations.
@@ -103,4 +101,10 @@ type Config struct {
 			}
 		}
 	}
+}
+
+// APICtlUser represents registered APICtl Users
+type APICtlUser struct {
+	Username string
+	Password string
 }
