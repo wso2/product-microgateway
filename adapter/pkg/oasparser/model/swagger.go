@@ -35,7 +35,6 @@ import (
 // No operation specific information is extracted.
 func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 	swagger.id = swagger2.ID
-	swagger.swaggerVersion = swagger2.Swagger
 	if swagger2.Info != nil {
 		swagger.description = swagger2.Info.Description
 		swagger.title = swagger2.Info.Title
@@ -43,6 +42,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 	}
 	swagger.vendorExtensible = swagger2.VendorExtensible.Extensions
 	swagger.resources = setResourcesSwagger(swagger2)
+	swagger.apiType = HTTP
 
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
 	// https is prioritized over http. If it is ws or wss, the microgateway will print an error.
@@ -53,11 +53,9 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 			//TODO: (VirajSalaka) Introduce Constants
 			if scheme == "https" {
 				urlScheme = "https://"
-				swagger.protocol = "https"
 				break
 			} else if scheme == "http" {
 				urlScheme = "http://"
-				swagger.protocol = "http"
 			} else {
 				//TODO: (VirajSalaka) Throw an error and stop processing
 				logger.LoggerOasparser.Errorf("The scheme : %v for the swagger definition %v:%v is not supported", scheme,
@@ -132,20 +130,21 @@ func setOperationSwagger(path string, methods []string, pathItem spec.PathItem) 
 }
 
 //SetInfoSwaggerWebSocket populates the mgwSwagger object for web sockets
+// TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
 func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{}) {
 
 	data := apiData["data"].(map[string]interface{})
 	// UUID in the generated api.yaml file is considerd as swagger.id
 	swagger.id = data["id"].(string)
-	// Assigns a default value to swaggerVersion since swagger version is not related to web sockets.
-	swagger.swaggerVersion = "WS"
+	// Set apiType as WS for websockets
+	swagger.apiType = "WS"
 	// name and version in api.yaml corresponds to title and version respectively.
 	swagger.title = data["name"].(string)
 	swagger.version = data["version"].(string)
 	// context value in api.yaml is assigned as xWso2Basepath
 	swagger.xWso2Basepath = data["context"].(string) + "/" + swagger.version
 
-	// productionURL & sandBoxURL values are extracted from endpointConfig nested json value in api.yaml
+	// productionURL & sandBoxURL values are extracted from endpointConfig in api.yaml
 	endpointConfig := data["endpointConfig"].(map[string]interface{})
 	if endpointConfig["sandbox_endpoints"] != nil {
 		sandboxEndpoints := endpointConfig["sandbox_endpoints"].(map[string]interface{})
@@ -158,13 +157,6 @@ func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{
 		productionURL := productionEndpoints["url"].(string)
 		productionEndpoint := getHostandBasepathandPortWebSocket(productionURL)
 		swagger.productionUrls = append(swagger.productionUrls, productionEndpoint)
-
-		// swagger protocol value assigned by refering to the production endpoint url type
-		if productionEndpoint.URLType == "ws" {
-			swagger.protocol = "ws"
-		} else if productionEndpoint.URLType == "wss" {
-			swagger.protocol = "wss"
-		}
 	}
 
 }

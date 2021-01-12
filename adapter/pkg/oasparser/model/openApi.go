@@ -38,7 +38,6 @@ import (
 //
 // No operation specific information is extracted.
 func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
-	swagger.swaggerVersion = swagger3.OpenAPI
 	if swagger3.Info != nil {
 		swagger.description = swagger3.Info.Description
 		swagger.title = swagger3.Info.Title
@@ -47,6 +46,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
 
 	swagger.vendorExtensible = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.resources = setResourcesOpenAPI(swagger3)
+	swagger.apiType = HTTP
 
 	if isServerURLIsAvailable(swagger3.Servers) {
 		for _, serverEntry := range swagger3.Servers {

@@ -42,8 +42,6 @@ const (
 	endpointCertDir       string = "Endpoint-certificates"
 	crtExtension          string = ".crt"
 	pemExtension          string = ".pem"
-	apiManagerGenerated   string = "api"
-	apictlGenerated       string = "HTTP"
 )
 
 // ApplyAPIProject accepts an apictl project (as a byte array) and updates the xds servers based upon the
@@ -55,7 +53,7 @@ func ApplyAPIProject(payload []byte) error {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	var upstreamCerts []byte
 	newLineByteArray := []byte("\n")
-	var swaggwerJsn []byte
+	var swaggerJsn []byte
 	var apiJsn []byte
 	var conversionErr error
 	var apiType string
@@ -74,7 +72,7 @@ func ApplyAPIProject(payload []byte) error {
 				loggers.LoggerAPI.Errorf("Error occured while reading the openapi file. %v", err.Error())
 				continue
 			}
-			swaggwerJsn, conversionErr = utills.ToJSON(unzippedFileBytes)
+			swaggerJsn, conversionErr = utills.ToJSON(unzippedFileBytes)
 			if conversionErr != nil {
 				loggers.LoggerAPI.Errorf("Error converting api file to json: %v", conversionErr.Error())
 				return conversionErr
@@ -100,7 +98,7 @@ func ApplyAPIProject(payload []byte) error {
 			unzippedFileBytes, conversionErr := readZipFile(file)
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error occured while reading the api definition file : %v %v", file.Name, err.Error())
-				return conversionErr
+				return err
 			}
 			apiJsn, conversionErr = utills.ToJSON(unzippedFileBytes)
 			if conversionErr != nil {
@@ -114,16 +112,17 @@ func ApplyAPIProject(payload []byte) error {
 
 		}
 	}
+	// TODO - (VirajSalaka) change the switch case and use one method with both api.yaml and swagger.yaml
 	switch apiType {
 	case mgw.HTTP:
-		xds.UpdateEnvoy(swaggwerJsn, upstreamCerts, apiType)
+		xds.UpdateEnvoy(swaggerJsn, upstreamCerts, apiType)
 	case mgw.WS:
 		xds.UpdateEnvoy(apiJsn, upstreamCerts, apiType)
 	default:
 		// If no api.yaml file is included in the zip folder , apiType defaults to HTTP to pass the APIDeployTestCase integration test.
 		// TODO : (LahiruUdayanga) Handle the default behaviour after when the APIDeployTestCase test is fixed.
 		apiType = mgw.HTTP
-		xds.UpdateEnvoy(swaggwerJsn, upstreamCerts, apiType)
+		xds.UpdateEnvoy(swaggerJsn, upstreamCerts, apiType)
 		loggers.LoggerAPI.Infof("API type is not currently supported with WSO2 micro-gateway")
 	}
 	return nil
@@ -139,23 +138,14 @@ func readZipFile(zf *zip.File) ([]byte, error) {
 }
 
 func getAPIType(apiJsn []byte) (string, error) {
-	var apiType string
 	var apiDef map[string]interface{}
 	unmarshalErr := json.Unmarshal(apiJsn, &apiDef)
 	if unmarshalErr != nil {
 		loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml %v", unmarshalErr.Error())
 		return "", unmarshalErr
 	}
-	// TODO : (LahiruUdayanga) Handle the differences between api.yaml from APIM and apictl.
-	folderType := apiDef["type"].(string)
-	if folderType == apiManagerGenerated {
-		data := apiDef["data"].(map[string]interface{})
-		apiType = data["type"].(string)
-	} else if folderType == apictlGenerated {
-		apiType = apictlGenerated
-	} else {
-		loggers.LoggerAPI.Info("Unrecognized project format")
-	}
+	data := apiDef["data"].(map[string]interface{})
+	apiType := data["type"].(string)
 
 	return apiType, nil
 }

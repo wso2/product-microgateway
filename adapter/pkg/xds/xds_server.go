@@ -149,6 +149,7 @@ func UpdateEnvoy(byteArr []byte, upstreamCerts []byte, apiType string) {
 
 	} else if apiType == mgw.WS {
 		mgwSwagger := operator.GetMgwSwaggerWebSocket(byteArr)
+		// TODO - uuid as the key
 		apiMapKey = mgwSwagger.GetTitle() + ":" + mgwSwagger.GetVersion()
 		existingWebSocketAPI, ok := webSocketAPIMap[apiMapKey]
 		if ok {
@@ -158,6 +159,7 @@ func UpdateEnvoy(byteArr []byte, upstreamCerts []byte, apiType string) {
 			}
 		}
 		webSocketAPIMap[apiMapKey] = mgwSwagger
+		// TODO - add label support
 		newLabels = operator.GetXWso2LabelsWebSocket(mgwSwagger)
 	} else {
 		// Unreachable else condition. Added in case apiType type check fails prior to this function

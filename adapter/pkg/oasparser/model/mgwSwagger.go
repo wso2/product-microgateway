@@ -25,17 +25,17 @@ import (
 // the root level of the openAPI definition. The pathItem level information is represented
 // by the resources array which contains the MgwResource entries.
 type MgwSwagger struct {
-	id               string
-	swaggerVersion   string
-	description      string
-	title            string
-	version          string
+	id          string
+	apiType     string
+	description string
+	title       string
+	version     string
+	// TODO - (VirajSalaka) rename to vendorExtensions
 	vendorExtensible map[string]interface{}
-	productionUrls   []Endpoint
+	productionUrls   []Endpoint //
 	sandboxUrls      []Endpoint
 	resources        []Resource
 	xWso2Basepath    string
-	protocol         string
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -57,9 +57,9 @@ type Endpoint struct {
 	Port uint32
 }
 
-// GetSwaggerVersion returns the openapi version
-func (swagger *MgwSwagger) GetSwaggerVersion() string {
-	return swagger.swaggerVersion
+// GetAPIType returns the openapi version
+func (swagger *MgwSwagger) GetAPIType() string {
+	return swagger.apiType
 }
 
 // GetVersion returns the API version
@@ -186,15 +186,4 @@ func getXWso2Basepath(vendorExtensible map[string]interface{}) string {
 
 func (swagger *MgwSwagger) setXWso2Basepath() {
 	swagger.xWso2Basepath = getXWso2Basepath(swagger.vendorExtensible)
-}
-
-// GetProtocol returns the type of protocol related to the API
-// HTTP, HTTPS, WS, WSS are considered here
-func (swagger *MgwSwagger) GetProtocol() string {
-	return swagger.protocol
-}
-
-// SetProtocol sets the protocol value for mgwSwagger
-func (swagger *MgwSwagger) SetProtocol(protocol string) {
-	swagger.protocol = protocol
 }
