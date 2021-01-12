@@ -24,17 +24,17 @@ import java.util.Properties;
  * Holds the configurations related to connecting with APIM event hub node.
  */
 public class EventHubConfigurationDto {
-    private boolean enabled;
+    private boolean enable;
     private String serviceUrl;
     private int initDelay = 0;
     private Properties jmsConnectionParameters = new Properties();
 
     public boolean isEnabled() {
-        return enabled;
+        return enable;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 
     public String getServiceUrl() {
