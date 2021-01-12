@@ -60,9 +60,14 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 
 	// Applies when the Authorization header is set with the Basic scheme
 	api.BasicAuthAuth = func(user string, pass string) (*models.Principal, error) {
-		if user != mgwConfig.Server.Username || pass != mgwConfig.Server.Password {
-			// TODO: (VirajSalaka) Introduce Constants
-			logger.LoggerAPI.Info("Credentials are invalid")
+		authenticated := false
+		for _, regUser := range mgwConfig.Adapter.Server.Users {
+			if user == regUser.Username && pass == regUser.Password {
+				authenticated = true
+			}
+		}
+		if !authenticated {
+			logger.LoggerAPI.Info("Credentials provided for deploy command are invalid")
 			return nil, errors.New(401, "Credentials are invalid")
 		}
 		// TODO: implement authentication principal
@@ -97,7 +102,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 func configureTLS(tlsConfig *tls.Config) {
 	// Make all necessary changes to the TLS configuration here.
 	// TODO: (VirajSalaka) Introduce PKCS12
-	tlsConfig.Certificates, _ = getCertificates(mgwConfig.Server.PublicKeyPath, mgwConfig.Server.PrivateKeyPath)
+	tlsConfig.Certificates, _ = getCertificates(mgwConfig.Adapter.Server.PublicKeyPath, mgwConfig.Adapter.Server.PrivateKeyPath)
 }
 
 func getCertificates(publicKeyPath, privateKeyPath string) ([]tls.Certificate, error) {
@@ -157,10 +162,10 @@ func StartRestServer(config *config.Config) {
 	defer server.Shutdown()
 
 	server.ConfigureAPI()
-	server.TLSHost = mgwConfig.Server.Host
-	port, err := strconv.Atoi(mgwConfig.Server.Port)
+	server.TLSHost = mgwConfig.Adapter.Server.Host
+	port, err := strconv.Atoi(mgwConfig.Adapter.Server.Port)
 	if err != nil {
-		logger.LoggerAPI.Fatalf("The provided port value for the REST Api Server :%v is not an integer. %v", mgwConfig.Server.Port, err)
+		logger.LoggerAPI.Fatalf("The provided port value for the REST Api Server :%v is not an integer. %v", mgwConfig.Adapter.Server.Port, err)
 		return
 	}
 	server.TLSPort = port
