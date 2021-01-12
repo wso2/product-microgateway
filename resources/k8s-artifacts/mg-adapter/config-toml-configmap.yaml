@@ -22,12 +22,14 @@ metadata:
   name: config-toml
 data:
   config.toml: |
+    [adapter]
     # The configuration file for mgw
-    [server]
+    [adapter.server]
     host = "0.0.0.0"
     port = "9843"
     publicKeyPath = "/home/wso2/security/localhost.pem"
     privateKeyPath = "/home/wso2/security/localhost.key"
+    [[adapter.server.users]]
     username = "admin"
     password = "admin"
 
@@ -43,7 +45,7 @@ data:
     [envoy.upstream.tls]
     minimumProtocolVersion = "TLS1_1"
     maximumProtocolVersion = "TLS1_2"
-    ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"  
+    ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"
     # the default endpoint certificates
     trustedCertificatesFilePath = "/etc/ssl/certs/ca-certificates.crt"
     clientCertPath = "/home/wso2/security/mg.pem"
@@ -51,22 +53,35 @@ data:
     verifyHostName = true
     disableSslVerification = false
 
-    [filter]
+    [enforcer]
+    [enforcer.authService]
+      port = 8081
+      maxMessageSize = 1000000000
+      maxHeaderLimit = 8192
+      #keep alive time of the external authz connection
+      keepAliveTime = 600
+      [enforcer.authService.threadPool]
+        coreSize = 400
+        maxSize = 500
+        #keep alive time of threads in seconds
+        keepAliveTime = 600
+        queueSize = 1000
+
     #Key Store Configuration
-    [filter.keystore]
+    [enforcer.keystore]
     location = "wso2carbon.jks"
     type = "jks"
     password = "wso2carbon"
 
     #Trust store configuration
-    [filter.truststore]
+    [enforcer.truststore]
     location = "/home/wso2/mg/security/client-truststore.jks"
     type = "jks"
     password = "wso2carbon"
 
     # JWT token authorization configurations. You can provide multiple JWT issuers
     # Issuer 1
-    [[filter.jwtTokenConfig]]
+    [[enforcer.jwtTokenConfig]]
         name="Resident Key Manager"
         issuer = "https://localhost:9443/oauth2/token"
         certificateAlias = "wso2carbon"
@@ -78,13 +93,16 @@ data:
         consumerKeyClaim = "azp"
 
     # Configurations for retrieving API and subscription data from API Manager.
-    [filter.eventHub]
+    [enforcer.eventHub]
         # Enable/ Disable the feature
         enable = false
         # The API Manager URL
         serviceUrl = "https://localhost:9443/"
         # User name and password of the internal data api.
+        [enforcer.eventHub.jmsConnectionParameters]
+            # The message broker connection URL.
+            eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
+
+    [enforcer.apimCredentials]
         username="admin"
         password="admin"
-        # The message broker connection URL.
-        eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
