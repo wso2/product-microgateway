@@ -52,21 +52,38 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
     }
 
     private CheckResponse buildResponse(ResponseObject responseObject) {
-        if (responseObject.getStatusCode() != 200) {
+        DeniedHttpResponse.Builder responseBuilder = DeniedHttpResponse.newBuilder();
+        HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
+        if (responseObject.isDirectResponse()) {
+            // To handle options request
+            if (responseObject.getStatusCode() == 204) {
+                responseObject.getHeaderMap().forEach((key, value) -> {
+                            HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
+                                    .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
+                                    .build();
+                            responseBuilder.addHeaders(headerValueOption);
+                        }
+                );
+                return CheckResponse.newBuilder()
+                        .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
+                        .setDeniedResponse(responseBuilder.setStatus(status).build())
+                        .build();
+            }
+            // Error handling
             String errorCode = responseObject.getErrorCode();
             String errorDescription = responseObject.getErrorDescription();
             JSONObject responseJson = new JSONObject();
             responseJson.put("errorCode", errorCode);
             responseJson.put("errorDescription", errorDescription);
-
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                     .setHeader(HeaderValue.newBuilder().setKey("Content-type").setValue("application/json").build())
                     .build();
-            HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
+            responseBuilder.addHeaders(headerValueOption);
+
             return CheckResponse.newBuilder()
                     .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
-                    .setDeniedResponse(DeniedHttpResponse.newBuilder().setBody(responseJson.toString())
-                            .addHeaders(headerValueOption).setStatus(status).build()).build();
+                    .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
+                    .build();
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
             if (responseObject.getHeaderMap() != null) {

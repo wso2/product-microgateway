@@ -31,6 +31,7 @@
     <test name="micro-gw-integration-tests" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2am.micro.gw.tests.apiDeploy.APiDeployTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.security.CorsTestCase"></class>
             <class name="org.wso2am.micro.gw.tests.jwtValidator.JwtTestCase"/>
             <class name="org.wso2am.micro.gw.tests.backendtls.BackendTLSTestcase"/>
             <class name="org.wso2am.micro.gw.tests.endpoints.ProductionSandboxTestCase"></class>

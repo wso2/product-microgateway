@@ -9,6 +9,18 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+x-wso2-cors:
+  accessControlAllowOrigins:
+    - http://test1.com
+    - http://test2.com
+  accessControlAllowHeaders:
+    - Authorization
+    - X-PINGOTHER
+  accessControlAllowMethods:
+    - GET
+    - PUT
+    - POST
+  accessControlAllowCredentials: true
 host: 'mockBackend:2383'
 basePath: /v2
 tags:

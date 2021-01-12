@@ -127,18 +127,18 @@ func TestCreateRoute(t *testing.T) {
 		},
 	}
 
-	generatedRouteWithXWso2BasePath := createRoute(title, apiType, xWso2BasePath, version, endpoint.Basepath, resourceWithGet.GetPath(), resourceWithGet.GetMethod(), clusterName, "")
+	generatedRouteWithXWso2BasePath := createRoute(title, apiType, xWso2BasePath, version, endpoint.Basepath, resourceWithGet.GetPath(), resourceWithGet.GetMethod(), clusterName, "", nil)
 	assert.NotNil(t, generatedRouteWithXWso2BasePath, "Route should not be null.")
 	assert.Equal(t, expectedRouteActionWithXWso2BasePath, generatedRouteWithXWso2BasePath.Action,
 		"Route generation mismatch when xWso2BasePath option is provided.")
 	assert.NotNil(t, generatedRouteWithXWso2BasePath.GetMatch().Headers, "Headers property should not be null")
-	assert.Equal(t, "^(GET)$", generatedRouteWithXWso2BasePath.GetMatch().Headers[0].GetSafeRegexMatch().Regex,
+	assert.Equal(t, "^(GET|OPTIONS)$", generatedRouteWithXWso2BasePath.GetMatch().Headers[0].GetSafeRegexMatch().Regex,
 		"Assigned HTTP Method Regex is incorrect when single method is available.")
 
-	generatedRouteWithoutXWso2BasePath := createRoute(title, apiType, "", version, endpoint.Basepath, resourceWithGetPost.GetPath(), resourceWithGetPost.GetMethod(), clusterName, "")
+	generatedRouteWithoutXWso2BasePath := createRoute(title, apiType, "", version, endpoint.Basepath, resourceWithGetPost.GetPath(), resourceWithGetPost.GetMethod(), clusterName, "", nil)
 	assert.NotNil(t, generatedRouteWithoutXWso2BasePath, "Route should not be null")
 	assert.NotNil(t, generatedRouteWithoutXWso2BasePath.GetMatch().Headers, "Headers property should not be null")
-	assert.Equal(t, "^(GET|POST)$", generatedRouteWithoutXWso2BasePath.GetMatch().Headers[0].GetSafeRegexMatch().Regex,
+	assert.Equal(t, "^(GET|POST|OPTIONS)$", generatedRouteWithoutXWso2BasePath.GetMatch().Headers[0].GetSafeRegexMatch().Regex,
 		"Assigned HTTP Method Regex is incorrect when multiple methods are available.")
 
 	assert.Equal(t, expectedRouteActionWithoutXWso2BasePath, generatedRouteWithoutXWso2BasePath.Action,
@@ -163,20 +163,20 @@ func TestCreateRouteClusterSpecifier(t *testing.T) {
 	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []string{"GET"},
 		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 
-	routeWithProdEp := createRoute(title, apiType, xWso2BasePath, version, endpointBasePath, resourceWithGet.GetPath(), resourceWithGet.GetMethod(), prodClusterName, "")
+	routeWithProdEp := createRoute(title, apiType, xWso2BasePath, version, endpointBasePath, resourceWithGet.GetPath(), resourceWithGet.GetMethod(), prodClusterName, "", nil)
 	assert.NotNil(t, routeWithProdEp, "Route should not be null")
 	assert.NotNil(t, routeWithProdEp.GetRoute().GetCluster(), "Route Cluster Name should not be null.")
 	assert.Empty(t, routeWithProdEp.GetRoute().GetClusterHeader(), "Route Cluster Header should be empty.")
 	assert.Equal(t, prodClusterName, routeWithProdEp.GetRoute().GetCluster(), "Route Cluster Name mismatch.")
 
-	routeWithSandEp := createRoute(title, apiType, xWso2BasePath, version, endpointBasePath, resourceWithGet.GetPath(), resourceWithGet.GetMethod(), "", sandClusterName)
+	routeWithSandEp := createRoute(title, apiType, xWso2BasePath, version, endpointBasePath, resourceWithGet.GetPath(), resourceWithGet.GetMethod(), "", sandClusterName, nil)
 	assert.NotNil(t, routeWithSandEp, "Route should not be null")
 	assert.NotNil(t, routeWithSandEp.GetRoute().GetCluster(), "Route Cluster Name should not be null.")
 	assert.Empty(t, routeWithSandEp.GetRoute().GetClusterHeader(), "Route Cluster Header should be empty.")
 	assert.Equal(t, sandClusterName, routeWithSandEp.GetRoute().GetCluster(), "Route Cluster Name mismatch.")
 
 	routeWithProdSandEp := createRoute(title, apiType, xWso2BasePath, version, endpointBasePath, resourceWithGet.GetPath(), resourceWithGet.GetMethod(), prodClusterName,
-		sandClusterName)
+		sandClusterName, nil)
 	assert.NotNil(t, routeWithProdSandEp, "Route should not be null")
 	assert.NotNil(t, routeWithProdSandEp.GetRoute().GetClusterHeader(), "Route Cluster Header should not be null.")
 	assert.Empty(t, routeWithProdSandEp.GetRoute().GetCluster(), "Route Cluster Name should be empty.")
@@ -199,7 +199,7 @@ func TestCreateRouteExtAuthzContext(t *testing.T) {
 	resourceWithGet := model.CreateMinimalDummyResourceForTests("/resourcePath", []string{"GET"},
 		"resource_operation_id", []model.Endpoint{}, []model.Endpoint{})
 
-	routeWithProdEp := createRoute(title, apiType, xWso2BasePath, version, endpointBasePath, resourceWithGet.GetPath(), resourceWithGet.GetMethod(), prodClusterName, sandClusterName)
+	routeWithProdEp := createRoute(title, apiType, xWso2BasePath, version, endpointBasePath, resourceWithGet.GetPath(), resourceWithGet.GetMethod(), prodClusterName, sandClusterName, nil)
 	assert.NotNil(t, routeWithProdEp, "Route should not be null")
 	assert.NotNil(t, routeWithProdEp.GetTypedPerFilterConfig(), "TypedPerFilter config should not be null")
 	assert.NotNil(t, routeWithProdEp.GetTypedPerFilterConfig()[wellknown.HTTPExternalAuthorization],
@@ -387,4 +387,55 @@ func TestCreateUpstreamTLSContext(t *testing.T) {
 		"Subject Alternative Names Should not be empty.")
 	assert.Equal(t, "abc.com", upstreamTLSContextWithCerts.CommonTlsContext.GetValidationContext().GetMatchSubjectAltNames()[0].GetExact(),
 		"Upstream SAN mismatch.")
+}
+
+func TestGetCorsPolicy(t *testing.T) {
+
+	corsConfigModel1 := &model.CorsConfig{
+		Enabled: false,
+	}
+
+	corsConfigModel2 := &model.CorsConfig{
+		Enabled:                       true,
+		AccessControlAllowMethods:     []string{"GET", "POST"},
+		AccessControlAllowHeaders:     []string{"X-TEST-HEADER1", "X-TEST-HEADER2"},
+		AccessControlAllowOrigins:     []string{"http://test.com"},
+		AccessControlAllowCredentials: true,
+	}
+
+	corsConfigModel3 := &model.CorsConfig{
+		Enabled:                   true,
+		AccessControlAllowMethods: []string{"GET"},
+		AccessControlAllowOrigins: []string{"http://test1.com", "http://test2.com"},
+	}
+
+	// Test the configuration when cors is disabled.
+	corsPolicy1 := getCorsPolicy(corsConfigModel1)
+	assert.Nil(t, corsPolicy1, "Cors Policy should be null.")
+
+	// Test configuration when all the fields are provided.
+	corsPolicy2 := getCorsPolicy(corsConfigModel2)
+	assert.NotNil(t, corsPolicy2, "Cors Policy should not be null.")
+	assert.NotEmpty(t, corsPolicy2.GetAllowOriginStringMatch(), "Cors Allowded Origins should not be null.")
+	assert.Equal(t, regexp.QuoteMeta("http://test.com"),
+		corsPolicy2.GetAllowOriginStringMatch()[0].GetSafeRegex().GetRegex(),
+		"Cors Allowed Origin Header mismatch")
+	assert.NotNil(t, corsPolicy2.GetAllowMethods())
+	assert.Equal(t, "GET, POST", corsPolicy2.GetAllowMethods(), "Cors allow methods mismatch.")
+	assert.NotNil(t, corsPolicy2.GetAllowHeaders(), "Cors Allowed headers should not be null.")
+	assert.Equal(t, "X-TEST-HEADER1, X-TEST-HEADER2", corsPolicy2.GetAllowHeaders(), "Cors Allow headers mismatch")
+	assert.True(t, corsPolicy2.GetAllowCredentials().GetValue(), "Cors Access Allow Credentials should be true")
+
+	// Test the configuration when few configurations are added.
+	corsPolicy3 := getCorsPolicy(corsConfigModel3)
+	assert.NotNil(t, corsPolicy3, "Cors Policy should not be null.")
+	assert.Empty(t, corsPolicy3.GetAllowHeaders(), "Cors Allow headers should be null.")
+	assert.NotEmpty(t, corsPolicy3.GetAllowOriginStringMatch(), "Cors Allowded Origins should not be null.")
+	assert.Equal(t, regexp.QuoteMeta("http://test1.com"),
+		corsPolicy3.GetAllowOriginStringMatch()[0].GetSafeRegex().GetRegex(),
+		"Cors Allowed Origin Header mismatch")
+	assert.Equal(t, regexp.QuoteMeta("http://test2.com"),
+		corsPolicy3.GetAllowOriginStringMatch()[1].GetSafeRegex().GetRegex(),
+		"Cors Allowed Origin Header mismatch")
+	assert.Empty(t, corsPolicy3.GetAllowCredentials(), "Allow Credential property should not be assigned.")
 }

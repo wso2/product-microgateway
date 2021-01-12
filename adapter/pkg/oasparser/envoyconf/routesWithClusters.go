@@ -18,6 +18,8 @@
 package envoyconf
 
 import (
+	"regexp"
+
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
@@ -73,6 +75,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 	apiVersion := mgwSwagger.GetVersion()
 	apiBasePath := mgwSwagger.GetXWso2Basepath()
 	apiType := mgwSwagger.GetAPIType()
+	envoyCorsPolicy := getCorsPolicy(mgwSwagger.GetCorsConfig())
 
 	// check API level production endpoints available
 	if len(mgwSwagger.GetProdEndpoints()) > 0 {
@@ -175,11 +178,11 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 				apiTitle, apiVersion, resource.GetPath())
 		}
 
-		routeP := createRoute(apiTitle, apiType, apiBasePath, apiVersion, endpointBasepath, resource.GetPath(), resource.GetMethod(), clusterRefProd, clusterRefSand)
+		routeP := createRoute(apiTitle, apiType, apiBasePath, apiVersion, endpointBasepath, resource.GetPath(), resource.GetMethod(), clusterRefProd, clusterRefSand, envoyCorsPolicy)
 		routesProd = append(routesProd, routeP)
 	}
 	if mgwSwagger.GetAPIType() == mgw.WS {
-		routesP := createRoute(apiTitle, apiType, apiBasePath, apiVersion, apiEndpointBasePath, "", []string{"GET"}, apilevelClusterProd.GetName(), apilevelClusterSand.GetName())
+		routesP := createRoute(apiTitle, apiType, apiBasePath, apiVersion, apiEndpointBasePath, "", []string{"GET"}, apilevelClusterProd.GetName(), apilevelClusterSand.GetName(), nil)
 		routesProd = append(routesProd, routesP)
 	}
 	return routesProd, clusters, endpoints
@@ -317,7 +320,7 @@ func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol
 // endpoint's basePath, resource Object (Microgateway's internal representation), production clusterName and
 // sandbox clusterName needs to be provided.
 func createRoute(title string, apiType string, xWso2Basepath string, version string, endpointBasepath string,
-	resourcePathParam string, resourceMethods []string, prodClusterName string, sandClusterName string) *routev3.Route {
+	resourcePathParam string, resourceMethods []string, prodClusterName string, sandClusterName string, corsPolicy *routev3.CorsPolicy) *routev3.Route {
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
@@ -327,6 +330,13 @@ func createRoute(title string, apiType string, xWso2Basepath string, version str
 		decorator    *routev3.Decorator
 		resourcePath string
 	)
+
+    // OPTIONS is always added even if it is not listed under resources
+    // This is required to handle CORS preflight request fail scenario
+	methodRegex := strings.Join(resourceMethods, "|")
+	if !strings.Contains(methodRegex, "OPTIONS") {
+		methodRegex = methodRegex + "|OPTIONS"
+	}
 	headerMatcherArray := routev3.HeaderMatcher{
 		Name: httpMethodHeader,
 		HeaderMatchSpecifier: &routev3.HeaderMatcher_SafeRegexMatch{
@@ -336,7 +346,7 @@ func createRoute(title string, apiType string, xWso2Basepath string, version str
 						MaxProgramSize: nil,
 					},
 				},
-				Regex: "^(" + strings.Join(resourceMethods, "|") + ")$",
+				Regex: "^(" + methodRegex + ")$",
 			},
 		},
 	}
@@ -451,6 +461,11 @@ func createRoute(title string, apiType string, xWso2Basepath string, version str
 		action.Route.ClusterSpecifier = directClusterSpecifier
 		logger.LoggerOasparser.Debugf("adding cluster: %v", sandClusterName)
 	}
+
+	if corsPolicy != nil {
+		action.Route.Cors = corsPolicy
+	}
+
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
 
 	router = routev3.Route{
@@ -532,4 +547,49 @@ func getUpgradeConfig(apiType string) []*routev3.RouteAction_UpgradeConfig {
 		}}
 	}
 	return upgradeConfig
+}
+
+func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
+
+	if corsConfig == nil || !corsConfig.Enabled {
+		return nil
+	}
+
+	stringMatcherArray := []*envoy_type_matcherv3.StringMatcher{}
+	for _, origin := range corsConfig.AccessControlAllowOrigins {
+		regexMatcher := &envoy_type_matcherv3.StringMatcher{
+			MatchPattern: &envoy_type_matcherv3.StringMatcher_SafeRegex{
+				SafeRegex: &envoy_type_matcherv3.RegexMatcher{
+					EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
+						GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
+							MaxProgramSize: nil,
+						},
+					},
+					// adds escape character when necessary
+					Regex: regexp.QuoteMeta(origin),
+				},
+			},
+		}
+		stringMatcherArray = append(stringMatcherArray, regexMatcher)
+	}
+
+	methods := strings.Join(corsConfig.AccessControlAllowMethods, ", ")
+	headers := strings.Join(corsConfig.AccessControlAllowHeaders, ", ")
+
+	corsPolicy := &routev3.CorsPolicy{
+		AllowCredentials: &wrapperspb.BoolValue{
+			Value: corsConfig.AccessControlAllowCredentials,
+		},
+	}
+
+	if len(stringMatcherArray) > 0 {
+		corsPolicy.AllowOriginStringMatch = stringMatcherArray
+	}
+	if len(methods) > 0 {
+		corsPolicy.AllowMethods = methods
+	}
+	if len(headers) > 0 {
+		corsPolicy.AllowHeaders = headers
+	}
+	return corsPolicy
 }
