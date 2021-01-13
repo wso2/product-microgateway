@@ -21,6 +21,7 @@ package mgw
 import (
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
+	apiservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/api"
 	configservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/config"
 	"github.com/wso2/micro-gw/pkg/api/restserver"
 
@@ -66,7 +67,7 @@ func init() {
 
 const grpcMaxConcurrentStreams = 1000000
 
-func runManagementServer(server xdsv3.Server, port uint) {
+func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
 	grpcServer := grpc.NewServer()
@@ -78,7 +79,8 @@ func runManagementServer(server xdsv3.Server, port uint) {
 
 	// register services
 	discoveryv3.RegisterAggregatedDiscoveryServiceServer(grpcServer, server)
-	configservice.RegisterConfigDiscoveryServiceServer(grpcServer, server)
+	configservice.RegisterConfigDiscoveryServiceServer(grpcServer, enforcerServer)
+	apiservice.RegisterApiDiscoveryServiceServer(grpcServer, enforcerServer)
 
 	logger.LoggerMgw.Info("port: ", port, " management server listening")
 	go func() {
@@ -109,9 +111,11 @@ func Run(conf *config.Config) {
 
 	logger.LoggerMgw.Info("Starting adapter ....")
 	cache := xds.GetXdsCache()
+	enforcerCache := xds.GetEnforcerCache()
 	srv := xdsv3.NewServer(ctx, cache, nil)
+	enforcerXdsSrv := xdsv3.NewServer(ctx, enforcerCache, nil)
 
-	runManagementServer(srv, port)
+	runManagementServer(srv, enforcerXdsSrv, port)
 
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)

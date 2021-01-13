@@ -24,14 +24,14 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 
+	wso2 "github.com/envoyproxy/go-control-plane/wso2/discovery/api"
 	envoy "github.com/wso2/micro-gw/pkg/oasparser/envoyconf"
-	"github.com/wso2/micro-gw/pkg/oasparser/operator"
+	"github.com/wso2/micro-gw/pkg/oasparser/model"
 )
 
 // GetProductionRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
-// when the openAPI Json is provided.
-func GetProductionRoutesClustersEndpoints(byteArr []byte) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
-	mgwSwagger := operator.GetMgwSwagger(byteArr)
+// when the MgwSwagger is provided.
+func GetProductionRoutesClustersEndpoints(mgwSwagger model.MgwSwagger) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
 	routes, clusters, endpoints, _, _, _ := envoy.CreateRoutesWithClusters(mgwSwagger)
 	return routes, clusters, endpoints
 }
@@ -79,4 +79,40 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, routes []*route
 	vHostName := "default"
 	vHost := envoy.CreateVirtualHost(vHostName, routes)
 	routeConfig.VirtualHosts = []*routev3.VirtualHost{vHost}
+}
+
+// GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition.
+func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *wso2.Api {
+	prodUrls := []*wso2.Endpoint{}
+	sandUrls := []*wso2.Endpoint{}
+	for _, ep := range mgwSwagger.GetProdEndpoints() {
+		prodEp := &wso2.Endpoint{
+			Basepath: ep.Basepath,
+			Host:     ep.Host,
+			Port:     ep.Port,
+			URLType:  ep.URLType,
+		}
+		prodUrls = append(prodUrls, prodEp)
+	}
+
+	for _, ep := range mgwSwagger.GetSandEndpoints() {
+		sandEp := &wso2.Endpoint{
+			Basepath: ep.Basepath,
+			Host:     ep.Host,
+			Port:     ep.Port,
+			URLType:  ep.URLType,
+		}
+		sandUrls = append(sandUrls, sandEp)
+	}
+
+	return &wso2.Api{
+		Id:             mgwSwagger.GetID(),
+		Title:          mgwSwagger.GetTitle(),
+		Description:    mgwSwagger.GetDescription(),
+		BasePath:       mgwSwagger.GetXWso2Basepath(),
+		Version:        mgwSwagger.GetVersion(),
+		SwaggerVersion: mgwSwagger.GetSwaggerVersion(),
+		ProductionUrls: prodUrls,
+		SandboxUrls:    sandUrls,
+	}
 }

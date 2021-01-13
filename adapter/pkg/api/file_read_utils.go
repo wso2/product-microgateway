@@ -56,7 +56,7 @@ func ApplyAPIProject(payload []byte) error {
 				loggers.LoggerAPI.Errorf("Error converting api file to json: %v", err.Error())
 				return conversionErr
 			}
-			xds.UpdateEnvoy(apiJsn)
+			xds.UpdateAPI(apiJsn)
 		}
 	}
 	return nil
@@ -70,7 +70,7 @@ func ApplyOpenAPIFile(payload []byte) {
 		log.Fatal("Error converting api file to json:", err)
 		return
 	}
-	xds.UpdateEnvoy(apiJsn)
+	xds.UpdateAPI(apiJsn)
 }
 
 func readZipFile(zf *zip.File) ([]byte, error) {

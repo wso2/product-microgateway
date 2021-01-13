@@ -69,7 +69,8 @@ func setPathInfoOpenAPI(path string, methods []string, pathItem *openapi3.PathIt
 			//Schemes: operation.,
 			//tags: operation.Tags,
 			//Security: operation.Security.,
-			vendorExtensible: convertExtensibletoReadableFormat(pathItem.ExtensionProps)}
+			vendorExtensible: convertExtensibletoReadableFormat(pathItem.ExtensionProps),
+		}
 	}
 	return resource
 }

@@ -28,6 +28,7 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+	"github.com/envoyproxy/go-control-plane/wso2/discovery/api"
 	"github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer"
 	openAPI3 "github.com/getkin/kin-openapi/openapi3"
 	openAPI2 "github.com/go-openapi/spec"
@@ -41,7 +42,8 @@ import (
 var (
 	version int32
 
-	cache cachev3.SnapshotCache
+	cache         cachev3.SnapshotCache
+	enforcerCache cachev3.SnapshotCache
 	// OpenAPI Name:Version -> openAPI3 struct map
 	openAPIV3Map map[string]openAPI3.Swagger
 	// OpenAPI Name:Version -> openAPI2 struct map
@@ -63,6 +65,8 @@ var (
 
 	// Enforcer config XDS resource version map
 	enforcerConfigVersionMap map[string]int64
+	enforcerApisMap          map[string]*api.Api
+	enforcerConfigMap        map[string][]types.Resource
 )
 
 // IDHash uses ID field as the node hash.
@@ -80,6 +84,7 @@ var _ cachev3.NodeHash = IDHash{}
 
 func init() {
 	cache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
 	openAPIV3Map = make(map[string]openAPI3.Swagger)
 	openAPIV2Map = make(map[string]openAPI2.Swagger)
 	openAPIEnvoyMap = make(map[string][]string)
@@ -92,6 +97,7 @@ func init() {
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 
 	enforcerConfigVersionMap = make(map[string]int64)
+	enforcerConfigMap = make(map[string][]types.Resource)
 }
 
 // GetXdsCache returns xds server cache.
@@ -99,8 +105,13 @@ func GetXdsCache() cachev3.SnapshotCache {
 	return cache
 }
 
-// UpdateEnvoy updates the Xds Cache when OpenAPI Json content is provided
-func UpdateEnvoy(byteArr []byte) {
+// GetEnforcerCache returns xds server cache for enforcer.
+func GetEnforcerCache() cachev3.SnapshotCache {
+	return enforcerCache
+}
+
+// UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
+func UpdateAPI(byteArr []byte) {
 	var apiMapKey string
 	var newLabels []string
 
@@ -155,7 +166,11 @@ func UpdateEnvoy(byteArr []byte) {
 	openAPIEnvoyMap[apiMapKey] = newLabels
 	// TODO: (VirajSalaka) Routes populated is wrong here. It has to follow https://github.com/envoyproxy/envoy/blob/v1.16.0/api/envoy/config/route/v3/route.proto
 	// TODO: (VirajSalaka) Can bring VHDS (Delta), but since the gateway would contain only one domain, it won't have much impact.
-	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(byteArr)
+
+	mgwSwagger := operator.GetMgwSwagger(byteArr)
+	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger)
+	enforcerAPI := oasParser.GetEnforcerAPI(mgwSwagger)
+
 	// TODO: (VirajSalaka) Decide if the routes and listeners need their own map since it is not going to be changed based on API at the moment.
 	openAPIRoutesMap[apiMapKey] = routes
 	// openAPIListenersMap[apiMapKey] = listeners
@@ -163,6 +178,7 @@ func UpdateEnvoy(byteArr []byte) {
 	openAPIEndpointsMap[apiMapKey] = endpoints
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
+	UpdateEnforcerApis(enforcerAPI)
 }
 
 func arrayContains(a []string, x string) bool {
@@ -280,7 +296,7 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	}
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	// Will be updated once decide to move to incremental XDS
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil, nil)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil, nil, nil)
 	snap.Consistent()
 	err := cache.SetSnapshot(label, snap)
 	if err != nil {
@@ -290,25 +306,39 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
-// UpdateEnforcerConfig Sets new update to the enforcer's configuration
-func UpdateEnforcerConfig(confiFile *config.Config) {
+func updateEnforcerCache(configs []types.Resource, apis []types.Resource) {
 	label := "enforcer"
-	configs := []types.Resource{generateEnforcerConfigs(confiFile)}
 	version, ok := enforcerConfigVersionMap[label]
 	if ok {
 		version++
 	} else {
 		version = 1
 	}
+	if configs == nil {
+		configs = enforcerConfigMap[label]
+	}
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis)
 	snap.Consistent()
 
-	err := cache.SetSnapshot(label, snap)
+	err := enforcerCache.SetSnapshot(label, snap)
 	if err != nil {
 		logger.LoggerMgw.Error(err)
 	}
 
 	enforcerConfigVersionMap[label] = version
-	logger.LoggerMgw.Infof("New config cache update for the enforcer: " + label + " version: " + fmt.Sprint(version))
+	enforcerConfigMap[label] = configs
+	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+// UpdateEnforcerConfig Sets new update to the enforcer's configuration
+func UpdateEnforcerConfig(confiFile *config.Config) {
+	configs := []types.Resource{generateEnforcerConfigs(confiFile)}
+	updateEnforcerCache(configs, nil)
+}
+
+// UpdateEnforcerApis Sets new update to the enforcer's Apis
+func UpdateEnforcerApis(api *api.Api) {
+	apis := []types.Resource{api}
+	updateEnforcerCache(nil, apis)
 }
