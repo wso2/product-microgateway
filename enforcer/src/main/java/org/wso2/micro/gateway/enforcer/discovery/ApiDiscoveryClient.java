@@ -28,9 +28,7 @@ import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.api.Api;
-import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.service.api.ApiDiscoveryServiceGrpc;
-import org.wso2.gateway.discovery.service.config.ConfigDiscoveryServiceGrpc;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 

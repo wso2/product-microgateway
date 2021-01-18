@@ -2,11 +2,11 @@ module github.com/wso2/micro-gw
 
 go 1.15
 
-replace github.com/envoyproxy/go-control-plane => ../../../envoy/go-control-plane
+replace github.com/envoyproxy/go-control-plane => github.com/praminda/go-control-plane v0.9.8-0.20210113101316-f23d43fb7624
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/envoyproxy/go-control-plane v0.9.4
+	github.com/envoyproxy/go-control-plane v0.9.8
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/getkin/kin-openapi v0.8.0
 	github.com/ghodss/yaml v1.0.0
