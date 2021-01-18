@@ -102,6 +102,32 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
+          case 42: {
+            org.wso2.gateway.discovery.config.enforcer.AuthService.Builder subBuilder = null;
+            if (authService_ != null) {
+              subBuilder = authService_.toBuilder();
+            }
+            authService_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.AuthService.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(authService_);
+              authService_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
+          case 50: {
+            org.wso2.gateway.discovery.config.enforcer.AmCredentials.Builder subBuilder = null;
+            if (apimCredentials_ != null) {
+              subBuilder = apimCredentials_.toBuilder();
+            }
+            apimCredentials_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.AmCredentials.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(apimCredentials_);
+              apimCredentials_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -255,6 +281,58 @@ private static final long serialVersionUID = 0L;
     return getEventhub();
   }
 
+  public static final int AUTHSERVICE_FIELD_NUMBER = 5;
+  private org.wso2.gateway.discovery.config.enforcer.AuthService authService_;
+  /**
+   * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+   * @return Whether the authService field is set.
+   */
+  @java.lang.Override
+  public boolean hasAuthService() {
+    return authService_ != null;
+  }
+  /**
+   * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+   * @return The authService.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.AuthService getAuthService() {
+    return authService_ == null ? org.wso2.gateway.discovery.config.enforcer.AuthService.getDefaultInstance() : authService_;
+  }
+  /**
+   * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder getAuthServiceOrBuilder() {
+    return getAuthService();
+  }
+
+  public static final int APIMCREDENTIALS_FIELD_NUMBER = 6;
+  private org.wso2.gateway.discovery.config.enforcer.AmCredentials apimCredentials_;
+  /**
+   * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+   * @return Whether the apimCredentials field is set.
+   */
+  @java.lang.Override
+  public boolean hasApimCredentials() {
+    return apimCredentials_ != null;
+  }
+  /**
+   * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+   * @return The apimCredentials.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.AmCredentials getApimCredentials() {
+    return apimCredentials_ == null ? org.wso2.gateway.discovery.config.enforcer.AmCredentials.getDefaultInstance() : apimCredentials_;
+  }
+  /**
+   * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.AmCredentialsOrBuilder getApimCredentialsOrBuilder() {
+    return getApimCredentials();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -281,6 +359,12 @@ private static final long serialVersionUID = 0L;
     if (eventhub_ != null) {
       output.writeMessage(4, getEventhub());
     }
+    if (authService_ != null) {
+      output.writeMessage(5, getAuthService());
+    }
+    if (apimCredentials_ != null) {
+      output.writeMessage(6, getApimCredentials());
+    }
     unknownFields.writeTo(output);
   }
 
@@ -305,6 +389,14 @@ private static final long serialVersionUID = 0L;
     if (eventhub_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(4, getEventhub());
+    }
+    if (authService_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(5, getAuthService());
+    }
+    if (apimCredentials_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(6, getApimCredentials());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -338,6 +430,16 @@ private static final long serialVersionUID = 0L;
       if (!getEventhub()
           .equals(other.getEventhub())) return false;
     }
+    if (hasAuthService() != other.hasAuthService()) return false;
+    if (hasAuthService()) {
+      if (!getAuthService()
+          .equals(other.getAuthService())) return false;
+    }
+    if (hasApimCredentials() != other.hasApimCredentials()) return false;
+    if (hasApimCredentials()) {
+      if (!getApimCredentials()
+          .equals(other.getApimCredentials())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -364,6 +466,14 @@ private static final long serialVersionUID = 0L;
     if (hasEventhub()) {
       hash = (37 * hash) + EVENTHUB_FIELD_NUMBER;
       hash = (53 * hash) + getEventhub().hashCode();
+    }
+    if (hasAuthService()) {
+      hash = (37 * hash) + AUTHSERVICE_FIELD_NUMBER;
+      hash = (53 * hash) + getAuthService().hashCode();
+    }
+    if (hasApimCredentials()) {
+      hash = (37 * hash) + APIMCREDENTIALS_FIELD_NUMBER;
+      hash = (53 * hash) + getApimCredentials().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -527,6 +637,18 @@ private static final long serialVersionUID = 0L;
         eventhub_ = null;
         eventhubBuilder_ = null;
       }
+      if (authServiceBuilder_ == null) {
+        authService_ = null;
+      } else {
+        authService_ = null;
+        authServiceBuilder_ = null;
+      }
+      if (apimCredentialsBuilder_ == null) {
+        apimCredentials_ = null;
+      } else {
+        apimCredentials_ = null;
+        apimCredentialsBuilder_ = null;
+      }
       return this;
     }
 
@@ -577,6 +699,16 @@ private static final long serialVersionUID = 0L;
         result.eventhub_ = eventhub_;
       } else {
         result.eventhub_ = eventhubBuilder_.build();
+      }
+      if (authServiceBuilder_ == null) {
+        result.authService_ = authService_;
+      } else {
+        result.authService_ = authServiceBuilder_.build();
+      }
+      if (apimCredentialsBuilder_ == null) {
+        result.apimCredentials_ = apimCredentials_;
+      } else {
+        result.apimCredentials_ = apimCredentialsBuilder_.build();
       }
       onBuilt();
       return result;
@@ -660,6 +792,12 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasEventhub()) {
         mergeEventhub(other.getEventhub());
+      }
+      if (other.hasAuthService()) {
+        mergeAuthService(other.getAuthService());
+      }
+      if (other.hasApimCredentials()) {
+        mergeApimCredentials(other.getApimCredentials());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1286,6 +1424,244 @@ private static final long serialVersionUID = 0L;
         eventhub_ = null;
       }
       return eventhubBuilder_;
+    }
+
+    private org.wso2.gateway.discovery.config.enforcer.AuthService authService_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.AuthService, org.wso2.gateway.discovery.config.enforcer.AuthService.Builder, org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder> authServiceBuilder_;
+    /**
+     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     * @return Whether the authService field is set.
+     */
+    public boolean hasAuthService() {
+      return authServiceBuilder_ != null || authService_ != null;
+    }
+    /**
+     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     * @return The authService.
+     */
+    public org.wso2.gateway.discovery.config.enforcer.AuthService getAuthService() {
+      if (authServiceBuilder_ == null) {
+        return authService_ == null ? org.wso2.gateway.discovery.config.enforcer.AuthService.getDefaultInstance() : authService_;
+      } else {
+        return authServiceBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     */
+    public Builder setAuthService(org.wso2.gateway.discovery.config.enforcer.AuthService value) {
+      if (authServiceBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        authService_ = value;
+        onChanged();
+      } else {
+        authServiceBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     */
+    public Builder setAuthService(
+        org.wso2.gateway.discovery.config.enforcer.AuthService.Builder builderForValue) {
+      if (authServiceBuilder_ == null) {
+        authService_ = builderForValue.build();
+        onChanged();
+      } else {
+        authServiceBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     */
+    public Builder mergeAuthService(org.wso2.gateway.discovery.config.enforcer.AuthService value) {
+      if (authServiceBuilder_ == null) {
+        if (authService_ != null) {
+          authService_ =
+            org.wso2.gateway.discovery.config.enforcer.AuthService.newBuilder(authService_).mergeFrom(value).buildPartial();
+        } else {
+          authService_ = value;
+        }
+        onChanged();
+      } else {
+        authServiceBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     */
+    public Builder clearAuthService() {
+      if (authServiceBuilder_ == null) {
+        authService_ = null;
+        onChanged();
+      } else {
+        authService_ = null;
+        authServiceBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.AuthService.Builder getAuthServiceBuilder() {
+      
+      onChanged();
+      return getAuthServiceFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder getAuthServiceOrBuilder() {
+      if (authServiceBuilder_ != null) {
+        return authServiceBuilder_.getMessageOrBuilder();
+      } else {
+        return authService_ == null ?
+            org.wso2.gateway.discovery.config.enforcer.AuthService.getDefaultInstance() : authService_;
+      }
+    }
+    /**
+     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.AuthService, org.wso2.gateway.discovery.config.enforcer.AuthService.Builder, org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder> 
+        getAuthServiceFieldBuilder() {
+      if (authServiceBuilder_ == null) {
+        authServiceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.AuthService, org.wso2.gateway.discovery.config.enforcer.AuthService.Builder, org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder>(
+                getAuthService(),
+                getParentForChildren(),
+                isClean());
+        authService_ = null;
+      }
+      return authServiceBuilder_;
+    }
+
+    private org.wso2.gateway.discovery.config.enforcer.AmCredentials apimCredentials_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.AmCredentials, org.wso2.gateway.discovery.config.enforcer.AmCredentials.Builder, org.wso2.gateway.discovery.config.enforcer.AmCredentialsOrBuilder> apimCredentialsBuilder_;
+    /**
+     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     * @return Whether the apimCredentials field is set.
+     */
+    public boolean hasApimCredentials() {
+      return apimCredentialsBuilder_ != null || apimCredentials_ != null;
+    }
+    /**
+     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     * @return The apimCredentials.
+     */
+    public org.wso2.gateway.discovery.config.enforcer.AmCredentials getApimCredentials() {
+      if (apimCredentialsBuilder_ == null) {
+        return apimCredentials_ == null ? org.wso2.gateway.discovery.config.enforcer.AmCredentials.getDefaultInstance() : apimCredentials_;
+      } else {
+        return apimCredentialsBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     */
+    public Builder setApimCredentials(org.wso2.gateway.discovery.config.enforcer.AmCredentials value) {
+      if (apimCredentialsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        apimCredentials_ = value;
+        onChanged();
+      } else {
+        apimCredentialsBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     */
+    public Builder setApimCredentials(
+        org.wso2.gateway.discovery.config.enforcer.AmCredentials.Builder builderForValue) {
+      if (apimCredentialsBuilder_ == null) {
+        apimCredentials_ = builderForValue.build();
+        onChanged();
+      } else {
+        apimCredentialsBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     */
+    public Builder mergeApimCredentials(org.wso2.gateway.discovery.config.enforcer.AmCredentials value) {
+      if (apimCredentialsBuilder_ == null) {
+        if (apimCredentials_ != null) {
+          apimCredentials_ =
+            org.wso2.gateway.discovery.config.enforcer.AmCredentials.newBuilder(apimCredentials_).mergeFrom(value).buildPartial();
+        } else {
+          apimCredentials_ = value;
+        }
+        onChanged();
+      } else {
+        apimCredentialsBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     */
+    public Builder clearApimCredentials() {
+      if (apimCredentialsBuilder_ == null) {
+        apimCredentials_ = null;
+        onChanged();
+      } else {
+        apimCredentials_ = null;
+        apimCredentialsBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.AmCredentials.Builder getApimCredentialsBuilder() {
+      
+      onChanged();
+      return getApimCredentialsFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.AmCredentialsOrBuilder getApimCredentialsOrBuilder() {
+      if (apimCredentialsBuilder_ != null) {
+        return apimCredentialsBuilder_.getMessageOrBuilder();
+      } else {
+        return apimCredentials_ == null ?
+            org.wso2.gateway.discovery.config.enforcer.AmCredentials.getDefaultInstance() : apimCredentials_;
+      }
+    }
+    /**
+     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.AmCredentials, org.wso2.gateway.discovery.config.enforcer.AmCredentials.Builder, org.wso2.gateway.discovery.config.enforcer.AmCredentialsOrBuilder> 
+        getApimCredentialsFieldBuilder() {
+      if (apimCredentialsBuilder_ == null) {
+        apimCredentialsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.AmCredentials, org.wso2.gateway.discovery.config.enforcer.AmCredentials.Builder, org.wso2.gateway.discovery.config.enforcer.AmCredentialsOrBuilder>(
+                getApimCredentials(),
+                getParentForChildren(),
+                isClean());
+        apimCredentials_ = null;
+      }
+      return apimCredentialsBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

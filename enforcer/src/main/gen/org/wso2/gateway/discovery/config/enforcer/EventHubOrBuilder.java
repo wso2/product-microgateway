@@ -41,73 +41,11 @@ public interface EventHubOrBuilder extends
 
   /**
    * <pre>
-   * The internal data REST API context.
-   * Ex: "/internal/data/v1/"
-   * </pre>
-   *
-   * <code>string internalDataContext = 3;</code>
-   * @return The internalDataContext.
-   */
-  java.lang.String getInternalDataContext();
-  /**
-   * <pre>
-   * The internal data REST API context.
-   * Ex: "/internal/data/v1/"
-   * </pre>
-   *
-   * <code>string internalDataContext = 3;</code>
-   * @return The bytes for internalDataContext.
-   */
-  com.google.protobuf.ByteString
-      getInternalDataContextBytes();
-
-  /**
-   * <pre>
-   * Username of the internal data api.
-   * </pre>
-   *
-   * <code>string username = 4;</code>
-   * @return The username.
-   */
-  java.lang.String getUsername();
-  /**
-   * <pre>
-   * Username of the internal data api.
-   * </pre>
-   *
-   * <code>string username = 4;</code>
-   * @return The bytes for username.
-   */
-  com.google.protobuf.ByteString
-      getUsernameBytes();
-
-  /**
-   * <pre>
-   * Password of the internal data api.
-   * </pre>
-   *
-   * <code>string password = 5;</code>
-   * @return The password.
-   */
-  java.lang.String getPassword();
-  /**
-   * <pre>
-   * Password of the internal data api.
-   * </pre>
-   *
-   * <code>string password = 5;</code>
-   * @return The bytes for password.
-   */
-  com.google.protobuf.ByteString
-      getPasswordBytes();
-
-  /**
-   * <pre>
    * Endpoint to be used as the dynamic change detection endpoint
    * Ex: "amqp://admin:admin&#64;carbon/carbon?brokerlist='tcp://localhost:5672'"
    * </pre>
    *
-   * <code>string listenerEndpoint = 6;</code>
+   * <code>string listenerEndpoint = 3;</code>
    * @return The listenerEndpoint.
    */
   java.lang.String getListenerEndpoint();
@@ -117,7 +55,7 @@ public interface EventHubOrBuilder extends
    * Ex: "amqp://admin:admin&#64;carbon/carbon?brokerlist='tcp://localhost:5672'"
    * </pre>
    *
-   * <code>string listenerEndpoint = 6;</code>
+   * <code>string listenerEndpoint = 3;</code>
    * @return The bytes for listenerEndpoint.
    */
   com.google.protobuf.ByteString

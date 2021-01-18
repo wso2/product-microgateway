@@ -75,4 +75,34 @@ public interface ConfigOrBuilder extends
    * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.EventHubOrBuilder getEventhubOrBuilder();
+
+  /**
+   * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+   * @return Whether the authService field is set.
+   */
+  boolean hasAuthService();
+  /**
+   * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+   * @return The authService.
+   */
+  org.wso2.gateway.discovery.config.enforcer.AuthService getAuthService();
+  /**
+   * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder getAuthServiceOrBuilder();
+
+  /**
+   * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+   * @return Whether the apimCredentials field is set.
+   */
+  boolean hasApimCredentials();
+  /**
+   * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+   * @return The apimCredentials.
+   */
+  org.wso2.gateway.discovery.config.enforcer.AmCredentials getApimCredentials();
+  /**
+   * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.AmCredentialsOrBuilder getApimCredentialsOrBuilder();
 }
