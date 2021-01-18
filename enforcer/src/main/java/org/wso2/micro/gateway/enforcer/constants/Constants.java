@@ -22,6 +22,8 @@ package org.wso2.micro.gateway.enforcer.constants;
  * This class holds the constant keys related to the Microgateway.
  */
 public class Constants {
+    public static final String XDS_HOST = "XDS_SERVER_HOST";
+    public static final String XDS_PORT = "XDS_SERVER_PORT";
     public static final String CONFIG_TYPE_URL = "type.googleapis.com/wso2.discovery.config.enforcer.Config";
 
     // Config constants

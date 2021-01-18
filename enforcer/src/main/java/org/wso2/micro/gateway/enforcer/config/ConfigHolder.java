@@ -31,6 +31,7 @@ import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 
@@ -71,8 +72,9 @@ public class ConfigHolder {
      * Initialize the configuration provider class by reading the Mgw Configuration file.
      */
     private void init() {
-        // TODO: praminda load the server details from init config
-        ConfigDiscoveryClient cds = new ConfigDiscoveryClient("adapter", 18000);
+        String cdsHost = System.getenv().get(Constants.XDS_HOST);
+        int cdsPort = Integer.parseInt(System.getenv().get(Constants.XDS_PORT));
+        ConfigDiscoveryClient cds = new ConfigDiscoveryClient(cdsHost, cdsPort);
 
         try {
             Config cdsConfig = cds.requestInitConfig();
