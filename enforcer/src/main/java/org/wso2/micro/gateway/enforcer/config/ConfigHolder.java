@@ -21,10 +21,14 @@ package org.wso2.micro.gateway.enforcer.config;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.gateway.discovery.config.enforcer.AuthService;
 import org.wso2.gateway.discovery.config.enforcer.CertStore;
 import org.wso2.gateway.discovery.config.enforcer.Config;
+import org.wso2.gateway.discovery.config.enforcer.EventHub;
 import org.wso2.gateway.discovery.config.enforcer.Issuer;
+import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
+import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
@@ -48,7 +52,7 @@ public class ConfigHolder {
     private static final Logger logger = LogManager.getLogger(ConfigHolder.class);
 
     private static ConfigHolder configHolder;
-    EnforcerConfig config;
+    EnforcerConfig config = new EnforcerConfig();
     private KeyStore trustStore = null;
 
     private ConfigHolder() {
@@ -68,13 +72,13 @@ public class ConfigHolder {
      */
     private void init() {
         // TODO: praminda load the server details from init config
-        ConfigDiscoveryClient cds = new ConfigDiscoveryClient("localhost", 18000);
+        ConfigDiscoveryClient cds = new ConfigDiscoveryClient("adapter", 18000);
 
         try {
             Config cdsConfig = cds.requestInitConfig();
             parseConfigs(cdsConfig);
         } catch (DiscoveryException e) {
-            logger.error("Error in loading configurations from Adapter");
+            logger.error("Error in loading configurations from Adapter", e);
         }
     }
 
@@ -84,6 +88,10 @@ public class ConfigHolder {
      * of the mgw. Later we can switch to CDS data models directly.
      */
     private void parseConfigs(Config config) {
+        // load EventHub
+        populateEventHub(config.getEventhub());
+        // load auth service
+        populateAuthService(config.getAuthService());
         //Load Client Trust Store
         loadTrustStore(config.getTruststore());
 
@@ -92,6 +100,31 @@ public class ConfigHolder {
 
         //Read credentials used to connect with APIM services
         populateAPIMCredentials();
+    }
+
+    private void populateAuthService(AuthService cdsAuth) {
+        AuthServiceConfigurationDto authDto = new AuthServiceConfigurationDto();
+        authDto.setKeepAliveTime(cdsAuth.getKeepAliveTime());
+        authDto.setPort(cdsAuth.getPort());
+        authDto.setMaxHeaderLimit(cdsAuth.getMaxHeaderLimit());
+        authDto.setMaxMessageSize(cdsAuth.getMaxMessageSize());
+
+        AuthServiceConfigurationDto.ThreadPoolConfig threadPool = authDto.new ThreadPoolConfig();
+        threadPool.setCoreSize(cdsAuth.getThreadPool().getCoreSize());
+        threadPool.setKeepAliveTime(cdsAuth.getThreadPool().getKeepAliveTime());
+        threadPool.setMaxSize(cdsAuth.getThreadPool().getMaxSize());
+        threadPool.setQueueSize(cdsAuth.getThreadPool().getQueueSize());
+        authDto.setThreadPool(threadPool);
+
+        config.setAuthService(authDto);
+    }
+
+    private void populateEventHub(EventHub eventhub) {
+        EventHubConfigurationDto eventHubDto = new EventHubConfigurationDto();
+        eventHubDto.setEnable(eventhub.getEnabled());
+        eventHubDto.setServiceUrl(eventhub.getServiceUrl());
+//        eventHubDto.setJmsConnectionParameters(eventhub.getListenerEndpoint());
+        config.setEventHub(eventHubDto);
     }
 
     private void populateJWTIssuerConfiguration(List<Issuer> cdsIssuers)  {

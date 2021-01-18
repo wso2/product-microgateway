@@ -28,7 +28,6 @@ import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants.EventType;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants.PolicyType;
 import org.wso2.micro.gateway.enforcer.constants.APIStatus;
-import org.wso2.micro.gateway.enforcer.constants.ConfigConstants;
 import org.wso2.micro.gateway.enforcer.listener.events.APIEvent;
 import org.wso2.micro.gateway.enforcer.listener.events.APIPolicyEvent;
 import org.wso2.micro.gateway.enforcer.listener.events.ApplicationEvent;

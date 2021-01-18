@@ -105,11 +105,33 @@ type Config struct {
 	}
 
 	Enforcer struct {
-		Keystore       keystore
-		Truststore     keystore
-		JwtTokenConfig []jwtTokenConfig
-		EventHub       eventHub
+		Keystore        keystore
+		Truststore      keystore
+		JwtTokenConfig  []jwtTokenConfig
+		EventHub        eventHub
+		ApimCredentials apimCredentials
+		AuthService     authService
 	}
+}
+
+type apimCredentials struct {
+	Username string
+	Password string
+}
+
+type authService struct {
+	Port           int32
+	MaxMessageSize int32
+	MaxHeaderLimit int32
+	KeepAliveTime  int32
+	ThreadPool     threadPool
+}
+
+type threadPool struct {
+	CoreSize      int32
+	MaxSize       int32
+	KeepAliveTime int32
+	QueueSize     int32
 }
 
 type keystore struct {
@@ -128,12 +150,9 @@ type jwtTokenConfig struct {
 }
 
 type eventHub struct {
-	Enabled                 bool
-	ServiceURL              string
-	Username                string
-	Password                string
-	InternalDataContext     string
-	EventListeningEndpoints string
+	Enabled           bool
+	ServiceURL        string
+	ListeningEndpoint string
 }
 
 // APICtlUser represents registered APICtl Users

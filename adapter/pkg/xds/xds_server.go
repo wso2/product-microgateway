@@ -290,20 +290,40 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 		issuers = append(issuers, jwtConfig)
 	}
 
+	authService := &enforcer.AuthService{
+		KeepAliveTime:  config.Enforcer.AuthService.KeepAliveTime,
+		MaxHeaderLimit: config.Enforcer.AuthService.MaxHeaderLimit,
+		MaxMessageSize: config.Enforcer.AuthService.MaxMessageSize,
+		Port:           config.Enforcer.AuthService.Port,
+		ThreadPool: &enforcer.ThreadPool{
+			CoreSize:      config.Enforcer.AuthService.ThreadPool.CoreSize,
+			KeepAliveTime: config.Enforcer.AuthService.ThreadPool.KeepAliveTime,
+			MaxSize:       config.Enforcer.AuthService.ThreadPool.MaxSize,
+			QueueSize:     config.Enforcer.AuthService.ThreadPool.QueueSize,
+		},
+	}
+
 	return &enforcer.Config{
 		Truststore: &enforcer.CertStore{
 			Location: config.Enforcer.Truststore.Location,
 			Password: config.Enforcer.Truststore.Password,
 			Type:     config.Enforcer.Truststore.StoreType,
 		},
+		Keystore: &enforcer.CertStore{
+			Location: config.Enforcer.Keystore.Location,
+			Password: config.Enforcer.Keystore.Password,
+			Type:     config.Enforcer.Keystore.StoreType,
+		},
+		ApimCredentials: &enforcer.AmCredentials{
+			Username: config.Enforcer.ApimCredentials.Username,
+			Password: config.Enforcer.ApimCredentials.Password,
+		},
+		AuthService:    authService,
 		JwtTokenConfig: issuers,
 		Eventhub: &enforcer.EventHub{
-			Enabled:             config.Enforcer.EventHub.Enabled,
-			ServiceUrl:          config.Enforcer.EventHub.ServiceURL,
-			InternalDataContext: config.Enforcer.EventHub.InternalDataContext,
-			ListenerEndpoint:    config.Enforcer.EventHub.EventListeningEndpoints,
-			Username:            config.Enforcer.EventHub.Username,
-			Password:            config.Enforcer.EventHub.Password,
+			Enabled:          config.Enforcer.EventHub.Enabled,
+			ServiceUrl:       config.Enforcer.EventHub.ServiceURL,
+			ListenerEndpoint: config.Enforcer.EventHub.ListeningEndpoint,
 		},
 	}
 }
