@@ -1,0 +1,78 @@
+# --------------------------------------------------------------------
+# Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# -----------------------------------------------------------------------
+
+# Deployment for enforcer
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mg-enforcer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mg-enforcer
+  template:
+    metadata:
+      labels:
+        app: mg-enforcer
+    spec:
+      containers:
+        - name: mg-enforcer
+          volumeMounts:
+            - mountPath: /home/wso2/mg/security/
+              name: client-truststore-vol
+            - mountPath: /home/wso2/conf/config.toml
+              subPath: config.toml
+              name: config-toml-vol
+            - mountPath: /home/wso2/conf/log_config.toml
+              subPath: log_config.toml
+              name: logconfig-toml-vol
+          image: wso2/mg-enforcer:4.0.0-m3
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "250Mi"
+              cpu: "250m"
+            limits:
+              memory: "500Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8081
+          livenessProbe:
+            tcpSocket:
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: 8081
+            initialDelaySeconds: 8
+            periodSeconds: 5
+      volumes:
+        - name: client-truststore-vol
+          secret:
+            secretName: client-truststore-secret
+            items:
+              - key: client-truststore.jks
+                path: client-truststore.jks
+        - name: config-toml-vol
+          configMap:
+            name: config-toml
+        - name: logconfig-toml-vol
+          configMap:
+            name: logconfig-toml
+      restartPolicy: Always

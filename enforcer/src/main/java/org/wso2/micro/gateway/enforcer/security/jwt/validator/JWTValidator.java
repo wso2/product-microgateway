@@ -27,9 +27,9 @@ import com.nimbusds.jwt.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
-import org.wso2.micro.gateway.enforcer.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.jwt.DefaultJWTTransformer;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTTransformer;
@@ -61,7 +61,7 @@ public class JWTValidator {
     }
 
     public void loadTokenIssuerConfiguration() {
-        tokenIssuers = ReferenceHolder.getInstance().getConfiguration().getJWTIssuers();
+        tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
         this.jwtTransformer = new DefaultJWTTransformer();
     }
 

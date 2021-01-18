@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package envoy.extensions.filters.http.mgw.v3;
+
+import "udpa/annotations/status.proto";
+
+option java_outer_classname = "MgwProto";
+option java_multiple_files = true;
+option (udpa.annotations.file_status).package_version_status = ACTIVE;
+
+// [#protodoc-title: Microgateway CPP Filters]
+// [#extension: envoy.filters.http.mgw]
+
+message MGW {
+}

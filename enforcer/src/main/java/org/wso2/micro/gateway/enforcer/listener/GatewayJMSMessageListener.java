@@ -23,12 +23,12 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
+import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants.EventType;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants.PolicyType;
 import org.wso2.micro.gateway.enforcer.constants.APIStatus;
-import org.wso2.micro.gateway.enforcer.constants.Constants;
-import org.wso2.micro.gateway.enforcer.dto.EventHubConfigurationDto;
+import org.wso2.micro.gateway.enforcer.constants.ConfigConstants;
 import org.wso2.micro.gateway.enforcer.listener.events.APIEvent;
 import org.wso2.micro.gateway.enforcer.listener.events.APIPolicyEvent;
 import org.wso2.micro.gateway.enforcer.listener.events.ApplicationEvent;
@@ -68,8 +68,8 @@ public class GatewayJMSMessageListener implements MessageListener {
         String initialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
         String connectionFactoryNamePrefix = "connectionfactory.";
         String connectionFactoryName = "qpidConnectionfactory";
-        String eventReceiverURL = eventHubConfigurationDto.getEventHubReceiverConfiguration()
-                .getJmsConnectionParameters().getProperty(Constants.EVENT_HUB_EVENT_LISTENING_ENDPOINT);
+        String eventReceiverURL = eventHubConfigurationDto.getJmsConnectionParameters()
+                .getProperty("eventHub.eventListeningEndpoints");
         Runnable runnable = () -> {
             try {
                 TopicConnection topicConnection;

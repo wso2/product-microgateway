@@ -14,7 +14,7 @@
         name: "Apache 2.0"
         url: "http://www.apache.org/licenses/LICENSE-2.0.html"
     host: "apis.wso2.com"
-    basePath: "/mgw/1.0"
+    basePath: "/api/mgw/adapter/0.1"
     schemes:
     - "https"
     consumes:
@@ -22,7 +22,7 @@
     produces:
     - "application/json"
     paths:
-      /import/api:
+      /apis:
         post:
           tags:
           - "API (Individual)"

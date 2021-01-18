@@ -34,6 +34,14 @@
             <directory>../resources/enforcer</directory>
             <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>../resources/router</directory>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>../resources/k8s-artifacts</directory>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/k8s-artifacts</outputDirectory>
+        </fileSet>
     </fileSets>
     <files>
         <file>

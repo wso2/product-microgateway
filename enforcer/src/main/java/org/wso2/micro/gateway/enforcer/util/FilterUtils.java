@@ -31,7 +31,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
@@ -70,7 +70,7 @@ public class FilterUtils {
         Certificate publicCert = null;
         //Read the client-truststore.jks into a KeyStore
         try {
-            KeyStore trustStore = ReferenceHolder.getInstance().getConfiguration().getTrustStore();
+            KeyStore trustStore = ConfigHolder.getInstance().getTrustStore();
             if (trustStore != null) {
                 // Read public certificate from trust store
                 publicCert = trustStore.getCertificate(certAlias);
@@ -135,7 +135,7 @@ public class FilterUtils {
     private static SSLConnectionSocketFactory createSocketFactory() throws MGWException {
         SSLContext sslContext;
         try {
-            KeyStore trustStore = ReferenceHolder.getInstance().getConfiguration().getTrustStore();
+            KeyStore trustStore = ConfigHolder.getInstance().getTrustStore();
             sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
 
             X509HostnameVerifier hostnameVerifier;

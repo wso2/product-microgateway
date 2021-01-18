@@ -38,7 +38,6 @@ import (
 //
 // No operation specific information is extracted.
 func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
-	swagger.swaggerVersion = swagger3.OpenAPI
 	if swagger3.Info != nil {
 		swagger.description = swagger3.Info.Description
 		swagger.title = swagger3.Info.Title
@@ -47,6 +46,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
 
 	swagger.vendorExtensible = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.resources = setResourcesOpenAPI(swagger3)
+	swagger.apiType = HTTP
 
 	if isServerURLIsAvailable(swagger3.Servers) {
 		for _, serverEntry := range swagger3.Servers {
@@ -208,4 +208,45 @@ func GetXWso2Label(vendorExtensions openapi3.ExtensionProps) []string {
 		logger.LoggerOasparser.Errorln("Error while parsing the x-wso2-label")
 	}
 	return []string{"default"}
+}
+
+func getHostandBasepathandPortWebSocket(rawURL string) Endpoint {
+	var (
+		basepath string
+		host     string
+		port     uint32
+		urlType  string
+	)
+	if !strings.Contains(rawURL, "://") {
+		rawURL = "ws://" + rawURL
+	}
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		logger.LoggerOasparser.Fatal(err)
+	}
+
+	host = parsedURL.Hostname()
+	if parsedURL.Path == "" {
+		basepath = "/"
+	} else {
+		basepath = parsedURL.Path
+	}
+	if parsedURL.Port() != "" {
+		u32, err := strconv.ParseUint(parsedURL.Port(), 10, 32)
+		if err != nil {
+			logger.LoggerOasparser.Error("Error passing port value to mgwSwagger", err)
+		}
+		port = uint32(u32)
+	} else {
+		if strings.HasPrefix(rawURL, "wss://") {
+			port = uint32(443)
+		} else {
+			port = uint32(80)
+		}
+	}
+	urlType = "ws"
+	if strings.HasPrefix(rawURL, "wss://") {
+		urlType = "wss"
+	}
+	return Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}
 }

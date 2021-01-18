@@ -18,4 +18,5 @@ FROM envoyproxy/envoy:v1.16.0
 
 #TODO: (VirajSalaka) change the root user
 COPY maven/envoy.yaml /etc/envoy/envoy.yaml
+COPY maven/security /home/wso2/security
 CMD /usr/local/bin/envoy -c /etc/envoy/envoy.yaml
