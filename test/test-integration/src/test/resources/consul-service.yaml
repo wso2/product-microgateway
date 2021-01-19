@@ -1,0 +1,6 @@
+    links:
+      - mockConsul
+  mockConsul:
+    image: rumeshms16/mockconsul:latest
+    ports:
+      - "8500:8500"

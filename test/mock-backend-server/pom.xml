@@ -28,6 +28,14 @@
     </parent>
 
     <version>4.0.0-m2-SNAPSHOT</version>
+    <dependencies>
+        <dependency>
+            <groupId>org.wso2.am.microgw</groupId>
+            <artifactId>test</artifactId>
+            <version>4.0.0-m2-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.am.microgw</groupId>
     <artifactId>mock-backend-server</artifactId>

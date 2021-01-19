@@ -323,7 +323,7 @@ public class Utils {
         try {
             FileUtils.copyFile(source, destination);
         } catch (IOException e) {
-            throw new MicroGWTestException("error while copying config file. ");
+            throw new MicroGWTestException("error while copying config file. ",e);
         }
     }
 

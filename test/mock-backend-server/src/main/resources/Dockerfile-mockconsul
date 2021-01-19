@@ -18,8 +18,11 @@ FROM adoptopenjdk/openjdk11:jre-11.0.9_11.1-alpine
 
 WORKDIR /home/app
 
-EXPOSE 2382
+EXPOSE 8500
 
-COPY maven/ lib/
+COPY . lib/
 
-CMD java -cp "lib/*" org.wso2am.micro.gw.mockbackend.MockBackEndServer
+WORKDIR lib
+
+CMD java -cp . org.wso2am.micro.gw.mockconsul.ConsulServer
+

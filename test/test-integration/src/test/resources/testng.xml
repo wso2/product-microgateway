@@ -32,6 +32,7 @@
         <classes>
             <class name="org.wso2am.micro.gw.tests.apiDeploy.APiDeployTestCase"/>
             <class name="org.wso2am.micro.gw.tests.jwtValidator.JwtTestCase"/>
+<!--            <class name="org.wso2am.micro.gw.tests.mockconsul.ConsulTestCase"/>-->
         </classes>
     </test>
 </suite>
