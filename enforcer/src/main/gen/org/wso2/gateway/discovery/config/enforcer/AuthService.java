@@ -8,11 +8,11 @@ package org.wso2.gateway.discovery.config.enforcer;
  * Auth service model
  * </pre>
  *
- * Protobuf type {@code discovery.config.enforcer.AuthService}
+ * Protobuf type {@code wso2.discovery.config.enforcer.AuthService}
  */
 public final class AuthService extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:discovery.config.enforcer.AuthService)
+    // @@protoc_insertion_point(message_implements:wso2.discovery.config.enforcer.AuthService)
     AuthServiceOrBuilder {
 private static final long serialVersionUID = 0L;
   // Use AuthService.newBuilder() to construct.
@@ -106,13 +106,13 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.wso2.gateway.discovery.config.enforcer.AuthServiceProto.internal_static_discovery_config_enforcer_AuthService_descriptor;
+    return org.wso2.gateway.discovery.config.enforcer.AuthServiceProto.internal_static_wso2_discovery_config_enforcer_AuthService_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.wso2.gateway.discovery.config.enforcer.AuthServiceProto.internal_static_discovery_config_enforcer_AuthService_fieldAccessorTable
+    return org.wso2.gateway.discovery.config.enforcer.AuthServiceProto.internal_static_wso2_discovery_config_enforcer_AuthService_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             org.wso2.gateway.discovery.config.enforcer.AuthService.class, org.wso2.gateway.discovery.config.enforcer.AuthService.Builder.class);
   }
@@ -168,7 +168,7 @@ private static final long serialVersionUID = 0L;
   public static final int THREADPOOL_FIELD_NUMBER = 5;
   private org.wso2.gateway.discovery.config.enforcer.ThreadPool threadPool_;
   /**
-   * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
    * @return Whether the threadPool field is set.
    */
   @java.lang.Override
@@ -176,7 +176,7 @@ private static final long serialVersionUID = 0L;
     return threadPool_ != null;
   }
   /**
-   * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
    * @return The threadPool.
    */
   @java.lang.Override
@@ -184,7 +184,7 @@ private static final long serialVersionUID = 0L;
     return threadPool_ == null ? org.wso2.gateway.discovery.config.enforcer.ThreadPool.getDefaultInstance() : threadPool_;
   }
   /**
-   * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.config.enforcer.ThreadPoolOrBuilder getThreadPoolOrBuilder() {
@@ -400,21 +400,21 @@ private static final long serialVersionUID = 0L;
    * Auth service model
    * </pre>
    *
-   * Protobuf type {@code discovery.config.enforcer.AuthService}
+   * Protobuf type {@code wso2.discovery.config.enforcer.AuthService}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:discovery.config.enforcer.AuthService)
+      // @@protoc_insertion_point(builder_implements:wso2.discovery.config.enforcer.AuthService)
       org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.gateway.discovery.config.enforcer.AuthServiceProto.internal_static_discovery_config_enforcer_AuthService_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.AuthServiceProto.internal_static_wso2_discovery_config_enforcer_AuthService_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.gateway.discovery.config.enforcer.AuthServiceProto.internal_static_discovery_config_enforcer_AuthService_fieldAccessorTable
+      return org.wso2.gateway.discovery.config.enforcer.AuthServiceProto.internal_static_wso2_discovery_config_enforcer_AuthService_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.gateway.discovery.config.enforcer.AuthService.class, org.wso2.gateway.discovery.config.enforcer.AuthService.Builder.class);
     }
@@ -457,7 +457,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.wso2.gateway.discovery.config.enforcer.AuthServiceProto.internal_static_discovery_config_enforcer_AuthService_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.AuthServiceProto.internal_static_wso2_discovery_config_enforcer_AuthService_descriptor;
     }
 
     @java.lang.Override
@@ -718,14 +718,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.ThreadPool, org.wso2.gateway.discovery.config.enforcer.ThreadPool.Builder, org.wso2.gateway.discovery.config.enforcer.ThreadPoolOrBuilder> threadPoolBuilder_;
     /**
-     * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
      * @return Whether the threadPool field is set.
      */
     public boolean hasThreadPool() {
       return threadPoolBuilder_ != null || threadPool_ != null;
     }
     /**
-     * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
      * @return The threadPool.
      */
     public org.wso2.gateway.discovery.config.enforcer.ThreadPool getThreadPool() {
@@ -736,7 +736,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
      */
     public Builder setThreadPool(org.wso2.gateway.discovery.config.enforcer.ThreadPool value) {
       if (threadPoolBuilder_ == null) {
@@ -752,7 +752,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
      */
     public Builder setThreadPool(
         org.wso2.gateway.discovery.config.enforcer.ThreadPool.Builder builderForValue) {
@@ -766,7 +766,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
      */
     public Builder mergeThreadPool(org.wso2.gateway.discovery.config.enforcer.ThreadPool value) {
       if (threadPoolBuilder_ == null) {
@@ -784,7 +784,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
      */
     public Builder clearThreadPool() {
       if (threadPoolBuilder_ == null) {
@@ -798,7 +798,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.ThreadPool.Builder getThreadPoolBuilder() {
       
@@ -806,7 +806,7 @@ private static final long serialVersionUID = 0L;
       return getThreadPoolFieldBuilder().getBuilder();
     }
     /**
-     * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.ThreadPoolOrBuilder getThreadPoolOrBuilder() {
       if (threadPoolBuilder_ != null) {
@@ -817,7 +817,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.ThreadPool, org.wso2.gateway.discovery.config.enforcer.ThreadPool.Builder, org.wso2.gateway.discovery.config.enforcer.ThreadPoolOrBuilder> 
@@ -845,10 +845,10 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:discovery.config.enforcer.AuthService)
+    // @@protoc_insertion_point(builder_scope:wso2.discovery.config.enforcer.AuthService)
   }
 
-  // @@protoc_insertion_point(class_scope:discovery.config.enforcer.AuthService)
+  // @@protoc_insertion_point(class_scope:wso2.discovery.config.enforcer.AuthService)
   private static final org.wso2.gateway.discovery.config.enforcer.AuthService DEFAULT_INSTANCE;
   static {
     DEFAULT_INSTANCE = new org.wso2.gateway.discovery.config.enforcer.AuthService();

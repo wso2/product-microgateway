@@ -56,7 +56,7 @@ public class ApiDiscoveryClient {
         List<Api> apis = new ArrayList<>();
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
                 .setNode(Node.newBuilder().setId("enforcer").build())
-                .setTypeUrl(Constants.CONFIG_TYPE_URL).build();
+                .setTypeUrl(Constants.API_TYPE_URL).build();
         try {
             DiscoveryResponse response = blockingStub.withDeadlineAfter(60, TimeUnit.SECONDS).fetchApis(req);
             shutdown();

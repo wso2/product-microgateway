@@ -8,11 +8,11 @@ package org.wso2.gateway.discovery.config.enforcer;
  * Token issuer model
  * </pre>
  *
- * Protobuf type {@code discovery.config.enforcer.Issuer}
+ * Protobuf type {@code wso2.discovery.config.enforcer.Issuer}
  */
 public final class Issuer extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:discovery.config.enforcer.Issuer)
+    // @@protoc_insertion_point(message_implements:wso2.discovery.config.enforcer.Issuer)
     IssuerOrBuilder {
 private static final long serialVersionUID = 0L;
   // Use Issuer.newBuilder() to construct.
@@ -113,13 +113,13 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.wso2.gateway.discovery.config.enforcer.IssuerProto.internal_static_discovery_config_enforcer_Issuer_descriptor;
+    return org.wso2.gateway.discovery.config.enforcer.IssuerProto.internal_static_wso2_discovery_config_enforcer_Issuer_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.wso2.gateway.discovery.config.enforcer.IssuerProto.internal_static_discovery_config_enforcer_Issuer_fieldAccessorTable
+    return org.wso2.gateway.discovery.config.enforcer.IssuerProto.internal_static_wso2_discovery_config_enforcer_Issuer_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             org.wso2.gateway.discovery.config.enforcer.Issuer.class, org.wso2.gateway.discovery.config.enforcer.Issuer.Builder.class);
   }
@@ -582,21 +582,21 @@ private static final long serialVersionUID = 0L;
    * Token issuer model
    * </pre>
    *
-   * Protobuf type {@code discovery.config.enforcer.Issuer}
+   * Protobuf type {@code wso2.discovery.config.enforcer.Issuer}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:discovery.config.enforcer.Issuer)
+      // @@protoc_insertion_point(builder_implements:wso2.discovery.config.enforcer.Issuer)
       org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.gateway.discovery.config.enforcer.IssuerProto.internal_static_discovery_config_enforcer_Issuer_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.IssuerProto.internal_static_wso2_discovery_config_enforcer_Issuer_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.gateway.discovery.config.enforcer.IssuerProto.internal_static_discovery_config_enforcer_Issuer_fieldAccessorTable
+      return org.wso2.gateway.discovery.config.enforcer.IssuerProto.internal_static_wso2_discovery_config_enforcer_Issuer_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.gateway.discovery.config.enforcer.Issuer.class, org.wso2.gateway.discovery.config.enforcer.Issuer.Builder.class);
     }
@@ -637,7 +637,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.wso2.gateway.discovery.config.enforcer.IssuerProto.internal_static_discovery_config_enforcer_Issuer_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.IssuerProto.internal_static_wso2_discovery_config_enforcer_Issuer_descriptor;
     }
 
     @java.lang.Override
@@ -1303,10 +1303,10 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:discovery.config.enforcer.Issuer)
+    // @@protoc_insertion_point(builder_scope:wso2.discovery.config.enforcer.Issuer)
   }
 
-  // @@protoc_insertion_point(class_scope:discovery.config.enforcer.Issuer)
+  // @@protoc_insertion_point(class_scope:wso2.discovery.config.enforcer.Issuer)
   private static final org.wso2.gateway.discovery.config.enforcer.Issuer DEFAULT_INSTANCE;
   static {
     DEFAULT_INSTANCE = new org.wso2.gateway.discovery.config.enforcer.Issuer();

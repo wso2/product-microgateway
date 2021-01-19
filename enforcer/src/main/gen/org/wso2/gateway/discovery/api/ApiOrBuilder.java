@@ -4,7 +4,7 @@
 package org.wso2.gateway.discovery.api;
 
 public interface ApiOrBuilder extends
-    // @@protoc_insertion_point(interface_extends:discovery.api.Api)
+    // @@protoc_insertion_point(interface_extends:wso2.discovery.api.Api)
     com.google.protobuf.MessageOrBuilder {
 
   /**
@@ -68,73 +68,73 @@ public interface ApiOrBuilder extends
       getDescriptionBytes();
 
   /**
-   * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
    */
   java.util.List<org.wso2.gateway.discovery.api.Endpoint> 
       getProductionUrlsList();
   /**
-   * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
    */
   org.wso2.gateway.discovery.api.Endpoint getProductionUrls(int index);
   /**
-   * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
    */
   int getProductionUrlsCount();
   /**
-   * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
    */
   java.util.List<? extends org.wso2.gateway.discovery.api.EndpointOrBuilder> 
       getProductionUrlsOrBuilderList();
   /**
-   * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
    */
   org.wso2.gateway.discovery.api.EndpointOrBuilder getProductionUrlsOrBuilder(
       int index);
 
   /**
-   * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
    */
   java.util.List<org.wso2.gateway.discovery.api.Endpoint> 
       getSandboxUrlsList();
   /**
-   * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
    */
   org.wso2.gateway.discovery.api.Endpoint getSandboxUrls(int index);
   /**
-   * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
    */
   int getSandboxUrlsCount();
   /**
-   * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
    */
   java.util.List<? extends org.wso2.gateway.discovery.api.EndpointOrBuilder> 
       getSandboxUrlsOrBuilderList();
   /**
-   * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
    */
   org.wso2.gateway.discovery.api.EndpointOrBuilder getSandboxUrlsOrBuilder(
       int index);
 
   /**
-   * <code>repeated .discovery.api.Resource resources = 8;</code>
+   * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
    */
   java.util.List<org.wso2.gateway.discovery.api.Resource> 
       getResourcesList();
   /**
-   * <code>repeated .discovery.api.Resource resources = 8;</code>
+   * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
    */
   org.wso2.gateway.discovery.api.Resource getResources(int index);
   /**
-   * <code>repeated .discovery.api.Resource resources = 8;</code>
+   * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
    */
   int getResourcesCount();
   /**
-   * <code>repeated .discovery.api.Resource resources = 8;</code>
+   * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
    */
   java.util.List<? extends org.wso2.gateway.discovery.api.ResourceOrBuilder> 
       getResourcesOrBuilderList();
   /**
-   * <code>repeated .discovery.api.Resource resources = 8;</code>
+   * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
    */
   org.wso2.gateway.discovery.api.ResourceOrBuilder getResourcesOrBuilder(
       int index);

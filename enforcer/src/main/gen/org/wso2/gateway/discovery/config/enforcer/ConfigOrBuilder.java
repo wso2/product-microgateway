@@ -4,105 +4,105 @@
 package org.wso2.gateway.discovery.config.enforcer;
 
 public interface ConfigOrBuilder extends
-    // @@protoc_insertion_point(interface_extends:discovery.config.enforcer.Config)
+    // @@protoc_insertion_point(interface_extends:wso2.discovery.config.enforcer.Config)
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
    */
   java.util.List<org.wso2.gateway.discovery.config.enforcer.Issuer> 
       getJwtTokenConfigList();
   /**
-   * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.Issuer getJwtTokenConfig(int index);
   /**
-   * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
    */
   int getJwtTokenConfigCount();
   /**
-   * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
    */
   java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder> 
       getJwtTokenConfigOrBuilderList();
   /**
-   * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder getJwtTokenConfigOrBuilder(
       int index);
 
   /**
-   * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
    * @return Whether the keystore field is set.
    */
   boolean hasKeystore();
   /**
-   * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
    * @return The keystore.
    */
   org.wso2.gateway.discovery.config.enforcer.CertStore getKeystore();
   /**
-   * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getKeystoreOrBuilder();
 
   /**
-   * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
    * @return Whether the truststore field is set.
    */
   boolean hasTruststore();
   /**
-   * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
    * @return The truststore.
    */
   org.wso2.gateway.discovery.config.enforcer.CertStore getTruststore();
   /**
-   * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getTruststoreOrBuilder();
 
   /**
-   * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+   * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
    * @return Whether the eventhub field is set.
    */
   boolean hasEventhub();
   /**
-   * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+   * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
    * @return The eventhub.
    */
   org.wso2.gateway.discovery.config.enforcer.EventHub getEventhub();
   /**
-   * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+   * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.EventHubOrBuilder getEventhubOrBuilder();
 
   /**
-   * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
    * @return Whether the authService field is set.
    */
   boolean hasAuthService();
   /**
-   * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
    * @return The authService.
    */
   org.wso2.gateway.discovery.config.enforcer.AuthService getAuthService();
   /**
-   * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder getAuthServiceOrBuilder();
 
   /**
-   * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
    * @return Whether the apimCredentials field is set.
    */
   boolean hasApimCredentials();
   /**
-   * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
    * @return The apimCredentials.
    */
   org.wso2.gateway.discovery.config.enforcer.AmCredentials getApimCredentials();
   /**
-   * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.AmCredentialsOrBuilder getApimCredentialsOrBuilder();
 }

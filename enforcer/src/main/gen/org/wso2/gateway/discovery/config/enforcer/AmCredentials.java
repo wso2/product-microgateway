@@ -8,11 +8,11 @@ package org.wso2.gateway.discovery.config.enforcer;
  * APIM Credentials model
  * </pre>
  *
- * Protobuf type {@code discovery.config.enforcer.AmCredentials}
+ * Protobuf type {@code wso2.discovery.config.enforcer.AmCredentials}
  */
 public final class AmCredentials extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:discovery.config.enforcer.AmCredentials)
+    // @@protoc_insertion_point(message_implements:wso2.discovery.config.enforcer.AmCredentials)
     AmCredentialsOrBuilder {
 private static final long serialVersionUID = 0L;
   // Use AmCredentials.newBuilder() to construct.
@@ -87,13 +87,13 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.wso2.gateway.discovery.config.enforcer.AmCredentialsProto.internal_static_discovery_config_enforcer_AmCredentials_descriptor;
+    return org.wso2.gateway.discovery.config.enforcer.AmCredentialsProto.internal_static_wso2_discovery_config_enforcer_AmCredentials_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.wso2.gateway.discovery.config.enforcer.AmCredentialsProto.internal_static_discovery_config_enforcer_AmCredentials_fieldAccessorTable
+    return org.wso2.gateway.discovery.config.enforcer.AmCredentialsProto.internal_static_wso2_discovery_config_enforcer_AmCredentials_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             org.wso2.gateway.discovery.config.enforcer.AmCredentials.class, org.wso2.gateway.discovery.config.enforcer.AmCredentials.Builder.class);
   }
@@ -343,21 +343,21 @@ private static final long serialVersionUID = 0L;
    * APIM Credentials model
    * </pre>
    *
-   * Protobuf type {@code discovery.config.enforcer.AmCredentials}
+   * Protobuf type {@code wso2.discovery.config.enforcer.AmCredentials}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:discovery.config.enforcer.AmCredentials)
+      // @@protoc_insertion_point(builder_implements:wso2.discovery.config.enforcer.AmCredentials)
       org.wso2.gateway.discovery.config.enforcer.AmCredentialsOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.gateway.discovery.config.enforcer.AmCredentialsProto.internal_static_discovery_config_enforcer_AmCredentials_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.AmCredentialsProto.internal_static_wso2_discovery_config_enforcer_AmCredentials_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.gateway.discovery.config.enforcer.AmCredentialsProto.internal_static_discovery_config_enforcer_AmCredentials_fieldAccessorTable
+      return org.wso2.gateway.discovery.config.enforcer.AmCredentialsProto.internal_static_wso2_discovery_config_enforcer_AmCredentials_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.gateway.discovery.config.enforcer.AmCredentials.class, org.wso2.gateway.discovery.config.enforcer.AmCredentials.Builder.class);
     }
@@ -390,7 +390,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.wso2.gateway.discovery.config.enforcer.AmCredentialsProto.internal_static_discovery_config_enforcer_AmCredentials_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.AmCredentialsProto.internal_static_wso2_discovery_config_enforcer_AmCredentials_descriptor;
     }
 
     @java.lang.Override
@@ -661,10 +661,10 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:discovery.config.enforcer.AmCredentials)
+    // @@protoc_insertion_point(builder_scope:wso2.discovery.config.enforcer.AmCredentials)
   }
 
-  // @@protoc_insertion_point(class_scope:discovery.config.enforcer.AmCredentials)
+  // @@protoc_insertion_point(class_scope:wso2.discovery.config.enforcer.AmCredentials)
   private static final org.wso2.gateway.discovery.config.enforcer.AmCredentials DEFAULT_INSTANCE;
   static {
     DEFAULT_INSTANCE = new org.wso2.gateway.discovery.config.enforcer.AmCredentials();

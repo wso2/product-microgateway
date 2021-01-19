@@ -15,10 +15,10 @@ public final class ThreadPoolProto {
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_discovery_config_enforcer_ThreadPool_descriptor;
+    internal_static_wso2_discovery_config_enforcer_ThreadPool_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_discovery_config_enforcer_ThreadPool_fieldAccessorTable;
+      internal_static_wso2_discovery_config_enforcer_ThreadPool_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -29,24 +29,24 @@ public final class ThreadPoolProto {
   static {
     java.lang.String[] descriptorData = {
       "\n0wso2/discovery/config/enforcer/thread_" +
-      "pool.proto\022\031discovery.config.enforcer\"Y\n" +
-      "\nThreadPool\022\020\n\010coreSize\030\001 \001(\005\022\017\n\007maxSize" +
-      "\030\002 \001(\005\022\025\n\rkeepAliveTime\030\004 \001(\005\022\021\n\tqueueSi" +
-      "ze\030\005 \001(\005B\217\001\n*org.wso2.gateway.discovery." +
-      "config.enforcerB\017ThreadPoolProtoP\001ZNgith" +
-      "ub.com/envoyproxy/go-control-plane/wso2/" +
-      "discovery/config/enforcer;enforcerb\006prot" +
-      "o3"
+      "pool.proto\022\036wso2.discovery.config.enforc" +
+      "er\"Y\n\nThreadPool\022\020\n\010coreSize\030\001 \001(\005\022\017\n\007ma" +
+      "xSize\030\002 \001(\005\022\025\n\rkeepAliveTime\030\004 \001(\005\022\021\n\tqu" +
+      "eueSize\030\005 \001(\005B\217\001\n*org.wso2.gateway.disco" +
+      "very.config.enforcerB\017ThreadPoolProtoP\001Z" +
+      "Ngithub.com/envoyproxy/go-control-plane/" +
+      "wso2/discovery/config/enforcer;enforcerb" +
+      "\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         });
-    internal_static_discovery_config_enforcer_ThreadPool_descriptor =
+    internal_static_wso2_discovery_config_enforcer_ThreadPool_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_discovery_config_enforcer_ThreadPool_fieldAccessorTable = new
+    internal_static_wso2_discovery_config_enforcer_ThreadPool_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_discovery_config_enforcer_ThreadPool_descriptor,
+        internal_static_wso2_discovery_config_enforcer_ThreadPool_descriptor,
         new java.lang.String[] { "CoreSize", "MaxSize", "KeepAliveTime", "QueueSize", });
   }
 

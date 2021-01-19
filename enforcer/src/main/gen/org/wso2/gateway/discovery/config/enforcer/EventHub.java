@@ -8,11 +8,11 @@ package org.wso2.gateway.discovery.config.enforcer;
  * Event hub configuration model
  * </pre>
  *
- * Protobuf type {@code discovery.config.enforcer.EventHub}
+ * Protobuf type {@code wso2.discovery.config.enforcer.EventHub}
  */
 public final class EventHub extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:discovery.config.enforcer.EventHub)
+    // @@protoc_insertion_point(message_implements:wso2.discovery.config.enforcer.EventHub)
     EventHubOrBuilder {
 private static final long serialVersionUID = 0L;
   // Use EventHub.newBuilder() to construct.
@@ -92,13 +92,13 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_discovery_config_enforcer_EventHub_descriptor;
+    return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_wso2_discovery_config_enforcer_EventHub_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_discovery_config_enforcer_EventHub_fieldAccessorTable
+    return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_wso2_discovery_config_enforcer_EventHub_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             org.wso2.gateway.discovery.config.enforcer.EventHub.class, org.wso2.gateway.discovery.config.enforcer.EventHub.Builder.class);
   }
@@ -395,21 +395,21 @@ private static final long serialVersionUID = 0L;
    * Event hub configuration model
    * </pre>
    *
-   * Protobuf type {@code discovery.config.enforcer.EventHub}
+   * Protobuf type {@code wso2.discovery.config.enforcer.EventHub}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:discovery.config.enforcer.EventHub)
+      // @@protoc_insertion_point(builder_implements:wso2.discovery.config.enforcer.EventHub)
       org.wso2.gateway.discovery.config.enforcer.EventHubOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_discovery_config_enforcer_EventHub_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_wso2_discovery_config_enforcer_EventHub_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_discovery_config_enforcer_EventHub_fieldAccessorTable
+      return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_wso2_discovery_config_enforcer_EventHub_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.gateway.discovery.config.enforcer.EventHub.class, org.wso2.gateway.discovery.config.enforcer.EventHub.Builder.class);
     }
@@ -444,7 +444,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_discovery_config_enforcer_EventHub_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_wso2_discovery_config_enforcer_EventHub_descriptor;
     }
 
     @java.lang.Override
@@ -812,10 +812,10 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:discovery.config.enforcer.EventHub)
+    // @@protoc_insertion_point(builder_scope:wso2.discovery.config.enforcer.EventHub)
   }
 
-  // @@protoc_insertion_point(class_scope:discovery.config.enforcer.EventHub)
+  // @@protoc_insertion_point(class_scope:wso2.discovery.config.enforcer.EventHub)
   private static final org.wso2.gateway.discovery.config.enforcer.EventHub DEFAULT_INSTANCE;
   static {
     DEFAULT_INSTANCE = new org.wso2.gateway.discovery.config.enforcer.EventHub();

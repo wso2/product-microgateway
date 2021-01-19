@@ -4,7 +4,7 @@
 package org.wso2.gateway.discovery.config.enforcer;
 
 public interface AuthServiceOrBuilder extends
-    // @@protoc_insertion_point(interface_extends:discovery.config.enforcer.AuthService)
+    // @@protoc_insertion_point(interface_extends:wso2.discovery.config.enforcer.AuthService)
     com.google.protobuf.MessageOrBuilder {
 
   /**
@@ -36,17 +36,17 @@ public interface AuthServiceOrBuilder extends
   int getKeepAliveTime();
 
   /**
-   * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
    * @return Whether the threadPool field is set.
    */
   boolean hasThreadPool();
   /**
-   * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
    * @return The threadPool.
    */
   org.wso2.gateway.discovery.config.enforcer.ThreadPool getThreadPool();
   /**
-   * <code>.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.ThreadPool threadPool = 5;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.ThreadPoolOrBuilder getThreadPoolOrBuilder();
 }

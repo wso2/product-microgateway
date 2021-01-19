@@ -8,11 +8,11 @@ package org.wso2.gateway.discovery.api;
  * Endpoint config model
  * </pre>
  *
- * Protobuf type {@code discovery.api.Endpoint}
+ * Protobuf type {@code wso2.discovery.api.Endpoint}
  */
 public final class Endpoint extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:discovery.api.Endpoint)
+    // @@protoc_insertion_point(message_implements:wso2.discovery.api.Endpoint)
     EndpointOrBuilder {
 private static final long serialVersionUID = 0L;
   // Use Endpoint.newBuilder() to construct.
@@ -99,13 +99,13 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.wso2.gateway.discovery.api.EndpointProto.internal_static_discovery_api_Endpoint_descriptor;
+    return org.wso2.gateway.discovery.api.EndpointProto.internal_static_wso2_discovery_api_Endpoint_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.wso2.gateway.discovery.api.EndpointProto.internal_static_discovery_api_Endpoint_fieldAccessorTable
+    return org.wso2.gateway.discovery.api.EndpointProto.internal_static_wso2_discovery_api_Endpoint_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             org.wso2.gateway.discovery.api.Endpoint.class, org.wso2.gateway.discovery.api.Endpoint.Builder.class);
   }
@@ -425,21 +425,21 @@ private static final long serialVersionUID = 0L;
    * Endpoint config model
    * </pre>
    *
-   * Protobuf type {@code discovery.api.Endpoint}
+   * Protobuf type {@code wso2.discovery.api.Endpoint}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:discovery.api.Endpoint)
+      // @@protoc_insertion_point(builder_implements:wso2.discovery.api.Endpoint)
       org.wso2.gateway.discovery.api.EndpointOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.gateway.discovery.api.EndpointProto.internal_static_discovery_api_Endpoint_descriptor;
+      return org.wso2.gateway.discovery.api.EndpointProto.internal_static_wso2_discovery_api_Endpoint_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.gateway.discovery.api.EndpointProto.internal_static_discovery_api_Endpoint_fieldAccessorTable
+      return org.wso2.gateway.discovery.api.EndpointProto.internal_static_wso2_discovery_api_Endpoint_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.gateway.discovery.api.Endpoint.class, org.wso2.gateway.discovery.api.Endpoint.Builder.class);
     }
@@ -476,7 +476,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.wso2.gateway.discovery.api.EndpointProto.internal_static_discovery_api_Endpoint_descriptor;
+      return org.wso2.gateway.discovery.api.EndpointProto.internal_static_wso2_discovery_api_Endpoint_descriptor;
     }
 
     @java.lang.Override
@@ -863,10 +863,10 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:discovery.api.Endpoint)
+    // @@protoc_insertion_point(builder_scope:wso2.discovery.api.Endpoint)
   }
 
-  // @@protoc_insertion_point(class_scope:discovery.api.Endpoint)
+  // @@protoc_insertion_point(class_scope:wso2.discovery.api.Endpoint)
   private static final org.wso2.gateway.discovery.api.Endpoint DEFAULT_INSTANCE;
   static {
     DEFAULT_INSTANCE = new org.wso2.gateway.discovery.api.Endpoint();

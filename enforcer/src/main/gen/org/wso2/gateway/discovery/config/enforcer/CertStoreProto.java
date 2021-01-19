@@ -15,10 +15,10 @@ public final class CertStoreProto {
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_discovery_config_enforcer_CertStore_descriptor;
+    internal_static_wso2_discovery_config_enforcer_CertStore_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_discovery_config_enforcer_CertStore_fieldAccessorTable;
+      internal_static_wso2_discovery_config_enforcer_CertStore_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -29,23 +29,23 @@ public final class CertStoreProto {
   static {
     java.lang.String[] descriptorData = {
       "\n)wso2/discovery/config/enforcer/cert.pr" +
-      "oto\022\031discovery.config.enforcer\"=\n\tCertSt" +
-      "ore\022\020\n\010location\030\001 \001(\t\022\014\n\004type\030\002 \001(\t\022\020\n\010p" +
-      "assword\030\003 \001(\tB\216\001\n*org.wso2.gateway.disco" +
-      "very.config.enforcerB\016CertStoreProtoP\001ZN" +
-      "github.com/envoyproxy/go-control-plane/w" +
-      "so2/discovery/config/enforcer;enforcerb\006" +
-      "proto3"
+      "oto\022\036wso2.discovery.config.enforcer\"=\n\tC" +
+      "ertStore\022\020\n\010location\030\001 \001(\t\022\014\n\004type\030\002 \001(\t" +
+      "\022\020\n\010password\030\003 \001(\tB\216\001\n*org.wso2.gateway." +
+      "discovery.config.enforcerB\016CertStoreProt" +
+      "oP\001ZNgithub.com/envoyproxy/go-control-pl" +
+      "ane/wso2/discovery/config/enforcer;enfor" +
+      "cerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         });
-    internal_static_discovery_config_enforcer_CertStore_descriptor =
+    internal_static_wso2_discovery_config_enforcer_CertStore_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_discovery_config_enforcer_CertStore_fieldAccessorTable = new
+    internal_static_wso2_discovery_config_enforcer_CertStore_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_discovery_config_enforcer_CertStore_descriptor,
+        internal_static_wso2_discovery_config_enforcer_CertStore_descriptor,
         new java.lang.String[] { "Location", "Type", "Password", });
   }
 

@@ -4,7 +4,7 @@
 package org.wso2.gateway.discovery.config.enforcer;
 
 public interface CertStoreOrBuilder extends
-    // @@protoc_insertion_point(interface_extends:discovery.config.enforcer.CertStore)
+    // @@protoc_insertion_point(interface_extends:wso2.discovery.config.enforcer.CertStore)
     com.google.protobuf.MessageOrBuilder {
 
   /**

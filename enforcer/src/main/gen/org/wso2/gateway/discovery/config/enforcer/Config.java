@@ -8,11 +8,11 @@ package org.wso2.gateway.discovery.config.enforcer;
  * Enforcer config model
  * </pre>
  *
- * Protobuf type {@code discovery.config.enforcer.Config}
+ * Protobuf type {@code wso2.discovery.config.enforcer.Config}
  */
 public final class Config extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:discovery.config.enforcer.Config)
+    // @@protoc_insertion_point(message_implements:wso2.discovery.config.enforcer.Config)
     ConfigOrBuilder {
 private static final long serialVersionUID = 0L;
   // Use Config.newBuilder() to construct.
@@ -152,13 +152,13 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.wso2.gateway.discovery.config.enforcer.ConfigProto.internal_static_discovery_config_enforcer_Config_descriptor;
+    return org.wso2.gateway.discovery.config.enforcer.ConfigProto.internal_static_wso2_discovery_config_enforcer_Config_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.wso2.gateway.discovery.config.enforcer.ConfigProto.internal_static_discovery_config_enforcer_Config_fieldAccessorTable
+    return org.wso2.gateway.discovery.config.enforcer.ConfigProto.internal_static_wso2_discovery_config_enforcer_Config_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             org.wso2.gateway.discovery.config.enforcer.Config.class, org.wso2.gateway.discovery.config.enforcer.Config.Builder.class);
   }
@@ -166,14 +166,14 @@ private static final long serialVersionUID = 0L;
   public static final int JWTTOKENCONFIG_FIELD_NUMBER = 1;
   private java.util.List<org.wso2.gateway.discovery.config.enforcer.Issuer> jwtTokenConfig_;
   /**
-   * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
    */
   @java.lang.Override
   public java.util.List<org.wso2.gateway.discovery.config.enforcer.Issuer> getJwtTokenConfigList() {
     return jwtTokenConfig_;
   }
   /**
-   * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
    */
   @java.lang.Override
   public java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder> 
@@ -181,21 +181,21 @@ private static final long serialVersionUID = 0L;
     return jwtTokenConfig_;
   }
   /**
-   * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
    */
   @java.lang.Override
   public int getJwtTokenConfigCount() {
     return jwtTokenConfig_.size();
   }
   /**
-   * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.config.enforcer.Issuer getJwtTokenConfig(int index) {
     return jwtTokenConfig_.get(index);
   }
   /**
-   * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder getJwtTokenConfigOrBuilder(
@@ -206,7 +206,7 @@ private static final long serialVersionUID = 0L;
   public static final int KEYSTORE_FIELD_NUMBER = 2;
   private org.wso2.gateway.discovery.config.enforcer.CertStore keystore_;
   /**
-   * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
    * @return Whether the keystore field is set.
    */
   @java.lang.Override
@@ -214,7 +214,7 @@ private static final long serialVersionUID = 0L;
     return keystore_ != null;
   }
   /**
-   * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
    * @return The keystore.
    */
   @java.lang.Override
@@ -222,7 +222,7 @@ private static final long serialVersionUID = 0L;
     return keystore_ == null ? org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : keystore_;
   }
   /**
-   * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getKeystoreOrBuilder() {
@@ -232,7 +232,7 @@ private static final long serialVersionUID = 0L;
   public static final int TRUSTSTORE_FIELD_NUMBER = 3;
   private org.wso2.gateway.discovery.config.enforcer.CertStore truststore_;
   /**
-   * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
    * @return Whether the truststore field is set.
    */
   @java.lang.Override
@@ -240,7 +240,7 @@ private static final long serialVersionUID = 0L;
     return truststore_ != null;
   }
   /**
-   * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
    * @return The truststore.
    */
   @java.lang.Override
@@ -248,7 +248,7 @@ private static final long serialVersionUID = 0L;
     return truststore_ == null ? org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : truststore_;
   }
   /**
-   * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getTruststoreOrBuilder() {
@@ -258,7 +258,7 @@ private static final long serialVersionUID = 0L;
   public static final int EVENTHUB_FIELD_NUMBER = 4;
   private org.wso2.gateway.discovery.config.enforcer.EventHub eventhub_;
   /**
-   * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+   * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
    * @return Whether the eventhub field is set.
    */
   @java.lang.Override
@@ -266,7 +266,7 @@ private static final long serialVersionUID = 0L;
     return eventhub_ != null;
   }
   /**
-   * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+   * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
    * @return The eventhub.
    */
   @java.lang.Override
@@ -274,7 +274,7 @@ private static final long serialVersionUID = 0L;
     return eventhub_ == null ? org.wso2.gateway.discovery.config.enforcer.EventHub.getDefaultInstance() : eventhub_;
   }
   /**
-   * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+   * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.config.enforcer.EventHubOrBuilder getEventhubOrBuilder() {
@@ -284,7 +284,7 @@ private static final long serialVersionUID = 0L;
   public static final int AUTHSERVICE_FIELD_NUMBER = 5;
   private org.wso2.gateway.discovery.config.enforcer.AuthService authService_;
   /**
-   * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
    * @return Whether the authService field is set.
    */
   @java.lang.Override
@@ -292,7 +292,7 @@ private static final long serialVersionUID = 0L;
     return authService_ != null;
   }
   /**
-   * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
    * @return The authService.
    */
   @java.lang.Override
@@ -300,7 +300,7 @@ private static final long serialVersionUID = 0L;
     return authService_ == null ? org.wso2.gateway.discovery.config.enforcer.AuthService.getDefaultInstance() : authService_;
   }
   /**
-   * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder getAuthServiceOrBuilder() {
@@ -310,7 +310,7 @@ private static final long serialVersionUID = 0L;
   public static final int APIMCREDENTIALS_FIELD_NUMBER = 6;
   private org.wso2.gateway.discovery.config.enforcer.AmCredentials apimCredentials_;
   /**
-   * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
    * @return Whether the apimCredentials field is set.
    */
   @java.lang.Override
@@ -318,7 +318,7 @@ private static final long serialVersionUID = 0L;
     return apimCredentials_ != null;
   }
   /**
-   * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
    * @return The apimCredentials.
    */
   @java.lang.Override
@@ -326,7 +326,7 @@ private static final long serialVersionUID = 0L;
     return apimCredentials_ == null ? org.wso2.gateway.discovery.config.enforcer.AmCredentials.getDefaultInstance() : apimCredentials_;
   }
   /**
-   * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.config.enforcer.AmCredentialsOrBuilder getApimCredentialsOrBuilder() {
@@ -575,21 +575,21 @@ private static final long serialVersionUID = 0L;
    * Enforcer config model
    * </pre>
    *
-   * Protobuf type {@code discovery.config.enforcer.Config}
+   * Protobuf type {@code wso2.discovery.config.enforcer.Config}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:discovery.config.enforcer.Config)
+      // @@protoc_insertion_point(builder_implements:wso2.discovery.config.enforcer.Config)
       org.wso2.gateway.discovery.config.enforcer.ConfigOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.gateway.discovery.config.enforcer.ConfigProto.internal_static_discovery_config_enforcer_Config_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.ConfigProto.internal_static_wso2_discovery_config_enforcer_Config_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.gateway.discovery.config.enforcer.ConfigProto.internal_static_discovery_config_enforcer_Config_fieldAccessorTable
+      return org.wso2.gateway.discovery.config.enforcer.ConfigProto.internal_static_wso2_discovery_config_enforcer_Config_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.gateway.discovery.config.enforcer.Config.class, org.wso2.gateway.discovery.config.enforcer.Config.Builder.class);
     }
@@ -655,7 +655,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.wso2.gateway.discovery.config.enforcer.ConfigProto.internal_static_discovery_config_enforcer_Config_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.ConfigProto.internal_static_wso2_discovery_config_enforcer_Config_descriptor;
     }
 
     @java.lang.Override
@@ -842,7 +842,7 @@ private static final long serialVersionUID = 0L;
         org.wso2.gateway.discovery.config.enforcer.Issuer, org.wso2.gateway.discovery.config.enforcer.Issuer.Builder, org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder> jwtTokenConfigBuilder_;
 
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public java.util.List<org.wso2.gateway.discovery.config.enforcer.Issuer> getJwtTokenConfigList() {
       if (jwtTokenConfigBuilder_ == null) {
@@ -852,7 +852,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public int getJwtTokenConfigCount() {
       if (jwtTokenConfigBuilder_ == null) {
@@ -862,7 +862,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.Issuer getJwtTokenConfig(int index) {
       if (jwtTokenConfigBuilder_ == null) {
@@ -872,7 +872,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public Builder setJwtTokenConfig(
         int index, org.wso2.gateway.discovery.config.enforcer.Issuer value) {
@@ -889,7 +889,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public Builder setJwtTokenConfig(
         int index, org.wso2.gateway.discovery.config.enforcer.Issuer.Builder builderForValue) {
@@ -903,7 +903,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public Builder addJwtTokenConfig(org.wso2.gateway.discovery.config.enforcer.Issuer value) {
       if (jwtTokenConfigBuilder_ == null) {
@@ -919,7 +919,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public Builder addJwtTokenConfig(
         int index, org.wso2.gateway.discovery.config.enforcer.Issuer value) {
@@ -936,7 +936,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public Builder addJwtTokenConfig(
         org.wso2.gateway.discovery.config.enforcer.Issuer.Builder builderForValue) {
@@ -950,7 +950,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public Builder addJwtTokenConfig(
         int index, org.wso2.gateway.discovery.config.enforcer.Issuer.Builder builderForValue) {
@@ -964,7 +964,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public Builder addAllJwtTokenConfig(
         java.lang.Iterable<? extends org.wso2.gateway.discovery.config.enforcer.Issuer> values) {
@@ -979,7 +979,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public Builder clearJwtTokenConfig() {
       if (jwtTokenConfigBuilder_ == null) {
@@ -992,7 +992,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public Builder removeJwtTokenConfig(int index) {
       if (jwtTokenConfigBuilder_ == null) {
@@ -1005,14 +1005,14 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.Issuer.Builder getJwtTokenConfigBuilder(
         int index) {
       return getJwtTokenConfigFieldBuilder().getBuilder(index);
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder getJwtTokenConfigOrBuilder(
         int index) {
@@ -1022,7 +1022,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder> 
          getJwtTokenConfigOrBuilderList() {
@@ -1033,14 +1033,14 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.Issuer.Builder addJwtTokenConfigBuilder() {
       return getJwtTokenConfigFieldBuilder().addBuilder(
           org.wso2.gateway.discovery.config.enforcer.Issuer.getDefaultInstance());
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.Issuer.Builder addJwtTokenConfigBuilder(
         int index) {
@@ -1048,7 +1048,7 @@ private static final long serialVersionUID = 0L;
           index, org.wso2.gateway.discovery.config.enforcer.Issuer.getDefaultInstance());
     }
     /**
-     * <code>repeated .discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
      */
     public java.util.List<org.wso2.gateway.discovery.config.enforcer.Issuer.Builder> 
          getJwtTokenConfigBuilderList() {
@@ -1073,14 +1073,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder> keystoreBuilder_;
     /**
-     * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      * @return Whether the keystore field is set.
      */
     public boolean hasKeystore() {
       return keystoreBuilder_ != null || keystore_ != null;
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      * @return The keystore.
      */
     public org.wso2.gateway.discovery.config.enforcer.CertStore getKeystore() {
@@ -1091,7 +1091,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
     public Builder setKeystore(org.wso2.gateway.discovery.config.enforcer.CertStore value) {
       if (keystoreBuilder_ == null) {
@@ -1107,7 +1107,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
     public Builder setKeystore(
         org.wso2.gateway.discovery.config.enforcer.CertStore.Builder builderForValue) {
@@ -1121,7 +1121,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
     public Builder mergeKeystore(org.wso2.gateway.discovery.config.enforcer.CertStore value) {
       if (keystoreBuilder_ == null) {
@@ -1139,7 +1139,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
     public Builder clearKeystore() {
       if (keystoreBuilder_ == null) {
@@ -1153,7 +1153,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.CertStore.Builder getKeystoreBuilder() {
       
@@ -1161,7 +1161,7 @@ private static final long serialVersionUID = 0L;
       return getKeystoreFieldBuilder().getBuilder();
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getKeystoreOrBuilder() {
       if (keystoreBuilder_ != null) {
@@ -1172,7 +1172,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder> 
@@ -1192,14 +1192,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder> truststoreBuilder_;
     /**
-     * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      * @return Whether the truststore field is set.
      */
     public boolean hasTruststore() {
       return truststoreBuilder_ != null || truststore_ != null;
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      * @return The truststore.
      */
     public org.wso2.gateway.discovery.config.enforcer.CertStore getTruststore() {
@@ -1210,7 +1210,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
     public Builder setTruststore(org.wso2.gateway.discovery.config.enforcer.CertStore value) {
       if (truststoreBuilder_ == null) {
@@ -1226,7 +1226,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
     public Builder setTruststore(
         org.wso2.gateway.discovery.config.enforcer.CertStore.Builder builderForValue) {
@@ -1240,7 +1240,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
     public Builder mergeTruststore(org.wso2.gateway.discovery.config.enforcer.CertStore value) {
       if (truststoreBuilder_ == null) {
@@ -1258,7 +1258,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
     public Builder clearTruststore() {
       if (truststoreBuilder_ == null) {
@@ -1272,7 +1272,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.CertStore.Builder getTruststoreBuilder() {
       
@@ -1280,7 +1280,7 @@ private static final long serialVersionUID = 0L;
       return getTruststoreFieldBuilder().getBuilder();
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getTruststoreOrBuilder() {
       if (truststoreBuilder_ != null) {
@@ -1291,7 +1291,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder> 
@@ -1311,14 +1311,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.EventHub, org.wso2.gateway.discovery.config.enforcer.EventHub.Builder, org.wso2.gateway.discovery.config.enforcer.EventHubOrBuilder> eventhubBuilder_;
     /**
-     * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
      * @return Whether the eventhub field is set.
      */
     public boolean hasEventhub() {
       return eventhubBuilder_ != null || eventhub_ != null;
     }
     /**
-     * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
      * @return The eventhub.
      */
     public org.wso2.gateway.discovery.config.enforcer.EventHub getEventhub() {
@@ -1329,7 +1329,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
      */
     public Builder setEventhub(org.wso2.gateway.discovery.config.enforcer.EventHub value) {
       if (eventhubBuilder_ == null) {
@@ -1345,7 +1345,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
      */
     public Builder setEventhub(
         org.wso2.gateway.discovery.config.enforcer.EventHub.Builder builderForValue) {
@@ -1359,7 +1359,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
      */
     public Builder mergeEventhub(org.wso2.gateway.discovery.config.enforcer.EventHub value) {
       if (eventhubBuilder_ == null) {
@@ -1377,7 +1377,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
      */
     public Builder clearEventhub() {
       if (eventhubBuilder_ == null) {
@@ -1391,7 +1391,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.EventHub.Builder getEventhubBuilder() {
       
@@ -1399,7 +1399,7 @@ private static final long serialVersionUID = 0L;
       return getEventhubFieldBuilder().getBuilder();
     }
     /**
-     * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.EventHubOrBuilder getEventhubOrBuilder() {
       if (eventhubBuilder_ != null) {
@@ -1410,7 +1410,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.discovery.config.enforcer.EventHub eventhub = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.EventHub, org.wso2.gateway.discovery.config.enforcer.EventHub.Builder, org.wso2.gateway.discovery.config.enforcer.EventHubOrBuilder> 
@@ -1430,14 +1430,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.AuthService, org.wso2.gateway.discovery.config.enforcer.AuthService.Builder, org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder> authServiceBuilder_;
     /**
-     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
      * @return Whether the authService field is set.
      */
     public boolean hasAuthService() {
       return authServiceBuilder_ != null || authService_ != null;
     }
     /**
-     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
      * @return The authService.
      */
     public org.wso2.gateway.discovery.config.enforcer.AuthService getAuthService() {
@@ -1448,7 +1448,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
      */
     public Builder setAuthService(org.wso2.gateway.discovery.config.enforcer.AuthService value) {
       if (authServiceBuilder_ == null) {
@@ -1464,7 +1464,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
      */
     public Builder setAuthService(
         org.wso2.gateway.discovery.config.enforcer.AuthService.Builder builderForValue) {
@@ -1478,7 +1478,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
      */
     public Builder mergeAuthService(org.wso2.gateway.discovery.config.enforcer.AuthService value) {
       if (authServiceBuilder_ == null) {
@@ -1496,7 +1496,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
      */
     public Builder clearAuthService() {
       if (authServiceBuilder_ == null) {
@@ -1510,7 +1510,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.AuthService.Builder getAuthServiceBuilder() {
       
@@ -1518,7 +1518,7 @@ private static final long serialVersionUID = 0L;
       return getAuthServiceFieldBuilder().getBuilder();
     }
     /**
-     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder getAuthServiceOrBuilder() {
       if (authServiceBuilder_ != null) {
@@ -1529,7 +1529,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.AuthService, org.wso2.gateway.discovery.config.enforcer.AuthService.Builder, org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder> 
@@ -1549,14 +1549,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.AmCredentials, org.wso2.gateway.discovery.config.enforcer.AmCredentials.Builder, org.wso2.gateway.discovery.config.enforcer.AmCredentialsOrBuilder> apimCredentialsBuilder_;
     /**
-     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
      * @return Whether the apimCredentials field is set.
      */
     public boolean hasApimCredentials() {
       return apimCredentialsBuilder_ != null || apimCredentials_ != null;
     }
     /**
-     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
      * @return The apimCredentials.
      */
     public org.wso2.gateway.discovery.config.enforcer.AmCredentials getApimCredentials() {
@@ -1567,7 +1567,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
      */
     public Builder setApimCredentials(org.wso2.gateway.discovery.config.enforcer.AmCredentials value) {
       if (apimCredentialsBuilder_ == null) {
@@ -1583,7 +1583,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
      */
     public Builder setApimCredentials(
         org.wso2.gateway.discovery.config.enforcer.AmCredentials.Builder builderForValue) {
@@ -1597,7 +1597,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
      */
     public Builder mergeApimCredentials(org.wso2.gateway.discovery.config.enforcer.AmCredentials value) {
       if (apimCredentialsBuilder_ == null) {
@@ -1615,7 +1615,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
      */
     public Builder clearApimCredentials() {
       if (apimCredentialsBuilder_ == null) {
@@ -1629,7 +1629,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.AmCredentials.Builder getApimCredentialsBuilder() {
       
@@ -1637,7 +1637,7 @@ private static final long serialVersionUID = 0L;
       return getApimCredentialsFieldBuilder().getBuilder();
     }
     /**
-     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.AmCredentialsOrBuilder getApimCredentialsOrBuilder() {
       if (apimCredentialsBuilder_ != null) {
@@ -1648,7 +1648,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
+     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.AmCredentials, org.wso2.gateway.discovery.config.enforcer.AmCredentials.Builder, org.wso2.gateway.discovery.config.enforcer.AmCredentialsOrBuilder> 
@@ -1676,10 +1676,10 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:discovery.config.enforcer.Config)
+    // @@protoc_insertion_point(builder_scope:wso2.discovery.config.enforcer.Config)
   }
 
-  // @@protoc_insertion_point(class_scope:discovery.config.enforcer.Config)
+  // @@protoc_insertion_point(class_scope:wso2.discovery.config.enforcer.Config)
   private static final org.wso2.gateway.discovery.config.enforcer.Config DEFAULT_INSTANCE;
   static {
     DEFAULT_INSTANCE = new org.wso2.gateway.discovery.config.enforcer.Config();

@@ -4,7 +4,7 @@
 package org.wso2.gateway.discovery.api;
 
 public interface EndpointOrBuilder extends
-    // @@protoc_insertion_point(interface_extends:discovery.api.Endpoint)
+    // @@protoc_insertion_point(interface_extends:wso2.discovery.api.Endpoint)
     com.google.protobuf.MessageOrBuilder {
 
   /**

@@ -8,11 +8,11 @@ package org.wso2.gateway.discovery.api;
  * API config model
  * </pre>
  *
- * Protobuf type {@code discovery.api.Api}
+ * Protobuf type {@code wso2.discovery.api.Api}
  */
 public final class Api extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:discovery.api.Api)
+    // @@protoc_insertion_point(message_implements:wso2.discovery.api.Api)
     ApiOrBuilder {
 private static final long serialVersionUID = 0L;
   // Use Api.newBuilder() to construct.
@@ -168,7 +168,7 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.wso2.gateway.discovery.api.APIProto.internal_static_discovery_api_Api_descriptor;
+    return org.wso2.gateway.discovery.api.ApiProto.internal_static_wso2_discovery_api_Api_descriptor;
   }
 
   @SuppressWarnings({"rawtypes"})
@@ -186,7 +186,7 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.wso2.gateway.discovery.api.APIProto.internal_static_discovery_api_Api_fieldAccessorTable
+    return org.wso2.gateway.discovery.api.ApiProto.internal_static_wso2_discovery_api_Api_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             org.wso2.gateway.discovery.api.Api.class, org.wso2.gateway.discovery.api.Api.Builder.class);
   }
@@ -384,14 +384,14 @@ private static final long serialVersionUID = 0L;
   public static final int PRODUCTIONURLS_FIELD_NUMBER = 6;
   private java.util.List<org.wso2.gateway.discovery.api.Endpoint> productionUrls_;
   /**
-   * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
    */
   @java.lang.Override
   public java.util.List<org.wso2.gateway.discovery.api.Endpoint> getProductionUrlsList() {
     return productionUrls_;
   }
   /**
-   * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
    */
   @java.lang.Override
   public java.util.List<? extends org.wso2.gateway.discovery.api.EndpointOrBuilder> 
@@ -399,21 +399,21 @@ private static final long serialVersionUID = 0L;
     return productionUrls_;
   }
   /**
-   * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
    */
   @java.lang.Override
   public int getProductionUrlsCount() {
     return productionUrls_.size();
   }
   /**
-   * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.api.Endpoint getProductionUrls(int index) {
     return productionUrls_.get(index);
   }
   /**
-   * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.api.EndpointOrBuilder getProductionUrlsOrBuilder(
@@ -424,14 +424,14 @@ private static final long serialVersionUID = 0L;
   public static final int SANDBOXURLS_FIELD_NUMBER = 7;
   private java.util.List<org.wso2.gateway.discovery.api.Endpoint> sandboxUrls_;
   /**
-   * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
    */
   @java.lang.Override
   public java.util.List<org.wso2.gateway.discovery.api.Endpoint> getSandboxUrlsList() {
     return sandboxUrls_;
   }
   /**
-   * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
    */
   @java.lang.Override
   public java.util.List<? extends org.wso2.gateway.discovery.api.EndpointOrBuilder> 
@@ -439,21 +439,21 @@ private static final long serialVersionUID = 0L;
     return sandboxUrls_;
   }
   /**
-   * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
    */
   @java.lang.Override
   public int getSandboxUrlsCount() {
     return sandboxUrls_.size();
   }
   /**
-   * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.api.Endpoint getSandboxUrls(int index) {
     return sandboxUrls_.get(index);
   }
   /**
-   * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+   * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.api.EndpointOrBuilder getSandboxUrlsOrBuilder(
@@ -464,14 +464,14 @@ private static final long serialVersionUID = 0L;
   public static final int RESOURCES_FIELD_NUMBER = 8;
   private java.util.List<org.wso2.gateway.discovery.api.Resource> resources_;
   /**
-   * <code>repeated .discovery.api.Resource resources = 8;</code>
+   * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
    */
   @java.lang.Override
   public java.util.List<org.wso2.gateway.discovery.api.Resource> getResourcesList() {
     return resources_;
   }
   /**
-   * <code>repeated .discovery.api.Resource resources = 8;</code>
+   * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
    */
   @java.lang.Override
   public java.util.List<? extends org.wso2.gateway.discovery.api.ResourceOrBuilder> 
@@ -479,21 +479,21 @@ private static final long serialVersionUID = 0L;
     return resources_;
   }
   /**
-   * <code>repeated .discovery.api.Resource resources = 8;</code>
+   * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
    */
   @java.lang.Override
   public int getResourcesCount() {
     return resources_.size();
   }
   /**
-   * <code>repeated .discovery.api.Resource resources = 8;</code>
+   * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.api.Resource getResources(int index) {
     return resources_.get(index);
   }
   /**
-   * <code>repeated .discovery.api.Resource resources = 8;</code>
+   * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.api.ResourceOrBuilder getResourcesOrBuilder(
@@ -545,7 +545,7 @@ private static final long serialVersionUID = 0L;
         java.lang.String, com.google.protobuf.Any> defaultEntry =
             com.google.protobuf.MapEntry
             .<java.lang.String, com.google.protobuf.Any>newDefaultInstance(
-                org.wso2.gateway.discovery.api.APIProto.internal_static_discovery_api_Api_VendorExtensibleEntry_descriptor, 
+                org.wso2.gateway.discovery.api.ApiProto.internal_static_wso2_discovery_api_Api_VendorExtensibleEntry_descriptor, 
                 com.google.protobuf.WireFormat.FieldType.STRING,
                 "",
                 com.google.protobuf.WireFormat.FieldType.MESSAGE,
@@ -890,15 +890,15 @@ private static final long serialVersionUID = 0L;
    * API config model
    * </pre>
    *
-   * Protobuf type {@code discovery.api.Api}
+   * Protobuf type {@code wso2.discovery.api.Api}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:discovery.api.Api)
+      // @@protoc_insertion_point(builder_implements:wso2.discovery.api.Api)
       org.wso2.gateway.discovery.api.ApiOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.gateway.discovery.api.APIProto.internal_static_discovery_api_Api_descriptor;
+      return org.wso2.gateway.discovery.api.ApiProto.internal_static_wso2_discovery_api_Api_descriptor;
     }
 
     @SuppressWarnings({"rawtypes"})
@@ -926,7 +926,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.gateway.discovery.api.APIProto.internal_static_discovery_api_Api_fieldAccessorTable
+      return org.wso2.gateway.discovery.api.ApiProto.internal_static_wso2_discovery_api_Api_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.gateway.discovery.api.Api.class, org.wso2.gateway.discovery.api.Api.Builder.class);
     }
@@ -989,7 +989,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.wso2.gateway.discovery.api.APIProto.internal_static_discovery_api_Api_descriptor;
+      return org.wso2.gateway.discovery.api.ApiProto.internal_static_wso2_discovery_api_Api_descriptor;
     }
 
     @java.lang.Override
@@ -1620,7 +1620,7 @@ private static final long serialVersionUID = 0L;
         org.wso2.gateway.discovery.api.Endpoint, org.wso2.gateway.discovery.api.Endpoint.Builder, org.wso2.gateway.discovery.api.EndpointOrBuilder> productionUrlsBuilder_;
 
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public java.util.List<org.wso2.gateway.discovery.api.Endpoint> getProductionUrlsList() {
       if (productionUrlsBuilder_ == null) {
@@ -1630,7 +1630,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public int getProductionUrlsCount() {
       if (productionUrlsBuilder_ == null) {
@@ -1640,7 +1640,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public org.wso2.gateway.discovery.api.Endpoint getProductionUrls(int index) {
       if (productionUrlsBuilder_ == null) {
@@ -1650,7 +1650,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public Builder setProductionUrls(
         int index, org.wso2.gateway.discovery.api.Endpoint value) {
@@ -1667,7 +1667,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public Builder setProductionUrls(
         int index, org.wso2.gateway.discovery.api.Endpoint.Builder builderForValue) {
@@ -1681,7 +1681,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public Builder addProductionUrls(org.wso2.gateway.discovery.api.Endpoint value) {
       if (productionUrlsBuilder_ == null) {
@@ -1697,7 +1697,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public Builder addProductionUrls(
         int index, org.wso2.gateway.discovery.api.Endpoint value) {
@@ -1714,7 +1714,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public Builder addProductionUrls(
         org.wso2.gateway.discovery.api.Endpoint.Builder builderForValue) {
@@ -1728,7 +1728,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public Builder addProductionUrls(
         int index, org.wso2.gateway.discovery.api.Endpoint.Builder builderForValue) {
@@ -1742,7 +1742,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public Builder addAllProductionUrls(
         java.lang.Iterable<? extends org.wso2.gateway.discovery.api.Endpoint> values) {
@@ -1757,7 +1757,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public Builder clearProductionUrls() {
       if (productionUrlsBuilder_ == null) {
@@ -1770,7 +1770,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public Builder removeProductionUrls(int index) {
       if (productionUrlsBuilder_ == null) {
@@ -1783,14 +1783,14 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public org.wso2.gateway.discovery.api.Endpoint.Builder getProductionUrlsBuilder(
         int index) {
       return getProductionUrlsFieldBuilder().getBuilder(index);
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public org.wso2.gateway.discovery.api.EndpointOrBuilder getProductionUrlsOrBuilder(
         int index) {
@@ -1800,7 +1800,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public java.util.List<? extends org.wso2.gateway.discovery.api.EndpointOrBuilder> 
          getProductionUrlsOrBuilderList() {
@@ -1811,14 +1811,14 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public org.wso2.gateway.discovery.api.Endpoint.Builder addProductionUrlsBuilder() {
       return getProductionUrlsFieldBuilder().addBuilder(
           org.wso2.gateway.discovery.api.Endpoint.getDefaultInstance());
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public org.wso2.gateway.discovery.api.Endpoint.Builder addProductionUrlsBuilder(
         int index) {
@@ -1826,7 +1826,7 @@ private static final long serialVersionUID = 0L;
           index, org.wso2.gateway.discovery.api.Endpoint.getDefaultInstance());
     }
     /**
-     * <code>repeated .discovery.api.Endpoint productionUrls = 6;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint productionUrls = 6;</code>
      */
     public java.util.List<org.wso2.gateway.discovery.api.Endpoint.Builder> 
          getProductionUrlsBuilderList() {
@@ -1860,7 +1860,7 @@ private static final long serialVersionUID = 0L;
         org.wso2.gateway.discovery.api.Endpoint, org.wso2.gateway.discovery.api.Endpoint.Builder, org.wso2.gateway.discovery.api.EndpointOrBuilder> sandboxUrlsBuilder_;
 
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public java.util.List<org.wso2.gateway.discovery.api.Endpoint> getSandboxUrlsList() {
       if (sandboxUrlsBuilder_ == null) {
@@ -1870,7 +1870,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public int getSandboxUrlsCount() {
       if (sandboxUrlsBuilder_ == null) {
@@ -1880,7 +1880,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public org.wso2.gateway.discovery.api.Endpoint getSandboxUrls(int index) {
       if (sandboxUrlsBuilder_ == null) {
@@ -1890,7 +1890,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public Builder setSandboxUrls(
         int index, org.wso2.gateway.discovery.api.Endpoint value) {
@@ -1907,7 +1907,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public Builder setSandboxUrls(
         int index, org.wso2.gateway.discovery.api.Endpoint.Builder builderForValue) {
@@ -1921,7 +1921,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public Builder addSandboxUrls(org.wso2.gateway.discovery.api.Endpoint value) {
       if (sandboxUrlsBuilder_ == null) {
@@ -1937,7 +1937,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public Builder addSandboxUrls(
         int index, org.wso2.gateway.discovery.api.Endpoint value) {
@@ -1954,7 +1954,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public Builder addSandboxUrls(
         org.wso2.gateway.discovery.api.Endpoint.Builder builderForValue) {
@@ -1968,7 +1968,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public Builder addSandboxUrls(
         int index, org.wso2.gateway.discovery.api.Endpoint.Builder builderForValue) {
@@ -1982,7 +1982,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public Builder addAllSandboxUrls(
         java.lang.Iterable<? extends org.wso2.gateway.discovery.api.Endpoint> values) {
@@ -1997,7 +1997,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public Builder clearSandboxUrls() {
       if (sandboxUrlsBuilder_ == null) {
@@ -2010,7 +2010,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public Builder removeSandboxUrls(int index) {
       if (sandboxUrlsBuilder_ == null) {
@@ -2023,14 +2023,14 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public org.wso2.gateway.discovery.api.Endpoint.Builder getSandboxUrlsBuilder(
         int index) {
       return getSandboxUrlsFieldBuilder().getBuilder(index);
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public org.wso2.gateway.discovery.api.EndpointOrBuilder getSandboxUrlsOrBuilder(
         int index) {
@@ -2040,7 +2040,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public java.util.List<? extends org.wso2.gateway.discovery.api.EndpointOrBuilder> 
          getSandboxUrlsOrBuilderList() {
@@ -2051,14 +2051,14 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public org.wso2.gateway.discovery.api.Endpoint.Builder addSandboxUrlsBuilder() {
       return getSandboxUrlsFieldBuilder().addBuilder(
           org.wso2.gateway.discovery.api.Endpoint.getDefaultInstance());
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public org.wso2.gateway.discovery.api.Endpoint.Builder addSandboxUrlsBuilder(
         int index) {
@@ -2066,7 +2066,7 @@ private static final long serialVersionUID = 0L;
           index, org.wso2.gateway.discovery.api.Endpoint.getDefaultInstance());
     }
     /**
-     * <code>repeated .discovery.api.Endpoint sandboxUrls = 7;</code>
+     * <code>repeated .wso2.discovery.api.Endpoint sandboxUrls = 7;</code>
      */
     public java.util.List<org.wso2.gateway.discovery.api.Endpoint.Builder> 
          getSandboxUrlsBuilderList() {
@@ -2100,7 +2100,7 @@ private static final long serialVersionUID = 0L;
         org.wso2.gateway.discovery.api.Resource, org.wso2.gateway.discovery.api.Resource.Builder, org.wso2.gateway.discovery.api.ResourceOrBuilder> resourcesBuilder_;
 
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public java.util.List<org.wso2.gateway.discovery.api.Resource> getResourcesList() {
       if (resourcesBuilder_ == null) {
@@ -2110,7 +2110,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public int getResourcesCount() {
       if (resourcesBuilder_ == null) {
@@ -2120,7 +2120,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public org.wso2.gateway.discovery.api.Resource getResources(int index) {
       if (resourcesBuilder_ == null) {
@@ -2130,7 +2130,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public Builder setResources(
         int index, org.wso2.gateway.discovery.api.Resource value) {
@@ -2147,7 +2147,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public Builder setResources(
         int index, org.wso2.gateway.discovery.api.Resource.Builder builderForValue) {
@@ -2161,7 +2161,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public Builder addResources(org.wso2.gateway.discovery.api.Resource value) {
       if (resourcesBuilder_ == null) {
@@ -2177,7 +2177,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public Builder addResources(
         int index, org.wso2.gateway.discovery.api.Resource value) {
@@ -2194,7 +2194,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public Builder addResources(
         org.wso2.gateway.discovery.api.Resource.Builder builderForValue) {
@@ -2208,7 +2208,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public Builder addResources(
         int index, org.wso2.gateway.discovery.api.Resource.Builder builderForValue) {
@@ -2222,7 +2222,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public Builder addAllResources(
         java.lang.Iterable<? extends org.wso2.gateway.discovery.api.Resource> values) {
@@ -2237,7 +2237,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public Builder clearResources() {
       if (resourcesBuilder_ == null) {
@@ -2250,7 +2250,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public Builder removeResources(int index) {
       if (resourcesBuilder_ == null) {
@@ -2263,14 +2263,14 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public org.wso2.gateway.discovery.api.Resource.Builder getResourcesBuilder(
         int index) {
       return getResourcesFieldBuilder().getBuilder(index);
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public org.wso2.gateway.discovery.api.ResourceOrBuilder getResourcesOrBuilder(
         int index) {
@@ -2280,7 +2280,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public java.util.List<? extends org.wso2.gateway.discovery.api.ResourceOrBuilder> 
          getResourcesOrBuilderList() {
@@ -2291,14 +2291,14 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public org.wso2.gateway.discovery.api.Resource.Builder addResourcesBuilder() {
       return getResourcesFieldBuilder().addBuilder(
           org.wso2.gateway.discovery.api.Resource.getDefaultInstance());
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public org.wso2.gateway.discovery.api.Resource.Builder addResourcesBuilder(
         int index) {
@@ -2306,7 +2306,7 @@ private static final long serialVersionUID = 0L;
           index, org.wso2.gateway.discovery.api.Resource.getDefaultInstance());
     }
     /**
-     * <code>repeated .discovery.api.Resource resources = 8;</code>
+     * <code>repeated .wso2.discovery.api.Resource resources = 8;</code>
      */
     public java.util.List<org.wso2.gateway.discovery.api.Resource.Builder> 
          getResourcesBuilderList() {
@@ -2543,10 +2543,10 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:discovery.api.Api)
+    // @@protoc_insertion_point(builder_scope:wso2.discovery.api.Api)
   }
 
-  // @@protoc_insertion_point(class_scope:discovery.api.Api)
+  // @@protoc_insertion_point(class_scope:wso2.discovery.api.Api)
   private static final org.wso2.gateway.discovery.api.Api DEFAULT_INSTANCE;
   static {
     DEFAULT_INSTANCE = new org.wso2.gateway.discovery.api.Api();

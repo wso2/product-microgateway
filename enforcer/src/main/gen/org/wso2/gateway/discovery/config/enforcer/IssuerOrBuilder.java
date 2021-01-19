@@ -4,7 +4,7 @@
 package org.wso2.gateway.discovery.config.enforcer;
 
 public interface IssuerOrBuilder extends
-    // @@protoc_insertion_point(interface_extends:discovery.config.enforcer.Issuer)
+    // @@protoc_insertion_point(interface_extends:wso2.discovery.config.enforcer.Issuer)
     com.google.protobuf.MessageOrBuilder {
 
   /**

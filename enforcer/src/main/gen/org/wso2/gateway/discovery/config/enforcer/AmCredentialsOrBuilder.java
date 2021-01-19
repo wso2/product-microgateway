@@ -4,7 +4,7 @@
 package org.wso2.gateway.discovery.config.enforcer;
 
 public interface AmCredentialsOrBuilder extends
-    // @@protoc_insertion_point(interface_extends:discovery.config.enforcer.AmCredentials)
+    // @@protoc_insertion_point(interface_extends:wso2.discovery.config.enforcer.AmCredentials)
     com.google.protobuf.MessageOrBuilder {
 
   /**

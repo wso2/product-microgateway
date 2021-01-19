@@ -8,11 +8,11 @@ package org.wso2.gateway.discovery.config.enforcer;
  * Listener and client certificate store model
  * </pre>
  *
- * Protobuf type {@code discovery.config.enforcer.CertStore}
+ * Protobuf type {@code wso2.discovery.config.enforcer.CertStore}
  */
 public final class CertStore extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:discovery.config.enforcer.CertStore)
+    // @@protoc_insertion_point(message_implements:wso2.discovery.config.enforcer.CertStore)
     CertStoreOrBuilder {
 private static final long serialVersionUID = 0L;
   // Use CertStore.newBuilder() to construct.
@@ -94,13 +94,13 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.wso2.gateway.discovery.config.enforcer.CertStoreProto.internal_static_discovery_config_enforcer_CertStore_descriptor;
+    return org.wso2.gateway.discovery.config.enforcer.CertStoreProto.internal_static_wso2_discovery_config_enforcer_CertStore_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.wso2.gateway.discovery.config.enforcer.CertStoreProto.internal_static_discovery_config_enforcer_CertStore_fieldAccessorTable
+    return org.wso2.gateway.discovery.config.enforcer.CertStoreProto.internal_static_wso2_discovery_config_enforcer_CertStore_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             org.wso2.gateway.discovery.config.enforcer.CertStore.class, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder.class);
   }
@@ -424,21 +424,21 @@ private static final long serialVersionUID = 0L;
    * Listener and client certificate store model
    * </pre>
    *
-   * Protobuf type {@code discovery.config.enforcer.CertStore}
+   * Protobuf type {@code wso2.discovery.config.enforcer.CertStore}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:discovery.config.enforcer.CertStore)
+      // @@protoc_insertion_point(builder_implements:wso2.discovery.config.enforcer.CertStore)
       org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.gateway.discovery.config.enforcer.CertStoreProto.internal_static_discovery_config_enforcer_CertStore_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.CertStoreProto.internal_static_wso2_discovery_config_enforcer_CertStore_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.gateway.discovery.config.enforcer.CertStoreProto.internal_static_discovery_config_enforcer_CertStore_fieldAccessorTable
+      return org.wso2.gateway.discovery.config.enforcer.CertStoreProto.internal_static_wso2_discovery_config_enforcer_CertStore_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.gateway.discovery.config.enforcer.CertStore.class, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder.class);
     }
@@ -473,7 +473,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.wso2.gateway.discovery.config.enforcer.CertStoreProto.internal_static_discovery_config_enforcer_CertStore_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.CertStoreProto.internal_static_wso2_discovery_config_enforcer_CertStore_descriptor;
     }
 
     @java.lang.Override
@@ -890,10 +890,10 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:discovery.config.enforcer.CertStore)
+    // @@protoc_insertion_point(builder_scope:wso2.discovery.config.enforcer.CertStore)
   }
 
-  // @@protoc_insertion_point(class_scope:discovery.config.enforcer.CertStore)
+  // @@protoc_insertion_point(class_scope:wso2.discovery.config.enforcer.CertStore)
   private static final org.wso2.gateway.discovery.config.enforcer.CertStore DEFAULT_INSTANCE;
   static {
     DEFAULT_INSTANCE = new org.wso2.gateway.discovery.config.enforcer.CertStore();

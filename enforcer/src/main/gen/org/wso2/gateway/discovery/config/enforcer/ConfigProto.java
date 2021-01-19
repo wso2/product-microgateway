@@ -15,10 +15,10 @@ public final class ConfigProto {
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_discovery_config_enforcer_Config_descriptor;
+    internal_static_wso2_discovery_config_enforcer_Config_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_discovery_config_enforcer_Config_fieldAccessorTable;
+      internal_static_wso2_discovery_config_enforcer_Config_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -29,26 +29,27 @@ public final class ConfigProto {
   static {
     java.lang.String[] descriptorData = {
       "\n+wso2/discovery/config/enforcer/config." +
-      "proto\022\031discovery.config.enforcer\032)wso2/d" +
-      "iscovery/config/enforcer/cert.proto\032+wso" +
-      "2/discovery/config/enforcer/issuer.proto" +
-      "\032.wso2/discovery/config/enforcer/event_h" +
-      "ub.proto\0323wso2/discovery/config/enforcer" +
-      "/am_credentials.proto\0321wso2/discovery/co" +
-      "nfig/enforcer/auth_service.proto\"\354\002\n\006Con" +
-      "fig\0229\n\016jwtTokenConfig\030\001 \003(\0132!.discovery." +
-      "config.enforcer.Issuer\0226\n\010keystore\030\002 \001(\013" +
-      "2$.discovery.config.enforcer.CertStore\0228" +
-      "\n\ntruststore\030\003 \001(\0132$.discovery.config.en" +
-      "forcer.CertStore\0225\n\010eventhub\030\004 \001(\0132#.dis" +
-      "covery.config.enforcer.EventHub\022;\n\013authS" +
-      "ervice\030\005 \001(\0132&.discovery.config.enforcer" +
-      ".AuthService\022A\n\017apimCredentials\030\006 \001(\0132(." +
-      "discovery.config.enforcer.AmCredentialsB" +
-      "\213\001\n*org.wso2.gateway.discovery.config.en" +
-      "forcerB\013ConfigProtoP\001ZNgithub.com/envoyp" +
-      "roxy/go-control-plane/wso2/discovery/con" +
-      "fig/enforcer;enforcerb\006proto3"
+      "proto\022\036wso2.discovery.config.enforcer\032)w" +
+      "so2/discovery/config/enforcer/cert.proto" +
+      "\032+wso2/discovery/config/enforcer/issuer." +
+      "proto\032.wso2/discovery/config/enforcer/ev" +
+      "ent_hub.proto\0323wso2/discovery/config/enf" +
+      "orcer/am_credentials.proto\0321wso2/discove" +
+      "ry/config/enforcer/auth_service.proto\"\212\003" +
+      "\n\006Config\022>\n\016jwtTokenConfig\030\001 \003(\0132&.wso2." +
+      "discovery.config.enforcer.Issuer\022;\n\010keys" +
+      "tore\030\002 \001(\0132).wso2.discovery.config.enfor" +
+      "cer.CertStore\022=\n\ntruststore\030\003 \001(\0132).wso2" +
+      ".discovery.config.enforcer.CertStore\022:\n\010" +
+      "eventhub\030\004 \001(\0132(.wso2.discovery.config.e" +
+      "nforcer.EventHub\022@\n\013authService\030\005 \001(\0132+." +
+      "wso2.discovery.config.enforcer.AuthServi" +
+      "ce\022F\n\017apimCredentials\030\006 \001(\0132-.wso2.disco" +
+      "very.config.enforcer.AmCredentialsB\213\001\n*o" +
+      "rg.wso2.gateway.discovery.config.enforce" +
+      "rB\013ConfigProtoP\001ZNgithub.com/envoyproxy/" +
+      "go-control-plane/wso2/discovery/config/e" +
+      "nforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -59,11 +60,11 @@ public final class ConfigProto {
           org.wso2.gateway.discovery.config.enforcer.AmCredentialsProto.getDescriptor(),
           org.wso2.gateway.discovery.config.enforcer.AuthServiceProto.getDescriptor(),
         });
-    internal_static_discovery_config_enforcer_Config_descriptor =
+    internal_static_wso2_discovery_config_enforcer_Config_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_discovery_config_enforcer_Config_fieldAccessorTable = new
+    internal_static_wso2_discovery_config_enforcer_Config_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_discovery_config_enforcer_Config_descriptor,
+        internal_static_wso2_discovery_config_enforcer_Config_descriptor,
         new java.lang.String[] { "JwtTokenConfig", "Keystore", "Truststore", "Eventhub", "AuthService", "ApimCredentials", });
     org.wso2.gateway.discovery.config.enforcer.CertStoreProto.getDescriptor();
     org.wso2.gateway.discovery.config.enforcer.IssuerProto.getDescriptor();

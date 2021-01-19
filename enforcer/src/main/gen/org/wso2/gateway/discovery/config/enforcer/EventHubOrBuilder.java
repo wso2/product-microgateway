@@ -4,7 +4,7 @@
 package org.wso2.gateway.discovery.config.enforcer;
 
 public interface EventHubOrBuilder extends
-    // @@protoc_insertion_point(interface_extends:discovery.config.enforcer.EventHub)
+    // @@protoc_insertion_point(interface_extends:wso2.discovery.config.enforcer.EventHub)
     com.google.protobuf.MessageOrBuilder {
 
   /**

@@ -8,11 +8,11 @@ package org.wso2.gateway.discovery.config.enforcer;
  * ThreadPool model
  * </pre>
  *
- * Protobuf type {@code discovery.config.enforcer.ThreadPool}
+ * Protobuf type {@code wso2.discovery.config.enforcer.ThreadPool}
  */
 public final class ThreadPool extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:discovery.config.enforcer.ThreadPool)
+    // @@protoc_insertion_point(message_implements:wso2.discovery.config.enforcer.ThreadPool)
     ThreadPoolOrBuilder {
 private static final long serialVersionUID = 0L;
   // Use ThreadPool.newBuilder() to construct.
@@ -93,13 +93,13 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.wso2.gateway.discovery.config.enforcer.ThreadPoolProto.internal_static_discovery_config_enforcer_ThreadPool_descriptor;
+    return org.wso2.gateway.discovery.config.enforcer.ThreadPoolProto.internal_static_wso2_discovery_config_enforcer_ThreadPool_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.wso2.gateway.discovery.config.enforcer.ThreadPoolProto.internal_static_discovery_config_enforcer_ThreadPool_fieldAccessorTable
+    return org.wso2.gateway.discovery.config.enforcer.ThreadPoolProto.internal_static_wso2_discovery_config_enforcer_ThreadPool_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             org.wso2.gateway.discovery.config.enforcer.ThreadPool.class, org.wso2.gateway.discovery.config.enforcer.ThreadPool.Builder.class);
   }
@@ -345,21 +345,21 @@ private static final long serialVersionUID = 0L;
    * ThreadPool model
    * </pre>
    *
-   * Protobuf type {@code discovery.config.enforcer.ThreadPool}
+   * Protobuf type {@code wso2.discovery.config.enforcer.ThreadPool}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:discovery.config.enforcer.ThreadPool)
+      // @@protoc_insertion_point(builder_implements:wso2.discovery.config.enforcer.ThreadPool)
       org.wso2.gateway.discovery.config.enforcer.ThreadPoolOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.wso2.gateway.discovery.config.enforcer.ThreadPoolProto.internal_static_discovery_config_enforcer_ThreadPool_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.ThreadPoolProto.internal_static_wso2_discovery_config_enforcer_ThreadPool_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.wso2.gateway.discovery.config.enforcer.ThreadPoolProto.internal_static_discovery_config_enforcer_ThreadPool_fieldAccessorTable
+      return org.wso2.gateway.discovery.config.enforcer.ThreadPoolProto.internal_static_wso2_discovery_config_enforcer_ThreadPool_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.wso2.gateway.discovery.config.enforcer.ThreadPool.class, org.wso2.gateway.discovery.config.enforcer.ThreadPool.Builder.class);
     }
@@ -396,7 +396,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.wso2.gateway.discovery.config.enforcer.ThreadPoolProto.internal_static_discovery_config_enforcer_ThreadPool_descriptor;
+      return org.wso2.gateway.discovery.config.enforcer.ThreadPoolProto.internal_static_wso2_discovery_config_enforcer_ThreadPool_descriptor;
     }
 
     @java.lang.Override
@@ -657,10 +657,10 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:discovery.config.enforcer.ThreadPool)
+    // @@protoc_insertion_point(builder_scope:wso2.discovery.config.enforcer.ThreadPool)
   }
 
-  // @@protoc_insertion_point(class_scope:discovery.config.enforcer.ThreadPool)
+  // @@protoc_insertion_point(class_scope:wso2.discovery.config.enforcer.ThreadPool)
   private static final org.wso2.gateway.discovery.config.enforcer.ThreadPool DEFAULT_INSTANCE;
   static {
     DEFAULT_INSTANCE = new org.wso2.gateway.discovery.config.enforcer.ThreadPool();
