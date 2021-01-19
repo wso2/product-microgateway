@@ -20,7 +20,6 @@ package xds
 import (
 	"fmt"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
-	"github.com/hashicorp/consul/api"
 	"github.com/wso2/micro-gw/pkg/svcdiscovery"
 	"reflect"
 	"sync"
@@ -280,15 +279,11 @@ func startConsulServiceDiscovery() {
 
 }
 
-func getServiceDiscoveryData(query svcdiscovery.QueryString, clusterName string, apiKey string) {
-	qo := api.QueryOptions{}
-	q := svcdiscovery.Query{
-		QString:      query,
-		QueryOptions: &qo,
-	}
+func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKey string) {
+
 	doneChan := make(chan bool)
 	svcdiscovery.ClusterConsulDoneChanMap[clusterName] = doneChan
-	resultChan := svcdiscovery.ConsulWatcherInstance.Watch(q, doneChan)
+	resultChan := svcdiscovery.ConsulWatcherInstance.Poll(query, doneChan)
 	for {
 		select {
 		case queryResultsList, ok := <-resultChan:
@@ -320,7 +315,7 @@ func getServiceDiscoveryData(query svcdiscovery.QueryString, clusterName string,
 
 }
 
-func updateRoute(apiKey string, clusterName string, queryResultsList []svcdiscovery.QueryResult) {
+func updateRoute(apiKey string, clusterName string, queryResultsList []svcdiscovery.Upstream) {
 	if clusterList, available := openAPIClustersMap[apiKey]; available {
 		for i, _ := range clusterList {
 			if clusterList[i].Name == clusterName {

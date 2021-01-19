@@ -93,7 +93,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 		//todo add to ClusterConsulKeyMap on Sand , Resource level as well
 		if apiLevelEndpointProd[0].ServiceDiscoveryString != "" {
 			svcdiscovery.ClusterConsulKeyMap[apiLevelClusterNameProd] = apiLevelEndpointProd[0].ServiceDiscoveryString
-			logger.LoggerOasparser.Info("Consul cluster added ", apiLevelClusterNameProd, " ",
+			logger.LoggerOasparser.Info("Consul cluster added for API level: ", apiLevelClusterNameProd, " ",
 				apiLevelEndpointProd[0].ServiceDiscoveryString)
 		}
 	} else {
@@ -146,6 +146,12 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 			routeP := createRoute(apiTitle, apiBasePath, apiVersion, endpointProd[0], resource, clusterRefProd)
 			routesProd = append(routesProd, routeP)
 			endpointsProd = append(endpointsProd, addressProd)
+
+			if endpointProd[0].ServiceDiscoveryString != "" {
+				svcdiscovery.ClusterConsulKeyMap[clusterNameProd] = endpointProd[0].ServiceDiscoveryString
+				logger.LoggerOasparser.Info("Consul cluster added for Resource level:", clusterNameProd, " ",
+					endpointProd[0].ServiceDiscoveryString)
+			}
 
 			// API level check
 		} else if len(mgwSwagger.GetProdEndpoints()) > 0 {

@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 package svcdiscovery
 
 import (
@@ -14,17 +30,17 @@ func TestIsDiscoveryServiceEndpoint(t *testing.T) {
 	}
 	dataItems := []isDiscoveryServiceEndpointList{
 		{
-			input:   "consul:",
+			input:   "consul",
 			output:  true,
 			message: "only consul keyword",
 		},
 		{
-			input:   "consul:",
+			input:   " consul",
 			output:  true,
-			message: "only ConsulBegin keyword",
+			message: "consul keyword with spaces",
 		},
 		{
-			input:   "consul:[dc1,dc2].dev.serviceA.[tag1,tag2]",
+			input:   "consul([dc1,dc2].dev.serviceA.[tag1,tag2],http://localhost:4000)",
 			output:  true,
 			message: "valid",
 		},
@@ -35,7 +51,7 @@ func TestIsDiscoveryServiceEndpoint(t *testing.T) {
 		},
 		{
 			input:   "consul",
-			output:  false,
+			output:  true,
 			message: "without :",
 		},
 	}
@@ -46,17 +62,17 @@ func TestIsDiscoveryServiceEndpoint(t *testing.T) {
 	}
 }
 
-func TestParseSyntax(t *testing.T) {
-	type parseListTestItem struct {
+func TestParseQueryString(t *testing.T) {
+	type parseQueryStringItem struct {
 		input   string
-		result  QueryString
+		result  Query
 		err     error
 		message string
 	}
-	dataItems := []parseListTestItem{
+	dataItems := []parseQueryStringItem{
 		{
-			input: "consul:[dc1,dc2].dev.serviceA.[tag1,tag2];http://abc.com:80",
-			result: QueryString{
+			input: "[dc1,dc2].dev.serviceA.[tag1,tag2]",
+			result: Query{
 				Datacenters: []string{"dc1", "dc2"},
 				ServiceName: "serviceA",
 				Namespace:   "dev",
@@ -66,8 +82,8 @@ func TestParseSyntax(t *testing.T) {
 			message: "simple scenario with namespace",
 		},
 		{
-			input: "consul:[dc 1,dc 2].service A.[tag1,tag2];http://192.168.0.1:3000",
-			result: QueryString{
+			input: "[dc 1,dc 2].service A.[tag1,tag2]",
+			result: Query{
 				Datacenters: []string{"dc 1", "dc 2"},
 				ServiceName: "service A",
 				Namespace:   "",
@@ -77,8 +93,8 @@ func TestParseSyntax(t *testing.T) {
 			message: "simple scenario without namespace",
 		},
 		{
-			input: "consul:[].prod.serviceA.[*];http://abc.com:80",
-			result: QueryString{
+			input: "[].prod.serviceA.[*]",
+			result: Query{
 				Datacenters: []string{""},
 				ServiceName: "serviceA",
 				Namespace:   "prod",
@@ -88,18 +104,45 @@ func TestParseSyntax(t *testing.T) {
 			message: "empty dcs and tags",
 		},
 		{
-			input:   "consul[].prod.serviceA.[*]",
-			err:     errors.New("default host not provided"),
-			message: "empty dcs and tags",
-		},
-		{
-			input:   "consul:[].fake.another.prod.serviceA.[*];http://abc.com:80",
+			input:   "[].fake.another.prod.serviceA.[*]",
 			err:     errors.New("bad query syntax"),
 			message: "5 pieces in syntax",
 		},
+		{
+			input: "[dc , dc1 ]. prod . serviceA . [ * ] ",
+			result: Query{
+				Datacenters: []string{"dc", "dc1"},
+				ServiceName: "serviceA",
+				Namespace:   "prod",
+				Tags:        []string{""},
+			},
+			err:     nil,
+			message: "spaces should be trimmed",
+		}, {
+			input: " serviceA ",
+			result: Query{
+				Datacenters: []string{""},
+				ServiceName: "serviceA",
+				Namespace:   "",
+				Tags:        []string{""},
+			},
+			err:     nil,
+			message: "service name only",
+		},
+		{
+			input: " dc1.serviceA.tagA",
+			result: Query{
+				Datacenters: []string{"dc1"},
+				ServiceName: "serviceA",
+				Namespace:   "",
+				Tags:        []string{"tagA"},
+			},
+			err:     nil,
+			message: "without brackets",
+		},
 	}
 	for i, item := range dataItems {
-		result, _, err := ParseConsulSyntax(item.input)
+		result, err := ParseQueryString(item.input)
 		assert.Equal(t, item.result, result, item.message, i)
 		assert.Equal(t, item.err, err, item.message)
 	}
@@ -139,149 +182,44 @@ func TestParseList(t *testing.T) {
 	}
 }
 
-//func TestCleanString(t *testing.T) {
-//	type cleanStringTestItem struct {
-//		inputString string
-//		result      string
-//		message     string
-//	}
-//	dataItems := []cleanStringTestItem{
-//		{
-//			inputString: "consul:[dc 1,dc 2].service A.[tag1,tag2]",
-//			result:      "consuldc1dc2serviceAtag1tag2",
-//			message:     "[ ] , <whitespace>",
-//		},
-//	}
-//	for _, item := range dataItems {
-//		result := cleanString(item.inputString)
-//		assert.Equal(t, item.result, result, item.message)
-//	}
-//
-//}
-
-func TestGetDefaultHost(t *testing.T) {
-	type getDefaultHostTestItem struct {
+func TestParseConsulSyntax(t *testing.T) {
+	type parseConsulSyntaxTestItem struct {
 		inputString string
-		result      DefaultHost
+		result1     string
+		result2     string
+		err         error
 		message     string
 	}
 
-	dataItems := []getDefaultHostTestItem{
+	dataItems := []parseConsulSyntaxTestItem{
+		{
+			inputString: "consul([dc 1,dc 2].service A.[tag1,tag2],http://192.168.0.1:80)",
+			result1:     "[dc 1,dc 2].service A.[tag1,tag2]",
+			result2:     "http://192.168.0.1:80",
+			err:         nil,
+			message:     "valid case",
+		},
+		{
+			inputString: " consul ( [dc 1,dc 2].service A.[tag1,tag2] , http://192.168.0.1:80 ) ",
+			result1:     "[dc 1,dc 2].service A.[tag1,tag2]",
+			result2:     "http://192.168.0.1:80",
+			err:         nil,
+			message:     "valid case with extra spaces",
+		},
 		{
 			inputString: "",
-			result: DefaultHost{
-				Host: "",
-				Port: "",
-			},
-			message: "empty string",
-		},
-		{
-			inputString: "http://www.dumpsters.com",
-			result: DefaultHost{
-				Host: "www.dumpsters.com",
-				Port: "",
-			},
-			message: "url with http and www",
-		},
-		{
-			inputString: "https://www.dumpsters.com:443",
-			result: DefaultHost{
-				Host: "www.dumpsters.com",
-				Port: "443",
-			},
-			message: "url with port",
-		},
-		{
-			inputString: "testing-path.com",
-			result: DefaultHost{
-				Host: "testing-path.com",
-				Port: "",
-			},
-			message: "url without http",
-		},
-		{
-			inputString: "abc.com:80",
-			result: DefaultHost{
-				Host: "abc.com",
-				Port: "80",
-			},
-			message: "url +port without http ",
-		},
-		{
-			inputString: "http://abc.com:80",
-			result: DefaultHost{
-				Host: "abc.com",
-				Port: "80",
-			},
-			message: "url +port +http ",
-		},
-		{
-			inputString: "192.168.0.1",
-			result: DefaultHost{
-				Host: "192.168.0.1",
-				Port: "",
-			},
-			message: "ipv4",
-		},
-		{
-			inputString: "192.168.0.1:80",
-			result: DefaultHost{
-				Host: "192.168.0.1",
-				Port: "80",
-			},
-			message: "ipv4+port",
-		},
-		{
-			inputString: "http://192.168.0.1:80",
-			result: DefaultHost{
-				Host: "192.168.0.1",
-				Port: "80",
-			},
-			message: "ipv4+port+http",
-		},
-		{
-			inputString: "http://2402:4000:2081:3573:e04f:da63:e607:d34d",
-			result: DefaultHost{
-				Host: "2402:4000:2081:3573:e04f:da63:e607:d34d",
-				Port: "",
-			},
-			message: "ipv6+http",
-		},
-		{
-			inputString: "::1",
-			result: DefaultHost{
-				Host: "::1",
-				Port: "",
-			},
-			message: "ipv6 shorthand",
-		},
-		{
-			inputString: "2001:4860:0:2001::68",
-			result: DefaultHost{
-				Host: "2001:4860:0:2001::68",
-				Port: "",
-			},
-			message: "ipv6",
-		}, {
-			inputString: "[1fff:0:a88:85a3::ac1f]:8001",
-			result: DefaultHost{
-				Host: "1fff:0:a88:85a3::ac1f",
-				Port: "8001",
-			},
-			message: "ipv6+port",
-		}, {
-			inputString: "https://[1fff:0:a88:85a3::ac1f]:8001",
-			result: DefaultHost{
-				Host: "1fff:0:a88:85a3::ac1f",
-				Port: "8001",
-			},
-			message: "ipv6+port+http",
+			result1:     "",
+			result2:     "",
+			err:         errors.New("default host not provided"),
+			message:     "empty string",
 		},
 	}
 
 	for _, item := range dataItems {
-		_, _ = getDefaultHost(item.inputString)
-		//assert.Equal(t, item.result, result, item.message)
+		result1, result2, err := ParseConsulSyntax(item.inputString)
+		assert.Equal(t, item.result1, result1, item.message)
+		assert.Equal(t, item.result2, result2, item.message)
+		assert.Equal(t, item.err, err, item.message)
 	}
 
 }

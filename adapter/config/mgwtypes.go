@@ -88,4 +88,13 @@ type Config struct {
 		ListenerKeyPath         string
 		ListenerTLSEnabled      bool
 	}
+
+	Consul struct {
+		Url                     string //http(s)://host:port
+		PollInterval            int
+		HealthChecksPassingOnly bool //Whether consul health checks should be considered when updating Router
+		CaCertPath              string
+		CertPath                string
+		KeyPath                 string
+	}
 }
