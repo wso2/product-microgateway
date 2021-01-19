@@ -24,20 +24,24 @@ package org.wso2am.micro.gw.mockbackend;
  */
 public class ResponseConstants {
 
-    public static final String responseBody = "{\"id\":111111148, \"category\":{ \"id\":0, \"name\":\"ABCD\" }," +
+    public static final String RESPONSE_BODY = "{\"id\":111111148, \"category\":{ \"id\":0, \"name\":\"ABCD\" }," +
             " \"name\":\"doggieUpdated\", \"photoUrls\":[ \"SampleImage1.png\" ], \"tags\":[ { \"id\":0, " +
             "\"name\":\"TestTag1\" } ], \"status\":\"pending\"}";
-    public static final String petByIdResponse = "{\"id\":2, \"category\":{\"id\":1, \"name\":\"John Doe\"}, " +
+    public static final String PET_BY_ID_RESPONSE = "{\"id\":2, \"category\":{\"id\":1, \"name\":\"John Doe\"}, " +
             "\"name\":\"shre\", \"photoUrls\":[\"ArrayItem1\"], \"tags\":[{\"id\":1, \"name\":\"TfNSW\"}]," +
             " \"status\":\"hello\"}";
-    public static final String getPetResponse = "{\"id\":2, \"category\":{\"id\":1, \"name\":\"John Doe\"}," +
+    public static final String GET_PET_RESPONSE = "{\"id\":2, \"category\":{\"id\":1, \"name\":\"John Doe\"}," +
             " \"name\":\"shre\", \"photoUrls\":[\"ArrayItem1\"], \"tags\":[{\"id\":1, \"name\":\"TfNSW\"}]," +
             " \"status\":\"hello\"}";
-    public static final String storeInventoryResponse = "{ \"AVAILABLE\": 1," + "  \"string\": 2,"
+    public static final String STORE_INVENTORY_RESPONSE = "{ \"AVAILABLE\": 1," + "  \"string\": 2,"
             + "  \"pending\": 2," + "  \"available\": 233539," + "  \"PENDING\": 1" + "}";
     public static final String RESPONSE_VALID_JWT_TRANSFORMER = "{\"id\":3, \"category\":{\"id\":1, \"name\":\"John Doe\"}, " +
             "\"name\":\"shre\", \"photoUrls\":[\"ArrayItem1\"], \"tags\":[{\"id\":1, \"name\":\"TfNSW\"}], " +
             "\"status\":\"hello\"}";
+    public static final String API_SANDBOX_RESPONSE = "{\"id\":111111155, \"category\":{ \"id\":0, \"name\":\"ABCD\" }," +
+            " \"name\":\"doggieUpdated\", \"photoUrls\":[ \"SampleImage1.png\" ], \"tags\":[ { \"id\":0, " +
+            "\"name\":\"TestTag1\" } ], \"status\":\"pending\"}";
+
 
     public static final String AUTHENTICATION_FAILURE_RESPONSE = "{\"fault\":\"Authorization credentials are not " +
             "provided.\"}";

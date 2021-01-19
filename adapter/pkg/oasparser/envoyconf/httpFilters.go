@@ -67,6 +67,18 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 	return &filter
 }
 
+// UpgradeFilters that are applied in websocket upgrade mode
+func getUpgradeFilters() []*hcmv3.HttpFilter {
+	extAauth := getExtAuthzHTTPFilter()
+	router := getRouterHTTPFilter()
+	// TODO : (LahiruUdayanga) Configure the custom C++ filter.
+	httpFilters := []*hcmv3.HttpFilter{
+		extAauth,
+		router,
+	}
+	return httpFilters
+}
+
 // getExtAuthzHTTPFilter gets ExtAauthz http filter.
 func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 	extAuthzConfig := &ext_authv3.ExtAuthz{
@@ -74,6 +86,12 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 			MaxRequestBytes:     1024,
 			AllowPartialMessage: false,
 		},
+		// This would clear the route cache only if there is a header added/removed or changed
+		// within ext-authz filter. Without this configuration, the API cannot have production
+		// and sandbox endpoints both at once as the cluster is set based on the header added
+		// from the ext-authz filter.
+		ClearRouteCache:     true,
+		TransportApiVersion: corev3.ApiVersion_V3,
 		Services: &ext_authv3.ExtAuthz_GrpcService{
 			GrpcService: &corev3.GrpcService{
 				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{

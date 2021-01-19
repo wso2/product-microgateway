@@ -23,16 +23,32 @@ import (
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
+	"github.com/wso2/micro-gw/loggers"
 
 	envoy "github.com/wso2/micro-gw/pkg/oasparser/envoyconf"
+	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 )
 
 // GetProductionRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
-// when the openAPI Json is provided.
-func GetProductionRoutesClustersEndpoints(byteArr []byte) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
-	mgwSwagger := operator.GetMgwSwagger(byteArr)
-	routes, clusters, endpoints, _, _, _ := envoy.CreateRoutesWithClusters(mgwSwagger)
+// when the openAPI Json is provided. For websockets apiJsn created from api.yaml file is considerd.
+func GetProductionRoutesClustersEndpoints(byteArr []byte, upstreamCerts []byte, apiType string) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
+	var mgwSwagger mgw.MgwSwagger
+	var routes []*routev3.Route
+	var clusters []*clusterv3.Cluster
+	var endpoints []*corev3.Address
+
+	if apiType == mgw.HTTP {
+		mgwSwagger = operator.GetMgwSwagger(byteArr)
+	} else if apiType == mgw.WS {
+		mgwSwagger = operator.GetMgwSwaggerWebSocket(byteArr)
+	} else {
+		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
+		loggers.LoggerOasparser.Errorf("API type not currently supported with WSO2 Micro-gateway")
+	}
+	routes, clusters, endpoints = envoy.CreateRoutesWithClusters(mgwSwagger, upstreamCerts)
+	//TODO: (VirajSalaka) Decide if this needs to be added to the MgwSwagger
+
 	return routes, clusters, endpoints
 }
 

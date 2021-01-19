@@ -29,6 +29,7 @@ import (
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/wrappers"
 
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
@@ -70,12 +71,19 @@ func CreateListenerWithRds(listenerName string) *listenerv3.Listener {
 
 func createListener(conf *config.Config, listenerName string) *listenerv3.Listener {
 	httpFilters := getHTTPFilters()
+	upgradeFilters := getUpgradeFilters()
 	accessLogs := getAccessLogConfigs()
 	var filters []*listenerv3.Filter
 
 	manager := &hcmv3.HttpConnectionManager{
 		CodecType:  hcmv3.HttpConnectionManager_AUTO,
 		StatPrefix: httpConManagerStartPrefix,
+		// WebSocket upgrades enabled from the HCM
+		UpgradeConfigs: []*hcmv3.HttpConnectionManager_UpgradeConfig{{
+			UpgradeType: "websocket",
+			Enabled:     &wrappers.BoolValue{Value: true},
+			Filters:     upgradeFilters,
+		}},
 		RouteSpecifier: &hcmv3.HttpConnectionManager_Rds{
 			Rds: &hcmv3.Rds{
 				//TODO: (VirajSalaka) Decide if we need this to be configurable in the first stage
@@ -128,10 +136,7 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 	}
 
 	if conf.Envoy.ListenerTLSEnabled {
-		tlsCert, err := generateTLSCert(conf.Envoy.ListenerKeyPath, conf.Envoy.ListenerCertPath)
-		if err != nil {
-			panic(err)
-		}
+		tlsCert := generateTLSCert(conf.Envoy.ListenerKeyPath, conf.Envoy.ListenerCertPath)
 		//TODO: (VirajSalaka) Make it configurable via SDS
 		tlsFilter := &tlsv3.DownstreamTlsContext{
 			CommonTlsContext: &tlsv3.CommonTlsContext{
@@ -226,10 +231,7 @@ func getAccessLogConfigs() *access_logv3.AccessLog {
 //TODO: (VirajSalaka) Still the following method is not utilized as Sds is not implement. Keeping the Implementation for future reference
 func generateDefaultSdsSecretFromConfigfile(privateKeyPath string, pulicKeyPath string) (*tlsv3.Secret, error) {
 	var secret tlsv3.Secret
-	tlsCert, err := generateTLSCert(privateKeyPath, pulicKeyPath)
-	if err != nil {
-		return &secret, err
-	}
+	tlsCert := generateTLSCert(privateKeyPath, pulicKeyPath)
 	secret = tlsv3.Secret{
 		Name: defaultListenerSecretConfigName,
 		Type: &tlsv3.Secret_TlsCertificate{
@@ -239,29 +241,23 @@ func generateDefaultSdsSecretFromConfigfile(privateKeyPath string, pulicKeyPath 
 	return &secret, nil
 }
 
-func generateTLSCert(privateKeyPath string, publicKeyPath string) (*tlsv3.TlsCertificate, error) {
+// generateTLSCert generates the TLS Certiificate with given private key filepath and the corresponding public Key filepath.
+// The files should be mounted to the router container unless the default cert is used.
+func generateTLSCert(privateKeyPath string, publicKeyPath string) *tlsv3.TlsCertificate {
 	var tlsCert tlsv3.TlsCertificate
-	privateKeyByteArray, err := readFileAsByteArray(privateKeyPath)
-	if err != nil {
-		return &tlsCert, err
-	}
-	publicKeyByteArray, err := readFileAsByteArray(publicKeyPath)
-	if err != nil {
-		return &tlsCert, err
-	}
 	tlsCert = tlsv3.TlsCertificate{
 		PrivateKey: &corev3.DataSource{
-			Specifier: &corev3.DataSource_InlineBytes{
-				InlineBytes: privateKeyByteArray,
+			Specifier: &corev3.DataSource_Filename{
+				Filename: privateKeyPath,
 			},
 		},
 		CertificateChain: &corev3.DataSource{
-			Specifier: &corev3.DataSource_InlineBytes{
-				InlineBytes: publicKeyByteArray,
+			Specifier: &corev3.DataSource_Filename{
+				Filename: publicKeyPath,
 			},
 		},
 	}
-	return &tlsCert, nil
+	return &tlsCert
 }
 
 func readFileAsByteArray(filepath string) ([]byte, error) {

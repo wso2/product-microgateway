@@ -1,0 +1,68 @@
+type: api
+version: v4
+data:
+  id: a7de60f9-82fb-46b5-9b35-0390acd88d32
+  name: prodws
+  context: /echowebsocketprod
+  version: "1.0"
+  provider: admin
+  lifeCycleStatus: CREATED
+  responseCachingEnabled: false
+  cacheTimeout: 300
+  isDefaultVersion: false
+  enableSchemaValidation: false
+  enableStore: true
+  type: WS
+  transport: []
+  tags: []
+  policies:
+   - Unlimited
+  authorizationHeader: Authorization
+  securityScheme:
+   - oauth2
+   - oauth_basic_auth_api_key_mandatory
+  visibility: PUBLIC
+  visibleRoles: []
+  visibleTenants: []
+  gatewayEnvironments:
+   - Production and Sandbox
+  deploymentEnvironments: []
+  labels: []
+  mediationPolicies: []
+  subscriptionAvailability: CURRENT_TENANT
+  subscriptionAvailableTenants: []
+  additionalProperties: {}
+  accessControl: NONE
+  accessControlRoles: []
+  businessInformation: {}
+  corsConfiguration:
+    corsConfigurationEnabled: false
+    accessControlAllowOrigins:
+     - '*'
+    accessControlAllowCredentials: false
+    accessControlAllowHeaders:
+     - authorization
+     - Access-Control-Allow-Origin
+     - Content-Type
+     - SOAPAction
+     - apikey
+     - testKey
+    accessControlAllowMethods:
+     - GET
+     - PUT
+     - POST
+     - DELETE
+     - PATCH
+     - OPTIONS
+  createdTime: Jan 10, 2021, 2:21:26 PM
+  lastUpdatedTime: Jan 10, 2021, 2:21:26 PM
+  endpointConfig:
+    endpoint_type: http
+    production_endpoints:
+      url: ws://echo.websocket.org:80
+  endpointImplementationType: ENDPOINT
+  scopes: []
+  operations: []
+  categories: []
+  keyManagers:
+   - all

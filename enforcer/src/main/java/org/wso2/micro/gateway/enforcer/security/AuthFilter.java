@@ -17,9 +17,13 @@
  */
 package org.wso2.micro.gateway.enforcer.security;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
+import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTAuthenticator;
 
@@ -46,15 +50,70 @@ public class AuthFilter implements Filter {
                 if (authenticator.canAuthenticate(requestContext)) {
                     AuthenticationContext authenticate = authenticator.authenticate(requestContext);
                     if (authenticate.isAuthenticated()) {
+                        updateClusterHeaderAndCheckEnv(requestContext, authenticate);
                         return true;
                     }
                 }
             }
         } catch (APISecurityException e) {
-            requestContext.getProperties().put("code", e.getErrorCode());
+            //TODO: (VirajSalaka) provide the error code properly based on exception (401, 403, 429 etc)
+            requestContext.getProperties().put("code", "401");
             requestContext.getProperties().put("error_code", e.getErrorCode());
             requestContext.getProperties().put("error_description", e.getMessage());
         }
         return false;
+    }
+
+    /**
+     * Update the cluster header based on the keyType and authenticate the token against its respective endpoint
+     * environment.
+     * 
+     * @param requestContext request Context 
+     * @param authContext authentication context
+     * @throws APISecurityException if the environment and 
+     */
+    private void updateClusterHeaderAndCheckEnv(RequestContext requestContext, AuthenticationContext authContext)
+            throws APISecurityException {
+
+        String keyType = authContext.getKeyType();
+        if (StringUtils.isEmpty(authContext.getKeyType())) {
+            keyType = APIConstants.API_KEY_TYPE_PRODUCTION;
+        } 
+
+        // Header needs to be set only if the relevant cluster is available for the resource and the key type is
+        // matched.
+        if (requestContext.isClusterHeaderEnabled()) {
+            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
+                requestContext.addResponseHeaders(AdapterConstants.CLUSTER_HEADER,
+                        requestContext.getProdClusterHeader());
+            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
+                requestContext.addResponseHeaders(AdapterConstants.CLUSTER_HEADER,
+                        requestContext.getSandClusterHeader());
+            } else {
+                if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Production key offered to the API with no production endpoint");
+                } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Sandbox key offered to the API with no sandbox endpoint");
+                }
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid key type.");
+            }
+        } else {
+            // Even if the header flag is false, it is required to check if the relevant resource has a defined cluster
+            // based on environment. 
+            // If not it should provide authentication error.
+            // Always at least one of the cluster header values should be set.
+            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)
+                    && StringUtils.isEmpty(requestContext.getProdClusterHeader())) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Production key offered to the API with no production endpoint");
+            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)
+                    && StringUtils.isEmpty(requestContext.getSandClusterHeader())) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Sandbox key offered to the API with no sandbox endpoint");
+            }   
+        }
     }
 }

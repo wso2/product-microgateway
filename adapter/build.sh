@@ -21,13 +21,18 @@ go test ./...
 if [ $? -ne 0 ]; then 
   echo "FAILED: Unit tests failure"
   exit 1
-fi 
+fi
 
 golint -set_exit_status ./...
 if [ $? -ne 0 ]; then
-  echo "FAILED: golint Failure"
-  exit 1
-fi  
+  echo "INFO: Trying to install golint"
+  go get -u golang.org/x/lint/golint
+  golint -set_exit_status ./...
+  if [ $? -ne 0 ]; then
+    echo "FAILED: golint Failure"
+    exit 1
+  fi
+fi
 
 go vet -c=5 ./...
 if [ $? -ne 0 ]; then 

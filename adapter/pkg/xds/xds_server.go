@@ -35,6 +35,7 @@ import (
 	logger "github.com/wso2/micro-gw/loggers"
 	oasParser "github.com/wso2/micro-gw/pkg/oasparser"
 	"github.com/wso2/micro-gw/pkg/oasparser/model"
+	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 )
 
@@ -46,6 +47,8 @@ var (
 	openAPIV3Map map[string]openAPI3.Swagger
 	// OpenAPI Name:Version -> openAPI2 struct map
 	openAPIV2Map map[string]openAPI2.Swagger
+	// WebsocketAPI Name:Version -> MgwSwagger struct map
+	webSocketAPIMap map[string]mgw.MgwSwagger
 	// OpenAPI Name:Version -> Envoy Label Array map
 	openAPIEnvoyMap map[string][]string
 	// OpenAPI Name:Version -> Envoy Routes map
@@ -79,6 +82,7 @@ func init() {
 	cache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
 	openAPIV3Map = make(map[string]openAPI3.Swagger)
 	openAPIV2Map = make(map[string]openAPI2.Swagger)
+	webSocketAPIMap = make(map[string]mgw.MgwSwagger)
 	openAPIEnvoyMap = make(map[string][]string)
 	openAPIRoutesMap = make(map[string][]*routev3.Route)
 	openAPIClustersMap = make(map[string][]*clusterv3.Cluster)
@@ -95,7 +99,7 @@ func GetXdsCache() cachev3.SnapshotCache {
 }
 
 // UpdateEnvoy updates the Xds Cache when OpenAPI Json content is provided
-func UpdateEnvoy(byteArr []byte) {
+func UpdateEnvoy(byteArr []byte, upstreamCerts []byte, apiType string) {
 	var apiMapKey string
 	var newLabels []string
 
@@ -104,53 +108,73 @@ func UpdateEnvoy(byteArr []byte) {
 	l.Lock()
 	defer l.Unlock()
 
-	openAPIVersion, jsonContent, err := operator.GetOpenAPIVersionAndJSONContent(byteArr)
-	if err != nil {
-		logger.LoggerXds.Error("Error while retrieving the openAPI version and Json Content from byte Array.", err)
-		return
-	}
-	logger.LoggerXds.Debugf("OpenAPI version : %v", openAPIVersion)
-	if openAPIVersion == "3" {
-		openAPIV3Struct, err := operator.GetOpenAPIV3Struct(jsonContent)
+	if apiType == mgw.HTTP {
+		openAPIVersion, jsonContent, err := operator.GetOpenAPIVersionAndJSONContent(byteArr)
 		if err != nil {
-			logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
+			logger.LoggerXds.Error("Error while retrieving the openAPI version and Json Content from byte Array.", err)
+			return
 		}
-		apiMapKey = openAPIV3Struct.Info.Title + ":" + openAPIV3Struct.Info.Version
-		existingOpenAPI, ok := openAPIV3Map[apiMapKey]
+		logger.LoggerXds.Debugf("OpenAPI version : %v", openAPIVersion)
+		if openAPIVersion == "3" {
+			openAPIV3Struct, err := operator.GetOpenAPIV3Struct(jsonContent)
+			if err != nil {
+				logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
+			}
+			apiMapKey = openAPIV3Struct.Info.Title + ":" + openAPIV3Struct.Info.Version
+			existingOpenAPI, ok := openAPIV3Map[apiMapKey]
+			if ok {
+				if reflect.DeepEqual(openAPIV3Struct, existingOpenAPI) {
+					//Works as the openAPI already contains the label feature.
+					logger.LoggerXds.Infof("No changes to apply for the OpenAPI key : %v", apiMapKey)
+					return
+				}
+			}
+			openAPIV3Map[apiMapKey] = openAPIV3Struct
+			//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
+			newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
+		} else {
+			openAPIV2Struct, err := operator.GetOpenAPIV2Struct(jsonContent)
+			if err != nil {
+				logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
+			}
+			apiMapKey = openAPIV2Struct.Info.Title + ":" + openAPIV2Struct.Info.Version
+			existingOpenAPI, ok := openAPIV2Map[apiMapKey]
+			if ok {
+				if reflect.DeepEqual(openAPIV2Struct, existingOpenAPI) {
+					//Works as the openAPI already contains the label feature.
+					logger.LoggerXds.Infof("No changes to apply for the OpenAPI key : %v", apiMapKey)
+					return
+				}
+			}
+			newLabels = operator.GetXWso2Labels(openAPIV2Struct.Extensions)
+		}
+
+	} else if apiType == mgw.WS {
+		mgwSwagger := operator.GetMgwSwaggerWebSocket(byteArr)
+		// TODO - uuid as the key
+		apiMapKey = mgwSwagger.GetTitle() + ":" + mgwSwagger.GetVersion()
+		existingWebSocketAPI, ok := webSocketAPIMap[apiMapKey]
 		if ok {
-			if reflect.DeepEqual(openAPIV3Struct, existingOpenAPI) {
-				//Works as the openAPI already contains the label feature.
-				logger.LoggerXds.Infof("No changes to apply for the OpenAPI key : %v", apiMapKey)
+			if reflect.DeepEqual(mgwSwagger, existingWebSocketAPI) {
+				logger.LoggerXds.Infof("No changes to apply for the WebSocketAPI with key: %v", apiMapKey)
 				return
 			}
 		}
-		openAPIV3Map[apiMapKey] = openAPIV3Struct
-		//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
-		newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
+		webSocketAPIMap[apiMapKey] = mgwSwagger
+		// TODO - add label support
+		newLabels = operator.GetXWso2LabelsWebSocket(mgwSwagger)
 	} else {
-		openAPIV2Struct, err := operator.GetOpenAPIV2Struct(jsonContent)
-		if err != nil {
-			logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
-		}
-		apiMapKey = openAPIV2Struct.Info.Title + ":" + openAPIV2Struct.Info.Version
-		existingOpenAPI, ok := openAPIV2Map[apiMapKey]
-		if ok {
-			if reflect.DeepEqual(openAPIV2Struct, existingOpenAPI) {
-				//Works as the openAPI already contains the label feature.
-				logger.LoggerXds.Infof("No changes to apply for the OpenAPI key : %v", apiMapKey)
-				return
-			}
-		}
-		newLabels = operator.GetXWso2Labels(openAPIV2Struct.Extensions)
+		// Unreachable else condition. Added in case apiType type check fails prior to this function
+		// due to any modifications to the code.
+		logger.LoggerXds.Info("API type is not cuurently supported by WSO2 micro-gateway")
 	}
+
 	logger.LoggerXds.Infof("Added/Updated the content under OpenAPI Key : %v", apiMapKey)
 	logger.LoggerXds.Debugf("Newly added labels for the OpenAPI Key : %v are %v", apiMapKey, newLabels)
 	oldLabels, _ := openAPIEnvoyMap[apiMapKey]
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiMapKey, oldLabels)
 	openAPIEnvoyMap[apiMapKey] = newLabels
-	// TODO: (VirajSalaka) Routes populated is wrong here. It has to follow https://github.com/envoyproxy/envoy/blob/v1.16.0/api/envoy/config/route/v3/route.proto
-	// TODO: (VirajSalaka) Can bring VHDS (Delta), but since the gateway would contain only one domain, it won't have much impact.
-	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(byteArr)
+	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(byteArr, upstreamCerts, apiType)
 	// TODO: (VirajSalaka) Decide if the routes and listeners need their own map since it is not going to be changed based on API at the moment.
 	openAPIRoutesMap[apiMapKey] = routes
 	// openAPIListenersMap[apiMapKey] = listeners

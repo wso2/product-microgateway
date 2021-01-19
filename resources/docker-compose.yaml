@@ -1,7 +1,9 @@
 version: "3.7"
 services:
   router:
-    image: wso2/mg-router:4.0.0-m2-SNAPSHOT
+    image: wso2/mg-router:4.0.0-m4-SNAPSHOT
+    volumes:
+      - ./resources/router/security:/home/wso2/security
     ports:
       - "9095:9095"
       - "9000:9000"
@@ -9,17 +11,18 @@ services:
       - adapter
       - enforcer
   enforcer:
-    image: wso2/mg-enforcer:4.0.0-m2-SNAPSHOT
+    image: wso2/mg-enforcer:4.0.0-m4-SNAPSHOT
     volumes:
       - ./resources/enforcer/security:/home/wso2/mg/security
       - ./resources/conf:/home/wso2/conf
     ports:
       - "8081:8081"
   adapter:
-    image: wso2/mg-adapter:4.0.0-m2-SNAPSHOT
+    image: wso2/mg-adapter:4.0.0-m4-SNAPSHOT
     volumes:  
       - ./resources/adapter/security:/home/wso2/security
       - ./resources/conf:/home/wso2/conf
     ports:
       - "18000:18000" 
       - "9843:9843"
+

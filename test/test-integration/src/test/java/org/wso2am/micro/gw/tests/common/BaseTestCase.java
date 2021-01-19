@@ -54,13 +54,26 @@ public class BaseTestCase {
     /**
      * start the mgw docker environment and mock backend.
      *
-     * @param confPath       external conf.toml file location
-     *
+     * @param confPath external conf.toml file location
      * @throws MicroGWTestException
      * @throws IOException
      */
     public void startMGW(String confPath) throws MicroGWTestException, IOException, InterruptedException {
         microGWServer = new MgwServerInstance(confPath);
+        microGWServer.startMGW();
+    }
+
+    /**
+     * start the mgw docker environment and mock backend.
+     *
+     * @param confPath   external conf.toml file location
+     * @param tlsEnabled true if the tls based backend server is required additionally
+     * @throws MicroGWTestException
+     * @throws IOException
+     */
+    public void startMGW(String confPath, boolean tlsEnabled) throws MicroGWTestException, IOException,
+            InterruptedException {
+        microGWServer = new MgwServerInstance(confPath, tlsEnabled);
         microGWServer.startMGW();
     }
 
@@ -89,16 +102,15 @@ public class BaseTestCase {
     /**
      * get a jwt token.
      *
-     * @param api                 api
-     * @param applicationDTO      application dto
-     * @param tier                tier
-     * @param keyType             keytype
-     * @param validityPeriod      validityPeriod
-     *
+     * @param api            api
+     * @param applicationDTO application dto
+     * @param tier           tier
+     * @param keyType        keytype
+     * @param validityPeriod validityPeriod
      * @throws Exception
      */
     public static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType,
-                                   int validityPeriod) throws Exception {
+                                int validityPeriod) throws Exception {
         SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
         subscribedApiDTO.setContext(api.getContext() + "/" + api.getVersion());
         subscribedApiDTO.setName(api.getName());

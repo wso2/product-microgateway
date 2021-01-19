@@ -17,10 +17,12 @@
  */
 package org.wso2.micro.gateway.enforcer.api;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Holds the set of meta data related to current request flowing through the gateway. This context should be shared
@@ -34,6 +36,13 @@ public class RequestContext {
     private ResourceConfig matchedResourcePath;
     private Map<String, String> headers;
     private Map<String, Object> properties = new HashMap();
+    // Denotes the cluster header name for each environment. Both properties can be null if
+    // the openAPI has production endpoints alone.
+    private String prodClusterHeader;
+    private String sandClusterHeader;
+    private boolean clusterHeaderEnabled = false;
+    //Denotes the specific headers which needs to be passed to response object
+    private Map<String, String> responseHeaders;
 
     private RequestContext() {
 
@@ -48,6 +57,8 @@ public class RequestContext {
         private String requestMethod;
         private ResourceConfig matchedResourceConfig;
         private Map<String, String> headers;
+        private String prodClusterHeader;
+        private String sandClusterHeader;
         private Map<String, Object> properties = new HashMap();
 
         public Builder(String requestPath) {
@@ -74,6 +85,20 @@ public class RequestContext {
             return this;
         }
 
+        public Builder prodClusterHeader(String cluster) {
+            if (!StringUtils.isEmpty(cluster)) {
+                this.prodClusterHeader = cluster;
+            }
+            return this;
+        }
+
+        public Builder sandClusterHeader(String cluster) {
+            if (!StringUtils.isEmpty(cluster)) {
+                this.sandClusterHeader = cluster;
+            }
+            return this;
+        }
+
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
@@ -81,7 +106,14 @@ public class RequestContext {
             requestContext.requestMethod = this.requestMethod;
             requestContext.requestPath = this.requestPath;
             requestContext.headers = this.headers;
+            requestContext.prodClusterHeader = this.prodClusterHeader;
+            requestContext.sandClusterHeader = this.sandClusterHeader;
             requestContext.properties = this.properties;
+
+            // Adapter assigns header based routing only if both type of endpoints are present.
+            if (!StringUtils.isEmpty(prodClusterHeader) && !StringUtils.isEmpty(sandClusterHeader)) {
+                requestContext.clusterHeaderEnabled = true;
+            }
             return requestContext;
         }
     }
@@ -108,5 +140,61 @@ public class RequestContext {
 
     public Map<String, Object> getProperties() {
         return properties;
+    }
+
+    /**
+     * Returns the production cluster header value.
+     * can be null if the openAPI has production endpoints alone.
+     * In that case, no header should not be set.
+     *
+     * @return prod Cluster name header value
+     */
+    public String getProdClusterHeader() {
+        return prodClusterHeader;
+    }
+
+    /**
+     * Returns the sandbox cluster header value.
+     * can be null if the openAPI has production endpoints alone.
+     * In that case, no header should not be set.
+     * If this property is null and the keytype is sand box, the request should be blocked
+     *
+     * @return sand Cluster name header value
+     */
+    public String getSandClusterHeader() {
+        return sandClusterHeader;
+    }
+
+    /**
+     * Returns true if both sandbox cluster header and prod cluster header is
+     * available.
+     *
+     * @return true if cluster-header is enabled.
+     */
+    public boolean isClusterHeaderEnabled() {
+        return clusterHeaderEnabled;
+    }
+
+    /**
+     * If a certain header needs to be added to the response additionally from enforcer,
+     * those header-value pairs  should be defined here.
+     *
+     * @param key   header
+     * @param value headerValue
+     */
+    public void addResponseHeaders(String key, String value) {
+        if (responseHeaders == null) {
+            responseHeaders = new TreeMap<>();
+        }
+        responseHeaders.put(key, value);
+    }
+
+    /**
+     * Returns the introduced response headers.
+     *
+     * @return response headers
+     */
+    public Map<String, String> getResponseHeaders() {
+        return responseHeaders;
     }
 }

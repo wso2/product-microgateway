@@ -27,6 +27,9 @@ import (
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
+	"github.com/golang/protobuf/ptypes/wrappers"
+	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
@@ -49,36 +52,28 @@ import (
 //
 // First set of routes, clusters, addresses represents the production endpoints related
 // configurations. Next set represents the sandbox endpoints related configurations.
-func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.Route,
-	clustersP []*clusterv3.Cluster, addressesP []*corev3.Address,
-	routesS []*routev3.Route, clustersS []*clusterv3.Cluster, addressesS []*corev3.Address) {
+func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte) (routesP []*routev3.Route,
+	clustersP []*clusterv3.Cluster, addressesP []*corev3.Address) {
 	var (
-		routesProd              []*routev3.Route
-		clustersProd            []*clusterv3.Cluster
-		endpointProd            []model.Endpoint
+		routesProd []*routev3.Route
+		clusters   []*clusterv3.Cluster
+		endpoints  []*corev3.Address
+
 		apiLevelEndpointProd    []model.Endpoint
 		apilevelClusterProd     *clusterv3.Cluster
 		apiLevelClusterNameProd string
-		endpointsProd           []*corev3.Address
 
-		routesSand              []*routev3.Route
-		clustersSand            []*clusterv3.Cluster
-		endpointSand            []model.Endpoint
 		apiLevelEndpointSand    []model.Endpoint
 		apilevelClusterSand     *clusterv3.Cluster
 		apiLevelClusterNameSand string
-		endpointsSand           []*corev3.Address
 	)
-	// check API level sandbox endpoints availble
-	if len(mgwSwagger.GetSandEndpoints()) > 0 {
-		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
-		apilevelAddressSand := createAddress(apiLevelEndpointSand[0].Host, apiLevelEndpointSand[0].Port)
-		apiLevelClusterNameSand = strings.TrimSpace(sandClustersConfigNamePrefix +
-			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
-		apilevelClusterSand = createCluster(apilevelAddressSand, apiLevelClusterNameSand, apiLevelEndpointSand[0].URLType)
-		clustersSand = append(clustersSand, apilevelClusterSand)
-		endpointsSand = append(endpointsSand, apilevelAddressSand)
-	}
+	// To keep track of API Level production endpoint basePath
+	apiEndpointBasePath := ""
+
+	apiTitle := mgwSwagger.GetTitle()
+	apiVersion := mgwSwagger.GetVersion()
+	apiBasePath := mgwSwagger.GetXWso2Basepath()
+	apiType := mgwSwagger.GetAPIType()
 
 	// check API level production endpoints available
 	if len(mgwSwagger.GetProdEndpoints()) > 0 {
@@ -86,9 +81,11 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 		apilevelAddressP := createAddress(apiLevelEndpointProd[0].Host, apiLevelEndpointProd[0].Port)
 		apiLevelClusterNameProd = strings.TrimSpace(prodClustersConfigNamePrefix +
 			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
-		apilevelClusterProd = createCluster(apilevelAddressP, apiLevelClusterNameProd, apiLevelEndpointProd[0].URLType)
-		clustersProd = append(clustersProd, apilevelClusterProd)
-		endpointsProd = append(endpointsProd, apilevelAddressP)
+		apilevelClusterProd = createCluster(apilevelAddressP, apiLevelClusterNameProd, apiLevelEndpointProd[0].URLType,
+			upstreamCerts)
+		clusters = append(clusters, apilevelClusterProd)
+		endpoints = append(endpoints, apilevelAddressP)
+		apiEndpointBasePath = apiLevelEndpointProd[0].Basepath
 
 		//todo add to ClusterConsulKeyMap on Sand , Resource level as well
 		if apiLevelEndpointProd[0].ServiceDiscoveryString != "" {
@@ -99,53 +96,46 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 	} else {
 		logger.LoggerOasparser.Warn("API level Producton endpoints are not defined")
 	}
-	for _, resource := range mgwSwagger.GetResources() {
-		apiTitle := mgwSwagger.GetTitle()
-		apiVersion := mgwSwagger.GetVersion()
-		apiBasePath := mgwSwagger.GetXWso2Basepath()
 
-		// resource level check sandbox endpoints
-		if len(resource.GetSandEndpoints()) > 0 {
-			endpointSand = resource.GetSandEndpoints()
-			addressSand := createAddress(endpointSand[0].Host, endpointSand[0].Port)
-			// TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
-			clusterNameSand := strings.TrimSpace(apiLevelClusterNameSand + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
-				"0")
-			clusterSand := createCluster(addressSand, clusterNameSand, endpointSand[0].URLType)
-			clustersSand = append(clustersSand, clusterSand)
-			clusterRefSand := clusterSand.GetName()
-
-			// sandbox endpoints
-			routeS := createRoute(apiTitle, apiBasePath, apiVersion, endpointSand[0], resource, clusterRefSand)
-			routesSand = append(routesSand, routeS)
-			endpointsSand = append(endpointsSand, addressSand)
-
-			// API level check
-		} else if len(mgwSwagger.GetSandEndpoints()) > 0 {
-			endpointSand = apiLevelEndpointSand
-			clusterRefSand := apilevelClusterSand.GetName()
-
-			// sandbox endpoints
-			routeS := createRoute(apiTitle, apiBasePath, apiVersion, endpointSand[0], resource, clusterRefSand)
-			routesSand = append(routesSand, routeS)
-
+	// check API level sandbox endpoints availble
+	if len(mgwSwagger.GetSandEndpoints()) > 0 {
+		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
+		if apiEndpointBasePath != apiLevelEndpointSand[0].Basepath && len(apiLevelEndpointProd) > 0 {
+			logger.LoggerOasparser.Warnf("Sandbox API level endpoint basepath is different compared to API level production endpoint "+
+				"for the API %v:%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion)
+		} else {
+			apilevelAddressSand := createAddress(apiLevelEndpointSand[0].Host, apiLevelEndpointSand[0].Port)
+			apiLevelClusterNameSand = strings.TrimSpace(sandClustersConfigNamePrefix +
+				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
+			apilevelClusterSand = createCluster(apilevelAddressSand, apiLevelClusterNameSand, apiLevelEndpointSand[0].URLType,
+				upstreamCerts)
+			clusters = append(clusters, apilevelClusterSand)
+			endpoints = append(endpoints, apilevelAddressSand)
 		}
+	}
+
+	for _, resource := range mgwSwagger.GetResources() {
+
+		clusterRefSand := ""
+		clusterRefProd := ""
+		// The upstream endpoint's basepath.
+		// The production endpoint's basepath is set. The developer has to stick
+		// into the same basePath when using the sandbox endpoint.
+		// TODO: (VirajSalaka) Finalize whether to proceed with this limitation.
+		endpointBasepath := ""
 
 		// resource level check production endpoints
 		if len(resource.GetProdEndpoints()) > 0 {
-			endpointProd = resource.GetProdEndpoints()
+			endpointProd := resource.GetProdEndpoints()
 			addressProd := createAddress(endpointProd[0].Host, endpointProd[0].Port)
 			// TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
 			clusterNameProd := strings.TrimSpace(apiLevelClusterNameProd + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
 				"0")
-			clusterProd := createCluster(addressProd, clusterNameProd, endpointProd[0].URLType)
-			clustersProd = append(clustersProd, clusterProd)
-			clusterRefProd := clusterProd.GetName()
-
-			// production endpoints
-			routeP := createRoute(apiTitle, apiBasePath, apiVersion, endpointProd[0], resource, clusterRefProd)
-			routesProd = append(routesProd, routeP)
-			endpointsProd = append(endpointsProd, addressProd)
+			clusterProd := createCluster(addressProd, clusterNameProd, endpointProd[0].URLType, upstreamCerts)
+			clusters = append(clusters, clusterProd)
+			clusterRefProd = clusterProd.GetName()
+			endpoints = append(endpoints, addressProd)
+			endpointBasepath = endpointProd[0].Basepath
 
 			if endpointProd[0].ServiceDiscoveryString != "" {
 				svcdiscovery.ClusterConsulKeyMap[clusterNameProd] = endpointProd[0].ServiceDiscoveryString
@@ -155,23 +145,62 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger) (routesP []*routev3.R
 
 			// API level check
 		} else if len(mgwSwagger.GetProdEndpoints()) > 0 {
-			endpointProd = apiLevelEndpointProd
-			clusterRefProd := apilevelClusterProd.GetName()
-
-			// production endpoints
-			routeP := createRoute(apiTitle, apiBasePath, apiVersion, endpointProd[0], resource, clusterRefProd)
-			routesProd = append(routesProd, routeP)
+			clusterRefProd = apilevelClusterProd.GetName()
+			endpointBasepath = apiLevelEndpointProd[0].Basepath
 
 		} else {
-			logger.LoggerOasparser.Fatalf("Producton endpoints are not defined")
+			logger.LoggerOasparser.Warnf("Production environment endpoints are not available for the resource %v:%v-%v",
+				apiTitle, apiVersion, resource.GetPath())
 		}
+
+		// resource level check sandbox endpoints
+		if len(resource.GetSandEndpoints()) > 0 {
+			endpointSand := resource.GetSandEndpoints()
+			addressSand := createAddress(endpointSand[0].Host, endpointSand[0].Port)
+			// TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
+			clusterNameSand := strings.TrimSpace(apiLevelClusterNameSand + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
+				"0")
+			if endpointBasepath != endpointSand[0].Basepath {
+				logger.LoggerOasparser.Warnf("Sandbox endpoint basepath is different compared to production endpoint "+
+					"for the resource %v:%v-%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion, resource.GetPath())
+			} else {
+				// sandbox cluster is not created if the basepath component of the endpoint is different compared to production
+				// endpoints
+				clusterSand := createCluster(addressSand, clusterNameSand, endpointSand[0].URLType, upstreamCerts)
+				clusters = append(clusters, clusterSand)
+				endpoints = append(endpoints, addressSand)
+				clusterRefSand = clusterSand.GetName()
+			}
+
+			// API level check
+			// Due to endpoint basePath restriction, the apiLevelEndpointSand may not be initialized.
+		} else if len(mgwSwagger.GetSandEndpoints()) > 0 || apiLevelEndpointSand != nil {
+			endpointSand := apiLevelEndpointSand
+			if endpointBasepath != endpointSand[0].Basepath && clusterRefProd != "" {
+				logger.LoggerOasparser.Warnf("Sandbox endpoint basepath of API is different compared to production endpoint "+
+					"for the resource %v:%v-%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion, resource.GetPath())
+			} else {
+				clusterRefSand = apilevelClusterSand.GetName()
+				endpointBasepath = endpointSand[0].Basepath
+			}
+		} else {
+			logger.LoggerOasparser.Debugf("Sandbox environment endpoints are not available for the resource %v:%v-%v",
+				apiTitle, apiVersion, resource.GetPath())
+		}
+
+		routeP := createRoute(apiTitle, apiType, apiBasePath, apiVersion, endpointBasepath, resource.GetPath(), resource.GetMethod(), clusterRefProd, clusterRefSand)
+		routesProd = append(routesProd, routeP)
 	}
-	return routesProd, clustersProd, endpointsProd, routesSand, clustersSand, endpointsSand
+	if mgwSwagger.GetAPIType() == mgw.WS {
+		routesP := createRoute(apiTitle, apiType, apiBasePath, apiVersion, apiEndpointBasePath, "", []string{"GET"}, apilevelClusterProd.GetName(), apilevelClusterSand.GetName())
+		routesProd = append(routesProd, routesP)
+	}
+	return routesProd, clusters, endpoints
 }
 
 // createCluster creates cluster configuration. AddressConfiguration, cluster name and
 // urlType (http or https) is required to be provided.
-func createCluster(address *corev3.Address, clusterName string, urlType string) *clusterv3.Cluster {
+func createCluster(address *corev3.Address, clusterName string, urlType string, upstreamCerts []byte) *clusterv3.Cluster {
 	logger.LoggerOasparser.Debug("creating a cluster....")
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
@@ -201,20 +230,8 @@ func createCluster(address *corev3.Address, clusterName string, urlType string) 
 			},
 		},
 	}
-	if strings.HasPrefix(urlType, httpsURLType) {
-		upstreamtlsContext := &tlsv3.UpstreamTlsContext{
-			CommonTlsContext: &tlsv3.CommonTlsContext{
-				ValidationContextType: &tlsv3.CommonTlsContext_ValidationContext{
-					ValidationContext: &tlsv3.CertificateValidationContext{
-						TrustedCa: &corev3.DataSource{
-							Specifier: &corev3.DataSource_Filename{
-								Filename: defaultCACertPath,
-							},
-						},
-					},
-				},
-			},
-		}
+	if strings.HasPrefix(urlType, httpsURLType) || strings.HasPrefix(urlType, wssURLType) {
+		upstreamtlsContext := createUpstreamTLSContext(upstreamCerts, address)
 		marshalledTLSContext, err := ptypes.MarshalAny(upstreamtlsContext)
 		if err != nil {
 			logger.LoggerOasparser.Error("Internal Error while marshalling the upstream TLS Context.")
@@ -231,8 +248,90 @@ func createCluster(address *corev3.Address, clusterName string, urlType string) 
 	return &cluster
 }
 
-func createRoute(title string, xWso2Basepath string, version string, endpoint model.Endpoint,
-	resource model.Resource, clusterName string) *routev3.Route {
+func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tlsv3.UpstreamTlsContext {
+	conf, errReadConfig := config.ReadConfigs()
+	//TODO: (VirajSalaka) Error Handling
+	if errReadConfig != nil {
+		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
+		return nil
+	}
+	tlsCert := generateTLSCert(conf.Envoy.Upstream.TLS.PrivateKeyPath, conf.Envoy.Upstream.TLS.PublicCertPath)
+	// Convert the cipher string to a string array
+	ciphersArray := strings.Split(conf.Envoy.Upstream.TLS.Ciphers, ",")
+	for i := range ciphersArray {
+		ciphersArray[i] = strings.TrimSpace(ciphersArray[i])
+	}
+
+	upstreamTLSContext := &tlsv3.UpstreamTlsContext{
+		CommonTlsContext: &tlsv3.CommonTlsContext{
+			TlsParams: &tlsv3.TlsParameters{
+				TlsMinimumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MinVersion),
+				TlsMaximumProtocolVersion: createTLSProtocolVersion(conf.Envoy.Upstream.TLS.MaxVersion),
+				CipherSuites:              ciphersArray,
+			},
+			TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
+		},
+	}
+
+	if !conf.Envoy.Upstream.TLS.DisableSSLVerification {
+		var trustedCASrc *corev3.DataSource
+
+		if len(upstreamCerts) > 0 {
+			trustedCASrc = &corev3.DataSource{
+				Specifier: &corev3.DataSource_InlineBytes{
+					InlineBytes: upstreamCerts,
+				},
+			}
+		} else {
+			trustedCASrc = &corev3.DataSource{
+				Specifier: &corev3.DataSource_Filename{
+					Filename: conf.Envoy.Upstream.TLS.CACrtPath,
+				},
+			}
+		}
+
+		upstreamTLSContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_ValidationContext{
+			ValidationContext: &tlsv3.CertificateValidationContext{
+				TrustedCa: trustedCASrc,
+			},
+		}
+	}
+
+	if conf.Envoy.Upstream.TLS.VerifyHostName && !conf.Envoy.Upstream.TLS.DisableSSLVerification {
+		addressString := address.GetSocketAddress().GetAddress()
+		subjectAltNames := []*envoy_type_matcherv3.StringMatcher{
+			{
+				MatchPattern: &envoy_type_matcherv3.StringMatcher_Exact{
+					Exact: addressString,
+				},
+			},
+		}
+		upstreamTLSContext.CommonTlsContext.GetValidationContext().MatchSubjectAltNames = subjectAltNames
+	}
+	return upstreamTLSContext
+}
+
+func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol {
+	switch tlsVersion {
+	case "TLS1_0":
+		return tlsv3.TlsParameters_TLSv1_0
+	case "TLS1_1":
+		return tlsv3.TlsParameters_TLSv1_1
+	case "TLS1_2":
+		return tlsv3.TlsParameters_TLSv1_2
+	case "TLS1_3":
+		return tlsv3.TlsParameters_TLSv1_3
+	default:
+		return tlsv3.TlsParameters_TLS_AUTO
+	}
+}
+
+// createRoute creates route elements for the route configurations. API title, xWso2Basepath, API version,
+// endpoint's basePath, resource Object (Microgateway's internal representation), production clusterName and
+// sandbox clusterName needs to be provided.
+func createRoute(title string, apiType string, xWso2Basepath string, version string, endpointBasepath string,
+	resourcePathParam string, resourceMethods []string, prodClusterName string, sandClusterName string) *routev3.Route {
+
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
 		router       routev3.Route
@@ -250,12 +349,12 @@ func createRoute(title string, xWso2Basepath string, version string, endpoint mo
 						MaxProgramSize: nil,
 					},
 				},
-				Regex: "^(" + strings.Join(resource.GetMethod(), "|") + ")$",
+				Regex: "^(" + strings.Join(resourceMethods, "|") + ")$",
 			},
 		},
 	}
-	resourcePath = resource.GetPath()
-	routePath := generateRoutePaths(xWso2Basepath, endpoint.Basepath, resourcePath)
+	resourcePath = resourcePathParam
+	routePath := generateRoutePaths(xWso2Basepath, endpointBasepath, resourcePath)
 
 	match = &routev3.RouteMatch{
 		PathSpecifier: &routev3.RouteMatch_SafeRegex{
@@ -271,26 +370,37 @@ func createRoute(title string, xWso2Basepath string, version string, endpoint mo
 		Headers: []*routev3.HeaderMatcher{&headerMatcherArray},
 	}
 
-	hostRewriteSpecifier := &routev3.RouteAction_HostRewriteLiteral{
-		HostRewriteLiteral: endpoint.Host,
+	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
+		AutoHostRewrite: &wrapperspb.BoolValue{
+			Value: true,
+		},
+	}
+	if apiType == mgw.WS {
+		decorator = &routev3.Decorator{
+			Operation: endpointBasepath,
+		}
+	} else if apiType == mgw.HTTP {
+		decorator = &routev3.Decorator{
+			Operation: resourcePath,
+		}
 	}
 
-	clusterSpecifier := &routev3.RouteAction_Cluster{
-		Cluster: clusterName,
-	}
-	decorator = &routev3.Decorator{
-		Operation: resourcePath,
-	}
 	var contextExtensions = make(map[string]string)
-	contextExtensions["path"] = resourcePath
+	contextExtensions[pathContextExtension] = resourcePath
 	if xWso2Basepath != "" {
-		contextExtensions["basePath"] = xWso2Basepath
+		contextExtensions[basePathContextExtension] = xWso2Basepath
 	} else {
-		contextExtensions["basePath"] = endpoint.Basepath
+		contextExtensions[basePathContextExtension] = endpointBasepath
 	}
-	contextExtensions["method"] = strings.Join(resource.GetMethod(), " ")
-	contextExtensions["version"] = version
-	contextExtensions["name"] = title
+	contextExtensions[methodContextExtension] = strings.Join(resourceMethods, " ")
+	contextExtensions[apiVersionContextExtension] = version
+	contextExtensions[apiNameContextExtension] = title
+	// One of these values will be selected and added as the cluster-header http header
+	// from enhancer
+	// Even if the routing is based on direct cluster, these properties needs to be populated
+	// to validate the key type component in the token.
+	contextExtensions["prodClusterName"] = prodClusterName
+	contextExtensions["sandClusterName"] = sandClusterName
 
 	perFilterConfig := extAuthService.ExtAuthzPerRoute{
 		Override: &extAuthService.ExtAuthzPerRoute_CheckSettings{
@@ -304,7 +414,7 @@ func createRoute(title string, xWso2Basepath string, version string, endpoint mo
 	b.SetDeterministic(true)
 	_ = b.Marshal(&perFilterConfig)
 	filter := &any.Any{
-		TypeUrl: "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute",
+		TypeUrl: extAuthzPerRouteName,
 		Value:   b.Bytes(),
 	}
 
@@ -322,18 +432,37 @@ func createRoute(title string, xWso2Basepath string, version string, endpoint mo
 						},
 						Regex: xWso2Basepath,
 					},
-					Substitution: endpoint.Basepath,
+					Substitution: endpointBasepath,
 				},
-				ClusterSpecifier: clusterSpecifier,
+				UpgradeConfigs: getUpgradeConfig(apiType),
 			},
 		}
 	} else {
 		action = &routev3.Route_Route{
 			Route: &routev3.RouteAction{
 				HostRewriteSpecifier: hostRewriteSpecifier,
-				ClusterSpecifier:     clusterSpecifier,
 			},
 		}
+	}
+
+	if prodClusterName != "" && sandClusterName != "" {
+		headerBasedClusterSpecifier := &routev3.RouteAction_ClusterHeader{
+			ClusterHeader: clusterHeaderName,
+		}
+		action.Route.ClusterSpecifier = headerBasedClusterSpecifier
+		logger.LoggerOasparser.Debug("adding cluster header")
+	} else if prodClusterName != "" {
+		directClusterSpecifier := &routev3.RouteAction_Cluster{
+			Cluster: prodClusterName,
+		}
+		action.Route.ClusterSpecifier = directClusterSpecifier
+		logger.LoggerOasparser.Debugf("adding cluster: %v", prodClusterName)
+	} else {
+		directClusterSpecifier := &routev3.RouteAction_Cluster{
+			Cluster: sandClusterName,
+		}
+		action.Route.ClusterSpecifier = directClusterSpecifier
+		logger.LoggerOasparser.Debugf("adding cluster: %v", sandClusterName)
 	}
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
 
@@ -400,4 +529,20 @@ func generateRegex(fullpath string) string {
 		newPath = "^" + fullpath + endRegex + "$"
 	}
 	return newPath
+}
+
+func getUpgradeConfig(apiType string) []*routev3.RouteAction_UpgradeConfig {
+	var upgradeConfig []*routev3.RouteAction_UpgradeConfig
+	if apiType == mgw.WS {
+		upgradeConfig = []*routev3.RouteAction_UpgradeConfig{{
+			UpgradeType: "websocket",
+			Enabled:     &wrappers.BoolValue{Value: true},
+		}}
+	} else {
+		upgradeConfig = []*routev3.RouteAction_UpgradeConfig{{
+			UpgradeType: "websocket",
+			Enabled:     &wrappers.BoolValue{Value: false},
+		}}
+	}
+	return upgradeConfig
 }

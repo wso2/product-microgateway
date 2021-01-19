@@ -18,6 +18,8 @@
 
 package org.wso2.micro.gateway.enforcer.api;
 
+import java.util.Map;
+
 /**
  * Holds the response data to build the response object to be sent to the envoy proxy.
  */
@@ -25,6 +27,15 @@ public class ResponseObject {
     private int statusCode;
     private String errorCode;
     private String errorDescription;
+    private Map<String, String> headerMap;
+
+    public void setHeaderMap(Map<String, String> headerMap) {
+        this.headerMap = headerMap;
+    }
+
+    public Map<String, String> getHeaderMap() {
+        return headerMap;
+    }
 
     public int getStatusCode() {
         return statusCode;

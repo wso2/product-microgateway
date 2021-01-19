@@ -26,7 +26,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/BurntSushi/toml"
+	toml "github.com/pelletier/go-toml"
 	logger "github.com/sirupsen/logrus"
 )
 
@@ -67,10 +67,14 @@ func ReadConfigs() (*Config, error) {
 		content, readErr := ioutil.ReadFile(mgwHome + relativeConfigPath)
 		if readErr != nil {
 			logger.Fatal("Error reading configurations. ", readErr)
+			return
 		}
-		_, e = toml.Decode(string(content), adapterConfig)
+		parseErr := toml.Unmarshal(content, adapterConfig)
+		if parseErr != nil {
+			logger.Fatal("Error parsing the configuration ", parseErr)
+			return
+		}
 	})
-
 	return adapterConfig, e
 }
 
@@ -92,8 +96,12 @@ func ReadLogConfigs() (*LogConfig, error) {
 		content, readErr := ioutil.ReadFile(mgwHome + relativeLogConfigPath)
 		if readErr != nil {
 			logger.Fatal("Error reading log configurations. ", readErr)
+			return
 		}
-		_, e = toml.Decode(string(content), adapterLogConfig)
+		parseErr := toml.Unmarshal(content, adapterLogConfig)
+		if parseErr != nil {
+			logger.Fatal("Error parsing the log configuration ", parseErr)
+		}
 
 	})
 	return adapterLogConfig, e

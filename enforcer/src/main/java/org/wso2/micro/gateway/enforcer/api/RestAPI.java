@@ -17,7 +17,7 @@
  */
 package org.wso2.micro.gateway.enforcer.api;
 
-import io.envoyproxy.envoy.service.auth.v2.CheckRequest;
+import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.Filter;
@@ -61,11 +61,15 @@ public class RestAPI implements API {
         ResponseObject responseObject = new ResponseObject();
         if (executeFilterChain(requestContext)) {
             responseObject.setStatusCode(200);
+            if (requestContext.getResponseHeaders() != null) {
+                responseObject.setHeaderMap(requestContext.getResponseHeaders());
+            }
         } else {
             responseObject.setStatusCode(Integer.parseInt(requestContext.getProperties().get("code").toString()));
             responseObject.setErrorCode(requestContext.getProperties().get("error_code").toString());
             responseObject.setErrorDescription(requestContext.getProperties().get("error_description").toString());
         }
+
         return responseObject;
     }
 

@@ -122,3 +122,27 @@ func GetXWso2Labels(vendorExtensionsMap map[string]interface{}) []string {
 	}
 	return []string{"default"}
 }
+
+/*
+GetXWso2LabelsWebSocket returns a string array of labels provided using extensions.
+For web sockets, since we are using the api.yaml file, need to figure out a way
+to pass labels. Currently value "default" is returned
+*/
+func GetXWso2LabelsWebSocket(webSocketAPIDef model.MgwSwagger) []string {
+	return []string{"default"}
+}
+
+/*
+GetMgwSwaggerWebSocket returns a MgwSwagger for the web socket APIs
+*/
+func GetMgwSwaggerWebSocket(apiContent []byte) model.MgwSwagger {
+	var mgwSwagger model.MgwSwagger
+	var apiData map[string]interface{}
+	unmarshalErr := json.Unmarshal(apiContent, &apiData)
+	if unmarshalErr != nil {
+		logger.LoggerOasparser.Errorf("JSON unmarshalling error: %v", unmarshalErr)
+	}
+	mgwSwagger.SetInfoSwaggerWebSocket(apiData)
+	return mgwSwagger
+
+}
