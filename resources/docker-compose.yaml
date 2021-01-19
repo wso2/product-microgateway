@@ -8,6 +8,13 @@ services:
     links:
       - adapter
       - enforcer
+  enforcer:
+    image: wso2/mg-enforcer:4.0.0-m2-SNAPSHOT
+    volumes:
+      - ./resources/enforcer/security:/home/wso2/mg/security
+      - ./resources/conf:/home/wso2/conf
+    ports:
+      - "8081:8081"
   adapter:
     image: wso2/mg-adapter:4.0.0-m2-SNAPSHOT
     volumes:  
@@ -16,10 +23,3 @@ services:
     ports:
       - "18000:18000" 
       - "9843:9843"
-  enforcer:
-    image: wso2/mg-enforcer:4.0.0-m2-SNAPSHOT
-    volumes:  
-      - ./resources/enforcer/security:/home/wso2/mg/security
-      - ./resources/conf:/home/wso2/conf
-    ports:
-      - "8081:8081"   
