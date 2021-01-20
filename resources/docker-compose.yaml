@@ -24,7 +24,7 @@ services:
       - ./resources/enforcer/security:/home/wso2/mg/security
       - ./resources/conf:/home/wso2/conf
     environment:
-      - XDS_SERVER_HOST=adapter
-      - XDS_SERVER_PORT=18000
+      - ADAPTER_HOST=adapter
+      - ADAPTER_XDS_PORT=18000
     ports:
       - "8081:8081"   

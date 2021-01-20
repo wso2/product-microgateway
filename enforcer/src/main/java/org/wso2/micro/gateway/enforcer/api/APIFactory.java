@@ -20,7 +20,11 @@ package org.wso2.micro.gateway.enforcer.api;
 import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.gateway.discovery.api.Api;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.constants.Constants;
+import org.wso2.micro.gateway.enforcer.discovery.ApiDiscoveryClient;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,7 +38,7 @@ public class APIFactory {
     private static final Logger logger = LogManager.getLogger(APIFactory.class);
 
     private static APIFactory apiFactory;
-    private ConcurrentHashMap<String, API> apiMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, API> apis = new ConcurrentHashMap<>();
 
     private APIFactory() {
 
@@ -47,10 +51,38 @@ public class APIFactory {
         return apiFactory;
     }
 
+    public void init() {
+        ApiDiscoveryClient ads =  ApiDiscoveryClient.getInstance();
+        ads.watchApis();
+    }
+
+    public void addApi(API api) {
+        String apiKey = api.getAPIConfig().getBasePath() + '/' + api.getAPIConfig().getVersion();
+        apis.put(apiKey, api);
+    }
+
+    public void addApis(List<Api> apis) {
+        for (Api api : apis) {
+            RestAPI enforcerApi = new RestAPI();
+            enforcerApi.init(api);
+            addApi(enforcerApi);
+        }
+    }
+
+    public void removeApi(API api) {
+        String apiKey = api.getAPIConfig().getBasePath() + '/' + api.getAPIConfig().getVersion();
+        apis.remove(apiKey);
+    }
+
     public API getMatchedAPI(CheckRequest request) {
         // TODO: (Praminda) Change the init type depending on the api type param from gw
-        API api = new RestAPI();
-        api.init(request);
+        String basePath = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_BASE_PATH_PARAM);
+        String version = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_VERSION_PARAM);
+        String apiKey = basePath + '/' + version;
+        if (logger.isDebugEnabled()) {
+            logger.debug("API {} added to the API cache", apiKey);
+        }
+        API api = apis.get(apiKey);
         return api;
     }
 
