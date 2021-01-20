@@ -157,6 +157,13 @@ deployedPolicies) returns boolean {
         if (!checkResourceLevelThrottled(caller, request, context, resourceLevelPolicyName, deployedPolicies, resourceLevelThrottleKey)) {
             return false;
         }
+
+        // applying custom throttling policies for unauthenticated api calls
+        if (enabledGlobalTMEventPublishing && keyTemplateMap.length() > 0 &&
+                 !checkCustomThrottlePolicies(caller, request, context, keyValidationResult, apiContext,
+                 apiVersion, resourceLevelThrottleKey, tenantDomain, clientIP)) {
+            return false;
+        }
         printDebug(KEY_THROTTLE_FILTER, "Not a secured resource. Proceeding with Unauthenticated tier.");
         // setting keytype to invocationContext
         invocationContext.attributes[KEY_TYPE_ATTR] = PRODUCTION_KEY_TYPE;
