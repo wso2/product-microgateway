@@ -2,7 +2,7 @@ module github.com/wso2/micro-gw
 
 go 1.15
 
-replace github.com/envoyproxy/go-control-plane => github.com/praminda/go-control-plane v0.9.8-0.20210118174811-edeee5b99447
+replace github.com/envoyproxy/go-control-plane => github.com/praminda/go-control-plane v0.9.8-0.20210119081951-da1f9251f109
 
 require (
 	github.com/envoyproxy/go-control-plane v0.9.8
