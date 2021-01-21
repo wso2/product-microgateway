@@ -103,4 +103,13 @@ type Config struct {
 			}
 		}
 	}
+
+	Enforcer struct {
+		EventHub struct {
+			Enable                  bool `toml:"enable"`
+			JmsConnectionParameters struct {
+				EventListeningEndpoints string `toml:"eventListeningEndpoints"`
+			}
+		}
+	}
 }

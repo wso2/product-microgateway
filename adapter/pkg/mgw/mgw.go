@@ -33,6 +33,8 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/micro-gw/pkg/api/restserver"
+	"github.com/wso2/micro-gw/pkg/jms"
 	xds "github.com/wso2/micro-gw/pkg/xds"
 	"google.golang.org/grpc"
 )
@@ -111,6 +113,12 @@ func Run(conf *config.Config) {
 
 	runManagementServer(srv, port)
 	go restserver.StartRestServer(conf)
+
+	var enableEventHub bool
+	enableEventHub = conf.Enforcer.EventHub.Enable
+	if enableEventHub {
+		go jms.ProcessEvents(conf)
+	}
 OUTER:
 	for {
 		select {
