@@ -1,8 +1,0 @@
-# Global config for consul service discovery
-address = "169.254.1.1:8500" # host ip + port
-scheme = "http"
-tokenFile = ""
-requestTimeout = 5 # seconds
-pollInterval = 5 # seconds
-# Whether consul health checks should be considered when updating envoy clusters
-healthChecksPassingOnly = true
