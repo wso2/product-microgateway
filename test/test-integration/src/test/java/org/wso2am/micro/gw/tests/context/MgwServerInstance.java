@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.mockbackend.MockBackendServer;
-import org.wso2am.micro.gw.tests.mockconsul.MockConsulServer;
 import org.wso2am.micro.gw.tests.util.HttpClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
 import org.wso2am.micro.gw.tests.util.Utils;
@@ -53,16 +52,6 @@ public class MgwServerInstance implements MgwServer {
      * @throws MicroGWTestException
      */
     public MgwServerInstance() throws IOException, MicroGWTestException {
-//        createTmpMgwSetup();
-//        File targetClassesDir = new File(MgwServerInstance.class.getProtectionDomain().getCodeSource().
-//                getLocation().getPath());
-//        String mgwServerPath = targetClassesDir.getParentFile().toString() + File.separator + "server-tmp";
-//
-//        String dockerCompsePath = mgwServerPath+  File.separator + "docker-compose.yaml";
-////        MockConsulServer.addConsulMockServiceToDockerCompose(dockerCompsePath);
-//        MockBackendServer.addMockBackendServiceToDockerCompose(dockerCompsePath);
-//        environment = new DockerComposeContainer(new File(dockerCompsePath))
-//                .withLocalCompose(true);
         this(null, false);
 
     }
@@ -99,7 +88,7 @@ public class MgwServerInstance implements MgwServer {
         }
         String dockerCompsePath = mgwServerPath+  File.separator + "docker-compose.yaml";
 //        MockConsulServer.addConsulMockServiceToDockerCompose(dockerCompsePath);
-        MockBackendServer.addMockBackendServiceToDockerCompose(dockerCompsePath);
+        MockBackendServer.addMockBackendServiceToDockerCompose(dockerCompsePath,tlsEnabled);
         environment = new DockerComposeContainer(new File(dockerCompsePath))
                 .withLocalCompose(true);
 
