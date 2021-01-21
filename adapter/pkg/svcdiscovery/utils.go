@@ -14,17 +14,18 @@
  *  limitations under the License.
  *
  */
+
 package svcdiscovery
 
 import (
 	"errors"
-	"fmt"
+	"regexp"
 	"strings"
 )
 
 const (
-	// ConsulBegin
-	ConsulBegin string = "consul"
+	// consulBegin
+	consulBegin string = "consul"
 )
 
 // DefaultHost host and port of the default host
@@ -34,12 +35,14 @@ type DefaultHost struct {
 	Port string
 }
 
-func IsDiscoveryServiceEndpoint(str string, discoveryServiceName string) bool {
+//IsDiscoveryServiceEndpoint checks whether an endpoint string is a consul syntax string
+func IsDiscoveryServiceEndpoint(str string) bool {
 	str = strings.TrimSpace(str)
-	fmt.Print("IsDiscoveryServiceEndpoint ", strings.HasPrefix(str, discoveryServiceName))
-	return strings.HasPrefix(str, discoveryServiceName)
+	re, _ := regexp.Compile(`^consul(\s*)\(.*,.*\)$`)
+	return re.MatchString(str)
 }
 
+//parse a list of datacenters or tags
 func parseList(str string) []string {
 	s := strings.Split(str, ",")
 	for i := range s {
@@ -68,22 +71,18 @@ func ParseConsulSyntax(str string) (string, string, error) {
 		str = strings.Join(list[0:length-1], ",")
 	}
 	str = strings.Replace(str, "(", "", 1)
-	str = strings.Replace(str, ConsulBegin, "", 1)
+	str = strings.Replace(str, consulBegin, "", 1)
 	str = strings.TrimSpace(str)
 	return str, defaultHost, nil
 }
 
-//ParseQueryString parses the string into a QueryString struct
+//ParseQueryString parses the string into a Query struct
 func ParseQueryString(query string) (Query, error) {
-	//example-->
-	//consul:[dc1,dc2].namespace.serviceA.[tag1,tag2]
-	//if !IsDiscoveryServiceEndpoint(query, ConsulBegin) {
-	//	return QueryString{}, errors.New("not a consul service string")
-	//}
-	//split := strings.Split(query, ":")
-	//if len(split) != 2 {
-	//	return QueryString{}, errors.New("bad query syntax")
-	//}
+	//examples-->
+	//[dc1,dc2].namespace.serviceA.[tag1,tag2]
+	//dc1.serviceA.tag1
+	//serviceA
+	//
 	str := strings.Split(query, ".")
 	qCategory := len(str)
 	if qCategory == 1 { //service name only
@@ -111,38 +110,5 @@ func ParseQueryString(query string) (Query, error) {
 		}
 		return queryString, nil
 	}
-	return Query{}, errors.New("bad query syntax")
+	return Query{}, errors.New("bad consul query syntax")
 }
-
-//func getDefaultHost(rawURL string) (DefaultHost, error) {
-//	if !strings.Contains(rawURL, "://") {
-//		rawURL = "http://" + rawURL
-//	}
-//	val, err1 := url.Parse(rawURL)
-//
-//	defHost := DefaultHost{
-//		Host: "",
-//		Port: "",
-//	}
-//	//try with SplitHostPort
-//	if err1 != nil {
-//		h, p, err2 := net.SplitHostPort(rawURL)
-//		if err2 != nil {
-//			//try with ParseIP
-//			ip := net.ParseIP(rawURL)
-//			if ip != nil {
-//				defHost.Host = ip.String()
-//			}
-//		} else {
-//			defHost.Host = h
-//			defHost.Port = p
-//		}
-//	} else {
-//		if val != nil {
-//			defHost.Host = val.Hostname()
-//			defHost.Port = val.Port()
-//		}
-//	}
-//
-//	return defHost, nil
-//}

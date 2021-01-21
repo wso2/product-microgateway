@@ -30,14 +30,14 @@ func TestIsDiscoveryServiceEndpoint(t *testing.T) {
 	}
 	dataItems := []isDiscoveryServiceEndpointList{
 		{
-			input:   "consul",
+			input:   " consul (dc1.dev.serviceA.tag1 , http://localhost:4000 ) ",
 			output:  true,
-			message: "only consul keyword",
+			message: "with spaces",
 		},
 		{
 			input:   " consul",
-			output:  true,
-			message: "consul keyword with spaces",
+			output:  false,
+			message: "invalid",
 		},
 		{
 			input:   "consul([dc1,dc2].dev.serviceA.[tag1,tag2],http://localhost:4000)",
@@ -50,14 +50,19 @@ func TestIsDiscoveryServiceEndpoint(t *testing.T) {
 			message: "empty",
 		},
 		{
-			input:   "consul",
-			output:  true,
-			message: "without :",
+			input:   "consul([dc1,dc2].dev.serviceA.[tag1,tag2],http://localhost:4000",
+			output:  false,
+			message: "missing parenthesis",
+		},
+		{
+			input:   "consul([dc1,dc2].dev.serviceA.[tag1,tag2] http://localhost:4000",
+			output:  false,
+			message: "missing middle comma",
 		},
 	}
 
 	for i, item := range dataItems {
-		result := IsDiscoveryServiceEndpoint(item.input, ConsulBegin)
+		result := IsDiscoveryServiceEndpoint(item.input)
 		assert.Equal(t, item.output, result, item.message, i)
 	}
 }
@@ -105,7 +110,7 @@ func TestParseQueryString(t *testing.T) {
 		},
 		{
 			input:   "[].fake.another.prod.serviceA.[*]",
-			err:     errors.New("bad query syntax"),
+			err:     errors.New("bad consul query syntax"),
 			message: "5 pieces in syntax",
 		},
 		{

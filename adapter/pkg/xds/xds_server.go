@@ -40,7 +40,8 @@ import (
 )
 
 var (
-	version int32
+	version           int32
+	mutexForXdsUpdate sync.Mutex
 
 	cache cachev3.SnapshotCache
 	// OpenAPI Name:Version -> openAPI3 struct map
@@ -220,14 +221,14 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 	for _, oldLabel := range oldLabels {
 		if !arrayContains(newLabels, oldLabel) {
 			listeners, clusters, routes, endpoints := generateEnvoyResoucesForLabel(oldLabel)
-			updateXdsCache(oldLabel, endpoints, clusters, routes, listeners)
+			updateXdsCacheWithLock(oldLabel, endpoints, clusters, routes, listeners)
 			logger.LoggerXds.Debugf("Xds Cache is updated for the already existing label : %v", oldLabel)
 		}
 	}
 
 	for _, newLabel := range newLabels {
 		listeners, clusters, routes, endpoints := generateEnvoyResoucesForLabel(newLabel)
-		updateXdsCache(newLabel, endpoints, clusters, routes, listeners)
+		updateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
 		logger.LoggerXds.Debugf("Xds Cache is updated for the newly added label : %v", newLabel)
 	}
 }
@@ -258,6 +259,7 @@ func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	return oasParser.GetCacheResources(endpointArray, clusterArray, listener, routesConfig)
 }
 
+//use updateXdsCacheWithLock to avoid race conditions
 func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) {
 	version, ok := envoyUpdateVersionMap[label]
 	if ok {
@@ -278,14 +280,23 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
+//different go routines could update XDS at the same time. To avoid this we use a mutex and lock
+func updateXdsCacheWithLock(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource,
+	listeners []types.Resource) {
+	mutexForXdsUpdate.Lock()
+	defer mutexForXdsUpdate.Unlock()
+	updateXdsCache(label, endpoints, clusters, routes, listeners)
+}
+
 func startConsulServiceDiscovery() {
 	//label := "default"
 	for apiKey, clusterList := range openAPIClustersMap {
-		logger.LoggerXds.Debugln("API key for consul service discovery: ", apiKey)
+		//logger.LoggerXds.Debugln("API key for consul service discovery: ", apiKey)
 		//logger.LoggerXds.Info(svcdiscovery.ClusterConsulKeyMap)
 		for _, cluster := range clusterList {
 			logger.LoggerXds.Info(cluster.Name)
 			if consulSyntax, ok := svcdiscovery.ClusterConsulKeyMap[cluster.Name]; ok {
+				svcdiscovery.InitConsul() //initialize consul client and load certs
 				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
 				if errConSyn != nil {
 					logger.LoggerXds.Error("consul syntax parse error ", errConSyn)
@@ -293,12 +304,9 @@ func startConsulServiceDiscovery() {
 				}
 				logger.LoggerXds.Info(query)
 				go getServiceDiscoveryData(query, cluster.Name, apiKey)
-			} else {
-				logger.LoggerXds.Info("svcdiscovery.ClusterConsulKeyMap[apiKey]; not ok")
 			}
 		}
 
-		//fmt.Println(route)
 	}
 
 }
@@ -307,7 +315,7 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 
 	doneChan := make(chan bool)
 	svcdiscovery.ClusterConsulDoneChanMap[clusterName] = doneChan
-	resultChan := svcdiscovery.ConsulWatcherInstance.Poll(query, doneChan)
+	resultChan := svcdiscovery.ConsulClientInstance.Poll(query, doneChan)
 	for {
 		select {
 		case queryResultsList, ok := <-resultChan:
@@ -322,7 +330,6 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 				if !reflect.DeepEqual(val, queryResultsList) {
 					svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList
 					//update the envoy cluster
-					//todo handle the race condition: service discovery update + deploy the same API with a different label at the same time
 					updateRoute(apiKey, clusterName, queryResultsList)
 
 					//logger.LoggerXds.Info("Change detected for consul cluster ", clusterName)
@@ -341,7 +348,7 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 
 func updateRoute(apiKey string, clusterName string, queryResultsList []svcdiscovery.Upstream) {
 	if clusterList, available := openAPIClustersMap[apiKey]; available {
-		for i, _ := range clusterList {
+		for i := range clusterList {
 			if clusterList[i].Name == clusterName {
 
 				var lbEndpointList []*endpointv3.LbEndpoint
@@ -389,9 +396,15 @@ func updateXDSRouteCacheForServiceDiscovery(apiKey string) {
 		if key == apiKey {
 			for _, label := range envoyLabelList {
 				listeners, clusters, routes, endpoints := generateEnvoyResoucesForLabel(label)
-				updateXdsCache(label, endpoints, clusters, routes, listeners)
+				updateXdsCacheWithLock(label, endpoints, clusters, routes, listeners)
 				logger.LoggerXds.Info("Updated XDS cache by consul service discovery")
 			}
 		}
+	}
+}
+
+func stopConsulDiscoveryFor(clusterName string) {
+	if doneChan, available := svcdiscovery.ClusterConsulDoneChanMap[clusterName]; available {
+		close(doneChan)
 	}
 }

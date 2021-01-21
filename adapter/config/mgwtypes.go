@@ -77,6 +77,22 @@ type Config struct {
 			// APICTL Users
 			Users []APICtlUser `toml:"users"`
 		}
+
+		//Consul represents the configuration required to connect to consul service discovery
+		Consul struct {
+			//URL url of the consul client in format: http(s)://host:port
+			URL string
+			//PollInterval how frequently consul API should be polled to get updates (in seconds)
+			PollInterval int
+			//HealthChecksPassingOnly whether consul health checks should be considered
+			HealthChecksPassingOnly bool
+			//CaCertPath path to the CA cert file(PEM encoded) required for tls connection between adapter and a consul client
+			CaCertPath string
+			//CertPath path to the cert file(PEM encoded) required for tls connection between adapter and a consul client
+			CertPath string
+			//CertPath path to the key file(PEM encoded) required for tls connection between adapter and a consul client
+			KeyPath string
+		}
 	}
 
 	// Envoy Listener Component related configurations.
@@ -102,15 +118,6 @@ type Config struct {
 				DisableSSLVerification bool   `toml:"disableSslVerification"`
 			}
 		}
-	}
-
-	Consul struct {
-		Url                     string //http(s)://host:port
-		PollInterval            int
-		HealthChecksPassingOnly bool //Whether consul health checks should be considered when updating Router
-		CaCertPath              string
-		CertPath                string
-		KeyPath                 string
 	}
 }
 
