@@ -690,8 +690,8 @@ schemes:
 - http
 x-wso2-production-endpoints:
   urls:
-  - consul:[local-dc,dc1].web.[production];http://localhost:5001
-  type: https
+  - consul(local-dc,dc1].web.[production],http://localhost:5001)
+  type: http
 securityDefinitions:
   api_key:
     in: header

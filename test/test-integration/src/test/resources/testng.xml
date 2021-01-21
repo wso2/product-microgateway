@@ -33,7 +33,7 @@
             <class name="org.wso2am.micro.gw.tests.apiDeploy.APiDeployTestCase"/>
             <class name="org.wso2am.micro.gw.tests.jwtValidator.JwtTestCase"/>
             <class name="org.wso2am.micro.gw.tests.backendtls.BackendTLSTestcase"/>
-            <class name="org.wso2am.micro.gw.tests.endpoints.ProductionSandboxTestCase"></class>
+            <class name="org.wso2am.micro.gw.tests.endpoints.ProductionSandboxTestCase"/>
 <!--            <class name="org.wso2am.micro.gw.tests.mockconsul.ConsulTestCase"/>-->
         </classes>
     </test>

@@ -49,7 +49,7 @@ public class ConsulTestCase extends BaseTestCase {
                 "consul"+File.separator+"withhttp"+File.separator+"config.toml";
         super.startMGW(configPath); //todo add conf path
         //mockConsulApis.yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("mockConsulApis.yaml");
+        String apiZipfile = ApiProjectGenerator.createApictlProjZip("apis/openApis/mockConsulApis.yaml");
 
         // Set header
         Map<String, String> headers = new HashMap<String, String>();

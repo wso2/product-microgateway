@@ -40,6 +40,7 @@ public class BackendSeversHTTP {
         String context = "/";
         httpServer.createContext(context, exchange -> {
             String resp = exchange.getLocalAddress() + "|" + exchange.getRequestURI() + "|" + exchange.getRemoteAddress();
+            System.out.println(resp);
 
             byte[] response = resp.getBytes();
             exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
@@ -61,7 +62,7 @@ public class BackendSeversHTTP {
     }
 
     public static void main(String[] args) {
-        BackendSeversHTTP b = new BackendSeversHTTP(6001, 6);
+        BackendSeversHTTP b = new BackendSeversHTTP("169.254.1.3",6001, 2);
         b.run();
     }
 

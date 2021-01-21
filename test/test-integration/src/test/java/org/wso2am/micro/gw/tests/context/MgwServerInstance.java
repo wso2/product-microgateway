@@ -53,16 +53,17 @@ public class MgwServerInstance implements MgwServer {
      * @throws MicroGWTestException
      */
     public MgwServerInstance() throws IOException, MicroGWTestException {
-        createTmpMgwSetup();
-        File targetClassesDir = new File(MgwServerInstance.class.getProtectionDomain().getCodeSource().
-                getLocation().getPath());
-        String mgwServerPath = targetClassesDir.getParentFile().toString() + File.separator + "server-tmp";
-
-        String dockerCompsePath = mgwServerPath+  File.separator + "docker-compose.yaml";
-        MockConsulServer.addConsulMockServiceToDockerCompose(dockerCompsePath);
-        MockBackendServer.addMockBackendServiceToDockerCompose(dockerCompsePath);
-        environment = new DockerComposeContainer(new File(dockerCompsePath))
-                .withLocalCompose(true);
+//        createTmpMgwSetup();
+//        File targetClassesDir = new File(MgwServerInstance.class.getProtectionDomain().getCodeSource().
+//                getLocation().getPath());
+//        String mgwServerPath = targetClassesDir.getParentFile().toString() + File.separator + "server-tmp";
+//
+//        String dockerCompsePath = mgwServerPath+  File.separator + "docker-compose.yaml";
+////        MockConsulServer.addConsulMockServiceToDockerCompose(dockerCompsePath);
+//        MockBackendServer.addMockBackendServiceToDockerCompose(dockerCompsePath);
+//        environment = new DockerComposeContainer(new File(dockerCompsePath))
+//                .withLocalCompose(true);
+        this(null, false);
 
     }
 
@@ -97,7 +98,7 @@ public class MgwServerInstance implements MgwServer {
                     "conf" +  File.separator + "config.toml");
         }
         String dockerCompsePath = mgwServerPath+  File.separator + "docker-compose.yaml";
-        MockConsulServer.addConsulMockServiceToDockerCompose(dockerCompsePath);
+//        MockConsulServer.addConsulMockServiceToDockerCompose(dockerCompsePath);
         MockBackendServer.addMockBackendServiceToDockerCompose(dockerCompsePath);
         environment = new DockerComposeContainer(new File(dockerCompsePath))
                 .withLocalCompose(true);
