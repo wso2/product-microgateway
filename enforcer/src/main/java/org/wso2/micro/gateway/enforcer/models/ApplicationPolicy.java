@@ -21,7 +21,7 @@ package org.wso2.micro.gateway.enforcer.models;
 import org.wso2.micro.gateway.enforcer.common.CacheableEntity;
 
 /**
- * Entity for keeping Application Policy
+ * Entity for keeping Application Policy.
  */
 public class ApplicationPolicy extends Policy {
 

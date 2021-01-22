@@ -20,7 +20,7 @@ package org.wso2.micro.gateway.enforcer.listener.events;
 import java.util.Set;
 
 /**
- * Deploy API in Gateway Event
+ * Deploy API in Gateway Event.
  */
 public class DeployAPIInGatewayEvent extends Event {
 

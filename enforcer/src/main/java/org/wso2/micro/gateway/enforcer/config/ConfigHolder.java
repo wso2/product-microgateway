@@ -33,7 +33,11 @@ import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
+import org.wso2.micro.gateway.enforcer.dto.ThrottleAgentConfigDTO;
+import org.wso2.micro.gateway.enforcer.dto.ThrottleURLGroupDTO;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
+import org.wso2.micro.gateway.enforcer.globalthrottle.databridge.agent.conf.AgentConfiguration;
+import org.wso2.micro.gateway.enforcer.globalthrottle.databridge.publisher.PublisherConfiguration;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
 import java.io.IOException;
@@ -64,6 +68,11 @@ public class ConfigHolder {
     private ConfigHolder() {
         init();
     }
+    public ThrottleAgentConfigDTO getThrottleAgentConfig() {
+        return throttleAgentConfig;
+    }
+
+    private ThrottleAgentConfigDTO throttleAgentConfig;
 
     public static ConfigHolder getInstance() {
         if (configHolder != null) {
@@ -111,6 +120,7 @@ public class ConfigHolder {
 
         //Read credentials used to connect with APIM services
         populateAPIMCredentials(config.getApimCredentials());
+        populateTMBinaryConfig();
     }
 
     private void populateAuthService(AuthService cdsAuth) {
@@ -176,6 +186,21 @@ public class ConfigHolder {
         }
     }
 
+    private void populateTMBinaryConfig() {
+        throttleAgentConfig =
+                configToml.getTable(ConfigConstants.TM_BINARY_THROTTLE_CONF_INSTANCE_ID)
+                        .to(ThrottleAgentConfigDTO.class);
+        AgentConfiguration agentConfiguration = throttleAgentConfig.getAgent();
+        agentConfiguration.setTrustStore(trustStore);
+        AgentConfiguration.setInstance(agentConfiguration);
+
+        PublisherConfiguration pubConfiguration = throttleAgentConfig.getPublisher();
+        pubConfiguration.setUserName(throttleAgentConfig.getUsername());
+        pubConfiguration.setPassword(throttleAgentConfig.getPassword());
+        processTMPublisherURLGroup(throttleAgentConfig.getUrlGroup(), pubConfiguration);
+        PublisherConfiguration.setInstance(pubConfiguration);
+    }
+
     private void loadTrustStore() {
         try {
             trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -227,4 +252,59 @@ public class ConfigHolder {
     public EnvVarConfig getEnvVarConfig() {
         return envVarConfig;
     }
+    /**
+     * The receiverURLGroup and the authURLGroup is preprocessed
+     * such that to make them compatible with the binary agent.
+     */
+    private void processTMPublisherURLGroup(List<ThrottleURLGroupDTO> urlGroups,
+                                            PublisherConfiguration pubConfiguration) {
+        StringBuilder restructuredReceiverURL = new StringBuilder();
+        StringBuilder restructuredAuthURL = new StringBuilder();
+
+        for (ThrottleURLGroupDTO urlGroup : urlGroups) {
+            String[] receiverUrls = urlGroup.getReceiverURLs();
+            String[] authUrls = urlGroup.getAuthURLs();
+            if (receiverUrls.length == 1 && authUrls.length == 1) {
+                restructuredReceiverURL.append("{").append(receiverUrls[0]).append("},");
+                restructuredAuthURL.append("{").append(authUrls[0]).append("},");
+                continue;
+            }
+            String urlType = urlGroup.getType();
+            if (urlType == null || urlType.isBlank() || !(ConfigConstants.LOADBALANCE.equalsIgnoreCase(urlType)
+                    || ConfigConstants.FAILOVER.equalsIgnoreCase(urlType))) {
+                logger.warn("Type is not "
+                        + ConfigConstants.LOADBALANCE + " or " + ConfigConstants.FAILOVER + ". Hence proceeding as a "
+                        + ConfigConstants.FAILOVER + " configuration.");
+                urlType = ConfigConstants.FAILOVER;
+            }
+            restructuredReceiverURL.append(processSingleURLGroup(receiverUrls, urlType)).append(",");
+            restructuredAuthURL.append(processSingleURLGroup(authUrls, urlType)).append(",");
+
+        }
+        //to remove the final ',' in the URLs and set to publisher config
+        if (!restructuredReceiverURL.toString().isBlank() && !restructuredAuthURL.toString().isBlank()) {
+            pubConfiguration.setReceiverUrlGroup(restructuredReceiverURL.substring(0,
+                    restructuredReceiverURL.length() - 1));
+            pubConfiguration.setAuthUrlGroup(restructuredAuthURL.substring(0, restructuredAuthURL.length() - 1));
+        }
+    }
+
+
+    private String processSingleURLGroup(String[] urlArray, String urlType) {
+        StringBuilder concatenatedURLString = new StringBuilder("{");
+        for (String url : urlArray) {
+            if (ConfigConstants.LOADBALANCE.equalsIgnoreCase(urlType)) {
+                concatenatedURLString.append(url).append(ConfigConstants.TM_BINARY_LOADBALANCE_SEPARATOR);
+            } else if (ConfigConstants.FAILOVER.equalsIgnoreCase(urlType)) {
+                concatenatedURLString.append(url).append(ConfigConstants.TM_BINARY_FAILOVER_SEPARATOR);
+            } else {
+                concatenatedURLString.append(url).append(ConfigConstants.TM_BINARY_FAILOVER_SEPARATOR);
+            }
+        }
+        //to remove the trailing '|' or ','
+        concatenatedURLString = new StringBuilder(
+                concatenatedURLString.substring(0, concatenatedURLString.length() - 1) + "}");
+        return concatenatedURLString.toString();
+    }
+
 }

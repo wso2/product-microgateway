@@ -26,7 +26,7 @@ import org.wso2.micro.gateway.enforcer.listener.events.SubscriptionEvent;
 import org.wso2.micro.gateway.enforcer.listener.events.SubscriptionPolicyEvent;
 
 /**
- * Interface to call keymanager data maps using events
+ * Interface to call keymanager data maps using events.
  */
 public interface KeyManagerDataService {
     
