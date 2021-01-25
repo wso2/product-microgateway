@@ -21,7 +21,6 @@ package messagelisteners
 import (
 	"encoding/base64"
 	"encoding/json"
-	"strconv"
 	"strings"
 
 	"github.com/streadway/amqp"
@@ -29,11 +28,16 @@ import (
 	resourcetypes "github.com/wso2/micro-gw/pkg/resource_types"
 )
 
+// constant variables
 const (
-	apiEventType          = "API"
-	applicationEventType  = "APPLICATION"
-	subscriptionEventType = "SUBSCRIPTIONS"
-	scopeEvenType         = "SCOPE"
+	apiEventType                = "API"
+	applicationEventType        = "APPLICATION"
+	subscriptionEventType       = "SUBSCRIPTIONS"
+	scopeEvenType               = "SCOPE"
+	removeAPIFromGateway        = "REMOVE_API_FROM_GATEWAY"
+	deployAPIToGateway          = "DEPLOY_API_IN_GATEWAY"
+	applicationRegistration     = "APPLICATION_REGISTRATION_CREATE"
+	removeApplicationKeyMapping = "REMOVE_APPLICATION_KEYMAPPING"
 )
 
 // var variables
@@ -46,6 +50,8 @@ var (
 	SubPolicyList             = make([]resourcetypes.SubscriptionPolicy, 0)
 	ApplicationKeyMappingList = make([]resourcetypes.SubscriptionPolicy, 0)
 	AppList                   = make([]resourcetypes.Application, 0)
+	APIListTimeStamp          = make(map[string]int64, 0)
+	ApplicationListTimeStamp  = make(map[string]int64, 0)
 )
 
 // handleNotification to process
@@ -54,12 +60,10 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 		var notification EventNotification
 		var eventType string
 		json.Unmarshal([]byte(string(d.Body)), &notification)
-		// fmt.Printf("EventType: %s, event: %s", notification.Event.PayloadData.EventType, notification.Event.PayloadData.Event)
-
 		var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Event)
 		if err != nil {
 			if _, ok := err.(base64.CorruptInputError); ok {
-				panic("\nbase64 input is corrupt, check service Key")
+				panic("\nbase64 input is corrupt, check the provided key")
 			}
 			panic(err)
 		}
@@ -83,84 +87,92 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 	done <- nil
 }
 
-// handleAPIRelatedEvents to process
+// handleAPIEvents to process api related data
 func handleAPIEvents(data []byte, eventType string) {
 	var apiEvent APIEvent
 	json.Unmarshal([]byte(string(data)), &apiEvent)
-	logger.LoggerJMS.Infof("EventType: %s, api: %v", apiEvent.Event.Type, apiEvent.APIType)
+	timeStampList := APIListTimeStamp
+	var oldTimeStamp int64 = 0
+	var newTimeStamp int64 = apiEvent.Event.TimeStamp
+	for apiID, timeStamp := range timeStampList {
+		if strings.EqualFold(apiEvent.APIID, apiID) {
+			oldTimeStamp = timeStamp
+		} else {
+			APIListTimeStamp[apiEvent.APIID] = newTimeStamp
+		}
+	}
 
-	apiID, err := strconv.Atoi(apiEvent.APIID)
-
-	if err != nil {
-		api := resourcetypes.API{APIID: apiID, Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
-			Version: apiEvent.APIVersion, Context: "", APIType: apiEvent.APIType, IsDefaultVersion: true,
-			TenantID: -1, TenantDomain: apiEvent.Event.TenantDomain, TimeStamp: apiEvent.Event.TimeStamp}
+	if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) && oldTimeStamp < newTimeStamp {
+		for i := range APIList {
+			if strings.EqualFold(apiEvent.APIID, APIList[i].APIID) {
+				copy(APIList[i:], APIList[i+1:])
+				APIList[len(APIList)-1] = resourcetypes.API{}
+				APIList = APIList[:len(APIList)-1]
+				break
+			}
+		}
+	} else if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
+		// pull API details
+		api := resourcetypes.API{APIID: apiEvent.APIID, Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
+			Version: apiEvent.APIVersion, Context: apiEvent.APIContext, APIType: apiEvent.APIType,
+			IsDefaultVersion: true, TenantID: -1, TenantDomain: apiEvent.Event.TenantDomain,
+			TimeStamp: apiEvent.Event.TimeStamp}
 		APIList = append(APIList, api)
 	}
 }
 
-// handleApplicationRelatedEvents to process
+// handleApplicationEvents to process application related events
 func handleApplicationEvents(data []byte, eventType string) {
-	if strings.EqualFold("APPLICATION_REGISTRATION_CREATE", eventType) ||
-		strings.EqualFold("REMOVE_APPLICATION_KEYMAPPING", eventType) {
+	if strings.EqualFold(applicationRegistration, eventType) ||
+		strings.EqualFold(removeApplicationKeyMapping, eventType) {
 		var applicationRegistrationEvent ApplicationRegistrationEvent
 		json.Unmarshal([]byte(string(data)), &applicationRegistrationEvent)
-		logger.LoggerJMS.Infof("EventType: %s for application %v, consumerKey %s", eventType,
-			applicationRegistrationEvent.ApplicationID, applicationRegistrationEvent.ConsumerKey)
 
 		applicationKeyMapping := resourcetypes.ApplicationKeyMapping{ApplicationID: applicationRegistrationEvent.ApplicationID,
 			ConsumerKey: applicationRegistrationEvent.ConsumerKey, KeyType: applicationRegistrationEvent.KeyType,
-			KeyManager: applicationRegistrationEvent.KeyManager, TenantID: -1,
-			TenantDomain: applicationRegistrationEvent.TenantDomain, TimeStamp: applicationRegistrationEvent.TimeStamp}
+			KeyManager: applicationRegistrationEvent.KeyManager, TenantID: -1, TenantDomain: applicationRegistrationEvent.TenantDomain,
+			TimeStamp: applicationRegistrationEvent.TimeStamp}
 
 		AppKeyMappingList = append(AppKeyMappingList, applicationKeyMapping)
-		// EventType.APPLICATION_REGISTRATION_CREATE, EventType.REMOVE_APPLICATION_KEYMAPPING
 	} else {
 		var applicationEvent ApplicationEvent
 		json.Unmarshal([]byte(string(data)), &applicationEvent)
-		logger.LoggerJMS.Infof("EventType: %s for application: %s", applicationEvent.Type, applicationEvent.ApplicationName)
-
 		application := resourcetypes.Application{UUID: applicationEvent.UUID, ID: applicationEvent.ApplicationID,
-			Name: applicationEvent.ApplicationName, SubName: applicationEvent.Subscriber, Policy: applicationEvent.ApplicationPolicy,
-			TokenType: applicationEvent.TokenType, GroupIds: nil, Attributes: nil,
+			Name: applicationEvent.ApplicationName, SubName: applicationEvent.Subscriber, Policy: applicationEvent.ApplicationPolicy, TokenType: applicationEvent.TokenType, GroupIds: applicationEvent.GroupID, Attributes: nil,
 			TenantID: -1, TenantDomain: applicationEvent.TenantDomain, TimeStamp: applicationEvent.TimeStamp}
 
 		AppList = append(AppList, application)
-		// EventType.APPLICATION_CREATE, EventType.APPLICATION_UPDATE, EventType.APPLICATION_DELETE
+		// EventTypes: APPLICATION_CREATE, APPLICATION_UPDATE, APPLICATION_DELETE
 	}
 }
 
-// handleSubscriptionRelatedEvents to process
+// handleSubscriptionRelatedEvents to process subscription related events
 func handleSubscriptionEvents(data []byte, eventType string) {
 	var subscriptionEvent SubscriptionEvent
-	// SUBSCRIPTIONS_CREATE, SUBSCRIPTIONS_UPDATE, SUBSCRIPTIONS_DELETE
 	json.Unmarshal([]byte(string(data)), &subscriptionEvent)
-	logger.LoggerJMS.Infof("EventType: %s for subscription: %v. application %v with api %v", subscriptionEvent.Type,
-		subscriptionEvent.SubscriptionID, subscriptionEvent.ApplicationID, subscriptionEvent.APIID)
-
 	subscription := resourcetypes.Subscription{SubscriptionID: subscriptionEvent.SubscriptionID, PolicyID: subscriptionEvent.PolicyID,
 		APIID: subscriptionEvent.APIID, AppID: subscriptionEvent.ApplicationID, SubscriptionState: subscriptionEvent.SubscriptionState,
-		TenantID: -1, TenantDomain: subscriptionEvent.TenantID, TimeStamp: subscriptionEvent.TimeStamp}
+		TenantID: subscriptionEvent.TenantID, TenantDomain: subscriptionEvent.TenantDomain, TimeStamp: subscriptionEvent.TimeStamp}
 
 	SubList = append(SubList, subscription)
+	// EventTypes: SUBSCRIPTIONS_CREATE, SUBSCRIPTIONS_UPDATE, SUBSCRIPTIONS_DELETE
 }
 
-// handleScopeRelatedEvents to process
+// handleScopeRelatedEvents to process scope related events
 func handleScopeEvents(data []byte, eventType string) {
 	var scopeEvent ScopeEvent
 	json.Unmarshal([]byte(string(data)), &scopeEvent)
-
-	logger.LoggerJMS.Infof("EventType: %s for scope: %s", scopeEvent.Type, scopeEvent.DisplayName)
-
 	scope := resourcetypes.Scope{Name: scopeEvent.Name, DisplayName: scopeEvent.DisplayName, ApplicationName: scopeEvent.ApplicationName}
 	ScopeList = append(ScopeList, scope)
-	// EventType.SCOPE_CREATE, EventType.SCOPE_UPDATE, EventType.SCOPE_DELETE
+	// EventTypes: SCOPE_CREATE, SCOPE_UPDATE,SCOPE_DELETE
 }
 
-// handlePolicyRelatedEvents to process
+// handlePolicyRelatedEvents to process policy related events
 func handlePolicyEvents(data []byte, eventType string) {
 	var policyEvent PolicyInfo
 	json.Unmarshal([]byte(string(data)), &policyEvent)
+
+	// TODO: Handle policy events
 	if strings.EqualFold(eventType, "POLICY_CREATE") {
 		logger.LoggerJMS.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
 	} else if strings.EqualFold(eventType, "POLICY_UPDATE") {
@@ -169,27 +181,10 @@ func handlePolicyEvents(data []byte, eventType string) {
 		logger.LoggerJMS.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
 	}
 
-	type PolicyInfo struct {
-		PolicyID   int32  `json:"policyId"`
-		PolicyName string `json:"policyName"`
-		QuotaType  string `json:"quotaType"`
-		PolicyType string `json:"policyType"`
-		Event
-	}
-
-	// ApplicationPolicy for struct ApplicationPolicy
-	type ApplicationPolicy struct {
-		ID        int    `json:"id"`
-		TenantID  int    `json:"tenantId"`
-		Name      string `json:"name"`
-		QuotaType string `json:"quotaType"`
-	}
-
 	if strings.EqualFold(apiEventType, policyEvent.PolicyType) {
 		var apiPolicyEvent APIPolicyEvent
 		json.Unmarshal([]byte(string(data)), &apiPolicyEvent)
 	} else if strings.EqualFold(applicationEventType, policyEvent.PolicyType) {
-		logger.LoggerJMS.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
 		applicationPolicy := resourcetypes.ApplicationPolicy{ID: policyEvent.PolicyID, TenantID: -1, Name: policyEvent.PolicyName,
 			QuotaType: policyEvent.QuotaType}
 		AppPolicyList = append(AppPolicyList, applicationPolicy)
@@ -197,9 +192,6 @@ func handlePolicyEvents(data []byte, eventType string) {
 	} else if strings.EqualFold(subscriptionEventType, policyEvent.PolicyType) {
 		var subscriptionPolicyEvent SubscriptionPolicyEvent
 		json.Unmarshal([]byte(string(data)), &subscriptionPolicyEvent)
-		logger.LoggerJMS.Infof("Policy: %s for policy type: %s , rateLimitCount : %v, QuotaType: %s ",
-			subscriptionPolicyEvent.PolicyName, subscriptionPolicyEvent.PolicyType, subscriptionPolicyEvent.RateLimitCount,
-			subscriptionPolicyEvent.QuotaType)
 
 		subscriptionPolicy := resourcetypes.SubscriptionPolicy{ID: subscriptionPolicyEvent.PolicyID, TenantID: -1,
 			Name: subscriptionPolicyEvent.PolicyName, QuotaType: subscriptionPolicyEvent.QuotaType,
@@ -210,5 +202,4 @@ func handlePolicyEvents(data []byte, eventType string) {
 
 		SubPolicyList = append(SubPolicyList, subscriptionPolicy)
 	}
-	// EventType.POLICY_CREATE, EventType.POLICY_UPDATE, EventType.POLICY_DELETE, API, APPLICATION, SUBSCRIPTION
 }

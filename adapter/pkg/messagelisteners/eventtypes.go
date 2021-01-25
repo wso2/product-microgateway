@@ -23,7 +23,7 @@ type EventNotification struct {
 	Event struct {
 		PayloadData struct {
 			EventType string  `json:"eventType"`
-			Timstamp  float64 `json:"timstamp"`
+			Timstamp  float64 `json:"timeStamp"`
 			Event     string  `json:"event"`
 		} `json:"payloadData"`
 	} `json:"event"`
@@ -61,7 +61,7 @@ type Event struct {
 	EventID      string `json:"eventId"`
 	TimeStamp    int64  `json:"timeStamp"`
 	Type         string `json:"type"`
-	TenantID     string `json:"tenantId"`
+	TenantID     int    `json:"tenantId"`
 	TenantDomain string `json:"tenantDomain"`
 }
 
@@ -96,7 +96,7 @@ type ApplicationEvent struct {
 	ApplicationPolicy string   `json:"applicationPolicy"`
 	Attributes        []string `json:"attributes"`
 	Subscriber        string   `json:"subscriber"`
-	GroupID           string   `json:"groupId"`
+	GroupID           []string `json:"groupIds"`
 	Event
 }
 

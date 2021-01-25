@@ -45,7 +45,7 @@ const (
 	tokenRevocation string = "tokenRevocation"
 )
 
-// ProcessEvents for struct
+// ProcessEvents to pass event consumption
 func ProcessEvents(config *config.Config) {
 	mgwConfig = config
 	amqpURI = mgwConfig.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints
@@ -54,7 +54,6 @@ func ProcessEvents(config *config.Config) {
 	for i, key := range bindingKeys {
 		logger.LoggerJMS.Infof("shutting down index %v key %s ", i, key)
 		go func(key string) {
-			// check durable or non durable
 			c, err := NewConsumer(key+"-queue", key)
 			if err != nil {
 				logger.LoggerJMS.Fatalf("%s", err)
@@ -75,7 +74,7 @@ func ProcessEvents(config *config.Config) {
 	}
 }
 
-// NewConsumer for struct
+// NewConsumer object to consume data
 func NewConsumer(queueName string, key string) (*Consumer, error) {
 	c := &Consumer{
 		conn:    nil,
@@ -163,9 +162,7 @@ func NewConsumer(queueName string, key string) (*Consumer, error) {
 	return c, nil
 }
 
-// Try to connect to the RabbitMQ server as
-// long as it takes to establish a connection
-//
+// Try to connect to the RabbitMQ server as long as it takes to establish a connection
 func connectToRabbitMQ() *amqp.Connection {
 	for {
 		conn, err := amqp.Dial(amqpURI)
@@ -196,7 +193,7 @@ func (c *Consumer) Shutdown() error {
 	return <-c.done
 }
 
-// Consumer struct.
+// Consumer struct
 type Consumer struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel

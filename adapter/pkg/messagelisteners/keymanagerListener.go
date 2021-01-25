@@ -41,18 +41,16 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 		var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Value)
 		if err != nil {
 			if _, ok := err.(base64.CorruptInputError); ok {
-				panic("\nbase64 input is corrupt, check service Key")
+				panic("\nbase64 input is corrupt, check the provided key")
 			}
 			panic(err)
 		}
 		if strings.EqualFold(keyManagerConfig, notification.Event.PayloadData.EventType) {
 			if decodedByte != nil {
 				json.Unmarshal([]byte(string(decodedByte)), &keyManagerEvent)
-
 				logger.LoggerJMS.Infof("EventType: %s, Action: %s ",
 					notification.Event.PayloadData.EventType, notification.Event.PayloadData.Action)
 			}
-			// eventType = notification.Event.PayloadData.EventType
 		}
 		d.Ack(false)
 	}

@@ -72,7 +72,7 @@ type ApplicationKeyMappingList struct {
 
 // API for struct Api
 type API struct {
-	APIID            int    `json:"apiId"`
+	APIID            string `json:"apiId"`
 	Provider         string `json:"provider"`
 	Name             string `json:"name"`
 	Version          string `json:"version"`
