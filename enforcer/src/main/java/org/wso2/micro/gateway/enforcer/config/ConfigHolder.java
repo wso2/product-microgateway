@@ -21,6 +21,7 @@ package org.wso2.micro.gateway.enforcer.config;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.gateway.discovery.config.enforcer.AmCredentials;
 import org.wso2.gateway.discovery.config.enforcer.AuthService;
 import org.wso2.gateway.discovery.config.enforcer.CertStore;
 import org.wso2.gateway.discovery.config.enforcer.Config;
@@ -50,6 +51,7 @@ import java.util.List;
  */
 public class ConfigHolder {
 
+    // TODO: Resolve default configs
     private static final Logger logger = LogManager.getLogger(ConfigHolder.class);
 
     private static ConfigHolder configHolder;
@@ -101,7 +103,7 @@ public class ConfigHolder {
         populateJWTIssuerConfiguration(config.getJwtTokenConfigList());
 
         //Read credentials used to connect with APIM services
-        populateAPIMCredentials();
+        populateAPIMCredentials(config.getApimCredentials());
     }
 
     private void populateAuthService(AuthService cdsAuth) {
@@ -159,7 +161,7 @@ public class ConfigHolder {
     private void loadTrustStore(CertStore cdsTruststore) {
         String trustStoreLocation = cdsTruststore.getLocation();
         String trustStorePassword = cdsTruststore.getPassword();
-        if (trustStoreLocation != null && trustStorePassword != null) {
+        if (!trustStoreLocation.isEmpty() && !trustStorePassword.isEmpty()) {
             try {
                 InputStream inputStream = new FileInputStream(trustStoreLocation);
                 trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -172,10 +174,10 @@ public class ConfigHolder {
         }
     }
 
-    private void populateAPIMCredentials() {
-        String username = "admin";
-        String password = "admin";
-        CredentialDto credentialDto = new CredentialDto(username, password.toCharArray());
+    private void populateAPIMCredentials(AmCredentials cred) {
+        String username = cred.getUsername();
+        char[] password = cred.getPassword().toCharArray();
+        CredentialDto credentialDto = new CredentialDto(username, password);
         config.setApimCredentials(credentialDto);
     }
 

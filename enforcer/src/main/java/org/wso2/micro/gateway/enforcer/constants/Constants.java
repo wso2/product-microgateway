@@ -26,6 +26,7 @@ public class Constants {
     public static final String XDS_PORT = "XDS_SERVER_PORT";
     public static final String CONFIG_TYPE_URL = "type.googleapis.com/wso2.discovery.config.enforcer.Config";
     public static final String API_TYPE_URL = "type.googleapis.com/wso2.discovery.api.Api";
+    public static final int MAX_XDS_RETRIES = 3;
 
     // Config constants
     public static final String EVENT_HUB_EVENT_LISTENING_ENDPOINT = "eventHub.eventListeningEndpoints";
