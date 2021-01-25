@@ -1,3 +1,21 @@
+/*
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+// Package messagelisteners holds the implementation for event listeners functions
 package messagelisteners
 
 import (
@@ -11,20 +29,27 @@ import (
 )
 
 var (
-	mgwConfig *config.Config
-	lifetime  = 0 * time.Second
-	amqpURI   string
+	mgwConfig        *config.Config
+	lifetime         = 0 * time.Second
+	amqpURI          string
+	rabbitConn       *amqp.Connection
+	rabbitCloseError chan *amqp.Error
 )
 
-const exchange = "amq.topic"
-const exchangeType = "topic"
-const consumerTag = "jms-consumer"
+const (
+	exchange        string = "amq.topic"
+	exchangeType    string = "topic"
+	consumerTag     string = "jms-consumer"
+	notification    string = "notification"
+	keymanager      string = "keymanager"
+	tokenRevocation string = "tokenRevocation"
+)
 
 // ProcessEvents for struct
 func ProcessEvents(config *config.Config) {
 	mgwConfig = config
-	amqpURI = mgwConfig.Enforcer.EventHub.JmsConnectionParameters.EventListeningEndpoints
-	bindingKeys := []string{"notification", "keymanager", "tokenRevocation", "cacheInvalidation"}
+	amqpURI = mgwConfig.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints
+	bindingKeys := []string{notification, keymanager, tokenRevocation}
 
 	for i, key := range bindingKeys {
 		logger.LoggerJMS.Infof("shutting down index %v key %s ", i, key)
@@ -62,10 +87,7 @@ func NewConsumer(queueName string, key string) (*Consumer, error) {
 	var err error
 
 	logger.LoggerJMS.Infof("dialing %q", amqpURI)
-	c.conn, err = amqp.Dial(amqpURI)
-	if err != nil {
-		return nil, fmt.Errorf("Dial: %s", err)
-	}
+	connectToRabbitMQ()
 
 	go func() {
 		logger.LoggerJMS.Infof("closing: %s", <-c.conn.NotifyClose(make(chan *amqp.Error)))
@@ -92,12 +114,12 @@ func NewConsumer(queueName string, key string) (*Consumer, error) {
 
 	logger.LoggerJMS.Infof("declared Exchange, declaring Queue %q", queueName)
 	queue, err := c.channel.QueueDeclare(
-		queueName, // name of the queue
-		true,      // durable
-		false,     // delete when usused
-		false,     // exclusive
-		false,     // noWait
-		nil,       // arguments
+		"",    // name of the queue
+		false, // durable
+		true,  // delete when usused
+		false, // exclusive
+		false, // noWait
+		nil,   // arguments
 	)
 	if err != nil {
 		return nil, fmt.Errorf("Queue Declare: %s", err)
@@ -130,17 +152,31 @@ func NewConsumer(queueName string, key string) (*Consumer, error) {
 		return nil, fmt.Errorf("Queue Consume: %s", err)
 	}
 
-	if strings.EqualFold(key, "notification") {
+	if strings.EqualFold(key, notification) {
 		go handleNotification(deliveries, c.done)
-	} else if strings.EqualFold(key, "keyManager") {
+	} else if strings.EqualFold(key, keymanager) {
 		go handleKMConfiguration(deliveries, c.done)
-	} else if strings.EqualFold(key, "tokenRevocation") {
+	} else if strings.EqualFold(key, tokenRevocation) {
 		go handleTokenRevocation(deliveries, c.done)
-	} else if strings.EqualFold(key, "cacheInvalidation") {
-		go handleCacheInvalidation(deliveries, c.done)
 	}
 
 	return c, nil
+}
+
+// Try to connect to the RabbitMQ server as
+// long as it takes to establish a connection
+//
+func connectToRabbitMQ() *amqp.Connection {
+	for {
+		conn, err := amqp.Dial(amqpURI)
+		if err == nil {
+			return conn
+		}
+
+		logger.LoggerJMS.Error(err)
+		logger.LoggerJMS.Printf("Trying to reconnect to RabbitMQ at %s\n", amqpURI)
+		time.Sleep(500 * time.Millisecond)
+	}
 }
 
 // Shutdown when error happens

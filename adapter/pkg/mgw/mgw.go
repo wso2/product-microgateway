@@ -33,8 +33,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
-	"github.com/wso2/micro-gw/pkg/api/restserver"
-	"github.com/wso2/micro-gw/pkg/jms"
+	"github.com/wso2/micro-gw/pkg/messagelisteners"
 	xds "github.com/wso2/micro-gw/pkg/xds"
 	"google.golang.org/grpc"
 )
@@ -115,9 +114,9 @@ func Run(conf *config.Config) {
 	go restserver.StartRestServer(conf)
 
 	var enableEventHub bool
-	enableEventHub = conf.Enforcer.EventHub.Enable
+	enableEventHub = conf.ControlPlane.EventHub.Enable
 	if enableEventHub {
-		go jms.ProcessEvents(conf)
+		go messagelisteners.ProcessEvents(conf)
 	}
 OUTER:
 	for {

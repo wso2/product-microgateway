@@ -1,34 +1,78 @@
+/*
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
+// Package messagelisteners holds the implementation for event listeners functions
 package messagelisteners
 
 import (
 	"encoding/base64"
 	"encoding/json"
+	"strconv"
 	"strings"
 
 	"github.com/streadway/amqp"
 	logger "github.com/wso2/micro-gw/loggers"
+	resourcetypes "github.com/wso2/micro-gw/pkg/resource_types"
+)
+
+const (
+	apiEventType          = "API"
+	applicationEventType  = "APPLICATION"
+	subscriptionEventType = "SUBSCRIPTIONS"
+	scopeEvenType         = "SCOPE"
+)
+
+// var variables
+var (
+	SubList                   = make([]resourcetypes.Subscription, 0)
+	AppKeyMappingList         = make([]resourcetypes.ApplicationKeyMapping, 0)
+	APIList                   = make([]resourcetypes.API, 0)
+	ScopeList                 = make([]resourcetypes.Scope, 0)
+	AppPolicyList             = make([]resourcetypes.ApplicationPolicy, 0)
+	SubPolicyList             = make([]resourcetypes.SubscriptionPolicy, 0)
+	ApplicationKeyMappingList = make([]resourcetypes.SubscriptionPolicy, 0)
+	AppList                   = make([]resourcetypes.Application, 0)
 )
 
 // handleNotification to process
 func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
-
 	for d := range deliveries {
 		var notification EventNotification
 		var eventType string
 		json.Unmarshal([]byte(string(d.Body)), &notification)
-		logger.LoggerJMS.Infof("[%v]", d.DeliveryTag)
 		// fmt.Printf("EventType: %s, event: %s", notification.Event.PayloadData.EventType, notification.Event.PayloadData.Event)
 
-		var decodedByte, _ = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Event)
+		var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Event)
+		if err != nil {
+			if _, ok := err.(base64.CorruptInputError); ok {
+				panic("\nbase64 input is corrupt, check service Key")
+			}
+			panic(err)
+		}
 		logger.LoggerJMS.Infof("\n\n[%s]", decodedByte)
 		eventType = notification.Event.PayloadData.EventType
-		if strings.Contains(eventType, "API") {
+
+		if strings.Contains(eventType, apiEventType) {
 			handleAPIEvents(decodedByte, eventType)
-		} else if strings.Contains(eventType, "APPLICATION") {
+		} else if strings.Contains(eventType, applicationEventType) {
 			handleApplicationEvents(decodedByte, eventType)
-		} else if strings.Contains(eventType, "SUBSCRIPTIONS") {
+		} else if strings.Contains(eventType, subscriptionEventType) {
 			handleSubscriptionEvents(decodedByte, eventType)
-		} else if strings.Contains(eventType, "SCOPE") {
+		} else if strings.Contains(eventType, scopeEvenType) {
 			handleScopeEvents(decodedByte, eventType)
 		} else {
 			handlePolicyEvents(decodedByte, eventType)
@@ -43,9 +87,16 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 func handleAPIEvents(data []byte, eventType string) {
 	var apiEvent APIEvent
 	json.Unmarshal([]byte(string(data)), &apiEvent)
-	logger.LoggerJMS.Infof("EventType: %s, api: %v", apiEvent.Type, apiEvent.APIID)
-	// REMOVE_API_FROM_GATEWAY, DEPLOY_API_IN_GATEWAY --> check the feasibility of sending one event
-	// EventType.API_DELETE, EventType.API_UPDATE, EventType.API_LIFECYCLE_CHANGE, EventType.API_DELETE
+	logger.LoggerJMS.Infof("EventType: %s, api: %v", apiEvent.Event.Type, apiEvent.APIType)
+
+	apiID, err := strconv.Atoi(apiEvent.APIID)
+
+	if err != nil {
+		api := resourcetypes.API{APIID: apiID, Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
+			Version: apiEvent.APIVersion, Context: "", APIType: apiEvent.APIType, IsDefaultVersion: true,
+			TenantID: -1, TenantDomain: apiEvent.Event.TenantDomain, TimeStamp: apiEvent.Event.TimeStamp}
+		APIList = append(APIList, api)
+	}
 }
 
 // handleApplicationRelatedEvents to process
@@ -56,30 +107,53 @@ func handleApplicationEvents(data []byte, eventType string) {
 		json.Unmarshal([]byte(string(data)), &applicationRegistrationEvent)
 		logger.LoggerJMS.Infof("EventType: %s for application %v, consumerKey %s", eventType,
 			applicationRegistrationEvent.ApplicationID, applicationRegistrationEvent.ConsumerKey)
+
+		applicationKeyMapping := resourcetypes.ApplicationKeyMapping{ApplicationID: applicationRegistrationEvent.ApplicationID,
+			ConsumerKey: applicationRegistrationEvent.ConsumerKey, KeyType: applicationRegistrationEvent.KeyType,
+			KeyManager: applicationRegistrationEvent.KeyManager, TenantID: -1,
+			TenantDomain: applicationRegistrationEvent.TenantDomain, TimeStamp: applicationRegistrationEvent.TimeStamp}
+
+		AppKeyMappingList = append(AppKeyMappingList, applicationKeyMapping)
 		// EventType.APPLICATION_REGISTRATION_CREATE, EventType.REMOVE_APPLICATION_KEYMAPPING
 	} else {
 		var applicationEvent ApplicationEvent
 		json.Unmarshal([]byte(string(data)), &applicationEvent)
 		logger.LoggerJMS.Infof("EventType: %s for application: %s", applicationEvent.Type, applicationEvent.ApplicationName)
-		// EventType.APPLICATION_CREATE, EventType.APPLICATION_UPDATE, EventType.APPLICATION_REGISTRATION_CREATE,
-		// EventType.APPLICATION_DELETE, EventType.REMOVE_APPLICATION_KEYMAPPING
+
+		application := resourcetypes.Application{UUID: applicationEvent.UUID, ID: applicationEvent.ApplicationID,
+			Name: applicationEvent.ApplicationName, SubName: applicationEvent.Subscriber, Policy: applicationEvent.ApplicationPolicy,
+			TokenType: applicationEvent.TokenType, GroupIds: nil, Attributes: nil,
+			TenantID: -1, TenantDomain: applicationEvent.TenantDomain, TimeStamp: applicationEvent.TimeStamp}
+
+		AppList = append(AppList, application)
+		// EventType.APPLICATION_CREATE, EventType.APPLICATION_UPDATE, EventType.APPLICATION_DELETE
 	}
 }
 
 // handleSubscriptionRelatedEvents to process
 func handleSubscriptionEvents(data []byte, eventType string) {
 	var subscriptionEvent SubscriptionEvent
+	// SUBSCRIPTIONS_CREATE, SUBSCRIPTIONS_UPDATE, SUBSCRIPTIONS_DELETE
 	json.Unmarshal([]byte(string(data)), &subscriptionEvent)
 	logger.LoggerJMS.Infof("EventType: %s for subscription: %v. application %v with api %v", subscriptionEvent.Type,
 		subscriptionEvent.SubscriptionID, subscriptionEvent.ApplicationID, subscriptionEvent.APIID)
-	// SUBSCRIPTIONS_CREATE, SUBSCRIPTIONS_UPDATE, SUBSCRIPTIONS_DELETE
+
+	subscription := resourcetypes.Subscription{SubscriptionID: subscriptionEvent.SubscriptionID, PolicyID: subscriptionEvent.PolicyID,
+		APIID: subscriptionEvent.APIID, AppID: subscriptionEvent.ApplicationID, SubscriptionState: subscriptionEvent.SubscriptionState,
+		TenantID: -1, TenantDomain: subscriptionEvent.TenantID, TimeStamp: subscriptionEvent.TimeStamp}
+
+	SubList = append(SubList, subscription)
 }
 
 // handleScopeRelatedEvents to process
 func handleScopeEvents(data []byte, eventType string) {
 	var scopeEvent ScopeEvent
 	json.Unmarshal([]byte(string(data)), &scopeEvent)
+
 	logger.LoggerJMS.Infof("EventType: %s for scope: %s", scopeEvent.Type, scopeEvent.DisplayName)
+
+	scope := resourcetypes.Scope{Name: scopeEvent.Name, DisplayName: scopeEvent.DisplayName, ApplicationName: scopeEvent.ApplicationName}
+	ScopeList = append(ScopeList, scope)
 	// EventType.SCOPE_CREATE, EventType.SCOPE_UPDATE, EventType.SCOPE_DELETE
 }
 
@@ -95,118 +169,46 @@ func handlePolicyEvents(data []byte, eventType string) {
 		logger.LoggerJMS.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
 	}
 
-	if strings.EqualFold("API", policyEvent.PolicyType) {
+	type PolicyInfo struct {
+		PolicyID   int32  `json:"policyId"`
+		PolicyName string `json:"policyName"`
+		QuotaType  string `json:"quotaType"`
+		PolicyType string `json:"policyType"`
+		Event
+	}
+
+	// ApplicationPolicy for struct ApplicationPolicy
+	type ApplicationPolicy struct {
+		ID        int    `json:"id"`
+		TenantID  int    `json:"tenantId"`
+		Name      string `json:"name"`
+		QuotaType string `json:"quotaType"`
+	}
+
+	if strings.EqualFold(apiEventType, policyEvent.PolicyType) {
 		var apiPolicyEvent APIPolicyEvent
 		json.Unmarshal([]byte(string(data)), &apiPolicyEvent)
-		logger.LoggerJMS.Infof("Policy: %s for policy type: %s , AddedConditionGroups: %s , DeletedConditionGroups: %s",
-			apiPolicyEvent.PolicyName, apiPolicyEvent.PolicyType, apiPolicyEvent.AddedConditionGroupIds,
-			apiPolicyEvent.DeletedConditionGroupIds)
-	} else if strings.EqualFold("APPLICATION", policyEvent.PolicyType) {
+	} else if strings.EqualFold(applicationEventType, policyEvent.PolicyType) {
 		logger.LoggerJMS.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
-	} else if strings.EqualFold("SUBSCRIPTION", policyEvent.PolicyType) {
+		applicationPolicy := resourcetypes.ApplicationPolicy{ID: policyEvent.PolicyID, TenantID: -1, Name: policyEvent.PolicyName,
+			QuotaType: policyEvent.QuotaType}
+		AppPolicyList = append(AppPolicyList, applicationPolicy)
+
+	} else if strings.EqualFold(subscriptionEventType, policyEvent.PolicyType) {
 		var subscriptionPolicyEvent SubscriptionPolicyEvent
 		json.Unmarshal([]byte(string(data)), &subscriptionPolicyEvent)
-		logger.LoggerJMS.Infof("Policy: %s for policy type: %s , rateLimitCount : %v, QuotaType: %s ", subscriptionPolicyEvent.PolicyName,
-			subscriptionPolicyEvent.PolicyType, subscriptionPolicyEvent.RateLimitCount, subscriptionPolicyEvent.QuotaType)
+		logger.LoggerJMS.Infof("Policy: %s for policy type: %s , rateLimitCount : %v, QuotaType: %s ",
+			subscriptionPolicyEvent.PolicyName, subscriptionPolicyEvent.PolicyType, subscriptionPolicyEvent.RateLimitCount,
+			subscriptionPolicyEvent.QuotaType)
+
+		subscriptionPolicy := resourcetypes.SubscriptionPolicy{ID: subscriptionPolicyEvent.PolicyID, TenantID: -1,
+			Name: subscriptionPolicyEvent.PolicyName, QuotaType: subscriptionPolicyEvent.QuotaType,
+			GraphQLMaxComplexity: subscriptionPolicyEvent.GraphQLMaxComplexity,
+			GraphQLMaxDepth:      subscriptionPolicyEvent.GraphQLMaxDepth, RateLimitCount: subscriptionPolicyEvent.RateLimitCount,
+			RateLimitTimeUnit: subscriptionPolicyEvent.RateLimitTimeUnit, StopOnQuotaReach: subscriptionPolicyEvent.StopOnQuotaReach,
+			TenantDomain: subscriptionPolicyEvent.TenantDomain, TimeStamp: subscriptionPolicyEvent.TimeStamp}
+
+		SubPolicyList = append(SubPolicyList, subscriptionPolicy)
 	}
 	// EventType.POLICY_CREATE, EventType.POLICY_UPDATE, EventType.POLICY_DELETE, API, APPLICATION, SUBSCRIPTION
-}
-
-// EventNotification for struct event notifications
-type EventNotification struct {
-	Event struct {
-		PayloadData struct {
-			EventType string  `json:"eventType"`
-			Timstamp  float64 `json:"timstamp"`
-			Event     string  `json:"event"`
-		} `json:"payloadData"`
-	} `json:"event"`
-}
-
-// Event for struct abstract event
-type Event struct {
-	EventID      string  `json:"eventId"`
-	TimeStamp    float64 `json:"timeStamp"`
-	Type         string  `json:"type"`
-	TenantID     string  `json:"tenantId"`
-	TenantDomain string  `json:"tenantDomain"`
-}
-
-// APIEvent for struct API events
-type APIEvent struct {
-	APIID         string   `json:"apiId"`
-	GatewayLabels []string `json:"gatewayLabels"`
-	APIVersion    string   `json:"apiVersion"`
-	APIContext    string   `json:"apiContext"`
-	APIName       string   `json:"apiName"`
-	APIProvider   string   `json:"apiProvider"`
-	APIStatus     string   `json:"apiStatus"`
-	APIType       string   `json:"apiType"`
-	Event
-}
-
-// ApplicationRegistrationEvent for struct application registration events
-type ApplicationRegistrationEvent struct {
-	ApplicationID int    `json:"applicationId"`
-	ConsumerKey   string `json:"consumerKey"`
-	KeyType       string `json:"keyType"`
-	KeyManager    string `json:"keyManager"`
-	Event
-}
-
-// ApplicationEvent for struct application events
-type ApplicationEvent struct {
-	UUID              string   `json:"uuid"`
-	ApplicationID     int      `json:"applicationId"`
-	ApplicationName   string   `json:"applicationName"`
-	TokenType         string   `json:"tokenType"`
-	ApplicationPolicy string   `json:"applicationPolicy"`
-	Attributes        []string `json:"attributes"`
-	Subscriber        string   `json:"subscriber"`
-	GroupID           string   `json:"groupId"`
-	Event
-}
-
-// SubscriptionEvent for struct subscription events
-type SubscriptionEvent struct {
-	SubscriptionID    int    `json:"subscriptionId"`
-	APIID             int    `json:"apiId"`
-	ApplicationID     int    `json:"applicationId"`
-	PolicyID          string `json:"policyId"`
-	SubscriptionState string `json:"subscriptionState"`
-	Event
-}
-
-// ScopeEvent for struct scope events
-type ScopeEvent struct {
-	Name            string `json:"name"`
-	DisplayName     string `json:"displayName"`
-	ApplicationName string `json:"description"`
-	Event
-}
-
-// PolicyInfo for struct policy Info events
-type PolicyInfo struct {
-	PolicyID   string `json:"policyId"`
-	PolicyName string `json:"policyName"`
-	QuotaType  string `json:"quotaType"`
-	PolicyType string `json:"policyType"`
-	Event
-}
-
-// APIPolicyEvent for struct API policy events
-type APIPolicyEvent struct {
-	PolicyInfo
-	AddedConditionGroupIds   string `json:"addedConditionGroupIds"`
-	DeletedConditionGroupIds string `json:"deletedConditionGroupIds"`
-}
-
-// SubscriptionPolicyEvent for struct subscriptionPolicy events
-type SubscriptionPolicyEvent struct {
-	PolicyInfo
-	RateLimitCount       int    `json:"rateLimitCount"`
-	RateLimitTimeUnit    string `json:"rateLimitTimeUnit"`
-	StopOnQuotaReach     bool   `json:"stopOnQuotaReach"`
-	GraphQLMaxComplexity int    `json:"graphQLMaxComplexity"`
-	GraphQLMaxDepth      int    `json:"graphQLMaxDepth"`
 }

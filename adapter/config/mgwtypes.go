@@ -104,7 +104,7 @@ type Config struct {
 		}
 	}
 
-	Enforcer struct {
+	ControlPlane struct {
 		EventHub struct {
 			Enable                  bool `toml:"enable"`
 			JmsConnectionParameters struct {
