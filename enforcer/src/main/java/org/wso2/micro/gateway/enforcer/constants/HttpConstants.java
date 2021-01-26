@@ -23,7 +23,6 @@ package org.wso2.micro.gateway.enforcer.constants;
  */
 public class HttpConstants {
     public static final int NO_CONTENT_STATUS_CODE = 204;
-    public static final int OK_STATUS_CODE = 204;
     public static final String OPTIONS = "OPTIONS";
     public static final String ALLOW_HEADER = "allow";
 }
