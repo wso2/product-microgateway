@@ -45,6 +45,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Configuration holder class for Microgateway.
@@ -127,7 +128,12 @@ public class ConfigHolder {
         EventHubConfigurationDto eventHubDto = new EventHubConfigurationDto();
         eventHubDto.setEnable(eventhub.getEnabled());
         eventHubDto.setServiceUrl(eventhub.getServiceUrl());
-//        eventHubDto.setJmsConnectionParameters(eventhub.getListenerEndpoint());
+
+        Properties jmsProps = new Properties();
+        jmsProps.put(Constants.EVENT_HUB_EVENT_LISTENING_ENDPOINT,
+                eventhub.getJmsConnectionParametersMap().get(Constants.EVENT_HUB_EVENT_LISTENING_ENDPOINT));
+        eventHubDto.setJmsConnectionParameters(jmsProps);
+
         config.setEventHub(eventHubDto);
     }
 

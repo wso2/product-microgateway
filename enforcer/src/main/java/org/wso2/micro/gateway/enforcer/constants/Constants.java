@@ -30,5 +30,5 @@ public class Constants {
     public static final int MAX_XDS_RETRIES = 3;
 
     // Config constants
-    public static final String EVENT_HUB_EVENT_LISTENING_ENDPOINT = "eventHub.eventListeningEndpoints";
+    public static final String EVENT_HUB_EVENT_LISTENING_ENDPOINT = "eventListeningEndpoints";
 }
