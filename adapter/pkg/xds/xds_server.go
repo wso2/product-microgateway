@@ -291,8 +291,6 @@ func updateXdsCacheWithLock(label string, endpoints []types.Resource, clusters [
 func startConsulServiceDiscovery() {
 	//label := "default"
 	for apiKey, clusterList := range openAPIClustersMap {
-		//logger.LoggerXds.Debugln("API key for consul service discovery: ", apiKey)
-		//logger.LoggerXds.Info(svcdiscovery.ClusterConsulKeyMap)
 		for _, cluster := range clusterList {
 			logger.LoggerXds.Info(cluster.Name)
 			if consulSyntax, ok := svcdiscovery.ClusterConsulKeyMap[cluster.Name]; ok {
@@ -323,18 +321,11 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 				logger.LoggerXds.Info("closed the result channel for cluster name: ", clusterName)
 				return
 			}
-			//logger.LoggerXds.Info(queryResultsList)
-
-			//logger.LoggerXds.Info("map: ", svcdiscovery.ClusterConsulResultMap)
 			if val, ok := svcdiscovery.ClusterConsulResultMap[clusterName]; ok {
 				if !reflect.DeepEqual(val, queryResultsList) {
 					svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList
 					//update the envoy cluster
 					updateRoute(apiKey, clusterName, queryResultsList)
-
-					//logger.LoggerXds.Info("Change detected for consul cluster ", clusterName)
-				} else {
-					//logger.LoggerXds.Info("No change in consul cluster ", clusterName)
 				}
 			} else {
 				logger.LoggerXds.Debugln("updating cluster from the consul service registry, removed the default host")
@@ -382,10 +373,7 @@ func updateRoute(apiKey string, clusterName string, queryResultsList []svcdiscov
 						},
 					},
 				}
-
-				//logger.LoggerXds.Info("CALLING SNAPSHOT.CONSISTENT............")
 				updateXDSRouteCacheForServiceDiscovery(apiKey)
-
 			}
 		}
 	}
