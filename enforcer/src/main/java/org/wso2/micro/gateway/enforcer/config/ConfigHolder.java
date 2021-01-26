@@ -74,8 +74,8 @@ public class ConfigHolder {
      * Initialize the configuration provider class by reading the Mgw Configuration file.
      */
     private void init() {
-        String cdsHost = System.getenv().get(Constants.XDS_HOST);
-        int cdsPort = Integer.parseInt(System.getenv().get(Constants.XDS_PORT));
+        String cdsHost = System.getenv().get(Constants.ADAPTER_HOST);
+        int cdsPort = Integer.parseInt(System.getenv().get(Constants.ADAPTER_XDS_PORT));
         ConfigDiscoveryClient cds = new ConfigDiscoveryClient(cdsHost, cdsPort);
 
         try {

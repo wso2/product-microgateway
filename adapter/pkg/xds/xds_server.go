@@ -66,10 +66,12 @@ var (
 	// Envoy Label -> Routes Configuration map
 	envoyRouteConfigMap map[string]*routev3.RouteConfiguration
 
-	// Enforcer config XDS resource version map
-	enforcerConfigVersionMap map[string]int64
-	enforcerApisMap          map[string]*api.Api
-	enforcerConfigMap        map[string][]types.Resource
+	// Enforcer XDS resource version map
+	enforcerCacheVersionMap map[string]int64
+	// Enforcer API XDS resource version map
+	enforcerAPIVersionMap map[string]int64
+	enforcerApisMap       map[string][]types.Resource
+	enforcerConfigMap     map[string][]types.Resource
 )
 
 // IDHash uses ID field as the node hash.
@@ -100,8 +102,10 @@ func init() {
 	envoyListenerConfigMap = make(map[string]*listenerv3.Listener)
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 
-	enforcerConfigVersionMap = make(map[string]int64)
+	enforcerCacheVersionMap = make(map[string]int64)
 	enforcerConfigMap = make(map[string][]types.Resource)
+	enforcerAPIVersionMap = make(map[string]int64)
+	enforcerApisMap = make(map[string][]types.Resource)
 }
 
 // GetXdsCache returns xds server cache.
@@ -348,17 +352,19 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
-func updateEnforcerCache(configs []types.Resource, apis []types.Resource) {
+// UpdateEnforcerConfig Sets new update to the enforcer's configuration
+func UpdateEnforcerConfig(configFile *config.Config) {
+	// TODO: (Praminda) handle labels
 	label := "enforcer"
-	version, ok := enforcerConfigVersionMap[label]
+	configs := []types.Resource{generateEnforcerConfigs(configFile)}
+	version, ok := enforcerCacheVersionMap[label]
 	if ok {
 		version++
 	} else {
 		version = 1
 	}
-	if configs == nil {
-		configs = enforcerConfigMap[label]
-	}
+
+	apis := enforcerApisMap[label]
 
 	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis)
 	snap.Consistent()
@@ -368,19 +374,34 @@ func updateEnforcerCache(configs []types.Resource, apis []types.Resource) {
 		logger.LoggerMgw.Error(err)
 	}
 
-	enforcerConfigVersionMap[label] = version
+	enforcerCacheVersionMap[label] = version
 	enforcerConfigMap[label] = configs
 	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
-// UpdateEnforcerConfig Sets new update to the enforcer's configuration
-func UpdateEnforcerConfig(confiFile *config.Config) {
-	configs := []types.Resource{generateEnforcerConfigs(confiFile)}
-	updateEnforcerCache(configs, nil)
-}
-
 // UpdateEnforcerApis Sets new update to the enforcer's Apis
 func UpdateEnforcerApis(api *api.Api) {
-	apis := []types.Resource{api}
-	updateEnforcerCache(nil, apis)
+	//TODO: (Praminda) Use same cache and the version for both API and envoy xds resources
+	label := "enforcer"
+	apis := enforcerApisMap[label]
+	apis = append(apis, api)
+	version, ok := enforcerCacheVersionMap[label]
+	if ok {
+		version++
+	} else {
+		version = 1
+	}
+	configs := enforcerConfigMap[label]
+
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis)
+	snap.Consistent()
+
+	err := enforcerCache.SetSnapshot(label, snap)
+	if err != nil {
+		logger.LoggerMgw.Error(err)
+	}
+
+	enforcerCacheVersionMap[label] = version
+	enforcerApisMap[label] = apis
+	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }

@@ -192,5 +192,8 @@ func getXWso2Basepath(vendorExtensible map[string]interface{}) string {
 }
 
 func (swagger *MgwSwagger) setXWso2Basepath() {
-	swagger.xWso2Basepath = getXWso2Basepath(swagger.vendorExtensible)
+	extBasepath := getXWso2Basepath(swagger.vendorExtensible)
+	if extBasepath != "" {
+		swagger.xWso2Basepath = extBasepath
+	}
 }

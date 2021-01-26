@@ -25,6 +25,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.service.config.ConfigDiscoveryServiceGrpc;
+import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 
@@ -36,16 +37,17 @@ import java.util.concurrent.TimeUnit;
 public class ConfigDiscoveryClient {
     private final ManagedChannel channel;
     private final ConfigDiscoveryServiceGrpc.ConfigDiscoveryServiceBlockingStub blockingStub;
+    private String nodeId;
 
     public ConfigDiscoveryClient(String host, int port) {
-        channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
+        channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().enableRetry().build();
         this.blockingStub = ConfigDiscoveryServiceGrpc.newBlockingStub(channel);
+        nodeId = ReferenceHolder.getInstance().getNodeLabel();
     }
 
     public Config requestInitConfig() throws DiscoveryException {
-        // TODO: praminda implement nodeid (label) behavior
         DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId("enforcer").build())
+                .setNode(Node.newBuilder().setId(nodeId).build())
                 .setTypeUrl(Constants.CONFIG_TYPE_URL).build();
         DiscoveryResponse res = DiscoveryResponse.getDefaultInstance();
         try {
