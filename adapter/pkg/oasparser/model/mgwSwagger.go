@@ -167,10 +167,7 @@ func getXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 				castedUrlsInterface := urlsProperty.([]interface{})
 				for _, v := range castedUrlsInterface {
 					endpoint := getHostandBasepathandPort(v.(string))
-					endpointType, endpointTypeFound := val[typeConst]
-					if endpointTypeFound {
-						endpoint.URLType = endpointType.(string)
-					}
+					// todo: To identify the endpoint type (LB, failover)
 					endpoints = append(endpoints, endpoint)
 				}
 				return endpoints

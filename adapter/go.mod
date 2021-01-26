@@ -26,8 +26,8 @@ require (
 	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5 // indirect
 	golang.org/x/net v0.0.0-20201201195509-5d6afe98e0b7
 	golang.org/x/tools v0.0.0-20210107193943-4ed967dd8eff // indirect
-	google.golang.org/appengine v1.6.1
-	google.golang.org/genproto v0.0.0-20201201144952-b05cb90ed32e
+	google.golang.org/appengine v1.6.1 // indirect
+	google.golang.org/genproto v0.0.0-20201201144952-b05cb90ed32e // indirect
 	google.golang.org/grpc v1.33.2
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0

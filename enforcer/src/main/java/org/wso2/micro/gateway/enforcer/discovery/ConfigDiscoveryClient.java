@@ -51,8 +51,7 @@ public class ConfigDiscoveryClient {
                 .setTypeUrl(Constants.CONFIG_TYPE_URL).build();
         DiscoveryResponse res = DiscoveryResponse.getDefaultInstance();
         try {
-            res = blockingStub.withDeadlineAfter(60, TimeUnit.SECONDS).fetchConfigs(req);
-            shutdown();
+            res = requestConfig(req);
 
             // Theres only one config root resource here. Therefore taking 0, no need to iterate
             return res.getResources(0).unpack(Config.class);
@@ -60,6 +59,34 @@ public class ConfigDiscoveryClient {
             // catching generic error here to wrap any grpc communication errors in the runtime
             throw new DiscoveryException("Couldn't fetch init configs", e);
         }
+    }
+
+    /**
+     * Call a blocking RPC and retry {@code Constats.MAX_XDS_RETRIES} times before failing.
+     *
+     * @param req {@link DiscoveryRequest} with the request information for the RPC
+     * @return Response as a {@link DiscoveryResponse} for the requested RPC
+     * @throws DiscoveryException all retries to the grpc server failed or attempt to shutdown the connection failed
+     */
+    private DiscoveryResponse requestConfig(DiscoveryRequest req) throws DiscoveryException {
+        DiscoveryResponse res;
+        int retries = 0;
+        Exception e = new Exception();
+
+        // We are looking for a runtime exception to retry. Therefore with the `break` statement,
+        // the IDE always mark this condition as always true condition.
+        while (retries < Constants.MAX_XDS_RETRIES) {
+            try {
+                res = blockingStub.withDeadlineAfter(10, TimeUnit.SECONDS).fetchConfigs(req);
+                shutdown();
+                return res;
+            } catch (Exception ex) {
+                // catching generic error here to wrap any grpc communication errors in the runtime
+                e = ex;
+            }
+            retries++;
+        }
+        throw new DiscoveryException("Failed " + Constants.MAX_XDS_RETRIES + " retries", e);
     }
 
     public void shutdown() throws InterruptedException {

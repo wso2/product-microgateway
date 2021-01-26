@@ -37,7 +37,7 @@ import (
 // API Controller related constants
 const (
 	openAPIDir            string = "Definitions"
-	openAPIFilename       string = "swagger.yaml"
+	openAPIFilename       string = "swagger."
 	apiDefinitionFilename string = "api.yaml"
 	endpointCertDir       string = "Endpoint-certificates"
 	crtExtension          string = ".crt"
@@ -62,10 +62,10 @@ func ApplyAPIProject(payload []byte) error {
 		loggers.LoggerAPI.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
 		return err
 	}
-
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
 	for _, file := range zipReader.File {
-		if strings.HasSuffix(file.Name, openAPIDir+string(os.PathSeparator)+openAPIFilename) {
+		loggers.LoggerAPI.Debugf("File reading now: %v", file.Name)
+		if strings.Contains(file.Name, openAPIDir+string(os.PathSeparator)+openAPIFilename) {
 			loggers.LoggerAPI.Debugf("openAPI file : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
