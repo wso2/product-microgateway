@@ -198,7 +198,7 @@ func (c ConsulClient) getUpstreams(query Query, resultChan chan []Upstream) {
 		if errGet == nil {
 			result = append(result, res...)
 		} else {
-			logger.LoggerSvcDiscovery.Error("service registry unreachable ", errGet)
+			logger.LoggerSvcDiscovery.Error("Service registry unreachable ", errGet)
 		}
 	}
 
