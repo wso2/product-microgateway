@@ -26,6 +26,7 @@ import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.cors.CorsFilter;
 import org.wso2.micro.gateway.enforcer.security.AuthFilter;
 
 import java.util.ArrayList;
@@ -87,11 +88,20 @@ public class RestAPI implements API {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
         } else {
+            // If a filter chain stops with a false, it will be passed directly to the client.
+            responseObject.setDirectResponse(true);
             responseObject.setStatusCode(Integer.parseInt(requestContext.getProperties().get("code").toString()));
-            responseObject.setErrorCode(requestContext.getProperties().get("error_code").toString());
-            responseObject.setErrorDescription(requestContext.getProperties().get("error_description").toString());
+            if (requestContext.getProperties().get("error_code") != null) {
+                responseObject.setErrorCode(requestContext.getProperties().get("error_code").toString());
+            }
+            if (requestContext.getProperties().get("error_code") != null) {
+                responseObject.setErrorDescription(requestContext.getProperties()
+                        .get("error_description").toString());
+            }
+            if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
+                responseObject.setHeaderMap(requestContext.getResponseHeaders());
+            }
         }
-
         return responseObject;
     }
 
@@ -130,6 +140,8 @@ public class RestAPI implements API {
     private void initFilters() {
         AuthFilter authFilter = new AuthFilter();
         authFilter.init(apiConfig);
+        CorsFilter corsFilter = new CorsFilter();
+        this.filters.add(corsFilter);
         this.filters.add(authFilter);
     }
 }

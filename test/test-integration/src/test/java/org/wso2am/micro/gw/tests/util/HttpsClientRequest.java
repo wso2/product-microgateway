@@ -20,6 +20,7 @@ package org.wso2am.micro.gw.tests.util;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
@@ -45,11 +46,7 @@ public class HttpsClientRequest {
         HttpResponse httpResponse;
         try {
             conn = getURLConnection(requestUrl);
-            //setting request headers
-            for (Map.Entry<String, String> e : headers.entrySet()) {
-                conn.setRequestProperty(e.getKey(), e.getValue());
-            }
-            conn.setRequestMethod(TestConstant.HTTP_METHOD_GET);
+            setHeadersAndMethod(conn, headers, TestConstant.HTTP_METHOD_GET);
             conn.connect();
             StringBuilder sb = new StringBuilder();
             BufferedReader rd = null;
@@ -83,7 +80,6 @@ public class HttpsClientRequest {
             }
         }
     }
-
     /**
      * Sends an HTTP GET request to a url.
      *
@@ -110,11 +106,7 @@ public class HttpsClientRequest {
         HttpResponse httpResponse;
         try {
             urlConnection = getURLConnection(endpoint);
-            //setting request headers
-            for (Map.Entry<String, String> e : headers.entrySet()) {
-                urlConnection.setRequestProperty(e.getKey(), e.getValue());
-            }
-            urlConnection.setRequestMethod(TestConstant.HTTP_METHOD_POST);
+            setHeadersAndMethod(urlConnection, headers, TestConstant.HTTP_METHOD_POST);
             OutputStream out = urlConnection.getOutputStream();
             try {
                 Writer writer = new OutputStreamWriter(out, TestConstant.CHARSET_NAME);
@@ -229,5 +221,12 @@ public class HttpsClientRequest {
         httpResponse = new HttpResponse(sb.toString(), conn.getResponseCode(), responseHeaders);
         httpResponse.setResponseMessage(conn.getResponseMessage());
         return httpResponse;
+    }
+
+    private static void setHeadersAndMethod(HttpsURLConnection connection, Map<String, String> headers, String method) throws ProtocolException {
+        for (Map.Entry<String, String> e : headers.entrySet()) {
+            connection.setRequestProperty(e.getKey(), e.getValue());
+        }
+        connection.setRequestMethod(method);
     }
 }

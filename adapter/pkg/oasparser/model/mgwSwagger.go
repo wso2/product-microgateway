@@ -17,6 +17,7 @@
 package model
 
 import (
+	parser "github.com/mitchellh/mapstructure"
 	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/svcdiscovery"
 )
@@ -37,6 +38,7 @@ type MgwSwagger struct {
 	sandboxUrls      []Endpoint
 	resources        []Resource
 	xWso2Basepath    string
+	xWso2Cors        *CorsConfig
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -58,6 +60,20 @@ type Endpoint struct {
 	Port uint32
 	//ServiceDiscoveryQuery consul query for service discovery
 	ServiceDiscoveryString string
+}
+
+// CorsConfig represents the API level Cors Configuration
+type CorsConfig struct {
+	Enabled                       bool     `mapstructure:"corsConfigurationEnabled"`
+	AccessControlAllowCredentials bool     `mapstructure:"accessControlAllowCredentials,omitempty"`
+	AccessControlAllowHeaders     []string `mapstructure:"accessControlAllowHeaders"`
+	AccessControlAllowMethods     []string `mapstructure:"accessControlAllowMethods"`
+	AccessControlAllowOrigins     []string `mapstructure:"accessControlAllowOrigins"`
+}
+
+// GetCorsConfig returns the CorsConfiguration Object.
+func (swagger *MgwSwagger) GetCorsConfig() *CorsConfig {
+	return swagger.xWso2Cors
 }
 
 // GetAPIType returns the openapi version
@@ -122,6 +138,7 @@ func (swagger *MgwSwagger) SetXWso2Extenstions() {
 	swagger.setXWso2Basepath()
 	swagger.setXWso2PrdoductionEndpoint()
 	swagger.setXWso2SandboxEndpoint()
+	swagger.setXWso2Cors()
 }
 
 func (swagger *MgwSwagger) setXWso2PrdoductionEndpoint() {
@@ -222,4 +239,26 @@ func (swagger *MgwSwagger) setXWso2Basepath() {
 	if extBasepath != "" {
 		swagger.xWso2Basepath = extBasepath
 	}
+}
+
+func (swagger *MgwSwagger) setXWso2Cors() {
+	if cors, corsFound := swagger.vendorExtensible[xWso2Cors]; corsFound {
+		logger.LoggerOasparser.Debugf("%v configuration is available", xWso2Cors)
+		if parsedCors, parsedCorsOk := cors.(map[string]interface{}); parsedCorsOk {
+			//Default CorsConfiguration
+			corsConfig := &CorsConfig{
+				Enabled: true,
+			}
+			err := parser.Decode(parsedCors, &corsConfig)
+			if err != nil {
+				logger.LoggerOasparser.Errorf("Error while parsing %v: "+err.Error(), xWso2Cors)
+				return
+			}
+			logger.LoggerOasparser.Debugf("Cors Configuration is applied : %+v\n", corsConfig)
+			swagger.xWso2Cors = corsConfig
+			return
+		}
+		logger.LoggerOasparser.Errorf("Error while parsing %v .", xWso2Cors)
+	}
+
 }

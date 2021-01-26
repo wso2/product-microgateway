@@ -69,7 +69,7 @@ public class ResourceConfig {
      * ENUM to hold http operations
      */
     public enum HttpMethods {
-        GET("get"), POST("post"), PUT("put"), DELETE("delete"), HEAD("head"), OPTION("option");
+        GET("get"), POST("post"), PUT("put"), DELETE("delete"), HEAD("head"), OPTIONS("options");
 
         private String value;
 
