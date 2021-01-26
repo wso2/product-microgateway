@@ -241,7 +241,7 @@ func (c ConsulClient) Poll(query Query, doneChan <-chan bool) <-chan []Upstream 
 			select {
 			case <-doneChan:
 				//sending a signal through doneChan will cause this go routine to exit
-				logger.LoggerSvcDiscovery.Info("consul query stopped polling for:", query)
+				logger.LoggerSvcDiscovery.Info("Consul stopped polling for query :", query)
 				return
 			case <-intervalChan:
 				c.getUpstreams(query, resultChan)
