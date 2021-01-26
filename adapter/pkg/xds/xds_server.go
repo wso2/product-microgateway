@@ -304,13 +304,10 @@ func startConsulServiceDiscovery() {
 				go getServiceDiscoveryData(query, cluster.Name, apiKey)
 			}
 		}
-
 	}
-
 }
 
 func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKey string) {
-
 	doneChan := make(chan bool)
 	svcdiscovery.ClusterConsulDoneChanMap[clusterName] = doneChan
 	resultChan := svcdiscovery.ConsulClientInstance.Poll(query, doneChan)
@@ -334,16 +331,13 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 			}
 		}
 	}
-
 }
 
 func updateRoute(apiKey string, clusterName string, queryResultsList []svcdiscovery.Upstream) {
 	if clusterList, available := openAPIClustersMap[apiKey]; available {
 		for i := range clusterList {
 			if clusterList[i].Name == clusterName {
-
 				var lbEndpointList []*endpointv3.LbEndpoint
-
 				for _, result := range queryResultsList {
 					address := &corev3.Address{Address: &corev3.Address_SocketAddress{
 						SocketAddress: &corev3.SocketAddress{
@@ -364,7 +358,6 @@ func updateRoute(apiKey string, clusterName string, queryResultsList []svcdiscov
 					}
 					lbEndpointList = append(lbEndpointList, lbEndPoint)
 				}
-
 				clusterList[i].LoadAssignment = &endpointv3.ClusterLoadAssignment{
 					ClusterName: clusterName,
 					Endpoints: []*endpointv3.LocalityLbEndpoints{
