@@ -69,15 +69,17 @@ password = "wso2carbon"
     consumerKeyClaim = "azp"
 
 # Configurations for retrieving API and subscription data from API Manager.
-[enforcer.eventHub]
+[controlPlane.eventHub]
     # Enable/ Disable the feature
     enabled = false
     # The API Manager URL
     serviceUrl = "https://localhost:9443/"
+    username="admin"
+    password="admin"
     # User name and password of the internal data api.
-    [enforcer.eventHub.jmsConnectionParameters]
+    [controlPlane.eventHub.jmsConnectionParameters]
         # The message broker connection URL.
-        eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
+        eventListeningEndpoints = "amqp://admin:admin@localhost:5672/"
 
 [enforcer.apimCredentials]
     username="admin"

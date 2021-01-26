@@ -36,6 +36,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/micro-gw/pkg/messaging"
 	"github.com/wso2/micro-gw/pkg/synchronizer"
 	xds "github.com/wso2/micro-gw/pkg/xds"
 	"google.golang.org/grpc"
@@ -126,6 +127,12 @@ func Run(conf *config.Config) {
 	fetchAPIsOnStartUp(conf)
 
 	go restserver.StartRestServer(conf)
+
+	var enableEventHub bool
+	enableEventHub = conf.ControlPlane.EventHub.Enable
+	if enableEventHub {
+		go messaging.ProcessEvents(conf)
+	}
 OUTER:
 	for {
 		select {

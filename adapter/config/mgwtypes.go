@@ -113,7 +113,7 @@ type Config struct {
 		AuthService     authService
 	}
 
-	ControlPlane ControlPlane `toml:"controlPlane`
+	ControlPlane controlPlane `toml:"controlPlane`
 }
 
 type apimCredentials struct {
@@ -152,9 +152,11 @@ type jwtTokenConfig struct {
 }
 
 type eventHub struct {
-	Enabled           bool
-	ServiceURL        string
-	ListeningEndpoint string
+	Enabled                 bool
+	ServiceURL              string
+	JmsConnectionParameters struct {
+		EventListeningEndpoints string `toml:"eventListeningEndpoints"`
+	} `toml:"jmsConnectionParameters"`
 }
 
 // APICtlUser represents registered APICtl Users
@@ -164,7 +166,7 @@ type APICtlUser struct {
 }
 
 // ControlPlane struct contains configurations related to the API Manager
-type ControlPlane struct {
+type controlPlane struct {
 	EventHub struct {
 		ServiceURL              string        `toml:"serviceUrl"`
 		Username                string        `toml:"username"`
