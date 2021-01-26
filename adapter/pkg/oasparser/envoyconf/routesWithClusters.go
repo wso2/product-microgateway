@@ -34,6 +34,7 @@ import (
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/oasparser/model"
+	"github.com/wso2/micro-gw/pkg/svcdiscovery"
 
 	"strings"
 	"time"
@@ -86,6 +87,13 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 		endpoints = append(endpoints, apilevelAddressP)
 		apiEndpointBasePath = apiLevelEndpointProd[0].Basepath
 
+		//todo add to ClusterConsulKeyMap on Sand , Resource level as well
+		if apiLevelEndpointProd[0].ServiceDiscoveryString != "" {
+			//add the api level cluster name to the ClusterConsulKeyMap
+			svcdiscovery.ClusterConsulKeyMap[apiLevelClusterNameProd] = apiLevelEndpointProd[0].ServiceDiscoveryString
+			logger.LoggerOasparser.Info("Consul cluster added for API level Production: ", apiLevelClusterNameProd, " ",
+				apiLevelEndpointProd[0].ServiceDiscoveryString)
+		}
 	} else {
 		logger.LoggerOasparser.Warn("API level Producton endpoints are not defined")
 	}
@@ -104,6 +112,12 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 				upstreamCerts)
 			clusters = append(clusters, apilevelClusterSand)
 			endpoints = append(endpoints, apilevelAddressSand)
+			if apiLevelEndpointSand[0].ServiceDiscoveryString != "" {
+				//add the api level cluster name to the ClusterConsulKeyMap
+				svcdiscovery.ClusterConsulKeyMap[apiLevelClusterNameSand] = apiLevelEndpointSand[0].ServiceDiscoveryString
+				logger.LoggerOasparser.Info("Consul cluster added for API level Sandbox: ", apiLevelClusterNameSand, " ",
+					apiLevelEndpointSand[0].ServiceDiscoveryString)
+			}
 		}
 	}
 
@@ -129,6 +143,13 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 			clusterRefProd = clusterProd.GetName()
 			endpoints = append(endpoints, addressProd)
 			endpointBasepath = endpointProd[0].Basepath
+
+			//add to ClusterConsulKeyMap: resource level prod endpoints
+			if endpointProd[0].ServiceDiscoveryString != "" {
+				svcdiscovery.ClusterConsulKeyMap[clusterNameProd] = endpointProd[0].ServiceDiscoveryString
+				logger.LoggerOasparser.Info("Consul cluster added for Resource level Production:", clusterNameProd, " ",
+					endpointProd[0].ServiceDiscoveryString)
+			}
 
 			// API level check
 		} else if len(mgwSwagger.GetProdEndpoints()) > 0 {
@@ -157,6 +178,13 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 				clusters = append(clusters, clusterSand)
 				endpoints = append(endpoints, addressSand)
 				clusterRefSand = clusterSand.GetName()
+
+				//add to ClusterConsulKeyMap: resource level sand endpoints
+				if endpointSand[0].ServiceDiscoveryString != "" {
+					svcdiscovery.ClusterConsulKeyMap[clusterNameSand] = endpointSand[0].ServiceDiscoveryString
+					logger.LoggerOasparser.Info("Consul cluster added for API level Sandbox:", clusterNameSand, " ",
+						endpointSand[0].ServiceDiscoveryString)
+				}
 			}
 
 			// API level check

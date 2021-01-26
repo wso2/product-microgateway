@@ -9,6 +9,15 @@ privateKeyPath = "/home/wso2/security/localhost.key"
 username = "admin"
 password = "admin"
 
+[adapter.consul]
+url = "https://169.254.1.1:8501" # scheme + host ip + port
+pollInterval = 5 # seconds
+aclTokenFilePath = ""
+# certs for tls
+caCertPath = "/home/wso2/security/consul/consul-agent-ca.pem"
+certPath = "/home/wso2/security/consul/local-dc-client-consul-0.pem"
+keyPath = "/home/wso2/security/consul/local-dc-client-consul-0-key.pem"
+
 [envoy]
 listenerHost = "0.0.0.0"
 listenerPort = 9095

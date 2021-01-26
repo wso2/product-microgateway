@@ -19,6 +19,8 @@ package xds
 
 import (
 	"fmt"
+	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
+	"github.com/wso2/micro-gw/pkg/svcdiscovery"
 	"reflect"
 	"sync"
 
@@ -38,7 +40,8 @@ import (
 )
 
 var (
-	version int32
+	version           int32
+	mutexForXdsUpdate sync.Mutex
 
 	cache cachev3.SnapshotCache
 	// OpenAPI Name:Version -> openAPI3 struct map
@@ -180,6 +183,7 @@ func UpdateEnvoy(byteArr []byte, upstreamCerts []byte, apiType string) {
 	openAPIEndpointsMap[apiMapKey] = endpoints
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
+	startConsulServiceDiscovery() //consul service discovery starting point
 }
 
 func arrayContains(a []string, x string) bool {
@@ -217,14 +221,14 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 	for _, oldLabel := range oldLabels {
 		if !arrayContains(newLabels, oldLabel) {
 			listeners, clusters, routes, endpoints := generateEnvoyResoucesForLabel(oldLabel)
-			updateXdsCache(oldLabel, endpoints, clusters, routes, listeners)
+			updateXdsCacheWithLock(oldLabel, endpoints, clusters, routes, listeners)
 			logger.LoggerXds.Debugf("Xds Cache is updated for the already existing label : %v", oldLabel)
 		}
 	}
 
 	for _, newLabel := range newLabels {
 		listeners, clusters, routes, endpoints := generateEnvoyResoucesForLabel(newLabel)
-		updateXdsCache(newLabel, endpoints, clusters, routes, listeners)
+		updateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
 		logger.LoggerXds.Debugf("Xds Cache is updated for the newly added label : %v", newLabel)
 	}
 }
@@ -255,6 +259,7 @@ func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	return oasParser.GetCacheResources(endpointArray, clusterArray, listener, routesConfig)
 }
 
+//use updateXdsCacheWithLock to avoid race conditions
 func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) {
 	version, ok := envoyUpdateVersionMap[label]
 	if ok {
@@ -273,4 +278,133 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	}
 	envoyUpdateVersionMap[label] = version
 	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+//different go routines could update XDS at the same time. To avoid this we use a mutex and lock
+func updateXdsCacheWithLock(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource,
+	listeners []types.Resource) {
+	mutexForXdsUpdate.Lock()
+	defer mutexForXdsUpdate.Unlock()
+	updateXdsCache(label, endpoints, clusters, routes, listeners)
+}
+
+func startConsulServiceDiscovery() {
+	//label := "default"
+	for apiKey, clusterList := range openAPIClustersMap {
+		//logger.LoggerXds.Debugln("API key for consul service discovery: ", apiKey)
+		//logger.LoggerXds.Info(svcdiscovery.ClusterConsulKeyMap)
+		for _, cluster := range clusterList {
+			logger.LoggerXds.Info(cluster.Name)
+			if consulSyntax, ok := svcdiscovery.ClusterConsulKeyMap[cluster.Name]; ok {
+				svcdiscovery.InitConsul() //initialize consul client and load certs
+				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
+				if errConSyn != nil {
+					logger.LoggerXds.Error("consul syntax parse error ", errConSyn)
+					return
+				}
+				logger.LoggerXds.Info(query)
+				go getServiceDiscoveryData(query, cluster.Name, apiKey)
+			}
+		}
+
+	}
+
+}
+
+func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKey string) {
+
+	doneChan := make(chan bool)
+	svcdiscovery.ClusterConsulDoneChanMap[clusterName] = doneChan
+	resultChan := svcdiscovery.ConsulClientInstance.Poll(query, doneChan)
+	for {
+		select {
+		case queryResultsList, ok := <-resultChan:
+			if !ok { //ok==false --> result chan is closed
+				logger.LoggerXds.Info("closed the result channel for cluster name: ", clusterName)
+				return
+			}
+			//logger.LoggerXds.Info(queryResultsList)
+
+			//logger.LoggerXds.Info("map: ", svcdiscovery.ClusterConsulResultMap)
+			if val, ok := svcdiscovery.ClusterConsulResultMap[clusterName]; ok {
+				if !reflect.DeepEqual(val, queryResultsList) {
+					svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList
+					//update the envoy cluster
+					updateRoute(apiKey, clusterName, queryResultsList)
+
+					//logger.LoggerXds.Info("Change detected for consul cluster ", clusterName)
+				} else {
+					//logger.LoggerXds.Info("No change in consul cluster ", clusterName)
+				}
+			} else {
+				logger.LoggerXds.Debugln("updating cluster from the consul service registry, removed the default host")
+				svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList
+				updateRoute(apiKey, clusterName, queryResultsList)
+			}
+		}
+	}
+
+}
+
+func updateRoute(apiKey string, clusterName string, queryResultsList []svcdiscovery.Upstream) {
+	if clusterList, available := openAPIClustersMap[apiKey]; available {
+		for i := range clusterList {
+			if clusterList[i].Name == clusterName {
+
+				var lbEndpointList []*endpointv3.LbEndpoint
+
+				for _, result := range queryResultsList {
+					address := &corev3.Address{Address: &corev3.Address_SocketAddress{
+						SocketAddress: &corev3.SocketAddress{
+							Address:  result.Address,
+							Protocol: corev3.SocketAddress_TCP,
+							PortSpecifier: &corev3.SocketAddress_PortValue{
+								PortValue: uint32(result.ServicePort),
+							},
+						},
+					}}
+
+					lbEndPoint := &endpointv3.LbEndpoint{
+						HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
+							Endpoint: &endpointv3.Endpoint{
+								Address: address,
+							},
+						},
+					}
+					lbEndpointList = append(lbEndpointList, lbEndPoint)
+				}
+
+				clusterList[i].LoadAssignment = &endpointv3.ClusterLoadAssignment{
+					ClusterName: clusterName,
+					Endpoints: []*endpointv3.LocalityLbEndpoints{
+						{
+							LbEndpoints: lbEndpointList,
+						},
+					},
+				}
+
+				//logger.LoggerXds.Info("CALLING SNAPSHOT.CONSISTENT............")
+				updateXDSRouteCacheForServiceDiscovery(apiKey)
+
+			}
+		}
+	}
+}
+
+func updateXDSRouteCacheForServiceDiscovery(apiKey string) {
+	for key, envoyLabelList := range openAPIEnvoyMap {
+		if key == apiKey {
+			for _, label := range envoyLabelList {
+				listeners, clusters, routes, endpoints := generateEnvoyResoucesForLabel(label)
+				updateXdsCacheWithLock(label, endpoints, clusters, routes, listeners)
+				logger.LoggerXds.Info("Updated XDS cache by consul service discovery")
+			}
+		}
+	}
+}
+
+func stopConsulDiscoveryFor(clusterName string) {
+	if doneChan, available := svcdiscovery.ClusterConsulDoneChanMap[clusterName]; available {
+		close(doneChan)
+	}
 }
