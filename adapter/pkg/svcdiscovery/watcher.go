@@ -98,13 +98,13 @@ func InitConsul() {
 			return
 		}
 		pollInterval = time.Duration(conf.Adapter.Consul.PollInterval) * time.Second
-		r, errURLParse := url.Parse(conf.Adapter.Consul.URL)
+		urlStructure, errURLParse := url.Parse(conf.Adapter.Consul.URL)
 		if errURLParse != nil {
 			errConfLoad = errURLParse
 			logger.LoggerSvcDiscovery.Error("Invalid URL to Consul Client ", errURLParse)
 			return
 		}
-		if r.Scheme == "https" { //communicate to consul through https
+		if urlStructure.Scheme == "https" { //communicate to consul through https
 			errCertRead := readCerts()
 			if errCertRead != nil {
 				errConfLoad = errCertRead
@@ -122,12 +122,12 @@ func InitConsul() {
 			tlsConfig := newTLSConfig(pool, []tls.Certificate{clientCert}, false)
 			transport := newHTTPSTransport(&tlsConfig)
 			client := newHTTPClient(&transport, pollInterval)
-			ConsulClientInstance = NewConsulClient(client, r.Scheme, r.Host, aclToken)
+			ConsulClientInstance = NewConsulClient(client, urlStructure.Scheme, urlStructure.Host, aclToken)
 		} else {
 			//communicate to consul through http
 			transport := newHTTPTransport()
 			client := newHTTPClient(&transport, pollInterval)
-			ConsulClientInstance = NewConsulClient(client, r.Scheme, r.Host, aclToken)
+			ConsulClientInstance = NewConsulClient(client, urlStructure.Scheme, urlStructure.Host, aclToken)
 		}
 
 	})

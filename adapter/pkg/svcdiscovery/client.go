@@ -102,7 +102,6 @@ type ConsulClient struct {
 
 //NewConsulClient constructor for ConsulClient
 func NewConsulClient(api http.Client, scheme string, host string, aclToken string) ConsulClient {
-	//logger.LoggerSvcDiscovery.Debugln("Consul client created")
 	return ConsulClient{
 		client:       api,
 		scheme:       scheme,
