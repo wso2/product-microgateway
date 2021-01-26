@@ -170,7 +170,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 		go synchronizer.FetchAPIs(nil, nil, c)
 	}
 
-	// Wait for each environment to return it's resul
+	// Wait for each environment to return it's result
 	for i := 0; i < len(envs); i++ {
 		data := <-c
 		logger.LoggerMgw.Debug("Receing data for an envrionment: %v", string(data.Resp))
