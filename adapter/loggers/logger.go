@@ -37,6 +37,7 @@ const (
 	pkgMgw       = "github.com/wso2/micro-gw/pkg/mgw"
 	pkgOasparser = "github.com/wso2/micro-gw/pkg/oasparser"
 	pkgXds       = "github.com/wso2/micro-gw/pkg/xds"
+	pkgJMS       = "github.com/wso2/micro-gw/jms"
 )
 
 // logger package references
@@ -46,6 +47,7 @@ var (
 	LoggerMgw       *logrus.Logger
 	LoggerOasparser *logrus.Logger
 	LoggerXds       *logrus.Logger
+	LoggerJMS       *logrus.Logger
 )
 
 func init() {
@@ -60,5 +62,6 @@ func UpdateLoggers() {
 	LoggerMgw = logging.InitPackageLogger(pkgMgw)
 	LoggerOasparser = logging.InitPackageLogger(pkgOasparser)
 	LoggerXds = logging.InitPackageLogger(pkgXds)
+	LoggerJMS = logging.InitPackageLogger(pkgJMS)
 	logrus.Info("Updated loggers")
 }

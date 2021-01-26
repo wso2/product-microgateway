@@ -103,6 +103,15 @@ type Config struct {
 			}
 		}
 	}
+
+	ControlPlane struct {
+		EventHub struct {
+			Enable                  bool `toml:"enable"`
+			JmsConnectionParameters struct {
+				EventListeningEndpoints string `toml:"eventListeningEndpoints"`
+			}
+		}
+	}
 }
 
 // APICtlUser represents registered APICtl Users
