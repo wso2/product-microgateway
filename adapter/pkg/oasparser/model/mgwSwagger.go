@@ -18,6 +18,7 @@ package model
 
 import (
 	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/micro-gw/pkg/svcdiscovery"
 )
 
 // MgwSwagger represents the object structure holding the information related to the
@@ -55,6 +56,8 @@ type Endpoint struct {
 	// If the port is not specified, 80 is assigned if URLType is http
 	// 443 is assigned if URLType is https
 	Port uint32
+	//ServiceDiscoveryQuery consul query for service discovery
+	ServiceDiscoveryString string
 }
 
 // GetAPIType returns the openapi version
@@ -156,12 +159,32 @@ func getXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 			} else {
 				castedUrlsInterface := urlsProperty.([]interface{})
 				for _, v := range castedUrlsInterface {
-					endpoint := getHostandBasepathandPort(v.(string))
-					endpointType, endpointTypeFound := val[typeConst]
-					if endpointTypeFound {
-						endpoint.URLType = endpointType.(string)
+					if svcdiscovery.IsDiscoveryServiceEndpoint(v.(string)) {
+						logger.LoggerOasparser.Debug("consul query syntax found: ", v.(string))
+						queryString, defHost, err := svcdiscovery.ParseConsulSyntax(v.(string))
+						if err != nil {
+							logger.LoggerOasparser.Error("consul syntax parse error ", err)
+							continue
+						}
+						endpoint := getHostandBasepathandPort(defHost)
+						endpointType, endpointTypeFound := val[typeConst]
+						endpoint.ServiceDiscoveryString = queryString
+
+						if endpointTypeFound {
+							endpoint.URLType = endpointType.(string)
+						}
+						endpoints = append(endpoints, endpoint)
+
+					} else {
+						endpoint := getHostandBasepathandPort(v.(string))
+						endpointType, endpointTypeFound := val[typeConst]
+
+						if endpointTypeFound {
+							endpoint.URLType = endpointType.(string)
+						}
+						endpoints = append(endpoints, endpoint)
 					}
-					endpoints = append(endpoints, endpoint)
+
 				}
 				return endpoints
 			}
