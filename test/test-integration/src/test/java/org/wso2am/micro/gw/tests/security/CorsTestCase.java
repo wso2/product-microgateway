@@ -28,6 +28,7 @@ import org.apache.http.client.methods.HttpOptions;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
@@ -232,5 +233,10 @@ public class CorsTestCase extends BaseTestCase {
             }
         }
         return null;
+    }
+
+    @AfterClass(description = "stop the setup")
+    void stop() {
+        super.stopMGW();
     }
 }
