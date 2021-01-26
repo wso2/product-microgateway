@@ -31,6 +31,7 @@ import io.envoyproxy.envoy.type.v3.HttpStatus;
 import io.grpc.stub.StreamObserver;
 import org.json.JSONObject;
 import org.wso2.micro.gateway.enforcer.api.ResponseObject;
+import org.wso2.micro.gateway.enforcer.constants.HttpConstants;
 import org.wso2.micro.gateway.enforcer.server.RequestHandler;
 
 /**
@@ -56,7 +57,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
         if (responseObject.isDirectResponse()) {
             // To handle options request
-            if (responseObject.getStatusCode() == 204) {
+            if (responseObject.getStatusCode() == HttpConstants.NO_CONTENT_STATUS_CODE) {
                 responseObject.getHeaderMap().forEach((key, value) -> {
                             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                                     .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())

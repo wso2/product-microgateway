@@ -65,7 +65,6 @@ public class CorsTestCase extends BaseTestCase {
         String apiZipfile2 = ApiProjectGenerator.createApictlProjZip("apis/openApis/mockApi.yaml");
         ApiDeployment.deployAPI(apiZipfile2);
 
-        //TODO: (VirajSalaka) change the token
         //generate JWT token from APIM
         API api = new API();
         api.setName("PetStoreAPI");
@@ -84,9 +83,8 @@ public class CorsTestCase extends BaseTestCase {
     }
 
     @Test(description = "Success Scenario, with allow credentials is set to true.")
-    public void CheckCORSHeadersInPreFlightResponse() throws Exception {
+    public void testCORSHeadersInPreFlightResponse() throws Exception {
         // AccessControlAllowCredentials set to true
-        // TODO: (VirajSalaka) MaxAge check
         HttpClient httpclient = HttpClientBuilder.create().build();
         HttpUriRequest option = new HttpOptions(getServiceURLHttps("/cors/pet/1"));
         option.addHeader(ORIGIN_HEADER, "http://test1.com");
@@ -118,7 +116,7 @@ public class CorsTestCase extends BaseTestCase {
     }
 
     @Test(description = "Success Scenario, with allow credentials is set to true.")
-    public void CheckCORSHeadersInSimpleResponse() throws IOException {
+    public void testCORSHeadersInSimpleResponse() throws IOException {
 
         HttpClient httpclient = HttpClientBuilder.create().build();
         HttpUriRequest getRequest = new HttpGet(getServiceURLHttps("/cors/pet/1"));

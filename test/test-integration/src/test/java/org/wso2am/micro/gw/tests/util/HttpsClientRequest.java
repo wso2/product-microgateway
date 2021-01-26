@@ -80,12 +80,6 @@ public class HttpsClientRequest {
             }
         }
     }
-
-    public static HttpResponse doOption(String requestUrl, Map<String, String> headers)
-            throws IOException {
-        return executeRequestWithoutRequestBody(TestConstant.HTTP_METHOD_OPTIONS, requestUrl, headers);
-    }
-
     /**
      * Sends an HTTP GET request to a url.
      *
@@ -234,20 +228,5 @@ public class HttpsClientRequest {
             connection.setRequestProperty(e.getKey(), e.getValue());
         }
         connection.setRequestMethod(method);
-    }
-
-    public static HttpResponse executeRequestWithoutRequestBody(String method, String requestUrl, Map<String
-            , String> headers) throws IOException {
-        HttpsURLConnection conn = null;
-        try {
-            conn = getURLConnection(requestUrl);
-            setHeadersAndMethod(conn, headers, method);
-            conn.connect();
-            return buildResponse(conn);
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
     }
 }
