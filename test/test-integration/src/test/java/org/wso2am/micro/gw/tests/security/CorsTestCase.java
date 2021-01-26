@@ -60,8 +60,10 @@ public class CorsTestCase extends BaseTestCase {
 
         //deploy the api
         //api yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("apis/openApis/mockApi.yaml");
+        String apiZipfile = ApiProjectGenerator.createApictlProjZip("cors/mockApi.yaml");
         ApiDeployment.deployAPI(apiZipfile);
+        String apiZipfile2 = ApiProjectGenerator.createApictlProjZip("apis/openApis/mockApi.yaml");
+        ApiDeployment.deployAPI(apiZipfile2);
 
         //TODO: (VirajSalaka) change the token
         //generate JWT token from APIM
@@ -86,7 +88,7 @@ public class CorsTestCase extends BaseTestCase {
         // AccessControlAllowCredentials set to true
         // TODO: (VirajSalaka) MaxAge check
         HttpClient httpclient = HttpClientBuilder.create().build();
-        HttpUriRequest option = new HttpOptions(getServiceURLHttps("/v2/pet/1"));
+        HttpUriRequest option = new HttpOptions(getServiceURLHttps("/cors/pet/1"));
         option.addHeader(ORIGIN_HEADER, "http://test1.com");
         option.addHeader(ACCESS_CONTROL_REQUEST_METHOD_HEADER, "POST");
         HttpResponse response = httpclient.execute(option);
@@ -119,7 +121,7 @@ public class CorsTestCase extends BaseTestCase {
     public void CheckCORSHeadersInSimpleResponse() throws IOException {
 
         HttpClient httpclient = HttpClientBuilder.create().build();
-        HttpUriRequest getRequest = new HttpGet(getServiceURLHttps("/v2/pet/1"));
+        HttpUriRequest getRequest = new HttpGet(getServiceURLHttps("/cors/pet/1"));
         getRequest.addHeader(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         getRequest.addHeader(ORIGIN_HEADER, "http://test2.com");
         HttpResponse response = httpclient.execute(getRequest);
@@ -144,7 +146,7 @@ public class CorsTestCase extends BaseTestCase {
     @Test(description = "Invalid Origin, CORS simple request")
     public void testSimpleReqInvalidOrigin() throws IOException {
         HttpClient httpclient = HttpClientBuilder.create().build();
-        HttpUriRequest getRequest = new HttpGet(getServiceURLHttps("/v2/pet/1"));
+        HttpUriRequest getRequest = new HttpGet(getServiceURLHttps("/cors/pet/1"));
         getRequest.addHeader(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         getRequest.addHeader(ORIGIN_HEADER, "http://notAllowedOrigin.com");
         HttpResponse response = httpclient.execute(getRequest);
@@ -157,6 +159,30 @@ public class CorsTestCase extends BaseTestCase {
 
     @Test(description = "Invalid Origin, CORS preflight request")
     public void testPreflightReqInvalidOrigin() throws IOException {
+        HttpClient httpclient = HttpClientBuilder.create().build();
+        HttpUriRequest option = new HttpOptions(getServiceURLHttps("/cors/pet/1"));
+        option.addHeader(ORIGIN_HEADER, "http://notAllowedOrigin.com");
+        option.addHeader(ACCESS_CONTROL_REQUEST_METHOD_HEADER, "POST");
+        HttpResponse response = httpclient.execute(option);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getStatusLine().getStatusCode(), HttpStatus.SC_NO_CONTENT,
+                "Response code mismatched");
+        Assert.assertNotNull(response.getAllHeaders());
+
+        Header[] responseHeaders = response.getAllHeaders();
+        Assert.assertNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_ORIGIN_HEADER),
+                ACCESS_CONTROL_ALLOW_ORIGIN_HEADER + " header is available");
+        Assert.assertNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_METHODS_HEADER),
+                HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS.toString() + " header is available");
+        Assert.assertNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_HEADERS_HEADER),
+                ACCESS_CONTROL_ALLOW_HEADERS_HEADER + " header is available");
+        Assert.assertNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER),
+                ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER + " header is available");
+    }
+
+    @Test(description = "CORS preflight request against a resource without CORS")
+    public void testPreflightReqResourceWithoutCors() throws IOException {
         HttpClient httpclient = HttpClientBuilder.create().build();
         HttpUriRequest option = new HttpOptions(getServiceURLHttps("/v2/pet/1"));
         option.addHeader(ORIGIN_HEADER, "http://notAllowedOrigin.com");
@@ -179,10 +205,11 @@ public class CorsTestCase extends BaseTestCase {
                 ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER + " header is available");
     }
 
+
     @Test(description = "Invalid Origin, CORS preflight request")
     public void testPreflightReqInvalidReqMethod() throws IOException {
         HttpClient httpclient = HttpClientBuilder.create().build();
-        HttpUriRequest option = new HttpOptions(getServiceURLHttps("/v2/pet/1"));
+        HttpUriRequest option = new HttpOptions(getServiceURLHttps("/cors/pet/1"));
         option.addHeader(ORIGIN_HEADER, "http://test1.com");
         option.addHeader(ACCESS_CONTROL_REQUEST_METHOD_HEADER, "DELETE");
         HttpResponse response = httpclient.execute(option);
