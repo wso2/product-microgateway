@@ -203,7 +203,7 @@ func (c ConsulClient) getUpstreams(query Query, resultChan chan []Upstream) {
 	}
 
 	if len(result) == 0 {
-		logger.LoggerSvcDiscovery.Error("consul service registry query came up with empty result/ service registry unreachable")
+		logger.LoggerSvcDiscovery.Error("Consul service registry query came up with empty result. Service registry unreachable")
 	} else {
 		resultChan <- result
 	}
