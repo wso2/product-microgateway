@@ -103,6 +103,8 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, routes []*route
 func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *wso2.Api {
 	prodUrls := []*wso2.Endpoint{}
 	sandUrls := []*wso2.Endpoint{}
+	resources := []*wso2.Resource{}
+
 	for _, ep := range mgwSwagger.GetProdEndpoints() {
 		prodEp := &wso2.Endpoint{
 			Basepath: ep.Basepath,
@@ -123,6 +125,15 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *wso2.Api {
 		sandUrls = append(sandUrls, sandEp)
 	}
 
+	for _, res := range mgwSwagger.GetResources() {
+		resource := &wso2.Resource{
+			Id:      res.GetID(),
+			Methods: res.GetMethod(),
+			Path:    res.GetPath(),
+		}
+		resources = append(resources, resource)
+	}
+
 	return &wso2.Api{
 		Id:             mgwSwagger.GetID(),
 		Title:          mgwSwagger.GetTitle(),
@@ -131,5 +142,6 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *wso2.Api {
 		Version:        mgwSwagger.GetVersion(),
 		ProductionUrls: prodUrls,
 		SandboxUrls:    sandUrls,
+		Resources:      resources,
 	}
 }

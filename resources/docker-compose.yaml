@@ -26,5 +26,6 @@ services:
     environment:
       - ADAPTER_HOST=adapter
       - ADAPTER_XDS_PORT=18000
+      - ENFORCER_LABEL=enforcer
     ports:
       - "8081:8081"   

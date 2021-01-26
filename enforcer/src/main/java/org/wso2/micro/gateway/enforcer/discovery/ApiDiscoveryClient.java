@@ -74,11 +74,13 @@ public class ApiDiscoveryClient {
     private final String nodeId;
 
     private ApiDiscoveryClient(String host, int port) {
-        apiFactory = APIFactory.getInstance();
-        channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
+        this.apiFactory = APIFactory.getInstance();
+        // TODO: (Praminda) Enable transport security
+        this.channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().enableRetry().build();
         this.stub = ApiDiscoveryServiceGrpc.newStub(channel);
         this.blockingStub = ApiDiscoveryServiceGrpc.newBlockingStub(channel);
-        nodeId = ReferenceHolder.getInstance().getNodeLabel();
+        this.nodeId = ReferenceHolder.getInstance().getNodeLabel();
+        this.latestACKed = DiscoveryResponse.getDefaultInstance();
     }
 
     public static ApiDiscoveryClient getInstance() {
@@ -108,9 +110,8 @@ public class ApiDiscoveryClient {
     }
 
     public void watchApis() {
-        // TODO: (Praminda) handle deadline properly with reconnections
-        reqObserver = stub.withDeadlineAfter(60, TimeUnit.SECONDS)
-                .streamApis(new StreamObserver<DiscoveryResponse>() {
+        // TODO: (Praminda) implement a deadline with retries
+        reqObserver = stub.streamApis(new StreamObserver<DiscoveryResponse>() {
                     @Override
                     public void onNext(DiscoveryResponse response) {
                         logger.debug("Received API discovery response " + response);
@@ -118,6 +119,7 @@ public class ApiDiscoveryClient {
                         try {
                             List<Api> apis = handleResponse(response);
                             apiFactory.addApis(apis);
+                            // TODO: (Praminda) fix recursive ack on ack failure
                             ack();
                         } catch (Exception e) {
                             // catching generic error here to wrap any grpc communication errors in the runtime
@@ -128,6 +130,7 @@ public class ApiDiscoveryClient {
                     @Override
                     public void onError(Throwable throwable) {
                         logger.error("Error occurred during API discovery", throwable);
+                        // TODO: (Praminda) if adapter is unavailable keep retrying
                         nack(throwable);
                     }
 
@@ -140,6 +143,7 @@ public class ApiDiscoveryClient {
         try {
             DiscoveryRequest req = DiscoveryRequest.newBuilder()
                     .setNode(Node.newBuilder().setId(nodeId).build())
+                    .setVersionInfo(latestACKed.getVersionInfo())
                     .setTypeUrl(Constants.API_TYPE_URL).build();
             reqObserver.onNext(req);
         } catch (Exception e) {

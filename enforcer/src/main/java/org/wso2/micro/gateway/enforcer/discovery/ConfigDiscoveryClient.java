@@ -40,7 +40,7 @@ public class ConfigDiscoveryClient {
     private String nodeId;
 
     public ConfigDiscoveryClient(String host, int port) {
-        channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
+        channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().enableRetry().build();
         this.blockingStub = ConfigDiscoveryServiceGrpc.newBlockingStub(channel);
         nodeId = ReferenceHolder.getInstance().getNodeLabel();
     }
