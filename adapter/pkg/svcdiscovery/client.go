@@ -187,7 +187,7 @@ func (c ConsulClient) getUpstreams(query Query, resultChan chan []Upstream) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			logger.LoggerSvcDiscovery.Error("Recovered of from a panic: ", r)
+			logger.LoggerSvcDiscovery.Error("Recovered from a panic: ", r)
 			//panic: if the resultChan is closed
 		}
 	}()
