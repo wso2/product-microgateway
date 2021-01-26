@@ -21,7 +21,7 @@ kind: Service
 metadata:
   labels:
     app: mg-adapter
-  name: adapter-service
+  name: adapter
 spec:
   type: NodePort
   selector:

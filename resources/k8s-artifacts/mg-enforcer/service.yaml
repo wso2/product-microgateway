@@ -21,7 +21,7 @@ kind: Service
 metadata:
   labels:
     app: mg-enforcer
-  name: enforcer-service
+  name: enforcer
 spec:
   type: ClusterIP
   selector:

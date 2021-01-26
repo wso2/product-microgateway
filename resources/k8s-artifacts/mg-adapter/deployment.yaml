@@ -39,6 +39,11 @@ spec:
             - mountPath: /home/wso2/security/localhost.pem
               subPath: localhost.pem
               name: adapter-tls-vol
+            - mountPath: /home/wso2/security/controlplane.pem
+              subPath: controlplane.pem
+              name: controlplane-cert-vol
+            - mountPath: /home/wso2/security/consul
+              name: consul-certs-vol
             - mountPath: /home/wso2/conf/config.toml
               subPath: config.toml
               name: config-toml-vol
@@ -48,7 +53,7 @@ spec:
             - mountPath: /home/wso2/conf/log_config.toml
               subPath: log_config.toml
               name: logconfig-toml-vol
-          image: wso2/mg-adapter:4.0.0-m3
+          image: wso2/mg-adapter:4.0.0-m4
           imagePullPolicy: Always
           resources:
             requests:
@@ -79,6 +84,12 @@ spec:
                 path: localhost.key
               - key: localhost.pem
                 path: localhost.pem
+        - name: controlplane-cert-vol
+          secret:
+            secretName: controlplane-cert
+        - name: consul-certs-vol
+          secret:
+            secretName: consul-certs
         - name: config-toml-vol
           configMap:
             name: config-toml

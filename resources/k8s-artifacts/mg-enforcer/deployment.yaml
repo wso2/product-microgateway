@@ -30,6 +30,10 @@ spec:
       labels:
         app: mg-enforcer
     spec:
+      initContainers:
+        - name: init-apim-analytics-db
+          image: busybox:1.31
+          command: [ 'sh', '-c', 'echo -e "Checking for the availability of Adapter"; while ! nc -z adapter 18000; do sleep 1; printf "-"; done; echo -e "  >> Adapter has started";' ]
       containers:
         - name: mg-enforcer
           volumeMounts:
@@ -38,11 +42,21 @@ spec:
             - mountPath: /home/wso2/conf/config.toml
               subPath: config.toml
               name: config-toml-vol
+            - mountPath: /home/wso2/conf/log4j2.properties
+              subPath: log4j2.properties
+              name: log4j2-vol
             - mountPath: /home/wso2/conf/log_config.toml
               subPath: log_config.toml
               name: logconfig-toml-vol
-          image: wso2/mg-enforcer:4.0.0-m3
+          image: wso2/mg-enforcer:4.0.0-m4
           imagePullPolicy: Always
+          env:
+            - name: ADAPTER_HOST
+              value: "adapter"
+            - name: ADAPTER_XDS_PORT
+              value: "18000"
+            - name: ENFORCER_LABEL
+              value: "enforcer"
           resources:
             requests:
               memory: "250Mi"
@@ -72,6 +86,9 @@ spec:
         - name: config-toml-vol
           configMap:
             name: config-toml
+        - name: log4j2-vol
+          configMap:
+            name: log4j2
         - name: logconfig-toml-vol
           configMap:
             name: logconfig-toml
