@@ -21,7 +21,6 @@ private static final long serialVersionUID = 0L;
   }
   private EventHub() {
     serviceUrl_ = "";
-    listenerEndpoint_ = "";
   }
 
   @java.lang.Override
@@ -44,6 +43,7 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
+    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -66,9 +66,16 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 26: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            listenerEndpoint_ = s;
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              jmsConnectionParameters_ = com.google.protobuf.MapField.newMapField(
+                  JmsConnectionParametersDefaultEntryHolder.defaultEntry);
+              mutable_bitField0_ |= 0x00000001;
+            }
+            com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+            jmsConnectionParameters__ = input.readMessage(
+                JmsConnectionParametersDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+            jmsConnectionParameters_.getMutableMap().put(
+                jmsConnectionParameters__.getKey(), jmsConnectionParameters__.getValue());
             break;
           }
           default: {
@@ -95,6 +102,18 @@ private static final long serialVersionUID = 0L;
     return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_wso2_discovery_config_enforcer_EventHub_descriptor;
   }
 
+  @SuppressWarnings({"rawtypes"})
+  @java.lang.Override
+  protected com.google.protobuf.MapField internalGetMapField(
+      int number) {
+    switch (number) {
+      case 3:
+        return internalGetJmsConnectionParameters();
+      default:
+        throw new RuntimeException(
+            "Invalid map field number: " + number);
+    }
+  }
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
@@ -166,52 +185,101 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int LISTENERENDPOINT_FIELD_NUMBER = 3;
-  private volatile java.lang.Object listenerEndpoint_;
-  /**
-   * <pre>
-   * Endpoint to be used as the dynamic change detection endpoint
-   * Ex: "amqp://admin:admin&#64;carbon/carbon?brokerlist='tcp://localhost:5672'"
-   * </pre>
-   *
-   * <code>string listenerEndpoint = 3;</code>
-   * @return The listenerEndpoint.
-   */
-  @java.lang.Override
-  public java.lang.String getListenerEndpoint() {
-    java.lang.Object ref = listenerEndpoint_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      listenerEndpoint_ = s;
-      return s;
+  public static final int JMSCONNECTIONPARAMETERS_FIELD_NUMBER = 3;
+  private static final class JmsConnectionParametersDefaultEntryHolder {
+    static final com.google.protobuf.MapEntry<
+        java.lang.String, java.lang.String> defaultEntry =
+            com.google.protobuf.MapEntry
+            .<java.lang.String, java.lang.String>newDefaultInstance(
+                org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_wso2_discovery_config_enforcer_EventHub_JmsConnectionParametersEntry_descriptor, 
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "",
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "");
+  }
+  private com.google.protobuf.MapField<
+      java.lang.String, java.lang.String> jmsConnectionParameters_;
+  private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+  internalGetJmsConnectionParameters() {
+    if (jmsConnectionParameters_ == null) {
+      return com.google.protobuf.MapField.emptyMapField(
+          JmsConnectionParametersDefaultEntryHolder.defaultEntry);
     }
+    return jmsConnectionParameters_;
+  }
+
+  public int getJmsConnectionParametersCount() {
+    return internalGetJmsConnectionParameters().getMap().size();
   }
   /**
    * <pre>
-   * Endpoint to be used as the dynamic change detection endpoint
-   * Ex: "amqp://admin:admin&#64;carbon/carbon?brokerlist='tcp://localhost:5672'"
+   * Connection parameters for the message listerner
    * </pre>
    *
-   * <code>string listenerEndpoint = 3;</code>
-   * @return The bytes for listenerEndpoint.
+   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+   */
+
+  @java.lang.Override
+  public boolean containsJmsConnectionParameters(
+      java.lang.String key) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    return internalGetJmsConnectionParameters().getMap().containsKey(key);
+  }
+  /**
+   * Use {@link #getJmsConnectionParametersMap()} instead.
    */
   @java.lang.Override
-  public com.google.protobuf.ByteString
-      getListenerEndpointBytes() {
-    java.lang.Object ref = listenerEndpoint_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      listenerEndpoint_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
+  @java.lang.Deprecated
+  public java.util.Map<java.lang.String, java.lang.String> getJmsConnectionParameters() {
+    return getJmsConnectionParametersMap();
+  }
+  /**
+   * <pre>
+   * Connection parameters for the message listerner
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+   */
+  @java.lang.Override
+
+  public java.util.Map<java.lang.String, java.lang.String> getJmsConnectionParametersMap() {
+    return internalGetJmsConnectionParameters().getMap();
+  }
+  /**
+   * <pre>
+   * Connection parameters for the message listerner
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+   */
+  @java.lang.Override
+
+  public java.lang.String getJmsConnectionParametersOrDefault(
+      java.lang.String key,
+      java.lang.String defaultValue) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetJmsConnectionParameters().getMap();
+    return map.containsKey(key) ? map.get(key) : defaultValue;
+  }
+  /**
+   * <pre>
+   * Connection parameters for the message listerner
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+   */
+  @java.lang.Override
+
+  public java.lang.String getJmsConnectionParametersOrThrow(
+      java.lang.String key) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetJmsConnectionParameters().getMap();
+    if (!map.containsKey(key)) {
+      throw new java.lang.IllegalArgumentException();
     }
+    return map.get(key);
   }
 
   private byte memoizedIsInitialized = -1;
@@ -234,9 +302,12 @@ private static final long serialVersionUID = 0L;
     if (!getServiceUrlBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 2, serviceUrl_);
     }
-    if (!getListenerEndpointBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, listenerEndpoint_);
-    }
+    com.google.protobuf.GeneratedMessageV3
+      .serializeStringMapTo(
+        output,
+        internalGetJmsConnectionParameters(),
+        JmsConnectionParametersDefaultEntryHolder.defaultEntry,
+        3);
     unknownFields.writeTo(output);
   }
 
@@ -253,8 +324,15 @@ private static final long serialVersionUID = 0L;
     if (!getServiceUrlBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, serviceUrl_);
     }
-    if (!getListenerEndpointBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, listenerEndpoint_);
+    for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+         : internalGetJmsConnectionParameters().getMap().entrySet()) {
+      com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+      jmsConnectionParameters__ = JmsConnectionParametersDefaultEntryHolder.defaultEntry.newBuilderForType()
+          .setKey(entry.getKey())
+          .setValue(entry.getValue())
+          .build();
+      size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, jmsConnectionParameters__);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -275,8 +353,8 @@ private static final long serialVersionUID = 0L;
         != other.getEnabled()) return false;
     if (!getServiceUrl()
         .equals(other.getServiceUrl())) return false;
-    if (!getListenerEndpoint()
-        .equals(other.getListenerEndpoint())) return false;
+    if (!internalGetJmsConnectionParameters().equals(
+        other.internalGetJmsConnectionParameters())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -293,8 +371,10 @@ private static final long serialVersionUID = 0L;
         getEnabled());
     hash = (37 * hash) + SERVICEURL_FIELD_NUMBER;
     hash = (53 * hash) + getServiceUrl().hashCode();
-    hash = (37 * hash) + LISTENERENDPOINT_FIELD_NUMBER;
-    hash = (53 * hash) + getListenerEndpoint().hashCode();
+    if (!internalGetJmsConnectionParameters().getMap().isEmpty()) {
+      hash = (37 * hash) + JMSCONNECTIONPARAMETERS_FIELD_NUMBER;
+      hash = (53 * hash) + internalGetJmsConnectionParameters().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -406,6 +486,28 @@ private static final long serialVersionUID = 0L;
       return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_wso2_discovery_config_enforcer_EventHub_descriptor;
     }
 
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 3:
+          return internalGetJmsConnectionParameters();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMutableMapField(
+        int number) {
+      switch (number) {
+        case 3:
+          return internalGetMutableJmsConnectionParameters();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -436,8 +538,7 @@ private static final long serialVersionUID = 0L;
 
       serviceUrl_ = "";
 
-      listenerEndpoint_ = "";
-
+      internalGetMutableJmsConnectionParameters().clear();
       return this;
     }
 
@@ -464,9 +565,11 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.gateway.discovery.config.enforcer.EventHub buildPartial() {
       org.wso2.gateway.discovery.config.enforcer.EventHub result = new org.wso2.gateway.discovery.config.enforcer.EventHub(this);
+      int from_bitField0_ = bitField0_;
       result.enabled_ = enabled_;
       result.serviceUrl_ = serviceUrl_;
-      result.listenerEndpoint_ = listenerEndpoint_;
+      result.jmsConnectionParameters_ = internalGetJmsConnectionParameters();
+      result.jmsConnectionParameters_.makeImmutable();
       onBuilt();
       return result;
     }
@@ -522,10 +625,8 @@ private static final long serialVersionUID = 0L;
         serviceUrl_ = other.serviceUrl_;
         onChanged();
       }
-      if (!other.getListenerEndpoint().isEmpty()) {
-        listenerEndpoint_ = other.listenerEndpoint_;
-        onChanged();
-      }
+      internalGetMutableJmsConnectionParameters().mergeFrom(
+          other.internalGetJmsConnectionParameters());
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -554,6 +655,7 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
+    private int bitField0_;
 
     private boolean enabled_ ;
     /**
@@ -699,104 +801,159 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object listenerEndpoint_ = "";
-    /**
-     * <pre>
-     * Endpoint to be used as the dynamic change detection endpoint
-     * Ex: "amqp://admin:admin&#64;carbon/carbon?brokerlist='tcp://localhost:5672'"
-     * </pre>
-     *
-     * <code>string listenerEndpoint = 3;</code>
-     * @return The listenerEndpoint.
-     */
-    public java.lang.String getListenerEndpoint() {
-      java.lang.Object ref = listenerEndpoint_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        listenerEndpoint_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> jmsConnectionParameters_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetJmsConnectionParameters() {
+      if (jmsConnectionParameters_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            JmsConnectionParametersDefaultEntryHolder.defaultEntry);
       }
+      return jmsConnectionParameters_;
+    }
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetMutableJmsConnectionParameters() {
+      onChanged();;
+      if (jmsConnectionParameters_ == null) {
+        jmsConnectionParameters_ = com.google.protobuf.MapField.newMapField(
+            JmsConnectionParametersDefaultEntryHolder.defaultEntry);
+      }
+      if (!jmsConnectionParameters_.isMutable()) {
+        jmsConnectionParameters_ = jmsConnectionParameters_.copy();
+      }
+      return jmsConnectionParameters_;
+    }
+
+    public int getJmsConnectionParametersCount() {
+      return internalGetJmsConnectionParameters().getMap().size();
     }
     /**
      * <pre>
-     * Endpoint to be used as the dynamic change detection endpoint
-     * Ex: "amqp://admin:admin&#64;carbon/carbon?brokerlist='tcp://localhost:5672'"
+     * Connection parameters for the message listerner
      * </pre>
      *
-     * <code>string listenerEndpoint = 3;</code>
-     * @return The bytes for listenerEndpoint.
+     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
      */
-    public com.google.protobuf.ByteString
-        getListenerEndpointBytes() {
-      java.lang.Object ref = listenerEndpoint_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        listenerEndpoint_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+
+    @java.lang.Override
+    public boolean containsJmsConnectionParameters(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      return internalGetJmsConnectionParameters().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getJmsConnectionParametersMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getJmsConnectionParameters() {
+      return getJmsConnectionParametersMap();
     }
     /**
      * <pre>
-     * Endpoint to be used as the dynamic change detection endpoint
-     * Ex: "amqp://admin:admin&#64;carbon/carbon?brokerlist='tcp://localhost:5672'"
+     * Connection parameters for the message listerner
      * </pre>
      *
-     * <code>string listenerEndpoint = 3;</code>
-     * @param value The listenerEndpoint to set.
-     * @return This builder for chaining.
+     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
      */
-    public Builder setListenerEndpoint(
+    @java.lang.Override
+
+    public java.util.Map<java.lang.String, java.lang.String> getJmsConnectionParametersMap() {
+      return internalGetJmsConnectionParameters().getMap();
+    }
+    /**
+     * <pre>
+     * Connection parameters for the message listerner
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getJmsConnectionParametersOrDefault(
+        java.lang.String key,
+        java.lang.String defaultValue) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetJmsConnectionParameters().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Connection parameters for the message listerner
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getJmsConnectionParametersOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetJmsConnectionParameters().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    public Builder clearJmsConnectionParameters() {
+      internalGetMutableJmsConnectionParameters().getMutableMap()
+          .clear();
+      return this;
+    }
+    /**
+     * <pre>
+     * Connection parameters for the message listerner
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+     */
+
+    public Builder removeJmsConnectionParameters(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      internalGetMutableJmsConnectionParameters().getMutableMap()
+          .remove(key);
+      return this;
+    }
+    /**
+     * Use alternate mutation accessors instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String>
+    getMutableJmsConnectionParameters() {
+      return internalGetMutableJmsConnectionParameters().getMutableMap();
+    }
+    /**
+     * <pre>
+     * Connection parameters for the message listerner
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+     */
+    public Builder putJmsConnectionParameters(
+        java.lang.String key,
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      listenerEndpoint_ = value;
-      onChanged();
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (value == null) { throw new java.lang.NullPointerException(); }
+      internalGetMutableJmsConnectionParameters().getMutableMap()
+          .put(key, value);
       return this;
     }
     /**
      * <pre>
-     * Endpoint to be used as the dynamic change detection endpoint
-     * Ex: "amqp://admin:admin&#64;carbon/carbon?brokerlist='tcp://localhost:5672'"
+     * Connection parameters for the message listerner
      * </pre>
      *
-     * <code>string listenerEndpoint = 3;</code>
-     * @return This builder for chaining.
+     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
      */
-    public Builder clearListenerEndpoint() {
-      
-      listenerEndpoint_ = getDefaultInstance().getListenerEndpoint();
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * Endpoint to be used as the dynamic change detection endpoint
-     * Ex: "amqp://admin:admin&#64;carbon/carbon?brokerlist='tcp://localhost:5672'"
-     * </pre>
-     *
-     * <code>string listenerEndpoint = 3;</code>
-     * @param value The bytes for listenerEndpoint to set.
-     * @return This builder for chaining.
-     */
-    public Builder setListenerEndpointBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      listenerEndpoint_ = value;
-      onChanged();
+
+    public Builder putAllJmsConnectionParameters(
+        java.util.Map<java.lang.String, java.lang.String> values) {
+      internalGetMutableJmsConnectionParameters().getMutableMap()
+          .putAll(values);
       return this;
     }
     @java.lang.Override

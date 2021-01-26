@@ -9,6 +9,16 @@ privateKeyPath = "/home/wso2/security/localhost.key"
 username = "admin"
 password = "admin"
 
+[adapter.consul]
+# todo rumesh check whether we need to have certPath and KeyPath
+url = "https://169.254.1.1:8501" # scheme + host ip + port
+pollInterval = 5 # seconds
+aclTokenFilePath = ""
+# certs for tls
+caCertPath = "/home/wso2/security/consul/consul-agent-ca.pem"
+certPath = "/home/wso2/security/consul/local-dc-client-consul-0.pem"
+keyPath = "/home/wso2/security/consul/local-dc-client-consul-0-key.pem"
+
 [envoy]
 listenerHost = "0.0.0.0"
 listenerPort = 9095
@@ -74,10 +84,12 @@ password = "wso2carbon"
     enabled = false
     # The API Manager URL
     serviceUrl = "https://localhost:9443/"
+    username="admin"
+    password="admin"
     # User name and password of the internal data api.
     [enforcer.eventHub.jmsConnectionParameters]
         # The message broker connection URL.
-        eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
+        eventListeningEndpoints = "amqp://admin:admin@localhost:5672/"
 
 [enforcer.apimCredentials]
     username="admin"
@@ -86,6 +98,7 @@ password = "wso2carbon"
 [controlPlane]
 # Control plane's eventHub details
 [controlPlane.eventHub]
+enabled = false
 serviceUrl = "https://localhost:9443/"
 username="admin"
 password="admin"

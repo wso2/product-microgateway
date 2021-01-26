@@ -32,22 +32,26 @@ When you add a new logger instance add the related package name as a constant
 
 // package name constants
 const (
-	pkgAPI       = "github.com/wso2/micro-gw/pkg/api"
-	pkgAuth      = "github.com/wso2/micro-gw/pkg/auth"
-	pkgMgw       = "github.com/wso2/micro-gw/pkg/mgw"
-	pkgOasparser = "github.com/wso2/micro-gw/pkg/oasparser"
-	pkgXds       = "github.com/wso2/micro-gw/pkg/xds"
-	pkgSync      = "github.com/wso2/micro-gw/pkg/synchronizer"
+	pkgAPI          = "github.com/wso2/micro-gw/pkg/api"
+	pkgAuth         = "github.com/wso2/micro-gw/pkg/auth"
+	pkgMgw          = "github.com/wso2/micro-gw/pkg/mgw"
+	pkgOasparser    = "github.com/wso2/micro-gw/pkg/oasparser"
+	pkgXds          = "github.com/wso2/micro-gw/pkg/xds"
+	pkgSync         = "github.com/wso2/micro-gw/pkg/synchronizer"
+	pkgMsg          = "github.com/wso2/micro-gw/messaging"
+	pkgSvcDiscovery = "github.com/wso2/micro-gw/pkg/svcDiscovery"
 )
 
 // logger package references
 var (
-	LoggerAPI       *logrus.Logger
-	LoggerAuth      *logrus.Logger
-	LoggerMgw       *logrus.Logger
-	LoggerOasparser *logrus.Logger
-	LoggerXds       *logrus.Logger
-	LoggerSync      *logrus.Logger
+	LoggerAPI          *logrus.Logger
+	LoggerAuth         *logrus.Logger
+	LoggerMgw          *logrus.Logger
+	LoggerOasparser    *logrus.Logger
+	LoggerXds          *logrus.Logger
+	LoggerSync         *logrus.Logger
+	LoggerMsg          *logrus.Logger
+	LoggerSvcDiscovery *logrus.Logger
 )
 
 func init() {
@@ -63,5 +67,7 @@ func UpdateLoggers() {
 	LoggerOasparser = logging.InitPackageLogger(pkgOasparser)
 	LoggerXds = logging.InitPackageLogger(pkgXds)
 	LoggerSync = logging.InitPackageLogger(pkgSync)
+	LoggerMsg = logging.InitPackageLogger(pkgMsg)
+	LoggerSvcDiscovery = logging.InitPackageLogger(pkgSvcDiscovery)
 	logrus.Info("Updated loggers")
 }

@@ -77,6 +77,22 @@ type Config struct {
 			// APICTL Users
 			Users []APICtlUser `toml:"users"`
 		}
+
+		//Consul represents the configuration required to connect to consul service discovery
+		Consul struct {
+			//URL url of the consul client in format: http(s)://host:port
+			URL string
+			//PollInterval how frequently consul API should be polled to get updates (in seconds)
+			PollInterval int
+			//ACLTokenFilePath ACL token required to invoke HTTP API
+			ACLTokenFilePath string
+			//CaCertPath path to the CA cert file(PEM encoded) required for tls connection between adapter and a consul client
+			CaCertPath string
+			//CertPath path to the cert file(PEM encoded) required for tls connection between adapter and a consul client
+			CertPath string
+			//CertPath path to the key file(PEM encoded) required for tls connection between adapter and a consul client
+			KeyPath string
+		}
 	}
 
 	// Envoy Listener Component related configurations.
@@ -113,7 +129,7 @@ type Config struct {
 		AuthService     authService
 	}
 
-	ControlPlane ControlPlane `toml:"controlPlane`
+	ControlPlane controlPlane `toml:"controlPlane"`
 }
 
 type apimCredentials struct {
@@ -152,9 +168,11 @@ type jwtTokenConfig struct {
 }
 
 type eventHub struct {
-	Enabled           bool
-	ServiceURL        string
-	ListeningEndpoint string
+	Enabled                 bool
+	ServiceURL              string
+	JmsConnectionParameters struct {
+		EventListeningEndpoints string `toml:"eventListeningEndpoints"`
+	} `toml:"jmsConnectionParameters"`
 }
 
 // APICtlUser represents registered APICtl Users
@@ -164,8 +182,9 @@ type APICtlUser struct {
 }
 
 // ControlPlane struct contains configurations related to the API Manager
-type ControlPlane struct {
+type controlPlane struct {
 	EventHub struct {
+		Enabled                 bool          `toml:"enabled"`
 		ServiceURL              string        `toml:"serviceUrl"`
 		Username                string        `toml:"username"`
 		Password                string        `toml:"password"`

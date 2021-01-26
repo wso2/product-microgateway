@@ -207,7 +207,7 @@ func PushAPIProjects(payload []byte) error {
 			// Pass the byte slice for the XDS APIs to push it to the enforcer and router
 			err = apiServer.ApplyAPIProject(r)
 			if err != nil {
-				logger.LoggerSync.Errorf("Error occurred while applying project", err)
+				logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 			}
 		}
 	}

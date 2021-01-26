@@ -36,6 +36,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/micro-gw/pkg/messaging"
 	"github.com/wso2/micro-gw/pkg/synchronizer"
 	xds "github.com/wso2/micro-gw/pkg/xds"
 	"google.golang.org/grpc"
@@ -122,10 +123,14 @@ func Run(conf *config.Config) {
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
 
-	// Fetch APIs from control plane
-	fetchAPIsOnStartUp(conf)
-
 	go restserver.StartRestServer(conf)
+
+	enableEventHub := conf.ControlPlane.EventHub.Enabled
+	if enableEventHub {
+		// Fetch APIs from control plane
+		fetchAPIsOnStartUp(conf)
+		go messaging.ProcessEvents(conf)
+	}
 OUTER:
 	for {
 		select {
@@ -159,7 +164,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 	if len(envs) > 0 {
 		// If the envrionment labels are present, call the controle plane
 		// with label concurrently (ControlPlane API is not supported for mutiple labels yet)
-		logger.LoggerMgw.Debug("Environments label present: %v", envs)
+		logger.LoggerMgw.Debugf("Environments label present: %v", envs)
 		for _, env := range envs {
 			go synchronizer.FetchAPIs(nil, &env, c)
 		}
@@ -173,7 +178,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 	// Wait for each environment to return it's result
 	for i := 0; i < len(envs); i++ {
 		data := <-c
-		logger.LoggerMgw.Debug("Receing data for an envrionment: %v", string(data.Resp))
+		logger.LoggerMgw.Debugf("Receing data for an envrionment: %v", string(data.Resp))
 		if data.Resp != nil {
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
 			logger.LoggerMgw.Debug("Pushing data to router and enforcer")

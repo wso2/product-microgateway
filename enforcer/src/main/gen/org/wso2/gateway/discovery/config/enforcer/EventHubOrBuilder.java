@@ -41,23 +41,55 @@ public interface EventHubOrBuilder extends
 
   /**
    * <pre>
-   * Endpoint to be used as the dynamic change detection endpoint
-   * Ex: "amqp://admin:admin&#64;carbon/carbon?brokerlist='tcp://localhost:5672'"
+   * Connection parameters for the message listerner
    * </pre>
    *
-   * <code>string listenerEndpoint = 3;</code>
-   * @return The listenerEndpoint.
+   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
    */
-  java.lang.String getListenerEndpoint();
+  int getJmsConnectionParametersCount();
   /**
    * <pre>
-   * Endpoint to be used as the dynamic change detection endpoint
-   * Ex: "amqp://admin:admin&#64;carbon/carbon?brokerlist='tcp://localhost:5672'"
+   * Connection parameters for the message listerner
    * </pre>
    *
-   * <code>string listenerEndpoint = 3;</code>
-   * @return The bytes for listenerEndpoint.
+   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
    */
-  com.google.protobuf.ByteString
-      getListenerEndpointBytes();
+  boolean containsJmsConnectionParameters(
+      java.lang.String key);
+  /**
+   * Use {@link #getJmsConnectionParametersMap()} instead.
+   */
+  @java.lang.Deprecated
+  java.util.Map<java.lang.String, java.lang.String>
+  getJmsConnectionParameters();
+  /**
+   * <pre>
+   * Connection parameters for the message listerner
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+   */
+  java.util.Map<java.lang.String, java.lang.String>
+  getJmsConnectionParametersMap();
+  /**
+   * <pre>
+   * Connection parameters for the message listerner
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+   */
+
+  java.lang.String getJmsConnectionParametersOrDefault(
+      java.lang.String key,
+      java.lang.String defaultValue);
+  /**
+   * <pre>
+   * Connection parameters for the message listerner
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+   */
+
+  java.lang.String getJmsConnectionParametersOrThrow(
+      java.lang.String key);
 }
