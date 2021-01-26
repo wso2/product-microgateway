@@ -57,5 +57,4 @@ public class ReferenceHolder {
     public KeyManagerDataService getKeyManagerDataService() {
         return this.keyManagerDataService;
     }
-
 }

@@ -98,6 +98,16 @@ func (swagger *MgwSwagger) GetResources() []Resource {
 	return swagger.resources
 }
 
+// GetDescription returns the description of the openapi
+func (swagger *MgwSwagger) GetDescription() string {
+	return swagger.description
+}
+
+// GetID returns the Id of the API
+func (swagger *MgwSwagger) GetID() string {
+	return swagger.id
+}
+
 // SetXWso2Extenstions set the MgwSwagger object with the properties
 // extracted from vendor extensions.
 // xWso2Basepath, xWso2ProductionEndpoints, and xWso2SandboxEndpoints are assigned

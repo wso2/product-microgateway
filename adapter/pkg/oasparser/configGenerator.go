@@ -25,14 +25,16 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/wso2/micro-gw/loggers"
 
+	wso2 "github.com/envoyproxy/go-control-plane/wso2/discovery/api"
 	envoy "github.com/wso2/micro-gw/pkg/oasparser/envoyconf"
+	"github.com/wso2/micro-gw/pkg/oasparser/model"
 	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 )
 
 // GetProductionRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
 // when the openAPI Json is provided. For websockets apiJsn created from api.yaml file is considerd.
-func GetProductionRoutesClustersEndpoints(byteArr []byte, upstreamCerts []byte, apiType string) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
+func GetProductionRoutesClustersEndpoints(byteArr []byte, upstreamCerts []byte, apiType string) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address, mgw.MgwSwagger) {
 	var mgwSwagger mgw.MgwSwagger
 	var routes []*routev3.Route
 	var clusters []*clusterv3.Cluster
@@ -49,7 +51,7 @@ func GetProductionRoutesClustersEndpoints(byteArr []byte, upstreamCerts []byte, 
 	routes, clusters, endpoints = envoy.CreateRoutesWithClusters(mgwSwagger, upstreamCerts)
 	//TODO: (VirajSalaka) Decide if this needs to be added to the MgwSwagger
 
-	return routes, clusters, endpoints
+	return routes, clusters, endpoints, mgwSwagger
 }
 
 // GetProductionListenerAndRouteConfig generates the listener and routesconfiguration configurations.
@@ -95,4 +97,39 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, routes []*route
 	vHostName := "default"
 	vHost := envoy.CreateVirtualHost(vHostName, routes)
 	routeConfig.VirtualHosts = []*routev3.VirtualHost{vHost}
+}
+
+// GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition.
+func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *wso2.Api {
+	prodUrls := []*wso2.Endpoint{}
+	sandUrls := []*wso2.Endpoint{}
+	for _, ep := range mgwSwagger.GetProdEndpoints() {
+		prodEp := &wso2.Endpoint{
+			Basepath: ep.Basepath,
+			Host:     ep.Host,
+			Port:     ep.Port,
+			URLType:  ep.URLType,
+		}
+		prodUrls = append(prodUrls, prodEp)
+	}
+
+	for _, ep := range mgwSwagger.GetSandEndpoints() {
+		sandEp := &wso2.Endpoint{
+			Basepath: ep.Basepath,
+			Host:     ep.Host,
+			Port:     ep.Port,
+			URLType:  ep.URLType,
+		}
+		sandUrls = append(sandUrls, sandEp)
+	}
+
+	return &wso2.Api{
+		Id:             mgwSwagger.GetID(),
+		Title:          mgwSwagger.GetTitle(),
+		Description:    mgwSwagger.GetDescription(),
+		BasePath:       mgwSwagger.GetXWso2Basepath(),
+		Version:        mgwSwagger.GetVersion(),
+		ProductionUrls: prodUrls,
+		SandboxUrls:    sandUrls,
+	}
 }

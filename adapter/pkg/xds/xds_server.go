@@ -28,8 +28,11 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+	"github.com/envoyproxy/go-control-plane/wso2/discovery/api"
+	"github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer"
 	openAPI3 "github.com/getkin/kin-openapi/openapi3"
 	openAPI2 "github.com/go-openapi/spec"
+	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	oasParser "github.com/wso2/micro-gw/pkg/oasparser"
 	"github.com/wso2/micro-gw/pkg/oasparser/model"
@@ -40,7 +43,8 @@ import (
 var (
 	version int32
 
-	cache cachev3.SnapshotCache
+	cache         cachev3.SnapshotCache
+	enforcerCache cachev3.SnapshotCache
 	// OpenAPI Name:Version -> openAPI3 struct map
 	openAPIV3Map map[string]openAPI3.Swagger
 	// OpenAPI Name:Version -> openAPI2 struct map
@@ -61,6 +65,11 @@ var (
 	envoyListenerConfigMap map[string]*listenerv3.Listener
 	// Envoy Label -> Routes Configuration map
 	envoyRouteConfigMap map[string]*routev3.RouteConfiguration
+
+	// Enforcer config XDS resource version map
+	enforcerConfigVersionMap map[string]int64
+	enforcerApisMap          map[string]*api.Api
+	enforcerConfigMap        map[string][]types.Resource
 )
 
 // IDHash uses ID field as the node hash.
@@ -78,6 +87,7 @@ var _ cachev3.NodeHash = IDHash{}
 
 func init() {
 	cache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
 	openAPIV3Map = make(map[string]openAPI3.Swagger)
 	openAPIV2Map = make(map[string]openAPI2.Swagger)
 	webSocketAPIMap = make(map[string]mgw.MgwSwagger)
@@ -89,6 +99,9 @@ func init() {
 	envoyUpdateVersionMap = make(map[string]int64)
 	envoyListenerConfigMap = make(map[string]*listenerv3.Listener)
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
+
+	enforcerConfigVersionMap = make(map[string]int64)
+	enforcerConfigMap = make(map[string][]types.Resource)
 }
 
 // GetXdsCache returns xds server cache.
@@ -96,8 +109,13 @@ func GetXdsCache() cachev3.SnapshotCache {
 	return cache
 }
 
-// UpdateEnvoy updates the Xds Cache when OpenAPI Json content is provided
-func UpdateEnvoy(byteArr []byte, upstreamCerts []byte, apiType string) {
+// GetEnforcerCache returns xds server cache.
+func GetEnforcerCache() cachev3.SnapshotCache {
+	return enforcerCache
+}
+
+// UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
+func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string) {
 	var apiMapKey string
 	var newLabels []string
 
@@ -172,7 +190,9 @@ func UpdateEnvoy(byteArr []byte, upstreamCerts []byte, apiType string) {
 	oldLabels, _ := openAPIEnvoyMap[apiMapKey]
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiMapKey, oldLabels)
 	openAPIEnvoyMap[apiMapKey] = newLabels
-	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(byteArr, upstreamCerts, apiType)
+
+	routes, clusters, endpoints, mgwSwagger := oasParser.GetProductionRoutesClustersEndpoints(byteArr, upstreamCerts, apiType)
+	enforcerAPI := oasParser.GetEnforcerAPI(mgwSwagger)
 	// TODO: (VirajSalaka) Decide if the routes and listeners need their own map since it is not going to be changed based on API at the moment.
 	openAPIRoutesMap[apiMapKey] = routes
 	// openAPIListenersMap[apiMapKey] = listeners
@@ -180,6 +200,7 @@ func UpdateEnvoy(byteArr []byte, upstreamCerts []byte, apiType string) {
 	openAPIEndpointsMap[apiMapKey] = endpoints
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
+	UpdateEnforcerApis(enforcerAPI)
 }
 
 func arrayContains(a []string, x string) bool {
@@ -255,6 +276,58 @@ func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	return oasParser.GetCacheResources(endpointArray, clusterArray, listener, routesConfig)
 }
 
+func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
+	issuers := []*enforcer.Issuer{}
+	for _, issuer := range config.Enforcer.JwtTokenConfig {
+		jwtConfig := &enforcer.Issuer{
+			CertificateAlias:     issuer.CertificateAlias,
+			ConsumerKeyClaim:     issuer.ConsumerKeyClaim,
+			Issuer:               issuer.Issuer,
+			Name:                 issuer.Name,
+			ValidateSubscription: issuer.ValidateSubscription,
+			JwksURL:              issuer.JwksURL,
+		}
+		issuers = append(issuers, jwtConfig)
+	}
+
+	authService := &enforcer.AuthService{
+		KeepAliveTime:  config.Enforcer.AuthService.KeepAliveTime,
+		MaxHeaderLimit: config.Enforcer.AuthService.MaxHeaderLimit,
+		MaxMessageSize: config.Enforcer.AuthService.MaxMessageSize,
+		Port:           config.Enforcer.AuthService.Port,
+		ThreadPool: &enforcer.ThreadPool{
+			CoreSize:      config.Enforcer.AuthService.ThreadPool.CoreSize,
+			KeepAliveTime: config.Enforcer.AuthService.ThreadPool.KeepAliveTime,
+			MaxSize:       config.Enforcer.AuthService.ThreadPool.MaxSize,
+			QueueSize:     config.Enforcer.AuthService.ThreadPool.QueueSize,
+		},
+	}
+
+	return &enforcer.Config{
+		Truststore: &enforcer.CertStore{
+			Location: config.Enforcer.Truststore.Location,
+			Password: config.Enforcer.Truststore.Password,
+			Type:     config.Enforcer.Truststore.StoreType,
+		},
+		Keystore: &enforcer.CertStore{
+			Location: config.Enforcer.Keystore.Location,
+			Password: config.Enforcer.Keystore.Password,
+			Type:     config.Enforcer.Keystore.StoreType,
+		},
+		ApimCredentials: &enforcer.AmCredentials{
+			Username: config.Enforcer.ApimCredentials.Username,
+			Password: config.Enforcer.ApimCredentials.Password,
+		},
+		AuthService:    authService,
+		JwtTokenConfig: issuers,
+		Eventhub: &enforcer.EventHub{
+			Enabled:          config.Enforcer.EventHub.Enabled,
+			ServiceUrl:       config.Enforcer.EventHub.ServiceURL,
+			ListenerEndpoint: config.Enforcer.EventHub.ListeningEndpoint,
+		},
+	}
+}
+
 func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) {
 	version, ok := envoyUpdateVersionMap[label]
 	if ok {
@@ -265,7 +338,7 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	}
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	// Will be updated once decide to move to incremental XDS
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil, nil, nil)
 	snap.Consistent()
 	err := cache.SetSnapshot(label, snap)
 	if err != nil {
@@ -273,4 +346,41 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	}
 	envoyUpdateVersionMap[label] = version
 	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+func updateEnforcerCache(configs []types.Resource, apis []types.Resource) {
+	label := "enforcer"
+	version, ok := enforcerConfigVersionMap[label]
+	if ok {
+		version++
+	} else {
+		version = 1
+	}
+	if configs == nil {
+		configs = enforcerConfigMap[label]
+	}
+
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis)
+	snap.Consistent()
+
+	err := enforcerCache.SetSnapshot(label, snap)
+	if err != nil {
+		logger.LoggerMgw.Error(err)
+	}
+
+	enforcerConfigVersionMap[label] = version
+	enforcerConfigMap[label] = configs
+	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+// UpdateEnforcerConfig Sets new update to the enforcer's configuration
+func UpdateEnforcerConfig(confiFile *config.Config) {
+	configs := []types.Resource{generateEnforcerConfigs(confiFile)}
+	updateEnforcerCache(configs, nil)
+}
+
+// UpdateEnforcerApis Sets new update to the enforcer's Apis
+func UpdateEnforcerApis(api *api.Api) {
+	apis := []types.Resource{api}
+	updateEnforcerCache(nil, apis)
 }

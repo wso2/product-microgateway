@@ -115,14 +115,14 @@ func ApplyAPIProject(payload []byte) error {
 	// TODO - (VirajSalaka) change the switch case and use one method with both api.yaml and swagger.yaml
 	switch apiType {
 	case mgw.HTTP:
-		xds.UpdateEnvoy(swaggerJsn, upstreamCerts, apiType)
+		xds.UpdateAPI(swaggerJsn, upstreamCerts, apiType)
 	case mgw.WS:
-		xds.UpdateEnvoy(apiJsn, upstreamCerts, apiType)
+		xds.UpdateAPI(apiJsn, upstreamCerts, apiType)
 	default:
 		// If no api.yaml file is included in the zip folder , apiType defaults to HTTP to pass the APIDeployTestCase integration test.
 		// TODO : (LahiruUdayanga) Handle the default behaviour after when the APIDeployTestCase test is fixed.
 		apiType = mgw.HTTP
-		xds.UpdateEnvoy(swaggerJsn, upstreamCerts, apiType)
+		xds.UpdateAPI(swaggerJsn, upstreamCerts, apiType)
 		loggers.LoggerAPI.Infof("API type is not currently supported with WSO2 micro-gateway")
 	}
 	return nil
