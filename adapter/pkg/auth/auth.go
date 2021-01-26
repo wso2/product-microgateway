@@ -16,3 +16,13 @@
  */
 
 package auth
+
+import "encoding/base64"
+
+// GetBasicAuth function returns the basicAuth header for the
+// given usename and password.
+// It returns the base64Encoded(username:password)
+func GetBasicAuth(username, password string) string {
+	auth := username + ":" + password
+	return base64.StdEncoding.EncodeToString([]byte(auth))
+}

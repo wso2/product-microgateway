@@ -57,6 +57,11 @@ func (resource *Resource) GetPath() string {
 	return resource.path
 }
 
+// GetSecurity returns the resource security definition
+func (resource *Resource) GetSecurity() []map[string][]string {
+	return resource.security
+}
+
 // GetID returns the id of a given resource.
 // This is a randomly generated UUID
 func (resource *Resource) GetID() string {

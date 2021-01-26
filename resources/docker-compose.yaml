@@ -23,5 +23,9 @@ services:
     volumes:  
       - ./resources/enforcer/security:/home/wso2/mg/security
       - ./resources/conf:/home/wso2/conf
+    environment:
+      - ADAPTER_HOST=adapter
+      - ADAPTER_XDS_PORT=18000
+      - ENFORCER_LABEL=enforcer
     ports:
       - "8081:8081"   

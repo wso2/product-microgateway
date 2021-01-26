@@ -20,7 +20,10 @@ package org.wso2.micro.gateway.enforcer.api;
 import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.gateway.discovery.api.Api;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.discovery.ApiDiscoveryClient;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,11 +37,9 @@ public class APIFactory {
     private static final Logger logger = LogManager.getLogger(APIFactory.class);
 
     private static APIFactory apiFactory;
-    private ConcurrentHashMap<String, API> apiMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, API> apis = new ConcurrentHashMap<>();
 
-    private APIFactory() {
-
-    }
+    private APIFactory() {}
 
     public static APIFactory getInstance() {
         if (apiFactory == null) {
@@ -47,11 +48,48 @@ public class APIFactory {
         return apiFactory;
     }
 
+    public void init() {
+        ApiDiscoveryClient ads =  ApiDiscoveryClient.getInstance();
+        ads.watchApis();
+    }
+
+    public void addApi(API api) {
+        String apiKey = getApiKey(api);
+        apis.put(apiKey, api);
+    }
+
+    public void addApis(List<Api> apis) {
+        //TODO: (Praminda) Use apiId as the map key. Need to add the apiId to envoy context meta
+        ConcurrentHashMap<String, API> newApis = new ConcurrentHashMap<>();
+
+        for (Api api : apis) {
+            RestAPI enforcerApi = new RestAPI();
+            enforcerApi.init(api);
+            String apiKey = getApiKey(enforcerApi);
+            newApis.put(apiKey, enforcerApi);
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Total APIs in new cache: {}", newApis.size());
+        }
+        this.apis = newApis;
+    }
+
+    public void removeApi(API api) {
+        String apiKey = getApiKey(api);
+        apis.remove(apiKey);
+    }
+
     public API getMatchedAPI(CheckRequest request) {
         // TODO: (Praminda) Change the init type depending on the api type param from gw
-        API api = new RestAPI();
-        api.init(request);
-        return api;
+        String basePath = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_BASE_PATH_PARAM);
+        String version = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_VERSION_PARAM);
+        String apiKey = basePath + '/' + version;
+        if (logger.isDebugEnabled()) {
+            logger.debug("Looking for matching API with basepath: {} and version: {}", basePath, version);
+        }
+
+        return apis.get(apiKey);
     }
 
     public ResourceConfig getMatchedResource(API api, String matchedResourcePath, String method) {
@@ -60,5 +98,9 @@ public class APIFactory {
                 .filter(resourceConfig -> resourceConfig.getPath().equals(matchedResourcePath)).
                         filter(resourceConfig -> (method == null) || resourceConfig.getMethod()
                                 .equals(ResourceConfig.HttpMethods.valueOf(method))).findFirst().orElse(null);
+    }
+
+    private String getApiKey(API api) {
+        return api.getAPIConfig().getBasePath() + '/' + api.getAPIConfig().getVersion();
     }
 }

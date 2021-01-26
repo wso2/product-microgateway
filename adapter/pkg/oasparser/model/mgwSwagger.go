@@ -101,6 +101,16 @@ func (swagger *MgwSwagger) GetResources() []Resource {
 	return swagger.resources
 }
 
+// GetDescription returns the description of the openapi
+func (swagger *MgwSwagger) GetDescription() string {
+	return swagger.description
+}
+
+// GetID returns the Id of the API
+func (swagger *MgwSwagger) GetID() string {
+	return swagger.id
+}
+
 // SetXWso2Extenstions set the MgwSwagger object with the properties
 // extracted from vendor extensions.
 // xWso2Basepath, xWso2ProductionEndpoints, and xWso2SandboxEndpoints are assigned
@@ -208,5 +218,8 @@ func getXWso2Basepath(vendorExtensible map[string]interface{}) string {
 }
 
 func (swagger *MgwSwagger) setXWso2Basepath() {
-	swagger.xWso2Basepath = getXWso2Basepath(swagger.vendorExtensible)
+	extBasepath := getXWso2Basepath(swagger.vendorExtensible)
+	if extBasepath != "" {
+		swagger.xWso2Basepath = extBasepath
+	}
 }

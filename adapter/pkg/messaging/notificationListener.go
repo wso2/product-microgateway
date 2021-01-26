@@ -69,7 +69,7 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 			}
 			panic(err)
 		}
-		logger.LoggerJMS.Infof("\n\n[%s]", decodedByte)
+		logger.LoggerMsg.Infof("\n\n[%s]", decodedByte)
 		eventType = notification.Event.PayloadData.EventType
 
 		if strings.Contains(eventType, apiEventType) {
@@ -85,7 +85,7 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 		}
 		d.Ack(false)
 	}
-	logger.LoggerJMS.Infof("handle: deliveries channel closed")
+	logger.LoggerMsg.Infof("handle: deliveries channel closed")
 	done <- nil
 }
 
@@ -118,7 +118,7 @@ func handleAPIEvents(data []byte, eventType string) {
 		}
 	}
 
-	logger.LoggerJMS.Infof("oldTimeStamp: %v , newTimeStamp: %v", oldTimeStamp, newTimeStamp)
+	logger.LoggerMsg.Infof("oldTimeStamp: %v , newTimeStamp: %v", oldTimeStamp, newTimeStamp)
 	if isFound && oldTimeStamp < newTimeStamp && strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
 		deleteAPIFromList(indexOfAPI, apiEvent.APIID)
 	} else if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
@@ -128,7 +128,7 @@ func handleAPIEvents(data []byte, eventType string) {
 			APIStatus: apiEvent.APIStatus, IsDefaultVersion: true, TenantID: apiEvent.TenantID,
 			TenantDomain: apiEvent.Event.TenantDomain, TimeStamp: apiEvent.Event.TimeStamp}
 		APIList = append(APIList, api)
-		logger.LoggerJMS.Infof("API %s is added/updated to APIList", apiEvent.APIID)
+		logger.LoggerMsg.Infof("API %s is added/updated to APIList", apiEvent.APIID)
 	}
 	fmt.Println(APIList)
 }
@@ -138,7 +138,7 @@ func deleteAPIFromList(indexToBeDeleted int, apiID string) {
 	copy(APIList[indexToBeDeleted:], APIList[indexToBeDeleted+1:])
 	APIList[len(APIList)-1] = resourceTypes.API{}
 	APIList = APIList[:len(APIList)-1]
-	logger.LoggerJMS.Infof("API %s is deleted from APIList", apiID)
+	logger.LoggerMsg.Infof("API %s is deleted from APIList", apiID)
 }
 
 // handleApplicationEvents to process application related events
@@ -194,11 +194,11 @@ func handlePolicyEvents(data []byte, eventType string) {
 
 	// TODO: Handle policy events
 	if strings.EqualFold(eventType, "POLICY_CREATE") {
-		logger.LoggerJMS.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+		logger.LoggerMsg.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
 	} else if strings.EqualFold(eventType, "POLICY_UPDATE") {
-		logger.LoggerJMS.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+		logger.LoggerMsg.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
 	} else if strings.EqualFold(eventType, "POLICY_DELETE") {
-		logger.LoggerJMS.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
+		logger.LoggerMsg.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
 	}
 
 	if strings.EqualFold(apiEventType, policyEvent.PolicyType) {

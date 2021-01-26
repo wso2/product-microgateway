@@ -25,6 +25,7 @@ import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.api.APIFactory;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
@@ -47,10 +48,11 @@ public class AuthServer {
 
     public static void main(String[] args) {
         try {
-            // Load configurations
-            ConfigHolder configHolder = ConfigHolder.getInstance();
             KeyManagerDataService keyManagerDataService = new KeyManagerDataServiceImpl();
             ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
+            // Load configurations
+            ConfigHolder configHolder = ConfigHolder.getInstance();
+            APIFactory.getInstance().init();
 
             // Create a new server to listen on port 8081
             Server server = initServer();

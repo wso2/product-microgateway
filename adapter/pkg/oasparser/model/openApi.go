@@ -69,7 +69,8 @@ func setPathInfoOpenAPI(path string, methods []string, pathItem *openapi3.PathIt
 			//Schemes: operation.,
 			//tags: operation.Tags,
 			//Security: operation.Security.,
-			vendorExtensible: convertExtensibletoReadableFormat(pathItem.ExtensionProps)}
+			vendorExtensible: convertExtensibletoReadableFormat(pathItem.ExtensionProps),
+		}
 	}
 	return resource
 }
@@ -158,10 +159,12 @@ func getHostandBasepathandPort(rawURL string) Endpoint {
 			port = uint32(80)
 		}
 	}
+
 	urlType = "http"
 	if strings.HasPrefix(rawURL, "https://") {
 		urlType = "https"
 	}
+
 	return Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}
 }
 

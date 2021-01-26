@@ -43,6 +43,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 	swagger.vendorExtensible = swagger2.VendorExtensible.Extensions
 	swagger.resources = setResourcesSwagger(swagger2)
 	swagger.apiType = HTTP
+	swagger.xWso2Basepath = swagger2.BasePath
 
 	// According to the definition, multiple schemes can be mentioned. Since the microgateway can assign only one scheme
 	// https is prioritized over http. If it is ws or wss, the microgateway will print an error.

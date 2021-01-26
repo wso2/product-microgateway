@@ -20,6 +20,8 @@ package org.wso2.micro.gateway.enforcer.api;
 import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.gateway.discovery.api.Api;
+import org.wso2.gateway.discovery.api.Resource;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
@@ -50,6 +52,26 @@ public class RestAPI implements API {
         String name = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_API_NAME_PARAM);
         String version = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_VERSION_PARAM);
         List<ResourceConfig> resources = extractResourceConfig(request.getAttributes().getContextExtensionsMap());
+        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).build();
+
+        initFilters();
+        return basePath;
+    }
+
+    @Override
+    public String init(Api api) {
+        String basePath = api.getBasePath();
+        String name = api.getTitle();
+        String version = api.getVersion();
+        List<ResourceConfig> resources = new ArrayList<>();
+        for (Resource res: api.getResourcesList()) {
+            // TODO: (Praminda) handle multiple methods for a resource
+            // TODO: (Praminda) handle all fields of resource
+            String method = res.getMethods(0);
+            ResourceConfig resConfig = buildResource(res.getPath(), method);
+
+            resources.add(resConfig);
+        }
         this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).build();
 
         initFilters();

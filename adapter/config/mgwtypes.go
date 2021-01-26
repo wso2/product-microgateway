@@ -120,18 +120,81 @@ type Config struct {
 		}
 	}
 
-	ControlPlane struct {
-		EventHub struct {
-			Enable                  bool `toml:"enable"`
-			JmsConnectionParameters struct {
-				EventListeningEndpoints string `toml:"eventListeningEndpoints"`
-			}
-		}
+	Enforcer struct {
+		Keystore        keystore
+		Truststore      keystore
+		JwtTokenConfig  []jwtTokenConfig
+		EventHub        eventHub
+		ApimCredentials apimCredentials
+		AuthService     authService
 	}
+
+	ControlPlane controlPlane `toml:"controlPlane"`
+}
+
+type apimCredentials struct {
+	Username string
+	Password string
+}
+
+type authService struct {
+	Port           int32
+	MaxMessageSize int32
+	MaxHeaderLimit int32
+	KeepAliveTime  int32
+	ThreadPool     threadPool
+}
+
+type threadPool struct {
+	CoreSize      int32
+	MaxSize       int32
+	KeepAliveTime int32
+	QueueSize     int32
+}
+
+type keystore struct {
+	Location  string
+	StoreType string `toml:"type"`
+	Password  string
+}
+
+type jwtTokenConfig struct {
+	Name                 string
+	Issuer               string
+	CertificateAlias     string
+	JwksURL              string
+	ValidateSubscription bool
+	ConsumerKeyClaim     string
+}
+
+type eventHub struct {
+	Enabled                 bool
+	ServiceURL              string
+	JmsConnectionParameters struct {
+		EventListeningEndpoints string `toml:"eventListeningEndpoints"`
+	} `toml:"jmsConnectionParameters"`
 }
 
 // APICtlUser represents registered APICtl Users
 type APICtlUser struct {
 	Username string
 	Password string
+}
+
+// ControlPlane struct contains configurations related to the API Manager
+type controlPlane struct {
+	EventHub struct {
+		Enabled                 bool          `toml:"enabled"`
+		ServiceURL              string        `toml:"serviceUrl"`
+		Username                string        `toml:"username"`
+		Password                string        `toml:"password"`
+		SyncApisOnStartUp       bool          `toml:"syncApisOnStartUp"`
+		EnvironmentLabels       []string      `toml:"environmentLabels"`
+		RetryInterval           time.Duration `toml:"retryInterval"`
+		TLSEnabled              bool          `toml:"tlsEnabled"`
+		PublicCertPath          string        `toml:"publicCertPath"`
+		JmsConnectionParameters struct {
+			EventListeningEndpoints string `toml:"eventListeningEndpoints"`
+		} `toml:"jmsConnectionParameters"`
+	} `toml:"eventHub"`
 }

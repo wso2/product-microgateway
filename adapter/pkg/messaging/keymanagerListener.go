@@ -48,12 +48,12 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 		if strings.EqualFold(keyManagerConfig, notification.Event.PayloadData.EventType) {
 			if decodedByte != nil {
 				json.Unmarshal([]byte(string(decodedByte)), &keyManagerEvent)
-				logger.LoggerJMS.Infof("EventType: %s, Action: %s ",
+				logger.LoggerMsg.Infof("EventType: %s, Action: %s ",
 					notification.Event.PayloadData.EventType, notification.Event.PayloadData.Action)
 			}
 		}
 		d.Ack(false)
 	}
-	logger.LoggerJMS.Info("handle: deliveries channel closed")
+	logger.LoggerMsg.Info("handle: deliveries channel closed")
 	done <- nil
 }
