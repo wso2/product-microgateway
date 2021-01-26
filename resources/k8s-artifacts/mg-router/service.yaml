@@ -21,7 +21,7 @@ kind: Service
 metadata:
   labels:
     app: mg-router
-  name: router-service
+  name: router
 spec:
   type: NodePort
   selector:
