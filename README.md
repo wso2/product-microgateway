@@ -22,14 +22,15 @@ microservice architectures efficiently.
     - Make sure you have installed *docker* on your machine.
     - Make sure you have installed the *docker-compose* on your machine
 
-Let's host our first API on a Microgateway. We will be exposing the publicly available [petstore services](https://petstore.swagger.io/) via  microgateway
+Let's host our first API on a Microgateway. We will be exposing the publicly available [petstore services](https://petstore.swagger.io/) via  microgateway.
 
-1. First download the CLI tool(APICTL) and the microgateway distribution from the  
-[github release page](https://github.com/wso2/product-microgateway/releases)
+1. First download the CLI tool(APICTL) and the microgateway distributions
 and extract them to a folder of your choice.
-  * [CLI (APICTL)](https://github.com/wso2/product-microgateway/releases)
-  * [Microgateway Distribution](https://github.com/wso2/product-microgateway/releases)
+  * [CLI (APICTL)](https://github.com/wso2/product-apim-tooling/releases/tag/4.0.0-M5)
+  * [Microgateway Distribution](https://github.com/wso2/product-microgateway/releases/tag/v4.0.0-m4)
   
+Note: WSO2 Microgateway v4.0.0-m4 is compatible with APICTL 4.0.0-M5.
+
 CLI tool extracted location will be referred as `CLI_HOME` and Microgateway distribution extracted location would be 
 referred as `MG_HOME`.
 
@@ -78,7 +79,7 @@ TOKEN=eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNNV0kyTkRBelpHUX
 
 8. We can now invoke the API running on the microgateway using cURL as below.
 ```
-curl -X GET "https://localhost:9095/v2/pet/1" -H "accept: application/json" -H "Authorization:Bearer $TOKEN" -k
+curl -X GET "https://localhost:9095/v2/pet/findByStatus?status=available" -H "accept: application/json" -H "Authorization:Bearer $TOKEN" -k
 ```
 
 
