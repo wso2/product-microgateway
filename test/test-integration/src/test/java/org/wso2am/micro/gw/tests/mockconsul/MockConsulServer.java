@@ -50,7 +50,7 @@ public class MockConsulServer {
         );
 
         // Output file
-        String tmpDockerCompose = targetDir +  File.separator  + System.currentTimeMillis() + ".yaml";
+        String tmpDockerCompose = targetDir + File.separator + System.currentTimeMillis() + ".yaml";
         File fileTmp = new File(tmpDockerCompose);
         fileTmp.createNewFile();
         Path output = Paths.get(tmpDockerCompose);
@@ -66,7 +66,7 @@ public class MockConsulServer {
                     StandardOpenOption.APPEND);
         }
 
-        Utils.copyFile(tmpDockerCompose,dockerComposePath);
+        Utils.copyFile(tmpDockerCompose, dockerComposePath);
         fileTmp.delete();
     }
 }

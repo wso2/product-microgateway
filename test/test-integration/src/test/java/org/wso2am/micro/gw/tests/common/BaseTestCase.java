@@ -76,7 +76,18 @@ public class BaseTestCase {
         microGWServer = new MgwServerInstance(confPath, tlsEnabled);
         microGWServer.startMGW();
     }
-
+    /**
+     * start the mgw docker environment with a mock
+     *
+     * @param confPath   external conf.toml file location
+     * @param addMock name of the mock server want to include
+     * @throws MicroGWTestException
+     * @throws IOException
+     */
+    public void startMGW(String confPath, String addMock) throws MicroGWTestException, IOException{
+        microGWServer = new MgwServerInstance(confPath, addMock);
+        microGWServer.getEnvironment().start();
+    }
     /**
      * stop the mgw docker environment.
      */

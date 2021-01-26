@@ -12,9 +12,11 @@ password = "admin"
 [adapter.consul]
 url = "http://mockConsul:8500" # scheme + host ip + port
 pollInterval = 5 # seconds
-# Whether consul health checks should be considered when updating envoy clusters
-healthChecksPassingOnly = false
+aclTokenFilePath = ""
 # certs for tls
+caCertPath = "/home/wso2/security/consul/consul-agent-ca.pem"
+certPath = "/home/wso2/security/consul/local-dc-client-consul-0.pem"
+keyPath = "/home/wso2/security/consul/local-dc-client-consul-0-key.pem"
 
 [envoy]
 listenerHost = "0.0.0.0"
