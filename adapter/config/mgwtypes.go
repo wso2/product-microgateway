@@ -113,7 +113,7 @@ type Config struct {
 		AuthService     authService
 	}
 
-	ControlPlane controlPlane `toml:"controlPlane`
+	ControlPlane controlPlane `toml:"controlPlane"`
 }
 
 type apimCredentials struct {
@@ -168,6 +168,7 @@ type APICtlUser struct {
 // ControlPlane struct contains configurations related to the API Manager
 type controlPlane struct {
 	EventHub struct {
+		Enabled                 bool          `toml:"enabled"`
 		ServiceURL              string        `toml:"serviceUrl"`
 		Username                string        `toml:"username"`
 		Password                string        `toml:"password"`

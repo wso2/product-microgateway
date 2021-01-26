@@ -52,23 +52,23 @@ func ProcessEvents(config *config.Config) {
 	bindingKeys := []string{notification, keymanager, tokenRevocation}
 
 	for i, key := range bindingKeys {
-		logger.LoggerJMS.Infof("shutting down index %v key %s ", i, key)
+		logger.LoggerMsg.Infof("shutting down index %v key %s ", i, key)
 		go func(key string) {
 			c, err := NewConsumer(key+"-queue", key)
 			if err != nil {
-				logger.LoggerJMS.Fatalf("%s", err)
+				logger.LoggerMsg.Fatalf("%s", err)
 			}
 			if lifetime > 0 {
-				logger.LoggerJMS.Infof("running %s events for %s", key, lifetime)
+				logger.LoggerMsg.Infof("running %s events for %s", key, lifetime)
 				time.Sleep(lifetime)
 			} else {
-				logger.LoggerJMS.Infof("process of receiving %s events running forever", key)
+				logger.LoggerMsg.Infof("process of receiving %s events running forever", key)
 				select {}
 			}
 
-			logger.LoggerJMS.Infof("shutting down")
+			logger.LoggerMsg.Infof("shutting down")
 			if err := c.Shutdown(); err != nil {
-				logger.LoggerJMS.Fatalf("error during shutdown: %s", err)
+				logger.LoggerMsg.Fatalf("error during shutdown: %s", err)
 			}
 		}(key)
 	}
@@ -85,20 +85,20 @@ func NewConsumer(queueName string, key string) (*Consumer, error) {
 
 	var err error
 
-	logger.LoggerJMS.Infof("dialing %q", amqpURI)
+	logger.LoggerMsg.Infof("dialing %q", amqpURI)
 	c.conn = connectToRabbitMQ()
 
 	go func() {
-		logger.LoggerJMS.Infof("closing: %s", <-c.conn.NotifyClose(make(chan *amqp.Error)))
+		logger.LoggerMsg.Infof("closing: %s", <-c.conn.NotifyClose(make(chan *amqp.Error)))
 	}()
 
-	logger.LoggerJMS.Infof("got Connection, getting Channel")
+	logger.LoggerMsg.Infof("got Connection, getting Channel")
 	c.channel, err = c.conn.Channel()
 	if err != nil {
 		return nil, fmt.Errorf("Channel: %s", err)
 	}
 
-	logger.LoggerJMS.Infof("got Channel, declaring Exchange (%q)", exchange)
+	logger.LoggerMsg.Infof("got Channel, declaring Exchange (%q)", exchange)
 	if err = c.channel.ExchangeDeclare(
 		exchange,     // name of the exchange
 		exchangeType, // type
@@ -111,7 +111,7 @@ func NewConsumer(queueName string, key string) (*Consumer, error) {
 		return nil, fmt.Errorf("Exchange Declare: %s", err)
 	}
 
-	logger.LoggerJMS.Infof("declared Exchange, declaring Queue %q", queueName)
+	logger.LoggerMsg.Infof("declared Exchange, declaring Queue %q", queueName)
 	queue, err := c.channel.QueueDeclare(
 		"",    // name of the queue
 		false, // durable
@@ -124,7 +124,7 @@ func NewConsumer(queueName string, key string) (*Consumer, error) {
 		return nil, fmt.Errorf("Queue Declare: %s", err)
 	}
 
-	logger.LoggerJMS.Infof("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
+	logger.LoggerMsg.Infof("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
 		queue.Name, queue.Messages, queue.Consumers, key)
 
 	if err = c.channel.QueueBind(
@@ -137,7 +137,7 @@ func NewConsumer(queueName string, key string) (*Consumer, error) {
 		return nil, fmt.Errorf("Queue Bind: %s", err)
 	}
 
-	logger.LoggerJMS.Infof("Queue bound to Exchange, starting Consume (consumer tag %q)", c.tag)
+	logger.LoggerMsg.Infof("Queue bound to Exchange, starting Consume (consumer tag %q)", c.tag)
 	deliveries, err := c.channel.Consume(
 		queue.Name, // name
 		c.tag,      // consumerTag,
@@ -170,8 +170,8 @@ func connectToRabbitMQ() *amqp.Connection {
 			return conn
 		}
 
-		logger.LoggerJMS.Error(err)
-		logger.LoggerJMS.Printf("Trying to reconnect to RabbitMQ at %s\n", amqpURI)
+		logger.LoggerMsg.Error(err)
+		logger.LoggerMsg.Printf("Trying to reconnect to RabbitMQ at %s\n", amqpURI)
 		time.Sleep(500 * time.Millisecond)
 	}
 }
@@ -187,7 +187,7 @@ func (c *Consumer) Shutdown() error {
 		return fmt.Errorf("AMQP connection close error: %s", err)
 	}
 
-	defer logger.LoggerJMS.Infof("AMQP shutdown OK")
+	defer logger.LoggerMsg.Infof("AMQP shutdown OK")
 
 	// wait for handle() to exit
 	return <-c.done
