@@ -25,11 +25,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
-	//logger "github.com/wso2/micro-gw/loggers"
 )
 
 const (
-	apiPath = "v1/health/service/"
+	apiPath           = "v1/health/service/"
+	datacenter        = "dc"
+	passing           = "passing"
+	passingVal        = "1"
+	namespace         = "nc"
+	consulTokenHeader = "X-Consul-Token"
 )
 
 type node struct {
@@ -125,7 +129,7 @@ func contains(source []string, elements []string) bool {
 
 //sends a get request to a consul-client
 //parses the response into []Upstream
-func (c ConsulClient) get(path string, dc string, namespace string, tags []string) ([]Upstream, error) {
+func (c ConsulClient) get(path string, dc string, nc string, tags []string) ([]Upstream, error) {
 	url := c.scheme + "://" + c.host
 	if c.host[len(c.host)-1:] != "/" {
 		url += "/"
@@ -137,10 +141,10 @@ func (c ConsulClient) get(path string, dc string, namespace string, tags []strin
 
 	//add query parameters
 	q := req.URL.Query()
-	q.Add("dc", dc)       //datacenter
-	q.Add("passing", "1") // health checks passing only
-	if namespace != "" {  //namespace, an enterprise feature
-		q.Add("nc", namespace)
+	q.Add(datacenter, dc)      //datacenter
+	q.Add(passing, passingVal) // health checks passing only
+	if nc != "" {              //namespace, an enterprise feature
+		q.Add(namespace, nc)
 	}
 
 	req.URL.RawQuery = q.Encode()
@@ -149,7 +153,7 @@ func (c ConsulClient) get(path string, dc string, namespace string, tags []strin
 		return []Upstream{}, errHTTP
 	}
 	//set headers
-	req.Header.Set("X-Consul-Token", c.aclToken)
+	req.Header.Set(consulTokenHeader, c.aclToken)
 	var result []result
 	body, errRead := ioutil.ReadAll(response.Body)
 	if errRead != nil {
@@ -214,7 +218,7 @@ func (c ConsulClient) Poll(query Query, doneChan <-chan bool) <-chan []Upstream 
 
 	//do not start polling consul if there are config errors
 	if errConfLoad != nil {
-		logger.LoggerSvcDiscovery.Error("Config errors found in consul config. ", query, " wil not be polled")
+		logger.LoggerSvcDiscovery.Error("Config errors found in consul config. ", errConfLoad, " query: ", query, " wil not be polled")
 		return resultChan
 	}
 
