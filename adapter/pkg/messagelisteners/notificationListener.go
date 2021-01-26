@@ -21,11 +21,12 @@ package messagelisteners
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/streadway/amqp"
 	logger "github.com/wso2/micro-gw/loggers"
-	resourcetypes "github.com/wso2/micro-gw/pkg/resource_types"
+	resourceTypes "github.com/wso2/micro-gw/pkg/resource_types"
 )
 
 // constant variables
@@ -42,14 +43,14 @@ const (
 
 // var variables
 var (
-	SubList                   = make([]resourcetypes.Subscription, 0)
-	AppKeyMappingList         = make([]resourcetypes.ApplicationKeyMapping, 0)
-	APIList                   = make([]resourcetypes.API, 0)
-	ScopeList                 = make([]resourcetypes.Scope, 0)
-	AppPolicyList             = make([]resourcetypes.ApplicationPolicy, 0)
-	SubPolicyList             = make([]resourcetypes.SubscriptionPolicy, 0)
-	ApplicationKeyMappingList = make([]resourcetypes.SubscriptionPolicy, 0)
-	AppList                   = make([]resourcetypes.Application, 0)
+	SubList                   = make([]resourceTypes.Subscription, 0)
+	AppKeyMappingList         = make([]resourceTypes.ApplicationKeyMapping, 0)
+	APIList                   = make([]resourceTypes.API, 0)
+	ScopeList                 = make([]resourceTypes.Scope, 0)
+	AppPolicyList             = make([]resourceTypes.ApplicationPolicy, 0)
+	SubPolicyList             = make([]resourceTypes.SubscriptionPolicy, 0)
+	ApplicationKeyMappingList = make([]resourceTypes.SubscriptionPolicy, 0)
+	AppList                   = make([]resourceTypes.Application, 0)
 	APIListTimeStamp          = make(map[string]int64, 0)
 	ApplicationListTimeStamp  = make(map[string]int64, 0)
 )
@@ -90,10 +91,13 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 // handleAPIEvents to process api related data
 func handleAPIEvents(data []byte, eventType string) {
 	var apiEvent APIEvent
-	json.Unmarshal([]byte(string(data)), &apiEvent)
-	timeStampList := APIListTimeStamp
 	var oldTimeStamp int64 = 0
 	var newTimeStamp int64 = apiEvent.Event.TimeStamp
+	var indexToBeDeleted int
+	var isFound bool
+
+	json.Unmarshal([]byte(string(data)), &apiEvent)
+	timeStampList := APIListTimeStamp
 	for apiID, timeStamp := range timeStampList {
 		if strings.EqualFold(apiEvent.APIID, apiID) {
 			oldTimeStamp = timeStamp
@@ -102,23 +106,34 @@ func handleAPIEvents(data []byte, eventType string) {
 		}
 	}
 
-	if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) && oldTimeStamp < newTimeStamp {
-		for i := range APIList {
-			if strings.EqualFold(apiEvent.APIID, APIList[i].APIID) {
-				copy(APIList[i:], APIList[i+1:])
-				APIList[len(APIList)-1] = resourcetypes.API{}
-				APIList = APIList[:len(APIList)-1]
-				break
-			}
+	for i := range APIList {
+		if strings.EqualFold(apiEvent.APIID, APIList[i].APIID) {
+			isFound = true
+			indexToBeDeleted = i
+			break
 		}
+	}
+
+	if isFound && oldTimeStamp < newTimeStamp && strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
+		deleteAPIFromList(indexToBeDeleted, apiEvent.APIID)
 	} else if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
 		// pull API details
-		api := resourcetypes.API{APIID: apiEvent.APIID, Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
+		api := resourceTypes.API{APIID: apiEvent.APIID, Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
 			Version: apiEvent.APIVersion, Context: apiEvent.APIContext, APIType: apiEvent.APIType,
 			IsDefaultVersion: true, TenantID: -1, TenantDomain: apiEvent.Event.TenantDomain,
 			TimeStamp: apiEvent.Event.TimeStamp}
 		APIList = append(APIList, api)
+		logger.LoggerJMS.Infof("API %s is added/updated to APIList", apiEvent.APIID)
 	}
+	fmt.Println(APIList)
+}
+
+// deleteAPIFromList when remove API From Gateway event happens
+func deleteAPIFromList(indexToBeDeleted int, apiID string) {
+	copy(APIList[indexToBeDeleted:], APIList[indexToBeDeleted+1:])
+	APIList[len(APIList)-1] = resourceTypes.API{}
+	APIList = APIList[:len(APIList)-1]
+	logger.LoggerJMS.Infof("API %s is deleted from APIList", apiID)
 }
 
 // handleApplicationEvents to process application related events
@@ -128,7 +143,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 		var applicationRegistrationEvent ApplicationRegistrationEvent
 		json.Unmarshal([]byte(string(data)), &applicationRegistrationEvent)
 
-		applicationKeyMapping := resourcetypes.ApplicationKeyMapping{ApplicationID: applicationRegistrationEvent.ApplicationID,
+		applicationKeyMapping := resourceTypes.ApplicationKeyMapping{ApplicationID: applicationRegistrationEvent.ApplicationID,
 			ConsumerKey: applicationRegistrationEvent.ConsumerKey, KeyType: applicationRegistrationEvent.KeyType,
 			KeyManager: applicationRegistrationEvent.KeyManager, TenantID: -1, TenantDomain: applicationRegistrationEvent.TenantDomain,
 			TimeStamp: applicationRegistrationEvent.TimeStamp}
@@ -137,7 +152,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 	} else {
 		var applicationEvent ApplicationEvent
 		json.Unmarshal([]byte(string(data)), &applicationEvent)
-		application := resourcetypes.Application{UUID: applicationEvent.UUID, ID: applicationEvent.ApplicationID,
+		application := resourceTypes.Application{UUID: applicationEvent.UUID, ID: applicationEvent.ApplicationID,
 			Name: applicationEvent.ApplicationName, SubName: applicationEvent.Subscriber, Policy: applicationEvent.ApplicationPolicy, TokenType: applicationEvent.TokenType, GroupIds: applicationEvent.GroupID, Attributes: nil,
 			TenantID: -1, TenantDomain: applicationEvent.TenantDomain, TimeStamp: applicationEvent.TimeStamp}
 
@@ -150,7 +165,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 func handleSubscriptionEvents(data []byte, eventType string) {
 	var subscriptionEvent SubscriptionEvent
 	json.Unmarshal([]byte(string(data)), &subscriptionEvent)
-	subscription := resourcetypes.Subscription{SubscriptionID: subscriptionEvent.SubscriptionID, PolicyID: subscriptionEvent.PolicyID,
+	subscription := resourceTypes.Subscription{SubscriptionID: subscriptionEvent.SubscriptionID, PolicyID: subscriptionEvent.PolicyID,
 		APIID: subscriptionEvent.APIID, AppID: subscriptionEvent.ApplicationID, SubscriptionState: subscriptionEvent.SubscriptionState,
 		TenantID: subscriptionEvent.TenantID, TenantDomain: subscriptionEvent.TenantDomain, TimeStamp: subscriptionEvent.TimeStamp}
 
@@ -162,7 +177,7 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 func handleScopeEvents(data []byte, eventType string) {
 	var scopeEvent ScopeEvent
 	json.Unmarshal([]byte(string(data)), &scopeEvent)
-	scope := resourcetypes.Scope{Name: scopeEvent.Name, DisplayName: scopeEvent.DisplayName, ApplicationName: scopeEvent.ApplicationName}
+	scope := resourceTypes.Scope{Name: scopeEvent.Name, DisplayName: scopeEvent.DisplayName, ApplicationName: scopeEvent.ApplicationName}
 	ScopeList = append(ScopeList, scope)
 	// EventTypes: SCOPE_CREATE, SCOPE_UPDATE,SCOPE_DELETE
 }
@@ -185,7 +200,7 @@ func handlePolicyEvents(data []byte, eventType string) {
 		var apiPolicyEvent APIPolicyEvent
 		json.Unmarshal([]byte(string(data)), &apiPolicyEvent)
 	} else if strings.EqualFold(applicationEventType, policyEvent.PolicyType) {
-		applicationPolicy := resourcetypes.ApplicationPolicy{ID: policyEvent.PolicyID, TenantID: -1, Name: policyEvent.PolicyName,
+		applicationPolicy := resourceTypes.ApplicationPolicy{ID: policyEvent.PolicyID, TenantID: -1, Name: policyEvent.PolicyName,
 			QuotaType: policyEvent.QuotaType}
 		AppPolicyList = append(AppPolicyList, applicationPolicy)
 
@@ -193,7 +208,7 @@ func handlePolicyEvents(data []byte, eventType string) {
 		var subscriptionPolicyEvent SubscriptionPolicyEvent
 		json.Unmarshal([]byte(string(data)), &subscriptionPolicyEvent)
 
-		subscriptionPolicy := resourcetypes.SubscriptionPolicy{ID: subscriptionPolicyEvent.PolicyID, TenantID: -1,
+		subscriptionPolicy := resourceTypes.SubscriptionPolicy{ID: subscriptionPolicyEvent.PolicyID, TenantID: -1,
 			Name: subscriptionPolicyEvent.PolicyName, QuotaType: subscriptionPolicyEvent.QuotaType,
 			GraphQLMaxComplexity: subscriptionPolicyEvent.GraphQLMaxComplexity,
 			GraphQLMaxDepth:      subscriptionPolicyEvent.GraphQLMaxDepth, RateLimitCount: subscriptionPolicyEvent.RateLimitCount,
