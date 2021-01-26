@@ -15,8 +15,8 @@
  *
  */
 
-// Package messagelisteners holds the implementation for event listeners functions
-package messagelisteners
+// Package messaging holds the implementation for event listeners functions
+package messaging
 
 import (
 	"encoding/base64"
@@ -91,11 +91,13 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 
 // handleAPIEvents to process api related data
 func handleAPIEvents(data []byte, eventType string) {
-	var apiEvent APIEvent
-	var oldTimeStamp int64 = 0
-	var newTimeStamp int64 = apiEvent.Event.TimeStamp
-	var indexToBeDeleted int
-	var isFound bool
+	var (
+		apiEvent     APIEvent
+		oldTimeStamp int64
+		indexOfAPI   int
+		isFound      bool
+		newTimeStamp int64 = apiEvent.Event.TimeStamp
+	)
 
 	json.Unmarshal([]byte(string(data)), &apiEvent)
 	timeStampList := APIListTimeStamp
@@ -111,14 +113,14 @@ func handleAPIEvents(data []byte, eventType string) {
 	for i := range APIList {
 		if strings.EqualFold(apiEvent.APIID, APIList[i].APIID) {
 			isFound = true
-			indexToBeDeleted = i
+			indexOfAPI = i
 			break
 		}
 	}
 
 	logger.LoggerJMS.Infof("oldTimeStamp: %v , newTimeStamp: %v", oldTimeStamp, newTimeStamp)
 	if isFound && oldTimeStamp < newTimeStamp && strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
-		deleteAPIFromList(indexToBeDeleted, apiEvent.APIID)
+		deleteAPIFromList(indexOfAPI, apiEvent.APIID)
 	} else if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
 		// pull API details
 		api := resourceTypes.API{APIID: apiEvent.APIID, Provider: apiEvent.APIProvider, Name: apiEvent.APIName,

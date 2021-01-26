@@ -15,8 +15,8 @@
  *
  */
 
-// Package messagelisteners holds the implementation for event listeners functions
-package messagelisteners
+// Package messaging holds the implementation for event listeners functions
+package messaging
 
 import (
 	"fmt"
