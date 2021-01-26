@@ -320,7 +320,8 @@ func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol
 // endpoint's basePath, resource Object (Microgateway's internal representation), production clusterName and
 // sandbox clusterName needs to be provided.
 func createRoute(title string, apiType string, xWso2Basepath string, version string, endpointBasepath string,
-	resourcePathParam string, resourceMethods []string, prodClusterName string, sandClusterName string, corsPolicy *routev3.CorsPolicy) *routev3.Route {
+	resourcePathParam string, resourceMethods []string, prodClusterName string, sandClusterName string, 
+	corsPolicy *routev3.CorsPolicy) *routev3.Route {
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
@@ -331,8 +332,8 @@ func createRoute(title string, apiType string, xWso2Basepath string, version str
 		resourcePath string
 	)
 
-    // OPTIONS is always added even if it is not listed under resources
-    // This is required to handle CORS preflight request fail scenario
+	// OPTIONS is always added even if it is not listed under resources
+	// This is required to handle CORS preflight request fail scenario
 	methodRegex := strings.Join(resourceMethods, "|")
 	if !strings.Contains(methodRegex, "OPTIONS") {
 		methodRegex = methodRegex + "|OPTIONS"
@@ -573,9 +574,6 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 		stringMatcherArray = append(stringMatcherArray, regexMatcher)
 	}
 
-	methods := strings.Join(corsConfig.AccessControlAllowMethods, ", ")
-	headers := strings.Join(corsConfig.AccessControlAllowHeaders, ", ")
-
 	corsPolicy := &routev3.CorsPolicy{
 		AllowCredentials: &wrapperspb.BoolValue{
 			Value: corsConfig.AccessControlAllowCredentials,
@@ -585,11 +583,11 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 	if len(stringMatcherArray) > 0 {
 		corsPolicy.AllowOriginStringMatch = stringMatcherArray
 	}
-	if len(methods) > 0 {
-		corsPolicy.AllowMethods = methods
+	if len(corsConfig.AccessControlAllowMethods) > 0 {
+		corsPolicy.AllowMethods = strings.Join(corsConfig.AccessControlAllowMethods, ", ")
 	}
-	if len(headers) > 0 {
-		corsPolicy.AllowHeaders = headers
+	if len(corsConfig.AccessControlAllowHeaders) > 0 {
+		corsPolicy.AllowHeaders = strings.Join(corsConfig.AccessControlAllowHeaders, ", ")
 	}
 	return corsPolicy
 }

@@ -426,7 +426,7 @@ func TestGetCorsPolicy(t *testing.T) {
 	assert.Equal(t, "X-TEST-HEADER1, X-TEST-HEADER2", corsPolicy2.GetAllowHeaders(), "Cors Allow headers mismatch")
 	assert.True(t, corsPolicy2.GetAllowCredentials().GetValue(), "Cors Access Allow Credentials should be true")
 
-	// Test the configuration when few configurations are added.
+	// Test the configuration when headers configuration is not provided.
 	corsPolicy3 := getCorsPolicy(corsConfigModel3)
 	assert.NotNil(t, corsPolicy3, "Cors Policy should not be null.")
 	assert.Empty(t, corsPolicy3.GetAllowHeaders(), "Cors Allow headers should be null.")
@@ -438,4 +438,14 @@ func TestGetCorsPolicy(t *testing.T) {
 		corsPolicy3.GetAllowOriginStringMatch()[1].GetSafeRegex().GetRegex(),
 		"Cors Allowed Origin Header mismatch")
 	assert.Empty(t, corsPolicy3.GetAllowCredentials(), "Allow Credential property should not be assigned.")
+
+	// Route without CORS configuration
+	routeWithoutCors := createRoute("test", "HTTP", "/test", "1.0.0", "/test", "/testPath", []string{"GET"},
+		"test-cluster", "", nil)
+	assert.Nil(t, routeWithoutCors.GetRoute().Cors, "Cors Configuration should be null.")
+
+	// Route with CORS configuration
+	routeWithCors := createRoute("test", "HTTP", "/test", "1.0.0", "/test", "/testPath", []string{"GET"},
+		"test-cluster", "", corsPolicy3)
+	assert.NotNil(t, routeWithCors.GetRoute().Cors, "Cors Configuration should not be null.")
 }

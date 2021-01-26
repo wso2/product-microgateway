@@ -48,7 +48,7 @@ public class CorsFilter implements Filter {
             StringBuilder allowedMethodsBuilder = new StringBuilder(HttpConstants.OPTIONS);
             for (ResourceConfig resourceConfig : requestContext.getMathedAPI().getAPIConfig().getResources()) {
                 if (resourceConfig.getMethod() != ResourceConfig.HttpMethods.OPTIONS) {
-                    allowedMethodsBuilder.append(", " + resourceConfig.getMethod().name());
+                    allowedMethodsBuilder.append(", ").append(resourceConfig.getMethod().name());
                 }
             }
             requestContext.addResponseHeaders(HttpConstants.ALLOW_HEADER, allowedMethodsBuilder.toString());
