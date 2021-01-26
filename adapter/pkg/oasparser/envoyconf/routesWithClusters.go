@@ -73,9 +73,6 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 
 	apiTitle := mgwSwagger.GetTitle()
 	apiVersion := mgwSwagger.GetVersion()
-	apiBasePath := mgwSwagger.GetXWso2Basepath()
-	apiType := mgwSwagger.GetAPIType()
-	envoyCorsPolicy := getCorsPolicy(mgwSwagger.GetCorsConfig())
 
 	// check API level production endpoints available
 	if len(mgwSwagger.GetProdEndpoints()) > 0 {
@@ -178,11 +175,12 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 				apiTitle, apiVersion, resource.GetPath())
 		}
 
-		routeP := createRoute(apiTitle, apiType, apiBasePath, apiVersion, endpointBasepath, resource.GetPath(), resource.GetMethod(), clusterRefProd, clusterRefSand, envoyCorsPolicy)
+		routeP := createRoute(genRouteCreateParams(&mgwSwagger, &resource, endpointBasepath, clusterRefProd, clusterRefSand))
 		routesProd = append(routesProd, routeP)
 	}
 	if mgwSwagger.GetAPIType() == mgw.WS {
-		routesP := createRoute(apiTitle, apiType, apiBasePath, apiVersion, apiEndpointBasePath, "", []string{"GET"}, apilevelClusterProd.GetName(), apilevelClusterSand.GetName(), nil)
+		routesP := createRoute(genRouteCreateParams(&mgwSwagger, nil, apiEndpointBasePath, apilevelClusterProd.GetName(),
+			apilevelClusterSand.GetName()))
 		routesProd = append(routesProd, routesP)
 	}
 	return routesProd, clusters, endpoints
@@ -319,9 +317,20 @@ func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol
 // createRoute creates route elements for the route configurations. API title, xWso2Basepath, API version,
 // endpoint's basePath, resource Object (Microgateway's internal representation), production clusterName and
 // sandbox clusterName needs to be provided.
-func createRoute(title string, apiType string, xWso2Basepath string, version string, endpointBasepath string,
-	resourcePathParam string, resourceMethods []string, prodClusterName string, sandClusterName string, 
-	corsPolicy *routev3.CorsPolicy) *routev3.Route {
+func createRoute(params *routeCreateParams) *routev3.Route {
+	// func createRoute(title string, apiType string, xWso2Basepath string, version string, endpointBasepath string,
+	// 	resourcePathParam string, resourceMethods []string, prodClusterName string, sandClusterName string,
+	// 	corsPolicy *routev3.CorsPolicy) *routev3.Route {
+	title := params.title
+	version := params.version
+	xWso2Basepath := params.xWSO2BasePath
+	apiType := params.apiType
+	corsPolicy := getCorsPolicy(params.corsPolicy)
+	resourcePathParam := params.resourcePathParam
+	resourceMethods := params.resourceMethods
+	prodClusterName := params.prodClusterName
+	sandClusterName := params.sandClusterName
+	endpointBasepath := params.endpointBasePath
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
@@ -590,4 +599,26 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 		corsPolicy.AllowHeaders = strings.Join(corsConfig.AccessControlAllowHeaders, ", ")
 	}
 	return corsPolicy
+}
+
+func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, endpointBasePath string,
+	prodClusterName string, sandClusterName string) *routeCreateParams {
+	params := &routeCreateParams{
+		title:             swagger.GetTitle(),
+		apiType:           swagger.GetAPIType(),
+		version:           swagger.GetVersion(),
+		xWSO2BasePath:     swagger.GetXWso2Basepath(),
+		prodClusterName:   prodClusterName,
+		sandClusterName:   sandClusterName,
+		endpointBasePath:  endpointBasePath,
+		corsPolicy:        swagger.GetCorsConfig(),
+		resourcePathParam: "",
+		resourceMethods:   []string{"GET"},
+	}
+
+	if resource != nil {
+		params.resourceMethods = resource.GetMethod()
+		params.resourcePathParam = resource.GetPath()
+	}
+	return params
 }
