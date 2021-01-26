@@ -163,7 +163,7 @@ func getXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 						logger.LoggerOasparser.Debug("consul query syntax found: ", v.(string))
 						queryString, defHost, err := svcdiscovery.ParseConsulSyntax(v.(string))
 						if err != nil {
-							logger.LoggerOasparser.Error("consul syntax parse error")
+							logger.LoggerOasparser.Error("consul syntax parse error ", err)
 							continue
 						}
 						endpoint := getHostandBasepathandPort(defHost)
