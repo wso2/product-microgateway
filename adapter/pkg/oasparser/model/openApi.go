@@ -155,13 +155,11 @@ func getHostandBasepathandPort(rawURL string) Endpoint {
 	} else {
 		if strings.HasPrefix(rawURL, "https://") {
 			port = uint32(443)
+			urlType = "https"
 		} else {
 			port = uint32(80)
+			urlType = "http"
 		}
-	}
-	urlType = "http"
-	if strings.HasPrefix(rawURL, "https://") {
-		urlType = "https"
 	}
 	return Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}
 }

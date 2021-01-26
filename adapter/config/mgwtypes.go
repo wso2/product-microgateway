@@ -112,6 +112,8 @@ type Config struct {
 		ApimCredentials apimCredentials
 		AuthService     authService
 	}
+
+	ControlPlane ControlPlane `toml:"controlPlane`
 }
 
 type apimCredentials struct {
@@ -159,4 +161,21 @@ type eventHub struct {
 type APICtlUser struct {
 	Username string
 	Password string
+}
+
+// ControlPlane struct contains configurations related to the API Manager
+type ControlPlane struct {
+	EventHub struct {
+		ServiceURL              string        `toml:"serviceUrl"`
+		Username                string        `toml:"username"`
+		Password                string        `toml:"password"`
+		SyncApisOnStartUp       bool          `toml:"syncApisOnStartUp"`
+		EnvironmentLabels       []string      `toml:"environmentLabels"`
+		RetryInterval           time.Duration `toml:"retryInterval"`
+		TLSEnabled              bool          `toml:"tlsEnabled"`
+		PublicCertPath          string        `toml:"publicCertPath"`
+		JmsConnectionParameters struct {
+			EventListeningEndpoints string `toml:"eventListeningEndpoints"`
+		} `toml:"jmsConnectionParameters"`
+	} `toml:"eventHub"`
 }

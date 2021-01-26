@@ -82,3 +82,17 @@ password = "wso2carbon"
 [enforcer.apimCredentials]
     username="admin"
     password="admin"
+
+[controlPlane]
+# Control plane's eventHub details
+[controlPlane.eventHub]
+serviceUrl = "https://localhost:9443/"
+username="admin"
+password="admin"
+environmentLabels = ["Production and Sandbox"]
+retryInterval = 5
+tlsEnabled=false
+publicCertPath="/home/wso2/security/controlplane.pem"
+# Message broker connection URL of the control plane
+[controlPlane.eventHub.jmsConnectionParameters]
+eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
