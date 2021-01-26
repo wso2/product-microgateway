@@ -44,15 +44,15 @@ func IsDiscoveryServiceEndpoint(str string) bool {
 
 //parse a list of datacenters or tags
 func parseList(str string) []string {
-	s := strings.Split(str, ",")
-	for i := range s {
-		s[i] = strings.TrimSpace(strings.ReplaceAll(s[i], "[", ""))
-		s[i] = strings.TrimSpace(strings.ReplaceAll(s[i], "]", ""))
-		if strings.TrimSpace(s[i]) == "*" {
-			s[i] = ""
+	parsedString := strings.Split(str, ",")
+	for i := range parsedString {
+		parsedString[i] = strings.TrimSpace(strings.ReplaceAll(parsedString[i], "[", ""))
+		parsedString[i] = strings.TrimSpace(strings.ReplaceAll(parsedString[i], "]", ""))
+		if strings.TrimSpace(parsedString[i]) == "*" {
+			parsedString[i] = ""
 		}
 	}
-	return s
+	return parsedString
 }
 
 //ParseConsulSyntax breaks the syntax string into query string and default host string
