@@ -10,6 +10,7 @@ username = "admin"
 password = "admin"
 
 [adapter.consul]
+# todo rumesh check whether we need to have certPath and KeyPath
 url = "https://169.254.1.1:8501" # scheme + host ip + port
 pollInterval = 5 # seconds
 aclTokenFilePath = ""
