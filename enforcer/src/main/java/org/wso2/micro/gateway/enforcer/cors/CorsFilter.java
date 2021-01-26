@@ -42,17 +42,20 @@ public class CorsFilter implements Filter {
         logger.debug("Cors Filter (enforcer) is applied.");
         // Options request is served here.
         // Preflight success request does not reach here.
-        // TODO: (VirajSalaka) Decide if microgateway should allow the OPTIONS call pass to the backend.
         if (requestContext.getRequestMethod().contains(HttpConstants.OPTIONS)) {
-            requestContext.getProperties().put("code", HttpConstants.NO_CONTENT_STATUS_CODE);
             StringBuilder allowedMethodsBuilder = new StringBuilder(HttpConstants.OPTIONS);
             for (ResourceConfig resourceConfig : requestContext.getMathedAPI().getAPIConfig().getResources()) {
-                if (resourceConfig.getMethod() != ResourceConfig.HttpMethods.OPTIONS) {
+                if (resourceConfig.getMethod() == ResourceConfig.HttpMethods.OPTIONS) {
+                    logger.debug("OPTIONS method is listed under the resource. Hence OPTIONS request will" +
+                            "be responded from the upstream");
+                    return true;
+                } else {
                     allowedMethodsBuilder.append(", ").append(resourceConfig.getMethod().name());
                 }
             }
+            requestContext.getProperties().put("code", HttpConstants.NO_CONTENT_STATUS_CODE);
             requestContext.addResponseHeaders(HttpConstants.ALLOW_HEADER, allowedMethodsBuilder.toString());
-            logger.debug("Options Call received for " +
+            logger.debug("OPTIONS request received for " +
                     requestContext.getMathedAPI().getAPIConfig().getResources().get(0).getPath() +
                     ". Responded with allow header : " + allowedMethodsBuilder.toString());
             return false;
