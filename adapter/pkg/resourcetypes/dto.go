@@ -24,9 +24,9 @@ type Subscription struct {
 	APIID             int    `json:"apiId"`
 	AppID             int    `json:"appId" json:"applicationId"`
 	SubscriptionState string `json:"subscriptionState"`
-	TenantID          int32
-	TenantDomain      string
-	TimeStamp         int64
+	TenantID          int32  `json:"tenanId,omitempty"`
+	TenantDomain      string `json:"tenanDomain,omitempty"`
+	TimeStamp         int64  `json:"timeStamp,omitempty"`
 }
 
 // SubscriptionList for struct list of applications
@@ -44,9 +44,9 @@ type Application struct {
 	TokenType    string            `json:"tokenType"`
 	GroupIds     []string          `json:"groupIds"`
 	Attributes   map[string]string `json:"attributes"`
-	TenantID     int32
-	TenantDomain string
-	TimeStamp    int64
+	TenantID     int32             `json:"tenanId,omitempty"`
+	TenantDomain string            `json:"tenanDomain,omitempty"`
+	TimeStamp    int64             `json:"timeStamp,omitempty"`
 }
 
 // ApplicationList for struct list of application
@@ -60,9 +60,9 @@ type ApplicationKeyMapping struct {
 	ConsumerKey   string `json:"consumerKey"`
 	KeyType       string `json:"keyType"`
 	KeyManager    string `json:"keyManager"`
-	TenantID      int32
-	TenantDomain  string
-	TimeStamp     int64
+	TenantID      int32  `json:"tenanId,omitempty"`
+	TenantDomain  string `json:"tenanDomain,omitempty"`
+	TimeStamp     int64  `json:"timeStamp,omitempty"`
 }
 
 // ApplicationKeyMappingList for struct list of applicationKeyMapping
@@ -81,9 +81,9 @@ type API struct {
 	APIType          string `json:"apiType"`
 	IsDefaultVersion bool   `json:"isDefaultVersion"`
 	APIStatus        string `json:"apiStatus"`
-	TenantID         int32
-	TenantDomain     string
-	TimeStamp        int64
+	TenantID         int32  `json:"tenanId,omitempty"`
+	TenantDomain     string `json:"tenanDomain,omitempty"`
+	TimeStamp        int64  `json:"timeStamp,omitempty"`
 }
 
 // APIList for struct ApiList
@@ -115,8 +115,8 @@ type SubscriptionPolicy struct {
 	RateLimitCount       int    `json:"rateLimitCount"`
 	RateLimitTimeUnit    string `json:"rateLimitTimeUnit"`
 	StopOnQuotaReach     bool   `json:"stopOnQuotaReach"`
-	TenantDomain         string
-	TimeStamp            int64
+	TenantDomain         string `json:"tenanDomain,omitempty"`
+	TimeStamp            int64  `json:"timeStamp,omitempty"`
 }
 
 // SubscriptionPolicyList for struct list of SubscriptionPolicy
@@ -132,7 +132,7 @@ type APIPolicy struct {
 	PolicyType               string `json:"policyType"`
 	AddedConditionGroupIds   string `json:"addedConditionGroupIds"`
 	DeletedConditionGroupIds string `json:"deletedConditionGroupIds"`
-	TimeStamp                int64
+	TimeStamp                int64  `json:"timeStamp,omitempty"`
 }
 
 // Scope for struct Scope
