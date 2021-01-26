@@ -61,7 +61,7 @@ type Event struct {
 	EventID      string `json:"eventId"`
 	TimeStamp    int64  `json:"timeStamp"`
 	Type         string `json:"type"`
-	TenantID     int    `json:"tenantId"`
+	TenantID     int32  `json:"tenantId"`
 	TenantDomain string `json:"tenantDomain"`
 }
 

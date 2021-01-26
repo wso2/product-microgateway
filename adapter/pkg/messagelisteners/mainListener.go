@@ -86,7 +86,7 @@ func NewConsumer(queueName string, key string) (*Consumer, error) {
 	var err error
 
 	logger.LoggerJMS.Infof("dialing %q", amqpURI)
-	connectToRabbitMQ()
+	c.conn = connectToRabbitMQ()
 
 	go func() {
 		logger.LoggerJMS.Infof("closing: %s", <-c.conn.NotifyClose(make(chan *amqp.Error)))

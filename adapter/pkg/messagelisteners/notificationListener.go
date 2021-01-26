@@ -26,7 +26,7 @@ import (
 
 	"github.com/streadway/amqp"
 	logger "github.com/wso2/micro-gw/loggers"
-	resourceTypes "github.com/wso2/micro-gw/pkg/resource_types"
+	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
 )
 
 // constant variables
@@ -39,6 +39,7 @@ const (
 	deployAPIToGateway          = "DEPLOY_API_IN_GATEWAY"
 	applicationRegistration     = "APPLICATION_REGISTRATION_CREATE"
 	removeApplicationKeyMapping = "REMOVE_APPLICATION_KEYMAPPING"
+	apiLifeCycleChange          = "API_LIFECYCLE_CHANGE"
 )
 
 // var variables
@@ -99,12 +100,13 @@ func handleAPIEvents(data []byte, eventType string) {
 	json.Unmarshal([]byte(string(data)), &apiEvent)
 	timeStampList := APIListTimeStamp
 	for apiID, timeStamp := range timeStampList {
+		fmt.Println(apiID, " timeStamp value is", timeStamp)
 		if strings.EqualFold(apiEvent.APIID, apiID) {
 			oldTimeStamp = timeStamp
-		} else {
-			APIListTimeStamp[apiEvent.APIID] = newTimeStamp
 		}
 	}
+
+	APIListTimeStamp[apiEvent.APIID] = newTimeStamp
 
 	for i := range APIList {
 		if strings.EqualFold(apiEvent.APIID, APIList[i].APIID) {
@@ -114,14 +116,15 @@ func handleAPIEvents(data []byte, eventType string) {
 		}
 	}
 
+	logger.LoggerJMS.Infof("oldTimeStamp: %v , newTimeStamp: %v", oldTimeStamp, newTimeStamp)
 	if isFound && oldTimeStamp < newTimeStamp && strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
 		deleteAPIFromList(indexToBeDeleted, apiEvent.APIID)
 	} else if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
 		// pull API details
 		api := resourceTypes.API{APIID: apiEvent.APIID, Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
 			Version: apiEvent.APIVersion, Context: apiEvent.APIContext, APIType: apiEvent.APIType,
-			IsDefaultVersion: true, TenantID: -1, TenantDomain: apiEvent.Event.TenantDomain,
-			TimeStamp: apiEvent.Event.TimeStamp}
+			APIStatus: apiEvent.APIStatus, IsDefaultVersion: true, TenantID: apiEvent.TenantID,
+			TenantDomain: apiEvent.Event.TenantDomain, TimeStamp: apiEvent.Event.TimeStamp}
 		APIList = append(APIList, api)
 		logger.LoggerJMS.Infof("API %s is added/updated to APIList", apiEvent.APIID)
 	}
