@@ -87,7 +87,6 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 		endpoints = append(endpoints, apilevelAddressP)
 		apiEndpointBasePath = apiLevelEndpointProd[0].Basepath
 
-		//todo add to ClusterConsulKeyMap on Sand , Resource level as well
 		if apiLevelEndpointProd[0].ServiceDiscoveryString != "" {
 			//add the api level cluster name to the ClusterConsulKeyMap
 			svcdiscovery.ClusterConsulKeyMap[apiLevelClusterNameProd] = apiLevelEndpointProd[0].ServiceDiscoveryString
