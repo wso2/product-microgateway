@@ -28,63 +28,27 @@ import (
 	//logger "github.com/wso2/micro-gw/loggers"
 )
 
-var (
+const (
 	apiPath = "v1/health/service/"
 )
 
-type proxy struct {
-	MeshGateway interface{}
-	Expose      interface{}
-}
-
-type connect struct {
-}
-
 type node struct {
-	ID              string
-	Node            string
 	Address         string
 	Datacenter      string
 	TaggedAddresses map[string]string
-	Meta            map[string]string
-	CreateIndex     int
-	ModifyIndex     int
 }
 
 type service struct {
-	ID                string
-	Service           string
-	Tags              []string
-	Address           string
-	TaggedAddresses   interface{}
-	Meta              interface{}
-	Port              int
-	Weights           map[string]int
-	EnableTagOverride bool
-	Proxy             proxy
-	Connect           connect
+	Tags            []string
+	Address         string
+	TaggedAddresses interface{}
+	Port            int
 }
 
-type check struct {
-	Node        string
-	CheckID     string
-	Name        string
-	Status      string
-	Notes       string
-	Output      string
-	ServiceID   string
-	ServiceName string
-	ServiceTags []string
-	Type        string
-	Definition  interface{}
-	CreateIndex int
-	ModifyIndex int
-}
-
+//result is used to unmarshal the required components from the consul server's response
 type result struct {
 	Node    node
 	Service service
-	Checks  []check
 }
 
 //Upstream Data for a service instance
@@ -101,6 +65,7 @@ type Query struct {
 	Tags        []string
 }
 
+//newHTTPClient is a golang http client with request timeout
 func newHTTPClient(transport *http.Transport, timeout time.Duration) http.Client {
 	client := http.Client{
 		Transport: transport,
@@ -117,32 +82,33 @@ func newTLSConfig(rootCAs *x509.CertPool, certs []tls.Certificate, insecureSkipV
 	}
 }
 
-func newTransport(config *tls.Config) http.Transport {
+func newHTTPSTransport(config *tls.Config) http.Transport {
 	return http.Transport{
 		TLSClientConfig: config,
 	}
 }
+func newHTTPTransport() http.Transport {
+	return http.Transport{}
+}
 
 //ConsulClient wraps the HTTP API
 type ConsulClient struct {
-	client                  http.Client //Health checks + all other functionalities
-	healthChecksPassingOnly bool
-	scheme                  string
-	host                    string
-	//requestTimeout          time.Duration
+	client       http.Client //Health checks + all other functionalities
+	scheme       string
+	host         string
+	aclToken     string
 	pollInterval time.Duration
 }
 
 //NewConsulClient constructor for ConsulClient
-func NewConsulClient(api http.Client, healthChecksPassingOnly bool, scheme string, host string) ConsulClient {
+func NewConsulClient(api http.Client, scheme string, host string, aclToken string) ConsulClient {
 	//logger.LoggerSvcDiscovery.Debugln("Consul client created")
 	return ConsulClient{
-		client:                  api,
-		healthChecksPassingOnly: healthChecksPassingOnly,
-		scheme:                  scheme,
-		host:                    host,
-		//requestTimeout:          requestTimeout,
+		client:       api,
+		scheme:       scheme,
+		host:         host,
 		pollInterval: api.Timeout,
+		aclToken:     aclToken,
 	}
 }
 
@@ -160,7 +126,7 @@ func contains(source []string, elements []string) bool {
 
 //sends a get request to a consul-client
 //parses the response into []Upstream
-func (c ConsulClient) get(path string, dc string, passingOnly bool, namespace string, tags []string) ([]Upstream, error) {
+func (c ConsulClient) get(path string, dc string, namespace string, tags []string) ([]Upstream, error) {
 	url := c.scheme + "://" + c.host
 	if c.host[len(c.host)-1:] != "/" {
 		url += "/"
@@ -172,11 +138,9 @@ func (c ConsulClient) get(path string, dc string, passingOnly bool, namespace st
 
 	//add query parameters
 	q := req.URL.Query()
-	q.Add("dc", dc)
-	if passingOnly {
-		q.Add("passing", "1")
-	}
-	if namespace != "" {
+	q.Add("dc", dc)       //datacenter
+	q.Add("passing", "1") // health checks passing only
+	if namespace != "" {  //namespace, an enterprise feature
 		q.Add("nc", namespace)
 	}
 
@@ -185,6 +149,8 @@ func (c ConsulClient) get(path string, dc string, passingOnly bool, namespace st
 	if errHTTP != nil {
 		return []Upstream{}, errHTTP
 	}
+	//set headers
+	req.Header.Set("X-Consul-Token", c.aclToken)
 	var result []result
 	body, errRead := ioutil.ReadAll(response.Body)
 	if errRead != nil {
@@ -225,11 +191,14 @@ func (c ConsulClient) getUpstreams(query Query, resultChan chan []Upstream) {
 
 	var result []Upstream
 	for _, dc := range query.Datacenters {
-		res, errGet := c.get(query.ServiceName, dc, c.healthChecksPassingOnly, query.Namespace, query.Tags)
+		res, errGet := c.get(query.ServiceName, dc, query.Namespace, query.Tags)
 		if errGet == nil {
 			result = append(result, res...)
+		} else {
+			logger.LoggerSvcDiscovery.Error("service registry unreachable ", errGet)
 		}
 	}
+
 	if len(result) == 0 {
 		logger.LoggerSvcDiscovery.Error("consul service registry query came up with empty result/ service registry unreachable")
 	} else {
@@ -269,7 +238,7 @@ func (c ConsulClient) Poll(query Query, doneChan <-chan bool) <-chan []Upstream 
 			select {
 			case <-doneChan:
 				//sending a signal through doneChan will cause this go routine to exit
-				//logger.LoggerSvcDiscovery.Info("consul query stopped polling for:", query.QString)
+				logger.LoggerSvcDiscovery.Info("consul query stopped polling for:", query)
 				return
 			case <-intervalChan:
 				c.getUpstreams(query, resultChan)

@@ -84,8 +84,8 @@ type Config struct {
 			URL string
 			//PollInterval how frequently consul API should be polled to get updates (in seconds)
 			PollInterval int
-			//HealthChecksPassingOnly whether consul health checks should be considered
-			HealthChecksPassingOnly bool
+			//ACLTokenFilePath ACL token required to invoke HTTP API
+			ACLTokenFilePath string
 			//CaCertPath path to the CA cert file(PEM encoded) required for tls connection between adapter and a consul client
 			CaCertPath string
 			//CertPath path to the cert file(PEM encoded) required for tls connection between adapter and a consul client

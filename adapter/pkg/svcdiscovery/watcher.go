@@ -24,20 +24,21 @@ import (
 	logger "github.com/wso2/micro-gw/loggers"
 	"io/ioutil"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 )
 
 var (
-	onceConfigLoad          sync.Once
-	conf                    *config.Config
-	healthChecksPassingOnly bool
-	pollInterval            time.Duration
-	errConfLoad             error
+	onceConfigLoad sync.Once
+	conf           *config.Config
+	pollInterval   time.Duration
+	errConfLoad    error
 	//ssl certs
-	caCert []byte
-	cert   []byte
-	key    []byte
+	caCert   []byte
+	cert     []byte
+	key      []byte
+	aclToken string
 
 	//ConsulClientInstance instance for consul client
 	ConsulClientInstance ConsulClient
@@ -57,7 +58,7 @@ func init() {
 	ClusterConsulDoneChanMap = make(map[string]chan bool)
 }
 
-//read the certs required for tls into respective variables
+//read the certs and access token required for tls into respective global variables
 func readCerts() error {
 	caFileContent, readErr := ioutil.ReadFile(conf.Adapter.Consul.CaCertPath)
 	if readErr != nil {
@@ -73,9 +74,17 @@ func readCerts() error {
 	if readErr != nil {
 		return readErr
 	}
+
+	aclTokenContent, readErr := ioutil.ReadFile(conf.Adapter.Consul.ACLTokenFilePath)
+	if readErr != nil && conf.Adapter.Consul.ACLTokenFilePath != "" {
+		return readErr
+	}
+
 	caCert = caFileContent
 	cert = certFileContent
 	key = keyFileContent
+	aclToken = strings.TrimSpace(string(aclTokenContent))
+
 	return nil
 }
 
@@ -88,7 +97,6 @@ func InitConsul() {
 			logger.LoggerSvcDiscovery.Error("Consul Config loading error ", errConfLoad)
 			return
 		}
-		healthChecksPassingOnly = conf.Adapter.Consul.HealthChecksPassingOnly
 		pollInterval = time.Duration(conf.Adapter.Consul.PollInterval) * time.Second
 		r, errURLParse := url.Parse(conf.Adapter.Consul.URL)
 		if errURLParse != nil {
@@ -96,23 +104,31 @@ func InitConsul() {
 			logger.LoggerSvcDiscovery.Error("Invalid URL to Consul Client ", errURLParse)
 			return
 		}
-		errCertRead := readCerts()
-		if errCertRead != nil {
-			errConfLoad = errCertRead
-			logger.LoggerSvcDiscovery.Error("Consul Certs read error ", errCertRead)
-			return
+		if r.Scheme == "https" { //communicate to consul through https
+			errCertRead := readCerts()
+			if errCertRead != nil {
+				errConfLoad = errCertRead
+				logger.LoggerSvcDiscovery.Error("Consul Certs read error ", errCertRead)
+				return
+			}
+			pool := x509.NewCertPool()
+			pool.AppendCertsFromPEM(caCert)
+			clientCert, errKeyPairLoad := tls.X509KeyPair(cert, key)
+			if errKeyPairLoad != nil {
+				errConfLoad = errKeyPairLoad
+				logger.LoggerSvcDiscovery.Error("Key pair error", errKeyPairLoad)
+				return
+			}
+			tlsConfig := newTLSConfig(pool, []tls.Certificate{clientCert}, false)
+			transport := newHTTPSTransport(&tlsConfig)
+			client := newHTTPClient(&transport, pollInterval)
+			ConsulClientInstance = NewConsulClient(client, r.Scheme, r.Host, aclToken)
+		} else {
+			//communicate to consul through http
+			transport := newHTTPTransport()
+			client := newHTTPClient(&transport, pollInterval)
+			ConsulClientInstance = NewConsulClient(client, r.Scheme, r.Host, aclToken)
 		}
-		pool := x509.NewCertPool()
-		pool.AppendCertsFromPEM(caCert)
-		clientCert, errKeyPairLoad := tls.X509KeyPair(cert, key)
-		if errKeyPairLoad != nil {
-			errConfLoad = errKeyPairLoad
-			logger.LoggerSvcDiscovery.Error("Key pair error", errKeyPairLoad)
-			return
-		}
-		tlsConfig := newTLSConfig(pool, []tls.Certificate{clientCert}, false)
-		transport := newTransport(&tlsConfig)
-		client := newHTTPClient(&transport, pollInterval)
-		ConsulClientInstance = NewConsulClient(client, healthChecksPassingOnly, r.Scheme, r.Host)
+
 	})
 }
