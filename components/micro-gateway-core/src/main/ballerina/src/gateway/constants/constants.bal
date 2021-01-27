@@ -608,6 +608,7 @@ public const string SERVER_HEADER = "header";
 //server preserve headers configurations
 public const string SERVER_PRESERVE_HEADERS_ID = "server.preserveHeaders";
 public const string SERVER_PRESERVE_HEADERS_USER_AGENT = "userAgent";
+public const string SERVER_PRESERVE_HEADERS_SERVER = "server";
 
 public const string APIM_CREDENTIALS_INSTANCE_ID = "apim.credentials";
 public const string APIM_CREDENTIALS_USERNAME = "username";

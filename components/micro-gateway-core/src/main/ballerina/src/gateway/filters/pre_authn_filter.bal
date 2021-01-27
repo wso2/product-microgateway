@@ -48,6 +48,13 @@ public type PreAuthnFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+        boolean preserveServerHeader = getConfigBooleanValue(SERVER_PRESERVE_HEADERS_ID,
+                                                                SERVER_PRESERVE_HEADERS_SERVER,
+                                                                DEFAULT_SERVER_PRESERVE_HEADERS_SERVER);
+        if (!preserveServerHeader) {
+            string serverHeaderConfig = getConfigValue(SERVER_CONF_ID, SERVER_HEADER, DEFAULT_SERVER_HEADER);
+            response.setHeader("server", serverHeaderConfig);
+        }
         if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
             printDebug(KEY_PRE_AUTHN_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;

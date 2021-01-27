@@ -507,6 +507,7 @@
   # The headers will be prserved in the request forwarded to the backend without any intermediate change
   [server.preserveHeaders]
     userAgent = false
+    server = true
 
 # Configurations for retrieving API and subscription data from API Manager.
 [apim.eventHub]
