@@ -32,7 +32,7 @@ import io.grpc.stub.StreamObserver;
 import org.json.JSONObject;
 import org.wso2.micro.gateway.enforcer.api.ResponseObject;
 import org.wso2.micro.gateway.enforcer.constants.HttpConstants;
-import org.wso2.micro.gateway.enforcer.server.RequestHandler;
+import org.wso2.micro.gateway.enforcer.server.HttpRequestHandler;
 
 /**
  * This is the gRPC server written to match with the envoy ext-authz filter proto file. Envoy proxy call this service.
@@ -40,11 +40,11 @@ import org.wso2.micro.gateway.enforcer.server.RequestHandler;
  */
 public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
-    private RequestHandler requestHandler = new RequestHandler();
+    private HttpRequestHandler requestHandler = new HttpRequestHandler();
 
     @Override
     public void check(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
-        ResponseObject responseObject = requestHandler.process(request, responseObserver);
+        ResponseObject responseObject = requestHandler.process(request);
         CheckResponse response1 = buildResponse(responseObject);
         responseObserver.onNext(response1);
 

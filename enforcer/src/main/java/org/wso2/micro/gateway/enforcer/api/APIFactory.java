@@ -24,6 +24,7 @@ import org.wso2.gateway.discovery.api.Api;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.discovery.ApiDiscoveryClient;
+import org.wso2.micro.gateway.enforcer.websocket.RateLimitRequest;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -89,6 +90,18 @@ public class APIFactory {
             logger.debug("Looking for matching API with basepath: {} and version: {}", basePath, version);
         }
 
+        return apis.get(apiKey);
+    }
+
+    public API getMatchedAPI(RateLimitRequest rateLimitRequest){
+        String basePath = rateLimitRequest.getMetadataContext().getFilterMetadataMap().
+                get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.GW_BASE_PATH_PARAM).getStringValue();
+        String version = rateLimitRequest.getMetadataContext().getFilterMetadataMap().
+                get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.GW_VERSION_PARAM).getStringValue();
+        String apiKey = basePath+ '/' + version;
+        if (logger.isDebugEnabled()) {
+            logger.debug("Looking for matching API with basepath: {} and version: {}", basePath, version);
+        }
         return apis.get(apiKey);
     }
 

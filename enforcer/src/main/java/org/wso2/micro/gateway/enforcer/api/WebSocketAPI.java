@@ -4,11 +4,12 @@ import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.wso2.gateway.discovery.api.Api;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
+import org.wso2.micro.gateway.enforcer.websocket.RateLimitRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class WebSocketAPI implements API{
+public class WebSocketAPI implements API <WebSocketMetadata, WebSocketResponseObject>{
 
     private APIConfig apiConfig;
     private List<Filter> filters = new ArrayList<>();
@@ -29,7 +30,7 @@ public class WebSocketAPI implements API{
     }
 
     @Override
-    public ResponseObject process(RequestContext requestContext) {
+    public WebSocketResponseObject process(WebSocketMetadata metadata) {
         return null;
     }
 

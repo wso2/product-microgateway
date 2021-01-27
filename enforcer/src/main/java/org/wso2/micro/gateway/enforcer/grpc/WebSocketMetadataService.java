@@ -1,7 +1,6 @@
 package org.wso2.micro.gateway.enforcer.grpc;
 
 import io.grpc.stub.StreamObserver;
-import org.wso2.micro.gateway.enforcer.models.WebSocketResponseObserver;
 import org.wso2.micro.gateway.enforcer.websocket.RateLimitRequest;
 import org.wso2.micro.gateway.enforcer.websocket.RateLimitResponse;
 import org.wso2.micro.gateway.enforcer.websocket.WebSocketMetadataServiceGrpc;

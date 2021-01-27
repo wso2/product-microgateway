@@ -59,6 +59,9 @@ public class APIConstants {
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_PAYLOAD = "event";
 
+    public static final String EXT_AUTHZ_METADATA = "envoy.filters.http.ext_authz";
+    public static final String WEBSOCKET_STREAM_ID = "stream_id";
+
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
      */

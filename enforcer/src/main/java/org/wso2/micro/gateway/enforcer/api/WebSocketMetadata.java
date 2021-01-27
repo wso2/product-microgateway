@@ -1,4 +1,4 @@
-package org.wso2.micro.gateway.enforcer.models;
+package org.wso2.micro.gateway.enforcer.api;
 
 
 
@@ -28,7 +28,7 @@ public class WebSocketMetadata {
         this.apiName = builder.apiName;
     }
 
-    private static class Builder{
+    public static class Builder{
         private final String streamId;
         private String applicationId;
         private String applicationTier;

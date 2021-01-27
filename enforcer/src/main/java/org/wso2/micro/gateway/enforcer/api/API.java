@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Interface to hold different API types. This can REST, gRPC, graphql and etc.
  */
-public interface API {
+public interface API <T, S>{
 
     List<Filter> getFilters();
 
@@ -35,7 +35,7 @@ public interface API {
 
     String init(Api api);
 
-    ResponseObject process(RequestContext requestContext);
+    S process(T requestContext);
 
     APIConfig getAPIConfig();
 
