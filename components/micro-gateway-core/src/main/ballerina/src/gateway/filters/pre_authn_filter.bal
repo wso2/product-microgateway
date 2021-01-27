@@ -24,6 +24,13 @@ public type PreAuthnFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext context) returns boolean {
         setFilterSkipToFilterContext(context);
+        boolean preserveUserAgentHeader = getConfigBooleanValue(SERVER_PRESERVE_HEADERS_ID,
+                                                                SERVER_PRESERVE_HEADERS_USER_AGENT,
+                                                                DEFAULT_SERVER_PRESERVE_HEADERS_USER_AGENT);
+        if (preserveUserAgentHeader) {
+            request.setHeader("User-Agent", request.userAgent);
+        }
+
         if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
             printDebug(KEY_PRE_AUTHN_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;

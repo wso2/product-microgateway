@@ -504,6 +504,9 @@
   timestampSkew = 5000
   # The value of the server header sent in the response by microgateway
   header="ballerina"
+  # The headers will be prserved in the request forwarded to the backend without any intermediate change
+  [server.preserveHeaders]
+    userAgent = false
 
 # Configurations for retrieving API and subscription data from API Manager.
 [apim.eventHub]
