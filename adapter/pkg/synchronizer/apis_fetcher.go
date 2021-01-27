@@ -96,6 +96,7 @@ func FetchAPIs(id *string, gwLabel *string, c chan SyncAPIResponse) {
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred when readin the cert form %v : %v", certPath, err)
 		}
+		// TODO: (VirajSalaka) Reuse the adapter truststore configuration ?
 		caCertPool := x509.NewCertPool()
 		caCertPool.AppendCertsFromPEM(caCert)
 		tr = &http.Transport{

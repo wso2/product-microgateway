@@ -30,10 +30,42 @@ static_resources:
             address: adapter
             port_value: 18000
       http2_protocol_options: {}
+      transport_socket:
+        name: "envoy.transport_sockets.tls"
+        typed_config: 
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_params:
+              tls_minimum_protocol_version: TLSv1_2
+              tls_maximum_protocol_version: TLSv1_2
+            tls_certificates:
+              private_key:  
+                filename: "/home/wso2/security/mg.key"
+              certificate_chain:
+                filename: "/home/wso2/security/mg.pem"
+            validation_context:
+              trusted_ca:
+                filename: "/home/wso2/security/mg.pem"
     - name: ext-authz
       type: STRICT_DNS
       connect_timeout: 20s
       http2_protocol_options: {}
+      transport_socket:
+        name: "envoy.transport_sockets.tls"
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          common_tls_context:
+            tls_params:
+              tls_minimum_protocol_version: TLSv1_2
+              tls_maximum_protocol_version: TLSv1_2
+            tls_certificates:
+              private_key:
+                filename: "/home/wso2/security/mg.key"
+              certificate_chain:
+                filename: "/home/wso2/security/mg.pem"
+            validation_context:
+                trusted_ca:
+                  filename: "/home/wso2/security/mg.pem"
       load_assignment:
         cluster_name: ext-authz
         endpoints:

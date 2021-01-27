@@ -64,11 +64,11 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 18: {
-            org.wso2.gateway.discovery.config.enforcer.CertStore.Builder subBuilder = null;
+            org.wso2.gateway.discovery.config.enforcer.Keystore.Builder subBuilder = null;
             if (keystore_ != null) {
               subBuilder = keystore_.toBuilder();
             }
-            keystore_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.CertStore.parser(), extensionRegistry);
+            keystore_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.Keystore.parser(), extensionRegistry);
             if (subBuilder != null) {
               subBuilder.mergeFrom(keystore_);
               keystore_ = subBuilder.buildPartial();
@@ -77,11 +77,11 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 26: {
-            org.wso2.gateway.discovery.config.enforcer.CertStore.Builder subBuilder = null;
+            org.wso2.gateway.discovery.config.enforcer.Truststore.Builder subBuilder = null;
             if (truststore_ != null) {
               subBuilder = truststore_.toBuilder();
             }
-            truststore_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.CertStore.parser(), extensionRegistry);
+            truststore_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.Truststore.parser(), extensionRegistry);
             if (subBuilder != null) {
               subBuilder.mergeFrom(truststore_);
               truststore_ = subBuilder.buildPartial();
@@ -204,9 +204,9 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int KEYSTORE_FIELD_NUMBER = 2;
-  private org.wso2.gateway.discovery.config.enforcer.CertStore keystore_;
+  private org.wso2.gateway.discovery.config.enforcer.Keystore keystore_;
   /**
-   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
    * @return Whether the keystore field is set.
    */
   @java.lang.Override
@@ -214,25 +214,25 @@ private static final long serialVersionUID = 0L;
     return keystore_ != null;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
    * @return The keystore.
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.CertStore getKeystore() {
-    return keystore_ == null ? org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : keystore_;
+  public org.wso2.gateway.discovery.config.enforcer.Keystore getKeystore() {
+    return keystore_ == null ? org.wso2.gateway.discovery.config.enforcer.Keystore.getDefaultInstance() : keystore_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getKeystoreOrBuilder() {
+  public org.wso2.gateway.discovery.config.enforcer.KeystoreOrBuilder getKeystoreOrBuilder() {
     return getKeystore();
   }
 
   public static final int TRUSTSTORE_FIELD_NUMBER = 3;
-  private org.wso2.gateway.discovery.config.enforcer.CertStore truststore_;
+  private org.wso2.gateway.discovery.config.enforcer.Truststore truststore_;
   /**
-   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
    * @return Whether the truststore field is set.
    */
   @java.lang.Override
@@ -240,18 +240,18 @@ private static final long serialVersionUID = 0L;
     return truststore_ != null;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
    * @return The truststore.
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.CertStore getTruststore() {
-    return truststore_ == null ? org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : truststore_;
+  public org.wso2.gateway.discovery.config.enforcer.Truststore getTruststore() {
+    return truststore_ == null ? org.wso2.gateway.discovery.config.enforcer.Truststore.getDefaultInstance() : truststore_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getTruststoreOrBuilder() {
+  public org.wso2.gateway.discovery.config.enforcer.TruststoreOrBuilder getTruststoreOrBuilder() {
     return getTruststore();
   }
 
@@ -1069,31 +1069,31 @@ private static final long serialVersionUID = 0L;
       return jwtTokenConfigBuilder_;
     }
 
-    private org.wso2.gateway.discovery.config.enforcer.CertStore keystore_;
+    private org.wso2.gateway.discovery.config.enforcer.Keystore keystore_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder> keystoreBuilder_;
+        org.wso2.gateway.discovery.config.enforcer.Keystore, org.wso2.gateway.discovery.config.enforcer.Keystore.Builder, org.wso2.gateway.discovery.config.enforcer.KeystoreOrBuilder> keystoreBuilder_;
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
      * @return Whether the keystore field is set.
      */
     public boolean hasKeystore() {
       return keystoreBuilder_ != null || keystore_ != null;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
      * @return The keystore.
      */
-    public org.wso2.gateway.discovery.config.enforcer.CertStore getKeystore() {
+    public org.wso2.gateway.discovery.config.enforcer.Keystore getKeystore() {
       if (keystoreBuilder_ == null) {
-        return keystore_ == null ? org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : keystore_;
+        return keystore_ == null ? org.wso2.gateway.discovery.config.enforcer.Keystore.getDefaultInstance() : keystore_;
       } else {
         return keystoreBuilder_.getMessage();
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
      */
-    public Builder setKeystore(org.wso2.gateway.discovery.config.enforcer.CertStore value) {
+    public Builder setKeystore(org.wso2.gateway.discovery.config.enforcer.Keystore value) {
       if (keystoreBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -1107,10 +1107,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
      */
     public Builder setKeystore(
-        org.wso2.gateway.discovery.config.enforcer.CertStore.Builder builderForValue) {
+        org.wso2.gateway.discovery.config.enforcer.Keystore.Builder builderForValue) {
       if (keystoreBuilder_ == null) {
         keystore_ = builderForValue.build();
         onChanged();
@@ -1121,13 +1121,13 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
      */
-    public Builder mergeKeystore(org.wso2.gateway.discovery.config.enforcer.CertStore value) {
+    public Builder mergeKeystore(org.wso2.gateway.discovery.config.enforcer.Keystore value) {
       if (keystoreBuilder_ == null) {
         if (keystore_ != null) {
           keystore_ =
-            org.wso2.gateway.discovery.config.enforcer.CertStore.newBuilder(keystore_).mergeFrom(value).buildPartial();
+            org.wso2.gateway.discovery.config.enforcer.Keystore.newBuilder(keystore_).mergeFrom(value).buildPartial();
         } else {
           keystore_ = value;
         }
@@ -1139,7 +1139,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
      */
     public Builder clearKeystore() {
       if (keystoreBuilder_ == null) {
@@ -1153,33 +1153,33 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.CertStore.Builder getKeystoreBuilder() {
+    public org.wso2.gateway.discovery.config.enforcer.Keystore.Builder getKeystoreBuilder() {
       
       onChanged();
       return getKeystoreFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getKeystoreOrBuilder() {
+    public org.wso2.gateway.discovery.config.enforcer.KeystoreOrBuilder getKeystoreOrBuilder() {
       if (keystoreBuilder_ != null) {
         return keystoreBuilder_.getMessageOrBuilder();
       } else {
         return keystore_ == null ?
-            org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : keystore_;
+            org.wso2.gateway.discovery.config.enforcer.Keystore.getDefaultInstance() : keystore_;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder> 
+        org.wso2.gateway.discovery.config.enforcer.Keystore, org.wso2.gateway.discovery.config.enforcer.Keystore.Builder, org.wso2.gateway.discovery.config.enforcer.KeystoreOrBuilder> 
         getKeystoreFieldBuilder() {
       if (keystoreBuilder_ == null) {
         keystoreBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder>(
+            org.wso2.gateway.discovery.config.enforcer.Keystore, org.wso2.gateway.discovery.config.enforcer.Keystore.Builder, org.wso2.gateway.discovery.config.enforcer.KeystoreOrBuilder>(
                 getKeystore(),
                 getParentForChildren(),
                 isClean());
@@ -1188,31 +1188,31 @@ private static final long serialVersionUID = 0L;
       return keystoreBuilder_;
     }
 
-    private org.wso2.gateway.discovery.config.enforcer.CertStore truststore_;
+    private org.wso2.gateway.discovery.config.enforcer.Truststore truststore_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder> truststoreBuilder_;
+        org.wso2.gateway.discovery.config.enforcer.Truststore, org.wso2.gateway.discovery.config.enforcer.Truststore.Builder, org.wso2.gateway.discovery.config.enforcer.TruststoreOrBuilder> truststoreBuilder_;
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
      * @return Whether the truststore field is set.
      */
     public boolean hasTruststore() {
       return truststoreBuilder_ != null || truststore_ != null;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
      * @return The truststore.
      */
-    public org.wso2.gateway.discovery.config.enforcer.CertStore getTruststore() {
+    public org.wso2.gateway.discovery.config.enforcer.Truststore getTruststore() {
       if (truststoreBuilder_ == null) {
-        return truststore_ == null ? org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : truststore_;
+        return truststore_ == null ? org.wso2.gateway.discovery.config.enforcer.Truststore.getDefaultInstance() : truststore_;
       } else {
         return truststoreBuilder_.getMessage();
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
      */
-    public Builder setTruststore(org.wso2.gateway.discovery.config.enforcer.CertStore value) {
+    public Builder setTruststore(org.wso2.gateway.discovery.config.enforcer.Truststore value) {
       if (truststoreBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -1226,10 +1226,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
      */
     public Builder setTruststore(
-        org.wso2.gateway.discovery.config.enforcer.CertStore.Builder builderForValue) {
+        org.wso2.gateway.discovery.config.enforcer.Truststore.Builder builderForValue) {
       if (truststoreBuilder_ == null) {
         truststore_ = builderForValue.build();
         onChanged();
@@ -1240,13 +1240,13 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
      */
-    public Builder mergeTruststore(org.wso2.gateway.discovery.config.enforcer.CertStore value) {
+    public Builder mergeTruststore(org.wso2.gateway.discovery.config.enforcer.Truststore value) {
       if (truststoreBuilder_ == null) {
         if (truststore_ != null) {
           truststore_ =
-            org.wso2.gateway.discovery.config.enforcer.CertStore.newBuilder(truststore_).mergeFrom(value).buildPartial();
+            org.wso2.gateway.discovery.config.enforcer.Truststore.newBuilder(truststore_).mergeFrom(value).buildPartial();
         } else {
           truststore_ = value;
         }
@@ -1258,7 +1258,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
      */
     public Builder clearTruststore() {
       if (truststoreBuilder_ == null) {
@@ -1272,33 +1272,33 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.CertStore.Builder getTruststoreBuilder() {
+    public org.wso2.gateway.discovery.config.enforcer.Truststore.Builder getTruststoreBuilder() {
       
       onChanged();
       return getTruststoreFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getTruststoreOrBuilder() {
+    public org.wso2.gateway.discovery.config.enforcer.TruststoreOrBuilder getTruststoreOrBuilder() {
       if (truststoreBuilder_ != null) {
         return truststoreBuilder_.getMessageOrBuilder();
       } else {
         return truststore_ == null ?
-            org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : truststore_;
+            org.wso2.gateway.discovery.config.enforcer.Truststore.getDefaultInstance() : truststore_;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder> 
+        org.wso2.gateway.discovery.config.enforcer.Truststore, org.wso2.gateway.discovery.config.enforcer.Truststore.Builder, org.wso2.gateway.discovery.config.enforcer.TruststoreOrBuilder> 
         getTruststoreFieldBuilder() {
       if (truststoreBuilder_ == null) {
         truststoreBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder>(
+            org.wso2.gateway.discovery.config.enforcer.Truststore, org.wso2.gateway.discovery.config.enforcer.Truststore.Builder, org.wso2.gateway.discovery.config.enforcer.TruststoreOrBuilder>(
                 getTruststore(),
                 getParentForChildren(),
                 isClean());

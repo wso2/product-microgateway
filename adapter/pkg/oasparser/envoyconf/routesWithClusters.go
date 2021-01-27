@@ -270,7 +270,7 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 		return nil
 	}
-	tlsCert := generateTLSCert(conf.Envoy.Upstream.TLS.PrivateKeyPath, conf.Envoy.Upstream.TLS.PublicCertPath)
+	tlsCert := generateTLSCert(conf.Envoy.KeyStore.PrivateKeyLocation, conf.Envoy.KeyStore.PublicKeyLocation)
 	// Convert the cipher string to a string array
 	ciphersArray := strings.Split(conf.Envoy.Upstream.TLS.Ciphers, ",")
 	for i := range ciphersArray {

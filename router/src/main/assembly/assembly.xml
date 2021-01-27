@@ -26,6 +26,14 @@
             <source>../resources/envoy.yaml</source>
             <outputDirectory></outputDirectory>
         </file>
+        <file>
+            <source>../resources/security/mg.key</source>
+            <outputDirectory>security</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>security</outputDirectory>
+        </file>
     </files>
     <fileSets>
       <fileSet>

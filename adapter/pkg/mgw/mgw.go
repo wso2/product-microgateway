@@ -19,11 +19,14 @@
 package mgw
 
 import (
+	"crypto/tls"
+
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	apiservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/api"
 	configservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/config"
 	"github.com/wso2/micro-gw/pkg/api/restserver"
+	"github.com/wso2/micro-gw/pkg/tlsutils"
 
 	"context"
 	"flag"
@@ -40,6 +43,7 @@ import (
 	"github.com/wso2/micro-gw/pkg/synchronizer"
 	xds "github.com/wso2/micro-gw/pkg/xds"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 var (
@@ -53,6 +57,10 @@ var (
 	alsPort     uint
 
 	mode string
+
+	crtFile string
+	keyFile string
+	caFile  string
 )
 
 const (
@@ -73,7 +81,24 @@ const grpcMaxConcurrentStreams = 1000000
 func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
-	grpcServer := grpc.NewServer()
+
+	cert, err := tlsutils.GetServerCertificate()
+
+	// TODO: (VirajSalaka) add properly
+	caCertPool := tlsutils.GetTrustedCertPool()
+
+	if err == nil {
+		grpcOptions = append(grpcOptions, grpc.Creds(
+			credentials.NewTLS(&tls.Config{
+				Certificates: []tls.Certificate{cert},
+				ClientAuth:   tls.RequireAndVerifyClientCert,
+				ClientCAs:    caCertPool,
+			}),
+		))
+	} else {
+		logger.LoggerMgw.Warn("failed to initiate the ssl context: ", err)
+	}
+	grpcServer := grpc.NewServer(grpcOptions...)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {

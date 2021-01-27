@@ -42,7 +42,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
 
 import javax.net.ssl.SSLContext;
 
@@ -65,23 +64,23 @@ public class FilterUtils {
         }
     }
 
-    public static Certificate getCertificateFromTrustStore(String certAlias) throws MGWException {
-
-        Certificate publicCert = null;
-        //Read the client-truststore.jks into a KeyStore
-        try {
-            KeyStore trustStore = ConfigHolder.getInstance().getTrustStore();
-            if (trustStore != null) {
-                // Read public certificate from trust store
-                publicCert = trustStore.getCertificate(certAlias);
-            }
-        } catch (KeyStoreException e) {
-            String msg = "Error in retrieving public certificate from the trust store with alias : " + certAlias;
-            log.error(msg, e);
-            throw new MGWException(msg, e);
-        }
-        return publicCert;
-    }
+//    public static Certificate getCertificateFromTrustStore(String certAlias) throws MGWException {
+//
+//        Certificate publicCert = null;
+//        //Read the client-truststore.jks into a KeyStore
+//        try {
+//            KeyStore trustStore = ConfigHolder.getInstance().getTrustStore();
+//            if (trustStore != null) {
+//                // Read public certificate from trust store
+//                publicCert = trustStore.getCertificate(certAlias);
+//            }
+//        } catch (KeyStoreException e) {
+//            String msg = "Error in retrieving public certificate from the trust store with alias : " + certAlias;
+//            log.error(msg, e);
+//            throw new MGWException(msg, e);
+//        }
+//        return publicCert;
+//    }
 
     /**
      * Return a http client instance

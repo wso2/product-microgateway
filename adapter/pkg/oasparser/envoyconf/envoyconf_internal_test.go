@@ -238,8 +238,8 @@ func TestCreateListener(t *testing.T) {
 	config.Envoy.ListenerPort = listenerPort
 	config.Envoy.ListenerHost = listenerAddress
 	config.Envoy.ListenerTLSEnabled = true
-	config.Envoy.ListenerCertPath = mgwconfig.GetMgwHome() + "/adapter/security/localhost.pem"
-	config.Envoy.ListenerKeyPath = mgwconfig.GetMgwHome() + "/adapter/security/localhost.key"
+	config.Envoy.KeyStore.PublicKeyLocation = mgwconfig.GetMgwHome() + "/adapter/security/localhost.pem"
+	config.Envoy.KeyStore.PrivateKeyLocation = mgwconfig.GetMgwHome() + "/adapter/security/localhost.key"
 
 	tlsEnabledListener := createListener(config, "test-id")
 

@@ -25,12 +25,12 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/wso2/micro-gw/loggers"
 	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/utills"
+	"github.com/wso2/micro-gw/pkg/tlsutils"
 	xds "github.com/wso2/micro-gw/pkg/xds"
 )
 
@@ -84,9 +84,8 @@ func ApplyAPIProject(payload []byte) error {
 				loggers.LoggerAPI.Errorf("Error occured while reading the endpoint certificate : %v, %v", file.Name, err.Error())
 				continue
 			}
-			certContentPattern := `\-\-\-\-\-BEGIN\sCERTIFICATE\-\-\-\-\-((.|\n)*)\-\-\-\-\-END\sCERTIFICATE\-\-\-\-\-`
-			regex := regexp.MustCompile(certContentPattern)
-			if !regex.Match(unzippedFileBytes) {
+
+			if !tlsutils.IsPublicCertificate(unzippedFileBytes) {
 				loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", file.Name)
 				// TODO: (VirajSalaka) Create standard error handling mechanism
 				return errors.New("Certificate Validation Error")

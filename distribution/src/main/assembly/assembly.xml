@@ -48,5 +48,29 @@
             <source>../resources/docker-compose.yaml</source>
             <outputDirectory>wso2am-micro-gw-${project.version}</outputDirectory>
         </file>
+        <file>
+            <source>../resources/security/mg.key</source>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.key</source>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/security</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/security</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.key</source>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security</outputDirectory>
+        </file>
     </files>
 </assembly>

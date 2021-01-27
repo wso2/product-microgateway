@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   router:
-    image: wso2/mg-router:4.0.0-m4
+    image: wso2/mg-router:4.0.0-m4-SNAPSHOT
     volumes:
       - ./resources/router/security:/home/wso2/security
     ports:
@@ -11,7 +11,7 @@ services:
       - adapter
       - enforcer
   adapter:
-    image: wso2/mg-adapter:4.0.0-m4
+    image: wso2/mg-adapter:4.0.0-m4-SNAPSHOT
     volumes:  
       - ./resources/adapter/security:/home/wso2/security
       - ./resources/conf:/home/wso2/conf
@@ -19,11 +19,17 @@ services:
       - "18000:18000" 
       - "9843:9843"
   enforcer:
-    image: wso2/mg-enforcer:4.0.0-m4
+    image: wso2/mg-enforcer:4.0.0-m4-SNAPSHOT
     volumes:  
       - ./resources/enforcer/security:/home/wso2/mg/security
       - ./resources/conf:/home/wso2/conf
+    links:
+      - adapter
     environment:
+      - ENFORCER_PRIVATE_KEY_PATH=/home/wso2/mg/security/mg.key
+      - ENFORCER_PUBLIC_KEY_PATH=/home/wso2/mg/security/mg.pem
+      - TRUSTED_ADAPTER_CERTS_PATH=/home/wso2/mg/security
+      - ADAPTER_HOST_NAME=adapter
       - ADAPTER_HOST=adapter
       - ADAPTER_XDS_PORT=18000
       - ENFORCER_LABEL=enforcer

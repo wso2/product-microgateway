@@ -70,10 +70,6 @@ type Config struct {
 			Host string
 			// Port of the server
 			Port string
-			// Public Certificate Path (For the https connection between adapter and apictl)
-			PublicKeyPath string
-			// Private Key Path (For the https connection between adapter and apictl)
-			PrivateKeyPath string
 			// APICTL Users
 			Users []APICtlUser `toml:"users"`
 		}
@@ -93,6 +89,10 @@ type Config struct {
 			//CertPath path to the key file(PEM encoded) required for tls connection between adapter and a consul client
 			KeyPath string
 		}
+		// Keystore contains the keyFile and Cert File of the adapter
+		Keystore keystore
+		//Trusted Certificates
+		Truststore truststore
 	}
 
 	// Envoy Listener Component related configurations.
@@ -100,8 +100,7 @@ type Config struct {
 		ListenerHost            string
 		ListenerPort            uint32
 		ClusterTimeoutInSeconds time.Duration
-		ListenerCertPath        string
-		ListenerKeyPath         string
+		KeyStore                keystore
 		ListenerTLSEnabled      bool
 
 		// Envoy Upstream Related Connfigurations
@@ -111,9 +110,7 @@ type Config struct {
 				MinVersion             string `toml:"minimumProtocolVersion"`
 				MaxVersion             string `toml:"maximumProtocolVersion"`
 				Ciphers                string `toml:"ciphers"`
-				CACrtPath              string `toml:"trustedCertificatesFilePath"`
-				PrivateKeyPath         string `toml:"clientKeyPath"`
-				PublicCertPath         string `toml:"clientCertPath"`
+				CACrtPath              string `toml:"trustedCertPath"`
 				VerifyHostName         bool   `toml:"verifyHostName"`
 				DisableSSLVerification bool   `toml:"disableSslVerification"`
 			}
@@ -122,7 +119,7 @@ type Config struct {
 
 	Enforcer struct {
 		Keystore        keystore
-		Truststore      keystore
+		Truststore      truststore
 		JwtTokenConfig  []jwtTokenConfig
 		EventHub        eventHub
 		ApimCredentials apimCredentials
@@ -153,9 +150,12 @@ type threadPool struct {
 }
 
 type keystore struct {
-	Location  string
-	StoreType string `toml:"type"`
-	Password  string
+	PrivateKeyLocation string `toml:"keyPath"`
+	PublicKeyLocation  string `toml:"certPath"`
+}
+
+type truststore struct {
+	Location string
 }
 
 type jwtTokenConfig struct {
@@ -165,6 +165,7 @@ type jwtTokenConfig struct {
 	JwksURL              string
 	ValidateSubscription bool
 	ConsumerKeyClaim     string
+	CertificateFilePath  string
 }
 
 type eventHub struct {
