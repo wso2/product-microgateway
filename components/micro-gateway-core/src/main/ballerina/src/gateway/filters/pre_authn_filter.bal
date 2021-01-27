@@ -24,13 +24,7 @@ public type PreAuthnFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext context) returns boolean {
         setFilterSkipToFilterContext(context);
-        boolean preserveUserAgentHeader = getConfigBooleanValue(SERVER_PRESERVE_HEADERS_ID,
-                                                                SERVER_PRESERVE_HEADERS_USER_AGENT,
-                                                                DEFAULT_SERVER_PRESERVE_HEADERS_USER_AGENT);
-        if (preserveUserAgentHeader) {
-            request.setHeader("User-Agent", request.userAgent);
-        }
-
+        preserveRequestHeaders(request);
         if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
             printDebug(KEY_PRE_AUTHN_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;
@@ -48,13 +42,7 @@ public type PreAuthnFilter object {
     }
 
     public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
-        boolean preserveServerHeader = getConfigBooleanValue(SERVER_PRESERVE_HEADERS_ID,
-                                                                SERVER_PRESERVE_HEADERS_SERVER,
-                                                                DEFAULT_SERVER_PRESERVE_HEADERS_SERVER);
-        if (!preserveServerHeader) {
-            string serverHeaderConfig = getConfigValue(SERVER_CONF_ID, SERVER_HEADER, DEFAULT_SERVER_HEADER);
-            response.setHeader("server", serverHeaderConfig);
-        }
+        preserveResponseHeaders(response);
         if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
             printDebug(KEY_PRE_AUTHN_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;
@@ -185,5 +173,24 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
         return AUTH_SCHEME_JWT;
     } else {
         return AUTH_SCHEME_OAUTH2;
+    }
+}
+
+function preserveRequestHeaders(http:Request request) {
+    boolean preserveUserAgentHeader = getConfigBooleanValue(SERVER_PRESERVE_HEADERS_ID,
+                                                            SERVER_PRESERVE_HEADERS_USER_AGENT,
+                                                            DEFAULT_SERVER_PRESERVE_HEADERS_USER_AGENT);
+    if (preserveUserAgentHeader) {
+        request.setHeader("User-Agent", request.userAgent);
+    }
+}
+
+function preserveResponseHeaders(http:Response response) {
+    boolean preserveServerHeader = getConfigBooleanValue(SERVER_PRESERVE_HEADERS_ID,
+                                                            SERVER_PRESERVE_HEADERS_SERVER,
+                                                            DEFAULT_SERVER_PRESERVE_HEADERS_SERVER);
+    if (!preserveServerHeader) {
+        string serverHeaderConfig = getConfigValue(SERVER_CONF_ID, SERVER_HEADER, DEFAULT_SERVER_HEADER);
+        response.setHeader("server", serverHeaderConfig);
     }
 }
