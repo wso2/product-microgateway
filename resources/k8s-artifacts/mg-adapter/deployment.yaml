@@ -53,7 +53,7 @@ spec:
             - mountPath: /home/wso2/conf/log_config.toml
               subPath: log_config.toml
               name: logconfig-toml-vol
-          image: wso2/mg-adapter:4.0.0-m4
+          image: wso2/mg-adapter:4.0.0-m5-SNAPSHOT
           imagePullPolicy: Always
           resources:
             requests:

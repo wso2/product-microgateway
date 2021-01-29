@@ -39,7 +39,7 @@ spec:
             - mountPath: /home/wso2/security/mg.pem
               subPath: mg.pem
               name: router-tls-vol
-          image: wso2/mg-router:4.0.0-m4
+          image: wso2/mg-router:4.0.0-m5-SNAPSHOT
           imagePullPolicy: Always
           resources:
             requests:
