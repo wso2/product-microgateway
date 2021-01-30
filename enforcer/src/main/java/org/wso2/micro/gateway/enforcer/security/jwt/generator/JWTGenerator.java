@@ -21,6 +21,7 @@ import java.util.Base64;
 
 public class JWTGenerator {
     private static final Logger log = LogManager.getLogger(JWTGenerator.class);
+    private static volatile long ttl = -1L;
 
     public static Certificate getPublicCert() {
         Certificate publicCert = null;
@@ -62,5 +63,8 @@ public class JWTGenerator {
         return privateKey;
     }
 
+    public static long getTTL() {
+        return ttl*1000;
+    }
 
 }

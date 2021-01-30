@@ -35,7 +35,7 @@ import org.wso2.micro.gateway.enforcer.config.EnforcerConfig;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
-import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.gateway.common.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
@@ -45,6 +45,7 @@ import org.wso2.micro.gateway.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 import import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
+import import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -140,7 +141,14 @@ public class JWTAuthenticator implements Authenticator {
 
                 log.debug("JWT authentication successful.");
                 String endUserToken = null;
-                JWTConfigurationDto jwtConfigurationDto =
+
+                // Get jwtConfigurationDto
+                JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().getJwtConfigurationDto();
+                if(jwtConfigurationDto.enabled) {
+                    int endUserTenantId = 0;
+                    apiKeyValidationInfoDTO.setEndUserTenantId(endUserTenantId);
+                    JWTInfoDto jwtInfoDto = new JWTInfoDto();
+                }
 
                 //                if (jwtGenerationEnabled) {
                 //                    JWTInfoDto jwtInfoDto = GatewayUtils

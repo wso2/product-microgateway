@@ -213,7 +213,7 @@ public class ConfigHolder {
         PrivateKey privateKey = JWTGenerator.getPrivateKey();
         jwtConfigurationDto.setPublicCert(publicCert);
         jwtConfigurationDto.setPrivateKey(privateKey);
-        ttl =
+        jwtConfigurationDto.getTTL(JWTGenerator.getTTL());
         config.setJwtConfigurationDto(jwtConfigurationDto);
 
     }
