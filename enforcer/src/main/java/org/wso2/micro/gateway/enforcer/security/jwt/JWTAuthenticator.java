@@ -46,6 +46,7 @@ import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHold
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 import import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
 import import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.gateway.common.util.JWTUtil;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -148,6 +149,14 @@ public class JWTAuthenticator implements Authenticator {
                     int endUserTenantId = 0;
                     apiKeyValidationInfoDTO.setEndUserTenantId(endUserTenantId);
                     JWTInfoDto jwtInfoDto = new JWTInfoDto();
+                    String apiContext = requestContext.getMathedAPI().getAPIConfig().getBasePath();
+                    String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
+                    jwtInfoDto.setApicontext(apiContext);
+                    jwtInfoDto.setVersion(apiVersion);
+
+                    jwtInfoDto = JWTUtil
+                            .generateJWTInfoDto(null, validationInfo, apiKeyValidationInfoDTO, jwtInfoDto);
+
                 }
 
                 //                if (jwtGenerationEnabled) {
