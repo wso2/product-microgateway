@@ -44,6 +44,7 @@ import org.wso2.micro.gateway.enforcer.security.TokenValidationContext;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
+import import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -139,6 +140,8 @@ public class JWTAuthenticator implements Authenticator {
 
                 log.debug("JWT authentication successful.");
                 String endUserToken = null;
+                JWTConfigurationDto jwtConfigurationDto =
+
                 //                if (jwtGenerationEnabled) {
                 //                    JWTInfoDto jwtInfoDto = GatewayUtils
                 //                            .generateJWTInfoDto(jwtValidationInfo, apiKeyValidationInfoDTO, synCtx);

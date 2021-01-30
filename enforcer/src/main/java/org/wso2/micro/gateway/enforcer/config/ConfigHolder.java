@@ -23,6 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.config.enforcer.AmCredentials;
 import org.wso2.gateway.discovery.config.enforcer.AuthService;
+import org.wso2.gateway.discovery.config.enforcer.CertStore;
 import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.config.enforcer.EventHub;
 import org.wso2.gateway.discovery.config.enforcer.Issuer;
@@ -34,9 +35,12 @@ import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -106,6 +110,8 @@ public class ConfigHolder {
 
         //Read credentials used to connect with APIM services
         populateAPIMCredentials(config.getApimCredentials());
+
+        populateJWTGeneratorConfigurations();
     }
 
     private void populateAuthService(AuthService cdsAuth) {
@@ -189,6 +195,20 @@ public class ConfigHolder {
         char[] password = cred.getPassword().toCharArray();
         CredentialDto credentialDto = new CredentialDto(username, password);
         config.setApimCredentials(credentialDto);
+    }
+
+    private void populateJWTGeneratorConfigurations() {
+        JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+        jwtConfigurationDto.setEnabled(true);
+        jwtConfigurationDto.setJwtHeader("X-JWT-Assertion");
+        jwtConfigurationDto.setConsumerDialectUri("http://wso2.org/claims");
+        jwtConfigurationDto.setSignatureAlgorithm("SHA256withRSA");
+        jwtConfigurationDto.setEnableUserClaims(false);
+        jwtConfigurationDto.setGatewayJWTGeneratorImpl("org.wso2.carbon.apimgt.gateway.common.jwtGenerator.APIMgtGatewayJWTGeneratorImpl");
+        jwtConfigurationDto.setClaimRetrieverImplClass("");
+        Certificate publicCert = getPublicCert();
+        config.setJwtConfigurationDto(jwtConfigurationDto);
+
     }
 
     public EnforcerConfig getConfig() {

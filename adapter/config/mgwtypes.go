@@ -124,6 +124,7 @@ type Config struct {
 		EventHub        eventHub
 		ApimCredentials apimCredentials
 		AuthService     authService
+		JwtGenerator  jwtGeneratorConfig
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
@@ -174,6 +175,18 @@ type eventHub struct {
 	JmsConnectionParameters struct {
 		EventListeningEndpoints string `toml:"eventListeningEndpoints"`
 	} `toml:"jmsConnectionParameters"`
+}
+
+type jwtGeneratorConfig struct {
+    Enable                 bool
+    Encoding               string
+    ClaimDialect          string
+    ConvertDialect        bool
+    Header                 string
+    SigningAlgorithm      string
+    EnableUserClaims     bool
+    GatewayGeneratorImpl string
+    ClaimsExtractorImpl  string
 }
 
 // APICtlUser represents registered APICtl Users

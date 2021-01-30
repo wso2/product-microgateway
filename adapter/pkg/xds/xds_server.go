@@ -339,6 +339,17 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 			Username: config.Enforcer.ApimCredentials.Username,
 			Password: config.Enforcer.ApimCredentials.Password,
 		},
+		JwtGenerator: &enforcer.JWTGenerator{
+	        Enable:               config.Enforcer.JwtGenerator.Enable,
+	        Encoding:             config.Enforcer.JwtGenerator.Encoding,
+	        ClaimDialect:         config.Enforcer.JwtGenerator.ClaimDialect,
+	        ConvertDialect:       config.Enforcer.JwtGenerator.ConvertDialect,
+	        Header:               config.Enforcer.JwtGenerator.Header,
+	        SigningAlgorithm:     config.Enforcer.JwtGenerator.SigningAlgorithm,
+	        EnableUserClaims:     config.Enforcer.JwtGenerator.EnableUserClaims,
+	        GatewayGeneratorImpl: config.Enforcer.JwtGenerator.GatewayGeneratorImpl,
+	        ClaimsExtractorImpl:  config.Enforcer.JwtGenerator.ClaimsExtractorImpl,
+	    },
 		AuthService:    authService,
 		JwtTokenConfig: issuers,
 		Eventhub: &enforcer.EventHub{
