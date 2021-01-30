@@ -36,6 +36,7 @@ import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
+import org.wso2.micro.gateway.enforcer.security.jwt.generator.JWTGenerator;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
 import java.io.FileInputStream;
@@ -44,6 +45,7 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.List;
@@ -62,6 +64,7 @@ public class ConfigHolder {
     private EnvVarConfig envVarConfig = new EnvVarConfig();
     EnforcerConfig config = new EnforcerConfig();
     private KeyStore trustStore = null;
+    private static volatile long ttl = -1L;
     private KeyStore trustStoreForJWT = null;
     private TrustManagerFactory trustManagerFactory = null;
 
@@ -206,7 +209,11 @@ public class ConfigHolder {
         jwtConfigurationDto.setEnableUserClaims(false);
         jwtConfigurationDto.setGatewayJWTGeneratorImpl("org.wso2.carbon.apimgt.gateway.common.jwtGenerator.APIMgtGatewayJWTGeneratorImpl");
         jwtConfigurationDto.setClaimRetrieverImplClass("");
-        Certificate publicCert = getPublicCert();
+        Certificate publicCert = JWTGenerator.getPublicCert();
+        PrivateKey privateKey = JWTGenerator.getPrivateKey();
+        jwtConfigurationDto.setPublicCert(publicCert);
+        jwtConfigurationDto.setPrivateKey(privateKey);
+        ttl =
         config.setJwtConfigurationDto(jwtConfigurationDto);
 
     }
