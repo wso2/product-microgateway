@@ -502,12 +502,15 @@
 [server]
   # timestamp skew in milliseconds which added when checking the token validity period
   timestampSkew = 5000
-  # The value of the server header sent in the response by microgateway
-  header="ballerina"
-  # The headers will be prserved in the request forwarded to the backend without any intermediate change
-  [server.preserveHeaders]
-    userAgent = false
-    server = true
+  # The headers will be preserved in the request and the response without any intermediate change
+  [[server.header]]
+      headerName = "User-Agent"
+      preserveHeader = true
+      overrideValue = "ballerina"
+  [[server.header]]
+      headerName = "Server"
+      preserveHeader = true
+      overrideValue = "ballerina"
 
 # Configurations for retrieving API and subscription data from API Manager.
 [apim.eventHub]
