@@ -504,7 +504,7 @@
   timestampSkew = 5000
   # The value of the server header sent in the response by microgateway
   header="ballerina"
-  # The headers will be preserved in the request and the response without any intermediate change
+  # Preserve or override header values intercepted by the gateway
   [[server.header]]
       headerName = "User-Agent"
       preserveHeader = true

@@ -20,8 +20,6 @@ public type ServerConfigDTO record {
     int timestampSkew = getConfigIntValue(SERVER_CONF_ID, SERVER_TIMESTAMP_SKEW, DEFAULT_SERVER_TIMESTAMP_SKEW);
     string header = getConfigValue(SERVER_CONF_ID, SERVER_HEADER, DEFAULT_SERVER_HEADER);
     serverHeaderDTO[] serverHeaders = getserverHeaders();
-    //PreservedHeaderDTO[] preservedRequestHeaders = getPreservedRequestHeaders();
-    //PreservedHeaderDTO[] preservedResponseHeaders = getPreservedResponseHeaders();
 };
 
 public type serverHeaderDTO record {
@@ -43,13 +41,22 @@ public function getserverHeaders() returns (serverHeaderDTO[]) {
                 string overridValueStr = DEFAULT_SERVER_HEADER;
                 if (preserveHeader is boolean) {
                     preserveHeaderVal = preserveHeader;
+                } else if (preserveHeader.toString() != "") {
+                    error err = error("'preservedHeader' config value is not 'boolean'");
+                    panic err;
                 }
                 if (overrideValue is string) {
                     overridValueStr = overrideValue;
+                } else if (overrideValue.toString() != "") {
+                    error err = error("'overrideValue' config value is not 'string'");
+                    panic err;
                 }
                 serverHeaderDTO serverHeaderDto = {headerName: headerName, preserveHeader: preserveHeaderVal,
                                                     overrideValue: overridValueStr};
                 serverHeaders.push(serverHeaderDto);
+            } else if (headerName.toString() != "") {
+                error err = error("'headerName' config value is not 'string'");
+                panic err;
             }
         }
     }
