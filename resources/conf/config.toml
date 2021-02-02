@@ -59,15 +59,6 @@ disableSslVerification = false
     keepAliveTime = 600
     queueSize = 1000
 
-#Key Store Configuration
-[enforcer.keystore]
-keyPath = "/home/wso2/mg/security/mg.key"
-certPath = "/home/wso2/mg/security/mg.pem"
-
-#Trust store configuration
-[enforcer.truststore]
-location = "/home/wso2/mg/security"
-
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1
 [[enforcer.jwtTokenConfig]]
