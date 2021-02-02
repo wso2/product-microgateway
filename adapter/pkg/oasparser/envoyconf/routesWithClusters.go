@@ -90,7 +90,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 		if apiLevelEndpointProd[0].ServiceDiscoveryString != "" {
 			//add the api level cluster name to the ClusterConsulKeyMap
 			svcdiscovery.ClusterConsulKeyMap[apiLevelClusterNameProd] = apiLevelEndpointProd[0].ServiceDiscoveryString
-			logger.LoggerOasparser.Info("Consul cluster added for API level Production: ", apiLevelClusterNameProd, " ",
+			logger.LoggerOasparser.Debugln("Consul cluster added for API level Production: ", apiLevelClusterNameProd, " ",
 				apiLevelEndpointProd[0].ServiceDiscoveryString)
 		}
 	} else {
@@ -114,7 +114,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 			if apiLevelEndpointSand[0].ServiceDiscoveryString != "" {
 				//add the api level cluster name to the ClusterConsulKeyMap
 				svcdiscovery.ClusterConsulKeyMap[apiLevelClusterNameSand] = apiLevelEndpointSand[0].ServiceDiscoveryString
-				logger.LoggerOasparser.Info("Consul cluster added for API level Sandbox: ", apiLevelClusterNameSand, " ",
+				logger.LoggerOasparser.Debugln("Consul cluster added for API level Sandbox: ", apiLevelClusterNameSand, " ",
 					apiLevelEndpointSand[0].ServiceDiscoveryString)
 			}
 		}
@@ -146,7 +146,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 			//add to ClusterConsulKeyMap: resource level prod endpoints
 			if endpointProd[0].ServiceDiscoveryString != "" {
 				svcdiscovery.ClusterConsulKeyMap[clusterNameProd] = endpointProd[0].ServiceDiscoveryString
-				logger.LoggerOasparser.Info("Consul cluster added for Resource level Production:", clusterNameProd, " ",
+				logger.LoggerOasparser.Debugln("Consul cluster added for Resource level Production:", clusterNameProd, " ",
 					endpointProd[0].ServiceDiscoveryString)
 			}
 
@@ -181,7 +181,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 				//add to ClusterConsulKeyMap: resource level sand endpoints
 				if endpointSand[0].ServiceDiscoveryString != "" {
 					svcdiscovery.ClusterConsulKeyMap[clusterNameSand] = endpointSand[0].ServiceDiscoveryString
-					logger.LoggerOasparser.Info("Consul cluster added for API level Sandbox:", clusterNameSand, " ",
+					logger.LoggerOasparser.Debugln("Consul cluster added for API level Sandbox:", clusterNameSand, " ",
 						endpointSand[0].ServiceDiscoveryString)
 				}
 			}
