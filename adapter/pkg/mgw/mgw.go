@@ -23,6 +23,7 @@ import (
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	apiservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/api"
 	configservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/config"
+	subscriptionservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/subscription"
 	"github.com/wso2/micro-gw/pkg/api/restserver"
 
 	"context"
@@ -37,8 +38,9 @@ import (
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/messaging"
+	"github.com/wso2/micro-gw/pkg/subscription"
 	"github.com/wso2/micro-gw/pkg/synchronizer"
-	xds "github.com/wso2/micro-gw/pkg/xds"
+	"github.com/wso2/micro-gw/pkg/xds"
 	"google.golang.org/grpc"
 )
 
@@ -70,7 +72,9 @@ func init() {
 
 const grpcMaxConcurrentStreams = 1000000
 
-func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, port uint) {
+func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, enforcerSdsServer xdsv3.Server,
+	enforcerAppDsSrv xdsv3.Server, enforcerAPIDsSrv xdsv3.Server, enforcerAppPolicyDsSrv xdsv3.Server,
+	enforcerSubPolicyDsSrv xdsv3.Server, enforcerAppKeyMappingDsSrv xdsv3.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
 	grpcServer := grpc.NewServer()
@@ -84,6 +88,12 @@ func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, port 
 	discoveryv3.RegisterAggregatedDiscoveryServiceServer(grpcServer, server)
 	configservice.RegisterConfigDiscoveryServiceServer(grpcServer, enforcerServer)
 	apiservice.RegisterApiDiscoveryServiceServer(grpcServer, enforcerServer)
+	subscriptionservice.RegisterSubscriptionDiscoveryServiceServer(grpcServer, enforcerSdsServer)
+	subscriptionservice.RegisterApplicationDiscoveryServiceServer(grpcServer, enforcerAppDsSrv)
+	subscriptionservice.RegisterApiListDiscoveryServiceServer(grpcServer, enforcerAPIDsSrv)
+	subscriptionservice.RegisterApplicationPolicyDiscoveryServiceServer(grpcServer, enforcerAppPolicyDsSrv)
+	subscriptionservice.RegisterSubscriptionPolicyDiscoveryServiceServer(grpcServer, enforcerSubPolicyDsSrv)
+	subscriptionservice.RegisterApplicationKeyMappingDiscoveryServiceServer(grpcServer, enforcerAppKeyMappingDsSrv)
 
 	logger.LoggerMgw.Info("port: ", port, " management server listening")
 	go func() {
@@ -115,13 +125,30 @@ func Run(conf *config.Config) {
 	logger.LoggerMgw.Info("Starting adapter ....")
 	cache := xds.GetXdsCache()
 	enforcerCache := xds.GetEnforcerCache()
+	enforcerSubscriptionCache := xds.GetEnforcerSubscriptionCache()
+	enforcerApplicationCache := xds.GetEnforcerApplicationCache()
+	enforcerAPICache := xds.GetEnforcerAPICache()
+	enforcerApplicationPolicyCache := xds.GetEnforcerApplicationPolicyCache()
+	enforcerSubscriptionPolicyCache := xds.GetEnforcerSubscriptionPolicyCache()
+	enforcerApplicationKeyMappingCache := xds.GetEnforcerApplicationKeyMappingCache()
+
 	srv := xdsv3.NewServer(ctx, cache, nil)
 	enforcerXdsSrv := xdsv3.NewServer(ctx, enforcerCache, nil)
+	enforcerSdsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionCache, nil)
+	enforcerAppDsSrv := xdsv3.NewServer(ctx, enforcerApplicationCache, nil)
+	enforcerAPIDsSrv := xdsv3.NewServer(ctx, enforcerAPICache, nil)
+	enforcerAppPolicyDsSrv := xdsv3.NewServer(ctx, enforcerApplicationPolicyCache, nil)
+	enforcerSubPolicyDsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionPolicyCache, nil)
+	enforcerAppKeyMappingDsSrv := xdsv3.NewServer(ctx, enforcerApplicationKeyMappingCache, nil)
 
-	runManagementServer(srv, enforcerXdsSrv, port)
+	runManagementServer(srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
+		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, port)
 
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
+
+	// Load subscription data
+	subscription.LoadSubscriptionData(conf)
 
 	go restserver.StartRestServer(conf)
 

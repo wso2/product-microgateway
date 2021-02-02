@@ -18,41 +18,22 @@
 
 package org.wso2.micro.gateway.enforcer.subscription;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * This class holds tenant wise subscription data stores
  */
 public class SubscriptionDataHolder {
 
-    protected Map<String, SubscriptionDataStore> subscriptionStore =
-            new ConcurrentHashMap<>();
     private static SubscriptionDataHolder instance = new SubscriptionDataHolder();
 
     public static SubscriptionDataHolder getInstance() {
-
         return instance;
     }
 
-    public void registerTenantSubscriptionStore(String tenantDomain) {
-
-        SubscriptionDataStore tenantStore = subscriptionStore.get(tenantDomain);
-        if (tenantStore == null) {
-            tenantStore = new SubscriptionDataStoreImpl(tenantDomain);
-        }
-        subscriptionStore.put(tenantDomain, tenantStore);
-    }
-
-    public void unregisterTenantSubscriptionStore(String tenantDomain) {
-
-        subscriptionStore.remove(tenantDomain);
-    }
-
     public SubscriptionDataStore getTenantSubscriptionStore(String tenantDomain) {
-
-        return subscriptionStore.get(tenantDomain);
+        return SubscriptionDataStoreImpl.getInstance();
     }
 
+    public SubscriptionDataStoreImpl getTenantSubscriptionStore() {
+        return SubscriptionDataStoreImpl.getInstance();
+    }
 }
-

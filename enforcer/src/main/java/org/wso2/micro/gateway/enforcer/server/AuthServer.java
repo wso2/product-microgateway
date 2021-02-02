@@ -68,7 +68,7 @@ public class AuthServer {
                 GatewayJMSMessageListener.init(configHolder.getConfig().getEventHub());
             }
             //TODO: Get the tenant domain from config
-            SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore("carbon.super");
+            SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().initializeStore();
 
             // Don't exit the main thread. Wait until server is terminated.
             server.awaitTermination();

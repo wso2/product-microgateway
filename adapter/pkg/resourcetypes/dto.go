@@ -21,8 +21,8 @@ package resourcetypes
 type Subscription struct {
 	SubscriptionID    int    `json:"subscriptionId"`
 	PolicyID          string `json:"policyId"`
-	APIID             int    `json:"apiId"`
-	AppID             int    `json:"appId" json:"applicationId"`
+	APIID             int32    `json:"apiId"`
+	AppID             int32    `json:"appId" json:"applicationId"`
 	SubscriptionState string `json:"subscriptionState"`
 	TenantID          int32  `json:"tenanId,omitempty"`
 	TenantDomain      string `json:"tenanDomain,omitempty"`
@@ -37,7 +37,7 @@ type SubscriptionList struct {
 // Application for struct application
 type Application struct {
 	UUID         string            `json:"uuid"`
-	ID           int               `json:"id" json:"applicationId"`
+	ID           int32             `json:"id" json:"applicationId"`
 	Name         string            `json:"name" json:"applicationName"`
 	SubName      string            `json:"subName" json:"subscriber"`
 	Policy       string            `json:"policy" json:"applicationPolicy"`
@@ -56,7 +56,7 @@ type ApplicationList struct {
 
 // ApplicationKeyMapping for struct applicationKeyMapping
 type ApplicationKeyMapping struct {
-	ApplicationID int    `json:"applicationId"`
+	ApplicationID int32    `json:"applicationId"`
 	ConsumerKey   string `json:"consumerKey"`
 	KeyType       string `json:"keyType"`
 	KeyManager    string `json:"keyManager"`
@@ -72,7 +72,7 @@ type ApplicationKeyMappingList struct {
 
 // API for struct Api
 type API struct {
-	APIID            string `json:"apiId"`
+	APIID            int32 `json:"apiId"`
 	Provider         string `json:"provider" json:"apiProvider"`
 	Name             string `json:"name" json:"apiName"`
 	Version          string `json:"version" json:"apiVersion"`
@@ -93,8 +93,8 @@ type APIList struct {
 
 // ApplicationPolicy for struct ApplicationPolicy
 type ApplicationPolicy struct {
-	ID        int    `json:"id"`
-	TenantID  int    `json:"tenantId"`
+	ID        int32    `json:"id"`
+	TenantID  int32    `json:"tenantId"`
 	Name      string `json:"name"`
 	QuotaType string `json:"quotaType"`
 }
@@ -106,13 +106,13 @@ type ApplicationPolicyList struct {
 
 // SubscriptionPolicy for struct list of SubscriptionPolicy
 type SubscriptionPolicy struct {
-	ID                   int    `json:"id" json:"policyId"`
-	TenantID             int    `json:"tenantId"`
+	ID                   int32    `json:"id" json:"policyId"`
+	TenantID             int32    `json:"tenantId"`
 	Name                 string `json:"name"`
 	QuotaType            string `json:"quotaType"`
-	GraphQLMaxComplexity int    `json:"graphQLMaxComplexity"`
-	GraphQLMaxDepth      int    `json:"graphQLMaxDepth"`
-	RateLimitCount       int    `json:"rateLimitCount"`
+	GraphQLMaxComplexity int32    `json:"graphQLMaxComplexity"`
+	GraphQLMaxDepth      int32    `json:"graphQLMaxDepth"`
+	RateLimitCount       int32    `json:"rateLimitCount"`
 	RateLimitTimeUnit    string `json:"rateLimitTimeUnit"`
 	StopOnQuotaReach     bool   `json:"stopOnQuotaReach"`
 	TenantDomain         string `json:"tenanDomain,omitempty"`
