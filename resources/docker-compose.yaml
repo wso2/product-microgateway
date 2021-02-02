@@ -2,6 +2,19 @@ version: "3.7"
 services:
   router:
     image: wso2/mg-router:4.0.0-m4-SNAPSHOT
+    environment:
+      - ROUTER_ADMIN_HOST=0.0.0.0
+      - ROUTER_ADMIN_PORT=9000
+      - ROUTER_CLUSTER=service_greeter
+      - ROUTER_LABEL=default
+      - ROUTER_PRIVATE_KEY_PATH=/home/wso2/security/mg.key
+      - ROUTER_PUBLIC_CERT_PATH=/home/wso2/security/mg.pem
+      - ADAPTER_HOST=adapter
+      - ADAPTER_PORT=18000
+      - ADAPTER_CA_CERT_PATH=/home/wso2/security/mg.pem
+      - ENFORCER_HOST=enforcer
+      - ENFORCER_PORT=8081
+      - ENFORCER_CA_CERT_PATH=/home/wso2/security/mg.pem
     volumes:
       - ./resources/router/security:/home/wso2/security
     ports:
