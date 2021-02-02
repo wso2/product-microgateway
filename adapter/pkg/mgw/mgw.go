@@ -168,13 +168,12 @@ func Run(conf *config.Config) {
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
 
-	// Load subscription data
-	subscription.LoadSubscriptionData(conf)
-
 	go restserver.StartRestServer(conf)
 
 	enableEventHub := conf.ControlPlane.EventHub.Enabled
 	if enableEventHub {
+		// Load subscription data
+		subscription.LoadSubscriptionData(conf)
 		// Fetch APIs from control plane
 		fetchAPIsOnStartUp(conf)
 		go messaging.ProcessEvents(conf)

@@ -41,6 +41,7 @@ const (
 	pkgMsg          = "github.com/wso2/micro-gw/messaging"
 	pkgSvcDiscovery = "github.com/wso2/micro-gw/pkg/svcDiscovery"
 	pkgTLSUtils     = "github.com/wso2/micro-gw/pkg/tlsutils"
+	pkgSubscription = "github.com/wso2/micro-gw/pkg/subscription"
 )
 
 // logger package references
@@ -54,6 +55,7 @@ var (
 	LoggerMsg          *logrus.Logger
 	LoggerSvcDiscovery *logrus.Logger
 	LoggerTLSUtils     *logrus.Logger
+	LoggerSubscription *logrus.Logger
 )
 
 func init() {
@@ -72,5 +74,6 @@ func UpdateLoggers() {
 	LoggerMsg = logging.InitPackageLogger(pkgMsg)
 	LoggerSvcDiscovery = logging.InitPackageLogger(pkgSvcDiscovery)
 	LoggerTLSUtils = logging.InitPackageLogger(pkgTLSUtils)
+	LoggerSubscription = logging.InitPackageLogger(pkgSubscription)
 	logrus.Info("Updated loggers")
 }
