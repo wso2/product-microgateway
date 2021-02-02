@@ -314,13 +314,6 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 	}
 
 	return &enforcer.Config{
-		Truststore: &enforcer.Truststore{
-			Location: config.Enforcer.Truststore.Location,
-		},
-		Keystore: &enforcer.Keystore{
-			PrivateKeyLocation: config.Enforcer.Keystore.PrivateKeyLocation,
-			PublicKeyLocation:  config.Enforcer.Keystore.PublicKeyLocation,
-		},
 		ApimCredentials: &enforcer.AmCredentials{
 			Username: config.Enforcer.ApimCredentials.Username,
 			Password: config.Enforcer.ApimCredentials.Password,

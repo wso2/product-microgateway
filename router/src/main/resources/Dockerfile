@@ -22,7 +22,7 @@ COPY maven/security /home/wso2/security
 ENV ROUTER_ADMIN_HOST=0.0.0.0
 ENV ROUTER_ADMIN_PORT=9000
 
-ENV ROUTER_CLUSTER=service_greeter
+ENV ROUTER_CLUSTER=default_cluster
 ENV ROUTER_LABEL=default
 ENV ROUTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
 ENV ROUTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem

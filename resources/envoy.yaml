@@ -5,5 +5,5 @@ admin:
       address: 0.0.0.0
       port_value: 9000
 node:
-  cluster: service_greeter
+  cluster: default_cluster
   id: default

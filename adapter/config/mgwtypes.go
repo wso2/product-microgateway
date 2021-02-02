@@ -118,8 +118,6 @@ type Config struct {
 	}
 
 	Enforcer struct {
-		Keystore        keystore
-		Truststore      truststore
 		JwtTokenConfig  []jwtTokenConfig
 		EventHub        eventHub
 		ApimCredentials apimCredentials

@@ -5,7 +5,7 @@ services:
     environment:
       - ROUTER_ADMIN_HOST=0.0.0.0
       - ROUTER_ADMIN_PORT=9000
-      - ROUTER_CLUSTER=service_greeter
+      - ROUTER_CLUSTER=default_cluster
       - ROUTER_LABEL=default
       - ROUTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
       - ROUTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
