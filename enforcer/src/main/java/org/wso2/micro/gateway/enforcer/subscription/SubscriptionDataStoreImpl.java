@@ -20,30 +20,29 @@ package org.wso2.micro.gateway.enforcer.subscription;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.common.CacheableEntity;
+import org.wso2.gateway.discovery.subscription.APIs;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.discovery.ApiListDiscoveryClient;
+import org.wso2.micro.gateway.enforcer.discovery.ApplicationDiscoveryClient;
+import org.wso2.micro.gateway.enforcer.discovery.ApplicationKeyMappingDiscoveryClient;
+import org.wso2.micro.gateway.enforcer.discovery.ApplicationPolicyDiscoveryClient;
+import org.wso2.micro.gateway.enforcer.discovery.SubscriptionDiscoveryClient;
+import org.wso2.micro.gateway.enforcer.discovery.SubscriptionPolicyDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DataLoadingException;
-import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.models.API;
 import org.wso2.micro.gateway.enforcer.models.ApiPolicy;
 import org.wso2.micro.gateway.enforcer.models.Application;
 import org.wso2.micro.gateway.enforcer.models.ApplicationKeyMapping;
 import org.wso2.micro.gateway.enforcer.models.ApplicationKeyMappingCacheKey;
 import org.wso2.micro.gateway.enforcer.models.ApplicationPolicy;
-import org.wso2.micro.gateway.enforcer.models.Policy;
 import org.wso2.micro.gateway.enforcer.models.Subscription;
 import org.wso2.micro.gateway.enforcer.models.SubscriptionPolicy;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +51,8 @@ import java.util.stream.Collectors;
 public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     private static final Logger log = LogManager.getLogger(SubscriptionDataStoreImpl.class);
+    private static SubscriptionDataStoreImpl instance = new SubscriptionDataStoreImpl();
+
     /**
      * ENUM to hold type of policies.
      */
@@ -60,6 +61,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         APPLICATION,
         API
     }
+
     public static final String DELEM_PERIOD = ":";
 
     // Maps for keeping Subscription related details.
@@ -70,29 +72,16 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private Map<String, SubscriptionPolicy> subscriptionPolicyMap;
     private Map<String, ApplicationPolicy> appPolicyMap;
     private Map<String, Subscription> subscriptionMap;
-    private boolean apisInitialized;
-    private boolean applicationsInitialized;
-    private boolean subscriptionsInitialized;
-    private boolean applicationKeysInitialized;
-    private boolean applicationPoliciesInitialized;
-    private boolean subscriptionPoliciesInitialized;
-    private boolean apiPoliciesInitialized;
-    public static final int LOADING_POOL_SIZE = 7;
     private String tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
-    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(LOADING_POOL_SIZE);
 
-    public SubscriptionDataStoreImpl(String tenantDomain) {
-
-        this.tenantDomain = tenantDomain;
-        initializeStore();
+    SubscriptionDataStoreImpl() {
     }
 
-    public SubscriptionDataStoreImpl() {
-
-        initializeStore();
+    public static SubscriptionDataStoreImpl getInstance() {
+        return instance;
     }
 
-    private void initializeStore() {
+    public void initializeStore() {
 
         this.applicationKeyMappingMap = new ConcurrentHashMap<>();
         this.applicationMap = new ConcurrentHashMap<>();
@@ -155,211 +144,142 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         return apiPolicyMap.get(key);
     }
 
-    public void initializeLoadingTasks() {
-
-        Runnable apiTask = new PopulateTask<String, API>(apiMap,
-                () -> {
-                    try {
-                        log.debug("Calling loadAllApis. ");
-                        List<API> apiList = new SubscriptionDataLoaderImpl().loadAllApis(tenantDomain);
-                        apisInitialized = true;
-                        return apiList;
-                    } catch (MGWException e) {
-                        log.error("Exception while loading APIs " + e);
-                    }
-                    return null;
-                });
-
-        executorService.schedule(apiTask, 0, TimeUnit.SECONDS);
-
-        Runnable subscriptionLoadingTask = new PopulateTask<String, Subscription>(subscriptionMap,
-                () -> {
-                    try {
-                        log.debug("Calling loadAllSubscriptions.");
-                        List<Subscription> subscriptionList =
-                                new SubscriptionDataLoaderImpl().loadAllSubscriptions(tenantDomain);
-                        subscriptionsInitialized = true;
-                        return subscriptionList;
-                    } catch (MGWException e) {
-                        log.error("Exception while loading Subscriptions " + e);
-                    }
-                    return null;
-                });
-
-        executorService.schedule(subscriptionLoadingTask, 0, TimeUnit.SECONDS);
-
-        Runnable applicationLoadingTask = new PopulateTask<Integer, Application>(applicationMap,
-                () -> {
-                    try {
-                        log.debug("Calling loadAllApplications.");
-                        List<Application> applicationList =
-                                new SubscriptionDataLoaderImpl().loadAllApplications(tenantDomain);
-                        applicationsInitialized = true;
-                        return applicationList;
-                    } catch (MGWException e) {
-                        log.error("Exception while loading Applications " + e);
-                    }
-                    return null;
-                });
-
-        executorService.schedule(applicationLoadingTask, 0, TimeUnit.SECONDS);
-
-        Runnable keyMappingsTask =
-                new PopulateTask<ApplicationKeyMappingCacheKey, ApplicationKeyMapping>(applicationKeyMappingMap,
-                        () -> {
-                            try {
-                                log.debug("Calling loadAllKeyMappings.");
-                                List<ApplicationKeyMapping> applicationKeyMappingList =
-                                        new SubscriptionDataLoaderImpl().loadAllKeyMappings(tenantDomain);
-                                applicationKeysInitialized = true;
-                                return applicationKeyMappingList;
-                            } catch (MGWException e) {
-                                log.error("Exception while loading ApplicationKeyMapping " + e);
-                            }
-                            return null;
-                        });
-
-        executorService.schedule(keyMappingsTask, 0, TimeUnit.SECONDS);
-
-        Runnable apiPolicyLoadingTask =
-                new PopulateTask<String, ApiPolicy>(apiPolicyMap,
-                        () -> {
-                            try {
-                                log.debug("Calling loadAllSubscriptionPolicies.");
-                                List<ApiPolicy> apiPolicyList =
-                                        new SubscriptionDataLoaderImpl().loadAllAPIPolicies(tenantDomain);
-                                apiPoliciesInitialized = true;
-                                return apiPolicyList;
-                            } catch (MGWException e) {
-                                log.error("Exception while loading api Policies " + e);
-                            }
-                            return null;
-                        });
-
-        executorService.schedule(apiPolicyLoadingTask, 0, TimeUnit.SECONDS);
-
-        Runnable subPolicyLoadingTask =
-                new PopulateTask<String, SubscriptionPolicy>(subscriptionPolicyMap,
-                        () -> {
-                            try {
-                                log.debug("Calling loadAllSubscriptionPolicies.");
-                                List<SubscriptionPolicy> subscriptionPolicyList =
-                                        new SubscriptionDataLoaderImpl().loadAllSubscriptionPolicies(tenantDomain);
-                                subscriptionPoliciesInitialized = true;
-                                return subscriptionPolicyList;
-                            } catch (MGWException e) {
-                                log.error("Exception while loading Subscription Policies " + e);
-                            }
-                            return null;
-                        });
-
-        executorService.schedule(subPolicyLoadingTask, 0, TimeUnit.SECONDS);
-
-        Runnable appPolicyLoadingTask =
-                new PopulateTask<String, ApplicationPolicy>(appPolicyMap,
-                        () -> {
-                            try {
-                                log.debug("Calling loadAllAppPolicies.");
-                                List<ApplicationPolicy> applicationPolicyList =
-                                        new SubscriptionDataLoaderImpl().loadAllAppPolicies(tenantDomain);
-                                applicationPoliciesInitialized = true;
-                                return applicationPolicyList;
-                            } catch (MGWException e) {
-                                log.error("Exception while loading Application Policies " + e);
-                            }
-                            return null;
-                        });
-
-        executorService.schedule(appPolicyLoadingTask, 0, TimeUnit.SECONDS);
+    private void initializeLoadingTasks() {
+        SubscriptionDiscoveryClient.getInstance().watchSubscriptions();
+        ApplicationDiscoveryClient.getInstance().watchApplications();
+        ApiListDiscoveryClient.getInstance().watchApiList();
+        ApplicationPolicyDiscoveryClient.getInstance().watchApplicationPolicies();
+        SubscriptionPolicyDiscoveryClient.getInstance().watchSubscriptionPolicies();
+        ApplicationKeyMappingDiscoveryClient.getInstance().watchApplicationKeyMappings();
     }
 
-    private <T extends Policy> T getPolicy(String policyName, int tenantId,
-                                           Map<String, T> policyMap) {
+    public void addSubscriptions(List<org.wso2.gateway.discovery.subscription.Subscription> subscriptionList) {
+        Map<String, Subscription> newSubscriptionMap = new ConcurrentHashMap<>();
 
-        return policyMap.get(SubscriptionDataStoreUtil.getPolicyCacheKey(policyName, tenantId));
-    }
+        for (org.wso2.gateway.discovery.subscription.Subscription subscription : subscriptionList) {
+            Subscription newSubscription = new Subscription();
+            newSubscription.setSubscriptionId(subscription.getSubscriptionId());
+            newSubscription.setPolicyId(subscription.getPolicyId());
+            newSubscription.setApiId(subscription.getApiId());
+            newSubscription.setAppId(subscription.getAppId());
+            newSubscription.setSubscriptionState(subscription.getSubscriptionState());
+            newSubscription.setTimeStamp(subscription.getTimeStamp());
 
-    private class PopulateTask<K, V extends CacheableEntity<K>> implements Runnable {
-
-        private Map<K, V> entityMap;
-        private Supplier<List<V>> supplier;
-
-        PopulateTask(Map<K, V> entityMap, Supplier<List<V>> supplier) {
-
-            this.entityMap = entityMap;
-            this.supplier = supplier;
+            newSubscriptionMap.put(newSubscription.getCacheKey(), newSubscription);
         }
 
-        public void run() {
-
-            List<V> list = supplier.get();
-            HashMap<K, V> tempMap = new HashMap<>();
-
-            if (list != null) {
-                for (V v : list) {
-                    tempMap.put(v.getCacheKey(), v);
-                    if (log.isDebugEnabled()) {
-                        log.debug(String.format("Adding entry Key : %s Value : %s", v.getCacheKey(), v));
-                    }
-
-                    if (!tempMap.isEmpty()) {
-                        entityMap.clear();
-                        entityMap.putAll(tempMap);
-                    }
-                }
-
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("List is null for " + supplier.getClass());
-                }
-            }
+        if (log.isDebugEnabled()) {
+            log.debug("Total Subscriptions in new cache: {}", newSubscriptionMap.size());
         }
+        this.subscriptionMap = newSubscriptionMap;
     }
 
-    public boolean isApisInitialized() {
 
-        return apisInitialized;
+    public void addApplications(List<org.wso2.gateway.discovery.subscription.Application> applicationList) {
+        Map<Integer, Application> newApplicationMap = new ConcurrentHashMap<>();
+
+        for (org.wso2.gateway.discovery.subscription.Application application : applicationList) {
+            Application newApplication = new Application();
+            newApplication.setId(application.getId());
+            newApplication.setName(application.getName());
+            newApplication.setPolicy(application.getPolicy());
+            newApplication.setSubId(application.getSubId());
+            newApplication.setSubName(application.getSubName());
+            newApplication.setTokenType(application.getTokenType());
+            newApplication.setUUID(application.getUuid());
+            application.getAttributesMap().forEach(newApplication::addAttribute);
+
+            newApplicationMap.put(newApplication.getCacheKey(), newApplication);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Total Applications in new cache: {}", newApplicationMap.size());
+        }
+        this.applicationMap = newApplicationMap;
     }
 
-    public boolean isApplicationsInitialized() {
+    public void addApis(List<APIs> apisList) {
+        Map<String, API> newApiMap = new ConcurrentHashMap<>();
 
-        return applicationsInitialized;
+        for (APIs api : apisList) {
+            API newApi = new API();
+            newApi.setApiId(api.getApiId());
+            newApi.setApiName(api.getName());
+            newApi.setApiProvider(api.getProvider());
+            newApi.setApiType(api.getApiType());
+            newApi.setApiVersion(api.getVersion());
+            newApi.setContext(api.getContext());
+            newApi.setApiTier(api.getPolicy());
+
+            newApiMap.put(newApi.getCacheKey(), newApi);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Total Apis in new cache: {}", newApiMap.size());
+        }
+        this.apiMap = newApiMap;
     }
 
-    public boolean isSubscriptionsInitialized() {
+    public void addApplicationPolicies(
+            List<org.wso2.gateway.discovery.subscription.ApplicationPolicy> applicationPolicyList) {
+        Map<String, ApplicationPolicy> newAppPolicyMap = new ConcurrentHashMap<>();
 
-        return subscriptionsInitialized;
+        for (org.wso2.gateway.discovery.subscription.ApplicationPolicy applicationPolicy : applicationPolicyList) {
+            ApplicationPolicy newApplicationPolicy = new ApplicationPolicy();
+            newApplicationPolicy.setId(applicationPolicy.getId());
+            newApplicationPolicy.setQuotaType(applicationPolicy.getQuotaType());
+            newApplicationPolicy.setTenantId(applicationPolicy.getTenantId());
+            newApplicationPolicy.setTierName(applicationPolicy.getName());
+
+            newAppPolicyMap.put(newApplicationPolicy.getCacheKey(), newApplicationPolicy);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Total Application Policies in new cache: {}", newAppPolicyMap.size());
+        }
+        this.appPolicyMap = newAppPolicyMap;
     }
 
-    public boolean isApplicationKeysInitialized() {
+    public void addSubscriptionPolicies(
+            List<org.wso2.gateway.discovery.subscription.SubscriptionPolicy> subscriptionPolicyList) {
+        Map<String, SubscriptionPolicy> newSubscriptionPolicyMap = new ConcurrentHashMap<>();
 
-        return applicationKeysInitialized;
+        for (org.wso2.gateway.discovery.subscription.SubscriptionPolicy subscriptionPolicy : subscriptionPolicyList) {
+            SubscriptionPolicy newSubscriptionPolicy = new SubscriptionPolicy();
+            newSubscriptionPolicy.setId(subscriptionPolicy.getId());
+            newSubscriptionPolicy.setQuotaType(subscriptionPolicy.getQuotaType());
+            newSubscriptionPolicy.setRateLimitCount(subscriptionPolicy.getRateLimitCount());
+            newSubscriptionPolicy.setRateLimitTimeUnit(subscriptionPolicy.getRateLimitTimeUnit());
+            newSubscriptionPolicy.setStopOnQuotaReach(subscriptionPolicy.getStopOnQuotaReach());
+            newSubscriptionPolicy.setTenantId(subscriptionPolicy.getTenantId());
+            newSubscriptionPolicy.setTierName(subscriptionPolicy.getName());
+            newSubscriptionPolicy.setGraphQLMaxComplexity(subscriptionPolicy.getGraphQLMaxComplexity());
+            newSubscriptionPolicy.setGraphQLMaxDepth(subscriptionPolicy.getGraphQLMaxDepth());
+
+            newSubscriptionPolicyMap.put(newSubscriptionPolicy.getCacheKey(), newSubscriptionPolicy);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Total Subscription Policies in new cache: {}", newSubscriptionPolicyMap.size());
+        }
+        this.subscriptionPolicyMap = newSubscriptionPolicyMap;
     }
 
-    public boolean isApplicationPoliciesInitialized() {
+    public void addApplicationKeyMappings(
+            List<org.wso2.gateway.discovery.subscription.ApplicationKeyMapping> applicationKeyMappingList) {
+        Map<ApplicationKeyMappingCacheKey, ApplicationKeyMapping> newApplicationKeyMappingMap =
+                new ConcurrentHashMap<>();
 
-        return applicationPoliciesInitialized;
-    }
+        for (org.wso2.gateway.discovery.subscription.ApplicationKeyMapping applicationKeyMapping :
+                applicationKeyMappingList) {
+            ApplicationKeyMapping mapping = new ApplicationKeyMapping();
+            mapping.setApplicationId(applicationKeyMapping.getApplicationId());
+            mapping.setConsumerKey(applicationKeyMapping.getConsumerKey());
+            mapping.setKeyType(applicationKeyMapping.getKeyType());
+            mapping.setKeyManager(applicationKeyMapping.getKeyManager());
 
-    public boolean isSubscriptionPoliciesInitialized() {
-
-        return subscriptionPoliciesInitialized;
-    }
-
-    public boolean isApiPoliciesInitialized() {
-
-        return apiPoliciesInitialized;
-    }
-
-    public boolean isSubscriptionValidationDataInitialized() {
-
-        return apisInitialized &&
-                applicationsInitialized &&
-                subscriptionsInitialized &&
-                applicationKeysInitialized &&
-                applicationPoliciesInitialized &&
-                subscriptionPoliciesInitialized &&
-                apiPoliciesInitialized;
+            newApplicationKeyMappingMap.put(mapping.getCacheKey(), mapping);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Total Application Key Mappings in new cache: {}", newApplicationKeyMappingMap.size());
+        }
+        this.applicationKeyMappingMap = newApplicationKeyMappingMap;
     }
 
     @Override
@@ -380,6 +300,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             }
         }
     }
+
     @Override
     public void removeSubscription(Subscription subscription) {
         subscriptionMap.remove(subscription.getCacheKey());
@@ -400,6 +321,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         }
 
     }
+
     @Override
     public void removeAPI(API api) {
         apiMap.remove(api.getCacheKey());
@@ -458,7 +380,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             apiPolicyMap.put(apiPolicy.getCacheKey(), policy);
         } catch (DataLoadingException e) {
             log.error("Exception while loading api policy for " + apiPolicy.getName() + " for domain " + tenantDomain,
-                    e);
+                      e);
         }
     }
 

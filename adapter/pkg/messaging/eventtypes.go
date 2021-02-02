@@ -80,7 +80,7 @@ type APIEvent struct {
 
 // ApplicationRegistrationEvent for struct application registration events
 type ApplicationRegistrationEvent struct {
-	ApplicationID int    `json:"applicationId"`
+	ApplicationID int32    `json:"applicationId"`
 	ConsumerKey   string `json:"consumerKey"`
 	KeyType       string `json:"keyType"`
 	KeyManager    string `json:"keyManager"`
@@ -90,7 +90,7 @@ type ApplicationRegistrationEvent struct {
 // ApplicationEvent for struct application events
 type ApplicationEvent struct {
 	UUID              string   `json:"uuid"`
-	ApplicationID     int      `json:"applicationId"`
+	ApplicationID     int32      `json:"applicationId"`
 	ApplicationName   string   `json:"applicationName"`
 	TokenType         string   `json:"tokenType"`
 	ApplicationPolicy string   `json:"applicationPolicy"`
@@ -103,8 +103,8 @@ type ApplicationEvent struct {
 // SubscriptionEvent for struct subscription events
 type SubscriptionEvent struct {
 	SubscriptionID    int    `json:"subscriptionId"`
-	APIID             int    `json:"apiId"`
-	ApplicationID     int    `json:"applicationId"`
+	APIID             int32    `json:"apiId"`
+	ApplicationID     int32    `json:"applicationId"`
 	PolicyID          string `json:"policyId"`
 	SubscriptionState string `json:"subscriptionState"`
 	Event
@@ -120,7 +120,7 @@ type ScopeEvent struct {
 
 // PolicyInfo for struct policy Info events
 type PolicyInfo struct {
-	PolicyID   int    `json:"policyId"`
+	PolicyID   int32    `json:"policyId"`
 	PolicyName string `json:"policyName"`
 	QuotaType  string `json:"quotaType"`
 	PolicyType string `json:"policyType"`
@@ -137,11 +137,11 @@ type APIPolicyEvent struct {
 // SubscriptionPolicyEvent for struct subscriptionPolicy events
 type SubscriptionPolicyEvent struct {
 	PolicyInfo
-	RateLimitCount       int    `json:"rateLimitCount"`
+	RateLimitCount       int32    `json:"rateLimitCount"`
 	RateLimitTimeUnit    string `json:"rateLimitTimeUnit"`
 	StopOnQuotaReach     bool   `json:"stopOnQuotaReach"`
-	GraphQLMaxComplexity int    `json:"graphQLMaxComplexity"`
-	GraphQLMaxDepth      int    `json:"graphQLMaxDepth"`
+	GraphQLMaxComplexity int32    `json:"graphQLMaxComplexity"`
+	GraphQLMaxDepth      int32    `json:"graphQLMaxDepth"`
 }
 
 // KeyManagerEvent for struct
