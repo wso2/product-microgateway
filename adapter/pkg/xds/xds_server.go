@@ -40,7 +40,6 @@ import (
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	oasParser "github.com/wso2/micro-gw/pkg/oasparser"
-	"github.com/wso2/micro-gw/pkg/oasparser/model"
 	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
@@ -228,7 +227,8 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string, environment
 			}
 			openAPIV3Map[apiMapKey] = openAPIV3Struct
 			//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
-			newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
+			// TODO: commented the following line as the implementation is not supported yet.
+			//newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
 		} else {
 			openAPIV2Struct, err := operator.GetOpenAPIV2Struct(jsonContent)
 			if err != nil {
@@ -244,7 +244,8 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string, environment
 				}
 			}
 			openAPIV2Map[apiMapKey] = openAPIV2Struct
-			newLabels = operator.GetXWso2Labels(openAPIV2Struct.Extensions)
+			// TODO: commented the following line as the implementation is not supported yet.
+			//newLabels = operator.GetXWso2Labels(openAPIV2Struct.Extensions)
 		}
 
 	} else if apiType == mgw.WS {
@@ -260,7 +261,8 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string, environment
 		}
 		webSocketAPIMap[apiMapKey] = mgwSwagger
 		// TODO - add label support
-		newLabels = operator.GetXWso2LabelsWebSocket(mgwSwagger)
+		// TODO: commented the following line as the implementation is not supported yet.
+		//newLabels = operator.GetXWso2LabelsWebSocket(mgwSwagger)
 	} else {
 		// Unreachable else condition. Added in case apiType type check fails prior to this function
 		// due to any modifications to the code.

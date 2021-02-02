@@ -254,29 +254,34 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 	}
 
 	c := make(chan SyncAPIResponse)
-	logger.LoggerMsg.Infof("API %s is added/updated to APIList for label %v", updatedAPIID, updatedEnvs)
+	logger.LoggerSync.Infof("API %s is added/updated to APIList for label %v", updatedAPIID, updatedEnvs)
 	// updatedEnvs contains at least a single env. Hence pulling API with a single environment is enough
 	// since API data is same for each of the updatedEnvs.
 	go FetchAPIs(&updatedAPIID, &updatedEnvs[0], c)
 	for {
 		data := <-c
-		logger.LoggerMgw.Debugf("Receing data for an envrionment: %v", string(data.Resp))
+		logger.LoggerSync.Debugf("Receing data for an envrionment: %v", string(data.Resp))
 		if data.Resp != nil {
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
-			logger.LoggerMgw.Info("Pushing data to router and enforcer")
+			logger.LoggerSync.Info("Pushing data to router and enforcer")
 			err := PushAPIProjects(data.Resp, finalEnvs)
 			if err != nil {
-				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
+				logger.LoggerSync.Errorf("Error occurred while pushing API data: %v ", err)
 			}
 			break
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
-			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
+			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
 			go func(d SyncAPIResponse) {
 				// Retry fetching from control plane after a configured time interval
-				logger.LoggerMgw.Debugf("Time Duration for retrying: %v", 5*time.Second)
-				time.Sleep(5 * time.Second)
-				logger.LoggerMgw.Infof("Retrying to fetch API data from control plane.")
+				// Retry fetching from control plane after a configured time interval
+				if conf.ControlPlane.EventHub.RetryInterval == 0 {
+					// Assign default retry interval
+					conf.ControlPlane.EventHub.RetryInterval = 5
+				}
+				logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.EventHub.RetryInterval*time.Second)
+				time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
+				logger.LoggerSync.Infof("Retrying to fetch API data from control plane.")
 				FetchAPIs(&updatedAPIID, &updatedEnvs[0], c)
 			}(data)
 		}
