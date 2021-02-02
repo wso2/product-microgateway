@@ -7,14 +7,14 @@ services:
       - ROUTER_ADMIN_PORT=9000
       - ROUTER_CLUSTER=service_greeter
       - ROUTER_LABEL=default
-      - ROUTER_PRIVATE_KEY_PATH=/home/wso2/security/mg.key
-      - ROUTER_PUBLIC_CERT_PATH=/home/wso2/security/mg.pem
+      - ROUTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
+      - ROUTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
       - ADAPTER_HOST=adapter
       - ADAPTER_PORT=18000
-      - ADAPTER_CA_CERT_PATH=/home/wso2/security/mg.pem
+      - ADAPTER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
       - ENFORCER_HOST=enforcer
       - ENFORCER_PORT=8081
-      - ENFORCER_CA_CERT_PATH=/home/wso2/security/mg.pem
+      - ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
     volumes:
       - ./resources/router/security:/home/wso2/security
     ports:

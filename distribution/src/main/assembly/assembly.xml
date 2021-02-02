@@ -74,11 +74,15 @@
         </file>
         <file>
             <source>../resources/security/mg.key</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security/keystore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security/keystore</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security/truststore</outputDirectory>
         </file>
     </files>
 </assembly>

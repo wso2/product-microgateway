@@ -32,8 +32,8 @@ clusterTimeoutInSeconds = 20
 listenerTLSEnabled = true
 
 [envoy.keystore]
-certPath = "/home/wso2/security/mg.pem"
-keyPath = "/home/wso2/security/mg.key"
+certPath = "/home/wso2/security/keystore/mg.pem"
+keyPath = "/home/wso2/security/keystore/mg.key"
 
 [envoy.upstream]
 [envoy.upstream.tls]
