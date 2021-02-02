@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Holds the response data to build the response object to be sent to the envoy proxy.
  */
-public class ResponseObject {
+public class ResponseObject implements Context{
     private int statusCode;
     private String errorCode;
     private String errorDescription;

@@ -2,7 +2,7 @@ package org.wso2.micro.gateway.enforcer.api;
 
 
 
-public class WebSocketMetadata {
+public class WebSocketMetadataContext implements Context{
 
     private final String streamId;
     private final String applicationId;
@@ -15,7 +15,7 @@ public class WebSocketMetadata {
     private final String subscriberTenantDomain;
     private final String apiName;
 
-    private WebSocketMetadata(Builder builder){
+    private WebSocketMetadataContext(Builder builder){
         this.streamId = builder.streamId;
         this.applicationId = builder.applicationId;
         this.applicationTier = builder.applicationTier;
@@ -89,8 +89,8 @@ public class WebSocketMetadata {
             return this;
         }
 
-        public WebSocketMetadata build() {
-            return new WebSocketMetadata(this);
+        public WebSocketMetadataContext build() {
+            return new WebSocketMetadataContext(this);
         }
 
     }

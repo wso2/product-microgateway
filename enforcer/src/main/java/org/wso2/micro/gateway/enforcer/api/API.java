@@ -35,18 +35,19 @@ public interface API <T, S>{
 
     String init(Api api);
 
-    S process(T requestContext);
+    S process(T t);
 
     APIConfig getAPIConfig();
 
-    default boolean executeFilterChain(RequestContext requestContext) {
+    default boolean executeFilterChain(T t) {
         boolean proceed;
         for (Filter filter : getFilters()) {
-            proceed = filter.handleRequest(requestContext);
+            proceed = filter.handleRequest(t);
             if (!proceed) {
                 return false;
             }
         }
         return true;
     }
+
 }

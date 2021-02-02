@@ -29,7 +29,7 @@ import org.wso2.micro.gateway.enforcer.constants.HttpConstants;
 /**
  * Cors Filter for failed preflight requests.
  */
-public class CorsFilter implements Filter {
+public class CorsFilter implements Filter<RequestContext> {
 
     private static final Logger logger = LogManager.getLogger(CorsFilter.class);
 

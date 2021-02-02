@@ -28,7 +28,7 @@ import java.util.TreeMap;
  * Holds the set of meta data related to current request flowing through the gateway. This context should be shared
  * through out the complete request flow through the gateway filter chain.
  */
-public class RequestContext {
+public class RequestContext implements Context{
 
     private API mathedAPI;
     private String requestPath;

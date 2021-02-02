@@ -79,8 +79,12 @@ public class JWTAuthenticator implements Authenticator {
         String name = requestContext.getMathedAPI().getAPIConfig().getName();
         String version = requestContext.getMathedAPI().getAPIConfig().getVersion();
         context = context + "/" + version;
-        String matchingResource = requestContext.getMatchedResourcePath().getPath();
-        String httpMethod = requestContext.getMatchedResourcePath().getMethod().toString();
+        String matchingResource = null;
+        String httpMethod = null;
+        if(requestContext.getMatchedResourcePath() != null){
+            matchingResource = requestContext.getMatchedResourcePath().getPath();
+            httpMethod = requestContext.getMatchedResourcePath().getMethod().toString();
+        }
         SignedJWTInfo signedJWTInfo;
         try {
             signedJWTInfo = getSignedJwt(jwtToken);

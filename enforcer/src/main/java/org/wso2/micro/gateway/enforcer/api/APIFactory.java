@@ -64,10 +64,18 @@ public class APIFactory {
         ConcurrentHashMap<String, API> newApis = new ConcurrentHashMap<>();
 
         for (Api api : apis) {
-            RestAPI enforcerApi = new RestAPI();
-            enforcerApi.init(api);
-            String apiKey = getApiKey(enforcerApi);
-            newApis.put(apiKey, enforcerApi);
+            if(api.getResourcesCount() != 0){
+                RestAPI enforcerApi = new RestAPI();
+                enforcerApi.init(api);
+                String apiKey = getApiKey(enforcerApi);
+                newApis.put(apiKey, enforcerApi);
+            }else{
+                WebSocketAPI webSocketAPI = new WebSocketAPI();
+                webSocketAPI.init(api);
+                String apiKey = getApiKey(webSocketAPI);
+                newApis.put(apiKey, webSocketAPI);
+            }
+
         }
 
         if (logger.isDebugEnabled()) {

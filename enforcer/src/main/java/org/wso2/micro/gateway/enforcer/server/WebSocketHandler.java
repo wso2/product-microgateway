@@ -12,21 +12,21 @@ public class WebSocketHandler implements RequestHandler<RateLimitRequest, WebSoc
     private static final Logger logger = LogManager.getLogger(WebSocketHandler.class);
     @Override
     public WebSocketResponseObject process(RateLimitRequest request) {
-        API<WebSocketMetadata, WebSocketResponseObject> matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
+        API<WebSocketMetadataContext, WebSocketResponseObject> matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
         if(matchedAPI == null){
             return WebSocketResponseObject.UNKNOWN;
         } else if (logger.isDebugEnabled()) {
             APIConfig api = matchedAPI.getAPIConfig();
             logger.debug("API {}/{} found in the cache", api.getBasePath(), api.getVersion());
         }
-        WebSocketMetadata webSocketMetadata = buildMetadataContext(matchedAPI, request);
+        WebSocketMetadataContext webSocketMetadata = buildMetadataContext(matchedAPI, request);
 
         return matchedAPI.process(webSocketMetadata);
     }
 
-    private WebSocketMetadata buildMetadataContext(API<WebSocketMetadata, WebSocketResponseObject> api, RateLimitRequest rateLimitRequest){
+    private WebSocketMetadataContext buildMetadataContext(API<WebSocketMetadataContext, WebSocketResponseObject> api, RateLimitRequest rateLimitRequest){
         String streamId = rateLimitRequest.getMetadataContext().getFilterMetadataMap().
                 get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.WEBSOCKET_STREAM_ID).getStringValue();
-        return new WebSocketMetadata.Builder(streamId).build();
+        return new WebSocketMetadataContext.Builder(streamId).build();
     }
 }
