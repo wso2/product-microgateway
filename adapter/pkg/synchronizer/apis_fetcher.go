@@ -31,6 +31,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/pkg/auth"
@@ -178,7 +179,7 @@ func FetchAPIs(id *string, gwLabel *string, c chan SyncAPIResponse) {
 // byte slice. This method ensures to update the enforcer and router using entries inside the
 // downloaded apis.zip one by one.
 // If the updating envoy or enforcer fails, this method returns an error, if not error would be nil.
-func PushAPIProjects(payload []byte) error {
+func PushAPIProjects(payload []byte, environments []string) error {
 	// Reading the root zip
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	if err != nil {
@@ -205,7 +206,7 @@ func PushAPIProjects(payload []byte) error {
 			//Read the files inside each xxxx-api.zip
 			r, err := ioutil.ReadAll(f)
 			// Pass the byte slice for the XDS APIs to push it to the enforcer and router
-			err = apiServer.ApplyAPIProject(r)
+			err = apiServer.ApplyAPIProject(r, environments)
 			if err != nil {
 				logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 			}
@@ -213,4 +214,72 @@ func PushAPIProjects(payload []byte) error {
 	}
 	// Error nil for successful execution
 	return nil
+}
+
+// FetchAPIsFromControlPlane method pulls API data for a given APIs according to a
+// given API ID and a list of environments that API has been deployed to.
+// updatedAPIID is the corresponding ID of the API in the form of an UUID
+// updatedEnvs contains the list of environments the API deployed to.
+func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
+	// Read configurations and derive the eventHub details
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		// This has to be error. For debugging purpose info
+		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
+	}
+	// Take the configured labels from the adapter
+	configuredEnvs := conf.ControlPlane.EventHub.EnvironmentLabels
+	//finalEnvs contains the actual envrionments that the adapter should update
+	finalEnvs := []string{}
+	if len(configuredEnvs) > 0 {
+		// If the configuration file contains environment list, then check if then check if the
+		// affected environments are present in the provided configs. If so, add that environment
+		// to the finalEnvs slice
+		for _, updatedEnv := range updatedEnvs {
+			for _, configuredEnv := range configuredEnvs {
+				if updatedEnv == configuredEnv {
+					finalEnvs = append(finalEnvs, updatedEnv)
+				}
+			}
+		}
+	} else {
+		// If the labels are not configured, publish the APIS to the default environment
+		finalEnvs = append(finalEnvs, "default")
+	}
+
+	if len(finalEnvs) == 0 {
+		// If the finalEnvs is empty -> it means, the configured envrionments  does not contains the affected/updated
+		// environments. If that's the case, then APIs should not be fetched from the adapter.
+		return
+	}
+
+	c := make(chan SyncAPIResponse)
+	logger.LoggerMsg.Infof("API %s is added/updated to APIList for label %v", updatedAPIID, updatedEnvs)
+	// updatedEnvs contains at least a single env. Hence pulling API with a single environment is enough
+	// since API data is same for each of the updatedEnvs.
+	go FetchAPIs(&updatedAPIID, &updatedEnvs[0], c)
+	for {
+		data := <-c
+		logger.LoggerMgw.Debugf("Receing data for an envrionment: %v", string(data.Resp))
+		if data.Resp != nil {
+			// For successfull fetches, data.Resp would return a byte slice with API project(s)
+			logger.LoggerMgw.Info("Pushing data to router and enforcer")
+			err := PushAPIProjects(data.Resp, finalEnvs)
+			if err != nil {
+				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
+			}
+			break
+		} else {
+			// Keep the iteration still until all the envrionment response properly.
+			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
+			go func(d SyncAPIResponse) {
+				// Retry fetching from control plane after a configured time interval
+				logger.LoggerMgw.Debugf("Time Duration for retrying: %v", 5*time.Second)
+				time.Sleep(5 * time.Second)
+				logger.LoggerMgw.Infof("Retrying to fetch API data from control plane.")
+				FetchAPIs(&updatedAPIID, &updatedEnvs[0], c)
+			}(data)
+		}
+	}
+
 }

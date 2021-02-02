@@ -28,6 +28,7 @@ import (
 	"github.com/streadway/amqp"
 	logger "github.com/wso2/micro-gw/loggers"
 	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
+	"github.com/wso2/micro-gw/pkg/synchronizer"
 )
 
 // constant variables
@@ -135,6 +136,9 @@ func handleAPIEvents(data []byte, eventType string) {
 			APIList = append(APIList, api)
 			logger.LoggerMsg.Infof("API %s is added/updated to APIList", apiEvent.APIID)
 		}
+
+		go synchronizer.FetchAPIsFromControlPlane(apiEvent.APIID, apiEvent.GatewayLabels)
+
 	}
 	fmt.Println(APIList)
 }

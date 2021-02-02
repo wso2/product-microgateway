@@ -196,7 +196,7 @@ func GetEnforcerApplicationKeyMappingCache() cachev3.SnapshotCache {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string) {
+func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string, environments []string) {
 	var apiMapKey string
 	var newLabels []string
 
@@ -266,7 +266,9 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string) {
 		// due to any modifications to the code.
 		logger.LoggerXds.Info("API type is not cuurently supported by WSO2 micro-gateway")
 	}
-
+	//:TODO: since currently labels are not taking from x-wso2-label, I have made it to be taken from the method
+	// argument.
+	newLabels = environments
 	logger.LoggerXds.Infof("Added/Updated the content under OpenAPI Key : %v", apiMapKey)
 	logger.LoggerXds.Debugf("Newly added labels for the OpenAPI Key : %v are %v", apiMapKey, newLabels)
 	oldLabels, _ := openAPIEnvoyMap[apiMapKey]
