@@ -36,5 +36,17 @@
             <source>target/micro-gw-ubuntu</source>
             <outputDirectory></outputDirectory>
         </file>
+        <file>
+            <source>../resources/security/mg.key</source>
+            <outputDirectory>security/keystore</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>security/keystore</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>security/truststore</outputDirectory>
+        </file>
     </files>
 </assembly>

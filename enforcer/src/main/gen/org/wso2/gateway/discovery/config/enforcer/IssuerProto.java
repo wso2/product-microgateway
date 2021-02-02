@@ -29,15 +29,15 @@ public final class IssuerProto {
   static {
     java.lang.String[] descriptorData = {
       "\n+wso2/discovery/config/enforcer/issuer." +
-      "proto\022\036wso2.discovery.config.enforcer\"\211\001" +
+      "proto\022\036wso2.discovery.config.enforcer\"\246\001" +
       "\n\006Issuer\022\014\n\004name\030\001 \001(\t\022\016\n\006issuer\030\002 \001(\t\022\030" +
       "\n\020certificateAlias\030\003 \001(\t\022\017\n\007jwksURL\030\004 \001(" +
       "\t\022\034\n\024validateSubscription\030\005 \001(\010\022\030\n\020consu" +
-      "merKeyClaim\030\006 \001(\tB\213\001\n*org.wso2.gateway.d" +
-      "iscovery.config.enforcerB\013IssuerProtoP\001Z" +
-      "Ngithub.com/envoyproxy/go-control-plane/" +
-      "wso2/discovery/config/enforcer;enforcerb" +
-      "\006proto3"
+      "merKeyClaim\030\006 \001(\t\022\033\n\023certificateFilePath" +
+      "\030\007 \001(\tB\213\001\n*org.wso2.gateway.discovery.co" +
+      "nfig.enforcerB\013IssuerProtoP\001ZNgithub.com" +
+      "/envoyproxy/go-control-plane/wso2/discov" +
+      "ery/config/enforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -48,7 +48,7 @@ public final class IssuerProto {
     internal_static_wso2_discovery_config_enforcer_Issuer_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Issuer_descriptor,
-        new java.lang.String[] { "Name", "Issuer", "CertificateAlias", "JwksURL", "ValidateSubscription", "ConsumerKeyClaim", });
+        new java.lang.String[] { "Name", "Issuer", "CertificateAlias", "JwksURL", "ValidateSubscription", "ConsumerKeyClaim", "CertificateFilePath", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

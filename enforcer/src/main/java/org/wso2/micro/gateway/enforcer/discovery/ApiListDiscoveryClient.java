@@ -24,16 +24,16 @@ import io.envoyproxy.envoy.config.core.v3.Node;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryRequest;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.service.subscription.ApiListDiscoveryServiceGrpc;
 import org.wso2.gateway.discovery.subscription.APIList;
 import org.wso2.gateway.discovery.subscription.APIs;
-import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataStoreImpl;
+import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,16 +74,16 @@ public class ApiListDiscoveryClient {
 
     private ApiListDiscoveryClient(String host, int port) {
         this.subscriptionDataStore = SubscriptionDataStoreImpl.getInstance();
-        this.channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
+        this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
         this.stub = ApiListDiscoveryServiceGrpc.newStub(channel);
-        this.nodeId = ReferenceHolder.getInstance().getNodeLabel();
+        this.nodeId = ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
     }
 
     public static ApiListDiscoveryClient getInstance() {
         if (instance == null) {
-            String sdsHost = System.getenv().get(Constants.ADAPTER_HOST);
-            int sdsPort = Integer.parseInt(System.getenv().get(Constants.ADAPTER_XDS_PORT));
+            String sdsHost = ConfigHolder.getInstance().getEnvVarConfig().getAdapterHost();
+            int sdsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new ApiListDiscoveryClient(sdsHost, sdsPort);
         }
         return instance;

@@ -373,6 +373,7 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 			Name:                 issuer.Name,
 			ValidateSubscription: issuer.ValidateSubscription,
 			JwksURL:              issuer.JwksURL,
+			CertificateFilePath:  issuer.CertificateFilePath,
 		}
 		issuers = append(issuers, jwtConfig)
 	}
@@ -391,16 +392,6 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 	}
 
 	return &enforcer.Config{
-		Truststore: &enforcer.CertStore{
-			Location: config.Enforcer.Truststore.Location,
-			Password: config.Enforcer.Truststore.Password,
-			Type:     config.Enforcer.Truststore.StoreType,
-		},
-		Keystore: &enforcer.CertStore{
-			Location: config.Enforcer.Keystore.Location,
-			Password: config.Enforcer.Keystore.Password,
-			Type:     config.Enforcer.Keystore.StoreType,
-		},
 		ApimCredentials: &enforcer.AmCredentials{
 			Username: config.Enforcer.ApimCredentials.Username,
 			Password: config.Enforcer.ApimCredentials.Password,

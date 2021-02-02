@@ -19,19 +19,19 @@ package subscription
 
 import (
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
-	"github.com/wso2/micro-gw/config"
-	logger "github.com/wso2/micro-gw/loggers"
-	"github.com/wso2/micro-gw/pkg/auth"
-	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
-	"github.com/wso2/micro-gw/pkg/xds"
 	"io/ioutil"
 	"net/http"
 	"reflect"
 	"strconv"
-	"time"
+
+	"github.com/wso2/micro-gw/config"
+	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/micro-gw/pkg/auth"
+	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
+	"github.com/wso2/micro-gw/pkg/tlsutils"
+	"github.com/wso2/micro-gw/pkg/xds"
 )
 
 const (
@@ -112,7 +112,7 @@ func LoadSubscriptionData(configFile *config.Config) {
 			err := json.Unmarshal(response.Payload, &newResponse)
 
 			if err != nil {
-				logger.LoggerSync.Errorf("Error occurred while unmarshalling the response received for: "+response.Endpoint, err)
+				logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the response received for: "+response.Endpoint, err)
 			} else {
 				switch t := newResponse.(type) {
 				case *resourceTypes.SubscriptionList:
@@ -134,7 +134,7 @@ func LoadSubscriptionData(configFile *config.Config) {
 					appKeyMappingList = newResponse.(*resourceTypes.ApplicationKeyMappingList)
 					xds.UpdateEnforcerApplicationKeyMappings(xds.GenerateApplicationKeyMappingList(appKeyMappingList))
 				default:
-					logger.LoggerSync.Debugf("Unknown type %T", t)
+					logger.LoggerSubscription.Debugf("Unknown type %T", t)
 				}
 			}
 		}
@@ -149,30 +149,16 @@ func invokeService(endpoint string, responseType interface{}, c chan response, r
 
 	if err != nil {
 		c <- response{err, nil, endpoint, responseType}
-		logger.LoggerSync.Errorf("Error occurred while creating an HTTP request for serviceURL: "+serviceURL, err)
+		logger.LoggerSubscription.Errorf("Error occurred while creating an HTTP request for serviceURL: "+serviceURL, err)
 		return
 	}
 
 	// Check if TLS is enabled
 	tlsEnabled := conf.ControlPlane.EventHub.TLSEnabled
-	logger.LoggerSync.Debugf("TLS Enabled: %v", tlsEnabled)
+	logger.LoggerSubscription.Debugf("TLS Enabled: %v", tlsEnabled)
 	tr := &http.Transport{}
 	if tlsEnabled {
-		// Read the cert from the defined path
-		certPath := conf.ControlPlane.EventHub.PublicCertPath
-		logger.LoggerSync.Infof("Reading the cert at %v", certPath)
-
-		if certPath == "" {
-			// If cert is defined, read the default cert path
-			logger.LoggerSync.Infof("Reading the default cert at %v", defaultCertPath)
-			certPath = defaultCertPath
-		}
-		caCert, err := ioutil.ReadFile(certPath)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error occurred when reading the cert form %v : %v", certPath, err)
-		}
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
+		caCertPool := tlsutils.GetTrustedCertPool()
 		tr = &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
 		}
@@ -191,44 +177,26 @@ func invokeService(endpoint string, responseType interface{}, c chan response, r
 	req.Header.Set(authorizationHeaderDefault, authorizationBasic+accessToken)
 
 	// Make the request
-	logger.LoggerSync.Debug("Sending the request to the control plane ")
+	logger.LoggerSubscription.Debug("Sending the request to the control plane ")
 	resp, err := client.Do(req)
 
 	if err != nil {
-		logger.LoggerMgw.Debugf("Time Duration for retrying: %v", conf.ControlPlane.EventHub.RetryInterval*time.Second)
-		time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
-		retryAttempt++
-		invokeService(endpoint, responseType, c, retryAttempt)
-		if retryAttempt >= retryCount {
-			c <- response{err, nil, endpoint, responseType}
-			logger.LoggerSync.Errorf("Error occurred while calling the REST API: "+serviceURL, err)
-			return
-		}
+		c <- response{err, nil, endpoint, responseType}
+		logger.LoggerSubscription.Errorf("Error occurred while calling the REST API: "+serviceURL, err)
+		return
 	}
 
 	responseBytes, err := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode == http.StatusOK {
 		if err != nil {
-			logger.LoggerMgw.Debugf("Time Duration for retrying: %v", conf.ControlPlane.EventHub.RetryInterval*time.Second)
-			time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
-			retryAttempt++
-			invokeService(endpoint, responseType, c, retryAttempt)
-			if retryAttempt >= retryCount {
-				c <- response{err, nil, endpoint, responseType}
-				logger.LoggerSync.Errorf("Error occurred while reading the response received for: "+serviceURL, err)
-				return
-			}
+			c <- response{err, nil, endpoint, responseType}
+			logger.LoggerSubscription.Errorf("Error occurred while reading the response received for: "+serviceURL, err)
+			return
 		}
 		c <- response{nil, responseBytes, endpoint, responseType}
 
 	} else {
-		logger.LoggerMgw.Debugf("Time Duration for retrying: %v", conf.ControlPlane.EventHub.RetryInterval*time.Second)
-		time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
-		retryAttempt++
-		invokeService(endpoint, responseType, c, retryAttempt)
-		if retryAttempt >= retryCount {
-			c <- response{errors.New(string(responseBytes)), nil, endpoint, responseType}
-			logger.LoggerSync.Errorf("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode), err)
-		}
+		c <- response{errors.New(string(responseBytes)), nil, endpoint, responseType}
+		logger.LoggerSubscription.Errorf("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode), err)
 	}
 }

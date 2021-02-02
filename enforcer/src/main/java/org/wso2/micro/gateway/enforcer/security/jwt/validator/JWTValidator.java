@@ -139,6 +139,7 @@ public class JWTValidator {
                     RSAPublicKey rsaPublicKey = (RSAPublicKey) tokenIssuer.getCertificate().getPublicKey();;
                     return JWTUtil.verifyTokenSignature(signedJWT, rsaPublicKey);
                 } else {
+                    //TODO: (VirajSalaka) Come up with a fix
                     return JWTUtil.verifyTokenSignature(signedJWT, keyID);
                 }
             }

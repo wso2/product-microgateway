@@ -26,7 +26,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"crypto/tls"
-	"crypto/x509"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -35,6 +34,7 @@ import (
 
 	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/pkg/auth"
+	"github.com/wso2/micro-gw/pkg/tlsutils"
 
 	logger "github.com/wso2/micro-gw/loggers"
 	apiServer "github.com/wso2/micro-gw/pkg/api"
@@ -84,21 +84,7 @@ func FetchAPIs(id *string, gwLabel *string, c chan SyncAPIResponse) {
 	logger.LoggerSync.Debugf("TLS Enabled: %v", tlsEnabled)
 	tr := &http.Transport{}
 	if tlsEnabled {
-		// Read the cert from the defined path
-		certPath := ehConfigs.PublicCertPath
-		logger.LoggerSync.Infof("Reading the cert at %v", certPath)
-
-		if certPath == "" {
-			// If cert is defined, read the default cert path
-			logger.LoggerSync.Infof("Reading the defaul cert at %v", defaultCertPath)
-			certPath = defaultCertPath
-		}
-		caCert, err := ioutil.ReadFile(certPath)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error occurred when readin the cert form %v : %v", certPath, err)
-		}
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
+		caCertPool := tlsutils.GetTrustedCertPool()
 		tr = &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
 		}

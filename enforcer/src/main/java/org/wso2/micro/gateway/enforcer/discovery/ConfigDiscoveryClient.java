@@ -22,27 +22,54 @@ import io.envoyproxy.envoy.config.core.v3.Node;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryRequest;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.service.config.ConfigDiscoveryServiceGrpc;
-import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
+import org.wso2.micro.gateway.enforcer.config.EnvVarConfig;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLException;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Client to communicate with configuration discovery service at the adapter.
  */
 public class ConfigDiscoveryClient {
+    private static final Logger log = LogManager.getLogger(ConfigDiscoveryClient.class);
     private final ManagedChannel channel;
     private final ConfigDiscoveryServiceGrpc.ConfigDiscoveryServiceBlockingStub blockingStub;
     private String nodeId;
 
-    public ConfigDiscoveryClient(String host, int port) {
-        channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().enableRetry().build();
+    public ConfigDiscoveryClient(EnvVarConfig envVarConfig, TrustManagerFactory trustManagerFactory) {
+        File certFile = Paths.get(envVarConfig.getEnforcerPublicKeyPath()).toFile();
+        File keyFile = Paths.get(envVarConfig.getEnforcerPrivateKeyPath()).toFile();
+        SslContext sslContext = null;
+        try {
+            sslContext = GrpcSslContexts.forClient()
+                    .trustManager(trustManagerFactory)
+                    .keyManager(certFile, keyFile)
+                    .build();
+            // TODO: (VirajSalaka) panic the enforcer
+        } catch (SSLException e) {
+            log.error("Error while generating SSL Context.", e);
+        }
+        channel = NettyChannelBuilder
+                .forAddress(envVarConfig.getAdapterHost(), Integer.parseInt(envVarConfig.getAdapterXdsPort()))
+                .useTransportSecurity()
+                .sslContext(sslContext)
+                .overrideAuthority(envVarConfig.getAdapterHostName())
+                .build();
         this.blockingStub = ConfigDiscoveryServiceGrpc.newBlockingStub(channel);
-        nodeId = ReferenceHolder.getInstance().getNodeLabel();
+        nodeId = envVarConfig.getEnforcerLabel();
     }
 
     public Config requestInitConfig() throws DiscoveryException {

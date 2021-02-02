@@ -59,6 +59,12 @@ public class HttpsPostMultipart {
         conn.setReadTimeout(30000);
         conn.setConnectTimeout(15000);
         conn.setDoInput(true);
+        conn.setHostnameVerifier(new HostnameVerifier() {
+            @Override
+            public boolean verify(String s, SSLSession sslSession) {
+                return true;
+            }
+        });
 
         conn.setAllowUserInteraction(false);
         conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);

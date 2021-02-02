@@ -6,6 +6,19 @@ services:
       options:
         max-size: "20m"
         max-file: "5"
+    environment:
+      - ROUTER_ADMIN_HOST=0.0.0.0
+      - ROUTER_ADMIN_PORT=9000
+      - ROUTER_CLUSTER=default_cluster
+      - ROUTER_LABEL=default
+      - ROUTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
+      - ROUTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
+      - ADAPTER_HOST=adapter
+      - ADAPTER_PORT=18000
+      - ADAPTER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
+      - ENFORCER_HOST=enforcer
+      - ENFORCER_PORT=8081
+      - ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
     volumes:
       - ./resources/router/security:/home/wso2/security
     ports:
@@ -33,9 +46,15 @@ services:
         max-size: "20m"
         max-file: "5"
     volumes:  
-      - ./resources/enforcer/security:/home/wso2/mg/security
+      - ./resources/enforcer/security:/home/wso2/security
       - ./resources/conf:/home/wso2/conf
+    links:
+      - adapter
     environment:
+      - ENFORCER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
+      - ENFORCER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
+      - TRUSTED_CA_CERTS_PATH=/home/wso2/security/truststore
+      - ADAPTER_HOST_NAME=adapter
       - ADAPTER_HOST=adapter
       - ADAPTER_XDS_PORT=18000
       - ENFORCER_LABEL=enforcer

@@ -23,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.config.enforcer.AmCredentials;
 import org.wso2.gateway.discovery.config.enforcer.AuthService;
-import org.wso2.gateway.discovery.config.enforcer.CertStore;
 import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.config.enforcer.EventHub;
 import org.wso2.gateway.discovery.config.enforcer.Issuer;
@@ -35,10 +34,9 @@ import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
+import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -47,6 +45,7 @@ import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Properties;
 
+import javax.net.ssl.TrustManagerFactory;
 /**
  * Configuration holder class for Microgateway.
  */
@@ -56,8 +55,11 @@ public class ConfigHolder {
     private static final Logger logger = LogManager.getLogger(ConfigHolder.class);
 
     private static ConfigHolder configHolder;
+    private EnvVarConfig envVarConfig = new EnvVarConfig();
     EnforcerConfig config = new EnforcerConfig();
     private KeyStore trustStore = null;
+    private KeyStore trustStoreForJWT = null;
+    private TrustManagerFactory trustManagerFactory = null;
 
     private ConfigHolder() {
         init();
@@ -75,9 +77,15 @@ public class ConfigHolder {
      * Initialize the configuration provider class by reading the Mgw Configuration file.
      */
     private void init() {
-        String cdsHost = System.getenv().get(Constants.ADAPTER_HOST);
-        int cdsPort = Integer.parseInt(System.getenv().get(Constants.ADAPTER_XDS_PORT));
-        ConfigDiscoveryClient cds = new ConfigDiscoveryClient(cdsHost, cdsPort);
+        //Load Client Trust Store
+        loadTrustStore();
+        try {
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(trustStore);
+        } catch (NoSuchAlgorithmException | KeyStoreException e) {
+            logger.error("Error while initiating trustManagerFactory.", e);
+        }
+        ConfigDiscoveryClient cds = new ConfigDiscoveryClient(envVarConfig, trustManagerFactory);
 
         try {
             Config cdsConfig = cds.requestInitConfig();
@@ -97,8 +105,6 @@ public class ConfigHolder {
         populateEventHub(config.getEventhub());
         // load auth service
         populateAuthService(config.getAuthService());
-        //Load Client Trust Store
-        loadTrustStore(config.getTruststore());
 
         // Read jwt token configuration
         populateJWTIssuerConfiguration(config.getJwtTokenConfigList());
@@ -137,7 +143,13 @@ public class ConfigHolder {
         config.setEventHub(eventHubDto);
     }
 
-    private void populateJWTIssuerConfiguration(List<Issuer> cdsIssuers)  {
+    private void populateJWTIssuerConfiguration(List<Issuer> cdsIssuers) {
+        try {
+            setTrustStoreForJWT(KeyStore.getInstance(KeyStore.getDefaultType()));
+            getTrustStoreForJWT().load(null);
+        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
+            logger.error("Error while initiaing the truststore for JWT related public certificates", e);
+        }
         for (Issuer jwtIssuer : cdsIssuers) {
             TokenIssuerDto issuerDto = new TokenIssuerDto(jwtIssuer.getIssuer());
 
@@ -147,14 +159,14 @@ public class ConfigHolder {
             issuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
 
             String certificateAlias = jwtIssuer.getCertificateAlias();
-            try {
-                if (trustStore.getCertificate(certificateAlias) != null) {
-                    Certificate issuerCertificate = trustStore.getCertificate(certificateAlias);
-                    issuerDto.setCertificate(issuerCertificate);
+            if (certificateAlias != null) {
+                try {
+                    Certificate cert = TLSUtils.getCertificateFromFile(jwtIssuer.getCertificateFilePath());
+                    getTrustStoreForJWT().setCertificateEntry(certificateAlias, cert);
+                    issuerDto.setCertificate(cert);
+                } catch (KeyStoreException | CertificateException | IOException e) {
+                    logger.error("Error while adding certificates to the JWT related Truststore", e);
                 }
-            } catch (KeyStoreException e) {
-                logger.error("Error while loading certificate with alias " + certificateAlias + " from the trust store",
-                        e);
             }
 
             issuerDto.setName(jwtIssuer.getName());
@@ -164,19 +176,16 @@ public class ConfigHolder {
         }
     }
 
-    private void loadTrustStore(CertStore cdsTruststore) {
-        String trustStoreLocation = cdsTruststore.getLocation();
-        String trustStorePassword = cdsTruststore.getPassword();
-        if (!trustStoreLocation.isEmpty() && !trustStorePassword.isEmpty()) {
-            try {
-                InputStream inputStream = new FileInputStream(trustStoreLocation);
-                trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                trustStore.load(inputStream, trustStorePassword.toCharArray());
-            } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
-                logger.error("Error in loading trust store.", e);
-            }
-        } else {
-            logger.error("Error in loading trust store. Configurations are not set.");
+    private void loadTrustStore() {
+        try {
+            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(null);
+            String truststoreFilePath = getEnvVarConfig().getTrustedAdapterCertsPath();
+            TLSUtils.addCertsToTruststore(trustStore, truststoreFilePath);
+            trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(trustStore);
+        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
+            logger.error("Error in loading certs to the trust store.", e);
         }
     }
 
@@ -199,4 +208,23 @@ public class ConfigHolder {
         return trustStore;
     }
 
+    public KeyStore getTrustStoreForJWT() {
+        return trustStoreForJWT;
+    }
+
+    public void setTrustStoreForJWT(KeyStore trustStoreForJWT) {
+        this.trustStoreForJWT = trustStoreForJWT;
+    }
+
+    public TrustManagerFactory getTrustManagerFactory() {
+        return trustManagerFactory;
+    }
+
+    public void setTrustManagerFactory(TrustManagerFactory trustManagerFactory) {
+        this.trustManagerFactory = trustManagerFactory;
+    }
+
+    public EnvVarConfig getEnvVarConfig() {
+        return envVarConfig;
+    }
 }
