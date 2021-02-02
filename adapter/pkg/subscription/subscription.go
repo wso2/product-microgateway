@@ -19,7 +19,6 @@ package subscription
 
 import (
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -31,6 +30,7 @@ import (
 	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/auth"
 	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
+	"github.com/wso2/micro-gw/pkg/tlsutils"
 	"github.com/wso2/micro-gw/pkg/xds"
 )
 
@@ -158,21 +158,7 @@ func invokeService(endpoint string, responseType interface{}, c chan response, r
 	logger.LoggerSubscription.Debugf("TLS Enabled: %v", tlsEnabled)
 	tr := &http.Transport{}
 	if tlsEnabled {
-		// Read the cert from the defined path
-		certPath := conf.ControlPlane.EventHub.PublicCertPath
-		logger.LoggerSync.Infof("Reading the cert at %v", certPath)
-
-		if certPath == "" {
-			// If cert is defined, read the default cert path
-			logger.LoggerSync.Infof("Reading the default cert at %v", defaultCertPath)
-			certPath = defaultCertPath
-		}
-		caCert, err := ioutil.ReadFile(certPath)
-		if err != nil {
-			logger.LoggerSync.Errorf("Error occurred when reading the cert form %v : %v", certPath, err)
-		}
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
+		caCertPool := tlsutils.GetTrustedCertPool()
 		tr = &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
 		}

@@ -191,7 +191,6 @@ type controlPlane struct {
 		EnvironmentLabels       []string      `toml:"environmentLabels"`
 		RetryInterval           time.Duration `toml:"retryInterval"`
 		TLSEnabled              bool          `toml:"tlsEnabled"`
-		PublicCertPath          string        `toml:"publicCertPath"`
 		JmsConnectionParameters struct {
 			EventListeningEndpoints string `toml:"eventListeningEndpoints"`
 		} `toml:"jmsConnectionParameters"`

@@ -110,7 +110,6 @@ password="admin"
 environmentLabels = ["Production and Sandbox"]
 retryInterval = 5
 tlsEnabled=false
-publicCertPath="/home/wso2/security/truststore/controlplane.pem"
 # Message broker connection URL of the control plane
 [controlPlane.eventHub.jmsConnectionParameters]
 eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
