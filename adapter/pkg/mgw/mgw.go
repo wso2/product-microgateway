@@ -57,10 +57,6 @@ var (
 	alsPort     uint
 
 	mode string
-
-	crtFile string
-	keyFile string
-	caFile  string
 )
 
 const (
@@ -84,7 +80,6 @@ func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, port 
 
 	cert, err := tlsutils.GetServerCertificate()
 
-	// TODO: (VirajSalaka) add properly
 	caCertPool := tlsutils.GetTrustedCertPool()
 
 	if err == nil {
@@ -97,6 +92,7 @@ func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, port 
 		))
 	} else {
 		logger.LoggerMgw.Warn("failed to initiate the ssl context: ", err)
+		panic(err)
 	}
 	grpcServer := grpc.NewServer(grpcOptions...)
 

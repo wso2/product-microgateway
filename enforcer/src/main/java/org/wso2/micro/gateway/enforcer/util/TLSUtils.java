@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -44,6 +44,8 @@ import java.util.List;
 public class TLSUtils {
     private static final Logger log = LogManager.getLogger(TLSUtils.class);
     private static final String X509 = "X.509";
+    private static final String crtExtension = ".crt";
+    private static final String pemExtension = ".pem";
 
     /**
      * Read the certificate file and return the certificate.
@@ -56,6 +58,12 @@ public class TLSUtils {
         return getCertsFromFile(filePath, true).get(0);
     }
 
+    /**
+     * Read the pem encoded certificate content and generate certificate.
+     *
+     * @param certificateContent Pem Encoded certificate Content
+     * @return Certificate
+     */
     public static Certificate getCertificateFromString(String certificateContent)
             throws CertificateException, IOException {
         // A single certificate file is expected
@@ -68,8 +76,8 @@ public class TLSUtils {
     /**
      * Add the certificates to the the truststore.
      *
-     * @param filePath Filepath of the corresponding certificate or directory containing the certificates
-     * @return Certificate
+     * @param filePath   Filepath of the corresponding certificate or directory containing the certificates
+     * @param trustStore Keystore with trusted certificates
      */
     public static void addCertsToTruststore(KeyStore trustStore, String filePath) throws IOException {
         if (!Files.exists(Paths.get(filePath))) {
@@ -80,40 +88,14 @@ public class TLSUtils {
             log.debug("Provided Path is a directory: " + filePath);
             Files.walk(Paths.get(filePath)).filter(path -> {
                 Path fileName = path.getFileName();
-                return fileName != null && (fileName.toString().endsWith(".crt") ||
-                        fileName.toString().endsWith(".pem"));
+                return fileName != null && (fileName.toString().endsWith(crtExtension) ||
+                        fileName.toString().endsWith(pemExtension));
             }).forEach(path -> {
-                try {
-                    List<Certificate> certificateList = getCertsFromFile(path.toAbsolutePath().toString(), false);
-                    certificateList.forEach(certificate -> {
-                        try {
-                            trustStore.setCertificateEntry(RandomStringUtils.random(10, true, false),
-                                    certificate);
-                        } catch (KeyStoreException e) {
-                            log.error("Error while adding the trusted certificates to the trustStore.", e);
-                        }
-                    });
-                    log.debug("Certificate Added to the truststore : " + path.toAbsolutePath());
-                } catch (CertificateException | IOException e) {
-                    log.error("Error while adding certificates to the truststore.", e);
-                }
+                updateTruststoreWithMutlipleCertPem(trustStore, path.toAbsolutePath().toString());
             });
         } else {
             log.debug("Provided Path is a regular File Path : " + filePath);
-            try {
-                List<Certificate> certificateList = getCertsFromFile(filePath, false);
-                certificateList.forEach(certificate -> {
-                    try {
-                        trustStore.setCertificateEntry(RandomStringUtils.random(10, true, false),
-                                certificate);
-                    } catch (KeyStoreException e) {
-                        log.error("Error while adding the trusted certificates to the trustStore.", e);
-                    }
-                });
-                log.debug("Certificate Added to the truststore : " + filePath);
-            } catch (CertificateException | IOException e) {
-                log.error("Error while adding certificates to the truststore.", e);
-            }
+            updateTruststoreWithMutlipleCertPem(trustStore, filePath);
         }
     }
 
@@ -135,6 +117,23 @@ public class TLSUtils {
                 count++;
             }
             return certList;
+        }
+    }
+
+    private static void updateTruststoreWithMutlipleCertPem (KeyStore trustStore, String filePath) {
+        try {
+            List<Certificate> certificateList = getCertsFromFile(filePath, false);
+            certificateList.forEach(certificate -> {
+                try {
+                    trustStore.setCertificateEntry(RandomStringUtils.random(10, true, false),
+                            certificate);
+                } catch (KeyStoreException e) {
+                    log.error("Error while adding the trusted certificates to the trustStore.", e);
+                }
+            });
+            log.debug("Certificate Added to the truststore : " + filePath);
+        } catch (CertificateException | IOException e) {
+            log.error("Error while adding certificates to the truststore.", e);
         }
     }
 }

@@ -39,6 +39,11 @@ var (
 	caCertPool           *x509.CertPool
 )
 
+const (
+	pemExtension string = ".pem"
+	crtExtension string = ".crt"
+)
+
 // GetServerCertificate returns the certificate (used for the restAPI server and xds server) created based on configuration values.
 func GetServerCertificate() (tls.Certificate, error) {
 	certReadErr = nil
@@ -66,7 +71,8 @@ func GetTrustedCertPool() *x509.CertPool {
 			if err != nil {
 				logger.LoggerTLSUtils.Warn("Error while reading the trusted certificates directory/file.", err)
 			} else {
-				if !info.IsDir() && (filepath.Ext(info.Name()) == ".crt" || filepath.Ext(info.Name()) == ".pem") {
+				if !info.IsDir() && (filepath.Ext(info.Name()) == pemExtension ||
+					filepath.Ext(info.Name()) == crtExtension) {
 					caCert, caCertErr := ioutil.ReadFile(path)
 					if caCertErr != nil {
 						logger.LoggerTLSUtils.Warn("Error while reading the certificate file.", info.Name())
@@ -88,16 +94,6 @@ func IsPublicCertificate(certContent []byte) bool {
 	certContentPattern := `\-\-\-\-\-BEGIN\sCERTIFICATE\-\-\-\-\-((.|\n)*)\-\-\-\-\-END\sCERTIFICATE\-\-\-\-\-`
 	regex := regexp.MustCompile(certContentPattern)
 	if regex.Match(certContent) {
-		return true
-	}
-	return false
-}
-
-// IsPrivateKey checks if the file content represents valid private KEY in PEM format.
-func IsPrivateKey(keyContent []byte) bool {
-	keyContentPattern := `\-\-\-\-\-BEGIN\sPRIVATE\sKEY\-\-\-\-\-((.|\n)*)\-\-\-\-\-END\sPRIVATE\sKEY\-\-\-\-\-`
-	regex := regexp.MustCompile(keyContentPattern)
-	if regex.Match(keyContent) {
 		return true
 	}
 	return false

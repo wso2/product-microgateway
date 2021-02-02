@@ -147,7 +147,6 @@ public class ConfigHolder {
         try {
             setTrustStoreForJWT(KeyStore.getInstance(KeyStore.getDefaultType()));
             getTrustStoreForJWT().load(null);
-            // TODO: (VirajSalaka) Should the microgateway panic or should it proceed
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
             logger.error("Error while initiaing the truststore for JWT related public certificates");
         }
