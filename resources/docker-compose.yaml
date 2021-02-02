@@ -1,7 +1,11 @@
 version: "3.7"
 services:
   router:
-    image: wso2/mg-router:4.0.0-m4-SNAPSHOT
+    image: wso2/mg-router:4.0.0-m5-SNAPSHOT
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "5"
     environment:
       - ROUTER_ADMIN_HOST=0.0.0.0
       - ROUTER_ADMIN_PORT=9000
@@ -24,7 +28,11 @@ services:
       - adapter
       - enforcer
   adapter:
-    image: wso2/mg-adapter:4.0.0-m4-SNAPSHOT
+    image: wso2/mg-adapter:4.0.0-m5-SNAPSHOT
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "5"
     volumes:  
       - ./resources/adapter/security:/home/wso2/security
       - ./resources/conf:/home/wso2/conf
@@ -32,7 +40,11 @@ services:
       - "18000:18000" 
       - "9843:9843"
   enforcer:
-    image: wso2/mg-enforcer:4.0.0-m4-SNAPSHOT
+    image: wso2/mg-enforcer:4.0.0-m5-SNAPSHOT
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "5"
     volumes:  
       - ./resources/enforcer/security:/home/wso2/security
       - ./resources/conf:/home/wso2/conf

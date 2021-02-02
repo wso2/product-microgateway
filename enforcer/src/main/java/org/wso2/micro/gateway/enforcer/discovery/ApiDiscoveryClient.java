@@ -25,9 +25,6 @@ import io.envoyproxy.envoy.config.core.v3.Node;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryRequest;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
 import io.grpc.ManagedChannel;
-import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,14 +34,11 @@ import org.wso2.micro.gateway.enforcer.api.APIFactory;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
+import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
 
-import java.io.File;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.SSLException;
 
 /**
  * Client to communicate with API discovery service at the adapter.
@@ -81,24 +75,7 @@ public class ApiDiscoveryClient {
     private final String nodeId;
 
     private ApiDiscoveryClient(String host, int port) {
-        File certFile = Paths.get(ConfigHolder.getInstance().getEnvVarConfig().getEnforcerPublicKeyPath()).toFile();
-        File keyFile = Paths.get(ConfigHolder.getInstance().getEnvVarConfig().getEnforcerPrivateKeyPath()).toFile();
-        SslContext sslContext = null;
-        try {
-            sslContext = GrpcSslContexts
-                    .forClient()
-                    .trustManager(ConfigHolder.getInstance().getTrustManagerFactory())
-                    .keyManager(certFile, keyFile)
-                    .build();
-        } catch (SSLException e) {
-            log.error("Error while generating SSL Context.", e);
-        }
-        channel = NettyChannelBuilder.forAddress(host, port)
-                .useTransportSecurity()
-                .sslContext(sslContext)
-                .overrideAuthority(ConfigHolder.getInstance().getEnvVarConfig().getAdapterHostName())
-                .build();
-
+        this.channel = GRPCUtils.createSecuredChannel(log, host, port);
         this.apiFactory = APIFactory.getInstance();
         this.stub = ApiDiscoveryServiceGrpc.newStub(channel);
         this.blockingStub = ApiDiscoveryServiceGrpc.newBlockingStub(channel);

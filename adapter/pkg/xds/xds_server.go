@@ -20,6 +20,7 @@ package xds
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"sync"
 
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
@@ -33,6 +34,7 @@ import (
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/wso2/discovery/api"
 	"github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer"
+	"github.com/envoyproxy/go-control-plane/wso2/discovery/subscription"
 	openAPI3 "github.com/getkin/kin-openapi/openapi3"
 	openAPI2 "github.com/go-openapi/spec"
 	"github.com/wso2/micro-gw/config"
@@ -41,14 +43,21 @@ import (
 	"github.com/wso2/micro-gw/pkg/oasparser/model"
 	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/operator"
+	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
 )
 
 var (
 	version           int32
 	mutexForXdsUpdate sync.Mutex
 
-	cache         cachev3.SnapshotCache
-	enforcerCache cachev3.SnapshotCache
+	cache                              cachev3.SnapshotCache
+	enforcerCache                      cachev3.SnapshotCache
+	enforcerSubscriptionCache          cachev3.SnapshotCache
+	enforcerApplicationCache           cachev3.SnapshotCache
+	enforcerAPICache                   cachev3.SnapshotCache
+	enforcerApplicationPolicyCache     cachev3.SnapshotCache
+	enforcerSubscriptionPolicyCache    cachev3.SnapshotCache
+	enforcerApplicationKeyMappingCache cachev3.SnapshotCache
 	// OpenAPI Name:Version -> openAPI3 struct map
 	openAPIV3Map map[string]openAPI3.Swagger
 	// OpenAPI Name:Version -> openAPI2 struct map
@@ -72,10 +81,26 @@ var (
 
 	// Enforcer XDS resource version map
 	enforcerCacheVersionMap map[string]int64
+
+	// Enforcer Subscription related resource version maps
+	enforcerSubscriptionCacheVersionMap          map[string]int64
+	enforcerApplicationCacheVersionMap           map[string]int64
+	enforcerAPICacheVersionMap                   map[string]int64
+	enforcerApplicationPolicyCacheVersionMap     map[string]int64
+	enforcerSubscriptionPolicyCacheVersionMap    map[string]int64
+	enforcerApplicationKeyMappingCacheVersionMap map[string]int64
+
 	// Enforcer API XDS resource version map
 	enforcerAPIVersionMap map[string]int64
 	enforcerApisMap       map[string][]types.Resource
 	enforcerConfigMap     map[string][]types.Resource
+
+	enforcerSubscriptionMap          map[string][]types.Resource
+	enforcerApplicationMap           map[string][]types.Resource
+	enforcerAPIListMap               map[string][]types.Resource
+	enforcerApplicationPolicyMap     map[string][]types.Resource
+	enforcerSubscriptionPolicyMap    map[string][]types.Resource
+	enforcerApplicationKeyMappingMap map[string][]types.Resource
 )
 
 // IDHash uses ID field as the node hash.
@@ -94,6 +119,12 @@ var _ cachev3.NodeHash = IDHash{}
 func init() {
 	cache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerSubscriptionCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerApplicationCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerAPICache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerApplicationPolicyCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerSubscriptionPolicyCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerApplicationKeyMappingCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
 	openAPIV3Map = make(map[string]openAPI3.Swagger)
 	openAPIV2Map = make(map[string]openAPI2.Swagger)
 	webSocketAPIMap = make(map[string]mgw.MgwSwagger)
@@ -109,7 +140,19 @@ func init() {
 	enforcerCacheVersionMap = make(map[string]int64)
 	enforcerConfigMap = make(map[string][]types.Resource)
 	enforcerAPIVersionMap = make(map[string]int64)
+	enforcerSubscriptionCacheVersionMap = make(map[string]int64)
+	enforcerApplicationCacheVersionMap = make(map[string]int64)
+	enforcerAPICacheVersionMap = make(map[string]int64)
+	enforcerApplicationPolicyCacheVersionMap = make(map[string]int64)
+	enforcerSubscriptionPolicyCacheVersionMap = make(map[string]int64)
+	enforcerApplicationKeyMappingCacheVersionMap = make(map[string]int64)
 	enforcerApisMap = make(map[string][]types.Resource)
+	enforcerSubscriptionMap = make(map[string][]types.Resource)
+	enforcerApplicationMap = make(map[string][]types.Resource)
+	enforcerAPIListMap = make(map[string][]types.Resource)
+	enforcerApplicationPolicyMap = make(map[string][]types.Resource)
+	enforcerSubscriptionPolicyMap = make(map[string][]types.Resource)
+	enforcerApplicationKeyMappingMap = make(map[string][]types.Resource)
 }
 
 // GetXdsCache returns xds server cache.
@@ -120,6 +163,36 @@ func GetXdsCache() cachev3.SnapshotCache {
 // GetEnforcerCache returns xds server cache.
 func GetEnforcerCache() cachev3.SnapshotCache {
 	return enforcerCache
+}
+
+// GetEnforcerSubscriptionCache returns xds server cache.
+func GetEnforcerSubscriptionCache() cachev3.SnapshotCache {
+	return enforcerSubscriptionCache
+}
+
+// GetEnforcerApplicationCache returns xds server cache.
+func GetEnforcerApplicationCache() cachev3.SnapshotCache {
+	return enforcerApplicationCache
+}
+
+// GetEnforcerAPICache returns xds server cache.
+func GetEnforcerAPICache() cachev3.SnapshotCache {
+	return enforcerAPICache
+}
+
+// GetEnforcerApplicationPolicyCache returns xds server cache.
+func GetEnforcerApplicationPolicyCache() cachev3.SnapshotCache {
+	return enforcerApplicationPolicyCache
+}
+
+// GetEnforcerSubscriptionPolicyCache returns xds server cache.
+func GetEnforcerSubscriptionPolicyCache() cachev3.SnapshotCache {
+	return enforcerSubscriptionPolicyCache
+}
+
+// GetEnforcerApplicationKeyMappingCache returns xds server cache.
+func GetEnforcerApplicationKeyMappingCache() cachev3.SnapshotCache {
+	return enforcerApplicationKeyMappingCache
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
@@ -159,7 +232,7 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string) {
 		} else {
 			openAPIV2Struct, err := operator.GetOpenAPIV2Struct(jsonContent)
 			if err != nil {
-				logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
+				logger.LoggerXds.Error("Error while parsing to a OpenAPIv2 struct. ", err)
 			}
 			apiMapKey = openAPIV2Struct.Info.Title + ":" + openAPIV2Struct.Info.Version
 			existingOpenAPI, ok := openAPIV2Map[apiMapKey]
@@ -170,6 +243,7 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string) {
 					return
 				}
 			}
+			openAPIV2Map[apiMapKey] = openAPIV2Struct
 			newLabels = operator.GetXWso2Labels(openAPIV2Struct.Extensions)
 		}
 
@@ -341,7 +415,7 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	}
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	// Will be updated once decide to move to incremental XDS
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil, nil, nil)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 	err := cache.SetSnapshot(label, snap)
 	if err != nil {
@@ -365,7 +439,8 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 
 	apis := enforcerApisMap[label]
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis)
+	snap := cachev3.NewSnapshot(
+		fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerCache.SetSnapshot(label, snap)
@@ -392,7 +467,8 @@ func UpdateEnforcerApis(api *api.Api) {
 	}
 	configs := enforcerConfigMap[label]
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis)
+	snap := cachev3.NewSnapshot(
+		fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerCache.SetSnapshot(label, snap)
@@ -402,6 +478,304 @@ func UpdateEnforcerApis(api *api.Api) {
 
 	enforcerCacheVersionMap[label] = version
 	enforcerApisMap[label] = apis
+	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+// GenerateSubscriptionList converts the data into SubscriptionList proto type
+func GenerateSubscriptionList(subList *resourceTypes.SubscriptionList) *subscription.SubscriptionList {
+	subscriptions := []*subscription.Subscription{}
+
+	for _, sb := range subList.List {
+		sub := &subscription.Subscription{
+			SubscriptionId:    strconv.Itoa(sb.SubscriptionID),
+			PolicyId:          sb.PolicyID,
+			ApiId:             sb.APIID,
+			AppId:             sb.AppID,
+			SubscriptionState: sb.SubscriptionState,
+			TimeStamp:         sb.TimeStamp,
+			TenantId:          sb.TenantID,
+			TenantDomain:      sb.TenantDomain,
+		}
+		subscriptions = append(subscriptions, sub)
+	}
+
+	return &subscription.SubscriptionList{
+		List: subscriptions,
+	}
+}
+
+// GenerateApplicationList converts the data into ApplicationList proto type
+func GenerateApplicationList(appList *resourceTypes.ApplicationList) *subscription.ApplicationList {
+	applications := []*subscription.Application{}
+
+	for _, app := range appList.List {
+		application := &subscription.Application{
+			Uuid:         app.UUID,
+			Id:           app.ID,
+			Name:         app.Name,
+			SubId:        app.ID,
+			SubName:      app.SubName,
+			Policy:       app.Policy,
+			TokenType:    app.TokenType,
+			GroupIds:     app.GroupIds,
+			Attributes:   app.Attributes,
+			TenantId:     app.TenantID,
+			TenantDomain: app.TenantDomain,
+			Timestamp:    app.TimeStamp,
+		}
+		applications = append(applications, application)
+	}
+
+	return &subscription.ApplicationList{
+		List: applications,
+	}
+}
+
+// GenerateAPIList converts the data into APIList proto type
+func GenerateAPIList(apiList *resourceTypes.APIList) *subscription.APIList {
+	apis := []*subscription.APIs{}
+
+	for _, api := range apiList.List {
+		newAPI := &subscription.APIs{
+			ApiId:            api.APIID,
+			Name:             api.Name,
+			Provider:         api.Provider,
+			Version:          api.Version,
+			Context:          api.Context,
+			Policy:           api.Policy,
+			ApiType:          api.APIType,
+			IsDefaultVersion: api.IsDefaultVersion,
+		}
+		apis = append(apis, newAPI)
+	}
+
+	return &subscription.APIList{
+		List: apis,
+	}
+}
+
+// GenerateApplicationPolicyList converts the data into ApplicationPolicyList proto type
+func GenerateApplicationPolicyList(appPolicyList *resourceTypes.ApplicationPolicyList) *subscription.ApplicationPolicyList {
+	applicationPolicies := []*subscription.ApplicationPolicy{}
+
+	for _, policy := range appPolicyList.List {
+		appPolicy := &subscription.ApplicationPolicy{
+			Id:        policy.ID,
+			TenantId:  policy.TenantID,
+			Name:      policy.Name,
+			QuotaType: policy.QuotaType,
+		}
+		applicationPolicies = append(applicationPolicies, appPolicy)
+	}
+
+	return &subscription.ApplicationPolicyList{
+		List: applicationPolicies,
+	}
+}
+
+// GenerateSubscriptionPolicyList converts the data into SubscriptionPolicyList proto type
+func GenerateSubscriptionPolicyList(subPolicyList *resourceTypes.SubscriptionPolicyList) *subscription.SubscriptionPolicyList {
+	subscriptionPolicies := []*subscription.SubscriptionPolicy{}
+
+	for _, policy := range subPolicyList.List {
+		subPolicy := &subscription.SubscriptionPolicy{
+			Id:                   policy.ID,
+			Name:                 policy.Name,
+			QuotaType:            policy.QuotaType,
+			GraphQLMaxComplexity: policy.GraphQLMaxComplexity,
+			GraphQLMaxDepth:      policy.GraphQLMaxDepth,
+			RateLimitCount:       policy.RateLimitCount,
+			RateLimitTimeUnit:    policy.RateLimitTimeUnit,
+			StopOnQuotaReach:     policy.StopOnQuotaReach,
+			TenantId:             policy.TenantID,
+			TenantDomain:         policy.TenantDomain,
+			Timestamp:            policy.TimeStamp,
+		}
+		subscriptionPolicies = append(subscriptionPolicies, subPolicy)
+	}
+
+	return &subscription.SubscriptionPolicyList{
+		List: subscriptionPolicies,
+	}
+}
+
+// GenerateApplicationKeyMappingList converts the data into ApplicationKeyMappingList proto type
+func GenerateApplicationKeyMappingList(keyMappingList *resourceTypes.ApplicationKeyMappingList) *subscription.ApplicationKeyMappingList {
+	applicationKeyMappings := []*subscription.ApplicationKeyMapping{}
+
+	for _, mapping := range keyMappingList.List {
+		keyMapping := &subscription.ApplicationKeyMapping{
+			ConsumerKey:   mapping.ConsumerKey,
+			KeyType:       mapping.KeyType,
+			KeyManager:    mapping.KeyManager,
+			ApplicationId: mapping.ApplicationID,
+			TenantId:      mapping.TenantID,
+			TenantDomain:  mapping.TenantDomain,
+			Timestamp:     mapping.TimeStamp,
+		}
+
+		applicationKeyMappings = append(applicationKeyMappings, keyMapping)
+	}
+
+	return &subscription.ApplicationKeyMappingList{
+		List: applicationKeyMappings,
+	}
+}
+
+// UpdateEnforcerSubscriptions sets new update to the enforcer's Subscriptions
+func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
+	//TODO: (Dinusha) check this hardcoded value
+	label := "enforcer"
+	subscriptionList := enforcerSubscriptionMap[label]
+	subscriptionList = append(subscriptionList, subscriptions)
+
+	version, ok := enforcerSubscriptionCacheVersionMap[label]
+
+	if ok {
+		version++
+	} else {
+		version = 1
+	}
+
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, subscriptionList, nil, nil, nil, nil, nil)
+	snap.Consistent()
+
+	err := enforcerSubscriptionCache.SetSnapshot(label, snap)
+	if err != nil {
+		logger.LoggerMgw.Error(err)
+	}
+	enforcerSubscriptionCacheVersionMap[label] = version
+	enforcerSubscriptionMap[label] = subscriptionList
+	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+// UpdateEnforcerApplications sets new update to the enforcer's Applications
+func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
+	label := "enforcer"
+	applicationList := enforcerApplicationMap[label]
+	applicationList = append(applicationList, applications)
+
+	version, ok := enforcerApplicationCacheVersionMap[label]
+
+	if ok {
+		version++
+	} else {
+		version = 1
+	}
+
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationList, nil, nil, nil, nil)
+	snap.Consistent()
+
+	err := enforcerApplicationCache.SetSnapshot(label, snap)
+	if err != nil {
+		logger.LoggerMgw.Error(err)
+	}
+	enforcerApplicationCacheVersionMap[label] = version
+	enforcerApplicationMap[label] = applicationList
+	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+// UpdateEnforcerAPIList sets new update to the enforcer's Apis
+func UpdateEnforcerAPIList(apis *subscription.APIList) {
+	label := "enforcer"
+	apiList := enforcerAPIListMap[label]
+	apiList = append(apiList, apis)
+
+	version, ok := enforcerAPICacheVersionMap[label]
+
+	if ok {
+		version++
+	} else {
+		version = 1
+	}
+
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, apiList, nil, nil, nil)
+	snap.Consistent()
+
+	err := enforcerAPICache.SetSnapshot(label, snap)
+	if err != nil {
+		logger.LoggerMgw.Error(err)
+	}
+	enforcerAPICacheVersionMap[label] = version
+	enforcerAPIListMap[label] = apiList
+	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+// UpdateEnforcerApplicationPolicies sets new update to the enforcer's Application Policies
+func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.ApplicationPolicyList) {
+	label := "enforcer"
+	applicationPolicyList := enforcerApplicationPolicyMap[label]
+	applicationPolicyList = append(applicationPolicyList, applicationPolicies)
+
+	version, ok := enforcerApplicationPolicyCacheVersionMap[label]
+
+	if ok {
+		version++
+	} else {
+		version = 1
+	}
+
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationPolicyList, nil, nil)
+	snap.Consistent()
+
+	err := enforcerApplicationPolicyCache.SetSnapshot(label, snap)
+	if err != nil {
+		logger.LoggerMgw.Error(err)
+	}
+	enforcerApplicationPolicyCacheVersionMap[label] = version
+	enforcerApplicationPolicyMap[label] = applicationPolicyList
+	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+// UpdateEnforcerSubscriptionPolicies sets new update to the enforcer's Subscription Policies
+func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.SubscriptionPolicyList) {
+	label := "enforcer"
+	subscriptionPolicyList := enforcerSubscriptionPolicyMap[label]
+	subscriptionPolicyList = append(subscriptionPolicyList, subscriptionPolicies)
+
+	version, ok := enforcerSubscriptionPolicyCacheVersionMap[label]
+
+	if ok {
+		version++
+	} else {
+		version = 1
+	}
+
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, subscriptionPolicyList, nil)
+	snap.Consistent()
+
+	err := enforcerSubscriptionPolicyCache.SetSnapshot(label, snap)
+	if err != nil {
+		logger.LoggerMgw.Error(err)
+	}
+	enforcerSubscriptionPolicyCacheVersionMap[label] = version
+	enforcerSubscriptionPolicyMap[label] = subscriptionPolicyList
+	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+// UpdateEnforcerApplicationKeyMappings sets new update to the enforcer's Application Key Mappings
+func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.ApplicationKeyMappingList) {
+	label := "enforcer"
+	applicationKeyMappingList := enforcerApplicationKeyMappingMap[label]
+	applicationKeyMappingList = append(applicationKeyMappingList, applicationKeyMappings)
+
+	version, ok := enforcerApplicationKeyMappingCacheVersionMap[label]
+
+	if ok {
+		version++
+	} else {
+		version = 1
+	}
+
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationKeyMappingList)
+	snap.Consistent()
+
+	err := enforcerApplicationKeyMappingCache.SetSnapshot(label, snap)
+	if err != nil {
+		logger.LoggerMgw.Error(err)
+	}
+	enforcerApplicationKeyMappingCacheVersionMap[label] = version
+	enforcerApplicationKeyMappingMap[label] = applicationKeyMappingList
 	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
@@ -417,7 +791,6 @@ func startConsulServiceDiscovery() {
 	//label := "default"
 	for apiKey, clusterList := range openAPIClustersMap {
 		for _, cluster := range clusterList {
-			logger.LoggerXds.Info(cluster.Name)
 			if consulSyntax, ok := svcdiscovery.ClusterConsulKeyMap[cluster.Name]; ok {
 				svcdiscovery.InitConsul() //initialize consul client and load certs
 				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
@@ -425,7 +798,7 @@ func startConsulServiceDiscovery() {
 					logger.LoggerXds.Error("consul syntax parse error ", errConSyn)
 					return
 				}
-				logger.LoggerXds.Info(query)
+				logger.LoggerXds.Debugln(query)
 				go getServiceDiscoveryData(query, cluster.Name, apiKey)
 			}
 		}
@@ -440,7 +813,7 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 		select {
 		case queryResultsList, ok := <-resultChan:
 			if !ok { //ok==false --> result chan is closed
-				logger.LoggerXds.Info("closed the result channel for cluster name: ", clusterName)
+				logger.LoggerXds.Debugln("closed the result channel for cluster name: ", clusterName)
 				return
 			}
 			if val, ok := svcdiscovery.ClusterConsulResultMap[clusterName]; ok {
