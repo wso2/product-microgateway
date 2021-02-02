@@ -148,7 +148,7 @@ public class ConfigHolder {
             setTrustStoreForJWT(KeyStore.getInstance(KeyStore.getDefaultType()));
             getTrustStoreForJWT().load(null);
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            logger.error("Error while initiaing the truststore for JWT related public certificates");
+            logger.error("Error while initiaing the truststore for JWT related public certificates", e);
         }
         for (Issuer jwtIssuer : cdsIssuers) {
             TokenIssuerDto issuerDto = new TokenIssuerDto(jwtIssuer.getIssuer());
@@ -160,13 +160,12 @@ public class ConfigHolder {
 
             String certificateAlias = jwtIssuer.getCertificateAlias();
             if (certificateAlias != null) {
-                // TODO: (VirajSalaka) Decide if it is required to have a alias
                 try {
                     Certificate cert = TLSUtils.getCertificateFromFile(jwtIssuer.getCertificateFilePath());
                     getTrustStoreForJWT().setCertificateEntry(certificateAlias, cert);
                     issuerDto.setCertificate(cert);
                 } catch (KeyStoreException | CertificateException | IOException e) {
-                    logger.error("Error while adding certificates to the JWT related Truststore");
+                    logger.error("Error while adding certificates to the JWT related Truststore", e);
                 }
             }
 

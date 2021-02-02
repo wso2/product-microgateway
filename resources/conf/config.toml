@@ -73,6 +73,7 @@ location = "/home/wso2/mg/security"
 [[enforcer.jwtTokenConfig]]
     name="Resident Key Manager"
     issuer = "https://localhost:9443/oauth2/token"
+    certificateAlias = "wso2carbon"
     # URL of the JWKs endpoint
     jwksURL = ""
     # Validate subscribed APIs
@@ -80,7 +81,7 @@ location = "/home/wso2/mg/security"
     # The claim in which the consumer key of the application is coming
     consumerKeyClaim = "azp"
     # Certificate Filepath within enforcer
-    certificateFilePath = "/home/wso2/mg/security/wso2carbon.pem"
+    certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 # Configurations for retrieving API and subscription data from API Manager.
 [enforcer.eventHub]

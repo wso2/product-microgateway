@@ -58,11 +58,15 @@
         </file>
         <file>
             <source>../resources/security/mg.key</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/security</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/security/keystore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/security</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/security/keystore</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/security/truststore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.key</source>

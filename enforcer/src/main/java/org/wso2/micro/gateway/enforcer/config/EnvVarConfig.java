@@ -24,19 +24,19 @@ import org.apache.commons.lang3.StringUtils;
  * Holds and returns the configuration values retrieved from the environment variables.
  */
 public class EnvVarConfig {
-    private static final String TRUSTED_ADAPTER_CERTS_PATH = "TRUSTED_ADAPTER_CERTS_PATH";
+    private static final String TRUSTED_CA_CERTS_PATH = "TRUSTED_CA_CERTS_PATH";
     private static final String ADAPTER_HOST_NAME = "ADAPTER_HOST_NAME";
     private static final String ENFORCER_PRIVATE_KEY_PATH = "ENFORCER_PRIVATE_KEY_PATH";
-    private static final String ENFORCER_PUBLIC_KEY_PATH = "ENFORCER_PUBLIC_KEY_PATH";
+    private static final String ENFORCER_PUBLIC_CERT_PATH = "ENFORCER_PUBLIC_CERT_PATH";
     private static final String ADAPTER_HOST = "ADAPTER_HOST";
     private static final String ADAPTER_XDS_PORT = "ADAPTER_XDS_PORT";
     private static final String ENFORCER_LABEL = "ENFORCER_LABEL";
 
     // Since the container is running in linux container, path separator is not needed.
-    private static final String DEFAULT_TRUSTED_ADAPTER_CERTS_PATH = "/home/wso2/mg/security";
+    private static final String DEFAULT_TRUSTED_CA_CERTS_PATH = "/home/wso2/security";
     private static final String DEFAULT_ADAPTER_HOST_NAME = "adapter";
-    private static final String DEFAULT_ENFORCER_PRIVATE_KEY_PATH = "/home/wso2/mg/security/mg.key";
-    private static final String DEFAULT_ENFORCER_PUBLIC_KEY_PATH = "/home/wso2/mg/security/mg.pem";
+    private static final String DEFAULT_ENFORCER_PRIVATE_KEY_PATH = "/home/wso2/security/keystore/mg.key";
+    private static final String DEFAULT_ENFORCER_PUBLIC_CERT_PATH = "/home/wso2/security/truststore/mg.pem";
     private static final String DEFAULT_ADAPTER_HOST = "adapter";
     private static final String DEFAULT_ADAPTER_XDS_PORT = "18000";
     private static final String DEFAULT_ENFORCER_LABEL = "enforcer";
@@ -50,12 +50,12 @@ public class EnvVarConfig {
     private String adapterHostName;
 
     public EnvVarConfig() {
-        trustedAdapterCertsPath = retrieveEnvVarOrDefault(TRUSTED_ADAPTER_CERTS_PATH,
-                DEFAULT_TRUSTED_ADAPTER_CERTS_PATH);
+        trustedAdapterCertsPath = retrieveEnvVarOrDefault(TRUSTED_CA_CERTS_PATH,
+                DEFAULT_TRUSTED_CA_CERTS_PATH);
         enforcerPrivateKeyPath = retrieveEnvVarOrDefault(ENFORCER_PRIVATE_KEY_PATH,
                 DEFAULT_ENFORCER_PRIVATE_KEY_PATH);
-        enforcerPublicKeyPath = retrieveEnvVarOrDefault(ENFORCER_PUBLIC_KEY_PATH,
-                DEFAULT_ENFORCER_PUBLIC_KEY_PATH);
+        enforcerPublicKeyPath = retrieveEnvVarOrDefault(ENFORCER_PUBLIC_CERT_PATH,
+                DEFAULT_ENFORCER_PUBLIC_CERT_PATH);
         enforcerLabel = retrieveEnvVarOrDefault(ENFORCER_LABEL, DEFAULT_ENFORCER_LABEL);
         adapterHost = retrieveEnvVarOrDefault(ADAPTER_HOST, DEFAULT_ADAPTER_HOST);
         adapterHostName = retrieveEnvVarOrDefault(ADAPTER_HOST_NAME, DEFAULT_ADAPTER_HOST_NAME);

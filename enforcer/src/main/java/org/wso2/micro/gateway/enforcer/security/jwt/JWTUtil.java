@@ -126,7 +126,7 @@ public class JWTUtil {
                 throw new MGWException("Public key is not RSA");
             }
         } else {
-            log.error("Couldn't find a public certificate to verify the signature");
+            log.debug("Couldn't find a public certificate to verify the signature");
             throw new MGWException("Couldn't find a public certificate to verify the signature");
         }
     }

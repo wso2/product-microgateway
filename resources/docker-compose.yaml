@@ -34,14 +34,14 @@ services:
   enforcer:
     image: wso2/mg-enforcer:4.0.0-m4-SNAPSHOT
     volumes:  
-      - ./resources/enforcer/security:/home/wso2/mg/security
+      - ./resources/enforcer/security:/home/wso2/security
       - ./resources/conf:/home/wso2/conf
     links:
       - adapter
     environment:
-      - ENFORCER_PRIVATE_KEY_PATH=/home/wso2/mg/security/mg.key
-      - ENFORCER_PUBLIC_KEY_PATH=/home/wso2/mg/security/mg.pem
-      - TRUSTED_ADAPTER_CERTS_PATH=/home/wso2/mg/security
+      - ENFORCER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
+      - ENFORCER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
+      - TRUSTED_CA_CERTS_PATH=/home/wso2/security/truststore
       - ADAPTER_HOST_NAME=adapter
       - ADAPTER_HOST=adapter
       - ADAPTER_XDS_PORT=18000
