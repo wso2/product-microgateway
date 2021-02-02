@@ -40,7 +40,6 @@ import (
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	oasParser "github.com/wso2/micro-gw/pkg/oasparser"
-	"github.com/wso2/micro-gw/pkg/oasparser/model"
 	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
@@ -196,7 +195,7 @@ func GetEnforcerApplicationKeyMappingCache() cachev3.SnapshotCache {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string) {
+func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string, environments []string) {
 	var apiMapKey string
 	var newLabels []string
 
@@ -228,7 +227,8 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string) {
 			}
 			openAPIV3Map[apiMapKey] = openAPIV3Struct
 			//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
-			newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
+			// TODO: commented the following line as the implementation is not supported yet.
+			//newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
 		} else {
 			openAPIV2Struct, err := operator.GetOpenAPIV2Struct(jsonContent)
 			if err != nil {
@@ -244,7 +244,8 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string) {
 				}
 			}
 			openAPIV2Map[apiMapKey] = openAPIV2Struct
-			newLabels = operator.GetXWso2Labels(openAPIV2Struct.Extensions)
+			// TODO: commented the following line as the implementation is not supported yet.
+			//newLabels = operator.GetXWso2Labels(openAPIV2Struct.Extensions)
 		}
 
 	} else if apiType == mgw.WS {
@@ -260,13 +261,16 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string) {
 		}
 		webSocketAPIMap[apiMapKey] = mgwSwagger
 		// TODO - add label support
-		newLabels = operator.GetXWso2LabelsWebSocket(mgwSwagger)
+		// TODO: commented the following line as the implementation is not supported yet.
+		//newLabels = operator.GetXWso2LabelsWebSocket(mgwSwagger)
 	} else {
 		// Unreachable else condition. Added in case apiType type check fails prior to this function
 		// due to any modifications to the code.
 		logger.LoggerXds.Info("API type is not cuurently supported by WSO2 micro-gateway")
 	}
-
+	//:TODO: since currently labels are not taking from x-wso2-label, I have made it to be taken from the method
+	// argument.
+	newLabels = environments
 	logger.LoggerXds.Infof("Added/Updated the content under OpenAPI Key : %v", apiMapKey)
 	logger.LoggerXds.Debugf("Newly added labels for the OpenAPI Key : %v are %v", apiMapKey, newLabels)
 	oldLabels, _ := openAPIEnvoyMap[apiMapKey]

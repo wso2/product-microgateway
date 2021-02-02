@@ -342,6 +342,8 @@ github.com/praminda/go-control-plane v0.9.8-0.20210121132323-12da77d24eb1 h1:IsK
 github.com/praminda/go-control-plane v0.9.8-0.20210121132323-12da77d24eb1/go.mod h1:UvAd1/goQ1lmaTmD3+Zu91IuX3UyKLaKfzL1fuGE+W0=
 github.com/praminda/go-control-plane v0.9.8-0.20210126114758-e471c7023312 h1:uyF/tkQ39e28I8E9jypxtYSG4fG0G18nax6Z90ZbAr0=
 github.com/praminda/go-control-plane v0.9.8-0.20210126114758-e471c7023312/go.mod h1:UvAd1/goQ1lmaTmD3+Zu91IuX3UyKLaKfzL1fuGE+W0=
+github.com/praminda/go-control-plane v0.9.8-0.20210202103443-f343d358b2cf h1:EJ0vnMdReYHNZRrUKKLPpIILt5KV4ttG1qE9U/8Sfaw=
+github.com/praminda/go-control-plane v0.9.8-0.20210202103443-f343d358b2cf/go.mod h1:UvAd1/goQ1lmaTmD3+Zu91IuX3UyKLaKfzL1fuGE+W0=
 github.com/prometheus/client_golang v0.9.1/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=
 github.com/prometheus/client_golang v0.9.3/go.mod h1:/TN21ttK/J9q6uSwhBd54HahCDft0ttaMvbicHlPoso=
 github.com/prometheus/client_model v0.0.0-20180712105110-5c3871d89910/go.mod h1:MbSGuTsp3dbXC40dX6PRTWyKYBIrTGTE9sqQNg2J8bo=
