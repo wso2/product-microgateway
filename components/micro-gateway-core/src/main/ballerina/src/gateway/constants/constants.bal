@@ -607,7 +607,7 @@ public const string SERVER_TIMESTAMP_SKEW = "timestampSkew";
 public const string SERVER_HEADER = "header";
 
 // server preserved header configurations
-public const string SERVER_HEADER_ID = "server.header";
+public const string SERVER_HEADER_ID = "server.headerConf";
 public const string SERVER_HEADER_HEADER_NAME = "headerName";
 public const string SERVER_HEADER_PRESERVE_HEADER = "preserveHeader";
 public const string SERVER_HEADER_OVERRIDE_VALUE = "overrideValue";

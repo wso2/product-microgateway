@@ -18,7 +18,7 @@ import ballerina/config;
 
 public type ServerConfigDTO record {
     int timestampSkew = getConfigIntValue(SERVER_CONF_ID, SERVER_TIMESTAMP_SKEW, DEFAULT_SERVER_TIMESTAMP_SKEW);
-    string header = getConfigValue(SERVER_CONF_ID, SERVER_HEADER, DEFAULT_SERVER_HEADER);
+    string header = getConfigValue(SERVER_CONF_ID, SERVER_HEADER, "");
     serverHeaderDTO[] serverHeaders = getserverHeaders();
 };
 

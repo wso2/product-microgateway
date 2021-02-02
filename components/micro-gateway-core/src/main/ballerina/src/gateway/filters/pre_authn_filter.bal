@@ -206,10 +206,12 @@ function preserveResponseHeaders(@tainted http:Response response) {
         string[] responseHeaders = response.getHeaderNames();
         foreach string responseHeader in responseHeaders {
             if (serverHeader.headerName.toLowerAscii() == SERVER_HEADER_NAME.toLowerAscii()) {
-                if (serverHeader.preserveHeader) {
-                    response.setHeader(serverHeader.headerName, response.server);
-                } else {
-                    response.setHeader(serverHeader.headerName, serverHeader.overrideValue);
+                if (!serverHeader.preserveHeader) {
+                    if (response.server != "") {
+                        response.setHeader(serverHeader.headerName, serverHeader.overrideValue);
+                    } else if (gatewayConf.getServerConfig().header == "") {
+                        response.setHeader(serverHeader.headerName, serverHeader.overrideValue);
+                    }
                 }
                 break;
             } else if (responseHeader.toLowerAscii() == serverHeader.headerName.toLowerAscii()) {
