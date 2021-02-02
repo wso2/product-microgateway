@@ -37,8 +37,13 @@ public function getserverHeaders() returns (serverHeaderDTO[]) {
             anydata preserveHeader = serverHeader[SERVER_HEADER_PRESERVE_HEADER];
             anydata overrideValue = serverHeader[SERVER_HEADER_OVERRIDE_VALUE];
             if (headerName is string) {
-                boolean preserveHeaderVal = DEFAULT_SERVER_HEADER_PRESERVE_HEADER;
-                string overridValueStr = DEFAULT_SERVER_HEADER;
+                boolean preserveHeaderVal = DEFAULT_SERVER_HEADERCONF_PRESERVE_HEADER;
+                if (headerName.toLowerAscii() == USER_AGENT_HEADER_NAME.toLowerAscii()) {
+                    preserveHeaderVal = DEFAULT_SERVER_HEADERCONF_USER_AGENT_PRESERVE_HEADER;
+                } else if (headerName.toLowerAscii() == SERVER_HEADER_NAME.toLowerAscii()) {
+                    preserveHeaderVal = DEFAULT_SERVER_HEADERCONF_SERVER_PRESERVE_HEADER;
+                }
+                string overrideValueStr = DEFAULT_SERVER_HEADER;
                 if (preserveHeader is boolean) {
                     preserveHeaderVal = preserveHeader;
                 } else if (preserveHeader.toString() != "") {
@@ -46,13 +51,13 @@ public function getserverHeaders() returns (serverHeaderDTO[]) {
                     panic err;
                 }
                 if (overrideValue is string) {
-                    overridValueStr = overrideValue;
+                    overrideValueStr = overrideValue;
                 } else if (overrideValue.toString() != "") {
                     error err = error("'overrideValue' config value is not 'string'");
                     panic err;
                 }
                 serverHeaderDTO serverHeaderDto = {headerName: headerName, preserveHeader: preserveHeaderVal,
-                                                    overrideValue: overridValueStr};
+                                                    overrideValue: overrideValueStr};
                 serverHeaders.push(serverHeaderDto);
             } else if (headerName.toString() != "") {
                 error err = error("'headerName' config value is not 'string'");

@@ -511,7 +511,7 @@
       overrideValue = "ballerina"
   [[server.headerConf]]
       headerName = "Server"
-      preserveHeader = false
+      preserveHeader = true
       overrideValue = "ballerina"
 
 # Configurations for retrieving API and subscription data from API Manager.
