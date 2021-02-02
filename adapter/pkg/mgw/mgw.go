@@ -229,7 +229,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 		if data.Resp != nil {
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
 			logger.LoggerMgw.Debug("Pushing data to router and enforcer")
-			err := synchronizer.PushAPIProjects(data.Resp)
+			err := synchronizer.PushAPIProjects(data.Resp, envs)
 			if err != nil {
 				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
 			}
