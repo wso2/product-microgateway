@@ -159,7 +159,7 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string) {
 		} else {
 			openAPIV2Struct, err := operator.GetOpenAPIV2Struct(jsonContent)
 			if err != nil {
-				logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
+				logger.LoggerXds.Error("Error while parsing to a OpenAPIv2 struct. ", err)
 			}
 			apiMapKey = openAPIV2Struct.Info.Title + ":" + openAPIV2Struct.Info.Version
 			existingOpenAPI, ok := openAPIV2Map[apiMapKey]
@@ -170,6 +170,7 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string) {
 					return
 				}
 			}
+			openAPIV2Map[apiMapKey] = openAPIV2Struct
 			newLabels = operator.GetXWso2Labels(openAPIV2Struct.Extensions)
 		}
 
