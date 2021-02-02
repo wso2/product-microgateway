@@ -427,7 +427,6 @@ func startConsulServiceDiscovery() {
 	//label := "default"
 	for apiKey, clusterList := range openAPIClustersMap {
 		for _, cluster := range clusterList {
-			logger.LoggerXds.Info(cluster.Name)
 			if consulSyntax, ok := svcdiscovery.ClusterConsulKeyMap[cluster.Name]; ok {
 				svcdiscovery.InitConsul() //initialize consul client and load certs
 				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
@@ -435,7 +434,7 @@ func startConsulServiceDiscovery() {
 					logger.LoggerXds.Error("consul syntax parse error ", errConSyn)
 					return
 				}
-				logger.LoggerXds.Info(query)
+				logger.LoggerXds.Debugln(query)
 				go getServiceDiscoveryData(query, cluster.Name, apiKey)
 			}
 		}
@@ -450,7 +449,7 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 		select {
 		case queryResultsList, ok := <-resultChan:
 			if !ok { //ok==false --> result chan is closed
-				logger.LoggerXds.Info("closed the result channel for cluster name: ", clusterName)
+				logger.LoggerXds.Debugln("closed the result channel for cluster name: ", clusterName)
 				return
 			}
 			if val, ok := svcdiscovery.ClusterConsulResultMap[clusterName]; ok {
