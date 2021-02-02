@@ -281,7 +281,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 				}
 				logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.EventHub.RetryInterval*time.Second)
 				time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
-				logger.LoggerSync.Infof("Retrying to fetch API data from control plane.")
+				logger.LoggerSync.Info("Retrying to fetch API data from control plane.")
 				FetchAPIs(&updatedAPIID, &updatedEnvs[0], c)
 			}(data)
 		}
