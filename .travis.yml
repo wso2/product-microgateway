@@ -1,12 +1,16 @@
-language: go
-go:
-  - "1.13"
+language: java
 dist: trusty
+services:
+  - docker
+before_install:
+  - sudo curl -L "https://github.com/docker/compose/releases/download/1.28.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  - sudo chmod +x /usr/local/bin/docker-compose
+  - docker-compose --version
 # Skip install phase to avoid unwanted mvn build
 install: skip
 # Run maven build in quiet mode to avoid log file limit in Travis CI.
 # Only errors and Maven version information will be printed in the CI logs.
-script: go build
+script: mvn clean install -B -V | grep -e "\[ERROR\]" -e Maven -e "// Start Running" -e "Building"; test ${PIPESTATUS[0]} -eq 0;
 cache:
   directories:
-  - $HOME/.m2
+    - $HOME/.m2
