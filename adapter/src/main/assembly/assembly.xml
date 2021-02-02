@@ -38,11 +38,15 @@
         </file>
         <file>
             <source>../resources/security/mg.key</source>
-            <outputDirectory>security</outputDirectory>
+            <outputDirectory>security/keystore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>security</outputDirectory>
+            <outputDirectory>security/keystore</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>security/truststore</outputDirectory>
         </file>
     </files>
 </assembly>

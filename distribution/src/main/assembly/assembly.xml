@@ -50,11 +50,15 @@
         </file>
         <file>
             <source>../resources/security/mg.key</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security/keystore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security</outputDirectory>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security/keystore</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security/truststore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.key</source>
