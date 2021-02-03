@@ -27,28 +27,37 @@ data:
     [adapter.server]
     host = "0.0.0.0"
     port = "9843"
-    publicKeyPath = "/home/wso2/security/localhost.pem"
-    privateKeyPath = "/home/wso2/security/localhost.key"
+
     [[adapter.server.users]]
     username = "admin"
     password = "admin"
 
+    [adapter.keystore]
+    certPath = "/home/wso2/security/keystore/mg.pem"
+    keyPath = "/home/wso2/security/keystore/mg.key"
+
+    [adapter.truststore]
+    location = "/home/wso2/security/truststore"
+
     [adapter.consul]
+    # todo rumesh check whether we need to have certPath and KeyPath
     url = "https://169.254.1.1:8501" # scheme + host ip + port
     pollInterval = 5 # seconds
     aclTokenFilePath = ""
     # certs for tls
-    caCertPath = "/home/wso2/security/consul/consul-agent-ca.pem"
-    certPath = "/home/wso2/security/consul/local-dc-client-consul-0.pem"
-    keyPath = "/home/wso2/security/consul/local-dc-client-consul-0-key.pem"
+    caCertPath = "/home/wso2/security/truststore/consul/consul-agent-ca.pem"
+    certPath = "/home/wso2/security/truststore/consul/local-dc-client-consul-0.pem"
+    keyPath = "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem"
 
     [envoy]
     listenerHost = "0.0.0.0"
     listenerPort = 9095
     clusterTimeoutInSeconds = 20
     listenerTLSEnabled = true
-    listenerCertPath = "/home/wso2/security/mg.pem"
-    listenerKeyPath = "/home/wso2/security/mg.key"
+
+    [envoy.keystore]
+    certPath = "/home/wso2/security/keystore/mg.pem"
+    keyPath = "/home/wso2/security/keystore/mg.key"
 
     [envoy.upstream]
     [envoy.upstream.tls]
@@ -56,9 +65,7 @@ data:
     maximumProtocolVersion = "TLS1_2"
     ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"
     # the default endpoint certificates
-    trustedCertificatesFilePath = "/etc/ssl/certs/ca-certificates.crt"
-    clientCertPath = "/home/wso2/security/mg.pem"
-    clientKeyPath = "/home/wso2/security/mg.key"
+    trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
     verifyHostName = true
     disableSslVerification = false
 
@@ -76,18 +83,6 @@ data:
         keepAliveTime = 600
         queueSize = 1000
 
-    #Key Store Configuration
-    [enforcer.keystore]
-    location = "wso2carbon.jks"
-    type = "jks"
-    password = "wso2carbon"
-
-    #Trust store configuration
-    [enforcer.truststore]
-    location = "/home/wso2/mg/security/client-truststore.jks"
-    type = "jks"
-    password = "wso2carbon"
-
     # JWT token authorization configurations. You can provide multiple JWT issuers
     # Issuer 1
     [[enforcer.jwtTokenConfig]]
@@ -100,6 +95,8 @@ data:
         validateSubscription = false
         # The claim in which the consumer key of the application is coming
         consumerKeyClaim = "azp"
+        # Certificate Filepath within enforcer
+        certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
     # Configurations for retrieving API and subscription data from API Manager.
     [enforcer.eventHub]
@@ -128,7 +125,6 @@ data:
     environmentLabels = ["Production and Sandbox"]
     retryInterval = 5
     tlsEnabled=false
-    publicCertPath="/home/wso2/security/controlplane.pem"
     # Message broker connection URL of the control plane
     [controlPlane.eventHub.jmsConnectionParameters]
     eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
