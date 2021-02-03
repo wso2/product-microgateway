@@ -76,7 +76,7 @@ public class SubscriptionPolicyDiscoveryClient {
         this.subscriptionDataStore = SubscriptionDataStoreImpl.getInstance();
         this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
         this.stub = SubscriptionPolicyDiscoveryServiceGrpc.newStub(channel);
-        this.nodeId = ConfigHolder.getInstance().getEnvVarConfig().getAdapterHost();
+        this.nodeId = ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
     }
 
