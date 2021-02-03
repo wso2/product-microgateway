@@ -38,8 +38,6 @@ const (
 	authorizationBasic         string = "Basic "
 	authorizationHeaderDefault string = "Authorization"
 	internalWebAppEP           string = "internal/data/v1/"
-	defaultCertPath            string = "/home/wso2/security/controlplane.pem"
-	retryCount                 int    = 5
 )
 
 var (
@@ -116,21 +114,27 @@ func LoadSubscriptionData(configFile *config.Config) {
 			} else {
 				switch t := newResponse.(type) {
 				case *resourceTypes.SubscriptionList:
+					logger.LoggerSubscription.Debug("Received Subscription information.")
 					subList = newResponse.(*resourceTypes.SubscriptionList)
 					xds.UpdateEnforcerSubscriptions(xds.GenerateSubscriptionList(subList))
 				case *resourceTypes.ApplicationList:
+					logger.LoggerSubscription.Debug("Received Application information.")
 					appList = newResponse.(*resourceTypes.ApplicationList)
 					xds.UpdateEnforcerApplications(xds.GenerateApplicationList(appList))
 				case *resourceTypes.APIList:
+					logger.LoggerSubscription.Debug("Received API information.")
 					apiList = newResponse.(*resourceTypes.APIList)
 					xds.UpdateEnforcerAPIList(xds.GenerateAPIList(apiList))
 				case *resourceTypes.ApplicationPolicyList:
+					logger.LoggerSubscription.Debug("Received Application Policy information.")
 					appPolicyList = newResponse.(*resourceTypes.ApplicationPolicyList)
 					xds.UpdateEnforcerApplicationPolicies(xds.GenerateApplicationPolicyList(appPolicyList))
 				case *resourceTypes.SubscriptionPolicyList:
+					logger.LoggerSubscription.Debug("Received Subscription Policy information.")
 					subPolicyList = newResponse.(*resourceTypes.SubscriptionPolicyList)
 					xds.UpdateEnforcerSubscriptionPolicies(xds.GenerateSubscriptionPolicyList(subPolicyList))
 				case *resourceTypes.ApplicationKeyMappingList:
+					logger.LoggerSubscription.Debug("Received Application Key Mapping information.")
 					appKeyMappingList = newResponse.(*resourceTypes.ApplicationKeyMappingList)
 					xds.UpdateEnforcerApplicationKeyMappings(xds.GenerateApplicationKeyMappingList(appKeyMappingList))
 				default:
@@ -177,7 +181,7 @@ func invokeService(endpoint string, responseType interface{}, c chan response, r
 	req.Header.Set(authorizationHeaderDefault, authorizationBasic+accessToken)
 
 	// Make the request
-	logger.LoggerSubscription.Debug("Sending the request to the control plane ")
+	logger.LoggerSubscription.Debug("Sending the request to the control plane over the REST API: " + serviceURL)
 	resp, err := client.Do(req)
 
 	if err != nil {

@@ -111,7 +111,7 @@ public class ApiListDiscoveryClient {
 
             @Override
             public void onError(Throwable throwable) {
-                logger.error("Error occurred during Subscription discovery", throwable);
+                logger.error("Error occurred during Api list discovery", throwable);
                 // TODO: (Praminda) if adapter is unavailable keep retrying
                 nack(throwable);
             }
@@ -128,6 +128,7 @@ public class ApiListDiscoveryClient {
                     .setVersionInfo(latestACKed.getVersionInfo())
                     .setTypeUrl(Constants.API_LIST_TYPE_URL).build();
             reqObserver.onNext(req);
+            logger.debug("Sent Discovery request for type url: " + Constants.API_LIST_TYPE_URL);
 
         } catch (Exception e) {
             logger.error("Unexpected error occurred in API list discovery service", e);
