@@ -154,13 +154,13 @@ func Run(conf *config.Config) {
 	enforcerApplicationKeyMappingCache := xds.GetEnforcerApplicationKeyMappingCache()
 
 	srv := xdsv3.NewServer(ctx, cache, nil)
-	enforcerXdsSrv := xdsv3.NewServer(ctx, enforcerCache, nil)
-	enforcerSdsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionCache, nil)
-	enforcerAppDsSrv := xdsv3.NewServer(ctx, enforcerApplicationCache, nil)
-	enforcerAPIDsSrv := xdsv3.NewServer(ctx, enforcerAPICache, nil)
-	enforcerAppPolicyDsSrv := xdsv3.NewServer(ctx, enforcerApplicationPolicyCache, nil)
-	enforcerSubPolicyDsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionPolicyCache, nil)
-	enforcerAppKeyMappingDsSrv := xdsv3.NewServer(ctx, enforcerApplicationKeyMappingCache, nil)
+	enforcerXdsSrv := xdsv3.NewServer(ctx, enforcerCache, &callbacks{})
+	enforcerSdsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionCache, &callbacks{})
+	enforcerAppDsSrv := xdsv3.NewServer(ctx, enforcerApplicationCache, &callbacks{})
+	enforcerAPIDsSrv := xdsv3.NewServer(ctx, enforcerAPICache, &callbacks{})
+	enforcerAppPolicyDsSrv := xdsv3.NewServer(ctx, enforcerApplicationPolicyCache, &callbacks{})
+	enforcerSubPolicyDsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionPolicyCache, &callbacks{})
+	enforcerAppKeyMappingDsSrv := xdsv3.NewServer(ctx, enforcerApplicationKeyMappingCache, &callbacks{})
 
 	runManagementServer(srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
 		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, port)
