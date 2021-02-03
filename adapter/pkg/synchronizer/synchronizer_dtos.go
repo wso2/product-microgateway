@@ -29,6 +29,7 @@ package synchronizer
 type SyncAPIResponse struct {
 	Resp         []byte
 	Err          error
+	ErrorCode    int
 	APIID        string
 	GatewayLabel string
 }

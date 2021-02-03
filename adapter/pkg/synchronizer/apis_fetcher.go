@@ -141,6 +141,7 @@ func FetchAPIs(id *string, gwLabel *string, c chan SyncAPIResponse) {
 	if err != nil {
 		logger.LoggerSync.Errorf("Error occurred while reading the response: %v", err)
 		respSyncAPI.Err = err
+		respSyncAPI.ErrorCode = resp.StatusCode
 		respSyncAPI.Resp = nil
 		c <- respSyncAPI
 		return
@@ -157,6 +158,7 @@ func FetchAPIs(id *string, gwLabel *string, c chan SyncAPIResponse) {
 	logger.LoggerSync.Errorf("Failure response: %v", string(respBytes))
 	respSyncAPI.Err = errors.New(string(respBytes))
 	respSyncAPI.Resp = nil
+	respSyncAPI.ErrorCode = resp.StatusCode
 	c <- respSyncAPI
 	return
 }
@@ -255,6 +257,8 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 				logger.LoggerSync.Errorf("Error occurred while pushing API data: %v ", err)
 			}
 			break
+		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
+			logger.LoggerSync.Errorf("Error occurred when retrieveing APIs from control plane: %v", data.Err)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
