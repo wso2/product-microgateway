@@ -75,14 +75,6 @@ public class APIFactory {
                 String apiKey = getApiKey(webSocketAPI);
                 newApis.put(apiKey, webSocketAPI);
             }
-//            logger.info("basepath: "+ api.getBasePath());
-//            logger.info("title: "+ api.getTitle());
-//            logger.info("version: "+ api.getVersion());
-//            RestAPI enforcerApi = new RestAPI();
-//            enforcerApi.init(api);
-//            String apiKey = getApiKey(enforcerApi);
-//            newApis.put(apiKey, enforcerApi);
-
         }
 
         if (logger.isDebugEnabled()) {

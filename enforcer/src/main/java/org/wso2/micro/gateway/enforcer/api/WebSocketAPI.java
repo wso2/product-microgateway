@@ -42,7 +42,7 @@ public class WebSocketAPI implements API <Context, Context>{
     @Override
     public Context process(Context context) {
         if(context instanceof WebSocketMetadataContext){
-            return WebSocketResponseObject.OK;
+            return context;
         }else {
             logger.info("websocket api process"+ context.toString());
             ResponseObject responseObject = new ResponseObject();
