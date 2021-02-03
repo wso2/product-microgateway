@@ -399,10 +399,10 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 		AuthService:    authService,
 		JwtTokenConfig: issuers,
 		Eventhub: &enforcer.EventHub{
-			Enabled:    config.Enforcer.EventHub.Enabled,
-			ServiceUrl: config.Enforcer.EventHub.ServiceURL,
+			Enabled:    config.ControlPlane.EventHub.Enabled,
+			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,
 			JmsConnectionParameters: map[string]string{
-				"eventListeningEndpoints": config.Enforcer.EventHub.JmsConnectionParameters.EventListeningEndpoints,
+				"eventListeningEndpoints": config.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints,
 			},
 		},
 	}
