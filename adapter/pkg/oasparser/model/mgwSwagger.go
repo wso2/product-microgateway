@@ -186,7 +186,7 @@ func getXWso2Endpoints(vendorExtensible map[string]interface{}, endpointType str
 			} else {
 				castedUrlsInterface := urlsProperty.([]interface{})
 				for _, v := range castedUrlsInterface {
-					if svcdiscovery.IsDiscoveryServiceEndpoint(v.(string)) {
+					if svcdiscovery.IsServiceDiscoveryEnabled && svcdiscovery.IsDiscoveryServiceEndpoint(v.(string)) {
 						logger.LoggerOasparser.Debug("consul query syntax found: ", v.(string))
 						queryString, defHost, err := svcdiscovery.ParseConsulSyntax(v.(string))
 						if err != nil {

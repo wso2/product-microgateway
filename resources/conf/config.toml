@@ -17,6 +17,7 @@ location = "/home/wso2/security/truststore"
 
 [adapter.consul]
 # todo rumesh check whether we need to have certPath and KeyPath
+enable = false
 url = "https://169.254.1.1:8501" # scheme + host ip + port
 pollInterval = 5 # seconds
 aclTokenFilePath = ""
