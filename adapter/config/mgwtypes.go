@@ -76,6 +76,8 @@ type Config struct {
 
 		//Consul represents the configuration required to connect to consul service discovery
 		Consul struct {
+			//Enable whether consul service discovery should be enabled
+			Enable bool
 			//URL url of the consul client in format: http(s)://host:port
 			URL string
 			//PollInterval how frequently consul API should be polled to get updates (in seconds)

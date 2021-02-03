@@ -287,7 +287,9 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string, environment
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
 	UpdateEnforcerApis(enforcerAPI)
-	startConsulServiceDiscovery() //consul service discovery starting point
+	if svcdiscovery.IsServiceDiscoveryEnabled {
+		startConsulServiceDiscovery() //consul service discovery starting point
+	}
 }
 
 func arrayContains(a []string, x string) bool {
