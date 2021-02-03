@@ -25,13 +25,11 @@ import (
 )
 
 func TestFindSwaggerVersion(t *testing.T) {
-
 	type findSwaggerVersionTestItem struct {
 		inputSwagger string
 		result       string
 		message      string
 	}
-
 	dataItems := []findSwaggerVersionTestItem{
 		{
 			inputSwagger: `{
@@ -63,7 +61,6 @@ func TestFindSwaggerVersion(t *testing.T) {
 			message: "when openAPi version is not provided",
 		},
 	}
-
 	for _, item := range dataItems {
 		apiJsn, _ := utills.ToJSON([]byte(item.inputSwagger))
 		resultswaggerVerison := utills.FindSwaggerVersion(apiJsn)
