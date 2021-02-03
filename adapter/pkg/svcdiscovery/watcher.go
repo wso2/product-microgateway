@@ -31,12 +31,11 @@ import (
 
 var (
 	//IsServiceDiscoveryEnabled whether Consul service discovery should be enabled
-	IsServiceDiscoveryEnabled   bool
-	onceServiceDiscoveryEnabled sync.Once
-	onceConfigLoad              sync.Once
-	conf                        *config.Config
-	pollInterval                time.Duration
-	errConfLoad                 error
+	IsServiceDiscoveryEnabled bool
+	onceConfigLoad            sync.Once
+	conf                      *config.Config
+	pollInterval              time.Duration
+	errConfLoad               error
 	//ssl certs
 	caCert   []byte
 	cert     []byte
@@ -59,15 +58,9 @@ func init() {
 	ClusterConsulKeyMap = make(map[string]string)
 	ClusterConsulResultMap = make(map[string][]Upstream)
 	ClusterConsulDoneChanMap = make(map[string]chan bool)
-	//No Consul agent url in config.toml ==> Don't start service Discovery
-	onceServiceDiscoveryEnabled.Do(func() {
-		conf, errConfLoad = config.ReadConfigs()
-		if conf.Adapter.Consul.URL != "" {
-			IsServiceDiscoveryEnabled = true
-		} else {
-			IsServiceDiscoveryEnabled = false
-		}
-	})
+	//Read config
+	conf, errConfLoad = config.ReadConfigs()
+	IsServiceDiscoveryEnabled = conf.Adapter.Consul.Enable
 }
 
 //read the certs and access token required for tls into respective global variables
