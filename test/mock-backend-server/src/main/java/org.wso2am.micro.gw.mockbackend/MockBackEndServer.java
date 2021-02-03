@@ -150,7 +150,7 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/store/order/1", exchange -> {
                 byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                if (exchange.getRequestHeaders().containsKey("Authorization") &&
                         exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46aGVsbG8="))
                 {
                     response = ResponseConstants.STORE_INVENTORY_RESPONSE.getBytes();
@@ -168,7 +168,7 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/user/john", exchange -> {
                 byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                if (exchange.getRequestHeaders().containsKey("Authorization") &&
                         exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46aGVsbG8="))
                 {
                     response = ResponseConstants.userResponse.getBytes();

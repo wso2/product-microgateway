@@ -86,7 +86,7 @@ public class MgwServerInstance implements MgwServer {
             Utils.copyFile(confPath, mgwServerPath  +  File.separator + "resources"  +  File.separator +
                     "conf" +  File.separator + "config.toml");
         }
-        String dockerCompsePath = mgwServerPath+  File.separator + "docker-compose.yaml";
+        String dockerCompsePath = mgwServerPath +  File.separator + "docker-compose.yaml";
         MockBackendServer.addMockBackendServiceToDockerCompose(dockerCompsePath, tlsEnabled);
         environment = new DockerComposeContainer(new File(dockerCompsePath))
                 .withLocalCompose(true);
