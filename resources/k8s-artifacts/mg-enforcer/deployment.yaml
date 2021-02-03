@@ -31,14 +31,16 @@ spec:
         app: mg-enforcer
     spec:
       initContainers:
-        - name: init-apim-analytics-db
+        - name: init-adapter-service
           image: busybox:1.31
           command: [ 'sh', '-c', 'echo -e "Checking for the availability of Adapter"; while ! nc -z adapter 18000; do sleep 1; printf "-"; done; echo -e "  >> Adapter has started";' ]
       containers:
         - name: mg-enforcer
           volumeMounts:
-            - mountPath: /home/wso2/mg/security/
-              name: client-truststore-vol
+            - mountPath: /home/wso2/security/truststore
+              name: enforcer-truststore-vol
+            - mountPath: /home/wso2/security/keystore
+              name: enforcer-keystore-vol
             - mountPath: /home/wso2/conf/config.toml
               subPath: config.toml
               name: config-toml-vol
@@ -48,9 +50,17 @@ spec:
             - mountPath: /home/wso2/conf/log_config.toml
               subPath: log_config.toml
               name: logconfig-toml-vol
-          image: wso2/mg-enforcer:4.0.0-m5-SNAPSHOT
+          image: wso2/mg-enforcer:4.0.0-m5
           imagePullPolicy: Always
           env:
+            - name: ENFORCER_PRIVATE_KEY_PATH
+              value: "/home/wso2/security/keystore/mg.key"
+            - name: ENFORCER_PUBLIC_CERT_PATH
+              value: "/home/wso2/security/keystore/mg.pem"
+            - name: TRUSTED_CA_CERTS_PATH
+              value: "/home/wso2/security/truststore"
+            - name: ADAPTER_HOST_NAME
+              value: "adapter"
             - name: ADAPTER_HOST
               value: "adapter"
             - name: ADAPTER_XDS_PORT
@@ -77,12 +87,12 @@ spec:
             initialDelaySeconds: 8
             periodSeconds: 5
       volumes:
-        - name: client-truststore-vol
+        - name: enforcer-truststore-vol
           secret:
-            secretName: client-truststore-secret
-            items:
-              - key: client-truststore.jks
-                path: client-truststore.jks
+            secretName: enforcer-truststore
+        - name: enforcer-keystore-vol
+          secret:
+            secretName: enforcer-keystore
         - name: config-toml-vol
           configMap:
             name: config-toml
