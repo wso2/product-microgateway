@@ -29,7 +29,7 @@ import java.util.List;
  */
 public interface API <T, S>{
 
-    List<Filter> getFilters();
+    List<Filter<T>> getFilters();
 
     String init(CheckRequest request);
 
@@ -41,7 +41,7 @@ public interface API <T, S>{
 
     default boolean executeFilterChain(T t) {
         boolean proceed;
-        for (Filter filter : getFilters()) {
+        for (Filter<T> filter : getFilters()) {
             proceed = filter.handleRequest(t);
             if (!proceed) {
                 return false;

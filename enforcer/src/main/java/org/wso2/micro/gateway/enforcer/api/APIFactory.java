@@ -75,6 +75,13 @@ public class APIFactory {
                 String apiKey = getApiKey(webSocketAPI);
                 newApis.put(apiKey, webSocketAPI);
             }
+//            logger.info("basepath: "+ api.getBasePath());
+//            logger.info("title: "+ api.getTitle());
+//            logger.info("version: "+ api.getVersion());
+//            RestAPI enforcerApi = new RestAPI();
+//            enforcerApi.init(api);
+//            String apiKey = getApiKey(enforcerApi);
+//            newApis.put(apiKey, enforcerApi);
 
         }
 
@@ -119,6 +126,15 @@ public class APIFactory {
                 .filter(resourceConfig -> resourceConfig.getPath().equals(matchedResourcePath)).
                         filter(resourceConfig -> (method == null) || resourceConfig.getMethod()
                                 .equals(ResourceConfig.HttpMethods.valueOf(method))).findFirst().orElse(null);
+    }
+
+    public ResourceConfig getMatchedBasePath(API api, String basePath){
+        ResourceConfig resourceConfig = new ResourceConfig();
+        if(api.getAPIConfig().getBasePath().equals(basePath)){
+            resourceConfig.setPath(basePath);
+            resourceConfig.setMethod(ResourceConfig.HttpMethods.GET);
+        }
+        return resourceConfig;
     }
 
     private String getApiKey(API api) {

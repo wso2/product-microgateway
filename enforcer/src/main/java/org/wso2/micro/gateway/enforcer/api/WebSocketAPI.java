@@ -1,26 +1,27 @@
 package org.wso2.micro.gateway.enforcer.api;
 
 import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
-import org.checkerframework.checker.units.qual.A;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.api.Api;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.cors.CorsFilter;
 import org.wso2.micro.gateway.enforcer.security.AuthFilter;
-import org.wso2.micro.gateway.enforcer.websocket.RateLimitRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class WebSocketAPI implements API <Context, Context>{
 
+    private static final Logger logger = LogManager.getLogger(WebSocketAPI.class);
     private APIConfig apiConfig;
-    private List<Filter> filters = new ArrayList<>();
-    private List<Filter> upgradeFilters = new ArrayList<>();
+    private List<Filter<RequestContext>> filters = new ArrayList<>();
+    private List<Filter<WebSocketMetadataContext>> upgradeFilters = new ArrayList<>();
 
     @Override
-    public List<Filter> getFilters() {
-        return filters;
+    public List<Filter<Context>> getFilters() {
+        return null;
     }
 
     @Override
@@ -34,6 +35,7 @@ public class WebSocketAPI implements API <Context, Context>{
         String name = api.getTitle();
         String version = api.getVersion();
         this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).build();
+        initFilters();
         return basePath;
     }
 
@@ -42,6 +44,7 @@ public class WebSocketAPI implements API <Context, Context>{
         if(context instanceof WebSocketMetadataContext){
             return WebSocketResponseObject.OK;
         }else {
+            logger.info("websocket api process"+ context.toString());
             ResponseObject responseObject = new ResponseObject();
             if(executeFilterChain(context)){
                 responseObject.setStatusCode(200);
@@ -76,9 +79,11 @@ public class WebSocketAPI implements API <Context, Context>{
         if(context instanceof WebSocketMetadataContext){
             return true;
         }else {
+            logger.info("normal filter chain");
             boolean proceed;
-            for (Filter filter : getFilters()) {
+            for (Filter filter : getHttpFilters()) {
                 proceed = filter.handleRequest(context);
+                logger.info("proceed:"+ proceed);
                 if (!proceed) {
                     return false;
                 }
@@ -87,8 +92,12 @@ public class WebSocketAPI implements API <Context, Context>{
         }
     }
 
-    public List<Filter> getUpgradeFilters(){
+    public List<Filter<WebSocketMetadataContext>> getUpgradeFilters(){
         return upgradeFilters;
+    }
+
+    public List<Filter<RequestContext>> getHttpFilters(){
+        return filters;
     }
 
     public void initFilters(){

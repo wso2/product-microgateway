@@ -40,10 +40,10 @@ public class RestAPI implements API <RequestContext, ResponseObject>{
     private static final Logger logger = LogManager.getLogger(RestAPI.class);
 
     private APIConfig apiConfig;
-    private List<Filter> filters = new ArrayList<>();
+    private List<Filter<RequestContext>> filters = new ArrayList<>();
 
     @Override
-    public List<Filter> getFilters() {
+    public List<Filter<RequestContext>> getFilters() {
         return filters;
     }
 

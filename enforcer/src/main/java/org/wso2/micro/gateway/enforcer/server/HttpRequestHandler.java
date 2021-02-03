@@ -66,9 +66,14 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest,ResponseO
                 .get(AdapterConstants.PROD_CLUSTER_HEADER_KEY);
         String sandCluster = request.getAttributes().getContextExtensionsMap()
                 .get(AdapterConstants.SAND_CLUSTER_HEADER_KEY);
-
-        ResourceConfig resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
-        return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
+        ResourceConfig resourceConfig = null;
+        logger.info("path: "+requestPath);
+        logger.info("basepath: "+ request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_BASE_PATH_PARAM));
+        if(api.getAPIConfig().getResources().isEmpty()){
+            resourceConfig = APIFactory.getInstance().getMatchedBasePath(api, requestPath);
+        }else {
+            resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
+        }return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api).headers(headers).prodClusterHeader(prodCluster).sandClusterHeader(sandCluster)
                 .build();
     }
