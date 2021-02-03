@@ -33,7 +33,10 @@ public class Callhome {
     private static final Logger log = LoggerFactory.getLogger("ballerina");
 
     /**
-     * run call home.
+     * Run call home.
+     *
+     * @param  trustStoreLocation trust store location
+     * @param  trustStorePassword trust store password
      */
     public static void runCallHome(String trustStoreLocation, String trustStorePassword) {
         try {
@@ -58,6 +61,8 @@ public class Callhome {
 
     /**
      * Get truststore location.
+     *
+     * @param  fullpath full path to the trust store location
      *
      * @return truststore location
      */
