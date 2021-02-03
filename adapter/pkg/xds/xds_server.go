@@ -629,6 +629,7 @@ func GenerateApplicationKeyMappingList(keyMappingList *resourceTypes.Application
 // UpdateEnforcerSubscriptions sets new update to the enforcer's Subscriptions
 func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 	//TODO: (Dinusha) check this hardcoded value
+	logger.LoggerMgw.Debug("Updating Enforcer Subscription Cache")
 	label := "enforcer"
 	subscriptionList := enforcerSubscriptionMap[label]
 	subscriptionList = append(subscriptionList, subscriptions)
@@ -655,6 +656,7 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 
 // UpdateEnforcerApplications sets new update to the enforcer's Applications
 func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
+	logger.LoggerMgw.Debug("Updating Enforcer Application Cache")
 	label := "enforcer"
 	applicationList := enforcerApplicationMap[label]
 	applicationList = append(applicationList, applications)
@@ -681,6 +683,7 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 
 // UpdateEnforcerAPIList sets new update to the enforcer's Apis
 func UpdateEnforcerAPIList(apis *subscription.APIList) {
+	logger.LoggerMgw.Debug("Updating Enforcer API Cache")
 	label := "enforcer"
 	apiList := enforcerAPIListMap[label]
 	apiList = append(apiList, apis)
@@ -707,6 +710,7 @@ func UpdateEnforcerAPIList(apis *subscription.APIList) {
 
 // UpdateEnforcerApplicationPolicies sets new update to the enforcer's Application Policies
 func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.ApplicationPolicyList) {
+	logger.LoggerMgw.Debug("Updating Enforcer Application Policy Cache")
 	label := "enforcer"
 	applicationPolicyList := enforcerApplicationPolicyMap[label]
 	applicationPolicyList = append(applicationPolicyList, applicationPolicies)
@@ -733,6 +737,7 @@ func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 
 // UpdateEnforcerSubscriptionPolicies sets new update to the enforcer's Subscription Policies
 func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.SubscriptionPolicyList) {
+	logger.LoggerMgw.Debug("Updating Enforcer Subscription Policy Cache")
 	label := "enforcer"
 	subscriptionPolicyList := enforcerSubscriptionPolicyMap[label]
 	subscriptionPolicyList = append(subscriptionPolicyList, subscriptionPolicies)
@@ -759,6 +764,7 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 
 // UpdateEnforcerApplicationKeyMappings sets new update to the enforcer's Application Key Mappings
 func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.ApplicationKeyMappingList) {
+	logger.LoggerMgw.Debug("Updating Application Key Mapping Cache")
 	label := "enforcer"
 	applicationKeyMappingList := enforcerApplicationKeyMappingMap[label]
 	applicationKeyMappingList = append(applicationKeyMappingList, applicationKeyMappings)
