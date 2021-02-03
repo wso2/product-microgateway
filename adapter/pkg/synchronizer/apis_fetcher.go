@@ -80,10 +80,10 @@ func FetchAPIs(id *string, gwLabel *string, c chan SyncAPIResponse) {
 	basicAuth := "Basic " + auth.GetBasicAuth(ehUname, ehPass)
 
 	// Check if TLS is enabled
-	tlsEnabled := ehConfigs.TLSEnabled
-	logger.LoggerSync.Debugf("TLS Enabled: %v", tlsEnabled)
+	skipSSL := ehConfigs.SkipSSLVerfication
+	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
 	tr := &http.Transport{}
-	if tlsEnabled {
+	if !skipSSL {
 		caCertPool := tlsutils.GetTrustedCertPool()
 		tr = &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: caCertPool},

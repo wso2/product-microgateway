@@ -88,7 +88,7 @@ username="admin"
 password="admin"
 environmentLabels = ["Production and Sandbox"]
 retryInterval = 5
-tlsEnabled=false
+skipSSLVerification=true
 # Message broker connection URL of the control plane
 [controlPlane.eventHub.jmsConnectionParameters]
 eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"

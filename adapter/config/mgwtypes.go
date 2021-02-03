@@ -192,7 +192,7 @@ type controlPlane struct {
 		SyncApisOnStartUp       bool          `toml:"syncApisOnStartUp"`
 		EnvironmentLabels       []string      `toml:"environmentLabels"`
 		RetryInterval           time.Duration `toml:"retryInterval"`
-		TLSEnabled              bool          `toml:"tlsEnabled"`
+		SkipSSLVerfication      bool          `toml:"skipSSLVerification"`
 		JmsConnectionParameters struct {
 			EventListeningEndpoints string `toml:"eventListeningEndpoints"`
 		} `toml:"jmsConnectionParameters"`
