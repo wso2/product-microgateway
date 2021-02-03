@@ -158,10 +158,10 @@ func invokeService(endpoint string, responseType interface{}, c chan response, r
 	}
 
 	// Check if TLS is enabled
-	tlsEnabled := conf.ControlPlane.EventHub.TLSEnabled
-	logger.LoggerSubscription.Debugf("TLS Enabled: %v", tlsEnabled)
+	skipSSL := conf.ControlPlane.EventHub.SkipSSLVerfication
+	logger.LoggerSubscription.Debugf("Skip SSL Verification: %v", skipSSL)
 	tr := &http.Transport{}
-	if tlsEnabled {
+	if !skipSSL {
 		caCertPool := tlsutils.GetTrustedCertPool()
 		tr = &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: caCertPool},

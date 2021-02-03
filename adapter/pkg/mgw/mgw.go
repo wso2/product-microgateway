@@ -234,6 +234,8 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 			if err != nil {
 				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
 			}
+		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
+			logger.LoggerMgw.Errorf("Error occurred when retrieveing APIs from control plane: %v", data.Err)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			i--
