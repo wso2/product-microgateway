@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    # Copyright 2021 WSO2 Inc. (http://wso2.org)
+    #
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+@@ -14,34 +14,12 @@
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
+-->
+<!--This file is copied from https://raw.githubusercontent.com/wso2/code-quality-tools/v1.3/checkstyle/suppressions.xml-->
+<!DOCTYPE suppressions PUBLIC
+        "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+        "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+
+<suppressions>
+
+    <suppress checks="Javadoc.*" files=".*/src/test/java/.*" />
+
+    <suppress checks="JavadocPackage" files=".*/src/(main|integration)/java/.*"/>
+    <suppress checks="JavadocPackage" files=".*/src/.*/internal/.*"/>
+
+    <suppress checks="JavadocStyle" files=".*/src/(main|integration)/java/.*"/>
+    <suppress checks="JavadocStyle" files=".*/src/.*/internal/.*"/>
+
+    <suppress checks="MethodNameCheck" files=".*/*CommandProvider.java"/>
+    <suppress checks="Regexp" files=".*/*CommandProvider.java"/>
+
+
+    <!-- copied from apache hadoop, won't fix style to keep diff minimal -->
+    <suppress checks=".*" files=".*/LocalJobRunnerWithFix.java"/>
+
+    <!-- do not check thrift generated files -->
+    <suppress checks=".*" files=".*/transaction/distributed/thrift/.*"/>
+
+    <!-- do not check swagger generated files -->
+    <suppress checks=".*" files=".*/src/gen/java/.*"/>
+
+    <!--  Following is added to exclude gen files in enforcer-->
+    <suppress checks=".*" files=".*/src/main/gen/.*"/>
+
+</suppressions>
