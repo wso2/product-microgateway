@@ -287,7 +287,9 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string, environment
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
 	UpdateEnforcerApis(enforcerAPI)
-	startConsulServiceDiscovery() //consul service discovery starting point
+	if svcdiscovery.IsServiceDiscoveryEnabled {
+		startConsulServiceDiscovery() //consul service discovery starting point
+	}
 }
 
 func arrayContains(a []string, x string) bool {
@@ -399,10 +401,10 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 		AuthService:    authService,
 		JwtTokenConfig: issuers,
 		Eventhub: &enforcer.EventHub{
-			Enabled:    config.Enforcer.EventHub.Enabled,
-			ServiceUrl: config.Enforcer.EventHub.ServiceURL,
+			Enabled:    config.ControlPlane.EventHub.Enabled,
+			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,
 			JmsConnectionParameters: map[string]string{
-				"eventListeningEndpoints": config.Enforcer.EventHub.JmsConnectionParameters.EventListeningEndpoints,
+				"eventListeningEndpoints": config.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints,
 			},
 		},
 	}
@@ -423,10 +425,10 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	snap.Consistent()
 	err := cache.SetSnapshot(label, snap)
 	if err != nil {
-		logger.LoggerMgw.Error(err)
+		logger.LoggerXds.Error(err)
 	}
 	envoyUpdateVersionMap[label] = version
-	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
 // UpdateEnforcerConfig Sets new update to the enforcer's configuration
@@ -449,12 +451,12 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 
 	err := enforcerCache.SetSnapshot(label, snap)
 	if err != nil {
-		logger.LoggerMgw.Error(err)
+		logger.LoggerXds.Error(err)
 	}
 
 	enforcerCacheVersionMap[label] = version
 	enforcerConfigMap[label] = configs
-	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
 // UpdateEnforcerApis Sets new update to the enforcer's Apis
@@ -477,12 +479,12 @@ func UpdateEnforcerApis(api *api.Api) {
 
 	err := enforcerCache.SetSnapshot(label, snap)
 	if err != nil {
-		logger.LoggerMgw.Error(err)
+		logger.LoggerXds.Error(err)
 	}
 
 	enforcerCacheVersionMap[label] = version
 	enforcerApisMap[label] = apis
-	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
 // GenerateSubscriptionList converts the data into SubscriptionList proto type
@@ -629,6 +631,7 @@ func GenerateApplicationKeyMappingList(keyMappingList *resourceTypes.Application
 // UpdateEnforcerSubscriptions sets new update to the enforcer's Subscriptions
 func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 	//TODO: (Dinusha) check this hardcoded value
+	logger.LoggerXds.Debug("Updating Enforcer Subscription Cache")
 	label := "enforcer"
 	subscriptionList := enforcerSubscriptionMap[label]
 	subscriptionList = append(subscriptionList, subscriptions)
@@ -646,15 +649,16 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 
 	err := enforcerSubscriptionCache.SetSnapshot(label, snap)
 	if err != nil {
-		logger.LoggerMgw.Error(err)
+		logger.LoggerXds.Error(err)
 	}
 	enforcerSubscriptionCacheVersionMap[label] = version
 	enforcerSubscriptionMap[label] = subscriptionList
-	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
 // UpdateEnforcerApplications sets new update to the enforcer's Applications
 func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
+	logger.LoggerXds.Debug("Updating Enforcer Application Cache")
 	label := "enforcer"
 	applicationList := enforcerApplicationMap[label]
 	applicationList = append(applicationList, applications)
@@ -672,15 +676,16 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 
 	err := enforcerApplicationCache.SetSnapshot(label, snap)
 	if err != nil {
-		logger.LoggerMgw.Error(err)
+		logger.LoggerXds.Error(err)
 	}
 	enforcerApplicationCacheVersionMap[label] = version
 	enforcerApplicationMap[label] = applicationList
-	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
 // UpdateEnforcerAPIList sets new update to the enforcer's Apis
 func UpdateEnforcerAPIList(apis *subscription.APIList) {
+	logger.LoggerXds.Debug("Updating Enforcer API Cache")
 	label := "enforcer"
 	apiList := enforcerAPIListMap[label]
 	apiList = append(apiList, apis)
@@ -698,15 +703,16 @@ func UpdateEnforcerAPIList(apis *subscription.APIList) {
 
 	err := enforcerAPICache.SetSnapshot(label, snap)
 	if err != nil {
-		logger.LoggerMgw.Error(err)
+		logger.LoggerXds.Error(err)
 	}
 	enforcerAPICacheVersionMap[label] = version
 	enforcerAPIListMap[label] = apiList
-	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
 // UpdateEnforcerApplicationPolicies sets new update to the enforcer's Application Policies
 func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.ApplicationPolicyList) {
+	logger.LoggerXds.Debug("Updating Enforcer Application Policy Cache")
 	label := "enforcer"
 	applicationPolicyList := enforcerApplicationPolicyMap[label]
 	applicationPolicyList = append(applicationPolicyList, applicationPolicies)
@@ -724,15 +730,16 @@ func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 
 	err := enforcerApplicationPolicyCache.SetSnapshot(label, snap)
 	if err != nil {
-		logger.LoggerMgw.Error(err)
+		logger.LoggerXds.Error(err)
 	}
 	enforcerApplicationPolicyCacheVersionMap[label] = version
 	enforcerApplicationPolicyMap[label] = applicationPolicyList
-	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
 // UpdateEnforcerSubscriptionPolicies sets new update to the enforcer's Subscription Policies
 func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.SubscriptionPolicyList) {
+	logger.LoggerXds.Debug("Updating Enforcer Subscription Policy Cache")
 	label := "enforcer"
 	subscriptionPolicyList := enforcerSubscriptionPolicyMap[label]
 	subscriptionPolicyList = append(subscriptionPolicyList, subscriptionPolicies)
@@ -750,15 +757,16 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 
 	err := enforcerSubscriptionPolicyCache.SetSnapshot(label, snap)
 	if err != nil {
-		logger.LoggerMgw.Error(err)
+		logger.LoggerXds.Error(err)
 	}
 	enforcerSubscriptionPolicyCacheVersionMap[label] = version
 	enforcerSubscriptionPolicyMap[label] = subscriptionPolicyList
-	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
 // UpdateEnforcerApplicationKeyMappings sets new update to the enforcer's Application Key Mappings
 func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.ApplicationKeyMappingList) {
+	logger.LoggerXds.Debug("Updating Application Key Mapping Cache")
 	label := "enforcer"
 	applicationKeyMappingList := enforcerApplicationKeyMappingMap[label]
 	applicationKeyMappingList = append(applicationKeyMappingList, applicationKeyMappings)
@@ -776,11 +784,11 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 
 	err := enforcerApplicationKeyMappingCache.SetSnapshot(label, snap)
 	if err != nil {
-		logger.LoggerMgw.Error(err)
+		logger.LoggerXds.Error(err)
 	}
 	enforcerApplicationKeyMappingCacheVersionMap[label] = version
 	enforcerApplicationKeyMappingMap[label] = applicationKeyMappingList
-	logger.LoggerMgw.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
 //different go routines could update XDS at the same time. To avoid this we use a mutex and lock

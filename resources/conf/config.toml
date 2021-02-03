@@ -17,6 +17,7 @@ location = "/home/wso2/security/truststore"
 
 [adapter.consul]
 # todo rumesh check whether we need to have certPath and KeyPath
+enable = false
 url = "https://169.254.1.1:8501" # scheme + host ip + port
 pollInterval = 5 # seconds
 aclTokenFilePath = ""
@@ -74,19 +75,6 @@ disableSslVerification = false
     # Certificate Filepath within enforcer
     certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
-# Configurations for retrieving API and subscription data from API Manager.
-[enforcer.eventHub]
-    # Enable/ Disable the feature
-    enabled = false
-    # The API Manager URL
-    serviceUrl = "https://localhost:9443/"
-    username="admin"
-    password="admin"
-    # User name and password of the internal data api.
-    [enforcer.eventHub.jmsConnectionParameters]
-        # The message broker connection URL.
-        eventListeningEndpoints = "amqp://admin:admin@localhost:5672/"
-
 [enforcer.apimCredentials]
     username="admin"
     password="admin"
@@ -100,7 +88,7 @@ username="admin"
 password="admin"
 environmentLabels = ["Production and Sandbox"]
 retryInterval = 5
-tlsEnabled=false
+skipSSLVerification=true
 # Message broker connection URL of the control plane
 [controlPlane.eventHub.jmsConnectionParameters]
-eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
+eventListeningEndpoints = "amqp://admin:admin@localhost:5672/"

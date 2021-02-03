@@ -76,7 +76,7 @@ public class SubscriptionPolicyDiscoveryClient {
         this.subscriptionDataStore = SubscriptionDataStoreImpl.getInstance();
         this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
         this.stub = SubscriptionPolicyDiscoveryServiceGrpc.newStub(channel);
-        this.nodeId = ConfigHolder.getInstance().getEnvVarConfig().getAdapterHost();
+        this.nodeId = ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
     }
 
@@ -128,6 +128,7 @@ public class SubscriptionPolicyDiscoveryClient {
                     .setVersionInfo(latestACKed.getVersionInfo())
                     .setTypeUrl(Constants.SUBSCRIPTION_POLICY_LIST_TYPE_URL).build();
             reqObserver.onNext(req);
+            logger.debug("Sent Discovery request for type url: " + Constants.SUBSCRIPTION_POLICY_LIST_TYPE_URL);
 
         } catch (Exception e) {
             logger.error("Unexpected error occurred in API discovery service", e);

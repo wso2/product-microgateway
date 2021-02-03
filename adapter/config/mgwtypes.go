@@ -76,6 +76,8 @@ type Config struct {
 
 		//Consul represents the configuration required to connect to consul service discovery
 		Consul struct {
+			//Enable whether consul service discovery should be enabled
+			Enable bool
 			//URL url of the consul client in format: http(s)://host:port
 			URL string
 			//PollInterval how frequently consul API should be polled to get updates (in seconds)
@@ -190,7 +192,7 @@ type controlPlane struct {
 		SyncApisOnStartUp       bool          `toml:"syncApisOnStartUp"`
 		EnvironmentLabels       []string      `toml:"environmentLabels"`
 		RetryInterval           time.Duration `toml:"retryInterval"`
-		TLSEnabled              bool          `toml:"tlsEnabled"`
+		SkipSSLVerfication      bool          `toml:"skipSSLVerification"`
 		JmsConnectionParameters struct {
 			EventListeningEndpoints string `toml:"eventListeningEndpoints"`
 		} `toml:"jmsConnectionParameters"`

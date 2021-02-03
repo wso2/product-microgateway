@@ -27,6 +27,7 @@ import (
 	configservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/config"
 	subscriptionservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/subscription"
 	"github.com/wso2/micro-gw/pkg/api/restserver"
+	cb "github.com/wso2/micro-gw/pkg/mgw/xdscallbacks"
 	"github.com/wso2/micro-gw/pkg/tlsutils"
 
 	"context"
@@ -154,13 +155,13 @@ func Run(conf *config.Config) {
 	enforcerApplicationKeyMappingCache := xds.GetEnforcerApplicationKeyMappingCache()
 
 	srv := xdsv3.NewServer(ctx, cache, nil)
-	enforcerXdsSrv := xdsv3.NewServer(ctx, enforcerCache, nil)
-	enforcerSdsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionCache, nil)
-	enforcerAppDsSrv := xdsv3.NewServer(ctx, enforcerApplicationCache, nil)
-	enforcerAPIDsSrv := xdsv3.NewServer(ctx, enforcerAPICache, nil)
-	enforcerAppPolicyDsSrv := xdsv3.NewServer(ctx, enforcerApplicationPolicyCache, nil)
-	enforcerSubPolicyDsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionPolicyCache, nil)
-	enforcerAppKeyMappingDsSrv := xdsv3.NewServer(ctx, enforcerApplicationKeyMappingCache, nil)
+	enforcerXdsSrv := xdsv3.NewServer(ctx, enforcerCache, &cb.Callbacks{})
+	enforcerSdsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionCache, &cb.Callbacks{})
+	enforcerAppDsSrv := xdsv3.NewServer(ctx, enforcerApplicationCache, &cb.Callbacks{})
+	enforcerAPIDsSrv := xdsv3.NewServer(ctx, enforcerAPICache, &cb.Callbacks{})
+	enforcerAppPolicyDsSrv := xdsv3.NewServer(ctx, enforcerApplicationPolicyCache, &cb.Callbacks{})
+	enforcerSubPolicyDsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionPolicyCache, &cb.Callbacks{})
+	enforcerAppKeyMappingDsSrv := xdsv3.NewServer(ctx, enforcerApplicationKeyMappingCache, &cb.Callbacks{})
 
 	runManagementServer(srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
 		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, port)
@@ -233,6 +234,8 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 			if err != nil {
 				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
 			}
+		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
+			logger.LoggerMgw.Errorf("Error occurred when retrieveing APIs from control plane: %v", data.Err)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			i--
