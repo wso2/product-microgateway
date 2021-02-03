@@ -90,4 +90,4 @@ retryInterval = 5
 tlsEnabled=false
 # Message broker connection URL of the control plane
 [controlPlane.eventHub.jmsConnectionParameters]
-eventListeningEndpoints = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
+eventListeningEndpoints = "amqp://admin:admin@localhost:5672/"
