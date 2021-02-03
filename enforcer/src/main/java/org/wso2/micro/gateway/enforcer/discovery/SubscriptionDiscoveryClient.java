@@ -129,6 +129,7 @@ public class SubscriptionDiscoveryClient {
                     .setVersionInfo(latestACKed.getVersionInfo())
                     .setTypeUrl(Constants.SUBSCRIPTION_LIST_TYPE_URL).build();
             reqObserver.onNext(req);
+            logger.debug("Sent Discovery request for type url: " + Constants.SUBSCRIPTION_LIST_TYPE_URL);
 
         } catch (Exception e) {
             logger.error("Unexpected error occurred in API discovery service", e);

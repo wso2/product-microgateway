@@ -128,6 +128,7 @@ public class ApplicationDiscoveryClient {
                     .setVersionInfo(latestACKed.getVersionInfo())
                     .setTypeUrl(Constants.APPLICATION_LIST_TYPE_URL).build();
             reqObserver.onNext(req);
+            logger.debug("Sent Discovery request for type url: " + Constants.APPLICATION_LIST_TYPE_URL);
 
         } catch (Exception e) {
             logger.error("Unexpected error occurred in Application discovery service", e);
