@@ -37,6 +37,13 @@
         <version>1.2</version>
     </parent>
 
+    <scm>
+        <url>https://github.com/wso2/product-microgateway.git</url>
+        <developerConnection>scm:git:https://github.com/wso2/product-microgateway.git</developerConnection>
+        <connection>scm:git:https://github.com/wso2/product-microgateway.git</connection>
+        <tag>HEAD</tag>
+    </scm>
+
     <modules>
         <module>adapter</module>
         <module>enforcer</module>
