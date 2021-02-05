@@ -6,7 +6,8 @@ jdk:
   - openjdk11
 go:
   - 1.15.x
-
+before_install:
+  - docker pull ubuntu:20.04
 #env:
 #  - DOCKER_COMPOSE_VERSION=1.4.2
 ##before_install:
