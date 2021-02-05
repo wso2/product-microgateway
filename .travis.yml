@@ -24,8 +24,11 @@ install: skip
 # Run maven build in quiet mode to avoid log file limit in Travis CI.
 # Only errors and Maven version information will be printed in the CI logs.
 script:
-  - echo ${JAVA_HOME}
-  - java --version
+  - java version
+  - export JAVA_HOME=$HOME/openjdk11
+  - $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk11 --target $JAVA_HOME
+  - # do stuff with open OpenJDK 11
+  - java version
   - mvn clean install -B -V | grep -e "\[ERROR\]" -e Maven -e "// Start Running" -e "Building"; test ${PIPESTATUS[0]} -eq 0;
 cache:
   directories:
