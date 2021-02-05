@@ -27,6 +27,7 @@ import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.analytics.AnalyticsFilter;
 import org.wso2.micro.gateway.enforcer.api.APIFactory;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
@@ -62,6 +63,15 @@ public class AuthServer {
 
             // Create a new server to listen on port 8081
             Server server = initServer();
+
+            // Enable global filters
+            // TODO (amalimatharaarachchi) enable analytics according to config
+            boolean analytics = true;
+            if (analytics) {
+                logger.info("analytics filter enabled");
+                new AnalyticsFilter();
+            }
+
             //Initialise cache objects
             CacheProvider.init();
 
