@@ -18,7 +18,7 @@
 package org.wso2.micro.gateway.enforcer.constants;
 
 /**
- * Holds the common set of constants for the filter chain package.
+ * Holds the common set of constants for the enforcer package.
  */
 public class APIConstants {
 
