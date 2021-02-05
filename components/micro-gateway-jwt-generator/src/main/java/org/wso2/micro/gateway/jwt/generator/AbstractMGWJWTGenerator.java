@@ -18,6 +18,7 @@ package org.wso2.micro.gateway.jwt.generator;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,6 +32,7 @@ import java.security.Signature;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,18 +58,10 @@ public abstract class AbstractMGWJWTGenerator {
     private Map<String, Object> apiDetails;
     private List<String> defaultRestrictedClaims;
 
-    public AbstractMGWJWTGenerator(String dialectURI,
-                                   String signatureAlgorithm,
-                                   String keyStorePath,
-                                   String keyStorePassword,
-                                   String certificateAlias,
-                                   String privateKeyAlias,
-                                   int jwtExpiryTime,
-                                   String[] restrictedClaims,
-                                   boolean cacheEnabled,
-                                   int cacheExpiry,
-                                   String tokenIssuer,
-                                   String[] tokenAudience) {
+    public AbstractMGWJWTGenerator(String dialectURI, String signatureAlgorithm, String keyStorePath,
+                                   String keyStorePassword, String certificateAlias, String privateKeyAlias,
+                                   int jwtExpiryTime, String[] restrictedClaims, boolean cacheEnabled,
+                                   int cacheExpiry, String tokenIssuer, String[] tokenAudience) {
         this.keyStorePath = keyStorePath;
         this.keyStorePassword = keyStorePassword;
         this.certificateAlias = certificateAlias;
@@ -80,8 +74,12 @@ public abstract class AbstractMGWJWTGenerator {
         this.tokenIssuer = tokenIssuer;
         this.tokenAudience = tokenAudience;
         this.restrictedClaims = new ArrayList<>(Arrays.asList(restrictedClaims));
-        defaultRestrictedClaims = new ArrayList<>(Arrays.asList("iss", "sub", "aud", "exp",
-                "nbf", "iat", "jti", "application", "tierInfo", "subscribedAPIs", "keytype"));
+        defaultRestrictedClaims = new ArrayList<>(Arrays.asList(MGWJWTGeneratorConstants.ISSUER_CLAIM,
+                MGWJWTGeneratorConstants.SUB_CLAIM, MGWJWTGeneratorConstants.AUDIENCE_CLAIM,
+                MGWJWTGeneratorConstants.EXP_CLAIM, MGWJWTGeneratorConstants.NBF_CLAIM,
+                MGWJWTGeneratorConstants.IAT_CLAIM, MGWJWTGeneratorConstants.JTI_CLAIM,
+                MGWJWTGeneratorConstants.APPLICATION_CLAIM, MGWJWTGeneratorConstants.TIER_INFO_CLAIM,
+                MGWJWTGeneratorConstants.SUBSCRIBED_APIS_CLAIM, MGWJWTGeneratorConstants.KEY_TYPE_CLAIM));
         this.restrictedClaims.addAll(defaultRestrictedClaims);
     }
 
@@ -199,6 +197,9 @@ public abstract class AbstractMGWJWTGenerator {
 
     /**
      * Used to generate the JWT token.
+     * @param jwtInfo - JWT Token payload
+     * @return generated JWT token
+     * @throws Exception - If an error occurred in building header
      */
     public String generateToken(Map<String, Object> jwtInfo) throws Exception {
         String jwtHeader = buildHeader();
@@ -224,17 +225,17 @@ public abstract class AbstractMGWJWTGenerator {
 
     /**
      * Used to build the JWT header.
+     * @return built JWT header
+     * @throws Exception - If an error occurred when adding certificate to header
      */
     public String buildHeader() throws Exception {
         String jwtHeader = null;
         if (NONE.equals(signatureAlgorithm)) {
-            StringBuilder jwtHeaderBuilder = new StringBuilder();
-            jwtHeaderBuilder.append("{\"typ\":\"JWT\",");
-            jwtHeaderBuilder.append("\"alg\":\"");
-            jwtHeaderBuilder.append("none");
-            jwtHeaderBuilder.append('\"');
-            jwtHeaderBuilder.append('}');
-            jwtHeader = jwtHeaderBuilder.toString();
+            Map<String, String> jsonMap = new HashMap<>();
+            jsonMap.put("typ", "JWT");
+            jsonMap.put("alg", "none");
+            JSONObject jsonHeader = new JSONObject(jsonMap);
+            jwtHeader = jsonHeader.toJSONString();
         } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
             jwtHeader = addCertToHeader();
         }
@@ -243,6 +244,9 @@ public abstract class AbstractMGWJWTGenerator {
 
     /**
      * Used to sign the JWT using the keystore.
+     * @param assertion - asserted JWT header and body
+     * @return byte array after the assertion is signed
+     * @throws Exception - if an error occurred when the JWT token is signed by a key from the keystore
      */
     public byte[] signJWT(String assertion) throws Exception {
         FileInputStream is;
@@ -260,16 +264,15 @@ public abstract class AbstractMGWJWTGenerator {
         //update signature with data to be signed
         byte[] dataInBytes = assertion.getBytes(Charset.defaultCharset());
         signature.update(dataInBytes);
-
         // close the file stream
         is.close();
-
         //sign the assertion and return the signature
         return signature.sign();
     }
 
     /**
      * Used to get the expiration time of the token.
+     * @return cache expiry time or the expiry time from the configuration
      */
     public long getTTL() {
         if (cacheEnabled) {
@@ -280,7 +283,9 @@ public abstract class AbstractMGWJWTGenerator {
     }
 
     /**
-     * Used to add "ballerina"the certificate from the keystore to the header.
+     * Used to add "ballerina" the certificate from the keystore to the header.
+     * @return jwt header after the certificate is added
+     * @throws Exception - if an error occurred while reading and adding the certificate into header
      */
     public String addCertToHeader() throws Exception {
         FileInputStream is;
@@ -298,29 +303,23 @@ public abstract class AbstractMGWJWTGenerator {
         String base64UrlEncodedThumbPrint;
         base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
                 .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
-        StringBuilder jwtHeader = new StringBuilder();
         //Sample header
         //{"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10"}
         //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
-        jwtHeader.append("{\"typ\":\"JWT\",");
-        jwtHeader.append("\"alg\":\"");
-        jwtHeader.append("RS256");
-        jwtHeader.append("\",");
-
-        jwtHeader.append("\"x5t\":\"");
-        jwtHeader.append(base64UrlEncodedThumbPrint);
-        jwtHeader.append('\"');
-
-        jwtHeader.append('}');
-
+        Map<String, String> jsonMap = new HashMap<>();
+        jsonMap.put("typ", "JWT");
+        jsonMap.put("alg", "RS256");
+        jsonMap.put("x5t", base64UrlEncodedThumbPrint);
+        JSONObject jwtHeader = new JSONObject(jsonMap);
         // close the file stream
         is.close();
-
-        return jwtHeader.toString();
+        return jwtHeader.toJSONString();
     }
 
     /**
      * Used to build the body with claims.
+     * @param jwtInfo - JWT token payload
+     * @return JWT claim set after the claims are populated
      */
     public String buildBody(Map<String, Object> jwtInfo) {
         JWTClaimsSet.Builder jwtClaimSetBuilder = new JWTClaimsSet.Builder();
@@ -344,6 +343,8 @@ public abstract class AbstractMGWJWTGenerator {
 
     /**
      * Used for base64 encoding.
+     * @param stringToBeEncoded - the string required to be encoded
+     * @return the encoded string
      */
     public String encode(byte[] stringToBeEncoded) {
         return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(stringToBeEncoded);
@@ -351,6 +352,8 @@ public abstract class AbstractMGWJWTGenerator {
 
     /**
      * Helper method to hexify a byte array.
+     * @param bytes - the byte array required to be hexified
+     * @return the hexified string
      */
     public String hexify(byte bytes[]) {
         char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7',
@@ -366,6 +369,8 @@ public abstract class AbstractMGWJWTGenerator {
 
     /**
      * Method to convert Java array to JSONArray.
+     * @param objectArray - java object array to be converted
+     * @return converted JSONArray
      */
     public JSONArray arrayToJSONArray(Object[] objectArray) {
         JSONArray jsonArray = new JSONArray();

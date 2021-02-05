@@ -20,6 +20,7 @@ package org.wso2.micro.gateway.tests.jwtgenerator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.micro.gateway.jwt.generator.AbstractMGWJWTGenerator;
+import org.wso2.micro.gateway.jwt.generator.MGWJWTGeneratorConstants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,63 +31,58 @@ import java.util.UUID;
  * This class is for default Jwt transformer.
  */
 public class TestJWTGenerator extends AbstractMGWJWTGenerator {
-    public TestJWTGenerator(String dialectURI,
-                            String signatureAlgorithm,
-                            String keyStorePath,
-                            String keyStorePassword,
-                            String certificateAlias,
-                            String privateKeyAlias,
-                            int jwtExpiryTime,
-                            String[] restrictedClaims,
-                            boolean cacheEnabled,
-                            int cacheExpiry,
-                            String tokenIssuer,
+    public TestJWTGenerator(String dialectURI, String signatureAlgorithm, String keyStorePath, String keyStorePassword,
+                            String certificateAlias, String privateKeyAlias, int jwtExpiryTime,
+                            String[] restrictedClaims, boolean cacheEnabled, int cacheExpiry, String tokenIssuer,
                             String[] tokenAudience) {
-        super(dialectURI,
-                signatureAlgorithm,
-                keyStorePath,
-                keyStorePassword,
-                certificateAlias,
-                privateKeyAlias,
-                jwtExpiryTime,
-                restrictedClaims,
-                cacheEnabled,
-                cacheExpiry,
-                tokenIssuer,
-                tokenAudience);
+        super(dialectURI, signatureAlgorithm, keyStorePath, keyStorePassword, certificateAlias, privateKeyAlias,
+                jwtExpiryTime, restrictedClaims, cacheEnabled, cacheExpiry, tokenIssuer, tokenAudience);
     }
 
+    /**
+     * Method to populate standard claims and APIM related claims
+     * @param jwtInfo - JWT payload
+     * @return generated standard claims
+     */
     @Override
     public Map<String, Object> populateStandardClaims(Map<String, Object> jwtInfo) {
         long currentTime = System.currentTimeMillis();
         long expireIn = currentTime + getTTL();
         String dialect = this.getDialectURI();
         Map<String, Object> claims = new HashMap<>();
-        HashMap<String, Object> customClaims = (HashMap<String, Object>) jwtInfo.get("customClaims");
-        claims.put("iss", getTokenIssuer());
+        HashMap<String, Object> customClaims = (HashMap<String, Object>) jwtInfo
+                .get(MGWJWTGeneratorConstants.CUSTOM_CLAIMS);
+        claims.put(MGWJWTGeneratorConstants.ISSUER_CLAIM, getTokenIssuer());
         if (getTokenAudience().length == 1) {
-            claims.put("aud", getTokenAudience()[0]);
+            claims.put(MGWJWTGeneratorConstants.AUDIENCE_CLAIM, getTokenAudience()[0]);
         } else if (getTokenAudience().length != 0) {
-            claims.put("aud", arrayToJSONArray(getTokenAudience()));
+            claims.put(MGWJWTGeneratorConstants.AUDIENCE_CLAIM, arrayToJSONArray(getTokenAudience()));
         }
-        claims.put("jti", UUID.randomUUID().toString());
-        claims.put("iat", (int) (currentTime / 1000));
-        claims.put("exp", (int) (expireIn / 1000));
-        if (StringUtils.isNotEmpty((CharSequence) jwtInfo.get("sub"))) {
-            claims.put("sub", jwtInfo.get("sub"));
-            claims.put(dialect + "/endUser", jwtInfo.get("sub"));
+        claims.put(MGWJWTGeneratorConstants.JTI_CLAIM, UUID.randomUUID().toString());
+        claims.put(MGWJWTGeneratorConstants.IAT_CLAIM, (int) (currentTime / 1000));
+        claims.put(MGWJWTGeneratorConstants.EXP_CLAIM, (int) (expireIn / 1000));
+        if (StringUtils.isNotEmpty((CharSequence) jwtInfo.get(MGWJWTGeneratorConstants.SUB_CLAIM))) {
+            claims.put(MGWJWTGeneratorConstants.SUB_CLAIM, jwtInfo.get(MGWJWTGeneratorConstants.SUB_CLAIM));
+            claims.put(dialect + "/endUser", jwtInfo.get(MGWJWTGeneratorConstants.SUB_CLAIM));
         }
-        if (StringUtils.isNotEmpty((CharSequence) customClaims.get("scopes"))) {
-            claims.put("scopes", (customClaims.get("scopes")));
+        if (StringUtils.isNotEmpty((CharSequence) customClaims.get(MGWJWTGeneratorConstants.SCOPES_CLAIM))) {
+            claims.put(MGWJWTGeneratorConstants.SCOPES_CLAIM,
+                    (customClaims.get(MGWJWTGeneratorConstants.SCOPES_CLAIM)));
         }
         return claims;
     }
 
+    /**
+     * Method to populate custom claims apart from the standard claims
+     * @param jwtInfo - JWT payload
+     * @param restrictedClaims - restricted claims that should not be included in the generated token payload
+     * @return generated custom claims
+     */
     @Override
     public Map<String, Object> populateCustomClaims(Map<String, Object> jwtInfo, ArrayList<String> restrictedClaims) {
         Map<String, Object> claims = new HashMap<>();
         for (String key: jwtInfo.keySet()) {
-            if (key.equals("customClaims")) {
+            if (key.equals(MGWJWTGeneratorConstants.CUSTOM_CLAIMS)) {
                 Map<String, Object> customClaims = (Map<String, Object>) jwtInfo.get(key);
                 for (String subKey: customClaims.keySet()) {
                     if (!restrictedClaims.contains(subKey)) {

@@ -30,20 +30,11 @@ import java.util.UUID;
  */
 public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
     private static final Logger logger = LogManager.getLogger(MGWJWTGeneratorImpl.class);
-    private static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
 
-    public MGWJWTGeneratorImpl(String dialectURI,
-                               String signatureAlgorithm,
-                               String trustStorePath,
-                               String trustStorePassword,
-                               String certificateAlias,
-                               String privateKeyAlias,
-                               int jwtExpiryTime,
-                               String[] restrictedClaims,
-                               boolean jwtCacheEnabled,
-                               int jwtCacheExpiry,
-                               String tokenIssuer,
-                               String[] tokenAudience) {
+    public MGWJWTGeneratorImpl(String dialectURI, String signatureAlgorithm, String trustStorePath,
+                               String trustStorePassword, String certificateAlias, String privateKeyAlias,
+                               int jwtExpiryTime, String[] restrictedClaims, boolean jwtCacheEnabled,
+                               int jwtCacheExpiry, String tokenIssuer, String[] tokenAudience) {
         super(dialectURI, signatureAlgorithm, trustStorePath, trustStorePassword, certificateAlias, privateKeyAlias,
                 jwtExpiryTime, restrictedClaims, jwtCacheEnabled, jwtCacheExpiry, tokenIssuer, tokenAudience);
     }
@@ -54,58 +45,78 @@ public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
         long expireIn = currentTime + getTTL();
         String dialect = this.getDialectURI();
         Map<String, Object> claims = new HashMap<>();
-        HashMap<String, Object> customClaims = (HashMap<String, Object>) jwtInfo.get("customClaims");
-        claims.put("iss", getTokenIssuer());
-        claims.put("jti", UUID.randomUUID().toString());
-        claims.put("iat", (int) (currentTime / 1000));
-        claims.put("exp", (int) (expireIn / 1000));
-        if (StringUtils.isNotEmpty((CharSequence) jwtInfo.get("sub"))) {
-            claims.put("sub", jwtInfo.get("sub"));
-            claims.put(dialect + "/enduser", jwtInfo.get("sub"));
+        HashMap<String, Object> customClaims = (HashMap<String, Object>) jwtInfo
+                .get(MGWJWTGeneratorConstants.CUSTOM_CLAIMS);
+        claims.put(MGWJWTGeneratorConstants.ISSUER_CLAIM, getTokenIssuer());
+        claims.put(MGWJWTGeneratorConstants.JTI_CLAIM, UUID.randomUUID().toString());
+        claims.put(MGWJWTGeneratorConstants.IAT_CLAIM, (int) (currentTime / 1000));
+        claims.put(MGWJWTGeneratorConstants.EXP_CLAIM, (int) (expireIn / 1000));
+        if (StringUtils.isNotEmpty((CharSequence) jwtInfo.get(MGWJWTGeneratorConstants.SUB_CLAIM))) {
+            claims.put(MGWJWTGeneratorConstants.SUB_CLAIM, jwtInfo.get(MGWJWTGeneratorConstants.SUB_CLAIM));
+            claims.put(dialect + "/enduser", jwtInfo.get(MGWJWTGeneratorConstants.SUB_CLAIM));
         }
-        if (StringUtils.isNotEmpty((CharSequence) customClaims.get("scopes"))) {
-            claims.put("scopes", (customClaims.get("scopes")));
+        if (StringUtils.isNotEmpty((CharSequence) customClaims.get(MGWJWTGeneratorConstants.SCOPES_CLAIM))) {
+            claims.put(MGWJWTGeneratorConstants.SCOPES_CLAIM,
+                    (customClaims.get(MGWJWTGeneratorConstants.SCOPES_CLAIM)));
         }
-        if (customClaims.get("application") != null) {
-            if (StringUtils.isNotEmpty(((HashMap) customClaims.get("application")).get("id").toString())) {
-                claims.put(dialect + "/applicationid", ((HashMap) customClaims.get("application")).get("id")
-                        .toString());
+        if (customClaims.get(MGWJWTGeneratorConstants.APPLICATION_CLAIM) != null) {
+            if (StringUtils.isNotEmpty(((HashMap) customClaims.get(MGWJWTGeneratorConstants.APPLICATION_CLAIM))
+                    .get(MGWJWTGeneratorConstants.APPLICATION_ID_CLAIM).toString())) {
+                claims.put(dialect + "/applicationid", ((HashMap) customClaims
+                        .get(MGWJWTGeneratorConstants.APPLICATION_CLAIM))
+                        .get(MGWJWTGeneratorConstants.APPLICATION_ID_CLAIM).toString());
             }
-            if (StringUtils.isNotEmpty(((HashMap) customClaims.get("application")).get("uuid").toString())) {
-                claims.put(dialect + "/applicationUUId", ((HashMap) customClaims.get("application")).get("uuid")
-                        .toString());
+            if (StringUtils.isNotEmpty(((HashMap) customClaims.get(MGWJWTGeneratorConstants.APPLICATION_CLAIM))
+                    .get(MGWJWTGeneratorConstants.APPLICATION_UUID_CLAIM).toString())) {
+                claims.put(dialect + "/applicationUUId", ((HashMap) customClaims
+                        .get(MGWJWTGeneratorConstants.APPLICATION_CLAIM))
+                        .get(MGWJWTGeneratorConstants.APPLICATION_UUID_CLAIM).toString());
             }
-            if (StringUtils.isNotEmpty((CharSequence) ((HashMap) customClaims.get("application")).get("owner"))) {
-                claims.put(dialect + "/subscriber", ((HashMap) customClaims.get("application")).get("owner"));
+            if (StringUtils.isNotEmpty((CharSequence) ((HashMap) customClaims
+                    .get(MGWJWTGeneratorConstants.APPLICATION_CLAIM))
+                    .get(MGWJWTGeneratorConstants.APPLICATION_OWNER_CLAIM))) {
+                claims.put(dialect + "/subscriber", ((HashMap) customClaims
+                        .get(MGWJWTGeneratorConstants.APPLICATION_CLAIM))
+                        .get(MGWJWTGeneratorConstants.APPLICATION_OWNER_CLAIM));
             }
-            if (StringUtils.isNotEmpty((CharSequence) ((HashMap) customClaims.get("application")).get("name"))) {
-                claims.put(dialect + "/applicationname", ((HashMap) customClaims.get("application")).get("name"));
+            if (StringUtils.isNotEmpty((CharSequence) ((HashMap) customClaims
+                    .get(MGWJWTGeneratorConstants.APPLICATION_CLAIM))
+                    .get(MGWJWTGeneratorConstants.APPLICATION_NAME_CLAIM))) {
+                claims.put(dialect + "/applicationname", ((HashMap) customClaims
+                        .get(MGWJWTGeneratorConstants.APPLICATION_CLAIM))
+                        .get(MGWJWTGeneratorConstants.APPLICATION_NAME_CLAIM));
             }
-            if (StringUtils.isNotEmpty((CharSequence) ((HashMap) customClaims.get("application")).get("tier"))) {
-                claims.put(dialect + "/applicationtier", ((HashMap) customClaims.get("application")).get("tier"));
+            if (StringUtils.isNotEmpty((CharSequence) ((HashMap) customClaims
+                    .get(MGWJWTGeneratorConstants.APPLICATION_CLAIM))
+                    .get(MGWJWTGeneratorConstants.APPLICATION_TIER_CLAIM))) {
+                claims.put(dialect + "/applicationtier", ((HashMap) customClaims
+                        .get(MGWJWTGeneratorConstants.APPLICATION_CLAIM))
+                        .get(MGWJWTGeneratorConstants.APPLICATION_TIER_CLAIM));
             }
         }
-        if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get("apiName"))) {
-            claims.put(dialect + "/apiname", getApiDetails().get("apiName"));
+        if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get(MGWJWTGeneratorConstants.API_NAME_CLAIM))) {
+            claims.put(dialect + "/apiname", getApiDetails().get(MGWJWTGeneratorConstants.API_NAME_CLAIM));
         }
-        if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get("subscriberTenantDomain"))) {
-            claims.put(dialect + "/enduserTenantDomain", getApiDetails().get("subscriberTenantDomain"));
+        if (StringUtils.isNotEmpty((CharSequence) getApiDetails()
+                .get(MGWJWTGeneratorConstants.SUBSCRIBER_TENANT_DOMAIN_CLAIM))) {
+            claims.put(dialect + "/enduserTenantDomain", getApiDetails()
+                    .get(MGWJWTGeneratorConstants.SUBSCRIBER_TENANT_DOMAIN_CLAIM));
         }
-        if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get("apiContext"))) {
-            claims.put(dialect + "/apicontext", getApiDetails().get("apiContext"));
+        if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get(MGWJWTGeneratorConstants.API_CONTEXT_CLAIM))) {
+            claims.put(dialect + "/apicontext", getApiDetails().get(MGWJWTGeneratorConstants.API_CONTEXT_CLAIM));
         }
-        if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get("apiVersion"))) {
-            claims.put(dialect + "/version", getApiDetails().get("apiVersion"));
+        if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get(MGWJWTGeneratorConstants.API_VERSION_CLAIM))) {
+            claims.put(dialect + "/version", getApiDetails().get(MGWJWTGeneratorConstants.API_VERSION_CLAIM));
         }
-        if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get("apiTier"))) {
-            claims.put(dialect + "/tier", getApiDetails().get("apiTier"));
+        if (StringUtils.isNotEmpty((CharSequence) getApiDetails().get(MGWJWTGeneratorConstants.API_TIER_CLAIM))) {
+            claims.put(dialect + "/tier", getApiDetails().get(MGWJWTGeneratorConstants.API_TIER_CLAIM));
         }
-        if (StringUtils.isNotEmpty((CharSequence) customClaims.get("keytype"))) {
-            claims.put(dialect + "/keytype", customClaims.get("keytype"));
+        if (StringUtils.isNotEmpty((CharSequence) customClaims.get(MGWJWTGeneratorConstants.KEY_TYPE_CLAIM))) {
+            claims.put(dialect + "/keytype", customClaims.get(MGWJWTGeneratorConstants.KEY_TYPE_CLAIM));
         } else {
-            claims.put(dialect + "/keytype", "PRODUCTION");
+            claims.put(dialect + "/keytype", MGWJWTGeneratorConstants.KEY_TYPE_PRODUCTION);
         }
-        claims.put(dialect + "/usertype", AUTH_APPLICATION_USER_LEVEL_TOKEN);
+        claims.put(dialect + "/usertype", MGWJWTGeneratorConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN);
         return claims;
     }
 
@@ -114,7 +125,7 @@ public class MGWJWTGeneratorImpl extends AbstractMGWJWTGenerator {
                                                     ArrayList<String> restrictedClaims) {
         Map<String, Object> claims = new HashMap<>();
         for (String key : jwtInfo.keySet()) {
-            if (key.equals("customClaims")) {
+            if (key.equals(MGWJWTGeneratorConstants.CUSTOM_CLAIMS)) {
                 Map<String, Object> customClaims = (Map<String, Object>) jwtInfo.get(key);
                 for (String subKey : customClaims.keySet()) {
                     if (!restrictedClaims.contains(subKey)) {

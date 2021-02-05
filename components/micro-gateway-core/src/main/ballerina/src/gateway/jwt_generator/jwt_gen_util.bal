@@ -28,11 +28,8 @@ boolean claimRetrieverClassLoaded = loadClaimRetrieverImpl();
 # + enabledCaching - jwt generator caching enabled
 # + generatedToken - generated Backend JWT
 # + return - Returns `true` if the token generation and setting the header completed successfully
-function setGeneratedTokenAsHeader(http:Request req,
-                                string cacheKey,
-                                boolean enabledCaching,
-                                handle | error generatedToken)
-                                returns @tainted boolean {
+function setGeneratedTokenAsHeader(http:Request req, string cacheKey, boolean enabledCaching,
+                                handle | error generatedToken) returns @tainted boolean {
 
     if (generatedToken is error) {
         printError(JWT_GEN_UTIL, "Token not generated due to error", generatedToken);
@@ -172,19 +169,9 @@ public function loadJWTGeneratorImpl() returns boolean {
         boolean enabledCaching = gatewayConf.jwtGeneratorConfig.jwtGeneratorCaching.tokenCacheEnable;
         int cacheExpiry = gatewayConf.jwtGeneratorConfig.jwtGeneratorCaching.tokenCacheExpiryTime;
 
-        return loadJWTGeneratorClass(generatorClass,
-                                    dialectURI,
-                                    signatureAlgorithm,
-                                    keyStoreLocationUnresolved,
-                                    keyStorePassword,
-                                    certificateAlias,
-                                    privateKeyAlias,
-                                    tokenExpiry,
-                                    restrictedClaims,
-                                    enabledCaching,
-                                    cacheExpiry,
-                                    tokenIssuer,
-                                    tokenAudience);
+        return loadJWTGeneratorClass(generatorClass, dialectURI, signatureAlgorithm, keyStoreLocationUnresolved,
+                                    keyStorePassword, certificateAlias, privateKeyAlias, tokenExpiry, restrictedClaims,
+                                    enabledCaching, cacheExpiry, tokenIssuer, tokenAudience);
     }
     return false;
 }
@@ -197,11 +184,8 @@ public function loadJWTGeneratorImpl() returns boolean {
 # + cacheKey - key for the jwt generator cache
 # + enabledCaching - jwt generator caching enabled
 # + return - Returns `true` if the token generation and setting the header completed successfully
-public function setJWTHeader(BackendJWTGenUserContextDTO tokenContextDTO,
-                            map<string> apiDetails,
-                            http:Request req,
-                            string cacheKey,
-                            boolean enabledCaching) returns @tainted boolean {
+public function setJWTHeader(BackendJWTGenUserContextDTO tokenContextDTO, map<string> apiDetails, http:Request req,
+                            string cacheKey, boolean enabledCaching) returns @tainted boolean {
 
     (handle|error) generatedToken;
     ClaimsMapDTO claimsMapDTO = createMapFromRetrievedUserClaimsListDTO(tokenContextDTO);
@@ -222,12 +206,8 @@ public function setJWTHeader(BackendJWTGenUserContextDTO tokenContextDTO,
 # + enabledCaching - True if caching is enabled for backend JWT generation
 # + tokenContextDTO - User Context which is used to populate the information required for jwtGenerator Implementation
 # + return - Returns `true` if adding the JWT token to the request is successful.
-function setJWTTokenWithCacheCheck(http:Request req,
-                                    string credential,
-                                    int skewTime,
-                                    boolean enabledCaching,
-                                    BackendJWTGenUserContextDTO tokenContextDTO)
-                                    returns @tainted boolean {
+function setJWTTokenWithCacheCheck(http:Request req, string credential, int skewTime, boolean enabledCaching,
+                                    BackendJWTGenUserContextDTO tokenContextDTO) returns @tainted boolean {
     boolean status = false;
     string apiName = "";
     string apiVersion = "";
@@ -316,15 +296,9 @@ function getGeneratedTokenExpTimeFromCache(string cacheKey, string jwtToken) ret
 # + isJWT - `true` if the user is authenticated using jwt token
 # + return - Returns `true` if the token generation and setting the header completed successfully
 # or the `AuthenticationError` in case of an error.
-public function generateAndSetBackendJwtHeader(string credential,
-                                                http:Request req,
-                                                boolean enabledJWTGenerator,
-                                                boolean classLoaded,
-                                                int skewTime,
-                                                boolean enabledCaching,
-                                                string issuer,
-                                                boolean remoteUserClaimRetrievalEnabled,
-                                                boolean isJWT)
+public function generateAndSetBackendJwtHeader(string credential, http:Request req, boolean enabledJWTGenerator,
+                                                boolean classLoaded, int skewTime, boolean enabledCaching,
+                                                string issuer, boolean remoteUserClaimRetrievalEnabled, boolean isJWT)
                                                 returns @tainted boolean {
     if (enabledJWTGenerator) {
         if (classLoaded) {
