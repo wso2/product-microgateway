@@ -104,27 +104,30 @@
                         </execution>
                     </executions>
                 </plugin>
-                <plugin>
-                    <artifactId>maven-antrun-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <phase>process-resources</phase>
-                            <goals>
-                                <goal>run</goal>
-                            </goals>
-                            <configuration>
-                                <target>
-                                    <replaceregexp file="resources/docker-compose.yaml" match="wso2\/mg\-router\:*" replace="wso2/mg-router:${project.version}" byline="true" />
-                                    <replaceregexp file="resources/docker-compose.yaml" match="wso2\/mg\-adapter\:*" replace="wso2/mg-adapter:${project.version}" byline="true" />
-                                    <replaceregexp file="resources/docker-compose.yaml" match="wso2\/mg\-enforcer\:*" replace="wso2/mg-enforcer:${project.version}" byline="true" />
-                                    <replaceregexp file="remove-containers.sh" match="micro_gw_version=*" replace="micro_gw_version=${project.version}" byline="true" />
-                                </target>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <replaceregexp file="resources/docker-compose.yaml" match="wso2\/mg\-router\:.*" replace="wso2/mg-router:${project.version}" byline="true" />
+                                <replaceregexp file="resources/docker-compose.yaml" match="wso2\/mg\-adapter\:.*" replace="wso2/mg-adapter:${project.version}" byline="true" />
+                                <replaceregexp file="resources/docker-compose.yaml" match="wso2\/mg\-enforcer\:.*" replace="wso2/mg-enforcer:${project.version}" byline="true" />
+                                <replaceregexp file="remove-containers.sh" match="micro_gw_version=.*" replace="micro_gw_version=${project.version}" byline="true" />
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
     <dependencyManagement>
         <dependencies>
