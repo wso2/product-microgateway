@@ -15,14 +15,13 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.am.microgw</groupId>
     <artifactId>micro-gateway-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.0-m5-SNAPSHOT</version>
+    <version>4.0.0-m5</version>
     <name>Micro Gateway - Parent</name>
 
     <url>https://wso2.org</url>
@@ -41,7 +40,7 @@
         <url>https://github.com/wso2/product-microgateway.git</url>
         <developerConnection>scm:git:https://github.com/wso2/product-microgateway.git</developerConnection>
         <connection>scm:git:https://github.com/wso2/product-microgateway.git</connection>
-        <tag>HEAD</tag>
+        <tag>v4.0.0-m5</tag>
     </scm>
 
     <modules>
