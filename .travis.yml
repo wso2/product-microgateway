@@ -15,20 +15,19 @@ before_install:
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
+  - java version
+  - export JAVA_HOME=$HOME/openjdk11
+  - $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk11 --target $JAVA_HOME --verbose
 addons:
   apt:
     packages:
       - docker-ce
+      - openjdk-11-jdk
 # Skip install phase to avoid unwanted mvn build
 install: skip
 # Run maven build in quiet mode to avoid log file limit in Travis CI.
 # Only errors and Maven version information will be printed in the CI logs.
 script:
-  - java version
-  - export JAVA_HOME=$HOME/openjdk11
-  - $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk11 --target $JAVA_HOME
-  - # do stuff with open OpenJDK 11
-  - java version
   - mvn clean install -B -V | grep -e "\[ERROR\]" -e Maven -e "// Start Running" -e "Building"; test ${PIPESTATUS[0]} -eq 0;
 cache:
   directories:
