@@ -41,8 +41,6 @@ import java.util.Map;
  */
 public abstract class AbstractMGWJWTGenerator {
     private static final Logger logger = LogManager.getLogger(AbstractMGWJWTGenerator.class);
-    private static final String NONE = "NONE";
-    private static final String SHA256_WITH_RSA = "SHA256withRSA";
     private String dialectURI;
     private String signatureAlgorithm;
     private String keyStorePath;
@@ -212,7 +210,7 @@ public abstract class AbstractMGWJWTGenerator {
         if (jwtBody != null) {
             base64UrlEncodedBody = encode(jwtBody.getBytes());
         }
-        if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
+        if (MGWJWTGeneratorConstants.SHA256_WITH_RSA.equals(signatureAlgorithm)) {
             String assertion = base64UrlEncodedHeader + '.' + base64UrlEncodedBody;
             //get the assertion signed
             byte[] signedAssertion = signJWT(assertion);
@@ -230,13 +228,13 @@ public abstract class AbstractMGWJWTGenerator {
      */
     public String buildHeader() throws Exception {
         String jwtHeader = null;
-        if (NONE.equals(signatureAlgorithm)) {
+        if (MGWJWTGeneratorConstants.NONE.equals(signatureAlgorithm)) {
             Map<String, String> jsonMap = new HashMap<>();
-            jsonMap.put("typ", "JWT");
-            jsonMap.put("alg", "none");
+            jsonMap.put(MGWJWTGeneratorConstants.TOKEN_TYPE, MGWJWTGeneratorConstants.TOKEN_TYPE_JWT);
+            jsonMap.put(MGWJWTGeneratorConstants.ALGORITHM, MGWJWTGeneratorConstants.NONE.toLowerCase());
             JSONObject jsonHeader = new JSONObject(jsonMap);
             jwtHeader = jsonHeader.toJSONString();
-        } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
+        } else if (MGWJWTGeneratorConstants.SHA256_WITH_RSA.equals(signatureAlgorithm)) {
             jwtHeader = addCertToHeader();
         }
         return jwtHeader;
@@ -307,9 +305,9 @@ public abstract class AbstractMGWJWTGenerator {
         //{"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10"}
         //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
         Map<String, String> jsonMap = new HashMap<>();
-        jsonMap.put("typ", "JWT");
-        jsonMap.put("alg", "RS256");
-        jsonMap.put("x5t", base64UrlEncodedThumbPrint);
+        jsonMap.put(MGWJWTGeneratorConstants.TOKEN_TYPE, MGWJWTGeneratorConstants.TOKEN_TYPE_JWT);
+        jsonMap.put(MGWJWTGeneratorConstants.ALGORITHM, MGWJWTGeneratorConstants.RS_256);
+        jsonMap.put(MGWJWTGeneratorConstants.X5T_HEADER, base64UrlEncodedThumbPrint);
         JSONObject jwtHeader = new JSONObject(jsonMap);
         // close the file stream
         is.close();

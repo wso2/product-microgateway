@@ -45,4 +45,11 @@ public class MGWJWTGeneratorConstants {
     public static final String CUSTOM_CLAIMS = "customClaims";
     public static final String KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
+    public static final String NONE = "NONE";
+    public static final String SHA256_WITH_RSA = "SHA256withRSA";
+    public static final String TOKEN_TYPE = "typ";
+    public static final String TOKEN_TYPE_JWT = "JWT";
+    public static final String ALGORITHM = "alg";
+    public static final String RS_256 = "RS256";
+    public static final String X5T_HEADER = "x5t";
 }
