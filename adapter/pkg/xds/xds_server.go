@@ -23,6 +23,9 @@ import (
 	"sync"
 
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
+	"github.com/wso2/micro-gw/api/wso2/discovery/api"
+	"github.com/wso2/micro-gw/api/wso2/discovery/config/enforcer"
+	"github.com/wso2/micro-gw/api/wso2/discovery/subscription"
 	"github.com/wso2/micro-gw/pkg/svcdiscovery"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
@@ -31,9 +34,6 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
-	"github.com/envoyproxy/go-control-plane/wso2/discovery/api"
-	"github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer"
-	"github.com/envoyproxy/go-control-plane/wso2/discovery/subscription"
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	oasParser "github.com/wso2/micro-gw/pkg/oasparser"

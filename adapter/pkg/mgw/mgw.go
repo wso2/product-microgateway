@@ -23,9 +23,9 @@ import (
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
-	apiservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/api"
-	configservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/config"
-	subscriptionservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/subscription"
+	apiservice "github.com/wso2/micro-gw/api/wso2/discovery/service/api"
+	configservice "github.com/wso2/micro-gw/api/wso2/discovery/service/config"
+	subscriptionservice "github.com/wso2/micro-gw/api/wso2/discovery/service/subscription"
 	"github.com/wso2/micro-gw/pkg/api/restserver"
 	cb "github.com/wso2/micro-gw/pkg/mgw/xdscallbacks"
 	"github.com/wso2/micro-gw/pkg/tlsutils"
