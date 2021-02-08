@@ -35,8 +35,6 @@ import (
 	"github.com/envoyproxy/go-control-plane/wso2/discovery/api"
 	"github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer"
 	"github.com/envoyproxy/go-control-plane/wso2/discovery/subscription"
-	openAPI3 "github.com/getkin/kin-openapi/openapi3"
-	openAPI2 "github.com/go-openapi/spec"
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	oasParser "github.com/wso2/micro-gw/pkg/oasparser"
@@ -57,19 +55,16 @@ var (
 	enforcerApplicationPolicyCache     cachev3.SnapshotCache
 	enforcerSubscriptionPolicyCache    cachev3.SnapshotCache
 	enforcerApplicationKeyMappingCache cachev3.SnapshotCache
-	// OpenAPI Name:Version -> openAPI3 struct map
-	openAPIV3Map map[string]openAPI3.Swagger
-	// OpenAPI Name:Version -> openAPI2 struct map
-	openAPIV2Map map[string]openAPI2.Swagger
-	// WebsocketAPI Name:Version -> MgwSwagger struct map
-	webSocketAPIMap map[string]mgw.MgwSwagger
-	// OpenAPI Name:Version -> Envoy Label Array map
+
+	// API Name:Version -> MgwSwagger struct map
+	apiMgwSwaggerMap map[string]mgw.MgwSwagger
+	// API Name:Version -> Envoy Label Array map
 	openAPIEnvoyMap map[string][]string
-	// OpenAPI Name:Version -> Envoy Routes map
+	// API Name:Version -> Envoy Routes map
 	openAPIRoutesMap map[string][]*routev3.Route
-	// OpenAPI Name:Version -> Envoy Clusters map
+	// API Name:Version -> Envoy Clusters map
 	openAPIClustersMap map[string][]*clusterv3.Cluster
-	// OpenAPI Name:Version -> Envoy Endpoints map
+	// API Name:Version -> Envoy Endpoints map
 	openAPIEndpointsMap map[string][]*corev3.Address
 	// Envoy Label -> XDS version map
 	envoyUpdateVersionMap map[string]int64
@@ -124,9 +119,7 @@ func init() {
 	enforcerApplicationPolicyCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerSubscriptionPolicyCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerApplicationKeyMappingCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
-	openAPIV3Map = make(map[string]openAPI3.Swagger)
-	openAPIV2Map = make(map[string]openAPI2.Swagger)
-	webSocketAPIMap = make(map[string]mgw.MgwSwagger)
+	apiMgwSwaggerMap = make(map[string]mgw.MgwSwagger)
 	openAPIEnvoyMap = make(map[string][]string)
 	openAPIRoutesMap = make(map[string][]*routev3.Route)
 	openAPIClustersMap = make(map[string][]*clusterv3.Cluster)
@@ -198,6 +191,8 @@ func GetEnforcerApplicationKeyMappingCache() cachev3.SnapshotCache {
 func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string, environments []string) {
 	var apiMapKey string
 	var newLabels []string
+	var mgwSwagger mgw.MgwSwagger
+	vhost := "default" //TODO: update once vhost feature added
 
 	//TODO: (VirajSalaka) Optimize locking
 	var l sync.Mutex
@@ -205,69 +200,25 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string, environment
 	defer l.Unlock()
 
 	if apiType == mgw.HTTP {
-		openAPIVersion, jsonContent, err := operator.GetOpenAPIVersionAndJSONContent(byteArr)
-		if err != nil {
-			logger.LoggerXds.Error("Error while retrieving the openAPI version and Json Content from byte Array.", err)
+		mgwSwagger = operator.GetMgwSwagger(byteArr)
+	} else if apiType == mgw.WS {
+		mgwSwagger = operator.GetMgwSwaggerWebSocket(byteArr)
+	} else {
+		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
+		logger.LoggerXds.Error("API type not currently supported with WSO2 Microgateway")
+	}
+	apiMapKey = vhost + ":" + mgwSwagger.GetTitle() + ":" + mgwSwagger.GetVersion()
+	existingMgwSwagger, exists := apiMgwSwaggerMap[apiMapKey]
+	if exists {
+		if reflect.DeepEqual(mgwSwagger, existingMgwSwagger) {
+			logger.LoggerXds.Infof("API %v already exists. No changes to apply.", apiMapKey)
 			return
 		}
-		logger.LoggerXds.Debugf("OpenAPI version : %v", openAPIVersion)
-		if openAPIVersion == "3" {
-			openAPIV3Struct, err := operator.GetOpenAPIV3Struct(jsonContent)
-			if err != nil {
-				logger.LoggerXds.Error("Error while parsing to a OpenAPIv3 struct. ", err)
-			}
-			apiMapKey = openAPIV3Struct.Info.Title + ":" + openAPIV3Struct.Info.Version
-			existingOpenAPI, ok := openAPIV3Map[apiMapKey]
-			if ok {
-				if reflect.DeepEqual(openAPIV3Struct, existingOpenAPI) {
-					//Works as the openAPI already contains the label feature.
-					logger.LoggerXds.Infof("No changes to apply for the OpenAPI key : %v", apiMapKey)
-					return
-				}
-			}
-			openAPIV3Map[apiMapKey] = openAPIV3Struct
-			//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
-			// TODO: commented the following line as the implementation is not supported yet.
-			//newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
-		} else {
-			openAPIV2Struct, err := operator.GetOpenAPIV2Struct(jsonContent)
-			if err != nil {
-				logger.LoggerXds.Error("Error while parsing to a OpenAPIv2 struct. ", err)
-			}
-			apiMapKey = openAPIV2Struct.Info.Title + ":" + openAPIV2Struct.Info.Version
-			existingOpenAPI, ok := openAPIV2Map[apiMapKey]
-			if ok {
-				if reflect.DeepEqual(openAPIV2Struct, existingOpenAPI) {
-					//Works as the openAPI already contains the label feature.
-					logger.LoggerXds.Infof("No changes to apply for the OpenAPI key : %v", apiMapKey)
-					return
-				}
-			}
-			openAPIV2Map[apiMapKey] = openAPIV2Struct
-			// TODO: commented the following line as the implementation is not supported yet.
-			//newLabels = operator.GetXWso2Labels(openAPIV2Struct.Extensions)
-		}
-
-	} else if apiType == mgw.WS {
-		mgwSwagger := operator.GetMgwSwaggerWebSocket(byteArr)
-		// TODO - uuid as the key
-		apiMapKey = mgwSwagger.GetTitle() + ":" + mgwSwagger.GetVersion()
-		existingWebSocketAPI, ok := webSocketAPIMap[apiMapKey]
-		if ok {
-			if reflect.DeepEqual(mgwSwagger, existingWebSocketAPI) {
-				logger.LoggerXds.Infof("No changes to apply for the WebSocketAPI with key: %v", apiMapKey)
-				return
-			}
-		}
-		webSocketAPIMap[apiMapKey] = mgwSwagger
-		// TODO - add label support
-		// TODO: commented the following line as the implementation is not supported yet.
-		//newLabels = operator.GetXWso2LabelsWebSocket(mgwSwagger)
-	} else {
-		// Unreachable else condition. Added in case apiType type check fails prior to this function
-		// due to any modifications to the code.
-		logger.LoggerXds.Info("API type is not cuurently supported by WSO2 micro-gateway")
 	}
+	apiMgwSwaggerMap[apiMapKey] = mgwSwagger
+	//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
+	// TODO: commented the following line as the implementation is not supported yet.
+	//newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
 	//:TODO: since currently labels are not taking from x-wso2-label, I have made it to be taken from the method
 	// argument.
 	newLabels = environments
@@ -277,7 +228,7 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string, environment
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiMapKey, oldLabels)
 	openAPIEnvoyMap[apiMapKey] = newLabels
 
-	routes, clusters, endpoints, mgwSwagger := oasParser.GetProductionRoutesClustersEndpoints(byteArr, upstreamCerts, apiType)
+	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, upstreamCerts)
 	enforcerAPI := oasParser.GetEnforcerAPI(mgwSwagger)
 	// TODO: (VirajSalaka) Decide if the routes and listeners need their own map since it is not going to be changed based on API at the moment.
 	openAPIRoutesMap[apiMapKey] = routes
