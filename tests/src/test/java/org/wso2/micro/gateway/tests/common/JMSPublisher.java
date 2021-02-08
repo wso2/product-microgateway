@@ -43,27 +43,32 @@ public class JMSPublisher {
     }
 
     public void getJson(JsonObject jsonObject) throws JMSException, NamingException {
-        String appKey = jsonObject.getAsJsonObject("event").getAsJsonObject("payloadData").get("appKey").getAsString();
-        String subscriptionKey = jsonObject.getAsJsonObject("event").getAsJsonObject("payloadData")
-                .get("subscriptionKey").getAsString();
+        String appKey = jsonObject.getAsJsonObject(JMSPublisherConstants.event)
+                .getAsJsonObject(JMSPublisherConstants.payloadData)
+                .get(JMSPublisherConstants.appKey).getAsString();
+        String subscriptionKey = jsonObject.getAsJsonObject(JMSPublisherConstants.event)
+                .getAsJsonObject(JMSPublisherConstants.payloadData)
+                .get(JMSPublisherConstants.subscriptionKey).getAsString();
 
-        String appTier = jsonObject.getAsJsonObject("event").getAsJsonObject("payloadData").get("appTier")
+        String appTier = jsonObject.getAsJsonObject(JMSPublisherConstants.event)
+                .getAsJsonObject(JMSPublisherConstants.payloadData).get(JMSPublisherConstants.appTier)
                 .getAsString();
-        String subscriptionTier = jsonObject.getAsJsonObject("event").getAsJsonObject("payloadData").
-                get("subscriptionTier").getAsString();
+        String subscriptionTier = jsonObject.getAsJsonObject(JMSPublisherConstants.event)
+                .getAsJsonObject(JMSPublisherConstants.payloadData).get(JMSPublisherConstants.subscriptionTier)
+                .getAsString();
 
-        if (appTier.equals("10MinAppPolicy")) {
+        if (appTier.equals(JMSPublisherConstants.tenMinAppPolicy)) {
             publishMessage(appKey);
-        } else if (subscriptionTier.equals("10MinSubPolicy") || subscriptionTier.equals("Unauthenticated")) {
+        } else if (subscriptionTier.equals(JMSPublisherConstants.tenMinSubPolicy) ||
+                subscriptionTier.equals(JMSPublisherConstants.unauthenticated)) {
             publishMessage(subscriptionKey);
         }
     }
 
     public void publishMessage(String msg) throws NamingException, JMSException {
-        String topicName = "throttleData";
-        InitialContext initialContext = ClientHelper.getInitialContextBuilder("admin", "admin",
-                "localhost", "5672")
-                .withTopic(topicName)
+        InitialContext initialContext = ClientHelper.getInitialContextBuilder(JMSPublisherConstants.brokerUsername,
+                JMSPublisherConstants.brokerPassword, JMSPublisherConstants.brokerHost, JMSPublisherConstants.brokerPort)
+                .withTopic(JMSPublisherConstants.throttleDataTopic)
                 .build();
         ConnectionFactory connectionFactory
                 = (ConnectionFactory) initialContext.lookup(ClientHelper.CONNECTION_FACTORY);
@@ -71,15 +76,15 @@ public class JMSPublisher {
         connection.start();
 
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        Topic topic = (Topic) initialContext.lookup(topicName);
+        Topic topic = (Topic) initialContext.lookup(JMSPublisherConstants.throttleDataTopic);
         MessageProducer producer = session.createProducer(topic);
 
         MapMessage mapMessage = session.createMapMessage();
-        mapMessage.setString("throttleKey", msg);
+        mapMessage.setString(JMSPublisherConstants.throttleKey, msg);
         Date date = new Date();
         long time = date.getTime() + 1000;
-        mapMessage.setLong("expiryTimeStamp", time);
-        mapMessage.setBoolean("isThrottled", true);
+        mapMessage.setLong(JMSPublisherConstants.expiryTimeStamp, time);
+        mapMessage.setBoolean(JMSPublisherConstants.isThrottled, true);
         producer.send(mapMessage);
 
         connection.close();
