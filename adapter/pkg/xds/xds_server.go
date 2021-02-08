@@ -192,7 +192,7 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string, environment
 	var apiMapKey string
 	var newLabels []string
 	var mgwSwagger mgw.MgwSwagger
-	vhost := "default" //TODO: update once vhost feature added
+	vhost := "default" //TODO: (SuKSW) update once vhost feature added
 
 	//TODO: (VirajSalaka) Optimize locking
 	var l sync.Mutex
