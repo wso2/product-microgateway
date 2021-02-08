@@ -5,7 +5,10 @@ go 1.15
 replace github.com/envoyproxy/go-control-plane => github.com/praminda/go-control-plane v0.9.8-0.20210202103443-f343d358b2cf
 
 require (
+	github.com/NomadXD/websocketconf v0.0.0-20210207174403-77b20981861c
+	github.com/cncf/udpa/go v0.0.0-20201211205326-cc1b757b3edd
 	github.com/envoyproxy/go-control-plane v0.9.8
+	github.com/envoyproxy/protoc-gen-validate v0.4.1
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/getkin/kin-openapi v0.8.0
 	github.com/ghodss/yaml v1.0.0

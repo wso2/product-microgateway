@@ -22,6 +22,7 @@ const (
 
 const (
 	extAuthzFilterName        string = "envoy.filters.http.ext_authz"
+	mgwWebSocketFilterName    string = "envoy.filters.http.mgw_websocket"
 	transportSocketName       string = "envoy.transport_sockets.tls"
 	accessLogName             string = "envoy.access_loggers.file"
 	httpConManagerStartPrefix string = "ingress_http"

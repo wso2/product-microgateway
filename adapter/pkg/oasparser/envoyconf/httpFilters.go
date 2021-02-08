@@ -28,6 +28,8 @@ import (
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
+	mgw_websokcet "github.com/NomadXD/websocketconf"
+	rls "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
 	"github.com/golang/protobuf/ptypes"
 	logger "github.com/wso2/micro-gw/loggers"
 )
@@ -75,7 +77,15 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 // UpgradeFilters that are applied in websocket upgrade mode
 func getUpgradeFilters() []*hcmv3.HttpFilter {
 	// TODO : (LahiruUdayanga) Configure the custom C++ filter.
-	return getHTTPFilters()
+	extAauth := getExtAuthzHTTPFilter()
+	mgwWebSocket := getMgwWebSocketFilter()
+	router := getRouterHTTPFilter()
+	upgradeFilters := []*hcmv3.HttpFilter{
+		extAauth,
+		mgwWebSocket,
+		router,
+	}
+	return upgradeFilters
 }
 
 // getExtAuthzHTTPFilter gets ExtAauthz http filter.
@@ -113,4 +123,35 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 		},
 	}
 	return &extAuthzFilter
+}
+
+func getMgwWebSocketFilter() *hcmv3.HttpFilter {
+	mgwWebsocketConfig := &mgw_websokcet.RateLimit{
+		Domain:          "rl",
+		RatelimitType:   "default",
+		Timeout:         ptypes.DurationProto(20 * time.Second),
+		FailureModeDeny: false,
+		RateLimitService: &rls.RateLimitServiceConfig{
+			GrpcService: &corev3.GrpcService{
+				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
+					EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{
+						ClusterName: extAuthzClusterName,
+					},
+				},
+				Timeout: ptypes.DurationProto(20 * time.Second),
+			},
+		},
+	}
+	ext, err2 := ptypes.MarshalAny(mgwWebsocketConfig)
+	if err2 != nil {
+		logger.LoggerOasparser.Error(err2)
+	}
+	mgwWebSocketFilter := hcmv3.HttpFilter{
+		Name: mgwWebSocketFilterName,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{
+			TypedConfig: ext,
+		},
+	}
+	return &mgwWebSocketFilter
+
 }
