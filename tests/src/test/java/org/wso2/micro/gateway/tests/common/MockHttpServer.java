@@ -181,7 +181,7 @@ public class MockHttpServer extends Thread {
                         try {
                             jmsPublisher.getJson(jsonObject);
                         } catch (JMSException e) {
-                            log.error("Error occurred while sending throttle event to TM", e);
+                            log.error("Error occurred while publishing throttle event to TM via JMS publisher", e);
                         } catch (NamingException e) {
                             log.error("Error occurred while sending throttle event to TM", e);
                         }
