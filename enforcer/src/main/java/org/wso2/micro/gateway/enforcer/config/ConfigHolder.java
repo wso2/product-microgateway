@@ -187,9 +187,10 @@ public class ConfigHolder {
     }
 
     private void populateTMBinaryConfig() {
-        throttleAgentConfig =
-                configToml.getTable(ConfigConstants.TM_BINARY_THROTTLE_CONF_INSTANCE_ID)
-                        .to(ThrottleAgentConfigDTO.class);
+        // TODO(amalimatharaarachchi) get binary configs from config
+//        throttleAgentConfig =
+//                configToml.getTable(Constants.TM_BINARY_THROTTLE_CONF_INSTANCE_ID)
+//                        .to(ThrottleAgentConfigDTO.class);
         AgentConfiguration agentConfiguration = throttleAgentConfig.getAgent();
         agentConfiguration.setTrustStore(trustStore);
         AgentConfiguration.setInstance(agentConfiguration);
@@ -270,12 +271,12 @@ public class ConfigHolder {
                 continue;
             }
             String urlType = urlGroup.getType();
-            if (urlType == null || urlType.isBlank() || !(ConfigConstants.LOADBALANCE.equalsIgnoreCase(urlType)
-                    || ConfigConstants.FAILOVER.equalsIgnoreCase(urlType))) {
+            if (urlType == null || urlType.isBlank() || !(Constants.LOADBALANCE.equalsIgnoreCase(urlType)
+                    || Constants.FAILOVER.equalsIgnoreCase(urlType))) {
                 logger.warn("Type is not "
-                        + ConfigConstants.LOADBALANCE + " or " + ConfigConstants.FAILOVER + ". Hence proceeding as a "
-                        + ConfigConstants.FAILOVER + " configuration.");
-                urlType = ConfigConstants.FAILOVER;
+                        + Constants.LOADBALANCE + " or " + Constants.FAILOVER + ". Hence proceeding as a "
+                        + Constants.FAILOVER + " configuration.");
+                urlType = Constants.FAILOVER;
             }
             restructuredReceiverURL.append(processSingleURLGroup(receiverUrls, urlType)).append(",");
             restructuredAuthURL.append(processSingleURLGroup(authUrls, urlType)).append(",");
@@ -293,12 +294,12 @@ public class ConfigHolder {
     private String processSingleURLGroup(String[] urlArray, String urlType) {
         StringBuilder concatenatedURLString = new StringBuilder("{");
         for (String url : urlArray) {
-            if (ConfigConstants.LOADBALANCE.equalsIgnoreCase(urlType)) {
-                concatenatedURLString.append(url).append(ConfigConstants.TM_BINARY_LOADBALANCE_SEPARATOR);
-            } else if (ConfigConstants.FAILOVER.equalsIgnoreCase(urlType)) {
-                concatenatedURLString.append(url).append(ConfigConstants.TM_BINARY_FAILOVER_SEPARATOR);
+            if (Constants.LOADBALANCE.equalsIgnoreCase(urlType)) {
+                concatenatedURLString.append(url).append(Constants.TM_BINARY_LOADBALANCE_SEPARATOR);
+            } else if (Constants.FAILOVER.equalsIgnoreCase(urlType)) {
+                concatenatedURLString.append(url).append(Constants.TM_BINARY_FAILOVER_SEPARATOR);
             } else {
-                concatenatedURLString.append(url).append(ConfigConstants.TM_BINARY_FAILOVER_SEPARATOR);
+                concatenatedURLString.append(url).append(Constants.TM_BINARY_FAILOVER_SEPARATOR);
             }
         }
         //to remove the trailing '|' or ','
