@@ -1,5 +1,5 @@
 language: go
-dist: trusty
+dist: xenial
 jdk:
   - openjdk11
 go:
@@ -15,13 +15,11 @@ before_install:
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
-  - export JAVA_HOME=$HOME/openjdk11
-  - $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk11 --target $JAVA_HOME --verbose
 addons:
   apt:
     packages:
       - docker-ce
-      - openjdk-11-jdk
+#      - openjdk-11-jdk
 # Skip install phase to avoid unwanted mvn build
 install: skip
 # Run maven build in quiet mode to avoid log file limit in Travis CI.
