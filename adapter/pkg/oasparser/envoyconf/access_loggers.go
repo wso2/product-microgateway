@@ -31,15 +31,19 @@ import (
 
 // getAccessLogConfigs provides file access log configurations for envoy
 func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
-	var logFormat *file_accesslogv3.FileAccessLog_Format
+	var logFormat *file_accesslogv3.FileAccessLog_LogFormat
 	logpath := defaultAccessLogPath //default access log path
 
 	logConf, errReadConfig := config.ReadLogConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
 	} else {
-		logFormat = &file_accesslogv3.FileAccessLog_Format{
-			Format: logConf.AccessLogs.Format,
+		logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
+			LogFormat: &corev3.SubstitutionFormatString{
+				Format: &corev3.SubstitutionFormatString_TextFormat{
+					TextFormat: logConf.AccessLogs.Format,
+				},
+			},
 		}
 		logpath = logConf.AccessLogs.LogFile
 	}
