@@ -21,21 +21,21 @@ package org.wso2.micro.gateway.tests.common;
  * JMS publisher related constants
  */
 public class JMSPublisherConstants {
-    public static final String event = "event";
-    public static final String payloadData = "payloadData";
-    public static final String appKey = "appKey";
-    public static final String subscriptionKey = "subscriptionKey";
-    public static final String appTier = "appTier";
-    public static final String subscriptionTier = "subscriptionTier";
-    public static final String tenMinAppPolicy = "10MinAppPolicy";
-    public static final String tenMinSubPolicy = "10MinSubPolicy";
-    public static final String unauthenticated = "Unauthenticated";
-    public static final String throttleDataTopic = "throttleData";
-    public static final String brokerUsername = "admin";
-    public static final String brokerPassword = "admin";
-    public static final String brokerHost = "localhost";
-    public static final String brokerPort = "5672";
-    public static final String throttleKey = "throttleKey";
-    public static final String expiryTimeStamp = "expiryTimeStamp";
-    public static final String isThrottled = "isThrottled";
+    public static final String EVENT = "event";
+    public static final String PAYLOAD_DATA = "payloadData";
+    public static final String APP_KEY = "appKey";
+    public static final String SUBSCRIPTION_KEY = "subscriptionKey";
+    public static final String APP_TIER = "appTier";
+    public static final String SUBSCRIPTION_TIER = "subscriptionTier";
+    public static final String TEN_MIN_APP_POLICY = "10MinAppPolicy";
+    public static final String TEN_MIN_SUB_POLICY = "10MinSubPolicy";
+    public static final String UNAUTHENTICATED = "Unauthenticated";
+    public static final String THROTTLE_DATA_TOPIC = "throttleData";
+    public static final String BROKER_USERNAME = "admin";
+    public static final String BROKER_PASSWORD = "admin";
+    public static final String BROKER_HOST = "localhost";
+    public static final String BROKER_PORT = "5672";
+    public static final String THROTTLE_KEY = "throttleKey";
+    public static final String EXPIRYTIMESTAMP = "expiryTimeStamp";
+    public static final String IS_THROTTLED = "isThrottled";
 }

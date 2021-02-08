@@ -43,32 +43,33 @@ public class JMSPublisher {
     }
 
     public void getJson(JsonObject jsonObject) throws JMSException, NamingException {
-        String appKey = jsonObject.getAsJsonObject(JMSPublisherConstants.event)
-                .getAsJsonObject(JMSPublisherConstants.payloadData)
-                .get(JMSPublisherConstants.appKey).getAsString();
-        String subscriptionKey = jsonObject.getAsJsonObject(JMSPublisherConstants.event)
-                .getAsJsonObject(JMSPublisherConstants.payloadData)
-                .get(JMSPublisherConstants.subscriptionKey).getAsString();
+        String appKey = jsonObject.getAsJsonObject(JMSPublisherConstants.EVENT)
+                .getAsJsonObject(JMSPublisherConstants.PAYLOAD_DATA)
+                .get(JMSPublisherConstants.APP_KEY).getAsString();
+        String subscriptionKey = jsonObject.getAsJsonObject(JMSPublisherConstants.EVENT)
+                .getAsJsonObject(JMSPublisherConstants.PAYLOAD_DATA)
+                .get(JMSPublisherConstants.SUBSCRIPTION_KEY).getAsString();
 
-        String appTier = jsonObject.getAsJsonObject(JMSPublisherConstants.event)
-                .getAsJsonObject(JMSPublisherConstants.payloadData).get(JMSPublisherConstants.appTier)
+        String appTier = jsonObject.getAsJsonObject(JMSPublisherConstants.EVENT)
+                .getAsJsonObject(JMSPublisherConstants.PAYLOAD_DATA).get(JMSPublisherConstants.APP_TIER)
                 .getAsString();
-        String subscriptionTier = jsonObject.getAsJsonObject(JMSPublisherConstants.event)
-                .getAsJsonObject(JMSPublisherConstants.payloadData).get(JMSPublisherConstants.subscriptionTier)
+        String subscriptionTier = jsonObject.getAsJsonObject(JMSPublisherConstants.EVENT)
+                .getAsJsonObject(JMSPublisherConstants.PAYLOAD_DATA).get(JMSPublisherConstants.SUBSCRIPTION_TIER)
                 .getAsString();
 
-        if (appTier.equals(JMSPublisherConstants.tenMinAppPolicy)) {
+        if (appTier.equals(JMSPublisherConstants.TEN_MIN_APP_POLICY)) {
             publishMessage(appKey);
-        } else if (subscriptionTier.equals(JMSPublisherConstants.tenMinSubPolicy) ||
-                subscriptionTier.equals(JMSPublisherConstants.unauthenticated)) {
+        } else if (subscriptionTier.equals(JMSPublisherConstants.TEN_MIN_SUB_POLICY) ||
+                subscriptionTier.equals(JMSPublisherConstants.UNAUTHENTICATED)) {
             publishMessage(subscriptionKey);
         }
     }
 
     public void publishMessage(String msg) throws NamingException, JMSException {
-        InitialContext initialContext = ClientHelper.getInitialContextBuilder(JMSPublisherConstants.brokerUsername,
-                JMSPublisherConstants.brokerPassword, JMSPublisherConstants.brokerHost, JMSPublisherConstants.brokerPort)
-                .withTopic(JMSPublisherConstants.throttleDataTopic)
+        InitialContext initialContext = ClientHelper.getInitialContextBuilder(JMSPublisherConstants.BROKER_USERNAME,
+                JMSPublisherConstants.BROKER_PASSWORD, JMSPublisherConstants.BROKER_HOST,
+                JMSPublisherConstants.BROKER_PORT)
+                .withTopic(JMSPublisherConstants.THROTTLE_DATA_TOPIC)
                 .build();
         ConnectionFactory connectionFactory
                 = (ConnectionFactory) initialContext.lookup(ClientHelper.CONNECTION_FACTORY);
@@ -76,15 +77,15 @@ public class JMSPublisher {
         connection.start();
 
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        Topic topic = (Topic) initialContext.lookup(JMSPublisherConstants.throttleDataTopic);
+        Topic topic = (Topic) initialContext.lookup(JMSPublisherConstants.THROTTLE_DATA_TOPIC);
         MessageProducer producer = session.createProducer(topic);
 
         MapMessage mapMessage = session.createMapMessage();
-        mapMessage.setString(JMSPublisherConstants.throttleKey, msg);
+        mapMessage.setString(JMSPublisherConstants.THROTTLE_KEY, msg);
         Date date = new Date();
         long time = date.getTime() + 1000;
-        mapMessage.setLong(JMSPublisherConstants.expiryTimeStamp, time);
-        mapMessage.setBoolean(JMSPublisherConstants.isThrottled, true);
+        mapMessage.setLong(JMSPublisherConstants.EXPIRYTIMESTAMP, time);
+        mapMessage.setBoolean(JMSPublisherConstants.IS_THROTTLED, true);
         producer.send(mapMessage);
 
         connection.close();
