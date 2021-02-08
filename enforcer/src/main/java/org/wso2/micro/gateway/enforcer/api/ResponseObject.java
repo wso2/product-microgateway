@@ -24,11 +24,16 @@ import java.util.Map;
  * Holds the response data to build the response object to be sent to the envoy proxy.
  */
 public class ResponseObject {
+    private final String correlationID;
     private int statusCode;
     private String errorCode;
     private String errorDescription;
     private Map<String, String> headerMap;
     private boolean isDirectResponse = false;
+
+    public ResponseObject(String correlationID) {
+        this.correlationID = correlationID;
+    }
 
     public void setHeaderMap(Map<String, String> headerMap) {
         this.headerMap = headerMap;
@@ -68,5 +73,9 @@ public class ResponseObject {
 
     public void setDirectResponse(boolean directResponse) {
         isDirectResponse = directResponse;
+    }
+
+    public String getCorrelationID() {
+        return correlationID;
     }
 }

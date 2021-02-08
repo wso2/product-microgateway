@@ -18,6 +18,8 @@
 
 package org.wso2.micro.gateway.enforcer.grpc;
 
+import com.google.protobuf.Struct;
+import com.google.protobuf.Value;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.envoyproxy.envoy.config.core.v3.HeaderValue;
@@ -68,6 +70,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 return CheckResponse.newBuilder()
                         .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                         .setDeniedResponse(responseBuilder.setStatus(status).build())
+                        .setDynamicMetadata(Struct.newBuilder().putFields("correlationID",
+                                Value.newBuilder().setStringValue(responseObject.getCorrelationID()).build())
+                                .build())
                         .build();
             }
             // Error handling
@@ -84,6 +89,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             return CheckResponse.newBuilder()
                     .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                     .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
+                    .setDynamicMetadata(Struct.newBuilder().putFields("correlationID",
+                            Value.newBuilder().setStringValue(responseObject.getCorrelationID()).build())
+                            .build())
                     .build();
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
@@ -97,7 +105,11 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 );
             }
             return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
-                    .setOkResponse(okResponseBuilder.build()).build();
+                    .setOkResponse(okResponseBuilder.build())
+                    .setDynamicMetadata(Struct.newBuilder().putFields("correlationID",
+                            Value.newBuilder().setStringValue(responseObject.getCorrelationID()).build())
+                            .build())
+                    .build();
         }
     }
 

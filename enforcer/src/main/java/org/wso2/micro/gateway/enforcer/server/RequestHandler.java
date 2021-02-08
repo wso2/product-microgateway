@@ -44,7 +44,8 @@ public class RequestHandler {
         API matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
 
         if (matchedAPI == null) {
-            ResponseObject responseObject = new ResponseObject();
+            // TODO: (VirajSalaka) Handle properly
+            ResponseObject responseObject = new ResponseObject("xxxxxx");
             responseObject.setStatusCode(StatusCode.NotFound_VALUE);
             responseObject.setErrorDescription("API not found");
             return responseObject;

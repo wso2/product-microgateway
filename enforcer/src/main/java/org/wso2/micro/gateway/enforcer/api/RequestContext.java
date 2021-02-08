@@ -23,6 +23,7 @@ import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 /**
  * Holds the set of meta data related to current request flowing through the gateway. This context should be shared
@@ -43,9 +44,20 @@ public class RequestContext {
     private boolean clusterHeaderEnabled = false;
     //Denotes the specific headers which needs to be passed to response object
     private Map<String, String> responseHeaders;
+    //Correlation ID
+    private final String correlationID;
 
     private RequestContext() {
+        correlationID = UUID.randomUUID().toString();
+    }
 
+    /**
+     * Returns the correlation ID for the request.
+     *
+     * @return correlation ID
+     */
+    public String getCorrelationID() {
+        return correlationID;
     }
 
     /**

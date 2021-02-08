@@ -81,7 +81,7 @@ public class RestAPI implements API {
 
     @Override
     public ResponseObject process(RequestContext requestContext) {
-        ResponseObject responseObject = new ResponseObject();
+        ResponseObject responseObject = new ResponseObject(requestContext.getCorrelationID());
         if (executeFilterChain(requestContext)) {
             responseObject.setStatusCode(200);
             if (requestContext.getResponseHeaders() != null) {
