@@ -25,6 +25,7 @@ private static final long serialVersionUID = 0L;
     certificateAlias_ = "";
     jwksURL_ = "";
     consumerKeyClaim_ = "";
+    certificateFilePath_ = "";
   }
 
   @java.lang.Override
@@ -90,6 +91,12 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             consumerKeyClaim_ = s;
+            break;
+          }
+          case 58: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            certificateFilePath_ = s;
             break;
           }
           default: {
@@ -371,6 +378,52 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int CERTIFICATEFILEPATH_FIELD_NUMBER = 7;
+  private volatile java.lang.Object certificateFilePath_;
+  /**
+   * <pre>
+   * FilePath of the public certificate mounted in enforcer container
+   * </pre>
+   *
+   * <code>string certificateFilePath = 7;</code>
+   * @return The certificateFilePath.
+   */
+  @java.lang.Override
+  public java.lang.String getCertificateFilePath() {
+    java.lang.Object ref = certificateFilePath_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      certificateFilePath_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * FilePath of the public certificate mounted in enforcer container
+   * </pre>
+   *
+   * <code>string certificateFilePath = 7;</code>
+   * @return The bytes for certificateFilePath.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getCertificateFilePathBytes() {
+    java.lang.Object ref = certificateFilePath_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      certificateFilePath_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -403,6 +456,9 @@ private static final long serialVersionUID = 0L;
     if (!getConsumerKeyClaimBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 6, consumerKeyClaim_);
     }
+    if (!getCertificateFilePathBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 7, certificateFilePath_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -431,6 +487,9 @@ private static final long serialVersionUID = 0L;
     if (!getConsumerKeyClaimBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, consumerKeyClaim_);
     }
+    if (!getCertificateFilePathBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, certificateFilePath_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -458,6 +517,8 @@ private static final long serialVersionUID = 0L;
         != other.getValidateSubscription()) return false;
     if (!getConsumerKeyClaim()
         .equals(other.getConsumerKeyClaim())) return false;
+    if (!getCertificateFilePath()
+        .equals(other.getCertificateFilePath())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -482,6 +543,8 @@ private static final long serialVersionUID = 0L;
         getValidateSubscription());
     hash = (37 * hash) + CONSUMERKEYCLAIM_FIELD_NUMBER;
     hash = (53 * hash) + getConsumerKeyClaim().hashCode();
+    hash = (37 * hash) + CERTIFICATEFILEPATH_FIELD_NUMBER;
+    hash = (53 * hash) + getCertificateFilePath().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -631,6 +694,8 @@ private static final long serialVersionUID = 0L;
 
       consumerKeyClaim_ = "";
 
+      certificateFilePath_ = "";
+
       return this;
     }
 
@@ -663,6 +728,7 @@ private static final long serialVersionUID = 0L;
       result.jwksURL_ = jwksURL_;
       result.validateSubscription_ = validateSubscription_;
       result.consumerKeyClaim_ = consumerKeyClaim_;
+      result.certificateFilePath_ = certificateFilePath_;
       onBuilt();
       return result;
     }
@@ -732,6 +798,10 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getConsumerKeyClaim().isEmpty()) {
         consumerKeyClaim_ = other.consumerKeyClaim_;
+        onChanged();
+      }
+      if (!other.getCertificateFilePath().isEmpty()) {
+        certificateFilePath_ = other.certificateFilePath_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -1287,6 +1357,102 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       consumerKeyClaim_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object certificateFilePath_ = "";
+    /**
+     * <pre>
+     * FilePath of the public certificate mounted in enforcer container
+     * </pre>
+     *
+     * <code>string certificateFilePath = 7;</code>
+     * @return The certificateFilePath.
+     */
+    public java.lang.String getCertificateFilePath() {
+      java.lang.Object ref = certificateFilePath_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        certificateFilePath_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * FilePath of the public certificate mounted in enforcer container
+     * </pre>
+     *
+     * <code>string certificateFilePath = 7;</code>
+     * @return The bytes for certificateFilePath.
+     */
+    public com.google.protobuf.ByteString
+        getCertificateFilePathBytes() {
+      java.lang.Object ref = certificateFilePath_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        certificateFilePath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * FilePath of the public certificate mounted in enforcer container
+     * </pre>
+     *
+     * <code>string certificateFilePath = 7;</code>
+     * @param value The certificateFilePath to set.
+     * @return This builder for chaining.
+     */
+    public Builder setCertificateFilePath(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      certificateFilePath_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * FilePath of the public certificate mounted in enforcer container
+     * </pre>
+     *
+     * <code>string certificateFilePath = 7;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearCertificateFilePath() {
+      
+      certificateFilePath_ = getDefaultInstance().getCertificateFilePath();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * FilePath of the public certificate mounted in enforcer container
+     * </pre>
+     *
+     * <code>string certificateFilePath = 7;</code>
+     * @param value The bytes for certificateFilePath to set.
+     * @return This builder for chaining.
+     */
+    public Builder setCertificateFilePathBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      certificateFilePath_ = value;
       onChanged();
       return this;
     }

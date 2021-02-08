@@ -30,12 +30,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.KeyStoreException;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
 
@@ -100,7 +102,7 @@ public class JWTUtil {
      * Verify the JWT token signature.
      *
      * @param jwt   SignedJwt Token
-     * @param alias public certificate keystore alias
+     * @param alias public certificate alias
      * @return whether the signature is verified or or not
      * @throws MGWException in case of signature verification failure
      */
@@ -109,9 +111,9 @@ public class JWTUtil {
         Certificate publicCert = null;
         //Read the client-truststore.jks into a KeyStore
         try {
-            publicCert = FilterUtils.getCertificateFromTrustStore(alias);
-        } catch (MGWException e) {
-            throw new MGWException("Error retrieving certificate from truststore ", e);
+            publicCert = ConfigHolder.getInstance().getTrustStoreForJWT().getCertificate(alias);
+        } catch (KeyStoreException e) {
+            throw new MGWException("Error while retrieving the certificate for JWT verification.", e);
         }
 
         if (publicCert != null) {
@@ -124,9 +126,8 @@ public class JWTUtil {
                 throw new MGWException("Public key is not RSA");
             }
         } else {
-            log.error("Couldn't find a public certificate with alias " + alias + " to verify the signature");
-            throw new MGWException(
-                    "Couldn't find a public certificate with alias " + alias + " to verify the signature");
+            log.debug("Couldn't find a public certificate to verify the signature");
+            throw new MGWException("Couldn't find a public certificate to verify the signature");
         }
     }
 

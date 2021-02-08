@@ -32,34 +32,34 @@ public interface ConfigOrBuilder extends
       int index);
 
   /**
-   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
    * @return Whether the keystore field is set.
    */
   boolean hasKeystore();
   /**
-   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
    * @return The keystore.
    */
-  org.wso2.gateway.discovery.config.enforcer.CertStore getKeystore();
+  org.wso2.gateway.discovery.config.enforcer.Keystore getKeystore();
   /**
-   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
    */
-  org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getKeystoreOrBuilder();
+  org.wso2.gateway.discovery.config.enforcer.KeystoreOrBuilder getKeystoreOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
    * @return Whether the truststore field is set.
    */
   boolean hasTruststore();
   /**
-   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
    * @return The truststore.
    */
-  org.wso2.gateway.discovery.config.enforcer.CertStore getTruststore();
+  org.wso2.gateway.discovery.config.enforcer.Truststore getTruststore();
   /**
-   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
    */
-  org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getTruststoreOrBuilder();
+  org.wso2.gateway.discovery.config.enforcer.TruststoreOrBuilder getTruststoreOrBuilder();
 
   /**
    * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>

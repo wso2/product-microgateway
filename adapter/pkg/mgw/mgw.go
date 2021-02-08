@@ -19,11 +19,16 @@
 package mgw
 
 import (
+	"crypto/tls"
+
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	apiservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/api"
 	configservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/config"
+	subscriptionservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/subscription"
 	"github.com/wso2/micro-gw/pkg/api/restserver"
+	cb "github.com/wso2/micro-gw/pkg/mgw/xdscallbacks"
+	"github.com/wso2/micro-gw/pkg/tlsutils"
 
 	"context"
 	"flag"
@@ -37,9 +42,11 @@ import (
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/messaging"
+	"github.com/wso2/micro-gw/pkg/subscription"
 	"github.com/wso2/micro-gw/pkg/synchronizer"
-	xds "github.com/wso2/micro-gw/pkg/xds"
+	"github.com/wso2/micro-gw/pkg/xds"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 var (
@@ -70,10 +77,29 @@ func init() {
 
 const grpcMaxConcurrentStreams = 1000000
 
-func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, port uint) {
+func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, enforcerSdsServer xdsv3.Server,
+	enforcerAppDsSrv xdsv3.Server, enforcerAPIDsSrv xdsv3.Server, enforcerAppPolicyDsSrv xdsv3.Server,
+	enforcerSubPolicyDsSrv xdsv3.Server, enforcerAppKeyMappingDsSrv xdsv3.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
-	grpcServer := grpc.NewServer()
+
+	cert, err := tlsutils.GetServerCertificate()
+
+	caCertPool := tlsutils.GetTrustedCertPool()
+
+	if err == nil {
+		grpcOptions = append(grpcOptions, grpc.Creds(
+			credentials.NewTLS(&tls.Config{
+				Certificates: []tls.Certificate{cert},
+				ClientAuth:   tls.RequireAndVerifyClientCert,
+				ClientCAs:    caCertPool,
+			}),
+		))
+	} else {
+		logger.LoggerMgw.Warn("failed to initiate the ssl context: ", err)
+		panic(err)
+	}
+	grpcServer := grpc.NewServer(grpcOptions...)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
@@ -84,6 +110,12 @@ func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, port 
 	discoveryv3.RegisterAggregatedDiscoveryServiceServer(grpcServer, server)
 	configservice.RegisterConfigDiscoveryServiceServer(grpcServer, enforcerServer)
 	apiservice.RegisterApiDiscoveryServiceServer(grpcServer, enforcerServer)
+	subscriptionservice.RegisterSubscriptionDiscoveryServiceServer(grpcServer, enforcerSdsServer)
+	subscriptionservice.RegisterApplicationDiscoveryServiceServer(grpcServer, enforcerAppDsSrv)
+	subscriptionservice.RegisterApiListDiscoveryServiceServer(grpcServer, enforcerAPIDsSrv)
+	subscriptionservice.RegisterApplicationPolicyDiscoveryServiceServer(grpcServer, enforcerAppPolicyDsSrv)
+	subscriptionservice.RegisterSubscriptionPolicyDiscoveryServiceServer(grpcServer, enforcerSubPolicyDsSrv)
+	subscriptionservice.RegisterApplicationKeyMappingDiscoveryServiceServer(grpcServer, enforcerAppKeyMappingDsSrv)
 
 	logger.LoggerMgw.Info("port: ", port, " management server listening")
 	go func() {
@@ -115,10 +147,24 @@ func Run(conf *config.Config) {
 	logger.LoggerMgw.Info("Starting adapter ....")
 	cache := xds.GetXdsCache()
 	enforcerCache := xds.GetEnforcerCache()
-	srv := xdsv3.NewServer(ctx, cache, nil)
-	enforcerXdsSrv := xdsv3.NewServer(ctx, enforcerCache, nil)
+	enforcerSubscriptionCache := xds.GetEnforcerSubscriptionCache()
+	enforcerApplicationCache := xds.GetEnforcerApplicationCache()
+	enforcerAPICache := xds.GetEnforcerAPICache()
+	enforcerApplicationPolicyCache := xds.GetEnforcerApplicationPolicyCache()
+	enforcerSubscriptionPolicyCache := xds.GetEnforcerSubscriptionPolicyCache()
+	enforcerApplicationKeyMappingCache := xds.GetEnforcerApplicationKeyMappingCache()
 
-	runManagementServer(srv, enforcerXdsSrv, port)
+	srv := xdsv3.NewServer(ctx, cache, nil)
+	enforcerXdsSrv := xdsv3.NewServer(ctx, enforcerCache, &cb.Callbacks{})
+	enforcerSdsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionCache, &cb.Callbacks{})
+	enforcerAppDsSrv := xdsv3.NewServer(ctx, enforcerApplicationCache, &cb.Callbacks{})
+	enforcerAPIDsSrv := xdsv3.NewServer(ctx, enforcerAPICache, &cb.Callbacks{})
+	enforcerAppPolicyDsSrv := xdsv3.NewServer(ctx, enforcerApplicationPolicyCache, &cb.Callbacks{})
+	enforcerSubPolicyDsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionPolicyCache, &cb.Callbacks{})
+	enforcerAppKeyMappingDsSrv := xdsv3.NewServer(ctx, enforcerApplicationKeyMappingCache, &cb.Callbacks{})
+
+	runManagementServer(srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
+		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, port)
 
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
@@ -127,6 +173,8 @@ func Run(conf *config.Config) {
 
 	enableEventHub := conf.ControlPlane.EventHub.Enabled
 	if enableEventHub {
+		// Load subscription data
+		subscription.LoadSubscriptionData(conf)
 		// Fetch APIs from control plane
 		fetchAPIsOnStartUp(conf)
 		go messaging.ProcessEvents(conf)
@@ -182,10 +230,12 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 		if data.Resp != nil {
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
 			logger.LoggerMgw.Debug("Pushing data to router and enforcer")
-			err := synchronizer.PushAPIProjects(data.Resp)
+			err := synchronizer.PushAPIProjects(data.Resp, envs)
 			if err != nil {
 				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
 			}
+		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
+			logger.LoggerMgw.Errorf("Error occurred when retrieveing APIs from control plane: %v", data.Err)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			i--

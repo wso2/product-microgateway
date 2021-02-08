@@ -18,7 +18,9 @@
 
 package org.wso2am.micro.gw.tests.util;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
 import java.io.*;
 import java.net.ProtocolException;
 import java.net.URL;
@@ -165,6 +167,12 @@ public class HttpsClientRequest {
         conn.setConnectTimeout(15000);
         conn.setDoInput(true);
         conn.setUseCaches(false);
+        conn.setHostnameVerifier(new HostnameVerifier() {
+            @Override
+            public boolean verify(String s, SSLSession sslSession) {
+                return true;
+            }
+        });
         conn.setAllowUserInteraction(false);
         return conn;
     }

@@ -16,11 +16,11 @@ maven 3.6
 The purpose is to remove the already created docker containers. Otherwise the docker 
 maven plugin would fail to create the new docker images)
 
-- `mvn clean install` (make sure java-11 is set because the filter-chain pom contains
+- `mvn clean install` (make sure java-11 is set because the enforcer pom contains
  java-11 as the source)
  
  - Navigate to distribution/target/.
- Then extract the zip file called wso2am-micro-gw-4.0.0-m5-SNAPSHOT.zip
+ Then extract the zip file called wso2am-micro-gw-4.0.0-m5.zip
  
  - Then execute `docker-compose up` to run the setup. This will start an envoy container,
  filter-core container and piot container. The mounted configurations can be found from
@@ -65,6 +65,6 @@ maven plugin would fail to create the new docker images)
  - Make sure you make/change the configurations correctly when you are using the distribution
  zip file.
  
- - If you need to run the control plane as a go executable, make sure you set MGW_HOME environment
+ - If you need to run the adaptor as a go executable, make sure you set MGW_HOME environment
  variable to point the directory where your configurations are located.
     - Ex. export MGW_HOME

@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-  <assembly>
+<assembly>
     <includeBaseDirectory>false</includeBaseDirectory>
     <baseDirectory>/</baseDirectory>
     <id>enforcer</id>
@@ -39,4 +39,14 @@
             </includes>
         </fileSet>
     </fileSets>
+    <files>
+        <file>
+            <source>../resources/security/mg.key</source>
+            <outputDirectory>security</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>security</outputDirectory>
+        </file>
+    </files>
 </assembly>

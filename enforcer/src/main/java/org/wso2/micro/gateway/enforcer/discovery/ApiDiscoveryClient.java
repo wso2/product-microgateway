@@ -25,16 +25,16 @@ import io.envoyproxy.envoy.config.core.v3.Node;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryRequest;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.api.Api;
 import org.wso2.gateway.discovery.service.api.ApiDiscoveryServiceGrpc;
 import org.wso2.micro.gateway.enforcer.api.APIFactory;
-import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
+import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +51,7 @@ public class ApiDiscoveryClient {
     private static final Logger logger = LogManager.getLogger(ApiDiscoveryClient.class);
     private final APIFactory apiFactory;
     private StreamObserver<DiscoveryRequest> reqObserver;
+    private static final Logger log = LogManager.getLogger(ApiDiscoveryClient.class);
     /**
      * This is a reference to the latest received response from the ADS.
      * <p>
@@ -74,19 +75,18 @@ public class ApiDiscoveryClient {
     private final String nodeId;
 
     private ApiDiscoveryClient(String host, int port) {
+        this.channel = GRPCUtils.createSecuredChannel(log, host, port);
         this.apiFactory = APIFactory.getInstance();
-        // TODO: (Praminda) Enable transport security
-        this.channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().enableRetry().build();
         this.stub = ApiDiscoveryServiceGrpc.newStub(channel);
         this.blockingStub = ApiDiscoveryServiceGrpc.newBlockingStub(channel);
-        this.nodeId = ReferenceHolder.getInstance().getNodeLabel();
+        this.nodeId = ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
     }
 
     public static ApiDiscoveryClient getInstance() {
         if (instance == null) {
-            String adsHost = System.getenv().get(Constants.ADAPTER_HOST);
-            int adsPort = Integer.parseInt(System.getenv().get(Constants.ADAPTER_XDS_PORT));
+            String adsHost = ConfigHolder.getInstance().getEnvVarConfig().getAdapterHost();
+            int adsPort = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getAdapterXdsPort());
             instance = new ApiDiscoveryClient(adsHost, adsPort);
         }
         return instance;

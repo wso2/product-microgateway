@@ -136,7 +136,7 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 	}
 
 	if conf.Envoy.ListenerTLSEnabled {
-		tlsCert := generateTLSCert(conf.Envoy.ListenerKeyPath, conf.Envoy.ListenerCertPath)
+		tlsCert := generateTLSCert(conf.Envoy.KeyStore.PrivateKeyLocation, conf.Envoy.KeyStore.PublicKeyLocation)
 		//TODO: (VirajSalaka) Make it configurable via SDS
 		tlsFilter := &tlsv3.DownstreamTlsContext{
 			CommonTlsContext: &tlsv3.CommonTlsContext{

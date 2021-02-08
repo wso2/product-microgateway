@@ -118,4 +118,24 @@ public interface IssuerOrBuilder extends
    */
   com.google.protobuf.ByteString
       getConsumerKeyClaimBytes();
+
+  /**
+   * <pre>
+   * FilePath of the public certificate mounted in enforcer container
+   * </pre>
+   *
+   * <code>string certificateFilePath = 7;</code>
+   * @return The certificateFilePath.
+   */
+  java.lang.String getCertificateFilePath();
+  /**
+   * <pre>
+   * FilePath of the public certificate mounted in enforcer container
+   * </pre>
+   *
+   * <code>string certificateFilePath = 7;</code>
+   * @return The bytes for certificateFilePath.
+   */
+  com.google.protobuf.ByteString
+      getCertificateFilePathBytes();
 }

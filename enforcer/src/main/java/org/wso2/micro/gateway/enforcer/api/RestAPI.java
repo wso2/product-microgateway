@@ -88,7 +88,7 @@ public class RestAPI implements API <RequestContext, ResponseObject>{
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
         } else {
-            // If a filter chain stops with a false, it will be passed directly to the client.
+            // If a enforcer stops with a false, it will be passed directly to the client.
             responseObject.setDirectResponse(true);
             responseObject.setStatusCode(Integer.parseInt(requestContext.getProperties().get("code").toString()));
             if (requestContext.getProperties().get("error_code") != null) {

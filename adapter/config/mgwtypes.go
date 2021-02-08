@@ -70,16 +70,14 @@ type Config struct {
 			Host string
 			// Port of the server
 			Port string
-			// Public Certificate Path (For the https connection between adapter and apictl)
-			PublicKeyPath string
-			// Private Key Path (For the https connection between adapter and apictl)
-			PrivateKeyPath string
 			// APICTL Users
 			Users []APICtlUser `toml:"users"`
 		}
 
 		//Consul represents the configuration required to connect to consul service discovery
 		Consul struct {
+			//Enable whether consul service discovery should be enabled
+			Enable bool
 			//URL url of the consul client in format: http(s)://host:port
 			URL string
 			//PollInterval how frequently consul API should be polled to get updates (in seconds)
@@ -93,6 +91,10 @@ type Config struct {
 			//CertPath path to the key file(PEM encoded) required for tls connection between adapter and a consul client
 			KeyPath string
 		}
+		// Keystore contains the keyFile and Cert File of the adapter
+		Keystore keystore
+		//Trusted Certificates
+		Truststore truststore
 	}
 
 	// Envoy Listener Component related configurations.
@@ -100,8 +102,7 @@ type Config struct {
 		ListenerHost            string
 		ListenerPort            uint32
 		ClusterTimeoutInSeconds time.Duration
-		ListenerCertPath        string
-		ListenerKeyPath         string
+		KeyStore                keystore
 		ListenerTLSEnabled      bool
 
 		// Envoy Upstream Related Connfigurations
@@ -111,9 +112,7 @@ type Config struct {
 				MinVersion             string `toml:"minimumProtocolVersion"`
 				MaxVersion             string `toml:"maximumProtocolVersion"`
 				Ciphers                string `toml:"ciphers"`
-				CACrtPath              string `toml:"trustedCertificatesFilePath"`
-				PrivateKeyPath         string `toml:"clientKeyPath"`
-				PublicCertPath         string `toml:"clientCertPath"`
+				CACrtPath              string `toml:"trustedCertPath"`
 				VerifyHostName         bool   `toml:"verifyHostName"`
 				DisableSSLVerification bool   `toml:"disableSslVerification"`
 			}
@@ -121,8 +120,6 @@ type Config struct {
 	}
 
 	Enforcer struct {
-		Keystore        keystore
-		Truststore      keystore
 		JwtTokenConfig  []jwtTokenConfig
 		EventHub        eventHub
 		ApimCredentials apimCredentials
@@ -153,9 +150,12 @@ type threadPool struct {
 }
 
 type keystore struct {
-	Location  string
-	StoreType string `toml:"type"`
-	Password  string
+	PrivateKeyLocation string `toml:"keyPath"`
+	PublicKeyLocation  string `toml:"certPath"`
+}
+
+type truststore struct {
+	Location string
 }
 
 type jwtTokenConfig struct {
@@ -165,6 +165,7 @@ type jwtTokenConfig struct {
 	JwksURL              string
 	ValidateSubscription bool
 	ConsumerKeyClaim     string
+	CertificateFilePath  string
 }
 
 type eventHub struct {
@@ -191,8 +192,7 @@ type controlPlane struct {
 		SyncApisOnStartUp       bool          `toml:"syncApisOnStartUp"`
 		EnvironmentLabels       []string      `toml:"environmentLabels"`
 		RetryInterval           time.Duration `toml:"retryInterval"`
-		TLSEnabled              bool          `toml:"tlsEnabled"`
-		PublicCertPath          string        `toml:"publicCertPath"`
+		SkipSSLVerfication      bool          `toml:"skipSSLVerification"`
 		JmsConnectionParameters struct {
 			EventListeningEndpoints string `toml:"eventListeningEndpoints"`
 		} `toml:"jmsConnectionParameters"`

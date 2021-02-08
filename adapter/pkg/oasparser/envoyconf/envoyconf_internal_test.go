@@ -238,8 +238,8 @@ func TestCreateListener(t *testing.T) {
 	config.Envoy.ListenerPort = listenerPort
 	config.Envoy.ListenerHost = listenerAddress
 	config.Envoy.ListenerTLSEnabled = true
-	config.Envoy.ListenerCertPath = mgwconfig.GetMgwHome() + "/adapter/security/localhost.pem"
-	config.Envoy.ListenerKeyPath = mgwconfig.GetMgwHome() + "/adapter/security/localhost.key"
+	config.Envoy.KeyStore.PublicKeyLocation = mgwconfig.GetMgwHome() + "/adapter/security/localhost.pem"
+	config.Envoy.KeyStore.PrivateKeyLocation = mgwconfig.GetMgwHome() + "/adapter/security/localhost.key"
 
 	tlsEnabledListener := createListener(config, "test-id")
 
@@ -349,8 +349,8 @@ func TestCreateUpstreamTLSContext(t *testing.T) {
 	certFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/certs/testcrt.crt"
 	certByteArr, err := ioutil.ReadFile(certFilePath)
 	assert.Nil(t, err, "Error while reading the certificate : "+certFilePath)
-	defaultMgwKeyPath := "/home/wso2/security/mg.key"
-	defaultMgwCertPath := "/home/wso2/security/mg.pem"
+	defaultMgwKeyPath := "/home/wso2/security/keystore/mg.key"
+	defaultMgwCertPath := "/home/wso2/security/keystore/mg.pem"
 	defaultCipherArray := "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA," +
 		" ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384," +
 		" ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"

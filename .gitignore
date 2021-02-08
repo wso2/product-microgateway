@@ -40,3 +40,6 @@ vendor
 envoy-filters/bazel-*
 envoy-filters/.vscode
 envoy-filters/.idea
+
+# executable
+adapter/micro-gw

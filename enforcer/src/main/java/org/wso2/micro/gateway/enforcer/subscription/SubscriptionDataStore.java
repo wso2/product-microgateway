@@ -18,6 +18,7 @@
 
 package org.wso2.micro.gateway.enforcer.subscription;
 
+import org.wso2.gateway.discovery.subscription.APIs;
 import org.wso2.micro.gateway.enforcer.models.API;
 import org.wso2.micro.gateway.enforcer.models.ApiPolicy;
 import org.wso2.micro.gateway.enforcer.models.Application;
@@ -25,6 +26,8 @@ import org.wso2.micro.gateway.enforcer.models.ApplicationKeyMapping;
 import org.wso2.micro.gateway.enforcer.models.ApplicationPolicy;
 import org.wso2.micro.gateway.enforcer.models.Subscription;
 import org.wso2.micro.gateway.enforcer.models.SubscriptionPolicy;
+
+import java.util.List;
 
 /**
  * A Facade for obtaining Subscription related Data.
@@ -42,7 +45,7 @@ public interface SubscriptionDataStore {
     /**
      * Gets the {@link ApplicationKeyMapping} entry by Key
      *
-     * @param key <ApplicationIs>.<keyType>
+     * @param key        <ApplicationIs>.<keyType>
      * @param keyManager Keymanager Name
      * @return {@link ApplicationKeyMapping} entry
      */
@@ -74,6 +77,7 @@ public interface SubscriptionDataStore {
      * @return API Throttling Policy
      */
     ApiPolicy getApiPolicyByName(String policyName, int tenantId);
+
     /**
      * Gets Subscription Throttling Policy by the name and Tenant Id
      *
@@ -91,6 +95,20 @@ public interface SubscriptionDataStore {
      * @return Application Throttling Policy
      */
     ApplicationPolicy getApplicationPolicyByName(String policyName, int tenantId);
+
+    void addSubscriptions(List<org.wso2.gateway.discovery.subscription.Subscription> subscriptionList);
+
+    void addApplications(List<org.wso2.gateway.discovery.subscription.Application> applicationList);
+
+    void addApis(List<APIs> apisList);
+
+    void addApplicationPolicies(List<org.wso2.gateway.discovery.subscription.ApplicationPolicy> applicationPolicyList);
+
+    void addSubscriptionPolicies(
+            List<org.wso2.gateway.discovery.subscription.SubscriptionPolicy> subscriptionPolicyList);
+
+    void addApplicationKeyMappings(
+            List<org.wso2.gateway.discovery.subscription.ApplicationKeyMapping> applicationKeyMappingList);
 
     void addOrUpdateApplication(Application application);
 
@@ -121,10 +139,6 @@ public interface SubscriptionDataStore {
     void removeApplicationPolicy(ApplicationPolicy applicationPolicy);
 
     void removeApiPolicy(ApiPolicy apiPolicy);
-
-    boolean isApisInitialized();
-
-    boolean isApiPoliciesInitialized();
 
     API getDefaultApiByContext(String context);
 }

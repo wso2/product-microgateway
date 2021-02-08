@@ -20,20 +20,23 @@ package svcdiscovery
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/wso2/micro-gw/config"
-	logger "github.com/wso2/micro-gw/loggers"
 	"io/ioutil"
 	"net/url"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/wso2/micro-gw/config"
+	logger "github.com/wso2/micro-gw/loggers"
 )
 
 var (
-	onceConfigLoad sync.Once
-	conf           *config.Config
-	pollInterval   time.Duration
-	errConfLoad    error
+	//IsServiceDiscoveryEnabled whether Consul service discovery should be enabled
+	IsServiceDiscoveryEnabled bool
+	onceConfigLoad            sync.Once
+	conf                      *config.Config
+	pollInterval              time.Duration
+	errConfLoad               error
 	//ssl certs
 	caCert   []byte
 	cert     []byte
@@ -56,10 +59,14 @@ func init() {
 	ClusterConsulKeyMap = make(map[string]string)
 	ClusterConsulResultMap = make(map[string][]Upstream)
 	ClusterConsulDoneChanMap = make(map[string]chan bool)
+	//Read config
+	conf, errConfLoad = config.ReadConfigs()
+	IsServiceDiscoveryEnabled = conf.Adapter.Consul.Enable
 }
 
 //read the certs and access token required for tls into respective global variables
 func readCerts() error {
+	// TODO: (VirajSalaka) Replace with common CA cert pool
 	caFileContent, readErr := ioutil.ReadFile(conf.Adapter.Consul.CaCertPath)
 	if readErr != nil {
 		return readErr

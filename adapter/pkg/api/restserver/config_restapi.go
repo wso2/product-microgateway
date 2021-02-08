@@ -20,9 +20,7 @@ package restserver
 import (
 	"crypto/tls"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -30,13 +28,13 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	keystore "github.com/pavel-v-chernykh/keystore-go/v3"
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	apiServer "github.com/wso2/micro-gw/pkg/api"
 	"github.com/wso2/micro-gw/pkg/api/models"
 	"github.com/wso2/micro-gw/pkg/api/restserver/operations"
 	"github.com/wso2/micro-gw/pkg/api/restserver/operations/api_individual"
+	"github.com/wso2/micro-gw/pkg/tlsutils"
 )
 
 var (
@@ -84,7 +82,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		principal *models.Principal) middleware.Responder {
 		// TODO: (VirajSalaka) Error is not handled in the response.
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
-		err := apiServer.ApplyAPIProject(jsonByteArray)
+		err := apiServer.ApplyAPIProject(jsonByteArray, []string{})
 		if err != nil {
 			return api_individual.NewPostApisInternalServerError()
 		}
@@ -100,34 +98,10 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 
 // The TLS configuration before HTTPS server starts.
 func configureTLS(tlsConfig *tls.Config) {
-	// Make all necessary changes to the TLS configuration here.
-	// TODO: (VirajSalaka) Introduce PKCS12
-	tlsConfig.Certificates, _ = getCertificates(mgwConfig.Adapter.Server.PublicKeyPath, mgwConfig.Adapter.Server.PrivateKeyPath)
-}
-
-func getCertificates(publicKeyPath, privateKeyPath string) ([]tls.Certificate, error) {
-	certificates := make([]tls.Certificate, 1)
-	tlsCertificate := publicKeyPath
-	tlsCertificateKey := privateKeyPath
-	certificate, err := tls.LoadX509KeyPair(string(tlsCertificate), string(tlsCertificateKey))
-	if err != nil {
-		logger.LoggerAPI.Fatal("Error while loading the tls keypair.", err)
-		return certificates, err
+	cert, err := tlsutils.GetServerCertificate()
+	if err == nil {
+		tlsConfig.Certificates = []tls.Certificate{cert}
 	}
-	certificates[0] = certificate
-	return certificates, nil
-}
-
-// TODO: (VirajSalaka) This is not removed at the moment. Finalize if this is going to be used in future
-func getCertificatesFromByteArr(keyPem, certPem []byte) []tls.Certificate {
-	certificates := make([]tls.Certificate, 1)
-	cert, err := tls.X509KeyPair(certPem, keyPem)
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		certificates[0] = cert
-	}
-	return certificates
 }
 
 // As soon as server is initialized but not run yet, this function will be called.
@@ -173,47 +147,4 @@ func StartRestServer(config *config.Config) {
 		logger.LoggerAPI.Fatal(err)
 	}
 
-}
-
-// TODO: (VirajSalaka) Either remove the unused methods or change impl such that the code segment is used.
-func getPrivateKeyFile() []byte {
-	var privateKeyByteArr []byte
-	f, err := os.Open("/Users/viraj/Desktop/temp/wso2am-micro-gw-macos-3.2.0-alpha/runtime/bre/security/ballerinaKeystore.p12")
-	if err != nil {
-		logger.LoggerAPI.Fatal(err)
-	}
-	defer f.Close()
-	keyStore, err := keystore.Decode(f, []byte("ballerina"))
-	if err != nil {
-		logger.LoggerAPI.Fatal(err)
-	}
-	key, ok := keyStore["ballerina"]
-	if ok {
-		privateKey := key.(*keystore.PrivateKeyEntry)
-		privateKeyByteArr = privateKey.PrivateKey
-		logger.LoggerAPI.Debugf("private key found \n%v", string(privateKeyByteArr))
-	}
-	return privateKeyByteArr
-}
-
-// TODO: (VirajSalaka) Either remove the unused methods or change impl such that the code segment is used.
-func getPublicKeyFile() []byte {
-	var publicKeyByteArr []byte
-	f, err := os.Open("/Users/viraj/Desktop/temp/wso2am-micro-gw-macos-3.2.0-alpha/runtime/bre/security/ballerinaTruststore.p12")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-	keyStore, err := keystore.Decode(f, []byte("ballerina"))
-	if err != nil {
-		logger.LoggerAPI.Fatal(err)
-	}
-	key, ok := keyStore["ballerina"]
-	if ok {
-		certEntry := key.(*keystore.TrustedCertificateEntry)
-		publicKeyByteArr = certEntry.Certificate.Content
-		logger.LoggerAPI.Debugf("public key found \n%v", string(publicKeyByteArr))
-
-	}
-	return publicKeyByteArr
 }

@@ -22,11 +22,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/streadway/amqp"
 	logger "github.com/wso2/micro-gw/loggers"
 	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
+	"github.com/wso2/micro-gw/pkg/synchronizer"
 )
 
 // constant variables
@@ -111,7 +113,7 @@ func handleAPIEvents(data []byte, eventType string) {
 	APIListTimeStamp[apiEvent.APIID] = newTimeStamp
 
 	for i := range APIList {
-		if strings.EqualFold(apiEvent.APIID, APIList[i].APIID) {
+		if strings.EqualFold(apiEvent.APIID, string(APIList[i].APIID)) {
 			isFound = true
 			indexOfAPI = i
 			break
@@ -123,12 +125,20 @@ func handleAPIEvents(data []byte, eventType string) {
 		deleteAPIFromList(indexOfAPI, apiEvent.APIID)
 	} else if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
 		// pull API details
-		api := resourceTypes.API{APIID: apiEvent.APIID, Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
-			Version: apiEvent.APIVersion, Context: apiEvent.APIContext, APIType: apiEvent.APIType,
-			APIStatus: apiEvent.APIStatus, IsDefaultVersion: true, TenantID: apiEvent.TenantID,
-			TenantDomain: apiEvent.Event.TenantDomain, TimeStamp: apiEvent.Event.TimeStamp}
-		APIList = append(APIList, api)
-		logger.LoggerMsg.Infof("API %s is added/updated to APIList", apiEvent.APIID)
+		ID, err := strconv.ParseInt(apiEvent.APIID, 01, 32)
+		if err != nil {
+			logger.LoggerMsg.Errorf("Cannot cast %s to an Integer", apiEvent.APIID)
+		} else {
+			api := resourceTypes.API{APIID: int32(ID), Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
+				Version: apiEvent.APIVersion, Context: apiEvent.APIContext, APIType: apiEvent.APIType,
+				APIStatus: apiEvent.APIStatus, IsDefaultVersion: true, TenantID: apiEvent.TenantID,
+				TenantDomain: apiEvent.Event.TenantDomain, TimeStamp: apiEvent.Event.TimeStamp}
+			APIList = append(APIList, api)
+			logger.LoggerMsg.Infof("API %s is added/updated to APIList", apiEvent.APIID)
+		}
+
+		go synchronizer.FetchAPIsFromControlPlane(apiEvent.APIID, apiEvent.GatewayLabels)
+
 	}
 	fmt.Println(APIList)
 }

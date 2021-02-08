@@ -25,12 +25,12 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/wso2/micro-gw/loggers"
 	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/utills"
+	"github.com/wso2/micro-gw/pkg/tlsutils"
 	xds "github.com/wso2/micro-gw/pkg/xds"
 )
 
@@ -49,7 +49,10 @@ const (
 // The apictl project must be in zipped format. And all the extensions should be defined with in the openAPI
 // definition as only swagger.yaml is taken into consideration here. For websocket APIs api.yaml is taken into
 // consideration. API type is decided by the type field in the api.yaml file.
-func ApplyAPIProject(payload []byte) error {
+func ApplyAPIProject(payload []byte, envrionments []string) error {
+	if len(envrionments) == 0 {
+		envrionments = append(envrionments, "default")
+	}
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	var upstreamCerts []byte
 	newLineByteArray := []byte("\n")
@@ -84,9 +87,8 @@ func ApplyAPIProject(payload []byte) error {
 				loggers.LoggerAPI.Errorf("Error occured while reading the endpoint certificate : %v, %v", file.Name, err.Error())
 				continue
 			}
-			certContentPattern := `\-\-\-\-\-BEGIN\sCERTIFICATE\-\-\-\-\-((.|\n)*)\-\-\-\-\-END\sCERTIFICATE\-\-\-\-\-`
-			regex := regexp.MustCompile(certContentPattern)
-			if !regex.Match(unzippedFileBytes) {
+
+			if !tlsutils.IsPublicCertificate(unzippedFileBytes) {
 				loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", file.Name)
 				// TODO: (VirajSalaka) Create standard error handling mechanism
 				return errors.New("Certificate Validation Error")
@@ -115,14 +117,14 @@ func ApplyAPIProject(payload []byte) error {
 	// TODO - (VirajSalaka) change the switch case and use one method with both api.yaml and swagger.yaml
 	switch apiType {
 	case mgw.HTTP:
-		xds.UpdateAPI(swaggerJsn, upstreamCerts, apiType)
+		xds.UpdateAPI(swaggerJsn, upstreamCerts, apiType, envrionments)
 	case mgw.WS:
-		xds.UpdateAPI(apiJsn, upstreamCerts, apiType)
+		xds.UpdateAPI(apiJsn, upstreamCerts, apiType, envrionments)
 	default:
 		// If no api.yaml file is included in the zip folder , apiType defaults to HTTP to pass the APIDeployTestCase integration test.
 		// TODO : (LahiruUdayanga) Handle the default behaviour after when the APIDeployTestCase test is fixed.
 		apiType = mgw.HTTP
-		xds.UpdateAPI(swaggerJsn, upstreamCerts, apiType)
+		xds.UpdateAPI(swaggerJsn, upstreamCerts, apiType, envrionments)
 		loggers.LoggerAPI.Infof("API type is not currently supported with WSO2 micro-gateway")
 	}
 	return nil
