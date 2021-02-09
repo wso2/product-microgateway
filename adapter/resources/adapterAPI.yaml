@@ -131,6 +131,11 @@
                 "http" for HTTP type
                 "ws" for WebSocket type
               type: string
+            - name : limit
+              in: query
+              description: |
+                Number of APIs (APIMeta objects to return)
+              type: integer
           responses:
             200:
               description: An array of API Metadata
