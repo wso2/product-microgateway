@@ -27,30 +27,36 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// DeployResponse deploy response
+// APIMetaListItem API meta list item
 //
-// swagger:model DeployResponse
-type DeployResponse struct {
+// swagger:model APIMetaListItem
+type APIMetaListItem struct {
 
-	// action
-	Action string `json:"action,omitempty"`
+	// api name
+	APIName string `json:"apiName,omitempty"`
 
-	// info
-	Info string `json:"info,omitempty"`
+	// api type
+	APIType string `json:"apiType,omitempty"`
+
+	// labels
+	Labels []string `json:"labels"`
+
+	// version
+	Version string `json:"version,omitempty"`
 }
 
-// Validate validates this deploy response
-func (m *DeployResponse) Validate(formats strfmt.Registry) error {
+// Validate validates this API meta list item
+func (m *APIMetaListItem) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this deploy response based on context it is used
-func (m *DeployResponse) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+// ContextValidate validates this API meta list item based on context it is used
+func (m *APIMetaListItem) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *DeployResponse) MarshalBinary() ([]byte, error) {
+func (m *APIMetaListItem) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -58,8 +64,8 @@ func (m *DeployResponse) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *DeployResponse) UnmarshalBinary(b []byte) error {
-	var res DeployResponse
+func (m *APIMetaListItem) UnmarshalBinary(b []byte) error {
+	var res APIMetaListItem
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
