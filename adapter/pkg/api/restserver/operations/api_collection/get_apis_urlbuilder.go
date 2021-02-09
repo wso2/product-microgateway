@@ -24,11 +24,14 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
+
+	"github.com/go-openapi/swag"
 )
 
 // GetApisURL generates an URL for the get apis operation
 type GetApisURL struct {
 	APIType *string
+	Limit   *int64
 
 	_basePath string
 	// avoid unkeyed usage
@@ -70,6 +73,14 @@ func (o *GetApisURL) Build() (*url.URL, error) {
 	}
 	if aPITypeQ != "" {
 		qs.Set("apiType", aPITypeQ)
+	}
+
+	var limitQ string
+	if o.Limit != nil {
+		limitQ = swag.FormatInt64(*o.Limit)
+	}
+	if limitQ != "" {
+		qs.Set("limit", limitQ)
 	}
 
 	_result.RawQuery = qs.Encode()

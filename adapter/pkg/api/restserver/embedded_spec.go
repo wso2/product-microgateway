@@ -79,6 +79,12 @@ func init() {
             "description": "Optional - Condition to filter APIs. Currently only filtering \nby API type (HTTP or WebSocket) is supported.\n\"http\" for HTTP type\n\"ws\" for WebSocket type\n",
             "name": "apiType",
             "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Number of APIs (APIMeta objects to return)\n",
+            "name": "limit",
+            "in": "query"
           }
         ],
         "responses": {
@@ -405,6 +411,12 @@ func init() {
             "type": "string",
             "description": "Optional - Condition to filter APIs. Currently only filtering \nby API type (HTTP or WebSocket) is supported.\n\"http\" for HTTP type\n\"ws\" for WebSocket type\n",
             "name": "apiType",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Number of APIs (APIMeta objects to return)\n",
+            "name": "limit",
             "in": "query"
           }
         ],
