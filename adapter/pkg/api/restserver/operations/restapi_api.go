@@ -35,6 +35,7 @@ import (
 	"github.com/go-openapi/swag"
 
 	"github.com/wso2/micro-gw/pkg/api/models"
+	"github.com/wso2/micro-gw/pkg/api/restserver/operations/api_collection"
 	"github.com/wso2/micro-gw/pkg/api/restserver/operations/api_individual"
 )
 
@@ -61,8 +62,14 @@ func NewRestapiAPI(spec *loads.Document) *RestapiAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
+		APICollectionGetApisHandler: api_collection.GetApisHandlerFunc(func(params api_collection.GetApisParams, principal *models.Principal) middleware.Responder {
+			return middleware.NotImplemented("operation api_collection.GetApis has not yet been implemented")
+		}),
 		APIIndividualPostApisHandler: api_individual.PostApisHandlerFunc(func(params api_individual.PostApisParams, principal *models.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation api_individual.PostApis has not yet been implemented")
+		}),
+		APIIndividualPostApisDeleteHandler: api_individual.PostApisDeleteHandlerFunc(func(params api_individual.PostApisDeleteParams, principal *models.Principal) middleware.Responder {
+			return middleware.NotImplemented("operation api_individual.PostApisDelete has not yet been implemented")
 		}),
 
 		// Applies when the Authorization header is set with the Basic scheme
@@ -74,9 +81,8 @@ func NewRestapiAPI(spec *loads.Document) *RestapiAPI {
 	}
 }
 
-/*RestapiAPI This document specifies a **RESTful API** for WSO2 **API Manager** - Admin Portal.
-Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.5.176/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
-*/
+/*RestapiAPI This document specifies a **RESTful API** for WSO2 **API Microgateway** - Adapter.
+ */
 type RestapiAPI struct {
 	spec            *loads.Document
 	context         *middleware.Context
@@ -92,9 +98,11 @@ type RestapiAPI struct {
 	// BasicAuthenticator generates a runtime.Authenticator from the supplied basic auth function.
 	// It has a default implementation in the security package, however you can replace it for your particular usage.
 	BasicAuthenticator func(security.UserPassAuthentication) runtime.Authenticator
+
 	// APIKeyAuthenticator generates a runtime.Authenticator from the supplied token auth function.
 	// It has a default implementation in the security package, however you can replace it for your particular usage.
 	APIKeyAuthenticator func(string, string, security.TokenAuthentication) runtime.Authenticator
+
 	// BearerAuthenticator generates a runtime.Authenticator from the supplied bearer token auth function.
 	// It has a default implementation in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
@@ -117,8 +125,13 @@ type RestapiAPI struct {
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
+	// APICollectionGetApisHandler sets the operation handler for the get apis operation
+	APICollectionGetApisHandler api_collection.GetApisHandler
 	// APIIndividualPostApisHandler sets the operation handler for the post apis operation
 	APIIndividualPostApisHandler api_individual.PostApisHandler
+	// APIIndividualPostApisDeleteHandler sets the operation handler for the post apis delete operation
+	APIIndividualPostApisDeleteHandler api_individual.PostApisDeleteHandler
+
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
 	ServeError func(http.ResponseWriter, *http.Request, error)
@@ -202,8 +215,14 @@ func (o *RestapiAPI) Validate() error {
 		unregistered = append(unregistered, "BasicAuthAuth")
 	}
 
+	if o.APICollectionGetApisHandler == nil {
+		unregistered = append(unregistered, "api_collection.GetApisHandler")
+	}
 	if o.APIIndividualPostApisHandler == nil {
 		unregistered = append(unregistered, "api_individual.PostApisHandler")
+	}
+	if o.APIIndividualPostApisDeleteHandler == nil {
+		unregistered = append(unregistered, "api_individual.PostApisDeleteHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -305,10 +324,18 @@ func (o *RestapiAPI) initHandlerCache() {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
 
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/apis"] = api_collection.NewGetApis(o.context, o.APICollectionGetApisHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/apis"] = api_individual.NewPostApis(o.context, o.APIIndividualPostApisHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/apis/delete"] = api_individual.NewPostApisDelete(o.context, o.APIIndividualPostApisDeleteHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

@@ -28,43 +28,43 @@ import (
 	"github.com/wso2/micro-gw/pkg/api/models"
 )
 
-// PostApisHandlerFunc turns a function with the right signature into a post apis handler
-type PostApisHandlerFunc func(PostApisParams, *models.Principal) middleware.Responder
+// PostApisDeleteHandlerFunc turns a function with the right signature into a post apis delete handler
+type PostApisDeleteHandlerFunc func(PostApisDeleteParams, *models.Principal) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PostApisHandlerFunc) Handle(params PostApisParams, principal *models.Principal) middleware.Responder {
+func (fn PostApisDeleteHandlerFunc) Handle(params PostApisDeleteParams, principal *models.Principal) middleware.Responder {
 	return fn(params, principal)
 }
 
-// PostApisHandler interface for that can handle valid post apis params
-type PostApisHandler interface {
-	Handle(PostApisParams, *models.Principal) middleware.Responder
+// PostApisDeleteHandler interface for that can handle valid post apis delete params
+type PostApisDeleteHandler interface {
+	Handle(PostApisDeleteParams, *models.Principal) middleware.Responder
 }
 
-// NewPostApis creates a new http.Handler for the post apis operation
-func NewPostApis(ctx *middleware.Context, handler PostApisHandler) *PostApis {
-	return &PostApis{Context: ctx, Handler: handler}
+// NewPostApisDelete creates a new http.Handler for the post apis delete operation
+func NewPostApisDelete(ctx *middleware.Context, handler PostApisDeleteHandler) *PostApisDelete {
+	return &PostApisDelete{Context: ctx, Handler: handler}
 }
 
-/* PostApis swagger:route POST /apis API (Individual) postApis
+/* PostApisDelete swagger:route POST /apis/delete API (Individual) postApisDelete
 
-Import an API
+Delete deployed API
 
-This operation can be used to import an API.
+This operation can be used to delete a API that was deployed
 
 
 */
-type PostApis struct {
+type PostApisDelete struct {
 	Context *middleware.Context
-	Handler PostApisHandler
+	Handler PostApisDeleteHandler
 }
 
-func (o *PostApis) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *PostApisDelete) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		r = rCtx
 	}
-	var Params = NewPostApisParams()
+	var Params = NewPostApisDeleteParams()
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)
