@@ -18,6 +18,7 @@
 
 package org.wso2.micro.gateway.enforcer.util;
 
+import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -31,6 +32,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
+import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
@@ -44,6 +48,8 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
+import java.security.cert.Certificate;
 import java.util.Map;
 
 import javax.net.ssl.SSLContext;
@@ -196,6 +202,67 @@ public class FilterUtils {
         }
 
         return authContext;
+    }
+
+    public static JWTInfoDto generateJWTInfoDto(JSONObject subscribedAPI, JWTValidationInfo jwtValidationInfo,
+                                                APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
+                                                RequestContext requestContext) {
+
+        JWTInfoDto jwtInfoDto = new JWTInfoDto();
+        jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
+        String apiContext = requestContext.getMathedAPI().getAPIConfig().getBasePath();
+        String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
+        jwtInfoDto.setApicontext(apiContext);
+        jwtInfoDto.setVersion(apiVersion);
+        constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
+        return jwtInfoDto;
+    }
+
+    private static void constructJWTContent(JSONObject subscribedAPI,
+                                            APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
+
+        if (apiKeyValidationInfoDTO != null) {
+            jwtInfoDto.setApplicationid(apiKeyValidationInfoDTO.getApplicationId());
+            jwtInfoDto.setApplicationname(apiKeyValidationInfoDTO.getApplicationName());
+            jwtInfoDto.setApplicationtier(apiKeyValidationInfoDTO.getApplicationTier());
+            jwtInfoDto.setKeytype(apiKeyValidationInfoDTO.getType());
+            jwtInfoDto.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
+            jwtInfoDto.setSubscriptionTier(apiKeyValidationInfoDTO.getTier());
+            jwtInfoDto.setApiName(apiKeyValidationInfoDTO.getApiName());
+            jwtInfoDto.setEndusertenantid(0);
+            jwtInfoDto.setApplicationuuid(apiKeyValidationInfoDTO.getApplicationUUID());
+            jwtInfoDto.setAppAttributes(apiKeyValidationInfoDTO.getAppAttributes());
+        } else if (subscribedAPI != null) {
+            // If the user is subscribed to the API
+            String apiName = subscribedAPI.getAsString(org.wso2.carbon.apimgt.impl.APIConstants.
+                    JwtTokenConstants.API_NAME);
+            jwtInfoDto.setApiName(apiName);
+            String subscriptionTier = subscribedAPI.getAsString(org.wso2.carbon.apimgt.impl.APIConstants.
+                    JwtTokenConstants.SUBSCRIPTION_TIER);
+            String subscriptionTenantDomain =
+                    subscribedAPI.getAsString(org.wso2.carbon.apimgt.impl.APIConstants.
+                            JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN);
+            jwtInfoDto.setSubscriptionTier(subscriptionTier);
+            jwtInfoDto.setEndusertenantid(0);
+
+            Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
+            if (claims.get(org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants.APPLICATION) != null) {
+                JSONObject
+                        applicationObj = (JSONObject) claims.get(org.wso2.carbon.apimgt.impl.APIConstants.
+                        JwtTokenConstants.APPLICATION);
+                jwtInfoDto.setApplicationid(
+                        String.valueOf(applicationObj.getAsNumber(org.wso2.carbon.apimgt.impl.APIConstants.
+                                JwtTokenConstants.APPLICATION_ID)));
+                jwtInfoDto
+                        .setApplicationname(applicationObj.getAsString(org.wso2.carbon.apimgt.impl.APIConstants.
+                                JwtTokenConstants.APPLICATION_NAME));
+                jwtInfoDto
+                        .setApplicationtier(applicationObj.getAsString(org.wso2.carbon.apimgt.impl.APIConstants.
+                                JwtTokenConstants.APPLICATION_TIER));
+                jwtInfoDto.setSubscriber(applicationObj.getAsString(org.wso2.carbon.apimgt.impl.APIConstants.
+                        JwtTokenConstants.APPLICATION_OWNER));
+            }
+        }
     }
 
     /**
