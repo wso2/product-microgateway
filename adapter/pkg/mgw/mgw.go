@@ -25,6 +25,7 @@ import (
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	apiservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/api"
 	configservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/config"
+	keymanagerservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/keyManagerConfig"
 	subscriptionservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/subscription"
 	"github.com/wso2/micro-gw/pkg/api/restserver"
 	cb "github.com/wso2/micro-gw/pkg/mgw/xdscallbacks"
@@ -42,7 +43,6 @@ import (
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/messaging"
-	"github.com/wso2/micro-gw/pkg/subscription"
 	"github.com/wso2/micro-gw/pkg/synchronizer"
 	"github.com/wso2/micro-gw/pkg/xds"
 	"google.golang.org/grpc"
@@ -79,7 +79,8 @@ const grpcMaxConcurrentStreams = 1000000
 
 func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, enforcerSdsServer xdsv3.Server,
 	enforcerAppDsSrv xdsv3.Server, enforcerAPIDsSrv xdsv3.Server, enforcerAppPolicyDsSrv xdsv3.Server,
-	enforcerSubPolicyDsSrv xdsv3.Server, enforcerAppKeyMappingDsSrv xdsv3.Server, port uint) {
+	enforcerSubPolicyDsSrv xdsv3.Server, enforcerAppKeyMappingDsSrv xdsv3.Server,
+	enforcerKeyManagerDsSrv xdsv3.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
 
@@ -106,16 +107,20 @@ func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, enfor
 		logger.LoggerMgw.Fatal("failed to listen: ", err)
 	}
 
+	var kmserver keymanagerservice.KMDiscoveryServiceServer
+
 	// register services
 	discoveryv3.RegisterAggregatedDiscoveryServiceServer(grpcServer, server)
 	configservice.RegisterConfigDiscoveryServiceServer(grpcServer, enforcerServer)
-	apiservice.RegisterApiDiscoveryServiceServer(grpcServer, enforcerServer)
+	// apiservice.RegisterApiDiscoveryServiceServer(grpcServer, enforcerServer)
 	subscriptionservice.RegisterSubscriptionDiscoveryServiceServer(grpcServer, enforcerSdsServer)
 	subscriptionservice.RegisterApplicationDiscoveryServiceServer(grpcServer, enforcerAppDsSrv)
 	subscriptionservice.RegisterApiListDiscoveryServiceServer(grpcServer, enforcerAPIDsSrv)
 	subscriptionservice.RegisterApplicationPolicyDiscoveryServiceServer(grpcServer, enforcerAppPolicyDsSrv)
 	subscriptionservice.RegisterSubscriptionPolicyDiscoveryServiceServer(grpcServer, enforcerSubPolicyDsSrv)
 	subscriptionservice.RegisterApplicationKeyMappingDiscoveryServiceServer(grpcServer, enforcerAppKeyMappingDsSrv)
+	apiservice.RegisterApiDiscoveryServiceServer(grpcServer, enforcerServer)
+	keymanagerservice.RegisterKMDiscoveryServiceServer(grpcServer, kmserver)
 
 	logger.LoggerMgw.Info("port: ", port, " management server listening")
 	go func() {
@@ -153,18 +158,20 @@ func Run(conf *config.Config) {
 	enforcerApplicationPolicyCache := xds.GetEnforcerApplicationPolicyCache()
 	enforcerSubscriptionPolicyCache := xds.GetEnforcerSubscriptionPolicyCache()
 	enforcerApplicationKeyMappingCache := xds.GetEnforcerApplicationKeyMappingCache()
+	enforcerKeyManagerCache := xds.GetEnforcerKeyManagerCache()
 
 	srv := xdsv3.NewServer(ctx, cache, nil)
 	enforcerXdsSrv := xdsv3.NewServer(ctx, enforcerCache, &cb.Callbacks{})
 	enforcerSdsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionCache, &cb.Callbacks{})
 	enforcerAppDsSrv := xdsv3.NewServer(ctx, enforcerApplicationCache, &cb.Callbacks{})
 	enforcerAPIDsSrv := xdsv3.NewServer(ctx, enforcerAPICache, &cb.Callbacks{})
+	enforcerKeyManagerDsSrv := xdsv3.NewServer(ctx, enforcerKeyManagerCache, &cb.Callbacks{})
 	enforcerAppPolicyDsSrv := xdsv3.NewServer(ctx, enforcerApplicationPolicyCache, &cb.Callbacks{})
 	enforcerSubPolicyDsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionPolicyCache, &cb.Callbacks{})
 	enforcerAppKeyMappingDsSrv := xdsv3.NewServer(ctx, enforcerApplicationKeyMappingCache, &cb.Callbacks{})
 
 	runManagementServer(srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
-		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, port)
+		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, enforcerKeyManagerDsSrv, port)
 
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
@@ -174,9 +181,10 @@ func Run(conf *config.Config) {
 	enableEventHub := conf.ControlPlane.EventHub.Enabled
 	if enableEventHub {
 		// Load subscription data
-		subscription.LoadSubscriptionData(conf)
+		// subscription.LoadSubscriptionData(conf)
 		// Fetch APIs from control plane
-		fetchAPIsOnStartUp(conf)
+		// fetchAPIsOnStartUp(conf)
+		synchronizer.FetchKeyManagersOnStartUp(conf)
 		go messaging.ProcessEvents(conf)
 	}
 OUTER:

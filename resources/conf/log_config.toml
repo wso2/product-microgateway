@@ -17,6 +17,10 @@ name = "github.com/wso2/micro-gw/pkg/mgw"
 logLevel = "INFO"
 
 [[pkg]]
+name = "github.com/wso2/micro-gw/pkg/mgw/xdscallbacks"
+logLevel = "DEBG"
+
+[[pkg]]
 name = "github.com/wso2/micro-gw/pkg/oasparser"
 logLevel = "INFO"
 

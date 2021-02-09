@@ -36,6 +36,8 @@ public class Constants {
             "type.googleapis.com/wso2.discovery.subscription.SubscriptionPolicyList";
     public static final String APPLICATION_KEY_MAPPING_LIST_TYPE_URL =
             "type.googleapis.com/wso2.discovery.subscription.ApplicationKeyMappingList";
+    public static final String KEY_MANAGER_TYPE_URL =
+            "type.googleapis.com/wso2.discovery.keyManagerConfig.KeyManagerConfig";
     public static final int MAX_XDS_RETRIES = 3;
 
     // Config constants

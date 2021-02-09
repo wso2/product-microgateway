@@ -34,6 +34,7 @@ import (
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/wso2/discovery/api"
 	"github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer"
+	"github.com/envoyproxy/go-control-plane/wso2/discovery/keyManagerConfig"
 	"github.com/envoyproxy/go-control-plane/wso2/discovery/subscription"
 	openAPI3 "github.com/getkin/kin-openapi/openapi3"
 	openAPI2 "github.com/go-openapi/spec"
@@ -57,6 +58,7 @@ var (
 	enforcerApplicationPolicyCache     cachev3.SnapshotCache
 	enforcerSubscriptionPolicyCache    cachev3.SnapshotCache
 	enforcerApplicationKeyMappingCache cachev3.SnapshotCache
+	enforcerKeyManagerCache            cachev3.SnapshotCache
 	// OpenAPI Name:Version -> openAPI3 struct map
 	openAPIV3Map map[string]openAPI3.Swagger
 	// OpenAPI Name:Version -> openAPI2 struct map
@@ -81,6 +83,9 @@ var (
 	// Enforcer XDS resource version map
 	enforcerCacheVersionMap map[string]int64
 
+	// Enforcer KeyManager XDS resource version map
+	enforcerCacheKeyManagerVersionMap map[string]int64
+
 	// Enforcer Subscription related resource version maps
 	enforcerSubscriptionCacheVersionMap          map[string]int64
 	enforcerApplicationCacheVersionMap           map[string]int64
@@ -93,6 +98,7 @@ var (
 	enforcerAPIVersionMap map[string]int64
 	enforcerApisMap       map[string][]types.Resource
 	enforcerConfigMap     map[string][]types.Resource
+	enforcerKeyManagerMap map[string][]types.Resource
 
 	enforcerSubscriptionMap          map[string][]types.Resource
 	enforcerApplicationMap           map[string][]types.Resource
@@ -124,6 +130,7 @@ func init() {
 	enforcerApplicationPolicyCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerSubscriptionPolicyCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerApplicationKeyMappingCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerKeyManagerCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
 	openAPIV3Map = make(map[string]openAPI3.Swagger)
 	openAPIV2Map = make(map[string]openAPI2.Swagger)
 	webSocketAPIMap = make(map[string]mgw.MgwSwagger)
@@ -145,6 +152,9 @@ func init() {
 	enforcerApplicationPolicyCacheVersionMap = make(map[string]int64)
 	enforcerSubscriptionPolicyCacheVersionMap = make(map[string]int64)
 	enforcerApplicationKeyMappingCacheVersionMap = make(map[string]int64)
+	enforcerCacheKeyManagerVersionMap = make(map[string]int64)
+
+	enforcerKeyManagerMap = make(map[string][]types.Resource)
 	enforcerApisMap = make(map[string][]types.Resource)
 	enforcerSubscriptionMap = make(map[string][]types.Resource)
 	enforcerApplicationMap = make(map[string][]types.Resource)
@@ -192,6 +202,11 @@ func GetEnforcerSubscriptionPolicyCache() cachev3.SnapshotCache {
 // GetEnforcerApplicationKeyMappingCache returns xds server cache.
 func GetEnforcerApplicationKeyMappingCache() cachev3.SnapshotCache {
 	return enforcerApplicationKeyMappingCache
+}
+
+// GetEnforcerKeyManagerCache returns xds server cache.
+func GetEnforcerKeyManagerCache() cachev3.SnapshotCache {
+	return enforcerKeyManagerCache
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
@@ -421,7 +436,7 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	}
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	// Will be updated once decide to move to incremental XDS
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 	err := cache.SetSnapshot(label, snap)
 	if err != nil {
@@ -446,7 +461,7 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 	apis := enforcerApisMap[label]
 
 	snap := cachev3.NewSnapshot(
-		fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis, nil, nil, nil, nil, nil, nil)
+		fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerCache.SetSnapshot(label, snap)
@@ -474,7 +489,7 @@ func UpdateEnforcerApis(api *api.Api) {
 	configs := enforcerConfigMap[label]
 
 	snap := cachev3.NewSnapshot(
-		fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis, nil, nil, nil, nil, nil, nil)
+		fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerCache.SetSnapshot(label, snap)
@@ -560,6 +575,24 @@ func GenerateAPIList(apiList *resourceTypes.APIList) *subscription.APIList {
 	}
 }
 
+// GenerateKeyManager converts the data into KeyManager proto type
+func GenerateKeyManager(keyManager *resourceTypes.Keymanager) *keyManagerConfig.KeyManagerConfig {
+	/*for key, element := range keyManager.Configuration {
+		fmt.Println("Key:", key, "=>", "Element:", element)
+		ss := &wrapperspb.BoolValue{Value: true}
+		value, _ := ptypes.MarshalAny(ss)
+		config[key] = value
+	}*/
+	newKeyManager := &keyManagerConfig.KeyManagerConfig{
+		Name:          keyManager.Name,
+		Type:          keyManager.Type,
+		Enabled:       keyManager.Enabled,
+		TenantDomain:  keyManager.TenantDomain,
+		Configuration: nil,
+	}
+	return newKeyManager
+}
+
 // GenerateApplicationPolicyList converts the data into ApplicationPolicyList proto type
 func GenerateApplicationPolicyList(appPolicyList *resourceTypes.ApplicationPolicyList) *subscription.ApplicationPolicyList {
 	applicationPolicies := []*subscription.ApplicationPolicy{}
@@ -628,6 +661,33 @@ func GenerateApplicationKeyMappingList(keyMappingList *resourceTypes.Application
 	}
 }
 
+// UpdateEnforcerKeyManagers Sets new update to the enforcer's configuration
+func UpdateEnforcerKeyManagers(keyManagerConfig *keyManagerConfig.KeyManagerConfig) {
+	// TODO: handle labels
+	label := "enforcer"
+	keyManagerList := enforcerKeyManagerMap[label]
+	keyManagerList = append(keyManagerList, keyManagerConfig)
+	version, ok := enforcerCacheKeyManagerVersionMap[label]
+	if ok {
+		version++
+	} else {
+		version = 1
+	}
+
+	snap := cachev3.NewSnapshot(
+		fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, keyManagerList)
+	snap.Consistent()
+
+	err := enforcerCache.SetSnapshot(label, snap)
+	if err != nil {
+		logger.LoggerXds.Error(err)
+	}
+
+	enforcerCacheKeyManagerVersionMap[label] = version
+	enforcerKeyManagerMap[label] = keyManagerList
+	logger.LoggerXds.Infof("New keymanager cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
 // UpdateEnforcerSubscriptions sets new update to the enforcer's Subscriptions
 func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 	//TODO: (Dinusha) check this hardcoded value
@@ -644,7 +704,7 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 		version = 1
 	}
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, subscriptionList, nil, nil, nil, nil, nil)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, subscriptionList, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerSubscriptionCache.SetSnapshot(label, snap)
@@ -671,7 +731,7 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 		version = 1
 	}
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationList, nil, nil, nil, nil)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationList, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationCache.SetSnapshot(label, snap)
@@ -698,7 +758,7 @@ func UpdateEnforcerAPIList(apis *subscription.APIList) {
 		version = 1
 	}
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, apiList, nil, nil, nil)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, apiList, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerAPICache.SetSnapshot(label, snap)
@@ -725,7 +785,7 @@ func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 		version = 1
 	}
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationPolicyList, nil, nil)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationPolicyList, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationPolicyCache.SetSnapshot(label, snap)
@@ -752,7 +812,7 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 		version = 1
 	}
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, subscriptionPolicyList, nil)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, subscriptionPolicyList, nil, nil)
 	snap.Consistent()
 
 	err := enforcerSubscriptionPolicyCache.SetSnapshot(label, snap)
@@ -779,7 +839,7 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 		version = 1
 	}
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationKeyMappingList)
+	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationKeyMappingList, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationKeyMappingCache.SetSnapshot(label, snap)

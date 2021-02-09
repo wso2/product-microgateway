@@ -21,22 +21,45 @@ package messaging
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/streadway/amqp"
 	logger "github.com/wso2/micro-gw/loggers"
+	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
 )
 
-const keyManagerConfig = "key_manager_configuration"
+const (
+	keyManagerConfigEvent = "key_manager_configuration"
+	actionAdd             = "add"
+	actionUpdate          = "update"
+	actionDelete          = "delete"
+)
+
+// KeyManagerList to store data
+var KeyManagerList = make([]resourceTypes.Keymanager, 0)
 
 // handleKMEvent
 func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
-
+	var (
+		indexOfKeymanager int
+		isFound           bool
+	)
 	for d := range deliveries {
 		var notification EventKeyManagerNotification
-		var keyManagerEvent KeyManagerEvent
+		// var keyManagerConfig resourceTypes.KeymanagerConfig
+		var keyManagerConfig map[string]interface{}
+
 		// var eventType string
 		json.Unmarshal([]byte(string(d.Body)), &notification)
+
+		for i := range KeyManagerList {
+			if strings.EqualFold(notification.Event.PayloadData.Name, KeyManagerList[i].Name) {
+				isFound = true
+				indexOfKeymanager = i
+				break
+			}
+		}
 
 		var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Value)
 		if err != nil {
@@ -45,11 +68,28 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 			}
 			panic(err)
 		}
-		if strings.EqualFold(keyManagerConfig, notification.Event.PayloadData.EventType) {
+		if strings.EqualFold(keyManagerConfigEvent, notification.Event.PayloadData.EventType) {
+			if isFound || strings.EqualFold(actionDelete, notification.Event.PayloadData.Action) {
+				logger.LoggerMsg.Infof("Found KM %s to be deleted index %d", notification.Event.PayloadData.Name,
+					indexOfKeymanager)
+				// deleteKeyManagerFromList(indexOfKeymanager)
+			}
 			if decodedByte != nil {
-				json.Unmarshal([]byte(string(decodedByte)), &keyManagerEvent)
-				logger.LoggerMsg.Infof("EventType: %s, Action: %s ",
-					notification.Event.PayloadData.EventType, notification.Event.PayloadData.Action)
+				logger.LoggerMsg.Infof("decoded stream %s", string(decodedByte))
+				json.Unmarshal([]byte(string(decodedByte)), &keyManagerConfig)
+
+				if strings.EqualFold(actionAdd, notification.Event.PayloadData.Action) ||
+					strings.EqualFold(actionUpdate, notification.Event.PayloadData.Action) {
+					keyManager := resourceTypes.Keymanager{Name: notification.Event.PayloadData.Name,
+						Type: notification.Event.PayloadData.Type, Enabled: notification.Event.PayloadData.Enabled,
+						TenantDomain: notification.Event.PayloadData.TenantDomain, Configuration: keyManagerConfig}
+					logger.LoggerMsg.Infof("data %v", keyManager.Configuration)
+
+					for key, value := range keyManager.Configuration {
+						fmt.Printf("configs: - [%s] = %s\n", key, value)
+					}
+					KeyManagerList = append(KeyManagerList, keyManager)
+				}
 			}
 		}
 		d.Ack(false)
@@ -57,3 +97,12 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 	logger.LoggerMsg.Info("handle: deliveries channel closed")
 	done <- nil
 }
+
+// // deleteKeyManagerFromList
+// func deleteKeyManagerFromList(index int) {
+// 	var KeyManagerNewList = make([]resourceTypes.Keymanager, 0)
+// 	KeyManagerNewList = append(KeyManagerList[:index], KeyManagerList[index+1:]...)
+// 	KeyManagerList = KeyManagerNewList
+// 	logger.LoggerMsg.Infof("Current KeyManagers", KeyManagerList)
+// 	logger.LoggerMsg.Infof("KeyManager %s is deleted from KeyManagerList", KeyManagerList[index].Name)
+// }
