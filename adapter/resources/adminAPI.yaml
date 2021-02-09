@@ -1,11 +1,13 @@
 ---
     swagger: "2.0"
+######################################################
+# Prolog
+######################################################
     info:
-      description: "This document specifies a **RESTful API** for WSO2 **API Manager**\
-        \ - Admin Portal.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.5.176/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml)\
-        \ of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n"
+      description: |
+        This document specifies a **RESTful API** for WSO2 **API Microgateway** - Adapter.
       version: "v1.2"
-      title: "WSO2 API Manager - Admin"
+      title: "WSO2 API Microgateway - Adapter"
       contact:
         name: "WSO2"
         url: "http://wso2.com/products/api-manager/"
@@ -13,16 +15,38 @@
       license:
         name: "Apache 2.0"
         url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+######################################################
+# The fixed parts of the URLs of the API
+######################################################
+
+    # The domain of the API.
+    # This is configured by the customer during deployment.
+    # The given host is just an example.
     host: "apis.wso2.com"
+
+    # The base path of the API.
+    # Will be prefixed to all paths.
     basePath: "/api/mgw/adapter/0.1"
     schemes:
     - "https"
     consumes:
     - "application/json"
+    - "multipart/form-data"
     produces:
     - "application/json"
+    securityDefinitions:
+      BasicAuth:     # <-- arbitrary name for the security scheme
+        type: "basic"
+
+######################################################
+# The Microgateway Adapter resource APIs
+######################################################
     paths:
       /apis:
+        #-----------------------------------------------------
+        # Deploy or update an API in the Microgateway
+        #-----------------------------------------------------
         post:
           tags:
           - "API (Individual)"
@@ -54,34 +78,137 @@
             x-exportParamName: "Overwrite"
             x-optionalDataType: "Bool"
           responses:
-            "200":
-              description: "Created.\nAPI Imported Successfully.\n"
-            "403":
-              description: "Forbidden\nNot Authorized to import.\n"
+            200:
+              description: |
+                Successful.
+                API deployed or updated Successfully.
+            403:
+              description: |
+                Forbidden.
+                Not Authorized to deploy or update.
               schema:
                 $ref: "#/definitions/Error"
-            "404":
-              description: "Not Found.\nRequested API to update not found.\n"
+            404:
+              description: |
+                Not Found. 
+                Requested API to update not found (when overwrite parameter is included).
               schema:
                 $ref: "#/definitions/Error"
-            "409":
-              description: "Conflict.\nAPI to import already exists.\n"
+            409:
+              description: |
+                Conflict.
+                API to import already exists (when overwrite parameter is not included).
               schema:
                 $ref: "#/definitions/Error"
-            "500":
-              description: "Internal Server Error.\nError in importing API.\n"
+            500:
+              description: Internal Server Error.
               schema:
                 $ref: "#/definitions/Error"
           security:
           - BasicAuth: []
           x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization:\
-            \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v1/import/api?preserveProvider=false&overwrite=false"
-          x-wso2-request: "POST https://localhost:9443/api/am/admin/v1/import/apis\nAuthorization:\
+            \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false&overwrite=true"
+          x-wso2-request: "POST https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization:\
             \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n"
           x-wso2-response: "HTTP/1.1 200 OK\nAPI imported successfully."
-    securityDefinitions:
-      BasicAuth:     # <-- arbitrary name for the security scheme
-        type: "basic"
+        #-----------------------------------------------------
+        # List APIs
+        #-----------------------------------------------------
+        get:
+          tags: 
+            - API (Collection)
+          summary: Get a list of API metadata
+          description: |
+            This operation can be used to retrieve meta info about all APIs
+          parameters:
+            - name : apiType
+              in: query
+              description: |
+                Optional - Condition to filter APIs. Currently only filtering 
+                by API type (HTTP or WebSocket) is supported.
+                "http" for HTTP type
+                "ws" for WebSocket type
+              type: string
+          responses:
+            200:
+              description: An array of API Metadata
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/APIMeta'
+            default:
+              description: Unexpected error
+              schema:
+                $ref: '#/definitions/Error'
+          security:
+          - BasicAuth: []
+          x-wso2-curl: |
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
+            -X GET "https://127.0.0.1:9443/api/mgw/adapter/0.1/apis"
+          x-wso2-request: |
+            GET https://127.0.0.1:9443/api/mgw/adapter/0.1/apis?apiType=http
+            Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+          x-wso2-response: "HTTP/1.1 200 OK"
+
+      /apis/delete:
+        #-----------------------------------------------------
+        # Undeploy/Delete an API from the Microgateway
+        #-----------------------------------------------------
+        post:
+          tags: 
+            - API (Individual)
+          summary: Delete deployed API
+          description: |
+            This operation can be used to delete a API that was deployed
+          parameters:
+            - name: apiName
+              description: |
+                Name of the API
+              in: query
+              type: string
+              required: true
+            - name: version
+              description: |
+                version of the API
+              in: query
+              type: string
+              required: true
+            - name: vhost
+              description: |
+                Virtual Host of the API
+              in: query
+              type: string
+              required: true
+          responses:
+            200:
+              description: |
+                OK.
+                API successfully undeployed from the Microgateway.
+              schema:
+                $ref: '#/definitions/DeployResponse'
+            400:
+              description: |
+                Bad Request.
+                Invalid request or validation error
+              schema:
+                $ref: '#/definitions/Error'
+            404:
+              description: |
+                Not Found.
+                Requested API does not exist.
+              schema:
+                $ref: '#/definitions/Error'
+          security:
+          - BasicAuth: []
+          x-wso2-curl: |
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
+            -d '{"apiName":"petstore", "version":"1.1", "vhost":"pets"}'
+            -X POST "https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete"
+          x-wso2-request: |
+            POST https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete
+            Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+            {"apiName":"petstore", "version":"1.1", "vhost":"pets"}
+          x-wso2-response: "HTTP/1.1 200 OK"
     definitions:
       Error:
         required:
