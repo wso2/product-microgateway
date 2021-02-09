@@ -33,6 +33,7 @@ import (
 	apiServer "github.com/wso2/micro-gw/pkg/api"
 	"github.com/wso2/micro-gw/pkg/api/models"
 	"github.com/wso2/micro-gw/pkg/api/restserver/operations"
+	"github.com/wso2/micro-gw/pkg/api/restserver/operations/api_collection"
 	"github.com/wso2/micro-gw/pkg/api/restserver/operations/api_individual"
 	"github.com/wso2/micro-gw/pkg/tlsutils"
 )
@@ -78,6 +79,9 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		return &p, nil
 	}
 
+	api.APICollectionGetApisHandler = api_collection.GetApisHandlerFunc(func(params api_collection.GetApisParams, principal *models.Principal) middleware.Responder {
+		return middleware.NotImplemented("operation api_collection.GetApis has not yet been implemented")
+	})
 	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(params api_individual.PostApisParams,
 		principal *models.Principal) middleware.Responder {
 		// TODO: (VirajSalaka) Error is not handled in the response.
@@ -87,6 +91,9 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 			return api_individual.NewPostApisInternalServerError()
 		}
 		return api_individual.NewPostApisOK()
+	})
+	api.APIIndividualPostApisDeleteHandler = api_individual.PostApisDeleteHandlerFunc(func(params api_individual.PostApisDeleteParams, principal *models.Principal) middleware.Responder {
+		return middleware.NotImplemented("operation api_individual.PostApisDelete has not yet been implemented")
 	})
 
 	api.PreServerShutdown = func() {}

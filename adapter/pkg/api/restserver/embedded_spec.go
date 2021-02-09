@@ -34,7 +34,8 @@ var (
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
   "consumes": [
-    "application/json"
+    "application/json",
+    "multipart/form-data"
   ],
   "produces": [
     "application/json"
@@ -44,8 +45,8 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Admin Portal.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.5.176/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
-    "title": "WSO2 API Manager - Admin",
+    "description": "This document specifies a **RESTful API** for WSO2 **API Microgateway** - Adapter.\n",
+    "title": "WSO2 API Microgateway - Adapter",
     "contact": {
       "name": "WSO2",
       "url": "http://wso2.com/products/api-manager/",
@@ -61,6 +62,46 @@ func init() {
   "basePath": "/api/mgw/adapter/0.1",
   "paths": {
     "/apis": {
+      "get": {
+        "security": [
+          {
+            "BasicAuth": []
+          }
+        ],
+        "description": "This operation can be used to retrieve meta info about all APIs\n",
+        "tags": [
+          "API (Collection)"
+        ],
+        "summary": "Get a list of API metadata",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Optional - Condition to filter APIs. Currently only filtering \nby API type (HTTP or WebSocket) is supported.\n\"http\" for HTTP type\n\"ws\" for WebSocket type\n",
+            "name": "apiType",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of API Metadata",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/APIMeta"
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \n-X GET \"https://127.0.0.1:9443/api/mgw/adapter/0.1/apis\"\n",
+        "x-wso2-request": "GET https://127.0.0.1:9443/api/mgw/adapter/0.1/apis?apiType=http\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK"
+      },
       "post": {
         "security": [
           {
@@ -103,40 +144,134 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Created.\nAPI Imported Successfully.\n"
+            "description": "Successful.\nAPI deployed or updated Successfully.\n",
+            "schema": {
+              "$ref": "#/definitions/DeployResponse"
+            }
           },
           "403": {
-            "description": "Forbidden\nNot Authorized to import.\n",
+            "description": "Forbidden.\nNot Authorized to deploy or update.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
           "404": {
-            "description": "Not Found.\nRequested API to update not found.\n",
+            "description": "Not Found. \nRequested API to update not found (when overwrite parameter is included).\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
           "409": {
-            "description": "Conflict.\nAPI to import already exists.\n",
+            "description": "Conflict.\nAPI to import already exists (when overwrite parameter is not included).\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
           "500": {
-            "description": "Internal Server Error.\nError in importing API.\n",
+            "description": "Internal Server Error.",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           }
         },
-        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v1/import/api?preserveProvider=false\u0026overwrite=false",
-        "x-wso2-request": "POST https://localhost:9443/api/am/admin/v1/import/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false\u0026overwrite=true",
+        "x-wso2-request": "POST https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK\nAPI imported successfully."
+      }
+    },
+    "/apis/delete": {
+      "post": {
+        "security": [
+          {
+            "BasicAuth": []
+          }
+        ],
+        "description": "This operation can be used to delete a API that was deployed\n",
+        "tags": [
+          "API (Individual)"
+        ],
+        "summary": "Delete deployed API",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Name of the API\n",
+            "name": "apiName",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "version of the API\n",
+            "name": "version",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Virtual Host of the API\n",
+            "name": "vhost",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nAPI successfully undeployed from the Microgateway.\n",
+            "schema": {
+              "$ref": "#/definitions/DeployResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \n-d '{\"apiName\":\"petstore\", \"version\":\"1.1\", \"vhost\":\"pets\"}'\n-X POST \"https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete\"\n",
+        "x-wso2-request": "POST https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n{\"apiName\":\"petstore\", \"version\":\"1.1\", \"vhost\":\"pets\"}\n",
+        "x-wso2-response": "HTTP/1.1 200 OK"
       }
     }
   },
   "definitions": {
+    "APIMeta": {
+      "type": "object",
+      "properties": {
+        "apiName": {
+          "type": "string"
+        },
+        "apiType": {
+          "type": "string"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "DeployResponse": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "info": {
+          "type": "string"
+        }
+      }
+    },
     "Error": {
       "title": "Error object returned with 4XX HTTP status",
       "required": [
@@ -210,7 +345,8 @@ func init() {
 }`))
 	FlatSwaggerJSON = json.RawMessage([]byte(`{
   "consumes": [
-    "application/json"
+    "application/json",
+    "multipart/form-data"
   ],
   "produces": [
     "application/json"
@@ -220,8 +356,8 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Admin Portal.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.5.176/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
-    "title": "WSO2 API Manager - Admin",
+    "description": "This document specifies a **RESTful API** for WSO2 **API Microgateway** - Adapter.\n",
+    "title": "WSO2 API Microgateway - Adapter",
     "contact": {
       "name": "WSO2",
       "url": "http://wso2.com/products/api-manager/",
@@ -237,6 +373,46 @@ func init() {
   "basePath": "/api/mgw/adapter/0.1",
   "paths": {
     "/apis": {
+      "get": {
+        "security": [
+          {
+            "BasicAuth": []
+          }
+        ],
+        "description": "This operation can be used to retrieve meta info about all APIs\n",
+        "tags": [
+          "API (Collection)"
+        ],
+        "summary": "Get a list of API metadata",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Optional - Condition to filter APIs. Currently only filtering \nby API type (HTTP or WebSocket) is supported.\n\"http\" for HTTP type\n\"ws\" for WebSocket type\n",
+            "name": "apiType",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of API Metadata",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/APIMeta"
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \n-X GET \"https://127.0.0.1:9443/api/mgw/adapter/0.1/apis\"\n",
+        "x-wso2-request": "GET https://127.0.0.1:9443/api/mgw/adapter/0.1/apis?apiType=http\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK"
+      },
       "post": {
         "security": [
           {
@@ -279,40 +455,134 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Created.\nAPI Imported Successfully.\n"
+            "description": "Successful.\nAPI deployed or updated Successfully.\n",
+            "schema": {
+              "$ref": "#/definitions/DeployResponse"
+            }
           },
           "403": {
-            "description": "Forbidden\nNot Authorized to import.\n",
+            "description": "Forbidden.\nNot Authorized to deploy or update.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
           "404": {
-            "description": "Not Found.\nRequested API to update not found.\n",
+            "description": "Not Found. \nRequested API to update not found (when overwrite parameter is included).\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
           "409": {
-            "description": "Conflict.\nAPI to import already exists.\n",
+            "description": "Conflict.\nAPI to import already exists (when overwrite parameter is not included).\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
           "500": {
-            "description": "Internal Server Error.\nError in importing API.\n",
+            "description": "Internal Server Error.",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           }
         },
-        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v1/import/api?preserveProvider=false\u0026overwrite=false",
-        "x-wso2-request": "POST https://localhost:9443/api/am/admin/v1/import/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false\u0026overwrite=true",
+        "x-wso2-request": "POST https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK\nAPI imported successfully."
+      }
+    },
+    "/apis/delete": {
+      "post": {
+        "security": [
+          {
+            "BasicAuth": []
+          }
+        ],
+        "description": "This operation can be used to delete a API that was deployed\n",
+        "tags": [
+          "API (Individual)"
+        ],
+        "summary": "Delete deployed API",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Name of the API\n",
+            "name": "apiName",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "version of the API\n",
+            "name": "version",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Virtual Host of the API\n",
+            "name": "vhost",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nAPI successfully undeployed from the Microgateway.\n",
+            "schema": {
+              "$ref": "#/definitions/DeployResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \n-d '{\"apiName\":\"petstore\", \"version\":\"1.1\", \"vhost\":\"pets\"}'\n-X POST \"https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete\"\n",
+        "x-wso2-request": "POST https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n{\"apiName\":\"petstore\", \"version\":\"1.1\", \"vhost\":\"pets\"}\n",
+        "x-wso2-response": "HTTP/1.1 200 OK"
       }
     }
   },
   "definitions": {
+    "APIMeta": {
+      "type": "object",
+      "properties": {
+        "apiName": {
+          "type": "string"
+        },
+        "apiType": {
+          "type": "string"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "DeployResponse": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "info": {
+          "type": "string"
+        }
+      }
+    },
     "Error": {
       "title": "Error object returned with 4XX HTTP status",
       "required": [
