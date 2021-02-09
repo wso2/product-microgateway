@@ -124,7 +124,7 @@ type Config struct {
 		EventHub        eventHub
 		ApimCredentials apimCredentials
 		AuthService     authService
-		JwtGenerator  jwtGeneratorConfig
+		JwtGenerator    jwtGenerator
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
