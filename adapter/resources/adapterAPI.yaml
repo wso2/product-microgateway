@@ -82,6 +82,8 @@
               description: |
                 Successful.
                 API deployed or updated Successfully.
+              schema:
+                $ref: '#/definitions/DeployResponse'
             403:
               description: |
                 Forbidden.
@@ -256,4 +258,25 @@
             type: string
           token:
             type: string
+      APIMeta:
+        type: object
+        properties:
+          apiName:
+            type: string
+          version:
+            type: string
+          apiType: 
+            type: string
+          labels:
+            type: array
+            items:
+              type: string
+      DeployResponse:
+        type: object
+        properties:
+          action:
+            type: string
+          info:
+            type: string
+
       
