@@ -8,6 +8,7 @@ import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.cors.CorsFilter;
 import org.wso2.micro.gateway.enforcer.security.AuthFilter;
+import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,27 +46,29 @@ public class WebSocketAPI implements API <Context, Context>{
             return context;
         }else {
             logger.info("websocket api process"+ context.toString());
-            ResponseObject responseObject = new ResponseObject();
+            WebSocketAuthResponse webSocketAuthResponse = new WebSocketAuthResponse();
             if(executeFilterChain(context)){
-                responseObject.setStatusCode(200);
+                AuthenticationContext authenticationContext = ((RequestContext)context).getAuthenticationContext();
+                webSocketAuthResponse.setWebSocketMetadataContext(authenticationContext, apiConfig);
+                webSocketAuthResponse.setStatusCode(200);
                 if (((RequestContext)context).getResponseHeaders() != null) {
-                    responseObject.setHeaderMap(((RequestContext)context).getResponseHeaders());
+                    webSocketAuthResponse.setHeaderMap(((RequestContext)context).getResponseHeaders());
                 }
             } else {
-                responseObject.setDirectResponse(true);
-                responseObject.setStatusCode(Integer.parseInt(((RequestContext)context).getProperties().get("code").toString()));
+                webSocketAuthResponse.setDirectResponse(true);
+                webSocketAuthResponse.setStatusCode(Integer.parseInt(((RequestContext)context).getProperties().get("code").toString()));
                 if (((RequestContext)context).getProperties().get("error_code") != null) {
-                    responseObject.setErrorCode(((RequestContext)context).getProperties().get("error_code").toString());
+                    webSocketAuthResponse.setErrorCode(((RequestContext)context).getProperties().get("error_code").toString());
                 }
                 if (((RequestContext)context).getProperties().get("error_code") != null) {
-                    responseObject.setErrorDescription(((RequestContext)context).getProperties()
+                    webSocketAuthResponse.setErrorDescription(((RequestContext)context).getProperties()
                             .get("error_description").toString());
                 }
                 if (((RequestContext)context).getResponseHeaders() != null && ((RequestContext)context).getResponseHeaders().size() > 0) {
-                    responseObject.setHeaderMap(((RequestContext)context).getResponseHeaders());
+                    webSocketAuthResponse.setHeaderMap(((RequestContext)context).getResponseHeaders());
                 }
             }
-            return responseObject;
+            return webSocketAuthResponse;
         }
     }
 

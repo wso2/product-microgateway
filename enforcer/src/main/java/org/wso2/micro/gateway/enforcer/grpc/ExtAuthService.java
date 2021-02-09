@@ -31,6 +31,7 @@ import io.envoyproxy.envoy.type.v3.HttpStatus;
 import io.grpc.stub.StreamObserver;
 import org.json.JSONObject;
 import org.wso2.micro.gateway.enforcer.api.ResponseObject;
+import org.wso2.micro.gateway.enforcer.api.WebSocketAuthResponse;
 import org.wso2.micro.gateway.enforcer.constants.HttpConstants;
 import org.wso2.micro.gateway.enforcer.server.HttpRequestHandler;
 
@@ -95,6 +96,11 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                             okResponseBuilder.addHeaders(headerValueOption);
                         }
                 );
+            }
+            if (responseObject instanceof WebSocketAuthResponse){
+                return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
+                        .setOkResponse(okResponseBuilder.build())
+                        .setDynamicMetadata(((WebSocketAuthResponse) responseObject).getMetadataStruct()).build();
             }
             return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                     .setOkResponse(okResponseBuilder.build()).build();

@@ -19,6 +19,7 @@ package org.wso2.micro.gateway.enforcer.api;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
+import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +44,7 @@ public class RequestContext implements Context{
     private boolean clusterHeaderEnabled = false;
     //Denotes the specific headers which needs to be passed to response object
     private Map<String, String> responseHeaders;
+    private AuthenticationContext authenticationContext = new AuthenticationContext();
 
     private RequestContext() {
 
@@ -60,6 +62,7 @@ public class RequestContext implements Context{
         private String prodClusterHeader;
         private String sandClusterHeader;
         private Map<String, Object> properties = new HashMap();
+        private AuthenticationContext authenticationContext = new AuthenticationContext();
 
         public Builder(String requestPath) {
             this.requestPath = requestPath;
@@ -99,6 +102,11 @@ public class RequestContext implements Context{
             return this;
         }
 
+        public Builder authenticationContext(AuthenticationContext authenticationContext) {
+            this.authenticationContext = authenticationContext;
+            return this;
+        }
+
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
@@ -109,6 +117,7 @@ public class RequestContext implements Context{
             requestContext.prodClusterHeader = this.prodClusterHeader;
             requestContext.sandClusterHeader = this.sandClusterHeader;
             requestContext.properties = this.properties;
+            requestContext.authenticationContext = this.authenticationContext;
 
             // Adapter assigns header based routing only if both type of endpoints are present.
             if (!StringUtils.isEmpty(prodClusterHeader) && !StringUtils.isEmpty(sandClusterHeader)) {
@@ -140,6 +149,10 @@ public class RequestContext implements Context{
 
     public Map<String, Object> getProperties() {
         return properties;
+    }
+
+    public AuthenticationContext getAuthenticationContext() {
+        return authenticationContext;
     }
 
     /**
