@@ -79,7 +79,7 @@ disableSslVerification = false
     username="admin"
     password="admin"
 
-[enforcer.jwtGeneratorConfig]
+[enforcer.jwtGenerator]
     enable = true
     encoding = "base64" # base64,base64url
     #generator_impl = "org.wso2.carbon.apimgt.keymgt.token.JWTGenerator"
@@ -88,10 +88,10 @@ disableSslVerification = false
     header = "X-JWT-Assertion"
     signingAlgorithm = "SHA256withRSA"
     enableUserClaims = false
-    gatewayGeneratorImpl = "org.wso2.carbon.apimgt.gateway.common.jwtGenerator.APIMgtGatewayJWTGeneratorImpl"
-    claimsExtractorImpl = "BBB"
-    #gateway_generator.impl = "CustomGatewayJWTGenerator"
-    #claims_extractor_impl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
+    gatewayGeneratorImpl = "org.wso2.carbon.apimgt.gateway.common.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
+    claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
+    publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
+    privateKeyPath = "/home/wso2/security/keystore/mg.key"
 
 [controlPlane]
 # Control plane's eventHub details

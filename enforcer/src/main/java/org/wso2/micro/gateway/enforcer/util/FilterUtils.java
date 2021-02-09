@@ -39,7 +39,6 @@ import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
-import org.wso2.micro.gateway.enforcer.security.jwt.JWTValidationInfo;
 
 import java.security.KeyManagementException;
 import java.security.KeyStore;

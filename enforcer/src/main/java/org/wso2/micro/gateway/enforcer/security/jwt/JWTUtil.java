@@ -30,15 +30,33 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
+import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
+import org.wso2.micro.gateway.enforcer.security.jwt.validator.JWTConstants;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.KeyFactory;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 /**
@@ -47,6 +65,7 @@ import java.security.interfaces.RSAPublicKey;
 public class JWTUtil {
 
     private static final Logger log = LogManager.getLogger(JWTUtil.class);
+    private static volatile long ttl = -1L;
 
     /**
      * This method used to retrieve JWKS keys from endpoint
@@ -129,6 +148,118 @@ public class JWTUtil {
             log.debug("Couldn't find a public certificate to verify the signature");
             throw new MGWException("Couldn't find a public certificate to verify the signature");
         }
+    }
+
+    public static Certificate getCertificate() {
+        Certificate certificate = null;
+        try {
+            CertificateFactory fact = CertificateFactory.getInstance("X.509");
+            FileInputStream is = new FileInputStream(ConfigHolder.getInstance().getConfig().
+                    getPublicCertificatePath());
+            X509Certificate cert = (X509Certificate) fact.generateCertificate(is);
+            certificate = (Certificate) cert;
+            return certificate;
+        } catch (CertificateException | FileNotFoundException e) {
+            log.debug("Error in loading certificate");
+        }
+        return certificate;
+    }
+
+    public static PrivateKey getPrivateKey() {
+        PrivateKey privateKey = null;
+        try {
+            String strKeyPEM = "";
+            BufferedReader br = new BufferedReader(new FileReader(ConfigHolder.getInstance().getConfig().
+                    getPrivateKeyPath()));
+            String line;
+            while ((line = br.readLine()) != null) {
+                strKeyPEM += line + "\n";
+            }
+            br.close();
+            strKeyPEM = strKeyPEM.replace(Constants.BEGINING_OF_PRIVATE_KEY, "");
+            strKeyPEM = strKeyPEM.replaceAll(System.lineSeparator(), "");
+            strKeyPEM = strKeyPEM.replace(Constants.END_OF_PRIVATE_KEY, "");
+
+            byte[] encoded = Base64.getDecoder().decode(strKeyPEM);
+            KeyFactory kf = KeyFactory.getInstance(Constants.RSA);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
+            RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) kf.generatePrivate(keySpec);
+            privateKey = (PrivateKey) rsaPrivateKey;
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+            log.debug("Error obtaining private key", e);
+        }
+        return privateKey;
+    }
+
+    public static long getTTL() {
+        return ttl * 1000;
+    }
+
+    public static AbstractAPIMgtGatewayJWTGenerator getApiMgtGatewayJWTGenerator() {
+        JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().getJwtConfigurationDto();
+        String classNameInConfig = jwtConfigurationDto.getGatewayJWTGeneratorImpl();
+        AbstractAPIMgtGatewayJWTGenerator jwtGenerator = null;
+
+        // Load default jwt generator class
+        if (classNameInConfig.equals(JWTConstants.DEFAULT_JWT_GENERATOR_CLASS_NAME)) {
+            jwtGenerator = new APIMgtGatewayJWTGeneratorImpl();
+            return jwtGenerator;
+        } else {
+            // Load custom jwt generator class
+            // Get the names of jar files available in the location.
+            List<String> jarFilesList = getJarFilesList();
+
+            for (int fileIndex = 0; fileIndex < jarFilesList.size(); fileIndex++) {
+                try {
+                    String pathToJar = "/home/wso2/mg/droppings/" + jarFilesList.get(fileIndex);
+                    JarFile jarFile = new JarFile(pathToJar);
+                    Enumeration<JarEntry> e = jarFile.entries();
+
+                    URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
+                    URLClassLoader cl = URLClassLoader.newInstance(urls);
+
+                    while (e.hasMoreElements()) {
+                        JarEntry je = e.nextElement();
+                        if (je.isDirectory() || !je.getName().endsWith(".class")) {
+                            continue;
+                        }
+                        // -6 because of .class
+                        String className = je.getName().substring(0, je.getName().length() - 6);
+                        className = className.replace('/', '.');
+                        if (classNameInConfig.equals(className)) {
+                            Class classInJar = cl.loadClass(className);
+                            try {
+                                jwtGenerator = (AbstractAPIMgtGatewayJWTGenerator) classInJar.newInstance();
+                                return jwtGenerator;
+                            } catch (InstantiationException | IllegalAccessException exception) {
+                                log.debug("Error in generating an object from the class", exception);
+                            }
+                        }
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    log.debug("Error in loading class", e);
+
+                }
+
+            }
+
+        }
+        return jwtGenerator;
+    }
+
+    public static List<String> getJarFilesList() {
+        List<String> jarFilesList = new ArrayList<String>();
+        File[] files = new File("/home/wso2/mg/droppings").listFiles();
+        //If this pathname does not denote a directory, then listFiles() returns null.
+        for (File file : files) {
+            if (file.isFile()) {
+                String fileName = file.getName();
+                if (fileName.endsWith(".jar")) {
+                    jarFilesList.add(file.getName());
+                }
+            }
+        }
+        return jarFilesList;
     }
 
 }

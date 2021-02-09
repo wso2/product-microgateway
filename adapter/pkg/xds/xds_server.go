@@ -349,6 +349,8 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 	        EnableUserClaims:     config.Enforcer.JwtGenerator.EnableUserClaims,
 	        GatewayGeneratorImpl: config.Enforcer.JwtGenerator.GatewayGeneratorImpl,
 	        ClaimsExtractorImpl:  config.Enforcer.JwtGenerator.ClaimsExtractorImpl,
+	        PublicCertificatePath: config.Enforcer.JwtGenerator.PublicCertificatePath,
+	        PrivateKeyPath:         config.Enforcer.JwtGenerator.PrivateKeyPath,
 	    },
 		AuthService:    authService,
 		JwtTokenConfig: issuers,
@@ -465,7 +467,7 @@ func GenerateAPIList(apiList *resourceTypes.APIList) *subscription.APIList {
 
 	for _, api := range apiList.List {
 		newAPI := &subscription.APIs{
-			ApiId:            api.APIID,
+			ApiId:            fmt.Sprint(api.APIID),
 			Name:             api.Name,
 			Provider:         api.Provider,
 			Version:          api.Version,

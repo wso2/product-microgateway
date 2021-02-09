@@ -18,6 +18,9 @@
 
 package org.wso2.micro.gateway.enforcer.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerDataService;
 import org.wso2.micro.gateway.enforcer.security.KeyValidator;
 
 import java.util.Map;
@@ -27,9 +30,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * Reference holder instance to hold certain set of object instances used by the filter core.
  */
 public class ReferenceHolder {
+    private static final Logger log = LoggerFactory.getLogger(ReferenceHolder.class);
     private static final ReferenceHolder instance = new ReferenceHolder();
 
     private final Map<String, KeyValidator> keyValidationHandlerMap = new ConcurrentHashMap<>();
+
 
     private ReferenceHolder() {
     }

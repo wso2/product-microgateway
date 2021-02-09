@@ -37,6 +37,8 @@ public class EnforcerConfig {
     private Map<String, TokenIssuerDto> issuersMap = new HashMap<>();
     private CredentialDto apimCredentials;
     private JWTConfigurationDto jwtConfigurationDto;
+    private String publicCertificatePath = "";
+    private String privateKeyPath = "";
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -76,6 +78,22 @@ public class EnforcerConfig {
 
     public JWTConfigurationDto getJwtConfigurationDto() {
         return jwtConfigurationDto;
+    }
+
+    public void setPublicCertificatePath(String certPath) {
+        this.publicCertificatePath = certPath;
+    }
+
+    public String getPublicCertificatePath() {
+        return publicCertificatePath;
+    }
+
+    public void setPrivateKeyPath(String keyPath) {
+        this.privateKeyPath = keyPath;
+    }
+
+    public String getPrivateKeyPath() {
+        return privateKeyPath;
     }
 }
 
