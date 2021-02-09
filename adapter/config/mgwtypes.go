@@ -178,17 +178,17 @@ type eventHub struct {
 }
 
 type jwtGenerator struct {
-    Enable               bool     `toml:"enable"`
-    Encoding             string   `toml:"encoding"`
-    ClaimDialect         string   `toml:"claimDialect"`
-    ConvertDialect       bool     `toml:"convertDialect"`
-    Header               string   `toml:"header"`
-    SigningAlgorithm     string   `toml:"signingAlgorithm"`
-    EnableUserClaims     bool     `toml:"enableUserClaims"`
-    GatewayGeneratorImpl string   `toml:"gatewayGeneratorImpl"`
-    ClaimsExtractorImpl  string   `toml:"claimsExtractorImpl"`
-    PublicCertificatePath string
-    PrivateKeyPath        string
+	Enable                bool   `toml:"enable"`
+	Encoding              string `toml:"encoding"`
+	ClaimDialect          string `toml:"claimDialect"`
+	ConvertDialect        bool   `toml:"convertDialect"`
+	Header                string `toml:"header"`
+	SigningAlgorithm      string `toml:"signingAlgorithm"`
+	EnableUserClaims      bool   `toml:"enableUserClaims"`
+	GatewayGeneratorImpl  string `toml:"gatewayGeneratorImpl"`
+	ClaimsExtractorImpl   string `toml:"claimsExtractorImpl"`
+	PublicCertificatePath string `toml:"publicCertificatePath"`
+	PrivateKeyPath        string `toml:"privateKeyPath"`
 }
 
 // APICtlUser represents registered APICtl Users

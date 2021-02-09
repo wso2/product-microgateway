@@ -40,7 +40,6 @@ public class Constants {
     // Config constants
     public static final String EVENT_HUB_EVENT_LISTENING_ENDPOINT = "eventListeningEndpoints";
 
-    public static final String DEFAULT_ENFORCER_PRIVATE_KEY_PATH = "/home/wso2/security/keystore/mg.key";
     public static final String BEGINING_OF_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n";
     public static final String END_OF_PRIVATE_KEY = "-----END PRIVATE KEY-----";
     public static final String RSA = "RSA";

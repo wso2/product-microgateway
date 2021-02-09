@@ -195,8 +195,4 @@ public class JWTValidator {
                     .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER)));
         }
     }
-
-    /*public Certificate getPublicCertForIssuer() {
-        return tokenIssuer.getCertificate();
-    }*/
 }
