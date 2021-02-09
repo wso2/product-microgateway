@@ -135,9 +135,7 @@
             200:
               description: An array of API Metadata
               schema:
-                type: array
-                items:
-                  $ref: '#/definitions/APIMeta'
+                $ref: '#/definitions/APIMeta'
             default:
               description: Unexpected error
               schema:
@@ -259,6 +257,19 @@
           token:
             type: string
       APIMeta:
+        properties:
+          total:
+            type: integer
+            description: Total number of APIs available in the MGW
+          count:
+            type: integer
+            description: Number of APIs returned in the response
+          list:
+            type: array
+            description: All or sub set of info about APIs in the MGW
+            items:
+              $ref: "#/definitions/APIMetaListItem"
+      APIMetaListItem:
         type: object
         properties:
           apiName:
