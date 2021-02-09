@@ -29,13 +29,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.api.APIFactory;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
-import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.grpc.ExtAuthService;
-import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerDataService;
-import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerDataServiceImpl;
-import org.wso2.micro.gateway.enforcer.listener.GatewayJMSMessageListener;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;
 
 import java.io.File;
@@ -54,10 +50,7 @@ public class AuthServer {
 
     public static void main(String[] args) {
         try {
-            KeyManagerDataService keyManagerDataService = new KeyManagerDataServiceImpl();
             // Load configurations
-            ConfigHolder configHolder = ConfigHolder.getInstance();
-            ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
             APIFactory.getInstance().init();
 
             // Create a new server to listen on port 8081
@@ -69,10 +62,6 @@ public class AuthServer {
             server.start();
             logger.info("Sever started Listening in port : " + 8081);
 
-            if (configHolder.getConfig().getEventHub().isEnabled()) {
-                logger.info("Event Hub configuration enabled... Starting JMS listener...");
-                GatewayJMSMessageListener.init(configHolder.getConfig().getEventHub());
-            }
             //TODO: Get the tenant domain from config
             SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().initializeStore();
 

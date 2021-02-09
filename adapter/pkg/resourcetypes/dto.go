@@ -19,7 +19,7 @@ package resourcetypes
 
 // Subscription for struct subscription
 type Subscription struct {
-	SubscriptionID    int    `json:"subscriptionId"`
+	SubscriptionID    int32    `json:"subscriptionId"`
 	PolicyID          string `json:"policyId"`
 	APIID             int32    `json:"apiId"`
 	AppID             int32    `json:"appId" json:"applicationId"`
@@ -72,7 +72,7 @@ type ApplicationKeyMappingList struct {
 
 // API for struct Api
 type API struct {
-	APIID            int32 `json:"apiId"`
+	APIID            string `json:"apiId"`
 	Provider         string `json:"provider" json:"apiProvider"`
 	Name             string `json:"name" json:"apiName"`
 	Version          string `json:"version" json:"apiVersion"`

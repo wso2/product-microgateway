@@ -102,7 +102,7 @@ type ApplicationEvent struct {
 
 // SubscriptionEvent for struct subscription events
 type SubscriptionEvent struct {
-	SubscriptionID    int    `json:"subscriptionId"`
+	SubscriptionID    int32    `json:"subscriptionId"`
 	APIID             int32    `json:"apiId"`
 	ApplicationID     int32    `json:"applicationId"`
 	PolicyID          string `json:"policyId"`
