@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync"
 
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
@@ -37,6 +38,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/wso2/discovery/subscription"
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
+	apiModel "github.com/wso2/micro-gw/pkg/api/models"
 	oasParser "github.com/wso2/micro-gw/pkg/oasparser"
 	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/operator"
@@ -849,4 +851,32 @@ func stopConsulDiscoveryFor(clusterName string) {
 	if doneChan, available := svcdiscovery.ClusterConsulDoneChanMap[clusterName]; available {
 		close(doneChan)
 	}
+}
+
+// ListApis returns a list of objects that holds info about each API
+func ListApis(apiType string) []*apiModel.APIMeta {
+	var apisArray []*apiModel.APIMeta
+	if apiType != "ws" { // "http" or ""
+		for apiIdentifier := range openAPIV3Map {
+			nameAndVersion := strings.Split(apiIdentifier, ":")
+			apiMeta := apiModel.CreateAPIMeta(nameAndVersion[0], nameAndVersion[1],
+				openAPIEnvoyMap[apiIdentifier], "http:OpenApiV3")
+			apisArray = append(apisArray, &apiMeta)
+		}
+		for apiIdentifier := range openAPIV2Map {
+			nameAndVersion := strings.Split(apiIdentifier, ":")
+			apiMeta := apiModel.CreateAPIMeta(nameAndVersion[0], nameAndVersion[1],
+				openAPIEnvoyMap[apiIdentifier], "http:OpenApiV2")
+			apisArray = append(apisArray, &apiMeta)
+		}
+	}
+	if apiType != "http" { // "ws" or ""
+		for apiIdentifier := range webSocketAPIMap {
+			nameAndVersion := strings.Split(apiIdentifier, ":")
+			apiMeta := apiModel.CreateAPIMeta(nameAndVersion[0], nameAndVersion[1],
+				openAPIEnvoyMap[apiIdentifier], "ws")
+			apisArray = append(apisArray, &apiMeta)
+		}
+	}
+	return apisArray
 }

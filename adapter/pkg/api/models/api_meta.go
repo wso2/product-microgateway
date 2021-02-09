@@ -72,3 +72,12 @@ func (m *APIMeta) UnmarshalBinary(b []byte) error {
 	*m = res
 	return nil
 }
+
+func CreateAPIMeta(apiName string, version string, labels []string, apiType string) (m APIMeta) {
+	var apiMeta APIMeta
+	apiMeta.APIName = apiName
+	apiMeta.Version = version
+	apiMeta.Labels = labels
+	apiMeta.APIType = apiType
+	return apiMeta
+}

@@ -28,6 +28,7 @@ import (
 	"strings"
 
 	"github.com/wso2/micro-gw/loggers"
+	apiModel "github.com/wso2/micro-gw/pkg/api/models"
 	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/utills"
 	"github.com/wso2/micro-gw/pkg/tlsutils"
@@ -128,6 +129,14 @@ func ApplyAPIProject(payload []byte, envrionments []string) error {
 		loggers.LoggerAPI.Infof("API type is not currently supported with WSO2 micro-gateway")
 	}
 	return nil
+}
+
+// ListApis calls the ListApis methos in xds_server.go
+func ListApis(apiType *string) []*apiModel.APIMeta {
+	if apiType != nil {
+		return xds.ListApis(*apiType)
+	}
+	return xds.ListApis("")
 }
 
 func readZipFile(zf *zip.File) ([]byte, error) {

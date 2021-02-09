@@ -80,7 +80,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	}
 
 	api.APICollectionGetApisHandler = api_collection.GetApisHandlerFunc(func(params api_collection.GetApisParams, principal *models.Principal) middleware.Responder {
-		return middleware.NotImplemented("operation api_collection.GetApis has not yet been implemented")
+		return api_collection.NewGetApisOK().WithPayload(apiServer.ListApis(params.APIType))
 	})
 	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(params api_individual.PostApisParams,
 		principal *models.Principal) middleware.Responder {
