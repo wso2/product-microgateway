@@ -26,6 +26,7 @@ import (
 	"github.com/wso2/micro-gw/api/wso2/discovery/api"
 	"github.com/wso2/micro-gw/api/wso2/discovery/config/enforcer"
 	"github.com/wso2/micro-gw/api/wso2/discovery/subscription"
+	wso2_cache "github.com/wso2/micro-gw/pkg/discovery/cache/v3"
 	"github.com/wso2/micro-gw/pkg/svcdiscovery"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
@@ -33,7 +34,7 @@ import (
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+	envoy_cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	oasParser "github.com/wso2/micro-gw/pkg/oasparser"
@@ -46,14 +47,14 @@ var (
 	version           int32
 	mutexForXdsUpdate sync.Mutex
 
-	cache                              cachev3.SnapshotCache
-	enforcerCache                      cachev3.SnapshotCache
-	enforcerSubscriptionCache          cachev3.SnapshotCache
-	enforcerApplicationCache           cachev3.SnapshotCache
-	enforcerAPICache                   cachev3.SnapshotCache
-	enforcerApplicationPolicyCache     cachev3.SnapshotCache
-	enforcerSubscriptionPolicyCache    cachev3.SnapshotCache
-	enforcerApplicationKeyMappingCache cachev3.SnapshotCache
+	cache                              envoy_cachev3.SnapshotCache
+	enforcerCache                      wso2_cache.SnapshotCache
+	enforcerSubscriptionCache          wso2_cache.SnapshotCache
+	enforcerApplicationCache           wso2_cache.SnapshotCache
+	enforcerAPICache                   wso2_cache.SnapshotCache
+	enforcerApplicationPolicyCache     wso2_cache.SnapshotCache
+	enforcerSubscriptionPolicyCache    wso2_cache.SnapshotCache
+	enforcerApplicationKeyMappingCache wso2_cache.SnapshotCache
 
 	// API Name:Version -> MgwSwagger struct map
 	apiMgwSwaggerMap map[string]mgw.MgwSwagger
@@ -107,17 +108,17 @@ func (IDHash) ID(node *corev3.Node) string {
 	return node.Id
 }
 
-var _ cachev3.NodeHash = IDHash{}
+var _ envoy_cachev3.NodeHash = IDHash{}
 
 func init() {
-	cache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
-	enforcerCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
-	enforcerSubscriptionCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
-	enforcerApplicationCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
-	enforcerAPICache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
-	enforcerApplicationPolicyCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
-	enforcerSubscriptionPolicyCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
-	enforcerApplicationKeyMappingCache = cachev3.NewSnapshotCache(false, IDHash{}, nil)
+	cache = envoy_cachev3.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerSubscriptionCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerApplicationCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerAPICache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerApplicationPolicyCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerSubscriptionPolicyCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerApplicationKeyMappingCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 	apiMgwSwaggerMap = make(map[string]mgw.MgwSwagger)
 	openAPIEnvoyMap = make(map[string][]string)
 	openAPIRoutesMap = make(map[string][]*routev3.Route)
@@ -147,42 +148,42 @@ func init() {
 }
 
 // GetXdsCache returns xds server cache.
-func GetXdsCache() cachev3.SnapshotCache {
+func GetXdsCache() envoy_cachev3.SnapshotCache {
 	return cache
 }
 
 // GetEnforcerCache returns xds server cache.
-func GetEnforcerCache() cachev3.SnapshotCache {
+func GetEnforcerCache() wso2_cache.SnapshotCache {
 	return enforcerCache
 }
 
 // GetEnforcerSubscriptionCache returns xds server cache.
-func GetEnforcerSubscriptionCache() cachev3.SnapshotCache {
+func GetEnforcerSubscriptionCache() wso2_cache.SnapshotCache {
 	return enforcerSubscriptionCache
 }
 
 // GetEnforcerApplicationCache returns xds server cache.
-func GetEnforcerApplicationCache() cachev3.SnapshotCache {
+func GetEnforcerApplicationCache() wso2_cache.SnapshotCache {
 	return enforcerApplicationCache
 }
 
 // GetEnforcerAPICache returns xds server cache.
-func GetEnforcerAPICache() cachev3.SnapshotCache {
+func GetEnforcerAPICache() wso2_cache.SnapshotCache {
 	return enforcerAPICache
 }
 
 // GetEnforcerApplicationPolicyCache returns xds server cache.
-func GetEnforcerApplicationPolicyCache() cachev3.SnapshotCache {
+func GetEnforcerApplicationPolicyCache() wso2_cache.SnapshotCache {
 	return enforcerApplicationPolicyCache
 }
 
 // GetEnforcerSubscriptionPolicyCache returns xds server cache.
-func GetEnforcerSubscriptionPolicyCache() cachev3.SnapshotCache {
+func GetEnforcerSubscriptionPolicyCache() wso2_cache.SnapshotCache {
 	return enforcerSubscriptionPolicyCache
 }
 
 // GetEnforcerApplicationKeyMappingCache returns xds server cache.
-func GetEnforcerApplicationKeyMappingCache() cachev3.SnapshotCache {
+func GetEnforcerApplicationKeyMappingCache() wso2_cache.SnapshotCache {
 	return enforcerApplicationKeyMappingCache
 }
 
@@ -371,7 +372,7 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	}
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	// Will be updated once decide to move to incremental XDS
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	snap := envoy_cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil)
 	snap.Consistent()
 	err := cache.SetSnapshot(label, snap)
 	if err != nil {
@@ -395,8 +396,7 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 
 	apis := enforcerApisMap[label]
 
-	snap := cachev3.NewSnapshot(
-		fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis, nil, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), configs, apis, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerCache.SetSnapshot(label, snap)
@@ -423,8 +423,7 @@ func UpdateEnforcerApis(api *api.Api) {
 	}
 	configs := enforcerConfigMap[label]
 
-	snap := cachev3.NewSnapshot(
-		fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis, nil, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), configs, apis, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerCache.SetSnapshot(label, snap)
@@ -594,7 +593,7 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 		version = 1
 	}
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, subscriptionList, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, subscriptionList, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerSubscriptionCache.SetSnapshot(label, snap)
@@ -621,7 +620,7 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 		version = 1
 	}
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationList, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, applicationList, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationCache.SetSnapshot(label, snap)
@@ -648,7 +647,7 @@ func UpdateEnforcerAPIList(apis *subscription.APIList) {
 		version = 1
 	}
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, apiList, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, apiList, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerAPICache.SetSnapshot(label, snap)
@@ -675,7 +674,7 @@ func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 		version = 1
 	}
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationPolicyList, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, applicationPolicyList, nil, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationPolicyCache.SetSnapshot(label, snap)
@@ -702,7 +701,7 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 		version = 1
 	}
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, subscriptionPolicyList, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, subscriptionPolicyList, nil)
 	snap.Consistent()
 
 	err := enforcerSubscriptionPolicyCache.SetSnapshot(label, snap)
@@ -729,7 +728,7 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 		version = 1
 	}
 
-	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationKeyMappingList)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, applicationKeyMappingList)
 	snap.Consistent()
 
 	err := enforcerApplicationKeyMappingCache.SetSnapshot(label, snap)

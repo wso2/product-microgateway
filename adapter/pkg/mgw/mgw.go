@@ -27,7 +27,7 @@ import (
 	configservice "github.com/wso2/micro-gw/api/wso2/discovery/service/config"
 	subscriptionservice "github.com/wso2/micro-gw/api/wso2/discovery/service/subscription"
 	"github.com/wso2/micro-gw/pkg/api/restserver"
-	cb "github.com/wso2/micro-gw/pkg/mgw/xdscallbacks"
+	"github.com/wso2/micro-gw/pkg/discovery/server/v3"
 	"github.com/wso2/micro-gw/pkg/tlsutils"
 
 	"context"
@@ -77,9 +77,9 @@ func init() {
 
 const grpcMaxConcurrentStreams = 1000000
 
-func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, enforcerSdsServer xdsv3.Server,
-	enforcerAppDsSrv xdsv3.Server, enforcerAPIDsSrv xdsv3.Server, enforcerAppPolicyDsSrv xdsv3.Server,
-	enforcerSubPolicyDsSrv xdsv3.Server, enforcerAppKeyMappingDsSrv xdsv3.Server, port uint) {
+func runManagementServer(server xdsv3.Server, enforcerServer server.Server, enforcerSdsServer server.Server,
+	enforcerAppDsSrv server.Server, enforcerAPIDsSrv server.Server, enforcerAppPolicyDsSrv server.Server,
+	enforcerSubPolicyDsSrv server.Server, enforcerAppKeyMappingDsSrv server.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
 
@@ -155,13 +155,13 @@ func Run(conf *config.Config) {
 	enforcerApplicationKeyMappingCache := xds.GetEnforcerApplicationKeyMappingCache()
 
 	srv := xdsv3.NewServer(ctx, cache, nil)
-	enforcerXdsSrv := xdsv3.NewServer(ctx, enforcerCache, &cb.Callbacks{})
-	enforcerSdsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionCache, &cb.Callbacks{})
-	enforcerAppDsSrv := xdsv3.NewServer(ctx, enforcerApplicationCache, &cb.Callbacks{})
-	enforcerAPIDsSrv := xdsv3.NewServer(ctx, enforcerAPICache, &cb.Callbacks{})
-	enforcerAppPolicyDsSrv := xdsv3.NewServer(ctx, enforcerApplicationPolicyCache, &cb.Callbacks{})
-	enforcerSubPolicyDsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionPolicyCache, &cb.Callbacks{})
-	enforcerAppKeyMappingDsSrv := xdsv3.NewServer(ctx, enforcerApplicationKeyMappingCache, &cb.Callbacks{})
+	enforcerXdsSrv := server.NewServer(ctx, enforcerCache, nil)
+	enforcerSdsSrv := server.NewServer(ctx, enforcerSubscriptionCache, nil)
+	enforcerAppDsSrv := server.NewServer(ctx, enforcerApplicationCache, nil)
+	enforcerAPIDsSrv := server.NewServer(ctx, enforcerAPICache, nil)
+	enforcerAppPolicyDsSrv := server.NewServer(ctx, enforcerApplicationPolicyCache, nil)
+	enforcerSubPolicyDsSrv := server.NewServer(ctx, enforcerSubscriptionPolicyCache, nil)
+	enforcerAppKeyMappingDsSrv := server.NewServer(ctx, enforcerApplicationKeyMappingCache, nil)
 
 	runManagementServer(srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
 		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, port)
@@ -177,7 +177,7 @@ func Run(conf *config.Config) {
 		subscription.LoadSubscriptionData(conf)
 
 		go messaging.ProcessEvents(conf)
-		
+
 		// Fetch APIs from control plane
 		fetchAPIsOnStartUp(conf)
 	}
