@@ -18,6 +18,7 @@
 package xds
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"reflect"
@@ -224,6 +225,42 @@ func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string, environment
 	}
 }
 
+// DeleteAPI deletes an API, its resources and updates the caches
+func DeleteAPI(apiName string, version string, vhost string) (errorCode string, errorMsg string) {
+	apiMapKey := vhost + ":" + apiName + ":" + version
+	apiInfo := "Name:" + apiName + " Version:" + version + " VirtualHost:" + vhost
+	_, ok := apiMgwSwaggerMap[apiMapKey]
+	if !ok {
+		errorCode = "NOT_FOUND"
+		errorMsg = "Unable to delete API " + apiInfo + " . Does not exist."
+		logger.LoggerXds.Infof(errorMsg)
+		return errorCode, errorMsg
+	}
+	//clean map of routes, clusters, endpoints
+	delete(openAPIRoutesMap, apiMapKey)
+	delete(openAPIClustersMap, apiMapKey)
+	delete(openAPIEndpointsMap, apiMapKey)
+
+	existingLabels := openAPIEnvoyMap[apiMapKey]
+	//updateXdsCacheOnAPIAdd is called after cleaning maps of routes, clusters, endpoints
+	//therefore created resources for existing label for all APIs except for the API to be deleted
+	updateXdsCacheOnAPIAdd(existingLabels, []string{})
+
+	err := cleanAPIInEnforcer(apiName, version)
+	if err != nil {
+		errorCode = "SERVER_ERROR"
+		errorMsg = "Error while deleting API from enforcer"
+		logger.LoggerXds.Info(errorMsg)
+		return errorCode, errorMsg
+	}
+
+	delete(openAPIEnvoyMap, apiMapKey)
+	delete(apiMgwSwaggerMap, apiMapKey)
+	//TODO: (SuKSW) clean any remaining in label wise maps, if this is the last API of that label
+	logger.LoggerXds.Infof("Deleted API. %v", apiInfo)
+	return "", ""
+}
+
 func arrayContains(a []string, x string) bool {
 	for _, n := range a {
 		if x == n {
@@ -393,6 +430,42 @@ func UpdateEnforcerApis(label string, apis []types.Resource) {
 	}
 
 	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+// CleanAPIInEnforcer removes API from enforcerApisMap
+func cleanAPIInEnforcer(apiName string, version string) error {
+	label := "enforcer"
+	apis := enforcerApisMap[label]
+	for index, apiResource := range apis {
+		apiObject := api.Api{}
+		json.Unmarshal([]byte(apiResource.String()), &apiObject)
+		if apiObject.Title == apiName && apiObject.Version == version {
+			//TODO: (SuKSW) update when vhost is supported
+			//TODO: (SuKSW) remove redundancy with UpdateEnforcerApis method
+			version, ok := enforcerCacheVersionMap[label]
+			if ok {
+				version++
+			} else {
+				version = 1
+			}
+			configs := enforcerConfigMap[label]
+
+			snap := cachev3.NewSnapshot(
+				fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis, nil, nil, nil, nil, nil, nil)
+			snap.Consistent()
+
+			err := enforcerCache.SetSnapshot(label, snap)
+			if err != nil {
+				logger.LoggerXds.Error(err)
+				return err
+			}
+			enforcerCacheVersionMap[label] = version
+			enforcerApisMap[label] = append(apis[:index], apis[index+1:]...)
+			logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+			break
+		}
+	}
+	return nil
 }
 
 // GenerateSubscriptionList converts the data into SubscriptionList proto type
