@@ -194,7 +194,7 @@ type controlPlane struct {
 		RetryInterval           time.Duration `toml:"retryInterval"`
 		SkipSSLVerfication      bool          `toml:"skipSSLVerification"`
 		JmsConnectionParameters struct {
-			EventListeningEndpoints string `toml:"eventListeningEndpoints"`
+			EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
 		} `toml:"jmsConnectionParameters"`
 	} `toml:"eventHub"`
 }

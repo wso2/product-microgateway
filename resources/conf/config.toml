@@ -91,4 +91,4 @@ retryInterval = 5
 skipSSLVerification=true
 # Message broker connection URL of the control plane
 [controlPlane.eventHub.jmsConnectionParameters] 
-eventListeningEndpoints="amqp://admin:admin@localhost:5673?retries='5'&connectdelay='30000'"
+eventListeningEndpoints=["amqp://admin:admin@localhost:5673?retries='5'&connectdelay='30000'"]

@@ -81,9 +81,9 @@ func connectionRetry(key string) (*Consumer, *amqp.Connection, error) {
 
 //extract AMQPURLList from EventListening connection url
 func retrieveAMQPURLList() []amqpFailoverURL {
+	var connectionURLList []string
+	connectionURLList = mgwConfig.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints
 
-	connectionURL := mgwConfig.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints
-	var connectionURLList = []string{connectionURL}
 	amqlURLList := []amqpFailoverURL{}
 
 	for _, conURL := range connectionURLList {
