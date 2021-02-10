@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 
 import java.util.UUID;
@@ -49,15 +50,15 @@ public class WebSocketAuthResponse extends ResponseObject{
 
     public Struct getMetadataStruct(){
         Struct.Builder structBuilder = Struct.newBuilder();
-        return structBuilder.putFields("streamId", Value.newBuilder().setStringValue(webSocketMetadataContext.getStreamId()).build())
+        return structBuilder.putFields(APIConstants.WEBSOCKET_STREAM_ID, Value.newBuilder().setStringValue(webSocketMetadataContext.getStreamId()).build())
 //                .putFields("applicationId", Value.newBuilder().setStringValue(webSocketMetadataContext.getApplicationId()).build())
 //                .putFields("applicationTier", Value.newBuilder().setStringValue(webSocketMetadataContext.getApplicationTier()).build())
 //                .putFields("apiTier", Value.newBuilder().setStringValue(webSocketMetadataContext.getApiTier()).build())
 //                .putFields("subscriptionTier", Value.newBuilder().setStringValue(webSocketMetadataContext.getSubscriptionTier()).build())
 //                .putFields("username", Value.newBuilder().setStringValue(webSocketMetadataContext.getUsername()).build())
-                .putFields("basepath", Value.newBuilder().setStringValue(webSocketMetadataContext.getBasepath()).build())
-                .putFields("apiVersion", Value.newBuilder().setStringValue(webSocketMetadataContext.getApiVersion()).build())
+                .putFields(APIConstants.GW_BASE_PATH_PARAM, Value.newBuilder().setStringValue(webSocketMetadataContext.getBasepath()).build())
+                .putFields(APIConstants.GW_VERSION_PARAM, Value.newBuilder().setStringValue(webSocketMetadataContext.getApiVersion()).build())
 //                .putFields("subscriberTenantDomain", Value.newBuilder().setStringValue(webSocketMetadataContext.getSubscriberTenantDomain()).build())
-                .putFields("apiName", Value.newBuilder().setStringValue(webSocketMetadataContext.getApiName()).build()).build();
+                .putFields(APIConstants.GW_API_NAME_PARAM, Value.newBuilder().setStringValue(webSocketMetadataContext.getApiName()).build()).build();
     }
 }

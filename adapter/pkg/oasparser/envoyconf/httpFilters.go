@@ -30,7 +30,9 @@ import (
 
 	mgw_websokcet "github.com/NomadXD/websocketconf"
 	rls "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
+	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/any"
 	logger "github.com/wso2/micro-gw/loggers"
 )
 
@@ -78,11 +80,11 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 func getUpgradeFilters() []*hcmv3.HttpFilter {
 	// TODO : (LahiruUdayanga) Configure the custom C++ filter.
 	extAauth := getExtAuthzHTTPFilter()
-	mgwWebSocket := getMgwWebSocketFilter()
+	//mgwWebSocket := getMgwWebSocketFilter()
 	router := getRouterHTTPFilter()
 	upgradeFilters := []*hcmv3.HttpFilter{
 		extAauth,
-		mgwWebSocket,
+		//mgwWebSocket,
 		router,
 	}
 	return upgradeFilters
@@ -142,14 +144,18 @@ func getMgwWebSocketFilter() *hcmv3.HttpFilter {
 			},
 		},
 	}
-	ext, err2 := ptypes.MarshalAny(mgwWebsocketConfig)
+	ext, err2 := proto.Marshal(mgwWebsocketConfig)
 	if err2 != nil {
+		logger.LoggerOasparser.Info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		logger.LoggerOasparser.Error(err2)
 	}
 	mgwWebSocketFilter := hcmv3.HttpFilter{
 		Name: mgwWebSocketFilterName,
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{
-			TypedConfig: ext,
+			TypedConfig: &any.Any{
+				TypeUrl: "type.googleapis.com/envoy.extensions.filters.http.mgw_websocket.v3.RateLimit",
+				Value:   ext,
+			},
 		},
 	}
 	return &mgwWebSocketFilter
