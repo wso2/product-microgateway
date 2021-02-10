@@ -23,6 +23,7 @@ private static final long serialVersionUID = 0L;
     name_ = "";
     type_ = "";
     tenantDomain_ = "";
+    configuration_ = "";
   }
 
   @java.lang.Override
@@ -45,7 +46,6 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
-    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -80,16 +80,9 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 42: {
-            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              configuration_ = com.google.protobuf.MapField.newMapField(
-                  ConfigurationDefaultEntryHolder.defaultEntry);
-              mutable_bitField0_ |= 0x00000001;
-            }
-            com.google.protobuf.MapEntry<java.lang.String, com.google.protobuf.Any>
-            configuration__ = input.readMessage(
-                ConfigurationDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-            configuration_.getMutableMap().put(
-                configuration__.getKey(), configuration__.getValue());
+            java.lang.String s = input.readStringRequireUtf8();
+
+            configuration_ = s;
             break;
           }
           default: {
@@ -116,18 +109,6 @@ private static final long serialVersionUID = 0L;
     return org.wso2.gateway.discovery.keyManagerConfig.KeyManagerConfigProto.internal_static_wso2_discovery_keyManagerConfig_KeyManagerConfig_descriptor;
   }
 
-  @SuppressWarnings({"rawtypes"})
-  @java.lang.Override
-  protected com.google.protobuf.MapField internalGetMapField(
-      int number) {
-    switch (number) {
-      case 5:
-        return internalGetConfiguration();
-      default:
-        throw new RuntimeException(
-            "Invalid map field number: " + number);
-    }
-  }
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
@@ -262,84 +243,41 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int CONFIGURATION_FIELD_NUMBER = 5;
-  private static final class ConfigurationDefaultEntryHolder {
-    static final com.google.protobuf.MapEntry<
-        java.lang.String, com.google.protobuf.Any> defaultEntry =
-            com.google.protobuf.MapEntry
-            .<java.lang.String, com.google.protobuf.Any>newDefaultInstance(
-                org.wso2.gateway.discovery.keyManagerConfig.KeyManagerConfigProto.internal_static_wso2_discovery_keyManagerConfig_KeyManagerConfig_ConfigurationEntry_descriptor, 
-                com.google.protobuf.WireFormat.FieldType.STRING,
-                "",
-                com.google.protobuf.WireFormat.FieldType.MESSAGE,
-                com.google.protobuf.Any.getDefaultInstance());
-  }
-  private com.google.protobuf.MapField<
-      java.lang.String, com.google.protobuf.Any> configuration_;
-  private com.google.protobuf.MapField<java.lang.String, com.google.protobuf.Any>
-  internalGetConfiguration() {
-    if (configuration_ == null) {
-      return com.google.protobuf.MapField.emptyMapField(
-          ConfigurationDefaultEntryHolder.defaultEntry);
+  private volatile java.lang.Object configuration_;
+  /**
+   * <code>string configuration = 5;</code>
+   * @return The configuration.
+   */
+  @java.lang.Override
+  public java.lang.String getConfiguration() {
+    java.lang.Object ref = configuration_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      configuration_ = s;
+      return s;
     }
-    return configuration_;
-  }
-
-  public int getConfigurationCount() {
-    return internalGetConfiguration().getMap().size();
   }
   /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
-   */
-
-  @java.lang.Override
-  public boolean containsConfiguration(
-      java.lang.String key) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    return internalGetConfiguration().getMap().containsKey(key);
-  }
-  /**
-   * Use {@link #getConfigurationMap()} instead.
+   * <code>string configuration = 5;</code>
+   * @return The bytes for configuration.
    */
   @java.lang.Override
-  @java.lang.Deprecated
-  public java.util.Map<java.lang.String, com.google.protobuf.Any> getConfiguration() {
-    return getConfigurationMap();
-  }
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
-   */
-  @java.lang.Override
-
-  public java.util.Map<java.lang.String, com.google.protobuf.Any> getConfigurationMap() {
-    return internalGetConfiguration().getMap();
-  }
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
-   */
-  @java.lang.Override
-
-  public com.google.protobuf.Any getConfigurationOrDefault(
-      java.lang.String key,
-      com.google.protobuf.Any defaultValue) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-        internalGetConfiguration().getMap();
-    return map.containsKey(key) ? map.get(key) : defaultValue;
-  }
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
-   */
-  @java.lang.Override
-
-  public com.google.protobuf.Any getConfigurationOrThrow(
-      java.lang.String key) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-        internalGetConfiguration().getMap();
-    if (!map.containsKey(key)) {
-      throw new java.lang.IllegalArgumentException();
+  public com.google.protobuf.ByteString
+      getConfigurationBytes() {
+    java.lang.Object ref = configuration_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      configuration_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
     }
-    return map.get(key);
   }
 
   private byte memoizedIsInitialized = -1;
@@ -368,12 +306,9 @@ private static final long serialVersionUID = 0L;
     if (!getTenantDomainBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 4, tenantDomain_);
     }
-    com.google.protobuf.GeneratedMessageV3
-      .serializeStringMapTo(
-        output,
-        internalGetConfiguration(),
-        ConfigurationDefaultEntryHolder.defaultEntry,
-        5);
+    if (!getConfigurationBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 5, configuration_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -396,15 +331,8 @@ private static final long serialVersionUID = 0L;
     if (!getTenantDomainBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, tenantDomain_);
     }
-    for (java.util.Map.Entry<java.lang.String, com.google.protobuf.Any> entry
-         : internalGetConfiguration().getMap().entrySet()) {
-      com.google.protobuf.MapEntry<java.lang.String, com.google.protobuf.Any>
-      configuration__ = ConfigurationDefaultEntryHolder.defaultEntry.newBuilderForType()
-          .setKey(entry.getKey())
-          .setValue(entry.getValue())
-          .build();
-      size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, configuration__);
+    if (!getConfigurationBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, configuration_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -429,8 +357,8 @@ private static final long serialVersionUID = 0L;
         != other.getEnabled()) return false;
     if (!getTenantDomain()
         .equals(other.getTenantDomain())) return false;
-    if (!internalGetConfiguration().equals(
-        other.internalGetConfiguration())) return false;
+    if (!getConfiguration()
+        .equals(other.getConfiguration())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -451,10 +379,8 @@ private static final long serialVersionUID = 0L;
         getEnabled());
     hash = (37 * hash) + TENANTDOMAIN_FIELD_NUMBER;
     hash = (53 * hash) + getTenantDomain().hashCode();
-    if (!internalGetConfiguration().getMap().isEmpty()) {
-      hash = (37 * hash) + CONFIGURATION_FIELD_NUMBER;
-      hash = (53 * hash) + internalGetConfiguration().hashCode();
-    }
+    hash = (37 * hash) + CONFIGURATION_FIELD_NUMBER;
+    hash = (53 * hash) + getConfiguration().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -566,28 +492,6 @@ private static final long serialVersionUID = 0L;
       return org.wso2.gateway.discovery.keyManagerConfig.KeyManagerConfigProto.internal_static_wso2_discovery_keyManagerConfig_KeyManagerConfig_descriptor;
     }
 
-    @SuppressWarnings({"rawtypes"})
-    protected com.google.protobuf.MapField internalGetMapField(
-        int number) {
-      switch (number) {
-        case 5:
-          return internalGetConfiguration();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
-    @SuppressWarnings({"rawtypes"})
-    protected com.google.protobuf.MapField internalGetMutableMapField(
-        int number) {
-      switch (number) {
-        case 5:
-          return internalGetMutableConfiguration();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -622,7 +526,8 @@ private static final long serialVersionUID = 0L;
 
       tenantDomain_ = "";
 
-      internalGetMutableConfiguration().clear();
+      configuration_ = "";
+
       return this;
     }
 
@@ -649,13 +554,11 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.gateway.discovery.keyManagerConfig.KeyManagerConfig buildPartial() {
       org.wso2.gateway.discovery.keyManagerConfig.KeyManagerConfig result = new org.wso2.gateway.discovery.keyManagerConfig.KeyManagerConfig(this);
-      int from_bitField0_ = bitField0_;
       result.name_ = name_;
       result.type_ = type_;
       result.enabled_ = enabled_;
       result.tenantDomain_ = tenantDomain_;
-      result.configuration_ = internalGetConfiguration();
-      result.configuration_.makeImmutable();
+      result.configuration_ = configuration_;
       onBuilt();
       return result;
     }
@@ -719,8 +622,10 @@ private static final long serialVersionUID = 0L;
         tenantDomain_ = other.tenantDomain_;
         onChanged();
       }
-      internalGetMutableConfiguration().mergeFrom(
-          other.internalGetConfiguration());
+      if (!other.getConfiguration().isEmpty()) {
+        configuration_ = other.configuration_;
+        onChanged();
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -749,7 +654,6 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
-    private int bitField0_;
 
     private java.lang.Object name_ = "";
     /**
@@ -1010,131 +914,79 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private com.google.protobuf.MapField<
-        java.lang.String, com.google.protobuf.Any> configuration_;
-    private com.google.protobuf.MapField<java.lang.String, com.google.protobuf.Any>
-    internalGetConfiguration() {
-      if (configuration_ == null) {
-        return com.google.protobuf.MapField.emptyMapField(
-            ConfigurationDefaultEntryHolder.defaultEntry);
+    private java.lang.Object configuration_ = "";
+    /**
+     * <code>string configuration = 5;</code>
+     * @return The configuration.
+     */
+    public java.lang.String getConfiguration() {
+      java.lang.Object ref = configuration_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        configuration_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
       }
-      return configuration_;
     }
-    private com.google.protobuf.MapField<java.lang.String, com.google.protobuf.Any>
-    internalGetMutableConfiguration() {
-      onChanged();;
-      if (configuration_ == null) {
-        configuration_ = com.google.protobuf.MapField.newMapField(
-            ConfigurationDefaultEntryHolder.defaultEntry);
+    /**
+     * <code>string configuration = 5;</code>
+     * @return The bytes for configuration.
+     */
+    public com.google.protobuf.ByteString
+        getConfigurationBytes() {
+      java.lang.Object ref = configuration_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        configuration_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
       }
-      if (!configuration_.isMutable()) {
-        configuration_ = configuration_.copy();
-      }
-      return configuration_;
-    }
-
-    public int getConfigurationCount() {
-      return internalGetConfiguration().getMap().size();
     }
     /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
+     * <code>string configuration = 5;</code>
+     * @param value The configuration to set.
+     * @return This builder for chaining.
      */
-
-    @java.lang.Override
-    public boolean containsConfiguration(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      return internalGetConfiguration().getMap().containsKey(key);
+    public Builder setConfiguration(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      configuration_ = value;
+      onChanged();
+      return this;
     }
     /**
-     * Use {@link #getConfigurationMap()} instead.
+     * <code>string configuration = 5;</code>
+     * @return This builder for chaining.
      */
-    @java.lang.Override
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, com.google.protobuf.Any> getConfiguration() {
-      return getConfigurationMap();
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
-     */
-    @java.lang.Override
-
-    public java.util.Map<java.lang.String, com.google.protobuf.Any> getConfigurationMap() {
-      return internalGetConfiguration().getMap();
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
-     */
-    @java.lang.Override
-
-    public com.google.protobuf.Any getConfigurationOrDefault(
-        java.lang.String key,
-        com.google.protobuf.Any defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-          internalGetConfiguration().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
-     */
-    @java.lang.Override
-
-    public com.google.protobuf.Any getConfigurationOrThrow(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-          internalGetConfiguration().getMap();
-      if (!map.containsKey(key)) {
-        throw new java.lang.IllegalArgumentException();
-      }
-      return map.get(key);
-    }
-
     public Builder clearConfiguration() {
-      internalGetMutableConfiguration().getMutableMap()
-          .clear();
+      
+      configuration_ = getDefaultInstance().getConfiguration();
+      onChanged();
       return this;
     }
     /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
+     * <code>string configuration = 5;</code>
+     * @param value The bytes for configuration to set.
+     * @return This builder for chaining.
      */
-
-    public Builder removeConfiguration(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      internalGetMutableConfiguration().getMutableMap()
-          .remove(key);
-      return this;
-    }
-    /**
-     * Use alternate mutation accessors instead.
-     */
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, com.google.protobuf.Any>
-    getMutableConfiguration() {
-      return internalGetMutableConfiguration().getMutableMap();
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
-     */
-    public Builder putConfiguration(
-        java.lang.String key,
-        com.google.protobuf.Any value) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      if (value == null) { throw new java.lang.NullPointerException(); }
-      internalGetMutableConfiguration().getMutableMap()
-          .put(key, value);
-      return this;
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
-     */
-
-    public Builder putAllConfiguration(
-        java.util.Map<java.lang.String, com.google.protobuf.Any> values) {
-      internalGetMutableConfiguration().getMutableMap()
-          .putAll(values);
+    public Builder setConfigurationBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      configuration_ = value;
+      onChanged();
       return this;
     }
     @java.lang.Override

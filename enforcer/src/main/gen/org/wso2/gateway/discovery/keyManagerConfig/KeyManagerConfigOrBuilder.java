@@ -50,36 +50,14 @@ public interface KeyManagerConfigOrBuilder extends
       getTenantDomainBytes();
 
   /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
+   * <code>string configuration = 5;</code>
+   * @return The configuration.
    */
-  int getConfigurationCount();
+  java.lang.String getConfiguration();
   /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
+   * <code>string configuration = 5;</code>
+   * @return The bytes for configuration.
    */
-  boolean containsConfiguration(
-      java.lang.String key);
-  /**
-   * Use {@link #getConfigurationMap()} instead.
-   */
-  @java.lang.Deprecated
-  java.util.Map<java.lang.String, com.google.protobuf.Any>
-  getConfiguration();
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
-   */
-  java.util.Map<java.lang.String, com.google.protobuf.Any>
-  getConfigurationMap();
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
-   */
-
-  com.google.protobuf.Any getConfigurationOrDefault(
-      java.lang.String key,
-      com.google.protobuf.Any defaultValue);
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; configuration = 5;</code>
-   */
-
-  com.google.protobuf.Any getConfigurationOrThrow(
-      java.lang.String key);
+  com.google.protobuf.ByteString
+      getConfigurationBytes();
 }

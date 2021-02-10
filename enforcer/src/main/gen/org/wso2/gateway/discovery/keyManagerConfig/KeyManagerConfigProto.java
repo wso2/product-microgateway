@@ -19,11 +19,6 @@ public final class KeyManagerConfigProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_wso2_discovery_keyManagerConfig_KeyManagerConfig_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_wso2_discovery_keyManagerConfig_KeyManagerConfig_ConfigurationEntry_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_wso2_discovery_keyManagerConfig_KeyManagerConfig_ConfigurationEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -35,23 +30,18 @@ public final class KeyManagerConfigProto {
     java.lang.String[] descriptorData = {
       "\n6wso2/discovery/keyManagerConfig/keyMan" +
       "agerConfig.proto\022\037wso2.discovery.keyMana" +
-      "gerConfig\032\031google/protobuf/any.proto\"\376\001\n" +
-      "\020KeyManagerConfig\022\014\n\004name\030\001 \001(\t\022\014\n\004type\030" +
-      "\002 \001(\t\022\017\n\007enabled\030\003 \001(\010\022\024\n\014tenantDomain\030\004" +
-      " \001(\t\022[\n\rconfiguration\030\005 \003(\0132D.wso2.disco" +
-      "very.keyManagerConfig.KeyManagerConfig.C" +
-      "onfigurationEntry\032J\n\022ConfigurationEntry\022" +
-      "\013\n\003key\030\001 \001(\t\022#\n\005value\030\002 \001(\0132\024.google.pro" +
-      "tobuf.Any:\0028\001B\235\001\n+org.wso2.gateway.disco" +
-      "very.keyManagerConfigB\025KeyManagerConfigP" +
-      "rotoP\001ZUgithub.com/praminda/go-control-p" +
-      "lane/wso2/discovery/keyManagerConfig;key" +
-      "ManagerConfigb\006proto3"
+      "gerConfig\"l\n\020KeyManagerConfig\022\014\n\004name\030\001 " +
+      "\001(\t\022\014\n\004type\030\002 \001(\t\022\017\n\007enabled\030\003 \001(\010\022\024\n\014te" +
+      "nantDomain\030\004 \001(\t\022\025\n\rconfiguration\030\005 \001(\tB" +
+      "\235\001\n+org.wso2.gateway.discovery.keyManage" +
+      "rConfigB\025KeyManagerConfigProtoP\001ZUgithub" +
+      ".com/praminda/go-control-plane/wso2/disc" +
+      "overy/keyManagerConfig;keyManagerConfigb" +
+      "\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          com.google.protobuf.AnyProto.getDescriptor(),
         });
     internal_static_wso2_discovery_keyManagerConfig_KeyManagerConfig_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -59,13 +49,6 @@ public final class KeyManagerConfigProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_keyManagerConfig_KeyManagerConfig_descriptor,
         new java.lang.String[] { "Name", "Type", "Enabled", "TenantDomain", "Configuration", });
-    internal_static_wso2_discovery_keyManagerConfig_KeyManagerConfig_ConfigurationEntry_descriptor =
-      internal_static_wso2_discovery_keyManagerConfig_KeyManagerConfig_descriptor.getNestedTypes().get(0);
-    internal_static_wso2_discovery_keyManagerConfig_KeyManagerConfig_ConfigurationEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_wso2_discovery_keyManagerConfig_KeyManagerConfig_ConfigurationEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", });
-    com.google.protobuf.AnyProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)
