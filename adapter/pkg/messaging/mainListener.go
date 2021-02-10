@@ -68,11 +68,11 @@ func ProcessEvents(config *config.Config) {
 					logger.LoggerMsg.Debugf("running %s events for %s", key, lifetime)
 					time.Sleep(lifetime)
 				} else {
-					logger.LoggerMsg.Infof("process of receiving %s events running forever", key)
+					logger.LoggerMsg.Debugf("process of receiving %s events running forever", key)
 					select {}
 				}
 
-				logger.LoggerMsg.Infof("shutting down")
+				logger.LoggerMsg.Debugf("shutting down")
 				if err := c.Shutdown(); err != nil {
 					logger.LoggerMsg.Fatalf("error during shutdown: %s", err)
 				}
@@ -115,7 +115,7 @@ func StartConsumer(key string) (*Consumer, error) {
 		return nil, fmt.Errorf("Exchange Declare: %s", err)
 	}
 
-	logger.LoggerMsg.Infof("declared Exchange, declaring Queue %q", key+"queue")
+	logger.LoggerMsg.Debugf("declared Exchange, declaring Queue %q", key+"queue")
 	queue, err := c.channel.QueueDeclare(
 		"",    // name of the queue
 		false, // durable
@@ -140,7 +140,7 @@ func StartConsumer(key string) (*Consumer, error) {
 	); err != nil {
 		return nil, fmt.Errorf("Queue Bind: %s", err)
 	}
-	logger.LoggerMsg.Infof("Queue bound to Exchange, starting Consume (consumer tag %q) events", c.tag)
+	logger.LoggerMsg.Debugf("Queue bound to Exchange, starting Consume (consumer tag %q) events", c.tag)
 	deliveries, err := c.channel.Consume(
 		queue.Name, // name
 		c.tag,      // consumerTag,

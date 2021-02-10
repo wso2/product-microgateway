@@ -117,5 +117,3 @@ type amqpFailoverURL struct {
 	retryCount      int
 	connectionDelay int
 }
-
-//

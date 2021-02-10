@@ -72,7 +72,7 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 			if isFound || strings.EqualFold(actionDelete, notification.Event.PayloadData.Action) {
 				logger.LoggerMsg.Infof("Found KM %s to be deleted index %d", notification.Event.PayloadData.Name,
 					indexOfKeymanager)
-				// deleteKeyManagerFromList(indexOfKeymanager)
+				// TODO: deleteKeyManagerFromList(indexOfKeymanager)
 			}
 			if decodedByte != nil {
 				logger.LoggerMsg.Infof("decoded stream %s", string(decodedByte))
@@ -89,6 +89,7 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 						fmt.Printf("configs: - [%s] = %s\n", key, value)
 					}
 					KeyManagerList = append(KeyManagerList, keyManager)
+					// TODO: passEventDataToEnforcer(KeyManagerList)
 				}
 			}
 		}
@@ -97,12 +98,3 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 	logger.LoggerMsg.Info("handle: deliveries channel closed")
 	done <- nil
 }
-
-// // deleteKeyManagerFromList
-// func deleteKeyManagerFromList(index int) {
-// 	var KeyManagerNewList = make([]resourceTypes.Keymanager, 0)
-// 	KeyManagerNewList = append(KeyManagerList[:index], KeyManagerList[index+1:]...)
-// 	KeyManagerList = KeyManagerNewList
-// 	logger.LoggerMsg.Infof("Current KeyManagers", KeyManagerList)
-// 	logger.LoggerMsg.Infof("KeyManager %s is deleted from KeyManagerList", KeyManagerList[index].Name)
-// }

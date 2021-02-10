@@ -29,6 +29,7 @@ import (
 	subscriptionservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/subscription"
 	"github.com/wso2/micro-gw/pkg/api/restserver"
 	cb "github.com/wso2/micro-gw/pkg/mgw/xdscallbacks"
+	"github.com/wso2/micro-gw/pkg/subscription"
 	"github.com/wso2/micro-gw/pkg/tlsutils"
 
 	"context"
@@ -112,7 +113,7 @@ func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, enfor
 	// register services
 	discoveryv3.RegisterAggregatedDiscoveryServiceServer(grpcServer, server)
 	configservice.RegisterConfigDiscoveryServiceServer(grpcServer, enforcerServer)
-	// apiservice.RegisterApiDiscoveryServiceServer(grpcServer, enforcerServer)
+	apiservice.RegisterApiDiscoveryServiceServer(grpcServer, enforcerServer)
 	subscriptionservice.RegisterSubscriptionDiscoveryServiceServer(grpcServer, enforcerSdsServer)
 	subscriptionservice.RegisterApplicationDiscoveryServiceServer(grpcServer, enforcerAppDsSrv)
 	subscriptionservice.RegisterApiListDiscoveryServiceServer(grpcServer, enforcerAPIDsSrv)
@@ -181,9 +182,9 @@ func Run(conf *config.Config) {
 	enableEventHub := conf.ControlPlane.EventHub.Enabled
 	if enableEventHub {
 		// Load subscription data
-		// subscription.LoadSubscriptionData(conf)
+		subscription.LoadSubscriptionData(conf)
 		// Fetch APIs from control plane
-		// fetchAPIsOnStartUp(conf)
+		fetchAPIsOnStartUp(conf)
 		synchronizer.FetchKeyManagersOnStartUp(conf)
 		go messaging.ProcessEvents(conf)
 	}
