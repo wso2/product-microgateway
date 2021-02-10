@@ -30,7 +30,7 @@ import (
 type PostApisDeleteURL struct {
 	APIName string
 	Version string
-	Vhost   string
+	Vhost   *string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -76,7 +76,10 @@ func (o *PostApisDeleteURL) Build() (*url.URL, error) {
 		qs.Set("version", versionQ)
 	}
 
-	vhostQ := o.Vhost
+	var vhostQ string
+	if o.Vhost != nil {
+		vhostQ = *o.Vhost
+	}
 	if vhostQ != "" {
 		qs.Set("vhost", vhostQ)
 	}

@@ -131,7 +131,16 @@ func ApplyAPIProject(payload []byte, envrionments []string) error {
 	return nil
 }
 
-// ListApis calls the ListApis methos in xds_server.go
+// DeleteAPI calls the DeleteAPI method in xds_server.go
+func DeleteAPI(apiName string, version string, vhostP *string) (errorCode string, errorMsg string) {
+	if vhostP == nil || *vhostP == "" {
+		vhost := "default"
+		vhostP = &vhost
+	}
+	return xds.DeleteAPI(apiName, version, *vhostP)
+}
+
+// ListApis calls the ListApis method in xds_server.go
 func ListApis(apiTypeP *string, limitP *int64) *apiModel.APIMeta {
 	var apiType string
 	if apiTypeP == nil {

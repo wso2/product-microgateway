@@ -61,10 +61,9 @@ type PostApisDeleteParams struct {
 	Version string
 	/*Virtual Host of the API
 
-	  Required: true
 	  In: query
 	*/
-	Vhost string
+	Vhost *string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -142,21 +141,18 @@ func (o *PostApisDeleteParams) bindVersion(rawData []string, hasKey bool, format
 
 // bindVhost binds and validates parameter Vhost from query.
 func (o *PostApisDeleteParams) bindVhost(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	if !hasKey {
-		return errors.Required("vhost", "query", rawData)
-	}
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
 
-	// Required: true
+	// Required: false
 	// AllowEmptyValue: false
 
-	if err := validate.RequiredString("vhost", "query", raw); err != nil {
-		return err
+	if raw == "" { // empty values pass all other validations
+		return nil
 	}
-	o.Vhost = raw
+	o.Vhost = &raw
 
 	return nil
 }

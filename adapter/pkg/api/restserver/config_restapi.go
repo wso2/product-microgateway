@@ -93,7 +93,15 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		return api_individual.NewPostApisOK()
 	})
 	api.APIIndividualPostApisDeleteHandler = api_individual.PostApisDeleteHandlerFunc(func(params api_individual.PostApisDeleteParams, principal *models.Principal) middleware.Responder {
-		return middleware.NotImplemented("operation api_individual.PostApisDelete has not yet been implemented")
+		errCode, _ := apiServer.DeleteAPI(params.APIName, params.Version, params.Vhost)
+		switch errCode {
+		case "":
+			return api_individual.NewPostApisDeleteOK()
+		case "NOT_FOUND":
+			return api_individual.NewPostApisDeleteNotFound()
+		default:
+			return api_individual.NewPostApisInternalServerError()
+		}
 	})
 
 	api.PreServerShutdown = func() {}

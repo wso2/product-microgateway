@@ -183,7 +183,6 @@
                 Virtual Host of the API
               in: query
               type: string
-              required: true
           responses:
             200:
               description: |

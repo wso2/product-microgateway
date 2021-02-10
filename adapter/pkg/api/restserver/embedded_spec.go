@@ -213,8 +213,7 @@ func init() {
             "type": "string",
             "description": "Virtual Host of the API\n",
             "name": "vhost",
-            "in": "query",
-            "required": true
+            "in": "query"
           }
         ],
         "responses": {
@@ -546,8 +545,7 @@ func init() {
             "type": "string",
             "description": "Virtual Host of the API\n",
             "name": "vhost",
-            "in": "query",
-            "required": true
+            "in": "query"
           }
         ],
         "responses": {
