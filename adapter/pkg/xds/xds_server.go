@@ -18,6 +18,7 @@
 package xds
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -418,9 +419,6 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 		Eventhub: &enforcer.EventHub{
 			Enabled:    config.ControlPlane.EventHub.Enabled,
 			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,
-			JmsConnectionParameters: map[string]string{
-				"eventListeningEndpoints": config.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints,
-			},
 		},
 	}
 }
@@ -576,21 +574,21 @@ func GenerateAPIList(apiList *resourceTypes.APIList) *subscription.APIList {
 }
 
 // GenerateKeyManager converts the data into KeyManager proto type
-func GenerateKeyManager(keyManager *resourceTypes.Keymanager) *keyManagerConfig.KeyManagerConfig {
-	/*for key, element := range keyManager.Configuration {
-		fmt.Println("Key:", key, "=>", "Element:", element)
-		ss := &wrapperspb.BoolValue{Value: true}
-		value, _ := ptypes.MarshalAny(ss)
-		config[key] = value
-	}*/
-	newKeyManager := &keyManagerConfig.KeyManagerConfig{
-		Name:          keyManager.Name,
-		Type:          keyManager.Type,
-		Enabled:       keyManager.Enabled,
-		TenantDomain:  keyManager.TenantDomain,
-		Configuration: nil,
+func GenerateKeyManager(keyManager *resourceTypes.Keymanager) (*keyManagerConfig.KeyManagerConfig, error) {
+	configList, err := json.Marshal(keyManager.Configuration)
+	configuration := string(configList)
+	if err != nil {
+		newKeyManager := &keyManagerConfig.KeyManagerConfig{
+			Name:          keyManager.Name,
+			Type:          keyManager.Type,
+			Enabled:       keyManager.Enabled,
+			TenantDomain:  keyManager.TenantDomain,
+			Configuration: configuration,
+		}
+		return newKeyManager, nil
 	}
-	return newKeyManager
+	logger.LoggerXds.Debugf("Error happens while marshaling configuration data for " + fmt.Sprint(keyManager.Name))
+	return nil, err
 }
 
 // GenerateApplicationPolicyList converts the data into ApplicationPolicyList proto type

@@ -109,13 +109,13 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 	var errorMsg string
 	if err != nil {
 		errorMsg = "Error occurred while calling the REST API: " + keymanagersEndpoint
-		retryFetchData(conf, errorMsg, err)
+		go retryFetchData(conf, errorMsg, err)
 		return
 	}
 	responseBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		errorMsg = "Error occurred while reading the response received for: " + keymanagersEndpoint
-		retryFetchData(conf, errorMsg, err)
+		go retryFetchData(conf, errorMsg, err)
 		return
 	}
 
@@ -125,12 +125,13 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 		logger.LoggerSync.Infof("unmarshal %v", keymanagers)
 
 		for _, kmConfig := range keymanagers {
-			xds.UpdateEnforcerKeyManagers(xds.GenerateKeyManager(kmConfig))
+			keyManagerConfig, _ := xds.GenerateKeyManager(kmConfig)
+			xds.UpdateEnforcerKeyManagers(keyManagerConfig)
 		}
 	} else {
 		errorMsg = "Failed to fetch data! " + keymanagersEndpoint + " responded with " +
 			strconv.Itoa(resp.StatusCode)
-		retryFetchData(conf, errorMsg, err)
+		go retryFetchData(conf, errorMsg, err)
 	}
 
 	return
