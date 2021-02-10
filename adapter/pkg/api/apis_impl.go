@@ -132,11 +132,14 @@ func ApplyAPIProject(payload []byte, envrionments []string) error {
 }
 
 // ListApis calls the ListApis methos in xds_server.go
-func ListApis(apiType *string) []*apiModel.APIMeta {
-	if apiType != nil {
-		return xds.ListApis(*apiType)
+func ListApis(apiTypeP *string, limitP *int64) *apiModel.APIMeta {
+	var apiType string
+	if apiTypeP == nil {
+		apiType = ""
+	} else {
+		apiType = *apiTypeP
 	}
-	return xds.ListApis("")
+	return xds.ListApis(apiType, limitP)
 }
 
 func readZipFile(zf *zip.File) ([]byte, error) {

@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
-	"strings"
 	"sync"
 
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
@@ -58,22 +57,17 @@ var (
 	enforcerSubscriptionPolicyCache    cachev3.SnapshotCache
 	enforcerApplicationKeyMappingCache cachev3.SnapshotCache
 
-	// API Name:Version -> MgwSwagger struct map
-	apiMgwSwaggerMap map[string]mgw.MgwSwagger
-	// API Name:Version -> Envoy Label Array map
-	openAPIEnvoyMap map[string][]string
-	// API Name:Version -> Envoy Routes map
-	openAPIRoutesMap map[string][]*routev3.Route
-	// API Name:Version -> Envoy Clusters map
-	openAPIClustersMap map[string][]*clusterv3.Cluster
-	// API Name:Version -> Envoy Endpoints map
-	openAPIEndpointsMap map[string][]*corev3.Address
-	// Envoy Label -> XDS version map
-	envoyUpdateVersionMap map[string]int64
-	// Envoy Label -> Listener Configuration map
-	envoyListenerConfigMap map[string]*listenerv3.Listener
-	// Envoy Label -> Routes Configuration map
-	envoyRouteConfigMap map[string]*routev3.RouteConfiguration
+	// API Name:Version as map key
+	apiMgwSwaggerMap    map[string]mgw.MgwSwagger       // MgwSwagger struct map
+	openAPIEnvoyMap     map[string][]string             // Envoy Label Array map
+	openAPIRoutesMap    map[string][]*routev3.Route     // Envoy Routes map
+	openAPIClustersMap  map[string][]*clusterv3.Cluster // Envoy Clusters map
+	openAPIEndpointsMap map[string][]*corev3.Address    // Envoy Endpoints map
+
+	// Envoy Label as map key
+	envoyUpdateVersionMap  map[string]int64                       // XDS version map
+	envoyListenerConfigMap map[string]*listenerv3.Listener        // Listener Configuration map
+	envoyRouteConfigMap    map[string]*routev3.RouteConfiguration // Routes Configuration map
 
 	// Enforcer XDS resource version map
 	enforcerCacheVersionMap map[string]int64
@@ -854,29 +848,32 @@ func stopConsulDiscoveryFor(clusterName string) {
 }
 
 // ListApis returns a list of objects that holds info about each API
-func ListApis(apiType string) []*apiModel.APIMeta {
-	var apisArray []*apiModel.APIMeta
-	if apiType != "ws" { // "http" or ""
-		for apiIdentifier := range openAPIV3Map {
-			nameAndVersion := strings.Split(apiIdentifier, ":")
-			apiMeta := apiModel.CreateAPIMeta(nameAndVersion[0], nameAndVersion[1],
-				openAPIEnvoyMap[apiIdentifier], "http:OpenApiV3")
-			apisArray = append(apisArray, &apiMeta)
-		}
-		for apiIdentifier := range openAPIV2Map {
-			nameAndVersion := strings.Split(apiIdentifier, ":")
-			apiMeta := apiModel.CreateAPIMeta(nameAndVersion[0], nameAndVersion[1],
-				openAPIEnvoyMap[apiIdentifier], "http:OpenApiV2")
-			apisArray = append(apisArray, &apiMeta)
-		}
+func ListApis(apiType string, limitP *int64) *apiModel.APIMeta {
+	var limit int
+	if limitP == nil {
+		limit = len(apiMgwSwaggerMap)
+	} else {
+		limit = int(*limitP)
 	}
-	if apiType != "http" { // "ws" or ""
-		for apiIdentifier := range webSocketAPIMap {
-			nameAndVersion := strings.Split(apiIdentifier, ":")
-			apiMeta := apiModel.CreateAPIMeta(nameAndVersion[0], nameAndVersion[1],
-				openAPIEnvoyMap[apiIdentifier], "ws")
-			apisArray = append(apisArray, &apiMeta)
+	var apisArray []*apiModel.APIMetaListItem
+	i := 0
+	for apiIdentifier, mgwSwagger := range apiMgwSwaggerMap {
+		if i == limit {
+			break
 		}
+		if apiType == "" || mgwSwagger.GetAPIType() == apiType {
+			var apiMetaListItem apiModel.APIMetaListItem
+			apiMetaListItem.APIName = mgwSwagger.GetTitle()
+			apiMetaListItem.Version = mgwSwagger.GetVersion()
+			apiMetaListItem.APIType = mgwSwagger.GetAPIType()
+			apiMetaListItem.Labels = openAPIEnvoyMap[apiIdentifier]
+			apisArray = append(apisArray, &apiMetaListItem)
+		}
+		i++
 	}
-	return apisArray
+	var apiMetaObject apiModel.APIMeta
+	apiMetaObject.Total = int64(len(apiMgwSwaggerMap))
+	apiMetaObject.Count = int64(len(apisArray))
+	apiMetaObject.List = apisArray
+	return &apiMetaObject
 }
