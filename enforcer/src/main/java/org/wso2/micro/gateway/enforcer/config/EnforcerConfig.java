@@ -18,11 +18,11 @@
 
 package org.wso2.micro.gateway.enforcer.config;
 
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
 
 import java.util.HashMap;
 import java.util.Map;

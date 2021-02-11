@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * Holds the data derived after validating the jwt token.
  */
-public class JWTValidationInfo implements Serializable {
+public class JWTValidationInfoToBeDeleted implements Serializable {
 
     private String user;
     private String issuer;

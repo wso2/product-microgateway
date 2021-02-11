@@ -39,6 +39,7 @@ import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
+import org.wso2.micro.gateway.enforcer.constants.JwtConstants;
 import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
@@ -48,8 +49,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
-import java.security.cert.Certificate;
 import java.util.Map;
 
 import javax.net.ssl.SSLContext;
@@ -234,33 +233,25 @@ public class FilterUtils {
             jwtInfoDto.setAppAttributes(apiKeyValidationInfoDTO.getAppAttributes());
         } else if (subscribedAPI != null) {
             // If the user is subscribed to the API
-            String apiName = subscribedAPI.getAsString(org.wso2.carbon.apimgt.impl.APIConstants.
-                    JwtTokenConstants.API_NAME);
+            String apiName = subscribedAPI.getAsString(JwtConstants.API_NAME);
             jwtInfoDto.setApiName(apiName);
-            String subscriptionTier = subscribedAPI.getAsString(org.wso2.carbon.apimgt.impl.APIConstants.
-                    JwtTokenConstants.SUBSCRIPTION_TIER);
+            String subscriptionTier = subscribedAPI.getAsString(JwtConstants.SUBSCRIPTION_TIER);
             String subscriptionTenantDomain =
-                    subscribedAPI.getAsString(org.wso2.carbon.apimgt.impl.APIConstants.
-                            JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN);
+                    subscribedAPI.getAsString(JwtConstants.SUBSCRIBER_TENANT_DOMAIN);
             jwtInfoDto.setSubscriptionTier(subscriptionTier);
             jwtInfoDto.setEndusertenantid(0);
 
             Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
-            if (claims.get(org.wso2.carbon.apimgt.impl.APIConstants.JwtTokenConstants.APPLICATION) != null) {
+            if (claims.get(JwtConstants.APPLICATION) != null) {
                 JSONObject
-                        applicationObj = (JSONObject) claims.get(org.wso2.carbon.apimgt.impl.APIConstants.
-                        JwtTokenConstants.APPLICATION);
+                        applicationObj = (JSONObject) claims.get(JwtConstants.APPLICATION);
                 jwtInfoDto.setApplicationid(
-                        String.valueOf(applicationObj.getAsNumber(org.wso2.carbon.apimgt.impl.APIConstants.
-                                JwtTokenConstants.APPLICATION_ID)));
+                        String.valueOf(applicationObj.getAsNumber(JwtConstants.APPLICATION_ID)));
                 jwtInfoDto
-                        .setApplicationname(applicationObj.getAsString(org.wso2.carbon.apimgt.impl.APIConstants.
-                                JwtTokenConstants.APPLICATION_NAME));
+                        .setApplicationname(applicationObj.getAsString(JwtConstants.APPLICATION_NAME));
                 jwtInfoDto
-                        .setApplicationtier(applicationObj.getAsString(org.wso2.carbon.apimgt.impl.APIConstants.
-                                JwtTokenConstants.APPLICATION_TIER));
-                jwtInfoDto.setSubscriber(applicationObj.getAsString(org.wso2.carbon.apimgt.impl.APIConstants.
-                        JwtTokenConstants.APPLICATION_OWNER));
+                        .setApplicationtier(applicationObj.getAsString(JwtConstants.APPLICATION_TIER));
+                jwtInfoDto.setSubscriber(applicationObj.getAsString(JwtConstants.APPLICATION_OWNER));
             }
         }
     }

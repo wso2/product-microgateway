@@ -207,7 +207,6 @@ public class ConfigHolder {
         config.setPublicCertificatePath(jwtGenerator.getPublicCertificatePath());
         config.setPrivateKeyPath(jwtGenerator.getPrivateKeyPath());
         config.setJwtConfigurationDto(jwtConfigurationDto);
-
     }
 
     public EnforcerConfig getConfig() {
