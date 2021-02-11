@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.APIMgtGatewayJWTGenera
 import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
+import org.wso2.micro.gateway.enforcer.constants.JwtConstants;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.JWTConstants;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
@@ -150,21 +151,6 @@ public class JWTUtil {
         }
     }
 
-    public static Certificate getCertificate() {
-        Certificate certificate = null;
-        try {
-            CertificateFactory fact = CertificateFactory.getInstance("X.509");
-            FileInputStream is = new FileInputStream(ConfigHolder.getInstance().getConfig().
-                    getPublicCertificatePath());
-            X509Certificate cert = (X509Certificate) fact.generateCertificate(is);
-            certificate = (Certificate) cert;
-            return certificate;
-        } catch (CertificateException | FileNotFoundException e) {
-            log.debug("Error in loading certificate");
-        }
-        return certificate;
-    }
-
     public static PrivateKey getPrivateKey() {
         PrivateKey privateKey = null;
         try {
@@ -211,7 +197,7 @@ public class JWTUtil {
 
             for (int fileIndex = 0; fileIndex < jarFilesList.size(); fileIndex++) {
                 try {
-                    String pathToJar = "/home/wso2/mg/droppings/" + jarFilesList.get(fileIndex);
+                    String pathToJar = JwtConstants.DROPPINGS_FOLDER + jarFilesList.get(fileIndex);
                     JarFile jarFile = new JarFile(pathToJar);
                     Enumeration<JarEntry> e = jarFile.entries();
 
@@ -220,7 +206,7 @@ public class JWTUtil {
 
                     while (e.hasMoreElements()) {
                         JarEntry je = e.nextElement();
-                        if (je.isDirectory() || !je.getName().endsWith(".class")) {
+                        if (je.isDirectory() || !je.getName().endsWith(JwtConstants.CLASS)) {
                             continue;
                         }
                         // -6 because of .class
@@ -238,29 +224,25 @@ public class JWTUtil {
                     }
                 } catch (IOException | ClassNotFoundException e) {
                     log.debug("Error in loading class", e);
-
                 }
-
             }
-
         }
         return jwtGenerator;
     }
 
     public static List<String> getJarFilesList() {
         List<String> jarFilesList = new ArrayList<String>();
-        File[] files = new File("/home/wso2/mg/droppings").listFiles();
+        File[] files = new File(JwtConstants.DROPPINGS_FOLDER).listFiles();
         //If this pathname does not denote a directory, then listFiles() returns null.
         for (File file : files) {
             if (file.isFile()) {
                 String fileName = file.getName();
-                if (fileName.endsWith(".jar")) {
+                if (fileName.endsWith(JwtConstants.JAR)) {
                     jarFilesList.add(file.getName());
                 }
             }
         }
         return jarFilesList;
     }
-
 }
 

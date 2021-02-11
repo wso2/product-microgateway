@@ -13,4 +13,7 @@ public class JwtConstants {
     public static final String APPLICATION_TIER = "tier";
     public static final String APPLICATION_OWNER = "owner";
     public static final String EXP = "exp";
+    public static final String DROPPINGS_FOLDER = "/home/wso2/mg/droppings/";
+    public static final String JAR = ".jar";
+    public static final String CLASS = ".class";
 }

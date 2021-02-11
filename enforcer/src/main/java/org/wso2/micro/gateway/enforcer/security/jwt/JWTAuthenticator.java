@@ -50,8 +50,9 @@ import org.wso2.micro.gateway.enforcer.security.TokenValidationContext;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
-import import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
-import import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
+import org.wso2.micro.gateway.enforcer.util.TLSUtils;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.gateway.common.util.JWTUtil;
 
 import java.text.ParseException;
@@ -158,7 +159,7 @@ public class JWTAuthenticator implements Authenticator {
                 if (jwtConfigurationDto.isEnabled()) {
                     // Set public certificate
                     //jwtConfigurationDto.setPublicCert(jwtValidator.getPublicCertForIssuer());
-                    jwtConfigurationDto.setPublicCert(JWTUtil.getCertificate());
+                    jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate());
 
                     //Set private key
                     jwtConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey());
@@ -169,7 +170,6 @@ public class JWTAuthenticator implements Authenticator {
                     JWTInfoDto jwtInfoDto = FilterUtils
                             .generateJWTInfoDto(null, validationInfo, apiKeyValidationInfoDTO, requestContext);
                     endUserToken = generateAndRetrieveJWTToken(jti, jwtInfoDto);
-
                     // Set generated jwt token as a response header
                     requestContext.addResponseHeaders(jwtConfigurationDto.getJwtHeader(), endUserToken);
                 }
