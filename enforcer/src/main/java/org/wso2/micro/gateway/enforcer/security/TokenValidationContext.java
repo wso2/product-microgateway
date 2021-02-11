@@ -18,6 +18,7 @@
 
 package org.wso2.micro.gateway.enforcer.security;
 
+import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
 
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class TokenValidationContext {
     private String requiredAuthenticationLevel;
     private String clientDomain;
     private String matchingResource;
+    private ResourceConfig matchingResourceConfig;
     private String httpVerb;
     private Map<String, Object> attributeMap = new HashMap<String, Object>();
     private String cacheKey;
@@ -116,6 +118,14 @@ public class TokenValidationContext {
 
     public void setMatchingResource(String matchingResource) {
         this.matchingResource = matchingResource;
+    }
+
+    public ResourceConfig getMatchingResourceConfig() {
+        return matchingResourceConfig;
+    }
+
+    public void setMatchingResourceConfig(ResourceConfig matchingResourceConfig) {
+        this.matchingResourceConfig = matchingResourceConfig;
     }
 
     public String getHttpVerb() {

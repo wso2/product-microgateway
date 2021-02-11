@@ -56,7 +56,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
 	}
 }
 
-func setPathInfoOpenAPI(path string, methods []string, pathItem *openapi3.PathItem) Resource {
+func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.PathItem) Resource {
 	var resource Resource
 	if pathItem != nil {
 		resource = Resource{
@@ -68,7 +68,7 @@ func setPathInfoOpenAPI(path string, methods []string, pathItem *openapi3.PathIt
 			description: pathItem.Description,
 			//Schemes: operation.,
 			//tags: operation.Tags,
-			//Security: operation.Security.,
+			//security: pathItem.operation.Security.,
 			vendorExtensible: convertExtensibletoReadableFormat(pathItem.ExtensionProps),
 		}
 	}
@@ -79,49 +79,39 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) []Resource {
 	var resources []Resource
 	if openAPI.Paths != nil {
 		for path, pathItem := range openAPI.Paths {
-			var methodsArray []string
-			methodFound := false
-			if pathItem.Get != nil {
-				methodsArray = append(methodsArray, "GET")
-				methodFound = true
-			}
-			if pathItem.Post != nil {
-				methodsArray = append(methodsArray, "POST")
-				methodFound = true
-			}
-			if pathItem.Put != nil {
-				methodsArray = append(methodsArray, "PUT")
-				methodFound = true
-			}
-			if pathItem.Delete != nil {
-				methodsArray = append(methodsArray, "DELETE")
-				methodFound = true
-			}
-			if pathItem.Head != nil {
-				methodsArray = append(methodsArray, "HEAD")
-				methodFound = true
-			}
-			if pathItem.Patch != nil {
-				methodsArray = append(methodsArray, "HEAD")
-				methodFound = true
-			}
-			if pathItem.Options != nil {
-				methodsArray = append(methodsArray, "OPTIONS")
-				methodFound = true
-			}
-			if methodFound {
-				resource := setPathInfoOpenAPI(path, methodsArray, pathItem)
-				if isServerURLIsAvailable(pathItem.Servers) {
-					for _, serverEntry := range pathItem.Servers {
-						endpoint := getHostandBasepathandPort(serverEntry.URL)
-						resource.productionUrls = append(resource.productionUrls, endpoint)
-					}
+			methodsArray := make([]Operation, len(pathItem.Operations()))
+			var arrayIndex int =0
+			for httpMethod,operation := range pathItem.Operations() {
+				if operation != nil {
+					methodsArray[arrayIndex] = getOperationLevelDetails(operation, httpMethod)
+					arrayIndex++
 				}
-				resources = append(resources, resource)
 			}
+
+			resource := setPathInfoOpenAPI(path, methodsArray, pathItem)
+			if isServerURLIsAvailable(pathItem.Servers) {
+				for _, serverEntry := range pathItem.Servers {
+					endpoint := getHostandBasepathandPort(serverEntry.URL)
+					resource.productionUrls = append(resource.productionUrls, endpoint)
+				}
+			}
+			resources = append(resources, resource)
+
 		}
 	}
 	return resources
+}
+
+func getOperationLevelDetails(operation *openapi3.Operation, method string) Operation {
+	if operation.Security != nil {
+		var securityData []openapi3.SecurityRequirement = *(operation.Security)
+		var securityArray = make([]map[string][]string, len(securityData))
+		for i, security := range securityData {
+			securityArray[i] = security
+		}
+		return Operation{method, securityArray}
+	}
+	return Operation{method, nil}
 }
 
 // getHostandBasepathandPort retrieves host, basepath and port from the endpoint defintion

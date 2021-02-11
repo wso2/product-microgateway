@@ -26,6 +26,7 @@ import java.util.Map;
 public class ResponseObject {
     private int statusCode;
     private String errorCode;
+    private String errorMessage;
     private String errorDescription;
     private Map<String, String> headerMap;
     private boolean isDirectResponse = false;
@@ -52,6 +53,14 @@ public class ResponseObject {
 
     public void setErrorCode(String errorCode) {
         this.errorCode = errorCode;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     public String getErrorDescription() {

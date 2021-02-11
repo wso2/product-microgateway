@@ -123,12 +123,12 @@ public class ApiListDiscoveryClient {
         });
 
         try {
-            DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                    .setNode(Node.newBuilder().setId(nodeId).build())
-                    .setVersionInfo(latestACKed.getVersionInfo())
-                    .setTypeUrl(Constants.API_LIST_TYPE_URL).build();
-            reqObserver.onNext(req);
-            logger.debug("Sent Discovery request for type url: " + Constants.API_LIST_TYPE_URL);
+//            DiscoveryRequest req = DiscoveryRequest.newBuilder()
+//                    .setNode(Node.newBuilder().setId(nodeId).build())
+//                    .setVersionInfo(latestACKed.getVersionInfo())
+//                    .setTypeUrl(Constants.API_LIST_TYPE_URL).build();
+//            reqObserver.onNext(req);
+//            logger.debug("Sent Discovery request for type url: " + Constants.API_LIST_TYPE_URL);
 
         } catch (Exception e) {
             logger.error("Unexpected error occurred in API list discovery service", e);

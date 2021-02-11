@@ -110,7 +110,7 @@ public class BaseTestCase {
      * @throws Exception
      */
     public static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType,
-                                int validityPeriod) throws Exception {
+                                int validityPeriod, String scopes) throws Exception {
         SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
         subscribedApiDTO.setContext(api.getContext() + "/" + api.getVersion());
         subscribedApiDTO.setName(api.getName());
@@ -122,6 +122,6 @@ public class BaseTestCase {
 
         JSONObject jwtTokenInfo = new JSONObject();
         jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(subscribedApiDTO)));
-        return TokenUtil.getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod);
+        return TokenUtil.getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod, scopes);
     }
 }

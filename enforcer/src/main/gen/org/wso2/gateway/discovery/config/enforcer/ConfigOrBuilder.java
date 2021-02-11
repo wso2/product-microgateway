@@ -32,34 +32,34 @@ public interface ConfigOrBuilder extends
       int index);
 
   /**
-   * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
    * @return Whether the keystore field is set.
    */
   boolean hasKeystore();
   /**
-   * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
    * @return The keystore.
    */
-  org.wso2.gateway.discovery.config.enforcer.Keystore getKeystore();
+  org.wso2.gateway.discovery.config.enforcer.CertStore getKeystore();
   /**
-   * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
    */
-  org.wso2.gateway.discovery.config.enforcer.KeystoreOrBuilder getKeystoreOrBuilder();
+  org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getKeystoreOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
    * @return Whether the truststore field is set.
    */
   boolean hasTruststore();
   /**
-   * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
    * @return The truststore.
    */
-  org.wso2.gateway.discovery.config.enforcer.Truststore getTruststore();
+  org.wso2.gateway.discovery.config.enforcer.CertStore getTruststore();
   /**
-   * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
    */
-  org.wso2.gateway.discovery.config.enforcer.TruststoreOrBuilder getTruststoreOrBuilder();
+  org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getTruststoreOrBuilder();
 
   /**
    * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
@@ -105,4 +105,19 @@ public interface ConfigOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.AmCredentialsOrBuilder getApimCredentialsOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+   * @return Whether the jwtGenerator field is set.
+   */
+  boolean hasJwtGenerator();
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+   * @return The jwtGenerator.
+   */
+  org.wso2.gateway.discovery.config.enforcer.JWTGenerator getJwtGenerator();
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.JWTGeneratorOrBuilder getJwtGeneratorOrBuilder();
 }

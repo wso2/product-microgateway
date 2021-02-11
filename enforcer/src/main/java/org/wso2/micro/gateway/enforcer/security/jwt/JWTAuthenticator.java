@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
+import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
@@ -79,7 +80,7 @@ public class JWTAuthenticator implements Authenticator {
         String name = requestContext.getMathedAPI().getAPIConfig().getName();
         String version = requestContext.getMathedAPI().getAPIConfig().getVersion();
         context = context + "/" + version;
-        String matchingResource = requestContext.getMatchedResourcePath().getPath();
+        ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
         String httpMethod = requestContext.getMatchedResourcePath().getMethod().toString();
         SignedJWTInfo signedJWTInfo;
         try {
@@ -134,7 +135,7 @@ public class JWTAuthenticator implements Authenticator {
                     }
                 }
                 // Validate scopes
-                validateScopes(context, version, matchingResource, httpMethod, validationInfo, signedJWTInfo);
+                validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
 
                 log.debug("JWT authentication successful.");
                 String endUserToken = null;
@@ -151,15 +152,21 @@ public class JWTAuthenticator implements Authenticator {
                 }
                 return authenticationContext;
             } else {
-                requestContext.getProperties().put("code", "401");
-                requestContext.getProperties().put("error_code", "900901");
-                requestContext.getProperties().put("error_description", "Invalid credentials");
+                requestContext.getProperties()
+                        .put(APIConstants.MessageFormat.CODE, APIConstants.StatusCodes.UNAUTHENTICATED.getValue());
+                requestContext.getProperties()
+                        .put(APIConstants.MessageFormat.ERROR_CODE, APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
+                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION, APISecurityConstants
+                        .getFailureMessageDetailDescription(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE));
                 throw new APISecurityException(validationInfo.getValidationCode(),
                         APISecurityConstants.getAuthenticationFailureMessage(validationInfo.getValidationCode()));
             }
         } else {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
 
     }
@@ -171,12 +178,11 @@ public class JWTAuthenticator implements Authenticator {
      * @param apiContext        API Context
      * @param apiVersion        API Version
      * @param matchingResource  Accessed API resource
-     * @param httpMethod        API resource's HTTP method
      * @param jwtValidationInfo Validated JWT Information
      * @param jwtToken          JWT Token
      * @throws APISecurityException in case of scope validation failure
      */
-    private void validateScopes(String apiContext, String apiVersion, String matchingResource, String httpMethod,
+    private void validateScopes(String apiContext, String apiVersion, ResourceConfig matchingResource,
             JWTValidationInfo jwtValidationInfo, SignedJWTInfo jwtToken) throws APISecurityException {
         try {
             String tenantDomain = "carbon.super"; //TODO : Derive proper tenant domain.
@@ -191,8 +197,8 @@ public class JWTAuthenticator implements Authenticator {
             tokenValidationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
 
             tokenValidationContext.setAccessToken(jwtToken.getToken());
-            tokenValidationContext.setHttpVerb(httpMethod);
-            tokenValidationContext.setMatchingResource(matchingResource);
+            tokenValidationContext.setHttpVerb(matchingResource.getPath().toUpperCase());
+            tokenValidationContext.setMatchingResourceConfig(matchingResource);
             tokenValidationContext.setContext(apiContext);
             tokenValidationContext.setVersion(apiVersion);
 
@@ -204,10 +210,11 @@ public class JWTAuthenticator implements Authenticator {
                             + jwtValidationInfo.getUser());
                 }
             } else {
-                String message = "User is NOT authorized to access the Resource: " + matchingResource
+                String message = "User is NOT authorized to access the Resource: " + matchingResource.getPath()
                         + ". Scope validation failed.";
                 log.debug(message);
-                throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, message);
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                        APISecurityConstants.INVALID_SCOPE, message);
             }
         } catch (MGWException e) {
             String message = "Error while accessing backend services for token scope validation";

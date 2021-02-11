@@ -21,6 +21,7 @@ package org.wso2.micro.gateway.enforcer.security;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.enforcer.exception.DataLoadingException;
@@ -39,8 +40,8 @@ import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataStore;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -80,8 +81,6 @@ public class KeyValidator {
         if (apiKeyValidationInfoDTO == null) {
             throw new MGWException("Key Validation information not set");
         }
-        String tenantDomain = "carbon.super"; //TODO: get correct tenant domain.
-        String httpVerb = validationContext.getHttpVerb();
         String[] scopes;
         Set<String> scopesSet = apiKeyValidationInfoDTO.getScopes();
         StringBuilder scopeList = new StringBuilder();
@@ -99,46 +98,29 @@ public class KeyValidator {
             }
         }
 
-        String resourceList = validationContext.getMatchingResource();
-        List<String> resourceArray = new ArrayList<>(Arrays.asList(resourceList.split(",")));
-        SubscriptionDataStore tenantSubscriptionStore = SubscriptionDataHolder.getInstance()
-                .getTenantSubscriptionStore(tenantDomain);
-        API api = tenantSubscriptionStore
-                .getApiByContextAndVersion(validationContext.getContext(), validationContext.getVersion());
-        boolean scopesValidated = true; //TODO: enable proper scope validation
-        if (api != null) {
-
-            for (String resource : resourceArray) {
-                List<URLMapping> resources = api.getResources();
-                URLMapping urlMapping = null;
-                for (URLMapping mapping : resources) {
-                    if (httpVerb.equals(mapping.getHttpMethod())) {
-                        if (isResourcePathMatching(resource, mapping)) {
-                            urlMapping = mapping;
-                            break;
-                        }
-                    }
-                }
-                if (urlMapping != null) {
-                    if (urlMapping.getScopes().size() == 0) {
-                        scopesValidated = true;
-                        continue;
-                    }
-                    List<String> mappingScopes = urlMapping.getScopes();
-                    boolean validate = false;
-                    for (String scope : mappingScopes) {
+        ResourceConfig matchedResource = validationContext.getMatchingResourceConfig();
+        boolean scopesValidated = false;
+        if (matchedResource.getSecuritySchemas().entrySet().size() > 0) {
+            for (Map.Entry<String, List<String>> pair : matchedResource.getSecuritySchemas().entrySet()) {
+                boolean validate = false;
+                if (pair.getValue() != null && pair.getValue().size() > 0) {
+                    scopesValidated = false;
+                    for (String scope : pair.getValue()) {
                         if (scopesSet.contains(scope)) {
                             scopesValidated = true;
                             validate = true;
                             break;
                         }
                     }
-                    if (!validate && urlMapping.getScopes().size() > 0) {
-                        scopesValidated = false;
-                        break;
-                    }
+                } else {
+                    scopesValidated = true;
+                }
+                if (validate) {
+                    break;
                 }
             }
+        } else {
+            scopesValidated = true;
         }
         if (!scopesValidated) {
             apiKeyValidationInfoDTO.setAuthorized(false);

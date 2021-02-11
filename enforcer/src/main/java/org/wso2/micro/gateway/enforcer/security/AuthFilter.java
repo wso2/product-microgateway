@@ -29,6 +29,7 @@ import org.wso2.micro.gateway.enforcer.security.jwt.JWTAuthenticator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is the filter handling the authentication for the requests flowing through the gateway.
@@ -57,9 +58,21 @@ public class AuthFilter implements Filter {
             }
         } catch (APISecurityException e) {
             //TODO: (VirajSalaka) provide the error code properly based on exception (401, 403, 429 etc)
-            requestContext.getProperties().put("code", "401");
-            requestContext.getProperties().put("error_code", e.getErrorCode());
-            requestContext.getProperties().put("error_description", e.getMessage());
+            Map<String, Object> requestContextProperties = requestContext.getProperties();
+            if (!requestContextProperties.containsKey(APIConstants.MessageFormat.CODE)) {
+                requestContext.getProperties().put(APIConstants.MessageFormat.CODE, e.getStatusCode());
+            }
+            if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_CODE)) {
+                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_CODE, e.getErrorCode());
+            }
+            if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_MESSAGE)) {
+                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                        APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
+            }
+            if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_DESCRIPTION)) {
+                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                        APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
+            }
         }
         return false;
     }
@@ -91,27 +104,31 @@ public class AuthFilter implements Filter {
                         requestContext.getSandClusterHeader());
             } else {
                 if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        "Production key offered to the API with no production endpoint");
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            "Production key offered to the API with no production endpoint");
                 } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
-                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        "Sandbox key offered to the API with no sandbox endpoint");
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            "Sandbox key offered to the API with no sandbox endpoint");
                 }
-                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        "Invalid key type.");
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid key type.");
             }
         } else {
             // Even if the header flag is false, it is required to check if the relevant resource has a defined cluster
             // based on environment. 
             // If not it should provide authentication error.
             // Always at least one of the cluster header values should be set.
-            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)
-                    && StringUtils.isEmpty(requestContext.getProdClusterHeader())) {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+            if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION) && StringUtils
+                    .isEmpty(requestContext.getProdClusterHeader())) {
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Production key offered to the API with no production endpoint");
-            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)
-                    && StringUtils.isEmpty(requestContext.getSandClusterHeader())) {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+            } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX) && StringUtils
+                    .isEmpty(requestContext.getSandClusterHeader())) {
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Sandbox key offered to the API with no sandbox endpoint");
             }   
         }

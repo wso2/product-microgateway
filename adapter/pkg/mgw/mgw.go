@@ -138,7 +138,7 @@ func Run(conf *config.Config) {
 	// log config watcher
 	// TODO: (VirajSalaka) Implement a rest endpoint to apply configurations
 	watcherLogConf, _ := fsnotify.NewWatcher()
-	errC := watcherLogConf.Add("conf/log_config.toml")
+	errC := watcherLogConf.Add(config.GetMgwHome() +"/conf/log_config.toml")
 
 	if errC != nil {
 		logger.LoggerMgw.Fatal("Error reading the log configs. ", errC)
@@ -154,7 +154,7 @@ func Run(conf *config.Config) {
 	enforcerSubscriptionPolicyCache := xds.GetEnforcerSubscriptionPolicyCache()
 	enforcerApplicationKeyMappingCache := xds.GetEnforcerApplicationKeyMappingCache()
 
-	srv := xdsv3.NewServer(ctx, cache, nil)
+	srv := xdsv3.NewServer(ctx, cache, &cb.Callbacks{})
 	enforcerXdsSrv := xdsv3.NewServer(ctx, enforcerCache, &cb.Callbacks{})
 	enforcerSdsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionCache, &cb.Callbacks{})
 	enforcerAppDsSrv := xdsv3.NewServer(ctx, enforcerApplicationCache, &cb.Callbacks{})

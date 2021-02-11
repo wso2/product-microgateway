@@ -129,7 +129,7 @@ func handleAPIEvents(data []byte, eventType string) {
 		if err != nil {
 			logger.LoggerMsg.Errorf("Cannot cast %s to an Integer", apiEvent.APIID)
 		} else {
-			api := resourceTypes.API{APIID: int32(ID), Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
+			api := resourceTypes.API{APIID: strconv.FormatInt(ID, 10), Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
 				Version: apiEvent.APIVersion, Context: apiEvent.APIContext, APIType: apiEvent.APIType,
 				APIStatus: apiEvent.APIStatus, IsDefaultVersion: true, TenantID: apiEvent.TenantID,
 				TenantDomain: apiEvent.Event.TenantDomain, TimeStamp: apiEvent.Event.TimeStamp}

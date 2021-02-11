@@ -126,9 +126,13 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *wso2.Api {
 	}
 
 	for _, res := range mgwSwagger.GetResources() {
+		var operations = make([]*wso2.Operation, len(res.GetMethod()))
+		for i,op := range res.GetMethod() {
+			operations[i] = GetEnforcerAPIOperation(op)
+		}
 		resource := &wso2.Resource{
 			Id:      res.GetID(),
-			Methods: res.GetMethod(),
+			Methods: operations,
 			Path:    res.GetPath(),
 		}
 		resources = append(resources, resource)
@@ -144,4 +148,27 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *wso2.Api {
 		SandboxUrls:    sandUrls,
 		Resources:      resources,
 	}
+}
+
+// GetEnforcerAPIOperation builds the operation object expected by the proto definition
+func GetEnforcerAPIOperation(operation mgw.Operation) *wso2.Operation {
+	secSchemas := make([]*wso2.SecurityList, len(operation.GetSecurity()))
+	for i, security := range operation.GetSecurity() {
+		mapOfSecurity := make(map[string]*wso2.Scopes)
+		for key, scopes := range security {
+			scopeList := &wso2.Scopes{
+				Scopes: scopes,
+			}
+			mapOfSecurity[key] = scopeList
+		}
+		secSchema := &wso2.SecurityList{
+			ScopeList: mapOfSecurity,
+		}
+		secSchemas[i] = secSchema
+	}
+	apiOperation := wso2.Operation{
+		Method: operation.GetMethod(),
+		Security: secSchemas,
+	}
+	return &apiOperation
 }

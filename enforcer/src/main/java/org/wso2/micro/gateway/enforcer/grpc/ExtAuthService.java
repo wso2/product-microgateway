@@ -31,6 +31,7 @@ import io.envoyproxy.envoy.type.v3.HttpStatus;
 import io.grpc.stub.StreamObserver;
 import org.json.JSONObject;
 import org.wso2.micro.gateway.enforcer.api.ResponseObject;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.HttpConstants;
 import org.wso2.micro.gateway.enforcer.server.RequestHandler;
 
@@ -71,11 +72,10 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         .build();
             }
             // Error handling
-            String errorCode = responseObject.getErrorCode();
-            String errorDescription = responseObject.getErrorDescription();
             JSONObject responseJson = new JSONObject();
-            responseJson.put("errorCode", errorCode);
-            responseJson.put("errorDescription", errorDescription);
+            responseJson.put(APIConstants.MessageFormat.ERROR_CODE, responseObject.getErrorCode());
+            responseJson.put(APIConstants.MessageFormat.ERROR_MESSAGE, responseObject.getErrorMessage());
+            responseJson.put(APIConstants.MessageFormat.ERROR_DESCRIPTION, responseObject.getErrorDescription());
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                     .setHeader(HeaderValue.newBuilder().setKey("Content-type").setValue("application/json").build())
                     .build();

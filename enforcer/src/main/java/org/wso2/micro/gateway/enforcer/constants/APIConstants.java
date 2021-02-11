@@ -202,4 +202,39 @@ public class APIConstants {
         public static final String TOPIC_KEY_MANAGER = "keyManager";
         public static final String TOPIC_NOTIFICATION = "notification";
     }
+
+    /**
+     * Holds the constants related to attributes to be sent in the response in case of an error
+     * scenario raised within the enforcer.
+     */
+    public static class MessageFormat {
+        public static final String CODE = "code";
+        public static final String ERROR_CODE = "error_code";
+        public static final String ERROR_MESSAGE = "error_message";
+        public static final String ERROR_DESCRIPTION = "error_description";
+    }
+
+    /**
+     * Holds the values related http status codes
+     */
+    public enum StatusCodes {
+        OK("200", 200),
+        UNAUTHENTICATED("401", 401),
+        UNAUTHORIZED("403", 403);
+
+        private String value;
+        private int code;
+        private  StatusCodes(String value, int code) {
+            this.value = value;
+            this.code = code;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+
+        public int getCode() {
+            return this.code;
+        }
+    }
 }
