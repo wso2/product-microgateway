@@ -79,8 +79,8 @@ public class RestAPI implements API {
         } else {
             // If a enforcer stops with a false, it will be passed directly to the client.
             responseObject.setDirectResponse(true);
-            responseObject.setStatusCode(
-                    Integer.parseInt(requestContext.getProperties().get(APIConstants.MessageFormat.CODE).toString()));
+            responseObject.setStatusCode(Integer.parseInt(
+                    requestContext.getProperties().get(APIConstants.MessageFormat.STATUS_CODE).toString()));
             if (requestContext.getProperties().get(APIConstants.MessageFormat.ERROR_CODE) != null) {
                 responseObject.setErrorCode(
                         requestContext.getProperties().get(APIConstants.MessageFormat.ERROR_CODE).toString());

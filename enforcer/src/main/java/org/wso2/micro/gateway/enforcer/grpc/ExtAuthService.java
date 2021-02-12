@@ -57,7 +57,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         DeniedHttpResponse.Builder responseBuilder = DeniedHttpResponse.newBuilder();
         HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
         if (responseObject.isDirectResponse()) {
-            // To handle options request
+            // To handle pre flight options request
             if (responseObject.getStatusCode() == HttpConstants.NO_CONTENT_STATUS_CODE) {
                 responseObject.getHeaderMap().forEach((key, value) -> {
                             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()

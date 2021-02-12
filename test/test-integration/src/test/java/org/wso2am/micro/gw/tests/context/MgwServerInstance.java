@@ -88,8 +88,8 @@ public class MgwServerInstance implements MgwServer {
         }
         String dockerCompsePath = mgwServerPath+  File.separator + "docker-compose.yaml";
         MockBackendServer.addMockBackendServiceToDockerCompose(dockerCompsePath, tlsEnabled);
-        environment = new DockerComposeContainer(new File(dockerCompsePath))
-                .withLocalCompose(true);
+        environment = new DockerComposeContainer(new File(dockerCompsePath)).withLocalCompose(true)
+                .withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5006");
 
     }
 

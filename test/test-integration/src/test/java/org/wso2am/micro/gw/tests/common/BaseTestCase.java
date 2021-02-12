@@ -21,6 +21,8 @@ package org.wso2am.micro.gw.tests.common;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2am.micro.gw.tests.common.model.API;
 import org.wso2am.micro.gw.tests.common.model.ApplicationDTO;
 import org.wso2am.micro.gw.tests.common.model.SubscribedApiDTO;
@@ -32,6 +34,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Base test class for mgw test cases.
@@ -39,6 +42,9 @@ import java.util.Arrays;
 public class BaseTestCase {
 
     protected MgwServerInstance microGWServer;
+    private static int maxRetryCount=10;
+    private static int retryIntervalMillis = 3000;
+    private static final Logger log = LoggerFactory.getLogger(BaseTestCase.class);
 
     /**
      * start the mgw docker environment and mock backend.
@@ -97,6 +103,41 @@ public class BaseTestCase {
 
     public static String getMockServiceURLHttp(String servicePath) throws MalformedURLException {
         return new URL(new URL("http://localhost:" + TestConstant.MOCK_SERVER_PORT), servicePath).toString();
+    }
+
+    public static HttpResponse retryPostRequestUntilDeployed(String requestUrl, Map<String, String> headers,
+            String body) throws IOException, InterruptedException {
+        HttpResponse response;
+        int retryCount = 0;
+        do {
+            log.info("Trying request with url : " + requestUrl);
+            response = HttpsClientRequest.doPost(requestUrl, body, headers);
+            retryCount++;
+        } while (response != null && response.getResponseCode() == 404 && response.getResponseMessage()
+                .contains("Not Found") && retry(retryCount));
+        return response;
+    }
+
+    public static HttpResponse retryGetRequestUntilDeployed(String requestUrl, Map<String, String> headers)
+            throws IOException, InterruptedException {
+        HttpResponse response;
+        int retryCount = 0;
+        do {
+            log.info("Trying request with url : " + requestUrl);
+            response = HttpsClientRequest.doGet(requestUrl, headers);
+            retryCount++;
+        } while (response != null && response.getResponseCode() == 404 && response.getResponseMessage()
+                .contains("Not Found") && retry(retryCount));
+        return response;
+    }
+
+    private static boolean retry(int retryCount) throws InterruptedException {
+        if(retryCount >= maxRetryCount) {
+            log.info("Retrying of the request is finished");
+            return false;
+        }
+        Thread.sleep(retryIntervalMillis);
+        return true;
     }
 
     /**

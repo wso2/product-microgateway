@@ -169,7 +169,6 @@ paths:
       security:
         - petstore_auth:
             - 'write:pets'
-            - 'read:pets'
   /pet/findByTags:
     get:
       tags:

@@ -58,5 +58,6 @@ services:
       - ADAPTER_HOST=adapter
       - ADAPTER_XDS_PORT=18000
       - ENFORCER_LABEL=enforcer
+      - JAVA_OPTS=${JAVA_OPTS}
     ports:
-      - "8081:8081"   
+      - "8081:8081"

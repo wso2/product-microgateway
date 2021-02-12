@@ -59,6 +59,10 @@ public class APIConstants {
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_PAYLOAD = "event";
 
+    public static final String NOT_FOUND_MESSAGE = "Not Found";
+    public static final String NOT_FOUND_DESCRIPTION = "The requested resource is not available.";
+
+
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
      */
@@ -208,8 +212,8 @@ public class APIConstants {
      * scenario raised within the enforcer.
      */
     public static class MessageFormat {
-        public static final String CODE = "code";
-        public static final String ERROR_CODE = "error_code";
+        public static final String STATUS_CODE = "status_code";
+        public static final String ERROR_CODE = "code";
         public static final String ERROR_MESSAGE = "error_message";
         public static final String ERROR_DESCRIPTION = "error_description";
     }
@@ -220,7 +224,8 @@ public class APIConstants {
     public enum StatusCodes {
         OK("200", 200),
         UNAUTHENTICATED("401", 401),
-        UNAUTHORIZED("403", 403);
+        UNAUTHORIZED("403", 403),
+        NOTFOUND("404", 4040);
 
         private String value;
         private int code;

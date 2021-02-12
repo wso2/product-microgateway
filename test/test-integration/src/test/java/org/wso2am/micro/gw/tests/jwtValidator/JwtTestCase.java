@@ -37,6 +37,10 @@ import java.util.Map;
 public class JwtTestCase extends BaseTestCase {
 
     protected String jwtTokenProd;
+    protected String jwtWithoutScope;
+    protected String jwtWithScope;
+    protected String jwtWithMultipleScopes;
+    protected String jwtWithMultipleInvalidScopes;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
@@ -63,6 +67,10 @@ public class JwtTestCase extends BaseTestCase {
         application.setId((int) (Math.random() * 1000));
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, null);
+        jwtWithoutScope = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, null);
+        jwtWithScope = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, "write:pets");
+        jwtWithMultipleScopes = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, "write:pets read:pets");
+        jwtWithMultipleInvalidScopes = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, "foo bar");
     }
 
 
