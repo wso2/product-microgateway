@@ -45,26 +45,19 @@ const (
 	pemExtension          string = ".pem"
 )
 
-// ApplyAPIProject accepts an apictl project (as a byte array) and updates the xds servers based upon the
-// content.
+// extractAPIProject accepts the API project as a zip file and returns the extracted content
 // The apictl project must be in zipped format. And all the extensions should be defined with in the openAPI
 // definition as only swagger.yaml is taken into consideration here. For websocket APIs api.yaml is taken into
 // consideration. API type is decided by the type field in the api.yaml file.
-func ApplyAPIProject(payload []byte, envrionments []string) error {
-	if len(envrionments) == 0 {
-		envrionments = append(envrionments, "Production and Sandbox")
-	}
+func extractAPIProject(payload []byte) (apiJsn []byte, swaggerJsn []byte, upstreamCerts []byte,
+	apiType string, err error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
-	var upstreamCerts []byte
 	newLineByteArray := []byte("\n")
-	var swaggerJsn []byte
-	var apiJsn []byte
 	var conversionErr error
-	var apiType string
 
 	if err != nil {
 		loggers.LoggerAPI.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
-		return err
+		return nil, nil, nil, "", err
 	}
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
 	for _, file := range zipReader.File {
@@ -79,8 +72,9 @@ func ApplyAPIProject(payload []byte, envrionments []string) error {
 			swaggerJsn, conversionErr = utills.ToJSON(unzippedFileBytes)
 			if conversionErr != nil {
 				loggers.LoggerAPI.Errorf("Error converting api file to json: %v", conversionErr.Error())
-				return conversionErr
+				return nil, nil, nil, "", conversionErr
 			}
+			apiType = mgw.HTTP
 		} else if strings.Contains(file.Name, endpointCertDir+string(os.PathSeparator)) &&
 			(strings.HasSuffix(file.Name, crtExtension) || strings.HasSuffix(file.Name, pemExtension)) {
 			unzippedFileBytes, err := readZipFile(file)
@@ -92,7 +86,7 @@ func ApplyAPIProject(payload []byte, envrionments []string) error {
 			if !tlsutils.IsPublicCertificate(unzippedFileBytes) {
 				loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", file.Name)
 				// TODO: (VirajSalaka) Create standard error handling mechanism
-				return errors.New("Certificate Validation Error")
+				return nil, nil, nil, "", errors.New("Certificate Validation Error")
 			}
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
@@ -101,32 +95,94 @@ func ApplyAPIProject(payload []byte, envrionments []string) error {
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error occured while reading the api definition file : %v %v", file.Name, err.Error())
-				return err
+				return nil, nil, nil, "", err
 			}
 			apiJsn, conversionErr = utills.ToJSON(unzippedFileBytes)
 			if conversionErr != nil {
 				loggers.LoggerAPI.Errorf("Error occured converting api file to json: %v", conversionErr.Error())
+				return nil, nil, nil, "", conversionErr
 			}
 			apiType, err = getAPIType(apiJsn)
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
-				return err
+				return nil, nil, nil, "", err
 			}
 
 		}
 	}
-	// TODO - (VirajSalaka) change the switch case and use one method with both api.yaml and swagger.yaml
-	switch apiType {
-	case mgw.HTTP:
-		xds.UpdateAPI(swaggerJsn, upstreamCerts, apiType, envrionments)
-	case mgw.WS:
-		xds.UpdateAPI(apiJsn, upstreamCerts, apiType, envrionments)
-	default:
-		// If no api.yaml file is included in the zip folder , apiType defaults to HTTP to pass the APIDeployTestCase integration test.
+	if apiJsn == nil {
 		// TODO : (LahiruUdayanga) Handle the default behaviour after when the APIDeployTestCase test is fixed.
-		apiType = mgw.HTTP
-		xds.UpdateAPI(swaggerJsn, upstreamCerts, apiType, envrionments)
-		loggers.LoggerAPI.Infof("API type is not currently supported with WSO2 micro-gateway")
+		// If no api.yaml file is included in the zip folder, return with error.
+		err := errors.New("Could not find api.yaml file")
+		loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
+		return nil, nil, nil, "", err
+	} else if apiType != mgw.HTTP && apiType != mgw.WS {
+		errMsg := "API type is not currently supported with WSO2 micro-gateway"
+		loggers.LoggerAPI.Infof(errMsg)
+		err = errors.New(errMsg)
+		return nil, nil, nil, "", err
+	}
+	return apiJsn, swaggerJsn, upstreamCerts, apiType, nil
+}
+
+// ApplyAPIProject accepts an apictl project (as a byte array) and updates the xds servers based upon the
+// content.
+func ApplyAPIProject(payload []byte, environments []string) error {
+	apiJsn, swaggerJsn, upstreamCerts, apiType, err := extractAPIProject(payload)
+	if err != nil {
+		return err
+	}
+	name, version, err := getAPINameAndVersion(apiJsn)
+	if err != nil {
+		return err
+	}
+	if len(envrionments) == 0 {
+		envrionments = append(envrionments, "Production and Sandbox")
+	}
+	apiIdentifier := "default:" + name + ":" + version // TODO: (SuKSW) update once vhost feature added
+	if apiType == mgw.HTTP {
+		xds.UpdateAPI(apiIdentifier, apiJsn, upstreamCerts, apiType, environments)
+	} else if apiType == mgw.WS {
+		xds.UpdateAPI(apiIdentifier, swaggerJsn, upstreamCerts, apiType, environments)
+	}
+	return nil
+}
+
+// ApplyAPIProjectWithOverwrite is called by the rest implementation to differentiate
+// between create and update using the overwrite param
+func ApplyAPIProjectWithOverwrite(payload []byte, envrionments []string, overwriteP *bool) error {
+	apiJsn, swaggerJsn, upstreamCerts, apiType, err := extractAPIProject(payload)
+	if err != nil {
+		return err
+	}
+	var overwrite bool
+	if overwriteP == nil {
+		overwrite = false
+	} else {
+		overwrite = *overwriteP
+	}
+	name, version, err := getAPINameAndVersion(apiJsn)
+	if err != nil {
+		return err
+	}
+	exists := xds.IsAPIExist("default", name, version) // TODO: (SuKSW) update once vhost feature added
+	apiIdentifier := "default:" + name + ":" + version
+
+	if overwrite && !exists {
+		loggers.LoggerAPI.Infof("Error updating API. API %v does not exist.", apiIdentifier)
+		return errors.New("NOT_FOUND")
+	}
+	if !overwrite && exists {
+		loggers.LoggerAPI.Infof("Error creating new API. API %v already exists.", apiIdentifier)
+		return errors.New("ALREADY_EXISTS")
+	}
+	if len(envrionments) == 0 {
+		envrionments = append(envrionments, "Production and Sandbox")
+	}
+	if apiType == mgw.HTTP {
+		xds.UpdateAPI(apiIdentifier, apiJsn, upstreamCerts, apiType, envrionments)
+	} else if apiType == mgw.WS {
+		xds.UpdateAPI(apiIdentifier, swaggerJsn, upstreamCerts, apiType, envrionments)
 	}
 	return nil
 }
@@ -146,7 +202,7 @@ func ListApis(apiTypeP *string, limitP *int64) *apiModel.APIMeta {
 	if apiTypeP == nil {
 		apiType = ""
 	} else {
-		apiType = *apiTypeP
+		apiType = strings.ToUpper(*apiTypeP)
 	}
 	return xds.ListApis(apiType, limitP)
 }
@@ -168,7 +224,20 @@ func getAPIType(apiJsn []byte) (string, error) {
 		return "", unmarshalErr
 	}
 	data := apiDef["data"].(map[string]interface{})
-	apiType := data["type"].(string)
+	apiType := strings.ToUpper(data["type"].(string))
 
 	return apiType, nil
+}
+
+func getAPINameAndVersion(apiJsn []byte) (name string, version string, err error) {
+	var apiDef map[string]interface{}
+	err = json.Unmarshal(apiJsn, &apiDef)
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml %v", err.Error())
+		return "", "", err
+	}
+	data := apiDef["data"].(map[string]interface{})
+	name = data["name"].(string)
+	version = data["version"].(string)
+	return name, version, nil
 }
