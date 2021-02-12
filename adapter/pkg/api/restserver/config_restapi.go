@@ -79,20 +79,27 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		return &p, nil
 	}
 
-	api.APICollectionGetApisHandler = api_collection.GetApisHandlerFunc(func(params api_collection.GetApisParams, principal *models.Principal) middleware.Responder {
+	api.APICollectionGetApisHandler = api_collection.GetApisHandlerFunc(func(params api_collection.GetApisParams,
+		principal *models.Principal) middleware.Responder {
 		return api_collection.NewGetApisOK().WithPayload(apiServer.ListApis(params.APIType, params.Limit))
 	})
 	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(params api_individual.PostApisParams,
 		principal *models.Principal) middleware.Responder {
 		// TODO: (VirajSalaka) Error is not handled in the response.
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
-		err := apiServer.ApplyAPIProject(jsonByteArray, []string{})
+		err := apiServer.ApplyAPIProjectWithOverwrite(jsonByteArray, []string{}, params.Overwrite)
 		if err != nil {
+			if err.Error() == "NOT_FOUND" {
+				api_individual.NewPostApisNotFound()
+			} else if err.Error() == "ALREADY_EXISTS" {
+				api_individual.NewPostApisConflict()
+			}
 			return api_individual.NewPostApisInternalServerError()
 		}
 		return api_individual.NewPostApisOK()
 	})
-	api.APIIndividualPostApisDeleteHandler = api_individual.PostApisDeleteHandlerFunc(func(params api_individual.PostApisDeleteParams, principal *models.Principal) middleware.Responder {
+	api.APIIndividualPostApisDeleteHandler = api_individual.PostApisDeleteHandlerFunc(func(params api_individual.PostApisDeleteParams,
+		principal *models.Principal) middleware.Responder {
 		errCode, _ := apiServer.DeleteAPI(params.APIName, params.Version, params.Vhost)
 		switch errCode {
 		case "":
