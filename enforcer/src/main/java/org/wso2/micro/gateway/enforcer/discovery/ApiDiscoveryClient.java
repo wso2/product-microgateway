@@ -111,7 +111,8 @@ public class ApiDiscoveryClient {
 
     public void watchApis() {
         // TODO: (Praminda) implement a deadline with retries
-        reqObserver = stub.streamApis(new StreamObserver<DiscoveryResponse>() {
+        int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
+        reqObserver = stub.withMaxInboundMessageSize(maxSize).streamApis(new StreamObserver<DiscoveryResponse>() {
                     @Override
                     public void onNext(DiscoveryResponse response) {
                         logger.debug("Received API discovery response " + response);
