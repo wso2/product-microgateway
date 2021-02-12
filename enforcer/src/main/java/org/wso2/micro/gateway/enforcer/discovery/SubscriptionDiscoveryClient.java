@@ -31,6 +31,7 @@ import org.wso2.gateway.discovery.service.subscription.SubscriptionDiscoveryServ
 import org.wso2.gateway.discovery.subscription.Subscription;
 import org.wso2.gateway.discovery.subscription.SubscriptionList;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataStoreImpl;
 import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
@@ -76,7 +77,7 @@ public class SubscriptionDiscoveryClient {
         this.subscriptionDataStore = SubscriptionDataStoreImpl.getInstance();
         this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
         this.stub = SubscriptionDiscoveryServiceGrpc.newStub(channel);
-        this.nodeId = ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
+        this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
     }
 

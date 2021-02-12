@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.service.config.ConfigDiscoveryServiceGrpc;
 import org.wso2.micro.gateway.enforcer.config.EnvVarConfig;
+import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 
@@ -69,7 +70,7 @@ public class ConfigDiscoveryClient {
                 .overrideAuthority(envVarConfig.getAdapterHostName())
                 .build();
         this.blockingStub = ConfigDiscoveryServiceGrpc.newBlockingStub(channel);
-        nodeId = envVarConfig.getEnforcerLabel();
+        nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
     }
 
     public Config requestInitConfig() throws DiscoveryException {

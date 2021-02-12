@@ -101,6 +101,10 @@ var (
 	enforcerApplicationKeyMappingMap map[string][]types.Resource
 )
 
+const (
+	commonEnforcerLabel string = "commonEnforcerLabel"
+)
+
 // IDHash uses ID field as the node hash.
 type IDHash struct{}
 
@@ -433,7 +437,7 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 // UpdateEnforcerConfig Sets new update to the enforcer's configuration
 func UpdateEnforcerConfig(configFile *config.Config) {
 	// TODO: (Praminda) handle labels
-	label := "enforcer"
+	label := commonEnforcerLabel
 	configs := []types.Resource{generateEnforcerConfigs(configFile)}
 	version, ok := enforcerCacheVersionMap[label]
 	if ok {
@@ -631,7 +635,7 @@ func GenerateApplicationKeyMappingList(keyMappingList *resourceTypes.Application
 func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 	//TODO: (Dinusha) check this hardcoded value
 	logger.LoggerXds.Debug("Updating Enforcer Subscription Cache")
-	label := "enforcer"
+	label := commonEnforcerLabel
 	subscriptionList := enforcerSubscriptionMap[label]
 	subscriptionList = append(subscriptionList, subscriptions)
 
@@ -658,7 +662,7 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 // UpdateEnforcerApplications sets new update to the enforcer's Applications
 func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 	logger.LoggerXds.Debug("Updating Enforcer Application Cache")
-	label := "enforcer"
+	label := commonEnforcerLabel
 	applicationList := enforcerApplicationMap[label]
 	applicationList = append(applicationList, applications)
 
@@ -685,7 +689,7 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 // UpdateEnforcerAPIList sets new update to the enforcer's Apis
 func UpdateEnforcerAPIList(apis *subscription.APIList) {
 	logger.LoggerXds.Debug("Updating Enforcer API Cache")
-	label := "enforcer"
+	label := commonEnforcerLabel
 	apiList := enforcerAPIListMap[label]
 	apiList = append(apiList, apis)
 
@@ -712,7 +716,7 @@ func UpdateEnforcerAPIList(apis *subscription.APIList) {
 // UpdateEnforcerApplicationPolicies sets new update to the enforcer's Application Policies
 func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.ApplicationPolicyList) {
 	logger.LoggerXds.Debug("Updating Enforcer Application Policy Cache")
-	label := "enforcer"
+	label := commonEnforcerLabel
 	applicationPolicyList := enforcerApplicationPolicyMap[label]
 	applicationPolicyList = append(applicationPolicyList, applicationPolicies)
 
@@ -739,7 +743,7 @@ func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 // UpdateEnforcerSubscriptionPolicies sets new update to the enforcer's Subscription Policies
 func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.SubscriptionPolicyList) {
 	logger.LoggerXds.Debug("Updating Enforcer Subscription Policy Cache")
-	label := "enforcer"
+	label := commonEnforcerLabel
 	subscriptionPolicyList := enforcerSubscriptionPolicyMap[label]
 	subscriptionPolicyList = append(subscriptionPolicyList, subscriptionPolicies)
 
@@ -766,7 +770,7 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 // UpdateEnforcerApplicationKeyMappings sets new update to the enforcer's Application Key Mappings
 func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.ApplicationKeyMappingList) {
 	logger.LoggerXds.Debug("Updating Application Key Mapping Cache")
-	label := "enforcer"
+	label := commonEnforcerLabel
 	applicationKeyMappingList := enforcerApplicationKeyMappingMap[label]
 	applicationKeyMappingList = append(applicationKeyMappingList, applicationKeyMappings)
 
