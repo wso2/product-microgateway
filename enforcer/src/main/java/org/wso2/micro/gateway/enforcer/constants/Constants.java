@@ -22,7 +22,6 @@ package org.wso2.micro.gateway.enforcer.constants;
  * This class holds the constant keys related to the Microgateway.
  */
 public class Constants {
-
     public static final String CONFIG_TYPE_URL = "type.googleapis.com/wso2.discovery.config.enforcer.Config";
     public static final String API_TYPE_URL = "type.googleapis.com/wso2.discovery.api.Api";
     public static final String SUBSCRIPTION_LIST_TYPE_URL =

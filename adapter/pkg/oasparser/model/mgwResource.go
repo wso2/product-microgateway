@@ -39,7 +39,7 @@ type Resource struct {
 	productionUrls   []Endpoint
 	sandboxUrls      []Endpoint
 	security         []map[string][]string
-	vendorExtensible map[string]interface{}
+	vendorExtensions map[string]interface{}
 }
 
 // GetProdEndpoints returns the production endpoints array of a given resource.
@@ -77,7 +77,7 @@ func (resource *Resource) GetMethod() []string {
 // CreateDummyResourceForTests create an resource object which could be used for unit tests.
 func CreateDummyResourceForTests(path, method, description string, consumes, schemes,
 	tags []string, summary, id string, productionUrls, sandboxUrls []Endpoint,
-	security []map[string][]string, vendorExtensible map[string]interface{}) Resource {
+	security []map[string][]string, vendorExtensions map[string]interface{}) Resource {
 	return Resource{
 		path:             path,
 		methods:          []string{method},
@@ -90,7 +90,7 @@ func CreateDummyResourceForTests(path, method, description string, consumes, sch
 		productionUrls:   productionUrls,
 		sandboxUrls:      sandboxUrls,
 		security:         security,
-		vendorExtensible: vendorExtensible,
+		vendorExtensions: vendorExtensions,
 	}
 }
 
