@@ -41,36 +41,42 @@ const (
 )
 
 var (
-	subList           *resourceTypes.SubscriptionList
-	appList           *resourceTypes.ApplicationList
-	appKeyMappingList *resourceTypes.ApplicationKeyMappingList
-	apiList           *resourceTypes.APIList
-	appPolicyList     *resourceTypes.ApplicationPolicyList
-	subPolicyList     *resourceTypes.SubscriptionPolicyList
-	resources         = []resource{
+	// SubList contains the Subscription list
+	SubList           *resourceTypes.SubscriptionList
+	// AppList contains the Application list
+	AppList           *resourceTypes.ApplicationList
+	// AppKeyMappingList contains the Application key mapping list
+	AppKeyMappingList *resourceTypes.ApplicationKeyMappingList
+	// APIList contains the Api list
+	APIList           *resourceTypes.APIList
+	// AppPolicyList contains the Application policy list
+	AppPolicyList     *resourceTypes.ApplicationPolicyList
+	// SubPolicyList contains the Subscription policy list
+	SubPolicyList     *resourceTypes.SubscriptionPolicyList
+	resources = []resource{
 		{
 			endpoint:     "subscriptions",
-			responseType: subList,
+			responseType: SubList,
 		},
 		{
 			endpoint:     "applications",
-			responseType: appList,
+			responseType: AppList,
 		},
 		{
 			endpoint:     "application-key-mappings",
-			responseType: appKeyMappingList,
+			responseType: AppKeyMappingList,
 		},
 		{
 			endpoint:     "apis",
-			responseType: apiList,
+			responseType: APIList,
 		},
 		{
 			endpoint:     "application-policies",
-			responseType: appPolicyList,
+			responseType: AppPolicyList,
 		},
 		{
 			endpoint:     "subscription-policies",
-			responseType: subPolicyList,
+			responseType: SubPolicyList,
 		},
 	}
 	accessToken string
@@ -115,28 +121,28 @@ func LoadSubscriptionData(configFile *config.Config) {
 				switch t := newResponse.(type) {
 				case *resourceTypes.SubscriptionList:
 					logger.LoggerSubscription.Debug("Received Subscription information.")
-					subList = newResponse.(*resourceTypes.SubscriptionList)
-					xds.UpdateEnforcerSubscriptions(xds.GenerateSubscriptionList(subList))
+					SubList = newResponse.(*resourceTypes.SubscriptionList)
+					xds.UpdateEnforcerSubscriptions(xds.GenerateSubscriptionList(SubList))
 				case *resourceTypes.ApplicationList:
 					logger.LoggerSubscription.Debug("Received Application information.")
-					appList = newResponse.(*resourceTypes.ApplicationList)
-					xds.UpdateEnforcerApplications(xds.GenerateApplicationList(appList))
+					AppList = newResponse.(*resourceTypes.ApplicationList)
+					xds.UpdateEnforcerApplications(xds.GenerateApplicationList(AppList))
 				case *resourceTypes.APIList:
 					logger.LoggerSubscription.Debug("Received API information.")
-					apiList = newResponse.(*resourceTypes.APIList)
-					xds.UpdateEnforcerAPIList(xds.GenerateAPIList(apiList))
+					APIList = newResponse.(*resourceTypes.APIList)
+					xds.UpdateEnforcerAPIList(xds.GenerateAPIList(APIList))
 				case *resourceTypes.ApplicationPolicyList:
 					logger.LoggerSubscription.Debug("Received Application Policy information.")
-					appPolicyList = newResponse.(*resourceTypes.ApplicationPolicyList)
-					xds.UpdateEnforcerApplicationPolicies(xds.GenerateApplicationPolicyList(appPolicyList))
+					AppPolicyList = newResponse.(*resourceTypes.ApplicationPolicyList)
+					xds.UpdateEnforcerApplicationPolicies(xds.GenerateApplicationPolicyList(AppPolicyList))
 				case *resourceTypes.SubscriptionPolicyList:
 					logger.LoggerSubscription.Debug("Received Subscription Policy information.")
-					subPolicyList = newResponse.(*resourceTypes.SubscriptionPolicyList)
-					xds.UpdateEnforcerSubscriptionPolicies(xds.GenerateSubscriptionPolicyList(subPolicyList))
+					SubPolicyList = newResponse.(*resourceTypes.SubscriptionPolicyList)
+					xds.UpdateEnforcerSubscriptionPolicies(xds.GenerateSubscriptionPolicyList(SubPolicyList))
 				case *resourceTypes.ApplicationKeyMappingList:
 					logger.LoggerSubscription.Debug("Received Application Key Mapping information.")
-					appKeyMappingList = newResponse.(*resourceTypes.ApplicationKeyMappingList)
-					xds.UpdateEnforcerApplicationKeyMappings(xds.GenerateApplicationKeyMappingList(appKeyMappingList))
+					AppKeyMappingList = newResponse.(*resourceTypes.ApplicationKeyMappingList)
+					xds.UpdateEnforcerApplicationKeyMappings(xds.GenerateApplicationKeyMappingList(AppKeyMappingList))
 				default:
 					logger.LoggerSubscription.Debugf("Unknown type %T", t)
 				}

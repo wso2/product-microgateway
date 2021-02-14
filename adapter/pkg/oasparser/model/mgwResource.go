@@ -38,8 +38,8 @@ type Resource struct {
 	iD               string
 	productionUrls   []Endpoint
 	sandboxUrls      []Endpoint
-	security         map[string]map[string][]string
-	vendorExtensible map[string]interface{}
+	security         []map[string][]string
+	vendorExtensions map[string]interface{}
 }
 
 // GetProdEndpoints returns the production endpoints array of a given resource.
@@ -55,11 +55,6 @@ func (resource *Resource) GetSandEndpoints() []Endpoint {
 // GetPath returns the pathItem name (of openAPI definition) corresponding to a given resource
 func (resource *Resource) GetPath() string {
 	return resource.path
-}
-
-// GetSecurity returns the resource security definition
-func (resource *Resource) GetSecurity() map[string]map[string][]string {
-	return resource.security
 }
 
 // GetID returns the id of a given resource.
@@ -87,7 +82,7 @@ func (resource *Resource) GetMethodList() []string {
 // CreateDummyResourceForTests create an resource object which could be used for unit tests.
 func CreateDummyResourceForTests(path string, method []Operation, description string, consumes, schemes,
 	tags []string, summary, id string, productionUrls, sandboxUrls []Endpoint,
-	security map[string]map[string][]string, vendorExtensible map[string]interface{}) Resource {
+	security []map[string][]string, vendorExtensions map[string]interface{}) Resource {
 	return Resource{
 		path:             path,
 		methods:          method,
@@ -100,7 +95,7 @@ func CreateDummyResourceForTests(path string, method []Operation, description st
 		productionUrls:   productionUrls,
 		sandboxUrls:      sandboxUrls,
 		security:         security,
-		vendorExtensible: vendorExtensible,
+		vendorExtensions: vendorExtensions,
 	}
 }
 

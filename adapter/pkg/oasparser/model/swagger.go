@@ -40,7 +40,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 		swagger.title = swagger2.Info.Title
 		swagger.version = swagger2.Info.Version
 	}
-	swagger.vendorExtensible = swagger2.VendorExtensible.Extensions
+	swagger.vendorExtensions = swagger2.VendorExtensible.Extensions
 	swagger.resources = setResourcesSwagger(swagger2)
 	swagger.apiType = HTTP
 	swagger.xWso2Basepath = swagger2.BasePath
@@ -130,7 +130,7 @@ func setOperationSwagger(path string, methods []Operation, pathItem spec.PathIte
 		//schemes:          operation.Schemes,
 		//tags:             operation.Tags,
 		//security:         operation.Security,
-		vendorExtensible: pathItem.VendorExtensible.Extensions,
+		vendorExtensions: pathItem.VendorExtensible.Extensions,
 	}
 	return resource
 }

@@ -44,7 +44,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
 		swagger.version = swagger3.Info.Version
 	}
 
-	swagger.vendorExtensible = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
+	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.resources = setResourcesOpenAPI(swagger3)
 	swagger.apiType = HTTP
 
@@ -69,7 +69,7 @@ func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.Pat
 			//Schemes: operation.,
 			//tags: operation.Tags,
 			//security: pathItem.operation.Security.,
-			vendorExtensible: convertExtensibletoReadableFormat(pathItem.ExtensionProps),
+			vendorExtensions: convertExtensibletoReadableFormat(pathItem.ExtensionProps),
 		}
 	}
 	return resource
@@ -169,8 +169,8 @@ func isServerURLIsAvailable(servers openapi3.Servers) bool {
 }
 
 // convertExtensibletoReadableFormat unmarshalls the vendor extensible in open api3.
-func convertExtensibletoReadableFormat(vendorExtensible openapi3.ExtensionProps) map[string]interface{} {
-	jsnRawExtensible := vendorExtensible.Extensions
+func convertExtensibletoReadableFormat(vendorExtensions openapi3.ExtensionProps) map[string]interface{} {
+	jsnRawExtensible := vendorExtensions.Extensions
 	b, err := json.Marshal(jsnRawExtensible)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marsheling vendor extenstions: ", err)
