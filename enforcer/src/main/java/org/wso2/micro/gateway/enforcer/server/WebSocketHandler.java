@@ -1,6 +1,7 @@
 package org.wso2.micro.gateway.enforcer.server;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.api.*;
@@ -33,6 +34,13 @@ public class WebSocketHandler implements RequestHandler<RateLimitRequest, WebSoc
                 .getFieldsMap().get(APIConstants.GW_VERSION_PARAM).getStringValue();
         String apiBasepath = rateLimitRequest.getMetadataContext().getFilterMetadataMap().get(APIConstants.EXT_AUTHZ_METADATA)
                 .getFieldsMap().get(APIConstants.GW_BASE_PATH_PARAM).getStringValue();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try{
+            //String contextString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rateLimitRequest.getMetadataContext().getFilterMetadataMap().toString());
+            logger.info("contextString:"+ rateLimitRequest.getMetadataContext().getFilterMetadataMap().toString());
+        }catch (Exception e){
+            logger.error(e);
+        }
         return new WebSocketMetadataContext.Builder(streamId).setApiName(apiName).setApiVersion(apiVersion)
                 .setBasepath(apiBasepath).build();
     }
