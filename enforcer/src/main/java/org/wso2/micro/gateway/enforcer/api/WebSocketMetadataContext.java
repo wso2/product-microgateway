@@ -3,7 +3,7 @@ package org.wso2.micro.gateway.enforcer.api;
 
 
 public class WebSocketMetadataContext implements Context{
-
+    // TODO - (LahriuUdayanga) Finalize the instance variables
     private final String streamId;
     private final String applicationId;
     private final String applicationTier;

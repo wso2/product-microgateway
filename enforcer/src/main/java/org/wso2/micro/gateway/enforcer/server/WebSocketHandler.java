@@ -27,6 +27,13 @@ public class WebSocketHandler implements RequestHandler<RateLimitRequest, WebSoc
     private WebSocketMetadataContext buildMetadataContext(API<WebSocketMetadataContext, WebSocketMetadataContext> api, RateLimitRequest rateLimitRequest){
         String streamId = rateLimitRequest.getMetadataContext().getFilterMetadataMap().
                 get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.WEBSOCKET_STREAM_ID).getStringValue();
-        return new WebSocketMetadataContext.Builder(streamId).build();
+        String apiName = rateLimitRequest.getMetadataContext().getFilterMetadataMap().get(APIConstants.EXT_AUTHZ_METADATA)
+                .getFieldsMap().get(APIConstants.GW_API_NAME_PARAM).getStringValue();
+        String apiVersion = rateLimitRequest.getMetadataContext().getFilterMetadataMap().get(APIConstants.EXT_AUTHZ_METADATA)
+                .getFieldsMap().get(APIConstants.GW_VERSION_PARAM).getStringValue();
+        String apiBasepath = rateLimitRequest.getMetadataContext().getFilterMetadataMap().get(APIConstants.EXT_AUTHZ_METADATA)
+                .getFieldsMap().get(APIConstants.GW_BASE_PATH_PARAM).getStringValue();
+        return new WebSocketMetadataContext.Builder(streamId).setApiName(apiName).setApiVersion(apiVersion)
+                .setBasepath(apiBasepath).build();
     }
 }
