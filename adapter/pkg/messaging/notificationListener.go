@@ -28,7 +28,9 @@ import (
 	"github.com/streadway/amqp"
 	logger "github.com/wso2/micro-gw/loggers"
 	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
+	"github.com/wso2/micro-gw/pkg/subscription"
 	"github.com/wso2/micro-gw/pkg/synchronizer"
+	"github.com/wso2/micro-gw/pkg/xds"
 )
 
 // constant variables
@@ -46,14 +48,8 @@ const (
 
 // var variables
 var (
-	SubList                   = make([]resourceTypes.Subscription, 0)
-	AppKeyMappingList         = make([]resourceTypes.ApplicationKeyMapping, 0)
 	APIList                   = make([]resourceTypes.API, 0)
 	ScopeList                 = make([]resourceTypes.Scope, 0)
-	AppPolicyList             = make([]resourceTypes.ApplicationPolicy, 0)
-	SubPolicyList             = make([]resourceTypes.SubscriptionPolicy, 0)
-	ApplicationKeyMappingList = make([]resourceTypes.SubscriptionPolicy, 0)
-	AppList                   = make([]resourceTypes.Application, 0)
 	APIListTimeStamp          = make(map[string]int64, 0)
 	ApplicationListTimeStamp  = make(map[string]int64, 0)
 )
@@ -129,11 +125,20 @@ func handleAPIEvents(data []byte, eventType string) {
 		if err != nil {
 			logger.LoggerMsg.Errorf("Cannot cast %s to an Integer", apiEvent.APIID)
 		} else {
-			api := resourceTypes.API{APIID: int32(ID), Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
+			api := resourceTypes.API{APIID: strconv.FormatInt(ID, 10), Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
 				Version: apiEvent.APIVersion, Context: apiEvent.APIContext, APIType: apiEvent.APIType,
 				APIStatus: apiEvent.APIStatus, IsDefaultVersion: true, TenantID: apiEvent.TenantID,
 				TenantDomain: apiEvent.Event.TenantDomain, TimeStamp: apiEvent.Event.TimeStamp}
-			APIList = append(APIList, api)
+
+			if apiEvent.Event.Type == "API_CREATE" {
+				subscription.APIList.List = append(subscription.APIList.List, api)
+			} else if apiEvent.Event.Type == "API_UPDATE" {
+				subscription.APIList.List = removeAPI(subscription.APIList.List, apiEvent.APIID)
+				subscription.APIList.List = append(subscription.APIList.List, api)
+			} else if apiEvent.Event.Type == "API_DELETE" {
+				subscription.APIList.List = removeAPI(subscription.APIList.List, apiEvent.APIID)
+			}
+			xds.UpdateEnforcerAPIList(xds.GenerateAPIList(subscription.APIList))
 			logger.LoggerMsg.Infof("API %s is added/updated to APIList", apiEvent.APIID)
 		}
 
@@ -163,7 +168,8 @@ func handleApplicationEvents(data []byte, eventType string) {
 			KeyManager: applicationRegistrationEvent.KeyManager, TenantID: -1, TenantDomain: applicationRegistrationEvent.TenantDomain,
 			TimeStamp: applicationRegistrationEvent.TimeStamp}
 
-		AppKeyMappingList = append(AppKeyMappingList, applicationKeyMapping)
+		subscription.AppKeyMappingList.List = append(subscription.AppKeyMappingList.List, applicationKeyMapping)
+		xds.UpdateEnforcerApplicationKeyMappings(xds.GenerateApplicationKeyMappingList(subscription.AppKeyMappingList))
 	} else {
 		var applicationEvent ApplicationEvent
 		json.Unmarshal([]byte(string(data)), &applicationEvent)
@@ -171,8 +177,15 @@ func handleApplicationEvents(data []byte, eventType string) {
 			Name: applicationEvent.ApplicationName, SubName: applicationEvent.Subscriber, Policy: applicationEvent.ApplicationPolicy, TokenType: applicationEvent.TokenType, GroupIds: applicationEvent.GroupID, Attributes: nil,
 			TenantID: -1, TenantDomain: applicationEvent.TenantDomain, TimeStamp: applicationEvent.TimeStamp}
 
-		AppList = append(AppList, application)
-		// EventTypes: APPLICATION_CREATE, APPLICATION_UPDATE, APPLICATION_DELETE
+		if applicationEvent.Event.Type == "APPLICATION_CREATE" {
+			subscription.AppList.List = append(subscription.AppList.List, application)
+		} else if applicationEvent.Event.Type == "APPLICATION_UPDATE" {
+			subscription.AppList.List = removeApplication(subscription.AppList.List, applicationEvent.ApplicationID)
+			subscription.AppList.List = append(subscription.AppList.List, application)
+		} else if applicationEvent.Event.Type == "APPLICATION_DELETE" {
+			subscription.AppList.List = removeApplication(subscription.AppList.List, applicationEvent.ApplicationID)
+		}
+		xds.UpdateEnforcerApplications(xds.GenerateApplicationList(subscription.AppList))
 	}
 }
 
@@ -180,11 +193,19 @@ func handleApplicationEvents(data []byte, eventType string) {
 func handleSubscriptionEvents(data []byte, eventType string) {
 	var subscriptionEvent SubscriptionEvent
 	json.Unmarshal([]byte(string(data)), &subscriptionEvent)
-	subscription := resourceTypes.Subscription{SubscriptionID: subscriptionEvent.SubscriptionID, PolicyID: subscriptionEvent.PolicyID,
+	sub := resourceTypes.Subscription{SubscriptionID: subscriptionEvent.SubscriptionID, PolicyID: subscriptionEvent.PolicyID,
 		APIID: subscriptionEvent.APIID, AppID: subscriptionEvent.ApplicationID, SubscriptionState: subscriptionEvent.SubscriptionState,
 		TenantID: subscriptionEvent.TenantID, TenantDomain: subscriptionEvent.TenantDomain, TimeStamp: subscriptionEvent.TimeStamp}
 
-	SubList = append(SubList, subscription)
+	if subscriptionEvent.Event.Type == "SUBSCRIPTIONS_CREATE" {
+		subscription.SubList.List = append(subscription.SubList.List, sub)
+	} else if subscriptionEvent.Event.Type == "SUBSCRIPTIONS_UPDATE" {
+		subscription.SubList.List = removeSubscription(subscription.SubList.List, subscriptionEvent.SubscriptionID)
+		subscription.SubList.List = append(subscription.SubList.List, sub)
+	} else if subscriptionEvent.Event.Type == "SUBSCRIPTIONS_DELETE" {
+		subscription.SubList.List = removeSubscription(subscription.SubList.List, subscriptionEvent.SubscriptionID)
+	}
+	xds.UpdateEnforcerSubscriptions(xds.GenerateSubscriptionList(subscription.SubList))
 	// EventTypes: SUBSCRIPTIONS_CREATE, SUBSCRIPTIONS_UPDATE, SUBSCRIPTIONS_DELETE
 }
 
@@ -217,7 +238,16 @@ func handlePolicyEvents(data []byte, eventType string) {
 	} else if strings.EqualFold(applicationEventType, policyEvent.PolicyType) {
 		applicationPolicy := resourceTypes.ApplicationPolicy{ID: policyEvent.PolicyID, TenantID: -1, Name: policyEvent.PolicyName,
 			QuotaType: policyEvent.QuotaType}
-		AppPolicyList = append(AppPolicyList, applicationPolicy)
+
+		if policyEvent.Event.Type == "POLICY_CREATE" {
+			subscription.AppPolicyList.List = append(subscription.AppPolicyList.List, applicationPolicy)
+		} else if policyEvent.Event.Type == "POLICY_UPDATE" {
+			subscription.AppPolicyList.List = removeAppPolicy(subscription.AppPolicyList.List, policyEvent.PolicyID)
+			subscription.AppPolicyList.List = append(subscription.AppPolicyList.List, applicationPolicy)
+		} else if policyEvent.Event.Type == "POLICY_DELETE" {
+			subscription.AppPolicyList.List = removeAppPolicy(subscription.AppPolicyList.List, policyEvent.PolicyID)
+		}
+		xds.UpdateEnforcerApplicationPolicies(xds.GenerateApplicationPolicyList(subscription.AppPolicyList))
 
 	} else if strings.EqualFold(subscriptionEventType, policyEvent.PolicyType) {
 		var subscriptionPolicyEvent SubscriptionPolicyEvent
@@ -230,6 +260,69 @@ func handlePolicyEvents(data []byte, eventType string) {
 			RateLimitTimeUnit: subscriptionPolicyEvent.RateLimitTimeUnit, StopOnQuotaReach: subscriptionPolicyEvent.StopOnQuotaReach,
 			TenantDomain: subscriptionPolicyEvent.TenantDomain, TimeStamp: subscriptionPolicyEvent.TimeStamp}
 
-		SubPolicyList = append(SubPolicyList, subscriptionPolicy)
+		if subscriptionPolicyEvent.Event.Type == "POLICY_CREATE" {
+			subscription.SubPolicyList.List = append(subscription.SubPolicyList.List, subscriptionPolicy)
+		} else if subscriptionPolicyEvent.Event.Type == "POLICY_UPDATE" {
+			subscription.SubPolicyList.List = removeSubPolicy(subscription.SubPolicyList.List, subscriptionPolicyEvent.PolicyID)
+			subscription.SubPolicyList.List = append(subscription.SubPolicyList.List, subscriptionPolicy)
+		} else if subscriptionPolicyEvent.Event.Type == "POLICY_DELETE" {
+			subscription.SubPolicyList.List = removeSubPolicy(subscription.SubPolicyList.List, subscriptionPolicyEvent.PolicyID)
+		}
+		xds.UpdateEnforcerSubscriptionPolicies(xds.GenerateSubscriptionPolicyList(subscription.SubPolicyList))
 	}
+}
+
+func removeApplication(applications []resourceTypes.Application, id int32) []resourceTypes.Application {
+	index := 0
+	for _, i := range applications {
+		if i.ID != id {
+			applications[index] = i
+			index++
+		}
+	}
+	return applications[:index]
+}
+
+func removeSubscription(subscriptions []resourceTypes.Subscription, id int32) []resourceTypes.Subscription {
+	index := 0
+	for _, i := range subscriptions {
+		if i.SubscriptionID != id {
+			subscriptions[index] = i
+			index++
+		}
+	}
+	return subscriptions[:index]
+}
+
+func removeAppPolicy(appPolicies []resourceTypes.ApplicationPolicy, id int32) []resourceTypes.ApplicationPolicy {
+	index := 0
+	for _, i := range appPolicies {
+		if i.ID != id {
+			appPolicies[index] = i
+			index++
+		}
+	}
+	return appPolicies[:index]
+}
+
+func removeSubPolicy(subPolicies []resourceTypes.SubscriptionPolicy, id int32) []resourceTypes.SubscriptionPolicy {
+	index := 0
+	for _, i := range subPolicies {
+		if i.ID != id {
+			subPolicies[index] = i
+			index++
+		}
+	}
+	return subPolicies[:index]
+}
+
+func removeAPI(apis []resourceTypes.API, id string) []resourceTypes.API {
+	index := 0
+	for _, i := range apis {
+		if i.APIID != id {
+			apis[index] = i
+			index++
+		}
+	}
+	return apis[:index]
 }

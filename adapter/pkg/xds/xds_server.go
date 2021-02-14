@@ -20,7 +20,6 @@ package xds
 import (
 	"fmt"
 	"reflect"
-	"strconv"
 	"sync"
 
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
@@ -444,7 +443,7 @@ func GenerateSubscriptionList(subList *resourceTypes.SubscriptionList) *subscrip
 
 	for _, sb := range subList.List {
 		sub := &subscription.Subscription{
-			SubscriptionId:    strconv.Itoa(sb.SubscriptionID),
+			SubscriptionId:    fmt.Sprint(sb.SubscriptionID),
 			PolicyId:          sb.PolicyID,
 			ApiId:             sb.APIID,
 			AppId:             sb.AppID,

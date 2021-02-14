@@ -175,9 +175,11 @@ func Run(conf *config.Config) {
 	if enableEventHub {
 		// Load subscription data
 		subscription.LoadSubscriptionData(conf)
+
+		go messaging.ProcessEvents(conf)
+		
 		// Fetch APIs from control plane
 		fetchAPIsOnStartUp(conf)
-		go messaging.ProcessEvents(conf)
 	}
 OUTER:
 	for {
