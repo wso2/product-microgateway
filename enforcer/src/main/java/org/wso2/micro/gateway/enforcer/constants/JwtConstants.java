@@ -19,7 +19,7 @@
 package org.wso2.micro.gateway.enforcer.constants;
 
 /**
- * JwtConstants class holds the constants related JWT generation.
+ * JwtConstants class holds the constants related to JWT generation
  */
 public class JwtConstants {
     public static final String API_NAME = "name";
