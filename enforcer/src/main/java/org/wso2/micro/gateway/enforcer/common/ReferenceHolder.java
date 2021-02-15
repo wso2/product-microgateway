@@ -18,7 +18,6 @@
 
 package org.wso2.micro.gateway.enforcer.common;
 
-import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerDataService;
 import org.wso2.micro.gateway.enforcer.security.KeyValidator;
 
 import java.util.Map;
