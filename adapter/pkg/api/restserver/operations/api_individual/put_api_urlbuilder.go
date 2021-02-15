@@ -24,13 +24,13 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
+
+	"github.com/go-openapi/swag"
 )
 
-// PostApisDeleteURL generates an URL for the post apis delete operation
-type PostApisDeleteURL struct {
-	APIName string
-	Version string
-	Vhost   *string
+// PutAPIURL generates an URL for the put API operation
+type PutAPIURL struct {
+	PreserveProvider *bool
 
 	_basePath string
 	// avoid unkeyed usage
@@ -40,7 +40,7 @@ type PostApisDeleteURL struct {
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *PostApisDeleteURL) WithBasePath(bp string) *PostApisDeleteURL {
+func (o *PutAPIURL) WithBasePath(bp string) *PutAPIURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -48,15 +48,15 @@ func (o *PostApisDeleteURL) WithBasePath(bp string) *PostApisDeleteURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *PostApisDeleteURL) SetBasePath(bp string) {
+func (o *PutAPIURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *PostApisDeleteURL) Build() (*url.URL, error) {
+func (o *PutAPIURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/apis/delete"
+	var _path = "/api"
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -66,22 +66,12 @@ func (o *PostApisDeleteURL) Build() (*url.URL, error) {
 
 	qs := make(url.Values)
 
-	aPINameQ := o.APIName
-	if aPINameQ != "" {
-		qs.Set("apiName", aPINameQ)
+	var preserveProviderQ string
+	if o.PreserveProvider != nil {
+		preserveProviderQ = swag.FormatBool(*o.PreserveProvider)
 	}
-
-	versionQ := o.Version
-	if versionQ != "" {
-		qs.Set("version", versionQ)
-	}
-
-	var vhostQ string
-	if o.Vhost != nil {
-		vhostQ = *o.Vhost
-	}
-	if vhostQ != "" {
-		qs.Set("vhost", vhostQ)
+	if preserveProviderQ != "" {
+		qs.Set("preserveProvider", preserveProviderQ)
 	}
 
 	_result.RawQuery = qs.Encode()
@@ -90,7 +80,7 @@ func (o *PostApisDeleteURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *PostApisDeleteURL) Must(u *url.URL, err error) *url.URL {
+func (o *PutAPIURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -101,17 +91,17 @@ func (o *PostApisDeleteURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *PostApisDeleteURL) String() string {
+func (o *PutAPIURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *PostApisDeleteURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *PutAPIURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on PostApisDeleteURL")
+		return nil, errors.New("scheme is required for a full url on PutAPIURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on PostApisDeleteURL")
+		return nil, errors.New("host is required for a full url on PutAPIURL")
 	}
 
 	base, err := o.Build()
@@ -125,6 +115,6 @@ func (o *PostApisDeleteURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *PostApisDeleteURL) StringFull(scheme, host string) string {
+func (o *PutAPIURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

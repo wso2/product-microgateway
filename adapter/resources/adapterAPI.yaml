@@ -43,15 +43,15 @@
 # The Microgateway Adapter resource APIs
 ######################################################
     paths:
-      /apis:
+      /api:
         #-----------------------------------------------------
-        # Deploy or update an API in the Microgateway
+        # Deploy an API in the Microgateway
         #-----------------------------------------------------
         post:
           tags:
           - "API (Individual)"
-          summary: "Import an API"
-          description: "This operation can be used to import an API.\n"
+          summary: "Deploy an API"
+          description: "This operation can be used to deploy an API.\n"
           consumes:
           - "multipart/form-data"
           parameters:
@@ -69,13 +69,60 @@
             type: "boolean"
             x-exportParamName: "PreserveProvider"
             x-optionalDataType: "Bool"
-          - name: "overwrite"
+          responses:
+            200:
+              description: |
+                Successful.
+                API deployed or updated Successfully.
+              schema:
+                $ref: '#/definitions/DeployResponse'
+            403:
+              description: |
+                Forbidden.
+                Not Authorized to deploy or update.
+              schema:
+                $ref: "#/definitions/Error"  
+            409:
+              description: |
+                Conflict.
+                API to import already exists.
+              schema:
+                $ref: "#/definitions/Error"
+            500:
+              description: Internal Server Error.
+              schema:
+                $ref: "#/definitions/Error"
+          security:
+          - BasicAuth: []
+          x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization:\
+            \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false"
+          x-wso2-request: "POST https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization:\
+            \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n"
+          x-wso2-response: "HTTP/1.1 200 OK\nAPI deployed successfully."
+        #-----------------------------------------------------
+        # Update an already deployed API in the Microgateway
+        #-----------------------------------------------------
+        put:
+          tags:
+          - "API (Individual)"
+          summary: "Update an API"
+          description: "This operation can be used to update an API.\n"
+          consumes:
+          - "multipart/form-data"
+          parameters:
+          - name: "file"
+            in: "formData"
+            description: "Zip archive consisting on exported api configuration\n"
+            required: true
+            type: "file"
+            x-exportParamName: "File"
+          - name: "preserveProvider"
             in: "query"
-            description: "Whether to update the API or not. This is used when updating\
-              \ already existing APIs.\n"
+            description: "Preserve Original Provider of the API. This is the user choice\
+              \ to keep or replace the API provider.\n"
             required: false
             type: "boolean"
-            x-exportParamName: "Overwrite"
+            x-exportParamName: "PreserveProvider"
             x-optionalDataType: "Bool"
           responses:
             200:
@@ -96,70 +143,21 @@
                 Requested API to update not found (when overwrite parameter is included).
               schema:
                 $ref: "#/definitions/Error"
-            409:
-              description: |
-                Conflict.
-                API to import already exists (when overwrite parameter is not included).
-              schema:
-                $ref: "#/definitions/Error"
             500:
               description: Internal Server Error.
               schema:
                 $ref: "#/definitions/Error"
           security:
           - BasicAuth: []
-          x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization:\
-            \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false&overwrite=true"
-          x-wso2-request: "POST https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization:\
+          x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization:\
+            \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false"
+          x-wso2-request: "PUT https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization:\
             \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n"
-          x-wso2-response: "HTTP/1.1 200 OK\nAPI imported successfully."
-        #-----------------------------------------------------
-        # List APIs
-        #-----------------------------------------------------
-        get:
-          tags: 
-            - API (Collection)
-          summary: Get a list of API metadata
-          description: |
-            This operation can be used to retrieve meta info about all APIs
-          parameters:
-            - name : apiType
-              in: query
-              description: |
-                Optional - Condition to filter APIs. Currently only filtering 
-                by API type (HTTP or WebSocket) is supported.
-                "http" for HTTP type
-                "ws" for WebSocket type
-              type: string
-            - name : limit
-              in: query
-              description: |
-                Number of APIs (APIMeta objects to return)
-              type: integer
-          responses:
-            200:
-              description: An array of API Metadata
-              schema:
-                $ref: '#/definitions/APIMeta'
-            default:
-              description: Unexpected error
-              schema:
-                $ref: '#/definitions/Error'
-          security:
-          - BasicAuth: []
-          x-wso2-curl: |
-            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
-            -X GET "https://127.0.0.1:9443/api/mgw/adapter/0.1/apis"
-          x-wso2-request: |
-            GET https://127.0.0.1:9443/api/mgw/adapter/0.1/apis?apiType=http
-            Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-          x-wso2-response: "HTTP/1.1 200 OK"
-
-      /apis/delete:
-        #-----------------------------------------------------
+          x-wso2-response: "HTTP/1.1 200 OK\nAPI updated successfully."
+                #-----------------------------------------------------
         # Undeploy/Delete an API from the Microgateway
         #-----------------------------------------------------
-        post:
+        delete:
           tags: 
             - API (Individual)
           summary: Delete deployed API
@@ -213,6 +211,51 @@
             Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
             {"apiName":"petstore", "version":"1.1", "vhost":"pets"}
           x-wso2-response: "HTTP/1.1 200 OK"
+      /apis:
+        #-----------------------------------------------------
+        # List APIs
+        #-----------------------------------------------------
+        get:
+          tags: 
+            - API (Collection)
+          summary: Get a list of API metadata
+          description: |
+            This operation can be used to retrieve meta info about all APIs
+          parameters:
+            - name : apiType
+              in: query
+              description: |
+                Optional - Condition to filter APIs. Currently only filtering 
+                by API type (HTTP or WebSocket) is supported.
+                "http" for HTTP type
+                "ws" for WebSocket type
+              type: string
+            - name : limit
+              in: query
+              description: |
+                Number of APIs (APIMeta objects to return)
+              type: integer
+          responses:
+            200:
+              description: An array of API Metadata
+              schema:
+                $ref: '#/definitions/APIMeta'
+            default:
+              description: Unexpected error
+              schema:
+                $ref: '#/definitions/Error'
+          security:
+          - BasicAuth: []
+          x-wso2-curl: |
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
+            -X GET "https://127.0.0.1:9443/api/mgw/adapter/0.1/apis"
+          x-wso2-request: |
+            GET https://127.0.0.1:9443/api/mgw/adapter/0.1/apis?apiType=http
+            Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+          x-wso2-response: "HTTP/1.1 200 OK"
+######################################################
+# Definitions
+######################################################   
     definitions:
       Error:
         required:
