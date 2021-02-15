@@ -30,6 +30,7 @@ import (
 
 // PostAPIURL generates an URL for the post API operation
 type PostAPIURL struct {
+	Overwrite        *bool
 	PreserveProvider *bool
 
 	_basePath string
@@ -65,6 +66,14 @@ func (o *PostAPIURL) Build() (*url.URL, error) {
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
 	qs := make(url.Values)
+
+	var overwriteQ string
+	if o.Overwrite != nil {
+		overwriteQ = swag.FormatBool(*o.Overwrite)
+	}
+	if overwriteQ != "" {
+		qs.Set("overwrite", overwriteQ)
+	}
 
 	var preserveProviderQ string
 	if o.PreserveProvider != nil {

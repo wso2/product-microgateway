@@ -98,26 +98,16 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.APIIndividualPostAPIHandler = api_individual.PostAPIHandlerFunc(func(params api_individual.PostAPIParams,
 		principal *models.Principal) middleware.Responder {
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
-		err := apiServer.ApplyAPIProjectWithOverwrite(jsonByteArray, []string{}, false)
+		err := apiServer.ApplyAPIProjectWithOverwrite(jsonByteArray, []string{}, params.Overwrite)
 		if err != nil {
 			if err.Error() == "ALREADY_EXISTS" {
 				api_individual.NewPostAPIConflict()
+			} else if err.Error() == "NOT_FOUND" {
+				api_individual.NewPostAPINotFound()
 			}
 			return api_individual.NewPostAPIInternalServerError()
 		}
 		return api_individual.NewPostAPIOK()
-	})
-	api.APIIndividualPutAPIHandler = api_individual.PutAPIHandlerFunc(func(params api_individual.PutAPIParams,
-		principal *models.Principal) middleware.Responder {
-		jsonByteArray, _ := ioutil.ReadAll(params.File)
-		err := apiServer.ApplyAPIProjectWithOverwrite(jsonByteArray, []string{}, true)
-		if err != nil {
-			if err.Error() == "NOT_FOUND" {
-				api_individual.NewPutAPINotFound()
-			}
-			return api_individual.NewPostAPIInternalServerError()
-		}
-		return api_individual.NewPutAPIOK()
 	})
 
 	api.PreServerShutdown = func() {}

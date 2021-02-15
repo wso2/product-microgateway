@@ -62,6 +62,11 @@ type PostAPIParams struct {
 	  In: formData
 	*/
 	File io.ReadCloser
+	/*Whether to update the API or not. This is used when updating already existing APIs.
+
+	  In: query
+	*/
+	Overwrite *bool
 	/*Preserve Original Provider of the API. This is the user choice to keep or replace the API provider.
 
 	  In: query
@@ -98,6 +103,11 @@ func (o *PostAPIParams) BindRequest(r *http.Request, route *middleware.MatchedRo
 		o.File = &runtime.File{Data: file, Header: fileHeader}
 	}
 
+	qOverwrite, qhkOverwrite, _ := qs.GetOK("overwrite")
+	if err := o.bindOverwrite(qOverwrite, qhkOverwrite, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	qPreserveProvider, qhkPreserveProvider, _ := qs.GetOK("preserveProvider")
 	if err := o.bindPreserveProvider(qPreserveProvider, qhkPreserveProvider, route.Formats); err != nil {
 		res = append(res, err)
@@ -112,6 +122,29 @@ func (o *PostAPIParams) BindRequest(r *http.Request, route *middleware.MatchedRo
 //
 // The only supported validations on files are MinLength and MaxLength
 func (o *PostAPIParams) bindFile(file multipart.File, header *multipart.FileHeader) error {
+	return nil
+}
+
+// bindOverwrite binds and validates parameter Overwrite from query.
+func (o *PostAPIParams) bindOverwrite(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	value, err := swag.ConvertBool(raw)
+	if err != nil {
+		return errors.InvalidType("overwrite", "query", "bool", raw)
+	}
+	o.Overwrite = &value
+
 	return nil
 }
 

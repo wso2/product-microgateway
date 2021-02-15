@@ -50,8 +50,8 @@
         post:
           tags:
           - "API (Individual)"
-          summary: "Deploy an API"
-          description: "This operation can be used to deploy an API.\n"
+          summary: "Deploy or update an API"
+          description: "This operation can be used to deploy or update an API.\n"
           consumes:
           - "multipart/form-data"
           parameters:
@@ -61,6 +61,14 @@
             required: true
             type: "file"
             x-exportParamName: "File"
+          - name: "overwrite"
+            in: "query"
+            description: "Whether to update the API or not. This is used when updating\
+              \ already existing APIs.\n"
+            required: false
+            type: "boolean"
+            x-exportParamName: "Overwrite"
+            x-optionalDataType: "Bool"
           - name: "preserveProvider"
             in: "query"
             description: "Preserve Original Provider of the API. This is the user choice\
@@ -81,11 +89,17 @@
                 Forbidden.
                 Not Authorized to deploy or update.
               schema:
-                $ref: "#/definitions/Error"  
+                $ref: "#/definitions/Error" 
+            404:
+              description: |
+                Not Found. 
+                Requested API to update not found (when overwrite parameter is included).
+              schema:
+                $ref: "#/definitions/Error" 
             409:
               description: |
                 Conflict.
-                API to import already exists.
+                API to import already exists (when overwrite parameter is not included).
               schema:
                 $ref: "#/definitions/Error"
             500:
@@ -100,61 +114,6 @@
             \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n"
           x-wso2-response: "HTTP/1.1 200 OK\nAPI deployed successfully."
         #-----------------------------------------------------
-        # Update an already deployed API in the Microgateway
-        #-----------------------------------------------------
-        put:
-          tags:
-          - "API (Individual)"
-          summary: "Update an API"
-          description: "This operation can be used to update an API.\n"
-          consumes:
-          - "multipart/form-data"
-          parameters:
-          - name: "file"
-            in: "formData"
-            description: "Zip archive consisting on exported api configuration\n"
-            required: true
-            type: "file"
-            x-exportParamName: "File"
-          - name: "preserveProvider"
-            in: "query"
-            description: "Preserve Original Provider of the API. This is the user choice\
-              \ to keep or replace the API provider.\n"
-            required: false
-            type: "boolean"
-            x-exportParamName: "PreserveProvider"
-            x-optionalDataType: "Bool"
-          responses:
-            200:
-              description: |
-                Successful.
-                API deployed or updated Successfully.
-              schema:
-                $ref: '#/definitions/DeployResponse'
-            403:
-              description: |
-                Forbidden.
-                Not Authorized to deploy or update.
-              schema:
-                $ref: "#/definitions/Error"
-            404:
-              description: |
-                Not Found. 
-                Requested API to update not found (when overwrite parameter is included).
-              schema:
-                $ref: "#/definitions/Error"
-            500:
-              description: Internal Server Error.
-              schema:
-                $ref: "#/definitions/Error"
-          security:
-          - BasicAuth: []
-          x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization:\
-            \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false"
-          x-wso2-request: "PUT https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization:\
-            \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n"
-          x-wso2-response: "HTTP/1.1 200 OK\nAPI updated successfully."
-                #-----------------------------------------------------
         # Undeploy/Delete an API from the Microgateway
         #-----------------------------------------------------
         delete:

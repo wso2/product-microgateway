@@ -48,9 +48,9 @@ func NewPostAPI(ctx *middleware.Context, handler PostAPIHandler) *PostAPI {
 
 /* PostAPI swagger:route POST /api API (Individual) postApi
 
-Deploy an API
+Deploy or update an API
 
-This operation can be used to deploy an API.
+This operation can be used to deploy or update an API.
 
 
 */

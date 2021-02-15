@@ -185,7 +185,7 @@ func GetEnforcerApplicationKeyMappingCache() cachev3.SnapshotCache {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(apiIdentifier string, byteArr []byte, upstreamCerts []byte, apiType string, environments []string) {
+func UpdateAPI(name string, version string, byteArr []byte, upstreamCerts []byte, apiType string, environments []string) {
 	var newLabels []string
 	var mgwSwagger mgw.MgwSwagger
 	if len(environments) == 0 {
@@ -205,6 +205,7 @@ func UpdateAPI(apiIdentifier string, byteArr []byte, upstreamCerts []byte, apiTy
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported with WSO2 Microgateway")
 	}
+	apiIdentifier := "default:" + name + ":" + version // TODO: (SuKSW) update once vhost feature added
 	existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
 	if exists {
 		if reflect.DeepEqual(mgwSwagger, existingMgwSwagger) {
@@ -212,6 +213,8 @@ func UpdateAPI(apiIdentifier string, byteArr []byte, upstreamCerts []byte, apiTy
 			return
 		}
 	}
+	mgwSwagger.SetName(name)
+	mgwSwagger.SetVersion(version)
 	apiMgwSwaggerMap[apiIdentifier] = mgwSwagger
 	//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
 	// TODO: commented the following line as the implementation is not supported yet.

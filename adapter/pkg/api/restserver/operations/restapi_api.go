@@ -71,9 +71,6 @@ func NewRestapiAPI(spec *loads.Document) *RestapiAPI {
 		APIIndividualPostAPIHandler: api_individual.PostAPIHandlerFunc(func(params api_individual.PostAPIParams, principal *models.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation api_individual.PostAPI has not yet been implemented")
 		}),
-		APIIndividualPutAPIHandler: api_individual.PutAPIHandlerFunc(func(params api_individual.PutAPIParams, principal *models.Principal) middleware.Responder {
-			return middleware.NotImplemented("operation api_individual.PutAPI has not yet been implemented")
-		}),
 
 		// Applies when the Authorization header is set with the Basic scheme
 		BasicAuthAuth: func(user string, pass string) (*models.Principal, error) {
@@ -134,8 +131,6 @@ type RestapiAPI struct {
 	APICollectionGetApisHandler api_collection.GetApisHandler
 	// APIIndividualPostAPIHandler sets the operation handler for the post API operation
 	APIIndividualPostAPIHandler api_individual.PostAPIHandler
-	// APIIndividualPutAPIHandler sets the operation handler for the put API operation
-	APIIndividualPutAPIHandler api_individual.PutAPIHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -228,9 +223,6 @@ func (o *RestapiAPI) Validate() error {
 	}
 	if o.APIIndividualPostAPIHandler == nil {
 		unregistered = append(unregistered, "api_individual.PostAPIHandler")
-	}
-	if o.APIIndividualPutAPIHandler == nil {
-		unregistered = append(unregistered, "api_individual.PutAPIHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -344,10 +336,6 @@ func (o *RestapiAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/api"] = api_individual.NewPostAPI(o.context, o.APIIndividualPostAPIHandler)
-	if o.handlers["PUT"] == nil {
-		o.handlers["PUT"] = make(map[string]http.Handler)
-	}
-	o.handlers["PUT"]["/api"] = api_individual.NewPutAPI(o.context, o.APIIndividualPutAPIHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP
