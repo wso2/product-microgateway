@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.api.WebSocketMetadataContext;
 import org.wso2.micro.gateway.enforcer.api.WebSocketResponseObject;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.server.WebSocketHandler;
 import org.wso2.micro.gateway.enforcer.websocket.RateLimitRequest;
 import org.wso2.micro.gateway.enforcer.websocket.RateLimitResponse;
@@ -15,6 +16,7 @@ public class WebSocketResponseObserver implements StreamObserver<RateLimitReques
     private WebSocketMetadataContext webSocketMetadataContext;
     private final StreamObserver<RateLimitResponse> responseStreamObserver;
     private final WebSocketHandler webSocketHandler = new WebSocketHandler();
+    private String streamId;
 
     public WebSocketResponseObserver(StreamObserver<RateLimitResponse> responseStreamObserver) {
         this.responseStreamObserver = responseStreamObserver;
@@ -23,6 +25,8 @@ public class WebSocketResponseObserver implements StreamObserver<RateLimitReques
     @Override
     public void onNext(RateLimitRequest rateLimitRequest) {
         webSocketMetadataContext = webSocketHandler.process(rateLimitRequest);
+        streamId = getStreamId(rateLimitRequest);
+        WebSocketMetadataService.addObserver(streamId,this);
         RateLimitResponse response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.OK).build();
 //        if(webSocketResponseObject == WebSocketResponseObject.OK){
 //            response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.OK).build();
@@ -38,10 +42,19 @@ public class WebSocketResponseObserver implements StreamObserver<RateLimitReques
     @Override
     public void onError(Throwable throwable) {
         logger.info("onError called");
+        WebSocketMetadataService.removeObserver(streamId);
     }
 
     @Override
     public void onCompleted() {
         logger.info("onCompleted");
+        WebSocketMetadataService.removeObserver(streamId);
     }
+
+    private String getStreamId(RateLimitRequest rateLimitRequest){
+        String streamId = rateLimitRequest.getMetadataContext().getFilterMetadataMap().
+                get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.WEBSOCKET_STREAM_ID).getStringValue();
+        return streamId;
+    }
+
 }
