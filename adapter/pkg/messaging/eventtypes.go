@@ -33,12 +33,12 @@ type EventNotification struct {
 type EventTokenRevocationNotification struct {
 	Event struct {
 		PayloadData struct {
-			EventID      string  `json:"eventId"`
-			RevokedToken string  `json:"revokedToken"`
-			TTL          string  `json:"ttl"`
-			ExpiryTime   float32 `json:"expiryTime"`
-			Type         string  `json:"type"`
-			TenantID     string  `json:"tenantId"`
+			EventID      string `json:"eventId"`
+			RevokedToken string `json:"revokedToken"`
+			TTL          string `json:"ttl"`
+			ExpiryTime   int64  `json:"expiryTime"`
+			Type         string `json:"type"`
+			TenantID     int    `json:"tenantId"`
 		} `json:"payloadData"`
 	} `json:"event"`
 }
@@ -80,7 +80,7 @@ type APIEvent struct {
 
 // ApplicationRegistrationEvent for struct application registration events
 type ApplicationRegistrationEvent struct {
-	ApplicationID int32    `json:"applicationId"`
+	ApplicationID int32  `json:"applicationId"`
 	ConsumerKey   string `json:"consumerKey"`
 	KeyType       string `json:"keyType"`
 	KeyManager    string `json:"keyManager"`
@@ -90,7 +90,7 @@ type ApplicationRegistrationEvent struct {
 // ApplicationEvent for struct application events
 type ApplicationEvent struct {
 	UUID              string   `json:"uuid"`
-	ApplicationID     int32      `json:"applicationId"`
+	ApplicationID     int32    `json:"applicationId"`
 	ApplicationName   string   `json:"applicationName"`
 	TokenType         string   `json:"tokenType"`
 	ApplicationPolicy string   `json:"applicationPolicy"`
@@ -102,9 +102,9 @@ type ApplicationEvent struct {
 
 // SubscriptionEvent for struct subscription events
 type SubscriptionEvent struct {
-	SubscriptionID    int32    `json:"subscriptionId"`
-	APIID             int32    `json:"apiId"`
-	ApplicationID     int32    `json:"applicationId"`
+	SubscriptionID    int    `json:"subscriptionId"`
+	APIID             int32  `json:"apiId"`
+	ApplicationID     int32  `json:"applicationId"`
 	PolicyID          string `json:"policyId"`
 	SubscriptionState string `json:"subscriptionState"`
 	Event
@@ -120,7 +120,7 @@ type ScopeEvent struct {
 
 // PolicyInfo for struct policy Info events
 type PolicyInfo struct {
-	PolicyID   int32    `json:"policyId"`
+	PolicyID   int32  `json:"policyId"`
 	PolicyName string `json:"policyName"`
 	QuotaType  string `json:"quotaType"`
 	PolicyType string `json:"policyType"`
@@ -137,11 +137,11 @@ type APIPolicyEvent struct {
 // SubscriptionPolicyEvent for struct subscriptionPolicy events
 type SubscriptionPolicyEvent struct {
 	PolicyInfo
-	RateLimitCount       int32    `json:"rateLimitCount"`
+	RateLimitCount       int32  `json:"rateLimitCount"`
 	RateLimitTimeUnit    string `json:"rateLimitTimeUnit"`
 	StopOnQuotaReach     bool   `json:"stopOnQuotaReach"`
-	GraphQLMaxComplexity int32    `json:"graphQLMaxComplexity"`
-	GraphQLMaxDepth      int32    `json:"graphQLMaxDepth"`
+	GraphQLMaxComplexity int32  `json:"graphQLMaxComplexity"`
+	GraphQLMaxDepth      int32  `json:"graphQLMaxDepth"`
 }
 
 // KeyManagerEvent for struct
