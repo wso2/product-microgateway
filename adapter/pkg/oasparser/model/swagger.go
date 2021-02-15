@@ -76,31 +76,31 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			var methodsArray []Operation
 			methodFound := false
 			if pathItem.Get != nil {
-				methodsArray = append(methodsArray, Operation{"GET", pathItem.Get.Security})
+				methodsArray = append(methodsArray, NewOperation("GET", pathItem.Get.Security))
 				methodFound = true
 			}
 			if pathItem.Post != nil {
-				methodsArray = append(methodsArray, Operation{"POST", pathItem.Post.Security})
+				methodsArray = append(methodsArray, NewOperation("POST", pathItem.Post.Security))
 				methodFound = true
 			}
 			if pathItem.Put != nil {
-				methodsArray = append(methodsArray, Operation{"PUT", pathItem.Put.Security})
+				methodsArray = append(methodsArray, NewOperation("PUT", pathItem.Put.Security))
 				methodFound = true
 			}
 			if pathItem.Delete != nil {
-				methodsArray = append(methodsArray, Operation{"DELETE", pathItem.Delete.Security})
+				methodsArray = append(methodsArray, NewOperation("DELETE", pathItem.Delete.Security))
 				methodFound = true
 			}
 			if pathItem.Head != nil {
-				methodsArray = append(methodsArray, Operation{"HEAD", pathItem.Head.Security})
+				methodsArray = append(methodsArray, NewOperation("HEAD", pathItem.Head.Security))
 				methodFound = true
 			}
 			if pathItem.Patch != nil {
-				methodsArray = append(methodsArray, Operation{"PATCH", pathItem.Patch.Security})
+				methodsArray = append(methodsArray, NewOperation("PATCH", pathItem.Patch.Security))
 				methodFound = true
 			}
 			if pathItem.Options != nil {
-				methodsArray = append(methodsArray, Operation{"OPTION", pathItem.Options.Security})
+				methodsArray = append(methodsArray, NewOperation("OPTION", pathItem.Options.Security))
 				methodFound = true
 			}
 			if methodFound {

@@ -56,7 +56,6 @@ public class RestAPI implements API {
         String version = api.getVersion();
         List<ResourceConfig> resources = new ArrayList<>();
         for (Resource res: api.getResourcesList()) {
-            // TODO: (Praminda) handle multiple methods for a resource
             // TODO: (Praminda) handle all fields of resource
             for (Operation operation : res.getMethodsList()) {
                 ResourceConfig resConfig = buildResource(operation, res.getPath());

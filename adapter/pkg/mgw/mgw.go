@@ -154,7 +154,7 @@ func Run(conf *config.Config) {
 	enforcerSubscriptionPolicyCache := xds.GetEnforcerSubscriptionPolicyCache()
 	enforcerApplicationKeyMappingCache := xds.GetEnforcerApplicationKeyMappingCache()
 
-	srv := xdsv3.NewServer(ctx, cache, &cb.Callbacks{})
+	srv := xdsv3.NewServer(ctx, cache, nil)
 	enforcerXdsSrv := xdsv3.NewServer(ctx, enforcerCache, &cb.Callbacks{})
 	enforcerSdsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionCache, &cb.Callbacks{})
 	enforcerAppDsSrv := xdsv3.NewServer(ctx, enforcerApplicationCache, &cb.Callbacks{})

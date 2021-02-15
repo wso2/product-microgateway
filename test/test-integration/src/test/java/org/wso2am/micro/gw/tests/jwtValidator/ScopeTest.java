@@ -20,6 +20,8 @@ package org.wso2am.micro.gw.tests.jwtValidator;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.mockbackend.ResponseConstants;

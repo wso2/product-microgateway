@@ -24,7 +24,7 @@ package org.wso2.micro.gateway.enforcer.constants;
 public class APISecurityConstants {
     public static final String API_AUTH_FAILURE_HANDLER = "_auth_failure_handler_";
     public static final int API_AUTH_GENERAL_ERROR = 900900;
-    public static final String   API_AUTH_GENERAL_ERROR_MESSAGE = "Unclassified Authentication Failure";
+    public static final String API_AUTH_GENERAL_ERROR_MESSAGE = "Unclassified Authentication Failure";
 
     public static final int API_AUTH_INVALID_CREDENTIALS = 900901;
     public static final String API_AUTH_INVALID_CREDENTIALS_MESSAGE = "Invalid Credentials";

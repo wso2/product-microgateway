@@ -219,13 +219,13 @@ public class APIConstants {
     }
 
     /**
-     * Holds the values related http status codes
+     * Holds the values related http status codes.
      */
     public enum StatusCodes {
         OK("200", 200),
         UNAUTHENTICATED("401", 401),
         UNAUTHORIZED("403", 403),
-        NOTFOUND("404", 4040);
+        NOTFOUND("404", 404);
 
         private String value;
         private int code;
