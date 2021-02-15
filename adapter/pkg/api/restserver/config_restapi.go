@@ -79,36 +79,45 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		return &p, nil
 	}
 
-	api.APICollectionGetApisHandler = api_collection.GetApisHandlerFunc(func(params api_collection.GetApisParams,
-		principal *models.Principal) middleware.Responder {
-		return api_collection.NewGetApisOK().WithPayload(apiServer.ListApis(params.APIType, params.Limit))
-	})
-	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(params api_individual.PostApisParams,
-		principal *models.Principal) middleware.Responder {
-		// TODO: (VirajSalaka) Error is not handled in the response.
-		jsonByteArray, _ := ioutil.ReadAll(params.File)
-		err := apiServer.ApplyAPIProjectWithOverwrite(jsonByteArray, []string{}, params.Overwrite)
-		if err != nil {
-			if err.Error() == "NOT_FOUND" {
-				api_individual.NewPostApisNotFound()
-			} else if err.Error() == "ALREADY_EXISTS" {
-				api_individual.NewPostApisConflict()
-			}
-			return api_individual.NewPostApisInternalServerError()
-		}
-		return api_individual.NewPostApisOK()
-	})
-	api.APIIndividualPostApisDeleteHandler = api_individual.PostApisDeleteHandlerFunc(func(params api_individual.PostApisDeleteParams,
+	api.APIIndividualDeleteAPIHandler = api_individual.DeleteAPIHandlerFunc(func(params api_individual.DeleteAPIParams,
 		principal *models.Principal) middleware.Responder {
 		errCode, _ := apiServer.DeleteAPI(params.APIName, params.Version, params.Vhost)
 		switch errCode {
 		case "":
-			return api_individual.NewPostApisDeleteOK()
+			return api_individual.NewDeleteAPIOK()
 		case "NOT_FOUND":
-			return api_individual.NewPostApisDeleteNotFound()
+			return api_individual.NewDeleteAPINotFound()
 		default:
-			return api_individual.NewPostApisInternalServerError()
+			return api_individual.NewPostAPIInternalServerError()
 		}
+	})
+	api.APICollectionGetApisHandler = api_collection.GetApisHandlerFunc(func(params api_collection.GetApisParams,
+		principal *models.Principal) middleware.Responder {
+		return api_collection.NewGetApisOK().WithPayload(apiServer.ListApis(params.APIType, params.Limit))
+	})
+	api.APIIndividualPostAPIHandler = api_individual.PostAPIHandlerFunc(func(params api_individual.PostAPIParams,
+		principal *models.Principal) middleware.Responder {
+		jsonByteArray, _ := ioutil.ReadAll(params.File)
+		err := apiServer.ApplyAPIProjectWithOverwrite(jsonByteArray, []string{}, false)
+		if err != nil {
+			if err.Error() == "ALREADY_EXISTS" {
+				api_individual.NewPostAPIConflict()
+			}
+			return api_individual.NewPostAPIInternalServerError()
+		}
+		return api_individual.NewPostAPIOK()
+	})
+	api.APIIndividualPutAPIHandler = api_individual.PutAPIHandlerFunc(func(params api_individual.PutAPIParams,
+		principal *models.Principal) middleware.Responder {
+		jsonByteArray, _ := ioutil.ReadAll(params.File)
+		err := apiServer.ApplyAPIProjectWithOverwrite(jsonByteArray, []string{}, true)
+		if err != nil {
+			if err.Error() == "NOT_FOUND" {
+				api_individual.NewPutAPINotFound()
+			}
+			return api_individual.NewPostAPIInternalServerError()
+		}
+		return api_individual.NewPutAPIOK()
 	})
 
 	api.PreServerShutdown = func() {}

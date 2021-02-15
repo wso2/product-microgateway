@@ -147,16 +147,10 @@ func ApplyAPIProject(payload []byte, environments []string) error {
 
 // ApplyAPIProjectWithOverwrite is called by the rest implementation to differentiate
 // between create and update using the overwrite param
-func ApplyAPIProjectWithOverwrite(payload []byte, envrionments []string, overwriteP *bool) error {
+func ApplyAPIProjectWithOverwrite(payload []byte, envrionments []string, overwrite bool) error {
 	apiJsn, swaggerJsn, upstreamCerts, apiType, err := extractAPIProject(payload)
 	if err != nil {
 		return err
-	}
-	var overwrite bool
-	if overwriteP == nil {
-		overwrite = false
-	} else {
-		overwrite = *overwriteP
 	}
 	name, version, err := getAPINameAndVersion(apiJsn)
 	if err != nil {

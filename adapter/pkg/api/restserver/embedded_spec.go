@@ -61,64 +61,21 @@ func init() {
   "host": "apis.wso2.com",
   "basePath": "/api/mgw/adapter/0.1",
   "paths": {
-    "/apis": {
-      "get": {
+    "/api": {
+      "put": {
         "security": [
           {
             "BasicAuth": []
           }
         ],
-        "description": "This operation can be used to retrieve meta info about all APIs\n",
-        "tags": [
-          "API (Collection)"
-        ],
-        "summary": "Get a list of API metadata",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Optional - Condition to filter APIs. Currently only filtering \nby API type (HTTP or WebSocket) is supported.\n\"http\" for HTTP type\n\"ws\" for WebSocket type\n",
-            "name": "apiType",
-            "in": "query"
-          },
-          {
-            "type": "integer",
-            "description": "Number of APIs (APIMeta objects to return)\n",
-            "name": "limit",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "An array of API Metadata",
-            "schema": {
-              "$ref": "#/definitions/APIMeta"
-            }
-          },
-          "default": {
-            "description": "Unexpected error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        },
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \n-X GET \"https://127.0.0.1:9443/api/mgw/adapter/0.1/apis\"\n",
-        "x-wso2-request": "GET https://127.0.0.1:9443/api/mgw/adapter/0.1/apis?apiType=http\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 200 OK"
-      },
-      "post": {
-        "security": [
-          {
-            "BasicAuth": []
-          }
-        ],
-        "description": "This operation can be used to import an API.\n",
+        "description": "This operation can be used to update an API.\n",
         "consumes": [
           "multipart/form-data"
         ],
         "tags": [
           "API (Individual)"
         ],
-        "summary": "Import an API",
+        "summary": "Update an API",
         "parameters": [
           {
             "type": "file",
@@ -134,14 +91,6 @@ func init() {
             "x-optionalDataType": "Bool",
             "description": "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider.\n",
             "name": "preserveProvider",
-            "in": "query"
-          },
-          {
-            "type": "boolean",
-            "x-exportParamName": "Overwrite",
-            "x-optionalDataType": "Bool",
-            "description": "Whether to update the API or not. This is used when updating already existing APIs.\n",
-            "name": "overwrite",
             "in": "query"
           }
         ],
@@ -164,8 +113,64 @@ func init() {
               "$ref": "#/definitions/Error"
             }
           },
+          "500": {
+            "description": "Internal Server Error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false",
+        "x-wso2-request": "PUT https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\nAPI updated successfully."
+      },
+      "post": {
+        "security": [
+          {
+            "BasicAuth": []
+          }
+        ],
+        "description": "This operation can be used to deploy an API.\n",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "tags": [
+          "API (Individual)"
+        ],
+        "summary": "Deploy an API",
+        "parameters": [
+          {
+            "type": "file",
+            "x-exportParamName": "File",
+            "description": "Zip archive consisting on exported api configuration\n",
+            "name": "file",
+            "in": "formData",
+            "required": true
+          },
+          {
+            "type": "boolean",
+            "x-exportParamName": "PreserveProvider",
+            "x-optionalDataType": "Bool",
+            "description": "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider.\n",
+            "name": "preserveProvider",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful.\nAPI deployed or updated Successfully.\n",
+            "schema": {
+              "$ref": "#/definitions/DeployResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden.\nNot Authorized to deploy or update.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "409": {
-            "description": "Conflict.\nAPI to import already exists (when overwrite parameter is not included).\n",
+            "description": "Conflict.\nAPI to import already exists.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -177,13 +182,11 @@ func init() {
             }
           }
         },
-        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false\u0026overwrite=true",
+        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false",
         "x-wso2-request": "POST https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 200 OK\nAPI imported successfully."
-      }
-    },
-    "/apis/delete": {
-      "post": {
+        "x-wso2-response": "HTTP/1.1 200 OK\nAPI deployed successfully."
+      },
+      "delete": {
         "security": [
           {
             "BasicAuth": []
@@ -238,6 +241,51 @@ func init() {
         },
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \n-d '{\"apiName\":\"petstore\", \"version\":\"1.1\", \"vhost\":\"pets\"}'\n-X POST \"https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete\"\n",
         "x-wso2-request": "POST https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n{\"apiName\":\"petstore\", \"version\":\"1.1\", \"vhost\":\"pets\"}\n",
+        "x-wso2-response": "HTTP/1.1 200 OK"
+      }
+    },
+    "/apis": {
+      "get": {
+        "security": [
+          {
+            "BasicAuth": []
+          }
+        ],
+        "description": "This operation can be used to retrieve meta info about all APIs\n",
+        "tags": [
+          "API (Collection)"
+        ],
+        "summary": "Get a list of API metadata",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Optional - Condition to filter APIs. Currently only filtering \nby API type (HTTP or WebSocket) is supported.\n\"http\" for HTTP type\n\"ws\" for WebSocket type\n",
+            "name": "apiType",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Number of APIs (APIMeta objects to return)\n",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of API Metadata",
+            "schema": {
+              "$ref": "#/definitions/APIMeta"
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \n-X GET \"https://127.0.0.1:9443/api/mgw/adapter/0.1/apis\"\n",
+        "x-wso2-request": "GET https://127.0.0.1:9443/api/mgw/adapter/0.1/apis?apiType=http\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK"
       }
     }
@@ -393,64 +441,21 @@ func init() {
   "host": "apis.wso2.com",
   "basePath": "/api/mgw/adapter/0.1",
   "paths": {
-    "/apis": {
-      "get": {
+    "/api": {
+      "put": {
         "security": [
           {
             "BasicAuth": []
           }
         ],
-        "description": "This operation can be used to retrieve meta info about all APIs\n",
-        "tags": [
-          "API (Collection)"
-        ],
-        "summary": "Get a list of API metadata",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Optional - Condition to filter APIs. Currently only filtering \nby API type (HTTP or WebSocket) is supported.\n\"http\" for HTTP type\n\"ws\" for WebSocket type\n",
-            "name": "apiType",
-            "in": "query"
-          },
-          {
-            "type": "integer",
-            "description": "Number of APIs (APIMeta objects to return)\n",
-            "name": "limit",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "An array of API Metadata",
-            "schema": {
-              "$ref": "#/definitions/APIMeta"
-            }
-          },
-          "default": {
-            "description": "Unexpected error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        },
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \n-X GET \"https://127.0.0.1:9443/api/mgw/adapter/0.1/apis\"\n",
-        "x-wso2-request": "GET https://127.0.0.1:9443/api/mgw/adapter/0.1/apis?apiType=http\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 200 OK"
-      },
-      "post": {
-        "security": [
-          {
-            "BasicAuth": []
-          }
-        ],
-        "description": "This operation can be used to import an API.\n",
+        "description": "This operation can be used to update an API.\n",
         "consumes": [
           "multipart/form-data"
         ],
         "tags": [
           "API (Individual)"
         ],
-        "summary": "Import an API",
+        "summary": "Update an API",
         "parameters": [
           {
             "type": "file",
@@ -466,14 +471,6 @@ func init() {
             "x-optionalDataType": "Bool",
             "description": "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider.\n",
             "name": "preserveProvider",
-            "in": "query"
-          },
-          {
-            "type": "boolean",
-            "x-exportParamName": "Overwrite",
-            "x-optionalDataType": "Bool",
-            "description": "Whether to update the API or not. This is used when updating already existing APIs.\n",
-            "name": "overwrite",
             "in": "query"
           }
         ],
@@ -496,8 +493,64 @@ func init() {
               "$ref": "#/definitions/Error"
             }
           },
+          "500": {
+            "description": "Internal Server Error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false",
+        "x-wso2-request": "PUT https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\nAPI updated successfully."
+      },
+      "post": {
+        "security": [
+          {
+            "BasicAuth": []
+          }
+        ],
+        "description": "This operation can be used to deploy an API.\n",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "tags": [
+          "API (Individual)"
+        ],
+        "summary": "Deploy an API",
+        "parameters": [
+          {
+            "type": "file",
+            "x-exportParamName": "File",
+            "description": "Zip archive consisting on exported api configuration\n",
+            "name": "file",
+            "in": "formData",
+            "required": true
+          },
+          {
+            "type": "boolean",
+            "x-exportParamName": "PreserveProvider",
+            "x-optionalDataType": "Bool",
+            "description": "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider.\n",
+            "name": "preserveProvider",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful.\nAPI deployed or updated Successfully.\n",
+            "schema": {
+              "$ref": "#/definitions/DeployResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden.\nNot Authorized to deploy or update.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "409": {
-            "description": "Conflict.\nAPI to import already exists (when overwrite parameter is not included).\n",
+            "description": "Conflict.\nAPI to import already exists.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -509,13 +562,11 @@ func init() {
             }
           }
         },
-        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false\u0026overwrite=true",
+        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false",
         "x-wso2-request": "POST https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 200 OK\nAPI imported successfully."
-      }
-    },
-    "/apis/delete": {
-      "post": {
+        "x-wso2-response": "HTTP/1.1 200 OK\nAPI deployed successfully."
+      },
+      "delete": {
         "security": [
           {
             "BasicAuth": []
@@ -570,6 +621,51 @@ func init() {
         },
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \n-d '{\"apiName\":\"petstore\", \"version\":\"1.1\", \"vhost\":\"pets\"}'\n-X POST \"https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete\"\n",
         "x-wso2-request": "POST https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n{\"apiName\":\"petstore\", \"version\":\"1.1\", \"vhost\":\"pets\"}\n",
+        "x-wso2-response": "HTTP/1.1 200 OK"
+      }
+    },
+    "/apis": {
+      "get": {
+        "security": [
+          {
+            "BasicAuth": []
+          }
+        ],
+        "description": "This operation can be used to retrieve meta info about all APIs\n",
+        "tags": [
+          "API (Collection)"
+        ],
+        "summary": "Get a list of API metadata",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Optional - Condition to filter APIs. Currently only filtering \nby API type (HTTP or WebSocket) is supported.\n\"http\" for HTTP type\n\"ws\" for WebSocket type\n",
+            "name": "apiType",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Number of APIs (APIMeta objects to return)\n",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of API Metadata",
+            "schema": {
+              "$ref": "#/definitions/APIMeta"
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \n-X GET \"https://127.0.0.1:9443/api/mgw/adapter/0.1/apis\"\n",
+        "x-wso2-request": "GET https://127.0.0.1:9443/api/mgw/adapter/0.1/apis?apiType=http\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK"
       }
     }
