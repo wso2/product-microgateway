@@ -62,20 +62,20 @@ func init() {
   "basePath": "/api/mgw/adapter/0.1",
   "paths": {
     "/api": {
-      "put": {
+      "post": {
         "security": [
           {
             "BasicAuth": []
           }
         ],
-        "description": "This operation can be used to update an API.\n",
+        "description": "This operation can be used to deploy or update an API.\n",
         "consumes": [
           "multipart/form-data"
         ],
         "tags": [
           "API (Individual)"
         ],
-        "summary": "Update an API",
+        "summary": "Deploy or update an API",
         "parameters": [
           {
             "type": "file",
@@ -84,6 +84,14 @@ func init() {
             "name": "file",
             "in": "formData",
             "required": true
+          },
+          {
+            "type": "boolean",
+            "x-exportParamName": "Overwrite",
+            "x-optionalDataType": "Bool",
+            "description": "Whether to update the API or not. This is used when updating already existing APIs.\n",
+            "name": "overwrite",
+            "in": "query"
           },
           {
             "type": "boolean",
@@ -113,64 +121,8 @@ func init() {
               "$ref": "#/definitions/Error"
             }
           },
-          "500": {
-            "description": "Internal Server Error.",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        },
-        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false",
-        "x-wso2-request": "PUT https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 200 OK\nAPI updated successfully."
-      },
-      "post": {
-        "security": [
-          {
-            "BasicAuth": []
-          }
-        ],
-        "description": "This operation can be used to deploy an API.\n",
-        "consumes": [
-          "multipart/form-data"
-        ],
-        "tags": [
-          "API (Individual)"
-        ],
-        "summary": "Deploy an API",
-        "parameters": [
-          {
-            "type": "file",
-            "x-exportParamName": "File",
-            "description": "Zip archive consisting on exported api configuration\n",
-            "name": "file",
-            "in": "formData",
-            "required": true
-          },
-          {
-            "type": "boolean",
-            "x-exportParamName": "PreserveProvider",
-            "x-optionalDataType": "Bool",
-            "description": "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider.\n",
-            "name": "preserveProvider",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful.\nAPI deployed or updated Successfully.\n",
-            "schema": {
-              "$ref": "#/definitions/DeployResponse"
-            }
-          },
-          "403": {
-            "description": "Forbidden.\nNot Authorized to deploy or update.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
           "409": {
-            "description": "Conflict.\nAPI to import already exists.\n",
+            "description": "Conflict.\nAPI to import already exists (when overwrite parameter is not included).\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -442,20 +394,20 @@ func init() {
   "basePath": "/api/mgw/adapter/0.1",
   "paths": {
     "/api": {
-      "put": {
+      "post": {
         "security": [
           {
             "BasicAuth": []
           }
         ],
-        "description": "This operation can be used to update an API.\n",
+        "description": "This operation can be used to deploy or update an API.\n",
         "consumes": [
           "multipart/form-data"
         ],
         "tags": [
           "API (Individual)"
         ],
-        "summary": "Update an API",
+        "summary": "Deploy or update an API",
         "parameters": [
           {
             "type": "file",
@@ -464,6 +416,14 @@ func init() {
             "name": "file",
             "in": "formData",
             "required": true
+          },
+          {
+            "type": "boolean",
+            "x-exportParamName": "Overwrite",
+            "x-optionalDataType": "Bool",
+            "description": "Whether to update the API or not. This is used when updating already existing APIs.\n",
+            "name": "overwrite",
+            "in": "query"
           },
           {
             "type": "boolean",
@@ -493,64 +453,8 @@ func init() {
               "$ref": "#/definitions/Error"
             }
           },
-          "500": {
-            "description": "Internal Server Error.",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        },
-        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false",
-        "x-wso2-request": "PUT https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 200 OK\nAPI updated successfully."
-      },
-      "post": {
-        "security": [
-          {
-            "BasicAuth": []
-          }
-        ],
-        "description": "This operation can be used to deploy an API.\n",
-        "consumes": [
-          "multipart/form-data"
-        ],
-        "tags": [
-          "API (Individual)"
-        ],
-        "summary": "Deploy an API",
-        "parameters": [
-          {
-            "type": "file",
-            "x-exportParamName": "File",
-            "description": "Zip archive consisting on exported api configuration\n",
-            "name": "file",
-            "in": "formData",
-            "required": true
-          },
-          {
-            "type": "boolean",
-            "x-exportParamName": "PreserveProvider",
-            "x-optionalDataType": "Bool",
-            "description": "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider.\n",
-            "name": "preserveProvider",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful.\nAPI deployed or updated Successfully.\n",
-            "schema": {
-              "$ref": "#/definitions/DeployResponse"
-            }
-          },
-          "403": {
-            "description": "Forbidden.\nNot Authorized to deploy or update.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
           "409": {
-            "description": "Conflict.\nAPI to import already exists.\n",
+            "description": "Conflict.\nAPI to import already exists (when overwrite parameter is not included).\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }

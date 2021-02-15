@@ -120,11 +120,57 @@ func (o *PostAPIForbidden) WriteResponse(rw http.ResponseWriter, producer runtim
 	}
 }
 
+// PostAPINotFoundCode is the HTTP code returned for type PostAPINotFound
+const PostAPINotFoundCode int = 404
+
+/*PostAPINotFound Not Found.
+Requested API to update not found (when overwrite parameter is included).
+
+
+swagger:response postApiNotFound
+*/
+type PostAPINotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewPostAPINotFound creates PostAPINotFound with default headers values
+func NewPostAPINotFound() *PostAPINotFound {
+
+	return &PostAPINotFound{}
+}
+
+// WithPayload adds the payload to the post Api not found response
+func (o *PostAPINotFound) WithPayload(payload *models.Error) *PostAPINotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the post Api not found response
+func (o *PostAPINotFound) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PostAPINotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(404)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // PostAPIConflictCode is the HTTP code returned for type PostAPIConflict
 const PostAPIConflictCode int = 409
 
 /*PostAPIConflict Conflict.
-API to import already exists.
+API to import already exists (when overwrite parameter is not included).
 
 
 swagger:response postApiConflict

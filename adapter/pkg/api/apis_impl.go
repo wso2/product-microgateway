@@ -141,16 +141,16 @@ func ApplyAPIProject(payload []byte, environments []string) error {
 	}
 	apiIdentifier := "default:" + name + ":" + version // TODO: (SuKSW) update once vhost feature added
 	if apiType == mgw.HTTP {
-		xds.UpdateAPI(apiIdentifier, apiJsn, upstreamCerts, apiType, environments)
+		xds.UpdateAPI(name, version, swaggerJsn, upstreamCerts, apiType, environments)
 	} else if apiType == mgw.WS {
-		xds.UpdateAPI(apiIdentifier, swaggerJsn, upstreamCerts, apiType, environments)
+		xds.UpdateAPI(name, version, apiJsn, upstreamCerts, apiType, environments)
 	}
 	return nil
 }
 
 // ApplyAPIProjectWithOverwrite is called by the rest implementation to differentiate
 // between create and update using the overwrite param
-func ApplyAPIProjectWithOverwrite(payload []byte, envrionments []string, overwrite bool) error {
+func ApplyAPIProjectWithOverwrite(payload []byte, envrionments []string, overwriteP *bool) error {
 	apiJsn, swaggerJsn, upstreamCerts, apiType, err := extractAPIProject(payload)
 	if err != nil {
 		return err
@@ -159,24 +159,28 @@ func ApplyAPIProjectWithOverwrite(payload []byte, envrionments []string, overwri
 	if err != nil {
 		return err
 	}
+	var overwrite bool
+	if overwriteP == nil {
+		overwrite = false
+	} else {
+		overwrite = *overwriteP
+	}
 	exists := xds.IsAPIExist("default", name, version) // TODO: (SuKSW) update once vhost feature added
-	apiIdentifier := "default:" + name + ":" + version
-
 	if overwrite && !exists {
-		loggers.LoggerAPI.Infof("Error updating API. API %v does not exist.", apiIdentifier)
+		loggers.LoggerAPI.Infof("Error updating API. API %v:%v does not exist.", name, version)
 		return errors.New("NOT_FOUND")
 	}
 	if !overwrite && exists {
-		loggers.LoggerAPI.Infof("Error creating new API. API %v already exists.", apiIdentifier)
+		loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.", name, version)
 		return errors.New("ALREADY_EXISTS")
 	}
 	if len(envrionments) == 0 {
 		envrionments = append(envrionments, "Production and Sandbox")
 	}
 	if apiType == mgw.HTTP {
-		xds.UpdateAPI(apiIdentifier, apiJsn, upstreamCerts, apiType, envrionments)
+		xds.UpdateAPI(name, version, swaggerJsn, upstreamCerts, apiType, envrionments)
 	} else if apiType == mgw.WS {
-		xds.UpdateAPI(apiIdentifier, swaggerJsn, upstreamCerts, apiType, envrionments)
+		xds.UpdateAPI(name, version, apiJsn, upstreamCerts, apiType, envrionments)
 	}
 	return nil
 }

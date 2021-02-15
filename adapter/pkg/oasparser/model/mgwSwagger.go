@@ -126,6 +126,16 @@ func (swagger *MgwSwagger) GetID() string {
 	return swagger.id
 }
 
+// SetName sets the name of the API
+func (swagger *MgwSwagger) SetName(name string) {
+	swagger.title = name
+}
+
+// SetVersion sets the version of the API
+func (swagger *MgwSwagger) SetVersion(version string) {
+	swagger.version = version
+}
+
 // SetXWso2Extenstions set the MgwSwagger object with the properties
 // extracted from vendor extensions.
 // xWso2Basepath, xWso2ProductionEndpoints, and xWso2SandboxEndpoints are assigned
