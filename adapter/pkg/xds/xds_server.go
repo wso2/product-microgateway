@@ -72,21 +72,8 @@ var (
 	// Envoy Label -> Routes Configuration map
 	envoyRouteConfigMap map[string]*routev3.RouteConfiguration
 
-	// Enforcer XDS resource version map
-	enforcerCacheVersionMap map[string]int64
-
-	// Enforcer Subscription related resource version maps
-	// TODO: (VirajSalaka) Delete Version Maps
-	enforcerSubscriptionCacheVersionMap          map[string]int64
-	enforcerApplicationCacheVersionMap           map[string]int64
-	enforcerAPICacheVersionMap                   map[string]int64
-	enforcerApplicationPolicyCacheVersionMap     map[string]int64
-	enforcerSubscriptionPolicyCacheVersionMap    map[string]int64
-	enforcerApplicationKeyMappingCacheVersionMap map[string]int64
-
 	// Enforcer API XDS resource version map
-	enforcerAPIVersionMap map[string]int64
-	enforcerConfigMap     map[string][]types.Resource
+	enforcerConfigMap map[string][]types.Resource
 
 	openAPIEnforcerApisMap           map[string]types.Resource
 	enforcerSubscriptionMap          map[string][]types.Resource
@@ -99,6 +86,7 @@ var (
 
 const (
 	commonEnforcerLabel string = "commonEnforcerLabel"
+	maxRandomInt        int    = 999999999
 )
 
 // IDHash uses ID field as the node hash.
@@ -134,15 +122,7 @@ func init() {
 	envoyListenerConfigMap = make(map[string]*listenerv3.Listener)
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 
-	enforcerCacheVersionMap = make(map[string]int64)
 	enforcerConfigMap = make(map[string][]types.Resource)
-	enforcerAPIVersionMap = make(map[string]int64)
-	enforcerSubscriptionCacheVersionMap = make(map[string]int64)
-	enforcerApplicationCacheVersionMap = make(map[string]int64)
-	enforcerAPICacheVersionMap = make(map[string]int64)
-	enforcerApplicationPolicyCacheVersionMap = make(map[string]int64)
-	enforcerSubscriptionPolicyCacheVersionMap = make(map[string]int64)
-	enforcerApplicationKeyMappingCacheVersionMap = make(map[string]int64)
 	enforcerSubscriptionMap = make(map[string][]types.Resource)
 	enforcerApplicationMap = make(map[string][]types.Resource)
 	enforcerAPIListMap = make(map[string][]types.Resource)
@@ -372,7 +352,7 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 
 //use updateXdsCacheWithLock to avoid race conditions
 func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) {
-	version := rand.Intn(999999999)
+	version := rand.Intn(maxRandomInt)
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	// Will be updated once decide to move to incremental XDS
 	snap := cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
@@ -389,7 +369,7 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 	// TODO: (Praminda) handle labels
 	label := commonEnforcerLabel
 	configs := []types.Resource{generateEnforcerConfigs(configFile)}
-	version := rand.Intn(999999999)
+	version := rand.Intn(maxRandomInt)
 	snap := cachev3.NewSnapshot(
 		fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
@@ -406,7 +386,7 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 // UpdateEnforcerApis Sets new update to the enforcer's Apis
 func UpdateEnforcerApis(label string, apis []types.Resource) {
 
-	version := rand.Intn(999999999)
+	version := rand.Intn(maxRandomInt)
 	snap := cachev3.NewSnapshot(
 		fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, apis, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
@@ -569,7 +549,7 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 	subscriptionList = append(subscriptionList, subscriptions)
 
 	// TODO: (VirajSalaka) Decide if a map is required to keep version (just to avoid having the same version)
-	version := rand.Intn(999999999)
+	version := rand.Intn(maxRandomInt)
 	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, subscriptionList, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
@@ -588,7 +568,7 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 	applicationList := enforcerApplicationMap[label]
 	applicationList = append(applicationList, applications)
 
-	version := rand.Intn(999999999)
+	version := rand.Intn(maxRandomInt)
 	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationList, nil, nil, nil, nil)
 	snap.Consistent()
 
@@ -607,7 +587,7 @@ func UpdateEnforcerAPIList(apis *subscription.APIList) {
 	apiList := enforcerAPIListMap[label]
 	apiList = append(apiList, apis)
 
-	version := rand.Intn(999999999)
+	version := rand.Intn(maxRandomInt)
 	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, apiList, nil, nil, nil)
 	snap.Consistent()
 
@@ -626,7 +606,7 @@ func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 	applicationPolicyList := enforcerApplicationPolicyMap[label]
 	applicationPolicyList = append(applicationPolicyList, applicationPolicies)
 
-	version := rand.Intn(999999999)
+	version := rand.Intn(maxRandomInt)
 	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationPolicyList, nil, nil)
 	snap.Consistent()
 
@@ -645,7 +625,7 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 	subscriptionPolicyList := enforcerSubscriptionPolicyMap[label]
 	subscriptionPolicyList = append(subscriptionPolicyList, subscriptionPolicies)
 
-	version := rand.Intn(999999999)
+	version := rand.Intn(maxRandomInt)
 	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, subscriptionPolicyList, nil)
 	snap.Consistent()
 
@@ -664,7 +644,7 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 	applicationKeyMappingList := enforcerApplicationKeyMappingMap[label]
 	applicationKeyMappingList = append(applicationKeyMappingList, applicationKeyMappings)
 
-	version := rand.Intn(999999999)
+	version := rand.Intn(maxRandomInt)
 	snap := cachev3.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, applicationKeyMappingList)
 	snap.Consistent()
 
