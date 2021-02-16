@@ -202,7 +202,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         for (APIs api : apisList) {
             API newApi = new API();
-            newApi.setApiId(api.getApiId());
+            newApi.setApiId(Integer.parseInt(api.getApiId()));
             newApi.setApiName(api.getName());
             newApi.setApiProvider(api.getProvider());
             newApi.setApiType(api.getApiType());

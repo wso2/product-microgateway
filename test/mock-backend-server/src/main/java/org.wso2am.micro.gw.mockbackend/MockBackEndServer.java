@@ -130,6 +130,15 @@ public class MockBackEndServer extends Thread {
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });
+            httpServer.createContext(context + "/pets/findByTags", exchange -> {
+
+                byte[] response = ResponseConstants.PET_BY_ID_RESPONSE.getBytes();
+                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
+                        Constants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
             httpServer.createContext(context + "/store/inventory", exchange -> {
 
                 byte[] response = ResponseConstants.STORE_INVENTORY_RESPONSE.getBytes();

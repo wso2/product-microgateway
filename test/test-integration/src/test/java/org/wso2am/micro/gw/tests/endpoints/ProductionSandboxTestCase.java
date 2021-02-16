@@ -71,8 +71,8 @@ public class ProductionSandboxTestCase extends BaseTestCase {
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
 
-        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
-        jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600);
+        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, null);
+        jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600, null);
     }
 
     @Test(description = "Invoke Production and Sandbox endpoint when both endpoints provided")
@@ -117,8 +117,8 @@ public class ProductionSandboxTestCase extends BaseTestCase {
 
         Assert.assertNotNull(prodResponse, "Production endoint response should not be null");
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
-        Assert.assertEquals(prodResponse.getData(), "{\"errorDescription\":\"Production " +
-                "key offered to the API with no production endpoint\",\"errorCode\":\"900901\"}");
+        Assert.assertTrue(
+                prodResponse.getData().contains("Production key offered to the API with no production endpoint"));
     }
 
     @Test(description = "Invoke Production endpoint when production endpoints provided alone")
@@ -138,10 +138,9 @@ public class ProductionSandboxTestCase extends BaseTestCase {
         HttpResponse sandResponse = HttpsClientRequest.doGet(getServiceURLHttps(
                 "/v2/prod/pet/findByStatus"), sandHeaders);
 
-        Assert.assertNotNull(sandResponse, "Sandbox endoint response should not be null");
+        Assert.assertNotNull(sandResponse, "Sandbox endpoint response should not be null");
         Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
-        Assert.assertEquals(sandResponse.getData(), "{\"errorDescription\":\"Sandbox " +
-                "key offered to the API with no sandbox endpoint\",\"errorCode\":\"900901\"}");
+        Assert.assertTrue(sandResponse.getData().contains("Sandbox key offered to the API with no sandbox endpoint"));
     }
 
 }

@@ -37,11 +37,14 @@ import java.util.concurrent.TimeUnit;
  */
 public class TokenUtil {
 
-    public static String getBasicJWT(ApplicationDTO applicationDTO, JSONObject jwtTokenInfo, String keyType, int validityPeriod)
-            throws Exception {
+    public static String getBasicJWT(ApplicationDTO applicationDTO, JSONObject jwtTokenInfo, String keyType,
+            int validityPeriod, String scopes) throws Exception {
 
         jwtTokenInfo.put("aud", "http://org.wso2.apimgt/gateway");
         jwtTokenInfo.put("sub", "admin");
+        if (scopes != null) {
+            jwtTokenInfo.put("scope", scopes);
+        }
         jwtTokenInfo.put("application", new JSONObject(applicationDTO));
         jwtTokenInfo.put("iss", "https://localhost:9443/oauth2/token");
         jwtTokenInfo.put("keytype", keyType);
@@ -87,7 +90,7 @@ public class TokenUtil {
         for(Map.Entry<String, String> entry : claims.entrySet()) {
             jwtTokenInfo.put(entry.getKey(), entry.getValue());
         }
-        return getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod);
+        return getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod, null);
     }
 
     public static String getJwtWithCustomClaimsTransformer(ApplicationDTO applicationDTO, JSONObject jwtTokenInfo,
@@ -97,6 +100,6 @@ public class TokenUtil {
         for(Map.Entry<String, Object> entry : claims.entrySet()) {
             jwtTokenInfo.put(entry.getKey(), entry.getValue());
         }
-        return getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod);
+        return getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod, null);
     }
 }

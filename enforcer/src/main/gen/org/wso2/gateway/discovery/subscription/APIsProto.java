@@ -31,7 +31,7 @@ public final class APIsProto {
       "\n%wso2/discovery/subscription/api.proto\022" +
       "\033wso2.discovery.subscription\032-wso2/disco" +
       "very/subscription/url_mapping.proto\"\320\001\n\004" +
-      "APIs\022\r\n\005apiId\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\020\n\010pro" +
+      "APIs\022\r\n\005apiId\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\020\n\010pro" +
       "vider\030\003 \001(\t\022\017\n\007version\030\004 \001(\t\022\017\n\007context\030" +
       "\005 \001(\t\022\016\n\006policy\030\006 \001(\t\022\017\n\007apiType\030\007 \001(\t\022\030" +
       "\n\020isDefaultVersion\030\010 \001(\010\022<\n\013urlMappings\030" +

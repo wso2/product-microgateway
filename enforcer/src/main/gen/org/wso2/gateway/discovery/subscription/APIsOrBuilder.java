@@ -8,10 +8,16 @@ public interface APIsOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>int32 apiId = 1;</code>
+   * <code>string apiId = 1;</code>
    * @return The apiId.
    */
-  int getApiId();
+  java.lang.String getApiId();
+  /**
+   * <code>string apiId = 1;</code>
+   * @return The bytes for apiId.
+   */
+  com.google.protobuf.ByteString
+      getApiIdBytes();
 
   /**
    * <code>string name = 2;</code>

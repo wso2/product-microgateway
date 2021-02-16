@@ -64,7 +64,7 @@ public class BackendTLSTestcase extends BaseTestCase {
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
 
-        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
+        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, "write:pets");
     }
 
     @AfterClass(description = "stop the setup")

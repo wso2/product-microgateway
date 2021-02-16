@@ -2,7 +2,7 @@ module github.com/wso2/micro-gw
 
 go 1.15
 
-replace github.com/envoyproxy/go-control-plane => github.com/praminda/go-control-plane v0.9.8-0.20210212020858-a318b3d8e3a0
+replace github.com/envoyproxy/go-control-plane => github.com/praminda/go-control-plane v0.9.8-0.20210214142219-a990e09885c5
 
 require (
 	github.com/envoyproxy/go-control-plane v0.9.8
@@ -27,7 +27,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5 // indirect
 	golang.org/x/net v0.0.0-20201201195509-5d6afe98e0b7
-	golang.org/x/tools v0.0.0-20210107193943-4ed967dd8eff // indirect
+	golang.org/x/tools v0.1.0 // indirect
 	google.golang.org/appengine v1.6.1 // indirect
 	google.golang.org/genproto v0.0.0-20201201144952-b05cb90ed32e // indirect
 	google.golang.org/grpc v1.33.2
