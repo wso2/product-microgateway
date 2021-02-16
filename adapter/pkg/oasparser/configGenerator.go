@@ -114,7 +114,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *api.Api {
 	}
 
 	for _, res := range mgwSwagger.GetResources() {
-		var operations = make([]*wso2.Operation, len(res.GetMethod()))
+		var operations = make([]*api.Operation, len(res.GetMethod()))
 		for i, op := range res.GetMethod() {
 			operations[i] = GetEnforcerAPIOperation(op)
 		}
@@ -139,22 +139,22 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *api.Api {
 }
 
 // GetEnforcerAPIOperation builds the operation object expected by the proto definition
-func GetEnforcerAPIOperation(operation mgw.Operation) *wso2.Operation {
-	secSchemas := make([]*wso2.SecurityList, len(operation.GetSecurity()))
+func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
+	secSchemas := make([]*api.SecurityList, len(operation.GetSecurity()))
 	for i, security := range operation.GetSecurity() {
-		mapOfSecurity := make(map[string]*wso2.Scopes)
+		mapOfSecurity := make(map[string]*api.Scopes)
 		for key, scopes := range security {
-			scopeList := &wso2.Scopes{
+			scopeList := &api.Scopes{
 				Scopes: scopes,
 			}
 			mapOfSecurity[key] = scopeList
 		}
-		secSchema := &wso2.SecurityList{
+		secSchema := &api.SecurityList{
 			ScopeList: mapOfSecurity,
 		}
 		secSchemas[i] = secSchema
 	}
-	apiOperation := wso2.Operation{
+	apiOperation := api.Operation{
 		Method:   operation.GetMethod(),
 		Security: secSchemas,
 	}
