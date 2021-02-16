@@ -19,10 +19,10 @@ package resourcetypes
 
 // Subscription for struct subscription
 type Subscription struct {
-	SubscriptionID    int32    `json:"subscriptionId"`
+	SubscriptionID    int32  `json:"subscriptionId"`
 	PolicyID          string `json:"policyId"`
-	APIID             int32    `json:"apiId"`
-	AppID             int32    `json:"appId" json:"applicationId"`
+	APIID             int32  `json:"apiId"`
+	AppID             int32  `json:"appId" json:"applicationId"`
 	SubscriptionState string `json:"subscriptionState"`
 	TenantID          int32  `json:"tenanId,omitempty"`
 	TenantDomain      string `json:"tenanDomain,omitempty"`
@@ -56,7 +56,7 @@ type ApplicationList struct {
 
 // ApplicationKeyMapping for struct applicationKeyMapping
 type ApplicationKeyMapping struct {
-	ApplicationID int32    `json:"applicationId"`
+	ApplicationID int32  `json:"applicationId"`
 	ConsumerKey   string `json:"consumerKey"`
 	KeyType       string `json:"keyType"`
 	KeyManager    string `json:"keyManager"`
@@ -73,6 +73,7 @@ type ApplicationKeyMappingList struct {
 // API for struct Api
 type API struct {
 	APIID            string `json:"apiId"`
+	UUID             string `json:"uuid"`
 	Provider         string `json:"provider" json:"apiProvider"`
 	Name             string `json:"name" json:"apiName"`
 	Version          string `json:"version" json:"apiVersion"`
@@ -93,8 +94,8 @@ type APIList struct {
 
 // ApplicationPolicy for struct ApplicationPolicy
 type ApplicationPolicy struct {
-	ID        int32    `json:"id"`
-	TenantID  int32    `json:"tenantId"`
+	ID        int32  `json:"id"`
+	TenantID  int32  `json:"tenantId"`
 	Name      string `json:"name"`
 	QuotaType string `json:"quotaType"`
 }
@@ -106,13 +107,13 @@ type ApplicationPolicyList struct {
 
 // SubscriptionPolicy for struct list of SubscriptionPolicy
 type SubscriptionPolicy struct {
-	ID                   int32    `json:"id" json:"policyId"`
-	TenantID             int32    `json:"tenantId"`
+	ID                   int32  `json:"id" json:"policyId"`
+	TenantID             int32  `json:"tenantId"`
 	Name                 string `json:"name"`
 	QuotaType            string `json:"quotaType"`
-	GraphQLMaxComplexity int32    `json:"graphQLMaxComplexity"`
-	GraphQLMaxDepth      int32    `json:"graphQLMaxDepth"`
-	RateLimitCount       int32    `json:"rateLimitCount"`
+	GraphQLMaxComplexity int32  `json:"graphQLMaxComplexity"`
+	GraphQLMaxDepth      int32  `json:"graphQLMaxDepth"`
+	RateLimitCount       int32  `json:"rateLimitCount"`
 	RateLimitTimeUnit    string `json:"rateLimitTimeUnit"`
 	StopOnQuotaReach     bool   `json:"stopOnQuotaReach"`
 	TenantDomain         string `json:"tenanDomain,omitempty"`
