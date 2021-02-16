@@ -35,7 +35,6 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
-import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
