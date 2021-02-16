@@ -68,6 +68,7 @@ type Event struct {
 // APIEvent for struct API events
 type APIEvent struct {
 	APIID         string   `json:"apiId"`
+	UUID          string   `json:"uuid"`
 	GatewayLabels []string `json:"gatewayLabels"`
 	APIVersion    string   `json:"apiVersion"`
 	APIContext    string   `json:"apiContext"`

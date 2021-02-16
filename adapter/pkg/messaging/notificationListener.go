@@ -48,10 +48,10 @@ const (
 
 // var variables
 var (
-	APIList                   = make([]resourceTypes.API, 0)
-	ScopeList                 = make([]resourceTypes.Scope, 0)
-	APIListTimeStamp          = make(map[string]int64, 0)
-	ApplicationListTimeStamp  = make(map[string]int64, 0)
+	APIList                  = make([]resourceTypes.API, 0)
+	ScopeList                = make([]resourceTypes.Scope, 0)
+	APIListTimeStamp         = make(map[string]int64, 0)
+	ApplicationListTimeStamp = make(map[string]int64, 0)
 )
 
 // handleNotification to process
@@ -125,7 +125,8 @@ func handleAPIEvents(data []byte, eventType string) {
 		if err != nil {
 			logger.LoggerMsg.Errorf("Cannot cast %s to an Integer", apiEvent.APIID)
 		} else {
-			api := resourceTypes.API{APIID: strconv.FormatInt(ID, 10), Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
+			api := resourceTypes.API{APIID: strconv.FormatInt(ID, 10), UUID: apiEvent.UUID,
+				Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
 				Version: apiEvent.APIVersion, Context: apiEvent.APIContext, APIType: apiEvent.APIType,
 				APIStatus: apiEvent.APIStatus, IsDefaultVersion: true, TenantID: apiEvent.TenantID,
 				TenantDomain: apiEvent.Event.TenantDomain, TimeStamp: apiEvent.Event.TimeStamp}
@@ -139,10 +140,10 @@ func handleAPIEvents(data []byte, eventType string) {
 				subscription.APIList.List = removeAPI(subscription.APIList.List, apiEvent.APIID)
 			}
 			xds.UpdateEnforcerAPIList(xds.GenerateAPIList(subscription.APIList))
-			logger.LoggerMsg.Infof("API %s is added/updated to APIList", apiEvent.APIID)
+			logger.LoggerMsg.Infof("API %s is added/updated to APIList", apiEvent.UUID)
 		}
 
-		go synchronizer.FetchAPIsFromControlPlane(apiEvent.APIID, apiEvent.GatewayLabels)
+		go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels)
 
 	}
 	fmt.Println(APIList)
