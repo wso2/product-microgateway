@@ -141,6 +141,19 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
+          case 66: {
+            org.wso2.gateway.discovery.config.enforcer.Throttling.Builder subBuilder = null;
+            if (throttlingConfig_ != null) {
+              subBuilder = throttlingConfig_.toBuilder();
+            }
+            throttlingConfig_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.Throttling.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(throttlingConfig_);
+              throttlingConfig_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -372,6 +385,32 @@ private static final long serialVersionUID = 0L;
     return getJwtGenerator();
   }
 
+  public static final int THROTTLINGCONFIG_FIELD_NUMBER = 8;
+  private org.wso2.gateway.discovery.config.enforcer.Throttling throttlingConfig_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+   * @return Whether the throttlingConfig field is set.
+   */
+  @java.lang.Override
+  public boolean hasThrottlingConfig() {
+    return throttlingConfig_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+   * @return The throttlingConfig.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.Throttling getThrottlingConfig() {
+    return throttlingConfig_ == null ? org.wso2.gateway.discovery.config.enforcer.Throttling.getDefaultInstance() : throttlingConfig_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder getThrottlingConfigOrBuilder() {
+    return getThrottlingConfig();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -406,6 +445,9 @@ private static final long serialVersionUID = 0L;
     }
     if (jwtGenerator_ != null) {
       output.writeMessage(7, getJwtGenerator());
+    }
+    if (throttlingConfig_ != null) {
+      output.writeMessage(8, getThrottlingConfig());
     }
     unknownFields.writeTo(output);
   }
@@ -443,6 +485,10 @@ private static final long serialVersionUID = 0L;
     if (jwtGenerator_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(7, getJwtGenerator());
+    }
+    if (throttlingConfig_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(8, getThrottlingConfig());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -491,6 +537,11 @@ private static final long serialVersionUID = 0L;
       if (!getJwtGenerator()
           .equals(other.getJwtGenerator())) return false;
     }
+    if (hasThrottlingConfig() != other.hasThrottlingConfig()) return false;
+    if (hasThrottlingConfig()) {
+      if (!getThrottlingConfig()
+          .equals(other.getThrottlingConfig())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -529,6 +580,10 @@ private static final long serialVersionUID = 0L;
     if (hasJwtGenerator()) {
       hash = (37 * hash) + JWTGENERATOR_FIELD_NUMBER;
       hash = (53 * hash) + getJwtGenerator().hashCode();
+    }
+    if (hasThrottlingConfig()) {
+      hash = (37 * hash) + THROTTLINGCONFIG_FIELD_NUMBER;
+      hash = (53 * hash) + getThrottlingConfig().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -710,6 +765,12 @@ private static final long serialVersionUID = 0L;
         jwtGenerator_ = null;
         jwtGeneratorBuilder_ = null;
       }
+      if (throttlingConfigBuilder_ == null) {
+        throttlingConfig_ = null;
+      } else {
+        throttlingConfig_ = null;
+        throttlingConfigBuilder_ = null;
+      }
       return this;
     }
 
@@ -775,6 +836,11 @@ private static final long serialVersionUID = 0L;
         result.jwtGenerator_ = jwtGenerator_;
       } else {
         result.jwtGenerator_ = jwtGeneratorBuilder_.build();
+      }
+      if (throttlingConfigBuilder_ == null) {
+        result.throttlingConfig_ = throttlingConfig_;
+      } else {
+        result.throttlingConfig_ = throttlingConfigBuilder_.build();
       }
       onBuilt();
       return result;
@@ -867,6 +933,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasJwtGenerator()) {
         mergeJwtGenerator(other.getJwtGenerator());
+      }
+      if (other.hasThrottlingConfig()) {
+        mergeThrottlingConfig(other.getThrottlingConfig());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1850,6 +1919,125 @@ private static final long serialVersionUID = 0L;
         jwtGenerator_ = null;
       }
       return jwtGeneratorBuilder_;
+    }
+
+    private org.wso2.gateway.discovery.config.enforcer.Throttling throttlingConfig_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.Throttling, org.wso2.gateway.discovery.config.enforcer.Throttling.Builder, org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder> throttlingConfigBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     * @return Whether the throttlingConfig field is set.
+     */
+    public boolean hasThrottlingConfig() {
+      return throttlingConfigBuilder_ != null || throttlingConfig_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     * @return The throttlingConfig.
+     */
+    public org.wso2.gateway.discovery.config.enforcer.Throttling getThrottlingConfig() {
+      if (throttlingConfigBuilder_ == null) {
+        return throttlingConfig_ == null ? org.wso2.gateway.discovery.config.enforcer.Throttling.getDefaultInstance() : throttlingConfig_;
+      } else {
+        return throttlingConfigBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    public Builder setThrottlingConfig(org.wso2.gateway.discovery.config.enforcer.Throttling value) {
+      if (throttlingConfigBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        throttlingConfig_ = value;
+        onChanged();
+      } else {
+        throttlingConfigBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    public Builder setThrottlingConfig(
+        org.wso2.gateway.discovery.config.enforcer.Throttling.Builder builderForValue) {
+      if (throttlingConfigBuilder_ == null) {
+        throttlingConfig_ = builderForValue.build();
+        onChanged();
+      } else {
+        throttlingConfigBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    public Builder mergeThrottlingConfig(org.wso2.gateway.discovery.config.enforcer.Throttling value) {
+      if (throttlingConfigBuilder_ == null) {
+        if (throttlingConfig_ != null) {
+          throttlingConfig_ =
+            org.wso2.gateway.discovery.config.enforcer.Throttling.newBuilder(throttlingConfig_).mergeFrom(value).buildPartial();
+        } else {
+          throttlingConfig_ = value;
+        }
+        onChanged();
+      } else {
+        throttlingConfigBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    public Builder clearThrottlingConfig() {
+      if (throttlingConfigBuilder_ == null) {
+        throttlingConfig_ = null;
+        onChanged();
+      } else {
+        throttlingConfig_ = null;
+        throttlingConfigBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.Throttling.Builder getThrottlingConfigBuilder() {
+      
+      onChanged();
+      return getThrottlingConfigFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder getThrottlingConfigOrBuilder() {
+      if (throttlingConfigBuilder_ != null) {
+        return throttlingConfigBuilder_.getMessageOrBuilder();
+      } else {
+        return throttlingConfig_ == null ?
+            org.wso2.gateway.discovery.config.enforcer.Throttling.getDefaultInstance() : throttlingConfig_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.Throttling, org.wso2.gateway.discovery.config.enforcer.Throttling.Builder, org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder> 
+        getThrottlingConfigFieldBuilder() {
+      if (throttlingConfigBuilder_ == null) {
+        throttlingConfigBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.Throttling, org.wso2.gateway.discovery.config.enforcer.Throttling.Builder, org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder>(
+                getThrottlingConfig(),
+                getParentForChildren(),
+                isClean());
+        throttlingConfig_ = null;
+      }
+      return throttlingConfigBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

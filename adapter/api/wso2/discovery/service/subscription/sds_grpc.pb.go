@@ -12,7 +12,6 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-// Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
 // SubscriptionDiscoveryServiceClient is the client API for SubscriptionDiscoveryService service.
@@ -31,7 +30,7 @@ func NewSubscriptionDiscoveryServiceClient(cc grpc.ClientConnInterface) Subscrip
 }
 
 func (c *subscriptionDiscoveryServiceClient) StreamSubscriptions(ctx context.Context, opts ...grpc.CallOption) (SubscriptionDiscoveryService_StreamSubscriptionsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &SubscriptionDiscoveryService_ServiceDesc.Streams[0], "/discovery.service.subscription.SubscriptionDiscoveryService/StreamSubscriptions", opts...)
+	stream, err := c.cc.NewStream(ctx, &_SubscriptionDiscoveryService_serviceDesc.Streams[0], "/discovery.service.subscription.SubscriptionDiscoveryService/StreamSubscriptions", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +86,7 @@ type UnsafeSubscriptionDiscoveryServiceServer interface {
 }
 
 func RegisterSubscriptionDiscoveryServiceServer(s grpc.ServiceRegistrar, srv SubscriptionDiscoveryServiceServer) {
-	s.RegisterService(&SubscriptionDiscoveryService_ServiceDesc, srv)
+	s.RegisterService(&_SubscriptionDiscoveryService_serviceDesc, srv)
 }
 
 func _SubscriptionDiscoveryService_StreamSubscriptions_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -116,10 +115,7 @@ func (x *subscriptionDiscoveryServiceStreamSubscriptionsServer) Recv() (*v3.Disc
 	return m, nil
 }
 
-// SubscriptionDiscoveryService_ServiceDesc is the grpc.ServiceDesc for SubscriptionDiscoveryService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var SubscriptionDiscoveryService_ServiceDesc = grpc.ServiceDesc{
+var _SubscriptionDiscoveryService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "discovery.service.subscription.SubscriptionDiscoveryService",
 	HandlerType: (*SubscriptionDiscoveryServiceServer)(nil),
 	Methods:     []grpc.MethodDesc{},

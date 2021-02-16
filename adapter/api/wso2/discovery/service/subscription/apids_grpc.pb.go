@@ -12,7 +12,6 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-// Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
 // ApiListDiscoveryServiceClient is the client API for ApiListDiscoveryService service.
@@ -31,7 +30,7 @@ func NewApiListDiscoveryServiceClient(cc grpc.ClientConnInterface) ApiListDiscov
 }
 
 func (c *apiListDiscoveryServiceClient) StreamApiList(ctx context.Context, opts ...grpc.CallOption) (ApiListDiscoveryService_StreamApiListClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ApiListDiscoveryService_ServiceDesc.Streams[0], "/discovery.service.subscription.ApiListDiscoveryService/StreamApiList", opts...)
+	stream, err := c.cc.NewStream(ctx, &_ApiListDiscoveryService_serviceDesc.Streams[0], "/discovery.service.subscription.ApiListDiscoveryService/StreamApiList", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +86,7 @@ type UnsafeApiListDiscoveryServiceServer interface {
 }
 
 func RegisterApiListDiscoveryServiceServer(s grpc.ServiceRegistrar, srv ApiListDiscoveryServiceServer) {
-	s.RegisterService(&ApiListDiscoveryService_ServiceDesc, srv)
+	s.RegisterService(&_ApiListDiscoveryService_serviceDesc, srv)
 }
 
 func _ApiListDiscoveryService_StreamApiList_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -116,10 +115,7 @@ func (x *apiListDiscoveryServiceStreamApiListServer) Recv() (*v3.DiscoveryReques
 	return m, nil
 }
 
-// ApiListDiscoveryService_ServiceDesc is the grpc.ServiceDesc for ApiListDiscoveryService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var ApiListDiscoveryService_ServiceDesc = grpc.ServiceDesc{
+var _ApiListDiscoveryService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "discovery.service.subscription.ApiListDiscoveryService",
 	HandlerType: (*ApiListDiscoveryServiceServer)(nil),
 	Methods:     []grpc.MethodDesc{},

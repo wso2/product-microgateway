@@ -12,7 +12,6 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-// Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
 // ApplicationKeyMappingDiscoveryServiceClient is the client API for ApplicationKeyMappingDiscoveryService service.
@@ -31,7 +30,7 @@ func NewApplicationKeyMappingDiscoveryServiceClient(cc grpc.ClientConnInterface)
 }
 
 func (c *applicationKeyMappingDiscoveryServiceClient) StreamApplicationKeyMappings(ctx context.Context, opts ...grpc.CallOption) (ApplicationKeyMappingDiscoveryService_StreamApplicationKeyMappingsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ApplicationKeyMappingDiscoveryService_ServiceDesc.Streams[0], "/discovery.service.subscription.ApplicationKeyMappingDiscoveryService/StreamApplicationKeyMappings", opts...)
+	stream, err := c.cc.NewStream(ctx, &_ApplicationKeyMappingDiscoveryService_serviceDesc.Streams[0], "/discovery.service.subscription.ApplicationKeyMappingDiscoveryService/StreamApplicationKeyMappings", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +86,7 @@ type UnsafeApplicationKeyMappingDiscoveryServiceServer interface {
 }
 
 func RegisterApplicationKeyMappingDiscoveryServiceServer(s grpc.ServiceRegistrar, srv ApplicationKeyMappingDiscoveryServiceServer) {
-	s.RegisterService(&ApplicationKeyMappingDiscoveryService_ServiceDesc, srv)
+	s.RegisterService(&_ApplicationKeyMappingDiscoveryService_serviceDesc, srv)
 }
 
 func _ApplicationKeyMappingDiscoveryService_StreamApplicationKeyMappings_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -116,10 +115,7 @@ func (x *applicationKeyMappingDiscoveryServiceStreamApplicationKeyMappingsServer
 	return m, nil
 }
 
-// ApplicationKeyMappingDiscoveryService_ServiceDesc is the grpc.ServiceDesc for ApplicationKeyMappingDiscoveryService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var ApplicationKeyMappingDiscoveryService_ServiceDesc = grpc.ServiceDesc{
+var _ApplicationKeyMappingDiscoveryService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "discovery.service.subscription.ApplicationKeyMappingDiscoveryService",
 	HandlerType: (*ApplicationKeyMappingDiscoveryServiceServer)(nil),
 	Methods:     []grpc.MethodDesc{},

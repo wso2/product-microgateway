@@ -12,7 +12,6 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-// Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
 // SubscriptionPolicyDiscoveryServiceClient is the client API for SubscriptionPolicyDiscoveryService service.
@@ -31,7 +30,7 @@ func NewSubscriptionPolicyDiscoveryServiceClient(cc grpc.ClientConnInterface) Su
 }
 
 func (c *subscriptionPolicyDiscoveryServiceClient) StreamSubscriptionPolicies(ctx context.Context, opts ...grpc.CallOption) (SubscriptionPolicyDiscoveryService_StreamSubscriptionPoliciesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &SubscriptionPolicyDiscoveryService_ServiceDesc.Streams[0], "/discovery.service.subscription.SubscriptionPolicyDiscoveryService/StreamSubscriptionPolicies", opts...)
+	stream, err := c.cc.NewStream(ctx, &_SubscriptionPolicyDiscoveryService_serviceDesc.Streams[0], "/discovery.service.subscription.SubscriptionPolicyDiscoveryService/StreamSubscriptionPolicies", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +86,7 @@ type UnsafeSubscriptionPolicyDiscoveryServiceServer interface {
 }
 
 func RegisterSubscriptionPolicyDiscoveryServiceServer(s grpc.ServiceRegistrar, srv SubscriptionPolicyDiscoveryServiceServer) {
-	s.RegisterService(&SubscriptionPolicyDiscoveryService_ServiceDesc, srv)
+	s.RegisterService(&_SubscriptionPolicyDiscoveryService_serviceDesc, srv)
 }
 
 func _SubscriptionPolicyDiscoveryService_StreamSubscriptionPolicies_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -116,10 +115,7 @@ func (x *subscriptionPolicyDiscoveryServiceStreamSubscriptionPoliciesServer) Rec
 	return m, nil
 }
 
-// SubscriptionPolicyDiscoveryService_ServiceDesc is the grpc.ServiceDesc for SubscriptionPolicyDiscoveryService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var SubscriptionPolicyDiscoveryService_ServiceDesc = grpc.ServiceDesc{
+var _SubscriptionPolicyDiscoveryService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "discovery.service.subscription.SubscriptionPolicyDiscoveryService",
 	HandlerType: (*SubscriptionPolicyDiscoveryServiceServer)(nil),
 	Methods:     []grpc.MethodDesc{},
