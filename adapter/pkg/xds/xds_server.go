@@ -246,11 +246,11 @@ func UpdateAPI(name string, version string, byteArr []byte, upstreamCerts []byte
 // DeleteAPI deletes an API, its resources and updates the caches
 func DeleteAPI(apiName string, version string, vhost string) (errorCode string, errorMsg string) {
 	apiMapKey := vhost + ":" + apiName + ":" + version
-	apiInfo := "Name:" + apiName + " Version:" + version + " VirtualHost:" + vhost
+	apiInfo := "Name: " + apiName + ", Version: " + version + ", Virtual Host: " + vhost
 	_, ok := apiMgwSwaggerMap[apiMapKey]
 	if !ok {
-		errorCode = "NOT_FOUND"
-		errorMsg = "Unable to delete API " + apiInfo + " . Does not exist."
+		errorCode = mgw.NotFound
+		errorMsg = "Unable to delete API " + apiInfo + ". Does not exist."
 		logger.LoggerXds.Infof(errorMsg)
 		return errorCode, errorMsg
 	}

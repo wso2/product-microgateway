@@ -35,6 +35,7 @@ import (
 	"github.com/wso2/micro-gw/pkg/api/restserver/operations"
 	"github.com/wso2/micro-gw/pkg/api/restserver/operations/api_collection"
 	"github.com/wso2/micro-gw/pkg/api/restserver/operations/api_individual"
+	constants "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/tlsutils"
 )
 
@@ -85,7 +86,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		switch errCode {
 		case "":
 			return api_individual.NewDeleteAPIOK()
-		case "NOT_FOUND":
+		case constants.NotFound:
 			return api_individual.NewDeleteAPINotFound()
 		default:
 			return api_individual.NewPostAPIInternalServerError()
@@ -100,12 +101,14 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
 		err := apiServer.ApplyAPIProjectWithOverwrite(jsonByteArray, []string{}, params.Overwrite)
 		if err != nil {
-			if err.Error() == "ALREADY_EXISTS" {
-				api_individual.NewPostAPIConflict()
-			} else if err.Error() == "NOT_FOUND" {
-				api_individual.NewPostAPINotFound()
+			switch err.Error() {
+			case constants.AlreadyExists:
+				return api_individual.NewPostAPIConflict()
+			case constants.NotFound:
+				return api_individual.NewPostAPINotFound()
+			default:
+				return api_individual.NewPostAPIInternalServerError()
 			}
-			return api_individual.NewPostAPIInternalServerError()
 		}
 		return api_individual.NewPostAPIOK()
 	})
