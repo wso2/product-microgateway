@@ -27,7 +27,7 @@ import (
 	configservice "github.com/wso2/micro-gw/api/wso2/discovery/service/config"
 	subscriptionservice "github.com/wso2/micro-gw/api/wso2/discovery/service/subscription"
 	"github.com/wso2/micro-gw/pkg/api/restserver"
-	"github.com/wso2/micro-gw/pkg/discovery/server/v3"
+	wso2_server "github.com/wso2/micro-gw/pkg/discovery/server/v3"
 	"github.com/wso2/micro-gw/pkg/tlsutils"
 
 	"context"
@@ -42,6 +42,7 @@ import (
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/messaging"
+	cb "github.com/wso2/micro-gw/pkg/mgw/xdscallbacks"
 	"github.com/wso2/micro-gw/pkg/subscription"
 	"github.com/wso2/micro-gw/pkg/synchronizer"
 	"github.com/wso2/micro-gw/pkg/xds"
@@ -77,9 +78,9 @@ func init() {
 
 const grpcMaxConcurrentStreams = 1000000
 
-func runManagementServer(server xdsv3.Server, enforcerServer server.Server, enforcerSdsServer server.Server,
-	enforcerAppDsSrv server.Server, enforcerAPIDsSrv server.Server, enforcerAppPolicyDsSrv server.Server,
-	enforcerSubPolicyDsSrv server.Server, enforcerAppKeyMappingDsSrv server.Server, port uint) {
+func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server, enforcerSdsServer wso2_server.Server,
+	enforcerAppDsSrv wso2_server.Server, enforcerAPIDsSrv wso2_server.Server, enforcerAppPolicyDsSrv wso2_server.Server,
+	enforcerSubPolicyDsSrv wso2_server.Server, enforcerAppKeyMappingDsSrv wso2_server.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
 
@@ -155,13 +156,13 @@ func Run(conf *config.Config) {
 	enforcerApplicationKeyMappingCache := xds.GetEnforcerApplicationKeyMappingCache()
 
 	srv := xdsv3.NewServer(ctx, cache, nil)
-	enforcerXdsSrv := server.NewServer(ctx, enforcerCache, nil)
-	enforcerSdsSrv := server.NewServer(ctx, enforcerSubscriptionCache, nil)
-	enforcerAppDsSrv := server.NewServer(ctx, enforcerApplicationCache, nil)
-	enforcerAPIDsSrv := server.NewServer(ctx, enforcerAPICache, nil)
-	enforcerAppPolicyDsSrv := server.NewServer(ctx, enforcerApplicationPolicyCache, nil)
-	enforcerSubPolicyDsSrv := server.NewServer(ctx, enforcerSubscriptionPolicyCache, nil)
-	enforcerAppKeyMappingDsSrv := server.NewServer(ctx, enforcerApplicationKeyMappingCache, nil)
+	enforcerXdsSrv := wso2_server.NewServer(ctx, enforcerCache, &cb.Callbacks{})
+	enforcerSdsSrv := wso2_server.NewServer(ctx, enforcerSubscriptionCache, &cb.Callbacks{})
+	enforcerAppDsSrv := wso2_server.NewServer(ctx, enforcerApplicationCache, &cb.Callbacks{})
+	enforcerAPIDsSrv := wso2_server.NewServer(ctx, enforcerAPICache, &cb.Callbacks{})
+	enforcerAppPolicyDsSrv := wso2_server.NewServer(ctx, enforcerApplicationPolicyCache, &cb.Callbacks{})
+	enforcerSubPolicyDsSrv := wso2_server.NewServer(ctx, enforcerSubscriptionPolicyCache, &cb.Callbacks{})
+	enforcerAppKeyMappingDsSrv := wso2_server.NewServer(ctx, enforcerApplicationKeyMappingCache, &cb.Callbacks{})
 
 	runManagementServer(srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
 		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, port)
