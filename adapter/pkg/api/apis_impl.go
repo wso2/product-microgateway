@@ -168,11 +168,11 @@ func ApplyAPIProjectWithOverwrite(payload []byte, envrionments []string, overwri
 	exists := xds.IsAPIExist("default", name, version) // TODO: (SuKSW) update once vhost feature added
 	if overwrite && !exists {
 		loggers.LoggerAPI.Infof("Error updating API. API %v:%v does not exist.", name, version)
-		return errors.New("NOT_FOUND")
+		return errors.New(mgw.NotFound)
 	}
 	if !overwrite && exists {
 		loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.", name, version)
-		return errors.New("ALREADY_EXISTS")
+		return errors.New(mgw.AlreadyExists)
 	}
 	if len(envrionments) == 0 {
 		envrionments = append(envrionments, "Production and Sandbox")
