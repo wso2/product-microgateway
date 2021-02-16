@@ -35,7 +35,6 @@ func (operation *Operation) GetSecurity() []map[string][]string {
 	return operation.security
 }
 
-
 // NewOperation Creates and returns operation type object
 func NewOperation(method string, security []map[string][]string) Operation {
 	return Operation{method, security}

@@ -32,7 +32,6 @@ import java.util.Map;
 
 /**
  * Scope validation related test cases.
- *
  */
 public class ScopeTest extends JwtTestCase {
 

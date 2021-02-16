@@ -26,10 +26,10 @@ import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
 import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTAuthenticator;
+import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This is the filter handling the authentication for the requests flowing through the gateway.
@@ -58,21 +58,7 @@ public class AuthFilter implements Filter {
             }
         } catch (APISecurityException e) {
             //TODO: (VirajSalaka) provide the error code properly based on exception (401, 403, 429 etc)
-            Map<String, Object> requestContextProperties = requestContext.getProperties();
-            if (!requestContextProperties.containsKey(APIConstants.MessageFormat.STATUS_CODE)) {
-                requestContext.getProperties().put(APIConstants.MessageFormat.STATUS_CODE, e.getStatusCode());
-            }
-            if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_CODE)) {
-                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_CODE, e.getErrorCode());
-            }
-            if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_MESSAGE)) {
-                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
-                        APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
-            }
-            if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_DESCRIPTION)) {
-                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
-                        APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
-            }
+            FilterUtils.setErrorToContext(requestContext, e);
         }
         return false;
     }

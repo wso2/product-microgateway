@@ -152,16 +152,8 @@ public class JWTAuthenticator implements Authenticator {
                 }
                 return authenticationContext;
             } else {
-                requestContext.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
-                        APIConstants.StatusCodes.UNAUTHENTICATED.getValue());
-                requestContext.getProperties()
-                        .put(APIConstants.MessageFormat.ERROR_CODE, APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
-                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
-                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION, APISecurityConstants
-                        .getFailureMessageDetailDescription(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE));
-                throw new APISecurityException(validationInfo.getValidationCode(),
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        validationInfo.getValidationCode(),
                         APISecurityConstants.getAuthenticationFailureMessage(validationInfo.getValidationCode()));
             }
         } else {

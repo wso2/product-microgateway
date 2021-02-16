@@ -42,7 +42,7 @@ import java.util.Map;
 public class BaseTestCase {
 
     protected MgwServerInstance microGWServer;
-    private static int maxRetryCount=10;
+    private static int maxRetryCount = 10;
     private static int retryIntervalMillis = 3000;
     private static final Logger log = LoggerFactory.getLogger(BaseTestCase.class);
 
