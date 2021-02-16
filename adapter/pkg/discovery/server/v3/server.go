@@ -20,12 +20,13 @@ import (
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/server/rest/v3"
-	"github.com/envoyproxy/go-control-plane/pkg/server/sotw/v3"
+	envoy_sotw "github.com/envoyproxy/go-control-plane/pkg/server/sotw/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/wso2/micro-gw/api/wso2/discovery/service/api"
 	"github.com/wso2/micro-gw/api/wso2/discovery/service/config"
 	"github.com/wso2/micro-gw/api/wso2/discovery/service/subscription"
 	"github.com/wso2/micro-gw/pkg/discovery/resource/v3"
+	"github.com/wso2/micro-gw/pkg/discovery/server/sotw/v3"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -42,7 +43,7 @@ type Server interface {
 	subscription.ApplicationKeyMappingDiscoveryServiceServer
 
 	rest.Server
-	sotw.Server
+	envoy_sotw.Server
 }
 
 // NewServer creates handlers from a config watcher and callbacks.
@@ -51,7 +52,7 @@ func NewServer(ctx context.Context, config cache.Cache, callbacks xdsv3.Callback
 }
 
 // NewServerAdvanced creates new server object
-func NewServerAdvanced(restServer rest.Server, sotwServer sotw.Server) Server {
+func NewServerAdvanced(restServer rest.Server, sotwServer envoy_sotw.Server) Server {
 	return &server{rest: restServer, sotw: sotwServer}
 }
 
@@ -65,10 +66,10 @@ type server struct {
 	subscription.UnimplementedSubscriptionPolicyDiscoveryServiceServer
 	subscription.UnimplementedApplicationKeyMappingDiscoveryServiceServer
 	rest rest.Server
-	sotw sotw.Server
+	sotw envoy_sotw.Server
 }
 
-func (s *server) StreamHandler(stream sotw.Stream, typeURL string) error {
+func (s *server) StreamHandler(stream envoy_sotw.Stream, typeURL string) error {
 	return s.sotw.StreamHandler(stream, typeURL)
 }
 
