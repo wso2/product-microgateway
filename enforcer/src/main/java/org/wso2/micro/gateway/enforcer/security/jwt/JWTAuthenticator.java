@@ -51,9 +51,6 @@ import org.wso2.micro.gateway.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
-import org.wso2.carbon.apimgt.gateway.common.util.JWTUtil;
 
 import java.text.ParseException;
 import java.util.Base64;
