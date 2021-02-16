@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package wso2.discovery.keymgt;
+
+option go_package =
+    "github.com/praminda/go-control-plane/wso2/discovery/km;km";
+option java_package = "org.wso2.gateway.discovery.km";
+option java_outer_classname = "KeyManagerConfigProto";
+option java_multiple_files = true;
+
+
+// KeyManagerConfig model
+message KeyManagerConfig {
+  string name = 1;
+  string type = 2;
+  bool enabled = 3;
+  string tenantDomain = 4;
+  string configuration = 5;
+}

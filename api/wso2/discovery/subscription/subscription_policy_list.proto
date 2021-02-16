@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package wso2.discovery.subscription;
+
+import "wso2/discovery/subscription/subscription_policy.proto";
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/subscription;subscription";
+option java_package = "org.wso2.gateway.discovery.subscription";
+option java_outer_classname = "SubscriptionPolicyListProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: SubscriptionPolicyList]
+
+// SubscriptionPolicyList data model
+message SubscriptionPolicyList {
+	repeated SubscriptionPolicy list = 2;
+}
