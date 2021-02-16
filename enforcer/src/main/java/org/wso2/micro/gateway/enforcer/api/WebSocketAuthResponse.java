@@ -4,7 +4,6 @@ import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
@@ -32,7 +31,7 @@ public class WebSocketAuthResponse extends ResponseObject{
                 .setApiVersion(apiConfig.getVersion())
                 .setApiName(apiConfig.getName()).build();
     }
-
+    // CheckResponse accepts a google.protobuf.Struct as dynamic metadata
     public Struct getMetadataStruct(){
         // TODO - (LahiruUdayanga) set all the related metadata to protobuf struct
         Struct.Builder structBuilder = Struct.newBuilder();

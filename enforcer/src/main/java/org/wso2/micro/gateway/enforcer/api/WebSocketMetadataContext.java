@@ -1,7 +1,12 @@
 package org.wso2.micro.gateway.enforcer.api;
 
 
-
+/**
+ * WebSocketMetadataContext object is sent along with external auth response for WebSocket APIs as dynamic metadata.
+ * Dynamic metadata will be available for the duration of a websocket connection and will be sent to enforcer with
+ * other websocket frame related metadata like frame size, upstream host etc through the websocket metadata grpc service.
+ * Those metadata will be used for web socket throttling and analytics.
+ */
 public class WebSocketMetadataContext implements Context{
     // TODO - (LahriuUdayanga) Finalize the instance variables
     private final String streamId;

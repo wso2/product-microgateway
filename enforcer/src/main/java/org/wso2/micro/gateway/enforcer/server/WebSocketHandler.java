@@ -36,7 +36,6 @@ public class WebSocketHandler implements RequestHandler<RateLimitRequest, WebSoc
                 .getFieldsMap().get(APIConstants.GW_BASE_PATH_PARAM).getStringValue();
         ObjectMapper objectMapper = new ObjectMapper();
         try{
-            //String contextString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rateLimitRequest.getMetadataContext().getFilterMetadataMap().toString());
             logger.info("contextString:"+ rateLimitRequest.getMetadataContext().getFilterMetadataMap().toString());
         }catch (Exception e){
             logger.error(e);

@@ -63,6 +63,7 @@ public class APIFactory {
         //TODO: (Praminda) Use apiId as the map key. Need to add the apiId to envoy context meta
         ConcurrentHashMap<String, API> newApis = new ConcurrentHashMap<>();
 
+        //TODO: (Lahiru) Check apiType field of API to differentiate WebSocket APIs
         for (Api api : apis) {
             if(api.getResourcesCount() != 0){
                 RestAPI enforcerApi = new RestAPI();

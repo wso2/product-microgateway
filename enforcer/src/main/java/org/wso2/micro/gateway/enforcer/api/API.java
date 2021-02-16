@@ -25,7 +25,10 @@ import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import java.util.List;
 
 /**
- * Interface to hold different API types. This can REST, gRPC, graphql and etc.
+ * Interface to hold different API types. This can REST, gRPC, graphql, websocket and etc.
+ * @param <T> - Type of object accepted by the API to process.
+ * @param <S> - Type of object returned by the API after processing.
+ * e.g : RestAPI implements API <RequestContext, ResponseObject>
  */
 public interface API <T, S>{
 

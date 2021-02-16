@@ -17,8 +17,8 @@ public class WebSocketAPI implements API <Context, Context>{
 
     private static final Logger logger = LogManager.getLogger(WebSocketAPI.class);
     private APIConfig apiConfig;
-    private List<Filter<RequestContext>> filters = new ArrayList<>();
-    private List<Filter<WebSocketMetadataContext>> upgradeFilters = new ArrayList<>();
+    private final List<Filter<RequestContext>> filters = new ArrayList<>();
+    private final List<Filter<WebSocketMetadataContext>> upgradeFilters = new ArrayList<>();
 
     @Override
     public List<Filter<Context>> getFilters() {
@@ -43,6 +43,7 @@ public class WebSocketAPI implements API <Context, Context>{
     @Override
     public Context process(Context context) {
         if(context instanceof WebSocketMetadataContext){
+            // TODO (LahiruUdayanga) - Process WebSocketMetadataContext.
             return context;
         }else {
             logger.info("websocket api process"+ context.toString());
@@ -80,12 +81,13 @@ public class WebSocketAPI implements API <Context, Context>{
     @Override
     public boolean executeFilterChain(Context context) {
         if(context instanceof WebSocketMetadataContext){
+            // TODO (LahiruUdayanga) - Execute upgrade filter chain for WebSocketMetadataContext.
             return true;
         }else {
             logger.info("normal filter chain");
             boolean proceed;
-            for (Filter filter : getHttpFilters()) {
-                proceed = filter.handleRequest(context);
+            for (Filter<RequestContext> filter : getHttpFilters()) {
+                proceed = filter.handleRequest((RequestContext) context);
                 logger.info("proceed:"+ proceed);
                 if (!proceed) {
                     return false;
@@ -112,6 +114,8 @@ public class WebSocketAPI implements API <Context, Context>{
     }
 
     public void initUpgradeFilters(){
-
+        // TODO (LahiruUdayanga) - Initiate upgrade filter chain.
+        // WebSocket throttle filter
+        // WebSocket analytics filter
     }
 }

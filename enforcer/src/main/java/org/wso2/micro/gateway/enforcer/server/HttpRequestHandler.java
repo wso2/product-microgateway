@@ -41,7 +41,7 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest,ResponseO
     private static final Logger logger = LogManager.getLogger(HttpRequestHandler.class);
 
     public ResponseObject process(CheckRequest request) {
-        API matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
+        API<RequestContext, ResponseObject> matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
 
         if (matchedAPI == null) {
             ResponseObject responseObject = new ResponseObject();
@@ -54,7 +54,7 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest,ResponseO
         }
 
         RequestContext requestContext = buildRequestContext(matchedAPI, request);
-        return (ResponseObject) matchedAPI.process(requestContext);
+        return matchedAPI.process(requestContext);
     }
 
     private RequestContext buildRequestContext(API api, CheckRequest request) {
@@ -69,6 +69,7 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest,ResponseO
         ResourceConfig resourceConfig = null;
         logger.info("path: "+requestPath);
         logger.info("basepath: "+ request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_BASE_PATH_PARAM));
+        // TODO (LahiruUdayanga) - Change the below logic for apiType in API.
         if(api.getAPIConfig().getResources().isEmpty()){
             resourceConfig = APIFactory.getInstance().getMatchedBasePath(api, requestPath);
         }else {
