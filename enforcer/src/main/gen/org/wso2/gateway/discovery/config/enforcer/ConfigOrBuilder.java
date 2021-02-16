@@ -120,4 +120,19 @@ public interface ConfigOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.JWTGeneratorOrBuilder getJwtGeneratorOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+   * @return Whether the throttlingConfig field is set.
+   */
+  boolean hasThrottlingConfig();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+   * @return The throttlingConfig.
+   */
+  org.wso2.gateway.discovery.config.enforcer.Throttling getThrottlingConfig();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder getThrottlingConfigOrBuilder();
 }
