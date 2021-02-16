@@ -254,7 +254,6 @@ public class FilterUtils {
             }
         }
     }
-
     /**
      * Set the error code, message and description to the request context. The enforcer response will
      * retrieve this error details from the request context. Make sure to call this method and set the proper error
