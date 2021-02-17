@@ -102,7 +102,7 @@ public class HttpsClientRequest {
      * @return - HttpResponse from end point
      * @throws IOException If an error occurs while sending the GET request
      */
-    public static HttpResponse doPost(String endpoint, String postBody, Map<String, String> headers, String serverHome)
+    public static HttpResponse doPost(String endpoint, String postBody, Map<String, String> headers)
             throws IOException {
         HttpsURLConnection urlConnection = null;
         HttpResponse httpResponse;

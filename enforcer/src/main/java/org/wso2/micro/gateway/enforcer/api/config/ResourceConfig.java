@@ -19,8 +19,9 @@ package org.wso2.micro.gateway.enforcer.api.config;
 
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Holds the metadata related to the resources/operations of an API. Common collection to hold data about
@@ -30,7 +31,7 @@ public class ResourceConfig {
 
     private String path;
     private HttpMethods method;
-    private List<String> securitySchemas = new ArrayList<>();
+    private Map<String, List<String>> securitySchemas = new HashMap();
     private String tier = APIConstants.UNLIMITED_TIER;
 
     public String getPath() {
@@ -49,11 +50,11 @@ public class ResourceConfig {
         this.method = method;
     }
 
-    public List<String> getSecuritySchemas() {
+    public Map<String, List<String>> getSecuritySchemas() {
         return securitySchemas;
     }
 
-    public void setSecuritySchemas(List<String> securitySchemas) {
+    public void setSecuritySchemas(Map<String, List<String>> securitySchemas) {
         this.securitySchemas = securitySchemas;
     }
 
