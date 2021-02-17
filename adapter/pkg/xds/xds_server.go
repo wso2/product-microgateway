@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math/rand"
 	"reflect"
+	"strconv"
 	"sync"
 
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
@@ -454,7 +455,7 @@ func GenerateAPIList(apiList *resourceTypes.APIList) *subscription.APIList {
 
 	for _, api := range apiList.List {
 		newAPI := &subscription.APIs{
-			ApiId:            api.APIID,
+			ApiId:            strconv.Itoa(api.APIID),
 			Name:             api.Name,
 			Provider:         api.Provider,
 			Version:          api.Version,

@@ -22,7 +22,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/streadway/amqp"
@@ -50,7 +49,7 @@ const (
 var (
 	APIList                  = make([]resourceTypes.API, 0)
 	ScopeList                = make([]resourceTypes.Scope, 0)
-	APIListTimeStamp         = make(map[string]int64, 0)
+	APIListTimeStamp         = make(map[int]int64, 0)
 	ApplicationListTimeStamp = make(map[string]int64, 0)
 )
 
@@ -101,7 +100,7 @@ func handleAPIEvents(data []byte, eventType string) {
 	timeStampList := APIListTimeStamp
 	for apiID, timeStamp := range timeStampList {
 		fmt.Println(apiID, " timeStamp value is", timeStamp)
-		if strings.EqualFold(apiEvent.APIID, apiID) {
+		if apiEvent.APIID == apiID {
 			oldTimeStamp = timeStamp
 		}
 	}
@@ -109,7 +108,7 @@ func handleAPIEvents(data []byte, eventType string) {
 	APIListTimeStamp[apiEvent.APIID] = newTimeStamp
 
 	for i := range APIList {
-		if strings.EqualFold(apiEvent.APIID, string(APIList[i].APIID)) {
+		if apiEvent.APIID == APIList[i].APIID {
 			isFound = true
 			indexOfAPI = i
 			break
@@ -121,27 +120,24 @@ func handleAPIEvents(data []byte, eventType string) {
 		deleteAPIFromList(indexOfAPI, apiEvent.APIID)
 	} else if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
 		// pull API details
-		ID, err := strconv.ParseInt(apiEvent.APIID, 01, 32)
-		if err != nil {
-			logger.LoggerMsg.Errorf("Cannot cast %s to an Integer", apiEvent.APIID)
-		} else {
-			api := resourceTypes.API{APIID: strconv.FormatInt(ID, 10), UUID: apiEvent.UUID,
-				Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
-				Version: apiEvent.APIVersion, Context: apiEvent.APIContext, APIType: apiEvent.APIType,
-				APIStatus: apiEvent.APIStatus, IsDefaultVersion: true, TenantID: apiEvent.TenantID,
-				TenantDomain: apiEvent.Event.TenantDomain, TimeStamp: apiEvent.Event.TimeStamp}
+		ID := apiEvent.APIID
+		api := resourceTypes.API{APIID: ID, UUID: apiEvent.UUID,
+			Provider: apiEvent.APIProvider, Name: apiEvent.APIName,
+			Version: apiEvent.APIVersion, Context: apiEvent.APIContext, APIType: apiEvent.APIType,
+			APIStatus: apiEvent.APIStatus, IsDefaultVersion: true, TenantID: apiEvent.TenantID,
+			TenantDomain: apiEvent.Event.TenantDomain, TimeStamp: apiEvent.Event.TimeStamp}
 
-			if apiEvent.Event.Type == "API_CREATE" {
-				subscription.APIList.List = append(subscription.APIList.List, api)
-			} else if apiEvent.Event.Type == "API_UPDATE" {
-				subscription.APIList.List = removeAPI(subscription.APIList.List, apiEvent.APIID)
-				subscription.APIList.List = append(subscription.APIList.List, api)
-			} else if apiEvent.Event.Type == "API_DELETE" {
-				subscription.APIList.List = removeAPI(subscription.APIList.List, apiEvent.APIID)
-			}
-			xds.UpdateEnforcerAPIList(xds.GenerateAPIList(subscription.APIList))
-			logger.LoggerMsg.Infof("API %s is added/updated to APIList", apiEvent.UUID)
+		if apiEvent.Event.Type == "API_CREATE" {
+			subscription.APIList.List = append(subscription.APIList.List, api)
+		} else if apiEvent.Event.Type == "API_UPDATE" {
+			subscription.APIList.List = removeAPI(subscription.APIList.List, apiEvent.APIID)
+			subscription.APIList.List = append(subscription.APIList.List, api)
+		} else if apiEvent.Event.Type == "API_DELETE" {
+			subscription.APIList.List = removeAPI(subscription.APIList.List, apiEvent.APIID)
 		}
+		xds.UpdateEnforcerAPIList(xds.GenerateAPIList(subscription.APIList))
+		logger.LoggerMsg.Infof("API %s is added/updated to APIList", apiEvent.UUID)
+		// }
 
 		go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels)
 
@@ -150,11 +146,11 @@ func handleAPIEvents(data []byte, eventType string) {
 }
 
 // deleteAPIFromList when remove API From Gateway event happens
-func deleteAPIFromList(indexToBeDeleted int, apiID string) {
+func deleteAPIFromList(indexToBeDeleted int, apiID int) {
 	copy(APIList[indexToBeDeleted:], APIList[indexToBeDeleted+1:])
 	APIList[len(APIList)-1] = resourceTypes.API{}
 	APIList = APIList[:len(APIList)-1]
-	logger.LoggerMsg.Infof("API %s is deleted from APIList", apiID)
+	logger.LoggerMsg.Infof("API %d is deleted from APIList", apiID)
 }
 
 // handleApplicationEvents to process application related events
@@ -317,7 +313,7 @@ func removeSubPolicy(subPolicies []resourceTypes.SubscriptionPolicy, id int32) [
 	return subPolicies[:index]
 }
 
-func removeAPI(apis []resourceTypes.API, id string) []resourceTypes.API {
+func removeAPI(apis []resourceTypes.API, id int) []resourceTypes.API {
 	index := 0
 	for _, i := range apis {
 		if i.APIID != id {
