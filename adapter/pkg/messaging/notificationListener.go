@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/streadway/amqp"
+	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
 	"github.com/wso2/micro-gw/pkg/subscription"
@@ -135,9 +136,15 @@ func handleAPIEvents(data []byte, eventType string) {
 		} else if apiEvent.Event.Type == "API_DELETE" {
 			subscription.APIList.List = removeAPI(subscription.APIList.List, apiEvent.APIID)
 		}
-		xds.UpdateEnforcerAPIList(xds.GenerateAPIList(subscription.APIList))
-		logger.LoggerMsg.Infof("API %s is added/updated to APIList", apiEvent.UUID)
-		// }
+		conf, _ := config.ReadConfigs()
+		for _, env := range apiEvent.GatewayLabels {
+			for _, configuredEnv := range conf.ControlPlane.EventHub.EnvironmentLabels {
+				if configuredEnv == env {
+					xds.UpdateEnforcerAPIList(env, xds.GenerateAPIList(subscription.APIList))
+					logger.LoggerMsg.Infof("API %s is added/updated to APIList under environment : %s", apiEvent.UUID, env)
+				}
+			}
+		}
 
 		go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels)
 

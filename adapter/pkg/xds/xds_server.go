@@ -581,9 +581,8 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 }
 
 // UpdateEnforcerAPIList sets new update to the enforcer's Apis
-func UpdateEnforcerAPIList(apis *subscription.APIList) {
+func UpdateEnforcerAPIList(label string, apis *subscription.APIList) {
 	logger.LoggerXds.Debug("Updating Enforcer API Cache")
-	label := commonEnforcerLabel
 	apiList := enforcerAPIListMap[label]
 	apiList = append(apiList, apis)
 

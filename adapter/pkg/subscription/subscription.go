@@ -67,10 +67,6 @@ var (
 			responseType: AppKeyMappingList,
 		},
 		{
-			endpoint:     "apis?gatewayLabel=Production and Sandbox",
-			responseType: APIList,
-		},
-		{
 			endpoint:     "application-policies",
 			responseType: AppPolicyList,
 		},
@@ -95,17 +91,58 @@ type resource struct {
 	responseType interface{}
 }
 
+const (
+	gatewayLabelParam    string = "gatewayLabel"
+	apisResourceEndpoint string = "apis"
+)
+
 // LoadSubscriptionData loads subscription data from control-plane
 func LoadSubscriptionData(configFile *config.Config) {
 	conf = configFile
 	accessToken = auth.GetBasicAuth(configFile.ControlPlane.EventHub.Username, configFile.ControlPlane.EventHub.Password)
 
 	var responseChannel = make(chan response)
+	var apiListChannel = make(chan response)
 	for _, url := range resources {
-		go invokeService(url.endpoint, url.responseType, responseChannel, 0)
+		go invokeService(url.endpoint, url.responseType, nil, responseChannel, 0)
+	}
+
+	// Take the configured labels from the adapter
+	configuredEnvs := conf.ControlPlane.EventHub.EnvironmentLabels
+
+	if len(configuredEnvs) > 0 {
+		for _, configuredEnv := range configuredEnvs {
+			queryParamMap := make(map[string]string, 1)
+			queryParamMap[gatewayLabelParam] = configuredEnv
+			go invokeService(apisResourceEndpoint, APIList, queryParamMap, apiListChannel, 0)
+		}
 	}
 
 	var response response
+	for _, env := range configuredEnvs {
+		response = <-apiListChannel
+
+		responseType := reflect.TypeOf(response.Type).Elem()
+		newResponse := reflect.New(responseType).Interface()
+
+		if response.Error == nil && response.Payload != nil {
+			err := json.Unmarshal(response.Payload, &newResponse)
+
+			if err != nil {
+				logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the APIList response received for: "+response.Endpoint, err)
+			} else {
+				switch t := newResponse.(type) {
+				case *resourceTypes.APIList:
+					logger.LoggerSubscription.Debug("Received API information.")
+					APIList = newResponse.(*resourceTypes.APIList)
+					xds.UpdateEnforcerAPIList(env, xds.GenerateAPIList(APIList))
+				default:
+					logger.LoggerSubscription.Debugf("Unknown type %T", t)
+				}
+			}
+		}
+	}
+
 	for i := 1; i <= len(resources); i++ {
 		response = <-responseChannel
 
@@ -127,10 +164,6 @@ func LoadSubscriptionData(configFile *config.Config) {
 					logger.LoggerSubscription.Debug("Received Application information.")
 					AppList = newResponse.(*resourceTypes.ApplicationList)
 					xds.UpdateEnforcerApplications(xds.GenerateApplicationList(AppList))
-				case *resourceTypes.APIList:
-					logger.LoggerSubscription.Debug("Received API information.")
-					APIList = newResponse.(*resourceTypes.APIList)
-					xds.UpdateEnforcerAPIList(xds.GenerateAPIList(APIList))
 				case *resourceTypes.ApplicationPolicyList:
 					logger.LoggerSubscription.Debug("Received Application Policy information.")
 					AppPolicyList = newResponse.(*resourceTypes.ApplicationPolicyList)
@@ -151,16 +184,20 @@ func LoadSubscriptionData(configFile *config.Config) {
 	}
 }
 
-func invokeService(endpoint string, responseType interface{}, c chan response, retryAttempt int) {
+func invokeService(endpoint string, responseType interface{}, queryParamMap map[string]string, c chan response, retryAttempt int) {
 
 	serviceURL := conf.ControlPlane.EventHub.ServiceURL + internalWebAppEP + endpoint
 	// Create the request
 	req, err := http.NewRequest("GET", serviceURL, nil)
 
-	// Making necessary query parameters for the request
-	q := req.URL.Query()
-	q.Add("gatewayLabel", "Production and Sandbox")
-	req.URL.RawQuery = q.Encode()
+	if queryParamMap != nil && len(queryParamMap) > 0 {
+		q := req.URL.Query()
+		// Making necessary query parameters for the request
+		for queryParamKey, queryParamValue := range queryParamMap {
+			q.Add(queryParamKey, queryParamValue)
+		}
+		req.URL.RawQuery = q.Encode()
+	}
 	if err != nil {
 		c <- response{err, nil, endpoint, responseType}
 		logger.LoggerSubscription.Errorf("Error occurred while creating an HTTP request for serviceURL: "+serviceURL, err)
