@@ -17,6 +17,7 @@ public class WebSocketResponseObserver implements StreamObserver<RateLimitReques
     private final StreamObserver<RateLimitResponse> responseStreamObserver;
     private final WebSocketHandler webSocketHandler = new WebSocketHandler();
     private String streamId;
+    private int count;
 
     public WebSocketResponseObserver(StreamObserver<RateLimitResponse> responseStreamObserver) {
         this.responseStreamObserver = responseStreamObserver;
@@ -24,10 +25,18 @@ public class WebSocketResponseObserver implements StreamObserver<RateLimitReques
 
     @Override
     public void onNext(RateLimitRequest rateLimitRequest) {
+        count++;
+        logger.info(">>>>>>> Frame count : "+ count);
         webSocketMetadataContext = webSocketHandler.process(rateLimitRequest);
         streamId = getStreamId(rateLimitRequest);
         WebSocketMetadataService.addObserver(streamId,this);
-        RateLimitResponse response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.OK).build();
+        if(count > 10 && count < 15){
+            RateLimitResponse response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.OVER_LIMIT).build();
+            responseStreamObserver.onNext(response);
+        }else {
+            RateLimitResponse response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.OK).build();
+            responseStreamObserver.onNext(response);
+        }
 //        if(webSocketResponseObject == WebSocketResponseObject.OK){
 //            response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.OK).build();
 //        }else if(webSocketResponseObject == WebSocketResponseObject.OVER_LIMIT){
@@ -35,7 +44,7 @@ public class WebSocketResponseObserver implements StreamObserver<RateLimitReques
 //        }else{
 //            response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.UNKNOWN).build();
 //        }
-        responseStreamObserver.onNext(response);
+
 
     }
 
