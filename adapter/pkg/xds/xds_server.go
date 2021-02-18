@@ -18,11 +18,10 @@
 package xds
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"reflect"
-	"strconv"
 	"sync"
 
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
@@ -60,21 +59,20 @@ var (
 	enforcerApplicationKeyMappingCache wso2_cache.SnapshotCache
 
 	// API Name:Version as map key
-	apiMgwSwaggerMap    map[string]mgw.MgwSwagger       // MgwSwagger struct map
-	openAPIEnvoyMap     map[string][]string             // Envoy Label Array map
-	openAPIRoutesMap    map[string][]*routev3.Route     // Envoy Routes map
-	openAPIClustersMap  map[string][]*clusterv3.Cluster // Envoy Clusters map
-	openAPIEndpointsMap map[string][]*corev3.Address    // Envoy Endpoints map
+	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // MgwSwagger struct map
+	openAPIEnvoyMap        map[string][]string             // Envoy Label Array map
+	openAPIRoutesMap       map[string][]*routev3.Route     // Envoy Routes map
+	openAPIClustersMap     map[string][]*clusterv3.Cluster // Envoy Clusters map
+	openAPIEndpointsMap    map[string][]*corev3.Address    // Envoy Endpoints map
+	openAPIEnforcerApisMap map[string]types.Resource       // API Resource map
 
 	// Envoy Label as map key
 	envoyUpdateVersionMap  map[string]int64                       // XDS version map
 	envoyListenerConfigMap map[string]*listenerv3.Listener        // Listener Configuration map
 	envoyRouteConfigMap    map[string]*routev3.RouteConfiguration // Routes Configuration map
 
-	// Enforcer API XDS resource version map
-	enforcerConfigMap map[string][]types.Resource
-
-	openAPIEnforcerApisMap           map[string]types.Resource
+	// Common Enforcer Label as map key
+	enforcerConfigMap                map[string][]types.Resource
 	enforcerSubscriptionMap          map[string][]types.Resource
 	enforcerApplicationMap           map[string][]types.Resource
 	enforcerAPIListMap               map[string][]types.Resource
@@ -171,7 +169,7 @@ func GetEnforcerApplicationKeyMappingCache() wso2_cache.SnapshotCache {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(name string, version string, byteArr []byte, upstreamCerts []byte, apiType string, environments []string) {
+func UpdateAPI(vhost, name, version, apiType string, byteArr, upstreamCerts []byte, environments []string) {
 	var newLabels []string
 	var mgwSwagger mgw.MgwSwagger
 	if len(environments) == 0 {
@@ -191,7 +189,7 @@ func UpdateAPI(name string, version string, byteArr []byte, upstreamCerts []byte
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported with WSO2 Microgateway")
 	}
-	apiIdentifier := "default:" + name + ":" + version // TODO: (SuKSW) update once vhost feature added
+	apiIdentifier := vhost + ":" + name + ":" + version // TODO: (SuKSW) update once vhost feature added
 	existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
 	if exists {
 		if reflect.DeepEqual(mgwSwagger, existingMgwSwagger) {
@@ -229,39 +227,30 @@ func UpdateAPI(name string, version string, byteArr []byte, upstreamCerts []byte
 }
 
 // DeleteAPI deletes an API, its resources and updates the caches
-func DeleteAPI(apiName string, version string, vhost string) (errorCode string, errorMsg string) {
-	apiMapKey := vhost + ":" + apiName + ":" + version
-	apiInfo := "Name: " + apiName + ", Version: " + version + ", Virtual Host: " + vhost
-	_, ok := apiMgwSwaggerMap[apiMapKey]
-	if !ok {
-		errorCode = mgw.NotFound
-		errorMsg = "Unable to delete API " + apiInfo + ". Does not exist."
-		logger.LoggerXds.Infof(errorMsg)
-		return errorCode, errorMsg
+func DeleteAPI(apiName string, version string, vhost string) error {
+	apiIdentifier := vhost + ":" + apiName + ":" + version
+	_, exists := apiMgwSwaggerMap[apiIdentifier]
+	if !exists {
+		logger.LoggerXds.Infof("Unable to delete API " + apiIdentifier + ". Does not exist.")
+		return errors.New(mgw.NotFound)
 	}
-	//clean map of routes, clusters, endpoints
-	delete(openAPIRoutesMap, apiMapKey)
-	delete(openAPIClustersMap, apiMapKey)
-	delete(openAPIEndpointsMap, apiMapKey)
+	//clean maps of routes, clusters, endpoints, enforcerAPIs
+	delete(openAPIRoutesMap, apiIdentifier)
+	delete(openAPIClustersMap, apiIdentifier)
+	delete(openAPIEndpointsMap, apiIdentifier)
+	delete(openAPIEnforcerApisMap, apiIdentifier)
 
-	existingLabels := openAPIEnvoyMap[apiMapKey]
-	//updateXdsCacheOnAPIAdd is called after cleaning maps of routes, clusters, endpoints
-	//therefore created resources for existing label for all APIs except for the API to be deleted
+	existingLabels := openAPIEnvoyMap[apiIdentifier]
+	//updateXdsCacheOnAPIAdd is called after cleaning maps of routes, clusters, endpoints, enforcerAPIs.
+	//Therefore resources that belongs to the deleting API do not exist. Caches updated only with
+	//resources that belongs to the remaining APIs
 	updateXdsCacheOnAPIAdd(existingLabels, []string{})
 
-	err := cleanAPIInEnforcer(apiName, version)
-	if err != nil {
-		errorCode = "SERVER_ERROR"
-		errorMsg = "Error while deleting API from enforcer"
-		logger.LoggerXds.Info(errorMsg)
-		return errorCode, errorMsg
-	}
-
-	delete(openAPIEnvoyMap, apiMapKey)
-	delete(apiMgwSwaggerMap, apiMapKey)
+	delete(openAPIEnvoyMap, apiIdentifier)  //delete labels
+	delete(apiMgwSwaggerMap, apiIdentifier) //delete mgwSwagger
 	//TODO: (SuKSW) clean any remaining in label wise maps, if this is the last API of that label
-	logger.LoggerXds.Infof("Deleted API. %v", apiInfo)
-	return "", ""
+	logger.LoggerXds.Infof("Deleted API. %v", apiIdentifier)
+	return nil
 }
 
 func arrayContains(a []string, x string) bool {
@@ -433,42 +422,6 @@ func UpdateEnforcerApis(label string, apis []types.Resource) {
 	}
 
 	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
-}
-
-// CleanAPIInEnforcer removes API from enforcerApisMap
-func cleanAPIInEnforcer(apiName string, version string) error {
-	label := "enforcer"
-	apis := enforcerApisMap[label]
-	for index, apiResource := range apis {
-		apiObject := api.Api{}
-		json.Unmarshal([]byte(apiResource.String()), &apiObject)
-		if apiObject.Title == apiName && apiObject.Version == version {
-			//TODO: (SuKSW) update when vhost is supported
-			//TODO: (SuKSW) remove redundancy with UpdateEnforcerApis method
-			version, ok := enforcerCacheVersionMap[label]
-			if ok {
-				version++
-			} else {
-				version = 1
-			}
-			configs := enforcerConfigMap[label]
-
-			snap := cachev3.NewSnapshot(
-				fmt.Sprint(version), nil, nil, nil, nil, nil, nil, configs, apis, nil, nil, nil, nil, nil, nil)
-			snap.Consistent()
-
-			err := enforcerCache.SetSnapshot(label, snap)
-			if err != nil {
-				logger.LoggerXds.Error(err)
-				return err
-			}
-			enforcerCacheVersionMap[label] = version
-			enforcerApisMap[label] = append(apis[:index], apis[index+1:]...)
-			logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
-			break
-		}
-	}
-	return nil
 }
 
 // GenerateSubscriptionList converts the data into SubscriptionList proto type
@@ -870,7 +823,7 @@ func ListApis(apiType string, limitP *int64) *apiModel.APIMeta {
 
 // IsAPIExist returns whether a given API exists
 func IsAPIExist(vhost string, name string, version string) (exists bool) {
-	apiMapKey := vhost + ":" + name + ":" + version
-	_, exists = apiMgwSwaggerMap[apiMapKey]
+	apiIdentifier := vhost + ":" + name + ":" + version
+	_, exists = apiMgwSwaggerMap[apiIdentifier]
 	return exists
 }

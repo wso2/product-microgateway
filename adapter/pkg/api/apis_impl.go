@@ -82,7 +82,6 @@ func extractAPIProject(payload []byte) (apiJsn []byte, swaggerJsn []byte, upstre
 				loggers.LoggerAPI.Errorf("Error occured while reading the endpoint certificate : %v, %v", file.Name, err.Error())
 				continue
 			}
-
 			if !tlsutils.IsPublicCertificate(unzippedFileBytes) {
 				loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", file.Name)
 				// TODO: (VirajSalaka) Create standard error handling mechanism
@@ -107,7 +106,6 @@ func extractAPIProject(payload []byte) (apiJsn []byte, swaggerJsn []byte, upstre
 				loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
 				return nil, nil, nil, "", err
 			}
-
 		}
 	}
 	if apiJsn == nil {
@@ -136,21 +134,13 @@ func ApplyAPIProject(payload []byte, environments []string) error {
 	if err != nil {
 		return err
 	}
-	if len(envrionments) == 0 {
-		envrionments = append(envrionments, "Production and Sandbox")
-	}
-	apiIdentifier := "default:" + name + ":" + version // TODO: (SuKSW) update once vhost feature added
-	if apiType == mgw.HTTP {
-		xds.UpdateAPI(name, version, swaggerJsn, upstreamCerts, apiType, environments)
-	} else if apiType == mgw.WS {
-		xds.UpdateAPI(name, version, apiJsn, upstreamCerts, apiType, environments)
-	}
+	xdsUpdateAPI(name, version, apiType, apiJsn, swaggerJsn, upstreamCerts, environments)
 	return nil
 }
 
 // ApplyAPIProjectWithOverwrite is called by the rest implementation to differentiate
 // between create and update using the overwrite param
-func ApplyAPIProjectWithOverwrite(payload []byte, envrionments []string, overwriteP *bool) error {
+func ApplyAPIProjectWithOverwrite(payload []byte, environments []string, overwriteP *bool) error {
 	apiJsn, swaggerJsn, upstreamCerts, apiType, err := extractAPIProject(payload)
 	if err != nil {
 		return err
@@ -174,19 +164,24 @@ func ApplyAPIProjectWithOverwrite(payload []byte, envrionments []string, overwri
 		loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.", name, version)
 		return errors.New(mgw.AlreadyExists)
 	}
-	if len(envrionments) == 0 {
-		envrionments = append(envrionments, "Production and Sandbox")
-	}
-	if apiType == mgw.HTTP {
-		xds.UpdateAPI(name, version, swaggerJsn, upstreamCerts, apiType, envrionments)
-	} else if apiType == mgw.WS {
-		xds.UpdateAPI(name, version, apiJsn, upstreamCerts, apiType, envrionments)
-	}
+	xdsUpdateAPI(name, version, apiType, apiJsn, swaggerJsn, upstreamCerts, environments)
 	return nil
 }
 
+func xdsUpdateAPI(name, version, apiType string, apiJsn, swaggerJsn, upstreamCerts []byte,
+	environments []string) {
+	if len(environments) == 0 {
+		environments = append(environments, "Production and Sandbox")
+	}
+	if apiType == mgw.HTTP {
+		xds.UpdateAPI("default", name, version, apiType, swaggerJsn, upstreamCerts, environments)
+	} else if apiType == mgw.WS {
+		xds.UpdateAPI("default", name, version, apiType, apiJsn, upstreamCerts, environments)
+	}
+}
+
 // DeleteAPI calls the DeleteAPI method in xds_server.go
-func DeleteAPI(apiName string, version string, vhostP *string) (errorCode string, errorMsg string) {
+func DeleteAPI(apiName string, version string, vhostP *string) error {
 	if vhostP == nil || *vhostP == "" {
 		vhost := "default"
 		vhostP = &vhost
