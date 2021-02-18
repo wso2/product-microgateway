@@ -42,6 +42,10 @@
             <directory>../resources/k8s-artifacts</directory>
             <outputDirectory>wso2am-micro-gw-${project.version}/resources/k8s-artifacts</outputDirectory>
         </fileSet>
+        <fileSet>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/dropins</outputDirectory>
+            <excludes><exclude>**/*</exclude></excludes>
+        </fileSet>
     </fileSets>
     <files>
         <file>
