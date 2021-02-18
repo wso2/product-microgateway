@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package wso2.discovery.api;
+
+import "google/protobuf/any.proto";
+import "wso2/discovery/api/Endpoint.proto";
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
+option java_package = "org.wso2.gateway.discovery.api";
+option java_outer_classname = "ResourceProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: Resource]
+
+// Resource config model
+message Resource {
+    string id = 1;
+	string path = 2;
+	repeated Operation methods = 3;
+	string summary = 4;
+	string description = 5;
+	repeated Endpoint productionUrls = 6;
+	repeated Endpoint sandboxUrls = 7;
+	map<string, string> security = 8;
+	map<string, google.protobuf.Any> vendorExtensible = 9;
+	repeated string consumes = 10;
+	repeated string schemes = 11;
+	repeated string tags = 12;
+}
+
+// Operation model which maps to a particular http methods
+message Operation {
+    string method = 1;
+    repeated SecurityList security = 2;
+}
+
+// Holds the array of security schemas defined for particular API operation
+message SecurityList {
+    map<string, Scopes> scopeList = 1;
+}
+
+// Holds the list of scopes belongs to a particular security schema
+message Scopes {
+    repeated string scopes = 1;
+}

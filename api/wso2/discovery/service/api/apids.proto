@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package discovery.service.api;
+
+import "envoy/service/discovery/v3/discovery.proto";
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/service/api";
+option java_package = "org.wso2.gateway.discovery.service.api";
+option java_outer_classname = "APIDsProto";
+option java_multiple_files = true;
+option java_generic_services = true;
+
+// [#protodoc-title: APIDS]
+service ApiDiscoveryService {
+  rpc StreamApis(stream envoy.service.discovery.v3.DiscoveryRequest)
+      returns (stream envoy.service.discovery.v3.DiscoveryResponse) {
+  }
+
+  rpc FetchApis(envoy.service.discovery.v3.DiscoveryRequest) returns (envoy.service.discovery.v3.DiscoveryResponse) {
+  }
+}

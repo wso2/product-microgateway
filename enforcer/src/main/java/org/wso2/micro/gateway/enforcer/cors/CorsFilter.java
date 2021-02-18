@@ -24,6 +24,7 @@ import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.HttpConstants;
 
 /**
@@ -53,7 +54,8 @@ public class CorsFilter implements Filter {
                     allowedMethodsBuilder.append(", ").append(resourceConfig.getMethod().name());
                 }
             }
-            requestContext.getProperties().put("code", HttpConstants.NO_CONTENT_STATUS_CODE);
+            requestContext.getProperties()
+                    .put(APIConstants.MessageFormat.STATUS_CODE, HttpConstants.NO_CONTENT_STATUS_CODE);
             requestContext.addResponseHeaders(HttpConstants.ALLOW_HEADER, allowedMethodsBuilder.toString());
             logger.debug("OPTIONS request received for " +
                     requestContext.getMathedAPI().getAPIConfig().getResources().get(0).getPath() +

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package wso2.discovery.config.enforcer;
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
+option java_package = "org.wso2.gateway.discovery.config.enforcer";
+option java_outer_classname = "TMURLGroupProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: TMURLGroup]
+
+message TMURLGroup {
+   repeated string receiverURLs = 1;
+   repeated string authURLs = 2;
+}

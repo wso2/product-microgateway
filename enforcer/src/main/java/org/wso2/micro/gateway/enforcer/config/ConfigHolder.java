@@ -88,12 +88,6 @@ public class ConfigHolder {
     private void init() {
         //Load Client Trust Store
         loadTrustStore();
-        try {
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(trustStore);
-        } catch (NoSuchAlgorithmException | KeyStoreException e) {
-            logger.error("Error while initiating trustManagerFactory.", e);
-        }
         ConfigDiscoveryClient cds = new ConfigDiscoveryClient(envVarConfig, trustManagerFactory);
 
         try {
@@ -101,6 +95,7 @@ public class ConfigHolder {
             parseConfigs(cdsConfig);
         } catch (DiscoveryException e) {
             logger.error("Error in loading configurations from Adapter", e);
+            System.exit(1);
         }
     }
 

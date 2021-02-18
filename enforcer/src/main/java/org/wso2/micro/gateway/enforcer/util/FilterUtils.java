@@ -34,7 +34,9 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
 import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
+import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTValidationInfo;
@@ -46,6 +48,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
@@ -236,6 +239,32 @@ public class FilterUtils {
             log.error("Error while parsing host IP " + ipAddress, e);
         }
         return BigInteger.ZERO;
+    }
+
+    /**
+     * Set the error code, message and description to the request context. The enforcer response will
+     * retrieve this error details from the request context. Make sure to call this method and set the proper error
+     * details when enforcer filters returns an error.
+     *
+     * @param requestContext - The context object holds detals about the specific request.
+     * @param e - APISecurityException thrown when validation failure happens at filter level.
+     */
+    public static void setErrorToContext(RequestContext requestContext, APISecurityException e) {
+        Map<String, Object> requestContextProperties = requestContext.getProperties();
+        if (!requestContextProperties.containsKey(APIConstants.MessageFormat.STATUS_CODE)) {
+            requestContext.getProperties().put(APIConstants.MessageFormat.STATUS_CODE, e.getStatusCode());
+        }
+        if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_CODE)) {
+            requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_CODE, e.getErrorCode());
+        }
+        if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_MESSAGE)) {
+            requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                    APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
+        }
+        if (!requestContextProperties.containsKey(APIConstants.MessageFormat.ERROR_DESCRIPTION)) {
+            requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                    APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
+        }
     }
 
 }

@@ -80,7 +80,7 @@ public class CorsTestCase extends BaseTestCase {
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
 
-        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600);
+        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, null);
     }
 
     @Test(description = "Success Scenario, with allow credentials is set to true.")

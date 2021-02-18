@@ -26,6 +26,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"crypto/tls"
+	"encoding/base64"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -114,7 +115,7 @@ func FetchAPIs(id *string, gwLabel *string, c chan SyncAPIResponse) {
 	if gwLabel != nil {
 		logger.LoggerSync.Debugf("Gateway Label: %v", *gwLabel)
 		respSyncAPI.GatewayLabel = *gwLabel
-		q.Add(gatewayLabel, *gwLabel)
+		q.Add(gatewayLabel, base64.StdEncoding.EncodeToString([]byte(*gwLabel)))
 	}
 	// Default "type" query parameter for adapter is "Envoy"
 	q.Add(gwType, envoy)
