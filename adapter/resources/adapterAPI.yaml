@@ -1,299 +1,297 @@
 ---
-    swagger: "2.0"
+swagger: "2.0"
 ######################################################
 # Prolog
 ######################################################
-    info:
-      description: |
-        This document specifies a **RESTful API** for WSO2 **API Microgateway** - Adapter.
-      version: "v1.2"
-      title: "WSO2 API Microgateway - Adapter"
-      contact:
-        name: "WSO2"
-        url: "http://wso2.com/products/api-manager/"
-        email: "architecture@wso2.com"
-      license:
-        name: "Apache 2.0"
-        url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+info:
+  description: |
+    This document specifies a **RESTful API** for WSO2 **API Microgateway** - Adapter.
+  version: "v1.2"
+  title: "WSO2 API Microgateway - Adapter"
+  contact:
+    name: "WSO2"
+    url: "http://wso2.com/products/api-manager/"
+    email: "architecture@wso2.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
 ######################################################
 # The fixed parts of the URLs of the API
 ######################################################
 
-    # The domain of the API.
-    # This is configured by the customer during deployment.
-    # The given host is just an example.
-    host: "apis.wso2.com"
+# The domain of the API.
+# This is configured by the customer during deployment.
+# The given host is just an example.
+host: "apis.wso2.com"
 
-    # The base path of the API.
-    # Will be prefixed to all paths.
-    basePath: "/api/mgw/adapter/0.1"
-    schemes:
-    - "https"
-    consumes:
-    - "application/json"
-    - "multipart/form-data"
-    produces:
-    - "application/json"
-    securityDefinitions:
-      BasicAuth:     # <-- arbitrary name for the security scheme
-        type: "basic"
+# The base path of the API.
+# Will be prefixed to all paths.
+basePath: "/api/mgw/adapter/0.1"
+schemes:
+- "https"
+consumes:
+- "application/json"
+- "multipart/form-data"
+produces:
+- "application/json"
+securityDefinitions:
+BasicAuth:     # <-- arbitrary name for the security scheme
+  type: "basic"
 
 ######################################################
 # The Microgateway Adapter resource APIs
 ######################################################
-    paths:
-      /api:
-        #-----------------------------------------------------
-        # Deploy an API in the Microgateway
-        #-----------------------------------------------------
-        post:
-          tags:
-          - "API (Individual)"
-          summary: "Deploy or update an API"
-          description: "This operation can be used to deploy or update an API.\n"
-          consumes:
-          - "multipart/form-data"
-          parameters:
-          - name: "file"
-            in: "formData"
-            description: "Zip archive consisting on exported api configuration\n"
-            required: true
-            type: "file"
-            x-exportParamName: "File"
-          - name: "overwrite"
-            in: "query"
-            description: "Whether to update the API or not. This is used when updating\
-              \ already existing APIs.\n"
-            required: false
-            type: "boolean"
-            x-exportParamName: "Overwrite"
-            x-optionalDataType: "Bool"
-          - name: "preserveProvider"
-            in: "query"
-            description: "Preserve Original Provider of the API. This is the user choice\
-              \ to keep or replace the API provider.\n"
-            required: false
-            type: "boolean"
-            x-exportParamName: "PreserveProvider"
-            x-optionalDataType: "Bool"
-          responses:
-            200:
-              description: |
-                Successful.
-                API deployed or updated Successfully.
-              schema:
-                $ref: '#/definitions/DeployResponse'
-            403:
-              description: |
-                Forbidden.
-                Not Authorized to deploy or update.
-              schema:
-                $ref: "#/definitions/Error" 
-            404:
-              description: |
-                Not Found. 
-                Requested API to update not found (when overwrite parameter is included).
-              schema:
-                $ref: "#/definitions/Error" 
-            409:
-              description: |
-                Conflict.
-                API to import already exists (when overwrite parameter is not included).
-              schema:
-                $ref: "#/definitions/Error"
-            500:
-              description: Internal Server Error.
-              schema:
-                $ref: "#/definitions/Error"
-          security:
-          - BasicAuth: []
-          x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization:\
-            \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false"
-          x-wso2-request: "POST https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization:\
-            \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n"
-          x-wso2-response: "HTTP/1.1 200 OK\nAPI deployed successfully."
-        #-----------------------------------------------------
-        # Undeploy/Delete an API from the Microgateway
-        #-----------------------------------------------------
-        delete:
-          tags: 
-            - API (Individual)
-          summary: Delete deployed API
+paths:
+  /api:
+    #-----------------------------------------------------
+    # Deploy an API in the Microgateway
+    #-----------------------------------------------------
+    post:
+      tags:
+      - "API (Individual)"
+      summary: "Deploy or update an API"
+      description: "This operation can be used to deploy or update an API.\n"
+      consumes:
+      - "multipart/form-data"
+      parameters:
+      - name: "file"
+        in: "formData"
+        description: "Zip archive consisting on exported api configuration\n"
+        required: true
+        type: "file"
+        x-exportParamName: "File"
+      - name: "overwrite"
+        in: "query"
+        description: "Whether to update the API or not. This is used when updating\
+          \ already existing APIs.\n"
+        required: false
+        type: "boolean"
+        x-exportParamName: "Overwrite"
+        x-optionalDataType: "Bool"
+      - name: "preserveProvider"
+        in: "query"
+        description: "Preserve Original Provider of the API. This is the user choice\
+          \ to keep or replace the API provider.\n"
+        required: false
+        type: "boolean"
+        x-exportParamName: "PreserveProvider"
+        x-optionalDataType: "Bool"
+      responses:
+        200:
           description: |
-            This operation can be used to delete a API that was deployed
-          parameters:
-            - name: apiName
-              description: |
-                Name of the API
-              in: query
-              type: string
-              required: true
-            - name: version
-              description: |
-                version of the API
-              in: query
-              type: string
-              required: true
-            - name: vhost
-              description: |
-                Virtual Host of the API
-              in: query
-              type: string
-          responses:
-            200:
-              description: |
-                OK.
-                API successfully undeployed from the Microgateway.
-              schema:
-                $ref: '#/definitions/DeployResponse'
-            400:
-              description: |
-                Bad Request.
-                Invalid request or validation error
-              schema:
-                $ref: '#/definitions/Error'
-            404:
-              description: |
-                Not Found.
-                Requested API does not exist.
-              schema:
-                $ref: '#/definitions/Error'
-          security:
-          - BasicAuth: []
-          x-wso2-curl: |
-            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
-            -d '{"apiName":"petstore", "version":"1.1", "vhost":"pets"}'
-            -X POST "https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete"
-          x-wso2-request: |
-            POST https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete
-            Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-            {"apiName":"petstore", "version":"1.1", "vhost":"pets"}
-          x-wso2-response: "HTTP/1.1 200 OK"
-      /apis:
-        #-----------------------------------------------------
-        # List APIs
-        #-----------------------------------------------------
-        get:
-          tags: 
-            - API (Collection)
-          summary: Get a list of API metadata
+            Successful.
+            API deployed or updated Successfully.
+          schema:
+            $ref: '#/definitions/DeployResponse'
+        403:
           description: |
-            This operation can be used to retrieve meta info about all APIs
-          parameters:
-            - name : apiType
-              in: query
-              description: |
-                Optional - Condition to filter APIs. Currently only filtering 
-                by API type (HTTP or WebSocket) is supported.
-                "http" for HTTP type
-                "ws" for WebSocket type
-              type: string
-            - name : limit
-              in: query
-              description: |
-                Number of APIs (APIMeta objects to return)
-              type: integer
-          responses:
-            200:
-              description: An array of API Metadata
-              schema:
-                $ref: '#/definitions/APIMeta'
-            default:
-              description: Unexpected error
-              schema:
-                $ref: '#/definitions/Error'
-          security:
-          - BasicAuth: []
-          x-wso2-curl: |
-            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
-            -X GET "https://127.0.0.1:9443/api/mgw/adapter/0.1/apis"
-          x-wso2-request: |
-            GET https://127.0.0.1:9443/api/mgw/adapter/0.1/apis?apiType=http
-            Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-          x-wso2-response: "HTTP/1.1 200 OK"
+            Forbidden.
+            Not Authorized to deploy or update.
+          schema:
+            $ref: "#/definitions/Error" 
+        404:
+          description: |
+            Not Found. 
+            Requested API to update not found (when overwrite parameter is included).
+          schema:
+            $ref: "#/definitions/Error" 
+        409:
+          description: |
+            Conflict.
+            API to import already exists (when overwrite parameter is not included).
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: Internal Server Error.
+          schema:
+            $ref: "#/definitions/Error"
+      security:
+      - BasicAuth: []
+      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization:\
+        \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false"
+      x-wso2-request: "POST https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization:\
+        \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n"
+      x-wso2-response: "HTTP/1.1 200 OK\nAPI deployed successfully."
+    #-----------------------------------------------------
+    # Undeploy/Delete an API from the Microgateway
+    #-----------------------------------------------------
+    delete:
+      tags: 
+        - API (Individual)
+      summary: Delete deployed API
+      description: |
+        This operation can be used to delete a API that was deployed
+      parameters:
+        - name: apiName
+          description: |
+            Name of the API
+          in: query
+          type: string
+          required: true
+        - name: version
+          description: |
+            version of the API
+          in: query
+          type: string
+          required: true
+        - name: vhost
+          description: |
+            Virtual Host of the API
+          in: query
+          type: string
+      responses:
+        200:
+          description: |
+            OK.
+            API successfully undeployed from the Microgateway.
+          schema:
+            $ref: '#/definitions/DeployResponse'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - BasicAuth: []
+      x-wso2-curl: |
+        curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
+        -d '{"apiName":"petstore", "version":"1.1", "vhost":"pets"}'
+        -X POST "https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete"
+      x-wso2-request: |
+        POST https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+        {"apiName":"petstore", "version":"1.1", "vhost":"pets"}
+      x-wso2-response: "HTTP/1.1 200 OK"
+  /apis:
+    #-----------------------------------------------------
+    # List APIs
+    #-----------------------------------------------------
+    get:
+      tags: 
+        - API (Collection)
+      summary: Get a list of API metadata
+      description: |
+        This operation can be used to retrieve meta info about all APIs
+      parameters:
+        - name : apiType
+          in: query
+          description: |
+            Optional - Condition to filter APIs. Currently only filtering 
+            by API type (HTTP or WebSocket) is supported.
+            "http" for HTTP type
+            "ws" for WebSocket type
+          type: string
+        - name : limit
+          in: query
+          description: |
+            Number of APIs (APIMeta objects to return)
+          type: integer
+      responses:
+        200:
+          description: An array of API Metadata
+          schema:
+            $ref: '#/definitions/APIMeta'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - BasicAuth: []
+      x-wso2-curl: |
+        curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
+        -X GET "https://127.0.0.1:9443/api/mgw/adapter/0.1/apis"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/mgw/adapter/0.1/apis?apiType=http
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK"
 ######################################################
 # Definitions
 ######################################################   
-    definitions:
-      Error:
-        required:
-        - "code"
-        - "message"
-        properties:
-          code:
-            type: "integer"
-            format: "int64"
-            description: "Error code"
-          message:
-            type: "string"
-            description: "Error message."
-          description:
-            type: "string"
-            description: "A detail description about the error message.\n"
-          moreInfo:
-            type: "string"
-            description: "Preferably an url with more details about the error.\n"
-          error:
-            type: "array"
-            description: "If there are more than one error list them out.\nFor example,\
-              \ list out validation errors by each field.\n"
-            items:
-              $ref: "#/definitions/ErrorListItem"
-        title: "Error object returned with 4XX HTTP status"
-      ErrorListItem:
-        required:
-        - "code"
-        - "message"
-        properties:
-          code:
-            type: "string"
-            description: "Error code"
-          message:
-            type: "string"
-            description: "Description about individual errors occurred\n"
-        title: "Description of individual errors that may have occurred during a request."
-      Principal:
-        type: object
-        properties:
-          username:
-            type: string
-          tenant:
-            type: string
-          token:
-            type: string
-      APIMeta:
-        properties:
-          total:
-            type: integer
-            description: Total number of APIs available in the MGW
-          count:
-            type: integer
-            description: Number of APIs returned in the response
-          list:
-            type: array
-            description: All or sub set of info about APIs in the MGW
-            items:
-              $ref: "#/definitions/APIMetaListItem"
-      APIMetaListItem:
-        type: object
-        properties:
-          apiName:
-            type: string
-          version:
-            type: string
-          apiType: 
-            type: string
-          labels:
-            type: array
-            items:
-              type: string
-      DeployResponse:
-        type: object
-        properties:
-          action:
-            type: string
-          info:
-            type: string
-
-      
+definitions:
+  Error:
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "integer"
+        format: "int64"
+        description: "Error code"
+      message:
+        type: "string"
+        description: "Error message."
+      description:
+        type: "string"
+        description: "A detail description about the error message.\n"
+      moreInfo:
+        type: "string"
+        description: "Preferably an url with more details about the error.\n"
+      error:
+        type: "array"
+        description: "If there are more than one error list them out.\nFor example,\
+          \ list out validation errors by each field.\n"
+        items:
+          $ref: "#/definitions/ErrorListItem"
+    title: "Error object returned with 4XX HTTP status"
+  ErrorListItem:
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "string"
+        description: "Error code"
+      message:
+        type: "string"
+        description: "Description about individual errors occurred\n"
+    title: "Description of individual errors that may have occurred during a request."
+  Principal:
+    type: object
+    properties:
+      username:
+        type: string
+      tenant:
+        type: string
+      token:
+        type: string
+  APIMeta:
+    properties:
+      total:
+        type: integer
+        description: Total number of APIs available in the MGW
+      count:
+        type: integer
+        description: Number of APIs returned in the response
+      list:
+        type: array
+        description: All or sub set of info about APIs in the MGW
+        items:
+          $ref: "#/definitions/APIMetaListItem"
+  APIMetaListItem:
+    type: object
+    properties:
+      apiName:
+        type: string
+      version:
+        type: string
+      apiType: 
+        type: string
+      labels:
+        type: array
+        items:
+          type: string
+  DeployResponse:
+    type: object
+    properties:
+      action:
+        type: string
+      info:
+        type: string
