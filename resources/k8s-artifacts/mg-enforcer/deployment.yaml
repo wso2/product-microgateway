@@ -50,7 +50,7 @@ spec:
             - mountPath: /home/wso2/conf/log_config.toml
               subPath: log_config.toml
               name: logconfig-toml-vol
-          image: wso2/mg-enforcer:4.0.0-m5
+          image: wso2/mg-enforcer:4.0.0-m6
           imagePullPolicy: Always
           env:
             - name: ENFORCER_PRIVATE_KEY_PATH
@@ -66,7 +66,11 @@ spec:
             - name: ADAPTER_XDS_PORT
               value: "18000"
             - name: ENFORCER_LABEL
-              value: "enforcer"
+              value: "Production and Sandbox"
+            - name: XDS_MAX_MSG_SIZE
+              value: "4194304"
+            - name: JAVA_OPTS
+              value: ""
           resources:
             requests:
               memory: "250Mi"
