@@ -31,8 +31,8 @@
             <outputDirectory>conf</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>../resources/enforcer/droppings</directory>
-            <outputDirectory>droppings</outputDirectory>
+            <directory>../resources/enforcer/dropins</directory>
+            <outputDirectory>dropins</outputDirectory>
         </fileSet>
         <fileSet>
             <!-- TODO: (VirajSalaka) Another option is to use the dependencySet option -->

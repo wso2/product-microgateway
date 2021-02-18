@@ -200,7 +200,7 @@ public class JWTUtil {
 
             for (int fileIndex = 0; fileIndex < jarFilesList.size(); fileIndex++) {
                 try {
-                    String pathToJar = JwtConstants.DROPPINGS_FOLDER + jarFilesList.get(fileIndex);
+                    String pathToJar = JwtConstants.DROPINS_FOLDER + jarFilesList.get(fileIndex);
                     JarFile jarFile = new JarFile(pathToJar);
                     Enumeration<JarEntry> e = jarFile.entries();
 
@@ -235,7 +235,7 @@ public class JWTUtil {
 
     public static List<String> getJarFilesList() {
         List<String> jarFilesList = new ArrayList<String>();
-        File[] files = new File(JwtConstants.DROPPINGS_FOLDER).listFiles();
+        File[] files = new File(JwtConstants.DROPINS_FOLDER).listFiles();
         //If this pathname does not denote a directory, then listFiles() returns null.
         for (File file : files) {
             if (file.isFile()) {
