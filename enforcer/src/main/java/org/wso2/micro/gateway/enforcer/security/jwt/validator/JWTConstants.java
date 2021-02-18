@@ -27,6 +27,6 @@ public class JWTConstants {
     public static final String UNAVAILABLE = "Token is not available in cache";
     public static final String VALID = "valid";
     public static final String INVALID = "invalid";
-    public static final String DEFAULT_JWT_GENERATOR_CLASS_NAME = "org.wso2.carbon.apimgt.gateway.common." +
+    public static final String DEFAULT_JWT_GENERATOR_CLASS_NAME = "org.wso2.carbon.apimgt.common.gateway." +
             "jwtgenerator.APIMgtGatewayJWTGeneratorImpl";
 }

@@ -21,7 +21,7 @@ package org.wso2.micro.gateway.enforcer.config;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.gateway.discovery.config.enforcer.AmCredentials;
 import org.wso2.gateway.discovery.config.enforcer.AuthService;
 import org.wso2.gateway.discovery.config.enforcer.Config;

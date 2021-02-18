@@ -82,13 +82,12 @@ disableSslVerification = false
 [enforcer.jwtGenerator]
     enable = true
     encoding = "base64" # base64,base64url
-    #generator_impl = "org.wso2.carbon.apimgt.keymgt.token.JWTGenerator"
     claimDialect = "http://wso2.org/claims"
     convertDialect = false
     header = "X-JWT-Assertion"
     signingAlgorithm = "SHA256withRSA"
     enableUserClaims = false
-    gatewayGeneratorImpl = "org.wso2.carbon.apimgt.gateway.common.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
+    gatewayGeneratorImpl = "org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
     claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
     publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
     privateKeyPath = "/home/wso2/security/keystore/mg.key"

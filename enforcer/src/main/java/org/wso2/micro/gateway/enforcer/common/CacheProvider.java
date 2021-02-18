@@ -21,7 +21,7 @@ package org.wso2.micro.gateway.enforcer.common;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.micro.gateway.enforcer.security.jwt.SignedJWTInfo;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.JWTConstants;
 
