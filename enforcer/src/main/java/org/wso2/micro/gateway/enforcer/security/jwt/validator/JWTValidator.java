@@ -29,13 +29,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
-import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
-import org.wso2.micro.gateway.enforcer.security.jwt.DefaultJWTTransformer;
-import org.wso2.micro.gateway.enforcer.security.jwt.JWTTransformer;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTUtil;
 import org.wso2.micro.gateway.enforcer.security.jwt.SignedJWTInfo;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
@@ -51,8 +53,8 @@ import java.util.Map;
  */
 public class JWTValidator {
     private static final Logger logger = LogManager.getLogger(JWTValidator.class);
-    private Map<String, TokenIssuerDto> tokenIssuers;
-    private TokenIssuerDto tokenIssuer;
+    private Map<String, ExtendedTokenIssuerDto> tokenIssuers;
+    private ExtendedTokenIssuerDto tokenIssuer;
     private JWTTransformer jwtTransformer;
     private JWKSet jwkSet;
 
@@ -105,7 +107,7 @@ public class JWTValidator {
                 jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 return jwtValidationInfo;
             }
-        } catch (ParseException e) {
+        } catch (ParseException | JWTGeneratorException e) {
             throw new MGWException("Error while parsing JWT", e);
         }
     }
@@ -163,17 +165,17 @@ public class JWTValidator {
         return jwkSet;
     }
 
-    protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws MGWException {
+    protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.getTransformedConsumerKey(jwtClaimsSet);
     }
 
-    protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws MGWException {
+    protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.getTransformedScopes(jwtClaimsSet);
     }
 
-    protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) throws MGWException {
+    protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.transform(jwtClaimsSet);
     }

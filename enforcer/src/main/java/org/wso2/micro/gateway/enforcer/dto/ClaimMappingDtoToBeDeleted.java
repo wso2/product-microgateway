@@ -26,16 +26,16 @@ import java.util.Objects;
 /**
  * Holds data related to claim mapping of a jwt token.
  */
-public class ClaimMappingDto implements Serializable {
+public class ClaimMappingDtoToBeDeleted implements Serializable {
 
     @SerializedName("remoteClaim") private String remoteClaim;
     @SerializedName("localClaim") private String localClaim;
 
-    public ClaimMappingDto() {
+    public ClaimMappingDtoToBeDeleted() {
 
     }
 
-    public ClaimMappingDto(String remoteClaim, String localClaim) {
+    public ClaimMappingDtoToBeDeleted(String remoteClaim, String localClaim) {
 
         this.remoteClaim = remoteClaim;
         this.localClaim = localClaim;
@@ -69,7 +69,7 @@ public class ClaimMappingDto implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ClaimMappingDto that = (ClaimMappingDto) o;
+        ClaimMappingDtoToBeDeleted that = (ClaimMappingDtoToBeDeleted) o;
         return Objects.equals(localClaim, that.localClaim);
     }
 

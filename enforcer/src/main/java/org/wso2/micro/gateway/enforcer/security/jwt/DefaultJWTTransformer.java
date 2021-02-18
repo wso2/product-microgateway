@@ -18,24 +18,12 @@
 
 package org.wso2.micro.gateway.enforcer.security.jwt;
 
-import com.nimbusds.jwt.JWTClaimsSet;
-import org.apache.commons.lang3.StringUtils;
-import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
-import org.wso2.micro.gateway.enforcer.constants.APIConstants;
-import org.wso2.micro.gateway.enforcer.dto.ClaimMappingDto;
-import org.wso2.micro.gateway.enforcer.exception.MGWException;
-
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Default transformer implementation of the JWTs.
  */
 public class DefaultJWTTransformer implements JWTTransformer {
 
-    protected TokenIssuerDto tokenIssuer;
+    /*protected TokenIssuerDto tokenIssuer;
 
     @Override
     public String getTransformedConsumerKey(JWTClaimsSet jwtClaimsSet) throws MGWException {
@@ -109,7 +97,7 @@ public class DefaultJWTTransformer implements JWTTransformer {
     public void loadConfiguration(TokenIssuerDto tokenIssuerConfiguration) {
 
         this.tokenIssuer = tokenIssuerConfiguration;
-    }
+    }*/
 
 }
 

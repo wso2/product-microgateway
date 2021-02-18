@@ -19,7 +19,6 @@
 package org.wso2.micro.gateway.enforcer.security.jwt;
 
 import com.nimbusds.jwt.JWTClaimsSet;
-import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 
 import java.util.List;
@@ -29,35 +28,35 @@ import java.util.List;
  */
 public interface JWTTransformer {
 
-    /**
+   /* *//**
      * This method used to retrieve ConsumerKey From JWT
      * @param jwtClaimsSet retrieved JwtClaimSet
      * @return consumerKey of JWT
-     */
+     *//*
     public String getTransformedConsumerKey(JWTClaimsSet jwtClaimsSet) throws MGWException;
 
-    /**
+    *//**
      * This method used to retrieve Scopes From JWT
      * @param jwtClaimsSet retrieved JwtClaimSet
      * @return scopes of JWT
-     */
+     *//*
     public List<String> getTransformedScopes(JWTClaimsSet jwtClaimsSet) throws MGWException;
 
 
-    /**
+    *//**
      * This method used to transform JWT claimset from given JWT into required format
      *
      * @param jwtClaimsSet jwtClaimSet from given JWT
      * @return transformed JWT Claims.
-     */
+     *//*
     public JWTClaimsSet transform(JWTClaimsSet jwtClaimsSet) throws MGWException;
 
-    /**
+    *//**
      * This method returns issuer name which used the implementation to transform JWT.
      *
      * @return issuer url.
-     */
+     *//*
     public String getIssuer();
 
-    public void loadConfiguration(TokenIssuerDto tokenIssuerConfiguration);
+    public void loadConfiguration(TokenIssuerDto tokenIssuerConfiguration);*/
 }

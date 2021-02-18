@@ -23,7 +23,7 @@ import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
-import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +35,7 @@ public class EnforcerConfig {
 
     private AuthServiceConfigurationDto authService;
     private EventHubConfigurationDto eventHub;
-    private Map<String, TokenIssuerDto> issuersMap = new HashMap<>();
+    private Map<String, ExtendedTokenIssuerDto> issuersMap = new HashMap<>();
     private CredentialDto apimCredentials;
     private JWTConfigurationDto jwtConfigurationDto;
     private CacheDto cacheDto;
@@ -58,11 +58,11 @@ public class EnforcerConfig {
         this.eventHub = eventHub;
     }
 
-    public Map<String, TokenIssuerDto> getIssuersMap() {
+    public Map<String, ExtendedTokenIssuerDto> getIssuersMap() {
         return issuersMap;
     }
 
-    public void setIssuersMap(Map<String, TokenIssuerDto> issuersMap) {
+    public void setIssuersMap(Map<String, ExtendedTokenIssuerDto> issuersMap) {
         this.issuersMap = issuersMap;
     }
 

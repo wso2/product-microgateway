@@ -18,32 +18,28 @@
 
 package org.wso2.micro.gateway.enforcer.config.dto;
 
-import org.wso2.micro.gateway.enforcer.dto.ClaimMappingDto;
-
-import java.security.cert.Certificate;
-import java.util.HashMap;
-import java.util.Map;
+import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 
 /**
  * Holds meta data related to a JWT token issuer.
  */
-public class TokenIssuerDto {
+public class ExtendedTokenIssuerDto extends TokenIssuerDto {
     private String issuer;
     private String name;
-    private boolean disableDefaultClaimMapping = false;
+    /*private boolean disableDefaultClaimMapping = false;
     private Map<String, ClaimMappingDto> claimConfigurations = new HashMap<>();
     private JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
     private Certificate certificate;
     private String consumerKeyClaim;
-    private String scopesClaim;
+    private String scopesClaim;*/
     private boolean validateSubscriptions;
 
-    public TokenIssuerDto(String issuer) {
 
-        this.issuer = issuer;
+    public ExtendedTokenIssuerDto(String issuer) {
+        super(issuer);
     }
 
-    public String getIssuer() {
+    /*public String getIssuer() {
 
         return issuer;
     }
@@ -117,7 +113,7 @@ public class TokenIssuerDto {
     public void setCertificate(Certificate certificate) {
 
         this.certificate = certificate;
-    }
+    }*/
 
     public boolean isValidateSubscriptions() {
         return validateSubscriptions;

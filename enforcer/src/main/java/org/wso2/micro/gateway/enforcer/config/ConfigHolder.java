@@ -37,8 +37,10 @@ import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
+import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -166,13 +168,14 @@ public class ConfigHolder {
             logger.error("Error while initiating the truststore for JWT related public certificates", e);
         }
         for (Issuer jwtIssuer : cdsIssuers) {
-            TokenIssuerDto issuerDto = new TokenIssuerDto(jwtIssuer.getIssuer());
+            ExtendedTokenIssuerDto issuerDto = new ExtendedTokenIssuerDto(jwtIssuer.getIssuer());
 
             JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
             jwksConfigurationDTO.setEnabled(StringUtils.isNotEmpty(jwtIssuer.getJwksURL()));
             jwksConfigurationDTO.setUrl(jwtIssuer.getJwksURL());
             issuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
-
+            ClaimMappingDto claimMap = new ClaimMappingDto("keytype", "@@@@@");
+            issuerDto.addClaimMapping(claimMap);
             String certificateAlias = jwtIssuer.getCertificateAlias();
             if (certificateAlias != null) {
                 try {

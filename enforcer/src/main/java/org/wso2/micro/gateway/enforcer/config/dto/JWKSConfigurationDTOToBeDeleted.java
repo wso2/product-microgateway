@@ -21,9 +21,9 @@ package org.wso2.micro.gateway.enforcer.config.dto;
 /**
  * Holds the configurations related to jwks endpoint of a key manager.
  */
-public class JWKSConfigurationDTO {
+public class JWKSConfigurationDTOToBeDeleted {
 
-    private String url;
+    /*private String url;
     private boolean enabled;
 
     public String getUrl() {
@@ -54,6 +54,6 @@ public class JWKSConfigurationDTO {
 
     public JWKSConfigurationDTO() {
 
-    }
+    }*/
 }
 
