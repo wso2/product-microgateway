@@ -49,7 +49,7 @@ public class JWTUtil {
     private static final Logger log = LogManager.getLogger(JWTUtil.class);
 
     /**
-     * This method used to retrieve JWKS keys from endpoint
+     * This method used to retrieve JWKS keys from endpoint.
      *
      * @param jwksEndpoint
      * @return

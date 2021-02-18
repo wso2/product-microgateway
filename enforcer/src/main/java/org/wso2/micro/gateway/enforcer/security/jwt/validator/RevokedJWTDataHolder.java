@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *  Singleton which stores the revoked JWT map
+ *  Singleton which stores the revoked JWT map.
  */
 public class RevokedJWTDataHolder {
 

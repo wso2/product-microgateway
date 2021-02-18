@@ -25,19 +25,19 @@ import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import java.util.List;
 
 /**
- * This Class will be used to transform JWT claims to local claims
+ * This Class will be used to transform JWT claims to local claims.
  */
 public interface JWTTransformer {
 
     /**
-     * This method used to retrieve ConsumerKey From JWT
+     * This method used to retrieve ConsumerKey From JWT.
      * @param jwtClaimsSet retrieved JwtClaimSet
      * @return consumerKey of JWT
      */
     public String getTransformedConsumerKey(JWTClaimsSet jwtClaimsSet) throws MGWException;
 
     /**
-     * This method used to retrieve Scopes From JWT
+     * This method used to retrieve Scopes From JWT.
      * @param jwtClaimsSet retrieved JwtClaimSet
      * @return scopes of JWT
      */
@@ -45,7 +45,7 @@ public interface JWTTransformer {
 
 
     /**
-     * This method used to transform JWT claimset from given JWT into required format
+     * This method used to transform JWT claimset from given JWT into required format.
      *
      * @param jwtClaimsSet jwtClaimSet from given JWT
      * @return transformed JWT Claims.

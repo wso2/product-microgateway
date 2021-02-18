@@ -87,7 +87,7 @@ public class APISecurityConstants {
     public static final String DESCRIPTION_SEPARATOR = ". ";
 
     /**
-     * returns an String that corresponds to errorCode passed in
+     * returns an String that corresponds to errorCode passed in.
      *
      * @param errorCode
      * @return String

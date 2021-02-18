@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Holds details about API/resource level Policy
+ * Holds details about API/resource level Policy.
  */
 public class ApiPolicy extends Policy {
 

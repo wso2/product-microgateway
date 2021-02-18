@@ -40,4 +40,10 @@ public class Constants {
 
     // Config constants
     public static final String EVENT_HUB_EVENT_LISTENING_ENDPOINT = "eventListeningEndpoints";
+
+    //Throttle config constants
+    public static final String LOADBALANCE = "loadbalance";
+    public static final String FAILOVER = "failover";
+    public static final String TM_BINARY_LOADBALANCE_SEPARATOR = ",";
+    public static final String TM_BINARY_FAILOVER_SEPARATOR = "|";
 }

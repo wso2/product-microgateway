@@ -22,7 +22,7 @@ import org.wso2.micro.gateway.enforcer.common.CacheableEntity;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataStoreUtil;
 
 /**
- * Entity for representing a SubscriptionDTO in APIM
+ * Entity for representing a SubscriptionDTO in APIM.
  */
 public class Subscription implements CacheableEntity<String> {
 

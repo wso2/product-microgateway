@@ -23,6 +23,8 @@ package org.wso2.micro.gateway.enforcer.constants;
 public class APIConstants {
 
     public static final String UNLIMITED_TIER = "Unlimited";
+    public static final String IP = "ip";
+    public static final String IPV6 = "ipv6";
 
     //open API extensions
     public static final String X_WSO2_BASE_PATH = "x-wso2-basepath";
@@ -79,7 +81,7 @@ public class APIConstants {
     }
 
     /**
-     * Holds the common set of constants for output of the subscription validation
+     * Holds the common set of constants for output of the subscription validation.
      */
     public static class SubscriptionStatus {
 
@@ -96,7 +98,7 @@ public class APIConstants {
     }
 
     /**
-     * Holds the common set of constants for validating the JWT tokens
+     * Holds the common set of constants for validating the JWT tokens.
      */
     public static class JwtTokenConstants {
 

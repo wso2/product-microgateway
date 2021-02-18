@@ -24,7 +24,7 @@ import com.nimbusds.jwt.SignedJWT;
 import java.io.Serializable;
 
 /**
- * JWT internal Representation
+ * JWT internal Representation.
  */
 public class SignedJWTInfo implements Serializable {
 

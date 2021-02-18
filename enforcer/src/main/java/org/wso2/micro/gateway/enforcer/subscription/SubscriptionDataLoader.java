@@ -45,7 +45,7 @@ public interface SubscriptionDataLoader {
     public List<Subscription> loadAllSubscriptions(String tenantDomain) throws DataLoadingException;
 
     /**
-     * Load all Applications from the Database belonging to all Tenants
+     * Load all Applications from the Database belonging to all Tenants.
      *
      * @return A list of all {@link Application}s.
      * @throws DataLoadingException If any error
@@ -53,8 +53,8 @@ public interface SubscriptionDataLoader {
     public List<Application> loadAllApplications(String tenantDomain) throws DataLoadingException;
 
     /**
-     * Load all Key Mappings (Mapping between the Consumer Key and Application) from the Database
-     * owned by all tenants
+     * Load all Key Mappings (Mapping between the Consumer Key and Application) from the Database.
+     * owned by all tenants.
      *
      * @return A list of {@link ApplicationKeyMapping}s
      * @throws DataLoadingException If any error
@@ -110,7 +110,7 @@ public interface SubscriptionDataLoader {
     public Application getApplicationById(int appId) throws DataLoadingException;
 
     /**
-     * Retrieve Key Mapping (Mapping between the Consumer Key and Application) from the Database
+     * Retrieve Key Mapping (Mapping between the Consumer Key and Application) from the Database.
      *
      * @return A list of {@link ApplicationKeyMapping}s
      * @throws DataLoadingException If any error
