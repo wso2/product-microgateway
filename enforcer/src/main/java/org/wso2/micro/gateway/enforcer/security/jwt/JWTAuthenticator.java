@@ -128,7 +128,8 @@ public class JWTAuthenticator implements Authenticator {
                                     .isAuthorized());
                         }
                         if (!apiKeyValidationInfoDTO.isAuthorized()) {
-                            throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
+                            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                                    apiKeyValidationInfoDTO.getValidationStatus(),
                                     "User is NOT authorized to access the Resource. " +
                                             "API Subscription validation failed.");
                         }

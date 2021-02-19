@@ -29,7 +29,6 @@ import org.wso2.micro.gateway.enforcer.discovery.ApplicationKeyMappingDiscoveryC
 import org.wso2.micro.gateway.enforcer.discovery.ApplicationPolicyDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.discovery.SubscriptionDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.discovery.SubscriptionPolicyDiscoveryClient;
-import org.wso2.micro.gateway.enforcer.exception.DataLoadingException;
 import org.wso2.micro.gateway.enforcer.models.API;
 import org.wso2.micro.gateway.enforcer.models.ApiPolicy;
 import org.wso2.micro.gateway.enforcer.models.Application;
@@ -313,13 +312,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public void addOrUpdateAPIWithUrlTemplates(API api) {
-        try {
-            API newAPI = new SubscriptionDataLoaderImpl().getApi(api.getContext(), api.getApiVersion());
-            apiMap.put(api.getCacheKey(), newAPI);
-        } catch (DataLoadingException e) {
-            log.error("Exception while loading api for " + api.getContext() + " " + api.getApiVersion(), e);
-        }
-
     }
 
     @Override
@@ -374,14 +366,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public void addOrUpdateApiPolicy(ApiPolicy apiPolicy) {
-        try {
-            ApiPolicy policy = new SubscriptionDataLoaderImpl().getAPIPolicy(apiPolicy.getName(), tenantDomain);
-            apiPolicyMap.remove(apiPolicy.getCacheKey());
-            apiPolicyMap.put(apiPolicy.getCacheKey(), policy);
-        } catch (DataLoadingException e) {
-            log.error("Exception while loading api policy for " + apiPolicy.getName() + " for domain " + tenantDomain,
-                      e);
-        }
     }
 
     @Override

@@ -229,7 +229,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 	// Wait for each environment to return it's result
 	for i := 0; i < len(envs); i++ {
 		data := <-c
-		logger.LoggerMgw.Debugf("Receing data for an envrionment: %v", string(data.Resp))
+		logger.LoggerMgw.Debugf("Receiving data for an environment: %v", string(data.Resp))
 		if data.Resp != nil {
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
 			logger.LoggerMgw.Debug("Pushing data to router and enforcer")
