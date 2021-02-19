@@ -47,11 +47,11 @@ public class ProductionSandboxTestCase extends BaseTestCase {
         //deploy the api
         //api yaml file should put to the resources/apis/openApis folder
         String prodSandApiZipfile = ApiProjectGenerator.createApictlProjZip(
-                "prod-sand/prodSandOpenAPI.yaml");
+                "prod-sand/prodSand_api.yaml", "prod-sand/prodSand_swagger.yaml");
         String prodOnlyApiZipfile = ApiProjectGenerator.createApictlProjZip(
-                "prod-sand/prodOpenAPI.yaml");
+                "prod-sand/prod_api.yaml", "prod-sand/prod_swagger.yaml");
         String sandOnlyApiZipfile = ApiProjectGenerator.createApictlProjZip(
-                "prod-sand/sandOpenAPI.yaml");
+                "prod-sand/sand_api.yaml", "prod-sand/sand_swagger.yaml");
         ApiDeployment.deployAPI(prodSandApiZipfile);
         ApiDeployment.deployAPI(prodOnlyApiZipfile);
         ApiDeployment.deployAPI(sandOnlyApiZipfile);
