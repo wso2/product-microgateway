@@ -49,7 +49,7 @@ ARG MOTD="\n\
 RUN \
     addgroup -S -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
     && adduser -S -u ${MG_USER_ID} -h ${MG_USER_HOME} -G ${MG_USER_GROUP} ${MG_USER} \
-    && mkdir ${MG_USER_HOME}/lib && mkdir -p ${MG_USER_HOME}/mg/security \
+    && mkdir ${MG_USER_HOME}/lib && mkdir -p ${MG_USER_HOME}/mg/security && mkdir -p ${MG_USER_HOME}/mg/logs  \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
 
 WORKDIR ${MG_USER_HOME}
@@ -59,4 +59,4 @@ USER ${MG_USER}
 COPY maven/ lib/
 COPY maven/conf conf
 COPY maven/security security
-CMD java $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -cp "lib/*" org.wso2.micro.gateway.enforcer.server.AuthServer
+CMD java $JAVA_OPTS -Dlog4j.configurationFile="/home/wso2/conf/log4j2.properties" -cp "lib/*" org.wso2.micro.gateway.enforcer.server.AuthServer

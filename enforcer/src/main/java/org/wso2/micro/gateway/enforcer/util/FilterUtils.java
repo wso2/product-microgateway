@@ -204,7 +204,7 @@ public class FilterUtils {
      * retrieve this error details from the request context. Make sure to call this method and set the proper error
      * details when enforcer filters returns an error.
      *
-     * @param requestContext - The context object holds detals about the specific request.
+     * @param requestContext - The context object holds details about the specific request.
      * @param e - APISecurityException thrown when validation failure happens at filter level.
      */
     public static void setErrorToContext(RequestContext requestContext, APISecurityException e) {
@@ -223,6 +223,25 @@ public class FilterUtils {
             requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
                     APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
         }
+    }
+
+    /**
+     * Set the unauthenticated status code(401), error code(900901), message and description to the request context.
+     * The enforcer response will retrieve this error details from the request context. Make sure to call
+     * this method and set the proper error details when enforcer filters returns an error.
+     *
+     * @param requestContext - The context object holds details about the specific request.
+     */
+    public static void setUnauthenticatedErrorToContext(RequestContext requestContext) {
+        requestContext.getProperties()
+                .put(APIConstants.MessageFormat.STATUS_CODE, APIConstants.StatusCodes.UNAUTHENTICATED.getCode());
+        requestContext.getProperties()
+                .put(APIConstants.MessageFormat.ERROR_CODE, APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
+        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE, APISecurityConstants
+                .getAuthenticationFailureMessage(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS));
+        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_DESCRIPTION);
+
     }
 
 }
