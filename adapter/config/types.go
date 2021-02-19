@@ -168,6 +168,8 @@ type jwtTokenConfig struct {
 	ValidateSubscription bool
 	ConsumerKeyClaim     string
 	CertificateFilePath  string
+	JwtTransformerImpl   string
+	ClaimMapping         []claimMapping
 }
 
 type eventHub struct {
@@ -190,6 +192,11 @@ type jwtGenerator struct {
 	ClaimsExtractorImpl   string `toml:"claimsExtractorImpl"`
 	PublicCertificatePath string `toml:"publicCertificatePath"`
 	PrivateKeyPath        string `toml:"privateKeyPath"`
+}
+
+type claimMapping struct {
+    RemoteClaim string
+    LocalClaim string
 }
 
 type cache struct {

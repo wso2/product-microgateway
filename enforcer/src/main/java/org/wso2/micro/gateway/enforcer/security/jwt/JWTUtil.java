@@ -33,6 +33,8 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.constants.JwtConstants;
@@ -252,6 +254,48 @@ public class JWTUtil {
             }
         }
         return jarFilesList;
+    }
+
+    public static JWTTransformer loadJWTTransformerClass(String issuer) {
+        String classNameInConfig = ConfigHolder.getInstance().getConfig().getJwtTransformerMap().get(issuer);
+        JWTTransformer jwtTransformer = null;
+
+        if (!(classNameInConfig.equals(JWTConstants.DEFAULT_JWT_TRANSFORMER_CLASS_NAME))) {
+            // Load custom jwt generator class
+            // Get the names of jar files available in the location.
+            List<String> jarFilesList = getJarFilesList();
+            for (int fileIndex = 0; fileIndex < jarFilesList.size(); fileIndex++) {
+                try {
+                    String pathToJar = JwtConstants.DROPINS_FOLDER + jarFilesList.get(fileIndex);
+                    JarFile jarFile = new JarFile(pathToJar);
+                    Enumeration<JarEntry> e = jarFile.entries();
+
+                    URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
+                    URLClassLoader cl = URLClassLoader.newInstance(urls);
+                    while (e.hasMoreElements()) {
+                        JarEntry je = e.nextElement();
+                        if (je.isDirectory() || !je.getName().endsWith(JwtConstants.CLASS)) {
+                            continue;
+                        }
+                        // -6 because of .class
+                        String className = je.getName().substring(0, je.getName().length() - 6);
+                        className = className.replace('/', '.');
+                        if (classNameInConfig.equals(className)) {
+                            Class classInJar = cl.loadClass(className);
+                            try {
+                                jwtTransformer = (JWTTransformer) classInJar.newInstance();
+                                return jwtTransformer;
+                            } catch (InstantiationException | IllegalAccessException exception) {
+                                log.debug("Error in generating an object from the class", exception);
+                            }
+                        }
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    log.debug("Error in loading class", e);
+                }
+            }
+        }
+        return (JWTTransformer) new DefaultJWTTransformer();
     }
 }
 

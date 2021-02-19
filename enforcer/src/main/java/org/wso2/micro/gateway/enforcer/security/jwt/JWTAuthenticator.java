@@ -37,7 +37,6 @@ import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.EnforcerConfig;
-import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;

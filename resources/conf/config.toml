@@ -74,6 +74,11 @@ disableSslVerification = false
     consumerKeyClaim = "azp"
     # Certificate Filepath within enforcer
     certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+    jwtTransformerImpl = "org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer"
+    [[enforcer.jwtTokenConfig.claimMapping]]
+        remoteClaim = "sub"
+        localClaim = "CUSTOM-CLAIM"
+
 
 [enforcer.apimCredentials]
     username="admin"

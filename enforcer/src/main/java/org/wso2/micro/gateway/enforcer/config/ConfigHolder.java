@@ -21,9 +21,12 @@ package org.wso2.micro.gateway.enforcer.config;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.gateway.discovery.config.enforcer.AmCredentials;
 import org.wso2.gateway.discovery.config.enforcer.AuthService;
+import org.wso2.gateway.discovery.config.enforcer.ClaimMapping;
 import org.wso2.gateway.discovery.config.enforcer.Cache;
 import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.config.enforcer.EventHub;
@@ -35,12 +38,14 @@ import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
+import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
-import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -174,8 +179,11 @@ public class ConfigHolder {
             jwksConfigurationDTO.setEnabled(StringUtils.isNotEmpty(jwtIssuer.getJwksURL()));
             jwksConfigurationDTO.setUrl(jwtIssuer.getJwksURL());
             issuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
-            ClaimMappingDto claimMap = new ClaimMappingDto("keytype", "@@@@@");
-            issuerDto.addClaimMapping(claimMap);
+            List<ClaimMapping> claimMaps = jwtIssuer.getClaimMappingList();
+            for (ClaimMapping claimMap : claimMaps) {
+                ClaimMappingDto map = new ClaimMappingDto(claimMap.getRemoteClaim(), claimMap.getLocalClaim());
+                issuerDto.addClaimMapping(map);
+            }
             String certificateAlias = jwtIssuer.getCertificateAlias();
             if (certificateAlias != null) {
                 try {
@@ -191,6 +199,8 @@ public class ConfigHolder {
             issuerDto.setConsumerKeyClaim(jwtIssuer.getConsumerKeyClaim());
             issuerDto.setValidateSubscriptions(jwtIssuer.getValidateSubscription());
             config.getIssuersMap().put(jwtIssuer.getIssuer(), issuerDto);
+            // Add jwt transformer class name
+            config.getJwtTransformerMap().put(jwtIssuer.getIssuer(), jwtIssuer.getJwtTransformerImpl());
             configIssuerList.add(issuerDto);
         }
     }

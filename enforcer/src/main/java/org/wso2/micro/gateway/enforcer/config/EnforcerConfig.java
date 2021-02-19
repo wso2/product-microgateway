@@ -41,6 +41,7 @@ public class EnforcerConfig {
     private CacheDto cacheDto;
     private String publicCertificatePath = "";
     private String privateKeyPath = "";
+    private Map<String, String> jwtTransformerMap = new HashMap<>();
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -104,6 +105,14 @@ public class EnforcerConfig {
 
     public String getPrivateKeyPath() {
         return privateKeyPath;
+    }
+
+    public Map<String, String> getJwtTransformerMap() {
+        return jwtTransformerMap;
+    }
+
+    public void setJwtTransformerMap(Map<String, String> jwtTransformerMap) {
+        this.jwtTransformerMap = jwtTransformerMap;
     }
 }
 

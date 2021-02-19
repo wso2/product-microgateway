@@ -26,6 +26,8 @@ private static final long serialVersionUID = 0L;
     jwksURL_ = "";
     consumerKeyClaim_ = "";
     certificateFilePath_ = "";
+    jwtTransformerImpl_ = "";
+    claimMapping_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -48,6 +50,7 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
+    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -99,6 +102,21 @@ private static final long serialVersionUID = 0L;
             certificateFilePath_ = s;
             break;
           }
+          case 66: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            jwtTransformerImpl_ = s;
+            break;
+          }
+          case 74: {
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              claimMapping_ = new java.util.ArrayList<org.wso2.gateway.discovery.config.enforcer.ClaimMapping>();
+              mutable_bitField0_ |= 0x00000001;
+            }
+            claimMapping_.add(
+                input.readMessage(org.wso2.gateway.discovery.config.enforcer.ClaimMapping.parser(), extensionRegistry));
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -114,6 +132,9 @@ private static final long serialVersionUID = 0L;
       throw new com.google.protobuf.InvalidProtocolBufferException(
           e).setUnfinishedMessage(this);
     } finally {
+      if (((mutable_bitField0_ & 0x00000001) != 0)) {
+        claimMapping_ = java.util.Collections.unmodifiableList(claimMapping_);
+      }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
     }
@@ -424,6 +445,112 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int JWTTRANSFORMERIMPL_FIELD_NUMBER = 8;
+  private volatile java.lang.Object jwtTransformerImpl_;
+  /**
+   * <pre>
+   * Class name of the jwt transformer
+   * </pre>
+   *
+   * <code>string jwtTransformerImpl = 8;</code>
+   * @return The jwtTransformerImpl.
+   */
+  @java.lang.Override
+  public java.lang.String getJwtTransformerImpl() {
+    java.lang.Object ref = jwtTransformerImpl_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      jwtTransformerImpl_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * Class name of the jwt transformer
+   * </pre>
+   *
+   * <code>string jwtTransformerImpl = 8;</code>
+   * @return The bytes for jwtTransformerImpl.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getJwtTransformerImplBytes() {
+    java.lang.Object ref = jwtTransformerImpl_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      jwtTransformerImpl_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int CLAIMMAPPING_FIELD_NUMBER = 9;
+  private java.util.List<org.wso2.gateway.discovery.config.enforcer.ClaimMapping> claimMapping_;
+  /**
+   * <pre>
+   * Claim mapping for the issuer
+   * </pre>
+   *
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   */
+  @java.lang.Override
+  public java.util.List<org.wso2.gateway.discovery.config.enforcer.ClaimMapping> getClaimMappingList() {
+    return claimMapping_;
+  }
+  /**
+   * <pre>
+   * Claim mapping for the issuer
+   * </pre>
+   *
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder> 
+      getClaimMappingOrBuilderList() {
+    return claimMapping_;
+  }
+  /**
+   * <pre>
+   * Claim mapping for the issuer
+   * </pre>
+   *
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   */
+  @java.lang.Override
+  public int getClaimMappingCount() {
+    return claimMapping_.size();
+  }
+  /**
+   * <pre>
+   * Claim mapping for the issuer
+   * </pre>
+   *
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.ClaimMapping getClaimMapping(int index) {
+    return claimMapping_.get(index);
+  }
+  /**
+   * <pre>
+   * Claim mapping for the issuer
+   * </pre>
+   *
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder getClaimMappingOrBuilder(
+      int index) {
+    return claimMapping_.get(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -459,6 +586,12 @@ private static final long serialVersionUID = 0L;
     if (!getCertificateFilePathBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 7, certificateFilePath_);
     }
+    if (!getJwtTransformerImplBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 8, jwtTransformerImpl_);
+    }
+    for (int i = 0; i < claimMapping_.size(); i++) {
+      output.writeMessage(9, claimMapping_.get(i));
+    }
     unknownFields.writeTo(output);
   }
 
@@ -490,6 +623,13 @@ private static final long serialVersionUID = 0L;
     if (!getCertificateFilePathBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, certificateFilePath_);
     }
+    if (!getJwtTransformerImplBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, jwtTransformerImpl_);
+    }
+    for (int i = 0; i < claimMapping_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(9, claimMapping_.get(i));
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -519,6 +659,10 @@ private static final long serialVersionUID = 0L;
         .equals(other.getConsumerKeyClaim())) return false;
     if (!getCertificateFilePath()
         .equals(other.getCertificateFilePath())) return false;
+    if (!getJwtTransformerImpl()
+        .equals(other.getJwtTransformerImpl())) return false;
+    if (!getClaimMappingList()
+        .equals(other.getClaimMappingList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -545,6 +689,12 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getConsumerKeyClaim().hashCode();
     hash = (37 * hash) + CERTIFICATEFILEPATH_FIELD_NUMBER;
     hash = (53 * hash) + getCertificateFilePath().hashCode();
+    hash = (37 * hash) + JWTTRANSFORMERIMPL_FIELD_NUMBER;
+    hash = (53 * hash) + getJwtTransformerImpl().hashCode();
+    if (getClaimMappingCount() > 0) {
+      hash = (37 * hash) + CLAIMMAPPING_FIELD_NUMBER;
+      hash = (53 * hash) + getClaimMappingList().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -677,6 +827,7 @@ private static final long serialVersionUID = 0L;
     private void maybeForceBuilderInitialization() {
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
+        getClaimMappingFieldBuilder();
       }
     }
     @java.lang.Override
@@ -696,6 +847,14 @@ private static final long serialVersionUID = 0L;
 
       certificateFilePath_ = "";
 
+      jwtTransformerImpl_ = "";
+
+      if (claimMappingBuilder_ == null) {
+        claimMapping_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+      } else {
+        claimMappingBuilder_.clear();
+      }
       return this;
     }
 
@@ -722,6 +881,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.gateway.discovery.config.enforcer.Issuer buildPartial() {
       org.wso2.gateway.discovery.config.enforcer.Issuer result = new org.wso2.gateway.discovery.config.enforcer.Issuer(this);
+      int from_bitField0_ = bitField0_;
       result.name_ = name_;
       result.issuer_ = issuer_;
       result.certificateAlias_ = certificateAlias_;
@@ -729,6 +889,16 @@ private static final long serialVersionUID = 0L;
       result.validateSubscription_ = validateSubscription_;
       result.consumerKeyClaim_ = consumerKeyClaim_;
       result.certificateFilePath_ = certificateFilePath_;
+      result.jwtTransformerImpl_ = jwtTransformerImpl_;
+      if (claimMappingBuilder_ == null) {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          claimMapping_ = java.util.Collections.unmodifiableList(claimMapping_);
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.claimMapping_ = claimMapping_;
+      } else {
+        result.claimMapping_ = claimMappingBuilder_.build();
+      }
       onBuilt();
       return result;
     }
@@ -804,6 +974,36 @@ private static final long serialVersionUID = 0L;
         certificateFilePath_ = other.certificateFilePath_;
         onChanged();
       }
+      if (!other.getJwtTransformerImpl().isEmpty()) {
+        jwtTransformerImpl_ = other.jwtTransformerImpl_;
+        onChanged();
+      }
+      if (claimMappingBuilder_ == null) {
+        if (!other.claimMapping_.isEmpty()) {
+          if (claimMapping_.isEmpty()) {
+            claimMapping_ = other.claimMapping_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureClaimMappingIsMutable();
+            claimMapping_.addAll(other.claimMapping_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.claimMapping_.isEmpty()) {
+          if (claimMappingBuilder_.isEmpty()) {
+            claimMappingBuilder_.dispose();
+            claimMappingBuilder_ = null;
+            claimMapping_ = other.claimMapping_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+            claimMappingBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getClaimMappingFieldBuilder() : null;
+          } else {
+            claimMappingBuilder_.addAllMessages(other.claimMapping_);
+          }
+        }
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -832,6 +1032,7 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
+    private int bitField0_;
 
     private java.lang.Object name_ = "";
     /**
@@ -1455,6 +1656,414 @@ private static final long serialVersionUID = 0L;
       certificateFilePath_ = value;
       onChanged();
       return this;
+    }
+
+    private java.lang.Object jwtTransformerImpl_ = "";
+    /**
+     * <pre>
+     * Class name of the jwt transformer
+     * </pre>
+     *
+     * <code>string jwtTransformerImpl = 8;</code>
+     * @return The jwtTransformerImpl.
+     */
+    public java.lang.String getJwtTransformerImpl() {
+      java.lang.Object ref = jwtTransformerImpl_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        jwtTransformerImpl_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Class name of the jwt transformer
+     * </pre>
+     *
+     * <code>string jwtTransformerImpl = 8;</code>
+     * @return The bytes for jwtTransformerImpl.
+     */
+    public com.google.protobuf.ByteString
+        getJwtTransformerImplBytes() {
+      java.lang.Object ref = jwtTransformerImpl_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        jwtTransformerImpl_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Class name of the jwt transformer
+     * </pre>
+     *
+     * <code>string jwtTransformerImpl = 8;</code>
+     * @param value The jwtTransformerImpl to set.
+     * @return This builder for chaining.
+     */
+    public Builder setJwtTransformerImpl(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      jwtTransformerImpl_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Class name of the jwt transformer
+     * </pre>
+     *
+     * <code>string jwtTransformerImpl = 8;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearJwtTransformerImpl() {
+      
+      jwtTransformerImpl_ = getDefaultInstance().getJwtTransformerImpl();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Class name of the jwt transformer
+     * </pre>
+     *
+     * <code>string jwtTransformerImpl = 8;</code>
+     * @param value The bytes for jwtTransformerImpl to set.
+     * @return This builder for chaining.
+     */
+    public Builder setJwtTransformerImplBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      jwtTransformerImpl_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.util.List<org.wso2.gateway.discovery.config.enforcer.ClaimMapping> claimMapping_ =
+      java.util.Collections.emptyList();
+    private void ensureClaimMappingIsMutable() {
+      if (!((bitField0_ & 0x00000001) != 0)) {
+        claimMapping_ = new java.util.ArrayList<org.wso2.gateway.discovery.config.enforcer.ClaimMapping>(claimMapping_);
+        bitField0_ |= 0x00000001;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.ClaimMapping, org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder, org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder> claimMappingBuilder_;
+
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public java.util.List<org.wso2.gateway.discovery.config.enforcer.ClaimMapping> getClaimMappingList() {
+      if (claimMappingBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(claimMapping_);
+      } else {
+        return claimMappingBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public int getClaimMappingCount() {
+      if (claimMappingBuilder_ == null) {
+        return claimMapping_.size();
+      } else {
+        return claimMappingBuilder_.getCount();
+      }
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.ClaimMapping getClaimMapping(int index) {
+      if (claimMappingBuilder_ == null) {
+        return claimMapping_.get(index);
+      } else {
+        return claimMappingBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public Builder setClaimMapping(
+        int index, org.wso2.gateway.discovery.config.enforcer.ClaimMapping value) {
+      if (claimMappingBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureClaimMappingIsMutable();
+        claimMapping_.set(index, value);
+        onChanged();
+      } else {
+        claimMappingBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public Builder setClaimMapping(
+        int index, org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder builderForValue) {
+      if (claimMappingBuilder_ == null) {
+        ensureClaimMappingIsMutable();
+        claimMapping_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        claimMappingBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public Builder addClaimMapping(org.wso2.gateway.discovery.config.enforcer.ClaimMapping value) {
+      if (claimMappingBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureClaimMappingIsMutable();
+        claimMapping_.add(value);
+        onChanged();
+      } else {
+        claimMappingBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public Builder addClaimMapping(
+        int index, org.wso2.gateway.discovery.config.enforcer.ClaimMapping value) {
+      if (claimMappingBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureClaimMappingIsMutable();
+        claimMapping_.add(index, value);
+        onChanged();
+      } else {
+        claimMappingBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public Builder addClaimMapping(
+        org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder builderForValue) {
+      if (claimMappingBuilder_ == null) {
+        ensureClaimMappingIsMutable();
+        claimMapping_.add(builderForValue.build());
+        onChanged();
+      } else {
+        claimMappingBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public Builder addClaimMapping(
+        int index, org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder builderForValue) {
+      if (claimMappingBuilder_ == null) {
+        ensureClaimMappingIsMutable();
+        claimMapping_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        claimMappingBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public Builder addAllClaimMapping(
+        java.lang.Iterable<? extends org.wso2.gateway.discovery.config.enforcer.ClaimMapping> values) {
+      if (claimMappingBuilder_ == null) {
+        ensureClaimMappingIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, claimMapping_);
+        onChanged();
+      } else {
+        claimMappingBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public Builder clearClaimMapping() {
+      if (claimMappingBuilder_ == null) {
+        claimMapping_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+      } else {
+        claimMappingBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public Builder removeClaimMapping(int index) {
+      if (claimMappingBuilder_ == null) {
+        ensureClaimMappingIsMutable();
+        claimMapping_.remove(index);
+        onChanged();
+      } else {
+        claimMappingBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder getClaimMappingBuilder(
+        int index) {
+      return getClaimMappingFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder getClaimMappingOrBuilder(
+        int index) {
+      if (claimMappingBuilder_ == null) {
+        return claimMapping_.get(index);  } else {
+        return claimMappingBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder> 
+         getClaimMappingOrBuilderList() {
+      if (claimMappingBuilder_ != null) {
+        return claimMappingBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(claimMapping_);
+      }
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder addClaimMappingBuilder() {
+      return getClaimMappingFieldBuilder().addBuilder(
+          org.wso2.gateway.discovery.config.enforcer.ClaimMapping.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder addClaimMappingBuilder(
+        int index) {
+      return getClaimMappingFieldBuilder().addBuilder(
+          index, org.wso2.gateway.discovery.config.enforcer.ClaimMapping.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * Claim mapping for the issuer
+     * </pre>
+     *
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     */
+    public java.util.List<org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder> 
+         getClaimMappingBuilderList() {
+      return getClaimMappingFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.ClaimMapping, org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder, org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder> 
+        getClaimMappingFieldBuilder() {
+      if (claimMappingBuilder_ == null) {
+        claimMappingBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.ClaimMapping, org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder, org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder>(
+                claimMapping_,
+                ((bitField0_ & 0x00000001) != 0),
+                getParentForChildren(),
+                isClean());
+        claimMapping_ = null;
+      }
+      return claimMappingBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

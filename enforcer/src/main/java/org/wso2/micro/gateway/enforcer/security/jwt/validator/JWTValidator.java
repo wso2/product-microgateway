@@ -28,16 +28,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
-import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
-import org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer;
-import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTUtil;
 import org.wso2.micro.gateway.enforcer.security.jwt.SignedJWTInfo;
-import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
@@ -64,7 +62,7 @@ public class JWTValidator {
 
     public void loadTokenIssuerConfiguration() {
         tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
-        this.jwtTransformer = new DefaultJWTTransformer();
+        //this.jwtTransformer = new DefaultJWTTransformer();
     }
 
     public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws MGWException {
@@ -72,6 +70,7 @@ public class JWTValidator {
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
         if (StringUtils.isNotEmpty(issuer) && tokenIssuers.containsKey(issuer)) {
             this.tokenIssuer = this.tokenIssuers.get(issuer);
+            this.jwtTransformer = JWTUtil.loadJWTTransformerClass(issuer);
             this.jwtTransformer.loadConfiguration(tokenIssuer);
             return validateToken(signedJWTInfo);
         }
@@ -195,4 +194,6 @@ public class JWTValidator {
                     .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER)));
         }
     }
+
+
 }
