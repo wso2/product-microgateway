@@ -47,19 +47,19 @@ type GetApisParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*Optional - Condition to filter APIs. Currently only filtering
-	by API type (HTTP or WebSocket) is supported.
-	"http" for HTTP type
-	"ws" for WebSocket type
-
-	  In: query
-	*/
-	APIType *string
 	/*Number of APIs (APIMeta objects to return)
 
 	  In: query
 	*/
 	Limit *int64
+	/*Optional - Condition to filter APIs. Currently only filtering
+	by API type (HTTP or WebSocket) is supported.
+	"type:http" for HTTP type
+	"type:ws" for WebSocket type
+
+	  In: query
+	*/
+	Query *string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -73,36 +73,18 @@ func (o *GetApisParams) BindRequest(r *http.Request, route *middleware.MatchedRo
 
 	qs := runtime.Values(r.URL.Query())
 
-	qAPIType, qhkAPIType, _ := qs.GetOK("apiType")
-	if err := o.bindAPIType(qAPIType, qhkAPIType, route.Formats); err != nil {
+	qLimit, qhkLimit, _ := qs.GetOK("limit")
+	if err := o.bindLimit(qLimit, qhkLimit, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
-	qLimit, qhkLimit, _ := qs.GetOK("limit")
-	if err := o.bindLimit(qLimit, qhkLimit, route.Formats); err != nil {
+	qQuery, qhkQuery, _ := qs.GetOK("query")
+	if err := o.bindQuery(qQuery, qhkQuery, route.Formats); err != nil {
 		res = append(res, err)
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-// bindAPIType binds and validates parameter APIType from query.
-func (o *GetApisParams) bindAPIType(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-	o.APIType = &raw
-
 	return nil
 }
 
@@ -125,6 +107,24 @@ func (o *GetApisParams) bindLimit(rawData []string, hasKey bool, formats strfmt.
 		return errors.InvalidType("limit", "query", "int64", raw)
 	}
 	o.Limit = &value
+
+	return nil
+}
+
+// bindQuery binds and validates parameter Query from query.
+func (o *GetApisParams) bindQuery(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Query = &raw
 
 	return nil
 }

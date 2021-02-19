@@ -36,14 +36,14 @@ consumes:
 produces:
 - "application/json"
 securityDefinitions:
-BasicAuth:     # <-- arbitrary name for the security scheme
-  type: "basic"
+  BasicAuth:     # <-- arbitrary name for the security scheme
+    type: "basic"
 
 ######################################################
 # The Microgateway Adapter resource APIs
 ######################################################
 paths:
-  /api:
+  /apis:
     #-----------------------------------------------------
     # Deploy an API in the Microgateway
     #-----------------------------------------------------
@@ -61,21 +61,13 @@ paths:
         required: true
         type: "file"
         x-exportParamName: "File"
-      - name: "overwrite"
+      - name: "override"
         in: "query"
-        description: "Whether to update the API or not. This is used when updating\
-          \ already existing APIs.\n"
+        description: "Whether to force create an API. When this is true, overrides if \
+          \ an API already exists.\n"
         required: false
         type: "boolean"
-        x-exportParamName: "Overwrite"
-        x-optionalDataType: "Bool"
-      - name: "preserveProvider"
-        in: "query"
-        description: "Preserve Original Provider of the API. This is the user choice\
-          \ to keep or replace the API provider.\n"
-        required: false
-        type: "boolean"
-        x-exportParamName: "PreserveProvider"
+        x-exportParamName: "Override"
         x-optionalDataType: "Bool"
       responses:
         200:
@@ -84,22 +76,16 @@ paths:
             API deployed or updated Successfully.
           schema:
             $ref: '#/definitions/DeployResponse'
-        403:
+        401:
           description: |
-            Forbidden.
+            Unautherized
             Not Authorized to deploy or update.
           schema:
-            $ref: "#/definitions/Error" 
-        404:
-          description: |
-            Not Found. 
-            Requested API to update not found (when overwrite parameter is included).
-          schema:
-            $ref: "#/definitions/Error" 
+            $ref: "#/definitions/Error"         
         409:
           description: |
             Conflict.
-            API to import already exists (when overwrite parameter is not included).
+            API to import already exists (when overwride parameter is not included).
           schema:
             $ref: "#/definitions/Error"
         500:
@@ -109,9 +95,9 @@ paths:
       security:
       - BasicAuth: []
       x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization:\
-        \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?preserveProvider=false"
+        \ Basic ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?overwride=true"
       x-wso2-request: "POST https://localhost:9443/api/mgw/adapter/0.1/apis\nAuthorization:\
-        \ Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n"
+        \ Basic ae4eae22-3f65-387b-a171-d37eaa366fa8\n"
       x-wso2-response: "HTTP/1.1 200 OK\nAPI deployed successfully."
     #-----------------------------------------------------
     # Undeploy/Delete an API from the Microgateway
@@ -162,15 +148,15 @@ paths:
       security:
       - BasicAuth: []
       x-wso2-curl: |
-        curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
-        -d '{"apiName":"petstore", "version":"1.1", "vhost":"pets"}'
-        -X POST "https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete"
+        curl -k -H "Authorization: Basic ae4eae22-3f65-387b-a171-d37eaa366fa8" 
+        -d '{"apiName":"petstore", "version":"1.1", "vhost":"www.pets.com"}'
+        -X DELETE "https://127.0.0.1:9443/api/mgw/adapter/0.1/apis"
       x-wso2-request: |
-        POST https://127.0.0.1:9443/api/mgw/adapter/0.1/apis/delete
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-        {"apiName":"petstore", "version":"1.1", "vhost":"pets"}
+        DELETE https://127.0.0.1:9443/api/mgw/adapter/0.1/apis
+        Authorization: Basic ae4eae22-3f65-387b-a171-d37eaa366fa8
+        {"apiName":"petstore", "version":"1.1", "vhost":"www.pets.com"}
       x-wso2-response: "HTTP/1.1 200 OK"
-  /apis:
+  
     #-----------------------------------------------------
     # List APIs
     #-----------------------------------------------------
@@ -181,13 +167,13 @@ paths:
       description: |
         This operation can be used to retrieve meta info about all APIs
       parameters:
-        - name : apiType
+        - name : query
           in: query
           description: |
             Optional - Condition to filter APIs. Currently only filtering 
             by API type (HTTP or WebSocket) is supported.
-            "http" for HTTP type
-            "ws" for WebSocket type
+            "type:http" for HTTP type
+            "type:ws" for WebSocket type
           type: string
         - name : limit
           in: query
@@ -206,11 +192,11 @@ paths:
       security:
       - BasicAuth: []
       x-wso2-curl: |
-        curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
+        curl -k -H "Authorization: Basic ae4eae22-3f65-387b-a171-d37eaa366fa8" 
         -X GET "https://127.0.0.1:9443/api/mgw/adapter/0.1/apis"
       x-wso2-request: |
         GET https://127.0.0.1:9443/api/mgw/adapter/0.1/apis?apiType=http
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+        Authorization: Basic ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK"
 ######################################################
 # Definitions
@@ -284,7 +270,7 @@ definitions:
         type: string
       apiType: 
         type: string
-      labels:
+      gateway-envs:
         type: array
         items:
           type: string

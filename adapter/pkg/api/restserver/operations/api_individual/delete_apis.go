@@ -28,25 +28,25 @@ import (
 	"github.com/wso2/micro-gw/pkg/api/models"
 )
 
-// DeleteAPIHandlerFunc turns a function with the right signature into a delete API handler
-type DeleteAPIHandlerFunc func(DeleteAPIParams, *models.Principal) middleware.Responder
+// DeleteApisHandlerFunc turns a function with the right signature into a delete apis handler
+type DeleteApisHandlerFunc func(DeleteApisParams, *models.Principal) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn DeleteAPIHandlerFunc) Handle(params DeleteAPIParams, principal *models.Principal) middleware.Responder {
+func (fn DeleteApisHandlerFunc) Handle(params DeleteApisParams, principal *models.Principal) middleware.Responder {
 	return fn(params, principal)
 }
 
-// DeleteAPIHandler interface for that can handle valid delete API params
-type DeleteAPIHandler interface {
-	Handle(DeleteAPIParams, *models.Principal) middleware.Responder
+// DeleteApisHandler interface for that can handle valid delete apis params
+type DeleteApisHandler interface {
+	Handle(DeleteApisParams, *models.Principal) middleware.Responder
 }
 
-// NewDeleteAPI creates a new http.Handler for the delete API operation
-func NewDeleteAPI(ctx *middleware.Context, handler DeleteAPIHandler) *DeleteAPI {
-	return &DeleteAPI{Context: ctx, Handler: handler}
+// NewDeleteApis creates a new http.Handler for the delete apis operation
+func NewDeleteApis(ctx *middleware.Context, handler DeleteApisHandler) *DeleteApis {
+	return &DeleteApis{Context: ctx, Handler: handler}
 }
 
-/* DeleteAPI swagger:route DELETE /api API (Individual) deleteApi
+/* DeleteApis swagger:route DELETE /apis API (Individual) deleteApis
 
 Delete deployed API
 
@@ -54,17 +54,17 @@ This operation can be used to delete a API that was deployed
 
 
 */
-type DeleteAPI struct {
+type DeleteApis struct {
 	Context *middleware.Context
-	Handler DeleteAPIHandler
+	Handler DeleteApisHandler
 }
 
-func (o *DeleteAPI) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *DeleteApis) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		r = rCtx
 	}
-	var Params = NewDeleteAPIParams()
+	var Params = NewDeleteApisParams()
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)

@@ -169,11 +169,11 @@ func GetEnforcerApplicationKeyMappingCache() wso2_cache.SnapshotCache {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(vhost, name, version, apiType string, byteArr, upstreamCerts []byte, environments []string) {
+func UpdateAPI(apiContent config.APIContent) {
 	var newLabels []string
 	var mgwSwagger mgw.MgwSwagger
-	if len(environments) == 0 {
-		environments = append(environments, "default")
+	if len(apiContent.Environments) == 0 {
+		apiContent.Environments = append(apiContent.Environments, "default")
 	}
 
 	//TODO: (VirajSalaka) Optimize locking
@@ -181,38 +181,39 @@ func UpdateAPI(vhost, name, version, apiType string, byteArr, upstreamCerts []by
 	l.Lock()
 	defer l.Unlock()
 
-	if apiType == mgw.HTTP {
-		mgwSwagger = operator.GetMgwSwagger(byteArr)
-	} else if apiType == mgw.WS {
-		mgwSwagger = operator.GetMgwSwaggerWebSocket(byteArr)
+	if apiContent.APIType == mgw.HTTP {
+		mgwSwagger = operator.GetMgwSwagger(apiContent.APIDefinition)
+		mgwSwagger.SetName(apiContent.Name)
+		mgwSwagger.SetVersion(apiContent.Version)
+	} else if apiContent.APIType == mgw.WS {
+		mgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
 	} else {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported with WSO2 Microgateway")
 	}
-	apiIdentifier := vhost + ":" + name + ":" + version // TODO: (SuKSW) update once vhost feature added
-	existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
-	if exists {
-		if reflect.DeepEqual(mgwSwagger, existingMgwSwagger) {
-			logger.LoggerXds.Infof("API %v already exists. No changes to apply.", apiIdentifier)
-			return
-		}
-	}
-	mgwSwagger.SetName(name)
-	mgwSwagger.SetVersion(version)
+	apiIdentifier := apiContent.VHost + ":" + apiContent.Name + ":" + apiContent.Version // TODO: (SuKSW) update once vhost feature added
+	//TODO: Uncomment the below section depending on MgwSwagger.Resource ids
+	//existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
+	// if exists {
+	// 	if reflect.DeepEqual(mgwSwagger, existingMgwSwagger) {
+	// 		logger.LoggerXds.Infof("API %v already exists. No changes to apply.", apiIdentifier)
+	// 		return
+	// 	}
+	// }
 	apiMgwSwaggerMap[apiIdentifier] = mgwSwagger
 	//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
 	// TODO: commented the following line as the implementation is not supported yet.
 	//newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
 	//:TODO: since currently labels are not taking from x-wso2-label, I have made it to be taken from the method
 	// argument.
-	newLabels = environments
+	newLabels = apiContent.Environments
 	logger.LoggerXds.Infof("Added/Updated the content under OpenAPI Key : %v", apiIdentifier)
 	logger.LoggerXds.Debugf("Newly added labels for the OpenAPI Key : %v are %v", apiIdentifier, newLabels)
 	oldLabels, _ := openAPIEnvoyMap[apiIdentifier]
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiIdentifier, oldLabels)
 	openAPIEnvoyMap[apiIdentifier] = newLabels
 
-	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, upstreamCerts)
+	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, apiContent.UpstreamCerts)
 	// TODO: (VirajSalaka) Decide if the routes and listeners need their own map since it is not going to be changed based on API at the moment.
 	openAPIRoutesMap[apiIdentifier] = routes
 	// openAPIListenersMap[apiMapKey] = listeners
@@ -791,17 +792,17 @@ func stopConsulDiscoveryFor(clusterName string) {
 }
 
 // ListApis returns a list of objects that holds info about each API
-func ListApis(apiType string, limitP *int64) *apiModel.APIMeta {
-	var limit int
-	if limitP == nil {
-		limit = len(apiMgwSwaggerMap)
+func ListApis(apiType string, limit *int64) *apiModel.APIMeta {
+	var limitValue int
+	if limit == nil {
+		limitValue = len(apiMgwSwaggerMap)
 	} else {
-		limit = int(*limitP)
+		limitValue = int(*limit)
 	}
 	var apisArray []*apiModel.APIMetaListItem
 	i := 0
 	for apiIdentifier, mgwSwagger := range apiMgwSwaggerMap {
-		if i == limit {
+		if i == limitValue {
 			break
 		}
 		if apiType == "" || mgwSwagger.GetAPIType() == apiType {
@@ -809,7 +810,7 @@ func ListApis(apiType string, limitP *int64) *apiModel.APIMeta {
 			apiMetaListItem.APIName = mgwSwagger.GetTitle()
 			apiMetaListItem.Version = mgwSwagger.GetVersion()
 			apiMetaListItem.APIType = mgwSwagger.GetAPIType()
-			apiMetaListItem.Labels = openAPIEnvoyMap[apiIdentifier]
+			apiMetaListItem.GatewayEnvs = openAPIEnvoyMap[apiIdentifier]
 			apisArray = append(apisArray, &apiMetaListItem)
 		}
 		i++

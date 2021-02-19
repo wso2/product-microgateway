@@ -30,19 +30,19 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// NewDeleteAPIParams creates a new DeleteAPIParams object
+// NewDeleteApisParams creates a new DeleteApisParams object
 //
 // There are no default values defined in the spec.
-func NewDeleteAPIParams() DeleteAPIParams {
+func NewDeleteApisParams() DeleteApisParams {
 
-	return DeleteAPIParams{}
+	return DeleteApisParams{}
 }
 
-// DeleteAPIParams contains all the bound params for the delete API operation
+// DeleteApisParams contains all the bound params for the delete apis operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters DeleteAPI
-type DeleteAPIParams struct {
+// swagger:parameters DeleteApis
+type DeleteApisParams struct {
 
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
@@ -69,8 +69,8 @@ type DeleteAPIParams struct {
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
 // for simple values it will use straight method calls.
 //
-// To ensure default values, the struct must have been initialized with NewDeleteAPIParams() beforehand.
-func (o *DeleteAPIParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
+// To ensure default values, the struct must have been initialized with NewDeleteApisParams() beforehand.
+func (o *DeleteApisParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
 
 	o.HTTPRequest = r
@@ -98,7 +98,7 @@ func (o *DeleteAPIParams) BindRequest(r *http.Request, route *middleware.Matched
 }
 
 // bindAPIName binds and validates parameter APIName from query.
-func (o *DeleteAPIParams) bindAPIName(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *DeleteApisParams) bindAPIName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("apiName", "query", rawData)
 	}
@@ -119,7 +119,7 @@ func (o *DeleteAPIParams) bindAPIName(rawData []string, hasKey bool, formats str
 }
 
 // bindVersion binds and validates parameter Version from query.
-func (o *DeleteAPIParams) bindVersion(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *DeleteApisParams) bindVersion(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("version", "query", rawData)
 	}
@@ -140,7 +140,7 @@ func (o *DeleteAPIParams) bindVersion(rawData []string, hasKey bool, formats str
 }
 
 // bindVhost binds and validates parameter Vhost from query.
-func (o *DeleteAPIParams) bindVhost(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *DeleteApisParams) bindVhost(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]

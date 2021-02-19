@@ -30,8 +30,8 @@ import (
 
 // GetApisURL generates an URL for the get apis operation
 type GetApisURL struct {
-	APIType *string
-	Limit   *int64
+	Limit *int64
+	Query *string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -67,20 +67,20 @@ func (o *GetApisURL) Build() (*url.URL, error) {
 
 	qs := make(url.Values)
 
-	var aPITypeQ string
-	if o.APIType != nil {
-		aPITypeQ = *o.APIType
-	}
-	if aPITypeQ != "" {
-		qs.Set("apiType", aPITypeQ)
-	}
-
 	var limitQ string
 	if o.Limit != nil {
 		limitQ = swag.FormatInt64(*o.Limit)
 	}
 	if limitQ != "" {
 		qs.Set("limit", limitQ)
+	}
+
+	var queryQ string
+	if o.Query != nil {
+		queryQ = *o.Query
+	}
+	if queryQ != "" {
+		qs.Set("query", queryQ)
 	}
 
 	_result.RawQuery = qs.Encode()

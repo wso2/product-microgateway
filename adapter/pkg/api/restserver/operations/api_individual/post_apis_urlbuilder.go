@@ -24,13 +24,13 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
+
+	"github.com/go-openapi/swag"
 )
 
-// DeleteAPIURL generates an URL for the delete API operation
-type DeleteAPIURL struct {
-	APIName string
-	Version string
-	Vhost   *string
+// PostApisURL generates an URL for the post apis operation
+type PostApisURL struct {
+	Override *bool
 
 	_basePath string
 	// avoid unkeyed usage
@@ -40,7 +40,7 @@ type DeleteAPIURL struct {
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *DeleteAPIURL) WithBasePath(bp string) *DeleteAPIURL {
+func (o *PostApisURL) WithBasePath(bp string) *PostApisURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -48,15 +48,15 @@ func (o *DeleteAPIURL) WithBasePath(bp string) *DeleteAPIURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *DeleteAPIURL) SetBasePath(bp string) {
+func (o *PostApisURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *DeleteAPIURL) Build() (*url.URL, error) {
+func (o *PostApisURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/api"
+	var _path = "/apis"
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -66,22 +66,12 @@ func (o *DeleteAPIURL) Build() (*url.URL, error) {
 
 	qs := make(url.Values)
 
-	aPINameQ := o.APIName
-	if aPINameQ != "" {
-		qs.Set("apiName", aPINameQ)
+	var overrideQ string
+	if o.Override != nil {
+		overrideQ = swag.FormatBool(*o.Override)
 	}
-
-	versionQ := o.Version
-	if versionQ != "" {
-		qs.Set("version", versionQ)
-	}
-
-	var vhostQ string
-	if o.Vhost != nil {
-		vhostQ = *o.Vhost
-	}
-	if vhostQ != "" {
-		qs.Set("vhost", vhostQ)
+	if overrideQ != "" {
+		qs.Set("override", overrideQ)
 	}
 
 	_result.RawQuery = qs.Encode()
@@ -90,7 +80,7 @@ func (o *DeleteAPIURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *DeleteAPIURL) Must(u *url.URL, err error) *url.URL {
+func (o *PostApisURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -101,17 +91,17 @@ func (o *DeleteAPIURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *DeleteAPIURL) String() string {
+func (o *PostApisURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *DeleteAPIURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *PostApisURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on DeleteAPIURL")
+		return nil, errors.New("scheme is required for a full url on PostApisURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on DeleteAPIURL")
+		return nil, errors.New("host is required for a full url on PostApisURL")
 	}
 
 	base, err := o.Build()
@@ -125,6 +115,6 @@ func (o *DeleteAPIURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *DeleteAPIURL) StringFull(scheme, host string) string {
+func (o *PostApisURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

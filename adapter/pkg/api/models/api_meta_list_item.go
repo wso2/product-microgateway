@@ -38,8 +38,8 @@ type APIMetaListItem struct {
 	// api type
 	APIType string `json:"apiType,omitempty"`
 
-	// labels
-	Labels []string `json:"labels"`
+	// gateway envs
+	GatewayEnvs []string `json:"gateway-envs"`
 
 	// version
 	Version string `json:"version,omitempty"`

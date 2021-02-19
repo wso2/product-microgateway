@@ -28,25 +28,25 @@ import (
 	"github.com/wso2/micro-gw/pkg/api/models"
 )
 
-// PostAPIHandlerFunc turns a function with the right signature into a post API handler
-type PostAPIHandlerFunc func(PostAPIParams, *models.Principal) middleware.Responder
+// PostApisHandlerFunc turns a function with the right signature into a post apis handler
+type PostApisHandlerFunc func(PostApisParams, *models.Principal) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PostAPIHandlerFunc) Handle(params PostAPIParams, principal *models.Principal) middleware.Responder {
+func (fn PostApisHandlerFunc) Handle(params PostApisParams, principal *models.Principal) middleware.Responder {
 	return fn(params, principal)
 }
 
-// PostAPIHandler interface for that can handle valid post API params
-type PostAPIHandler interface {
-	Handle(PostAPIParams, *models.Principal) middleware.Responder
+// PostApisHandler interface for that can handle valid post apis params
+type PostApisHandler interface {
+	Handle(PostApisParams, *models.Principal) middleware.Responder
 }
 
-// NewPostAPI creates a new http.Handler for the post API operation
-func NewPostAPI(ctx *middleware.Context, handler PostAPIHandler) *PostAPI {
-	return &PostAPI{Context: ctx, Handler: handler}
+// NewPostApis creates a new http.Handler for the post apis operation
+func NewPostApis(ctx *middleware.Context, handler PostApisHandler) *PostApis {
+	return &PostApis{Context: ctx, Handler: handler}
 }
 
-/* PostAPI swagger:route POST /api API (Individual) postApi
+/* PostApis swagger:route POST /apis API (Individual) postApis
 
 Deploy or update an API
 
@@ -54,17 +54,17 @@ This operation can be used to deploy or update an API.
 
 
 */
-type PostAPI struct {
+type PostApis struct {
 	Context *middleware.Context
-	Handler PostAPIHandler
+	Handler PostApisHandler
 }
 
-func (o *PostAPI) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *PostApis) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		r = rCtx
 	}
-	var Params = NewPostAPIParams()
+	var Params = NewPostApisParams()
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)

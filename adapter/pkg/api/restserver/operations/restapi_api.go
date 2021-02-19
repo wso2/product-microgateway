@@ -62,14 +62,14 @@ func NewRestapiAPI(spec *loads.Document) *RestapiAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
-		APIIndividualDeleteAPIHandler: api_individual.DeleteAPIHandlerFunc(func(params api_individual.DeleteAPIParams, principal *models.Principal) middleware.Responder {
-			return middleware.NotImplemented("operation api_individual.DeleteAPI has not yet been implemented")
+		APIIndividualDeleteApisHandler: api_individual.DeleteApisHandlerFunc(func(params api_individual.DeleteApisParams, principal *models.Principal) middleware.Responder {
+			return middleware.NotImplemented("operation api_individual.DeleteApis has not yet been implemented")
 		}),
 		APICollectionGetApisHandler: api_collection.GetApisHandlerFunc(func(params api_collection.GetApisParams, principal *models.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation api_collection.GetApis has not yet been implemented")
 		}),
-		APIIndividualPostAPIHandler: api_individual.PostAPIHandlerFunc(func(params api_individual.PostAPIParams, principal *models.Principal) middleware.Responder {
-			return middleware.NotImplemented("operation api_individual.PostAPI has not yet been implemented")
+		APIIndividualPostApisHandler: api_individual.PostApisHandlerFunc(func(params api_individual.PostApisParams, principal *models.Principal) middleware.Responder {
+			return middleware.NotImplemented("operation api_individual.PostApis has not yet been implemented")
 		}),
 
 		// Applies when the Authorization header is set with the Basic scheme
@@ -125,12 +125,12 @@ type RestapiAPI struct {
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
-	// APIIndividualDeleteAPIHandler sets the operation handler for the delete API operation
-	APIIndividualDeleteAPIHandler api_individual.DeleteAPIHandler
+	// APIIndividualDeleteApisHandler sets the operation handler for the delete apis operation
+	APIIndividualDeleteApisHandler api_individual.DeleteApisHandler
 	// APICollectionGetApisHandler sets the operation handler for the get apis operation
 	APICollectionGetApisHandler api_collection.GetApisHandler
-	// APIIndividualPostAPIHandler sets the operation handler for the post API operation
-	APIIndividualPostAPIHandler api_individual.PostAPIHandler
+	// APIIndividualPostApisHandler sets the operation handler for the post apis operation
+	APIIndividualPostApisHandler api_individual.PostApisHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -215,14 +215,14 @@ func (o *RestapiAPI) Validate() error {
 		unregistered = append(unregistered, "BasicAuthAuth")
 	}
 
-	if o.APIIndividualDeleteAPIHandler == nil {
-		unregistered = append(unregistered, "api_individual.DeleteAPIHandler")
+	if o.APIIndividualDeleteApisHandler == nil {
+		unregistered = append(unregistered, "api_individual.DeleteApisHandler")
 	}
 	if o.APICollectionGetApisHandler == nil {
 		unregistered = append(unregistered, "api_collection.GetApisHandler")
 	}
-	if o.APIIndividualPostAPIHandler == nil {
-		unregistered = append(unregistered, "api_individual.PostAPIHandler")
+	if o.APIIndividualPostApisHandler == nil {
+		unregistered = append(unregistered, "api_individual.PostApisHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -327,7 +327,7 @@ func (o *RestapiAPI) initHandlerCache() {
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
-	o.handlers["DELETE"]["/api"] = api_individual.NewDeleteAPI(o.context, o.APIIndividualDeleteAPIHandler)
+	o.handlers["DELETE"]["/apis"] = api_individual.NewDeleteApis(o.context, o.APIIndividualDeleteApisHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -335,7 +335,7 @@ func (o *RestapiAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/api"] = api_individual.NewPostAPI(o.context, o.APIIndividualPostAPIHandler)
+	o.handlers["POST"]["/apis"] = api_individual.NewPostApis(o.context, o.APIIndividualPostApisHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

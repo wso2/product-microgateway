@@ -80,39 +80,37 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		return &p, nil
 	}
 
-	api.APIIndividualDeleteAPIHandler = api_individual.DeleteAPIHandlerFunc(func(params api_individual.DeleteAPIParams,
+	api.APIIndividualDeleteApisHandler = api_individual.DeleteApisHandlerFunc(func(params api_individual.DeleteApisParams,
 		principal *models.Principal) middleware.Responder {
 		err := apiServer.DeleteAPI(params.APIName, params.Version, params.Vhost)
 		if err == nil {
-			return api_individual.NewDeleteAPIOK()
+			return api_individual.NewDeleteApisOK()
 		}
 		switch err.Error() {
 		case constants.NotFound:
-			return api_individual.NewDeleteAPINotFound()
+			return api_individual.NewDeleteApisNotFound()
 		default:
-			return api_individual.NewPostAPIInternalServerError()
+			return api_individual.NewPostApisInternalServerError()
 		}
 
 	})
 	api.APICollectionGetApisHandler = api_collection.GetApisHandlerFunc(func(params api_collection.GetApisParams,
 		principal *models.Principal) middleware.Responder {
-		return api_collection.NewGetApisOK().WithPayload(apiServer.ListApis(params.APIType, params.Limit))
+		return api_collection.NewGetApisOK().WithPayload(apiServer.ListApis(params.Query, params.Limit))
 	})
-	api.APIIndividualPostAPIHandler = api_individual.PostAPIHandlerFunc(func(params api_individual.PostAPIParams,
+	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(params api_individual.PostApisParams,
 		principal *models.Principal) middleware.Responder {
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
-		err := apiServer.ApplyAPIProjectWithOverwrite(jsonByteArray, []string{}, params.Overwrite)
+		err := apiServer.ApplyAPIProjectWithOverwrite(jsonByteArray, []string{}, params.Override)
 		if err != nil {
 			switch err.Error() {
 			case constants.AlreadyExists:
-				return api_individual.NewPostAPIConflict()
-			case constants.NotFound:
-				return api_individual.NewPostAPINotFound()
+				return api_individual.NewPostApisConflict()
 			default:
-				return api_individual.NewPostAPIInternalServerError()
+				return api_individual.NewPostApisInternalServerError()
 			}
 		}
-		return api_individual.NewPostAPIOK()
+		return api_individual.NewPostApisOK()
 	})
 
 	api.PreServerShutdown = func() {}
