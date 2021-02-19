@@ -67,7 +67,6 @@ public class APIConstants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
 
-
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
      */

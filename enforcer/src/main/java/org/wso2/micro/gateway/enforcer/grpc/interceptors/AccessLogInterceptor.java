@@ -43,7 +43,8 @@ public class AccessLogInterceptor implements ServerInterceptor {
             EnforcerServerCall enforcerServerCall = new EnforcerServerCall(serverCall);
             ServerCall.Listener listener = serverCallHandler.startCall(enforcerServerCall, metadata);
             return new EnforcerForwardingServerCallListener<ReqT>(serverCall.getMethodDescriptor(), listener) {
-                @Override public void onMessage(ReqT message) {
+                @Override
+                public void onMessage(ReqT message) {
                     if (message instanceof CheckRequest) {
                         CheckRequest checkRequest = (CheckRequest) message;
                         enforcerServerCall.setStartTime(System.currentTimeMillis());

@@ -241,7 +241,6 @@ public class FilterUtils {
                 .getAuthenticationFailureMessage(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS));
         requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_DESCRIPTION);
-
     }
 
 }
