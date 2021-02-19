@@ -208,14 +208,17 @@ func DeleteAPI(apiName string, version string, vhost *string) error {
 }
 
 // ListApis calls the ListApis method in xds_server.go
-func ListApis(apiType *string, limit *int64) *apiModel.APIMeta {
-	var apiTypeValue string
-	if apiType == nil {
-		apiTypeValue = ""
-	} else {
-		apiTypeValue = strings.ToUpper(*apiType)
+func ListApis(query *string, limit *int64) *apiModel.APIMeta {
+	var apiType string
+	if query != nil {
+		queryPair := strings.Split(*query, ":")
+		if queryPair[0] == "type" {
+			apiType = strings.ToUpper(queryPair[1])
+			return xds.ListApis(apiType, limit)
+		}
+
 	}
-	return xds.ListApis(apiTypeValue, limit)
+	return xds.ListApis("", limit)
 }
 
 func readZipFile(zf *zip.File) ([]byte, error) {
