@@ -21,11 +21,9 @@ import (
 	"fmt"
 	"math/rand"
 	"reflect"
-	"strconv"
 	"sync"
 
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
-	"github.com/wso2/micro-gw/api/wso2/discovery/config/enforcer"
 	"github.com/wso2/micro-gw/api/wso2/discovery/subscription"
 	wso2_cache "github.com/wso2/micro-gw/pkg/discovery/cache/v3"
 	"github.com/wso2/micro-gw/pkg/svcdiscovery"
@@ -41,7 +39,6 @@ import (
 	oasParser "github.com/wso2/micro-gw/pkg/oasparser"
 	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
 	"github.com/wso2/micro-gw/pkg/oasparser/operator"
-	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
 )
 
 var (
@@ -307,71 +304,6 @@ func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	return endpoints, clusters, listeners, routeConfigs, apis
 }
 
-func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
-	issuers := []*enforcer.Issuer{}
-	for _, issuer := range config.Enforcer.JwtTokenConfig {
-		jwtConfig := &enforcer.Issuer{
-			CertificateAlias:     issuer.CertificateAlias,
-			ConsumerKeyClaim:     issuer.ConsumerKeyClaim,
-			Issuer:               issuer.Issuer,
-			Name:                 issuer.Name,
-			ValidateSubscription: issuer.ValidateSubscription,
-			JwksURL:              issuer.JwksURL,
-			CertificateFilePath:  issuer.CertificateFilePath,
-		}
-		issuers = append(issuers, jwtConfig)
-	}
-
-	authService := &enforcer.AuthService{
-		KeepAliveTime:  config.Enforcer.AuthService.KeepAliveTime,
-		MaxHeaderLimit: config.Enforcer.AuthService.MaxHeaderLimit,
-		MaxMessageSize: config.Enforcer.AuthService.MaxMessageSize,
-		Port:           config.Enforcer.AuthService.Port,
-		ThreadPool: &enforcer.ThreadPool{
-			CoreSize:      config.Enforcer.AuthService.ThreadPool.CoreSize,
-			KeepAliveTime: config.Enforcer.AuthService.ThreadPool.KeepAliveTime,
-			MaxSize:       config.Enforcer.AuthService.ThreadPool.MaxSize,
-			QueueSize:     config.Enforcer.AuthService.ThreadPool.QueueSize,
-		},
-	}
-
-	cache := &enforcer.Cache{
-		Enable: config.Enforcer.Cache.Enabled,
-		MaximumSize: config.Enforcer.Cache.MaximumSize,
-		ExpiryTime: config.Enforcer.Cache.ExpiryTime,
-	}
-
-	return &enforcer.Config{
-		ApimCredentials: &enforcer.AmCredentials{
-			Username: config.Enforcer.ApimCredentials.Username,
-			Password: config.Enforcer.ApimCredentials.Password,
-		},
-		JwtGenerator: &enforcer.JWTGenerator{
-			Enable:                config.Enforcer.JwtGenerator.Enable,
-			Encoding:              config.Enforcer.JwtGenerator.Encoding,
-			ClaimDialect:          config.Enforcer.JwtGenerator.ClaimDialect,
-			ConvertDialect:        config.Enforcer.JwtGenerator.ConvertDialect,
-			Header:                config.Enforcer.JwtGenerator.Header,
-			SigningAlgorithm:      config.Enforcer.JwtGenerator.SigningAlgorithm,
-			EnableUserClaims:      config.Enforcer.JwtGenerator.EnableUserClaims,
-			GatewayGeneratorImpl:  config.Enforcer.JwtGenerator.GatewayGeneratorImpl,
-			ClaimsExtractorImpl:   config.Enforcer.JwtGenerator.ClaimsExtractorImpl,
-			PublicCertificatePath: config.Enforcer.JwtGenerator.PublicCertificatePath,
-			PrivateKeyPath:        config.Enforcer.JwtGenerator.PrivateKeyPath,
-		},
-		AuthService:    authService,
-		JwtTokenConfig: issuers,
-		Cache: cache,
-		Eventhub: &enforcer.EventHub{
-			Enabled:    config.ControlPlane.EventHub.Enabled,
-			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,
-			JmsConnectionParameters: map[string]string{
-				"eventListeningEndpoints": config.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints,
-			},
-		},
-	}
-}
-
 //use updateXdsCacheWithLock to avoid race conditions
 func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) {
 	version := rand.Intn(maxRandomInt)
@@ -390,7 +322,7 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 func UpdateEnforcerConfig(configFile *config.Config) {
 	// TODO: (Praminda) handle labels
 	label := commonEnforcerLabel
-	configs := []types.Resource{generateEnforcerConfigs(configFile)}
+	configs := []types.Resource{MarshalConfig(configFile)}
 	version := rand.Intn(maxRandomInt)
 	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), configs, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
@@ -417,147 +349,6 @@ func UpdateEnforcerApis(label string, apis []types.Resource) {
 	}
 
 	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
-}
-
-// GenerateSubscriptionList converts the data into SubscriptionList proto type
-func GenerateSubscriptionList(subList *resourceTypes.SubscriptionList) *subscription.SubscriptionList {
-	subscriptions := []*subscription.Subscription{}
-
-	for _, sb := range subList.List {
-		sub := &subscription.Subscription{
-			SubscriptionId:    fmt.Sprint(sb.SubscriptionID),
-			PolicyId:          sb.PolicyID,
-			ApiId:             sb.APIID,
-			AppId:             sb.AppID,
-			SubscriptionState: sb.SubscriptionState,
-			TimeStamp:         sb.TimeStamp,
-			TenantId:          sb.TenantID,
-			TenantDomain:      sb.TenantDomain,
-		}
-		subscriptions = append(subscriptions, sub)
-	}
-
-	return &subscription.SubscriptionList{
-		List: subscriptions,
-	}
-}
-
-// GenerateApplicationList converts the data into ApplicationList proto type
-func GenerateApplicationList(appList *resourceTypes.ApplicationList) *subscription.ApplicationList {
-	applications := []*subscription.Application{}
-
-	for _, app := range appList.List {
-		application := &subscription.Application{
-			Uuid:         app.UUID,
-			Id:           app.ID,
-			Name:         app.Name,
-			SubId:        app.ID,
-			SubName:      app.SubName,
-			Policy:       app.Policy,
-			TokenType:    app.TokenType,
-			GroupIds:     app.GroupIds,
-			Attributes:   app.Attributes,
-			TenantId:     app.TenantID,
-			TenantDomain: app.TenantDomain,
-			Timestamp:    app.TimeStamp,
-		}
-		applications = append(applications, application)
-	}
-
-	return &subscription.ApplicationList{
-		List: applications,
-	}
-}
-
-// GenerateAPIList converts the data into APIList proto type
-func GenerateAPIList(apiList *resourceTypes.APIList) *subscription.APIList {
-	apis := []*subscription.APIs{}
-
-	for _, api := range apiList.List {
-		newAPI := &subscription.APIs{
-			ApiId:            strconv.Itoa(api.APIID),
-			Name:             api.Name,
-			Provider:         api.Provider,
-			Version:          api.Version,
-			Context:          api.Context,
-			Policy:           api.Policy,
-			ApiType:          api.APIType,
-			IsDefaultVersion: api.IsDefaultVersion,
-		}
-		apis = append(apis, newAPI)
-	}
-
-	return &subscription.APIList{
-		List: apis,
-	}
-}
-
-// GenerateApplicationPolicyList converts the data into ApplicationPolicyList proto type
-func GenerateApplicationPolicyList(appPolicyList *resourceTypes.ApplicationPolicyList) *subscription.ApplicationPolicyList {
-	applicationPolicies := []*subscription.ApplicationPolicy{}
-
-	for _, policy := range appPolicyList.List {
-		appPolicy := &subscription.ApplicationPolicy{
-			Id:        policy.ID,
-			TenantId:  policy.TenantID,
-			Name:      policy.Name,
-			QuotaType: policy.QuotaType,
-		}
-		applicationPolicies = append(applicationPolicies, appPolicy)
-	}
-
-	return &subscription.ApplicationPolicyList{
-		List: applicationPolicies,
-	}
-}
-
-// GenerateSubscriptionPolicyList converts the data into SubscriptionPolicyList proto type
-func GenerateSubscriptionPolicyList(subPolicyList *resourceTypes.SubscriptionPolicyList) *subscription.SubscriptionPolicyList {
-	subscriptionPolicies := []*subscription.SubscriptionPolicy{}
-
-	for _, policy := range subPolicyList.List {
-		subPolicy := &subscription.SubscriptionPolicy{
-			Id:                   policy.ID,
-			Name:                 policy.Name,
-			QuotaType:            policy.QuotaType,
-			GraphQLMaxComplexity: policy.GraphQLMaxComplexity,
-			GraphQLMaxDepth:      policy.GraphQLMaxDepth,
-			RateLimitCount:       policy.RateLimitCount,
-			RateLimitTimeUnit:    policy.RateLimitTimeUnit,
-			StopOnQuotaReach:     policy.StopOnQuotaReach,
-			TenantId:             policy.TenantID,
-			TenantDomain:         policy.TenantDomain,
-			Timestamp:            policy.TimeStamp,
-		}
-		subscriptionPolicies = append(subscriptionPolicies, subPolicy)
-	}
-
-	return &subscription.SubscriptionPolicyList{
-		List: subscriptionPolicies,
-	}
-}
-
-// GenerateApplicationKeyMappingList converts the data into ApplicationKeyMappingList proto type
-func GenerateApplicationKeyMappingList(keyMappingList *resourceTypes.ApplicationKeyMappingList) *subscription.ApplicationKeyMappingList {
-	applicationKeyMappings := []*subscription.ApplicationKeyMapping{}
-
-	for _, mapping := range keyMappingList.List {
-		keyMapping := &subscription.ApplicationKeyMapping{
-			ConsumerKey:   mapping.ConsumerKey,
-			KeyType:       mapping.KeyType,
-			KeyManager:    mapping.KeyManager,
-			ApplicationId: mapping.ApplicationID,
-			TenantId:      mapping.TenantID,
-			TenantDomain:  mapping.TenantDomain,
-			Timestamp:     mapping.TimeStamp,
-		}
-
-		applicationKeyMappings = append(applicationKeyMappings, keyMapping)
-	}
-
-	return &subscription.ApplicationKeyMappingList{
-		List: applicationKeyMappings,
-	}
 }
 
 // UpdateEnforcerSubscriptions sets new update to the enforcer's Subscriptions

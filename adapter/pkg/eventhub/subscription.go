@@ -16,7 +16,7 @@
  *
 */
 
-package subscription
+package eventhub
 
 import (
 	"crypto/tls"
@@ -31,7 +31,7 @@ import (
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/auth"
-	resourceTypes "github.com/wso2/micro-gw/pkg/resourcetypes"
+	"github.com/wso2/micro-gw/pkg/eventhub/types"
 	"github.com/wso2/micro-gw/pkg/tlsutils"
 	"github.com/wso2/micro-gw/pkg/xds"
 )
@@ -54,17 +54,17 @@ const (
 
 var (
 	// SubList contains the Subscription list
-	SubList *resourceTypes.SubscriptionList
+	SubList *types.SubscriptionList
 	// AppList contains the Application list
-	AppList *resourceTypes.ApplicationList
+	AppList *types.ApplicationList
 	// AppKeyMappingList contains the Application key mapping list
-	AppKeyMappingList *resourceTypes.ApplicationKeyMappingList
+	AppKeyMappingList *types.ApplicationKeyMappingList
 	// APIListMap contains the Api list against each label
-	APIListMap map[string]*resourceTypes.APIList
+	APIListMap map[string]*types.APIList
 	// AppPolicyList contains the Application policy list
-	AppPolicyList *resourceTypes.ApplicationPolicyList
+	AppPolicyList *types.ApplicationPolicyList
 	// SubPolicyList contains the Subscription policy list
-	SubPolicyList *resourceTypes.SubscriptionPolicyList
+	SubPolicyList *types.SubscriptionPolicyList
 	resources     = []resource{
 		{
 			endpoint:     "subscriptions",
@@ -108,7 +108,7 @@ type resource struct {
 
 func init() {
 	APIListChannel = make(chan response)
-	APIListMap = make(map[string]*resourceTypes.APIList)
+	APIListMap = make(map[string]*types.APIList)
 }
 
 // LoadSubscriptionData loads subscription data from control-plane
@@ -150,26 +150,26 @@ func LoadSubscriptionData(configFile *config.Config) {
 				logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the response received for: "+response.Endpoint, err)
 			} else {
 				switch t := newResponse.(type) {
-				case *resourceTypes.SubscriptionList:
+				case *types.SubscriptionList:
 					logger.LoggerSubscription.Debug("Received Subscription information.")
-					SubList = newResponse.(*resourceTypes.SubscriptionList)
-					xds.UpdateEnforcerSubscriptions(xds.GenerateSubscriptionList(SubList))
-				case *resourceTypes.ApplicationList:
+					SubList = newResponse.(*types.SubscriptionList)
+					xds.UpdateEnforcerSubscriptions(xds.MarshalSubscriptionList(SubList))
+				case *types.ApplicationList:
 					logger.LoggerSubscription.Debug("Received Application information.")
-					AppList = newResponse.(*resourceTypes.ApplicationList)
-					xds.UpdateEnforcerApplications(xds.GenerateApplicationList(AppList))
-				case *resourceTypes.ApplicationPolicyList:
+					AppList = newResponse.(*types.ApplicationList)
+					xds.UpdateEnforcerApplications(xds.MarshalApplicationList(AppList))
+				case *types.ApplicationPolicyList:
 					logger.LoggerSubscription.Debug("Received Application Policy information.")
-					AppPolicyList = newResponse.(*resourceTypes.ApplicationPolicyList)
-					xds.UpdateEnforcerApplicationPolicies(xds.GenerateApplicationPolicyList(AppPolicyList))
-				case *resourceTypes.SubscriptionPolicyList:
+					AppPolicyList = newResponse.(*types.ApplicationPolicyList)
+					xds.UpdateEnforcerApplicationPolicies(xds.MarshalApplicationPolicyList(AppPolicyList))
+				case *types.SubscriptionPolicyList:
 					logger.LoggerSubscription.Debug("Received Subscription Policy information.")
-					SubPolicyList = newResponse.(*resourceTypes.SubscriptionPolicyList)
-					xds.UpdateEnforcerSubscriptionPolicies(xds.GenerateSubscriptionPolicyList(SubPolicyList))
-				case *resourceTypes.ApplicationKeyMappingList:
+					SubPolicyList = newResponse.(*types.SubscriptionPolicyList)
+					xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalSubscriptionPolicyList(SubPolicyList))
+				case *types.ApplicationKeyMappingList:
 					logger.LoggerSubscription.Debug("Received Application Key Mapping information.")
-					AppKeyMappingList = newResponse.(*resourceTypes.ApplicationKeyMappingList)
-					xds.UpdateEnforcerApplicationKeyMappings(xds.GenerateApplicationKeyMappingList(AppKeyMappingList))
+					AppKeyMappingList = newResponse.(*types.ApplicationKeyMappingList)
+					xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingList(AppKeyMappingList))
 				default:
 					logger.LoggerSubscription.Debugf("Unknown type %T", t)
 				}
@@ -266,8 +266,8 @@ func retrieveAPIListFromChannel(c chan response) {
 					response.Endpoint, err)
 			} else {
 				switch t := newResponse.(type) {
-				case *resourceTypes.APIList:
-					apiListResponse := newResponse.(*resourceTypes.APIList)
+				case *types.APIList:
+					apiListResponse := newResponse.(*types.APIList)
 					if logger.LoggerSubscription.Level == logrus.DebugLevel {
 						for _, api := range apiListResponse.List {
 							logger.LoggerSubscription.Debugf("Received API List information for API : %s", api.UUID)
@@ -275,7 +275,7 @@ func retrieveAPIListFromChannel(c chan response) {
 					}
 					if _, ok := APIListMap[response.GatewayLabel]; !ok {
 						// During the startup
-						APIListMap[response.GatewayLabel] = newResponse.(*resourceTypes.APIList)
+						APIListMap[response.GatewayLabel] = newResponse.(*types.APIList)
 					} else {
 						// API Details retrieved after startup contains single API per response.
 						if len(apiListResponse.List) == 1 {
@@ -283,7 +283,7 @@ func retrieveAPIListFromChannel(c chan response) {
 								apiListResponse.List[0])
 						}
 					}
-					xds.UpdateEnforcerAPIList(response.GatewayLabel, xds.GenerateAPIList(APIListMap[response.GatewayLabel]))
+					xds.UpdateEnforcerAPIList(response.GatewayLabel, xds.MarshalAPIList(APIListMap[response.GatewayLabel]))
 				default:
 					logger.LoggerSubscription.Warnf("APIList Type DTO is not recieved. Unknown type %T", t)
 				}

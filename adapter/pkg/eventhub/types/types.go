@@ -15,7 +15,7 @@
  *
  */
 
-package resourcetypes
+package types
 
 // Subscription for struct subscription
 type Subscription struct {

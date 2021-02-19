@@ -41,9 +41,9 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/micro-gw/pkg/eventhub"
 	"github.com/wso2/micro-gw/pkg/messaging"
 	cb "github.com/wso2/micro-gw/pkg/mgw/xdscallbacks"
-	"github.com/wso2/micro-gw/pkg/subscription"
 	"github.com/wso2/micro-gw/pkg/synchronizer"
 	"github.com/wso2/micro-gw/pkg/xds"
 	"google.golang.org/grpc"
@@ -175,7 +175,7 @@ func Run(conf *config.Config) {
 	enableEventHub := conf.ControlPlane.EventHub.Enabled
 	if enableEventHub {
 		// Load subscription data
-		subscription.LoadSubscriptionData(conf)
+		eventhub.LoadSubscriptionData(conf)
 
 		go messaging.ProcessEvents(conf)
 
