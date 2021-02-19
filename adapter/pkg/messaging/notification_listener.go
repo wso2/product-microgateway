@@ -27,7 +27,7 @@ import (
 	"github.com/streadway/amqp"
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
-	"github.com/wso2/micro-gw/pkg/eventhub"
+	eh "github.com/wso2/micro-gw/pkg/eventhub"
 	"github.com/wso2/micro-gw/pkg/eventhub/types"
 	"github.com/wso2/micro-gw/pkg/synchronizer"
 	"github.com/wso2/micro-gw/pkg/xds"
@@ -123,12 +123,12 @@ func handleAPIEvents(data []byte, eventType string) {
 			conf, _ := config.ReadConfigs()
 			configuredEnvs := conf.ControlPlane.EventHub.EnvironmentLabels
 			if len(configuredEnvs) == 0 {
-				configuredEnvs = append(configuredEnvs, eventhub.DefaultGatewayLabelValue)
+				configuredEnvs = append(configuredEnvs, eh.DefaultGatewayLabelValue)
 			}
 			for _, configuredEnv := range configuredEnvs {
 				if configuredEnv == env {
-					if _, ok := eventhub.APIListMap[env]; ok {
-						apiListOfEnv := eventhub.APIListMap[env].List
+					if _, ok := eh.APIListMap[env]; ok {
+						apiListOfEnv := eh.APIListMap[env].List
 						for i := range apiListOfEnv {
 							// If API is already found, it is a new revision deployement.
 							// Subscription relates details of an API does not change between new revisions
@@ -138,25 +138,25 @@ func handleAPIEvents(data []byte, eventType string) {
 							}
 						}
 						queryParamMap := make(map[string]string, 3)
-						queryParamMap[eventhub.GatewayLabelParam] = configuredEnv
-						queryParamMap[eventhub.ContextParam] = apiEvent.Context
-						queryParamMap[eventhub.VersionParam] = apiEvent.Version
+						queryParamMap[eh.GatewayLabelParam] = configuredEnv
+						queryParamMap[eh.ContextParam] = apiEvent.Context
+						queryParamMap[eh.VersionParam] = apiEvent.Version
 						// TODO: (VirajSalaka) Fix the REST API call once the APIM Event hub implementation is fixed.
 						// TODO: (VirajSalaka) Optimize the number of requests sent to /apis endpoint as the same API is returned
 						// repeatedly. (If Eventhub implementation is not fixed)
-						go eventhub.InvokeService(eventhub.ApisEndpoint, eventhub.APIListMap[env], queryParamMap,
-							eventhub.APIListChannel, 0)
+						go eh.InvokeService(eh.ApisEndpoint, eh.APIListMap[env], queryParamMap,
+							eh.APIListChannel, 0)
 					}
 				}
 			}
 		} else if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
-			if _, ok := eventhub.APIListMap[env]; ok {
-				apiListOfEnv := eventhub.APIListMap[env].List
+			if _, ok := eh.APIListMap[env]; ok {
+				apiListOfEnv := eh.APIListMap[env].List
 				for i := range apiListOfEnv {
 					// TODO: (VirajSalaka) Use APIId once it is fixed from control plane
 					if apiEvent.Context == apiListOfEnv[i].Context && apiEvent.Version == apiListOfEnv[i].Version {
-						eventhub.APIListMap[env].List = deleteAPIFromList(apiListOfEnv, i, apiEvent.UUID, env)
-						xds.UpdateEnforcerAPIList(env, xds.MarshalAPIList(eventhub.APIListMap[env]))
+						eh.APIListMap[env].List = deleteAPIFromList(apiListOfEnv, i, apiEvent.UUID, env)
+						xds.UpdateEnforcerAPIList(env, xds.MarshalAPIList(eh.APIListMap[env]))
 						break
 					}
 				}
@@ -189,8 +189,8 @@ func handleApplicationEvents(data []byte, eventType string) {
 			return
 		}
 
-		eventhub.AppKeyMappingList.List = append(eventhub.AppKeyMappingList.List, applicationKeyMapping)
-		xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingList(eventhub.AppKeyMappingList))
+		eh.AppKeyMappingList.List = append(eh.AppKeyMappingList.List, applicationKeyMapping)
+		xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingList(eh.AppKeyMappingList))
 	} else {
 		var applicationEvent ApplicationEvent
 		json.Unmarshal([]byte(string(data)), &applicationEvent)
@@ -205,16 +205,16 @@ func handleApplicationEvents(data []byte, eventType string) {
 		}
 
 		if applicationEvent.Event.Type == applicationCreate {
-			eventhub.AppList.List = append(eventhub.AppList.List, application)
+			eh.AppList.List = append(eh.AppList.List, application)
 			logger.LoggerMsg.Infof("Application %s is added.", applicationEvent.ApplicationName)
 		} else if applicationEvent.Event.Type == applicationUpdate {
-			eventhub.AppList.List = removeApplication(eventhub.AppList.List, applicationEvent.ApplicationID)
-			eventhub.AppList.List = append(eventhub.AppList.List, application)
+			eh.AppList.List = removeApplication(eh.AppList.List, applicationEvent.ApplicationID)
+			eh.AppList.List = append(eh.AppList.List, application)
 			logger.LoggerMsg.Infof("Application %s is added.", applicationEvent.ApplicationName)
 		} else if applicationEvent.Event.Type == applicationDelete {
-			eventhub.AppList.List = removeApplication(eventhub.AppList.List, applicationEvent.ApplicationID)
+			eh.AppList.List = removeApplication(eh.AppList.List, applicationEvent.ApplicationID)
 		}
-		xds.UpdateEnforcerApplications(xds.MarshalApplicationList(eventhub.AppList))
+		xds.UpdateEnforcerApplications(xds.MarshalApplicationList(eh.AppList))
 	}
 }
 
@@ -232,12 +232,12 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 	if subscriptionEvent.Event.Type == subscriptionCreate {
 		updateSubscription(subscriptionEvent.SubscriptionID, sub)
 	} else if subscriptionEvent.Event.Type == subscriptionUpdate {
-		eventhub.SubList.List = removeSubscription(eventhub.SubList.List, subscriptionEvent.SubscriptionID)
+		eh.SubList.List = removeSubscription(eh.SubList.List, subscriptionEvent.SubscriptionID)
 		updateSubscription(subscriptionEvent.SubscriptionID, sub)
 	} else if subscriptionEvent.Event.Type == subscriptionDelete {
-		eventhub.SubList.List = removeSubscription(eventhub.SubList.List, subscriptionEvent.SubscriptionID)
+		eh.SubList.List = removeSubscription(eh.SubList.List, subscriptionEvent.SubscriptionID)
 	}
-	xds.UpdateEnforcerSubscriptions(xds.MarshalSubscriptionList(eventhub.SubList))
+	xds.UpdateEnforcerSubscriptions(xds.MarshalSubscriptionList(eh.SubList))
 	// EventTypes: SUBSCRIPTIONS_CREATE, SUBSCRIPTIONS_UPDATE, SUBSCRIPTIONS_DELETE
 }
 
@@ -274,14 +274,14 @@ func handlePolicyEvents(data []byte, eventType string) {
 			QuotaType: policyEvent.QuotaType}
 
 		if policyEvent.Event.Type == policyCreate {
-			eventhub.AppPolicyList.List = append(eventhub.AppPolicyList.List, applicationPolicy)
+			eh.AppPolicyList.List = append(eh.AppPolicyList.List, applicationPolicy)
 		} else if policyEvent.Event.Type == policyUpdate {
-			eventhub.AppPolicyList.List = removeAppPolicy(eventhub.AppPolicyList.List, policyEvent.PolicyID)
-			eventhub.AppPolicyList.List = append(eventhub.AppPolicyList.List, applicationPolicy)
+			eh.AppPolicyList.List = removeAppPolicy(eh.AppPolicyList.List, policyEvent.PolicyID)
+			eh.AppPolicyList.List = append(eh.AppPolicyList.List, applicationPolicy)
 		} else if policyEvent.Event.Type == policyDelete {
-			eventhub.AppPolicyList.List = removeAppPolicy(eventhub.AppPolicyList.List, policyEvent.PolicyID)
+			eh.AppPolicyList.List = removeAppPolicy(eh.AppPolicyList.List, policyEvent.PolicyID)
 		}
-		xds.UpdateEnforcerApplicationPolicies(xds.MarshalApplicationPolicyList(eventhub.AppPolicyList))
+		xds.UpdateEnforcerApplicationPolicies(xds.MarshalApplicationPolicyList(eh.AppPolicyList))
 
 	} else if strings.EqualFold(subscriptionEventType, policyEvent.PolicyType) {
 		var subscriptionPolicyEvent SubscriptionPolicyEvent
@@ -295,14 +295,14 @@ func handlePolicyEvents(data []byte, eventType string) {
 			TenantDomain: subscriptionPolicyEvent.TenantDomain, TimeStamp: subscriptionPolicyEvent.TimeStamp}
 
 		if subscriptionPolicyEvent.Event.Type == policyCreate {
-			eventhub.SubPolicyList.List = append(eventhub.SubPolicyList.List, subscriptionPolicy)
+			eh.SubPolicyList.List = append(eh.SubPolicyList.List, subscriptionPolicy)
 		} else if subscriptionPolicyEvent.Event.Type == policyUpdate {
-			eventhub.SubPolicyList.List = removeSubPolicy(eventhub.SubPolicyList.List, subscriptionPolicyEvent.PolicyID)
-			eventhub.SubPolicyList.List = append(eventhub.SubPolicyList.List, subscriptionPolicy)
+			eh.SubPolicyList.List = removeSubPolicy(eh.SubPolicyList.List, subscriptionPolicyEvent.PolicyID)
+			eh.SubPolicyList.List = append(eh.SubPolicyList.List, subscriptionPolicy)
 		} else if subscriptionPolicyEvent.Event.Type == policyDelete {
-			eventhub.SubPolicyList.List = removeSubPolicy(eventhub.SubPolicyList.List, subscriptionPolicyEvent.PolicyID)
+			eh.SubPolicyList.List = removeSubPolicy(eh.SubPolicyList.List, subscriptionPolicyEvent.PolicyID)
 		}
-		xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalSubscriptionPolicyList(eventhub.SubPolicyList))
+		xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalSubscriptionPolicyList(eh.SubPolicyList))
 	}
 }
 
@@ -346,17 +346,17 @@ func removeSubscription(subscriptions []types.Subscription, id int32) []types.Su
 func updateSubscription(id int32, sub types.Subscription) {
 	//Iterated in reverse to optimize handling subscription creation scenario.
 	updateIndex := -1
-	for index := len(eventhub.SubList.List) - 1; index >= 0; index-- {
-		if eventhub.SubList.List[index].SubscriptionID == id {
+	for index := len(eh.SubList.List) - 1; index >= 0; index-- {
+		if eh.SubList.List[index].SubscriptionID == id {
 			updateIndex = index
 			break
 		}
 	}
 	if updateIndex == -1 {
-		eventhub.SubList.List = append(eventhub.SubList.List, sub)
+		eh.SubList.List = append(eh.SubList.List, sub)
 		return
 	}
-	eventhub.SubList.List[updateIndex] = sub
+	eh.SubList.List[updateIndex] = sub
 }
 
 func removeAppPolicy(appPolicies []types.ApplicationPolicy, id int32) []types.ApplicationPolicy {
