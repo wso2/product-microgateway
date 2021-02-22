@@ -23,6 +23,7 @@ import ballerina/stringutils;
 public type PreAuthnFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request,@tainted http:FilterContext context) returns boolean {
+        preserveRequestHeaders(request);
         setFilterSkipToFilterContext(context);
         if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
             printDebug(KEY_PRE_AUTHN_FILTER, "Skip all filter annotation set in the service. Skip the filter");
@@ -40,7 +41,8 @@ public type PreAuthnFilter object {
         return result;
     }
 
-    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+    public function filterResponse(@tainted http:Response response, http:FilterContext context) returns boolean {
+        preserveResponseHeaders(response);
         if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
             printDebug(KEY_PRE_AUTHN_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;
@@ -173,3 +175,54 @@ function getAuthenticationProviderType(string authHeader) returns (string) {
         return AUTH_SCHEME_OAUTH2;
     }
 }
+
+function preserveRequestHeaders(http:Request request) {
+    serverHeaderDTO[] serverHeaders = gatewayConf.getServerConfig().serverHeaders;
+    foreach serverHeaderDTO serverHeader in serverHeaders {
+        string[] requestHeaders = request.getHeaderNames();
+        foreach string requestHeader in requestHeaders {
+            if (serverHeader.headerName.toLowerAscii() == USER_AGENT_HEADER_NAME.toLowerAscii()) {
+                if (serverHeader.preserveHeader) {
+                    request.setHeader(serverHeader.headerName, request.userAgent);
+                } else {
+                    request.setHeader(serverHeader.headerName, serverHeader.overrideValue);
+                }
+                break;
+            } else if (requestHeader.toLowerAscii() == serverHeader.headerName.toLowerAscii()) {
+                if (serverHeader.preserveHeader) {
+                    request.setHeader(serverHeader.headerName, request.getHeader(<@untainted> requestHeader));
+                } else {
+                    request.setHeader(serverHeader.headerName, serverHeader.overrideValue);
+                }
+                break;
+            }
+        }
+    }
+}
+
+function preserveResponseHeaders(@tainted http:Response response) {
+    serverHeaderDTO[] serverHeaders = gatewayConf.getServerConfig().serverHeaders;
+    foreach serverHeaderDTO serverHeader in serverHeaders {
+        string[] responseHeaders = response.getHeaderNames();
+        foreach string responseHeader in responseHeaders {
+            if (serverHeader.headerName.toLowerAscii() == SERVER_HEADER_NAME.toLowerAscii()) {
+                if (!serverHeader.preserveHeader) {
+                    if (response.server != "") {
+                        response.setHeader(serverHeader.headerName, serverHeader.overrideValue);
+                    } else if (gatewayConf.getServerConfig().header == "") {
+                        response.setHeader(serverHeader.headerName, serverHeader.overrideValue);
+                    }
+                }
+                break;
+            } else if (responseHeader.toLowerAscii() == serverHeader.headerName.toLowerAscii()) {
+                if (serverHeader.preserveHeader) {
+                    response.setHeader(serverHeader.headerName, response.getHeader(<@untainted> responseHeader));
+                } else {
+                    response.setHeader(serverHeader.headerName, serverHeader.overrideValue);
+                }
+                break;
+            }
+        }
+    }
+}
+

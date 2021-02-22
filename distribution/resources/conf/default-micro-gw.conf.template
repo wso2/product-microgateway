@@ -504,6 +504,15 @@
   timestampSkew = 5000
   # The value of the server header sent in the response by microgateway
   header="ballerina"
+  # Preserve or override header values intercepted by the gateway
+  [[server.headerConf]]
+      headerName = "User-Agent"
+      preserveHeader = false
+      overrideValue = "ballerina"
+  [[server.headerConf]]
+      headerName = "Server"
+      preserveHeader = true
+      overrideValue = "ballerina"
 
 # Configurations for retrieving API and subscription data from API Manager.
 [apim.eventHub]
