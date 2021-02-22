@@ -104,7 +104,7 @@ data:
         password="admin"
 
     [enforcer.jwtGenerator]
-        enable = true
+        enable = false
         encoding = "base64" # base64,base64url
         claimDialect = "http://wso2.org/claims"
         convertDialect = false
