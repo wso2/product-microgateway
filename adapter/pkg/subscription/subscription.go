@@ -47,6 +47,8 @@ const (
 	GatewayLabelParam string = "gatewayLabel"
 	// ApisEndpoint is the resource path of /apis endpoint
 	ApisEndpoint string = "apis"
+	// DefaultGatewayLabelValue is the default environment which is used to retrieve API details
+	DefaultGatewayLabelValue string = "Production and Sandbox"
 )
 
 var (
@@ -121,12 +123,14 @@ func LoadSubscriptionData(configFile *config.Config) {
 	// Take the configured labels from the adapter
 	configuredEnvs := conf.ControlPlane.EventHub.EnvironmentLabels
 
-	if len(configuredEnvs) > 0 {
-		for _, configuredEnv := range configuredEnvs {
-			queryParamMap := make(map[string]string, 1)
-			queryParamMap[GatewayLabelParam] = configuredEnv
-			go InvokeService(ApisEndpoint, APIListMap[configuredEnv], queryParamMap, APIListChannel, 0)
-		}
+	// If no environments are configured, default gateway label value is assigned.
+	if len(configuredEnvs) == 0 {
+		configuredEnvs = append(configuredEnvs, DefaultGatewayLabelValue)
+	}
+	for _, configuredEnv := range configuredEnvs {
+		queryParamMap := make(map[string]string, 1)
+		queryParamMap[GatewayLabelParam] = configuredEnv
+		go InvokeService(ApisEndpoint, APIListMap[configuredEnv], queryParamMap, APIListChannel, 0)
 	}
 
 	var response response

@@ -57,11 +57,13 @@ const (
 
 // var variables
 var (
-	ScopeList                         = make([]resourceTypes.Scope, 0)
+	ScopeList = make([]resourceTypes.Scope, 0)
+	// timestamps needs to be maintained as it is not guranteed to receive them in order,
+	// hence older events should be discarded
 	apiListTimeStampMap               = make(map[string]int64, 0)
 	subsriptionsListTimeStampMap      = make(map[string]int64, 0)
-	ApplicationKeyMappingTimeStampMap = make(map[string]int64, 0)
-	ApplicationListTimeStampMap       = make(map[string]int64, 0)
+	applicationKeyMappingTimeStampMap = make(map[string]int64, 0)
+	applicationListTimeStampMap       = make(map[string]int64, 0)
 )
 
 // handleNotification to process
@@ -86,11 +88,12 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 			handleApplicationEvents(decodedByte, eventType)
 		} else if strings.Contains(eventType, subscriptionEventType) {
 			handleSubscriptionEvents(decodedByte, eventType)
-		} else if strings.Contains(eventType, scopeEvenType) {
-			handleScopeEvents(decodedByte, eventType)
-		} else {
-			handlePolicyEvents(decodedByte, eventType)
 		}
+		// else if strings.Contains(eventType, scopeEvenType) {
+		// 	handleScopeEvents(decodedByte, eventType)
+		// } else {
+		// 	handlePolicyEvents(decodedByte, eventType)
+		// }
 		d.Ack(false)
 	}
 	logger.LoggerMsg.Infof("handle: deliveries channel closed")
@@ -111,46 +114,48 @@ func handleAPIEvents(data []byte, eventType string) {
 	}
 
 	// TODO: (VirajSalaka) Handle API Blocked event
-	if len(apiEvent.GatewayLabels) > 0 {
-		for _, env := range apiEvent.GatewayLabels {
-			// TODO: (VirajSalaka) This stores unnecessary keyvalue pairs as well.
-			if isLaterEvent(apiListTimeStampMap, apiEvent.UUID+":"+env, currentTimeStamp) {
-				return
+	for _, env := range apiEvent.GatewayLabels {
+		// TODO: (VirajSalaka) This stores unnecessary keyvalue pairs as well.
+		if isLaterEvent(apiListTimeStampMap, apiEvent.UUID+":"+env, currentTimeStamp) {
+			return
+		}
+		if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
+			conf, _ := config.ReadConfigs()
+			configuredEnvs := conf.ControlPlane.EventHub.EnvironmentLabels
+			if len(configuredEnvs) == 0 {
+				configuredEnvs = append(configuredEnvs, subscription.DefaultGatewayLabelValue)
 			}
-			if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
-				conf, _ := config.ReadConfigs()
-				for _, configuredEnv := range conf.ControlPlane.EventHub.EnvironmentLabels {
-					if configuredEnv == env {
-						if _, ok := subscription.APIListMap[env]; ok {
-							apiListOfEnv := subscription.APIListMap[env].List
-							for i := range apiListOfEnv {
-								// If API is already found, it is a new revision deployement.
-								// Subscription relates details of an API does not change between new revisions
-								if apiEvent.Context == apiListOfEnv[i].Context && apiEvent.Version == apiListOfEnv[i].Version {
-									logger.LoggerMsg.Debugf("APIList for apiIId: %s is not updated as it already exists", apiEvent.UUID)
-									return
-								}
+			for _, configuredEnv := range configuredEnvs {
+				if configuredEnv == env {
+					if _, ok := subscription.APIListMap[env]; ok {
+						apiListOfEnv := subscription.APIListMap[env].List
+						for i := range apiListOfEnv {
+							// If API is already found, it is a new revision deployement.
+							// Subscription relates details of an API does not change between new revisions
+							if apiEvent.Context == apiListOfEnv[i].Context && apiEvent.Version == apiListOfEnv[i].Version {
+								logger.LoggerMsg.Debugf("APIList for apiIId: %s is not updated as it already exists", apiEvent.UUID)
+								return
 							}
-							queryParamMap := make(map[string]string, 3)
-							queryParamMap[subscription.GatewayLabelParam] = configuredEnv
-							queryParamMap[subscription.ContextParam] = apiEvent.Context
-							queryParamMap[subscription.VersionParam] = apiEvent.Version
-							// TODO: (VirajSalaka) Fix the REST API call once the APIM Event hub implementation is fixed.
-							go subscription.InvokeService(subscription.ApisEndpoint, subscription.APIListMap[env], queryParamMap,
-								subscription.APIListChannel, 0)
 						}
+						queryParamMap := make(map[string]string, 3)
+						queryParamMap[subscription.GatewayLabelParam] = configuredEnv
+						queryParamMap[subscription.ContextParam] = apiEvent.Context
+						queryParamMap[subscription.VersionParam] = apiEvent.Version
+						// TODO: (VirajSalaka) Fix the REST API call once the APIM Event hub implementation is fixed.
+						go subscription.InvokeService(subscription.ApisEndpoint, subscription.APIListMap[env], queryParamMap,
+							subscription.APIListChannel, 0)
 					}
 				}
-			} else if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
-				if _, ok := subscription.APIListMap[env]; ok {
-					apiListOfEnv := subscription.APIListMap[env].List
-					for i := range apiListOfEnv {
-						// TODO: (VirajSalaka) Use APIId once it is fixed from control plane
-						if apiEvent.Context == apiListOfEnv[i].Context && apiEvent.Version == apiListOfEnv[i].Version {
-							subscription.APIListMap[env].List = deleteAPIFromList(apiListOfEnv, i, apiEvent.UUID, env)
-							xds.UpdateEnforcerAPIList(env, xds.GenerateAPIList(subscription.APIListMap[env]))
-							break
-						}
+			}
+		} else if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
+			if _, ok := subscription.APIListMap[env]; ok {
+				apiListOfEnv := subscription.APIListMap[env].List
+				for i := range apiListOfEnv {
+					// TODO: (VirajSalaka) Use APIId once it is fixed from control plane
+					if apiEvent.Context == apiListOfEnv[i].Context && apiEvent.Version == apiListOfEnv[i].Version {
+						subscription.APIListMap[env].List = deleteAPIFromList(apiListOfEnv, i, apiEvent.UUID, env)
+						xds.UpdateEnforcerAPIList(env, xds.GenerateAPIList(subscription.APIListMap[env]))
+						break
 					}
 				}
 			}
@@ -177,7 +182,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 			KeyManager: applicationRegistrationEvent.KeyManager, TenantID: -1, TenantDomain: applicationRegistrationEvent.TenantDomain,
 			TimeStamp: applicationRegistrationEvent.TimeStamp}
 
-		if isLaterEvent(ApplicationKeyMappingTimeStampMap, fmt.Sprint(applicationRegistrationEvent.ApplicationID),
+		if isLaterEvent(applicationKeyMappingTimeStampMap, fmt.Sprint(applicationRegistrationEvent.ApplicationID),
 			applicationRegistrationEvent.TimeStamp) {
 			return
 		}
@@ -188,10 +193,12 @@ func handleApplicationEvents(data []byte, eventType string) {
 		var applicationEvent ApplicationEvent
 		json.Unmarshal([]byte(string(data)), &applicationEvent)
 		application := resourceTypes.Application{UUID: applicationEvent.UUID, ID: applicationEvent.ApplicationID,
-			Name: applicationEvent.ApplicationName, SubName: applicationEvent.Subscriber, Policy: applicationEvent.ApplicationPolicy, TokenType: applicationEvent.TokenType, GroupIds: applicationEvent.GroupID, Attributes: nil,
+			Name: applicationEvent.ApplicationName, SubName: applicationEvent.Subscriber,
+			Policy: applicationEvent.ApplicationPolicy, TokenType: applicationEvent.TokenType,
+			GroupIds: applicationEvent.GroupID, Attributes: nil,
 			TenantID: -1, TenantDomain: applicationEvent.TenantDomain, TimeStamp: applicationEvent.TimeStamp}
 
-		if isLaterEvent(ApplicationListTimeStampMap, fmt.Sprint(applicationEvent.ApplicationID), applicationEvent.TimeStamp) {
+		if isLaterEvent(applicationListTimeStampMap, fmt.Sprint(applicationEvent.ApplicationID), applicationEvent.TimeStamp) {
 			return
 		}
 
@@ -232,7 +239,6 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 
 // handleScopeRelatedEvents to process scope related events
 func handleScopeEvents(data []byte, eventType string) {
-	// TODO: (VirajSalaka) Decide the usage
 	var scopeEvent ScopeEvent
 	json.Unmarshal([]byte(string(data)), &scopeEvent)
 	scope := resourceTypes.Scope{Name: scopeEvent.Name, DisplayName: scopeEvent.DisplayName, ApplicationName: scopeEvent.ApplicationName}
