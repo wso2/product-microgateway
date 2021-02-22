@@ -48,6 +48,7 @@ services:
     volumes:  
       - ./resources/enforcer/security:/home/wso2/security
       - ./resources/conf:/home/wso2/conf
+      - ./resources/enforcer/dropins:/home/wso2/lib/dropins
     links:
       - adapter
     environment:
