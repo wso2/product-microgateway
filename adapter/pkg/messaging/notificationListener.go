@@ -307,6 +307,7 @@ func handlePolicyEvents(data []byte, eventType string) {
 }
 
 func removeApplication(applications []resourceTypes.Application, id int32) []resourceTypes.Application {
+	// TODO: (VirajSalaka) Improve the search logic with binary search mechanism
 	deleteIndex := -1
 	appName := ""
 	for index, app := range applications {
