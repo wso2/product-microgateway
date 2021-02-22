@@ -464,6 +464,7 @@ public const string SECURITY_INSTANCE_ID = "security";
 public const string SECURITY_VALIDATE_SUBSCRIPTIONS = "validateSubscriptions";
 
 // end of config constants
+public const string CUSTOM_PROPERTY = "customProperty";
 public const string IS_THROTTLED = "isThrottled";
 public const string EXPIRY_TIMESTAMP = "expiryTimeStamp";
 const string TRUE = "true";
