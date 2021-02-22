@@ -60,7 +60,6 @@ public class ConfigHolder {
     private EnvVarConfig envVarConfig = new EnvVarConfig();
     EnforcerConfig config = new EnforcerConfig();
     private KeyStore trustStore = null;
-    private static volatile long ttl = -1L;
     private KeyStore trustStoreForJWT = null;
     private TrustManagerFactory trustManagerFactory = null;
 

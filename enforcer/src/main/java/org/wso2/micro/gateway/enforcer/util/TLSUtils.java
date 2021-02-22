@@ -26,7 +26,6 @@ import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -140,18 +139,13 @@ public class TLSUtils {
         }
     }
 
-    public static Certificate getCertificate() {
+    public static Certificate getCertificate() throws CertificateException, IOException {
         Certificate certificate = null;
-        try {
-            CertificateFactory fact = CertificateFactory.getInstance(X509);
-            FileInputStream is = new FileInputStream(ConfigHolder.getInstance().getConfig().
-                    getPublicCertificatePath());
-            X509Certificate cert = (X509Certificate) fact.generateCertificate(is);
-            certificate = (Certificate) cert;
-            return certificate;
-        } catch (CertificateException | FileNotFoundException e) {
-            log.debug("Error in loading certificate");
-        }
+        CertificateFactory fact = CertificateFactory.getInstance(X509);
+        FileInputStream is = new FileInputStream(ConfigHolder.getInstance().getConfig().
+                getPublicCertificatePath());
+        X509Certificate cert = (X509Certificate) fact.generateCertificate(is);
+        certificate = (Certificate) cert;
         return certificate;
     }
 }

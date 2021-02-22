@@ -23,5 +23,3 @@ EXPOSE 23823
 COPY maven/ lib/
 
 CMD java -cp "lib/*" org.wso2am.micro.gw.mockbackend.MockBackEndServer
-
-

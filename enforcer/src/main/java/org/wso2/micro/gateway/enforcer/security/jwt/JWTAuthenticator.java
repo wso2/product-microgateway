@@ -52,6 +52,8 @@ import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHold
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
+import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.text.ParseException;
 import java.util.Base64;
 import java.util.Date;
@@ -154,13 +156,16 @@ public class JWTAuthenticator implements Authenticator {
                 JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().
                         getJwtConfigurationDto();
                 if (jwtConfigurationDto.isEnabled()) {
-                    // Set public certificate
-                    //jwtConfigurationDto.setPublicCert(jwtValidator.getPublicCertForIssuer());
-                    jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate());
-
-                    //Set private key
-                    jwtConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey());
-
+                    try {
+                        // Set public certificate
+                        jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate());
+                        //Set private key
+                        jwtConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey());
+                    } catch (MGWException | CertificateException | IOException e) {
+                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+                    }
                     // Set ttl
                     jwtConfigurationDto.setTtl(JWTUtil.getTTL());
 
@@ -240,7 +245,7 @@ public class JWTAuthenticator implements Authenticator {
                 }
             }
         } else {
-            log.debug("Error in loading class");
+            log.debug("Error while loading JWTGenerator");
         }
         return endUserToken;
     }

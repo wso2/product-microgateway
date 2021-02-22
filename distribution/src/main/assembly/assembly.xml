@@ -44,7 +44,9 @@
         </fileSet>
         <fileSet>
             <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/dropins</outputDirectory>
-            <excludes><exclude>**/*</exclude></excludes>
+            <excludes>
+                <exclude>**/*</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
     <files>

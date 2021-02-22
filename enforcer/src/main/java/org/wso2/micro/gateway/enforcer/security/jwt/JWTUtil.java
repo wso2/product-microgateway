@@ -40,13 +40,15 @@ import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.JWTConstants;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -154,20 +156,16 @@ public class JWTUtil {
         }
     }
 
-    public static PrivateKey getPrivateKey() {
+    public static PrivateKey getPrivateKey() throws MGWException {
         PrivateKey privateKey = null;
         try {
             String strKeyPEM = "";
-            BufferedReader br = new BufferedReader(new FileReader(ConfigHolder.getInstance().getConfig().
-                    getPrivateKeyPath()));
-            String line;
-            while ((line = br.readLine()) != null) {
-                strKeyPEM += line + "\n";
-            }
-            br.close();
-            strKeyPEM = strKeyPEM.replace(Constants.BEGINING_OF_PRIVATE_KEY, "");
-            strKeyPEM = strKeyPEM.replaceAll(System.lineSeparator(), "");
-            strKeyPEM = strKeyPEM.replace(Constants.END_OF_PRIVATE_KEY, "");
+            Path keyPath = Paths.get(ConfigHolder.getInstance().getConfig().getPrivateKeyPath());
+            String key = Files.readString(keyPath, Charset.defaultCharset());
+            strKeyPEM = key
+                    .replace(Constants.BEGINING_OF_PRIVATE_KEY, "")
+                    .replaceAll(System.lineSeparator(), "")
+                    .replace(Constants.END_OF_PRIVATE_KEY, "");
 
             byte[] encoded = Base64.getDecoder().decode(strKeyPEM);
             KeyFactory kf = KeyFactory.getInstance(Constants.RSA);
@@ -176,6 +174,7 @@ public class JWTUtil {
             privateKey = (PrivateKey) rsaPrivateKey;
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             log.debug("Error obtaining private key", e);
+            throw new MGWException("Error obtaining private key");
         }
         return privateKey;
     }
