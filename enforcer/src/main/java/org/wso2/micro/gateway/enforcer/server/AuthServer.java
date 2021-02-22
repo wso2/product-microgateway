@@ -19,6 +19,7 @@
 package org.wso2.micro.gateway.enforcer.server;
 
 import io.grpc.Server;
+import io.grpc.ServerInterceptors;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.channel.EventLoopGroup;
@@ -32,6 +33,7 @@ import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.grpc.ExtAuthService;
+import org.wso2.micro.gateway.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;
 
 import java.io.File;
@@ -92,14 +94,13 @@ public class AuthServer {
                 Constants.EXTERNAL_AUTHZ_THREAD_GROUP, Constants.EXTERNAL_AUTHZ_THREAD_ID);
         return NettyServerBuilder.forPort(authServerConfig.getPort())
                 .keepAliveTime(authServerConfig.getKeepAliveTime(), TimeUnit.SECONDS).bossEventLoopGroup(bossGroup)
-                .workerEventLoopGroup(workerGroup).addService(new ExtAuthService())
+                .workerEventLoopGroup(workerGroup)
+                .addService(ServerInterceptors.intercept(new ExtAuthService(), new AccessLogInterceptor()))
                 .maxInboundMessageSize(authServerConfig.getMaxMessageSize())
                 .maxInboundMetadataSize(authServerConfig.getMaxHeaderLimit()).channelType(NioServerSocketChannel.class)
-                .executor(enforcerWorkerPool.getExecutor())
-                .sslContext(GrpcSslContexts.forServer(certFile, keyFile)
+                .executor(enforcerWorkerPool.getExecutor()).sslContext(GrpcSslContexts.forServer(certFile, keyFile)
                         .trustManager(ConfigHolder.getInstance().getTrustManagerFactory())
-                        .clientAuth(ClientAuth.REQUIRE)
-                        .build())
-                .build();
+                        .clientAuth(ClientAuth.REQUIRE).build()).build();
+
     }
 }

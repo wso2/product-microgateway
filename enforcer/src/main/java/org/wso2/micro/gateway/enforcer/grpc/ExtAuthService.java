@@ -46,16 +46,17 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
     @Override
     public void check(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
         ResponseObject responseObject = requestHandler.process(request, responseObserver);
-        CheckResponse response1 = buildResponse(responseObject);
+        CheckResponse response1 = buildResponse(request, responseObject);
         responseObserver.onNext(response1);
 
         // When you are done, you must call onCompleted.
         responseObserver.onCompleted();
     }
 
-    private CheckResponse buildResponse(ResponseObject responseObject) {
+    private CheckResponse buildResponse(CheckRequest request, ResponseObject responseObject) {
         DeniedHttpResponse.Builder responseBuilder = DeniedHttpResponse.newBuilder();
         HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
+        String traceKey = request.getAttributes().getRequest().getHttp().getId();
         if (responseObject.isDirectResponse()) {
             // To handle pre flight options request
             if (responseObject.getStatusCode() == HttpConstants.NO_CONTENT_STATUS_CODE) {
@@ -76,8 +77,10 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             responseJson.put(APIConstants.MessageFormat.ERROR_CODE, responseObject.getErrorCode());
             responseJson.put(APIConstants.MessageFormat.ERROR_MESSAGE, responseObject.getErrorMessage());
             responseJson.put(APIConstants.MessageFormat.ERROR_DESCRIPTION, responseObject.getErrorDescription());
-            HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
-                    .setHeader(HeaderValue.newBuilder().setKey("Content-type").setValue("application/json").build())
+            HeaderValueOption headerValueOption = HeaderValueOption.newBuilder().setHeader(
+                    HeaderValue.newBuilder().setKey(APIConstants.CONTENT_TYPE_HEADER)
+                            .setValue(APIConstants.APPLICATION_JSON).build())
+                    .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
                     .build();
             responseBuilder.addHeaders(headerValueOption);
 
@@ -96,6 +99,10 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         }
                 );
             }
+            HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
+                    .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
+                    .build();
+            responseBuilder.addHeaders(headerValueOption);
             return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                     .setOkResponse(okResponseBuilder.build()).build();
         }
