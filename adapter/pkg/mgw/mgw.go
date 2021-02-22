@@ -23,11 +23,11 @@ import (
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
-	apiservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/api"
-	configservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/config"
-	subscriptionservice "github.com/envoyproxy/go-control-plane/wso2/discovery/service/subscription"
+	apiservice "github.com/wso2/micro-gw/api/wso2/discovery/service/api"
+	configservice "github.com/wso2/micro-gw/api/wso2/discovery/service/config"
+	subscriptionservice "github.com/wso2/micro-gw/api/wso2/discovery/service/subscription"
 	"github.com/wso2/micro-gw/pkg/api/restserver"
-	cb "github.com/wso2/micro-gw/pkg/mgw/xdscallbacks"
+	wso2_server "github.com/wso2/micro-gw/pkg/discovery/server/v3"
 	"github.com/wso2/micro-gw/pkg/tlsutils"
 
 	"context"
@@ -42,6 +42,7 @@ import (
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/messaging"
+	cb "github.com/wso2/micro-gw/pkg/mgw/xdscallbacks"
 	"github.com/wso2/micro-gw/pkg/subscription"
 	"github.com/wso2/micro-gw/pkg/synchronizer"
 	"github.com/wso2/micro-gw/pkg/xds"
@@ -77,9 +78,9 @@ func init() {
 
 const grpcMaxConcurrentStreams = 1000000
 
-func runManagementServer(server xdsv3.Server, enforcerServer xdsv3.Server, enforcerSdsServer xdsv3.Server,
-	enforcerAppDsSrv xdsv3.Server, enforcerAPIDsSrv xdsv3.Server, enforcerAppPolicyDsSrv xdsv3.Server,
-	enforcerSubPolicyDsSrv xdsv3.Server, enforcerAppKeyMappingDsSrv xdsv3.Server, port uint) {
+func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server, enforcerSdsServer wso2_server.Server,
+	enforcerAppDsSrv wso2_server.Server, enforcerAPIDsSrv wso2_server.Server, enforcerAppPolicyDsSrv wso2_server.Server,
+	enforcerSubPolicyDsSrv wso2_server.Server, enforcerAppKeyMappingDsSrv wso2_server.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
 
@@ -138,7 +139,7 @@ func Run(conf *config.Config) {
 	// log config watcher
 	// TODO: (VirajSalaka) Implement a rest endpoint to apply configurations
 	watcherLogConf, _ := fsnotify.NewWatcher()
-	errC := watcherLogConf.Add("conf/log_config.toml")
+	errC := watcherLogConf.Add(config.GetMgwHome() + "/conf/log_config.toml")
 
 	if errC != nil {
 		logger.LoggerMgw.Fatal("Error reading the log configs. ", errC)
@@ -155,13 +156,13 @@ func Run(conf *config.Config) {
 	enforcerApplicationKeyMappingCache := xds.GetEnforcerApplicationKeyMappingCache()
 
 	srv := xdsv3.NewServer(ctx, cache, nil)
-	enforcerXdsSrv := xdsv3.NewServer(ctx, enforcerCache, &cb.Callbacks{})
-	enforcerSdsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionCache, &cb.Callbacks{})
-	enforcerAppDsSrv := xdsv3.NewServer(ctx, enforcerApplicationCache, &cb.Callbacks{})
-	enforcerAPIDsSrv := xdsv3.NewServer(ctx, enforcerAPICache, &cb.Callbacks{})
-	enforcerAppPolicyDsSrv := xdsv3.NewServer(ctx, enforcerApplicationPolicyCache, &cb.Callbacks{})
-	enforcerSubPolicyDsSrv := xdsv3.NewServer(ctx, enforcerSubscriptionPolicyCache, &cb.Callbacks{})
-	enforcerAppKeyMappingDsSrv := xdsv3.NewServer(ctx, enforcerApplicationKeyMappingCache, &cb.Callbacks{})
+	enforcerXdsSrv := wso2_server.NewServer(ctx, enforcerCache, &cb.Callbacks{})
+	enforcerSdsSrv := wso2_server.NewServer(ctx, enforcerSubscriptionCache, &cb.Callbacks{})
+	enforcerAppDsSrv := wso2_server.NewServer(ctx, enforcerApplicationCache, &cb.Callbacks{})
+	enforcerAPIDsSrv := wso2_server.NewServer(ctx, enforcerAPICache, &cb.Callbacks{})
+	enforcerAppPolicyDsSrv := wso2_server.NewServer(ctx, enforcerApplicationPolicyCache, &cb.Callbacks{})
+	enforcerSubPolicyDsSrv := wso2_server.NewServer(ctx, enforcerSubscriptionPolicyCache, &cb.Callbacks{})
+	enforcerAppKeyMappingDsSrv := wso2_server.NewServer(ctx, enforcerApplicationKeyMappingCache, &cb.Callbacks{})
 
 	runManagementServer(srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
 		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, port)
@@ -175,9 +176,11 @@ func Run(conf *config.Config) {
 	if enableEventHub {
 		// Load subscription data
 		subscription.LoadSubscriptionData(conf)
+
+		go messaging.ProcessEvents(conf)
+
 		// Fetch APIs from control plane
 		fetchAPIsOnStartUp(conf)
-		go messaging.ProcessEvents(conf)
 	}
 OUTER:
 	for {

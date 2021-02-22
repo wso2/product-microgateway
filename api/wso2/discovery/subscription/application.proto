@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package wso2.discovery.subscription;
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/subscription;subscription";
+option java_package = "org.wso2.gateway.discovery.subscription";
+option java_outer_classname = "ApplicationProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: Application]
+
+// Application data model
+message Application {
+    int32 id = 1;
+    string uuid = 2;
+	string name = 3;
+	int32 subId = 4;
+	string subName = 5;
+	string policy = 6;
+	string tokenType = 7;
+	repeated string groupIds = 8;
+	map<string, string> attributes = 9;
+	int32 tenantId = 10;
+	string tenantDomain = 11;
+	int64 timestamp = 12;
+}

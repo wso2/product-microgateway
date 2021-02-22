@@ -16,18 +16,16 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <artifactId>micro-gateway-tests</artifactId>
         <groupId>org.wso2.am.microgw</groupId>
-        <version>4.0.0-m5-SNAPSHOT</version>
+        <version>4.0.0-m6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <version>4.0.0-m5-SNAPSHOT</version>
+    <version>4.0.0-m6-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.am.microgw</groupId>
     <artifactId>mock-backend-server</artifactId>
@@ -75,6 +73,7 @@
                             </build>
                         </image>
                     </images>
+                    <skipPush>true</skipPush>
                 </configuration>
                 <executions>
                     <execution>

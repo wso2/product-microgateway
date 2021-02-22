@@ -44,7 +44,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
 		swagger.version = swagger3.Info.Version
 	}
 
-	swagger.vendorExtensible = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
+	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.resources = setResourcesOpenAPI(swagger3)
 	swagger.apiType = HTTP
 
@@ -56,7 +56,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
 	}
 }
 
-func setPathInfoOpenAPI(path string, methods []string, pathItem *openapi3.PathItem) Resource {
+func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.PathItem) Resource {
 	var resource Resource
 	if pathItem != nil {
 		resource = Resource{
@@ -68,8 +68,8 @@ func setPathInfoOpenAPI(path string, methods []string, pathItem *openapi3.PathIt
 			description: pathItem.Description,
 			//Schemes: operation.,
 			//tags: operation.Tags,
-			//Security: operation.Security.,
-			vendorExtensible: convertExtensibletoReadableFormat(pathItem.ExtensionProps),
+			//security: pathItem.operation.Security.,
+			vendorExtensions: convertExtensibletoReadableFormat(pathItem.ExtensionProps),
 		}
 	}
 	return resource
@@ -79,49 +79,39 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) []Resource {
 	var resources []Resource
 	if openAPI.Paths != nil {
 		for path, pathItem := range openAPI.Paths {
-			var methodsArray []string
-			methodFound := false
-			if pathItem.Get != nil {
-				methodsArray = append(methodsArray, "GET")
-				methodFound = true
-			}
-			if pathItem.Post != nil {
-				methodsArray = append(methodsArray, "POST")
-				methodFound = true
-			}
-			if pathItem.Put != nil {
-				methodsArray = append(methodsArray, "PUT")
-				methodFound = true
-			}
-			if pathItem.Delete != nil {
-				methodsArray = append(methodsArray, "DELETE")
-				methodFound = true
-			}
-			if pathItem.Head != nil {
-				methodsArray = append(methodsArray, "HEAD")
-				methodFound = true
-			}
-			if pathItem.Patch != nil {
-				methodsArray = append(methodsArray, "HEAD")
-				methodFound = true
-			}
-			if pathItem.Options != nil {
-				methodsArray = append(methodsArray, "OPTIONS")
-				methodFound = true
-			}
-			if methodFound {
-				resource := setPathInfoOpenAPI(path, methodsArray, pathItem)
-				if isServerURLIsAvailable(pathItem.Servers) {
-					for _, serverEntry := range pathItem.Servers {
-						endpoint := getHostandBasepathandPort(serverEntry.URL)
-						resource.productionUrls = append(resource.productionUrls, endpoint)
-					}
+			methodsArray := make([]Operation, len(pathItem.Operations()))
+			var arrayIndex int =0
+			for httpMethod,operation := range pathItem.Operations() {
+				if operation != nil {
+					methodsArray[arrayIndex] = getOperationLevelDetails(operation, httpMethod)
+					arrayIndex++
 				}
-				resources = append(resources, resource)
 			}
+
+			resource := setPathInfoOpenAPI(path, methodsArray, pathItem)
+			if isServerURLIsAvailable(pathItem.Servers) {
+				for _, serverEntry := range pathItem.Servers {
+					endpoint := getHostandBasepathandPort(serverEntry.URL)
+					resource.productionUrls = append(resource.productionUrls, endpoint)
+				}
+			}
+			resources = append(resources, resource)
+
 		}
 	}
 	return resources
+}
+
+func getOperationLevelDetails(operation *openapi3.Operation, method string) Operation {
+	if operation.Security != nil {
+		var securityData []openapi3.SecurityRequirement = *(operation.Security)
+		var securityArray = make([]map[string][]string, len(securityData))
+		for i, security := range securityData {
+			securityArray[i] = security
+		}
+		return Operation{method, securityArray}
+	}
+	return Operation{method, nil}
 }
 
 // getHostandBasepathandPort retrieves host, basepath and port from the endpoint defintion
@@ -179,8 +169,8 @@ func isServerURLIsAvailable(servers openapi3.Servers) bool {
 }
 
 // convertExtensibletoReadableFormat unmarshalls the vendor extensible in open api3.
-func convertExtensibletoReadableFormat(vendorExtensible openapi3.ExtensionProps) map[string]interface{} {
-	jsnRawExtensible := vendorExtensible.Extensions
+func convertExtensibletoReadableFormat(vendorExtensions openapi3.ExtensionProps) map[string]interface{} {
+	jsnRawExtensible := vendorExtensions.Extensions
 	b, err := json.Marshal(jsnRawExtensible)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marsheling vendor extenstions: ", err)

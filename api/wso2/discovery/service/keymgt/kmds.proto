@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package wso2.discovery.service.keymgt;
+
+import "envoy/service/discovery/v3/discovery.proto";
+
+option go_package = "github.com/praminda/go-control-plane/wso2/discovery/service/keymgt";
+option java_package = "org.wso2.gateway.discovery.service.keymgt";
+option java_outer_classname = "KmdsProto";
+option java_multiple_files = true;
+option java_generic_services = true;
+
+// [#protodoc-title: KMDS]
+service KMDiscoveryService {
+  rpc StreamKeyManagers(stream envoy.service.discovery.v3.DiscoveryRequest)
+      returns (stream envoy.service.discovery.v3.DiscoveryResponse) {
+  }
+
+  rpc FetchKeyManagers(envoy.service.discovery.v3.DiscoveryRequest)
+      returns (envoy.service.discovery.v3.DiscoveryResponse) {
+  }
+}

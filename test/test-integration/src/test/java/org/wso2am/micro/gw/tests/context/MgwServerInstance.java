@@ -43,6 +43,7 @@ public class MgwServerInstance implements MgwServer {
 
     private static final Logger log = LoggerFactory.getLogger(MgwServerInstance.class);
     private DockerComposeContainer environment;
+    private static final String ENFORCER_DEBUG_ENV = "ENFORCER_DEBUG";
 
 
     /**
@@ -86,10 +87,13 @@ public class MgwServerInstance implements MgwServer {
             Utils.copyFile(confPath, mgwServerPath  +  File.separator + "resources"  +  File.separator +
                     "conf" +  File.separator + "config.toml");
         }
-        String dockerCompsePath = mgwServerPath +  File.separator + "docker-compose.yaml";
-        MockBackendServer.addMockBackendServiceToDockerCompose(dockerCompsePath, tlsEnabled);
-        environment = new DockerComposeContainer(new File(dockerCompsePath))
-                .withLocalCompose(true);
+
+        String dockerComposePath = mgwServerPath+  File.separator + "docker-compose.yaml";
+        MockBackendServer.addMockBackendServiceToDockerCompose(dockerComposePath, tlsEnabled);
+        environment = new DockerComposeContainer(new File(dockerComposePath)).withLocalCompose(true);
+        if (Boolean.parseBoolean(System.getenv(ENFORCER_DEBUG_ENV))) {
+            environment.withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5006");
+        }
 
     }
 

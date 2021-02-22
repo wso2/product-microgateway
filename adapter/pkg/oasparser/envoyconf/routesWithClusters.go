@@ -640,11 +640,11 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, e
 		endpointBasePath:  endpointBasePath,
 		corsPolicy:        swagger.GetCorsConfig(),
 		resourcePathParam: "",
-		resourceMethods:   []string{"GET"},
+		resourceMethods:   nil,
 	}
 
 	if resource != nil {
-		params.resourceMethods = resource.GetMethod()
+		params.resourceMethods = resource.GetMethodList()
 		params.resourcePathParam = resource.GetPath()
 	}
 	return params

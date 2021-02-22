@@ -33,14 +33,37 @@ spec:
       containers:
         - name: mg-router
           volumeMounts:
-            - mountPath: /home/wso2/security/mg.key
-              subPath: mg.key
-              name: router-tls-vol
-            - mountPath: /home/wso2/security/mg.pem
-              subPath: mg.pem
-              name: router-tls-vol
-          image: wso2/mg-router:4.0.0-m5-SNAPSHOT
+            - mountPath: /home/wso2/security/keystore
+              name: router-keystore-vol
+            - mountPath: /home/wso2/security/truststore
+              name: router-truststore-vol
+          image: wso2/mg-router:4.0.0-m5
           imagePullPolicy: Always
+          env:
+            - name: ROUTER_ADMIN_HOST
+              value: "0.0.0.0"
+            - name: ROUTER_ADMIN_PORT
+              value: "9000"
+            - name: ROUTER_CLUSTER
+              value: "default_cluster"
+            - name: ROUTER_LABEL
+              value: "default"
+            - name: ROUTER_PRIVATE_KEY_PATH
+              value: "/home/wso2/security/keystore/mg.key"
+            - name: ROUTER_PUBLIC_CERT_PATH
+              value: "/home/wso2/security/keystore/mg.pem"
+            - name: ADAPTER_HOST
+              value: "adapter"
+            - name: ADAPTER_PORT
+              value: "18000"
+            - name: ADAPTER_CA_CERT_PATH
+              value: "/home/wso2/security/truststore/mg.pem"
+            - name: ENFORCER_HOST
+              value: "enforcer"
+            - name: ENFORCER_PORT
+              value: "8081"
+            - name: ENFORCER_CA_CERT_PATH
+              value: "/home/wso2/security/truststore/mg.pem"
           resources:
             requests:
               memory: "250Mi"
@@ -62,12 +85,10 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 5
       volumes:
-        - name: router-tls-vol
+        - name: router-keystore-vol
           secret:
-            secretName: router-tls-secret
-            items:
-              - key: mg.key
-                path: mg.key
-              - key: mg.pem
-                path: mg.pem
+            secretName: router-keystore
+        - name: router-truststore-vol
+          secret:
+            secretName: router-truststore
       restartPolicy: Always

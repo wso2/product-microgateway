@@ -25,9 +25,16 @@ package org.wso2.micro.gateway.enforcer.exception;
 public class APISecurityException extends Exception {
 
     private int errorCode;
+    private int statusCode;
 
     public APISecurityException(int errorCode, String message) {
         super(message);
+        this.errorCode = errorCode;
+    }
+
+    public APISecurityException(int statusCode, int errorCode, String message) {
+        super(message);
+        this.statusCode = statusCode;
         this.errorCode = errorCode;
     }
 
@@ -38,5 +45,9 @@ public class APISecurityException extends Exception {
 
     public int getErrorCode() {
         return errorCode;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
     }
 }

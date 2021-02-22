@@ -51,7 +51,7 @@ const (
 // consideration. API type is decided by the type field in the api.yaml file.
 func ApplyAPIProject(payload []byte, envrionments []string) error {
 	if len(envrionments) == 0 {
-		envrionments = append(envrionments, "default")
+		envrionments = append(envrionments, "Production and Sandbox")
 	}
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	var upstreamCerts []byte

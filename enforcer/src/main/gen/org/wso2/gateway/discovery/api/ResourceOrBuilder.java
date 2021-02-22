@@ -32,29 +32,28 @@ public interface ResourceOrBuilder extends
       getPathBytes();
 
   /**
-   * <code>repeated string methods = 3;</code>
-   * @return A list containing the methods.
+   * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
    */
-  java.util.List<java.lang.String>
+  java.util.List<org.wso2.gateway.discovery.api.Operation> 
       getMethodsList();
   /**
-   * <code>repeated string methods = 3;</code>
-   * @return The count of methods.
+   * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
+   */
+  org.wso2.gateway.discovery.api.Operation getMethods(int index);
+  /**
+   * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
    */
   int getMethodsCount();
   /**
-   * <code>repeated string methods = 3;</code>
-   * @param index The index of the element to return.
-   * @return The methods at the given index.
+   * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
    */
-  java.lang.String getMethods(int index);
+  java.util.List<? extends org.wso2.gateway.discovery.api.OperationOrBuilder> 
+      getMethodsOrBuilderList();
   /**
-   * <code>repeated string methods = 3;</code>
-   * @param index The index of the value to return.
-   * @return The bytes of the methods at the given index.
+   * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
    */
-  com.google.protobuf.ByteString
-      getMethodsBytes(int index);
+  org.wso2.gateway.discovery.api.OperationOrBuilder getMethodsOrBuilder(
+      int index);
 
   /**
    * <code>string summary = 4;</code>

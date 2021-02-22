@@ -29,7 +29,7 @@ package model
 // mentioned under pathItem.
 type Resource struct {
 	path             string
-	methods          []string
+	methods          []Operation
 	description      string
 	consumes         []string
 	schemes          []string
@@ -39,7 +39,7 @@ type Resource struct {
 	productionUrls   []Endpoint
 	sandboxUrls      []Endpoint
 	security         []map[string][]string
-	vendorExtensible map[string]interface{}
+	vendorExtensions map[string]interface{}
 }
 
 // GetProdEndpoints returns the production endpoints array of a given resource.
@@ -57,30 +57,35 @@ func (resource *Resource) GetPath() string {
 	return resource.path
 }
 
-// GetSecurity returns the resource security definition
-func (resource *Resource) GetSecurity() []map[string][]string {
-	return resource.security
-}
-
 // GetID returns the id of a given resource.
 // This is a randomly generated UUID
 func (resource *Resource) GetID() string {
 	return resource.iD
 }
 
-// GetMethod returns an array of http Methods which are explicitly defined under
+// GetMethod returns an array of http method  operations which are explicitly defined under
 // a given resource.
-func (resource *Resource) GetMethod() []string {
+func (resource *Resource) GetMethod() []Operation {
 	return resource.methods
 }
 
+// GetMethodList returns a list of http Methods as strings which are explicitly defined under
+// a given resource.
+func (resource *Resource) GetMethodList() []string {
+	var methodList = make([]string, len(resource.methods))
+	for i,method := range resource.methods {
+		methodList[i] =  method.method
+	}
+	return methodList
+}
+
 // CreateDummyResourceForTests create an resource object which could be used for unit tests.
-func CreateDummyResourceForTests(path, method, description string, consumes, schemes,
+func CreateDummyResourceForTests(path string, method []Operation, description string, consumes, schemes,
 	tags []string, summary, id string, productionUrls, sandboxUrls []Endpoint,
-	security []map[string][]string, vendorExtensible map[string]interface{}) Resource {
+	security []map[string][]string, vendorExtensions map[string]interface{}) Resource {
 	return Resource{
 		path:             path,
-		methods:          []string{method},
+		methods:          method,
 		description:      description,
 		consumes:         consumes,
 		schemes:          schemes,
@@ -90,13 +95,13 @@ func CreateDummyResourceForTests(path, method, description string, consumes, sch
 		productionUrls:   productionUrls,
 		sandboxUrls:      sandboxUrls,
 		security:         security,
-		vendorExtensible: vendorExtensible,
+		vendorExtensions: vendorExtensions,
 	}
 }
 
 // CreateMinimalDummyResourceForTests create a resource object with minimal required set of values
 // which could be used for unit tests.
-func CreateMinimalDummyResourceForTests(path string, methods []string, id string, productionUrls,
+func CreateMinimalDummyResourceForTests(path string, methods []Operation, id string, productionUrls,
 	sandboxUrls []Endpoint) Resource {
 	return Resource{
 		path:           path,
