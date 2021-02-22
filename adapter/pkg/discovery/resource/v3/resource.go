@@ -21,7 +21,7 @@ const (
 	APIType                       = apiTypePrefix + "wso2.discovery.api.Api"
 	SubscriptionListType          = apiTypePrefix + "wso2.discovery.subscription.SubscriptionList"
 	ApplicationListType           = apiTypePrefix + "wso2.discovery.subscription.ApplicationList"
-	APIListType                   = apiTypePrefix + "wso2.discovery.subscription.ApiList"
+	APIListType                   = apiTypePrefix + "wso2.discovery.subscription.APIList"
 	ApplicationPolicyListType     = apiTypePrefix + "wso2.discovery.subscription.ApplicationPolicyList"
 	SubscriptionPolicyListType    = apiTypePrefix + "wso2.discovery.subscription.SubscriptionPolicyList"
 	ApplicationKeyMappingListType = apiTypePrefix + "wso2.discovery.subscription.ApplicationKeyMappingList"

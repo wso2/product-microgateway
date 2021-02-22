@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math/rand"
 	"reflect"
+	"strconv"
 	"sync"
 
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
@@ -467,7 +468,7 @@ func GenerateAPIList(apiList *resourceTypes.APIList) *subscription.APIList {
 
 	for _, api := range apiList.List {
 		newAPI := &subscription.APIs{
-			ApiId:            fmt.Sprint(api.APIID),
+			ApiId:            strconv.Itoa(api.APIID),
 			Name:             api.Name,
 			Provider:         api.Provider,
 			Version:          api.Version,
@@ -593,9 +594,8 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 }
 
 // UpdateEnforcerAPIList sets new update to the enforcer's Apis
-func UpdateEnforcerAPIList(apis *subscription.APIList) {
+func UpdateEnforcerAPIList(label string, apis *subscription.APIList) {
 	logger.LoggerXds.Debug("Updating Enforcer API Cache")
-	label := commonEnforcerLabel
 	apiList := enforcerAPIListMap[label]
 	apiList = append(apiList, apis)
 

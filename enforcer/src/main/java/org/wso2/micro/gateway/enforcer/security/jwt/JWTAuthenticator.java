@@ -140,7 +140,8 @@ public class JWTAuthenticator implements Authenticator {
                                     .isAuthorized());
                         }
                         if (!apiKeyValidationInfoDTO.isAuthorized()) {
-                            throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
+                            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                                    apiKeyValidationInfoDTO.getValidationStatus(),
                                     "User is NOT authorized to access the Resource. " +
                                             "API Subscription validation failed.");
                         }
@@ -369,7 +370,8 @@ public class JWTAuthenticator implements Authenticator {
                             ", version: " + version + ". Token: " + FilterUtils.getMaskedToken(splitToken[0]));
                 }
                 log.error("User is not subscribed to access the API.");
-                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                        APISecurityConstants.API_AUTH_FORBIDDEN,
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
         } else {
@@ -379,7 +381,8 @@ public class JWTAuthenticator implements Authenticator {
             // we perform mandatory authentication for Api Keys
             if (!isOauth) {
                 log.error("User is not subscribed to access the API.");
-                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                        APISecurityConstants.API_AUTH_FORBIDDEN,
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
         }

@@ -193,21 +193,11 @@ func getXWso2Endpoints(vendorExtensions map[string]interface{}, endpointType str
 							continue
 						}
 						endpoint := getHostandBasepathandPort(defHost)
-						endpointType, endpointTypeFound := val[typeConst]
 						endpoint.ServiceDiscoveryString = queryString
-
-						if endpointTypeFound {
-							endpoint.URLType = endpointType.(string)
-						}
 						endpoints = append(endpoints, endpoint)
 
 					} else {
 						endpoint := getHostandBasepathandPort(v.(string))
-						endpointType, endpointTypeFound := val[typeConst]
-
-						if endpointTypeFound {
-							endpoint.URLType = endpointType.(string)
-						}
 						endpoints = append(endpoints, endpoint)
 					}
 
