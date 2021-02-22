@@ -142,6 +142,8 @@ func handleAPIEvents(data []byte, eventType string) {
 						queryParamMap[subscription.ContextParam] = apiEvent.Context
 						queryParamMap[subscription.VersionParam] = apiEvent.Version
 						// TODO: (VirajSalaka) Fix the REST API call once the APIM Event hub implementation is fixed.
+						// TODO: (VirajSalaka) Optimize the number of requests sent to /apis endpoint as the same API is returned
+						// repeatedly. (If Eventhub implementation is not fixed)
 						go subscription.InvokeService(subscription.ApisEndpoint, subscription.APIListMap[env], queryParamMap,
 							subscription.APIListChannel, 0)
 					}
@@ -304,9 +306,11 @@ func handlePolicyEvents(data []byte, eventType string) {
 
 func removeApplication(applications []resourceTypes.Application, id int32) []resourceTypes.Application {
 	deleteIndex := -1
+	appName := ""
 	for index, app := range applications {
 		if app.ID == id {
 			deleteIndex = index
+			appName = app.Name
 			break
 		}
 	}
@@ -315,6 +319,7 @@ func removeApplication(applications []resourceTypes.Application, id int32) []res
 		return nil
 	}
 	applications[deleteIndex] = applications[len(applications)-1]
+	logger.LoggerMsg.Infof("Application %s is deleted.", appName)
 	return applications[:len(applications)-1]
 }
 
@@ -331,6 +336,7 @@ func removeSubscription(subscriptions []resourceTypes.Subscription, id int32) []
 		return nil
 	}
 	subscriptions[deleteIndex] = subscriptions[len(subscriptions)-1]
+	logger.LoggerMsg.Debugf("Subscription under id: %d is deleted.", id)
 	return subscriptions[:len(subscriptions)-1]
 }
 
