@@ -335,10 +335,10 @@ func removeSubscription(subscriptions []resourceTypes.Subscription, id int32) []
 }
 
 func updateSubscription(id int32, sub resourceTypes.Subscription) {
-	// TODO: (VirajSalaka) Iterate in reverse
+	//Iterated in reverse to optimize handling subscription creation scenario.
 	updateIndex := -1
-	for index, sub := range subscription.SubList.List {
-		if sub.SubscriptionID == id {
+	for index := len(subscription.SubList.List); index >= 0; index-- {
+		if subscription.SubList.List[index].SubscriptionID == id {
 			updateIndex = index
 			break
 		}
