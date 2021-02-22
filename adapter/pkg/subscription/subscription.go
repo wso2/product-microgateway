@@ -1,4 +1,5 @@
 /*
+/*
  *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- */
+*/
 
 package subscription
 
@@ -178,7 +179,8 @@ func LoadSubscriptionData(configFile *config.Config) {
 }
 
 // InvokeService invokes the internal data resource
-func InvokeService(endpoint string, responseType interface{}, queryParamMap map[string]string, c chan response, retryAttempt int) {
+func InvokeService(endpoint string, responseType interface{}, queryParamMap map[string]string, c chan response,
+	retryAttempt int) {
 
 	serviceURL := conf.ControlPlane.EventHub.ServiceURL + internalWebAppEP + endpoint
 	// Create the request
@@ -246,7 +248,8 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 		c <- response{nil, responseBytes, endpoint, gatewayLabel, responseType}
 	} else {
 		c <- response{errors.New(string(responseBytes)), nil, endpoint, gatewayLabel, responseType}
-		logger.LoggerSubscription.Errorf("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode), err)
+		logger.LoggerSubscription.Errorf("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode),
+			err)
 	}
 }
 
@@ -259,7 +262,8 @@ func retrieveAPIListFromChannel(c chan response) {
 			err := json.Unmarshal(response.Payload, &newResponse)
 
 			if err != nil {
-				logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the APIList response received for: "+response.Endpoint, err)
+				logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the APIList response received for: "+
+					response.Endpoint, err)
 			} else {
 				switch t := newResponse.(type) {
 				case *resourceTypes.APIList:
@@ -275,7 +279,8 @@ func retrieveAPIListFromChannel(c chan response) {
 					} else {
 						// API Details retrieved after startup contains single API per response.
 						if len(apiListResponse.List) == 1 {
-							APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List, apiListResponse.List[0])
+							APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List,
+								apiListResponse.List[0])
 						}
 					}
 					xds.UpdateEnforcerAPIList(response.GatewayLabel, xds.GenerateAPIList(APIListMap[response.GatewayLabel]))
