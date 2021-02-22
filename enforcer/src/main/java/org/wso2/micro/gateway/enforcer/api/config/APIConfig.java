@@ -26,7 +26,6 @@ import java.util.List;
  * Holds the metadata related to the API. Common collection to hold data about any API type like REST, gRPC and etc.
  */
 public class APIConfig {
-
     private String name;
     private String version;
     private String basePath;

@@ -59,7 +59,9 @@ public class AuthFilter implements Filter {
         } catch (APISecurityException e) {
             //TODO: (VirajSalaka) provide the error code properly based on exception (401, 403, 429 etc)
             FilterUtils.setErrorToContext(requestContext, e);
+            return false;
         }
+        FilterUtils.setUnauthenticatedErrorToContext(requestContext);
         return false;
     }
 

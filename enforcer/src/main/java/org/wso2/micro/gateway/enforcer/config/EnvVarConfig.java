@@ -34,10 +34,10 @@ public class EnvVarConfig {
     public static final String XDS_MAX_MSG_SIZE = "XDS_MAX_MSG_SIZE";
 
     // Since the container is running in linux container, path separator is not needed.
-    private static final String DEFAULT_TRUSTED_CA_CERTS_PATH = "/home/wso2/security";
+    private static final String DEFAULT_TRUSTED_CA_CERTS_PATH = "/home/wso2/security/truststore";
     private static final String DEFAULT_ADAPTER_HOST_NAME = "adapter";
     private static final String DEFAULT_ENFORCER_PRIVATE_KEY_PATH = "/home/wso2/security/keystore/mg.key";
-    private static final String DEFAULT_ENFORCER_PUBLIC_CERT_PATH = "/home/wso2/security/truststore/mg.pem";
+    private static final String DEFAULT_ENFORCER_PUBLIC_CERT_PATH = "/home/wso2/security/keystore/mg.pem";
     private static final String DEFAULT_ADAPTER_HOST = "adapter";
     private static final String DEFAULT_ADAPTER_XDS_PORT = "18000";
     private static final String DEFAULT_ENFORCER_LABEL = "enforcer";

@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package wso2.discovery.config.enforcer;
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
+option java_package = "org.wso2.gateway.discovery.config.enforcer";
+option java_outer_classname = "IssuerProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: Issuer]
+
+// Token issuer model
+message Issuer {
+    // Issuer name
+    string name = 1;
+
+    // Issuer identifier
+    string issuer = 2;
+
+    // Alias of the local certificate to be used for token validation
+    // with this issuer
+    string certificateAlias = 3;
+
+    // JWKS endpoint of the issuer
+    string jwksURL = 4;
+
+    // Enable or disable subscription validation for this issuer
+    bool validateSubscription = 5;
+
+    // JWT claim that communicates the consumerKey value
+    string consumerKeyClaim = 6;
+
+    // FilePath of the public certificate mounted in enforcer container
+    string certificateFilePath = 7;
+}
