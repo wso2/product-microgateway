@@ -46,6 +46,8 @@ func GetResponseType(typeURL string) types.ResponseType {
 		return types.SubscriptionPolicyList
 	case resource.ApplicationKeyMappingListType:
 		return types.ApplicationKeyMappingList
+	case resource.RevokedTokensType:
+		return types.RevokedTokens
 	}
 	return types.UnknownType
 }

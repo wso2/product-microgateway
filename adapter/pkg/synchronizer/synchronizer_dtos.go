@@ -33,3 +33,8 @@ type SyncAPIResponse struct {
 	APIID        string
 	GatewayLabel string
 }
+
+type RevokedToken struct {
+	JWT        string `json:"jwt_signature"`
+	ExpiryTime int64  `json:"expiry_time"`
+}

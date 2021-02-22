@@ -25,6 +25,7 @@ import (
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	apiservice "github.com/wso2/micro-gw/api/wso2/discovery/service/api"
 	configservice "github.com/wso2/micro-gw/api/wso2/discovery/service/config"
+	keymgtservice "github.com/wso2/micro-gw/api/wso2/discovery/service/keymgt"
 	subscriptionservice "github.com/wso2/micro-gw/api/wso2/discovery/service/subscription"
 	"github.com/wso2/micro-gw/pkg/api/restserver"
 	wso2_server "github.com/wso2/micro-gw/pkg/discovery/server/v3"
@@ -111,6 +112,7 @@ func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server,
 	discoveryv3.RegisterAggregatedDiscoveryServiceServer(grpcServer, server)
 	configservice.RegisterConfigDiscoveryServiceServer(grpcServer, enforcerServer)
 	apiservice.RegisterApiDiscoveryServiceServer(grpcServer, enforcerServer)
+	keymgtservice.RegisterRevokedTokenDiscoveryServiceServer(grpcServer, enforcerServer)
 	subscriptionservice.RegisterSubscriptionDiscoveryServiceServer(grpcServer, enforcerSdsServer)
 	subscriptionservice.RegisterApplicationDiscoveryServiceServer(grpcServer, enforcerAppDsSrv)
 	subscriptionservice.RegisterApiListDiscoveryServiceServer(grpcServer, enforcerAPIDsSrv)
@@ -181,6 +183,7 @@ func Run(conf *config.Config) {
 
 		// Fetch APIs from control plane
 		fetchAPIsOnStartUp(conf)
+		synchronizer.RetrieveTokensFromCP()
 	}
 OUTER:
 	for {

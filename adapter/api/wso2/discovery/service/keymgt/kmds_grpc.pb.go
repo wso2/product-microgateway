@@ -12,6 +12,7 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
+// Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
 // KMDiscoveryServiceClient is the client API for KMDiscoveryService service.
@@ -31,7 +32,7 @@ func NewKMDiscoveryServiceClient(cc grpc.ClientConnInterface) KMDiscoveryService
 }
 
 func (c *kMDiscoveryServiceClient) StreamKeyManagers(ctx context.Context, opts ...grpc.CallOption) (KMDiscoveryService_StreamKeyManagersClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_KMDiscoveryService_serviceDesc.Streams[0], "/wso2.discovery.service.keymgt.KMDiscoveryService/StreamKeyManagers", opts...)
+	stream, err := c.cc.NewStream(ctx, &KMDiscoveryService_ServiceDesc.Streams[0], "/wso2.discovery.service.keymgt.KMDiscoveryService/StreamKeyManagers", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +100,7 @@ type UnsafeKMDiscoveryServiceServer interface {
 }
 
 func RegisterKMDiscoveryServiceServer(s grpc.ServiceRegistrar, srv KMDiscoveryServiceServer) {
-	s.RegisterService(&_KMDiscoveryService_serviceDesc, srv)
+	s.RegisterService(&KMDiscoveryService_ServiceDesc, srv)
 }
 
 func _KMDiscoveryService_StreamKeyManagers_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -146,7 +147,10 @@ func _KMDiscoveryService_FetchKeyManagers_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
-var _KMDiscoveryService_serviceDesc = grpc.ServiceDesc{
+// KMDiscoveryService_ServiceDesc is the grpc.ServiceDesc for KMDiscoveryService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var KMDiscoveryService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "wso2.discovery.service.keymgt.KMDiscoveryService",
 	HandlerType: (*KMDiscoveryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
