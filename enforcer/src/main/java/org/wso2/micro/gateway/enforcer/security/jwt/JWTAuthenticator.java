@@ -26,6 +26,11 @@ import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
@@ -35,6 +40,7 @@ import org.wso2.micro.gateway.enforcer.config.EnforcerConfig;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
+import org.wso2.micro.gateway.enforcer.constants.JwtConstants;
 import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
@@ -44,8 +50,12 @@ import org.wso2.micro.gateway.enforcer.security.TokenValidationContext;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
+import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
+import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.text.ParseException;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -58,6 +68,7 @@ public class JWTAuthenticator implements Authenticator {
     private static final Logger log = LogManager.getLogger(JWTAuthenticator.class);
     private JWTValidator jwtValidator = new JWTValidator();
     private boolean isGatewayTokenCacheEnabled;
+    private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
 
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
@@ -105,7 +116,8 @@ public class JWTAuthenticator implements Authenticator {
 
         }
 
-        JWTValidationInfo validationInfo = getJwtValidationInfo(signedJWTInfo, jti);
+        JWTValidationInfo validationInfo =
+                getJwtValidationInfo(signedJWTInfo, jti);
         if (validationInfo != null) {
             if (validationInfo.isValid()) {
 
@@ -140,11 +152,31 @@ public class JWTAuthenticator implements Authenticator {
 
                 log.debug("JWT authentication successful.");
                 String endUserToken = null;
-                //                if (jwtGenerationEnabled) {
-                //                    JWTInfoDto jwtInfoDto = GatewayUtils
-                //                            .generateJWTInfoDto(jwtValidationInfo, apiKeyValidationInfoDTO, synCtx);
-                //                    endUserToken = generateAndRetrieveJWTToken(jti, jwtInfoDto);
-                //                }
+
+                // Get jwtConfigurationDto
+                JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().
+                        getJwtConfigurationDto();
+                if (jwtConfigurationDto.isEnabled()) {
+                    try {
+                        // Set public certificate
+                        jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate());
+                        //Set private key
+                        jwtConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey());
+                    } catch (MGWException | CertificateException | IOException e) {
+                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+                    }
+                    // Set ttl
+                    jwtConfigurationDto.setTtl(JWTUtil.getTTL());
+
+                    JWTInfoDto jwtInfoDto = FilterUtils
+                            .generateJWTInfoDto(null, validationInfo, apiKeyValidationInfoDTO, requestContext);
+                    endUserToken = generateAndRetrieveJWTToken(jti, jwtInfoDto);
+                    // Set generated jwt token as a response header
+                    requestContext.addResponseHeaders(jwtConfigurationDto.getJwtHeader(), endUserToken);
+                }
+
                 AuthenticationContext authenticationContext = FilterUtils.generateAuthenticationContext(jti,
                         validationInfo, apiKeyValidationInfoDTO, endUserToken, true);
                 //TODO: (VirajSalaka) Place the keytype population logic properly for self contained token
@@ -162,6 +194,61 @@ public class JWTAuthenticator implements Authenticator {
                     APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
 
+    }
+
+    private String generateAndRetrieveJWTToken(String tokenSignature, JWTInfoDto jwtInfoDto)
+            throws APISecurityException {
+        log.debug("Inside generateAndRetrieveJWTToken");
+
+        String endUserToken = null;
+        boolean valid = false;
+        String jwtTokenCacheKey = jwtInfoDto.getApicontext().concat(":").concat(jwtInfoDto.getVersion()).concat(":")
+                .concat(tokenSignature);
+        JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().getJwtConfigurationDto();
+        // Get the jwt generator class (Default jwt generator class)
+        //Todo: load the class from the configuration
+        jwtGenerator = JWTUtil.getApiMgtGatewayJWTGenerator();
+        if (jwtGenerator != null) {
+            jwtGenerator.setJWTConfigurationDto(jwtConfigurationDto);
+            if (isGatewayTokenCacheEnabled) {
+                try {
+                    Object token = CacheProvider.getGatewayJWTTokenCache().get(jwtTokenCacheKey);
+                    if (token != null) {
+                        endUserToken = (String) token;
+                        String[] splitToken = ((String) token).split("\\.");
+                        org.json.JSONObject payload = new org.json.JSONObject(new String(Base64.getUrlDecoder().
+                                decode(splitToken[1])));
+                        long exp = payload.getLong(JwtConstants.EXP);
+                        long timestampSkew = getTimeStampSkewInSeconds() * 1000;
+                        valid = (exp - System.currentTimeMillis() > timestampSkew);
+                    }
+                } catch (Exception e) {
+                    log.error("Error while getting token from the cache", e);
+                }
+
+                if (StringUtils.isEmpty(endUserToken) || !valid) {
+                    try {
+                        endUserToken = jwtGenerator.generateToken(jwtInfoDto);
+                        CacheProvider.getGatewayJWTTokenCache().put(jwtTokenCacheKey, endUserToken);
+                    } catch (JWTGeneratorException e) {
+                        log.error("Error while Generating Backend JWT", e);
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+                    }
+                }
+            } else {
+                try {
+                    endUserToken = jwtGenerator.generateToken(jwtInfoDto);
+                } catch (JWTGeneratorException e) {
+                    log.error("Error while Generating Backend JWT", e);
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                            APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+                }
+            }
+        } else {
+            log.debug("Error while loading JWTGenerator");
+        }
+        return endUserToken;
     }
 
     /**
@@ -312,7 +399,8 @@ public class JWTAuthenticator implements Authenticator {
             String cacheToken = (String) CacheProvider.getGatewayTokenCache().getIfPresent(jti);
             if (cacheToken != null) {
                 if (CacheProvider.getGatewayKeyCache().getIfPresent(jti) != null) {
-                    JWTValidationInfo tempJWTValidationInfo = (JWTValidationInfo) CacheProvider.getGatewayKeyCache()
+                    JWTValidationInfo tempJWTValidationInfo =
+                            (JWTValidationInfo) CacheProvider.getGatewayKeyCache()
                             .getIfPresent(jti);
                     checkTokenExpiration(jti, tempJWTValidationInfo);
                     jwtValidationInfo = tempJWTValidationInfo;

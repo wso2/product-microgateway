@@ -26,6 +26,16 @@
     </parent>
 
     <version>4.0.0-m6-SNAPSHOT</version>
+    <dependencies>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+    </dependencies>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.am.microgw</groupId>
     <artifactId>mock-backend-server</artifactId>
