@@ -26,6 +26,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/sirupsen/logrus"
 	"github.com/wso2/micro-gw/config"
 	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/auth"
@@ -55,8 +56,8 @@ var (
 	AppList *resourceTypes.ApplicationList
 	// AppKeyMappingList contains the Application key mapping list
 	AppKeyMappingList *resourceTypes.ApplicationKeyMappingList
-	// APIList contains the Api list
-	APIList map[string]*resourceTypes.APIList
+	// APIListMap contains the Api list against each label
+	APIListMap map[string]*resourceTypes.APIList
 	// AppPolicyList contains the Application policy list
 	AppPolicyList *resourceTypes.ApplicationPolicyList
 	// SubPolicyList contains the Subscription policy list
@@ -104,7 +105,7 @@ type resource struct {
 
 func init() {
 	APIListChannel = make(chan response)
-	APIList = make(map[string]*resourceTypes.APIList)
+	APIListMap = make(map[string]*resourceTypes.APIList)
 }
 
 // LoadSubscriptionData loads subscription data from control-plane
@@ -124,7 +125,7 @@ func LoadSubscriptionData(configFile *config.Config) {
 		for _, configuredEnv := range configuredEnvs {
 			queryParamMap := make(map[string]string, 1)
 			queryParamMap[GatewayLabelParam] = configuredEnv
-			go InvokeService(ApisEndpoint, APIList[configuredEnv], queryParamMap, APIListChannel, 0)
+			go InvokeService(ApisEndpoint, APIListMap[configuredEnv], queryParamMap, APIListChannel, 0)
 		}
 	}
 
@@ -237,7 +238,7 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 			logger.LoggerSubscription.Errorf("Error occurred while reading the response received for: "+serviceURL, err)
 			return
 		}
-		logger.LoggerSubscription.Debug("the request to the control plane over the REST API: " + serviceURL + " is successful.")
+		logger.LoggerSubscription.Debug("Request to the control plane over the REST API: " + serviceURL + " is successful.")
 		c <- response{nil, responseBytes, endpoint, gatewayLabel, responseType}
 	} else {
 		c <- response{errors.New(string(responseBytes)), nil, endpoint, gatewayLabel, responseType}
@@ -258,20 +259,24 @@ func retrieveAPIListFromChannel(c chan response) {
 			} else {
 				switch t := newResponse.(type) {
 				case *resourceTypes.APIList:
-					logger.LoggerSubscription.Debug("Received API List information.")
 					apiListResponse := newResponse.(*resourceTypes.APIList)
-					if _, ok := APIList[response.GatewayLabel]; !ok {
+					if logger.LoggerSubscription.Level == logrus.DebugLevel {
+						for _, api := range apiListResponse.List {
+							logger.LoggerSubscription.Debugf("Received API List information for API : %s", api.UUID)
+						}
+					}
+					if _, ok := APIListMap[response.GatewayLabel]; !ok {
 						// During the startup
-						APIList[response.GatewayLabel] = newResponse.(*resourceTypes.APIList)
+						APIListMap[response.GatewayLabel] = newResponse.(*resourceTypes.APIList)
 					} else {
 						// API Details retrieved after startup contains single API per response.
 						if len(apiListResponse.List) == 1 {
-							APIList[response.GatewayLabel].List = append(APIList[response.GatewayLabel].List, apiListResponse.List[0])
+							APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List, apiListResponse.List[0])
 						}
 					}
-					xds.UpdateEnforcerAPIList(response.GatewayLabel, xds.GenerateAPIList(APIList[response.GatewayLabel]))
+					xds.UpdateEnforcerAPIList(response.GatewayLabel, xds.GenerateAPIList(APIListMap[response.GatewayLabel]))
 				default:
-					logger.LoggerSubscription.Debugf("Unknown type %T", t)
+					logger.LoggerSubscription.Warnf("APIList Type DTO is not recieved. Unknown type %T", t)
 				}
 			}
 		}

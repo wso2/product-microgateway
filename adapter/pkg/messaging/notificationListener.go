@@ -121,8 +121,8 @@ func handleAPIEvents(data []byte, eventType string) {
 				conf, _ := config.ReadConfigs()
 				for _, configuredEnv := range conf.ControlPlane.EventHub.EnvironmentLabels {
 					if configuredEnv == env {
-						if _, ok := subscription.APIList[env]; ok {
-							apiListOfEnv := subscription.APIList[env].List
+						if _, ok := subscription.APIListMap[env]; ok {
+							apiListOfEnv := subscription.APIListMap[env].List
 							for i := range apiListOfEnv {
 								// If API is already found, it is a new revision deployement.
 								// Subscription relates details of an API does not change between new revisions
@@ -136,19 +136,19 @@ func handleAPIEvents(data []byte, eventType string) {
 							queryParamMap[subscription.ContextParam] = apiEvent.Context
 							queryParamMap[subscription.VersionParam] = apiEvent.Version
 							// TODO: (VirajSalaka) Fix the REST API call once the APIM Event hub implementation is fixed.
-							go subscription.InvokeService(subscription.ApisEndpoint, subscription.APIList[env], queryParamMap,
+							go subscription.InvokeService(subscription.ApisEndpoint, subscription.APIListMap[env], queryParamMap,
 								subscription.APIListChannel, 0)
 						}
 					}
 				}
 			} else if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
-				if _, ok := subscription.APIList[env]; ok {
-					apiListOfEnv := subscription.APIList[env].List
+				if _, ok := subscription.APIListMap[env]; ok {
+					apiListOfEnv := subscription.APIListMap[env].List
 					for i := range apiListOfEnv {
 						// TODO: (VirajSalaka) Use APIId once it is fixed from control plane
 						if apiEvent.Context == apiListOfEnv[i].Context && apiEvent.Version == apiListOfEnv[i].Version {
-							subscription.APIList[env].List = deleteAPIFromList(apiListOfEnv, i, apiEvent.UUID, env)
-							xds.UpdateEnforcerAPIList(env, xds.GenerateAPIList(subscription.APIList[env]))
+							subscription.APIListMap[env].List = deleteAPIFromList(apiListOfEnv, i, apiEvent.UUID, env)
+							xds.UpdateEnforcerAPIList(env, xds.GenerateAPIList(subscription.APIListMap[env]))
 							break
 						}
 					}
