@@ -206,9 +206,11 @@ func handleApplicationEvents(data []byte, eventType string) {
 
 		if applicationEvent.Event.Type == applicationCreate {
 			subscription.AppList.List = append(subscription.AppList.List, application)
+			logger.LoggerMsg.Infof("Application %s is added.", applicationEvent.ApplicationName)
 		} else if applicationEvent.Event.Type == applicationUpdate {
 			subscription.AppList.List = removeApplication(subscription.AppList.List, applicationEvent.ApplicationID)
 			subscription.AppList.List = append(subscription.AppList.List, application)
+			logger.LoggerMsg.Infof("Application %s is added.", applicationEvent.ApplicationName)
 		} else if applicationEvent.Event.Type == applicationDelete {
 			subscription.AppList.List = removeApplication(subscription.AppList.List, applicationEvent.ApplicationID)
 		}
@@ -343,7 +345,7 @@ func removeSubscription(subscriptions []resourceTypes.Subscription, id int32) []
 func updateSubscription(id int32, sub resourceTypes.Subscription) {
 	//Iterated in reverse to optimize handling subscription creation scenario.
 	updateIndex := -1
-	for index := len(subscription.SubList.List); index >= 0; index-- {
+	for index := len(subscription.SubList.List) - 1; index >= 0; index-- {
 		if subscription.SubList.List[index].SubscriptionID == id {
 			updateIndex = index
 			break
