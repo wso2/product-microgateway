@@ -18,6 +18,7 @@
 package envoyconf
 
 import (
+	"net"
 	"regexp"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
@@ -286,6 +287,11 @@ func createUpstreamTLSContext(upstreamCerts []byte, address *corev3.Address) *tl
 			},
 			TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
 		},
+	}
+
+	// Sni should be assigned when there is a hostname
+	if net.ParseIP(address.GetSocketAddress().GetAddress()) == nil {
+		upstreamTLSContext.Sni = address.GetSocketAddress().GetAddress()
 	}
 
 	if !conf.Envoy.Upstream.TLS.DisableSSLVerification {
