@@ -46,6 +46,7 @@ public class RequestContext {
     private Map<String, String> responseHeaders;
     //Correlation ID
     private final String correlationID;
+    private Map<String, String> metadataMap = new HashMap<>();
 
     private RequestContext() {
         correlationID = UUID.randomUUID().toString();
@@ -58,6 +59,14 @@ public class RequestContext {
      */
     public String getCorrelationID() {
         return correlationID;
+    }
+
+    public Map<String, String> getMetadataMap() {
+        return metadataMap;
+    }
+
+    public void addMetadataToMap(String key, String value) {
+        metadataMap.put(key, value);
     }
 
     /**

@@ -107,15 +107,17 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         }
                 );
             }
+            Struct.Builder structBuilder = Struct.newBuilder();
+            responseObject.getMetaDataMap().forEach((key, value) ->
+                    structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
                     .build();
             responseBuilder.addHeaders(headerValueOption);
+
             return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                     .setOkResponse(okResponseBuilder.build())
-                    .setDynamicMetadata(Struct.newBuilder().putFields("correlationID",
-                            Value.newBuilder().setStringValue(responseObject.getCorrelationID()).build())
-                            .build())
+                    .setDynamicMetadata(structBuilder.build())
                     .build();
         }
     }

@@ -23,6 +23,7 @@ import org.wso2.gateway.discovery.api.Api;
 import org.wso2.gateway.discovery.api.Operation;
 import org.wso2.gateway.discovery.api.Resource;
 import org.wso2.micro.gateway.enforcer.Filter;
+import org.wso2.micro.gateway.enforcer.analytics.AnalyticsFilter;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
@@ -75,9 +76,17 @@ public class RestAPI implements API {
             if (requestContext.getResponseHeaders() != null) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
+            boolean analyticsEnabled = true;
+            if (analyticsEnabled) {
+                responseObject.setMetaDataMap(requestContext.getMetadataMap());
+            }
         } else {
             // If a enforcer stops with a false, it will be passed directly to the client.
             responseObject.setDirectResponse(true);
+            boolean analyticsEnabled = true;
+            if (analyticsEnabled) {
+                responseObject.setMetaDataMap(requestContext.getMetadataMap());
+            }
             responseObject.setStatusCode(Integer.parseInt(
                     requestContext.getProperties().get(APIConstants.MessageFormat.STATUS_CODE).toString()));
             if (requestContext.getProperties().get(APIConstants.MessageFormat.ERROR_CODE) != null) {
@@ -124,7 +133,9 @@ public class RestAPI implements API {
         AuthFilter authFilter = new AuthFilter();
         authFilter.init(apiConfig);
         CorsFilter corsFilter = new CorsFilter();
+        AnalyticsFilter analyticsFilter = new AnalyticsFilter();
         this.filters.add(corsFilter);
         this.filters.add(authFilter);
+        this.filters.add(analyticsFilter);
     }
 }

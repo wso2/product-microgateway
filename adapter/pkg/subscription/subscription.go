@@ -248,7 +248,7 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 		c <- response{nil, responseBytes, endpoint, gatewayLabel, responseType}
 	} else {
 		c <- response{errors.New(string(responseBytes)), nil, endpoint, gatewayLabel, responseType}
-		logger.LoggerSubscription.Errorf("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCqode),
+		logger.LoggerSubscription.Errorf("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode),
 			err)
 	}
 }

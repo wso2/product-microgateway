@@ -30,6 +30,7 @@ public class ResponseObject {
     private String errorMessage;
     private String errorDescription;
     private Map<String, String> headerMap;
+    private Map<String, String> metaDataMap;
     private boolean isDirectResponse = false;
 
     public ResponseObject(String correlationID) {
@@ -90,5 +91,13 @@ public class ResponseObject {
 
     public String getCorrelationID() {
         return correlationID;
+    }
+
+    public Map<String, String> getMetaDataMap() {
+        return metaDataMap;
+    }
+
+    public void setMetaDataMap(Map<String, String> metaDataMap) {
+        this.metaDataMap = metaDataMap;
     }
 }
