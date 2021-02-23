@@ -365,7 +365,6 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 			ValidateSubscription: issuer.ValidateSubscription,
 			JwksURL:              issuer.JwksURL,
 			CertificateFilePath:  issuer.CertificateFilePath,
-			JwtTransformerImpl:   issuer.JwtTransformerImpl,
 			ClaimMapping:         claimMaps,
 		}
 		issuers = append(issuers, jwtConfig)

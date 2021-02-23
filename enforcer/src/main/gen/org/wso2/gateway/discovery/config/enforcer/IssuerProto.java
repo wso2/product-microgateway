@@ -31,17 +31,16 @@ public final class IssuerProto {
       "\n+wso2/discovery/config/enforcer/issuer." +
       "proto\022\036wso2.discovery.config.enforcer\0322w" +
       "so2/discovery/config/enforcer/claim_mapp" +
-      "ing.proto\"\206\002\n\006Issuer\022\014\n\004name\030\001 \001(\t\022\016\n\006is" +
+      "ing.proto\"\352\001\n\006Issuer\022\014\n\004name\030\001 \001(\t\022\016\n\006is" +
       "suer\030\002 \001(\t\022\030\n\020certificateAlias\030\003 \001(\t\022\017\n\007" +
       "jwksURL\030\004 \001(\t\022\034\n\024validateSubscription\030\005 " +
       "\001(\010\022\030\n\020consumerKeyClaim\030\006 \001(\t\022\033\n\023certifi" +
-      "cateFilePath\030\007 \001(\t\022\032\n\022jwtTransformerImpl" +
-      "\030\010 \001(\t\022B\n\014claimMapping\030\t \003(\0132,.wso2.disc" +
-      "overy.config.enforcer.ClaimMappingB\213\001\n*o" +
-      "rg.wso2.gateway.discovery.config.enforce" +
-      "rB\013IssuerProtoP\001ZNgithub.com/envoyproxy/" +
-      "go-control-plane/wso2/discovery/config/e" +
-      "nforcer;enforcerb\006proto3"
+      "cateFilePath\030\007 \001(\t\022B\n\014claimMapping\030\010 \003(\013" +
+      "2,.wso2.discovery.config.enforcer.ClaimM" +
+      "appingB\213\001\n*org.wso2.gateway.discovery.co" +
+      "nfig.enforcerB\013IssuerProtoP\001ZNgithub.com" +
+      "/envoyproxy/go-control-plane/wso2/discov" +
+      "ery/config/enforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -53,7 +52,7 @@ public final class IssuerProto {
     internal_static_wso2_discovery_config_enforcer_Issuer_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Issuer_descriptor,
-        new java.lang.String[] { "Name", "Issuer", "CertificateAlias", "JwksURL", "ValidateSubscription", "ConsumerKeyClaim", "CertificateFilePath", "JwtTransformerImpl", "ClaimMapping", });
+        new java.lang.String[] { "Name", "Issuer", "CertificateAlias", "JwksURL", "ValidateSubscription", "ConsumerKeyClaim", "CertificateFilePath", "ClaimMapping", });
     org.wso2.gateway.discovery.config.enforcer.ClaimMappingProto.getDescriptor();
   }
 

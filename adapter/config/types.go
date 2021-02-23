@@ -168,7 +168,6 @@ type jwtTokenConfig struct {
 	ValidateSubscription bool
 	ConsumerKeyClaim     string
 	CertificateFilePath  string
-	JwtTransformerImpl   string
 	ClaimMapping         []claimMapping
 }
 

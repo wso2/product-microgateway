@@ -26,7 +26,6 @@ private static final long serialVersionUID = 0L;
     jwksURL_ = "";
     consumerKeyClaim_ = "";
     certificateFilePath_ = "";
-    jwtTransformerImpl_ = "";
     claimMapping_ = java.util.Collections.emptyList();
   }
 
@@ -103,12 +102,6 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 66: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            jwtTransformerImpl_ = s;
-            break;
-          }
-          case 74: {
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
               claimMapping_ = new java.util.ArrayList<org.wso2.gateway.discovery.config.enforcer.ClaimMapping>();
               mutable_bitField0_ |= 0x00000001;
@@ -445,60 +438,14 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int JWTTRANSFORMERIMPL_FIELD_NUMBER = 8;
-  private volatile java.lang.Object jwtTransformerImpl_;
-  /**
-   * <pre>
-   * Class name of the jwt transformer
-   * </pre>
-   *
-   * <code>string jwtTransformerImpl = 8;</code>
-   * @return The jwtTransformerImpl.
-   */
-  @java.lang.Override
-  public java.lang.String getJwtTransformerImpl() {
-    java.lang.Object ref = jwtTransformerImpl_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      jwtTransformerImpl_ = s;
-      return s;
-    }
-  }
-  /**
-   * <pre>
-   * Class name of the jwt transformer
-   * </pre>
-   *
-   * <code>string jwtTransformerImpl = 8;</code>
-   * @return The bytes for jwtTransformerImpl.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getJwtTransformerImplBytes() {
-    java.lang.Object ref = jwtTransformerImpl_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      jwtTransformerImpl_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int CLAIMMAPPING_FIELD_NUMBER = 9;
+  public static final int CLAIMMAPPING_FIELD_NUMBER = 8;
   private java.util.List<org.wso2.gateway.discovery.config.enforcer.ClaimMapping> claimMapping_;
   /**
    * <pre>
    * Claim mapping for the issuer
    * </pre>
    *
-   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
    */
   @java.lang.Override
   public java.util.List<org.wso2.gateway.discovery.config.enforcer.ClaimMapping> getClaimMappingList() {
@@ -509,7 +456,7 @@ private static final long serialVersionUID = 0L;
    * Claim mapping for the issuer
    * </pre>
    *
-   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
    */
   @java.lang.Override
   public java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder> 
@@ -521,7 +468,7 @@ private static final long serialVersionUID = 0L;
    * Claim mapping for the issuer
    * </pre>
    *
-   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
    */
   @java.lang.Override
   public int getClaimMappingCount() {
@@ -532,7 +479,7 @@ private static final long serialVersionUID = 0L;
    * Claim mapping for the issuer
    * </pre>
    *
-   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.config.enforcer.ClaimMapping getClaimMapping(int index) {
@@ -543,7 +490,7 @@ private static final long serialVersionUID = 0L;
    * Claim mapping for the issuer
    * </pre>
    *
-   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder getClaimMappingOrBuilder(
@@ -586,11 +533,8 @@ private static final long serialVersionUID = 0L;
     if (!getCertificateFilePathBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 7, certificateFilePath_);
     }
-    if (!getJwtTransformerImplBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 8, jwtTransformerImpl_);
-    }
     for (int i = 0; i < claimMapping_.size(); i++) {
-      output.writeMessage(9, claimMapping_.get(i));
+      output.writeMessage(8, claimMapping_.get(i));
     }
     unknownFields.writeTo(output);
   }
@@ -623,12 +567,9 @@ private static final long serialVersionUID = 0L;
     if (!getCertificateFilePathBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, certificateFilePath_);
     }
-    if (!getJwtTransformerImplBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, jwtTransformerImpl_);
-    }
     for (int i = 0; i < claimMapping_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(9, claimMapping_.get(i));
+        .computeMessageSize(8, claimMapping_.get(i));
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -659,8 +600,6 @@ private static final long serialVersionUID = 0L;
         .equals(other.getConsumerKeyClaim())) return false;
     if (!getCertificateFilePath()
         .equals(other.getCertificateFilePath())) return false;
-    if (!getJwtTransformerImpl()
-        .equals(other.getJwtTransformerImpl())) return false;
     if (!getClaimMappingList()
         .equals(other.getClaimMappingList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
@@ -689,8 +628,6 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getConsumerKeyClaim().hashCode();
     hash = (37 * hash) + CERTIFICATEFILEPATH_FIELD_NUMBER;
     hash = (53 * hash) + getCertificateFilePath().hashCode();
-    hash = (37 * hash) + JWTTRANSFORMERIMPL_FIELD_NUMBER;
-    hash = (53 * hash) + getJwtTransformerImpl().hashCode();
     if (getClaimMappingCount() > 0) {
       hash = (37 * hash) + CLAIMMAPPING_FIELD_NUMBER;
       hash = (53 * hash) + getClaimMappingList().hashCode();
@@ -847,8 +784,6 @@ private static final long serialVersionUID = 0L;
 
       certificateFilePath_ = "";
 
-      jwtTransformerImpl_ = "";
-
       if (claimMappingBuilder_ == null) {
         claimMapping_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -889,7 +824,6 @@ private static final long serialVersionUID = 0L;
       result.validateSubscription_ = validateSubscription_;
       result.consumerKeyClaim_ = consumerKeyClaim_;
       result.certificateFilePath_ = certificateFilePath_;
-      result.jwtTransformerImpl_ = jwtTransformerImpl_;
       if (claimMappingBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0)) {
           claimMapping_ = java.util.Collections.unmodifiableList(claimMapping_);
@@ -972,10 +906,6 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getCertificateFilePath().isEmpty()) {
         certificateFilePath_ = other.certificateFilePath_;
-        onChanged();
-      }
-      if (!other.getJwtTransformerImpl().isEmpty()) {
-        jwtTransformerImpl_ = other.jwtTransformerImpl_;
         onChanged();
       }
       if (claimMappingBuilder_ == null) {
@@ -1658,102 +1588,6 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object jwtTransformerImpl_ = "";
-    /**
-     * <pre>
-     * Class name of the jwt transformer
-     * </pre>
-     *
-     * <code>string jwtTransformerImpl = 8;</code>
-     * @return The jwtTransformerImpl.
-     */
-    public java.lang.String getJwtTransformerImpl() {
-      java.lang.Object ref = jwtTransformerImpl_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        jwtTransformerImpl_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <pre>
-     * Class name of the jwt transformer
-     * </pre>
-     *
-     * <code>string jwtTransformerImpl = 8;</code>
-     * @return The bytes for jwtTransformerImpl.
-     */
-    public com.google.protobuf.ByteString
-        getJwtTransformerImplBytes() {
-      java.lang.Object ref = jwtTransformerImpl_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        jwtTransformerImpl_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <pre>
-     * Class name of the jwt transformer
-     * </pre>
-     *
-     * <code>string jwtTransformerImpl = 8;</code>
-     * @param value The jwtTransformerImpl to set.
-     * @return This builder for chaining.
-     */
-    public Builder setJwtTransformerImpl(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      jwtTransformerImpl_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * Class name of the jwt transformer
-     * </pre>
-     *
-     * <code>string jwtTransformerImpl = 8;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearJwtTransformerImpl() {
-      
-      jwtTransformerImpl_ = getDefaultInstance().getJwtTransformerImpl();
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * Class name of the jwt transformer
-     * </pre>
-     *
-     * <code>string jwtTransformerImpl = 8;</code>
-     * @param value The bytes for jwtTransformerImpl to set.
-     * @return This builder for chaining.
-     */
-    public Builder setJwtTransformerImplBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      jwtTransformerImpl_ = value;
-      onChanged();
-      return this;
-    }
-
     private java.util.List<org.wso2.gateway.discovery.config.enforcer.ClaimMapping> claimMapping_ =
       java.util.Collections.emptyList();
     private void ensureClaimMappingIsMutable() {
@@ -1771,7 +1605,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public java.util.List<org.wso2.gateway.discovery.config.enforcer.ClaimMapping> getClaimMappingList() {
       if (claimMappingBuilder_ == null) {
@@ -1785,7 +1619,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public int getClaimMappingCount() {
       if (claimMappingBuilder_ == null) {
@@ -1799,7 +1633,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.ClaimMapping getClaimMapping(int index) {
       if (claimMappingBuilder_ == null) {
@@ -1813,7 +1647,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public Builder setClaimMapping(
         int index, org.wso2.gateway.discovery.config.enforcer.ClaimMapping value) {
@@ -1834,7 +1668,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public Builder setClaimMapping(
         int index, org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder builderForValue) {
@@ -1852,7 +1686,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public Builder addClaimMapping(org.wso2.gateway.discovery.config.enforcer.ClaimMapping value) {
       if (claimMappingBuilder_ == null) {
@@ -1872,7 +1706,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public Builder addClaimMapping(
         int index, org.wso2.gateway.discovery.config.enforcer.ClaimMapping value) {
@@ -1893,7 +1727,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public Builder addClaimMapping(
         org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder builderForValue) {
@@ -1911,7 +1745,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public Builder addClaimMapping(
         int index, org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder builderForValue) {
@@ -1929,7 +1763,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public Builder addAllClaimMapping(
         java.lang.Iterable<? extends org.wso2.gateway.discovery.config.enforcer.ClaimMapping> values) {
@@ -1948,7 +1782,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public Builder clearClaimMapping() {
       if (claimMappingBuilder_ == null) {
@@ -1965,7 +1799,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public Builder removeClaimMapping(int index) {
       if (claimMappingBuilder_ == null) {
@@ -1982,7 +1816,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder getClaimMappingBuilder(
         int index) {
@@ -1993,7 +1827,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder getClaimMappingOrBuilder(
         int index) {
@@ -2007,7 +1841,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder> 
          getClaimMappingOrBuilderList() {
@@ -2022,7 +1856,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder addClaimMappingBuilder() {
       return getClaimMappingFieldBuilder().addBuilder(
@@ -2033,7 +1867,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder addClaimMappingBuilder(
         int index) {
@@ -2045,7 +1879,7 @@ private static final long serialVersionUID = 0L;
      * Claim mapping for the issuer
      * </pre>
      *
-     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
      */
     public java.util.List<org.wso2.gateway.discovery.config.enforcer.ClaimMapping.Builder> 
          getClaimMappingBuilderList() {

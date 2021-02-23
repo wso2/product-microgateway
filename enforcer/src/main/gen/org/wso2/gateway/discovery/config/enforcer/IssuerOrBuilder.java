@@ -141,30 +141,10 @@ public interface IssuerOrBuilder extends
 
   /**
    * <pre>
-   * Class name of the jwt transformer
-   * </pre>
-   *
-   * <code>string jwtTransformerImpl = 8;</code>
-   * @return The jwtTransformerImpl.
-   */
-  java.lang.String getJwtTransformerImpl();
-  /**
-   * <pre>
-   * Class name of the jwt transformer
-   * </pre>
-   *
-   * <code>string jwtTransformerImpl = 8;</code>
-   * @return The bytes for jwtTransformerImpl.
-   */
-  com.google.protobuf.ByteString
-      getJwtTransformerImplBytes();
-
-  /**
-   * <pre>
    * Claim mapping for the issuer
    * </pre>
    *
-   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
    */
   java.util.List<org.wso2.gateway.discovery.config.enforcer.ClaimMapping> 
       getClaimMappingList();
@@ -173,7 +153,7 @@ public interface IssuerOrBuilder extends
    * Claim mapping for the issuer
    * </pre>
    *
-   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.ClaimMapping getClaimMapping(int index);
   /**
@@ -181,7 +161,7 @@ public interface IssuerOrBuilder extends
    * Claim mapping for the issuer
    * </pre>
    *
-   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
    */
   int getClaimMappingCount();
   /**
@@ -189,7 +169,7 @@ public interface IssuerOrBuilder extends
    * Claim mapping for the issuer
    * </pre>
    *
-   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
    */
   java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder> 
       getClaimMappingOrBuilderList();
@@ -198,7 +178,7 @@ public interface IssuerOrBuilder extends
    * Claim mapping for the issuer
    * </pre>
    *
-   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 9;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder getClaimMappingOrBuilder(
       int index);

@@ -36,9 +36,6 @@ message Issuer {
     // FilePath of the public certificate mounted in enforcer container
     string certificateFilePath = 7;
 
-    // Class name of the jwt transformer
-    string jwtTransformerImpl = 8;
-
     // Claim mapping for the issuer
-    repeated ClaimMapping claimMapping = 9;
+    repeated ClaimMapping claimMapping = 8;
 }

@@ -29,6 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
@@ -70,7 +71,10 @@ public class JWTValidator {
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
         if (StringUtils.isNotEmpty(issuer) && tokenIssuers.containsKey(issuer)) {
             this.tokenIssuer = this.tokenIssuers.get(issuer);
-            this.jwtTransformer = JWTUtil.loadJWTTransformerClass(issuer);
+            this.jwtTransformer = ConfigHolder.getInstance().getConfig().getJwtTransformerMap().get(issuer);
+            if (this.jwtTransformer == null) {
+                this.jwtTransformer = new DefaultJWTTransformer();
+            }
             this.jwtTransformer.loadConfiguration(tokenIssuer);
             return validateToken(signedJWTInfo);
         }

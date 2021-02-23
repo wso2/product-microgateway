@@ -45,6 +45,7 @@ import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
+import org.wso2.micro.gateway.enforcer.security.jwt.JWTUtil;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
 import java.io.IOException;
@@ -184,14 +185,20 @@ public class ConfigHolder {
                 ClaimMappingDto map = new ClaimMappingDto(claimMap.getRemoteClaim(), claimMap.getLocalClaim());
                 issuerDto.addClaimMapping(map);
             }
+            // Load jwt transformer map.
+            config.setJwtTransformerMap(JWTUtil.loadJWTTransformers());
             String certificateAlias = jwtIssuer.getCertificateAlias();
             if (certificateAlias != null) {
                 try {
                     Certificate cert = TLSUtils.getCertificateFromFile(jwtIssuer.getCertificateFilePath());
                     getTrustStoreForJWT().setCertificateEntry(certificateAlias, cert);
-                    issuerDto.setCertificate(cert);
+                    TLSUtils.convertCertificate(cert);
+                    // Convert the certificate to a javax.security.cert.Certificate and set to issuerDto.
+                    issuerDto.setCertificate(TLSUtils.convertCertificate(cert));
                 } catch (KeyStoreException | CertificateException | IOException e) {
                     logger.error("Error while adding certificates to the JWT related Truststore", e);
+                    // Continue to avoid making a invalid issuer.
+                    continue;
                 }
             }
 

@@ -24,96 +24,14 @@ import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
  * Holds meta data related to a JWT token issuer.
  */
 public class ExtendedTokenIssuerDto extends TokenIssuerDto {
-    private String issuer;
+    //private String issuer;
     private String name;
-    /*private boolean disableDefaultClaimMapping = false;
-    private Map<String, ClaimMappingDto> claimConfigurations = new HashMap<>();
-    private JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
-    private Certificate certificate;
-    private String consumerKeyClaim;
-    private String scopesClaim;*/
     private boolean validateSubscriptions;
 
 
     public ExtendedTokenIssuerDto(String issuer) {
         super(issuer);
     }
-
-    /*public String getIssuer() {
-
-        return issuer;
-    }
-
-    public void setIssuer(String issuer) {
-
-        this.issuer = issuer;
-    }
-
-    public Map<String, ClaimMappingDto> getClaimConfigurations() {
-
-        return claimConfigurations;
-    }
-
-    public void addClaimMapping(ClaimMappingDto claimMappingDto) {
-        claimConfigurations.put(claimMappingDto.getRemoteClaim(), claimMappingDto);
-    }
-
-    public JWKSConfigurationDTO getJwksConfigurationDTO() {
-
-        return jwksConfigurationDTO;
-    }
-
-    public boolean isDisableDefaultClaimMapping() {
-
-        return disableDefaultClaimMapping;
-    }
-
-    public void setDisableDefaultClaimMapping(boolean disableDefaultClaimMapping) {
-
-        this.disableDefaultClaimMapping = disableDefaultClaimMapping;
-    }
-
-    public void setJwksConfigurationDTO(JWKSConfigurationDTO jwksConfigurationDTO) {
-
-        this.jwksConfigurationDTO = jwksConfigurationDTO;
-    }
-
-    public String getConsumerKeyClaim() {
-
-        return consumerKeyClaim;
-    }
-
-    public void setConsumerKeyClaim(String consumerKeyClaim) {
-
-        this.consumerKeyClaim = consumerKeyClaim;
-    }
-
-    public String getScopesClaim() {
-
-        return scopesClaim;
-    }
-
-    public void setScopesClaim(String scopesClaim) {
-
-        this.scopesClaim = scopesClaim;
-    }
-
-    public void addClaimMappings(ClaimMappingDto[] claimMappingDto) {
-
-        for (ClaimMappingDto mappingDto : claimMappingDto) {
-            addClaimMapping(mappingDto);
-        }
-    }
-
-    public Certificate getCertificate() {
-
-        return certificate;
-    }
-
-    public void setCertificate(Certificate certificate) {
-
-        this.certificate = certificate;
-    }*/
 
     public boolean isValidateSubscriptions() {
         return validateSubscriptions;

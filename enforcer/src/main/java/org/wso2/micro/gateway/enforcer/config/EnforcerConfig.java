@@ -19,6 +19,7 @@
 package org.wso2.micro.gateway.enforcer.config;
 
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
@@ -41,7 +42,7 @@ public class EnforcerConfig {
     private CacheDto cacheDto;
     private String publicCertificatePath = "";
     private String privateKeyPath = "";
-    private Map<String, String> jwtTransformerMap = new HashMap<>();
+    private Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -107,11 +108,11 @@ public class EnforcerConfig {
         return privateKeyPath;
     }
 
-    public Map<String, String> getJwtTransformerMap() {
+    public Map<String, JWTTransformer> getJwtTransformerMap() {
         return jwtTransformerMap;
     }
 
-    public void setJwtTransformerMap(Map<String, String> jwtTransformerMap) {
+    public void setJwtTransformerMap(Map<String, JWTTransformer> jwtTransformerMap) {
         this.jwtTransformerMap = jwtTransformerMap;
     }
 }

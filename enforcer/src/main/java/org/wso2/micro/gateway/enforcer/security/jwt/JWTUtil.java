@@ -33,7 +33,6 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
-import org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
@@ -49,6 +48,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
@@ -70,7 +70,9 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -256,46 +258,49 @@ public class JWTUtil {
         return jarFilesList;
     }
 
-    public static JWTTransformer loadJWTTransformerClass(String issuer) {
-        String classNameInConfig = ConfigHolder.getInstance().getConfig().getJwtTransformerMap().get(issuer);
+    public static Map<String, JWTTransformer> loadJWTTransformers() {
         JWTTransformer jwtTransformer = null;
+        List<String> jarFilesList = getJarFilesList();
+        Map<String, JWTTransformer> jwtTransformersMap = new HashMap<>();
+        for (int fileIndex = 0; fileIndex < jarFilesList.size(); fileIndex++) {
+            try {
+                String pathToJar = JwtConstants.DROPINS_FOLDER + jarFilesList.get(fileIndex);
+                JarFile jarFile = new JarFile(pathToJar);
+                Enumeration<JarEntry> e = jarFile.entries();
 
-        if (!(classNameInConfig.equals(JWTConstants.DEFAULT_JWT_TRANSFORMER_CLASS_NAME))) {
-            // Load custom jwt generator class
-            // Get the names of jar files available in the location.
-            List<String> jarFilesList = getJarFilesList();
-            for (int fileIndex = 0; fileIndex < jarFilesList.size(); fileIndex++) {
-                try {
-                    String pathToJar = JwtConstants.DROPINS_FOLDER + jarFilesList.get(fileIndex);
-                    JarFile jarFile = new JarFile(pathToJar);
-                    Enumeration<JarEntry> e = jarFile.entries();
+                URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
+                URLClassLoader cl = URLClassLoader.newInstance(urls);
+                while (e.hasMoreElements()) {
+                    JarEntry je = e.nextElement();
+                    if (je.isDirectory() || !je.getName().endsWith(JwtConstants.CLASS)) {
+                        continue;
+                    }
+                    // -6 because of .class
+                    String className = je.getName().substring(0, je.getName().length() - 6);
+                    className = className.replace('/', '.');
 
-                    URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
-                    URLClassLoader cl = URLClassLoader.newInstance(urls);
-                    while (e.hasMoreElements()) {
-                        JarEntry je = e.nextElement();
-                        if (je.isDirectory() || !je.getName().endsWith(JwtConstants.CLASS)) {
-                            continue;
-                        }
-                        // -6 because of .class
-                        String className = je.getName().substring(0, je.getName().length() - 6);
-                        className = className.replace('/', '.');
-                        if (classNameInConfig.equals(className)) {
-                            Class classInJar = cl.loadClass(className);
-                            try {
-                                jwtTransformer = (JWTTransformer) classInJar.newInstance();
-                                return jwtTransformer;
-                            } catch (InstantiationException | IllegalAccessException exception) {
-                                log.debug("Error in generating an object from the class", exception);
+                    Class classInJar = cl.loadClass(className);
+                    try {
+                        Annotation[] annotations = classInJar.getAnnotations();
+                        for (Annotation annotation : annotations) {
+                            if (annotation instanceof JwtTransformerAnnotation) {
+                                JwtTransformerAnnotation jwtTransformerAnnotation =
+                                        (JwtTransformerAnnotation) annotation;
+                                if (jwtTransformerAnnotation.enabled() == true) {
+                                    jwtTransformer = (JWTTransformer) classInJar.newInstance();
+                                    jwtTransformersMap.put(jwtTransformerAnnotation.issuer(), jwtTransformer);
+                                }
                             }
                         }
+                    } catch (InstantiationException | IllegalAccessException exception) {
+                        log.debug("Error in generating an object from the class", exception);
                     }
-                } catch (IOException | ClassNotFoundException e) {
-                    log.debug("Error in loading class", e);
                 }
+            } catch (IOException | ClassNotFoundException e) {
+                log.debug("Error in loading class", e);
             }
         }
-        return (JWTTransformer) new DefaultJWTTransformer();
+        return jwtTransformersMap;
     }
 }
 
