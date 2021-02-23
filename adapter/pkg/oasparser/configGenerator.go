@@ -23,35 +23,23 @@ import (
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	"github.com/wso2/micro-gw/loggers"
-
-	wso2 "github.com/envoyproxy/go-control-plane/wso2/discovery/api"
+	"github.com/wso2/micro-gw/api/wso2/discovery/api"
 	envoy "github.com/wso2/micro-gw/pkg/oasparser/envoyconf"
 	"github.com/wso2/micro-gw/pkg/oasparser/model"
 	mgw "github.com/wso2/micro-gw/pkg/oasparser/model"
-	"github.com/wso2/micro-gw/pkg/oasparser/operator"
 )
 
 // GetProductionRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
 // when the openAPI Json is provided. For websockets apiJsn created from api.yaml file is considerd.
-func GetProductionRoutesClustersEndpoints(byteArr []byte, upstreamCerts []byte, apiType string) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address, mgw.MgwSwagger) {
-	var mgwSwagger mgw.MgwSwagger
+func GetProductionRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCerts []byte) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
 	var routes []*routev3.Route
 	var clusters []*clusterv3.Cluster
 	var endpoints []*corev3.Address
 
-	if apiType == mgw.HTTP {
-		mgwSwagger = operator.GetMgwSwagger(byteArr)
-	} else if apiType == mgw.WS {
-		mgwSwagger = operator.GetMgwSwaggerWebSocket(byteArr)
-	} else {
-		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
-		loggers.LoggerOasparser.Errorf("API type not currently supported with WSO2 Micro-gateway")
-	}
 	routes, clusters, endpoints = envoy.CreateRoutesWithClusters(mgwSwagger, upstreamCerts)
 	//TODO: (VirajSalaka) Decide if this needs to be added to the MgwSwagger
 
-	return routes, clusters, endpoints, mgwSwagger
+	return routes, clusters, endpoints
 }
 
 // GetProductionListenerAndRouteConfig generates the listener and routesconfiguration configurations.
@@ -100,13 +88,13 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, routes []*route
 }
 
 // GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition.
-func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *wso2.Api {
-	prodUrls := []*wso2.Endpoint{}
-	sandUrls := []*wso2.Endpoint{}
-	resources := []*wso2.Resource{}
+func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *api.Api {
+	prodUrls := []*api.Endpoint{}
+	sandUrls := []*api.Endpoint{}
+	resources := []*api.Resource{}
 
 	for _, ep := range mgwSwagger.GetProdEndpoints() {
-		prodEp := &wso2.Endpoint{
+		prodEp := &api.Endpoint{
 			Basepath: ep.Basepath,
 			Host:     ep.Host,
 			Port:     ep.Port,
@@ -116,7 +104,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *wso2.Api {
 	}
 
 	for _, ep := range mgwSwagger.GetSandEndpoints() {
-		sandEp := &wso2.Endpoint{
+		sandEp := &api.Endpoint{
 			Basepath: ep.Basepath,
 			Host:     ep.Host,
 			Port:     ep.Port,
@@ -126,15 +114,19 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *wso2.Api {
 	}
 
 	for _, res := range mgwSwagger.GetResources() {
-		resource := &wso2.Resource{
+		var operations = make([]*api.Operation, len(res.GetMethod()))
+		for i, op := range res.GetMethod() {
+			operations[i] = GetEnforcerAPIOperation(op)
+		}
+		resource := &api.Resource{
 			Id:      res.GetID(),
-			Methods: res.GetMethod(),
+			Methods: operations,
 			Path:    res.GetPath(),
 		}
 		resources = append(resources, resource)
 	}
 
-	return &wso2.Api{
+	return &api.Api{
 		Id:             mgwSwagger.GetID(),
 		Title:          mgwSwagger.GetTitle(),
 		Description:    mgwSwagger.GetDescription(),
@@ -144,4 +136,27 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *wso2.Api {
 		SandboxUrls:    sandUrls,
 		Resources:      resources,
 	}
+}
+
+// GetEnforcerAPIOperation builds the operation object expected by the proto definition
+func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
+	secSchemas := make([]*api.SecurityList, len(operation.GetSecurity()))
+	for i, security := range operation.GetSecurity() {
+		mapOfSecurity := make(map[string]*api.Scopes)
+		for key, scopes := range security {
+			scopeList := &api.Scopes{
+				Scopes: scopes,
+			}
+			mapOfSecurity[key] = scopeList
+		}
+		secSchema := &api.SecurityList{
+			ScopeList: mapOfSecurity,
+		}
+		secSchemas[i] = secSchema
+	}
+	apiOperation := api.Operation{
+		Method:   operation.GetMethod(),
+		Security: secSchemas,
+	}
+	return &apiOperation
 }

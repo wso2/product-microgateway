@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package wso2.discovery.config.enforcer;
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
+option java_package = "org.wso2.gateway.discovery.config.enforcer";
+option java_outer_classname = "CertStoreProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: SSL]
+
+// Listener and client certificate store model
+message CertStore {
+    // Path to the certificate store. Ex: keystore jks
+    string location = 1;
+
+    // Certificate store type
+    // Ex: jks
+    string type = 2;
+
+    // Certificate store password
+    string password = 3;
+}

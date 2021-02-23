@@ -19,7 +19,7 @@
 package org.wso2.micro.gateway.enforcer.config.dto;
 
 /**
- * Holds the configurations related to gRPC netty server that implements the filter chain functionality.
+ * Holds the configurations related to gRPC netty server that implements the enforcer functionality.
  */
 public class AuthServiceConfigurationDto {
 

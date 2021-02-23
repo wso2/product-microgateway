@@ -40,7 +40,7 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 		swagger.title = swagger2.Info.Title
 		swagger.version = swagger2.Info.Version
 	}
-	swagger.vendorExtensible = swagger2.VendorExtensible.Extensions
+	swagger.vendorExtensions = swagger2.VendorExtensible.Extensions
 	swagger.resources = setResourcesSwagger(swagger2)
 	swagger.apiType = HTTP
 	swagger.xWso2Basepath = swagger2.BasePath
@@ -73,34 +73,34 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 	var resources []Resource
 	if swagger2.Paths != nil {
 		for path, pathItem := range swagger2.Paths.Paths {
-			var methodsArray []string
+			var methodsArray []Operation
 			methodFound := false
 			if pathItem.Get != nil {
-				methodsArray = append(methodsArray, "GET")
+				methodsArray = append(methodsArray, NewOperation("GET", pathItem.Get.Security))
 				methodFound = true
 			}
 			if pathItem.Post != nil {
-				methodsArray = append(methodsArray, "POST")
+				methodsArray = append(methodsArray, NewOperation("POST", pathItem.Post.Security))
 				methodFound = true
 			}
 			if pathItem.Put != nil {
-				methodsArray = append(methodsArray, "PUT")
+				methodsArray = append(methodsArray, NewOperation("PUT", pathItem.Put.Security))
 				methodFound = true
 			}
 			if pathItem.Delete != nil {
-				methodsArray = append(methodsArray, "DELETE")
+				methodsArray = append(methodsArray, NewOperation("DELETE", pathItem.Delete.Security))
 				methodFound = true
 			}
 			if pathItem.Head != nil {
-				methodsArray = append(methodsArray, "HEAD")
+				methodsArray = append(methodsArray, NewOperation("HEAD", pathItem.Head.Security))
 				methodFound = true
 			}
 			if pathItem.Patch != nil {
-				methodsArray = append(methodsArray, "HEAD")
+				methodsArray = append(methodsArray, NewOperation("PATCH", pathItem.Patch.Security))
 				methodFound = true
 			}
 			if pathItem.Options != nil {
-				methodsArray = append(methodsArray, "GET")
+				methodsArray = append(methodsArray, NewOperation("OPTION", pathItem.Options.Security))
 				methodFound = true
 			}
 			if methodFound {
@@ -112,7 +112,12 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 	return resources
 }
 
-func setOperationSwagger(path string, methods []string, pathItem spec.PathItem) Resource {
+func getSwaggerOperationLevelDetails(operation *spec.Operation, method string) Operation {
+	var securityData []map[string][]string = operation.Security
+	return Operation{method, securityData}
+}
+
+func setOperationSwagger(path string, methods []Operation, pathItem spec.PathItem) Resource {
 	var resource Resource
 	resource = Resource{
 		path:    path,
@@ -125,7 +130,7 @@ func setOperationSwagger(path string, methods []string, pathItem spec.PathItem) 
 		//schemes:          operation.Schemes,
 		//tags:             operation.Tags,
 		//security:         operation.Security,
-		vendorExtensible: pathItem.VendorExtensible.Extensions,
+		vendorExtensions: pathItem.VendorExtensible.Extensions,
 	}
 	return resource
 }

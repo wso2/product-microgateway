@@ -27,12 +27,17 @@ public class ResponseObject {
     private final String correlationID;
     private int statusCode;
     private String errorCode;
+    private String errorMessage;
     private String errorDescription;
     private Map<String, String> headerMap;
     private boolean isDirectResponse = false;
 
     public ResponseObject(String correlationID) {
         this.correlationID = correlationID;
+    }
+
+    public ResponseObject() {
+        this.correlationID = "xxxxx";
     }
 
     public void setHeaderMap(Map<String, String> headerMap) {
@@ -57,6 +62,14 @@ public class ResponseObject {
 
     public void setErrorCode(String errorCode) {
         this.errorCode = errorCode;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     public String getErrorDescription() {

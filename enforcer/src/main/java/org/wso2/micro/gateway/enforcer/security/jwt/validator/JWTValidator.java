@@ -27,6 +27,7 @@ import com.nimbusds.jwt.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
@@ -34,7 +35,6 @@ import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.jwt.DefaultJWTTransformer;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTTransformer;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTUtil;
-import org.wso2.micro.gateway.enforcer.security.jwt.JWTValidationInfo;
 import org.wso2.micro.gateway.enforcer.security.jwt.SignedJWTInfo;
 
 import java.io.IOException;

@@ -18,6 +18,7 @@
 
 package org.wso2.micro.gateway.enforcer.config;
 
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
@@ -35,6 +36,9 @@ public class EnforcerConfig {
     private EventHubConfigurationDto eventHub;
     private Map<String, TokenIssuerDto> issuersMap = new HashMap<>();
     private CredentialDto apimCredentials;
+    private JWTConfigurationDto jwtConfigurationDto;
+    private String publicCertificatePath = "";
+    private String privateKeyPath = "";
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -66,6 +70,30 @@ public class EnforcerConfig {
 
     public void setApimCredentials(CredentialDto apimCredentials) {
         this.apimCredentials = apimCredentials;
+    }
+
+    public void setJwtConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {
+        this.jwtConfigurationDto = jwtConfigurationDto;
+    }
+
+    public JWTConfigurationDto getJwtConfigurationDto() {
+        return jwtConfigurationDto;
+    }
+
+    public void setPublicCertificatePath(String certPath) {
+        this.publicCertificatePath = certPath;
+    }
+
+    public String getPublicCertificatePath() {
+        return publicCertificatePath;
+    }
+
+    public void setPrivateKeyPath(String keyPath) {
+        this.privateKeyPath = keyPath;
+    }
+
+    public String getPrivateKeyPath() {
+        return privateKeyPath;
     }
 }
 

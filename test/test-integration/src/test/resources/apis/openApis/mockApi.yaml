@@ -22,7 +22,10 @@ x-wso2-cors:
     - POST
   accessControlAllowCredentials: true
 host: 'mockBackend:2383'
-basePath: /v2
+x-wso2-production-endpoints:
+  urls:
+    - 'http://mockBackend:2383/v2'
+x-wso2-basePath: /v2
 tags:
   - name: pet
     description: Everything about your Pets
@@ -169,8 +172,7 @@ paths:
       security:
         - petstore_auth:
             - 'write:pets'
-            - 'read:pets'
-  /pet/findByTags:
+  /pets/findByTags:
     get:
       tags:
         - pet
@@ -585,6 +587,30 @@ paths:
       responses:
         default:
           description: successful operation
+  /jwtheader:
+    get:
+      summary: Get the status of the backend header
+      description: Identify backend JWT header
+      operationId: jwtheader
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid status value
+      security:
+        - petstore_auth: [ ]
+  /jwttoken:
+    get:
+      summary: Get the backend jwt token
+      description: Identify backend JWT token
+      operationId: jwttoken
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid status value
+      security:
+        - petstore_auth: [ ]
 securityDefinitions:
   api_key:
     type: apiKey

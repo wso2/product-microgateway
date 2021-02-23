@@ -1,12 +1,31 @@
 language: go
+dist: xenial
+jdk:
+  - openjdk11
 go:
-  - "1.13"
-dist: trusty
+  - 1.15.x
+env:
+  - DOCKER_COMPOSE_VERSION=1.23.2
+before_install:
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - docker pull testcontainers/ryuk:0.3.0
+addons:
+  apt:
+    packages:
+      - docker-ce
 # Skip install phase to avoid unwanted mvn build
 install: skip
 # Run maven build in quiet mode to avoid log file limit in Travis CI.
 # Only errors and Maven version information will be printed in the CI logs.
-script: go build
+script:
+  - mvn clean install -B -V | grep -e "\[ERROR\]" -e Maven -e "// Start Running" -e "Building"; test ${PIPESTATUS[0]} -eq 0;
 cache:
   directories:
-  - $HOME/.m2
+    - $HOME/.m2

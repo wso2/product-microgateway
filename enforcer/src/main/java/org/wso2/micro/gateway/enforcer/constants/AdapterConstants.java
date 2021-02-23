@@ -29,4 +29,6 @@ public class AdapterConstants {
     public static final String PROD_CLUSTER_HEADER_KEY = "prodClusterName";
      // The key which specifies the sandbox cluster name inside the request context
     public static final String SAND_CLUSTER_HEADER_KEY = "sandClusterName";
+    // The common enforcer Label
+    public static final String COMMON_ENFORCER_LABEL = "commonEnforcerLabel";
 }

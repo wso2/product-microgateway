@@ -18,12 +18,11 @@
 
 package org.wso2.micro.gateway.enforcer.security;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
-import org.wso2.micro.gateway.enforcer.exception.DataLoadingException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.models.API;
 import org.wso2.micro.gateway.enforcer.models.ApiPolicy;
@@ -34,13 +33,12 @@ import org.wso2.micro.gateway.enforcer.models.Subscription;
 import org.wso2.micro.gateway.enforcer.models.SubscriptionPolicy;
 import org.wso2.micro.gateway.enforcer.models.URLMapping;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;
-import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataLoaderImpl;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataStore;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -80,8 +78,6 @@ public class KeyValidator {
         if (apiKeyValidationInfoDTO == null) {
             throw new MGWException("Key Validation information not set");
         }
-        String tenantDomain = "carbon.super"; //TODO: get correct tenant domain.
-        String httpVerb = validationContext.getHttpVerb();
         String[] scopes;
         Set<String> scopesSet = apiKeyValidationInfoDTO.getScopes();
         StringBuilder scopeList = new StringBuilder();
@@ -99,46 +95,29 @@ public class KeyValidator {
             }
         }
 
-        String resourceList = validationContext.getMatchingResource();
-        List<String> resourceArray = new ArrayList<>(Arrays.asList(resourceList.split(",")));
-        SubscriptionDataStore tenantSubscriptionStore = SubscriptionDataHolder.getInstance()
-                .getTenantSubscriptionStore(tenantDomain);
-        API api = tenantSubscriptionStore
-                .getApiByContextAndVersion(validationContext.getContext(), validationContext.getVersion());
-        boolean scopesValidated = true; //TODO: enable proper scope validation
-        if (api != null) {
-
-            for (String resource : resourceArray) {
-                List<URLMapping> resources = api.getResources();
-                URLMapping urlMapping = null;
-                for (URLMapping mapping : resources) {
-                    if (httpVerb.equals(mapping.getHttpMethod())) {
-                        if (isResourcePathMatching(resource, mapping)) {
-                            urlMapping = mapping;
-                            break;
-                        }
-                    }
-                }
-                if (urlMapping != null) {
-                    if (urlMapping.getScopes().size() == 0) {
-                        scopesValidated = true;
-                        continue;
-                    }
-                    List<String> mappingScopes = urlMapping.getScopes();
-                    boolean validate = false;
-                    for (String scope : mappingScopes) {
+        ResourceConfig matchedResource = validationContext.getMatchingResourceConfig();
+        boolean scopesValidated = false;
+        if (matchedResource.getSecuritySchemas().entrySet().size() > 0) {
+            for (Map.Entry<String, List<String>> pair : matchedResource.getSecuritySchemas().entrySet()) {
+                boolean validate = false;
+                if (pair.getValue() != null && pair.getValue().size() > 0) {
+                    scopesValidated = false;
+                    for (String scope : pair.getValue()) {
                         if (scopesSet.contains(scope)) {
                             scopesValidated = true;
                             validate = true;
                             break;
                         }
                     }
-                    if (!validate && urlMapping.getScopes().size() > 0) {
-                        scopesValidated = false;
-                        break;
-                    }
+                } else {
+                    scopesValidated = true;
+                }
+                if (validate) {
+                    break;
                 }
             }
+        } else {
+            scopesValidated = true;
         }
         if (!scopesValidated) {
             apiKeyValidationInfoDTO.setAuthorized(false);
@@ -180,6 +159,7 @@ public class KeyValidator {
         SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(apiTenantDomain);
         //TODO add a check to see whether datastore is initialized an load data using rest api if it is not loaded
+        // TODO: (VirajSalaka) Handle the scenario where the event is dropped.
         if (datastore != null) {
             api = datastore.getApiByContextAndVersion(context, version);
             if (api != null) {
@@ -197,35 +177,25 @@ public class KeyValidator {
                                 log.debug("Valid subscription not found for appId " + app.getId() + " and apiId " + api
                                         .getApiId());
                             }
-                            loadInfoFromRestAPIAndValidate(api, app, key, sub, context, version, consumerKey,
-                                            keyManager, datastore, apiTenantDomain, infoDTO, tenantId);
                         }
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Application not found in the datastore for id " + key.getApplicationId());
                         }
-                        loadInfoFromRestAPIAndValidate(api, app, key, sub, context, version, consumerKey, keyManager,
-                                datastore, apiTenantDomain, infoDTO, tenantId);
                     }
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug(
                                 "Application keymapping not found in the datastore for id consumerKey " + consumerKey);
                     }
-                    loadInfoFromRestAPIAndValidate(api, app, key, sub, context, version, consumerKey, keyManager,
-                            datastore, apiTenantDomain, infoDTO, tenantId);
                 }
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("API not found in the datastore for " + context + ":" + version);
                 }
-             loadInfoFromRestAPIAndValidate(api, app, key, sub, context, version, consumerKey, keyManager, datastore,
-                        apiTenantDomain, infoDTO, tenantId);
             }
         } else {
             log.error("Subscription datastore is null for tenant domain " + apiTenantDomain);
-            loadInfoFromRestAPIAndValidate(api, app, key, sub, context, version, consumerKey, keyManager, datastore,
-                    apiTenantDomain, infoDTO, tenantId);
         }
 
         if (api != null && app != null && key != null && sub != null) {
@@ -276,23 +246,7 @@ public class KeyValidator {
         String subscriberTenant = "carbon.super"; //TODO : get correct tenant domain
 
         ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(), tenantId);
-        if (appPolicy == null) {
-            try {
-                appPolicy = new SubscriptionDataLoaderImpl().getApplicationPolicy(app.getPolicy(), apiTenantDomain);
-                datastore.addOrUpdateApplicationPolicy(appPolicy);
-            } catch (DataLoadingException e) {
-                log.error("Error while loading ApplicationPolicy");
-            }
-        }
         SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(sub.getPolicyId(), tenantId);
-        if (subPolicy == null) {
-            try {
-                subPolicy = new SubscriptionDataLoaderImpl().getSubscriptionPolicy(sub.getPolicyId(), apiTenantDomain);
-                datastore.addOrUpdateSubscriptionPolicy(subPolicy);
-            } catch (DataLoadingException e) {
-                log.error("Error while loading SubscriptionPolicy");
-            }
-        }
         ApiPolicy apiPolicy = datastore.getApiPolicyByName(api.getApiTier(), tenantId);
 
         boolean isContentAware = false;
@@ -360,72 +314,5 @@ public class KeyValidator {
         }
 
         return false;
-    }
-
-    private void loadInfoFromRestAPIAndValidate(API api, Application app, ApplicationKeyMapping key, Subscription sub,
-                                                String context, String version, String consumerKey, String keyManager,
-                                                SubscriptionDataStore datastore, String apiTenantDomain,
-                                                APIKeyValidationInfoDTO infoDTO, int tenantId) {
-        // TODO Load using a single single rest api.
-        if (log.isDebugEnabled()) {
-            log.debug("Loading missing information in the datastore by invoking the Rest API");
-        }
-        try {
-            // only loading if the api is not found previously
-            if (api == null) {
-                api = new SubscriptionDataLoaderImpl().getApi(context, version);
-                if (api != null && api.getApiId() != 0) {
-                    // load to the memory
-                    log.debug("Loading API to the in-memory datastore.");
-                    datastore.addOrUpdateAPI(api);
-                }
-            }
-            // only loading if the key is not found previously
-            if (key == null) {
-                key = new SubscriptionDataLoaderImpl().getKeyMapping(consumerKey);
-                if (key != null && !StringUtils.isEmpty(key.getConsumerKey())) {
-                    // load to the memory
-                    log.debug("Loading Keymapping to the in-memory datastore.");
-                    datastore.addOrUpdateApplicationKeyMapping(key);
-                }
-            }
-            // check whether still api and keys are not found
-            if (api == null || key == null) {
-                // invalid request. nothing to do. return without any further processing
-                if (log.isDebugEnabled()) {
-                    if (api == null) {
-                        log.debug("API not found for the " + context + " " + version);
-                    }
-                    if (key == null) {
-                        log.debug("KeyMapping not found for the " + consumerKey);
-                    }
-                }
-                return;
-            } else {
-                //go further and load missing objects
-                if (app == null) {
-                    app = new SubscriptionDataLoaderImpl().getApplicationById(key.getApplicationId());
-                    if (app != null && app.getId() != null && app.getId() != 0) {
-                        // load to the memory
-                        log.debug("Loading Application to the in-memory datastore. applicationId = " + app.getId());
-                        datastore.addOrUpdateApplication(app);
-                    } else {
-                        log.debug("Application not found. applicationId = " + key.getApplicationId());
-                    }
-                }
-                if (app != null) {
-                    sub = new SubscriptionDataLoaderImpl().getSubscriptionById(Integer.toString(api.getApiId()),
-                            Integer.toString(app.getId()));
-                    if (sub != null && !StringUtils.isEmpty(sub.getSubscriptionId())) {
-                        // load to the memory
-                        log.debug("Loading Subscription to the in-memory datastore.");
-                        datastore.addOrUpdateSubscription(sub);
-                        validate(infoDTO, apiTenantDomain, tenantId, datastore, api, key, app, sub, keyManager);
-                    }
-                }
-            }
-        } catch (DataLoadingException e) {
-            log.error("Error while connecting the backend for loading subscription related data ", e);
-        }
     }
 }

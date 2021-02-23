@@ -31,6 +31,15 @@ ENV VERSION=${MG_VERSION}
 ENV JAVA_OPTS=""
 ENV ENFORCER_HOME=${MG_USER_HOME}
 
+ENV ENFORCER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
+ENV ENFORCER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
+ENV TRUSTED_CA_CERTS_PATH=/home/wso2/security/truststore
+ENV ADAPTER_HOST_NAME=adapter
+ENV ADAPTER_HOST=adapter
+ENV ADAPTER_XDS_PORT=18000
+ENV ENFORCER_LABEL="Production and Sandbox"
+ENV XDS_MAX_MSG_SIZE=4194304
+
 ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\
  --------------------------------- \n\
@@ -40,7 +49,7 @@ ARG MOTD="\n\
 RUN \
     addgroup -S -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
     && adduser -S -u ${MG_USER_ID} -h ${MG_USER_HOME} -G ${MG_USER_GROUP} ${MG_USER} \
-    && mkdir ${MG_USER_HOME}/lib && mkdir -p ${MG_USER_HOME}/mg/security \
+    && mkdir ${MG_USER_HOME}/lib && mkdir -p ${MG_USER_HOME}/mg/security && mkdir -p ${MG_USER_HOME}/mg/logs  \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
 
 WORKDIR ${MG_USER_HOME}

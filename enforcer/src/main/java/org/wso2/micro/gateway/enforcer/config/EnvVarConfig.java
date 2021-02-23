@@ -31,15 +31,17 @@ public class EnvVarConfig {
     private static final String ADAPTER_HOST = "ADAPTER_HOST";
     private static final String ADAPTER_XDS_PORT = "ADAPTER_XDS_PORT";
     private static final String ENFORCER_LABEL = "ENFORCER_LABEL";
+    public static final String XDS_MAX_MSG_SIZE = "XDS_MAX_MSG_SIZE";
 
     // Since the container is running in linux container, path separator is not needed.
-    private static final String DEFAULT_TRUSTED_CA_CERTS_PATH = "/home/wso2/security";
+    private static final String DEFAULT_TRUSTED_CA_CERTS_PATH = "/home/wso2/security/truststore";
     private static final String DEFAULT_ADAPTER_HOST_NAME = "adapter";
     private static final String DEFAULT_ENFORCER_PRIVATE_KEY_PATH = "/home/wso2/security/keystore/mg.key";
-    private static final String DEFAULT_ENFORCER_PUBLIC_CERT_PATH = "/home/wso2/security/truststore/mg.pem";
+    private static final String DEFAULT_ENFORCER_PUBLIC_CERT_PATH = "/home/wso2/security/keystore/mg.pem";
     private static final String DEFAULT_ADAPTER_HOST = "adapter";
     private static final String DEFAULT_ADAPTER_XDS_PORT = "18000";
     private static final String DEFAULT_ENFORCER_LABEL = "enforcer";
+    public static final String DEFAULT_XDS_MAX_MSG_SIZE = "4194304";
 
     private String trustedAdapterCertsPath;
     private String enforcerPrivateKeyPath;
@@ -48,6 +50,7 @@ public class EnvVarConfig {
     private String enforcerLabel;
     private String adapterXdsPort;
     private String adapterHostName;
+    private final String xdsMaxMsgSize;
 
     public EnvVarConfig() {
         trustedAdapterCertsPath = retrieveEnvVarOrDefault(TRUSTED_CA_CERTS_PATH,
@@ -60,6 +63,7 @@ public class EnvVarConfig {
         adapterHost = retrieveEnvVarOrDefault(ADAPTER_HOST, DEFAULT_ADAPTER_HOST);
         adapterHostName = retrieveEnvVarOrDefault(ADAPTER_HOST_NAME, DEFAULT_ADAPTER_HOST_NAME);
         adapterXdsPort = retrieveEnvVarOrDefault(ADAPTER_XDS_PORT, DEFAULT_ADAPTER_XDS_PORT);
+        xdsMaxMsgSize = retrieveEnvVarOrDefault(XDS_MAX_MSG_SIZE, DEFAULT_XDS_MAX_MSG_SIZE);
     }
 
     private String retrieveEnvVarOrDefault(String variable, String defaultValue) {
@@ -95,5 +99,9 @@ public class EnvVarConfig {
 
     public String getAdapterHostName() {
         return adapterHostName;
+    }
+
+    public String getXdsMaxMsgSize() {
+        return xdsMaxMsgSize;
     }
 }

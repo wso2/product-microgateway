@@ -22,7 +22,7 @@ private static final long serialVersionUID = 0L;
   private Resource() {
     id_ = "";
     path_ = "";
-    methods_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    methods_ = java.util.Collections.emptyList();
     summary_ = "";
     description_ = "";
     productionUrls_ = java.util.Collections.emptyList();
@@ -76,12 +76,12 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 26: {
-            java.lang.String s = input.readStringRequireUtf8();
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              methods_ = new com.google.protobuf.LazyStringArrayList();
+              methods_ = new java.util.ArrayList<org.wso2.gateway.discovery.api.Operation>();
               mutable_bitField0_ |= 0x00000001;
             }
-            methods_.add(s);
+            methods_.add(
+                input.readMessage(org.wso2.gateway.discovery.api.Operation.parser(), extensionRegistry));
             break;
           }
           case 34: {
@@ -183,7 +183,7 @@ private static final long serialVersionUID = 0L;
           e).setUnfinishedMessage(this);
     } finally {
       if (((mutable_bitField0_ & 0x00000001) != 0)) {
-        methods_ = methods_.getUnmodifiableView();
+        methods_ = java.util.Collections.unmodifiableList(methods_);
       }
       if (((mutable_bitField0_ & 0x00000002) != 0)) {
         productionUrls_ = java.util.Collections.unmodifiableList(productionUrls_);
@@ -308,38 +308,43 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int METHODS_FIELD_NUMBER = 3;
-  private com.google.protobuf.LazyStringList methods_;
+  private java.util.List<org.wso2.gateway.discovery.api.Operation> methods_;
   /**
-   * <code>repeated string methods = 3;</code>
-   * @return A list containing the methods.
+   * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
    */
-  public com.google.protobuf.ProtocolStringList
-      getMethodsList() {
+  @java.lang.Override
+  public java.util.List<org.wso2.gateway.discovery.api.Operation> getMethodsList() {
     return methods_;
   }
   /**
-   * <code>repeated string methods = 3;</code>
-   * @return The count of methods.
+   * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
    */
+  @java.lang.Override
+  public java.util.List<? extends org.wso2.gateway.discovery.api.OperationOrBuilder> 
+      getMethodsOrBuilderList() {
+    return methods_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
+   */
+  @java.lang.Override
   public int getMethodsCount() {
     return methods_.size();
   }
   /**
-   * <code>repeated string methods = 3;</code>
-   * @param index The index of the element to return.
-   * @return The methods at the given index.
+   * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
    */
-  public java.lang.String getMethods(int index) {
+  @java.lang.Override
+  public org.wso2.gateway.discovery.api.Operation getMethods(int index) {
     return methods_.get(index);
   }
   /**
-   * <code>repeated string methods = 3;</code>
-   * @param index The index of the value to return.
-   * @return The bytes of the methods at the given index.
+   * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
    */
-  public com.google.protobuf.ByteString
-      getMethodsBytes(int index) {
-    return methods_.getByteString(index);
+  @java.lang.Override
+  public org.wso2.gateway.discovery.api.OperationOrBuilder getMethodsOrBuilder(
+      int index) {
+    return methods_.get(index);
   }
 
   public static final int SUMMARY_FIELD_NUMBER = 4;
@@ -786,7 +791,7 @@ private static final long serialVersionUID = 0L;
       com.google.protobuf.GeneratedMessageV3.writeString(output, 2, path_);
     }
     for (int i = 0; i < methods_.size(); i++) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, methods_.getRaw(i));
+      output.writeMessage(3, methods_.get(i));
     }
     if (!getSummaryBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 4, summary_);
@@ -836,13 +841,9 @@ private static final long serialVersionUID = 0L;
     if (!getPathBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, path_);
     }
-    {
-      int dataSize = 0;
-      for (int i = 0; i < methods_.size(); i++) {
-        dataSize += computeStringSizeNoTag(methods_.getRaw(i));
-      }
-      size += dataSize;
-      size += 1 * getMethodsList().size();
+    for (int i = 0; i < methods_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(3, methods_.get(i));
     }
     if (!getSummaryBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, summary_);
@@ -1150,6 +1151,7 @@ private static final long serialVersionUID = 0L;
     private void maybeForceBuilderInitialization() {
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
+        getMethodsFieldBuilder();
         getProductionUrlsFieldBuilder();
         getSandboxUrlsFieldBuilder();
       }
@@ -1161,8 +1163,12 @@ private static final long serialVersionUID = 0L;
 
       path_ = "";
 
-      methods_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000001);
+      if (methodsBuilder_ == null) {
+        methods_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+      } else {
+        methodsBuilder_.clear();
+      }
       summary_ = "";
 
       description_ = "";
@@ -1216,11 +1222,15 @@ private static final long serialVersionUID = 0L;
       int from_bitField0_ = bitField0_;
       result.id_ = id_;
       result.path_ = path_;
-      if (((bitField0_ & 0x00000001) != 0)) {
-        methods_ = methods_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000001);
+      if (methodsBuilder_ == null) {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          methods_ = java.util.Collections.unmodifiableList(methods_);
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.methods_ = methods_;
+      } else {
+        result.methods_ = methodsBuilder_.build();
       }
-      result.methods_ = methods_;
       result.summary_ = summary_;
       result.description_ = description_;
       if (productionUrlsBuilder_ == null) {
@@ -1316,15 +1326,31 @@ private static final long serialVersionUID = 0L;
         path_ = other.path_;
         onChanged();
       }
-      if (!other.methods_.isEmpty()) {
-        if (methods_.isEmpty()) {
-          methods_ = other.methods_;
-          bitField0_ = (bitField0_ & ~0x00000001);
-        } else {
-          ensureMethodsIsMutable();
-          methods_.addAll(other.methods_);
+      if (methodsBuilder_ == null) {
+        if (!other.methods_.isEmpty()) {
+          if (methods_.isEmpty()) {
+            methods_ = other.methods_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureMethodsIsMutable();
+            methods_.addAll(other.methods_);
+          }
+          onChanged();
         }
-        onChanged();
+      } else {
+        if (!other.methods_.isEmpty()) {
+          if (methodsBuilder_.isEmpty()) {
+            methodsBuilder_.dispose();
+            methodsBuilder_ = null;
+            methods_ = other.methods_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+            methodsBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getMethodsFieldBuilder() : null;
+          } else {
+            methodsBuilder_.addAllMessages(other.methods_);
+          }
+        }
       }
       if (!other.getSummary().isEmpty()) {
         summary_ = other.summary_;
@@ -1602,114 +1628,244 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private com.google.protobuf.LazyStringList methods_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    private java.util.List<org.wso2.gateway.discovery.api.Operation> methods_ =
+      java.util.Collections.emptyList();
     private void ensureMethodsIsMutable() {
       if (!((bitField0_ & 0x00000001) != 0)) {
-        methods_ = new com.google.protobuf.LazyStringArrayList(methods_);
+        methods_ = new java.util.ArrayList<org.wso2.gateway.discovery.api.Operation>(methods_);
         bitField0_ |= 0x00000001;
        }
     }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.gateway.discovery.api.Operation, org.wso2.gateway.discovery.api.Operation.Builder, org.wso2.gateway.discovery.api.OperationOrBuilder> methodsBuilder_;
+
     /**
-     * <code>repeated string methods = 3;</code>
-     * @return A list containing the methods.
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
      */
-    public com.google.protobuf.ProtocolStringList
-        getMethodsList() {
-      return methods_.getUnmodifiableView();
+    public java.util.List<org.wso2.gateway.discovery.api.Operation> getMethodsList() {
+      if (methodsBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(methods_);
+      } else {
+        return methodsBuilder_.getMessageList();
+      }
     }
     /**
-     * <code>repeated string methods = 3;</code>
-     * @return The count of methods.
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
      */
     public int getMethodsCount() {
-      return methods_.size();
+      if (methodsBuilder_ == null) {
+        return methods_.size();
+      } else {
+        return methodsBuilder_.getCount();
+      }
     }
     /**
-     * <code>repeated string methods = 3;</code>
-     * @param index The index of the element to return.
-     * @return The methods at the given index.
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
      */
-    public java.lang.String getMethods(int index) {
-      return methods_.get(index);
+    public org.wso2.gateway.discovery.api.Operation getMethods(int index) {
+      if (methodsBuilder_ == null) {
+        return methods_.get(index);
+      } else {
+        return methodsBuilder_.getMessage(index);
+      }
     }
     /**
-     * <code>repeated string methods = 3;</code>
-     * @param index The index of the value to return.
-     * @return The bytes of the methods at the given index.
-     */
-    public com.google.protobuf.ByteString
-        getMethodsBytes(int index) {
-      return methods_.getByteString(index);
-    }
-    /**
-     * <code>repeated string methods = 3;</code>
-     * @param index The index to set the value at.
-     * @param value The methods to set.
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
      */
     public Builder setMethods(
-        int index, java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureMethodsIsMutable();
-      methods_.set(index, value);
-      onChanged();
+        int index, org.wso2.gateway.discovery.api.Operation value) {
+      if (methodsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureMethodsIsMutable();
+        methods_.set(index, value);
+        onChanged();
+      } else {
+        methodsBuilder_.setMessage(index, value);
+      }
       return this;
     }
     /**
-     * <code>repeated string methods = 3;</code>
-     * @param value The methods to add.
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
+     */
+    public Builder setMethods(
+        int index, org.wso2.gateway.discovery.api.Operation.Builder builderForValue) {
+      if (methodsBuilder_ == null) {
+        ensureMethodsIsMutable();
+        methods_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        methodsBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
+     */
+    public Builder addMethods(org.wso2.gateway.discovery.api.Operation value) {
+      if (methodsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureMethodsIsMutable();
+        methods_.add(value);
+        onChanged();
+      } else {
+        methodsBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
      */
     public Builder addMethods(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureMethodsIsMutable();
-      methods_.add(value);
-      onChanged();
+        int index, org.wso2.gateway.discovery.api.Operation value) {
+      if (methodsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureMethodsIsMutable();
+        methods_.add(index, value);
+        onChanged();
+      } else {
+        methodsBuilder_.addMessage(index, value);
+      }
       return this;
     }
     /**
-     * <code>repeated string methods = 3;</code>
-     * @param values The methods to add.
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
+     */
+    public Builder addMethods(
+        org.wso2.gateway.discovery.api.Operation.Builder builderForValue) {
+      if (methodsBuilder_ == null) {
+        ensureMethodsIsMutable();
+        methods_.add(builderForValue.build());
+        onChanged();
+      } else {
+        methodsBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
+     */
+    public Builder addMethods(
+        int index, org.wso2.gateway.discovery.api.Operation.Builder builderForValue) {
+      if (methodsBuilder_ == null) {
+        ensureMethodsIsMutable();
+        methods_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        methodsBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
      */
     public Builder addAllMethods(
-        java.lang.Iterable<java.lang.String> values) {
-      ensureMethodsIsMutable();
-      com.google.protobuf.AbstractMessageLite.Builder.addAll(
-          values, methods_);
-      onChanged();
+        java.lang.Iterable<? extends org.wso2.gateway.discovery.api.Operation> values) {
+      if (methodsBuilder_ == null) {
+        ensureMethodsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, methods_);
+        onChanged();
+      } else {
+        methodsBuilder_.addAllMessages(values);
+      }
       return this;
     }
     /**
-     * <code>repeated string methods = 3;</code>
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
      */
     public Builder clearMethods() {
-      methods_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000001);
-      onChanged();
+      if (methodsBuilder_ == null) {
+        methods_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+      } else {
+        methodsBuilder_.clear();
+      }
       return this;
     }
     /**
-     * <code>repeated string methods = 3;</code>
-     * @param value The bytes of the methods to add.
-     * @return This builder for chaining.
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
      */
-    public Builder addMethodsBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      ensureMethodsIsMutable();
-      methods_.add(value);
-      onChanged();
+    public Builder removeMethods(int index) {
+      if (methodsBuilder_ == null) {
+        ensureMethodsIsMutable();
+        methods_.remove(index);
+        onChanged();
+      } else {
+        methodsBuilder_.remove(index);
+      }
       return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
+     */
+    public org.wso2.gateway.discovery.api.Operation.Builder getMethodsBuilder(
+        int index) {
+      return getMethodsFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
+     */
+    public org.wso2.gateway.discovery.api.OperationOrBuilder getMethodsOrBuilder(
+        int index) {
+      if (methodsBuilder_ == null) {
+        return methods_.get(index);  } else {
+        return methodsBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
+     */
+    public java.util.List<? extends org.wso2.gateway.discovery.api.OperationOrBuilder> 
+         getMethodsOrBuilderList() {
+      if (methodsBuilder_ != null) {
+        return methodsBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(methods_);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
+     */
+    public org.wso2.gateway.discovery.api.Operation.Builder addMethodsBuilder() {
+      return getMethodsFieldBuilder().addBuilder(
+          org.wso2.gateway.discovery.api.Operation.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
+     */
+    public org.wso2.gateway.discovery.api.Operation.Builder addMethodsBuilder(
+        int index) {
+      return getMethodsFieldBuilder().addBuilder(
+          index, org.wso2.gateway.discovery.api.Operation.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.api.Operation methods = 3;</code>
+     */
+    public java.util.List<org.wso2.gateway.discovery.api.Operation.Builder> 
+         getMethodsBuilderList() {
+      return getMethodsFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.gateway.discovery.api.Operation, org.wso2.gateway.discovery.api.Operation.Builder, org.wso2.gateway.discovery.api.OperationOrBuilder> 
+        getMethodsFieldBuilder() {
+      if (methodsBuilder_ == null) {
+        methodsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.wso2.gateway.discovery.api.Operation, org.wso2.gateway.discovery.api.Operation.Builder, org.wso2.gateway.discovery.api.OperationOrBuilder>(
+                methods_,
+                ((bitField0_ & 0x00000001) != 0),
+                getParentForChildren(),
+                isClean());
+        methods_ = null;
+      }
+      return methodsBuilder_;
     }
 
     private java.lang.Object summary_ = "";

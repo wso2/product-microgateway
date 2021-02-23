@@ -27,7 +27,7 @@ import java.util.UUID;
 
 /**
  * Holds the set of meta data related to current request flowing through the gateway. This context should be shared
- * through out the complete request flow through the gateway filter chain.
+ * through out the complete request flow through the gateway enforcer.
  */
 public class RequestContext {
 

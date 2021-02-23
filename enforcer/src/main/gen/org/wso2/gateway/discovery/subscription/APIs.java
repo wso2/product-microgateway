@@ -20,6 +20,7 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private APIs() {
+    apiId_ = "";
     name_ = "";
     provider_ = "";
     version_ = "";
@@ -58,9 +59,10 @@ private static final long serialVersionUID = 0L;
           case 0:
             done = true;
             break;
-          case 8: {
+          case 10: {
+            java.lang.String s = input.readStringRequireUtf8();
 
-            apiId_ = input.readInt32();
+            apiId_ = s;
             break;
           }
           case 18: {
@@ -150,14 +152,41 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int APIID_FIELD_NUMBER = 1;
-  private int apiId_;
+  private volatile java.lang.Object apiId_;
   /**
-   * <code>int32 apiId = 1;</code>
+   * <code>string apiId = 1;</code>
    * @return The apiId.
    */
   @java.lang.Override
-  public int getApiId() {
-    return apiId_;
+  public java.lang.String getApiId() {
+    java.lang.Object ref = apiId_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      apiId_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string apiId = 1;</code>
+   * @return The bytes for apiId.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getApiIdBytes() {
+    java.lang.Object ref = apiId_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      apiId_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
   }
 
   public static final int NAME_FIELD_NUMBER = 2;
@@ -439,8 +468,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (apiId_ != 0) {
-      output.writeInt32(1, apiId_);
+    if (!getApiIdBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, apiId_);
     }
     if (!getNameBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
@@ -475,9 +504,8 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (apiId_ != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(1, apiId_);
+    if (!getApiIdBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, apiId_);
     }
     if (!getNameBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
@@ -520,8 +548,8 @@ private static final long serialVersionUID = 0L;
     }
     org.wso2.gateway.discovery.subscription.APIs other = (org.wso2.gateway.discovery.subscription.APIs) obj;
 
-    if (getApiId()
-        != other.getApiId()) return false;
+    if (!getApiId()
+        .equals(other.getApiId())) return false;
     if (!getName()
         .equals(other.getName())) return false;
     if (!getProvider()
@@ -553,7 +581,7 @@ private static final long serialVersionUID = 0L;
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
     hash = (37 * hash) + APIID_FIELD_NUMBER;
-    hash = (53 * hash) + getApiId();
+    hash = (53 * hash) + getApiId().hashCode();
     hash = (37 * hash) + NAME_FIELD_NUMBER;
     hash = (53 * hash) + getName().hashCode();
     hash = (37 * hash) + PROVIDER_FIELD_NUMBER;
@@ -710,7 +738,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      apiId_ = 0;
+      apiId_ = "";
 
       name_ = "";
 
@@ -819,8 +847,9 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.wso2.gateway.discovery.subscription.APIs other) {
       if (other == org.wso2.gateway.discovery.subscription.APIs.getDefaultInstance()) return this;
-      if (other.getApiId() != 0) {
-        setApiId(other.getApiId());
+      if (!other.getApiId().isEmpty()) {
+        apiId_ = other.apiId_;
+        onChanged();
       }
       if (!other.getName().isEmpty()) {
         name_ = other.name_;
@@ -881,33 +910,78 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private int apiId_ ;
+    private java.lang.Object apiId_ = "";
     /**
-     * <code>int32 apiId = 1;</code>
+     * <code>string apiId = 1;</code>
      * @return The apiId.
      */
-    @java.lang.Override
-    public int getApiId() {
-      return apiId_;
+    public java.lang.String getApiId() {
+      java.lang.Object ref = apiId_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        apiId_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
     }
     /**
-     * <code>int32 apiId = 1;</code>
+     * <code>string apiId = 1;</code>
+     * @return The bytes for apiId.
+     */
+    public com.google.protobuf.ByteString
+        getApiIdBytes() {
+      java.lang.Object ref = apiId_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        apiId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string apiId = 1;</code>
      * @param value The apiId to set.
      * @return This builder for chaining.
      */
-    public Builder setApiId(int value) {
-      
+    public Builder setApiId(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
       apiId_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>int32 apiId = 1;</code>
+     * <code>string apiId = 1;</code>
      * @return This builder for chaining.
      */
     public Builder clearApiId() {
       
-      apiId_ = 0;
+      apiId_ = getDefaultInstance().getApiId();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string apiId = 1;</code>
+     * @param value The bytes for apiId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApiIdBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      apiId_ = value;
       onChanged();
       return this;
     }

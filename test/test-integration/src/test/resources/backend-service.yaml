@@ -1,3 +1,4 @@
+      - "5006:5006"
   mockBackend:
     image: wso2/mg-mock-backend:latest
     ports:

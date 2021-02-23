@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>4.0.0-m5-SNAPSHOT</version>
+        <version>4.0.0-m6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -137,8 +135,7 @@
                     </filters>
                     <artifactSet>
                         <excludes>
-                            <exclude>org.apache.logging.log4j:log4j-core</exclude>
-                            <exclude>org.apache.logging.log4j:log4j-api</exclude>
+                            <exclude>org.apache.logging:*</exclude>
                         </excludes>
                     </artifactSet>
                 </configuration>
@@ -218,7 +215,6 @@
                     <pluginId>grpc-java</pluginId>
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.33.1:exe:${os.detected.classifier}</pluginArtifact>
                     <clearOutputDirectory>false</clearOutputDirectory>
-                    <outputBaseDirectory>${project.build.sourceDirectory}/../gen/grpc</outputBaseDirectory>
                 </configuration>
                 <executions>
                     <execution>
@@ -227,6 +223,7 @@
                             <goal>compile-custom</goal>
                         </goals>
                         <configuration>
+                            <protoSourceRoot>${project.parent.basedir}/api</protoSourceRoot>
                             <outputDirectory>${project.build.sourceDirectory}/../gen/</outputDirectory>
                         </configuration>
                     </execution>
@@ -317,6 +314,11 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
+            <version>6.8.228</version>
         </dependency>
     </dependencies>
 </project>
