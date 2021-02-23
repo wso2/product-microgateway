@@ -335,6 +335,12 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 		},
 	}
 
+	cache := &enforcer.Cache{
+		Enable: config.Enforcer.Cache.Enabled,
+		MaximumSize: config.Enforcer.Cache.MaximumSize,
+		ExpiryTime: config.Enforcer.Cache.ExpiryTime,
+	}
+
 	return &enforcer.Config{
 		ApimCredentials: &enforcer.AmCredentials{
 			Username: config.Enforcer.ApimCredentials.Username,
@@ -355,6 +361,7 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 		},
 		AuthService:    authService,
 		JwtTokenConfig: issuers,
+		Cache: cache,
 		Eventhub: &enforcer.EventHub{
 			Enabled:    config.ControlPlane.EventHub.Enabled,
 			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,

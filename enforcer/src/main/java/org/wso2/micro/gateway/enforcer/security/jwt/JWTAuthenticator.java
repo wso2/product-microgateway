@@ -70,6 +70,9 @@ public class JWTAuthenticator implements Authenticator {
     private boolean isGatewayTokenCacheEnabled;
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
 
+    public JWTAuthenticator() {
+        this.isGatewayTokenCacheEnabled = ConfigHolder.getInstance().getConfig().getCacheDto().isEnabled();
+    }
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
         String jwt = requestContext.getHeaders().get("authorization");
@@ -99,13 +102,12 @@ public class JWTAuthenticator implements Authenticator {
         } catch (ParseException | IllegalArgumentException e) {
             throw new SecurityException("Not a JWT token. Failed to decode the token header.", e);
         }
-        String jti;
         JWTClaimsSet claims = signedJWTInfo.getJwtClaimsSet();
-        jti = claims.getJWTID();
+        String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
 
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
-        if (StringUtils.isNotEmpty(jti)) {
-            if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jti)) {
+        if (StringUtils.isNotEmpty(jwtTokenIdentifier)) {
+            if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jwtTokenIdentifier)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the revoked jwt token map. Token: "
                             + FilterUtils.getMaskedToken(jwtHeader));
@@ -117,7 +119,7 @@ public class JWTAuthenticator implements Authenticator {
         }
 
         JWTValidationInfo validationInfo =
-                getJwtValidationInfo(signedJWTInfo, jti);
+                getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
         if (validationInfo != null) {
             if (validationInfo.isValid()) {
 
@@ -172,13 +174,14 @@ public class JWTAuthenticator implements Authenticator {
 
                     JWTInfoDto jwtInfoDto = FilterUtils
                             .generateJWTInfoDto(null, validationInfo, apiKeyValidationInfoDTO, requestContext);
-                    endUserToken = generateAndRetrieveJWTToken(jti, jwtInfoDto);
+                    endUserToken = generateAndRetrieveJWTToken(jwtTokenIdentifier, jwtInfoDto);
                     // Set generated jwt token as a response header
                     requestContext.addResponseHeaders(jwtConfigurationDto.getJwtHeader(), endUserToken);
                 }
 
-                AuthenticationContext authenticationContext = FilterUtils.generateAuthenticationContext(jti,
-                        validationInfo, apiKeyValidationInfoDTO, endUserToken, true);
+                AuthenticationContext authenticationContext = FilterUtils
+                        .generateAuthenticationContext(jwtTokenIdentifier, validationInfo, apiKeyValidationInfoDTO,
+                                endUserToken, true);
                 //TODO: (VirajSalaka) Place the keytype population logic properly for self contained token
                 if (claims.getClaim("keytype") != null) {
                     authenticationContext.setKeyType(claims.getClaim("keytype").toString());
@@ -396,8 +399,8 @@ public class JWTAuthenticator implements Authenticator {
         String tenantDomain = "carbon.super"; //TODO : Get the tenant domain.
         JWTValidationInfo jwtValidationInfo = null;
         if (isGatewayTokenCacheEnabled) {
-            String cacheToken = (String) CacheProvider.getGatewayTokenCache().getIfPresent(jti);
-            if (cacheToken != null) {
+            Object cacheToken = CacheProvider.getGatewayTokenCache().getIfPresent(jti);
+            if (cacheToken != null && (Boolean) cacheToken) {
                 if (CacheProvider.getGatewayKeyCache().getIfPresent(jti) != null) {
                     JWTValidationInfo tempJWTValidationInfo =
                             (JWTValidationInfo) CacheProvider.getGatewayKeyCache()
@@ -492,5 +495,15 @@ public class JWTAuthenticator implements Authenticator {
             signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
         }
         return signedJWTInfo;
+    }
+
+    private String getJWTTokenIdentifier(SignedJWTInfo signedJWTInfo) {
+
+        JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
+        String jwtid = jwtClaimsSet.getJWTID();
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(jwtid)) {
+            return jwtid;
+        }
+        return signedJWTInfo.getSignedJWT().getSignature().toString();
     }
 }
