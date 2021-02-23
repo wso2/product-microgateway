@@ -18,6 +18,8 @@
 
 package org.wso2am.micro.gw.tests.util;
 
+import java.io.File;
+
 /**
  * Constants used in test cases.
  */
@@ -60,6 +62,9 @@ public class TestConstant {
     public static final int GATEWAY_LISTENER_HTTPS_PORT = 9095;
     public static final int ADAPTER_IMPORT_API_PORT = 9843;
     public final static int MOCK_SERVER_PORT = 2383;
+
+
+    public static final String BASE_RESOURCE_DIR = "src" + File.separator + "test" + File.separator + "resources";
 
     public static final int INVALID_CREDENTIALS_CODE = 900901;
 

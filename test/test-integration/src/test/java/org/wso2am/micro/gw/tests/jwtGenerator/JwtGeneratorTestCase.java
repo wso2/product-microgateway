@@ -28,9 +28,9 @@ import org.wso2am.micro.gw.mockbackend.ResponseConstants;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.common.model.API;
 import org.wso2am.micro.gw.tests.common.model.ApplicationDTO;
-import org.wso2am.micro.gw.tests.mockbackend.MockBackendServer;
 import org.wso2am.micro.gw.tests.util.*;
 
+import java.io.File;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,14 +38,16 @@ import java.util.Map;
 /**
  * Jwt generator test cases.
  */
-public class jwtGeneratorTestCase extends BaseTestCase {
+public class JwtGeneratorTestCase extends BaseTestCase {
     private static String JWT_GENERATOR_ISSUER = "wso2.org/products/am";
 
     protected String jwtTokenProd;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        super.startMGW();
+        String confPath = TestConstant.BASE_RESOURCE_DIR
+                + File.separator + "jwtGenerator" + File.separator + "config.toml";
+        super.startMGW(confPath);
 
         //deploy the api
         //api yaml file should put to the resources/apis/openApis folder
