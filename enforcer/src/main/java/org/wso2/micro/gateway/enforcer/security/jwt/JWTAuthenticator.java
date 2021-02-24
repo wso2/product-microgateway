@@ -501,7 +501,7 @@ public class JWTAuthenticator implements Authenticator {
 
         JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
         String jwtid = jwtClaimsSet.getJWTID();
-        if (org.apache.commons.lang.StringUtils.isNotEmpty(jwtid)) {
+        if (StringUtils.isNotEmpty(jwtid)) {
             return jwtid;
         }
         return signedJWTInfo.getSignedJWT().getSignature().toString();

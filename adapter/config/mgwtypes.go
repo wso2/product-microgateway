@@ -120,12 +120,12 @@ type Config struct {
 	}
 
 	Enforcer struct {
-		JwtTokenConfig  []jwtTokenConfig
-		EventHub        eventHub
-		ApimCredentials apimCredentials
-		AuthService     authService
-		JwtGenerator    jwtGenerator
-		Cache		    cache
+		JwtTokenConfig	[]jwtTokenConfig
+		EventHub	eventHub
+		ApimCredentials	apimCredentials
+		AuthService	authService
+		JwtGenerator	jwtGenerator
+		Cache		cache
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
@@ -193,9 +193,9 @@ type jwtGenerator struct {
 }
 
 type cache struct {
-	Enabled               bool   `toml:"enabled"`
-	MaximumSize           int32  `toml:"maximumSize"`
-	ExpiryTime			  int32  `toml:"expiryTime"`
+	Enabled				bool   `toml:"enabled"`
+	MaximumSize			int32  `toml:"maximumSize"`
+	ExpiryTime			int32  `toml:"expiryTime"`
 }
 
 // APICtlUser represents registered APICtl Users
