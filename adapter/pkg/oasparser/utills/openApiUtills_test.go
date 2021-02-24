@@ -61,6 +61,7 @@ func TestFindSwaggerVersion(t *testing.T) {
 			message: "when openAPi version is not provided",
 		},
 	}
+
 	for _, item := range dataItems {
 		apiJsn, _ := utills.ToJSON([]byte(item.inputSwagger))
 		resultswaggerVerison := utills.FindSwaggerVersion(apiJsn)
