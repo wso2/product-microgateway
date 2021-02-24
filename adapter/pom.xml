@@ -66,7 +66,7 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>${project.basedir}/build.${script.extension}</executable>
+                            <executable>${project.basedir}/scripts/build.${script.extension}</executable>
                         </configuration>
                     </execution>
                 </executions>
