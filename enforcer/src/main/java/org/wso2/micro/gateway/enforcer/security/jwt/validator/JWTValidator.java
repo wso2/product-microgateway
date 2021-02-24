@@ -185,7 +185,6 @@ public class JWTValidator {
 
     private void createJWTValidationInfoFromJWT(JWTValidationInfo jwtValidationInfo, JWTClaimsSet jwtClaimsSet)
             throws ParseException {
-
         jwtValidationInfo.setIssuer(jwtClaimsSet.getIssuer());
         jwtValidationInfo.setValid(true);
         jwtValidationInfo.setClaims(jwtClaimsSet.getClaims());

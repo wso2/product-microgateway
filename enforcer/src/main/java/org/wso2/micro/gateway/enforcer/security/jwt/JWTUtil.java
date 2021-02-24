@@ -271,7 +271,6 @@ public class JWTUtil {
                     // -6 because of .class
                     String className = je.getName().substring(0, je.getName().length() - 6);
                     className = className.replace('/', '.');
-
                     Class classInJar = cl.loadClass(className);
                     try {
                         Annotation[] annotations = classInJar.getAnnotations();

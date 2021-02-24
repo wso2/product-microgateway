@@ -14,8 +14,8 @@ import java.util.Map;
 
 public class JwtTransformerTestCase extends JwtGeneratorTestCase{
 
-    @Test(description = "Test JWT Generator token cache and the properties")
-    public void testCustomClaimMapping() throws Exception {
+    @Test(description = "Test default jwt claim mapping")
+    public void testDefaultJwtClaimMapping() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
