@@ -25,13 +25,11 @@ import (
 )
 
 func TestFindSwaggerVersion(t *testing.T) {
-
 	type findSwaggerVersionTestItem struct {
 		inputSwagger string
 		result       string
 		message      string
 	}
-
 	dataItems := []findSwaggerVersionTestItem{
 		{
 			inputSwagger: `{

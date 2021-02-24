@@ -88,6 +88,7 @@ public class MgwServerInstance implements MgwServer {
             Utils.copyFile(confPath, mgwServerPath  +  File.separator + "resources"  +  File.separator +
                     "conf" +  File.separator + "config.toml");
         }
+
         String dockerComposePath = mgwServerPath+  File.separator + "docker-compose.yaml";
         Logger enforcerLogger = LoggerFactory.getLogger("Enforcer");
         Logger adapterLogger = LoggerFactory.getLogger("Adapter");
