@@ -37,7 +37,7 @@ spec:
               name: router-keystore-vol
             - mountPath: /home/wso2/security/truststore
               name: router-truststore-vol
-          image: wso2/mg-router:4.0.0-m5
+          image: wso2/mg-router:4.0.0-m6
           imagePullPolicy: Always
           env:
             - name: ROUTER_ADMIN_HOST
@@ -47,7 +47,7 @@ spec:
             - name: ROUTER_CLUSTER
               value: "default_cluster"
             - name: ROUTER_LABEL
-              value: "default"
+              value: "Production and Sandbox"
             - name: ROUTER_PRIVATE_KEY_PATH
               value: "/home/wso2/security/keystore/mg.key"
             - name: ROUTER_PUBLIC_CERT_PATH

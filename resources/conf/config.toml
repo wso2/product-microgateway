@@ -79,6 +79,24 @@ disableSslVerification = false
     username="admin"
     password="admin"
 
+[enforcer.cache]
+  enabled = true
+  maximumSize = 10000
+  expiryTime = 15
+
+[enforcer.jwtGenerator]
+    enable = false
+    encoding = "base64" # base64,base64url
+    claimDialect = "http://wso2.org/claims"
+    convertDialect = false
+    header = "X-JWT-Assertion"
+    signingAlgorithm = "SHA256withRSA"
+    enableUserClaims = false
+    gatewayGeneratorImpl = "org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
+    claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
+    publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
+    privateKeyPath = "/home/wso2/security/keystore/mg.key"
+
 [controlPlane]
 # Control plane's eventHub details
 [controlPlane.eventHub]

@@ -64,11 +64,11 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 18: {
-            org.wso2.gateway.discovery.config.enforcer.Keystore.Builder subBuilder = null;
+            org.wso2.gateway.discovery.config.enforcer.CertStore.Builder subBuilder = null;
             if (keystore_ != null) {
               subBuilder = keystore_.toBuilder();
             }
-            keystore_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.Keystore.parser(), extensionRegistry);
+            keystore_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.CertStore.parser(), extensionRegistry);
             if (subBuilder != null) {
               subBuilder.mergeFrom(keystore_);
               keystore_ = subBuilder.buildPartial();
@@ -77,11 +77,11 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 26: {
-            org.wso2.gateway.discovery.config.enforcer.Truststore.Builder subBuilder = null;
+            org.wso2.gateway.discovery.config.enforcer.CertStore.Builder subBuilder = null;
             if (truststore_ != null) {
               subBuilder = truststore_.toBuilder();
             }
-            truststore_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.Truststore.parser(), extensionRegistry);
+            truststore_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.CertStore.parser(), extensionRegistry);
             if (subBuilder != null) {
               subBuilder.mergeFrom(truststore_);
               truststore_ = subBuilder.buildPartial();
@@ -124,6 +124,45 @@ private static final long serialVersionUID = 0L;
             if (subBuilder != null) {
               subBuilder.mergeFrom(apimCredentials_);
               apimCredentials_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
+          case 58: {
+            org.wso2.gateway.discovery.config.enforcer.JWTGenerator.Builder subBuilder = null;
+            if (jwtGenerator_ != null) {
+              subBuilder = jwtGenerator_.toBuilder();
+            }
+            jwtGenerator_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.JWTGenerator.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(jwtGenerator_);
+              jwtGenerator_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
+          case 66: {
+            org.wso2.gateway.discovery.config.enforcer.Throttling.Builder subBuilder = null;
+            if (throttlingConfig_ != null) {
+              subBuilder = throttlingConfig_.toBuilder();
+            }
+            throttlingConfig_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.Throttling.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(throttlingConfig_);
+              throttlingConfig_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
+          case 74: {
+            org.wso2.gateway.discovery.config.enforcer.Cache.Builder subBuilder = null;
+            if (cache_ != null) {
+              subBuilder = cache_.toBuilder();
+            }
+            cache_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.Cache.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(cache_);
+              cache_ = subBuilder.buildPartial();
             }
 
             break;
@@ -204,9 +243,9 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int KEYSTORE_FIELD_NUMBER = 2;
-  private org.wso2.gateway.discovery.config.enforcer.Keystore keystore_;
+  private org.wso2.gateway.discovery.config.enforcer.CertStore keystore_;
   /**
-   * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
    * @return Whether the keystore field is set.
    */
   @java.lang.Override
@@ -214,25 +253,25 @@ private static final long serialVersionUID = 0L;
     return keystore_ != null;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
    * @return The keystore.
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.Keystore getKeystore() {
-    return keystore_ == null ? org.wso2.gateway.discovery.config.enforcer.Keystore.getDefaultInstance() : keystore_;
+  public org.wso2.gateway.discovery.config.enforcer.CertStore getKeystore() {
+    return keystore_ == null ? org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : keystore_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.KeystoreOrBuilder getKeystoreOrBuilder() {
+  public org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getKeystoreOrBuilder() {
     return getKeystore();
   }
 
   public static final int TRUSTSTORE_FIELD_NUMBER = 3;
-  private org.wso2.gateway.discovery.config.enforcer.Truststore truststore_;
+  private org.wso2.gateway.discovery.config.enforcer.CertStore truststore_;
   /**
-   * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
    * @return Whether the truststore field is set.
    */
   @java.lang.Override
@@ -240,18 +279,18 @@ private static final long serialVersionUID = 0L;
     return truststore_ != null;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
    * @return The truststore.
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.Truststore getTruststore() {
-    return truststore_ == null ? org.wso2.gateway.discovery.config.enforcer.Truststore.getDefaultInstance() : truststore_;
+  public org.wso2.gateway.discovery.config.enforcer.CertStore getTruststore() {
+    return truststore_ == null ? org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : truststore_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.TruststoreOrBuilder getTruststoreOrBuilder() {
+  public org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getTruststoreOrBuilder() {
     return getTruststore();
   }
 
@@ -333,6 +372,84 @@ private static final long serialVersionUID = 0L;
     return getApimCredentials();
   }
 
+  public static final int JWTGENERATOR_FIELD_NUMBER = 7;
+  private org.wso2.gateway.discovery.config.enforcer.JWTGenerator jwtGenerator_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+   * @return Whether the jwtGenerator field is set.
+   */
+  @java.lang.Override
+  public boolean hasJwtGenerator() {
+    return jwtGenerator_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+   * @return The jwtGenerator.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.JWTGenerator getJwtGenerator() {
+    return jwtGenerator_ == null ? org.wso2.gateway.discovery.config.enforcer.JWTGenerator.getDefaultInstance() : jwtGenerator_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.JWTGeneratorOrBuilder getJwtGeneratorOrBuilder() {
+    return getJwtGenerator();
+  }
+
+  public static final int THROTTLINGCONFIG_FIELD_NUMBER = 8;
+  private org.wso2.gateway.discovery.config.enforcer.Throttling throttlingConfig_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+   * @return Whether the throttlingConfig field is set.
+   */
+  @java.lang.Override
+  public boolean hasThrottlingConfig() {
+    return throttlingConfig_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+   * @return The throttlingConfig.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.Throttling getThrottlingConfig() {
+    return throttlingConfig_ == null ? org.wso2.gateway.discovery.config.enforcer.Throttling.getDefaultInstance() : throttlingConfig_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder getThrottlingConfigOrBuilder() {
+    return getThrottlingConfig();
+  }
+
+  public static final int CACHE_FIELD_NUMBER = 9;
+  private org.wso2.gateway.discovery.config.enforcer.Cache cache_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   * @return Whether the cache field is set.
+   */
+  @java.lang.Override
+  public boolean hasCache() {
+    return cache_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   * @return The cache.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.Cache getCache() {
+    return cache_ == null ? org.wso2.gateway.discovery.config.enforcer.Cache.getDefaultInstance() : cache_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder getCacheOrBuilder() {
+    return getCache();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -364,6 +481,15 @@ private static final long serialVersionUID = 0L;
     }
     if (apimCredentials_ != null) {
       output.writeMessage(6, getApimCredentials());
+    }
+    if (jwtGenerator_ != null) {
+      output.writeMessage(7, getJwtGenerator());
+    }
+    if (throttlingConfig_ != null) {
+      output.writeMessage(8, getThrottlingConfig());
+    }
+    if (cache_ != null) {
+      output.writeMessage(9, getCache());
     }
     unknownFields.writeTo(output);
   }
@@ -397,6 +523,18 @@ private static final long serialVersionUID = 0L;
     if (apimCredentials_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(6, getApimCredentials());
+    }
+    if (jwtGenerator_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(7, getJwtGenerator());
+    }
+    if (throttlingConfig_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(8, getThrottlingConfig());
+    }
+    if (cache_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(9, getCache());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -440,6 +578,21 @@ private static final long serialVersionUID = 0L;
       if (!getApimCredentials()
           .equals(other.getApimCredentials())) return false;
     }
+    if (hasJwtGenerator() != other.hasJwtGenerator()) return false;
+    if (hasJwtGenerator()) {
+      if (!getJwtGenerator()
+          .equals(other.getJwtGenerator())) return false;
+    }
+    if (hasThrottlingConfig() != other.hasThrottlingConfig()) return false;
+    if (hasThrottlingConfig()) {
+      if (!getThrottlingConfig()
+          .equals(other.getThrottlingConfig())) return false;
+    }
+    if (hasCache() != other.hasCache()) return false;
+    if (hasCache()) {
+      if (!getCache()
+          .equals(other.getCache())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -474,6 +627,18 @@ private static final long serialVersionUID = 0L;
     if (hasApimCredentials()) {
       hash = (37 * hash) + APIMCREDENTIALS_FIELD_NUMBER;
       hash = (53 * hash) + getApimCredentials().hashCode();
+    }
+    if (hasJwtGenerator()) {
+      hash = (37 * hash) + JWTGENERATOR_FIELD_NUMBER;
+      hash = (53 * hash) + getJwtGenerator().hashCode();
+    }
+    if (hasThrottlingConfig()) {
+      hash = (37 * hash) + THROTTLINGCONFIG_FIELD_NUMBER;
+      hash = (53 * hash) + getThrottlingConfig().hashCode();
+    }
+    if (hasCache()) {
+      hash = (37 * hash) + CACHE_FIELD_NUMBER;
+      hash = (53 * hash) + getCache().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -649,6 +814,24 @@ private static final long serialVersionUID = 0L;
         apimCredentials_ = null;
         apimCredentialsBuilder_ = null;
       }
+      if (jwtGeneratorBuilder_ == null) {
+        jwtGenerator_ = null;
+      } else {
+        jwtGenerator_ = null;
+        jwtGeneratorBuilder_ = null;
+      }
+      if (throttlingConfigBuilder_ == null) {
+        throttlingConfig_ = null;
+      } else {
+        throttlingConfig_ = null;
+        throttlingConfigBuilder_ = null;
+      }
+      if (cacheBuilder_ == null) {
+        cache_ = null;
+      } else {
+        cache_ = null;
+        cacheBuilder_ = null;
+      }
       return this;
     }
 
@@ -709,6 +892,21 @@ private static final long serialVersionUID = 0L;
         result.apimCredentials_ = apimCredentials_;
       } else {
         result.apimCredentials_ = apimCredentialsBuilder_.build();
+      }
+      if (jwtGeneratorBuilder_ == null) {
+        result.jwtGenerator_ = jwtGenerator_;
+      } else {
+        result.jwtGenerator_ = jwtGeneratorBuilder_.build();
+      }
+      if (throttlingConfigBuilder_ == null) {
+        result.throttlingConfig_ = throttlingConfig_;
+      } else {
+        result.throttlingConfig_ = throttlingConfigBuilder_.build();
+      }
+      if (cacheBuilder_ == null) {
+        result.cache_ = cache_;
+      } else {
+        result.cache_ = cacheBuilder_.build();
       }
       onBuilt();
       return result;
@@ -798,6 +996,15 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasApimCredentials()) {
         mergeApimCredentials(other.getApimCredentials());
+      }
+      if (other.hasJwtGenerator()) {
+        mergeJwtGenerator(other.getJwtGenerator());
+      }
+      if (other.hasThrottlingConfig()) {
+        mergeThrottlingConfig(other.getThrottlingConfig());
+      }
+      if (other.hasCache()) {
+        mergeCache(other.getCache());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1069,31 +1276,31 @@ private static final long serialVersionUID = 0L;
       return jwtTokenConfigBuilder_;
     }
 
-    private org.wso2.gateway.discovery.config.enforcer.Keystore keystore_;
+    private org.wso2.gateway.discovery.config.enforcer.CertStore keystore_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.Keystore, org.wso2.gateway.discovery.config.enforcer.Keystore.Builder, org.wso2.gateway.discovery.config.enforcer.KeystoreOrBuilder> keystoreBuilder_;
+        org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder> keystoreBuilder_;
     /**
-     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      * @return Whether the keystore field is set.
      */
     public boolean hasKeystore() {
       return keystoreBuilder_ != null || keystore_ != null;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      * @return The keystore.
      */
-    public org.wso2.gateway.discovery.config.enforcer.Keystore getKeystore() {
+    public org.wso2.gateway.discovery.config.enforcer.CertStore getKeystore() {
       if (keystoreBuilder_ == null) {
-        return keystore_ == null ? org.wso2.gateway.discovery.config.enforcer.Keystore.getDefaultInstance() : keystore_;
+        return keystore_ == null ? org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : keystore_;
       } else {
         return keystoreBuilder_.getMessage();
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
-    public Builder setKeystore(org.wso2.gateway.discovery.config.enforcer.Keystore value) {
+    public Builder setKeystore(org.wso2.gateway.discovery.config.enforcer.CertStore value) {
       if (keystoreBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -1107,10 +1314,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
     public Builder setKeystore(
-        org.wso2.gateway.discovery.config.enforcer.Keystore.Builder builderForValue) {
+        org.wso2.gateway.discovery.config.enforcer.CertStore.Builder builderForValue) {
       if (keystoreBuilder_ == null) {
         keystore_ = builderForValue.build();
         onChanged();
@@ -1121,13 +1328,13 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
-    public Builder mergeKeystore(org.wso2.gateway.discovery.config.enforcer.Keystore value) {
+    public Builder mergeKeystore(org.wso2.gateway.discovery.config.enforcer.CertStore value) {
       if (keystoreBuilder_ == null) {
         if (keystore_ != null) {
           keystore_ =
-            org.wso2.gateway.discovery.config.enforcer.Keystore.newBuilder(keystore_).mergeFrom(value).buildPartial();
+            org.wso2.gateway.discovery.config.enforcer.CertStore.newBuilder(keystore_).mergeFrom(value).buildPartial();
         } else {
           keystore_ = value;
         }
@@ -1139,7 +1346,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
     public Builder clearKeystore() {
       if (keystoreBuilder_ == null) {
@@ -1153,33 +1360,33 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.Keystore.Builder getKeystoreBuilder() {
+    public org.wso2.gateway.discovery.config.enforcer.CertStore.Builder getKeystoreBuilder() {
       
       onChanged();
       return getKeystoreFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.KeystoreOrBuilder getKeystoreOrBuilder() {
+    public org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getKeystoreOrBuilder() {
       if (keystoreBuilder_ != null) {
         return keystoreBuilder_.getMessageOrBuilder();
       } else {
         return keystore_ == null ?
-            org.wso2.gateway.discovery.config.enforcer.Keystore.getDefaultInstance() : keystore_;
+            org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : keystore_;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Keystore keystore = 2;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.Keystore, org.wso2.gateway.discovery.config.enforcer.Keystore.Builder, org.wso2.gateway.discovery.config.enforcer.KeystoreOrBuilder> 
+        org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder> 
         getKeystoreFieldBuilder() {
       if (keystoreBuilder_ == null) {
         keystoreBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.gateway.discovery.config.enforcer.Keystore, org.wso2.gateway.discovery.config.enforcer.Keystore.Builder, org.wso2.gateway.discovery.config.enforcer.KeystoreOrBuilder>(
+            org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder>(
                 getKeystore(),
                 getParentForChildren(),
                 isClean());
@@ -1188,31 +1395,31 @@ private static final long serialVersionUID = 0L;
       return keystoreBuilder_;
     }
 
-    private org.wso2.gateway.discovery.config.enforcer.Truststore truststore_;
+    private org.wso2.gateway.discovery.config.enforcer.CertStore truststore_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.Truststore, org.wso2.gateway.discovery.config.enforcer.Truststore.Builder, org.wso2.gateway.discovery.config.enforcer.TruststoreOrBuilder> truststoreBuilder_;
+        org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder> truststoreBuilder_;
     /**
-     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      * @return Whether the truststore field is set.
      */
     public boolean hasTruststore() {
       return truststoreBuilder_ != null || truststore_ != null;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      * @return The truststore.
      */
-    public org.wso2.gateway.discovery.config.enforcer.Truststore getTruststore() {
+    public org.wso2.gateway.discovery.config.enforcer.CertStore getTruststore() {
       if (truststoreBuilder_ == null) {
-        return truststore_ == null ? org.wso2.gateway.discovery.config.enforcer.Truststore.getDefaultInstance() : truststore_;
+        return truststore_ == null ? org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : truststore_;
       } else {
         return truststoreBuilder_.getMessage();
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
-    public Builder setTruststore(org.wso2.gateway.discovery.config.enforcer.Truststore value) {
+    public Builder setTruststore(org.wso2.gateway.discovery.config.enforcer.CertStore value) {
       if (truststoreBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -1226,10 +1433,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
     public Builder setTruststore(
-        org.wso2.gateway.discovery.config.enforcer.Truststore.Builder builderForValue) {
+        org.wso2.gateway.discovery.config.enforcer.CertStore.Builder builderForValue) {
       if (truststoreBuilder_ == null) {
         truststore_ = builderForValue.build();
         onChanged();
@@ -1240,13 +1447,13 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
-    public Builder mergeTruststore(org.wso2.gateway.discovery.config.enforcer.Truststore value) {
+    public Builder mergeTruststore(org.wso2.gateway.discovery.config.enforcer.CertStore value) {
       if (truststoreBuilder_ == null) {
         if (truststore_ != null) {
           truststore_ =
-            org.wso2.gateway.discovery.config.enforcer.Truststore.newBuilder(truststore_).mergeFrom(value).buildPartial();
+            org.wso2.gateway.discovery.config.enforcer.CertStore.newBuilder(truststore_).mergeFrom(value).buildPartial();
         } else {
           truststore_ = value;
         }
@@ -1258,7 +1465,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
     public Builder clearTruststore() {
       if (truststoreBuilder_ == null) {
@@ -1272,33 +1479,33 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.Truststore.Builder getTruststoreBuilder() {
+    public org.wso2.gateway.discovery.config.enforcer.CertStore.Builder getTruststoreBuilder() {
       
       onChanged();
       return getTruststoreFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.TruststoreOrBuilder getTruststoreOrBuilder() {
+    public org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder getTruststoreOrBuilder() {
       if (truststoreBuilder_ != null) {
         return truststoreBuilder_.getMessageOrBuilder();
       } else {
         return truststore_ == null ?
-            org.wso2.gateway.discovery.config.enforcer.Truststore.getDefaultInstance() : truststore_;
+            org.wso2.gateway.discovery.config.enforcer.CertStore.getDefaultInstance() : truststore_;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Truststore truststore = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.CertStore truststore = 3;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.Truststore, org.wso2.gateway.discovery.config.enforcer.Truststore.Builder, org.wso2.gateway.discovery.config.enforcer.TruststoreOrBuilder> 
+        org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder> 
         getTruststoreFieldBuilder() {
       if (truststoreBuilder_ == null) {
         truststoreBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.gateway.discovery.config.enforcer.Truststore, org.wso2.gateway.discovery.config.enforcer.Truststore.Builder, org.wso2.gateway.discovery.config.enforcer.TruststoreOrBuilder>(
+            org.wso2.gateway.discovery.config.enforcer.CertStore, org.wso2.gateway.discovery.config.enforcer.CertStore.Builder, org.wso2.gateway.discovery.config.enforcer.CertStoreOrBuilder>(
                 getTruststore(),
                 getParentForChildren(),
                 isClean());
@@ -1662,6 +1869,363 @@ private static final long serialVersionUID = 0L;
         apimCredentials_ = null;
       }
       return apimCredentialsBuilder_;
+    }
+
+    private org.wso2.gateway.discovery.config.enforcer.JWTGenerator jwtGenerator_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.JWTGenerator, org.wso2.gateway.discovery.config.enforcer.JWTGenerator.Builder, org.wso2.gateway.discovery.config.enforcer.JWTGeneratorOrBuilder> jwtGeneratorBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     * @return Whether the jwtGenerator field is set.
+     */
+    public boolean hasJwtGenerator() {
+      return jwtGeneratorBuilder_ != null || jwtGenerator_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     * @return The jwtGenerator.
+     */
+    public org.wso2.gateway.discovery.config.enforcer.JWTGenerator getJwtGenerator() {
+      if (jwtGeneratorBuilder_ == null) {
+        return jwtGenerator_ == null ? org.wso2.gateway.discovery.config.enforcer.JWTGenerator.getDefaultInstance() : jwtGenerator_;
+      } else {
+        return jwtGeneratorBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     */
+    public Builder setJwtGenerator(org.wso2.gateway.discovery.config.enforcer.JWTGenerator value) {
+      if (jwtGeneratorBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        jwtGenerator_ = value;
+        onChanged();
+      } else {
+        jwtGeneratorBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     */
+    public Builder setJwtGenerator(
+        org.wso2.gateway.discovery.config.enforcer.JWTGenerator.Builder builderForValue) {
+      if (jwtGeneratorBuilder_ == null) {
+        jwtGenerator_ = builderForValue.build();
+        onChanged();
+      } else {
+        jwtGeneratorBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     */
+    public Builder mergeJwtGenerator(org.wso2.gateway.discovery.config.enforcer.JWTGenerator value) {
+      if (jwtGeneratorBuilder_ == null) {
+        if (jwtGenerator_ != null) {
+          jwtGenerator_ =
+            org.wso2.gateway.discovery.config.enforcer.JWTGenerator.newBuilder(jwtGenerator_).mergeFrom(value).buildPartial();
+        } else {
+          jwtGenerator_ = value;
+        }
+        onChanged();
+      } else {
+        jwtGeneratorBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     */
+    public Builder clearJwtGenerator() {
+      if (jwtGeneratorBuilder_ == null) {
+        jwtGenerator_ = null;
+        onChanged();
+      } else {
+        jwtGenerator_ = null;
+        jwtGeneratorBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.JWTGenerator.Builder getJwtGeneratorBuilder() {
+      
+      onChanged();
+      return getJwtGeneratorFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.JWTGeneratorOrBuilder getJwtGeneratorOrBuilder() {
+      if (jwtGeneratorBuilder_ != null) {
+        return jwtGeneratorBuilder_.getMessageOrBuilder();
+      } else {
+        return jwtGenerator_ == null ?
+            org.wso2.gateway.discovery.config.enforcer.JWTGenerator.getDefaultInstance() : jwtGenerator_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.JWTGenerator, org.wso2.gateway.discovery.config.enforcer.JWTGenerator.Builder, org.wso2.gateway.discovery.config.enforcer.JWTGeneratorOrBuilder> 
+        getJwtGeneratorFieldBuilder() {
+      if (jwtGeneratorBuilder_ == null) {
+        jwtGeneratorBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.JWTGenerator, org.wso2.gateway.discovery.config.enforcer.JWTGenerator.Builder, org.wso2.gateway.discovery.config.enforcer.JWTGeneratorOrBuilder>(
+                getJwtGenerator(),
+                getParentForChildren(),
+                isClean());
+        jwtGenerator_ = null;
+      }
+      return jwtGeneratorBuilder_;
+    }
+
+    private org.wso2.gateway.discovery.config.enforcer.Throttling throttlingConfig_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.Throttling, org.wso2.gateway.discovery.config.enforcer.Throttling.Builder, org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder> throttlingConfigBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     * @return Whether the throttlingConfig field is set.
+     */
+    public boolean hasThrottlingConfig() {
+      return throttlingConfigBuilder_ != null || throttlingConfig_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     * @return The throttlingConfig.
+     */
+    public org.wso2.gateway.discovery.config.enforcer.Throttling getThrottlingConfig() {
+      if (throttlingConfigBuilder_ == null) {
+        return throttlingConfig_ == null ? org.wso2.gateway.discovery.config.enforcer.Throttling.getDefaultInstance() : throttlingConfig_;
+      } else {
+        return throttlingConfigBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    public Builder setThrottlingConfig(org.wso2.gateway.discovery.config.enforcer.Throttling value) {
+      if (throttlingConfigBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        throttlingConfig_ = value;
+        onChanged();
+      } else {
+        throttlingConfigBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    public Builder setThrottlingConfig(
+        org.wso2.gateway.discovery.config.enforcer.Throttling.Builder builderForValue) {
+      if (throttlingConfigBuilder_ == null) {
+        throttlingConfig_ = builderForValue.build();
+        onChanged();
+      } else {
+        throttlingConfigBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    public Builder mergeThrottlingConfig(org.wso2.gateway.discovery.config.enforcer.Throttling value) {
+      if (throttlingConfigBuilder_ == null) {
+        if (throttlingConfig_ != null) {
+          throttlingConfig_ =
+            org.wso2.gateway.discovery.config.enforcer.Throttling.newBuilder(throttlingConfig_).mergeFrom(value).buildPartial();
+        } else {
+          throttlingConfig_ = value;
+        }
+        onChanged();
+      } else {
+        throttlingConfigBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    public Builder clearThrottlingConfig() {
+      if (throttlingConfigBuilder_ == null) {
+        throttlingConfig_ = null;
+        onChanged();
+      } else {
+        throttlingConfig_ = null;
+        throttlingConfigBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.Throttling.Builder getThrottlingConfigBuilder() {
+      
+      onChanged();
+      return getThrottlingConfigFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder getThrottlingConfigOrBuilder() {
+      if (throttlingConfigBuilder_ != null) {
+        return throttlingConfigBuilder_.getMessageOrBuilder();
+      } else {
+        return throttlingConfig_ == null ?
+            org.wso2.gateway.discovery.config.enforcer.Throttling.getDefaultInstance() : throttlingConfig_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.Throttling, org.wso2.gateway.discovery.config.enforcer.Throttling.Builder, org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder> 
+        getThrottlingConfigFieldBuilder() {
+      if (throttlingConfigBuilder_ == null) {
+        throttlingConfigBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.Throttling, org.wso2.gateway.discovery.config.enforcer.Throttling.Builder, org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder>(
+                getThrottlingConfig(),
+                getParentForChildren(),
+                isClean());
+        throttlingConfig_ = null;
+      }
+      return throttlingConfigBuilder_;
+    }
+
+    private org.wso2.gateway.discovery.config.enforcer.Cache cache_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.Cache, org.wso2.gateway.discovery.config.enforcer.Cache.Builder, org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder> cacheBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     * @return Whether the cache field is set.
+     */
+    public boolean hasCache() {
+      return cacheBuilder_ != null || cache_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     * @return The cache.
+     */
+    public org.wso2.gateway.discovery.config.enforcer.Cache getCache() {
+      if (cacheBuilder_ == null) {
+        return cache_ == null ? org.wso2.gateway.discovery.config.enforcer.Cache.getDefaultInstance() : cache_;
+      } else {
+        return cacheBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    public Builder setCache(org.wso2.gateway.discovery.config.enforcer.Cache value) {
+      if (cacheBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        cache_ = value;
+        onChanged();
+      } else {
+        cacheBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    public Builder setCache(
+        org.wso2.gateway.discovery.config.enforcer.Cache.Builder builderForValue) {
+      if (cacheBuilder_ == null) {
+        cache_ = builderForValue.build();
+        onChanged();
+      } else {
+        cacheBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    public Builder mergeCache(org.wso2.gateway.discovery.config.enforcer.Cache value) {
+      if (cacheBuilder_ == null) {
+        if (cache_ != null) {
+          cache_ =
+            org.wso2.gateway.discovery.config.enforcer.Cache.newBuilder(cache_).mergeFrom(value).buildPartial();
+        } else {
+          cache_ = value;
+        }
+        onChanged();
+      } else {
+        cacheBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    public Builder clearCache() {
+      if (cacheBuilder_ == null) {
+        cache_ = null;
+        onChanged();
+      } else {
+        cache_ = null;
+        cacheBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.Cache.Builder getCacheBuilder() {
+      
+      onChanged();
+      return getCacheFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder getCacheOrBuilder() {
+      if (cacheBuilder_ != null) {
+        return cacheBuilder_.getMessageOrBuilder();
+      } else {
+        return cache_ == null ?
+            org.wso2.gateway.discovery.config.enforcer.Cache.getDefaultInstance() : cache_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.Cache, org.wso2.gateway.discovery.config.enforcer.Cache.Builder, org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder> 
+        getCacheFieldBuilder() {
+      if (cacheBuilder_ == null) {
+        cacheBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.Cache, org.wso2.gateway.discovery.config.enforcer.Cache.Builder, org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder>(
+                getCache(),
+                getParentForChildren(),
+                isClean());
+        cache_ = null;
+      }
+      return cacheBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

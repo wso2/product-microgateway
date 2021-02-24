@@ -28,10 +28,10 @@ Let's host our first API on a Microgateway. We will be exposing the publicly ava
 
 1. First download the CLI tool(APICTL) and the microgateway distributions
 and extract them to a folder of your choice.
-  * [CLI (APICTL)](https://github.com/wso2/product-apim-tooling/releases/tag/4.0.0-M5)
-  * [Microgateway Distribution](https://github.com/wso2/product-microgateway/releases/tag/v4.0.0-m5)
+  * [CLI (APICTL)](https://github.com/wso2/product-apim-tooling/releases/tag/v4.0.0-M8)
+  * [Microgateway Distribution](https://github.com/wso2/product-microgateway/releases/tag/v4.0.0-m6)
   
-Note: WSO2 Microgateway v4.0.0-m5 is compatible with APICTL 4.0.0-M5.
+Note: WSO2 Microgateway v4.0.0-m6 is compatible with APICTL 4.0.0-M6.
 
 CLI tool extracted location will be referred as `CLI_HOME` and Microgateway distribution extracted location would be 
 referred as `MG_HOME`.

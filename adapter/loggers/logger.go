@@ -21,7 +21,7 @@ package loggers
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/pkg/logging"
+	"github.com/wso2/micro-gw/internal/logging"
 )
 
 /* loggers should be initiated only for the main packages
@@ -32,17 +32,17 @@ When you add a new logger instance add the related package name as a constant
 
 // package name constants
 const (
-	pkgAPI          = "github.com/wso2/micro-gw/pkg/api"
+	pkgAPI          = "github.com/wso2/micro-gw/internal/api"
 	pkgAuth         = "github.com/wso2/micro-gw/pkg/auth"
-	pkgMgw          = "github.com/wso2/micro-gw/pkg/mgw"
-	pkgOasparser    = "github.com/wso2/micro-gw/pkg/oasparser"
-	pkgXds          = "github.com/wso2/micro-gw/pkg/xds"
+	pkgMgw          = "github.com/wso2/micro-gw/internal/mgw"
+	pkgOasparser    = "github.com/wso2/micro-gw/internal/oasparser"
+	pkgXds          = "github.com/wso2/micro-gw/internal/discovery/xds"
 	pkgSync         = "github.com/wso2/micro-gw/pkg/synchronizer"
 	pkgMsg          = "github.com/wso2/micro-gw/messaging"
-	pkgSvcDiscovery = "github.com/wso2/micro-gw/pkg/svcDiscovery"
-	pkgTLSUtils     = "github.com/wso2/micro-gw/pkg/tlsutils"
-	pkgSubscription = "github.com/wso2/micro-gw/pkg/subscription"
-	pkgXdsCallbacks = "github.com/wso2/micro-gw/pkg/mgw/xdscallbacks"
+	pkgSvcDiscovery = "github.com/wso2/micro-gw/internal/svcDiscovery"
+	pkgTLSUtils     = "github.com/wso2/micro-gw/internal/tlsutils"
+	pkgSubscription = "github.com/wso2/micro-gw/internal/subscription"
+	pkgXdsCallbacks = "github.com/wso2/micro-gw/internal/discovery/xds"
 )
 
 // logger package references

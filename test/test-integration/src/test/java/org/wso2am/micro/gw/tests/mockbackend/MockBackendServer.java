@@ -18,7 +18,6 @@
 
 package org.wso2am.micro.gw.tests.mockbackend;
 
-
 import org.wso2am.micro.gw.tests.context.MicroGWTestException;
 import org.wso2am.micro.gw.tests.util.Utils;
 

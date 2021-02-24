@@ -21,12 +21,16 @@ package org.wso2.micro.gateway.enforcer.config;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.gateway.discovery.config.enforcer.AmCredentials;
 import org.wso2.gateway.discovery.config.enforcer.AuthService;
+import org.wso2.gateway.discovery.config.enforcer.Cache;
 import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.config.enforcer.EventHub;
 import org.wso2.gateway.discovery.config.enforcer.Issuer;
+import org.wso2.gateway.discovery.config.enforcer.JWTGenerator;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
@@ -106,6 +110,13 @@ public class ConfigHolder {
 
         //Read credentials used to connect with APIM services
         populateAPIMCredentials(config.getApimCredentials());
+
+        // Read backend jwt generation configurations
+        populateJWTGeneratorConfigurations(config.getJwtGenerator());
+
+        // Read token caching configs
+        populateCacheConfigs(config.getCache());
+
     }
 
     private void populateAuthService(AuthService cdsAuth) {
@@ -189,6 +200,27 @@ public class ConfigHolder {
         char[] password = cred.getPassword().toCharArray();
         CredentialDto credentialDto = new CredentialDto(username, password);
         config.setApimCredentials(credentialDto);
+    }
+
+    private void populateJWTGeneratorConfigurations(JWTGenerator jwtGenerator) {
+        JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+        jwtConfigurationDto.setEnabled(jwtGenerator.getEnable());
+        jwtConfigurationDto.setJwtHeader(jwtGenerator.getHeader());
+        jwtConfigurationDto.setConsumerDialectUri(jwtGenerator.getClaimDialect());
+        jwtConfigurationDto.setSignatureAlgorithm(jwtGenerator.getSigningAlgorithm());
+        jwtConfigurationDto.setEnableUserClaims(jwtGenerator.getEnableUserClaims());
+        jwtConfigurationDto.setGatewayJWTGeneratorImpl(jwtGenerator.getGatewayGeneratorImpl());
+        config.setPublicCertificatePath(jwtGenerator.getPublicCertificatePath());
+        config.setPrivateKeyPath(jwtGenerator.getPrivateKeyPath());
+        config.setJwtConfigurationDto(jwtConfigurationDto);
+    }
+
+    private void populateCacheConfigs(Cache cache) {
+        CacheDto cacheDto = new CacheDto();
+        cacheDto.setEnabled(cache.getEnable());
+        cacheDto.setMaximumSize(cache.getMaximumSize());
+        cacheDto.setExpiryTime(cache.getExpiryTime());
+        config.setCacheDto(cacheDto);
     }
 
     public EnforcerConfig getConfig() {

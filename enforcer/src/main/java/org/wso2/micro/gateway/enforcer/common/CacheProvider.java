@@ -21,7 +21,9 @@ package org.wso2.micro.gateway.enforcer.common;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import org.wso2.micro.gateway.enforcer.security.jwt.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.security.jwt.SignedJWTInfo;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.JWTConstants;
 
@@ -36,12 +38,17 @@ public class CacheProvider {
     private static LoadingCache<String, JWTValidationInfo> gatewayKeyCache;
     private static LoadingCache<String, Boolean> invalidTokenCache;
     private static LoadingCache<String, JWTValidationInfo> gatewayJWTTokenCache;
+    private static boolean cacheEnabled = true;
     public static void init() {
-        gatewaySignedJWTParseCache = initCache(100, 15);
-        gatewayTokenCache = initCache(100, 15);
-        gatewayKeyCache = initCache(100, 15);
-        invalidTokenCache = initCache(100, 15);
-        gatewayJWTTokenCache = initCache(100, 15);
+        CacheDto cacheDto = ConfigHolder.getInstance().getConfig().getCacheDto();
+        cacheEnabled = cacheDto.isEnabled();
+        int maxSize = cacheDto.getMaximumSize();
+        int expiryTime = cacheDto.getExpiryTime();
+        gatewaySignedJWTParseCache = initCache(maxSize, expiryTime);
+        gatewayTokenCache = initCache(maxSize, expiryTime);
+        gatewayKeyCache = initCache(maxSize, expiryTime);
+        invalidTokenCache = initCache(maxSize, expiryTime);
+        gatewayJWTTokenCache = initCache(maxSize, expiryTime);
     }
 
     private static LoadingCache initCache(int maxSize, int expiryTime) {

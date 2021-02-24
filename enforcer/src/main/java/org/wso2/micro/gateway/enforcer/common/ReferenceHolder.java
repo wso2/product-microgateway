@@ -18,7 +18,6 @@
 
 package org.wso2.micro.gateway.enforcer.common;
 
-import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerDataService;
 import org.wso2.micro.gateway.enforcer.security.KeyValidator;
 
 import java.util.Map;
@@ -31,7 +30,6 @@ public class ReferenceHolder {
     private static final ReferenceHolder instance = new ReferenceHolder();
 
     private final Map<String, KeyValidator> keyValidationHandlerMap = new ConcurrentHashMap<>();
-    private KeyManagerDataService keyManagerDataService;
 
     private ReferenceHolder() {
     }
@@ -48,13 +46,5 @@ public class ReferenceHolder {
         KeyValidator defaultKeyValidationHandler = new KeyValidator();
         keyValidationHandlerMap.put(tenantDomain, defaultKeyValidationHandler);
         return defaultKeyValidationHandler;
-    }
-
-    public void setKeyManagerDataService(KeyManagerDataService keyManagerDataService) {
-        this.keyManagerDataService = keyManagerDataService;
-    }
-
-    public KeyManagerDataService getKeyManagerDataService() {
-        return this.keyManagerDataService;
     }
 }

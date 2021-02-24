@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package wso2.discovery.subscription;
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/subscription;subscription";
+option java_package = "org.wso2.gateway.discovery.subscription";
+option java_outer_classname = "ApplicationKeyMappingProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: ApplicationKeyMapping]
+
+// ApplicationKeyMapping data model
+message ApplicationKeyMapping {
+    string consumerKey = 1;
+	string keyType = 2;
+	string keyManager = 3;
+	int32 applicationId = 4;
+	int32 tenantId = 5;
+    string tenantDomain = 6;
+    int64 timestamp = 7;
+}

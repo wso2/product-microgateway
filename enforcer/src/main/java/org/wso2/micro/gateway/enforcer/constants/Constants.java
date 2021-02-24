@@ -26,7 +26,7 @@ public class Constants {
     public static final String API_TYPE_URL = "type.googleapis.com/wso2.discovery.api.Api";
     public static final String SUBSCRIPTION_LIST_TYPE_URL =
             "type.googleapis.com/wso2.discovery.subscription.SubscriptionList";
-    public static final String API_LIST_TYPE_URL = "type.googleapis.com/wso2.discovery.subscription.ApiList";
+    public static final String API_LIST_TYPE_URL = "type.googleapis.com/wso2.discovery.subscription.APIList";
     public static final String APPLICATION_LIST_TYPE_URL =
             "type.googleapis.com/wso2.discovery.subscription.ApplicationList";
     public static final String APPLICATION_POLICY_LIST_TYPE_URL =
@@ -39,4 +39,8 @@ public class Constants {
 
     // Config constants
     public static final String EVENT_HUB_EVENT_LISTENING_ENDPOINT = "eventListeningEndpoints";
+
+    public static final String BEGINING_OF_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n";
+    public static final String END_OF_PRIVATE_KEY = "-----END PRIVATE KEY-----";
+    public static final String RSA = "RSA";
 }

@@ -19,6 +19,7 @@
 package org.wso2.micro.gateway.enforcer.server;
 
 import io.grpc.Server;
+import io.grpc.ServerInterceptors;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.channel.EventLoopGroup;
@@ -29,10 +30,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.api.APIFactory;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
-import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.grpc.ExtAuthService;
+import org.wso2.micro.gateway.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.micro.gateway.enforcer.grpc.WebSocketMetadataService;
 import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerDataService;
 import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerDataServiceImpl;
@@ -55,10 +56,7 @@ public class AuthServer {
 
     public static void main(String[] args) {
         try {
-            KeyManagerDataService keyManagerDataService = new KeyManagerDataServiceImpl();
             // Load configurations
-            ConfigHolder configHolder = ConfigHolder.getInstance();
-            ReferenceHolder.getInstance().setKeyManagerDataService(keyManagerDataService);
             APIFactory.getInstance().init();
 
             // Create a new server to listen on port 8081
@@ -70,10 +68,6 @@ public class AuthServer {
             server.start();
             logger.info("Sever started Listening in port : " + 8081);
 
-            if (configHolder.getConfig().getEventHub().isEnabled()) {
-                logger.info("Event Hub configuration enabled... Starting JMS listener...");
-                GatewayJMSMessageListener.init(configHolder.getConfig().getEventHub());
-            }
             //TODO: Get the tenant domain from config
             SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().initializeStore();
 
@@ -104,14 +98,13 @@ public class AuthServer {
                 Constants.EXTERNAL_AUTHZ_THREAD_GROUP, Constants.EXTERNAL_AUTHZ_THREAD_ID);
         return NettyServerBuilder.forPort(authServerConfig.getPort())
                 .keepAliveTime(authServerConfig.getKeepAliveTime(), TimeUnit.SECONDS).bossEventLoopGroup(bossGroup)
-                .workerEventLoopGroup(workerGroup).addService(new ExtAuthService()).addService(new WebSocketMetadataService())
+                .workerEventLoopGroup(workerGroup)
+                .addService(ServerInterceptors.intercept(new ExtAuthService(), new AccessLogInterceptor()))
                 .maxInboundMessageSize(authServerConfig.getMaxMessageSize())
                 .maxInboundMetadataSize(authServerConfig.getMaxHeaderLimit()).channelType(NioServerSocketChannel.class)
-                .executor(enforcerWorkerPool.getExecutor())
-                .sslContext(GrpcSslContexts.forServer(certFile, keyFile)
+                .executor(enforcerWorkerPool.getExecutor()).sslContext(GrpcSslContexts.forServer(certFile, keyFile)
                         .trustManager(ConfigHolder.getInstance().getTrustManagerFactory())
-                        .clientAuth(ClientAuth.REQUIRE)
-                        .build())
-                .build();
+                        .clientAuth(ClientAuth.REQUIRE).build()).build();
+
     }
 }
