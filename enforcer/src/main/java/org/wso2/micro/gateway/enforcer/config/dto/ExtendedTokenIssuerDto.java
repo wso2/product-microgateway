@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
  * Holds meta data related to a JWT token issuer.
  */
 public class ExtendedTokenIssuerDto extends TokenIssuerDto {
-    //private String issuer;
     private String name;
     private boolean validateSubscriptions;
 

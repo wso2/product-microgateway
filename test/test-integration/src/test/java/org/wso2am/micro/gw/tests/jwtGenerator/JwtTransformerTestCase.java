@@ -29,7 +29,6 @@ public class JwtTransformerTestCase extends JwtGeneratorTestCase{
         String strTokenBody = tokenFull.split("\\.")[1];
         String decodedTokenBody = new String(Base64.getUrlDecoder().decode(strTokenBody));
         JSONObject tokenBody = new JSONObject(decodedTokenBody);
-        System.out.println(tokenFull);
         Assert.assertEquals(tokenBody.get("CUSTOM-CLAIM"), "admin",
                 "The custom claim has not correctly mapped");
     }
