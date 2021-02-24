@@ -12,7 +12,8 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-public class jwtTransformerTestCase extends jwtGeneratorTestCase{
+public class JwtTransformerTestCase extends JwtGeneratorTestCase{
+
     @Test(description = "Test JWT Generator token cache and the properties")
     public void testCustomClaimMapping() throws Exception {
         Map<String, String> headers = new HashMap<>();

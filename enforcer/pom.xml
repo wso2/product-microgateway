@@ -319,7 +319,7 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
-            <version>6.8.243-SNAPSHOT</version>
+            <version>9.0.0</version>
         </dependency>
     </dependencies>
 </project>
