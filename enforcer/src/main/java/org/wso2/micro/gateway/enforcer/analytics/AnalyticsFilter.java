@@ -15,6 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.micro.gateway.enforcer.analytics;
 
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
@@ -72,6 +73,10 @@ public class AnalyticsFilter implements Filter {
         requestContext.addMetadataToMap("ApplicationOwner", "not implemented");
 
         requestContext.addMetadataToMap("CorrelationId", requestContext.getCorrelationID());
+        requestContext.addMetadataToMap("DeploymentId", "not implemented");
+        // TODO: (VirajSalaka) Move this out of this method as these remain static
+        requestContext.addMetadataToMap("RegionId", "not implemented");
+        requestContext.addMetadataToMap("GatewayType", "Envoy");
         return true;
     }
 }

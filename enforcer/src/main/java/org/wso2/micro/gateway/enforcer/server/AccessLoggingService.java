@@ -34,6 +34,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.MetaInfo;
 
 import java.io.IOException;
 import java.util.Map;
@@ -73,6 +74,7 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
                     // TODO: (VirajSalaka) Use the map itself
                     event.setApi(generateAPIFromMetadataMap(fieldsMap));
                     event.setApplication(generateApplicationFromMetadataMap(fieldsMap));
+                    event.setMetaInfo(generateMetaInfoFromMetadataMap(fieldsMap));
                 }
 
             }
@@ -110,6 +112,15 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
         application.setKeyType(getValueAsString(fieldsMap, "ApplicationKeyType"));
         application.setApplicationId(getValueAsString(fieldsMap, "ApplicationId"));
         return application;
+    }
+
+    private MetaInfo generateMetaInfoFromMetadataMap(Map<String, Value> fieldsMap) {
+        MetaInfo metaInfo = new MetaInfo();
+        metaInfo.setCorrelationId(getValueAsString(fieldsMap, "CorrelationId"));
+        metaInfo.setDeploymentId(getValueAsString(fieldsMap, "DeploymentId"));
+        metaInfo.setGatewayType(getValueAsString(fieldsMap, "GatewayType"));
+        metaInfo.setRegionId(getValueAsString(fieldsMap, "RegionId"));
+        return metaInfo;
     }
 
     private String getValueAsString(Map<String, Value> fieldsMap, String key) {
