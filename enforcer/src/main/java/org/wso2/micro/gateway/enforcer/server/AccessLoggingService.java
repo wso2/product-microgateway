@@ -19,6 +19,7 @@
 package org.wso2.micro.gateway.enforcer.server;
 
 import com.google.protobuf.Value;
+import io.envoyproxy.envoy.data.accesslog.v3.AccessLogCommon;
 import io.envoyproxy.envoy.data.accesslog.v3.HTTPAccessLogEntry;
 import io.envoyproxy.envoy.service.accesslog.v3.AccessLogServiceGrpc;
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
@@ -34,6 +35,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.MetaInfo;
 
 import java.io.IOException;
@@ -66,7 +68,6 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
                 for (int i = 0; i < message.getHttpLogs().getLogEntryCount(); i++) {
                     Event event = new Event();
                     HTTPAccessLogEntry logEntry = message.getHttpLogs().getLogEntry(i);
-                    logEntry.getCommonProperties().getMetadata().getFilterMetadataMap();
                     // TODO: (VirajSalaka) Null check
                     Map<String, Value> fieldsMap = logEntry.getCommonProperties().getMetadata()
                             .getFilterMetadataMap().get("envoy.filters.http.ext_authz").getFieldsMap();
@@ -75,6 +76,7 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
                     event.setApi(generateAPIFromMetadataMap(fieldsMap));
                     event.setApplication(generateApplicationFromMetadataMap(fieldsMap));
                     event.setMetaInfo(generateMetaInfoFromMetadataMap(fieldsMap));
+                    event.setLatencies(generateLatencies(logEntry.getCommonProperties()));
                 }
 
             }
@@ -125,6 +127,19 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
 
     private String getValueAsString(Map<String, Value> fieldsMap, String key) {
         return fieldsMap.get(key).getStringValue();
+    }
+
+    private Latencies generateLatencies(AccessLogCommon properties) {
+        Latencies latencies = new Latencies();
+        // TODO: (VirajSalaka) If connection error happens these won't be available
+        // TODO: (VirajSalaka) Finalize the correctness after discussion
+        latencies.setBackendLatency(properties.getTimeToFirstUpstreamTxByte().getNanos() / 1000000 -
+                properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000);
+        latencies.setResponseLatency(properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000);
+        latencies.setRequestMediationLatency(properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000);
+        latencies.setResponseMediationLatency(properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000 -
+                properties.getTimeToFirstUpstreamRxByte().getNanos() / 1000000);
+        return latencies;
     }
 
     private boolean startAccessLoggingServer() {
