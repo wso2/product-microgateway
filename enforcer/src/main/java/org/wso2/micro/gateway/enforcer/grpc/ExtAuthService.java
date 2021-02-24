@@ -108,8 +108,10 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 );
             }
             Struct.Builder structBuilder = Struct.newBuilder();
-            responseObject.getMetaDataMap().forEach((key, value) ->
-                    structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
+            if (responseObject.getMetaDataMap() != null) {
+                responseObject.getMetaDataMap().forEach((key, value) ->
+                        structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
+            }
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
                     .build();

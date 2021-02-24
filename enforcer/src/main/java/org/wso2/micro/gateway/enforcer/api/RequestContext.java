@@ -19,6 +19,7 @@ package org.wso2.micro.gateway.enforcer.api;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
+import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +48,7 @@ public class RequestContext {
     //Correlation ID
     private final String correlationID;
     private Map<String, String> metadataMap = new HashMap<>();
+    private AuthenticationContext authenticationContext;
 
     private RequestContext() {
         correlationID = UUID.randomUUID().toString();
@@ -67,6 +69,14 @@ public class RequestContext {
 
     public void addMetadataToMap(String key, String value) {
         metadataMap.put(key, value);
+    }
+
+    public AuthenticationContext getAuthenticationContext() {
+        return authenticationContext;
+    }
+
+    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+        this.authenticationContext = authenticationContext;
     }
 
     /**

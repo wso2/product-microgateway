@@ -184,6 +184,7 @@ public class FilterUtils {
             authContext.setTier(apiKeyValidationInfoDTO.getTier());
             authContext.setSubscriberTenantDomain(apiKeyValidationInfoDTO.getSubscriberTenantDomain());
             authContext.setApiName(apiKeyValidationInfoDTO.getApiName());
+            authContext.setApiVersion(apiKeyValidationInfoDTO.getApiVersion());
             authContext.setApiPublisher(apiKeyValidationInfoDTO.getApiPublisher());
             authContext.setStopOnQuotaReach(apiKeyValidationInfoDTO.isStopOnQuotaReach());
             authContext.setSpikeArrestLimit(apiKeyValidationInfoDTO.getSpikeArrestLimit());

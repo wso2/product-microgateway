@@ -18,6 +18,8 @@
 
 package org.wso2.micro.gateway.enforcer.server;
 
+import com.google.protobuf.Value;
+import io.envoyproxy.envoy.data.accesslog.v3.HTTPAccessLogEntry;
 import io.envoyproxy.envoy.service.accesslog.v3.AccessLogServiceGrpc;
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsResponse;
@@ -29,8 +31,12 @@ import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -56,6 +62,18 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
             @Override
             public void onNext(StreamAccessLogsMessage message) {
                 logger.info("Received msg" + message.toString());
+                for (int i = 0; i < message.getHttpLogs().getLogEntryCount(); i++) {
+                    Event event = new Event();
+                    HTTPAccessLogEntry logEntry = message.getHttpLogs().getLogEntry(i);
+                    logEntry.getCommonProperties().getMetadata().getFilterMetadataMap();
+                    // TODO: (VirajSalaka) Null check
+                    Map<String, Value> fieldsMap = logEntry.getCommonProperties().getMetadata()
+                            .getFilterMetadataMap().get("envoy.filters.http.ext_authz").getFieldsMap();
+
+                    // TODO: (VirajSalaka) Use the map itself
+                    event.setApi(generateAPIFromMetadataMap(fieldsMap));
+                    event.setApplication(generateApplicationFromMetadataMap(fieldsMap));
+                }
 
             }
 
@@ -72,6 +90,30 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
                 responseObserver.onCompleted();
             }
         };
+    }
+
+    private API generateAPIFromMetadataMap(Map<String, Value> fieldsMap) {
+        API api = new API();
+        api.setApiId(getValueAsString(fieldsMap, "ApiId"));
+        api.setApiCreator(getValueAsString(fieldsMap, "ApiCreator"));
+        api.setApiType(getValueAsString(fieldsMap, "ApiType"));
+        api.setApiName(getValueAsString(fieldsMap, "ApiName"));
+        api.setApiVersion(getValueAsString(fieldsMap, "ApiVersion"));
+        api.setApiCreatorTenantDomain(getValueAsString(fieldsMap, "ApiCreatorTenantDomain"));
+        return api;
+    }
+
+    private Application generateApplicationFromMetadataMap(Map<String, Value> fieldsMap) {
+        Application application = new Application();
+        application.setApplicationOwner(getValueAsString(fieldsMap, "ApplicationOwner"));
+        application.setApplicationId(getValueAsString(fieldsMap, "ApplicationName"));
+        application.setKeyType(getValueAsString(fieldsMap, "ApplicationKeyType"));
+        application.setApplicationId(getValueAsString(fieldsMap, "ApplicationId"));
+        return application;
+    }
+
+    private String getValueAsString(Map<String, Value> fieldsMap, String key) {
+        return fieldsMap.get(key).getStringValue();
     }
 
     private boolean startAccessLoggingServer() {

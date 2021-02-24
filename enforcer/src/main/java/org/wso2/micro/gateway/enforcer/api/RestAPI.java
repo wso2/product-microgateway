@@ -72,12 +72,14 @@ public class RestAPI implements API {
     public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject(requestContext.getCorrelationID());
         if (executeFilterChain(requestContext)) {
+
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
             if (requestContext.getResponseHeaders() != null) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
             boolean analyticsEnabled = true;
             if (analyticsEnabled) {
+                AnalyticsFilter.getInstance().handleRequest(requestContext);
                 responseObject.setMetaDataMap(requestContext.getMetadataMap());
             }
         } else {
@@ -133,9 +135,7 @@ public class RestAPI implements API {
         AuthFilter authFilter = new AuthFilter();
         authFilter.init(apiConfig);
         CorsFilter corsFilter = new CorsFilter();
-        AnalyticsFilter analyticsFilter = new AnalyticsFilter();
         this.filters.add(corsFilter);
         this.filters.add(authFilter);
-        this.filters.add(analyticsFilter);
     }
 }

@@ -20,18 +20,31 @@ package org.wso2.micro.gateway.enforcer.analytics;
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
+import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 
 /**
  * This is the filter is for Analytics.
  */
 public class AnalyticsFilter implements Filter {
     private static final Logger logger = LogManager.getLogger(AnalyticsFilter.class);
+    private static AnalyticsFilter analyticsFilter;
+
+    private AnalyticsFilter () {
+    }
+
+    public static AnalyticsFilter getInstance() {
+        if (analyticsFilter == null) {
+            synchronized (new Object()) {
+                if (analyticsFilter == null) {
+                    analyticsFilter = new AnalyticsFilter();
+                }
+            }
+        }
+        return analyticsFilter;
+    }
 
     public boolean handleMsg(StreamAccessLogsMessage message) {
         // TODO (amalimatharaarachchi) process message and set analytics data'
@@ -44,39 +57,21 @@ public class AnalyticsFilter implements Filter {
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
-        APIConfig apiConfig = requestContext.getMathedAPI().getAPIConfig();
-
-
-        Event event = new Event();
-
-        API api = new API();
-        api.setApiId("not-implemented.");
-        api.setApiCreator("not-implemented.");
-        api.setApiName(apiConfig.getName());
-        api.setApiVersion(apiConfig.getVersion());
-        api.setApiType("HTTP");
-        api.setApiCreatorTenantDomain("carbon.super");
-
-        Application app = new Application();
-        app.setKeyType("Production");
-        app.setApplicationId("not-implemented.");
-        app.setApplicationName("not-implemented.");
-        app.setApplicationOwner("not-implemented.");
+        AuthenticationContext authContext = requestContext.getAuthenticationContext();
 
         requestContext.addMetadataToMap("ApiId", "Not-Implemented");
-        requestContext.addMetadataToMap("ApiCreator", "Not Implemented");
-        requestContext.addMetadataToMap("ApiName", apiConfig.getName());
-        requestContext.addMetadataToMap("ApiVersion", apiConfig.getVersion());
+        requestContext.addMetadataToMap("ApiCreator", authContext.getApiPublisher());
+        requestContext.addMetadataToMap("ApiName", authContext.getApiName());
+        requestContext.addMetadataToMap("ApiVersion", authContext.getApiVersion());
         requestContext.addMetadataToMap("ApiType", "HTTP");
-        requestContext.addMetadataToMap("ApiCreatorDomain", "Not Implemented");
+        requestContext.addMetadataToMap("ApiCreatorTenantDomain", "carbon.super");
 
-        requestContext.addMetadataToMap("ApplicationKeyType", "Production");
-        requestContext.addMetadataToMap("setApplicationId", "not-implemented");
-        requestContext.addMetadataToMap("setApplicationName", "not-implemented");
-        requestContext.addMetadataToMap("setApplicationOwner", "not-implemented");
+        requestContext.addMetadataToMap("ApplicationKeyType", authContext.getKeyType());
+        requestContext.addMetadataToMap("ApplicationId", authContext.getApplicationId());
+        requestContext.addMetadataToMap("ApplicationName", authContext.getApplicationName());
+        requestContext.addMetadataToMap("ApplicationOwner", "not implemented");
 
-        requestContext.addMetadataToMap("CorrelationId", "xxxxxx");
-
+        requestContext.addMetadataToMap("CorrelationId", requestContext.getCorrelationID());
         return true;
     }
 }
