@@ -26,30 +26,12 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
-import org.wso2.micro.gateway.enforcer.server.AccessLoggingService;
-
-import java.util.HashMap;
-import java.util.Map;
-
 
 /**
  * This is the filter is for Analytics.
  */
 public class AnalyticsFilter implements Filter {
     private static final Logger logger = LogManager.getLogger(AnalyticsFilter.class);
-    private static Map<String, ResponseEvent> responseEventMap;
-
-    public AnalyticsFilter() {
-        AccessLoggingService accessLoggingService = new AccessLoggingService();
-        if (accessLoggingService.init(this)) {
-            responseEventMap = new HashMap<>();
-            logger.info("Analytics filter initiated");
-            //start analytics publishing server
-        } else {
-            responseEventMap = null;
-            logger.warn("Analytics filter initiation failed due to access logger service failure");
-        }
-    }
 
     public boolean handleMsg(StreamAccessLogsMessage message) {
         // TODO (amalimatharaarachchi) process message and set analytics data'

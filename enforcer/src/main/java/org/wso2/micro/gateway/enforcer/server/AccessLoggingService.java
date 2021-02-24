@@ -29,7 +29,6 @@ import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.analytics.AnalyticsFilter;
 
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
@@ -45,10 +44,8 @@ import java.util.concurrent.TimeUnit;
 public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceImplBase {
 
     private static final Logger logger = LogManager.getLogger(AccessLoggingService.class);
-    private AnalyticsFilter analyticsFilter;
 
-    public boolean init (AnalyticsFilter analyticsFilter) {
-        this.analyticsFilter = analyticsFilter;
+    public boolean init() {
         return startAccessLoggingServer();
     }
 
@@ -59,7 +56,7 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
             @Override
             public void onNext(StreamAccessLogsMessage message) {
                 logger.info("Received msg" + message.toString());
-                analyticsFilter.handleMsg(message);
+
             }
 
             @Override
@@ -93,7 +90,7 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
         try {
             accessLoggerService.start();
         } catch (IOException e) {
-            logger.error("Error while starting the gRPC access logging server");
+            logger.error("Error while starting the gRPC access logging server", e);
             return false;
         }
         logger.info("Access loggers Sever started Listening in port : " + 18090);

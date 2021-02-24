@@ -28,7 +28,6 @@ import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.analytics.AnalyticsFilter;
 import org.wso2.micro.gateway.enforcer.api.APIFactory;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
@@ -64,7 +63,13 @@ public class AuthServer {
             boolean analytics = true;
             if (analytics) {
                 logger.info("analytics filter enabled");
-                new AnalyticsFilter();
+                AccessLoggingService accessLoggingService = new AccessLoggingService();
+                if (accessLoggingService.init()) {
+                    logger.info("Analytics filter initiated");
+                    //start analytics publishing server
+                } else {
+                    logger.warn("Analytics filter initiation failed due to access logger service failure");
+                }
             }
 
             //Initialise cache objects
