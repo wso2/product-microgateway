@@ -40,7 +40,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-GOOS=linux GOARCH=amd64 go build -v -o target/micro-gw-ubuntu main.go
+GOOS=linux GOARCH=amd64 go build -v -o target/micro-gw-ubuntu github.com/wso2/micro-gw/cmd/microgateway
 if [ $? -ne 0 ]; then 
   echo "FAILED: Build failure"
   exit 1
