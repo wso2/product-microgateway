@@ -26,11 +26,6 @@ public class WebSocketAPI implements API <Context, Context>{
     }
 
     @Override
-    public String init(CheckRequest request) {
-        return null;
-    }
-
-    @Override
     public String init(Api api) {
         String basePath = api.getBasePath();
         String name = api.getTitle();
