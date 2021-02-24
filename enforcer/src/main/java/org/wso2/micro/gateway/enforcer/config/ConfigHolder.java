@@ -185,7 +185,7 @@ public class ConfigHolder {
                 ClaimMappingDto map = new ClaimMappingDto(claimMap.getRemoteClaim(), claimMap.getLocalClaim());
                 issuerDto.addClaimMapping(map);
             }
-            // Load jwt transformer map.
+            // Load jwt transformers map.
             config.setJwtTransformerMap(JWTUtil.loadJWTTransformers());
             String certificateAlias = jwtIssuer.getCertificateAlias();
             if (certificateAlias != null) {
