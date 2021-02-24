@@ -31,7 +31,7 @@ import (
 	mgw "github.com/wso2/micro-gw/internal/oasparser/model"
 	"github.com/wso2/micro-gw/internal/oasparser/utills"
 	"github.com/wso2/micro-gw/internal/tlsutils"
-	xds "github.com/wso2/micro-gw/internal/xds"
+	xds "github.com/wso2/micro-gw/internal/discovery/xds"
 )
 
 // API Controller related constants

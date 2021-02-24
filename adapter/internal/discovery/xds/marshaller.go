@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/wso2/micro-gw/api/wso2/discovery/config/enforcer"
-	"github.com/wso2/micro-gw/api/wso2/discovery/subscription"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/config/enforcer"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/internal/eventhub/types"
 )

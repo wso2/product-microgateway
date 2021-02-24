@@ -36,13 +36,13 @@ const (
 	pkgAuth         = "github.com/wso2/micro-gw/pkg/auth"
 	pkgMgw          = "github.com/wso2/micro-gw/internal/mgw"
 	pkgOasparser    = "github.com/wso2/micro-gw/internal/oasparser"
-	pkgXds          = "github.com/wso2/micro-gw/internal/xds"
+	pkgXds          = "github.com/wso2/micro-gw/internal/discovery/xds"
 	pkgSync         = "github.com/wso2/micro-gw/pkg/synchronizer"
 	pkgMsg          = "github.com/wso2/micro-gw/messaging"
 	pkgSvcDiscovery = "github.com/wso2/micro-gw/internal/svcDiscovery"
 	pkgTLSUtils     = "github.com/wso2/micro-gw/internal/tlsutils"
 	pkgSubscription = "github.com/wso2/micro-gw/internal/subscription"
-	pkgXdsCallbacks = "github.com/wso2/micro-gw/internal/mgw/xdscallbacks"
+	pkgXdsCallbacks = "github.com/wso2/micro-gw/internal/discovery/xds"
 )
 
 // logger package references

@@ -30,7 +30,7 @@ import (
 	eh "github.com/wso2/micro-gw/internal/eventhub"
 	"github.com/wso2/micro-gw/internal/eventhub/types"
 	"github.com/wso2/micro-gw/pkg/synchronizer"
-	"github.com/wso2/micro-gw/internal/xds"
+	"github.com/wso2/micro-gw/internal/discovery/xds"
 )
 
 // constant variables

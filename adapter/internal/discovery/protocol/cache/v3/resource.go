@@ -17,14 +17,14 @@ package cache
 import (
 	"fmt"
 
-	"github.com/wso2/micro-gw/api/wso2/discovery/subscription"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
 
-	"github.com/wso2/micro-gw/api/wso2/discovery/config/enforcer"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/config/enforcer"
 
 	envoy_types "github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	"github.com/wso2/micro-gw/api/wso2/discovery/api"
-	"github.com/wso2/micro-gw/pkg/discovery/cache/types"
-	"github.com/wso2/micro-gw/pkg/discovery/resource/v3"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/api"
+	"github.com/wso2/micro-gw/internal/discovery/protocol/cache/types"
+	"github.com/wso2/micro-gw/internal/discovery/protocol/resource/v3"
 )
 
 // GetResponseType returns the enumeration for a valid xDS type URL

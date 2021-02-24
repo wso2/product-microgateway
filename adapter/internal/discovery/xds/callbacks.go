@@ -15,7 +15,7 @@
  *
  */
 
-package xdscallbacks
+package xds
 
 import (
 	"context"

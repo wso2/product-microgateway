@@ -24,8 +24,8 @@ import (
 	"sync"
 
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
-	"github.com/wso2/micro-gw/api/wso2/discovery/subscription"
-	wso2_cache "github.com/wso2/micro-gw/pkg/discovery/cache/v3"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
+	wso2_cache "github.com/wso2/micro-gw/internal/discovery/protocol/cache/v3"
 	"github.com/wso2/micro-gw/internal/svcdiscovery"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
