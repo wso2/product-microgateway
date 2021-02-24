@@ -135,4 +135,19 @@ public interface ConfigOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder getThrottlingConfigOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   * @return Whether the cache field is set.
+   */
+  boolean hasCache();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   * @return The cache.
+   */
+  org.wso2.gateway.discovery.config.enforcer.Cache getCache();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder getCacheOrBuilder();
 }

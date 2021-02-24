@@ -154,6 +154,19 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
+          case 74: {
+            org.wso2.gateway.discovery.config.enforcer.Cache.Builder subBuilder = null;
+            if (cache_ != null) {
+              subBuilder = cache_.toBuilder();
+            }
+            cache_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.Cache.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(cache_);
+              cache_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -411,6 +424,32 @@ private static final long serialVersionUID = 0L;
     return getThrottlingConfig();
   }
 
+  public static final int CACHE_FIELD_NUMBER = 9;
+  private org.wso2.gateway.discovery.config.enforcer.Cache cache_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   * @return Whether the cache field is set.
+   */
+  @java.lang.Override
+  public boolean hasCache() {
+    return cache_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   * @return The cache.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.Cache getCache() {
+    return cache_ == null ? org.wso2.gateway.discovery.config.enforcer.Cache.getDefaultInstance() : cache_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder getCacheOrBuilder() {
+    return getCache();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -448,6 +487,9 @@ private static final long serialVersionUID = 0L;
     }
     if (throttlingConfig_ != null) {
       output.writeMessage(8, getThrottlingConfig());
+    }
+    if (cache_ != null) {
+      output.writeMessage(9, getCache());
     }
     unknownFields.writeTo(output);
   }
@@ -489,6 +531,10 @@ private static final long serialVersionUID = 0L;
     if (throttlingConfig_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(8, getThrottlingConfig());
+    }
+    if (cache_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(9, getCache());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -542,6 +588,11 @@ private static final long serialVersionUID = 0L;
       if (!getThrottlingConfig()
           .equals(other.getThrottlingConfig())) return false;
     }
+    if (hasCache() != other.hasCache()) return false;
+    if (hasCache()) {
+      if (!getCache()
+          .equals(other.getCache())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -584,6 +635,10 @@ private static final long serialVersionUID = 0L;
     if (hasThrottlingConfig()) {
       hash = (37 * hash) + THROTTLINGCONFIG_FIELD_NUMBER;
       hash = (53 * hash) + getThrottlingConfig().hashCode();
+    }
+    if (hasCache()) {
+      hash = (37 * hash) + CACHE_FIELD_NUMBER;
+      hash = (53 * hash) + getCache().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -771,6 +826,12 @@ private static final long serialVersionUID = 0L;
         throttlingConfig_ = null;
         throttlingConfigBuilder_ = null;
       }
+      if (cacheBuilder_ == null) {
+        cache_ = null;
+      } else {
+        cache_ = null;
+        cacheBuilder_ = null;
+      }
       return this;
     }
 
@@ -841,6 +902,11 @@ private static final long serialVersionUID = 0L;
         result.throttlingConfig_ = throttlingConfig_;
       } else {
         result.throttlingConfig_ = throttlingConfigBuilder_.build();
+      }
+      if (cacheBuilder_ == null) {
+        result.cache_ = cache_;
+      } else {
+        result.cache_ = cacheBuilder_.build();
       }
       onBuilt();
       return result;
@@ -936,6 +1002,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasThrottlingConfig()) {
         mergeThrottlingConfig(other.getThrottlingConfig());
+      }
+      if (other.hasCache()) {
+        mergeCache(other.getCache());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -2038,6 +2107,125 @@ private static final long serialVersionUID = 0L;
         throttlingConfig_ = null;
       }
       return throttlingConfigBuilder_;
+    }
+
+    private org.wso2.gateway.discovery.config.enforcer.Cache cache_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.Cache, org.wso2.gateway.discovery.config.enforcer.Cache.Builder, org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder> cacheBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     * @return Whether the cache field is set.
+     */
+    public boolean hasCache() {
+      return cacheBuilder_ != null || cache_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     * @return The cache.
+     */
+    public org.wso2.gateway.discovery.config.enforcer.Cache getCache() {
+      if (cacheBuilder_ == null) {
+        return cache_ == null ? org.wso2.gateway.discovery.config.enforcer.Cache.getDefaultInstance() : cache_;
+      } else {
+        return cacheBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    public Builder setCache(org.wso2.gateway.discovery.config.enforcer.Cache value) {
+      if (cacheBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        cache_ = value;
+        onChanged();
+      } else {
+        cacheBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    public Builder setCache(
+        org.wso2.gateway.discovery.config.enforcer.Cache.Builder builderForValue) {
+      if (cacheBuilder_ == null) {
+        cache_ = builderForValue.build();
+        onChanged();
+      } else {
+        cacheBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    public Builder mergeCache(org.wso2.gateway.discovery.config.enforcer.Cache value) {
+      if (cacheBuilder_ == null) {
+        if (cache_ != null) {
+          cache_ =
+            org.wso2.gateway.discovery.config.enforcer.Cache.newBuilder(cache_).mergeFrom(value).buildPartial();
+        } else {
+          cache_ = value;
+        }
+        onChanged();
+      } else {
+        cacheBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    public Builder clearCache() {
+      if (cacheBuilder_ == null) {
+        cache_ = null;
+        onChanged();
+      } else {
+        cache_ = null;
+        cacheBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.Cache.Builder getCacheBuilder() {
+      
+      onChanged();
+      return getCacheFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder getCacheOrBuilder() {
+      if (cacheBuilder_ != null) {
+        return cacheBuilder_.getMessageOrBuilder();
+      } else {
+        return cache_ == null ?
+            org.wso2.gateway.discovery.config.enforcer.Cache.getDefaultInstance() : cache_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.Cache, org.wso2.gateway.discovery.config.enforcer.Cache.Builder, org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder> 
+        getCacheFieldBuilder() {
+      if (cacheBuilder_ == null) {
+        cacheBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.Cache, org.wso2.gateway.discovery.config.enforcer.Cache.Builder, org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder>(
+                getCache(),
+                getParentForChildren(),
+                isClean());
+        cache_ = null;
+      }
+      return cacheBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

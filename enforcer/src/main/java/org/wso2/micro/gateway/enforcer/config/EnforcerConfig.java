@@ -20,6 +20,7 @@ package org.wso2.micro.gateway.enforcer.config;
 
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
@@ -37,6 +38,7 @@ public class EnforcerConfig {
     private Map<String, TokenIssuerDto> issuersMap = new HashMap<>();
     private CredentialDto apimCredentials;
     private JWTConfigurationDto jwtConfigurationDto;
+    private CacheDto cacheDto;
     private String publicCertificatePath = "";
     private String privateKeyPath = "";
 
@@ -78,6 +80,14 @@ public class EnforcerConfig {
 
     public JWTConfigurationDto getJwtConfigurationDto() {
         return jwtConfigurationDto;
+    }
+
+    public CacheDto getCacheDto() {
+        return cacheDto;
+    }
+
+    public void setCacheDto(CacheDto cacheDto) {
+        this.cacheDto = cacheDto;
     }
 
     public void setPublicCertificatePath(String certPath) {

@@ -79,6 +79,11 @@ disableSslVerification = false
     username="admin"
     password="admin"
 
+[enforcer.cache]
+  enabled = true
+  maximumSize = 10000
+  expiryTime = 15
+
 [enforcer.jwtGenerator]
     enable = false
     encoding = "base64" # base64,base64url
