@@ -46,7 +46,7 @@ public class BackendTLSTestcase extends BaseTestCase {
         //deploy the api
         //api yaml file should put to the resources/apis/openApis folder
         String apiZipfile = ApiProjectGenerator.createApictlProjZip("backendtls/openapi.yaml",
-                "backendtls/backend.crt");
+                "backendtls/backend.crt", null);
         ApiDeployment.deployAPI(apiZipfile);
 
         //TODO: (VirajSalaka) change the token

@@ -1,0 +1,70 @@
+type: api
+version: v4
+data:
+  id: a65d7b25-96aa-46b0-b635-97bb0731b31c
+  name: EchoWebSocket
+  context: /echowebsocket
+  version: "1.0"
+  provider: admin
+  lifeCycleStatus: CREATED
+  responseCachingEnabled: false
+  cacheTimeout: 300
+  isDefaultVersion: false
+  enableSchemaValidation: false
+  enableStore: true
+  type: WS
+  transport: []
+  tags: []
+  policies:
+    - Unlimited
+  authorizationHeader: Authorization
+  securityScheme:
+    - oauth2
+    - oauth_basic_auth_api_key_mandatory
+  visibility: PUBLIC
+  visibleRoles: []
+  visibleTenants: []
+  gatewayEnvironments:
+    - Production and Sandbox
+  deploymentEnvironments: []
+  labels: []
+  mediationPolicies: []
+  subscriptionAvailability: CURRENT_TENANT
+  subscriptionAvailableTenants: []
+  additionalProperties: {}
+  accessControl: NONE
+  accessControlRoles: []
+  businessInformation: {}
+  corsConfiguration:
+    corsConfigurationEnabled: false
+    accessControlAllowOrigins:
+      - '*'
+    accessControlAllowCredentials: false
+    accessControlAllowHeaders:
+      - authorization
+      - Access-Control-Allow-Origin
+      - Content-Type
+      - SOAPAction
+      - apikey
+      - testKey
+    accessControlAllowMethods:
+      - GET
+      - PUT
+      - POST
+      - DELETE
+      - PATCH
+      - OPTIONS
+  createdTime: Jan 9, 2021, 6:39:31 PM
+  lastUpdatedTime: Jan 9, 2021, 6:39:31 PM
+  endpointConfig:
+    endpoint_type: http
+    sandbox_endpoints:
+      url: ws://mockBackend:2395
+    production_endpoints:
+      url: ws://mockBackend:2395
+  endpointImplementationType: ENDPOINT
+  scopes: []
+  operations: []
+  categories: []
+  keyManagers:
+    - all

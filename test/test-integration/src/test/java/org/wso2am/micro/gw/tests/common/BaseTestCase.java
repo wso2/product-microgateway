@@ -32,6 +32,8 @@ import org.wso2am.micro.gw.tests.util.*;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
@@ -165,5 +167,9 @@ public class BaseTestCase {
         JSONObject jwtTokenInfo = new JSONObject();
         jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(subscribedApiDTO)));
         return TokenUtil.getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod, scopes);
+    }
+
+    public static URI getMockServiceURLWebSocket(String servicePath) throws URISyntaxException {
+        return new URI("wss://localhost:"+TestConstant.GATEWAY_LISTENER_HTTPS_PORT+servicePath);
     }
 }

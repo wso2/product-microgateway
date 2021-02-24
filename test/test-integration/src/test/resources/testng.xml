@@ -36,6 +36,9 @@
             <class name="org.wso2am.micro.gw.tests.jwtGenerator.JwtGeneratorTestCase"/>
             <class name="org.wso2am.micro.gw.tests.backendtls.BackendTLSTestcase"/>
             <class name="org.wso2am.micro.gw.tests.endpoints.ProductionSandboxTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.websocket.WebSocketDeployTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.websocket.WebSocketEndPointTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.websocket.WebSocketTLSTestCase"/>
         </classes>
     </test>
 </suite>

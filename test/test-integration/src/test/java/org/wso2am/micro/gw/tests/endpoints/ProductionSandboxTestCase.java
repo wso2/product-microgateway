@@ -21,6 +21,7 @@ package org.wso2am.micro.gw.tests.endpoints;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
@@ -141,6 +142,11 @@ public class ProductionSandboxTestCase extends BaseTestCase {
         Assert.assertNotNull(sandResponse, "Sandbox endpoint response should not be null");
         Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
         Assert.assertTrue(sandResponse.getData().contains("Sandbox key offered to the API with no sandbox endpoint"));
+    }
+
+    @AfterClass(description = "stop the setup")
+    void stop() {
+        super.stopMGW();
     }
 
 }

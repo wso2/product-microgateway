@@ -53,4 +53,6 @@ public class ResponseConstants {
     public static final String INVALID_JWT_RESPONSE ="\"{\"header\":\"not available\"}\"";
     public static final String VALID_JWT_RESPONSE ="\"{\"header\":\"available\"}\"";
 
+    public static final String WEBSOCKET_GREETING = "Hello from WebSocket Server";
+
 }

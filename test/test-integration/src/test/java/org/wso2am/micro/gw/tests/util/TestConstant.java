@@ -70,4 +70,10 @@ public class TestConstant {
 
     public static final String LINE = "\r\n";
     public static final String MOCK_BACKEND_DOCKER_IMAGE = "wso2/mg-mock-backend";
+
+    public static final int MOCK_WEB_SOCKET_PORT = 2395;
+    public static final int SECURE_MOCK_WEB_SOCKET_PORT = 2396;
+    public static final String MOCK_WEBSOCKET_HELLO = "Hello";
+    public static final int MOCK_WEBSOCKET_CONNECT_TIMEOUT = 5000;
+    public static final int MOCK_WEBSOCKET_ECHO_CHECK_INTERVAL = 1000;
 }
