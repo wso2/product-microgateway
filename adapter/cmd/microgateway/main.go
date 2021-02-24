@@ -15,23 +15,35 @@
  *
  */
 
-// Package microgateway contains the adapter bootstrap implementation.
-// This includes loading configurations and starting the adapter.
-package microgateway
+// Package main is the main packages
+package main
 
 import (
+	"os"
+
 	logger "github.com/sirupsen/logrus"
 	"github.com/wso2/micro-gw/config"
-	"github.com/wso2/micro-gw/pkg/mgw"
+	_ "github.com/wso2/micro-gw/internal/logging"
+	"github.com/wso2/micro-gw/internal/mgw"
 )
+
+func main() {
+
+	var file string
+	if len(os.Args) > 1 {
+		file = os.Args[1]
+		logger.Debug(file)
+	}
+	startMicroGateway(os.Args)
+}
 
 func initServer() error {
 	return nil
 }
 
-// StartMicroGateway reads the configuration files and then start the adapter components.
+// startMicroGateway reads the configuration files and then start the adapter components.
 // Commandline arguments needs to be provided as args
-func StartMicroGateway(args []string) {
+func startMicroGateway(args []string) {
 
 	logger.Info("Starting Microgateway")
 	err := initServer()
