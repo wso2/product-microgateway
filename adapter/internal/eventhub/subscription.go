@@ -29,11 +29,11 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/micro-gw/internal/auth"
+	"github.com/wso2/micro-gw/internal/discovery/xds"
 	"github.com/wso2/micro-gw/internal/eventhub/types"
 	"github.com/wso2/micro-gw/internal/tlsutils"
-	"github.com/wso2/micro-gw/internal/discovery/xds"
 	logger "github.com/wso2/micro-gw/loggers"
-	"github.com/wso2/micro-gw/pkg/auth"
 )
 
 const (
