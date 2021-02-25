@@ -143,7 +143,7 @@ public class ConfigHolder {
 
         Properties jmsProps = new Properties();
         jmsProps.put(Constants.EVENT_HUB_EVENT_LISTENING_ENDPOINT,
-                eventhub.getJmsConnectionParametersMap().get(Constants.EVENT_HUB_EVENT_LISTENING_ENDPOINT));
+                eventhub.getJmsConnectionParameters().getEventListeningEndpointsList());
         eventHubDto.setJmsConnectionParameters(jmsProps);
 
         config.setEventHub(eventHubDto);

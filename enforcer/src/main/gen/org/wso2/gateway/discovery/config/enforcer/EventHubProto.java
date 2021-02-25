@@ -19,11 +19,6 @@ public final class EventHubProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_wso2_discovery_config_enforcer_EventHub_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_wso2_discovery_config_enforcer_EventHub_JmsConnectionParametersEntry_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_wso2_discovery_config_enforcer_EventHub_JmsConnectionParametersEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -35,20 +30,20 @@ public final class EventHubProto {
     java.lang.String[] descriptorData = {
       "\n.wso2/discovery/config/enforcer/event_h" +
       "ub.proto\022\036wso2.discovery.config.enforcer" +
-      "\"\327\001\n\010EventHub\022\017\n\007enabled\030\001 \001(\010\022\022\n\nservic" +
-      "eUrl\030\002 \001(\t\022f\n\027jmsConnectionParameters\030\003 " +
-      "\003(\0132E.wso2.discovery.config.enforcer.Eve" +
-      "ntHub.JmsConnectionParametersEntry\032>\n\034Jm" +
-      "sConnectionParametersEntry\022\013\n\003key\030\001 \001(\t\022" +
-      "\r\n\005value\030\002 \001(\t:\0028\001B\215\001\n*org.wso2.gateway." +
-      "discovery.config.enforcerB\rEventHubProto" +
-      "P\001ZNgithub.com/envoyproxy/go-control-pla" +
-      "ne/wso2/discovery/config/enforcer;enforc" +
-      "erb\006proto3"
+      "\032:wso2/discovery/config/enforcer/jms_con" +
+      "nection_params.proto\"\211\001\n\010EventHub\022\017\n\007ena" +
+      "bled\030\001 \001(\010\022\022\n\nserviceUrl\030\002 \001(\t\022X\n\027jmsCon" +
+      "nectionParameters\030\003 \001(\01327.wso2.discovery" +
+      ".config.enforcer.JmsConnectionParameters" +
+      "B\215\001\n*org.wso2.gateway.discovery.config.e" +
+      "nforcerB\rEventHubProtoP\001ZNgithub.com/env" +
+      "oyproxy/go-control-plane/wso2/discovery/" +
+      "config/enforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
+          org.wso2.gateway.discovery.config.enforcer.JMSConnectionParamsProto.getDescriptor(),
         });
     internal_static_wso2_discovery_config_enforcer_EventHub_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -56,12 +51,7 @@ public final class EventHubProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_EventHub_descriptor,
         new java.lang.String[] { "Enabled", "ServiceUrl", "JmsConnectionParameters", });
-    internal_static_wso2_discovery_config_enforcer_EventHub_JmsConnectionParametersEntry_descriptor =
-      internal_static_wso2_discovery_config_enforcer_EventHub_descriptor.getNestedTypes().get(0);
-    internal_static_wso2_discovery_config_enforcer_EventHub_JmsConnectionParametersEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_wso2_discovery_config_enforcer_EventHub_JmsConnectionParametersEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", });
+    org.wso2.gateway.discovery.config.enforcer.JMSConnectionParamsProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)
