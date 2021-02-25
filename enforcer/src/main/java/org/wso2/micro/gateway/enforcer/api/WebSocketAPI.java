@@ -1,6 +1,5 @@
 package org.wso2.micro.gateway.enforcer.api;
 
-import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.api.Api;

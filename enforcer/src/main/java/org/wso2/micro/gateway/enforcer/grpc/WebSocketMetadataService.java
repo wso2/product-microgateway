@@ -14,17 +14,15 @@ public class WebSocketMetadataService extends WebSocketMetadataServiceGrpc.WebSo
     private static ConcurrentHashMap<String, WebSocketResponseObserver> responseObservers = new ConcurrentHashMap<>();
     @Override
     public StreamObserver<RateLimitRequest> publishMetadata(StreamObserver<RateLimitResponse> responseObserver) {
-        logger.info("publishMetadata called");
+        logger.debug("publishMetadata invoked from websocket meatadata service");
         return new WebSocketResponseObserver(responseObserver);
     }
 
     public static void addObserver(String streamId, WebSocketResponseObserver observer){
         responseObservers.put(streamId, observer);
-        logger.info("observer added: "+ streamId);
     }
 
     public static void removeObserver(String streamId){
         responseObservers.remove(streamId);
-        logger.info("observer removed: "+ streamId);
     }
 }

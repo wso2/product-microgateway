@@ -18,15 +18,10 @@
 package org.wso2.micro.gateway.enforcer.server;
 
 import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
-import io.envoyproxy.envoy.service.auth.v3.CheckResponse;
 import io.envoyproxy.envoy.type.v3.StatusCode;
-import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.api.API;
-import org.wso2.micro.gateway.enforcer.api.APIFactory;
-import org.wso2.micro.gateway.enforcer.api.RequestContext;
-import org.wso2.micro.gateway.enforcer.api.ResponseObject;
+import org.wso2.micro.gateway.enforcer.api.*;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
@@ -67,14 +62,14 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest,ResponseO
         String sandCluster = request.getAttributes().getContextExtensionsMap()
                 .get(AdapterConstants.SAND_CLUSTER_HEADER_KEY);
         ResourceConfig resourceConfig = null;
-        logger.info("path: "+requestPath);
-        logger.info("basepath: "+ request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_BASE_PATH_PARAM));
         // TODO (LahiruUdayanga) - Change the below logic for apiType in API.
-        if(api.getAPIConfig().getResources().isEmpty()){
-            resourceConfig = APIFactory.getInstance().getMatchedBasePath(api, requestPath);
-        }else {
+        if(api instanceof RestAPI){
             resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
-        }return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
+        }else {
+            // Basepath is considered for websocket APIs since there are no resources.
+            resourceConfig = APIFactory.getInstance().getMatchedBasePath(api, requestPath);
+        }
+        return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api).headers(headers).prodClusterHeader(prodCluster).sandClusterHeader(sandCluster)
                 .build();
     }

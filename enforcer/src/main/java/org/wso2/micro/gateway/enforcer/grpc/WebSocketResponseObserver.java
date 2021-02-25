@@ -4,7 +4,6 @@ import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.api.WebSocketMetadataContext;
-import org.wso2.micro.gateway.enforcer.api.WebSocketResponseObject;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.server.WebSocketHandler;
 import org.wso2.micro.gateway.enforcer.websocket.RateLimitRequest;
@@ -26,10 +25,10 @@ public class WebSocketResponseObserver implements StreamObserver<RateLimitReques
     @Override
     public void onNext(RateLimitRequest rateLimitRequest) {
         count++;
-        logger.info(">>>>>>> Frame count : "+ count);
         webSocketMetadataContext = webSocketHandler.process(rateLimitRequest);
         streamId = getStreamId(rateLimitRequest);
         WebSocketMetadataService.addObserver(streamId,this);
+        // Demo rate limit scenario
         if(count > 10 && count < 15){
             RateLimitResponse response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.OVER_LIMIT).build();
             responseStreamObserver.onNext(response);
@@ -37,33 +36,22 @@ public class WebSocketResponseObserver implements StreamObserver<RateLimitReques
             RateLimitResponse response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.OK).build();
             responseStreamObserver.onNext(response);
         }
-//        if(webSocketResponseObject == WebSocketResponseObject.OK){
-//            response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.OK).build();
-//        }else if(webSocketResponseObject == WebSocketResponseObject.OVER_LIMIT){
-//            response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.OVER_LIMIT).build();
-//        }else{
-//            response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.UNKNOWN).build();
-//        }
-
-
     }
 
     @Override
     public void onError(Throwable throwable) {
-        logger.info("onError called");
+        logger.debug("websocket metadata service onError: "+ throwable.toString());
         WebSocketMetadataService.removeObserver(streamId);
     }
 
     @Override
     public void onCompleted() {
-        logger.info("onCompleted");
         WebSocketMetadataService.removeObserver(streamId);
     }
 
     private String getStreamId(RateLimitRequest rateLimitRequest){
-        String streamId = rateLimitRequest.getMetadataContext().getFilterMetadataMap().
+        return rateLimitRequest.getMetadataContext().getFilterMetadataMap().
                 get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.WEBSOCKET_STREAM_ID).getStringValue();
-        return streamId;
     }
 
 }
