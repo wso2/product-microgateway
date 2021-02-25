@@ -77,6 +77,10 @@ public class AnalyticsFilter implements Filter {
         // TODO: (VirajSalaka) Move this out of this method as these remain static
         requestContext.addMetadataToMap("RegionId", "not implemented");
         requestContext.addMetadataToMap("GatewayType", "Envoy");
+
+        // As in the matched API, only the resources under the matched resource template are selected.
+        requestContext.addMetadataToMap("ApiResourceTemplate",
+                requestContext.getMathedAPI().getAPIConfig().getResources().get(0).getPath());
         return true;
     }
 }

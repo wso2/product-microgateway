@@ -37,8 +37,13 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Applicatio
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.MetaInfo;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -77,6 +82,8 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
                     event.setApplication(generateApplicationFromMetadataMap(fieldsMap));
                     event.setMetaInfo(generateMetaInfoFromMetadataMap(fieldsMap));
                     event.setLatencies(generateLatencies(logEntry.getCommonProperties()));
+                    event.setOperation(generateOperation(fieldsMap, logEntry));
+                    event.setTarget(generateTarget(logEntry));
                 }
 
             }
@@ -125,6 +132,13 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
         return metaInfo;
     }
 
+    private Operation generateOperation(Map<String, Value> fieldsMap, HTTPAccessLogEntry logEntry) {
+        Operation operation = new Operation();
+        operation.setApiResourceTemplate(getValueAsString(fieldsMap, "ApiResourceTemplate"));
+        operation.setApiMethod(logEntry.getRequest().getRequestMethod().name());
+        return operation;
+    }
+
     private String getValueAsString(Map<String, Value> fieldsMap, String key) {
         return fieldsMap.get(key).getStringValue();
     }
@@ -140,6 +154,24 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
         latencies.setResponseMediationLatency(properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000 -
                 properties.getTimeToFirstUpstreamRxByte().getNanos() / 1000000);
         return latencies;
+    }
+
+    private Target generateTarget(HTTPAccessLogEntry logEntry) {
+        Target target = new Target();
+        // As response caching is not configured at the moment.
+        target.setResponseCacheHit(false);
+        target.setTargetResponseCode(logEntry.getResponse().getResponseCode().getValue());
+        // TODO: (VirajSalaka) get destination in the format of url
+        // TODO: (VirajSalaka) add backend basepath
+        target.setDestination(logEntry.getCommonProperties().getUpstreamRemoteAddress().getSocketAddress()
+                .getAddress());
+        return target;
+    }
+
+    public static String getTimeInISO(long time) {
+        OffsetDateTime offsetDateTime = OffsetDateTime
+                .ofInstant(Instant.ofEpochMilli(time), ZoneOffset.UTC.normalized());
+        return offsetDateTime.toString();
     }
 
     private boolean startAccessLoggingServer() {
