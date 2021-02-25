@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/config/enforcer"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
-	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/internal/eventhub/types"
 )
 
@@ -70,8 +70,8 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		Eventhub: &enforcer.EventHub{
 			Enabled:    config.ControlPlane.EventHub.Enabled,
 			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,
-			JmsConnectionParameters: map[string]string{
-				"eventListeningEndpoints": config.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints,
+			JmsConnectionParameters: &enforcer.JmsConnectionParameters{
+				EventListeningEndpoints: config.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints,
 			},
 		},
 	}

@@ -34,6 +34,7 @@ var (
 	amqpURI          string
 	rabbitConn       *amqp.Connection
 	rabbitCloseError chan *amqp.Error
+	amqpURIArray     = make([]amqpFailoverURL, 0)
 )
 
 const (
@@ -47,58 +48,61 @@ const (
 
 // ProcessEvents to pass event consumption
 func ProcessEvents(config *config.Config) {
+	var err error
 	mgwConfig = config
-	amqpURI = mgwConfig.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints
+	amqpURIArray = retrieveAMQPURLList()
 	bindingKeys := []string{notification, keymanager, tokenRevocation}
 
-	for i, key := range bindingKeys {
-		logger.LoggerMsg.Infof("shutting down index %v key %s ", i, key)
-		go func(key string) {
-			c, err := NewConsumer(key+"-queue", key)
-			if err != nil {
-				logger.LoggerMsg.Fatalf("%s", err)
-			}
-			if lifetime > 0 {
-				logger.LoggerMsg.Infof("running %s events for %s", key, lifetime)
-				time.Sleep(lifetime)
-			} else {
-				logger.LoggerMsg.Infof("process of receiving %s events running forever", key)
-				select {}
-			}
+	logger.LoggerMsg.Infof("dialing %q", amqpURIArray[0].url+"/")
+	rabbitConn, err = connectToRabbitMQ(amqpURIArray[0].url + "/")
 
-			logger.LoggerMsg.Infof("shutting down")
-			if err := c.Shutdown(); err != nil {
-				logger.LoggerMsg.Fatalf("error during shutdown: %s", err)
-			}
-		}(key)
+	if err == nil {
+		for i, key := range bindingKeys {
+			logger.LoggerMsg.Infof("Establishing consumer index %v for key %s ", i, key)
+			go func(key string) {
+				c, err := StartConsumer(key)
+				if err != nil {
+					logger.LoggerMsg.Fatalf("%s", err)
+				}
+				if lifetime > 0 {
+					logger.LoggerMsg.Debugf("running %s events for %s", key, lifetime)
+					time.Sleep(lifetime)
+				} else {
+					logger.LoggerMsg.Infof("process of receiving %s events running forever", key)
+					select {}
+				}
+
+				logger.LoggerMsg.Infof("shutting down")
+				if err := c.Shutdown(); err != nil {
+					logger.LoggerMsg.Fatalf("error during shutdown: %s", err)
+				}
+			}(key)
+		}
 	}
 }
 
-// NewConsumer object to consume data
-func NewConsumer(queueName string, key string) (*Consumer, error) {
+// StartConsumer for provided key consume data
+func StartConsumer(key string) (*Consumer, error) {
+	var err error
 	c := &Consumer{
 		conn:    nil,
 		channel: nil,
-		tag:     consumerTag,
+		tag:     consumerTag + "-key",
 		done:    make(chan error),
 	}
 
-	var err error
-
-	logger.LoggerMsg.Infof("dialing %q", amqpURI)
-	c.conn = connectToRabbitMQ()
-
+	c.conn = rabbitConn
 	go func() {
-		logger.LoggerMsg.Infof("closing: %s", <-c.conn.NotifyClose(make(chan *amqp.Error)))
+		c.reconnect(key)
 	}()
 
-	logger.LoggerMsg.Infof("got Connection, getting Channel")
+	logger.LoggerMsg.Debugf("got Connection, getting Channel for %s events", key)
 	c.channel, err = c.conn.Channel()
 	if err != nil {
 		return nil, fmt.Errorf("Channel: %s", err)
 	}
 
-	logger.LoggerMsg.Infof("got Channel, declaring Exchange (%q)", exchange)
+	logger.LoggerMsg.Debugf("got Channel, declaring Exchange (%q)", exchange)
 	if err = c.channel.ExchangeDeclare(
 		exchange,     // name of the exchange
 		exchangeType, // type
@@ -111,7 +115,7 @@ func NewConsumer(queueName string, key string) (*Consumer, error) {
 		return nil, fmt.Errorf("Exchange Declare: %s", err)
 	}
 
-	logger.LoggerMsg.Infof("declared Exchange, declaring Queue %q", queueName)
+	logger.LoggerMsg.Infof("declared Exchange, declaring Queue %q", key+"queue")
 	queue, err := c.channel.QueueDeclare(
 		"",    // name of the queue
 		false, // durable
@@ -124,7 +128,7 @@ func NewConsumer(queueName string, key string) (*Consumer, error) {
 		return nil, fmt.Errorf("Queue Declare: %s", err)
 	}
 
-	logger.LoggerMsg.Infof("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
+	logger.LoggerMsg.Debugf("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
 		queue.Name, queue.Messages, queue.Consumers, key)
 
 	if err = c.channel.QueueBind(
@@ -136,8 +140,7 @@ func NewConsumer(queueName string, key string) (*Consumer, error) {
 	); err != nil {
 		return nil, fmt.Errorf("Queue Bind: %s", err)
 	}
-
-	logger.LoggerMsg.Infof("Queue bound to Exchange, starting Consume (consumer tag %q)", c.tag)
+	logger.LoggerMsg.Infof("Queue bound to Exchange, starting Consume (consumer tag %q) events", c.tag)
 	deliveries, err := c.channel.Consume(
 		queue.Name, // name
 		c.tag,      // consumerTag,
@@ -160,20 +163,6 @@ func NewConsumer(queueName string, key string) (*Consumer, error) {
 	}
 
 	return c, nil
-}
-
-// Try to connect to the RabbitMQ server as long as it takes to establish a connection
-func connectToRabbitMQ() *amqp.Connection {
-	for {
-		conn, err := amqp.Dial(amqpURI)
-		if err == nil {
-			return conn
-		}
-
-		logger.LoggerMsg.Error(err)
-		logger.LoggerMsg.Printf("Trying to reconnect to RabbitMQ at %s\n", amqpURI)
-		time.Sleep(500 * time.Millisecond)
-	}
 }
 
 // Shutdown when error happens
