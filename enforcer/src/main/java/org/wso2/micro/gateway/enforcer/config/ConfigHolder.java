@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.net.ssl.TrustManagerFactory;
+
 /**
  * Configuration holder class for Microgateway.
  */
@@ -248,6 +249,7 @@ public class ConfigHolder {
     public EnvVarConfig getEnvVarConfig() {
         return envVarConfig;
     }
+
     /**
      * The receiverURLGroup and the authURLGroup is preprocessed
      * such that to make them compatible with the binary agent.
