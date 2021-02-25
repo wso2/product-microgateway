@@ -25,46 +25,46 @@ import (
 
 	"github.com/go-openapi/runtime/middleware"
 
-	"github.com/wso2/micro-gw/internal/api/models"
+	"github.com/wso2/micro-gw/pkg/api/models"
 )
 
-// PostApisHandlerFunc turns a function with the right signature into a post apis handler
-type PostApisHandlerFunc func(PostApisParams, *models.Principal) middleware.Responder
+// DeleteApisHandlerFunc turns a function with the right signature into a delete apis handler
+type DeleteApisHandlerFunc func(DeleteApisParams, *models.Principal) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PostApisHandlerFunc) Handle(params PostApisParams, principal *models.Principal) middleware.Responder {
+func (fn DeleteApisHandlerFunc) Handle(params DeleteApisParams, principal *models.Principal) middleware.Responder {
 	return fn(params, principal)
 }
 
-// PostApisHandler interface for that can handle valid post apis params
-type PostApisHandler interface {
-	Handle(PostApisParams, *models.Principal) middleware.Responder
+// DeleteApisHandler interface for that can handle valid delete apis params
+type DeleteApisHandler interface {
+	Handle(DeleteApisParams, *models.Principal) middleware.Responder
 }
 
-// NewPostApis creates a new http.Handler for the post apis operation
-func NewPostApis(ctx *middleware.Context, handler PostApisHandler) *PostApis {
-	return &PostApis{Context: ctx, Handler: handler}
+// NewDeleteApis creates a new http.Handler for the delete apis operation
+func NewDeleteApis(ctx *middleware.Context, handler DeleteApisHandler) *DeleteApis {
+	return &DeleteApis{Context: ctx, Handler: handler}
 }
 
-/* PostApis swagger:route POST /apis API (Individual) postApis
+/* DeleteApis swagger:route DELETE /apis API (Individual) deleteApis
 
-Deploy or update an API
+Delete deployed API
 
-This operation can be used to deploy or update an API.
+This operation can be used to delete a API that was deployed
 
 
 */
-type PostApis struct {
+type DeleteApis struct {
 	Context *middleware.Context
-	Handler PostApisHandler
+	Handler DeleteApisHandler
 }
 
-func (o *PostApis) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *DeleteApis) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		r = rCtx
 	}
-	var Params = NewPostApisParams()
+	var Params = NewDeleteApisParams()
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)

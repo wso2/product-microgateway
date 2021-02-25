@@ -18,6 +18,7 @@
 package xds
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"reflect"
@@ -35,10 +36,11 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	envoy_cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/wso2/micro-gw/config"
-	logger "github.com/wso2/micro-gw/loggers"
+	apiModel "github.com/wso2/micro-gw/internal/api/models"
 	oasParser "github.com/wso2/micro-gw/internal/oasparser"
 	mgw "github.com/wso2/micro-gw/internal/oasparser/model"
 	"github.com/wso2/micro-gw/internal/oasparser/operator"
+	logger "github.com/wso2/micro-gw/loggers"
 )
 
 var (
@@ -54,27 +56,21 @@ var (
 	enforcerSubscriptionPolicyCache    wso2_cache.SnapshotCache
 	enforcerApplicationKeyMappingCache wso2_cache.SnapshotCache
 
-	// API Name:Version -> MgwSwagger struct map
-	apiMgwSwaggerMap map[string]mgw.MgwSwagger
-	// API Name:Version -> Envoy Label Array map
-	openAPIEnvoyMap map[string][]string
-	// API Name:Version -> Envoy Routes map
-	openAPIRoutesMap map[string][]*routev3.Route
-	// API Name:Version -> Envoy Clusters map
-	openAPIClustersMap map[string][]*clusterv3.Cluster
-	// API Name:Version -> Envoy Endpoints map
-	openAPIEndpointsMap map[string][]*corev3.Address
-	// Envoy Label -> XDS version map
-	envoyUpdateVersionMap map[string]int64
-	// Envoy Label -> Listener Configuration map
-	envoyListenerConfigMap map[string]*listenerv3.Listener
-	// Envoy Label -> Routes Configuration map
-	envoyRouteConfigMap map[string]*routev3.RouteConfiguration
+	// API Name:Version as map key
+	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // MgwSwagger struct map
+	openAPIEnvoyMap        map[string][]string             // Envoy Label Array map
+	openAPIRoutesMap       map[string][]*routev3.Route     // Envoy Routes map
+	openAPIClustersMap     map[string][]*clusterv3.Cluster // Envoy Clusters map
+	openAPIEndpointsMap    map[string][]*corev3.Address    // Envoy Endpoints map
+	openAPIEnforcerApisMap map[string]types.Resource       // API Resource map
 
-	// Enforcer API XDS resource version map
-	enforcerConfigMap map[string][]types.Resource
+	// Envoy Label as map key
+	envoyUpdateVersionMap  map[string]int64                       // XDS version map
+	envoyListenerConfigMap map[string]*listenerv3.Listener        // Listener Configuration map
+	envoyRouteConfigMap    map[string]*routev3.RouteConfiguration // Routes Configuration map
 
-	openAPIEnforcerApisMap           map[string]types.Resource
+	// Common Enforcer Label as map key
+	enforcerConfigMap                map[string][]types.Resource
 	enforcerSubscriptionMap          map[string][]types.Resource
 	enforcerApplicationMap           map[string][]types.Resource
 	enforcerAPIListMap               map[string][]types.Resource
@@ -171,58 +167,89 @@ func GetEnforcerApplicationKeyMappingCache() wso2_cache.SnapshotCache {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(byteArr []byte, upstreamCerts []byte, apiType string, environments []string) {
-	var apiMapKey string
+func UpdateAPI(apiContent config.APIContent) {
 	var newLabels []string
 	var mgwSwagger mgw.MgwSwagger
-	vhost := "default" //TODO: (SuKSW) update once vhost feature added
+	if len(apiContent.Environments) == 0 {
+		apiContent.Environments = append(apiContent.Environments, "default")
+	}
 
 	//TODO: (VirajSalaka) Optimize locking
 	var l sync.Mutex
 	l.Lock()
 	defer l.Unlock()
 
-	if apiType == mgw.HTTP {
-		mgwSwagger = operator.GetMgwSwagger(byteArr)
-	} else if apiType == mgw.WS {
-		mgwSwagger = operator.GetMgwSwaggerWebSocket(byteArr)
+	if apiContent.APIType == mgw.HTTP {
+		mgwSwagger = operator.GetMgwSwagger(apiContent.APIDefinition)
+		mgwSwagger.SetName(apiContent.Name)
+		mgwSwagger.SetVersion(apiContent.Version)
+	} else if apiContent.APIType == mgw.WS {
+		mgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
 	} else {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported with WSO2 Microgateway")
 	}
-	apiMapKey = vhost + ":" + mgwSwagger.GetTitle() + ":" + mgwSwagger.GetVersion()
-	existingMgwSwagger, exists := apiMgwSwaggerMap[apiMapKey]
-	if exists {
-		if reflect.DeepEqual(mgwSwagger, existingMgwSwagger) {
-			logger.LoggerXds.Infof("API %v already exists. No changes to apply.", apiMapKey)
-			return
-		}
-	}
-	apiMgwSwaggerMap[apiMapKey] = mgwSwagger
+	apiIdentifier := apiContent.VHost + ":" + apiContent.Name + ":" + apiContent.Version // TODO: (SuKSW) update once vhost feature added
+	//TODO: Uncomment the below section depending on MgwSwagger.Resource ids
+	//existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
+	// if exists {
+	// 	if reflect.DeepEqual(mgwSwagger, existingMgwSwagger) {
+	// 		logger.LoggerXds.Infof("API %v already exists. No changes to apply.", apiIdentifier)
+	// 		return
+	// 	}
+	// }
+	apiMgwSwaggerMap[apiIdentifier] = mgwSwagger
 	//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
 	// TODO: commented the following line as the implementation is not supported yet.
 	//newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
 	//:TODO: since currently labels are not taking from x-wso2-label, I have made it to be taken from the method
 	// argument.
-	newLabels = environments
-	logger.LoggerXds.Infof("Added/Updated the content under OpenAPI Key : %v", apiMapKey)
-	logger.LoggerXds.Debugf("Newly added labels for the OpenAPI Key : %v are %v", apiMapKey, newLabels)
-	oldLabels, _ := openAPIEnvoyMap[apiMapKey]
-	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiMapKey, oldLabels)
-	openAPIEnvoyMap[apiMapKey] = newLabels
+	newLabels = apiContent.Environments
+	logger.LoggerXds.Infof("Added/Updated the content under OpenAPI Key : %v", apiIdentifier)
+	logger.LoggerXds.Debugf("Newly added labels for the OpenAPI Key : %v are %v", apiIdentifier, newLabels)
+	oldLabels, _ := openAPIEnvoyMap[apiIdentifier]
+	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiIdentifier, oldLabels)
+	openAPIEnvoyMap[apiIdentifier] = newLabels
 
-	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, upstreamCerts)
+	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, apiContent.UpstreamCerts)
 	// TODO: (VirajSalaka) Decide if the routes and listeners need their own map since it is not going to be changed based on API at the moment.
-	openAPIRoutesMap[apiMapKey] = routes
+	openAPIRoutesMap[apiIdentifier] = routes
 	// openAPIListenersMap[apiMapKey] = listeners
-	openAPIClustersMap[apiMapKey] = clusters
-	openAPIEndpointsMap[apiMapKey] = endpoints
-	openAPIEnforcerApisMap[apiMapKey] = oasParser.GetEnforcerAPI(mgwSwagger)
+	openAPIClustersMap[apiIdentifier] = clusters
+	openAPIEndpointsMap[apiIdentifier] = endpoints
+	openAPIEnforcerApisMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger)
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
 	if svcdiscovery.IsServiceDiscoveryEnabled {
 		startConsulServiceDiscovery() //consul service discovery starting point
 	}
+}
+
+// DeleteAPI deletes an API, its resources and updates the caches
+func DeleteAPI(apiName string, version string, vhost string) error {
+	apiIdentifier := vhost + ":" + apiName + ":" + version
+	_, exists := apiMgwSwaggerMap[apiIdentifier]
+	if !exists {
+		logger.LoggerXds.Infof("Unable to delete API " + apiIdentifier + ". Does not exist.")
+		return errors.New(mgw.NotFound)
+	}
+	//clean maps of routes, clusters, endpoints, enforcerAPIs
+	delete(openAPIRoutesMap, apiIdentifier)
+	delete(openAPIClustersMap, apiIdentifier)
+	delete(openAPIEndpointsMap, apiIdentifier)
+	delete(openAPIEnforcerApisMap, apiIdentifier)
+
+	existingLabels := openAPIEnvoyMap[apiIdentifier]
+	//updateXdsCacheOnAPIAdd is called after cleaning maps of routes, clusters, endpoints, enforcerAPIs.
+	//Therefore resources that belongs to the deleting API do not exist. Caches updated only with
+	//resources that belongs to the remaining APIs
+	updateXdsCacheOnAPIAdd(existingLabels, []string{})
+
+	delete(openAPIEnvoyMap, apiIdentifier)  //delete labels
+	delete(apiMgwSwaggerMap, apiIdentifier) //delete mgwSwagger
+	//TODO: (SuKSW) clean any remaining in label wise maps, if this is the last API of that label
+	logger.LoggerXds.Infof("Deleted API. %v", apiIdentifier)
+	return nil
 }
 
 func arrayContains(a []string, x string) bool {
@@ -573,4 +600,42 @@ func stopConsulDiscoveryFor(clusterName string) {
 	if doneChan, available := svcdiscovery.ClusterConsulDoneChanMap[clusterName]; available {
 		close(doneChan)
 	}
+}
+
+// ListApis returns a list of objects that holds info about each API
+func ListApis(apiType string, limit *int64) *apiModel.APIMeta {
+	var limitValue int
+	if limit == nil {
+		limitValue = len(apiMgwSwaggerMap)
+	} else {
+		limitValue = int(*limit)
+	}
+	var apisArray []*apiModel.APIMetaListItem
+	i := 0
+	for apiIdentifier, mgwSwagger := range apiMgwSwaggerMap {
+		if i == limitValue {
+			break
+		}
+		if apiType == "" || mgwSwagger.GetAPIType() == apiType {
+			var apiMetaListItem apiModel.APIMetaListItem
+			apiMetaListItem.APIName = mgwSwagger.GetTitle()
+			apiMetaListItem.Version = mgwSwagger.GetVersion()
+			apiMetaListItem.APIType = mgwSwagger.GetAPIType()
+			apiMetaListItem.GatewayEnvs = openAPIEnvoyMap[apiIdentifier]
+			apisArray = append(apisArray, &apiMetaListItem)
+		}
+		i++
+	}
+	var apiMetaObject apiModel.APIMeta
+	apiMetaObject.Total = int64(len(apiMgwSwaggerMap))
+	apiMetaObject.Count = int64(len(apisArray))
+	apiMetaObject.List = apisArray
+	return &apiMetaObject
+}
+
+// IsAPIExist returns whether a given API exists
+func IsAPIExist(vhost string, name string, version string) (exists bool) {
+	apiIdentifier := vhost + ":" + name + ":" + version
+	_, exists = apiMgwSwaggerMap[apiIdentifier]
+	return exists
 }

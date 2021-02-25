@@ -220,3 +220,14 @@ type controlPlane struct {
 		} `toml:"jmsConnectionParameters"`
 	} `toml:"eventHub"`
 }
+
+// APIContent contains everything necessary to create an API
+type APIContent struct {
+	VHost         string
+	Name          string
+	Version       string
+	APIType       string
+	APIDefinition []byte
+	UpstreamCerts []byte
+	Environments  []string
+}

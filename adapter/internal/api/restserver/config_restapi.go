@@ -29,12 +29,14 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 
 	"github.com/wso2/micro-gw/config"
-	logger "github.com/wso2/micro-gw/loggers"
 	apiServer "github.com/wso2/micro-gw/internal/api"
 	"github.com/wso2/micro-gw/internal/api/models"
 	"github.com/wso2/micro-gw/internal/api/restserver/operations"
+	"github.com/wso2/micro-gw/internal/api/restserver/operations/api_collection"
 	"github.com/wso2/micro-gw/internal/api/restserver/operations/api_individual"
+	constants "github.com/wso2/micro-gw/internal/oasparser/model"
 	"github.com/wso2/micro-gw/internal/tlsutils"
+	logger "github.com/wso2/micro-gw/loggers"
 )
 
 var (
@@ -78,13 +80,35 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		return &p, nil
 	}
 
+	api.APIIndividualDeleteApisHandler = api_individual.DeleteApisHandlerFunc(func(params api_individual.DeleteApisParams,
+		principal *models.Principal) middleware.Responder {
+		err := apiServer.DeleteAPI(params.APIName, params.Version, params.Vhost)
+		if err == nil {
+			return api_individual.NewDeleteApisOK()
+		}
+		switch err.Error() {
+		case constants.NotFound:
+			return api_individual.NewDeleteApisNotFound()
+		default:
+			return api_individual.NewPostApisInternalServerError()
+		}
+
+	})
+	api.APICollectionGetApisHandler = api_collection.GetApisHandlerFunc(func(params api_collection.GetApisParams,
+		principal *models.Principal) middleware.Responder {
+		return api_collection.NewGetApisOK().WithPayload(apiServer.ListApis(params.Query, params.Limit))
+	})
 	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(params api_individual.PostApisParams,
 		principal *models.Principal) middleware.Responder {
-		// TODO: (VirajSalaka) Error is not handled in the response.
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
-		err := apiServer.ApplyAPIProject(jsonByteArray, []string{})
+		err := apiServer.ApplyAPIProjectWithOverwrite(jsonByteArray, []string{}, params.Override)
 		if err != nil {
-			return api_individual.NewPostApisInternalServerError()
+			switch err.Error() {
+			case constants.AlreadyExists:
+				return api_individual.NewPostApisConflict()
+			default:
+				return api_individual.NewPostApisInternalServerError()
+			}
 		}
 		return api_individual.NewPostApisOK()
 	})
