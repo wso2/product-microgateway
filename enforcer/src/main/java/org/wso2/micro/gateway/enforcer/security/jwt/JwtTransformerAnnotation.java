@@ -12,7 +12,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 
 public @interface JwtTransformerAnnotation {
+    // make enable true to enable the custom claim mapping class for the issuer.
     boolean enabled() default false;
+    // Name of the class. "ex:CustomJWTTransformer"
     String name();
+    // Issuer. ex: "https://localhost:9443/oauth2/token"
     String issuer();
 }
