@@ -18,17 +18,26 @@ import (
 func MarshalConfig(config *config.Config) *enforcer.Config {
 	issuers := []*enforcer.Issuer{}
 	for _, issuer := range config.Enforcer.JwtTokenConfig {
-		jwtConfig := &enforcer.Issuer{
-			CertificateAlias:     issuer.CertificateAlias,
-			ConsumerKeyClaim:     issuer.ConsumerKeyClaim,
-			Issuer:               issuer.Issuer,
-			Name:                 issuer.Name,
-			ValidateSubscription: issuer.ValidateSubscription,
-			JwksURL:              issuer.JwksURL,
-			CertificateFilePath:  issuer.CertificateFilePath,
-		}
-		issuers = append(issuers, jwtConfig)
-	}
+	    claimMaps := []*enforcer.ClaimMapping{}
+	    for _, claimMap := range issuer.ClaimMapping{
+	        claim := &enforcer.ClaimMapping{
+	            RemoteClaim:    claimMap.RemoteClaim,
+	            LocalClaim:     claimMap.LocalClaim,
+        	}
+        	claimMaps = append(claimMaps,claim)
+        }
+    	jwtConfig := &enforcer.Issuer{
+            CertificateAlias:     issuer.CertificateAlias,
+    		ConsumerKeyClaim:     issuer.ConsumerKeyClaim,
+    		Issuer:               issuer.Issuer,
+    		Name:                 issuer.Name,
+    		ValidateSubscription: issuer.ValidateSubscription,
+    		JwksURL:              issuer.JwksURL,
+    		CertificateFilePath:  issuer.CertificateFilePath,
+    		ClaimMapping:         claimMaps,
+    	}
+    	issuers = append(issuers, jwtConfig)
+    }
 
 	authService := &enforcer.AuthService{
 		KeepAliveTime:  config.Enforcer.AuthService.KeepAliveTime,

@@ -105,8 +105,6 @@ public class JwtGeneratorTestCase extends BaseTestCase {
         String strTokenBody = tokenFull.split("\\.")[1];
         String decodedTokenBody = new String(Base64.getUrlDecoder().decode(strTokenBody));
         JSONObject tokenBody = new JSONObject(decodedTokenBody);
-        System.out.println("token>>>>>>>>>>>>>>>>>");
-        System.out.println(tokenFull);
         Assert.assertEquals(tokenBody.get("iss"), JWT_GENERATOR_ISSUER,
                 "Issuer is  not set correctly in JWT generator");
         Assert.assertEquals(tokenBody.get("keytype"), TestConstant.KEY_TYPE_PRODUCTION,
