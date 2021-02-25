@@ -28,7 +28,7 @@ import (
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
-	mgw_websokcet "github.com/NomadXD/websocketconf"
+	mgw_websocket "github.com/wso2/micro-gw/internal/oasparser/envoyconf/api"
 	rls "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
@@ -133,7 +133,7 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 }
 
 func getMgwWebSocketFilter() *hcmv3.HttpFilter {
-	mgwWebsocketConfig := &mgw_websokcet.RateLimit{
+	mgwWebsocketConfig := &mgw_websocket.RateLimit{
 		Domain:          "rl",
 		RatelimitType:   "default",
 		Timeout:         ptypes.DurationProto(20 * time.Second),
@@ -151,7 +151,6 @@ func getMgwWebSocketFilter() *hcmv3.HttpFilter {
 	}
 	ext, err2 := proto.Marshal(mgwWebsocketConfig)
 	if err2 != nil {
-		logger.LoggerOasparser.Info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 		logger.LoggerOasparser.Error(err2)
 	}
 	mgwWebSocketFilter := hcmv3.HttpFilter{
