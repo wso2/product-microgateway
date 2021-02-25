@@ -120,10 +120,11 @@ type Config struct {
 	}
 
 	Enforcer struct {
-		JwtTokenConfig  []jwtTokenConfig
-		EventHub        eventHub
-		ApimCredentials apimCredentials
-		AuthService     authService
+		JwtTokenConfig   []jwtTokenConfig
+		EventHub         eventHub
+		ApimCredentials  apimCredentials
+		AuthService      authService
+		ThrottlingConfig throttlingConfig
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
@@ -174,6 +175,52 @@ type eventHub struct {
 	JmsConnectionParameters struct {
 		EventListeningEndpoints string `toml:"eventListeningEndpoints"`
 	} `toml:"jmsConnectionParameters"`
+}
+
+type throttlingConfig struct {
+	Binary binaryThrottleConfig
+}
+
+type binaryThrottleConfig struct {
+	Enabled   bool
+	Username  string
+	Password  string
+	URLGroup  []urlGroup
+	Publisher binaryPublisher
+	Agent     binaryAgent
+}
+
+type urlGroup struct {
+	ReceiverURLs []string
+	AuthURLs     []string
+}
+
+type binaryPublisher struct {
+	MaxIdleDataPublishingAgents        int32
+	InitIdleObjectDataPublishingAgents int32
+	PublisherThreadPoolCoreSize        int32
+	PublisherThreadPoolMaximumSize     int32
+	PublisherThreadPoolKeepAliveTime   int32
+}
+
+type binaryAgent struct {
+	SslEnabledProtocols        string
+	Ciphers                    string
+	QueueSize                  int32
+	BatchSize                  int32
+	CorePoolSize               int32
+	SocketTimeoutMS            int32
+	MaxPoolSize                int32
+	KeepAliveTimeInPool        int32
+	ReconnectionInterval       int32
+	MaxTransportPoolSize       int32
+	MaxIdleConnections         int32
+	EvictionTimePeriod         int32
+	MinIdleTimeInPool          int32
+	SecureMaxTransportPoolSize int32
+	SecureMaxIdleConnections   int32
+	SecureEvictionTimePeriod   int32
+	SecureMinIdleTimeInPool    int32
 }
 
 // APICtlUser represents registered APICtl Users

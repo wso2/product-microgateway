@@ -308,6 +308,8 @@ func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 
 func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 	issuers := []*enforcer.Issuer{}
+	urlGroups := []*enforcer.TMURLGroup{}
+
 	for _, issuer := range config.Enforcer.JwtTokenConfig {
 		jwtConfig := &enforcer.Issuer{
 			CertificateAlias:     issuer.CertificateAlias,
@@ -319,6 +321,14 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 			CertificateFilePath:  issuer.CertificateFilePath,
 		}
 		issuers = append(issuers, jwtConfig)
+	}
+
+	for _, urlGroup := range config.Enforcer.ThrottlingConfig.Binary.URLGroup {
+		group := &enforcer.TMURLGroup{
+			AuthURLs:     urlGroup.AuthURLs,
+			ReceiverURLs: urlGroup.ReceiverURLs,
+		}
+		urlGroups = append(urlGroups, group)
 	}
 
 	authService := &enforcer.AuthService{
@@ -346,6 +356,40 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,
 			JmsConnectionParameters: map[string]string{
 				"eventListeningEndpoints": config.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints,
+			},
+		},
+		ThrottlingConfig: &enforcer.Throttling{
+			Binary: &enforcer.BinaryThrottling{
+				Enabled:  config.Enforcer.ThrottlingConfig.Binary.Enabled,
+				Username: config.Enforcer.ThrottlingConfig.Binary.Username,
+				Password: config.Enforcer.ThrottlingConfig.Binary.Password,
+				UrlGroup: urlGroups,
+				Publisher: &enforcer.ThrottlePublisher{
+					InitIdleObjectDataPublishingAgents: config.Enforcer.ThrottlingConfig.Binary.Publisher.InitIdleObjectDataPublishingAgents,
+					MaxIdleDataPublishingAgents:        config.Enforcer.ThrottlingConfig.Binary.Publisher.MaxIdleDataPublishingAgents,
+					PublisherThreadPoolCoreSize:        config.Enforcer.ThrottlingConfig.Binary.Publisher.PublisherThreadPoolCoreSize,
+					PublisherThreadPoolKeepAliveTime:   config.Enforcer.ThrottlingConfig.Binary.Publisher.PublisherThreadPoolKeepAliveTime,
+					PublisherThreadPoolMaximumSize:     config.Enforcer.ThrottlingConfig.Binary.Publisher.PublisherThreadPoolMaximumSize,
+				},
+				Agent: &enforcer.ThrottleAgent{
+					BatchSize:                  config.Enforcer.ThrottlingConfig.Binary.Agent.BatchSize,
+					Ciphers:                    config.Enforcer.ThrottlingConfig.Binary.Agent.Ciphers,
+					CorePoolSize:               config.Enforcer.ThrottlingConfig.Binary.Agent.CorePoolSize,
+					EvictionTimePeriod:         config.Enforcer.ThrottlingConfig.Binary.Agent.EvictionTimePeriod,
+					KeepAliveTimeInPool:        config.Enforcer.ThrottlingConfig.Binary.Agent.KeepAliveTimeInPool,
+					MaxIdleConnections:         config.Enforcer.ThrottlingConfig.Binary.Agent.MaxIdleConnections,
+					MaxPoolSize:                config.Enforcer.ThrottlingConfig.Binary.Agent.MaxPoolSize,
+					MaxTransportPoolSize:       config.Enforcer.ThrottlingConfig.Binary.Agent.MaxTransportPoolSize,
+					MinIdleTimeInPool:          config.Enforcer.ThrottlingConfig.Binary.Agent.MinIdleTimeInPool,
+					QueueSize:                  config.Enforcer.ThrottlingConfig.Binary.Agent.QueueSize,
+					ReconnectionInterval:       config.Enforcer.ThrottlingConfig.Binary.Agent.ReconnectionInterval,
+					SecureEvictionTimePeriod:   config.Enforcer.ThrottlingConfig.Binary.Agent.SecureEvictionTimePeriod,
+					SecureMaxIdleConnections:   config.Enforcer.ThrottlingConfig.Binary.Agent.SecureMaxIdleConnections,
+					SecureMaxTransportPoolSize: config.Enforcer.ThrottlingConfig.Binary.Agent.SecureMaxTransportPoolSize,
+					SecureMinIdleTimeInPool:    config.Enforcer.ThrottlingConfig.Binary.Agent.SecureMinIdleTimeInPool,
+					SocketTimeoutMS:            config.Enforcer.ThrottlingConfig.Binary.Agent.SocketTimeoutMS,
+					SslEnabledProtocols:        config.Enforcer.ThrottlingConfig.Binary.Agent.SslEnabledProtocols,
+				},
 			},
 		},
 	}
