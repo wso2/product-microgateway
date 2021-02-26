@@ -82,7 +82,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 
 	api.APIIndividualDeleteApisHandler = api_individual.DeleteApisHandlerFunc(func(params api_individual.DeleteApisParams,
 		principal *models.Principal) middleware.Responder {
-		err := apiServer.DeleteAPI(params.APIName, params.Version, params.Vhost)
+		err := apiServer.DeleteAPI(params.Vhost, params.APIName, params.Version)
 		if err == nil {
 			return api_individual.NewDeleteApisOK()
 		}
@@ -92,7 +92,6 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		default:
 			return api_individual.NewPostApisInternalServerError()
 		}
-
 	})
 	api.APICollectionGetApisHandler = api_collection.GetApisHandlerFunc(func(params api_collection.GetApisParams,
 		principal *models.Principal) middleware.Responder {

@@ -44,7 +44,10 @@ const (
 	endpointCertDir       string = "Endpoint-certificates"
 	crtExtension          string = ".crt"
 	pemExtension          string = ".pem"
-	defaultEnv            string = "Production and Sandbox"
+	defaultEnv            string = "Production and Sandbox" //Todo: (SuKSW) update to `default` once APIM side changes.
+	defaultVHost          string = "default"
+	apiTypeFilterKey      string = "type"
+	apiTypeYamlKey        string = "type"
 )
 
 // ProjectAPI contains the extracted from an API project zip
@@ -169,7 +172,7 @@ func ApplyAPIProjectWithOverwrite(payload []byte, environments []string, overrid
 		overrideValue = *override
 	}
 	//TODO: force overwride
-	exists := xds.IsAPIExist("default", name, version) // TODO: (SuKSW) update once vhost feature added
+	exists := xds.IsAPIExist(defaultVHost, name, version) // TODO: (SuKSW) update once vhost feature added
 	if !overrideValue && exists {
 		loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.", name, version)
 		return errors.New(mgw.AlreadyExists)
@@ -180,10 +183,10 @@ func ApplyAPIProjectWithOverwrite(payload []byte, environments []string, overrid
 
 func updateAPI(name, version string, apiProject ProjectAPI, environments []string) {
 	if len(environments) == 0 {
-		environments = append(environments, "Production and Sandbox") //constant? //todo default
+		environments = append(environments, defaultEnv)
 	}
 	var apiContent config.APIContent
-	apiContent.VHost = "default"
+	apiContent.VHost = defaultVHost
 	apiContent.Name = name
 	apiContent.Version = version
 	apiContent.APIType = apiProject.APIType
@@ -199,12 +202,12 @@ func updateAPI(name, version string, apiProject ProjectAPI, environments []strin
 }
 
 // DeleteAPI calls the DeleteAPI method in xds_server.go
-func DeleteAPI(apiName string, version string, vhost *string) error {
+func DeleteAPI(vhost *string, apiName string, version string) error {
 	if vhost == nil || *vhost == "" {
-		vhostValue := "default"
+		vhostValue := defaultVHost
 		vhost = &vhostValue
 	}
-	return xds.DeleteAPI(apiName, version, *vhost)
+	return xds.DeleteAPI(*vhost, apiName, version)
 }
 
 // ListApis calls the ListApis method in xds_server.go
@@ -212,11 +215,10 @@ func ListApis(query *string, limit *int64) *apiModel.APIMeta {
 	var apiType string
 	if query != nil {
 		queryPair := strings.Split(*query, ":")
-		if queryPair[0] == "type" {
+		if queryPair[0] == apiTypeFilterKey {
 			apiType = strings.ToUpper(queryPair[1])
 			return xds.ListApis(apiType, limit)
 		}
-
 	}
 	return xds.ListApis("", limit)
 }
@@ -238,7 +240,7 @@ func getAPIType(apiJsn []byte) (string, error) {
 		return "", unmarshalErr
 	}
 	data := apiDef["data"].(map[string]interface{})
-	apiType := strings.ToUpper(data["type"].(string))
+	apiType := strings.ToUpper(data[apiTypeYamlKey].(string))
 
 	return apiType, nil
 }

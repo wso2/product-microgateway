@@ -56,7 +56,7 @@ var (
 	enforcerSubscriptionPolicyCache    wso2_cache.SnapshotCache
 	enforcerApplicationKeyMappingCache wso2_cache.SnapshotCache
 
-	// API Name:Version as map key
+	// Vhost:APIName:Version as map key
 	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // MgwSwagger struct map
 	openAPIEnvoyMap        map[string][]string             // Envoy Label Array map
 	openAPIRoutesMap       map[string][]*routev3.Route     // Envoy Routes map
@@ -226,8 +226,8 @@ func UpdateAPI(apiContent config.APIContent) {
 }
 
 // DeleteAPI deletes an API, its resources and updates the caches
-func DeleteAPI(apiName string, version string, vhost string) error {
-	apiIdentifier := vhost + ":" + apiName + ":" + version
+func DeleteAPI(vhost, apiName, version string) error {
+	apiIdentifier := GenerateIdentifierForAPI(vhost, apiName, version)
 	_, exists := apiMgwSwaggerMap[apiIdentifier]
 	if !exists {
 		logger.LoggerXds.Infof("Unable to delete API " + apiIdentifier + ". Does not exist.")
@@ -623,8 +623,8 @@ func ListApis(apiType string, limit *int64) *apiModel.APIMeta {
 			apiMetaListItem.APIType = mgwSwagger.GetAPIType()
 			apiMetaListItem.GatewayEnvs = openAPIEnvoyMap[apiIdentifier]
 			apisArray = append(apisArray, &apiMetaListItem)
+			i++
 		}
-		i++
 	}
 	var apiMetaObject apiModel.APIMeta
 	apiMetaObject.Total = int64(len(apiMgwSwaggerMap))
@@ -634,8 +634,13 @@ func ListApis(apiType string, limit *int64) *apiModel.APIMeta {
 }
 
 // IsAPIExist returns whether a given API exists
-func IsAPIExist(vhost string, name string, version string) (exists bool) {
-	apiIdentifier := vhost + ":" + name + ":" + version
+func IsAPIExist(vhost, name, version string) (exists bool) {
+	apiIdentifier := GenerateIdentifierForAPI(vhost, name, version)
 	_, exists = apiMgwSwaggerMap[apiIdentifier]
 	return exists
+}
+
+// GenerateIdentifierForAPI generates an identifier unique to the API
+func GenerateIdentifierForAPI(vhost, name, version string) string {
+	return vhost + ":" + name + ":" + version
 }
