@@ -66,6 +66,7 @@ public class JWTValidator {
     }
 
     public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws MGWException {
+        loadTokenIssuerConfiguration();
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
         if (StringUtils.isNotEmpty(issuer) && tokenIssuers.containsKey(issuer)) {
@@ -136,7 +137,7 @@ public class JWTValidator {
                     }
                 } else if (tokenIssuer.getCertificate() != null) {
                     logger.debug("Retrieve certificate from Token issuer and validating");
-                    RSAPublicKey rsaPublicKey = (RSAPublicKey) tokenIssuer.getCertificate().getPublicKey();;
+                    RSAPublicKey rsaPublicKey = (RSAPublicKey) tokenIssuer.getCertificate().getPublicKey();
                     return JWTUtil.verifyTokenSignature(signedJWT, rsaPublicKey);
                 } else {
                     //TODO: (VirajSalaka) Come up with a fix
@@ -145,10 +146,8 @@ public class JWTValidator {
             }
             return JWTUtil.verifyTokenSignature(signedJWT, certificateAlias);
         } catch (ParseException | JOSEException | IOException e) {
-            logger.error("Error while parsing JWT", e);
+            throw new MGWException("Error while parsing JWT", e);
         }
-
-        return true;
     }
 
     protected boolean validateTokenExpiry(JWTClaimsSet jwtClaimsSet) {

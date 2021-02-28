@@ -24,32 +24,80 @@ import (
 	"strings"
 
 	"github.com/streadway/amqp"
+	"github.com/wso2/micro-gw/internal/discovery/xds"
+	eventhubTypes "github.com/wso2/micro-gw/internal/eventhub/types"
 	logger "github.com/wso2/micro-gw/loggers"
 )
 
-const keyManagerConfig = "key_manager_configuration"
+// constants related to key manager events
+const (
+	keyManagerConfigEvent = "key_manager_configuration"
+	actionAdd             = "add"
+	actionUpdate          = "update"
+	actionDelete          = "delete"
+	superTenantDomain     = "carbon.super"
+)
 
 // handleKMEvent
 func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
-
+	var (
+		indexOfKeymanager int
+		isFound           bool
+	)
 	for d := range deliveries {
 		var notification EventKeyManagerNotification
-		var keyManagerEvent KeyManagerEvent
+		// var keyManagerConfig resourceTypes.KeymanagerConfig
+		var kmConfigMap map[string]interface{}
+
 		// var eventType string
 		json.Unmarshal([]byte(string(d.Body)), &notification)
 
-		var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Value)
-		if err != nil {
-			if _, ok := err.(base64.CorruptInputError); ok {
-				panic("\nbase64 input is corrupt, check the provided key")
+		if strings.EqualFold(superTenantDomain, notification.Event.PayloadData.TenantDomain) {
+
+			for i := range xds.KeyManagerList {
+				if strings.EqualFold(notification.Event.PayloadData.Name, xds.KeyManagerList[i].Name) {
+					isFound = true
+					indexOfKeymanager = i
+					break
+				}
 			}
-			panic(err)
-		}
-		if strings.EqualFold(keyManagerConfig, notification.Event.PayloadData.EventType) {
-			if decodedByte != nil {
-				json.Unmarshal([]byte(string(decodedByte)), &keyManagerEvent)
-				logger.LoggerMsg.Infof("EventType: %s, Action: %s ",
-					notification.Event.PayloadData.EventType, notification.Event.PayloadData.Action)
+
+			var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Value)
+			if err != nil {
+				if _, ok := err.(base64.CorruptInputError); ok {
+					panic("\nbase64 input is corrupt, check the provided key")
+				}
+				panic(err)
+			}
+
+			if strings.EqualFold(keyManagerConfigEvent, notification.Event.PayloadData.EventType) {
+				if isFound && strings.EqualFold(actionDelete, notification.Event.PayloadData.Action) {
+					logger.LoggerMsg.Infof("Found KM %s to be deleted index %d", notification.Event.PayloadData.Name,
+						indexOfKeymanager)
+					if isFound {
+						xds.KeyManagerList[indexOfKeymanager] = xds.KeyManagerList[len(xds.KeyManagerList)-1]
+						xds.KeyManagerList = xds.KeyManagerList[:len(xds.KeyManagerList)-1]
+					}
+					xds.GenerateAndUpdateKeyManagerList()
+				} else if decodedByte != nil {
+					logger.LoggerMsg.Infof("decoded stream %s", string(decodedByte))
+					json.Unmarshal([]byte(string(decodedByte)), &kmConfigMap)
+
+					if strings.EqualFold(actionAdd, notification.Event.PayloadData.Action) ||
+						strings.EqualFold(actionUpdate, notification.Event.PayloadData.Action) {
+						keyManager := eventhubTypes.KeyManager{Name: notification.Event.PayloadData.Name,
+							Type: notification.Event.PayloadData.Type, Enabled: notification.Event.PayloadData.Enabled,
+							TenantDomain: notification.Event.PayloadData.TenantDomain, Configuration: kmConfigMap}
+						logger.LoggerMsg.Infof("data %v", keyManager.Configuration)
+
+						if isFound {
+							xds.KeyManagerList[indexOfKeymanager] = keyManager
+						} else {
+							xds.KeyManagerList = append(xds.KeyManagerList, keyManager)
+						}
+						xds.GenerateAndUpdateKeyManagerList()
+					}
+				}
 			}
 		}
 		d.Ack(false)

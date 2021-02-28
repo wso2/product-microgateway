@@ -27,5 +27,6 @@ const (
 	ApplicationPolicyList
 	SubscriptionPolicyList
 	ApplicationKeyMappingList
+	KeyManagerConfig
 	UnknownType // token to count the total number of supported types
 )
