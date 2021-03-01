@@ -66,7 +66,6 @@ public class JWTValidator {
     }
 
     public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws MGWException {
-        loadTokenIssuerConfiguration();
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
         if (StringUtils.isNotEmpty(issuer) && tokenIssuers.containsKey(issuer)) {

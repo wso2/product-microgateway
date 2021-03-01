@@ -53,6 +53,7 @@ public class KeyManagerHolder {
 
     private static final String X509 = "X.509";
     private static KeyManagerHolder instance;
+    private Map<String, TokenIssuerDto> tokenIssuerMap = ConfigHolder.getInstance().getConfig().getIssuersMap();
 
     private KeyManagerHolder() {}
 
@@ -93,7 +94,8 @@ public class KeyManagerHolder {
                 resultIssuerList.put(tokenIssuerDto.getIssuer(), tokenIssuerDto);
             }
         }
-        ConfigHolder.getInstance().getConfig().setIssuersMap(resultIssuerList);
+        tokenIssuerMap.clear();
+        tokenIssuerMap.putAll(resultIssuerList);
     }
 
     public void updateTokenIssuerList(Map<String, Object> configuration, Map<String, TokenIssuerDto> resultIssuerList) {
