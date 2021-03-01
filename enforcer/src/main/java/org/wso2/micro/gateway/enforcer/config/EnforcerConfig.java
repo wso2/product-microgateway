@@ -25,6 +25,7 @@ import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.JWTIssuerConfigurationDto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,7 @@ public class EnforcerConfig {
     private CredentialDto apimCredentials;
     private JWTConfigurationDto jwtConfigurationDto;
     private CacheDto cacheDto;
+    private JWTIssuerConfigurationDto jwtIssuerConfigurationDto;
     private String publicCertificatePath = "";
     private String privateKeyPath = "";
     private Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
@@ -80,6 +82,14 @@ public class EnforcerConfig {
         this.jwtConfigurationDto = jwtConfigurationDto;
     }
 
+    public void setJwtIssuerConfigurationDto(JWTIssuerConfigurationDto jwtIssuerConfigurationDto) {
+        this.jwtIssuerConfigurationDto = jwtIssuerConfigurationDto;
+    }
+
+    public JWTIssuerConfigurationDto getJwtIssuerConfigurationDto() {
+        return jwtIssuerConfigurationDto;
+    }
+
     public JWTConfigurationDto getJwtConfigurationDto() {
         return jwtConfigurationDto;
     }
@@ -116,4 +126,3 @@ public class EnforcerConfig {
         this.jwtTransformerMap = jwtTransformerMap;
     }
 }
-

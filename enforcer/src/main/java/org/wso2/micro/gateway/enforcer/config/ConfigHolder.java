@@ -32,11 +32,13 @@ import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.config.enforcer.EventHub;
 import org.wso2.gateway.discovery.config.enforcer.Issuer;
 import org.wso2.gateway.discovery.config.enforcer.JWTGenerator;
+import org.wso2.gateway.discovery.config.enforcer.JWTIssuer;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
@@ -128,6 +130,8 @@ public class ConfigHolder {
         // resolve string variables provided as environment variables.
         resolveConfigsWithEnvs(this.config);
 
+        // Read jwt issuer configurations
+        populateJWTIssuerConfigurations(config.getJwtIssuer());
     }
 
     private void populateAuthService(AuthService cdsAuth) {
@@ -301,6 +305,17 @@ public class ConfigHolder {
             }
         }
         return configValue;
+    }
+
+    private void populateJWTIssuerConfigurations(JWTIssuer jwtIssuer) {
+        JWTIssuerConfigurationDto jwtIssuerConfigurationDto = new JWTIssuerConfigurationDto();
+        jwtIssuerConfigurationDto.setEnabled(jwtIssuer.getEnabled());
+        jwtIssuerConfigurationDto.setIssuer(jwtIssuer.getIssuer());
+        jwtIssuerConfigurationDto.setConsumerDialectUri(jwtIssuer.getClaimDialect());
+        jwtIssuerConfigurationDto.setSignatureAlgorithm(jwtIssuer.getSigningAlgorithm());
+        config.setPublicCertificatePath(jwtIssuer.getPublicCertificatePath());
+        config.setPrivateKeyPath(jwtIssuer.getPrivateKeyPath());
+        config.setJwtIssuerConfigurationDto(jwtIssuerConfigurationDto);
     }
 
     public EnforcerConfig getConfig() {

@@ -333,7 +333,7 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 }
 
 func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Resource, []types.Resource,
-	[]types.Resource, []types.Resource) {
+[]types.Resource, []types.Resource) {
 	var clusterArray []*clusterv3.Cluster
 	var routeArray []*routev3.Route
 	var endpointArray []*corev3.Address
@@ -526,7 +526,7 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 
 //different go routines could update XDS at the same time. To avoid this we use a mutex and lock
 func updateXdsCacheWithLock(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource,
-	listeners []types.Resource) {
+listeners []types.Resource) {
 	mutexForXdsUpdate.Lock()
 	defer mutexForXdsUpdate.Unlock()
 	updateXdsCache(label, endpoints, clusters, routes, listeners)

@@ -22,10 +22,18 @@ import io.grpc.Server;
 import io.grpc.ServerInterceptors;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
+import io.grpc.netty.shaded.io.netty.bootstrap.ServerBootstrap;
+import io.grpc.netty.shaded.io.netty.channel.Channel;
+import io.grpc.netty.shaded.io.netty.channel.ChannelOption;
 import io.grpc.netty.shaded.io.netty.channel.EventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.grpc.netty.shaded.io.netty.handler.logging.LogLevel;
+import io.grpc.netty.shaded.io.netty.handler.logging.LoggingHandler;
 import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
+import io.grpc.netty.shaded.io.netty.handler.ssl.util.SelfSignedCertificate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.api.APIFactory;
@@ -36,11 +44,13 @@ import org.wso2.micro.gateway.enforcer.grpc.ExtAuthService;
 import org.wso2.micro.gateway.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
+import org.wso2.micro.gateway.enforcer.security.jwt.issuer.HttpTokenServerInitializer;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
@@ -51,6 +61,8 @@ import javax.net.ssl.SSLException;
 public class AuthServer {
 
     private static final Logger logger = LogManager.getLogger(AuthServer.class);
+    static final boolean SSL = System.getProperty("ssl") != null;
+    static final int PORT = Integer.parseInt(System.getProperty("port", SSL ? "8445" : "8082"));
 
     public static void main(String[] args) {
         try {
@@ -59,12 +71,16 @@ public class AuthServer {
 
             // Create a new server to listen on port 8081
             Server server = initServer();
-            //Initialise cache objects
+            // Initialise cache objects
             CacheProvider.init();
 
             // Start the server
             server.start();
             logger.info("Sever started Listening in port : " + 8081);
+
+            // Create a new server to listen on port 8082
+            new AuthServer().initToken();
+            logger.info("Token server started Listening in port : " + 8082);
 
             //TODO: Get the tenant domain from config
             SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().initializeStore();
@@ -74,13 +90,13 @@ public class AuthServer {
             // Don't exit the main thread. Wait until server is terminated.
             server.awaitTermination();
         } catch (IOException e) {
-            logger.error("Error while starting the enforcer gRPC server.", e);
+            logger.error("Error while starting the enforcer gRPC server or http server.", e);
             System.exit(1);
         } catch (InterruptedException e) {
             logger.error("Enforcer server main thread interrupted.", e);
             System.exit(1);
         } catch (Exception ex) {
-            // printing the stack trace in case logger might not have been initialized
+            // Printing the stack trace in case logger might not have been initialized
             ex.printStackTrace();
             System.exit(1);
         }
@@ -106,5 +122,41 @@ public class AuthServer {
                         .trustManager(ConfigHolder.getInstance().getTrustManagerFactory())
                         .clientAuth(ClientAuth.REQUIRE).build()).build();
 
+    }
+
+    private void initToken() throws SSLException, CertificateException, InterruptedException {
+
+        // Configure SSL.
+        final SslContext sslCtx;
+        if (SSL) {
+            SelfSignedCertificate ssc = new SelfSignedCertificate();
+            sslCtx = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build();
+        } else {
+            sslCtx = null;
+        }
+
+        // Create the multithreaded event loops for the server
+        final EventLoopGroup bossGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
+        final EventLoopGroup workerGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors() * 2);
+        try {
+            //A helper class that simplifies server configuration
+            ServerBootstrap b = new ServerBootstrap();
+            // Configure the server
+            b.option(ChannelOption.SO_BACKLOG, 1024);
+            b.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .handler(new LoggingHandler(LogLevel.INFO))
+                    .childHandler(new HttpTokenServerInitializer(sslCtx));
+
+            Channel ch = b.bind(PORT).sync().channel();
+
+            logger.info("Open your web browser and navigate to " +
+                    (SSL ? "https" : "http") + "://localhost:" + PORT + '/');
+            // Wait until server socket is closed
+            ch.closeFuture().sync();
+        } finally {
+            workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
+        }
     }
 }
