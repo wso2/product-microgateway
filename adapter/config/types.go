@@ -187,15 +187,15 @@ type binaryThrottleConfig struct {
 	Enabled   bool
 	Username  string
 	Password  string
-	URLGroup  []urlGroup
+	URLGroup  []urlGroup `toml:"urlGroup"`
 	Publisher binaryPublisher
 	Agent     binaryAgent
 }
 
 type urlGroup struct {
-	ReceiverURLs []string
-	AuthURLs     []string
-	Type         string
+	ReceiverURLs []string `toml:"receiverURLs"`
+	AuthURLs     []string `toml:"authURLs"`
+	Type         string   `toml:"type"`
 }
 
 type binaryPublisher struct {

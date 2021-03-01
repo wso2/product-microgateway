@@ -47,7 +47,6 @@ import org.wso2.micro.gateway.enforcer.globalthrottle.databridge.agent.conf.Agen
 import org.wso2.micro.gateway.enforcer.globalthrottle.databridge.publisher.PublisherConfiguration;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
-import javax.net.ssl.TrustManagerFactory;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -56,6 +55,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Properties;
+
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Configuration holder class for Microgateway.
