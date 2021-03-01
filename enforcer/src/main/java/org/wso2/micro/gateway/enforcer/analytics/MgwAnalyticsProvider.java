@@ -208,6 +208,7 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public Error getError() {
+        // TODO: (VirajSalaka) Fix error codes
         // TODO: (VirajSalaka) Error details should be added to the metadata as the response payload cannot be read.
         return null;
     }
