@@ -34,6 +34,7 @@ type SyncAPIResponse struct {
 	GatewayLabel string
 }
 
+//RevokedToken contains informations related to JWT revocation.
 type RevokedToken struct {
 	JWT        string `json:"jwt_signature"`
 	ExpiryTime int64  `json:"expiry_time"`

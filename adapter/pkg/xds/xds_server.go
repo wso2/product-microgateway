@@ -25,7 +25,7 @@ import (
 
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	"github.com/wso2/micro-gw/api/wso2/discovery/config/enforcer"
-	keymgt "github.com/wso2/micro-gw/api/wso2/discovery/keymgt"
+	km "github.com/wso2/micro-gw/api/wso2/discovery/keymgt"
 	"github.com/wso2/micro-gw/api/wso2/discovery/subscription"
 
 	wso2_cache "github.com/wso2/micro-gw/pkg/discovery/cache/v3"
@@ -178,6 +178,7 @@ func GetEnforcerApplicationKeyMappingCache() wso2_cache.SnapshotCache {
 	return enforcerApplicationKeyMappingCache
 }
 
+//GetEnforcerRevokedTokenCache return token cache
 func GetEnforcerRevokedTokenCache() wso2_cache.SnapshotCache {
 	return enforcerRevokedTokensCache
 }
@@ -774,11 +775,12 @@ func stopConsulDiscoveryFor(clusterName string) {
 	}
 }
 
-func updateEnforcerRevokedTokens(revokedTokens *keymgt.RevokedToken) {
+//UpdateEnforcerRevokedTokens send tokens
+func UpdateEnforcerRevokedTokens(revokedTokens []km.RevokedToken) {
 	logger.LoggerXds.Debug("Updating enforcer cache for revoked tokens")
 	label := commonEnforcerLabel
 	tokens := enforcerRevokedTokensMap[label]
-	tokens = append(tokens, revokedTokens)
+	tokens = append(tokens, revokedTokens...)
 
 	version := rand.Intn(maxRandomInt)
 	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, tokens)

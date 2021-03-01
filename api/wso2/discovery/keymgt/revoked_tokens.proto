@@ -14,5 +14,5 @@ option java_multiple_files = true;
 message RevokedToken {
     string jti = 1;
 
-    int32 expirytime = 2;
+    int64 expirytime = 2;
 }

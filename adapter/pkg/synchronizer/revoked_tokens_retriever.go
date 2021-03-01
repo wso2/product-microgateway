@@ -35,12 +35,14 @@ import (
 	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/auth"
 	"github.com/wso2/micro-gw/pkg/tlsutils"
+	"github.com/wso2/micro-gw/pkg/xds"
 )
 
 const (
 	revokeEndpoint string = "internal/data/v1/revokedjwt"
 )
 
+// RetrieveTokens func return tokens
 func RetrieveTokens(c chan SyncAPIResponse) {
 	respSyncAPI := SyncAPIResponse{}
 
@@ -138,17 +140,20 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 func PushTokens(data []byte) {
 	tokens := []RevokedToken{}
 	err := json.Unmarshal(data, &tokens)
-	stoken := &keymgt.RevokedToken{}
-	ctoken := tokens[0]
-	stoken.Jti = ctoken.JWT
-	stoken.Expirytime = (int32)(ctoken.ExpiryTime)
-	logger.LoggerSync.Infof("TOKENS %+v", stoken)
+	stokens := make([]keymgt.RevokedToken, len(tokens))
+	for i, v := range tokens {
+		stokens[i].Jti = v.JWT
+		stokens[i].Expirytime = (v.ExpiryTime)
+	}
+	xds.UpdateEnforcerRevokedTokens(stokens)
+	logger.LoggerSync.Infof("TOKENS NEW %+v", stokens)
 	if err != nil {
 		logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the response received for: %v ", err)
 	}
 	logger.LoggerSync.Infof("Printing TOKENS %+v", tokens)
 }
 
+//RetrieveTokensFromCP pulls tokens
 func RetrieveTokensFromCP() {
 
 	c := make(chan SyncAPIResponse)

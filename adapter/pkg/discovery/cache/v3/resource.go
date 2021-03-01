@@ -23,6 +23,8 @@ import (
 
 	envoy_types "github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/wso2/micro-gw/api/wso2/discovery/api"
+	km "github.com/wso2/micro-gw/api/wso2/discovery/keymgt"
+
 	"github.com/wso2/micro-gw/pkg/discovery/cache/types"
 	"github.com/wso2/micro-gw/pkg/discovery/resource/v3"
 )
@@ -61,6 +63,8 @@ func GetResourceName(res envoy_types.Resource) string {
 		return "Config"
 	case *subscription.SubscriptionList:
 		return "Subscription"
+	case *km.RevokedToken:
+		return "RevokedToken"
 	default:
 		return ""
 	}
