@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.api.WebSocketMetadataContext;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 import org.wso2.micro.gateway.enforcer.server.WebSocketHandler;
 import org.wso2.micro.gateway.enforcer.websocket.RateLimitRequest;
 import org.wso2.micro.gateway.enforcer.websocket.RateLimitResponse;
@@ -12,7 +13,7 @@ import org.wso2.micro.gateway.enforcer.websocket.RateLimitResponse;
 public class WebSocketResponseObserver implements StreamObserver<RateLimitRequest> {
 
     private static final Logger logger = LogManager.getLogger(WebSocketResponseObserver.class);
-    private WebSocketMetadataContext webSocketMetadataContext;
+    private AuthenticationContext authenticationContext;
     private final StreamObserver<RateLimitResponse> responseStreamObserver;
     private final WebSocketHandler webSocketHandler = new WebSocketHandler();
     private String streamId;
@@ -25,7 +26,7 @@ public class WebSocketResponseObserver implements StreamObserver<RateLimitReques
     @Override
     public void onNext(RateLimitRequest rateLimitRequest) {
         count++;
-        webSocketMetadataContext = webSocketHandler.process(rateLimitRequest);
+        authenticationContext = webSocketHandler.process(rateLimitRequest);
         streamId = getStreamId(rateLimitRequest);
         WebSocketMetadataService.addObserver(streamId,this);
         // Demo rate limit scenario

@@ -18,16 +18,16 @@
 package org.wso2.micro.gateway.enforcer;
 
 
+import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 
 /**
  * Filters are the request interceptors that applies API Management capabilities at the gateway layer. This is the
  * Interface to implement chain of filters at the gateway.
- * @param <T> - The type of object handled by the filter. eg: AuthFilter implements Filter<RequestContext>
  */
-public interface Filter<T> {
+public interface Filter {
 
     void init(APIConfig apiConfig);
 
-    boolean handleRequest(T t);
+    boolean handleRequest(RequestContext requestContext);
 }

@@ -1,76 +1,51 @@
 package org.wso2.micro.gateway.enforcer.api;
 
 
+import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
+
 /**
  * WebSocketMetadataContext object is sent along with external auth response for WebSocket APIs as dynamic metadata.
  * Dynamic metadata will be available for the duration of a websocket connection and will be sent to enforcer with
  * other websocket frame related metadata like frame size, upstream host etc through the websocket metadata grpc service.
  * Those metadata will be used for web socket throttling and analytics.
  */
-public class WebSocketMetadataContext implements Context{
+
+public class WebSocketMetadataContext{
     // TODO - (LahriuUdayanga) Finalize the instance variables
     private final String streamId;
-    private final String applicationId;
-    private final String applicationTier;
-    private final String apiTier;
-    private final String subscriptionTier;
-    private final String username;
+    private final int frameLength;
+    private final String upstreamHost;
     private final String basepath;
-    private final String apiVersion;
-    private final String subscriberTenantDomain;
-    private final String apiName;
+    private final AuthenticationContext authenticationContext;
 
     private WebSocketMetadataContext(Builder builder){
         this.streamId = builder.streamId;
-        this.applicationId = builder.applicationId;
-        this.applicationTier = builder.applicationTier;
-        this.apiTier = builder.apiTier;
-        this.subscriptionTier = builder.subscriptionTier;
-        this.username = builder.username;
+        this.frameLength = builder.frameLength;
+        this.upstreamHost = builder.upstreamHost;
         this.basepath = builder.basepath;
-        this.apiVersion = builder.apiVersion;
-        this.subscriberTenantDomain = builder.subscriberTenantDomain;
-        this.apiName = builder.apiName;
+        this.authenticationContext = builder.authenticationContext;
+
+
     }
 
     public static class Builder{
         private final String streamId;
-        private String applicationId;
-        private String applicationTier;
-        private String apiTier;
-        private String subscriptionTier;
-        private String username;
+        private int frameLength;
+        private String upstreamHost;
         private String basepath;
-        private String apiVersion;
-        private String subscriberTenantDomain;
-        private String apiName;
+        private AuthenticationContext authenticationContext;
 
         public Builder(String streamId){
             this.streamId = streamId;
         }
 
-        public Builder setApplicationId(String applicationId){
-            this.applicationId = applicationId;
+        public Builder setFrameLength(int frameLength){
+            this.frameLength = frameLength;
             return this;
         }
 
-        public Builder setApplicationTier(String applicationTier){
-            this.applicationTier = applicationTier;
-            return this;
-        }
-
-        public Builder setApiTier(String apiTier){
-            this.apiTier = apiTier;
-            return this;
-        }
-
-        public Builder setSubscriptionTier(String subscriptionTier){
-            this.subscriptionTier = subscriptionTier;
-            return this;
-        }
-
-        public Builder setUsername(String username){
-            this.username = username;
+        public Builder setUpstreamHost(String upstreamHost){
+            this.upstreamHost = upstreamHost;
             return this;
         }
 
@@ -79,18 +54,8 @@ public class WebSocketMetadataContext implements Context{
             return this;
         }
 
-        public Builder setApiVersion(String apiVersion){
-            this.apiVersion = apiVersion;
-            return this;
-        }
-
-        public Builder setSubscriberTenantDomain(String subscriberTenantDomain){
-            this.subscriberTenantDomain = subscriberTenantDomain;
-            return this;
-        }
-
-        public Builder setApiName(String apiName){
-            this.apiName = apiName;
+        public Builder setAuthenticationContext(AuthenticationContext authenticationContext){
+            this.authenticationContext = authenticationContext;
             return this;
         }
 
@@ -104,39 +69,19 @@ public class WebSocketMetadataContext implements Context{
         return streamId;
     }
 
-    public String getApplicationId() {
-        return applicationId;
+    public int getFrameLength() {
+        return frameLength;
     }
 
-    public String getApplicationTier() {
-        return applicationTier;
-    }
-
-    public String getApiTier() {
-        return apiTier;
-    }
-
-    public String getSubscriptionTier() {
-        return subscriptionTier;
-    }
-
-    public String getUsername() {
-        return username;
+    public String getUpstreamHost() {
+        return upstreamHost;
     }
 
     public String getBasepath() {
         return basepath;
     }
 
-    public String getApiVersion() {
-        return apiVersion;
-    }
-
-    public String getSubscriberTenantDomain() {
-        return subscriberTenantDomain;
-    }
-
-    public String getApiName() {
-        return apiName;
+    public AuthenticationContext getAuthenticationContext() {
+        return authenticationContext;
     }
 }

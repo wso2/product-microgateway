@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * This is the filter handling the authentication for the requests flowing through the gateway.
  */
-public class AuthFilter implements Filter<RequestContext> {
+public class AuthFilter implements Filter {
     private List<Authenticator> authenticators = new ArrayList<>();
 
     @Override

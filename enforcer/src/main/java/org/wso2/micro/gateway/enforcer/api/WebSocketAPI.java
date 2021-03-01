@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.api.Api;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.cors.CorsFilter;
 import org.wso2.micro.gateway.enforcer.security.AuthFilter;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
@@ -12,15 +13,15 @@ import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WebSocketAPI implements API <Context, Context>{
+public class WebSocketAPI implements API {
 
     private static final Logger logger = LogManager.getLogger(WebSocketAPI.class);
     private APIConfig apiConfig;
-    private final List<Filter<RequestContext>> filters = new ArrayList<>();
-    private final List<Filter<WebSocketMetadataContext>> upgradeFilters = new ArrayList<>();
+    private final List<Filter> filters = new ArrayList<>();
+    private final List<Filter> upgradeFilters = new ArrayList<>();
 
     @Override
-    public List<Filter<Context>> getFilters() {
+    public List<Filter> getFilters() {
         return null;
     }
 
@@ -29,42 +30,44 @@ public class WebSocketAPI implements API <Context, Context>{
         String basePath = api.getBasePath();
         String name = api.getTitle();
         String version = api.getVersion();
-        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).build();
+        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).
+                apiType(APIConstants.ApiType.WEB_SOCKET).build();
         initFilters();
         return basePath;
     }
 
     @Override
-    public Context process(Context context) {
-        if(context instanceof WebSocketMetadataContext){
-            // TODO (LahiruUdayanga) - Process WebSocketMetadataContext.
-            return context;
-        }else {
-            logger.info("websocket api process"+ context.toString());
-            WebSocketAuthResponse webSocketAuthResponse = new WebSocketAuthResponse();
-            if(executeFilterChain(context)){
-                AuthenticationContext authenticationContext = ((RequestContext)context).getAuthenticationContext();
-                webSocketAuthResponse.setWebSocketMetadataContext(authenticationContext, apiConfig);
-                webSocketAuthResponse.setStatusCode(200);
-                if (((RequestContext)context).getResponseHeaders() != null) {
-                    webSocketAuthResponse.setHeaderMap(((RequestContext)context).getResponseHeaders());
-                }
-            } else {
-                webSocketAuthResponse.setDirectResponse(true);
-                webSocketAuthResponse.setStatusCode(Integer.parseInt(((RequestContext)context).getProperties().get("code").toString()));
-                if (((RequestContext)context).getProperties().get("error_code") != null) {
-                    webSocketAuthResponse.setErrorCode(((RequestContext)context).getProperties().get("error_code").toString());
-                }
-                if (((RequestContext)context).getProperties().get("error_code") != null) {
-                    webSocketAuthResponse.setErrorDescription(((RequestContext)context).getProperties()
-                            .get("error_description").toString());
-                }
-                if (((RequestContext)context).getResponseHeaders() != null && ((RequestContext)context).getResponseHeaders().size() > 0) {
-                    webSocketAuthResponse.setHeaderMap(((RequestContext)context).getResponseHeaders());
-                }
+    public ResponseObject process(RequestContext requestContext) {
+        ResponseObject responseObject = new ResponseObject();
+        if (executeFilterChain(requestContext)) {
+            responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
+            responseObject.setAuthenticationContext(requestContext.getAuthenticationContext());
+            responseObject.setApiConfig(apiConfig);
+            if (requestContext.getResponseHeaders() != null) {
+                responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
-            return webSocketAuthResponse;
+        } else {
+            // If a enforcer stops with a false, it will be passed directly to the client.
+            responseObject.setDirectResponse(true);
+            responseObject.setStatusCode(Integer.parseInt(
+                    requestContext.getProperties().get(APIConstants.MessageFormat.STATUS_CODE).toString()));
+            if (requestContext.getProperties().get(APIConstants.MessageFormat.ERROR_CODE) != null) {
+                responseObject.setErrorCode(
+                        requestContext.getProperties().get(APIConstants.MessageFormat.ERROR_CODE).toString());
+            }
+            if (requestContext.getProperties().get(APIConstants.MessageFormat.ERROR_MESSAGE) != null) {
+                responseObject.setErrorMessage(requestContext.getProperties()
+                        .get(APIConstants.MessageFormat.ERROR_MESSAGE).toString());
+            }
+            if (requestContext.getProperties().get(APIConstants.MessageFormat.ERROR_DESCRIPTION) != null) {
+                responseObject.setErrorDescription(requestContext.getProperties()
+                        .get(APIConstants.MessageFormat.ERROR_DESCRIPTION).toString());
+            }
+            if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
+                responseObject.setHeaderMap(requestContext.getResponseHeaders());
+            }
         }
+        return responseObject;
     }
 
     @Override
@@ -73,29 +76,25 @@ public class WebSocketAPI implements API <Context, Context>{
     }
 
     @Override
-    public boolean executeFilterChain(Context context) {
-        if(context instanceof WebSocketMetadataContext){
-            // TODO (LahiruUdayanga) - Execute upgrade filter chain for WebSocketMetadataContext.
-            return true;
-        }else {
-            logger.info("normal filter chain");
-            boolean proceed;
-            for (Filter<RequestContext> filter : getHttpFilters()) {
-                proceed = filter.handleRequest((RequestContext) context);
-                logger.info("proceed:"+ proceed);
-                if (!proceed) {
-                    return false;
-                }
+    public boolean executeFilterChain(RequestContext requestContext) {
+        logger.info("normal filter chain");
+        boolean proceed;
+        for (Filter filter : getHttpFilters()) {
+            proceed = filter.handleRequest(requestContext);
+            logger.info("proceed:"+ proceed);
+            if (!proceed) {
+                return false;
             }
-            return true;
         }
+        return true;
     }
 
-    public List<Filter<WebSocketMetadataContext>> getUpgradeFilters(){
+
+    public List<Filter> getUpgradeFilters(){
         return upgradeFilters;
     }
 
-    public List<Filter<RequestContext>> getHttpFilters(){
+    public List<Filter> getHttpFilters(){
         return filters;
     }
 
@@ -111,5 +110,9 @@ public class WebSocketAPI implements API <Context, Context>{
         // TODO (LahiruUdayanga) - Initiate upgrade filter chain.
         // WebSocket throttle filter
         // WebSocket analytics filter
+    }
+
+    public AuthenticationContext processMetadata(RequestContext requestContext){
+        return requestContext.getAuthenticationContext();
     }
 }

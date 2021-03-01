@@ -101,7 +101,7 @@ public class APIFactory {
         return apis.get(apiKey);
     }
 
-    public API getMatchedAPI(RateLimitRequest rateLimitRequest){
+    public WebSocketAPI getMatchedAPI(RateLimitRequest rateLimitRequest){
         String basePath = rateLimitRequest.getMetadataContext().getFilterMetadataMap().
                 get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.GW_BASE_PATH_PARAM).getStringValue();
         String version = rateLimitRequest.getMetadataContext().getFilterMetadataMap().
@@ -110,7 +110,7 @@ public class APIFactory {
         if (logger.isDebugEnabled()) {
             logger.debug("Looking for matching API with basepath: {} and version: {}", basePath, version);
         }
-        return apis.get(apiKey);
+        return (WebSocketAPI) apis.get(apiKey);
     }
 
     public ResourceConfig getMatchedResource(API api, String matchedResourcePath, String method) {

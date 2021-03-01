@@ -69,6 +69,10 @@ public class APIConstants {
 
     public static final String EXT_AUTHZ_METADATA = "envoy.filters.http.ext_authz";
     public static final String WEBSOCKET_STREAM_ID = "stream_id";
+    public static final String MGW_WEB_SOCKET = "envoy.filters.http.mgw_websocket";
+    public static final String FRAME_LENGTH = "frameLength";
+    public static final String UPSTREAM_HOST = "upstreamHost";
+
 
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
@@ -248,5 +252,10 @@ public class APIConstants {
         public int getCode() {
             return this.code;
         }
+    }
+
+    public static class ApiType {
+        public static final String WEB_SOCKET = "websocket";
+        public static final String REST = "REST";
     }
 }

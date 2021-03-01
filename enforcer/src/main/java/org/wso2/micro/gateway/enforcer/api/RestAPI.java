@@ -37,14 +37,14 @@ import java.util.Map;
 /**
  * Specific implementation for a Rest API type APIs.
  */
-public class RestAPI implements API <RequestContext, ResponseObject>{
+public class RestAPI implements API{
     private static final Logger logger = LogManager.getLogger(RestAPI.class);
 
     private APIConfig apiConfig;
-    private List<Filter<RequestContext>> filters = new ArrayList<>();
+    private List<Filter> filters = new ArrayList<>();
 
     @Override
-    public List<Filter<RequestContext>> getFilters() {
+    public List<Filter> getFilters() {
         return filters;
     }
 
@@ -62,7 +62,8 @@ public class RestAPI implements API <RequestContext, ResponseObject>{
                 resources.add(resConfig);
             }
         }
-        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).build();
+        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources)
+                .apiType(APIConstants.ApiType.REST).build();
         initFilters();
         return basePath;
     }

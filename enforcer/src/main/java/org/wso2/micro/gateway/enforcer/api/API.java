@@ -25,24 +25,21 @@ import java.util.List;
 
 /**
  * Interface to hold different API types. This can REST, gRPC, graphql, websocket and etc.
- * @param <T> - Type of object accepted by the API to process.
- * @param <S> - Type of object returned by the API after processing.
- * e.g : RestAPI implements API <RequestContext, ResponseObject>
  */
-public interface API <T, S>{
+public interface API{
 
-    List<Filter<T>> getFilters();
+    List<Filter> getFilters();
 
     String init(Api api);
 
-    S process(T t);
+    ResponseObject process(RequestContext requestContext);
 
     APIConfig getAPIConfig();
 
-    default boolean executeFilterChain(T t) {
+    default boolean executeFilterChain(RequestContext requestContext) {
         boolean proceed;
-        for (Filter<T> filter : getFilters()) {
-            proceed = filter.handleRequest(t);
+        for (Filter filter : getFilters()) {
+            proceed = filter.handleRequest(requestContext);
             if (!proceed) {
                 return false;
             }

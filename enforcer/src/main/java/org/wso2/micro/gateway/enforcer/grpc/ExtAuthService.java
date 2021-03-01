@@ -29,10 +29,11 @@ import io.envoyproxy.envoy.service.auth.v3.DeniedHttpResponse;
 import io.envoyproxy.envoy.service.auth.v3.OkHttpResponse;
 import io.envoyproxy.envoy.type.v3.HttpStatus;
 import io.grpc.stub.StreamObserver;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.wso2.micro.gateway.enforcer.api.ResponseObject;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
-import org.wso2.micro.gateway.enforcer.api.WebSocketAuthResponse;
 import org.wso2.micro.gateway.enforcer.constants.HttpConstants;
 import org.wso2.micro.gateway.enforcer.server.HttpRequestHandler;
 
@@ -42,6 +43,7 @@ import org.wso2.micro.gateway.enforcer.server.HttpRequestHandler;
  */
 public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
+    private static final Logger logger = LogManager.getLogger(ExtAuthService.class);
     private HttpRequestHandler requestHandler = new HttpRequestHandler();
 
     @Override
@@ -103,10 +105,10 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
                     .build();
             responseBuilder.addHeaders(headerValueOption);
-            if (responseObject instanceof WebSocketAuthResponse){
+            if (responseObject.getApiConfig() != null && responseObject.getApiConfig().getApiType().equals(APIConstants.ApiType.WEB_SOCKET)){
                 return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                         .setOkResponse(okResponseBuilder.build())
-                        .setDynamicMetadata(((WebSocketAuthResponse) responseObject).getMetadataStruct()).build();
+                        .setDynamicMetadata(responseObject.getMetadataStruct()).build();
             }
             return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                     .setOkResponse(okResponseBuilder.build()).build();

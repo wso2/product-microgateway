@@ -36,7 +36,7 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest,ResponseO
     private static final Logger logger = LogManager.getLogger(HttpRequestHandler.class);
 
     public ResponseObject process(CheckRequest request) {
-        API<RequestContext, ResponseObject> matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
+        API matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
 
         if (matchedAPI == null) {
             ResponseObject responseObject = new ResponseObject();

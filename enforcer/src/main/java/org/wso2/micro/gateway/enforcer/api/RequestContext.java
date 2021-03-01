@@ -29,7 +29,7 @@ import java.util.TreeMap;
  * Holds the set of meta data related to current request flowing through the gateway. This context should be shared
  * through out the complete request flow through the gateway enforcer.
  */
-public class RequestContext implements Context{
+public class RequestContext{
 
     private API mathedAPI;
     private String requestPath;
@@ -45,6 +45,7 @@ public class RequestContext implements Context{
     //Denotes the specific headers which needs to be passed to response object
     private Map<String, String> responseHeaders;
     private AuthenticationContext authenticationContext = new AuthenticationContext();
+    private WebSocketMetadataContext webSocketMetadataContext;
 
     private RequestContext() {
 
@@ -63,6 +64,7 @@ public class RequestContext implements Context{
         private String sandClusterHeader;
         private Map<String, Object> properties = new HashMap();
         private AuthenticationContext authenticationContext = new AuthenticationContext();
+        private WebSocketMetadataContext webSocketMetadataContext;
 
         public Builder(String requestPath) {
             this.requestPath = requestPath;
@@ -107,6 +109,11 @@ public class RequestContext implements Context{
             return this;
         }
 
+        public Builder webSocketMetadataContext(WebSocketMetadataContext webSocketMetadataContext){
+            this.webSocketMetadataContext = webSocketMetadataContext;
+            return this;
+        }
+
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
@@ -122,6 +129,9 @@ public class RequestContext implements Context{
             // Adapter assigns header based routing only if both type of endpoints are present.
             if (!StringUtils.isEmpty(prodClusterHeader) && !StringUtils.isEmpty(sandClusterHeader)) {
                 requestContext.clusterHeaderEnabled = true;
+            }
+            if(this.webSocketMetadataContext != null){
+                requestContext.webSocketMetadataContext = this.webSocketMetadataContext;
             }
             return requestContext;
         }
@@ -209,5 +219,9 @@ public class RequestContext implements Context{
      */
     public Map<String, String> getResponseHeaders() {
         return responseHeaders;
+    }
+
+    public WebSocketMetadataContext getWebSocketMetadataContext() {
+        return webSocketMetadataContext;
     }
 }
