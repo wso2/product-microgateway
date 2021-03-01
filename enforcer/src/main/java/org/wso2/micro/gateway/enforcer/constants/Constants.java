@@ -43,4 +43,9 @@ public class Constants {
     public static final String BEGINING_OF_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n";
     public static final String END_OF_PRIVATE_KEY = "-----END PRIVATE KEY-----";
     public static final String RSA = "RSA";
+
+    public static final String OBJECT_THIS_NOTATION = "this$";
+    public static final String ENV_PREFIX = "$env{";
+    public static final String START_BRACKET = "{";
+    public static final String END_BRACKET = "}";
 }

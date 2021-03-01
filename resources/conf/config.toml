@@ -6,7 +6,7 @@ port = "9843"
 
 [[adapter.server.users]]
 username = "admin"
-password = "admin"
+password = "$env{adapter_admin_pwd}"
 
 [adapter.keystore]
 certPath = "/home/wso2/security/keystore/mg.pem"
@@ -77,7 +77,7 @@ disableSslVerification = false
 
 [enforcer.apimCredentials]
     username="admin"
-    password="admin"
+    password="$env{apim_admin_pwd}"
 
 [enforcer.cache]
   enabled = true
@@ -103,7 +103,7 @@ disableSslVerification = false
 enabled = false
 serviceUrl = "https://localhost:9443/"
 username="admin"
-password="admin"
+password="$env{cp_admin_pwd}"
 environmentLabels = ["Production and Sandbox"]
 retryInterval = 5
 skipSSLVerification=true

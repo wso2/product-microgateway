@@ -41,12 +41,14 @@ import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.ssl.TrustManagerFactory;
@@ -117,6 +119,9 @@ public class ConfigHolder {
         // Read token caching configs
         populateCacheConfigs(config.getCache());
 
+        // resolve string variables provided as environment variables.
+        resolveConfigsWithEnvs(this.config);
+
     }
 
     private void populateAuthService(AuthService cdsAuth) {
@@ -154,7 +159,7 @@ public class ConfigHolder {
             setTrustStoreForJWT(KeyStore.getInstance(KeyStore.getDefaultType()));
             getTrustStoreForJWT().load(null);
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            logger.error("Error while initiaing the truststore for JWT related public certificates", e);
+            logger.error("Error while initiating the truststore for JWT related public certificates", e);
         }
         for (Issuer jwtIssuer : cdsIssuers) {
             TokenIssuerDto issuerDto = new TokenIssuerDto(jwtIssuer.getIssuer());
@@ -221,6 +226,63 @@ public class ConfigHolder {
         cacheDto.setMaximumSize(cache.getMaximumSize());
         cacheDto.setExpiryTime(cache.getExpiryTime());
         config.setCacheDto(cacheDto);
+    }
+
+    /**
+     * This method recursively looks for the string type config values in the {@link EnforcerConfig} object ,
+     * which have the prefix `$env{` and reads the respective value from the environment variable and set it to
+     * the config object.
+     *
+     * @param config - Enforcer config object.
+     */
+    private void resolveConfigsWithEnvs(Object config) {
+        String packageName = this.config.getClass().getPackageName();
+        for (Field field : config.getClass().getDeclaredFields()) {
+            try {
+                field.setAccessible(true);
+                if (field.getType().isAssignableFrom(String.class) || field.getType().isAssignableFrom(char[].class)) {
+                    field.set(config, getEnvValue(field.get(config)));
+                } else if (field.getName().contains(Constants.OBJECT_THIS_NOTATION)) {
+                    continue;
+                } else if (Map.class.isAssignableFrom(field.getType())) {
+                    Map<Object, Object> objectMap = (Map<Object, Object>) field.get(config);
+                    for (Map.Entry<Object, Object> entry : objectMap.entrySet()) {
+                        if (entry.getValue().getClass().isAssignableFrom(String.class) || entry.getValue().getClass()
+                                .isAssignableFrom(char[].class)) {
+                            field.set(config, getEnvValue(field.get(config)));
+                            continue;
+                        } else if (entry.getValue().getClass().getPackageName().contains(packageName)) {
+                            resolveConfigsWithEnvs(entry.getValue());
+                        }
+                    }
+                } else if (field.getType().getPackageName()
+                        .contains(packageName)) { //recursively call the dto objects in the same package
+                    resolveConfigsWithEnvs(field.get(config));
+                }
+            } catch (IllegalAccessException e) {
+                //log and continue
+                logger.error("Error while reading the config value : " + field.getName(), e);
+            }
+        }
+    }
+
+    private Object getEnvValue(Object configValue) {
+        if (configValue instanceof String) {
+            String value = (String) configValue;
+            if (value.contains(Constants.ENV_PREFIX)) {
+                String envName = value
+                        .substring(value.indexOf(Constants.START_BRACKET) + 1, value.indexOf(Constants.END_BRACKET));
+                return System.getenv(envName);
+            }
+        } else if (configValue instanceof char[]) {
+            String value = String.valueOf((char[]) configValue);
+            if (value.contains(Constants.ENV_PREFIX)) {
+                String envName = value
+                        .substring(value.indexOf(Constants.START_BRACKET) + 1, value.indexOf(Constants.END_BRACKET));
+                return System.getenv(envName) != null ? System.getenv(envName).toCharArray() : configValue;
+            }
+        }
+        return configValue;
     }
 
     public EnforcerConfig getConfig() {
