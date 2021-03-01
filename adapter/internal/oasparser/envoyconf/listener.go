@@ -98,6 +98,9 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 			},
 		},
 		HttpFilters: httpFilters,
+		LocalReplyConfig: &hcmv3.LocalReplyConfig{
+			Mappers: []*hcmv3.ResponseMapper{},
+		},
 	}
 
 	if len(accessLogs) > 0 {
