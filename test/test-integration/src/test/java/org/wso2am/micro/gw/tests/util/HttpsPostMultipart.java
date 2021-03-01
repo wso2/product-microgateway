@@ -129,6 +129,7 @@ public class HttpsPostMultipart {
      * Completes the request and receives response from the server.
      *
      * @throws IOException
+     * @return HttpResponse
      */
     public HttpResponse getResponse() throws IOException {
         writer.flush();

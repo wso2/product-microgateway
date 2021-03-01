@@ -149,6 +149,7 @@ public class BaseTestCase {
      * @param keyType        keytype
      * @param validityPeriod validityPeriod
      * @throws Exception
+     * @return JWT
      */
     public static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType,
                                 int validityPeriod, String scopes) throws Exception {

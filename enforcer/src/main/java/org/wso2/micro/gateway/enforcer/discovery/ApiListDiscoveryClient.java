@@ -31,7 +31,6 @@ import org.wso2.gateway.discovery.service.subscription.ApiListDiscoveryServiceGr
 import org.wso2.gateway.discovery.subscription.APIList;
 import org.wso2.gateway.discovery.subscription.APIs;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
-import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataStoreImpl;
 import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
@@ -77,7 +76,7 @@ public class ApiListDiscoveryClient {
         this.subscriptionDataStore = SubscriptionDataStoreImpl.getInstance();
         this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
         this.stub = ApiListDiscoveryServiceGrpc.newStub(channel);
-        this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
+        this.nodeId = ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
     }
 

@@ -21,16 +21,20 @@ package org.wso2.micro.gateway.enforcer.config;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.gateway.discovery.config.enforcer.AmCredentials;
 import org.wso2.gateway.discovery.config.enforcer.AuthService;
 import org.wso2.gateway.discovery.config.enforcer.BinaryThrottling;
+import org.wso2.gateway.discovery.config.enforcer.Cache;
 import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.config.enforcer.EventHub;
 import org.wso2.gateway.discovery.config.enforcer.Issuer;
+import org.wso2.gateway.discovery.config.enforcer.JWTGenerator;
 import org.wso2.gateway.discovery.config.enforcer.TMURLGroup;
 import org.wso2.gateway.discovery.config.enforcer.ThrottleAgent;
 import org.wso2.gateway.discovery.config.enforcer.ThrottlePublisher;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
@@ -43,6 +47,7 @@ import org.wso2.micro.gateway.enforcer.globalthrottle.databridge.agent.conf.Agen
 import org.wso2.micro.gateway.enforcer.globalthrottle.databridge.publisher.PublisherConfiguration;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
+import javax.net.ssl.TrustManagerFactory;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -51,8 +56,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Properties;
-
-import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Configuration holder class for Microgateway.
@@ -112,9 +115,18 @@ public class ConfigHolder {
         // Read jwt token configuration
         populateJWTIssuerConfiguration(config.getJwtTokenConfigList());
 
-        //Read credentials used to connect with APIM services
+        // Read credentials used to connect with APIM services
         populateAPIMCredentials(config.getApimCredentials());
+
+        // Read throttle publisher configurations
         populateTMBinaryConfig(config.getThrottlingConfig().getBinary());
+
+        // Read backend jwt generation configurations
+        populateJWTGeneratorConfigurations(config.getJwtGenerator());
+
+        // Read token caching configs
+        populateCacheConfigs(config.getCache());
+
     }
 
     private void populateAuthService(AuthService cdsAuth) {
@@ -141,7 +153,7 @@ public class ConfigHolder {
 
         Properties jmsProps = new Properties();
         jmsProps.put(Constants.EVENT_HUB_EVENT_LISTENING_ENDPOINT,
-                eventhub.getJmsConnectionParametersMap().get(Constants.EVENT_HUB_EVENT_LISTENING_ENDPOINT));
+                eventhub.getJmsConnectionParameters().getEventListeningEndpointsList());
         eventHubDto.setJmsConnectionParameters(jmsProps);
 
         config.setEventHub(eventHubDto);
@@ -243,7 +255,6 @@ public class ConfigHolder {
         config.setApimCredentials(credentialDto);
     }
 
-
     /**
      * The receiverURLGroup and the authURLGroup is preprocessed
      * such that to make them compatible with the binary agent.
@@ -296,6 +307,27 @@ public class ConfigHolder {
         concatenatedURLString = new StringBuilder(
                 concatenatedURLString.substring(0, concatenatedURLString.length() - 1) + "}");
         return concatenatedURLString.toString();
+    }
+
+    private void populateJWTGeneratorConfigurations(JWTGenerator jwtGenerator) {
+        JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+        jwtConfigurationDto.setEnabled(jwtGenerator.getEnable());
+        jwtConfigurationDto.setJwtHeader(jwtGenerator.getHeader());
+        jwtConfigurationDto.setConsumerDialectUri(jwtGenerator.getClaimDialect());
+        jwtConfigurationDto.setSignatureAlgorithm(jwtGenerator.getSigningAlgorithm());
+        jwtConfigurationDto.setEnableUserClaims(jwtGenerator.getEnableUserClaims());
+        jwtConfigurationDto.setGatewayJWTGeneratorImpl(jwtGenerator.getGatewayGeneratorImpl());
+        config.setPublicCertificatePath(jwtGenerator.getPublicCertificatePath());
+        config.setPrivateKeyPath(jwtGenerator.getPrivateKeyPath());
+        config.setJwtConfigurationDto(jwtConfigurationDto);
+    }
+
+    private void populateCacheConfigs(Cache cache) {
+        CacheDto cacheDto = new CacheDto();
+        cacheDto.setEnabled(cache.getEnable());
+        cacheDto.setMaximumSize(cache.getMaximumSize());
+        cacheDto.setExpiryTime(cache.getExpiryTime());
+        config.setCacheDto(cacheDto);
     }
 
     public EnforcerConfig getConfig() {

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-tests</artifactId>
-        <version>4.0.0-m6-SNAPSHOT</version>
+        <version>4.0.0-m7-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -116,7 +116,6 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -139,7 +138,7 @@
         <dependency>
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>mock-backend-server</artifactId>
-            <version>4.0.0-m6-SNAPSHOT</version>
+            <version>4.0.0-m7-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>

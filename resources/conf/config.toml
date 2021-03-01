@@ -79,6 +79,24 @@ disableSslVerification = false
     username="admin"
     password="admin"
 
+[enforcer.cache]
+  enabled = true
+  maximumSize = 10000
+  expiryTime = 15
+
+[enforcer.jwtGenerator]
+    enable = false
+    encoding = "base64" # base64,base64url
+    claimDialect = "http://wso2.org/claims"
+    convertDialect = false
+    header = "X-JWT-Assertion"
+    signingAlgorithm = "SHA256withRSA"
+    enableUserClaims = false
+    gatewayGeneratorImpl = "org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
+    claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
+    publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
+    privateKeyPath = "/home/wso2/security/keystore/mg.key"
+
 # Throttling configurations related to event publishing using a binary connection
 [enforcer.throttlingConfig.binary]
  enabled = false
@@ -141,4 +159,4 @@ retryInterval = 5
 skipSSLVerification=true
 # Message broker connection URL of the control plane
 [controlPlane.eventHub.jmsConnectionParameters]
-eventListeningEndpoints = "amqp://admin:admin@localhost:5672/"
+eventListeningEndpoints = ["amqp://admin:admin@localhost:5672?retries='5'&connectdelay='30000'"]

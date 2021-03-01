@@ -22,6 +22,8 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
+import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames;
+import org.json.JSONObject;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -29,6 +31,7 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.logging.Level;
 import java.net.HttpURLConnection;
@@ -159,7 +162,7 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/store/order/1", exchange -> {
                 byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                if (exchange.getRequestHeaders().containsKey("Authorization") &&
                         exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46aGVsbG8="))
                 {
                     response = ResponseConstants.STORE_INVENTORY_RESPONSE.getBytes();
@@ -177,7 +180,7 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/user/john", exchange -> {
                 byte[] response;
-                if(exchange.getRequestHeaders().containsKey("Authorization") &&
+                if (exchange.getRequestHeaders().containsKey("Authorization") &&
                         exchange.getRequestHeaders().get("Authorization").toString().contains("Basic YWRtaW46aGVsbG8="))
                 {
                     response = ResponseConstants.userResponse.getBytes();
@@ -190,6 +193,38 @@ public class MockBackEndServer extends Thread {
                             Constants.CONTENT_TYPE_APPLICATION_JSON);
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_FORBIDDEN, response.length);
                 }
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            // to test jwt generator
+            httpServer.createContext(context + "/jwtheader", exchange -> {
+                byte[] response;
+                if (exchange.getRequestHeaders().containsKey("X-JWT-Assertion")) {
+                    response = ResponseConstants.VALID_JWT_RESPONSE.getBytes();
+                } else {
+                    response = ResponseConstants.INVALID_JWT_RESPONSE.getBytes();
+                }
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        Constants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(context + "/jwttoken", exchange -> {
+                byte[] response;
+                if (exchange.getRequestHeaders().containsKey("X-JWT-Assertion")) {
+                    String token = exchange.getRequestHeaders().get("X-JWT-Assertion").toString();
+                    // token is in the format: [token]
+                    token = token.substring(1, (token.length()-1));
+                    JSONObject responseJSON = new JSONObject();
+                    responseJSON.put("token", token);
+                    response = responseJSON.toString().getBytes();
+                } else {
+                    response = ResponseConstants.INVALID_JWT_RESPONSE.getBytes();
+                }
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        Constants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });

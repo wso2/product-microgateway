@@ -18,6 +18,7 @@
 
 package org.wso2.micro.gateway.enforcer.util;
 
+import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -31,15 +32,17 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
+import org.wso2.micro.gateway.enforcer.constants.JwtConstants;
 import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
-import org.wso2.micro.gateway.enforcer.security.jwt.JWTValidationInfo;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -241,12 +244,65 @@ public class FilterUtils {
         return BigInteger.ZERO;
     }
 
+    public static JWTInfoDto generateJWTInfoDto(JSONObject subscribedAPI, JWTValidationInfo jwtValidationInfo,
+                                                APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
+                                                RequestContext requestContext) {
+
+        JWTInfoDto jwtInfoDto = new JWTInfoDto();
+        jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
+        String apiContext = requestContext.getMathedAPI().getAPIConfig().getBasePath();
+        String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
+        jwtInfoDto.setApicontext(apiContext);
+        jwtInfoDto.setVersion(apiVersion);
+        constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
+        return jwtInfoDto;
+    }
+
+    private static void constructJWTContent(JSONObject subscribedAPI,
+                                            APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
+
+        if (apiKeyValidationInfoDTO != null) {
+            jwtInfoDto.setApplicationid(apiKeyValidationInfoDTO.getApplicationId());
+            jwtInfoDto.setApplicationname(apiKeyValidationInfoDTO.getApplicationName());
+            jwtInfoDto.setApplicationtier(apiKeyValidationInfoDTO.getApplicationTier());
+            jwtInfoDto.setKeytype(apiKeyValidationInfoDTO.getType());
+            jwtInfoDto.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
+            jwtInfoDto.setSubscriptionTier(apiKeyValidationInfoDTO.getTier());
+            jwtInfoDto.setApiName(apiKeyValidationInfoDTO.getApiName());
+            jwtInfoDto.setEndusertenantid(0);
+            jwtInfoDto.setApplicationuuid(apiKeyValidationInfoDTO.getApplicationUUID());
+            jwtInfoDto.setAppAttributes(apiKeyValidationInfoDTO.getAppAttributes());
+        } else if (subscribedAPI != null) {
+            // If the user is subscribed to the API
+            String apiName = subscribedAPI.getAsString(JwtConstants.API_NAME);
+            jwtInfoDto.setApiName(apiName);
+            String subscriptionTier = subscribedAPI.getAsString(JwtConstants.SUBSCRIPTION_TIER);
+            String subscriptionTenantDomain =
+                    subscribedAPI.getAsString(JwtConstants.SUBSCRIBER_TENANT_DOMAIN);
+            jwtInfoDto.setSubscriptionTier(subscriptionTier);
+            jwtInfoDto.setEndusertenantid(0);
+
+            Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
+            if (claims.get(JwtConstants.APPLICATION) != null) {
+                JSONObject
+                        applicationObj = (JSONObject) claims.get(JwtConstants.APPLICATION);
+                jwtInfoDto.setApplicationid(
+                        String.valueOf(applicationObj.getAsNumber(JwtConstants.APPLICATION_ID)));
+                jwtInfoDto
+                        .setApplicationname(applicationObj.getAsString(JwtConstants.APPLICATION_NAME));
+                jwtInfoDto
+                        .setApplicationtier(applicationObj.getAsString(JwtConstants.APPLICATION_TIER));
+                jwtInfoDto.setSubscriber(applicationObj.getAsString(JwtConstants.APPLICATION_OWNER));
+            }
+        }
+    }
+
     /**
      * Set the error code, message and description to the request context. The enforcer response will
      * retrieve this error details from the request context. Make sure to call this method and set the proper error
      * details when enforcer filters returns an error.
      *
-     * @param requestContext - The context object holds detals about the specific request.
+     * @param requestContext - The context object holds details about the specific request.
      * @param e - APISecurityException thrown when validation failure happens at filter level.
      */
     public static void setErrorToContext(RequestContext requestContext, APISecurityException e) {
@@ -265,6 +321,24 @@ public class FilterUtils {
             requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
                     APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
         }
+    }
+
+    /**
+     * Set the unauthenticated status code(401), error code(900901), message and description to the request context.
+     * The enforcer response will retrieve this error details from the request context. Make sure to call
+     * this method and set the proper error details when enforcer filters returns an error.
+     *
+     * @param requestContext - The context object holds details about the specific request.
+     */
+    public static void setUnauthenticatedErrorToContext(RequestContext requestContext) {
+        requestContext.getProperties()
+                .put(APIConstants.MessageFormat.STATUS_CODE, APIConstants.StatusCodes.UNAUTHENTICATED.getCode());
+        requestContext.getProperties()
+                .put(APIConstants.MessageFormat.ERROR_CODE, APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
+        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE, APISecurityConstants
+                .getAuthenticationFailureMessage(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS));
+        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_DESCRIPTION);
     }
 
 }

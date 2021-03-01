@@ -40,6 +40,10 @@ public class Constants {
     // Config constants
     public static final String EVENT_HUB_EVENT_LISTENING_ENDPOINT = "eventListeningEndpoints";
 
+    public static final String BEGINING_OF_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n";
+    public static final String END_OF_PRIVATE_KEY = "-----END PRIVATE KEY-----";
+    public static final String RSA = "RSA";
+
     //Throttle config constants
     public static final String LOADBALANCE = "loadbalance";
     public static final String FAILOVER = "failover";

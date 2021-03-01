@@ -18,10 +18,17 @@
 
 package org.wso2am.micro.gw.tests.util;
 
-import java.io.*;
-import java.nio.file.*;
-import java.util.zip.*;
-import java.nio.file.attribute.*;
+
+import java.io.IOException;
+import java.io.FileOutputStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * To compress a directory in ZIP format.

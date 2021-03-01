@@ -44,52 +44,25 @@ public interface EventHubOrBuilder extends
    * Connection parameters for the message listerner
    * </pre>
    *
-   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
+   * @return Whether the jmsConnectionParameters field is set.
    */
-  int getJmsConnectionParametersCount();
+  boolean hasJmsConnectionParameters();
   /**
    * <pre>
    * Connection parameters for the message listerner
    * </pre>
    *
-   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
+   * @return The jmsConnectionParameters.
    */
-  boolean containsJmsConnectionParameters(
-      java.lang.String key);
-  /**
-   * Use {@link #getJmsConnectionParametersMap()} instead.
-   */
-  @java.lang.Deprecated
-  java.util.Map<java.lang.String, java.lang.String>
-  getJmsConnectionParameters();
+  org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters getJmsConnectionParameters();
   /**
    * <pre>
    * Connection parameters for the message listerner
    * </pre>
    *
-   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
    */
-  java.util.Map<java.lang.String, java.lang.String>
-  getJmsConnectionParametersMap();
-  /**
-   * <pre>
-   * Connection parameters for the message listerner
-   * </pre>
-   *
-   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
-   */
-
-  java.lang.String getJmsConnectionParametersOrDefault(
-      java.lang.String key,
-      java.lang.String defaultValue);
-  /**
-   * <pre>
-   * Connection parameters for the message listerner
-   * </pre>
-   *
-   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
-   */
-
-  java.lang.String getJmsConnectionParametersOrThrow(
-      java.lang.String key);
+  org.wso2.gateway.discovery.config.enforcer.JmsConnectionParametersOrBuilder getJmsConnectionParametersOrBuilder();
 }
