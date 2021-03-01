@@ -22,6 +22,7 @@ import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.dto.ThrottleAgentConfigDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,7 @@ public class EnforcerConfig {
     private EventHubConfigurationDto eventHub;
     private Map<String, TokenIssuerDto> issuersMap = new HashMap<>();
     private CredentialDto apimCredentials;
+    private ThrottleAgentConfigDTO throttleAgentConfig;
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -66,6 +68,14 @@ public class EnforcerConfig {
 
     public void setApimCredentials(CredentialDto apimCredentials) {
         this.apimCredentials = apimCredentials;
+    }
+
+    public ThrottleAgentConfigDTO getThrottleAgentConfig() {
+        return throttleAgentConfig;
+    }
+
+    public void setThrottleAgentConfig(ThrottleAgentConfigDTO throttleAgentConfig) {
+        this.throttleAgentConfig = throttleAgentConfig;
     }
 }
 

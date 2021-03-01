@@ -129,7 +129,7 @@ public class RestAPI implements API {
         this.filters.add(corsFilter);
         this.filters.add(authFilter);
         // enable throttle filter
-        if (ConfigHolder.getInstance().getThrottleAgentConfig().isEnabled()) {
+        if (ConfigHolder.getInstance().getConfig().getThrottleAgentConfig().isEnabled()) {
             ThrottleFilter throttleFilter = new ThrottleFilter();
             throttleFilter.init(apiConfig);
             this.filters.add(throttleFilter);
