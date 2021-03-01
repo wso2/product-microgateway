@@ -193,6 +193,7 @@ type binaryThrottleConfig struct {
 type urlGroup struct {
 	ReceiverURLs []string
 	AuthURLs     []string
+	Type         string
 }
 
 type binaryPublisher struct {

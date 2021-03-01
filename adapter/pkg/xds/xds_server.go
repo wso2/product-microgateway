@@ -327,6 +327,7 @@ func generateEnforcerConfigs(config *config.Config) *enforcer.Config {
 		group := &enforcer.TMURLGroup{
 			AuthURLs:     urlGroup.AuthURLs,
 			ReceiverURLs: urlGroup.ReceiverURLs,
+			Type:         urlGroup.Type,
 		}
 		urlGroups = append(urlGroups, group)
 	}

@@ -79,20 +79,6 @@ disableSslVerification = false
     username="admin"
     password="admin"
 
-[controlPlane]
-# Control plane's eventHub details
-[controlPlane.eventHub]
-enabled = false
-serviceUrl = "https://localhost:9443/"
-username="admin"
-password="admin"
-environmentLabels = ["Production and Sandbox"]
-retryInterval = 5
-skipSSLVerification=true
-# Message broker connection URL of the control plane
-[controlPlane.eventHub.jmsConnectionParameters]
-eventListeningEndpoints = "amqp://admin:admin@localhost:5672/"
-
 # Throttling configurations related to event publishing using a binary connection
 [enforcer.throttlingConfig.binary]
  enabled = false
@@ -103,6 +89,7 @@ eventListeningEndpoints = "amqp://admin:admin@localhost:5672/"
  [[enforcer.throttlingConfig.binary.urlGroup]]
    receiverURLs = ["tcp://localhost:9611"]
    authURLs = ["ssl://localhost:9711"]
+   type = "loadbalance"
  # Data publisher object pool configurations
  [enforcer.throttlingConfig.binary.publisher]
    maxIdleDataPublishingAgents = 1000
@@ -141,3 +128,17 @@ eventListeningEndpoints = "amqp://admin:admin@localhost:5672/"
    secureMaxIdleConnections = 250
    secureEvictionTimePeriod = 5500
    secureMinIdleTimeInPool = 5000
+
+[controlPlane]
+# Control plane's eventHub details
+[controlPlane.eventHub]
+enabled = false
+serviceUrl = "https://localhost:9443/"
+username="admin"
+password="admin"
+environmentLabels = ["Production and Sandbox"]
+retryInterval = 5
+skipSSLVerification=true
+# Message broker connection URL of the control plane
+[controlPlane.eventHub.jmsConnectionParameters]
+eventListeningEndpoints = "amqp://admin:admin@localhost:5672/"
