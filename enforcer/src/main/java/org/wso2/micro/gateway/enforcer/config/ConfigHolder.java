@@ -46,10 +46,12 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 import javax.net.ssl.TrustManagerFactory;
+
 /**
  * Configuration holder class for Microgateway.
  */
@@ -64,6 +66,7 @@ public class ConfigHolder {
     private KeyStore trustStore = null;
     private KeyStore trustStoreForJWT = null;
     private TrustManagerFactory trustManagerFactory = null;
+    private ArrayList<TokenIssuerDto> configIssuerList;
 
     private ConfigHolder() {
         init();
@@ -150,11 +153,12 @@ public class ConfigHolder {
     }
 
     private void populateJWTIssuerConfiguration(List<Issuer> cdsIssuers) {
+        configIssuerList = new ArrayList<>();
         try {
             setTrustStoreForJWT(KeyStore.getInstance(KeyStore.getDefaultType()));
             getTrustStoreForJWT().load(null);
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            logger.error("Error while initiaing the truststore for JWT related public certificates", e);
+            logger.error("Error while initiating the truststore for JWT related public certificates", e);
         }
         for (Issuer jwtIssuer : cdsIssuers) {
             TokenIssuerDto issuerDto = new TokenIssuerDto(jwtIssuer.getIssuer());
@@ -179,6 +183,7 @@ public class ConfigHolder {
             issuerDto.setConsumerKeyClaim(jwtIssuer.getConsumerKeyClaim());
             issuerDto.setValidateSubscriptions(jwtIssuer.getValidateSubscription());
             config.getIssuersMap().put(jwtIssuer.getIssuer(), issuerDto);
+            configIssuerList.add(issuerDto);
         }
     }
 
@@ -253,5 +258,13 @@ public class ConfigHolder {
 
     public EnvVarConfig getEnvVarConfig() {
         return envVarConfig;
+    }
+
+    public ArrayList<TokenIssuerDto> getConfigIssuerList() {
+        return configIssuerList;
+    }
+
+    public void setConfigIssuerList(ArrayList<TokenIssuerDto> configIssuerList) {
+        this.configIssuerList = configIssuerList;
     }
 }

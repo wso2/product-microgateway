@@ -25,6 +25,7 @@ const (
 	ApplicationPolicyListType     = apiTypePrefix + "wso2.discovery.subscription.ApplicationPolicyList"
 	SubscriptionPolicyListType    = apiTypePrefix + "wso2.discovery.subscription.SubscriptionPolicyList"
 	ApplicationKeyMappingListType = apiTypePrefix + "wso2.discovery.subscription.ApplicationKeyMappingList"
+	KeyManagerType                = apiTypePrefix + "wso2.discovery.keymgt.KeyManagerConfig"
 
 	// AnyType is used only by ADS
 	AnyType = ""

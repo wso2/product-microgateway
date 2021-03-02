@@ -37,6 +37,7 @@ import (
 	envoy_cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/wso2/micro-gw/config"
 	apiModel "github.com/wso2/micro-gw/internal/api/models"
+	eventhubTypes "github.com/wso2/micro-gw/internal/eventhub/types"
 	oasParser "github.com/wso2/micro-gw/internal/oasparser"
 	mgw "github.com/wso2/micro-gw/internal/oasparser/model"
 	"github.com/wso2/micro-gw/internal/oasparser/operator"
@@ -55,6 +56,7 @@ var (
 	enforcerApplicationPolicyCache     wso2_cache.SnapshotCache
 	enforcerSubscriptionPolicyCache    wso2_cache.SnapshotCache
 	enforcerApplicationKeyMappingCache wso2_cache.SnapshotCache
+	enforcerKeyManagerCache            wso2_cache.SnapshotCache
 
 	// Vhost:APIName:Version as map key
 	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // MgwSwagger struct map
@@ -71,12 +73,16 @@ var (
 
 	// Common Enforcer Label as map key
 	enforcerConfigMap                map[string][]types.Resource
+	enforcerKeyManagerMap 			 map[string][]types.Resource
 	enforcerSubscriptionMap          map[string][]types.Resource
 	enforcerApplicationMap           map[string][]types.Resource
 	enforcerAPIListMap               map[string][]types.Resource
 	enforcerApplicationPolicyMap     map[string][]types.Resource
 	enforcerSubscriptionPolicyMap    map[string][]types.Resource
 	enforcerApplicationKeyMappingMap map[string][]types.Resource
+
+	// KeyManagerList to store data
+	KeyManagerList = make([]eventhubTypes.KeyManager, 0)
 )
 
 const (
@@ -106,6 +112,8 @@ func init() {
 	enforcerApplicationPolicyCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerSubscriptionPolicyCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerApplicationKeyMappingCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerKeyManagerCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
+
 	apiMgwSwaggerMap = make(map[string]mgw.MgwSwagger)
 	openAPIEnvoyMap = make(map[string][]string)
 	openAPIEnforcerApisMap = make(map[string]types.Resource)
@@ -118,6 +126,7 @@ func init() {
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 
 	enforcerConfigMap = make(map[string][]types.Resource)
+	enforcerKeyManagerMap = make(map[string][]types.Resource)
 	enforcerSubscriptionMap = make(map[string][]types.Resource)
 	enforcerApplicationMap = make(map[string][]types.Resource)
 	enforcerAPIListMap = make(map[string][]types.Resource)
@@ -164,6 +173,11 @@ func GetEnforcerSubscriptionPolicyCache() wso2_cache.SnapshotCache {
 // GetEnforcerApplicationKeyMappingCache returns xds server cache.
 func GetEnforcerApplicationKeyMappingCache() wso2_cache.SnapshotCache {
 	return enforcerApplicationKeyMappingCache
+}
+
+// GetEnforcerKeyManagerCache returns xds server cache.
+func GetEnforcerKeyManagerCache() wso2_cache.SnapshotCache {
+	return enforcerKeyManagerCache
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
@@ -351,7 +365,7 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 	label := commonEnforcerLabel
 	configs := []types.Resource{MarshalConfig(configFile)}
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), configs, nil, nil, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), configs, nil, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerCache.SetSnapshot(label, snap)
@@ -367,7 +381,7 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 func UpdateEnforcerApis(label string, apis []types.Resource) {
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, apis, nil, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, apis, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerCache.SetSnapshot(label, snap)
@@ -388,7 +402,7 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 
 	// TODO: (VirajSalaka) Decide if a map is required to keep version (just to avoid having the same version)
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, subscriptionList, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, subscriptionList, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerSubscriptionCache.SetSnapshot(label, snap)
@@ -407,7 +421,7 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 	applicationList = append(applicationList, applications)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, applicationList, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, applicationList, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationCache.SetSnapshot(label, snap)
@@ -425,7 +439,7 @@ func UpdateEnforcerAPIList(label string, apis *subscription.APIList) {
 	apiList = append(apiList, apis)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, apiList, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, apiList, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerAPICache.SetSnapshot(label, snap)
@@ -444,7 +458,7 @@ func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 	applicationPolicyList = append(applicationPolicyList, applicationPolicies)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, applicationPolicyList, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, applicationPolicyList, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationPolicyCache.SetSnapshot(label, snap)
@@ -463,7 +477,7 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 	subscriptionPolicyList = append(subscriptionPolicyList, subscriptionPolicies)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, subscriptionPolicyList, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, subscriptionPolicyList, nil, nil)
 	snap.Consistent()
 
 	err := enforcerSubscriptionPolicyCache.SetSnapshot(label, snap)
@@ -482,7 +496,7 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 	applicationKeyMappingList = append(applicationKeyMappingList, applicationKeyMappings)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, applicationKeyMappingList)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, applicationKeyMappingList, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationKeyMappingCache.SetSnapshot(label, snap)
@@ -643,4 +657,33 @@ func IsAPIExist(vhost, name, version string) (exists bool) {
 // GenerateIdentifierForAPI generates an identifier unique to the API
 func GenerateIdentifierForAPI(vhost, name, version string) string {
 	return vhost + ":" + name + ":" + version
+}
+
+// GenerateAndUpdateKeyManagerList converts the data into KeyManager proto type
+func GenerateAndUpdateKeyManagerList() {
+	var keyManagerConfigList = make([]types.Resource, 0)
+	for _, keyManager := range KeyManagerList {
+		kmConfig := MarshalKeyManager(&keyManager)
+		if kmConfig != nil {
+			keyManagerConfigList = append(keyManagerConfigList, kmConfig)
+		}
+	}
+	UpdateEnforcerKeyManagers(keyManagerConfigList)
+}
+
+// UpdateEnforcerKeyManagers Sets new update to the enforcer's configuration
+func UpdateEnforcerKeyManagers(keyManagerConfigList []types.Resource) {
+	logger.LoggerXds.Debug("Updating Key Manager Cache")
+	label := commonEnforcerLabel
+
+	version := rand.Intn(maxRandomInt)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, keyManagerConfigList)
+	snap.Consistent()
+
+	err := enforcerKeyManagerCache.SetSnapshot(label, snap)
+	if err != nil {
+		logger.LoggerXds.Error(err)
+	}
+	enforcerKeyManagerMap[label] = keyManagerConfigList
+	logger.LoggerXds.Infof("New key manager cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }

@@ -24,6 +24,7 @@ import (
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/api"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/config"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/keymgt"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/subscription"
 	"github.com/wso2/micro-gw/internal/discovery/protocol/resource/v3"
 	"github.com/wso2/micro-gw/internal/discovery/protocol/server/sotw/v3"
@@ -41,6 +42,7 @@ type Server interface {
 	subscription.ApplicationPolicyDiscoveryServiceServer
 	subscription.SubscriptionPolicyDiscoveryServiceServer
 	subscription.ApplicationKeyMappingDiscoveryServiceServer
+	keymgt.KMDiscoveryServiceServer
 
 	rest.Server
 	envoy_sotw.Server
@@ -65,6 +67,7 @@ type server struct {
 	subscription.UnimplementedApplicationPolicyDiscoveryServiceServer
 	subscription.UnimplementedSubscriptionPolicyDiscoveryServiceServer
 	subscription.UnimplementedApplicationKeyMappingDiscoveryServiceServer
+	keymgt.UnimplementedKMDiscoveryServiceServer
 	rest rest.Server
 	sotw envoy_sotw.Server
 }
@@ -103,6 +106,10 @@ func (s *server) StreamSubscriptionPolicies(stream subscription.SubscriptionPoli
 
 func (s *server) StreamApplicationKeyMappings(stream subscription.ApplicationKeyMappingDiscoveryService_StreamApplicationKeyMappingsServer) error {
 	return s.StreamHandler(stream, resource.ApplicationKeyMappingListType)
+}
+
+func (s *server) StreamKeyManagers(stream keymgt.KMDiscoveryService_StreamKeyManagersServer) error {
+	return s.StreamHandler(stream, resource.KeyManagerType)
 }
 
 // Fetch is the universal fetch method.

@@ -1,13 +1,16 @@
 package xds
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 
 	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/config/enforcer"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/keymgt"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/micro-gw/internal/eventhub/types"
+	logger "github.com/wso2/micro-gw/loggers"
 )
 
 // MarshalConfig will marshal a Config struct - read from the config toml - to
@@ -216,4 +219,22 @@ func MarshalKeyMappingList(keyMappingList *types.ApplicationKeyMappingList) *sub
 	return &subscription.ApplicationKeyMappingList{
 		List: applicationKeyMappings,
 	}
+}
+
+// MarshalKeyManager converts the data into KeyManager proto type
+func MarshalKeyManager(keyManager *types.KeyManager) *keymgt.KeyManagerConfig {
+	configList, err := json.Marshal(keyManager.Configuration)
+	configuration := string(configList)
+	if err == nil {
+		newKeyManager := &keymgt.KeyManagerConfig{
+			Name:          keyManager.Name,
+			Type:          keyManager.Type,
+			Enabled:       keyManager.Enabled,
+			TenantDomain:  keyManager.TenantDomain,
+			Configuration: configuration,
+		}
+		return newKeyManager
+	}
+	logger.LoggerXds.Debugf("Error happens while marshaling key manager data for " + fmt.Sprint(keyManager.Name))
+	return nil
 }

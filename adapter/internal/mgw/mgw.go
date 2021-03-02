@@ -26,6 +26,7 @@ import (
 	"github.com/wso2/micro-gw/internal/api/restserver"
 	apiservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/api"
 	configservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/config"
+	keymanagerservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/keymgt"
 	subscriptionservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/subscription"
 	wso2_server "github.com/wso2/micro-gw/internal/discovery/protocol/server/v3"
 	"github.com/wso2/micro-gw/internal/tlsutils"
@@ -80,7 +81,8 @@ const grpcMaxConcurrentStreams = 1000000
 
 func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server, enforcerSdsServer wso2_server.Server,
 	enforcerAppDsSrv wso2_server.Server, enforcerAPIDsSrv wso2_server.Server, enforcerAppPolicyDsSrv wso2_server.Server,
-	enforcerSubPolicyDsSrv wso2_server.Server, enforcerAppKeyMappingDsSrv wso2_server.Server, port uint) {
+	enforcerSubPolicyDsSrv wso2_server.Server, enforcerAppKeyMappingDsSrv wso2_server.Server,
+	enforcerKeyManagerDsSrv wso2_server.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
 
@@ -117,6 +119,7 @@ func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server,
 	subscriptionservice.RegisterApplicationPolicyDiscoveryServiceServer(grpcServer, enforcerAppPolicyDsSrv)
 	subscriptionservice.RegisterSubscriptionPolicyDiscoveryServiceServer(grpcServer, enforcerSubPolicyDsSrv)
 	subscriptionservice.RegisterApplicationKeyMappingDiscoveryServiceServer(grpcServer, enforcerAppKeyMappingDsSrv)
+	keymanagerservice.RegisterKMDiscoveryServiceServer(grpcServer, enforcerKeyManagerDsSrv)
 
 	logger.LoggerMgw.Info("port: ", port, " management server listening")
 	go func() {
@@ -154,6 +157,7 @@ func Run(conf *config.Config) {
 	enforcerApplicationPolicyCache := xds.GetEnforcerApplicationPolicyCache()
 	enforcerSubscriptionPolicyCache := xds.GetEnforcerSubscriptionPolicyCache()
 	enforcerApplicationKeyMappingCache := xds.GetEnforcerApplicationKeyMappingCache()
+	enforcerKeyManagerCache := xds.GetEnforcerKeyManagerCache()
 
 	srv := xdsv3.NewServer(ctx, cache, nil)
 	enforcerXdsSrv := wso2_server.NewServer(ctx, enforcerCache, &cb.Callbacks{})
@@ -163,9 +167,10 @@ func Run(conf *config.Config) {
 	enforcerAppPolicyDsSrv := wso2_server.NewServer(ctx, enforcerApplicationPolicyCache, &cb.Callbacks{})
 	enforcerSubPolicyDsSrv := wso2_server.NewServer(ctx, enforcerSubscriptionPolicyCache, &cb.Callbacks{})
 	enforcerAppKeyMappingDsSrv := wso2_server.NewServer(ctx, enforcerApplicationKeyMappingCache, &cb.Callbacks{})
+	enforcerKeyManagerDsSrv := wso2_server.NewServer(ctx, enforcerKeyManagerCache, &cb.Callbacks{})
 
 	runManagementServer(srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
-		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, port)
+		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, enforcerKeyManagerDsSrv, port)
 
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
@@ -181,6 +186,8 @@ func Run(conf *config.Config) {
 
 		// Fetch APIs from control plane
 		fetchAPIsOnStartUp(conf)
+		// Fetch Key Managers from APIM
+		synchronizer.FetchKeyManagersOnStartUp(conf)
 	}
 OUTER:
 	for {
