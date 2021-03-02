@@ -21,18 +21,26 @@ package messaging
 import (
 	"encoding/json"
 
+	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
+	km "github.com/wso2/micro-gw/api/wso2/discovery/keymgt"
+	"github.com/wso2/micro-gw/pkg/xds"
+
 	"github.com/streadway/amqp"
 	logger "github.com/wso2/micro-gw/loggers"
 )
 
 func handleTokenRevocation(deliveries <-chan amqp.Delivery, done chan error) {
-
 	for d := range deliveries {
 		var notification EventTokenRevocationNotification
 		json.Unmarshal([]byte(string(d.Body)), &notification)
 		logger.LoggerMsg.Printf("RevokedToken: %s, Token Type: %s", notification.Event.PayloadData.RevokedToken,
 			notification.Event.PayloadData.Type)
-
+		var stokens []types.Resource
+		t := &km.RevokedToken{}
+		t.Jti = notification.Event.PayloadData.RevokedToken
+		t.Expirytime = notification.Event.PayloadData.ExpiryTime
+		stokens = append(stokens, t)
+		xds.UpdateEnforcerRevokedTokens(stokens)
 		d.Ack(false)
 	}
 	logger.LoggerMsg.Infof("handle: deliveries channel closed")

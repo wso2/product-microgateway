@@ -20,8 +20,8 @@ public interface RevokedTokenOrBuilder extends
       getJtiBytes();
 
   /**
-   * <code>int32 expirytime = 2;</code>
+   * <code>int64 expirytime = 2;</code>
    * @return The expirytime.
    */
-  int getExpirytime();
+  long getExpirytime();
 }

@@ -30,7 +30,7 @@ public final class RevokedTokensProto {
     java.lang.String[] descriptorData = {
       "\n*wso2/discovery/keymgt/revoked_tokens.p" +
       "roto\022\025wso2.discovery.keymgt\"/\n\014RevokedTo" +
-      "ken\022\013\n\003jti\030\001 \001(\t\022\022\n\nexpirytime\030\002 \001(\005Bp\n\035" +
+      "ken\022\013\n\003jti\030\001 \001(\t\022\022\n\nexpirytime\030\002 \001(\003Bp\n\035" +
       "org.wso2.gateway.discovery.kmB\022RevokedTo" +
       "kensProtoP\001Z9github.com/praminda/go-cont" +
       "rol-plane/wso2/discovery/km;kmb\006proto3"

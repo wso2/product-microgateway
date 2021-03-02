@@ -64,7 +64,7 @@ func GetResourceName(res envoy_types.Resource) string {
 	case *subscription.SubscriptionList:
 		return "Subscription"
 	case *km.RevokedToken:
-		return "RevokedToken"
+		return v.Jti
 	default:
 		return ""
 	}

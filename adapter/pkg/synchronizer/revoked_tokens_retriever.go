@@ -30,8 +30,10 @@ import (
 	"net/http"
 	"strings"
 
-	keymgt "github.com/wso2/micro-gw/api/wso2/discovery/keymgt"
+	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
+	km "github.com/wso2/micro-gw/api/wso2/discovery/keymgt"
 	"github.com/wso2/micro-gw/config"
+
 	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/pkg/auth"
 	"github.com/wso2/micro-gw/pkg/tlsutils"
@@ -140,10 +142,13 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 func PushTokens(data []byte) {
 	tokens := []RevokedToken{}
 	err := json.Unmarshal(data, &tokens)
-	stokens := make([]keymgt.RevokedToken, len(tokens))
-	for i, v := range tokens {
-		stokens[i].Jti = v.JWT
-		stokens[i].Expirytime = (v.ExpiryTime)
+	//
+	var stokens []types.Resource
+	for _, v := range tokens {
+		t := &km.RevokedToken{}
+		t.Jti = v.JWT
+		t.Expirytime = (v.ExpiryTime)
+		stokens = append(stokens, t)
 	}
 	xds.UpdateEnforcerRevokedTokens(stokens)
 	logger.LoggerSync.Infof("TOKENS NEW %+v", stokens)

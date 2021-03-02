@@ -61,7 +61,7 @@ private static final long serialVersionUID = 0L;
           }
           case 16: {
 
-            expirytime_ = input.readInt32();
+            expirytime_ = input.readInt64();
             break;
           }
           default: {
@@ -135,13 +135,13 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int EXPIRYTIME_FIELD_NUMBER = 2;
-  private int expirytime_;
+  private long expirytime_;
   /**
-   * <code>int32 expirytime = 2;</code>
+   * <code>int64 expirytime = 2;</code>
    * @return The expirytime.
    */
   @java.lang.Override
-  public int getExpirytime() {
+  public long getExpirytime() {
     return expirytime_;
   }
 
@@ -162,8 +162,8 @@ private static final long serialVersionUID = 0L;
     if (!getJtiBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 1, jti_);
     }
-    if (expirytime_ != 0) {
-      output.writeInt32(2, expirytime_);
+    if (expirytime_ != 0L) {
+      output.writeInt64(2, expirytime_);
     }
     unknownFields.writeTo(output);
   }
@@ -177,9 +177,9 @@ private static final long serialVersionUID = 0L;
     if (!getJtiBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, jti_);
     }
-    if (expirytime_ != 0) {
+    if (expirytime_ != 0L) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(2, expirytime_);
+        .computeInt64Size(2, expirytime_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -214,7 +214,8 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + JTI_FIELD_NUMBER;
     hash = (53 * hash) + getJti().hashCode();
     hash = (37 * hash) + EXPIRYTIME_FIELD_NUMBER;
-    hash = (53 * hash) + getExpirytime();
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getExpirytime());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -354,7 +355,7 @@ private static final long serialVersionUID = 0L;
       super.clear();
       jti_ = "";
 
-      expirytime_ = 0;
+      expirytime_ = 0L;
 
       return this;
     }
@@ -436,7 +437,7 @@ private static final long serialVersionUID = 0L;
         jti_ = other.jti_;
         onChanged();
       }
-      if (other.getExpirytime() != 0) {
+      if (other.getExpirytime() != 0L) {
         setExpirytime(other.getExpirytime());
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -544,33 +545,33 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private int expirytime_ ;
+    private long expirytime_ ;
     /**
-     * <code>int32 expirytime = 2;</code>
+     * <code>int64 expirytime = 2;</code>
      * @return The expirytime.
      */
     @java.lang.Override
-    public int getExpirytime() {
+    public long getExpirytime() {
       return expirytime_;
     }
     /**
-     * <code>int32 expirytime = 2;</code>
+     * <code>int64 expirytime = 2;</code>
      * @param value The expirytime to set.
      * @return This builder for chaining.
      */
-    public Builder setExpirytime(int value) {
+    public Builder setExpirytime(long value) {
       
       expirytime_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>int32 expirytime = 2;</code>
+     * <code>int64 expirytime = 2;</code>
      * @return This builder for chaining.
      */
     public Builder clearExpirytime() {
       
-      expirytime_ = 0;
+      expirytime_ = 0L;
       onChanged();
       return this;
     }

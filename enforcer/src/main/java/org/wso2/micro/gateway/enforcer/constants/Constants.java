@@ -36,7 +36,7 @@ public class Constants {
     public static final String APPLICATION_KEY_MAPPING_LIST_TYPE_URL =
             "type.googleapis.com/wso2.discovery.subscription.ApplicationKeyMappingList";
     public static final String ROVOKED_TOKEN_TYPE_URL =
-            "type.googleapis.com/wso2.discovery.km.RevokedTokens";
+            "type.googleapis.com/wso2.discovery.keymgt.RevokedTokens";
     public static final int MAX_XDS_RETRIES = 3;
 
     // Config constants

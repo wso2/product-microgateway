@@ -32,7 +32,6 @@ import org.wso2.gateway.discovery.km.RevokedToken;
 import org.wso2.gateway.discovery.service.keymgt.RevokedTokenDiscoveryServiceGrpc;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
-import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
 
@@ -92,30 +91,13 @@ public class RevokedTokenDiscoveryClient {
         return instance;
     }
 
-    public List<RevokedToken> requestInitRevokedTokens() throws DiscoveryException {
-        List<RevokedToken> revokedTokens;
-        DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
-                .setTypeUrl(Constants.ROVOKED_TOKEN_TYPE_URL).build();
-        try {
-            DiscoveryResponse response = blockingStub.withDeadlineAfter(60, TimeUnit.SECONDS).fetchTokens(req);
-            shutdown();
-
-            revokedTokens = handleResponse(response);
-        } catch (Exception e) {
-            // catching generic error here to wrap any grpc communication errors in the runtime
-            throw new DiscoveryException("Couldn't fetch init APIs", e);
-        }
-        return revokedTokens;
-    }
-
     public void watchRevokedTokens() {
         // TODO: (Praminda) implement a deadline with retries
         int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
         reqObserver = stub.withMaxInboundMessageSize(maxSize).streamTokens(new StreamObserver<DiscoveryResponse>() {
                     @Override
                     public void onNext(DiscoveryResponse response) {
-                        logger.debug("Received revoked tokens response " + response);
+                        logger.debug("Received revoked tokens response new " + response);
                         latestReceived = response;
                         try {
                             List<RevokedToken> tokens = handleResponse(response);
@@ -123,6 +105,7 @@ public class RevokedTokenDiscoveryClient {
                             // TODO: (Praminda) fix recursive ack on ack failure
                             ack();
                         } catch (Exception e) {
+                            logger.info(e);
                             // catching generic error here to wrap any grpc communication errors in the runtime
                             onError(e);
                         }
@@ -147,6 +130,8 @@ public class RevokedTokenDiscoveryClient {
                     .setVersionInfo(latestACKed.getVersionInfo())
                     .setTypeUrl(Constants.ROVOKED_TOKEN_TYPE_URL).build();
             reqObserver.onNext(req);
+           logger.debug("Sent Discovery request for type url: " + Constants.ROVOKED_TOKEN_TYPE_URL);
+
         } catch (Exception e) {
             logger.error("Unexpected error occurred in revoked token discovery service", e);
             reqObserver.onError(e);
@@ -184,6 +169,9 @@ public class RevokedTokenDiscoveryClient {
     private void handleRevokedTokens(List<RevokedToken> tokens) {
         for (RevokedToken revokedToken : tokens) {
             revokedJWTDataHolder.addRevokedJWTToMap(revokedToken.getJti(), Long.valueOf(revokedToken.getExpirytime()));
+            logger.info("Adding JTI: ", revokedToken.getJti());
+            logger.info("Adding Ex: ", revokedToken.getExpirytime());
+
         }
     }
 

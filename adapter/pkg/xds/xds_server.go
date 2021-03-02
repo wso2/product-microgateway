@@ -25,7 +25,6 @@ import (
 
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	"github.com/wso2/micro-gw/api/wso2/discovery/config/enforcer"
-	km "github.com/wso2/micro-gw/api/wso2/discovery/keymgt"
 	"github.com/wso2/micro-gw/api/wso2/discovery/subscription"
 
 	wso2_cache "github.com/wso2/micro-gw/pkg/discovery/cache/v3"
@@ -776,7 +775,7 @@ func stopConsulDiscoveryFor(clusterName string) {
 }
 
 //UpdateEnforcerRevokedTokens send tokens
-func UpdateEnforcerRevokedTokens(revokedTokens []km.RevokedToken) {
+func UpdateEnforcerRevokedTokens(revokedTokens []types.Resource) {
 	logger.LoggerXds.Debug("Updating enforcer cache for revoked tokens")
 	label := commonEnforcerLabel
 	tokens := enforcerRevokedTokensMap[label]
