@@ -70,7 +70,7 @@ public class KeyManagerHolder {
     }
 
     public void populateKMIssuerConfiguration(List<KeyManagerConfig> kmIssuers) {
-        Map<String, TokenIssuerDto> resultIssuerList = new HashMap<>();
+        Map<String, TokenIssuerDto> kmIssuerMap = new HashMap<>();
         for (KeyManagerConfig keyManagerConfig : kmIssuers) {
             JSONObject configObj = new JSONObject(keyManagerConfig.getConfiguration());
             Map<String, Object> configuration = new HashMap<>();
@@ -82,23 +82,16 @@ public class KeyManagerHolder {
             }
 
             if (keyManagerConfig.getEnabled()) {
-                updateTokenIssuerList(configuration, resultIssuerList);
+                addKMTokenIssuers(configuration, kmIssuerMap);
             }
         }
-        ArrayList<TokenIssuerDto> configIssuerList = ConfigHolder.getInstance().getConfigIssuerList();
-        for (TokenIssuerDto tokenIssuerDto : configIssuerList) {
-            if (resultIssuerList.containsKey(tokenIssuerDto.getIssuer())) {
-                logger.warn("token issuer " + tokenIssuerDto.getIssuer() + " already exists in config map. " +
-                        "Existing configurations will be replaced by KeyManager configuration");
-            } else {
-                resultIssuerList.put(tokenIssuerDto.getIssuer(), tokenIssuerDto);
-            }
-        }
+        updateIssuerMapWithConfigIssuers(kmIssuerMap);
+        // add the updated issuer list replacing the existing one
         tokenIssuerMap.clear();
-        tokenIssuerMap.putAll(resultIssuerList);
+        tokenIssuerMap.putAll(kmIssuerMap);
     }
 
-    public void updateTokenIssuerList(Map<String, Object> configuration, Map<String, TokenIssuerDto> resultIssuerList) {
+    public void addKMTokenIssuers(Map<String, Object> configuration, Map<String, TokenIssuerDto> kmIssuerMap) {
         Object selfValidateJWT = configuration.get(APIConstants.KeyManager.SELF_VALIDATE_JWT);
         if (selfValidateJWT != null && (Boolean) selfValidateJWT) {
             Object issuer = configuration.get(APIConstants.KeyManager.ISSUER);
@@ -152,7 +145,20 @@ public class KeyManagerHolder {
                         }
                     }
                 }
-                resultIssuerList.put(tokenIssuerDto.getIssuer(), tokenIssuerDto);
+                kmIssuerMap.put(tokenIssuerDto.getIssuer(), tokenIssuerDto);
+            }
+        }
+    }
+
+    public void updateIssuerMapWithConfigIssuers(Map<String, TokenIssuerDto> kmIssuerMap) {
+        ArrayList<TokenIssuerDto> configIssuerList = ConfigHolder.getInstance().getConfigIssuerList();
+        for (TokenIssuerDto configTokenIssuer : configIssuerList) {
+            if (kmIssuerMap.containsKey(configTokenIssuer.getIssuer())) {
+                logger.warn("token issuer " + configTokenIssuer.getIssuer() + " already exists in config map. " +
+                        "Existing configurations will be replaced by KeyManager configuration");
+            } else {
+                //add issuer from config if they are not present in external km response
+                kmIssuerMap.put(configTokenIssuer.getIssuer(), configTokenIssuer);
             }
         }
     }
