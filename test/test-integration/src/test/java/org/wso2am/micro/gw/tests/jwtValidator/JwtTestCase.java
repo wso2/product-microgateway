@@ -48,7 +48,8 @@ public class JwtTestCase extends BaseTestCase {
 
         //deploy the api
         //api yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("/apis/openApis/mockApi.yaml");
+        String apiZipfile = ApiProjectGenerator.createApictlProjZip("/apis/openApis/api.yaml",
+            "/apis/openApis/swagger.yaml");
 
         ApiDeployment.deployAPI(apiZipfile);
 

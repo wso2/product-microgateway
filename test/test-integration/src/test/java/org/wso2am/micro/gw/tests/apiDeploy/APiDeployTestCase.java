@@ -49,7 +49,8 @@ public class APiDeployTestCase extends BaseTestCase {
     public void apiDeployTest() throws Exception {
 
         //api yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("apis/openApis/mockApi.yaml");
+        String apiZipfile = ApiProjectGenerator.createApictlProjZip("apis/openApis/api.yaml", 
+            "apis/openApis/swagger.yaml");
 
         // Set header
         Map<String, String> headers = new HashMap<String,String>();
