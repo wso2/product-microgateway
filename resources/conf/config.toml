@@ -79,6 +79,11 @@ disableSslVerification = false
     username="admin"
     password="admin"
 
+[enforcer.cache]
+  enabled = true
+  maximumSize = 10000
+  expiryTime = 15
+
 [enforcer.jwtGenerator]
     enable = false
     encoding = "base64" # base64,base64url
@@ -104,4 +109,4 @@ retryInterval = 5
 skipSSLVerification=true
 # Message broker connection URL of the control plane
 [controlPlane.eventHub.jmsConnectionParameters]
-eventListeningEndpoints = "amqp://admin:admin@localhost:5672/"
+eventListeningEndpoints = ["amqp://admin:admin@localhost:5672?retries='5'&connectdelay='30000'"]

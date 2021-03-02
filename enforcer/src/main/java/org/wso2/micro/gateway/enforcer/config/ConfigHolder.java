@@ -24,11 +24,13 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.gateway.discovery.config.enforcer.AmCredentials;
 import org.wso2.gateway.discovery.config.enforcer.AuthService;
+import org.wso2.gateway.discovery.config.enforcer.Cache;
 import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.config.enforcer.EventHub;
 import org.wso2.gateway.discovery.config.enforcer.Issuer;
 import org.wso2.gateway.discovery.config.enforcer.JWTGenerator;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
@@ -111,6 +113,10 @@ public class ConfigHolder {
 
         // Read backend jwt generation configurations
         populateJWTGeneratorConfigurations(config.getJwtGenerator());
+
+        // Read token caching configs
+        populateCacheConfigs(config.getCache());
+
     }
 
     private void populateAuthService(AuthService cdsAuth) {
@@ -137,7 +143,7 @@ public class ConfigHolder {
 
         Properties jmsProps = new Properties();
         jmsProps.put(Constants.EVENT_HUB_EVENT_LISTENING_ENDPOINT,
-                eventhub.getJmsConnectionParametersMap().get(Constants.EVENT_HUB_EVENT_LISTENING_ENDPOINT));
+                eventhub.getJmsConnectionParameters().getEventListeningEndpointsList());
         eventHubDto.setJmsConnectionParameters(jmsProps);
 
         config.setEventHub(eventHubDto);
@@ -207,6 +213,14 @@ public class ConfigHolder {
         config.setPublicCertificatePath(jwtGenerator.getPublicCertificatePath());
         config.setPrivateKeyPath(jwtGenerator.getPrivateKeyPath());
         config.setJwtConfigurationDto(jwtConfigurationDto);
+    }
+
+    private void populateCacheConfigs(Cache cache) {
+        CacheDto cacheDto = new CacheDto();
+        cacheDto.setEnabled(cache.getEnable());
+        cacheDto.setMaximumSize(cache.getMaximumSize());
+        cacheDto.setExpiryTime(cache.getExpiryTime());
+        config.setCacheDto(cacheDto);
     }
 
     public EnforcerConfig getConfig() {

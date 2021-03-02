@@ -70,7 +70,7 @@ public class AnalyticsFilter implements Filter {
         requestContext.addMetadataToMap("ApplicationKeyType", authContext.getKeyType());
         requestContext.addMetadataToMap("ApplicationId", authContext.getApplicationId());
         requestContext.addMetadataToMap("ApplicationName", authContext.getApplicationName());
-        requestContext.addMetadataToMap("ApplicationOwner", "not implemented");
+        requestContext.addMetadataToMap("ApplicationOwner", authContext.getSubscriber());
 
         requestContext.addMetadataToMap("CorrelationId", requestContext.getCorrelationID());
         requestContext.addMetadataToMap("DeploymentId", "not implemented");

@@ -43,7 +43,6 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
-    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -66,16 +65,16 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 26: {
-            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              jmsConnectionParameters_ = com.google.protobuf.MapField.newMapField(
-                  JmsConnectionParametersDefaultEntryHolder.defaultEntry);
-              mutable_bitField0_ |= 0x00000001;
+            org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters.Builder subBuilder = null;
+            if (jmsConnectionParameters_ != null) {
+              subBuilder = jmsConnectionParameters_.toBuilder();
             }
-            com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
-            jmsConnectionParameters__ = input.readMessage(
-                JmsConnectionParametersDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-            jmsConnectionParameters_.getMutableMap().put(
-                jmsConnectionParameters__.getKey(), jmsConnectionParameters__.getValue());
+            jmsConnectionParameters_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(jmsConnectionParameters_);
+              jmsConnectionParameters_ = subBuilder.buildPartial();
+            }
+
             break;
           }
           default: {
@@ -102,18 +101,6 @@ private static final long serialVersionUID = 0L;
     return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_wso2_discovery_config_enforcer_EventHub_descriptor;
   }
 
-  @SuppressWarnings({"rawtypes"})
-  @java.lang.Override
-  protected com.google.protobuf.MapField internalGetMapField(
-      int number) {
-    switch (number) {
-      case 3:
-        return internalGetJmsConnectionParameters();
-      default:
-        throw new RuntimeException(
-            "Invalid map field number: " + number);
-    }
-  }
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
@@ -186,100 +173,41 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int JMSCONNECTIONPARAMETERS_FIELD_NUMBER = 3;
-  private static final class JmsConnectionParametersDefaultEntryHolder {
-    static final com.google.protobuf.MapEntry<
-        java.lang.String, java.lang.String> defaultEntry =
-            com.google.protobuf.MapEntry
-            .<java.lang.String, java.lang.String>newDefaultInstance(
-                org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_wso2_discovery_config_enforcer_EventHub_JmsConnectionParametersEntry_descriptor, 
-                com.google.protobuf.WireFormat.FieldType.STRING,
-                "",
-                com.google.protobuf.WireFormat.FieldType.STRING,
-                "");
-  }
-  private com.google.protobuf.MapField<
-      java.lang.String, java.lang.String> jmsConnectionParameters_;
-  private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-  internalGetJmsConnectionParameters() {
-    if (jmsConnectionParameters_ == null) {
-      return com.google.protobuf.MapField.emptyMapField(
-          JmsConnectionParametersDefaultEntryHolder.defaultEntry);
-    }
-    return jmsConnectionParameters_;
-  }
-
-  public int getJmsConnectionParametersCount() {
-    return internalGetJmsConnectionParameters().getMap().size();
+  private org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters_;
+  /**
+   * <pre>
+   * Connection parameters for the message listerner
+   * </pre>
+   *
+   * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
+   * @return Whether the jmsConnectionParameters field is set.
+   */
+  @java.lang.Override
+  public boolean hasJmsConnectionParameters() {
+    return jmsConnectionParameters_ != null;
   }
   /**
    * <pre>
    * Connection parameters for the message listerner
    * </pre>
    *
-   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
-   */
-
-  @java.lang.Override
-  public boolean containsJmsConnectionParameters(
-      java.lang.String key) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    return internalGetJmsConnectionParameters().getMap().containsKey(key);
-  }
-  /**
-   * Use {@link #getJmsConnectionParametersMap()} instead.
+   * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
+   * @return The jmsConnectionParameters.
    */
   @java.lang.Override
-  @java.lang.Deprecated
-  public java.util.Map<java.lang.String, java.lang.String> getJmsConnectionParameters() {
-    return getJmsConnectionParametersMap();
+  public org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters getJmsConnectionParameters() {
+    return jmsConnectionParameters_ == null ? org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters.getDefaultInstance() : jmsConnectionParameters_;
   }
   /**
    * <pre>
    * Connection parameters for the message listerner
    * </pre>
    *
-   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+   * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
    */
   @java.lang.Override
-
-  public java.util.Map<java.lang.String, java.lang.String> getJmsConnectionParametersMap() {
-    return internalGetJmsConnectionParameters().getMap();
-  }
-  /**
-   * <pre>
-   * Connection parameters for the message listerner
-   * </pre>
-   *
-   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
-   */
-  @java.lang.Override
-
-  public java.lang.String getJmsConnectionParametersOrDefault(
-      java.lang.String key,
-      java.lang.String defaultValue) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    java.util.Map<java.lang.String, java.lang.String> map =
-        internalGetJmsConnectionParameters().getMap();
-    return map.containsKey(key) ? map.get(key) : defaultValue;
-  }
-  /**
-   * <pre>
-   * Connection parameters for the message listerner
-   * </pre>
-   *
-   * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
-   */
-  @java.lang.Override
-
-  public java.lang.String getJmsConnectionParametersOrThrow(
-      java.lang.String key) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    java.util.Map<java.lang.String, java.lang.String> map =
-        internalGetJmsConnectionParameters().getMap();
-    if (!map.containsKey(key)) {
-      throw new java.lang.IllegalArgumentException();
-    }
-    return map.get(key);
+  public org.wso2.gateway.discovery.config.enforcer.JmsConnectionParametersOrBuilder getJmsConnectionParametersOrBuilder() {
+    return getJmsConnectionParameters();
   }
 
   private byte memoizedIsInitialized = -1;
@@ -302,12 +230,9 @@ private static final long serialVersionUID = 0L;
     if (!getServiceUrlBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 2, serviceUrl_);
     }
-    com.google.protobuf.GeneratedMessageV3
-      .serializeStringMapTo(
-        output,
-        internalGetJmsConnectionParameters(),
-        JmsConnectionParametersDefaultEntryHolder.defaultEntry,
-        3);
+    if (jmsConnectionParameters_ != null) {
+      output.writeMessage(3, getJmsConnectionParameters());
+    }
     unknownFields.writeTo(output);
   }
 
@@ -324,15 +249,9 @@ private static final long serialVersionUID = 0L;
     if (!getServiceUrlBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, serviceUrl_);
     }
-    for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
-         : internalGetJmsConnectionParameters().getMap().entrySet()) {
-      com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
-      jmsConnectionParameters__ = JmsConnectionParametersDefaultEntryHolder.defaultEntry.newBuilderForType()
-          .setKey(entry.getKey())
-          .setValue(entry.getValue())
-          .build();
+    if (jmsConnectionParameters_ != null) {
       size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, jmsConnectionParameters__);
+        .computeMessageSize(3, getJmsConnectionParameters());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -353,8 +272,11 @@ private static final long serialVersionUID = 0L;
         != other.getEnabled()) return false;
     if (!getServiceUrl()
         .equals(other.getServiceUrl())) return false;
-    if (!internalGetJmsConnectionParameters().equals(
-        other.internalGetJmsConnectionParameters())) return false;
+    if (hasJmsConnectionParameters() != other.hasJmsConnectionParameters()) return false;
+    if (hasJmsConnectionParameters()) {
+      if (!getJmsConnectionParameters()
+          .equals(other.getJmsConnectionParameters())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -371,9 +293,9 @@ private static final long serialVersionUID = 0L;
         getEnabled());
     hash = (37 * hash) + SERVICEURL_FIELD_NUMBER;
     hash = (53 * hash) + getServiceUrl().hashCode();
-    if (!internalGetJmsConnectionParameters().getMap().isEmpty()) {
+    if (hasJmsConnectionParameters()) {
       hash = (37 * hash) + JMSCONNECTIONPARAMETERS_FIELD_NUMBER;
-      hash = (53 * hash) + internalGetJmsConnectionParameters().hashCode();
+      hash = (53 * hash) + getJmsConnectionParameters().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -486,28 +408,6 @@ private static final long serialVersionUID = 0L;
       return org.wso2.gateway.discovery.config.enforcer.EventHubProto.internal_static_wso2_discovery_config_enforcer_EventHub_descriptor;
     }
 
-    @SuppressWarnings({"rawtypes"})
-    protected com.google.protobuf.MapField internalGetMapField(
-        int number) {
-      switch (number) {
-        case 3:
-          return internalGetJmsConnectionParameters();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
-    @SuppressWarnings({"rawtypes"})
-    protected com.google.protobuf.MapField internalGetMutableMapField(
-        int number) {
-      switch (number) {
-        case 3:
-          return internalGetMutableJmsConnectionParameters();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -538,7 +438,12 @@ private static final long serialVersionUID = 0L;
 
       serviceUrl_ = "";
 
-      internalGetMutableJmsConnectionParameters().clear();
+      if (jmsConnectionParametersBuilder_ == null) {
+        jmsConnectionParameters_ = null;
+      } else {
+        jmsConnectionParameters_ = null;
+        jmsConnectionParametersBuilder_ = null;
+      }
       return this;
     }
 
@@ -565,11 +470,13 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.gateway.discovery.config.enforcer.EventHub buildPartial() {
       org.wso2.gateway.discovery.config.enforcer.EventHub result = new org.wso2.gateway.discovery.config.enforcer.EventHub(this);
-      int from_bitField0_ = bitField0_;
       result.enabled_ = enabled_;
       result.serviceUrl_ = serviceUrl_;
-      result.jmsConnectionParameters_ = internalGetJmsConnectionParameters();
-      result.jmsConnectionParameters_.makeImmutable();
+      if (jmsConnectionParametersBuilder_ == null) {
+        result.jmsConnectionParameters_ = jmsConnectionParameters_;
+      } else {
+        result.jmsConnectionParameters_ = jmsConnectionParametersBuilder_.build();
+      }
       onBuilt();
       return result;
     }
@@ -625,8 +532,9 @@ private static final long serialVersionUID = 0L;
         serviceUrl_ = other.serviceUrl_;
         onChanged();
       }
-      internalGetMutableJmsConnectionParameters().mergeFrom(
-          other.internalGetJmsConnectionParameters());
+      if (other.hasJmsConnectionParameters()) {
+        mergeJmsConnectionParameters(other.getJmsConnectionParameters());
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -655,7 +563,6 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
-    private int bitField0_;
 
     private boolean enabled_ ;
     /**
@@ -801,145 +708,111 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private com.google.protobuf.MapField<
-        java.lang.String, java.lang.String> jmsConnectionParameters_;
-    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-    internalGetJmsConnectionParameters() {
-      if (jmsConnectionParameters_ == null) {
-        return com.google.protobuf.MapField.emptyMapField(
-            JmsConnectionParametersDefaultEntryHolder.defaultEntry);
-      }
-      return jmsConnectionParameters_;
-    }
-    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-    internalGetMutableJmsConnectionParameters() {
-      onChanged();;
-      if (jmsConnectionParameters_ == null) {
-        jmsConnectionParameters_ = com.google.protobuf.MapField.newMapField(
-            JmsConnectionParametersDefaultEntryHolder.defaultEntry);
-      }
-      if (!jmsConnectionParameters_.isMutable()) {
-        jmsConnectionParameters_ = jmsConnectionParameters_.copy();
-      }
-      return jmsConnectionParameters_;
-    }
-
-    public int getJmsConnectionParametersCount() {
-      return internalGetJmsConnectionParameters().getMap().size();
+    private org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters, org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters.Builder, org.wso2.gateway.discovery.config.enforcer.JmsConnectionParametersOrBuilder> jmsConnectionParametersBuilder_;
+    /**
+     * <pre>
+     * Connection parameters for the message listerner
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
+     * @return Whether the jmsConnectionParameters field is set.
+     */
+    public boolean hasJmsConnectionParameters() {
+      return jmsConnectionParametersBuilder_ != null || jmsConnectionParameters_ != null;
     }
     /**
      * <pre>
      * Connection parameters for the message listerner
      * </pre>
      *
-     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
+     * @return The jmsConnectionParameters.
      */
-
-    @java.lang.Override
-    public boolean containsJmsConnectionParameters(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      return internalGetJmsConnectionParameters().getMap().containsKey(key);
-    }
-    /**
-     * Use {@link #getJmsConnectionParametersMap()} instead.
-     */
-    @java.lang.Override
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, java.lang.String> getJmsConnectionParameters() {
-      return getJmsConnectionParametersMap();
-    }
-    /**
-     * <pre>
-     * Connection parameters for the message listerner
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
-     */
-    @java.lang.Override
-
-    public java.util.Map<java.lang.String, java.lang.String> getJmsConnectionParametersMap() {
-      return internalGetJmsConnectionParameters().getMap();
-    }
-    /**
-     * <pre>
-     * Connection parameters for the message listerner
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
-     */
-    @java.lang.Override
-
-    public java.lang.String getJmsConnectionParametersOrDefault(
-        java.lang.String key,
-        java.lang.String defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, java.lang.String> map =
-          internalGetJmsConnectionParameters().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
-    }
-    /**
-     * <pre>
-     * Connection parameters for the message listerner
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
-     */
-    @java.lang.Override
-
-    public java.lang.String getJmsConnectionParametersOrThrow(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, java.lang.String> map =
-          internalGetJmsConnectionParameters().getMap();
-      if (!map.containsKey(key)) {
-        throw new java.lang.IllegalArgumentException();
+    public org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters getJmsConnectionParameters() {
+      if (jmsConnectionParametersBuilder_ == null) {
+        return jmsConnectionParameters_ == null ? org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters.getDefaultInstance() : jmsConnectionParameters_;
+      } else {
+        return jmsConnectionParametersBuilder_.getMessage();
       }
-      return map.get(key);
     }
+    /**
+     * <pre>
+     * Connection parameters for the message listerner
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
+     */
+    public Builder setJmsConnectionParameters(org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters value) {
+      if (jmsConnectionParametersBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        jmsConnectionParameters_ = value;
+        onChanged();
+      } else {
+        jmsConnectionParametersBuilder_.setMessage(value);
+      }
 
+      return this;
+    }
+    /**
+     * <pre>
+     * Connection parameters for the message listerner
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
+     */
+    public Builder setJmsConnectionParameters(
+        org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters.Builder builderForValue) {
+      if (jmsConnectionParametersBuilder_ == null) {
+        jmsConnectionParameters_ = builderForValue.build();
+        onChanged();
+      } else {
+        jmsConnectionParametersBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <pre>
+     * Connection parameters for the message listerner
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
+     */
+    public Builder mergeJmsConnectionParameters(org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters value) {
+      if (jmsConnectionParametersBuilder_ == null) {
+        if (jmsConnectionParameters_ != null) {
+          jmsConnectionParameters_ =
+            org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters.newBuilder(jmsConnectionParameters_).mergeFrom(value).buildPartial();
+        } else {
+          jmsConnectionParameters_ = value;
+        }
+        onChanged();
+      } else {
+        jmsConnectionParametersBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <pre>
+     * Connection parameters for the message listerner
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
+     */
     public Builder clearJmsConnectionParameters() {
-      internalGetMutableJmsConnectionParameters().getMutableMap()
-          .clear();
-      return this;
-    }
-    /**
-     * <pre>
-     * Connection parameters for the message listerner
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
-     */
+      if (jmsConnectionParametersBuilder_ == null) {
+        jmsConnectionParameters_ = null;
+        onChanged();
+      } else {
+        jmsConnectionParameters_ = null;
+        jmsConnectionParametersBuilder_ = null;
+      }
 
-    public Builder removeJmsConnectionParameters(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      internalGetMutableJmsConnectionParameters().getMutableMap()
-          .remove(key);
-      return this;
-    }
-    /**
-     * Use alternate mutation accessors instead.
-     */
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, java.lang.String>
-    getMutableJmsConnectionParameters() {
-      return internalGetMutableJmsConnectionParameters().getMutableMap();
-    }
-    /**
-     * <pre>
-     * Connection parameters for the message listerner
-     * </pre>
-     *
-     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
-     */
-    public Builder putJmsConnectionParameters(
-        java.lang.String key,
-        java.lang.String value) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      if (value == null) { throw new java.lang.NullPointerException(); }
-      internalGetMutableJmsConnectionParameters().getMutableMap()
-          .put(key, value);
       return this;
     }
     /**
@@ -947,14 +820,47 @@ private static final long serialVersionUID = 0L;
      * Connection parameters for the message listerner
      * </pre>
      *
-     * <code>map&lt;string, string&gt; jmsConnectionParameters = 3;</code>
+     * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
      */
-
-    public Builder putAllJmsConnectionParameters(
-        java.util.Map<java.lang.String, java.lang.String> values) {
-      internalGetMutableJmsConnectionParameters().getMutableMap()
-          .putAll(values);
-      return this;
+    public org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters.Builder getJmsConnectionParametersBuilder() {
+      
+      onChanged();
+      return getJmsConnectionParametersFieldBuilder().getBuilder();
+    }
+    /**
+     * <pre>
+     * Connection parameters for the message listerner
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.JmsConnectionParametersOrBuilder getJmsConnectionParametersOrBuilder() {
+      if (jmsConnectionParametersBuilder_ != null) {
+        return jmsConnectionParametersBuilder_.getMessageOrBuilder();
+      } else {
+        return jmsConnectionParameters_ == null ?
+            org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters.getDefaultInstance() : jmsConnectionParameters_;
+      }
+    }
+    /**
+     * <pre>
+     * Connection parameters for the message listerner
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.JmsConnectionParameters jmsConnectionParameters = 3;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters, org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters.Builder, org.wso2.gateway.discovery.config.enforcer.JmsConnectionParametersOrBuilder> 
+        getJmsConnectionParametersFieldBuilder() {
+      if (jmsConnectionParametersBuilder_ == null) {
+        jmsConnectionParametersBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters, org.wso2.gateway.discovery.config.enforcer.JmsConnectionParameters.Builder, org.wso2.gateway.discovery.config.enforcer.JmsConnectionParametersOrBuilder>(
+                getJmsConnectionParameters(),
+                getParentForChildren(),
+                isClean());
+        jmsConnectionParameters_ = null;
+      }
+      return jmsConnectionParametersBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(
