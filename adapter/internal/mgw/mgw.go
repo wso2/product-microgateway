@@ -185,6 +185,14 @@ func Run(conf *config.Config) {
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
 
+	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
+	if enableJwtIssuer {
+		label := "Production and Sandbox"
+		listeners, clusters, routes, endpoints, apis := xds.GenerateEnvoyResoucesForLabel(label)
+		xds.UpdateXdsCacheWithLock(label, endpoints, clusters, routes, listeners)
+		xds.UpdateEnforcerApis(label, apis)
+	}
+
 	go restserver.StartRestServer(conf)
 
 	enableEventHub := conf.ControlPlane.EventHub.Enabled

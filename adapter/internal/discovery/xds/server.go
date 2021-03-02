@@ -43,6 +43,7 @@ import (
 	mgw "github.com/wso2/micro-gw/internal/oasparser/model"
 	"github.com/wso2/micro-gw/internal/oasparser/operator"
 	logger "github.com/wso2/micro-gw/loggers"
+	envoyconf "github.com/wso2/micro-gw/internal/oasparser/envoyconf"
 )
 
 var (
@@ -317,22 +318,23 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 	// TODO: (VirajSalaka) check possible optimizations, Since the number of labels are low by design it should not be an issue
 	for _, oldLabel := range oldLabels {
 		if !arrayContains(newLabels, oldLabel) {
-			listeners, clusters, routes, endpoints, apis := generateEnvoyResoucesForLabel(oldLabel)
-			updateXdsCacheWithLock(oldLabel, endpoints, clusters, routes, listeners)
+			listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(oldLabel)
+			UpdateXdsCacheWithLock(oldLabel, endpoints, clusters, routes, listeners)
 			UpdateEnforcerApis(oldLabel, apis)
 			logger.LoggerXds.Debugf("Xds Cache is updated for the already existing label : %v", oldLabel)
 		}
 	}
 
 	for _, newLabel := range newLabels {
-		listeners, clusters, routes, endpoints, apis := generateEnvoyResoucesForLabel(newLabel)
-		updateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
+		listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(newLabel)
+		UpdateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
 		UpdateEnforcerApis(newLabel, apis)
 		logger.LoggerXds.Debugf("Xds Cache is updated for the newly added label : %v", newLabel)
 	}
 }
 
-func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Resource, []types.Resource,
+// GenerateEnvoyResoucesForLabel generates envoy resources for a given label
+func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Resource, []types.Resource,
 []types.Resource, []types.Resource) {
 	var clusterArray []*clusterv3.Cluster
 	var routeArray []*routev3.Route
@@ -348,6 +350,15 @@ func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 			// listenerArrays = append(listenerArrays, openAPIListenersMap[apiKey])
 		}
 	}
+	conf, _ := config.ReadConfigs()
+	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
+	if enableJwtIssuer {
+		addressToken := envoyconf.CreateAddress("enforcer", 8082)
+		clusterToken := envoyconf.CreateCluster(addressToken, "tokenCluster", "HTTP", nil)
+		clusterArray = append(clusterArray, clusterToken)
+		routeToken := envoyconf.CreateTokenRoute()
+		routeArray = append(routeArray, routeToken)
+	}
 	listener, listenerFound := envoyListenerConfigMap[label]
 	routesConfig, routesConfigFound := envoyRouteConfigMap[label]
 	if !listenerFound && !routesConfigFound {
@@ -362,7 +373,7 @@ func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	return endpoints, clusters, listeners, routeConfigs, apis
 }
 
-//use updateXdsCacheWithLock to avoid race conditions
+//use UpdateXdsCacheWithLock to avoid race conditions
 func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) {
 	version := rand.Intn(maxRandomInt)
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
@@ -524,8 +535,8 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
-//different go routines could update XDS at the same time. To avoid this we use a mutex and lock
-func updateXdsCacheWithLock(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource,
+// UpdateXdsCacheWithLock uses mutex and lock to avoid different go routines updating XDS at the same time
+func UpdateXdsCacheWithLock(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource,
 listeners []types.Resource) {
 	mutexForXdsUpdate.Lock()
 	defer mutexForXdsUpdate.Unlock()
@@ -619,8 +630,8 @@ func updateXDSRouteCacheForServiceDiscovery(apiKey string) {
 	for key, envoyLabelList := range openAPIEnvoyMap {
 		if key == apiKey {
 			for _, label := range envoyLabelList {
-				listeners, clusters, routes, endpoints, _ := generateEnvoyResoucesForLabel(label)
-				updateXdsCacheWithLock(label, endpoints, clusters, routes, listeners)
+				listeners, clusters, routes, endpoints, _ := GenerateEnvoyResoucesForLabel(label)
+				UpdateXdsCacheWithLock(label, endpoints, clusters, routes, listeners)
 				logger.LoggerXds.Info("Updated XDS cache by consul service discovery")
 			}
 		}

@@ -79,10 +79,10 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 	// check API level production endpoints available
 	if len(mgwSwagger.GetProdEndpoints()) > 0 {
 		apiLevelEndpointProd = mgwSwagger.GetProdEndpoints()
-		apilevelAddressP := createAddress(apiLevelEndpointProd[0].Host, apiLevelEndpointProd[0].Port)
+		apilevelAddressP := CreateAddress(apiLevelEndpointProd[0].Host, apiLevelEndpointProd[0].Port)
 		apiLevelClusterNameProd = strings.TrimSpace(prodClustersConfigNamePrefix +
 			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
-		apilevelClusterProd = createCluster(apilevelAddressP, apiLevelClusterNameProd, apiLevelEndpointProd[0].URLType,
+		apilevelClusterProd = CreateCluster(apilevelAddressP, apiLevelClusterNameProd, apiLevelEndpointProd[0].URLType,
 			upstreamCerts)
 		clusters = append(clusters, apilevelClusterProd)
 		endpoints = append(endpoints, apilevelAddressP)
@@ -105,10 +105,10 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 			logger.LoggerOasparser.Warnf("Sandbox API level endpoint basepath is different compared to API level production endpoint "+
 				"for the API %v:%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion)
 		} else {
-			apilevelAddressSand := createAddress(apiLevelEndpointSand[0].Host, apiLevelEndpointSand[0].Port)
+			apilevelAddressSand := CreateAddress(apiLevelEndpointSand[0].Host, apiLevelEndpointSand[0].Port)
 			apiLevelClusterNameSand = strings.TrimSpace(sandClustersConfigNamePrefix +
 				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
-			apilevelClusterSand = createCluster(apilevelAddressSand, apiLevelClusterNameSand, apiLevelEndpointSand[0].URLType,
+			apilevelClusterSand = CreateCluster(apilevelAddressSand, apiLevelClusterNameSand, apiLevelEndpointSand[0].URLType,
 				upstreamCerts)
 			clusters = append(clusters, apilevelClusterSand)
 			endpoints = append(endpoints, apilevelAddressSand)
@@ -134,11 +134,11 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 		// resource level check production endpoints
 		if len(resource.GetProdEndpoints()) > 0 {
 			endpointProd := resource.GetProdEndpoints()
-			addressProd := createAddress(endpointProd[0].Host, endpointProd[0].Port)
+			addressProd := CreateAddress(endpointProd[0].Host, endpointProd[0].Port)
 			// TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
 			clusterNameProd := strings.TrimSpace(apiLevelClusterNameProd + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
 				"0")
-			clusterProd := createCluster(addressProd, clusterNameProd, endpointProd[0].URLType, upstreamCerts)
+			clusterProd := CreateCluster(addressProd, clusterNameProd, endpointProd[0].URLType, upstreamCerts)
 			clusters = append(clusters, clusterProd)
 			clusterRefProd = clusterProd.GetName()
 			endpoints = append(endpoints, addressProd)
@@ -164,7 +164,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 		// resource level check sandbox endpoints
 		if len(resource.GetSandEndpoints()) > 0 {
 			endpointSand := resource.GetSandEndpoints()
-			addressSand := createAddress(endpointSand[0].Host, endpointSand[0].Port)
+			addressSand := CreateAddress(endpointSand[0].Host, endpointSand[0].Port)
 			// TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
 			clusterNameSand := strings.TrimSpace(apiLevelClusterNameSand + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
 				"0")
@@ -174,7 +174,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 			} else {
 				// sandbox cluster is not created if the basepath component of the endpoint is different compared to production
 				// endpoints
-				clusterSand := createCluster(addressSand, clusterNameSand, endpointSand[0].URLType, upstreamCerts)
+				clusterSand := CreateCluster(addressSand, clusterNameSand, endpointSand[0].URLType, upstreamCerts)
 				clusters = append(clusters, clusterSand)
 				endpoints = append(endpoints, addressSand)
 				clusterRefSand = clusterSand.GetName()
@@ -214,9 +214,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 	return routesProd, clusters, endpoints
 }
 
-// createCluster creates cluster configuration. AddressConfiguration, cluster name and
+// CreateCluster creates cluster configuration. AddressConfiguration, cluster name and
 // urlType (http or https) is required to be provided.
-func createCluster(address *corev3.Address, clusterName string, urlType string, upstreamCerts []byte) *clusterv3.Cluster {
+func CreateCluster(address *corev3.Address, clusterName string, urlType string, upstreamCerts []byte) *clusterv3.Cluster {
 	logger.LoggerOasparser.Debug("creating a cluster....")
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
@@ -520,6 +520,89 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		TypedPerFilterConfig: map[string]*any.Any{
 			wellknown.HTTPExternalAuthorization: filter,
 		},
+	}
+	return &router
+}
+
+// CreateTokenRoute generates a route for the jwt /token endpoint
+func CreateTokenRoute() *routev3.Route {
+	var (
+		router routev3.Route
+		action       *routev3.Route_Route
+		match        *routev3.RouteMatch
+		decorator    *routev3.Decorator
+	)
+
+	match = &routev3.RouteMatch{
+		PathSpecifier: &routev3.RouteMatch_SafeRegex{
+			SafeRegex: &envoy_type_matcherv3.RegexMatcher{
+				EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
+					GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
+						MaxProgramSize: nil,
+					},
+				},
+				Regex: "/token",
+			},
+		},
+	}
+
+	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
+		AutoHostRewrite: &wrapperspb.BoolValue{
+			Value: true,
+		},
+	}
+
+	decorator = &routev3.Decorator{
+		Operation: "/token",
+	}
+
+	perFilterConfig := extAuthService.ExtAuthzPerRoute{
+	Override: &extAuthService.ExtAuthzPerRoute_Disabled{
+	Disabled: true,
+	},
+	}
+
+	b := proto.NewBuffer(nil)
+	b.SetDeterministic(true)
+	_ = b.Marshal(&perFilterConfig)
+	filter := &any.Any{
+	TypeUrl: extAuthzPerRouteName,
+	Value:   b.Bytes(),
+	}
+
+	action = &routev3.Route_Route{
+	Route: &routev3.RouteAction{
+	HostRewriteSpecifier: hostRewriteSpecifier,
+	// TODO: (VirajSalaka) Provide prefix rewrite since it is simple
+	RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
+	Pattern: &envoy_type_matcherv3.RegexMatcher{
+	EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
+	GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
+	MaxProgramSize: nil,
+	},
+	},
+	Regex: "/token",
+	},
+	Substitution: "/",
+	},
+	},
+	}
+
+	directClusterSpecifier := &routev3.RouteAction_Cluster{
+	Cluster: "tokenCluster",
+	}
+	action.Route.ClusterSpecifier = directClusterSpecifier
+
+
+	router = routev3.Route{
+	Name:      "/token", //Categorize routes with same base path
+	Match:     match,
+	Action:    action,
+	Metadata:  nil,
+	Decorator: decorator,
+	TypedPerFilterConfig: map[string]*any.Any{
+	wellknown.HTTPExternalAuthorization: filter,
+	},
 	}
 	return &router
 }
