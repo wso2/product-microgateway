@@ -45,8 +45,8 @@ import (
 	cb "github.com/wso2/micro-gw/internal/discovery/xds"
 	"github.com/wso2/micro-gw/internal/eventhub"
 	"github.com/wso2/micro-gw/internal/messaging"
+	"github.com/wso2/micro-gw/internal/synchronizer"
 	logger "github.com/wso2/micro-gw/loggers"
-	"github.com/wso2/micro-gw/pkg/synchronizer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

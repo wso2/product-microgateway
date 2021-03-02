@@ -32,11 +32,11 @@ import (
 	"time"
 
 	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/micro-gw/internal/auth"
 	"github.com/wso2/micro-gw/internal/discovery/xds"
 	eventhubTypes "github.com/wso2/micro-gw/internal/eventhub/types"
 	"github.com/wso2/micro-gw/internal/tlsutils"
 	logger "github.com/wso2/micro-gw/loggers"
-	"github.com/wso2/micro-gw/pkg/auth"
 )
 
 const (

@@ -26,11 +26,11 @@ import (
 
 	"github.com/streadway/amqp"
 	"github.com/wso2/micro-gw/config"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/micro-gw/internal/discovery/xds"
 	eh "github.com/wso2/micro-gw/internal/eventhub"
 	"github.com/wso2/micro-gw/internal/eventhub/types"
-	"github.com/wso2/micro-gw/pkg/synchronizer"
-	"github.com/wso2/micro-gw/internal/discovery/xds"
+	"github.com/wso2/micro-gw/internal/synchronizer"
+	logger "github.com/wso2/micro-gw/loggers"
 )
 
 // constant variables
