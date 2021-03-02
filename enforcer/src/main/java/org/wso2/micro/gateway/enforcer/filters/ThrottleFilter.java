@@ -25,8 +25,8 @@ import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
-import org.wso2.micro.gateway.enforcer.globalthrottle.ThrottleAgent;
-import org.wso2.micro.gateway.enforcer.globalthrottle.databridge.agent.util.ThrottleEventConstants;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleAgent;
+import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.util.ThrottleEventConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 

@@ -18,8 +18,8 @@
 
 package org.wso2.micro.gateway.enforcer.dto;
 
-import org.wso2.micro.gateway.enforcer.globalthrottle.databridge.agent.conf.AgentConfiguration;
-import org.wso2.micro.gateway.enforcer.globalthrottle.databridge.publisher.PublisherConfiguration;
+import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
+import org.wso2.micro.gateway.enforcer.throttle.databridge.publisher.PublisherConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;

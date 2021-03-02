@@ -32,7 +32,7 @@ import org.wso2.micro.gateway.enforcer.api.APIFactory;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
-import org.wso2.micro.gateway.enforcer.globalthrottle.ThrottleAgent;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleAgent;
 import org.wso2.micro.gateway.enforcer.grpc.ExtAuthService;
 import org.wso2.micro.gateway.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;

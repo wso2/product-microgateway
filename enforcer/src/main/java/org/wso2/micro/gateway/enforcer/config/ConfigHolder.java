@@ -43,8 +43,8 @@ import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.dto.ThrottleAgentConfigDTO;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
-import org.wso2.micro.gateway.enforcer.globalthrottle.databridge.agent.conf.AgentConfiguration;
-import org.wso2.micro.gateway.enforcer.globalthrottle.databridge.publisher.PublisherConfiguration;
+import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
+import org.wso2.micro.gateway.enforcer.throttle.databridge.publisher.PublisherConfiguration;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
 import java.io.IOException;
