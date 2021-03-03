@@ -70,6 +70,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 
 // getAccessLogConfigs provides grpc access log configurations for envoy
 func getGRPCAccessLogConfigs() *config_access_logv3.AccessLog {
+	// TODO: (VirajSalaka) Filter downstream connection requests
 	accessLogConf := &grpc_accesslogv3.HttpGrpcAccessLogConfig{
 		CommonConfig: &grpc_accesslogv3.CommonGrpcAccessLogConfig{
 			TransportApiVersion: corev3.ApiVersion_V3,

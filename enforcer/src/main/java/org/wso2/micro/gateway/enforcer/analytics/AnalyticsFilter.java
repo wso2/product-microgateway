@@ -58,6 +58,7 @@ public class AnalyticsFilter implements Filter {
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
+        // TODO: (VirajSalaka) Decide on whether to include/exclude the options requests, Cors requests
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
 
         requestContext.addMetadataToMap("ApiId", authContext.getApiUUID());
@@ -79,6 +80,7 @@ public class AnalyticsFilter implements Filter {
         requestContext.addMetadataToMap("GatewayType", "Envoy");
 
         // As in the matched API, only the resources under the matched resource template are selected.
+        //TODO: (VirajSalaka) populated API Resource template is incorrect.
         requestContext.addMetadataToMap("ApiResourceTemplate",
                 requestContext.getMathedAPI().getAPIConfig().getResources().get(0).getPath());
         return true;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -31,6 +31,9 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.MetaInfo;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.EventCategory;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.micro.gateway.enforcer.api.APIFactory;
 
 import java.util.Map;
@@ -40,28 +43,42 @@ import java.util.Map;
  */
 public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     private static final Logger logger = LogManager.getLogger(APIFactory.class);
-    private HTTPAccessLogEntry logEntry;
+    private final HTTPAccessLogEntry logEntry;
 
     public MgwAnalyticsProvider(HTTPAccessLogEntry logEntry) {
         this.logEntry = logEntry;
     }
 
-    @Override
-    public boolean isSuccessRequest() {
-        // TODO: (VirajSalaka) Decide if all 2xx and 100 response codes to be considered.
-        // 100 Continue scenario may require a separate test
-        if (logEntry.getResponse().getResponseCode().getValue() == 200
-                && logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
-            return true;
-        }
-        return false;
-    }
+//    @Override
+//    public boolean isSuccessRequest() {
+//        // TODO: (VirajSalaka) Decide if all 2xx and 100 response codes to be considered.
+//        // 100 Continue scenario may require a separate test
+//        if (logEntry.getResponse().getResponseCode().getValue() == 200
+//                && logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
+//            return true;
+//        }
+//        return false;
+//    }
+
+//    @Override
+//    public boolean isFaultRequest() {
+//        // TODO: (VirajSalaka) Correct?
+//        return logEntry.getResponse().getResponseCode().getValue() != 200
+//                && !logEntry.getResponse().getResponseCodeDetails().equals("via_upstream");
+//    }
 
     @Override
-    public boolean isFaultRequest() {
-        // TODO: (VirajSalaka) Correct?
-        return logEntry.getResponse().getResponseCode().getValue() != 200
-                && !logEntry.getResponse().getResponseCodeDetails().equals("via_upstream");
+    public EventCategory getEventCategory() {
+        if (logEntry.getResponse().getResponseCode().getValue() == 200
+                && logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
+            return EventCategory.SUCCESS;
+            // TODO: (VirajSalaka) Finalize what is a fault
+        } else if (logEntry.getResponse().getResponseCode().getValue() != 200
+                && !logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
+            return EventCategory.FAULT;
+        } else {
+            return EventCategory.INVALID;
+        }
     }
 
     @Override
@@ -77,35 +94,45 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public boolean isAuthFaultRequest() {
+    public FaultCategory getFaultType() {
+        if (isAuthFaultRequest()) {
+            return FaultCategory.AUTH;
+        } else if (isThrottledFaultRequest()) {
+            return FaultCategory.THROTTLED;
+        } else if (isTargetFaultRequest()) {
+            return FaultCategory.TARGET_CONNECTIVITY;
+        } else {
+            return FaultCategory.OTHER;
+        }
+    }
+
+    private boolean isAuthFaultRequest() {
         return (logEntry.getResponse().getResponseCode().getValue() == 401
                 || logEntry.getResponse().getResponseCode().getValue() == 403)
                 && logEntry.getResponse().getResponseCodeDetails().equals("ext_authz_denied");
     }
 
-    @Override
     public boolean isThrottledFaultRequest() {
         return logEntry.getResponse().getResponseCode().getValue() == 429
                 && logEntry.getResponse().getResponseCodeDetails().equals("ext_authz_denied");
     }
 
-    @Override
     public boolean isTargetFaultRequest() {
-        return logEntry.getResponse().getResponseCode().getValue() != 200
-                && logEntry.getResponse().getResponseCodeDetails().equals("via_upstream");
+        // TODO: (VirajSalaka) Response flags based check
+        return logEntry.getResponse().getResponseCode().getValue() != 200;
     }
 
-    @Override
-    public boolean isResourceNotFound() {
-        return logEntry.getResponse().getResponseCode().getValue() == 404
-                && logEntry.getResponse().getResponseCodeDetails().equals("route_not_found");
-    }
+//    @Override
+//    public boolean isResourceNotFound() {
+//        return logEntry.getResponse().getResponseCode().getValue() == 404
+//                && logEntry.getResponse().getResponseCodeDetails().equals("route_not_found");
+//    }
 
-    @Override
-    public boolean isMethodNotAllowed() {
-        // TODO: (VirajSalaka) Method not allowed should be filtered from enforcer rather than router ?
-        return false;
-    }
+//    @Override
+//    public boolean isMethodNotAllowed() {
+//        // TODO: (VirajSalaka) Method not allowed should be filtered from enforcer rather than router ?
+//        return false;
+//    }
 
     @Override
     public API getApi() {
@@ -179,7 +206,6 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
                 .getFilterMetadataMap().get("envoy.filters.http.ext_authz").getFieldsMap();
         MetaInfo metaInfo = new MetaInfo();
         metaInfo.setCorrelationId(getValueAsString(fieldsMap, "CorrelationId"));
-        metaInfo.setDeploymentId(getValueAsString(fieldsMap, "DeploymentId"));
         metaInfo.setGatewayType(getValueAsString(fieldsMap, "GatewayType"));
         metaInfo.setRegionId(getValueAsString(fieldsMap, "RegionId"));
         return metaInfo;
@@ -207,15 +233,33 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public Error getError() {
-        // TODO: (VirajSalaka) Fix error codes
-        // TODO: (VirajSalaka) Error details should be added to the metadata as the response payload cannot be read.
-        return null;
+    public Error getError(FaultCategory faultCategory) {
+
+//        int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
+//        FaultCodeClassifier faultCodeClassifier = new FaultCodeClassifier(messageContext);
+//        FaultSubCategory faultSubCategory = faultCodeClassifier.getFaultSubCategory(faultCategory, errorCode);
+//        Error error = new Error();
+//        error.setErrorCode(errorCode);
+//        error.setErrorMessage(faultSubCategory);
+        Error error = new Error();
+        return error;
     }
+
+//    @Override
+//    public Error getError() {
+//        // TODO: (VirajSalaka) Fix error codes
+//        // TODO: (VirajSalaka) Error details should be added to the metadata as the response payload cannot be read.
+//        return null;
+//    }
 
     @Override
     public String getUserAgentHeader() {
         return logEntry.getRequest().getUserAgent();
+    }
+
+    @Override
+    public String getEndUserIP() {
+        return logEntry.getCommonProperties().getDownstreamRemoteAddress().getSocketAddress().getAddress();
     }
 
     private String getValueAsString(Map<String, Value> fieldsMap, String key) {

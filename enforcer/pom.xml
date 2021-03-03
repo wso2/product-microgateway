@@ -318,7 +318,7 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
-            <version>6.8.228</version>
+            <version>9.0.17</version>
         </dependency>
     </dependencies>
 </project>
