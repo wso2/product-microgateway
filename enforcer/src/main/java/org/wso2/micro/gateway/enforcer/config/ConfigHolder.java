@@ -71,7 +71,7 @@ public class ConfigHolder {
     private KeyStore trustStore = null;
     private KeyStore trustStoreForJWT = null;
     private TrustManagerFactory trustManagerFactory = null;
-    private ArrayList<TokenIssuerDto> configIssuerList;
+    private ArrayList<ExtendedTokenIssuerDto> configIssuerList;
 
     private ConfigHolder() {
         init();
@@ -201,8 +201,6 @@ public class ConfigHolder {
             issuerDto.setConsumerKeyClaim(jwtIssuer.getConsumerKeyClaim());
             issuerDto.setValidateSubscriptions(jwtIssuer.getValidateSubscription());
             config.getIssuersMap().put(jwtIssuer.getIssuer(), issuerDto);
-            // Add jwt transformer class name
-            config.getJwtTransformerMap().put(jwtIssuer.getIssuer(), jwtIssuer.getJwtTransformerImpl());
             configIssuerList.add(issuerDto);
         }
     }
@@ -337,11 +335,11 @@ public class ConfigHolder {
         return envVarConfig;
     }
 
-    public ArrayList<TokenIssuerDto> getConfigIssuerList() {
+    public ArrayList<ExtendedTokenIssuerDto> getConfigIssuerList() {
         return configIssuerList;
     }
 
-    public void setConfigIssuerList(ArrayList<TokenIssuerDto> configIssuerList) {
+    public void setConfigIssuerList(ArrayList<ExtendedTokenIssuerDto> configIssuerList) {
         this.configIssuerList = configIssuerList;
     }
 }
