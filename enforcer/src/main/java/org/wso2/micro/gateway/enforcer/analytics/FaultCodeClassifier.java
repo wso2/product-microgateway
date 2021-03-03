@@ -156,10 +156,108 @@ public class FaultCodeClassifier {
     }
 
     private int getErrorCodeFromFlags() {
-//        ResponseFlags responseFlags = logEntry.getCommonProperties().getResponseFlags();
-//        if (responseFlags == null) {
-//            return -1;
-//        }
-//        if (responseFlags.getDownstreamConnectionTermination() || )
+//        // Indicates local server healthcheck failed.
+//        FailedLocalHealthcheck
+//        // Indicates there was no healthy upstream.
+//        NoHealthyUpstream
+//        // Indicates an there was an upstream request timeout.
+//        UpstreamRequestTimeout
+//        // Indicates local codec level reset was sent on the stream.
+//        LocalReset
+//        // Indicates remote codec level reset was received on the stream.
+//        UpstreamRemoteReset
+//        // Indicates there was a local reset by a connection pool due to an initial connection failure.
+//        UpstreamConnectionFailure
+//        // Indicates the stream was reset due to an upstream connection termination.
+//        UpstreamConnectionTermination
+//        // Indicates the stream was reset because of a resource overflow.
+//        UpstreamOverflow
+//        // Indicates no route was found for the request.
+//        NoRouteFound
+//        // Indicates that the request was delayed before proxying.
+//        DelayInjected
+//        // Indicates that the request was aborted with an injected error code.
+//        FaultInjected
+//        // Indicates that the request was rate-limited locally.
+//        RateLimited
+//        // Indicates if the request was deemed unauthorized and the reason for it.
+//        UnauthorizedDetails
+//        // Indicates that the request was rejected because there was an error in rate limit service.
+//        RateLimitServiceError
+//        // Indicates the stream was reset due to a downstream connection termination.
+//        DownstreamConnectionTermination
+//        // Indicates that the upstream retry limit was exceeded, resulting in a downstream error.
+//        UpstreamRetryLimitExceeded
+//        // Indicates that the stream idle timeout was hit, resulting in a downstream 408.
+//        StreamIdleTimeout
+//        // Indicates that the request was rejected because an envoy request header failed strict
+//        // validation.
+//        InvalidEnvoyRequestHeaders
+//        // Indicates there was an HTTP protocol error on the downstream request.
+//        DownstreamProtocolError
+//        // Indicates there was a max stream duration reached on the upstream request.
+//        UpstreamMaxStreamDurationReached
+//        // Indicates the response was served from a cache filter.
+//        ResponseFromCacheFilter
+//        // Indicates that a filter configuration is not available.
+//        NoFilterConfigFound
+//        // Indicates that request or connection exceeded the downstream connection duration.
+//        DurationTimeout
+
+        ResponseFlags responseFlags = logEntry.getCommonProperties().getResponseFlags();
+        if (responseFlags == null) {
+            return -1;
+        }
+        if (responseFlags.getFailedLocalHealthcheck() || responseFlags.getNoHealthyUpstream()) {
+            return 101503;
+        }
+        if (responseFlags.getUpstreamRequestTimeout()) {
+            return 101504;
+        }
+        // TODO: (VirajSalaka) Confirm ?
+        if (responseFlags.getLocalReset()) {
+            return 101001;
+        }
+        // TODO: (VirajSalaka) Confirm ?
+        if (responseFlags.getUpstreamRemoteReset()) {
+            return 101503;
+        }
+        if (responseFlags.getUpstreamConnectionFailure()) {
+            return 101500;
+        }
+        if (responseFlags.getUpstreamConnectionTermination()) {
+            return 101505;
+        }
+        // TODO: (VirajSalaka) Decide if it is required to move it to somewhere else
+        if (responseFlags.getNoRouteFound()) {
+            return 900906;
+        }
+        if (responseFlags.getDownstreamConnectionTermination()) {
+            return 101001;
+        }
+        if (responseFlags.getStreamIdleTimeout()) {
+            return 101504;
+        }
+        if (responseFlags.getDownstreamProtocolError()) {
+            return 101506;
+        }
+        // https://www.envoyproxy.io/docs/envoy/latest/faq/configuration/timeouts
+        if (responseFlags.getUpstreamMaxStreamDurationReached()) {
+            return 101504;
+        }
+        if (responseFlags.getDurationTimeout()) {
+            return 101000;
+        }
+        return -1;
+
+        // UpstreamOverflow
+        // DelayInjected
+        // FaultInjected
+        // RateLimited
+        // UnauthorizedDetails
+        // RateLimitServiceError
+        // UpstreamRetryLimitExceeded
+        // InvalidEnvoyRequestHeaders
+        // ResponseFromCacheFilter
     }
 }
