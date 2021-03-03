@@ -77,7 +77,7 @@ public class RestAPI implements API {
             if (requestContext.getResponseHeaders() != null) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
-            boolean analyticsEnabled = false;
+            boolean analyticsEnabled = true;
             if (analyticsEnabled) {
                 AnalyticsFilter.getInstance().handleRequest(requestContext);
                 responseObject.setMetaDataMap(requestContext.getMetadataMap());
@@ -85,7 +85,7 @@ public class RestAPI implements API {
         } else {
             // If a enforcer stops with a false, it will be passed directly to the client.
             responseObject.setDirectResponse(true);
-            boolean analyticsEnabled = false;
+            boolean analyticsEnabled = true;
             if (analyticsEnabled) {
                 responseObject.setMetaDataMap(requestContext.getMetadataMap());
             }

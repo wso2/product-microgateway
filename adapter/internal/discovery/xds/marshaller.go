@@ -140,6 +140,7 @@ func MarshalAPIList(apiList *types.APIList) *subscription.APIList {
 			Context:          api.Context,
 			Policy:           api.Policy,
 			ApiType:          api.APIType,
+			Uuid:             api.UUID,
 			IsDefaultVersion: api.IsDefaultVersion,
 		}
 		apis = append(apis, newAPI)

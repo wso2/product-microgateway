@@ -60,7 +60,7 @@ public class AnalyticsFilter implements Filter {
     public boolean handleRequest(RequestContext requestContext) {
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
 
-        requestContext.addMetadataToMap("ApiId", "Not-Implemented");
+        requestContext.addMetadataToMap("ApiId", authContext.getApiUUID());
         requestContext.addMetadataToMap("ApiCreator", authContext.getApiPublisher());
         requestContext.addMetadataToMap("ApiName", authContext.getApiName());
         requestContext.addMetadataToMap("ApiVersion", authContext.getApiVersion());

@@ -31,8 +31,6 @@ import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsConfigurationHolder;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.micro.gateway.enforcer.server.EnforcerThreadPoolExecutor;
 import org.wso2.micro.gateway.enforcer.server.NativeThreadFactory;
 
@@ -83,9 +81,9 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
 //                    event.setOperation(generateOperation(fieldsMap, logEntry));
 //                    event.setTarget(generateTarget(logEntry));
 
-                    AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
-                    GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-                    dataCollector.collectData();
+//                    AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
+//                    GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+//                    dataCollector.collectData();
                 }
 
             }

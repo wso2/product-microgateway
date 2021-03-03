@@ -27,6 +27,7 @@ private static final long serialVersionUID = 0L;
     context_ = "";
     policy_ = "";
     apiType_ = "";
+    uuid_ = "";
   }
 
   @java.lang.Override
@@ -117,6 +118,12 @@ private static final long serialVersionUID = 0L;
               urlMappings_ = subBuilder.buildPartial();
             }
 
+            break;
+          }
+          case 82: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            uuid_ = s;
             break;
           }
           default: {
@@ -454,6 +461,44 @@ private static final long serialVersionUID = 0L;
     return getUrlMappings();
   }
 
+  public static final int UUID_FIELD_NUMBER = 10;
+  private volatile java.lang.Object uuid_;
+  /**
+   * <code>string uuid = 10;</code>
+   * @return The uuid.
+   */
+  @java.lang.Override
+  public java.lang.String getUuid() {
+    java.lang.Object ref = uuid_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      uuid_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string uuid = 10;</code>
+   * @return The bytes for uuid.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getUuidBytes() {
+    java.lang.Object ref = uuid_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      uuid_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -495,6 +540,9 @@ private static final long serialVersionUID = 0L;
     if (urlMappings_ != null) {
       output.writeMessage(9, getUrlMappings());
     }
+    if (!getUuidBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 10, uuid_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -533,6 +581,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(9, getUrlMappings());
     }
+    if (!getUuidBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, uuid_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -569,6 +620,8 @@ private static final long serialVersionUID = 0L;
       if (!getUrlMappings()
           .equals(other.getUrlMappings())) return false;
     }
+    if (!getUuid()
+        .equals(other.getUuid())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -601,6 +654,8 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + URLMAPPINGS_FIELD_NUMBER;
       hash = (53 * hash) + getUrlMappings().hashCode();
     }
+    hash = (37 * hash) + UUID_FIELD_NUMBER;
+    hash = (53 * hash) + getUuid().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -760,6 +815,8 @@ private static final long serialVersionUID = 0L;
         urlMappings_ = null;
         urlMappingsBuilder_ = null;
       }
+      uuid_ = "";
+
       return this;
     }
 
@@ -799,6 +856,7 @@ private static final long serialVersionUID = 0L;
       } else {
         result.urlMappings_ = urlMappingsBuilder_.build();
       }
+      result.uuid_ = uuid_;
       onBuilt();
       return result;
     }
@@ -880,6 +938,10 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasUrlMappings()) {
         mergeUrlMappings(other.getUrlMappings());
+      }
+      if (!other.getUuid().isEmpty()) {
+        uuid_ = other.uuid_;
+        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1590,6 +1652,82 @@ private static final long serialVersionUID = 0L;
         urlMappings_ = null;
       }
       return urlMappingsBuilder_;
+    }
+
+    private java.lang.Object uuid_ = "";
+    /**
+     * <code>string uuid = 10;</code>
+     * @return The uuid.
+     */
+    public java.lang.String getUuid() {
+      java.lang.Object ref = uuid_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        uuid_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string uuid = 10;</code>
+     * @return The bytes for uuid.
+     */
+    public com.google.protobuf.ByteString
+        getUuidBytes() {
+      java.lang.Object ref = uuid_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        uuid_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string uuid = 10;</code>
+     * @param value The uuid to set.
+     * @return This builder for chaining.
+     */
+    public Builder setUuid(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      uuid_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string uuid = 10;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearUuid() {
+      
+      uuid_ = getDefaultInstance().getUuid();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string uuid = 10;</code>
+     * @param value The bytes for uuid to set.
+     * @return This builder for chaining.
+     */
+    public Builder setUuidBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      uuid_ = value;
+      onChanged();
+      return this;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

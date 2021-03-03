@@ -239,6 +239,7 @@ public class KeyValidator {
         infoDTO.setApplicationTier(app.getPolicy());
         infoDTO.setApplicationUUID(app.getUUID());
         infoDTO.setAppAttributes(app.getAttributes());
+        infoDTO.setApiUUID(api.getApiUUID());
         infoDTO.setType(type);
 
         // Advanced Level Throttling Related Properties

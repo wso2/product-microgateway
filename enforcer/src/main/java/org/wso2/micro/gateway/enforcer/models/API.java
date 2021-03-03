@@ -36,6 +36,7 @@ public class API implements CacheableEntity<String> {
     private String policy = null;
     private String apiType = null;
     private boolean isDefaultVersion = false;
+    private String apiUUID = null;
 
     private List<URLMapping> urlMappings = new ArrayList<>();
 
@@ -144,5 +145,12 @@ public class API implements CacheableEntity<String> {
         this.isDefaultVersion = isDefaultVersion;
     }
 
+    public String getApiUUID() {
+        return apiUUID;
+    }
+
+    public void setApiUUID(String apiUUID) {
+        this.apiUUID = apiUUID;
+    }
 }
 

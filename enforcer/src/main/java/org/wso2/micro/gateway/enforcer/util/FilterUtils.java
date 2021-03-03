@@ -191,6 +191,7 @@ public class FilterUtils {
             authContext.setSpikeArrestUnit(apiKeyValidationInfoDTO.getSpikeArrestUnit());
             authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
             authContext.setIsContentAware(apiKeyValidationInfoDTO.isContentAware());
+            authContext.setApiUUID(apiKeyValidationInfoDTO.getApiUUID());
         }
         if (isOauth) {
             authContext.setConsumerKey(jwtValidationInfo.getConsumerKey());

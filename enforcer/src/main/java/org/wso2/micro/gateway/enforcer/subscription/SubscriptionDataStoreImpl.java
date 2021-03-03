@@ -208,6 +208,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             newApi.setApiVersion(api.getVersion());
             newApi.setContext(api.getContext());
             newApi.setApiTier(api.getPolicy());
+            newApi.setApiUUID(api.getUuid());
 
             newApiMap.put(newApi.getCacheKey(), newApi);
         }
