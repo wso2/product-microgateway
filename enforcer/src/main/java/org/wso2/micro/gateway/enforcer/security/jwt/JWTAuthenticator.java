@@ -118,11 +118,9 @@ public class JWTAuthenticator implements Authenticator {
 
         }
 
-        JWTValidationInfo validationInfo =
-                getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
+        JWTValidationInfo validationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
         if (validationInfo != null) {
             if (validationInfo.isValid()) {
-
                 // Validate subscriptions
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
                 EnforcerConfig configuration = ConfigHolder.getInstance().getConfig();
@@ -162,7 +160,7 @@ public class JWTAuthenticator implements Authenticator {
                     try {
                         // Set public certificate
                         jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate());
-                        //Set private key
+                        // Set private key
                         jwtConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey());
                     } catch (MGWException | CertificateException | IOException e) {
                         throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
