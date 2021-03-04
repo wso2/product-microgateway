@@ -95,7 +95,7 @@ func ApplyAPIProject(payload []byte, envrionments []string) error {
 			}
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
-		} else if strings.Contains(file.Name, apiDefinitionFilename) {
+		} else if strings.Contains(file.Name, apiDefinitionFilename) && !strings.Contains(file.Name, openAPIDir){
 			loggers.LoggerAPI.Debugf("fileName : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
