@@ -27,16 +27,27 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.Faul
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
 
-import java.util.HashMap;
-import java.util.Map;
-
+/**
+ * FaultCodeClassifier classifies the fault and returns error code.
+ */
 public class FaultCodeClassifier {
     private static final Logger log = LogManager.getLogger(FaultCodeClassifier.class);
     private final HTTPAccessLogEntry logEntry;
-    private Map<String, Integer> flagErrorCodeMap = new HashMap<>(10);
+    private int errorCode;
+
+    public static final int NHTTP_CONNECTION_TIMEOUT = 101504;
+    public static final int NHTTP_CONNECT_TIMEOUT = 101508;
+    // TODO: (VirajSalaka) Not used
+    public static final int ENDPOINT_SUSPENDED_ERROR_CODE = 303001;
+
 
     public FaultCodeClassifier(HTTPAccessLogEntry logEntry) {
         this.logEntry = logEntry;
+        int errorCodeFromEntry = getErrorCodeFromMetadata();
+        if (errorCodeFromEntry == -1) {
+            errorCodeFromEntry = getErrorCodeFromFlags();
+        }
+        errorCode = errorCodeFromEntry;
     }
 
     public FaultSubCategory getFaultSubCategory(FaultCategory faultCategory) {
@@ -54,8 +65,7 @@ public class FaultCodeClassifier {
     }
 
     protected FaultSubCategory getAuthFaultSubCategory() {
-        int errorCode = getErrorCode();
-        switch (errorCode) {
+        switch (getErrorCodeFromMetadata()) {
             case APISecurityConstants.API_AUTH_GENERAL_ERROR:
             case APISecurityConstants.API_AUTH_INVALID_CREDENTIALS:
             case APISecurityConstants.API_AUTH_MISSING_CREDENTIALS:
@@ -75,13 +85,12 @@ public class FaultCodeClassifier {
     }
 
     protected FaultSubCategory getTargetFaultSubCategory() {
-        int errorCode = getErrorCode();
-        switch (errorCode) {
-//            case SynapseConstants.NHTTP_CONNECTION_TIMEOUT:
-//            case SynapseConstants.NHTTP_CONNECT_TIMEOUT:
-//                return FaultSubCategories.TargetConnectivity.CONNECTION_TIMEOUT;
-//            case Constants.ENDPOINT_SUSPENDED_ERROR_CODE:
-//                return FaultSubCategories.TargetConnectivity.CONNECTION_SUSPENDED;
+        switch (getErrorCodeFromMetadata()) {
+            case NHTTP_CONNECTION_TIMEOUT:
+            case NHTTP_CONNECT_TIMEOUT:
+                return FaultSubCategories.TargetConnectivity.CONNECTION_TIMEOUT;
+            case ENDPOINT_SUSPENDED_ERROR_CODE:
+                return FaultSubCategories.TargetConnectivity.CONNECTION_SUSPENDED;
             default:
                 return FaultSubCategories.TargetConnectivity.OTHER;
         }
@@ -89,8 +98,7 @@ public class FaultCodeClassifier {
 
     protected FaultSubCategory getThrottledFaultSubCategory() {
         // TODO: (VirajSalaka) Complete function body.
-        int errorCode = getErrorCode();
-        switch (errorCode) {
+        switch (getErrorCodeFromMetadata()) {
 //            case APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE:
 //                return FaultSubCategories.Throttling.API_LEVEL_LIMIT_EXCEEDED;
 //            case APIThrottleConstants.HARD_LIMIT_EXCEEDED_ERROR_CODE:
@@ -118,8 +126,10 @@ public class FaultCodeClassifier {
 
     protected FaultSubCategory getOtherFaultSubCategory() {
         if (isMethodNotAllowed()) {
+            errorCode = 404;
             return FaultSubCategories.Other.METHOD_NOT_ALLOWED;
         } else if (isResourceNotFound()) {
+            errorCode = 405;
             return FaultSubCategories.Other.RESOURCE_NOT_FOUND;
         } else {
             return FaultSubCategories.Other.UNCLASSIFIED;
@@ -127,24 +137,19 @@ public class FaultCodeClassifier {
     }
 
     public boolean isResourceNotFound() {
-//        if (messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)) {
-//            int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
-//            return messageContext.getPropertyKeySet().contains(RESTConstants.PROCESSED_API)
-//                    && errorCode == Constants.RESOURCE_NOT_FOUND_ERROR_CODE;
-//        }
-        return false;
+        ResponseFlags responseFlags = logEntry.getCommonProperties().getResponseFlags();
+        if (responseFlags == null) {
+            return false;
+        }
+        return responseFlags.getNoRouteFound();
     }
 
     public boolean isMethodNotAllowed() {
-//        if (messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)) {
-//            int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
-//            return messageContext.getPropertyKeySet().contains(RESTConstants.PROCESSED_API)
-//                    && errorCode == Constants.METHOD_NOT_ALLOWED_ERROR_CODE;
-//        }
+        // TODO: (VirajSalaka) Implement method not allowed
         return false;
     }
 
-    private int getErrorCode() {
+    private int getErrorCodeFromMetadata() {
         int errorCode = -1;
         // TODO: (VirajSalaka) Handle possible null pointer exception
         if (logEntry.getCommonProperties().getMetadata().getFilterMetadataMap().containsKey("ErrorCode")) {
@@ -259,5 +264,9 @@ public class FaultCodeClassifier {
         // UpstreamRetryLimitExceeded
         // InvalidEnvoyRequestHeaders
         // ResponseFromCacheFilter
+    }
+
+    public int getErrorCode() {
+        return errorCode;
     }
 }

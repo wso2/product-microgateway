@@ -49,24 +49,6 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         this.logEntry = logEntry;
     }
 
-//    @Override
-//    public boolean isSuccessRequest() {
-//        // TODO: (VirajSalaka) Decide if all 2xx and 100 response codes to be considered.
-//        // 100 Continue scenario may require a separate test
-//        if (logEntry.getResponse().getResponseCode().getValue() == 200
-//                && logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
-//            return true;
-//        }
-//        return false;
-//    }
-
-//    @Override
-//    public boolean isFaultRequest() {
-//        // TODO: (VirajSalaka) Correct?
-//        return logEntry.getResponse().getResponseCode().getValue() != 200
-//                && !logEntry.getResponse().getResponseCodeDetails().equals("via_upstream");
-//    }
-
     @Override
     public EventCategory getEventCategory() {
         if (logEntry.getResponse().getResponseCode().getValue() == 200
@@ -119,20 +101,9 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     public boolean isTargetFaultRequest() {
         // TODO: (VirajSalaka) Response flags based check
-        return logEntry.getResponse().getResponseCode().getValue() != 200;
+        return logEntry.getResponse().getResponseCode().getValue() != 200
+                && !logEntry.getResponse().getResponseCodeDetails().equals("via_upstream");
     }
-
-//    @Override
-//    public boolean isResourceNotFound() {
-//        return logEntry.getResponse().getResponseCode().getValue() == 404
-//                && logEntry.getResponse().getResponseCodeDetails().equals("route_not_found");
-//    }
-
-//    @Override
-//    public boolean isMethodNotAllowed() {
-//        // TODO: (VirajSalaka) Method not allowed should be filtered from enforcer rather than router ?
-//        return false;
-//    }
 
     @Override
     public API getApi() {
@@ -235,22 +206,14 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public Error getError(FaultCategory faultCategory) {
 
-//        int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
-//        FaultCodeClassifier faultCodeClassifier = new FaultCodeClassifier(messageContext);
-//        FaultSubCategory faultSubCategory = faultCodeClassifier.getFaultSubCategory(faultCategory, errorCode);
-//        Error error = new Error();
-//        error.setErrorCode(errorCode);
-//        error.setErrorMessage(faultSubCategory);
+        FaultCodeClassifier faultCodeClassifier = new FaultCodeClassifier(logEntry);
+        FaultSubCategory faultSubCategory = faultCodeClassifier.getFaultSubCategory(faultCategory);
         Error error = new Error();
+        // TODO: (VirajSalaka) Check against -1 values.
+        error.setErrorCode(faultCodeClassifier.getErrorCode());
+        error.setErrorMessage(faultSubCategory);
         return error;
     }
-
-//    @Override
-//    public Error getError() {
-//        // TODO: (VirajSalaka) Fix error codes
-//        // TODO: (VirajSalaka) Error details should be added to the metadata as the response payload cannot be read.
-//        return null;
-//    }
 
     @Override
     public String getUserAgentHeader() {
