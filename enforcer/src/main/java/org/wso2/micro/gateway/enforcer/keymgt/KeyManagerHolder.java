@@ -24,13 +24,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.gateway.discovery.keymgt.KeyManagerConfig;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
-import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
-import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.discovery.KeyManagerDiscoveryClient;
-import org.wso2.micro.gateway.enforcer.dto.ClaimMappingDto;
+import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -53,7 +54,7 @@ public class KeyManagerHolder {
 
     private static final String X509 = "X.509";
     private static KeyManagerHolder instance;
-    private Map<String, TokenIssuerDto> tokenIssuerMap = ConfigHolder.getInstance().getConfig().getIssuersMap();
+    private Map<String, ExtendedTokenIssuerDto> tokenIssuerMap = ConfigHolder.getInstance().getConfig().getIssuersMap();
 
     private KeyManagerHolder() {}
 
@@ -70,7 +71,7 @@ public class KeyManagerHolder {
     }
 
     public void populateKMIssuerConfiguration(List<KeyManagerConfig> kmIssuers) {
-        Map<String, TokenIssuerDto> kmIssuerMap = new HashMap<>();
+        Map<String, ExtendedTokenIssuerDto> kmIssuerMap = new HashMap<>();
         for (KeyManagerConfig keyManagerConfig : kmIssuers) {
             JSONObject configObj = new JSONObject(keyManagerConfig.getConfiguration());
             Map<String, Object> configuration = new HashMap<>();
@@ -91,12 +92,12 @@ public class KeyManagerHolder {
         tokenIssuerMap.putAll(kmIssuerMap);
     }
 
-    public void addKMTokenIssuers(Map<String, Object> configuration, Map<String, TokenIssuerDto> kmIssuerMap) {
+    public void addKMTokenIssuers(Map<String, Object> configuration, Map<String, ExtendedTokenIssuerDto> kmIssuerMap) {
         Object selfValidateJWT = configuration.get(APIConstants.KeyManager.SELF_VALIDATE_JWT);
         if (selfValidateJWT != null && (Boolean) selfValidateJWT) {
             Object issuer = configuration.get(APIConstants.KeyManager.ISSUER);
             if (issuer != null) {
-                TokenIssuerDto tokenIssuerDto = new TokenIssuerDto((String) issuer);
+                ExtendedTokenIssuerDto tokenIssuerDto = new ExtendedTokenIssuerDto((String) issuer);
                 Object claimMappings = configuration.get(APIConstants.KeyManager.CLAIM_MAPPING);
                 if (claimMappings instanceof JSONArray) {
                     Gson gson = new Gson();
@@ -138,7 +139,7 @@ public class KeyManagerHolder {
                             InputStream is = new ByteArrayInputStream(certBytes);
                             Certificate certificate = CertificateFactory.getInstance(X509)
                                     .generateCertificate(is);
-                            tokenIssuerDto.setCertificate(certificate);
+                            tokenIssuerDto.setCertificate(TLSUtils.convertCertificate(certificate));
                         } catch (CertificateException e) {
                             logger.error("Error reading the certificate for issuer " + issuer + ". Error cause: " +
                                     e.getMessage());
@@ -150,9 +151,9 @@ public class KeyManagerHolder {
         }
     }
 
-    public void updateIssuerMapWithConfigIssuers(Map<String, TokenIssuerDto> kmIssuerMap) {
-        ArrayList<TokenIssuerDto> configIssuerList = ConfigHolder.getInstance().getConfigIssuerList();
-        for (TokenIssuerDto configTokenIssuer : configIssuerList) {
+    public void updateIssuerMapWithConfigIssuers(Map<String, ExtendedTokenIssuerDto> kmIssuerMap) {
+        ArrayList<ExtendedTokenIssuerDto> configIssuerList = ConfigHolder.getInstance().getConfigIssuerList();
+        for (ExtendedTokenIssuerDto configTokenIssuer : configIssuerList) {
             if (kmIssuerMap.containsKey(configTokenIssuer.getIssuer())) {
                 logger.warn("token issuer " + configTokenIssuer.getIssuer() + " already exists in config map. " +
                         "Existing configurations will be replaced by KeyManager configuration");

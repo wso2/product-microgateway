@@ -24,7 +24,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2am.micro.gw.mockbackend.ResponseConstants;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.common.model.API;
 import org.wso2am.micro.gw.tests.common.model.ApplicationDTO;
@@ -35,24 +34,19 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Jwt generator test cases.
- */
-public class JwtGeneratorTestCase extends BaseTestCase {
-    private static String JWT_GENERATOR_ISSUER = "wso2.org/products/am";
-
+public class CustomJwtTransformerTestCase extends BaseTestCase {
     protected String jwtTokenProd;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
         String confPath = TestConstant.BASE_RESOURCE_DIR
                 + File.separator + "jwtGenerator" + File.separator + "config.toml";
-        super.startMGW(confPath);
+        super.startMGW(confPath, false, true);
 
         //deploy the api
         //api yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("/apis/openApis/api.yaml", 
-            "/apis/openApis/swagger.yaml");
+        String apiZipfile = ApiProjectGenerator.createApictlProjZip("/apis/openApis/api.yaml",
+                "/apis/openApis/swagger.yaml");
 
         ApiDeployment.deployAPI(apiZipfile);
 
@@ -71,6 +65,8 @@ public class JwtGeneratorTestCase extends BaseTestCase {
         application.setId((int) (Math.random() * 1000));
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600,null);
+        System.out.println("@@@@@@@@@@@@");
+        System.out.println(jwtTokenProd);
     }
 
     @AfterClass(description = "stop the setup")
@@ -78,20 +74,8 @@ public class JwtGeneratorTestCase extends BaseTestCase {
         super.stopMGW();
     }
 
-    @Test(description = "Test the availability of JWT Generator header")
-    public void testResponseJWTGenerationHeader() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        //test endpoint with token
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpClientRequest
-                .doGet(getServiceURLHttps("v2/jwtheader"), headers);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getData(), ResponseConstants.VALID_JWT_RESPONSE);
-        Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
-    }
-
-    @Test(description = "Test JWT Generator token cache and the properties")
-    public void testResponseJWTGenerationToken() throws Exception {
+    @Test(description = "Test custom jwt claim mapping")
+    public void testCustomJwtClaimMapping() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
@@ -102,12 +86,11 @@ public class JwtGeneratorTestCase extends BaseTestCase {
 
         JSONObject responseJSON = new JSONObject(response.getData());
         String tokenFull = responseJSON.get("token").toString();
+        System.out.println(tokenFull);
         String strTokenBody = tokenFull.split("\\.")[1];
         String decodedTokenBody = new String(Base64.getUrlDecoder().decode(strTokenBody));
         JSONObject tokenBody = new JSONObject(decodedTokenBody);
-        Assert.assertEquals(tokenBody.get("iss"), JWT_GENERATOR_ISSUER,
-                "Issuer is  not set correctly in JWT generator");
-        Assert.assertEquals(tokenBody.get("keytype"), TestConstant.KEY_TYPE_PRODUCTION,
-                "Key type is not set correctly in JWT generator");
+        Assert.assertEquals(tokenBody.get("CustomClaim: CUSTOM-CLAIM"), "admin",
+                "The custom claim has not correctly mapped");
     }
 }

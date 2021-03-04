@@ -21,10 +21,13 @@ package org.wso2.micro.gateway.enforcer.config;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.gateway.discovery.config.enforcer.AmCredentials;
 import org.wso2.gateway.discovery.config.enforcer.AuthService;
 import org.wso2.gateway.discovery.config.enforcer.Cache;
+import org.wso2.gateway.discovery.config.enforcer.ClaimMapping;
 import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.config.enforcer.EventHub;
 import org.wso2.gateway.discovery.config.enforcer.Issuer;
@@ -33,11 +36,11 @@ import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
-import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
-import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
+import org.wso2.micro.gateway.enforcer.security.jwt.JWTUtil;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
 import java.io.IOException;
@@ -68,7 +71,7 @@ public class ConfigHolder {
     private KeyStore trustStore = null;
     private KeyStore trustStoreForJWT = null;
     private TrustManagerFactory trustManagerFactory = null;
-    private ArrayList<TokenIssuerDto> configIssuerList;
+    private ArrayList<ExtendedTokenIssuerDto> configIssuerList;
 
     private ConfigHolder() {
         init();
@@ -166,21 +169,31 @@ public class ConfigHolder {
             logger.error("Error while initiating the truststore for JWT related public certificates", e);
         }
         for (Issuer jwtIssuer : cdsIssuers) {
-            TokenIssuerDto issuerDto = new TokenIssuerDto(jwtIssuer.getIssuer());
+            ExtendedTokenIssuerDto issuerDto = new ExtendedTokenIssuerDto(jwtIssuer.getIssuer());
 
             JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
             jwksConfigurationDTO.setEnabled(StringUtils.isNotEmpty(jwtIssuer.getJwksURL()));
             jwksConfigurationDTO.setUrl(jwtIssuer.getJwksURL());
             issuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
-
+            List<ClaimMapping> claimMaps = jwtIssuer.getClaimMappingList();
+            for (ClaimMapping claimMap : claimMaps) {
+                ClaimMappingDto map = new ClaimMappingDto(claimMap.getRemoteClaim(), claimMap.getLocalClaim());
+                issuerDto.addClaimMapping(map);
+            }
+            // Load jwt transformers map.
+            config.setJwtTransformerMap(JWTUtil.loadJWTTransformers());
             String certificateAlias = jwtIssuer.getCertificateAlias();
             if (certificateAlias != null) {
                 try {
                     Certificate cert = TLSUtils.getCertificateFromFile(jwtIssuer.getCertificateFilePath());
                     getTrustStoreForJWT().setCertificateEntry(certificateAlias, cert);
-                    issuerDto.setCertificate(cert);
+                    TLSUtils.convertCertificate(cert);
+                    // Convert the certificate to a javax.security.cert.Certificate and set to issuerDto.
+                    issuerDto.setCertificate(TLSUtils.convertCertificate(cert));
                 } catch (KeyStoreException | CertificateException | IOException e) {
                     logger.error("Error while adding certificates to the JWT related Truststore", e);
+                    // Continue to avoid making a invalid issuer.
+                    continue;
                 }
             }
 
@@ -322,11 +335,11 @@ public class ConfigHolder {
         return envVarConfig;
     }
 
-    public ArrayList<TokenIssuerDto> getConfigIssuerList() {
+    public ArrayList<ExtendedTokenIssuerDto> getConfigIssuerList() {
         return configIssuerList;
     }
 
-    public void setConfigIssuerList(ArrayList<TokenIssuerDto> configIssuerList) {
+    public void setConfigIssuerList(ArrayList<ExtendedTokenIssuerDto> configIssuerList) {
         this.configIssuerList = configIssuerList;
     }
 }
