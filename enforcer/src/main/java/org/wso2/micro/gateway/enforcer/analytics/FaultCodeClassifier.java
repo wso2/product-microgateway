@@ -153,9 +153,9 @@ public class FaultCodeClassifier {
         int errorCode = -1;
         // TODO: (VirajSalaka) Handle possible null pointer exception
         if (logEntry.getCommonProperties().getMetadata().getFilterMetadataMap().containsKey("ErrorCode")) {
-            errorCode = (int) logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
+            errorCode = Integer.parseInt(logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
                     .get("envoy.filters.http.ext_authz").getFieldsMap().get("ErrorCode")
-                    .getNumberValue();
+                    .getStringValue());
         }
         return errorCode;
     }

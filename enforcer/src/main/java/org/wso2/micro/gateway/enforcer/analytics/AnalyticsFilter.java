@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 
 /**
@@ -83,6 +84,10 @@ public class AnalyticsFilter implements Filter {
         //TODO: (VirajSalaka) populated API Resource template is incorrect.
         requestContext.addMetadataToMap("ApiResourceTemplate",
                 requestContext.getMathedAPI().getAPIConfig().getResources().get(0).getPath());
+        if (requestContext.getProperties().containsKey(APIConstants.MessageFormat.STATUS_CODE)) {
+            requestContext.addMetadataToMap("ErrorCode",
+                    requestContext.getProperties().get(APIConstants.MessageFormat.STATUS_CODE).toString());
+        }
         return true;
     }
 }
