@@ -39,14 +39,7 @@ public interface API {
 
     default boolean executeFilterChain(RequestContext requestContext) {
         boolean proceed;
-        List<Filter> filterList = getFilters();
-        String lifeCycleState = requestContext.getMathedAPI().getAPIConfig().getApiLifeCycleState();
-        if (lifeCycleState.equals(APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS)) {
-            CorsFilter corsFilter = new CorsFilter();
-            filterList.clear();
-            filterList.add(corsFilter);
-        }
-        for (Filter filter : filterList) {
+        for (Filter filter : getFilters()) {
             proceed = filter.handleRequest(requestContext);
             if (!proceed) {
                 return false;

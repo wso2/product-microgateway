@@ -41,6 +41,7 @@ public class RestAPI implements API {
     private static final Logger logger = LogManager.getLogger(RestAPI.class);
 
     private APIConfig apiConfig;
+    private String apiLifeCycleState;
     private List<Filter> filters = new ArrayList<>();
 
     @Override
@@ -48,13 +49,11 @@ public class RestAPI implements API {
         return filters;
     }
 
-
     @Override
     public String init(Api api) {
         String basePath = api.getBasePath();
         String name = api.getTitle();
         String version = api.getVersion();
-        String apiLifeCycleState = api.getApiLifeCycleStatus();
         List<ResourceConfig> resources = new ArrayList<>();
         for (Resource res: api.getResourcesList()) {
             // TODO: (Praminda) handle all fields of resource
@@ -65,6 +64,7 @@ public class RestAPI implements API {
         }
         this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).
                 apiLifeCycleState(apiLifeCycleState).build();
+        this.apiLifeCycleState = api.getApiLifeCycleStatus();
         initFilters();
         return basePath;
     }
@@ -123,10 +123,12 @@ public class RestAPI implements API {
     }
 
     private void initFilters() {
-        AuthFilter authFilter = new AuthFilter();
-        authFilter.init(apiConfig);
         CorsFilter corsFilter = new CorsFilter();
         this.filters.add(corsFilter);
-        this.filters.add(authFilter);
+        if (!APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(apiLifeCycleState)) {
+            AuthFilter authFilter = new AuthFilter();
+            authFilter.init(apiConfig);
+            this.filters.add(authFilter);
+        }
     }
 }
