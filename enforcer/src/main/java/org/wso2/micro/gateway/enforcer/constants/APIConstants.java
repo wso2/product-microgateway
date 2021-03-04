@@ -32,6 +32,7 @@ public class APIConstants {
     public static final String GW_RES_METHOD_PARAM = "method";
     public static final String GW_VERSION_PARAM = "version";
     public static final String GW_API_NAME_PARAM = "name";
+    public static final String PROTOTYPED_LIFE_CYCLE_STATUS = "PROTOTYPED";
 
 
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";

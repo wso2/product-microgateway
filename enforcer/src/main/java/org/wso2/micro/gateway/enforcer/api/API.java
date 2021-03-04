@@ -20,6 +20,8 @@ package org.wso2.micro.gateway.enforcer.api;
 import org.wso2.gateway.discovery.api.Api;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.cors.CorsFilter;
 
 import java.util.List;
 
@@ -27,7 +29,6 @@ import java.util.List;
  * Interface to hold different API types. This can REST, gRPC, graphql and etc.
  */
 public interface API {
-
     List<Filter> getFilters();
 
     String init(Api api);
@@ -38,7 +39,14 @@ public interface API {
 
     default boolean executeFilterChain(RequestContext requestContext) {
         boolean proceed;
-        for (Filter filter : getFilters()) {
+        List<Filter> filterList = getFilters();
+        String lifeCycleState = requestContext.getMathedAPI().getAPIConfig().getApiLifeCycleState();
+        if (lifeCycleState.equals(APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS)) {
+            CorsFilter corsFilter = new CorsFilter();
+            filterList.clear();
+            filterList.add(corsFilter);
+        }
+        for (Filter filter : filterList) {
             proceed = filter.handleRequest(requestContext);
             if (!proceed) {
                 return false;

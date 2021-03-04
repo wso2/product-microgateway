@@ -29,6 +29,7 @@ public class APIConfig {
     private String name;
     private String version;
     private String basePath;
+    private String apiLifeCycleState;
 
     private List<String> securitySchemas = new ArrayList<>();
     private String tier = APIConstants.UNLIMITED_TIER;
@@ -42,6 +43,7 @@ public class APIConfig {
         private String name;
         private String version;
         private String basePath;
+        private String apiLifeCycleState;
 
         private List<String> securitySchemas = new ArrayList<>();
         private String tier = APIConstants.UNLIMITED_TIER;
@@ -61,6 +63,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder apiLifeCycleState(String apiLifeCycleState) {
+            this.apiLifeCycleState = apiLifeCycleState;
+            return this;
+        }
+
         public Builder resources(List<ResourceConfig> resources) {
             this.resources = resources;
             return this;
@@ -71,6 +78,7 @@ public class APIConfig {
             apiConfig.name = this.name;
             apiConfig.basePath = this.basePath;
             apiConfig.version = this.version;
+            apiConfig.apiLifeCycleState = this.apiLifeCycleState;
             apiConfig.resources = this.resources;
             return apiConfig;
         }
@@ -89,6 +97,10 @@ public class APIConfig {
 
     public String getBasePath() {
         return basePath;
+    }
+
+    public String getApiLifeCycleState() {
+        return apiLifeCycleState;
     }
 
     public List<String> getSecuritySchemas() {

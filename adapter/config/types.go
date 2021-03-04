@@ -223,11 +223,14 @@ type controlPlane struct {
 
 // APIContent contains everything necessary to create an API
 type APIContent struct {
-	VHost         string
-	Name          string
-	Version       string
-	APIType       string
-	APIDefinition []byte
-	UpstreamCerts []byte
-	Environments  []string
+	VHost              string
+	Name               string
+	Version            string
+	APIType            string
+	LifeCycleStatus    string
+	APIDefinition      []byte
+	UpstreamCerts      []byte
+	Environments       []string
+	ProductionEndpoint string
+	SandboxEndpoint    string
 }
