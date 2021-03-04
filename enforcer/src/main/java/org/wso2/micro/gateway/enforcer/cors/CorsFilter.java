@@ -46,6 +46,9 @@ public class CorsFilter implements Filter {
         if (requestContext.getRequestMethod().contains(HttpConstants.OPTIONS)) {
             StringBuilder allowedMethodsBuilder = new StringBuilder(HttpConstants.OPTIONS);
             for (ResourceConfig resourceConfig : requestContext.getMathedAPI().getAPIConfig().getResources()) {
+                if (!resourceConfig.getPath().equals(requestContext.getMatchedResourcePath().getPath())) {
+                    continue;
+                }
                 if (resourceConfig.getMethod() == ResourceConfig.HttpMethods.OPTIONS) {
                     logger.debug("OPTIONS method is listed under the resource. Hence OPTIONS request will" +
                             "be responded from the upstream");

@@ -51,6 +51,7 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public EventCategory getEventCategory() {
+        // TODO: (VirajSalaka) Decide if options call should be neglected.
         if (logEntry.getResponse().getResponseCode().getValue() == 200
                 && logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
             return EventCategory.SUCCESS;

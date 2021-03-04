@@ -82,8 +82,8 @@ public class AnalyticsFilter implements Filter {
 
         // As in the matched API, only the resources under the matched resource template are selected.
         //TODO: (VirajSalaka) populated API Resource template is incorrect.
-        requestContext.addMetadataToMap("ApiResourceTemplate",
-                requestContext.getMathedAPI().getAPIConfig().getResources().get(0).getPath());
+        requestContext.addMetadataToMap("ApiResourceTemplate", requestContext.getMatchedResourcePath().getPath());
+
         if (requestContext.getProperties().containsKey(APIConstants.MessageFormat.STATUS_CODE)) {
             requestContext.addMetadataToMap("ErrorCode",
                     requestContext.getProperties().get(APIConstants.MessageFormat.STATUS_CODE).toString());
