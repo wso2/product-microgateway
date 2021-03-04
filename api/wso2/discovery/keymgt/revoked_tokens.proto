@@ -1,0 +1,17 @@
+
+syntax = "proto3";
+
+package wso2.discovery.keymgt;
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/keymgt;keymgt";
+option java_package = "org.wso2.gateway.discovery.keymgt";
+option java_outer_classname = "RevokedTokensProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: Config]
+
+// Enforcer config model
+message RevokedToken {
+    string jti = 1;
+    int64 expirytime = 2;
+}

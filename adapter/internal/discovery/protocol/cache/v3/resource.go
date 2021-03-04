@@ -16,6 +16,7 @@ package cache
 
 import (
 	"fmt"
+
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/keymgt"
 
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
@@ -49,6 +50,8 @@ func GetResponseType(typeURL string) types.ResponseType {
 		return types.ApplicationKeyMappingList
 	case resource.KeyManagerType:
 		return types.KeyManagerConfig
+	case resource.RevokedTokensType:
+		return types.RevokedTokens
 	}
 	return types.UnknownType
 }
@@ -64,6 +67,8 @@ func GetResourceName(res envoy_types.Resource) string {
 		return "Subscription"
 	case *keymgt.KeyManagerConfig:
 		return fmt.Sprint(v.Name)
+	case *keymgt.RevokedToken:
+		return v.Jti
 	default:
 		return ""
 	}

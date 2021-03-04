@@ -27,6 +27,7 @@ import org.wso2.micro.gateway.enforcer.discovery.ApiListDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.discovery.ApplicationDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.discovery.ApplicationKeyMappingDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.discovery.ApplicationPolicyDiscoveryClient;
+import org.wso2.micro.gateway.enforcer.discovery.RevokedTokenDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.discovery.SubscriptionDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.discovery.SubscriptionPolicyDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.models.API;
@@ -150,6 +151,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         ApplicationPolicyDiscoveryClient.getInstance().watchApplicationPolicies();
         SubscriptionPolicyDiscoveryClient.getInstance().watchSubscriptionPolicies();
         ApplicationKeyMappingDiscoveryClient.getInstance().watchApplicationKeyMappings();
+        RevokedTokenDiscoveryClient.getInstance().watchRevokedTokens();
     }
 
     public void addSubscriptions(List<org.wso2.gateway.discovery.subscription.Subscription> subscriptionList) {
