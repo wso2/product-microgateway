@@ -42,6 +42,7 @@ import org.wso2.micro.gateway.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
+import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTUtil;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
@@ -127,11 +128,11 @@ public class ConfigHolder {
         // Read token caching configs
         populateCacheConfigs(config.getCache());
 
-        // resolve string variables provided as environment variables.
-        resolveConfigsWithEnvs(this.config);
-
         // Read jwt issuer configurations
         populateJWTIssuerConfigurations(config.getJwtIssuer());
+
+        // resolve string variables provided as environment variables.
+        resolveConfigsWithEnvs(this.config);
     }
 
     private void populateAuthService(AuthService cdsAuth) {
@@ -237,8 +238,12 @@ public class ConfigHolder {
         jwtConfigurationDto.setSignatureAlgorithm(jwtGenerator.getSigningAlgorithm());
         jwtConfigurationDto.setEnableUserClaims(jwtGenerator.getEnableUserClaims());
         jwtConfigurationDto.setGatewayJWTGeneratorImpl(jwtGenerator.getGatewayGeneratorImpl());
-        config.setPublicCertificatePath(jwtGenerator.getPublicCertificatePath());
-        config.setPrivateKeyPath(jwtGenerator.getPrivateKeyPath());
+        try {
+            jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtGenerator.getPublicCertificatePath()));
+            jwtConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey(jwtGenerator.getPrivateKeyPath()));
+        } catch (MGWException | CertificateException | IOException e) {
+            logger.error("Error in loading public cert or private key", e);
+        }
         config.setJwtConfigurationDto(jwtConfigurationDto);
     }
 
@@ -313,8 +318,12 @@ public class ConfigHolder {
         jwtIssuerConfigurationDto.setIssuer(jwtIssuer.getIssuer());
         jwtIssuerConfigurationDto.setConsumerDialectUri(jwtIssuer.getClaimDialect());
         jwtIssuerConfigurationDto.setSignatureAlgorithm(jwtIssuer.getSigningAlgorithm());
-        config.setPublicCertificatePath(jwtIssuer.getPublicCertificatePath());
-        config.setPrivateKeyPath(jwtIssuer.getPrivateKeyPath());
+        try {
+            jwtIssuerConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey(jwtIssuer.getPrivateKeyPath()));
+            jwtIssuerConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtIssuer.getPublicCertificatePath()));
+        } catch (MGWException | CertificateException | IOException e) {
+            logger.error("Error in loading public cert or private key", e);
+        }
         config.setJwtIssuerConfigurationDto(jwtIssuerConfigurationDto);
     }
 

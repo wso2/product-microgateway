@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.micro.gateway.enforcer.security.TokenValidationContext;
-import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -169,9 +168,6 @@ public abstract class AbstractJWTIssuer implements TokenIssuer {
     public byte[] signJWT(String assertion, String endUserName) throws JWTGeneratorException {
 
         try {
-            // Set private key
-            jwtIssuerConfigurationDto
-                    .setPrivateKey(org.wso2.micro.gateway.enforcer.security.jwt.JWTUtil.getPrivateKey());
             PrivateKey privateKey = jwtIssuerConfigurationDto.getPrivateKey();
             return JWTUtil.signJwt(assertion, privateKey, signatureAlgorithm);
         } catch (Exception e) {
@@ -193,8 +189,6 @@ public abstract class AbstractJWTIssuer implements TokenIssuer {
     protected String addCertToHeader() throws JWTGeneratorException {
 
         try {
-            // Set public certificate
-            jwtIssuerConfigurationDto.setPublicCert(TLSUtils.getCertificate());
             Certificate publicCert = jwtIssuerConfigurationDto.getPublicCert();
             return JWTUtil.generateHeader(publicCert, signatureAlgorithm);
         } catch (Exception e) {
