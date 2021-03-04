@@ -152,10 +152,11 @@ public class MgwServerInstance implements MgwServer {
                 "wso2am-micro-gw-" + properties.getProperty("version"), targetDir +
                 File.separator + "server-tmp");
 
+        String jarLocation = System.getProperty("jwt_transformer_jar");
         if (customJwtTransformerEnabled) {
-            Utils.copyDirectory("/home/shalki/WSO2/Envoy_mgw/product-microgateway/test/test-integration/src/test/resources/jwtTransformer/dropins", targetDir +
+            Utils.copyFile(jarLocation, targetDir +
                     File.separator + "server-tmp" + File.separator + "resources" + File.separator + "enforcer" +
-                    File.separator + "dropins");
+                    File.separator + "dropins" + File.separator + "jwt-transformer.jar");
         }
     }
 

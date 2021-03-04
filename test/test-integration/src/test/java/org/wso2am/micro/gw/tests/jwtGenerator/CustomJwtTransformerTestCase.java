@@ -65,6 +65,8 @@ public class CustomJwtTransformerTestCase extends BaseTestCase {
         application.setId((int) (Math.random() * 1000));
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600,null);
+        System.out.println("@@@@@@@@@@@@");
+        System.out.println(jwtTokenProd);
     }
 
     @AfterClass(description = "stop the setup")
@@ -73,7 +75,7 @@ public class CustomJwtTransformerTestCase extends BaseTestCase {
     }
 
     @Test(description = "Test custom jwt claim mapping")
-    public void testDefaultJwtClaimMapping() throws Exception {
+    public void testCustomJwtClaimMapping() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
@@ -84,6 +86,7 @@ public class CustomJwtTransformerTestCase extends BaseTestCase {
 
         JSONObject responseJSON = new JSONObject(response.getData());
         String tokenFull = responseJSON.get("token").toString();
+        System.out.println(tokenFull);
         String strTokenBody = tokenFull.split("\\.")[1];
         String decodedTokenBody = new String(Base64.getUrlDecoder().decode(strTokenBody));
         JSONObject tokenBody = new JSONObject(decodedTokenBody);
