@@ -38,16 +38,17 @@ import (
 
 // API Controller related constants
 const (
-	openAPIDir            string = "Definitions"
-	openAPIFilename       string = "swagger."
-	apiDefinitionFilename string = "api.yaml"
-	endpointCertDir       string = "Endpoint-certificates"
-	crtExtension          string = ".crt"
-	pemExtension          string = ".pem"
-	defaultEnv            string = "Production and Sandbox" //Todo: (SuKSW) update to `default` once APIM side changes.
-	defaultVHost          string = "default"
-	apiTypeFilterKey      string = "type"
-	apiTypeYamlKey        string = "type"
+	openAPIDir       string = "Definitions"
+	openAPIFilename  string = "swagger."
+	apiYAMLFile      string = "api.yaml"
+	apiJSONFile      string = "api.json"
+	endpointCertDir  string = "Endpoint-certificates"
+	crtExtension     string = ".crt"
+	pemExtension     string = ".pem"
+	defaultEnv       string = "Production and Sandbox" //Todo: (SuKSW) update to `default` once APIM side changes.
+	defaultVHost     string = "default"
+	apiTypeFilterKey string = "type"
+	apiTypeYamlKey   string = "type"
 )
 
 // ProjectAPI contains the extracted from an API project zip
@@ -102,7 +103,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			}
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
-		} else if strings.Contains(file.Name, apiDefinitionFilename) {
+		} else if strings.Contains(file.Name, apiYAMLFile) || strings.Contains(file.Name, apiJSONFile) {
 			loggers.LoggerAPI.Debugf("fileName : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
@@ -126,7 +127,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 	if apiProject.APIJsn == nil {
 		// TODO : (LahiruUdayanga) Handle the default behaviour after when the APIDeployTestCase test is fixed.
 		// If no api.yaml file is included in the zip folder, return with error.
-		err := errors.New("Could not find api.yaml file")
+		err := errors.New("Could not find api.yaml or api.json")
 		loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
 		return apiProject, err
 	} else if apiProject.APIType != mgw.HTTP && apiProject.APIType != mgw.WS {
