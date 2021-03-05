@@ -27,7 +27,6 @@ import org.wso2.micro.gateway.enforcer.discovery.ApiListDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.discovery.ApplicationDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.discovery.ApplicationKeyMappingDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.discovery.ApplicationPolicyDiscoveryClient;
-import org.wso2.micro.gateway.enforcer.discovery.RevokedTokenDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.discovery.SubscriptionDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.discovery.SubscriptionPolicyDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.models.API;

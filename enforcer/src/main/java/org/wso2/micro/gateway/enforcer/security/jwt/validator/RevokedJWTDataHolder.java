@@ -34,6 +34,11 @@ public class RevokedJWTDataHolder {
     private static Map<String, Long> revokedJWTMap = new ConcurrentHashMap<>();
     private static RevokedJWTDataHolder instance = new RevokedJWTDataHolder();
 
+    public void init() {
+        RevokedTokenDiscoveryClient revokedTokenDs =  RevokedTokenDiscoveryClient.getInstance();
+        revokedTokenDs.watchRevokedTokens();
+    }
+
     /**
      * Adds a given key,value pair to the revoke map.
      * @param key key to be added.
@@ -57,11 +62,6 @@ public class RevokedJWTDataHolder {
 
     private RevokedJWTDataHolder() {
 
-    }
-
-    public void init() {
-        RevokedTokenDiscoveryClient revokedTokenDs =  RevokedTokenDiscoveryClient.getInstance();
-        revokedTokenDs.watchRevokedTokens();
     }
 
     /**
