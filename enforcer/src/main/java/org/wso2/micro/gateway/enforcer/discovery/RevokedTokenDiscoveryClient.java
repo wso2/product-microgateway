@@ -101,7 +101,7 @@ public class RevokedTokenDiscoveryClient {
         reqObserver = stub.withMaxInboundMessageSize(maxSize).streamTokens(new StreamObserver<DiscoveryResponse>() {
                     @Override
                     public void onNext(DiscoveryResponse response) {
-                        logger.debug("Received revoked tokens response new " + response);
+                        logger.debug("Received revoked tokens response " + response);
                         latestReceived = response;
                         try {
                             List<RevokedToken> tokens = handleResponse(response);
