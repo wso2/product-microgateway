@@ -20,8 +20,6 @@ package org.wso2.micro.gateway.enforcer.api;
 import org.wso2.gateway.discovery.api.Api;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
-import org.wso2.micro.gateway.enforcer.constants.APIConstants;
-import org.wso2.micro.gateway.enforcer.cors.CorsFilter;
 
 import java.util.List;
 
