@@ -29,6 +29,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/wso2/micro-gw/config"
@@ -136,13 +137,9 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 	return
 }
 
-//
-
-// PushTokens helps
-func PushTokens(data []byte) {
-	tokens := []RevokedToken{}
-	err := json.Unmarshal(data, &tokens)
-	//
+// PushTokens func will update the revoked tokens snapshots in
+// the enforcer(s).
+func PushTokens(tokens []RevokedToken) {
 	var stokens []types.Resource
 	for _, v := range tokens {
 		t := &km.RevokedToken{}
@@ -151,23 +148,45 @@ func PushTokens(data []byte) {
 		stokens = append(stokens, t)
 	}
 	xds.UpdateEnforcerRevokedTokens(stokens)
-	logger.LoggerSync.Infof("TOKENS NEW %+v", stokens)
-	if err != nil {
-		logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the response received for: %v ", err)
-	}
-	logger.LoggerSync.Infof("Printing TOKENS %+v", tokens)
+	logger.LoggerSync.Debug("Updated the snapshot for revoked tokens")
 }
 
-//RetrieveTokensFromCP pulls tokens
-func RetrieveTokensFromCP() {
-
+// UpdateRevokedTokens pulls revoked tokens from control plane.
+// Once it's done, revoked tokens will be pushed to the enforcers.
+func UpdateRevokedTokens() {
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		// This has to be error. For debugging purpose info
+		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
+	}
 	c := make(chan SyncAPIResponse)
-
 	go RetrieveTokens(c)
-
-	d := <-c
-	//logger.LoggerSync.Infof("SS %v", string(d.Resp))
-
-	PushTokens(d.Resp)
-
+	for {
+		data := <-c
+		if data.Resp != nil {
+			tokens := []RevokedToken{}
+			err := json.Unmarshal(data.Resp, &tokens)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error occurred while unmarshalling tokens %v", err)
+			}
+			PushTokens(tokens)
+		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
+			logger.LoggerSync.Errorf("Error occurred when retrieveing revoked token from control plane: %v", data.Err)
+		} else {
+			// Keep the iteration still until all the envrionment response properly.
+			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
+			go func() {
+				// Retry fetching from control plane after a configured time interval
+				if conf.ControlPlane.EventHub.RetryInterval == 0 {
+					// Assign default retry interval
+					conf.ControlPlane.EventHub.RetryInterval = 5
+				}
+				logger.LoggerSync.Debugf("Time Duration for retrying: %v",
+					conf.ControlPlane.EventHub.RetryInterval*time.Second)
+				time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
+				logger.LoggerSync.Info("Retrying to get revoked tokens from control plane.")
+				RetrieveTokens(c)
+			}()
+		}
+	}
 }
