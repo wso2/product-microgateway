@@ -41,13 +41,13 @@ public class RestAPI implements API {
     private static final Logger logger = LogManager.getLogger(RestAPI.class);
 
     private APIConfig apiConfig;
+    private String apiLifeCycleState;
     private List<Filter> filters = new ArrayList<>();
 
     @Override
     public List<Filter> getFilters() {
         return filters;
     }
-
 
     @Override
     public String init(Api api) {
@@ -62,7 +62,9 @@ public class RestAPI implements API {
                 resources.add(resConfig);
             }
         }
-        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).build();
+        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).
+                apiLifeCycleState(apiLifeCycleState).build();
+        this.apiLifeCycleState = api.getApiLifeCycleStatus();
         initFilters();
         return basePath;
     }
@@ -121,10 +123,12 @@ public class RestAPI implements API {
     }
 
     private void initFilters() {
-        AuthFilter authFilter = new AuthFilter();
-        authFilter.init(apiConfig);
         CorsFilter corsFilter = new CorsFilter();
         this.filters.add(corsFilter);
-        this.filters.add(authFilter);
+        if (!APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(apiLifeCycleState)) {
+            AuthFilter authFilter = new AuthFilter();
+            authFilter.init(apiConfig);
+            this.filters.add(authFilter);
+        }
     }
 }

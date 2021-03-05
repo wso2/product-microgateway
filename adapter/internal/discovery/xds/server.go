@@ -88,6 +88,7 @@ var (
 const (
 	commonEnforcerLabel string = "commonEnforcerLabel"
 	maxRandomInt        int    = 999999999
+	prototypedAPI       string = "PROTOTYPED"
 )
 
 // IDHash uses ID field as the node hash.
@@ -203,6 +204,12 @@ func UpdateAPI(apiContent config.APIContent) {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported with WSO2 Microgateway")
 	}
+
+	if apiContent.LifeCycleStatus == prototypedAPI {
+		mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
+		mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
+	}
+
 	apiIdentifier := apiContent.VHost + ":" + apiContent.Name + ":" + apiContent.Version // TODO: (SuKSW) update once vhost feature added
 	//TODO: Uncomment the below section depending on MgwSwagger.Resource ids
 	//existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
@@ -231,7 +238,7 @@ func UpdateAPI(apiContent config.APIContent) {
 	// openAPIListenersMap[apiMapKey] = listeners
 	openAPIClustersMap[apiIdentifier] = clusters
 	openAPIEndpointsMap[apiIdentifier] = endpoints
-	openAPIEnforcerApisMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger)
+	openAPIEnforcerApisMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiContent.LifeCycleStatus)
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
 	if svcdiscovery.IsServiceDiscoveryEnabled {
