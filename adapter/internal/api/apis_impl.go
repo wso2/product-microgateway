@@ -135,7 +135,6 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			apiProject.APILifeCycleStatus = lifeCycleStatus
 			apiProject.ProductionEndpoint = productionEndpoint
 			apiProject.SandboxEndpoint = sandboxEndpoint
-			apiProject.APIJsn = apiJsn
 		}
 	}
 	if apiProject.APIJsn == nil {
@@ -220,8 +219,8 @@ func updateAPI(name, version string, apiProject ProjectAPI, environments []strin
 	}
 }
 
-func extractAPIInformation(apiJsn []byte) (apiType string, apiLifeCycleStatus string,
-	productionEndpoint string, sandboxEndpoint string, apiEndpointImplementationType string, err error) {
+func extractAPIInformation(apiJsn []byte) (apiType, apiLifeCycleStatus, productionEndpoint, sandboxEndpoint,
+	apiEndpointImplementationType string, err error) {
 
 	var apiDef map[string]interface{}
 	unmarshalErr := json.Unmarshal(apiJsn, &apiDef)
@@ -229,9 +228,7 @@ func extractAPIInformation(apiJsn []byte) (apiType string, apiLifeCycleStatus st
 		loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml %v", unmarshalErr.Error())
 		return "", "", "", "", "", unmarshalErr
 	}
-
 	data := apiDef["data"].(map[string]interface{})
-
 	apiType = strings.ToUpper(data[apiTypeYamlKey].(string))
 	apiLifeCycleStatus = strings.ToUpper(data[lifeCycleStatus].(string))
 	apiEndpointImplementationType = data[endpointImplementationType].(string)
