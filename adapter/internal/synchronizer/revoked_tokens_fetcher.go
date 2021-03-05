@@ -137,9 +137,9 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 	return
 }
 
-// PushTokens func will update the revoked tokens snapshots in
+// pushTokens func will update the revoked tokens snapshots in
 // the enforcer(s).
-func PushTokens(tokens []RevokedToken) {
+func pushTokens(tokens []RevokedToken) {
 	var stokens []types.Resource
 	for _, v := range tokens {
 		t := &km.RevokedToken{}
@@ -169,7 +169,7 @@ func UpdateRevokedTokens() {
 			if err != nil {
 				logger.LoggerSync.Errorf("Error occurred while unmarshalling tokens %v", err)
 			}
-			PushTokens(tokens)
+			pushTokens(tokens)
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 			logger.LoggerSync.Errorf("Error occurred when retrieveing revoked token from control plane: %v", data.Err)
 		} else {

@@ -173,9 +173,6 @@ public class RevokedTokenDiscoveryClient {
     private void handleRevokedTokens(List<RevokedToken> tokens) {
         for (RevokedToken revokedToken : tokens) {
             revokedJWTDataHolder.addRevokedJWTToMap(revokedToken.getJti(), Long.valueOf(revokedToken.getExpirytime()));
-            logger.info("Adding JTI: ", revokedToken.getJti());
-            logger.info("Adding Ex: ", revokedToken.getExpirytime());
-
         }
     }
 
