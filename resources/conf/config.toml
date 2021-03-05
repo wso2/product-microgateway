@@ -1,52 +1,57 @@
-[adapter]
 # The configuration file for mgw
-[adapter.server]
-host = "0.0.0.0"
-port = "9843"
 
-[[adapter.server.users]]
-username = "admin"
-password = "$env{adapter_admin_pwd}"
+[adapter] # --------------------------------------------------------
+
+# server: configuration related to REST API
+[adapter.server]
+  host = "0.0.0.0"
+  port = "9843"
+  tokenDuration = "1h"
+  tokenPrivateKeyPath = "/home/wso2/security/keystore/mg.key"
+  [[adapter.server.users]]
+    username = "admin"
+    password = "$env{adapter_admin_pwd}"
 
 [adapter.keystore]
-certPath = "/home/wso2/security/keystore/mg.pem"
-keyPath = "/home/wso2/security/keystore/mg.key"
+  certPath = "/home/wso2/security/keystore/mg.pem"
+  keyPath = "/home/wso2/security/keystore/mg.key"
 
 [adapter.truststore]
-location = "/home/wso2/security/truststore"
+  location = "/home/wso2/security/truststore"
 
 [adapter.consul]
-# todo rumesh check whether we need to have certPath and KeyPath
-enable = false
-url = "https://169.254.1.1:8501" # scheme + host ip + port
-pollInterval = 5 # seconds
-aclTokenFilePath = ""
-# certs for tls
-caCertPath = "/home/wso2/security/truststore/consul/consul-agent-ca.pem"
-certPath = "/home/wso2/security/truststore/consul/local-dc-client-consul-0.pem"
-keyPath = "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem"
+  # todo rumesh check whether we need to have certPath and KeyPath
+  enable = false
+  url = "https://169.254.1.1:8501" # scheme + host ip + port
+  pollInterval = 5 # seconds
+  aclTokenFilePath = ""
+  # certs for tls
+  caCertPath = "/home/wso2/security/truststore/consul/consul-agent-ca.pem"
+  certPath = "/home/wso2/security/truststore/consul/local-dc-client-consul-0.pem"
+  keyPath = "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem"
 
-[envoy]
-listenerHost = "0.0.0.0"
-listenerPort = 9095
-clusterTimeoutInSeconds = 20
-listenerTLSEnabled = true
+[envoy] # --------------------------------------------------------
+  listenerHost = "0.0.0.0"
+  listenerPort = 9095
+  clusterTimeoutInSeconds = 20
+  listenerTLSEnabled = true
 
 [envoy.keystore]
-certPath = "/home/wso2/security/keystore/mg.pem"
-keyPath = "/home/wso2/security/keystore/mg.key"
+  certPath = "/home/wso2/security/keystore/mg.pem"
+  keyPath = "/home/wso2/security/keystore/mg.key"
 
 [envoy.upstream]
 [envoy.upstream.tls]
-minimumProtocolVersion = "TLS1_1"
-maximumProtocolVersion = "TLS1_2"
-ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"  
-# the default endpoint certificates
-trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
-verifyHostName = true
-disableSslVerification = false
+  minimumProtocolVersion = "TLS1_1"
+  maximumProtocolVersion = "TLS1_2"
+  ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"  
+  # the default endpoint certificates
+  trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
+  verifyHostName = true
+  disableSslVerification = false
 
-[enforcer]
+[enforcer] # --------------------------------------------------------
+
 [enforcer.authService]
   port = 8081
   maxMessageSize = 1000000000
@@ -63,25 +68,25 @@ disableSslVerification = false
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1
 [[enforcer.jwtTokenConfig]]
-    name="Resident Key Manager"
-    issuer = "https://localhost:9443/oauth2/token"
-    certificateAlias = "wso2carbon"
-    # URL of the JWKs endpoint
-    jwksURL = ""
-    # Validate subscribed APIs
-    validateSubscription = false
-    # The claim in which the consumer key of the application is coming
-    consumerKeyClaim = "azp"
-    # Certificate Filepath within enforcer
-    certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
-    [[enforcer.jwtTokenConfig.claimMapping]]
-        remoteClaim = "sub"
-        localClaim = "CUSTOM-CLAIM"
+  name="Resident Key Manager"
+  issuer = "https://localhost:9443/oauth2/token"
+  certificateAlias = "wso2carbon"
+  # URL of the JWKs endpoint
+  jwksURL = ""
+  # Validate subscribed APIs
+  validateSubscription = false
+  # The claim in which the consumer key of the application is coming
+  consumerKeyClaim = "azp"
+  # Certificate Filepath within enforcer
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+  [[enforcer.jwtTokenConfig.claimMapping]]
+    remoteClaim = "sub"
+    localClaim = "CUSTOM-CLAIM"
 
 
 [enforcer.apimCredentials]
-    username="admin"
-    password="$env{apim_admin_pwd}"
+  username="admin"
+  password="$env{apim_admin_pwd}"
 
 [enforcer.cache]
   enabled = true
@@ -89,28 +94,29 @@ disableSslVerification = false
   expiryTime = 15
 
 [enforcer.jwtGenerator]
-    enable = false
-    encoding = "base64" # base64,base64url
-    claimDialect = "http://wso2.org/claims"
-    convertDialect = false
-    header = "X-JWT-Assertion"
-    signingAlgorithm = "SHA256withRSA"
-    enableUserClaims = false
-    gatewayGeneratorImpl = "org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
-    claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
-    publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
-    privateKeyPath = "/home/wso2/security/keystore/mg.key"
+  enable = false
+  encoding = "base64" # base64,base64url
+  claimDialect = "http://wso2.org/claims"
+  convertDialect = false
+  header = "X-JWT-Assertion"
+  signingAlgorithm = "SHA256withRSA"
+  enableUserClaims = false
+  gatewayGeneratorImpl = "org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
+  claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
+  publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
+  privateKeyPath = "/home/wso2/security/keystore/mg.key"
 
 [controlPlane]
+
 # Control plane's eventHub details
 [controlPlane.eventHub]
-enabled = false
-serviceUrl = "https://apim:9443/"
-username="admin"
-password="$env{cp_admin_pwd}"
-environmentLabels = ["Production and Sandbox"]
-retryInterval = 5
-skipSSLVerification=true
-# Message broker connection URL of the control plane
-[controlPlane.eventHub.jmsConnectionParameters]
-eventListeningEndpoints = ["amqp://admin:admin@apim:5672?retries='5'&connectdelay='30000'"]
+  enabled = false
+  serviceUrl = "https://apim:9443/"
+  username="admin"
+  password="$env{cp_admin_pwd}"
+  environmentLabels = ["Production and Sandbox"]
+  retryInterval = 5
+  skipSSLVerification=true
+  # Message broker connection URL of the control plane
+  [controlPlane.eventHub.jmsConnectionParameters]
+    eventListeningEndpoints = ["amqp://admin:admin@apim:5672?retries='5'&connectdelay='30000'"]

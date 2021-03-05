@@ -24,6 +24,7 @@ import (
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/wso2/micro-gw/internal/api/restserver"
+	"github.com/wso2/micro-gw/internal/auth"
 	apiservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/api"
 	configservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/config"
 	keymanagerservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/keymgt"
@@ -126,6 +127,12 @@ func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server,
 	go func() {
 		if err = grpcServer.Serve(lis); err != nil {
 			logger.LoggerMgw.Error(err)
+		}
+	}()
+
+	go func() {
+		if err = auth.Init(); err != nil {
+			logger.LoggerMgw.Error("error while initializing autherization component.", err)
 		}
 	}()
 }

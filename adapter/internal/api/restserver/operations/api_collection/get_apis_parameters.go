@@ -28,6 +28,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // NewGetApisParams creates a new GetApisParams object
@@ -49,6 +50,8 @@ type GetApisParams struct {
 
 	/*Number of APIs (APIMeta objects to return)
 
+	  Maximum: 1e+08
+	  Minimum: 1
 	  In: query
 	*/
 	Limit *int64
@@ -57,6 +60,8 @@ type GetApisParams struct {
 	"type:http" for HTTP type
 	"type:ws" for WebSocket type
 
+	  Max Length: 9
+	  Pattern: ^[a-zA-Z:]*$
 	  In: query
 	*/
 	Query *string
@@ -108,6 +113,24 @@ func (o *GetApisParams) bindLimit(rawData []string, hasKey bool, formats strfmt.
 	}
 	o.Limit = &value
 
+	if err := o.validateLimit(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateLimit carries on validations for parameter Limit
+func (o *GetApisParams) validateLimit(formats strfmt.Registry) error {
+
+	if err := validate.MinimumInt("limit", "query", *o.Limit, 1, false); err != nil {
+		return err
+	}
+
+	if err := validate.MaximumInt("limit", "query", *o.Limit, 1e+08, false); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -125,6 +148,24 @@ func (o *GetApisParams) bindQuery(rawData []string, hasKey bool, formats strfmt.
 		return nil
 	}
 	o.Query = &raw
+
+	if err := o.validateQuery(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateQuery carries on validations for parameter Query
+func (o *GetApisParams) validateQuery(formats strfmt.Registry) error {
+
+	if err := validate.MaxLength("query", "query", *o.Query, 9); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("query", "query", *o.Query, `^[a-zA-Z:]*$`); err != nil {
+		return err
+	}
 
 	return nil
 }

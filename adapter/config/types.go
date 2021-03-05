@@ -64,7 +64,7 @@ func NewReceiver() chan string {
 type Config struct {
 	//Adapter related Configurations
 	Adapter struct {
-		// Server represents the configuration related to rest API (to which the apictl requests)
+		// Server represents the configuration related to REST API (to which the apictl requests)
 		Server struct {
 			// Host name of the server
 			Host string
@@ -72,6 +72,10 @@ type Config struct {
 			Port string
 			// APICTL Users
 			Users []APICtlUser `toml:"users"`
+			// Access token validity duration
+			TokenDuration string
+			// Private key to sign the token
+			TokenPrivateKeyPath string
 		}
 
 		//Consul represents the configuration required to connect to consul service discovery

@@ -66,6 +66,11 @@ func init() {
         "security": [
           {
             "BasicAuth": []
+          },
+          {
+            "BearerToken": [
+              "admin"
+            ]
           }
         ],
         "description": "This operation can be used to retrieve meta info about all APIs\n",
@@ -75,12 +80,16 @@ func init() {
         "summary": "Get a list of API metadata",
         "parameters": [
           {
+            "maxLength": 9,
+            "pattern": "^[a-zA-Z:]*$",
             "type": "string",
             "description": "Optional - Condition to filter APIs. Currently only filtering \nby API type (HTTP or WebSocket) is supported.\n\"type:http\" for HTTP type\n\"type:ws\" for WebSocket type\n",
             "name": "query",
             "in": "query"
           },
           {
+            "maximum": 100000000,
+            "minimum": 1,
             "type": "integer",
             "description": "Number of APIs (APIMeta objects to return)\n",
             "name": "limit",
@@ -94,11 +103,11 @@ func init() {
               "$ref": "#/definitions/APIMeta"
             }
           },
-          "default": {
-            "description": "Unexpected error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
           }
         },
         "x-wso2-curl": "curl -k -H \"Authorization: Basic ae4eae22-3f65-387b-a171-d37eaa366fa8\" \n-X GET \"https://127.0.0.1:9443/api/mgw/adapter/0.1/apis\"\n",
@@ -109,6 +118,11 @@ func init() {
         "security": [
           {
             "BasicAuth": []
+          },
+          {
+            "BearerToken": [
+              "admin"
+            ]
           }
         ],
         "description": "This operation can be used to deploy or update an API.\n",
@@ -145,10 +159,7 @@ func init() {
             }
           },
           "401": {
-            "description": "Unautherized\nNot Authorized to deploy or update.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
+            "$ref": "#/responses/Unauthorized"
           },
           "409": {
             "description": "Conflict.\nAPI to import already exists (when overwride parameter is not included).\n",
@@ -157,10 +168,7 @@ func init() {
             }
           },
           "500": {
-            "description": "Internal Server Error.",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
+            "$ref": "#/responses/ServerError"
           }
         },
         "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Basic ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/mgw/adapter/0.1/apis?overwride=true",
@@ -171,6 +179,11 @@ func init() {
         "security": [
           {
             "BasicAuth": []
+          },
+          {
+            "BearerToken": [
+              "admin"
+            ]
           }
         ],
         "description": "This operation can be used to delete a API that was deployed\n",
@@ -180,6 +193,9 @@ func init() {
         "summary": "Delete deployed API",
         "parameters": [
           {
+            "maxLength": 255,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_~.-]*$",
             "type": "string",
             "description": "Name of the API\n",
             "name": "apiName",
@@ -187,6 +203,9 @@ func init() {
             "required": true
           },
           {
+            "maxLength": 15,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9_.-]*$",
             "type": "string",
             "description": "version of the API\n",
             "name": "version",
@@ -194,6 +213,8 @@ func init() {
             "required": true
           },
           {
+            "maxLength": 255,
+            "pattern": "\\b((xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,}\\b",
             "type": "string",
             "description": "Virtual Host of the API\n",
             "name": "vhost",
@@ -213,16 +234,64 @@ func init() {
               "$ref": "#/definitions/Error"
             }
           },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
           "404": {
             "description": "Not Found.\nRequested API does not exist.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
           }
         },
         "x-wso2-curl": "curl -k -H \"Authorization: Basic ae4eae22-3f65-387b-a171-d37eaa366fa8\" \n-d '{\"apiName\":\"petstore\", \"version\":\"1.1\", \"vhost\":\"www.pets.com\"}'\n-X DELETE \"https://127.0.0.1:9443/api/mgw/adapter/0.1/apis\"\n",
         "x-wso2-request": "DELETE https://127.0.0.1:9443/api/mgw/adapter/0.1/apis\nAuthorization: Basic ae4eae22-3f65-387b-a171-d37eaa366fa8\n{\"apiName\":\"petstore\", \"version\":\"1.1\", \"vhost\":\"www.pets.com\"}\n",
         "x-wso2-response": "HTTP/1.1 200 OK"
+      }
+    },
+    "/oauth2/token": {
+      "post": {
+        "description": "This operation can be used to get an access token by providing the username and password\nin the autherization header\n",
+        "consumes": [
+          "application/json"
+        ],
+        "tags": [
+          "Authorization"
+        ],
+        "summary": "Get an access token",
+        "parameters": [
+          {
+            "description": "Credentials of the microgateway REST API user",
+            "name": "credentials",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Credentials"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authentication successful. \nReturns an access token.\n",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "accessToken": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
       }
     }
   },
@@ -255,6 +324,9 @@ func init() {
         "apiType": {
           "type": "string"
         },
+        "context": {
+          "type": "string"
+        },
         "gateway-envs": {
           "type": "array",
           "items": {
@@ -263,6 +335,26 @@ func init() {
         },
         "version": {
           "type": "string"
+        }
+      }
+    },
+    "Credentials": {
+      "required": [
+        "username",
+        "password"
+      ],
+      "properties": {
+        "password": {
+          "description": "Password of the microgateway REST API user",
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9_~.@-]*$"
+        },
+        "username": {
+          "description": "Username of the microgateway REST API user",
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9_~.@-]*$"
         }
       }
     },
@@ -342,9 +434,32 @@ func init() {
       }
     }
   },
+  "responses": {
+    "ServerError": {
+      "description": "Internal Server Error.",
+      "schema": {
+        "$ref": "#/definitions/Error"
+      }
+    },
+    "Unauthorized": {
+      "description": "Unauthorized. Invalid authentication credentials.",
+      "schema": {
+        "$ref": "#/definitions/Error"
+      }
+    }
+  },
   "securityDefinitions": {
     "BasicAuth": {
       "type": "basic"
+    },
+    "BearerToken": {
+      "type": "oauth2",
+      "flow": "password",
+      "authorizationUrl": "",
+      "tokenUrl": "/oauth2/token",
+      "scopes": {
+        "admin": "Grants deploy, undeploy, and list access"
+      }
     }
   }
 }`))
@@ -382,6 +497,11 @@ func init() {
         "security": [
           {
             "BasicAuth": []
+          },
+          {
+            "BearerToken": [
+              "admin"
+            ]
           }
         ],
         "description": "This operation can be used to retrieve meta info about all APIs\n",
@@ -391,12 +511,16 @@ func init() {
         "summary": "Get a list of API metadata",
         "parameters": [
           {
+            "maxLength": 9,
+            "pattern": "^[a-zA-Z:]*$",
             "type": "string",
             "description": "Optional - Condition to filter APIs. Currently only filtering \nby API type (HTTP or WebSocket) is supported.\n\"type:http\" for HTTP type\n\"type:ws\" for WebSocket type\n",
             "name": "query",
             "in": "query"
           },
           {
+            "maximum": 100000000,
+            "minimum": 1,
             "type": "integer",
             "description": "Number of APIs (APIMeta objects to return)\n",
             "name": "limit",
@@ -410,8 +534,14 @@ func init() {
               "$ref": "#/definitions/APIMeta"
             }
           },
-          "default": {
-            "description": "Unexpected error",
+          "401": {
+            "description": "Unauthorized. Invalid authentication credentials.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -425,6 +555,11 @@ func init() {
         "security": [
           {
             "BasicAuth": []
+          },
+          {
+            "BearerToken": [
+              "admin"
+            ]
           }
         ],
         "description": "This operation can be used to deploy or update an API.\n",
@@ -461,7 +596,7 @@ func init() {
             }
           },
           "401": {
-            "description": "Unautherized\nNot Authorized to deploy or update.\n",
+            "description": "Unauthorized. Invalid authentication credentials.",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -487,6 +622,11 @@ func init() {
         "security": [
           {
             "BasicAuth": []
+          },
+          {
+            "BearerToken": [
+              "admin"
+            ]
           }
         ],
         "description": "This operation can be used to delete a API that was deployed\n",
@@ -496,6 +636,9 @@ func init() {
         "summary": "Delete deployed API",
         "parameters": [
           {
+            "maxLength": 255,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_~.-]*$",
             "type": "string",
             "description": "Name of the API\n",
             "name": "apiName",
@@ -503,6 +646,9 @@ func init() {
             "required": true
           },
           {
+            "maxLength": 15,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9_.-]*$",
             "type": "string",
             "description": "version of the API\n",
             "name": "version",
@@ -510,6 +656,8 @@ func init() {
             "required": true
           },
           {
+            "maxLength": 255,
+            "pattern": "\\b((xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,}\\b",
             "type": "string",
             "description": "Virtual Host of the API\n",
             "name": "vhost",
@@ -529,8 +677,20 @@ func init() {
               "$ref": "#/definitions/Error"
             }
           },
+          "401": {
+            "description": "Unauthorized. Invalid authentication credentials.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "404": {
             "description": "Not Found.\nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -539,6 +699,54 @@ func init() {
         "x-wso2-curl": "curl -k -H \"Authorization: Basic ae4eae22-3f65-387b-a171-d37eaa366fa8\" \n-d '{\"apiName\":\"petstore\", \"version\":\"1.1\", \"vhost\":\"www.pets.com\"}'\n-X DELETE \"https://127.0.0.1:9443/api/mgw/adapter/0.1/apis\"\n",
         "x-wso2-request": "DELETE https://127.0.0.1:9443/api/mgw/adapter/0.1/apis\nAuthorization: Basic ae4eae22-3f65-387b-a171-d37eaa366fa8\n{\"apiName\":\"petstore\", \"version\":\"1.1\", \"vhost\":\"www.pets.com\"}\n",
         "x-wso2-response": "HTTP/1.1 200 OK"
+      }
+    },
+    "/oauth2/token": {
+      "post": {
+        "description": "This operation can be used to get an access token by providing the username and password\nin the autherization header\n",
+        "consumes": [
+          "application/json"
+        ],
+        "tags": [
+          "Authorization"
+        ],
+        "summary": "Get an access token",
+        "parameters": [
+          {
+            "description": "Credentials of the microgateway REST API user",
+            "name": "credentials",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Credentials"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authentication successful. \nReturns an access token.\n",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "accessToken": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Invalid authentication credentials.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       }
     }
   },
@@ -571,6 +779,9 @@ func init() {
         "apiType": {
           "type": "string"
         },
+        "context": {
+          "type": "string"
+        },
         "gateway-envs": {
           "type": "array",
           "items": {
@@ -579,6 +790,26 @@ func init() {
         },
         "version": {
           "type": "string"
+        }
+      }
+    },
+    "Credentials": {
+      "required": [
+        "username",
+        "password"
+      ],
+      "properties": {
+        "password": {
+          "description": "Password of the microgateway REST API user",
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9_~.@-]*$"
+        },
+        "username": {
+          "description": "Username of the microgateway REST API user",
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9_~.@-]*$"
         }
       }
     },
@@ -658,9 +889,32 @@ func init() {
       }
     }
   },
+  "responses": {
+    "ServerError": {
+      "description": "Internal Server Error.",
+      "schema": {
+        "$ref": "#/definitions/Error"
+      }
+    },
+    "Unauthorized": {
+      "description": "Unauthorized. Invalid authentication credentials.",
+      "schema": {
+        "$ref": "#/definitions/Error"
+      }
+    }
+  },
   "securityDefinitions": {
     "BasicAuth": {
       "type": "basic"
+    },
+    "BearerToken": {
+      "type": "oauth2",
+      "flow": "password",
+      "authorizationUrl": "",
+      "tokenUrl": "/oauth2/token",
+      "scopes": {
+        "admin": "Grants deploy, undeploy, and list access"
+      }
     }
   }
 }`))
