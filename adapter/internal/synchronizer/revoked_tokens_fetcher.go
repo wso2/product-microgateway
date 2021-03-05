@@ -174,7 +174,7 @@ func UpdateRevokedTokens() {
 			logger.LoggerSync.Errorf("Error occurred when retrieveing revoked token from control plane: %v", data.Err)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
-			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
+			logger.LoggerSync.Errorf("Error occurred while fetching revoked tokens from control plane: %v", data.Err)
 			go func() {
 				// Retry fetching from control plane after a configured time interval
 				if conf.ControlPlane.EventHub.RetryInterval == 0 {
