@@ -189,7 +189,7 @@ func Run(conf *config.Config) {
 
 		// Fetch APIs from control plane
 		fetchAPIsOnStartUp(conf)
-		synchronizer.RetrieveTokensFromCP()
+		synchronizer.UpdateRevokedTokens()
 		// Fetch Key Managers from APIM
 		synchronizer.FetchKeyManagersOnStartUp(conf)
 	}
