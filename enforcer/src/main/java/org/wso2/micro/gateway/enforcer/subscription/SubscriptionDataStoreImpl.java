@@ -151,7 +151,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         ApplicationPolicyDiscoveryClient.getInstance().watchApplicationPolicies();
         SubscriptionPolicyDiscoveryClient.getInstance().watchSubscriptionPolicies();
         ApplicationKeyMappingDiscoveryClient.getInstance().watchApplicationKeyMappings();
-        RevokedTokenDiscoveryClient.getInstance().watchRevokedTokens();
     }
 
     public void addSubscriptions(List<org.wso2.gateway.discovery.subscription.Subscription> subscriptionList) {
