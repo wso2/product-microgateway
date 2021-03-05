@@ -62,9 +62,9 @@ public class RestAPI implements API{
                 resources.add(resConfig);
             }
         }
-        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).
+        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources)
+                .apiLifeCycleState(apiLifeCycleState).apiType(APIConstants.ApiType.REST).build();
         this.apiLifeCycleState = api.getApiLifeCycleStatus();
-                apiLifeCycleState(apiLifeCycleState).build();
         initFilters();
         return basePath;
     }
