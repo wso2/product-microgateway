@@ -35,7 +35,6 @@ public class APIConstants {
     public static final String GW_VERSION_PARAM = "version";
     public static final String GW_API_NAME_PARAM = "name";
 
-
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "wso2carbon";
     public static final String HTTPS_PROTOCOL = "https";
@@ -68,6 +67,8 @@ public class APIConstants {
     public static final String CONTENT_TYPE_HEADER = "Content-type";
     public static final String APPLICATION_JSON = "application/json";
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
+
+    public static final String THROTTLE_KEY = "throttleKey";
 
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
@@ -247,5 +248,16 @@ public class APIConstants {
         public int getCode() {
             return this.code;
         }
+    }
+
+    /**
+     * Advanced Throttling related constants.
+     */
+    public static class AdvancedThrottleConstants {
+        public static final String IS_THROTTLED = "isThrottled";
+        public static final String THROTTLE_KEY = "throttleKey";
+        public static final String EXPIRY_TIMESTAMP = "expiryTimeStamp";
+        public static final String EVALUATED_CONDITIONS = "evaluatedConditions";
+        public static final String TRUE = "true";
     }
 }

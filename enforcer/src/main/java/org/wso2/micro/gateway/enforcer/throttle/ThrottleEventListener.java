@@ -22,10 +22,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -45,6 +49,15 @@ import javax.naming.NamingException;
  */
 public class ThrottleEventListener implements MessageListener {
     private static final Log log = LogFactory.getLog(ThrottleEventListener.class);
+
+    // These patterns will be used to determine for which type of keys the throttling condition has occurred.
+    private final Pattern apiPattern = Pattern.compile("/.*/(.*):\\1_(condition_(\\d*)|default)");
+    private static final int API_PATTERN_GROUPS = 3;
+    private static final int API_PATTERN_CONDITION_INDEX = 2;
+
+    private final Pattern resourcePattern = Pattern.compile("/.*/(.*)/\\1(.*)?:[A-Z]{0,7}_(condition_(\\d*)|default)");
+    public static final int RESOURCE_PATTERN_GROUPS = 4;
+    public static final int RESOURCE_PATTERN_CONDITION_INDEX = 3;
 
     private ThrottleEventListener() {}
 
@@ -86,14 +99,10 @@ public class ThrottleEventListener implements MessageListener {
             return;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Event received in JMS Event Receiver - " + message);
-        }
-
         try {
             Topic jmsDestination = (Topic) message.getJMSDestination();
             MapMessage mapMessage = (MapMessage) message;
-            Map<String, Object> map = new HashMap<String, Object>();
+            Map<String, Object> map = new HashMap<>();
             Enumeration enumeration = mapMessage.getMapNames();
             while (enumeration.hasMoreElements()) {
                 String key = (String) enumeration.nextElement();
@@ -109,29 +118,72 @@ public class ThrottleEventListener implements MessageListener {
                      * expiryTimeStamp - When the throttling time window will expires
                      */
 
-                    log.info("Event THROTTLE_KEY received in JMS Event Receiver - " + message);
-//                    handleThrottleUpdateMessage(map);
-                } else if (map.get(APIConstants.BLOCKING_CONDITION_KEY) != null) {
-                    /*
-                     * This message contains blocking condition data
-                     * blockingCondition - Blocking condition type
-                     * conditionValue - blocking condition value
-                     * state - State whether blocking condition is enabled or not
-                     */
-                    log.info("Event BLOCKING_CONDITION_KEY received in JMS Event Receiver - " + message);
-//                    handleBlockingMessage(map);
-                } else if (map.get(APIConstants.POLICY_TEMPLATE_KEY) != null) {
-                    /*
-                     * This message contains key template data
-                     * keyTemplateValue - Value of key template
-                     * keyTemplateState - whether key template active or not
-                     */
-                    log.info("Event POLICY_TEMPLATE_KEY received in JMS Event Receiver - " + message);
-//                    handleKeyTemplateMessage(map);
+                    handleThrottleUpdateMessage(map);
                 }
             }
         } catch (JMSException e) {
             log.error("Error occurred when processing the received message ", e);
         }
+    }
+
+    private void handleThrottleUpdateMessage(Map<String, Object> map) {
+        String throttleKey = map.get(APIConstants.AdvancedThrottleConstants.THROTTLE_KEY).toString();
+        String throttleState = map.get(APIConstants.AdvancedThrottleConstants.IS_THROTTLED).toString();
+        long timeStamp = Long.parseLong(map.get(APIConstants.AdvancedThrottleConstants.EXPIRY_TIMESTAMP).toString());
+        Object evaluatedConditionObject = map.get(APIConstants.AdvancedThrottleConstants.EVALUATED_CONDITIONS);
+        ThrottleDataHolder dataHolder = ThrottleDataHolder.getInstance();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Received event -  throttleKey : " + throttleKey + ", isThrottled: " +
+                    throttleState + ", expiryTime: " + new Date(timeStamp).toString());
+        }
+
+        if (APIConstants.AdvancedThrottleConstants.TRUE.equalsIgnoreCase(throttleState)) {
+            dataHolder.addThrottleData(throttleKey, timeStamp);
+            APICondition extractedKey = extractAPIorResourceKey(throttleKey);
+            if (log.isDebugEnabled()) {
+                log.debug("Adding throttling key : " + extractedKey);
+            }
+
+            if (extractedKey != null) {
+                if (evaluatedConditionObject != null) {
+                    String conditionStr = (String) evaluatedConditionObject;
+                    List<ThrottleCondition> conditions = ThrottleUtils.extractThrottleCondition(conditionStr);
+                    dataHolder.addThrottledConditions(extractedKey.getResourceKey(), extractedKey.getName(),
+                            conditions);
+                }
+            }
+        } else {
+            dataHolder.removeThrottleData(throttleKey);
+            APICondition extractedKey = extractAPIorResourceKey(throttleKey);
+            if (extractedKey != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Removing throttling key : " + extractedKey.getResourceKey());
+                }
+
+                dataHolder.removeThrottledConditions(extractedKey.getResourceKey(), extractedKey.getName());
+            }
+        }
+    }
+
+    private APICondition extractAPIorResourceKey(String throttleKey) {
+        Matcher m = resourcePattern.matcher(throttleKey);
+        if (m.matches()) {
+            if (m.groupCount() == RESOURCE_PATTERN_GROUPS) {
+                String condition = m.group(RESOURCE_PATTERN_CONDITION_INDEX);
+                String resourceKey = throttleKey.substring(0, throttleKey.indexOf("_" + condition));
+                return new APICondition(resourceKey, condition);
+            }
+        } else {
+            m = apiPattern.matcher(throttleKey);
+            if (m.matches()) {
+                if (m.groupCount() == API_PATTERN_GROUPS) {
+                    String condition = m.group(API_PATTERN_CONDITION_INDEX);
+                    String resourceKey = throttleKey.substring(0, throttleKey.indexOf("_" + condition));
+                    return new APICondition(resourceKey, condition);
+                }
+            }
+        }
+        return null;
     }
 }
