@@ -35,6 +35,7 @@ import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.grpc.ExtAuthService;
 import org.wso2.micro.gateway.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerHolder;
+import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;
 
 import java.io.File;
@@ -68,6 +69,7 @@ public class AuthServer {
             //TODO: Get the tenant domain from config
             SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().initializeStore();
             KeyManagerHolder.getInstance().init();
+            RevokedJWTDataHolder.getInstance().init();
 
             // Don't exit the main thread. Wait until server is terminated.
             server.awaitTermination();
