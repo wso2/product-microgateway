@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.keymgt.RevokedToken;
 import org.wso2.gateway.discovery.service.keymgt.RevokedTokenDiscoveryServiceGrpc;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
@@ -78,7 +79,10 @@ public class RevokedTokenDiscoveryClient {
         this.revokedJWTDataHolder = RevokedJWTDataHolder.getInstance();
         this.stub = RevokedTokenDiscoveryServiceGrpc.newStub(channel);
         this.blockingStub = RevokedTokenDiscoveryServiceGrpc.newBlockingStub(channel);
-        this.nodeId = ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
+        // Since revoked tokens should be received by every enforcer, adapter creates a
+        // common snapshot for revoked tokens. Hence each enforces requests data using the
+        // common enforcer label to avoid redundent snapshots
+        this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
     }
 

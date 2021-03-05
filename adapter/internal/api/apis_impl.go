@@ -38,16 +38,18 @@ import (
 
 // API Controller related constants
 const (
-	openAPIDir            string = "Definitions"
-	openAPIFilename       string = "swagger."
-	apiDefinitionFilename string = "api.yaml"
-	endpointCertDir       string = "Endpoint-certificates"
-	crtExtension          string = ".crt"
-	pemExtension          string = ".pem"
-	defaultEnv            string = "Production and Sandbox" //Todo: (SuKSW) update to `default` once APIM side changes.
-	defaultVHost          string = "default"
-	apiTypeFilterKey      string = "type"
-	apiTypeYamlKey        string = "type"
+	openAPIDir                string = "Definitions"
+	openAPIFilename           string = "swagger."
+	apiDefinitionJSONFilename string = "api.json"
+	apiDefinitionYAMLFilename string = "api.yaml"
+
+	endpointCertDir  string = "Endpoint-certificates"
+	crtExtension     string = ".crt"
+	pemExtension     string = ".pem"
+	defaultEnv       string = "Production and Sandbox" //Todo: (SuKSW) update to `default` once APIM side changes.
+	defaultVHost     string = "default"
+	apiTypeFilterKey string = "type"
+	apiTypeYamlKey   string = "type"
 )
 
 // ProjectAPI contains the extracted from an API project zip
@@ -102,7 +104,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			}
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
-		} else if strings.Contains(file.Name, apiDefinitionFilename) {
+		} else if strings.Contains(file.Name, apiDefinitionJSONFilename) || strings.Contains(file.Name, apiDefinitionYAMLFilename) {
 			loggers.LoggerAPI.Debugf("fileName : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
