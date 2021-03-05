@@ -21,8 +21,11 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -47,6 +50,8 @@ const (
 	relativeConfigPath = "/conf/config.toml"
 	// RelativeLogConfigPath is the relative file path where the log configuration file is.
 	relativeLogConfigPath = "/conf/log_config.toml"
+	// The prefix used when configs should be read from environment variables.
+	envConfigPrefix = "$env{"
 )
 
 // ReadConfigs implements adapter configuration read operation. The read operation will happen only once, hence
@@ -74,8 +79,44 @@ func ReadConfigs() (*Config, error) {
 			logger.Fatal("Error parsing the configuration ", parseErr)
 			return
 		}
+		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem())
+		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem())
 	})
 	return adapterConfig, e
+}
+
+// resolveConfigEnvValues looks for the string type config values which should be read from environment variables
+// and replace the respective config values from environment variable.
+func resolveConfigEnvValues(v reflect.Value) {
+	s := v
+	for fieldNum := 0; fieldNum < s.NumField(); fieldNum++ {
+		field := s.Field(fieldNum)
+		if field.Kind() == reflect.String && strings.Contains(fmt.Sprint(field.Interface()), envConfigPrefix) {
+			field.SetString(resolveEnvValue(fmt.Sprint(field.Interface())))
+		}
+		if reflect.TypeOf(field.Interface()).Kind() == reflect.Slice {
+			for index := 0; index < field.Len(); index++ {
+				if field.Index(index).Kind() == reflect.Struct {
+					resolveConfigEnvValues(field.Index(index).Addr().Elem())
+				}
+			}
+		}
+		if field.Kind() == reflect.Struct {
+			resolveConfigEnvValues(field.Addr().Elem())
+		}
+	}
+}
+
+func resolveEnvValue(value string) string {
+	re := regexp.MustCompile(`(?s)\{(.*)}`) // regex to get everything in between curly brackets
+	m := re.FindStringSubmatch(value)
+	if len(m) > 1 {
+		envValue, exists := os.LookupEnv(m[1])
+		if exists {
+			return envValue
+		}
+	}
+	return value
 }
 
 // ReadLogConfigs implements adapter/proxy log-configuration read operation.The read operation will happen only once, hence

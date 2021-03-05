@@ -120,12 +120,12 @@ type Config struct {
 	}
 
 	Enforcer struct {
-		JwtTokenConfig	[]jwtTokenConfig
-		EventHub	eventHub
-		ApimCredentials	apimCredentials
-		AuthService	authService
-		JwtGenerator	jwtGenerator
-		Cache		cache
+		JwtTokenConfig  []jwtTokenConfig
+		EventHub        eventHub
+		ApimCredentials apimCredentials
+		AuthService     authService
+		JwtGenerator    jwtGenerator
+		Cache           cache
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
@@ -168,6 +168,7 @@ type jwtTokenConfig struct {
 	ValidateSubscription bool
 	ConsumerKeyClaim     string
 	CertificateFilePath  string
+	ClaimMapping         []claimMapping
 }
 
 type eventHub struct {
@@ -192,10 +193,15 @@ type jwtGenerator struct {
 	PrivateKeyPath        string `toml:"privateKeyPath"`
 }
 
+type claimMapping struct {
+    RemoteClaim string
+    LocalClaim string
+}
+
 type cache struct {
-	Enabled				bool   `toml:"enabled"`
-	MaximumSize			int32  `toml:"maximumSize"`
-	ExpiryTime			int32  `toml:"expiryTime"`
+	Enabled     bool  `toml:"enabled"`
+	MaximumSize int32 `toml:"maximumSize"`
+	ExpiryTime  int32 `toml:"expiryTime"`
 }
 
 // APICtlUser represents registered APICtl Users
@@ -216,7 +222,21 @@ type controlPlane struct {
 		RetryInterval           time.Duration `toml:"retryInterval"`
 		SkipSSLVerfication      bool          `toml:"skipSSLVerification"`
 		JmsConnectionParameters struct {
-			EventListeningEndpoints string `toml:"eventListeningEndpoints"`
+			EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
 		} `toml:"jmsConnectionParameters"`
 	} `toml:"eventHub"`
+}
+
+// APIContent contains everything necessary to create an API
+type APIContent struct {
+	VHost              string
+	Name               string
+	Version            string
+	APIType            string
+	LifeCycleStatus    string
+	APIDefinition      []byte
+	UpstreamCerts      []byte
+	Environments       []string
+	ProductionEndpoint string
+	SandboxEndpoint    string
 }

@@ -184,4 +184,16 @@ public interface ApiOrBuilder extends
 
   com.google.protobuf.Any getVendorExtensibleOrThrow(
       java.lang.String key);
+
+  /**
+   * <code>string apiLifeCycleStatus = 11;</code>
+   * @return The apiLifeCycleStatus.
+   */
+  java.lang.String getApiLifeCycleStatus();
+  /**
+   * <code>string apiLifeCycleStatus = 11;</code>
+   * @return The bytes for apiLifeCycleStatus.
+   */
+  com.google.protobuf.ByteString
+      getApiLifeCycleStatusBytes();
 }

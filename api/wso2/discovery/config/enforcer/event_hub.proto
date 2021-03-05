@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package wso2.discovery.config.enforcer;
 
+import "wso2/discovery/config/enforcer/jms_connection_params.proto";
+
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
 option java_package = "org.wso2.gateway.discovery.config.enforcer";
 option java_outer_classname = "EventHubProto";
@@ -20,5 +22,5 @@ message EventHub {
   string serviceUrl = 2;
 
   // Connection parameters for the message listerner
-  map<string, string> jmsConnectionParameters = 3;
+  JmsConnectionParameters jmsConnectionParameters = 3;
 }

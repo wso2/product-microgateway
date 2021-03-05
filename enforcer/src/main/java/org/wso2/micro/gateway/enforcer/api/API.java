@@ -26,8 +26,7 @@ import java.util.List;
 /**
  * Interface to hold different API types. This can REST, gRPC, graphql, websocket and etc.
  */
-public interface API{
-
+public interface API {
     List<Filter> getFilters();
 
     String init(Api api);

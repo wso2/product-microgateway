@@ -1,13 +1,16 @@
 package xds
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/config/enforcer"
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/config/enforcer"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/keymgt"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/micro-gw/internal/eventhub/types"
+	logger "github.com/wso2/micro-gw/loggers"
 )
 
 // MarshalConfig will marshal a Config struct - read from the config toml - to
@@ -15,17 +18,26 @@ import (
 func MarshalConfig(config *config.Config) *enforcer.Config {
 	issuers := []*enforcer.Issuer{}
 	for _, issuer := range config.Enforcer.JwtTokenConfig {
-		jwtConfig := &enforcer.Issuer{
-			CertificateAlias:     issuer.CertificateAlias,
-			ConsumerKeyClaim:     issuer.ConsumerKeyClaim,
-			Issuer:               issuer.Issuer,
-			Name:                 issuer.Name,
-			ValidateSubscription: issuer.ValidateSubscription,
-			JwksURL:              issuer.JwksURL,
-			CertificateFilePath:  issuer.CertificateFilePath,
-		}
-		issuers = append(issuers, jwtConfig)
-	}
+	    claimMaps := []*enforcer.ClaimMapping{}
+	    for _, claimMap := range issuer.ClaimMapping{
+	        claim := &enforcer.ClaimMapping{
+	            RemoteClaim:    claimMap.RemoteClaim,
+	            LocalClaim:     claimMap.LocalClaim,
+        	}
+        	claimMaps = append(claimMaps,claim)
+        }
+    	jwtConfig := &enforcer.Issuer{
+            CertificateAlias:     issuer.CertificateAlias,
+    		ConsumerKeyClaim:     issuer.ConsumerKeyClaim,
+    		Issuer:               issuer.Issuer,
+    		Name:                 issuer.Name,
+    		ValidateSubscription: issuer.ValidateSubscription,
+    		JwksURL:              issuer.JwksURL,
+    		CertificateFilePath:  issuer.CertificateFilePath,
+    		ClaimMapping:         claimMaps,
+    	}
+    	issuers = append(issuers, jwtConfig)
+    }
 
 	authService := &enforcer.AuthService{
 		KeepAliveTime:  config.Enforcer.AuthService.KeepAliveTime,
@@ -70,8 +82,8 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		Eventhub: &enforcer.EventHub{
 			Enabled:    config.ControlPlane.EventHub.Enabled,
 			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,
-			JmsConnectionParameters: map[string]string{
-				"eventListeningEndpoints": config.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints,
+			JmsConnectionParameters: &enforcer.JmsConnectionParameters{
+				EventListeningEndpoints: config.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints,
 			},
 		},
 	}
@@ -216,4 +228,22 @@ func MarshalKeyMappingList(keyMappingList *types.ApplicationKeyMappingList) *sub
 	return &subscription.ApplicationKeyMappingList{
 		List: applicationKeyMappings,
 	}
+}
+
+// MarshalKeyManager converts the data into KeyManager proto type
+func MarshalKeyManager(keyManager *types.KeyManager) *keymgt.KeyManagerConfig {
+	configList, err := json.Marshal(keyManager.Configuration)
+	configuration := string(configList)
+	if err == nil {
+		newKeyManager := &keymgt.KeyManagerConfig{
+			Name:          keyManager.Name,
+			Type:          keyManager.Type,
+			Enabled:       keyManager.Enabled,
+			TenantDomain:  keyManager.TenantDomain,
+			Configuration: configuration,
+		}
+		return newKeyManager
+	}
+	logger.LoggerXds.Debugf("Error happens while marshaling key manager data for " + fmt.Sprint(keyManager.Name))
+	return nil
 }

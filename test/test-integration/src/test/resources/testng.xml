@@ -33,8 +33,9 @@
             <class name="org.wso2am.micro.gw.tests.apiDeploy.APiDeployTestCase"/>
             <class name="org.wso2am.micro.gw.tests.security.CorsTestCase"/>
             <class name="org.wso2am.micro.gw.tests.jwtValidator.ScopeTest"/>
-            <class name="org.wso2am.micro.gw.tests.jwtGenerator.JwtGeneratorTestCase"/>
             <class name="org.wso2am.micro.gw.tests.backendtls.BackendTLSTestcase"/>
+            <class name="org.wso2am.micro.gw.tests.jwtGenerator.JwtTransformerTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.jwtGenerator.CustomJwtTransformerTestCase"/>
             <class name="org.wso2am.micro.gw.tests.endpoints.ProductionSandboxTestCase"/>
             <class name="org.wso2am.micro.gw.tests.websocket.WebSocketDeployTestCase"/>
             <class name="org.wso2am.micro.gw.tests.websocket.WebSocketEndPointTestCase"/>

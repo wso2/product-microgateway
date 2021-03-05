@@ -147,3 +147,47 @@ type Scope struct {
 type ScopeList struct {
 	List []Scope `json:"list"`
 }
+
+// KeyManagerList for struct list of KeyManager
+type KeyManagerList struct {
+	KeyManagers []KeyManager `json:"KeyManager"`
+}
+
+// KeyManager for struct
+type KeyManager struct {
+	Name          string `json:"name"`
+	Type          string `json:"type"`
+	Enabled       bool   `json:"enabled"`
+	TenantDomain  string `json:"tenantDomain,omitempty"`
+	Configuration map[string]interface{}
+	// Configuration KeyManagerConfig `json:"configuration"`
+}
+
+// KeyManagerConfig for struct Configuration map[string]interface{} `json:"value"`
+type KeyManagerConfig struct {
+	TokenFormatString          string   `json:"token_format_string"`
+	ServerURL                  string   `json:"ServerURL"`
+	ValidationEnable           bool     `json:"validation_enable"`
+	ClaimMappings              []Claim  `json:"Claim"`
+	GrantTypes                 []string `json:"grant_types"`
+	EncryptPersistedTokens     bool     `json:"OAuthConfigurations.EncryptPersistedTokens"`
+	EnableOauthAppCreation     bool     `json:"enable_oauth_app_creation"`
+	ValidityPeriod             string   `json:"VALIDITY_PERIOD"`
+	EnableTokenGeneration      bool     `json:"enable_token_generation"`
+	Issuer                     string   `json:"issuer"`
+	EnableMapOauthConsumerApps bool     `json:"enable_map_oauth_consumer_apps"`
+	EnableTokenHash            bool     `json:"enable_token_hash"`
+	SelfValidateJwt            bool     `json:"self_validate_jwt"`
+	RevokeEndpoint             string   `json:"revoke_endpoint"`
+	EnableTokenEncryption      bool     `json:"enable_token_encryption"`
+	RevokeURL                  string   `json:"RevokeURL"`
+	TokenURL                   string   `json:"TokenURL,token_endpoint"`
+	CertificateType            string   `json:"certificate_type"`
+	CertificateValue           string   `json:"certificate_value"`
+}
+
+// Claim for struct
+type Claim struct {
+	RemoteClaim string `json:"remoteClaim"`
+	LocalClaim  string `json:"localClaim"`
+}

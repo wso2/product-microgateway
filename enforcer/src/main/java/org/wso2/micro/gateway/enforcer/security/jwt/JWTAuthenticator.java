@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -38,7 +38,7 @@ import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.EnforcerConfig;
-import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
 import org.wso2.micro.gateway.enforcer.constants.JwtConstants;
@@ -139,12 +139,7 @@ public class JWTAuthenticator implements Authenticator {
                 // Validate subscriptions
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
                 EnforcerConfig configuration = ConfigHolder.getInstance().getConfig();
-                TokenIssuerDto issuerDto = configuration.getIssuersMap().get(validationInfo.getIssuer());
-//                try {
-//                    log.info("TokenIssuerDto:"+ objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(issuerDto));
-//                }catch (Exception e){
-//                    log.error(new Error(e));
-//                }
+                ExtendedTokenIssuerDto issuerDto = configuration.getIssuersMap().get(validationInfo.getIssuer());
                   //TODO: enable subscription validation
                 if (issuerDto.isValidateSubscriptions()) {
 

@@ -74,6 +74,9 @@ disableSslVerification = false
     consumerKeyClaim = "azp"
     # Certificate Filepath within enforcer
     certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+    [[enforcer.jwtTokenConfig.claimMapping]]
+        remoteClaim = "sub"
+        localClaim = "CUSTOM-CLAIM"
 
 [enforcer.apimCredentials]
     username="admin"
@@ -104,4 +107,4 @@ retryInterval = 5
 skipSSLVerification=true
 # Message broker connection URL of the control plane
 [controlPlane.eventHub.jmsConnectionParameters]
-eventListeningEndpoints = "amqp://admin:admin@localhost:5672/"
+eventListeningEndpoints = ["amqp://admin:admin@localhost:5672?retries='5'&connectdelay='30000'"]
