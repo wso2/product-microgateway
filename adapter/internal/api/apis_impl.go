@@ -229,10 +229,25 @@ func extractAPIInformation(apiJsn []byte) (apiType, apiLifeCycleStatus, producti
 		return "", "", "", "", "", unmarshalErr
 	}
 	data := apiDef["data"].(map[string]interface{})
-	apiType = strings.ToUpper(data[apiTypeYamlKey].(string))
-	apiLifeCycleStatus = strings.ToUpper(data[lifeCycleStatus].(string))
-	apiEndpointImplementationType = data[endpointImplementationType].(string)
-	endpointConfig := data["endpointConfig"].(map[string]interface{})
+	// TODO: apictl m8 does not contain certain fields. Hence the null check
+	if data[apiTypeYamlKey] != nil {
+		apiType = strings.ToUpper(data[apiTypeYamlKey].(string))
+	} else {
+		apiType = mgw.HTTP
+	}
+	if data[lifeCycleStatus] != nil {
+		apiLifeCycleStatus = strings.ToUpper(data[lifeCycleStatus].(string))
+
+	}
+
+	if data[endpointImplementationType] != nil {
+		apiEndpointImplementationType = data[endpointImplementationType].(string)
+
+	}
+	var endpointConfig map[string]interface{}
+	if data["endpointConfig"] != nil {
+		endpointConfig = data["endpointConfig"].(map[string]interface{})
+	}
 
 	if endpointConfig["sandbox_endpoints"] != nil {
 		sandboxEndpoints := endpointConfig["sandbox_endpoints"].(map[string]interface{})
