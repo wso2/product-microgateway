@@ -52,14 +52,18 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public EventCategory getEventCategory() {
         // TODO: (VirajSalaka) Decide if options call should be neglected.
+        // TODO: (VirajSalaka) Backend returns some error ?
         if (logEntry.getResponse().getResponseCode().getValue() == 200
                 && logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
+            logger.info("Is success event");
             return EventCategory.SUCCESS;
             // TODO: (VirajSalaka) Finalize what is a fault
         } else if (logEntry.getResponse().getResponseCode().getValue() != 200
                 && !logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
+            logger.info("Is fault event");
             return EventCategory.FAULT;
         } else {
+            logger.info("Is invalid event");
             return EventCategory.INVALID;
         }
     }
@@ -118,6 +122,7 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         api.setApiName(getValueAsString(fieldsMap, "ApiName"));
         api.setApiVersion(getValueAsString(fieldsMap, "ApiVersion"));
         api.setApiCreatorTenantDomain(getValueAsString(fieldsMap, "ApiCreatorTenantDomain"));
+        logger.info(" API Analytics Event: " + api.toString());
         return api;
     }
 
@@ -128,9 +133,10 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
                 .getFilterMetadataMap().get("envoy.filters.http.ext_authz").getFieldsMap();
         Application application = new Application();
         application.setApplicationOwner(getValueAsString(fieldsMap, "ApplicationOwner"));
-        application.setApplicationId(getValueAsString(fieldsMap, "ApplicationName"));
+        application.setApplicationName(getValueAsString(fieldsMap, "ApplicationName"));
         application.setKeyType(getValueAsString(fieldsMap, "ApplicationKeyType"));
         application.setApplicationId(getValueAsString(fieldsMap, "ApplicationId"));
+        logger.info(" APP Analytics Event: " + application.toString());
         return application;
     }
 
@@ -140,7 +146,9 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
                 .getFilterMetadataMap().get("envoy.filters.http.ext_authz").getFieldsMap();
         Operation operation = new Operation();
         operation.setApiResourceTemplate(getValueAsString(fieldsMap, "ApiResourceTemplate"));
+        // TODO: (VirajSalaka) read from context
         operation.setApiMethod(logEntry.getRequest().getRequestMethod().name());
+        logger.info(" Operation Analytics Event: " + operation.toString());
         return operation;
     }
 
@@ -154,6 +162,7 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         // TODO: (VirajSalaka) add backend basepath
         target.setDestination(logEntry.getCommonProperties().getUpstreamRemoteAddress().getSocketAddress()
                 .getAddress());
+        logger.info(" Target Event: " + target.toString());
         return target;
     }
 
@@ -163,12 +172,13 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         Latencies latencies = new Latencies();
         // TODO: (VirajSalaka) If connection error happens these won't be available
         // TODO: (VirajSalaka) Finalize the correctness after discussion
-        latencies.setBackendLatency(properties.getTimeToFirstUpstreamTxByte().getNanos() / 1000000 -
-                properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000);
+        latencies.setBackendLatency(properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000 -
+                properties.getTimeToFirstUpstreamTxByte().getNanos() / 1000000);
         latencies.setResponseLatency(properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000);
         latencies.setRequestMediationLatency(properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000);
         latencies.setResponseMediationLatency(properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000 -
                 properties.getTimeToFirstUpstreamRxByte().getNanos() / 1000000);
+        logger.info(" Latencies Analytics Event: " + latencies.toString());
         return latencies;
     }
 
@@ -180,6 +190,7 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         metaInfo.setCorrelationId(getValueAsString(fieldsMap, "CorrelationId"));
         metaInfo.setGatewayType(getValueAsString(fieldsMap, "GatewayType"));
         metaInfo.setRegionId(getValueAsString(fieldsMap, "RegionId"));
+        logger.info(" Metadata Analytics Event: " + metaInfo.toString());
         return metaInfo;
     }
 
@@ -201,7 +212,7 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public long getRequestTime() {
         // TODO: (VirajSalaka) Findout if it is seconds or millies
-        return logEntry.getCommonProperties().getStartTime().getSeconds();
+        return logEntry.getCommonProperties().getStartTime().getSeconds() * 1000;
     }
 
     @Override

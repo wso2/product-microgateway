@@ -78,7 +78,7 @@ public class AnalyticsFilter implements Filter {
         requestContext.addMetadataToMap("DeploymentId", "not implemented");
         // TODO: (VirajSalaka) Move this out of this method as these remain static
         requestContext.addMetadataToMap("RegionId", "not implemented");
-        requestContext.addMetadataToMap("GatewayType", "Envoy");
+        requestContext.addMetadataToMap("GatewayType", "SYNAPSE");
 
         // As in the matched API, only the resources under the matched resource template are selected.
         //TODO: (VirajSalaka) populated API Resource template is incorrect.

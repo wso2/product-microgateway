@@ -31,6 +31,9 @@ import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsConfigurationHolder;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.micro.gateway.enforcer.server.EnforcerThreadPoolExecutor;
 import org.wso2.micro.gateway.enforcer.server.NativeThreadFactory;
 
@@ -53,8 +56,21 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
 
     public boolean init() {
         Map<String, String> configuration = new HashMap<>(2);
-        configuration.put("auth.api.token", "");
-        configuration.put("auth.api.url", "");
+        configuration.put("auth.api.token", "eyJ4NXQiOiJOVGd5TTJabE9XVTJOV00zWlRVeFpESTRNamsyTWpoa1pEVT" +
+                "FOak15TjJZMlpHRTBPV1ExTVRFek9HVmtabVl4WlRVMU9Ea3dOekV6TnpjNU9EVXpaZyIsImtpZCI6Ik5UZ3lNMl" +
+                "psT1dVMk5XTTNaVFV4WkRJNE1qazJNamhrWkRVMU5qTXlOMlkyWkdFME9XUTFNVEV6T0dWa1ptWXhaVFUxT0Rrd" +
+                "056RXpOemM1T0RVelpnX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJ3c28yX2Rldl9hZG1pbiIsImF1dCI" +
+                "6IkFQUExJQ0FUSU9OX1VTRVIiLCJpc3MiOiJodHRwczpcL1wvaWQucHJlcHJvZC5jaG9yZW8uZGV2OjQ0M1wvb2F1" +
+                "dGgyXC90b2tlbiIsImdyb3VwcyI6WyJJbnRlcm5hbFwvZXZlcnlvbmUiLCJBTkFMWVRJQ1MtQVBJTS5DT01cL21vbmV" +
+                "0aXplIl0sImF1ZCI6Im5wRk9oVG1aZjRTSUtUMFJFcGZQaDc0QTJWa2EiLCJlbnZpcm9ubWVudCI6InByb2QiLCJuYmY" +
+                "iOjE2MTQxODQ5NTcsImF6cCI6Im5wRk9oVG1aZjRTSUtUMFJFcGZQaDc0QTJWa2EiLCJzY29wZSI6ImFuYWx5dGljc19hc" +
+                "GltIG9wZW5pZCIsImN1c3RvbWVySWQiOiJ3c28yIiwiZXhwIjoxNjE1NDgwOTU3LCJpYXQiOjE2MTQxODQ5NTcsIm" +
+                "p0aSI6IjFiYzJjMTAxLWM5YTYtNGQwOS1iMjJmLTE0OWQxNmYyZjg1ZSJ9.hKFAsQpV_CTMaE_6l4IcjZ-ZWYQEFP" +
+                "Ef_EBrru5D73LYz7qkWAF67rLJqn29DizPf8Q8PsRRoeXiIO8St2hfv7QI6GW35ex1ak0I9g_8228I96WlO6Ihdydo" +
+                "NYTi9Mvrq2_ZWzF3RwWBqM6vTSiIdFZB9rSJ54TmeVCQdI0IzKSXGV7LVN-kP6uXSiTF83eqEXNTaVnIqKZ_VEtiti" +
+                "VdASW3PU45C1ksD7NLFXjhkJHEUfkuBXXXJJr1oNOdEXMXdoky2kbI0coZQxo0vZOOfxhXoMnE5H9qkyt89qbv13ZR" +
+                "7jZx83lcZb4dar8ImvKZVUxkYbUaR49aRZd22jULEQ");
+        configuration.put("auth.api.url", "https://analytics-event-auth.st.choreo.dev/auth/v1");
         AnalyticsConfigurationHolder.getInstance().setConfigurations(configuration);
         return startAccessLoggingServer();
     }
@@ -81,9 +97,13 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
 //                    event.setOperation(generateOperation(fieldsMap, logEntry));
 //                    event.setTarget(generateTarget(logEntry));
 
-//                    AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
-//                    GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-//                    dataCollector.collectData();
+                    AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
+                    GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+                    try {
+                        dataCollector.collectData();
+                    } catch (AnalyticsException e) {
+                        logger.error("Analtytics Error. ", e);
+                    }
                 }
 
             }
