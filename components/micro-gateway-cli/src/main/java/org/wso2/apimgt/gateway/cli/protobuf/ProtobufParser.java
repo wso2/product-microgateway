@@ -92,7 +92,7 @@ public class ProtobufParser {
         try {
             process = builder.start();
         } catch (IOException e) {
-            throw new CLIInternalException("Error in executing protoc command '" + command + "'.", e);
+            throw new CLIInternalException("Error in executing protoc command '" + builder.command() + "'.", e);
         }
         try {
             process.waitFor();

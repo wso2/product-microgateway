@@ -20,6 +20,7 @@ public type GatewayConf object {
     public JWTGeneratorConfigDTO jwtGeneratorConfig = {};
     public ListenerConfigDTO listenerConfig = {};
     public ApimCredentialsDTO apimCredentials = {};
+    public ServerConfigDTO serverConfig = {};
 
     public function getGatewayConf() returns (GatewayConf) {
         return gatewayConf;
@@ -31,6 +32,14 @@ public type GatewayConf object {
 
     public function getKeyManagerConf() returns (KeyManagerConf) {
         return gatewayConf.keyManagerConf;
+    }
+
+    public function setServerConfig(ServerConfigDTO serverConfig) {
+        gatewayConf.serverConfig = serverConfig;
+    }
+
+    public function getServerConfig() returns (ServerConfigDTO) {
+        return gatewayConf.serverConfig;
     }
 };
 

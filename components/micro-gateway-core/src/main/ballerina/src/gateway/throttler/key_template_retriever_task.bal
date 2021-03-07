@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import ballerina/task;
+import ballerina/time;
 
 const int keyTemplateRetrievalRetries = 15;
 string keyTemplateSrerviceURL = getConfigValue(THROTTLE_CONF_KEY_TEMPLATE_INSTANCE_ID, KM_SERVER_URL,
@@ -75,7 +76,8 @@ service keyTemplateRetrievalService = service {
                 if (keyTemplates is json[]) {
                     foreach var key in keyTemplates {
                         string keyTempalteValue = key.toString();
-                        keyTemplateMap[keyTempalteValue] = <@untainted>keyTempalteValue;
+                        time:Time time = time:currentTime();
+                        addKeyTemplate(<@untainted>keyTempalteValue, time.time);
                     }
                 }
                 printDebug(KEY_TEMPLATE_RETIEVAL_TASK, "Key template map : " + keyTemplateMap.toString());

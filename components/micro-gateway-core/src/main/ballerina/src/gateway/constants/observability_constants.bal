@@ -20,6 +20,7 @@ public const string MICRO_GATEWAY_METRICS_PORTS = "b7a.observability.metrics.pro
 public const string PORT = "port";
 public const string JMX_PORT = "jmx_port";
 public const string SECURE_PORT = "secure_port";
+public const string ENABLE_AUTH = "enableAuth";
 
 public const string PRE_AUTHN_FILTER_REQUEST = "Pre_Authen_Filter_Request";
 public const string BASICAUTH_PROVIDER = "BasicAuth_Provider";

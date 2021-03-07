@@ -177,6 +177,9 @@ public const int DEFAULT_HTTP_CLIENTS_MAX_ACTIVE_CONNECTIONS = -1;
 public const int DEFAULT_HTTP_CLIENTS_MAX_IDLE_CONNECTIONS = 100;
 public const int DEFAULT_HTTP_CLIENTS_WAIT_TIME = 30000;
 public const int DEFAULT_HTTP_CLIENTS_MAX_ACTIVE_STREAMS = 50;
+public const int DEFAULT_HTTP_CLIENTS_RESPONSE_MAX_STATUS_LINE_LENGTH = 4096;
+public const int DEFAULT_HTTP_CLIENTS_RESPONSE_MAX_HEADER_SIZE = 8192;
+public const int DEFAULT_HTTP_CLIENTS_RESPONSE_MAX_ENTITY_BODY_SIZE = -1;
 
 public const string DEFAULT_API_KEY_ISSUER = "https://localhost:9095/apikey";
 public const string DEFAULT_API_KEY_ALIAS = "ballerina";
@@ -201,3 +204,7 @@ public const string DEFAULT_APIM_CREDENTIALS_USERNAME = "admin";
 public const string DEFAULT_APIM_CREDENTIALS_PASSWORD = "admin";
 
 public const int DEFAULT_SERVER_TIMESTAMP_SKEW = -1;
+public const string DEFAULT_SERVER_HEADER = "ballerina";
+public const boolean DEFAULT_SERVER_HEADERCONF_USER_AGENT_PRESERVE_HEADER = false;
+public const boolean DEFAULT_SERVER_HEADERCONF_SERVER_PRESERVE_HEADER = true;
+public const boolean DEFAULT_SERVER_HEADERCONF_PRESERVE_HEADER = false;

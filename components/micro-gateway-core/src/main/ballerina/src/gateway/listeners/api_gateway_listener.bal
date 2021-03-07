@@ -51,6 +51,22 @@ public type APIGatewayListener object {
             self.listenerPort = getConfigIntValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_HTTPS_PORT, port);
             self.listenerType = "HTTPS";
         }
+        string serverHeaderConf = gatewayConf.getServerConfig().header;
+        if (serverHeaderConf == "") {
+            serverHeaderDTO[] serverHeaders = gatewayConf.getServerConfig().serverHeaders;
+            boolean headerFound = false;
+            foreach serverHeaderDTO serverHeader in serverHeaders {
+                if (serverHeader.headerName.toLowerAscii() == SERVER_HEADER_NAME.toLowerAscii()) {
+                    serverHeaderConf = serverHeader.overrideValue;
+                    headerFound = true;
+                    break;
+                }
+            }
+            if (!headerFound) {
+                serverHeaderConf = DEFAULT_SERVER_HEADER;
+            }
+        }
+        config.server = serverHeaderConf;
         printDebug(KEY_GW_LISTNER, "Initialized gateway configurations for port:" + self.listenerPort.toString());
         self.httpListener = new (self.listenerPort, config = config);
         printDebug(KEY_GW_LISTNER, "Successfully initialized APIGatewayListener for port:" + self.listenerPort.toString());

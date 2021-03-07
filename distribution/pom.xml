@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>3.2.1-SNAPSHOT</version>
+        <version>3.2.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -50,12 +50,10 @@
         <dependency>
             <groupId>org.wso2.andes.wso2</groupId>
             <artifactId>andes-client</artifactId>
-            <version>${andes.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.ballerina.jre.artifacts</groupId>
             <artifactId>ballerina-jre-artifacts</artifactId>
-            <version>${ballerina.jre.artifacts.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
@@ -90,12 +88,10 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>${jackson-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${jackson-core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.callhome</groupId>

@@ -18,6 +18,7 @@ const string KEY_LISTENER_INIT = "ListenerInit";
 
 http:ListenerConfiguration secureServiceEndpointConfiguration = { {{>http2}},
                                                                    {{>http1Settings}}
+                                                                   {{>requestLimits}}
                                                                            {{>mutualSSL}}
                                                                            filters:getFilters()
                                                                        };
@@ -29,6 +30,7 @@ listener gateway:APIGatewaySecureListener apiSecureListener = new(9095, secureSe
 
 http:ListenerConfiguration serviceEndpointConfiguration = { {{>http2}},
                                                             {{>http1Settings}}
+                                                            {{>requestLimits}}
                                                                      filters:getFilters()
                                                                  };
 

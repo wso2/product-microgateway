@@ -25,6 +25,8 @@ public const string QUERY = "query";
 public const string API_KEY_IN = "in";
 public const string API_KEY_NAME = "name";
 public const string AUTH_HEADER = "Authorization";
+public const string SERVER_HEADER_NAME = "server";
+public const string USER_AGENT_HEADER_NAME = "User-Agent";
 public const string AUTH_SCHEME_BASIC = "Basic";
 public const string AUTH_SCHEME_BEARER = "Bearer";
 public const string AUTH_SCHEME_BASIC_LOWERCASE = "basic";
@@ -35,7 +37,7 @@ public const string SERVICE_ANN_NAME = "ServiceConfig";
 public const string API_ANN_NAME = "API";
 public const string FILTER_ANN_NAME = "Filters";
 public const string SKIP_FILTERS_ANN_NAME = "SkipFilters";
-public const string GATEWAY_ANN_PACKAGE = "wso2/gateway:3.2.0";
+public const string GATEWAY_ANN_PACKAGE = "wso2/gateway:3.2.1";
 
 public const string BASIC_PREFIX_WITH_SPACE = "Basic ";
 public const string AUTHORIZATION_HEADER = "Authorization";
@@ -229,7 +231,7 @@ public const string KM_CONF_SECURITY_OAUTH2_PASSWORD_INSTANCE_ID = "keymanager.s
 public const string KM_CONF_SECURITY_OAUTH2_DIRECT_INSTANCE_ID = "keymanager.security.oauth2.directToken";
 public const string KM_CONF_SECURITY_OAUTH2_REFRESH_INSTANCE_ID = "keymanager.security.oauth2.refresh";
 public const string ENABLED = "enabled";
-public const string CLIENT_ID = "clientId";
+public const string CLIENT_ID = "client_id";
 public const string CLIENT_SECRET = "clientSecret";
 public const string SCOPES = "scopes";
 public const string SCOPE = "scope";
@@ -246,6 +248,7 @@ public const string KM_CONF_ISSUER = "issuer";
 
 public const string HTTP_CLIENTS_INSTANCE_ID = "httpClients";
 public const string HTTP_CLIENTS_POOL_CONFIG_INSTANCE_ID = "httpClients.poolConfig";
+public const string CLIENT_SSL_CONF_INSTANCE_ID = "httpClients.sslConfig";
 public const string HTTP_CLIENTS_MAX_ACTIVE_CONNECTIONS = "maxActiveConnections";
 public const string HTTP_CLIENTS_MAX_IDLE_CONNECTIONS = "maxIdleConnections";
 public const string HTTP_CLIENTS_WAIT_TIME = "waitTimeInMillis";
@@ -260,6 +263,10 @@ public const string HTTP_CLIENTS_PROXY_HOST = "host";
 public const string HTTP_CLIENTS_PROXY_PORT = "port";
 public const string HTTP_CLIENTS_PROXY_USERNAME = "username";
 public const string HTTP_CLIENTS_PROXY_PASSWORD = "password";
+public const string HTTP_CLIENTS_RESPONSE_LIMITS_CONFIG_INSTANCE_ID = "httpClients.responseLimits";
+public const string HTTP_CLIENTS_RESPONSE_MAX_STATUS_LINE_LENGTH  = "maxStatusLineLength";
+public const string HTTP_CLIENTS_RESPONSE_MAX_HEADER_SIZE = "maxHeaderSize";
+public const string HTTP_CLIENTS_RESPONSE_MAX_ENTITY_BODY_SIZE = "maxEntityBodySize";
 
 public const string BLOCKING_CONDITION_STATE = "state";
 public const string BLOCKING_CONDITION_KEY = "blockingCondition";
@@ -457,6 +464,7 @@ public const string SECURITY_INSTANCE_ID = "security";
 public const string SECURITY_VALIDATE_SUBSCRIPTIONS = "validateSubscriptions";
 
 // end of config constants
+public const string CUSTOM_PROPERTY = "customProperty";
 public const string IS_THROTTLED = "isThrottled";
 public const string EXPIRY_TIMESTAMP = "expiryTimeStamp";
 const string TRUE = "true";
@@ -597,6 +605,13 @@ public const string JWT_GENERATOR_TOKEN_CACHE_EVICTION_FACTOR = "tokenCacheEvict
 // server configurations
 public const string SERVER_CONF_ID = "server";
 public const string SERVER_TIMESTAMP_SKEW = "timestampSkew";
+public const string SERVER_HEADER = "header";
+
+// server preserved header configurations
+public const string SERVER_HEADER_ID = "server.headerConf";
+public const string SERVER_HEADER_HEADER_NAME = "headerName";
+public const string SERVER_HEADER_PRESERVE_HEADER = "preserveHeader";
+public const string SERVER_HEADER_OVERRIDE_VALUE = "overrideValue";
 
 public const string APIM_CREDENTIALS_INSTANCE_ID = "apim.credentials";
 public const string APIM_CREDENTIALS_USERNAME = "username";
