@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.Even
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.micro.gateway.enforcer.api.APIFactory;
+import org.wso2.micro.gateway.enforcer.constants.MetadataConstants;
 
 import java.util.Map;
 
@@ -113,42 +114,36 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public API getApi() {
         // TODO: (VirajSalaka) Null check (If enforcer connection is failed)
-        Map<String, Value> fieldsMap = logEntry.getCommonProperties().getMetadata()
-                .getFilterMetadataMap().get("envoy.filters.http.ext_authz").getFieldsMap();
+        Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
         API api = new API();
-        api.setApiId(getValueAsString(fieldsMap, "ApiId"));
-        api.setApiCreator(getValueAsString(fieldsMap, "ApiCreator"));
-        api.setApiType(getValueAsString(fieldsMap, "ApiType"));
-        api.setApiName(getValueAsString(fieldsMap, "ApiName"));
-        api.setApiVersion(getValueAsString(fieldsMap, "ApiVersion"));
-        api.setApiCreatorTenantDomain(getValueAsString(fieldsMap, "ApiCreatorTenantDomain"));
-        logger.info(" API Analytics Event: " + api.toString());
+        api.setApiId(getValueAsString(fieldsMap, MetadataConstants.API_ID_KEY));
+        api.setApiCreator(getValueAsString(fieldsMap, MetadataConstants.API_CREATOR_KEY));
+        api.setApiType(getValueAsString(fieldsMap, MetadataConstants.API_TYPE_KEY));
+        api.setApiName(getValueAsString(fieldsMap, MetadataConstants.API_NAME_KEY));
+        api.setApiVersion(getValueAsString(fieldsMap, MetadataConstants.API_VERSION_KEY));
+        api.setApiCreatorTenantDomain(getValueAsString(fieldsMap, MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY));
         return api;
     }
 
     @Override
     public Application getApplication() {
         // TODO: (VirajSalaka) Null check (If enforcer connection is failed)
-        Map<String, Value> fieldsMap = logEntry.getCommonProperties().getMetadata()
-                .getFilterMetadataMap().get("envoy.filters.http.ext_authz").getFieldsMap();
+        Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
         Application application = new Application();
-        application.setApplicationOwner(getValueAsString(fieldsMap, "ApplicationOwner"));
-        application.setApplicationName(getValueAsString(fieldsMap, "ApplicationName"));
-        application.setKeyType(getValueAsString(fieldsMap, "ApplicationKeyType"));
-        application.setApplicationId(getValueAsString(fieldsMap, "ApplicationId"));
-        logger.info(" APP Analytics Event: " + application.toString());
+        application.setApplicationOwner(getValueAsString(fieldsMap, MetadataConstants.APP_OWNER_KEY));
+        application.setApplicationName(getValueAsString(fieldsMap, MetadataConstants.APP_NAME_KEY));
+        application.setKeyType(getValueAsString(fieldsMap, MetadataConstants.APP_KEY_TYPE_KEY));
+        application.setApplicationId(getValueAsString(fieldsMap, MetadataConstants.APP_ID_KEY));
         return application;
     }
 
     @Override
     public Operation getOperation() {
-        Map<String, Value> fieldsMap = logEntry.getCommonProperties().getMetadata()
-                .getFilterMetadataMap().get("envoy.filters.http.ext_authz").getFieldsMap();
+        Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
         Operation operation = new Operation();
-        operation.setApiResourceTemplate(getValueAsString(fieldsMap, "ApiResourceTemplate"));
+        operation.setApiResourceTemplate(getValueAsString(fieldsMap, MetadataConstants.API_RESOURCE_TEMPLATE_KEY));
         // TODO: (VirajSalaka) read from context
         operation.setApiMethod(logEntry.getRequest().getRequestMethod().name());
-        logger.info(" Operation Analytics Event: " + operation.toString());
         return operation;
     }
 
@@ -178,19 +173,17 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         latencies.setRequestMediationLatency(properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000);
         latencies.setResponseMediationLatency(properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000 -
                 properties.getTimeToFirstUpstreamRxByte().getNanos() / 1000000);
-        logger.info(" Latencies Analytics Event: " + latencies.toString());
         return latencies;
     }
 
     @Override
     public MetaInfo getMetaInfo() {
-        Map<String, Value> fieldsMap = logEntry.getCommonProperties().getMetadata()
-                .getFilterMetadataMap().get("envoy.filters.http.ext_authz").getFieldsMap();
+        Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
         MetaInfo metaInfo = new MetaInfo();
-        metaInfo.setCorrelationId(getValueAsString(fieldsMap, "CorrelationId"));
-        metaInfo.setGatewayType(getValueAsString(fieldsMap, "GatewayType"));
-        metaInfo.setRegionId(getValueAsString(fieldsMap, "RegionId"));
-        logger.info(" Metadata Analytics Event: " + metaInfo.toString());
+        metaInfo.setCorrelationId(getValueAsString(fieldsMap, MetadataConstants.CORRELATION_ID_KEY));
+        // TODO: (VirajSalaka) Introduce Constant
+        metaInfo.setGatewayType("SYNAPSE");
+        metaInfo.setRegionId(getValueAsString(fieldsMap, MetadataConstants.REGION_KEY));
         return metaInfo;
     }
 
@@ -239,5 +232,10 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     private String getValueAsString(Map<String, Value> fieldsMap, String key) {
         return fieldsMap.get(key).getStringValue();
+    }
+
+    private Map<String, Value> getFieldsMapFromLogEntry() {
+        return logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
+                .get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY).getFieldsMap();
     }
 }

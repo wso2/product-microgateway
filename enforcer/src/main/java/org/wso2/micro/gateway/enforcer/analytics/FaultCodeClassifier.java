@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.Faul
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategories;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
+import org.wso2.micro.gateway.enforcer.constants.MetadataConstants;
 
 /**
  * FaultCodeClassifier classifies the fault and returns error code.
@@ -152,9 +153,11 @@ public class FaultCodeClassifier {
     private int getErrorCodeFromMetadata() {
         int errorCode = -1;
         // TODO: (VirajSalaka) Handle possible null pointer exception
-        if (logEntry.getCommonProperties().getMetadata().getFilterMetadataMap().containsKey("ErrorCode")) {
+        if (logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
+                .containsKey(MetadataConstants.ERROR_CODE_KEY)) {
             errorCode = Integer.parseInt(logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
-                    .get("envoy.filters.http.ext_authz").getFieldsMap().get("ErrorCode")
+                    .get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY).getFieldsMap()
+                    .get(MetadataConstants.ERROR_CODE_KEY)
                     .getStringValue());
         }
         return errorCode;

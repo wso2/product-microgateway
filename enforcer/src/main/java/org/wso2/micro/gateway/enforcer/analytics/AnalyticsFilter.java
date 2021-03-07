@@ -25,6 +25,7 @@ import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.constants.MetadataConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 
 /**
@@ -62,30 +63,29 @@ public class AnalyticsFilter implements Filter {
         // TODO: (VirajSalaka) Decide on whether to include/exclude the options requests, Cors requests
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
 
-        requestContext.addMetadataToMap("ApiId", authContext.getApiUUID());
-        requestContext.addMetadataToMap("ApiCreator", authContext.getApiPublisher());
-        requestContext.addMetadataToMap("ApiName", authContext.getApiName());
-        requestContext.addMetadataToMap("ApiVersion", authContext.getApiVersion());
-        requestContext.addMetadataToMap("ApiType", "HTTP");
-        requestContext.addMetadataToMap("ApiCreatorTenantDomain", "carbon.super");
+        requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY, authContext.getApiUUID());
+        requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_KEY, authContext.getApiPublisher());
+        requestContext.addMetadataToMap(MetadataConstants.API_NAME_KEY, authContext.getApiName());
+        requestContext.addMetadataToMap(MetadataConstants.API_VERSION_KEY, authContext.getApiVersion());
+        requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, "HTTP");
+        requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY, "carbon.super");
 
-        requestContext.addMetadataToMap("ApplicationKeyType", authContext.getKeyType());
-        requestContext.addMetadataToMap("ApplicationId", authContext.getApplicationId());
-        requestContext.addMetadataToMap("ApplicationName", authContext.getApplicationName());
-        requestContext.addMetadataToMap("ApplicationOwner", authContext.getSubscriber());
+        requestContext.addMetadataToMap(MetadataConstants.APP_KEY_TYPE_KEY, authContext.getKeyType());
+        requestContext.addMetadataToMap(MetadataConstants.APP_ID_KEY, authContext.getApplicationId());
+        requestContext.addMetadataToMap(MetadataConstants.APP_NAME_KEY, authContext.getApplicationName());
+        requestContext.addMetadataToMap(MetadataConstants.APP_OWNER_KEY, authContext.getSubscriber());
 
-        requestContext.addMetadataToMap("CorrelationId", requestContext.getCorrelationID());
-        requestContext.addMetadataToMap("DeploymentId", "not implemented");
+        requestContext.addMetadataToMap(MetadataConstants.CORRELATION_ID_KEY, requestContext.getCorrelationID());
         // TODO: (VirajSalaka) Move this out of this method as these remain static
-        requestContext.addMetadataToMap("RegionId", "not implemented");
+        requestContext.addMetadataToMap(MetadataConstants.REGION_KEY, "not implemented");
         requestContext.addMetadataToMap("GatewayType", "SYNAPSE");
 
         // As in the matched API, only the resources under the matched resource template are selected.
-        //TODO: (VirajSalaka) populated API Resource template is incorrect.
-        requestContext.addMetadataToMap("ApiResourceTemplate", requestContext.getMatchedResourcePath().getPath());
+        requestContext.addMetadataToMap(MetadataConstants.API_RESOURCE_TEMPLATE_KEY,
+                requestContext.getMatchedResourcePath().getPath());
 
         if (requestContext.getProperties().containsKey(APIConstants.MessageFormat.STATUS_CODE)) {
-            requestContext.addMetadataToMap("ErrorCode",
+            requestContext.addMetadataToMap(MetadataConstants.ERROR_CODE_KEY,
                     requestContext.getProperties().get(APIConstants.MessageFormat.STATUS_CODE).toString());
         }
         return true;

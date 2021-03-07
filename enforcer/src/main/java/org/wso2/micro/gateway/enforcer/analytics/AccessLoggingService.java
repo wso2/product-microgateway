@@ -83,20 +83,7 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
             public void onNext(StreamAccessLogsMessage message) {
                 logger.info("Received msg" + message.toString());
                 for (int i = 0; i < message.getHttpLogs().getLogEntryCount(); i++) {
-//                    Event event = new Event();
                     HTTPAccessLogEntry logEntry = message.getHttpLogs().getLogEntry(i);
-//                    // TODO: (VirajSalaka) Null check
-//                    Map<String, Value> fieldsMap = logEntry.getCommonProperties().getMetadata()
-//                            .getFilterMetadataMap().get("envoy.filters.http.ext_authz").getFieldsMap();
-//
-//                    // TODO: (VirajSalaka) Use the map itself
-//                    event.setApi(generateAPIFromMetadataMap(fieldsMap));
-//                    event.setApplication(generateApplicationFromMetadataMap(fieldsMap));
-//                    event.setMetaInfo(generateMetaInfoFromMetadataMap(fieldsMap));
-//                    event.setLatencies(generateLatencies(logEntry.getCommonProperties()));
-//                    event.setOperation(generateOperation(fieldsMap, logEntry));
-//                    event.setTarget(generateTarget(logEntry));
-
                     AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
                     GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
                     try {
@@ -105,7 +92,6 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
                         logger.error("Analtytics Error. ", e);
                     }
                 }
-
             }
 
             @Override
@@ -122,77 +108,6 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
             }
         };
     }
-
-//    private API generateAPIFromMetadataMap(Map<String, Value> fieldsMap) {
-//        API api = new API();
-//        api.setApiId(getValueAsString(fieldsMap, "ApiId"));
-//        api.setApiCreator(getValueAsString(fieldsMap, "ApiCreator"));
-//        api.setApiType(getValueAsString(fieldsMap, "ApiType"));
-//        api.setApiName(getValueAsString(fieldsMap, "ApiName"));
-//        api.setApiVersion(getValueAsString(fieldsMap, "ApiVersion"));
-//        api.setApiCreatorTenantDomain(getValueAsString(fieldsMap, "ApiCreatorTenantDomain"));
-//        return api;
-//    }
-
-//    private Application generateApplicationFromMetadataMap(Map<String, Value> fieldsMap) {
-//        Application application = new Application();
-//        application.setApplicationOwner(getValueAsString(fieldsMap, "ApplicationOwner"));
-//        application.setApplicationId(getValueAsString(fieldsMap, "ApplicationName"));
-//        application.setKeyType(getValueAsString(fieldsMap, "ApplicationKeyType"));
-//        application.setApplicationId(getValueAsString(fieldsMap, "ApplicationId"));
-//        return application;
-//    }
-
-//    private MetaInfo generateMetaInfoFromMetadataMap(Map<String, Value> fieldsMap) {
-//        MetaInfo metaInfo = new MetaInfo();
-//        metaInfo.setCorrelationId(getValueAsString(fieldsMap, "CorrelationId"));
-//        metaInfo.setDeploymentId(getValueAsString(fieldsMap, "DeploymentId"));
-//        metaInfo.setGatewayType(getValueAsString(fieldsMap, "GatewayType"));
-//        metaInfo.setRegionId(getValueAsString(fieldsMap, "RegionId"));
-//        return metaInfo;
-//    }
-
-//    private Operation generateOperation(Map<String, Value> fieldsMap, HTTPAccessLogEntry logEntry) {
-//        Operation operation = new Operation();
-//        operation.setApiResourceTemplate(getValueAsString(fieldsMap, "ApiResourceTemplate"));
-//        operation.setApiMethod(logEntry.getRequest().getRequestMethod().name());
-//        return operation;
-//    }
-
-//    private String getValueAsString(Map<String, Value> fieldsMap, String key) {
-//        return fieldsMap.get(key).getStringValue();
-//    }
-
-//    private Latencies generateLatencies(AccessLogCommon properties) {
-//        Latencies latencies = new Latencies();
-//        // TODO: (VirajSalaka) If connection error happens these won't be available
-//        // TODO: (VirajSalaka) Finalize the correctness after discussion
-//        latencies.setBackendLatency(properties.getTimeToFirstUpstreamTxByte().getNanos() / 1000000 -
-//                properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000);
-//        latencies.setResponseLatency(properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000);
-//        latencies.setRequestMediationLatency(properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000);
-//        latencies.setResponseMediationLatency(properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000 -
-//                properties.getTimeToFirstUpstreamRxByte().getNanos() / 1000000);
-//        return latencies;
-//    }
-
-//    private Target generateTarget(HTTPAccessLogEntry logEntry) {
-//        Target target = new Target();
-//        // As response caching is not configured at the moment.
-//        target.setResponseCacheHit(false);
-//        target.setTargetResponseCode(logEntry.getResponse().getResponseCode().getValue());
-//        // TODO: (VirajSalaka) get destination in the format of url
-//        // TODO: (VirajSalaka) add backend basepath
-//        target.setDestination(logEntry.getCommonProperties().getUpstreamRemoteAddress().getSocketAddress()
-//                .getAddress());
-//        return target;
-//    }
-
-//    public static String getTimeInISO(long time) {
-//        OffsetDateTime offsetDateTime = OffsetDateTime
-//                .ofInstant(Instant.ofEpochMilli(time), ZoneOffset.UTC.normalized());
-//        return offsetDateTime.toString();
-//    }
 
     private boolean startAccessLoggingServer() {
         final EventLoopGroup bossGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
