@@ -119,6 +119,7 @@ type Config struct {
 		}
 	}
 
+	// TODO: (VirajSalaka) Analytics config is shared among adapter and enforcer
 	Enforcer struct {
 		JwtTokenConfig  []jwtTokenConfig
 		EventHub        eventHub
@@ -126,6 +127,7 @@ type Config struct {
 		AuthService     authService
 		JwtGenerator    jwtGenerator
 		Cache           cache
+		Analytics       analytics
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
@@ -196,6 +198,12 @@ type cache struct {
 	Enabled     bool  `toml:"enabled"`
 	MaximumSize int32 `toml:"maximumSize"`
 	ExpiryTime  int32 `toml:"expiryTime"`
+}
+
+type analytics struct {
+	Enabled   bool   `toml:"enabled"`
+	AuthURL   string `toml:"authURL"`
+	AuthToken string `toml:"authToken"`
 }
 
 // APICtlUser represents registered APICtl Users

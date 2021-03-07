@@ -150,4 +150,19 @@ public interface ConfigOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder getCacheOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+   * @return Whether the analytics field is set.
+   */
+  boolean hasAnalytics();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+   * @return The analytics.
+   */
+  org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics getAnalytics();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.AnalyticsOrBuilder getAnalyticsOrBuilder();
 }

@@ -167,6 +167,19 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
+          case 82: {
+            org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.Builder subBuilder = null;
+            if (analytics_ != null) {
+              subBuilder = analytics_.toBuilder();
+            }
+            analytics_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(analytics_);
+              analytics_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -450,6 +463,32 @@ private static final long serialVersionUID = 0L;
     return getCache();
   }
 
+  public static final int ANALYTICS_FIELD_NUMBER = 10;
+  private org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics analytics_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+   * @return Whether the analytics field is set.
+   */
+  @java.lang.Override
+  public boolean hasAnalytics() {
+    return analytics_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+   * @return The analytics.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics getAnalytics() {
+    return analytics_ == null ? org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.getDefaultInstance() : analytics_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.AnalyticsOrBuilder getAnalyticsOrBuilder() {
+    return getAnalytics();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -490,6 +529,9 @@ private static final long serialVersionUID = 0L;
     }
     if (cache_ != null) {
       output.writeMessage(9, getCache());
+    }
+    if (analytics_ != null) {
+      output.writeMessage(10, getAnalytics());
     }
     unknownFields.writeTo(output);
   }
@@ -535,6 +577,10 @@ private static final long serialVersionUID = 0L;
     if (cache_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(9, getCache());
+    }
+    if (analytics_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(10, getAnalytics());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -593,6 +639,11 @@ private static final long serialVersionUID = 0L;
       if (!getCache()
           .equals(other.getCache())) return false;
     }
+    if (hasAnalytics() != other.hasAnalytics()) return false;
+    if (hasAnalytics()) {
+      if (!getAnalytics()
+          .equals(other.getAnalytics())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -639,6 +690,10 @@ private static final long serialVersionUID = 0L;
     if (hasCache()) {
       hash = (37 * hash) + CACHE_FIELD_NUMBER;
       hash = (53 * hash) + getCache().hashCode();
+    }
+    if (hasAnalytics()) {
+      hash = (37 * hash) + ANALYTICS_FIELD_NUMBER;
+      hash = (53 * hash) + getAnalytics().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -832,6 +887,12 @@ private static final long serialVersionUID = 0L;
         cache_ = null;
         cacheBuilder_ = null;
       }
+      if (analyticsBuilder_ == null) {
+        analytics_ = null;
+      } else {
+        analytics_ = null;
+        analyticsBuilder_ = null;
+      }
       return this;
     }
 
@@ -907,6 +968,11 @@ private static final long serialVersionUID = 0L;
         result.cache_ = cache_;
       } else {
         result.cache_ = cacheBuilder_.build();
+      }
+      if (analyticsBuilder_ == null) {
+        result.analytics_ = analytics_;
+      } else {
+        result.analytics_ = analyticsBuilder_.build();
       }
       onBuilt();
       return result;
@@ -1005,6 +1071,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasCache()) {
         mergeCache(other.getCache());
+      }
+      if (other.hasAnalytics()) {
+        mergeAnalytics(other.getAnalytics());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -2226,6 +2295,125 @@ private static final long serialVersionUID = 0L;
         cache_ = null;
       }
       return cacheBuilder_;
+    }
+
+    private org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics analytics_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics, org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.Builder, org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.AnalyticsOrBuilder> analyticsBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+     * @return Whether the analytics field is set.
+     */
+    public boolean hasAnalytics() {
+      return analyticsBuilder_ != null || analytics_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+     * @return The analytics.
+     */
+    public org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics getAnalytics() {
+      if (analyticsBuilder_ == null) {
+        return analytics_ == null ? org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.getDefaultInstance() : analytics_;
+      } else {
+        return analyticsBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+     */
+    public Builder setAnalytics(org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics value) {
+      if (analyticsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        analytics_ = value;
+        onChanged();
+      } else {
+        analyticsBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+     */
+    public Builder setAnalytics(
+        org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.Builder builderForValue) {
+      if (analyticsBuilder_ == null) {
+        analytics_ = builderForValue.build();
+        onChanged();
+      } else {
+        analyticsBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+     */
+    public Builder mergeAnalytics(org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics value) {
+      if (analyticsBuilder_ == null) {
+        if (analytics_ != null) {
+          analytics_ =
+            org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.newBuilder(analytics_).mergeFrom(value).buildPartial();
+        } else {
+          analytics_ = value;
+        }
+        onChanged();
+      } else {
+        analyticsBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+     */
+    public Builder clearAnalytics() {
+      if (analyticsBuilder_ == null) {
+        analytics_ = null;
+        onChanged();
+      } else {
+        analytics_ = null;
+        analyticsBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.Builder getAnalyticsBuilder() {
+      
+      onChanged();
+      return getAnalyticsFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.AnalyticsOrBuilder getAnalyticsOrBuilder() {
+      if (analyticsBuilder_ != null) {
+        return analyticsBuilder_.getMessageOrBuilder();
+      } else {
+        return analytics_ == null ?
+            org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.getDefaultInstance() : analytics_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics, org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.Builder, org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.AnalyticsOrBuilder> 
+        getAnalyticsFieldBuilder() {
+      if (analyticsBuilder_ == null) {
+        analyticsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics, org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.Builder, org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.AnalyticsOrBuilder>(
+                getAnalytics(),
+                getParentForChildren(),
+                isClean());
+        analytics_ = null;
+      }
+      return analyticsBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

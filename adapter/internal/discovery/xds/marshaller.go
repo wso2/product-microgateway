@@ -46,6 +46,12 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		ExpiryTime:  config.Enforcer.Cache.ExpiryTime,
 	}
 
+	analytics := &enforcer.Analytics{
+		Enabled:   config.Enforcer.Analytics.Enabled,
+		AuthUrl:   config.Enforcer.Analytics.AuthURL,
+		AuthToken: config.Enforcer.Analytics.AuthToken,
+	}
+
 	return &enforcer.Config{
 		ApimCredentials: &enforcer.AmCredentials{
 			Username: config.Enforcer.ApimCredentials.Username,
@@ -67,6 +73,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		AuthService:    authService,
 		JwtTokenConfig: issuers,
 		Cache:          cache,
+		Analytics:      analytics,
 		Eventhub: &enforcer.EventHub{
 			Enabled:    config.ControlPlane.EventHub.Enabled,
 			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,
