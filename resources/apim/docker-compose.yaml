@@ -20,7 +20,7 @@ services:
       - ENFORCER_PORT=8081
       - ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
     volumes:
-      - ./resources/router/security:/home/wso2/security
+      - ../resources/router/security:/home/wso2/security
     ports:
       - "9095:9095"
       - "9000:9000"
@@ -33,29 +33,33 @@ services:
       options:
         max-size: "20m"
         max-file: "5"
+    depends_on:
+      apim:
+        condition: service_healthy
     volumes:
-      - ./resources/adapter/security:/home/wso2/security
-      - ./resources/conf:/home/wso2/conf
+      - ../resources/adapter/security:/home/wso2/security
+      - ../resources/conf:/home/wso2/conf
     environment:
       - cp_admin_pwd=admin
       - adapter_admin_pwd=admin
     ports:
       - "18000:18000"
       - "9843:9843"
-    extra_hosts:
-      - "localhost:172.17.0.1"
+    links:
+      - apim
   enforcer:
     image: wso2/mg-enforcer:4.0.0-m7
     logging:
       options:
         max-size: "20m"
         max-file: "5"
-    volumes:  
-      - ./resources/enforcer/security:/home/wso2/security
-      - ./resources/conf:/home/wso2/conf
-      - ./resources/enforcer/dropins:/home/wso2/lib/dropins
+    volumes:
+      - ../resources/enforcer/security:/home/wso2/security
+      - ../resources/conf:/home/wso2/conf
+      - ../resources/enforcer/dropins:/home/wso2/lib/dropins
     links:
       - adapter
+      - apim
     environment:
       - ENFORCER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
       - ENFORCER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
@@ -65,8 +69,21 @@ services:
       - ADAPTER_XDS_PORT=18000
       - ENFORCER_LABEL=Production and Sandbox
       - XDS_MAX_MSG_SIZE=4194304
-      - JAVA_OPTS=${JAVA_OPTS}
+      - JAVA_OPTS=${JAVA_OPTS} -Dhttpclient.hostnameVerifier=AllowAll
       - apim_admin_pwd=admin
-
     ports:
       - "8081:8081"
+  apim:
+    image: wso2am/wso2am:4.0.0-alpha-alpine
+    healthcheck:
+      test: ["CMD", "nc", "-z","localhost", "9443"]
+      interval: 10s
+      start_period: 120s
+      retries: 50
+    ports:
+      - "9763:9763"
+      - "9443:9443"
+      - "5672:5672"
+      - "8243:8243"
+    volumes:
+      - ../resources/apim/deployment.toml:/home/wso2carbon/wso2am-4.0.0-alpha/repository/conf/deployment.toml
