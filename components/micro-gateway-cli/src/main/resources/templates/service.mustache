@@ -316,7 +316,8 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
                                 message : "Runtime Error",
                                 description : errorDescription
                             }};
-                            res.setPayload(payload);
+
+                res.setPayload(payload);
             } else {
                 gateway:attachGrpcErrorHeaders (res, errorDescription);
             }
