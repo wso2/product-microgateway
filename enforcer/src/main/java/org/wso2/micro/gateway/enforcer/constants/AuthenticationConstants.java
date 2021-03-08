@@ -1,5 +1,8 @@
 package org.wso2.micro.gateway.enforcer.constants;
 
+/**
+ * Holds the values for AuthenticationContext fields
+ */
 public class AuthenticationConstants {
     public static final String USERNAME = "username";
     public static final String APP_TIER = "applicationTier";

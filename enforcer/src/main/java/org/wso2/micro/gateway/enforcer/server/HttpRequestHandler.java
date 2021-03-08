@@ -21,7 +21,11 @@ import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import io.envoyproxy.envoy.type.v3.StatusCode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.api.*;
+import org.wso2.micro.gateway.enforcer.api.API;
+import org.wso2.micro.gateway.enforcer.api.APIFactory;
+import org.wso2.micro.gateway.enforcer.api.RequestContext;
+import org.wso2.micro.gateway.enforcer.api.ResponseObject;
+import org.wso2.micro.gateway.enforcer.api.RestAPI;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
@@ -32,7 +36,7 @@ import java.util.Map;
 /**
  * This class handles the request coming via the external auth gRPC service.
  */
-public class HttpRequestHandler implements RequestHandler<CheckRequest,ResponseObject>{
+public class HttpRequestHandler implements RequestHandler<CheckRequest, ResponseObject> {
     private static final Logger logger = LogManager.getLogger(HttpRequestHandler.class);
 
     public ResponseObject process(CheckRequest request) {
@@ -63,9 +67,9 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest,ResponseO
                 .get(AdapterConstants.SAND_CLUSTER_HEADER_KEY);
         ResourceConfig resourceConfig = null;
         // TODO (LahiruUdayanga) - Change the below logic for apiType in API.
-        if(api instanceof RestAPI){
+        if (api instanceof RestAPI) {
             resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
-        }else {
+        } else {
             // Basepath is considered for websocket APIs since there are no resources.
             resourceConfig = APIFactory.getInstance().getMatchedBasePath(api, requestPath);
         }

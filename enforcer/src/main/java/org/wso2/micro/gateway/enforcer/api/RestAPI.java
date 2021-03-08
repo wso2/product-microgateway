@@ -37,7 +37,7 @@ import java.util.Map;
 /**
  * Specific implementation for a Rest API type APIs.
  */
-public class RestAPI implements API{
+public class RestAPI implements API {
     private static final Logger logger = LogManager.getLogger(RestAPI.class);
 
     private APIConfig apiConfig;

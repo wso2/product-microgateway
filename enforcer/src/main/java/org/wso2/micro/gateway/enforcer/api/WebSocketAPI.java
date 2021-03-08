@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.micro.gateway.enforcer.api;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,6 +30,10 @@ import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Specific implementation for a WebSocket API type APIs. Contains 2 filter chains to process initial HTTP request and
+ * websocket frame metadata.
+ */
 public class WebSocketAPI implements API {
 
     private static final Logger logger = LogManager.getLogger(WebSocketAPI.class);
@@ -81,7 +102,7 @@ public class WebSocketAPI implements API {
         boolean proceed;
         for (Filter filter : getHttpFilters()) {
             proceed = filter.handleRequest(requestContext);
-            logger.info("proceed:"+ proceed);
+            logger.info("proceed:" + proceed);
             if (!proceed) {
                 return false;
             }
@@ -90,15 +111,15 @@ public class WebSocketAPI implements API {
     }
 
 
-    public List<Filter> getUpgradeFilters(){
+    public List<Filter> getUpgradeFilters() {
         return upgradeFilters;
     }
 
-    public List<Filter> getHttpFilters(){
+    public List<Filter> getHttpFilters() {
         return filters;
     }
 
-    public void initFilters(){
+    public void initFilters() {
         AuthFilter authFilter = new AuthFilter();
         authFilter.init(apiConfig);
         CorsFilter corsFilter = new CorsFilter();
@@ -106,13 +127,13 @@ public class WebSocketAPI implements API {
         this.filters.add(authFilter);
     }
 
-    public void initUpgradeFilters(){
+    public void initUpgradeFilters() {
         // TODO (LahiruUdayanga) - Initiate upgrade filter chain.
         // WebSocket throttle filter
         // WebSocket analytics filter
     }
 
-    public AuthenticationContext processMetadata(RequestContext requestContext){
+    public AuthenticationContext processMetadata(RequestContext requestContext) {
         return requestContext.getAuthenticationContext();
     }
 }

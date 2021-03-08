@@ -75,7 +75,7 @@ public class APIConfig {
             return this;
         }
 
-        public Builder apiType(String apiType){
+        public Builder apiType(String apiType) {
             this.apiType = apiType;
             return this;
         }

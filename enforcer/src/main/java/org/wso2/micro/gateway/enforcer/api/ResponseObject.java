@@ -32,7 +32,7 @@ import java.util.UUID;
 /**
  * Holds the response data to build the response object to be sent to the envoy proxy.
  */
-public class ResponseObject{
+public class ResponseObject {
     private int statusCode;
     private String errorCode;
     private String errorMessage;
@@ -106,37 +106,53 @@ public class ResponseObject{
         this.apiConfig = apiConfig;
     }
 
-    public Struct getMetadataStruct(){
+    public Struct getMetadataStruct() {
         Struct.Builder structBuilder = Struct.newBuilder();
-        return structBuilder.putFields(APIConstants.WEBSOCKET_STREAM_ID, Value.newBuilder().setStringValue(UUID.randomUUID().toString()).build())
+        return structBuilder.putFields(APIConstants.WEBSOCKET_STREAM_ID, Value.newBuilder()
+                .setStringValue(UUID.randomUUID().toString()).build())
                 .putFields(APIConstants.GW_API_NAME_PARAM, getNullableStringValue(apiConfig.getName()))
                 .putFields(APIConstants.GW_VERSION_PARAM, getNullableStringValue(apiConfig.getVersion()))
                 .putFields(APIConstants.GW_BASE_PATH_PARAM, getNullableStringValue(apiConfig.getBasePath()))
-                .putFields(AuthenticationConstants.USERNAME, getNullableStringValue(authenticationContext.getUsername()))
-                .putFields(AuthenticationConstants.APP_TIER, getNullableStringValue( authenticationContext.getApplicationTier()))
+                .putFields(AuthenticationConstants.USERNAME,
+                        getNullableStringValue(authenticationContext.getUsername()))
+                .putFields(AuthenticationConstants.APP_TIER,
+                        getNullableStringValue(authenticationContext.getApplicationTier()))
                 .putFields(AuthenticationConstants.TIER, getNullableStringValue(authenticationContext.getTier()))
                 .putFields(AuthenticationConstants.API_TIER, getNullableStringValue(authenticationContext.getApiTier()))
-                .putFields(AuthenticationConstants.CONTENT_AWARE_TIER_PRESENT, Value.newBuilder().setBoolValue(authenticationContext.isContentAwareTierPresent()).build())
+                .putFields(AuthenticationConstants.CONTENT_AWARE_TIER_PRESENT,
+                        Value.newBuilder().setBoolValue(authenticationContext.isContentAwareTierPresent()).build())
                 .putFields(AuthenticationConstants.API_KEY, getNullableStringValue(authenticationContext.getApiKey()))
                 .putFields(AuthenticationConstants.KEY_TYPE, getNullableStringValue(authenticationContext.getKeyType()))
-                .putFields(AuthenticationConstants.CALLER_TOKEN, getNullableStringValue(authenticationContext.getCallerToken()))
-                .putFields(AuthenticationConstants.APP_ID, getNullableStringValue(authenticationContext.getApplicationId()))
-                .putFields(AuthenticationConstants.APP_NAME, getNullableStringValue(authenticationContext.getApplicationName()))
-                .putFields(AuthenticationConstants.CONSUMER_KEY, getNullableStringValue(authenticationContext.getConsumerKey()))
-                .putFields(AuthenticationConstants.SUBSCRIBER, getNullableStringValue(authenticationContext.getSubscriber()))
-                .putFields(AuthenticationConstants.SPIKE_ARREST_LIMIT, Value.newBuilder().setNumberValue(authenticationContext.getSpikeArrestLimit()).build())
-                .putFields(AuthenticationConstants.SUBSCRIBER_TENANT_DOMAIN, getNullableStringValue(authenticationContext.getSubscriberTenantDomain()))
-                .putFields(AuthenticationConstants.SPIKE_ARREST_UNIT, getNullableStringValue(authenticationContext.getSpikeArrestUnit()))
-                .putFields(AuthenticationConstants.STOP_ON_QUOTA, Value.newBuilder().setBoolValue(authenticationContext.isStopOnQuotaReach()).build())
-                .putFields(AuthenticationConstants.PRODUCT_NAME, getNullableStringValue(authenticationContext.getProductName()))
-                .putFields(AuthenticationConstants.PRODUCT_PROVIDER, getNullableStringValue(authenticationContext.getProductProvider()))
-                .putFields(AuthenticationConstants.API_PUBLISHER, getNullableStringValue(authenticationContext.getApiPublisher())).build();
+                .putFields(AuthenticationConstants.CALLER_TOKEN,
+                        getNullableStringValue(authenticationContext.getCallerToken()))
+                .putFields(AuthenticationConstants.APP_ID,
+                        getNullableStringValue(authenticationContext.getApplicationId()))
+                .putFields(AuthenticationConstants.APP_NAME,
+                        getNullableStringValue(authenticationContext.getApplicationName()))
+                .putFields(AuthenticationConstants.CONSUMER_KEY,
+                        getNullableStringValue(authenticationContext.getConsumerKey()))
+                .putFields(AuthenticationConstants.SUBSCRIBER,
+                        getNullableStringValue(authenticationContext.getSubscriber()))
+                .putFields(AuthenticationConstants.SPIKE_ARREST_LIMIT,
+                        Value.newBuilder().setNumberValue(authenticationContext.getSpikeArrestLimit()).build())
+                .putFields(AuthenticationConstants.SUBSCRIBER_TENANT_DOMAIN,
+                        getNullableStringValue(authenticationContext.getSubscriberTenantDomain()))
+                .putFields(AuthenticationConstants.SPIKE_ARREST_UNIT,
+                        getNullableStringValue(authenticationContext.getSpikeArrestUnit()))
+                .putFields(AuthenticationConstants.STOP_ON_QUOTA,
+                        Value.newBuilder().setBoolValue(authenticationContext.isStopOnQuotaReach()).build())
+                .putFields(AuthenticationConstants.PRODUCT_NAME,
+                        getNullableStringValue(authenticationContext.getProductName()))
+                .putFields(AuthenticationConstants.PRODUCT_PROVIDER,
+                        getNullableStringValue(authenticationContext.getProductProvider()))
+                .putFields(AuthenticationConstants.API_PUBLISHER,
+                        getNullableStringValue(authenticationContext.getApiPublisher())).build();
     }
 
-    private Value getNullableStringValue(String value){
-        if(value != null){
+    private Value getNullableStringValue(String value) {
+        if (value != null) {
             return Value.newBuilder().setStringValue(value).build();
-        }else {
+        } else {
             return Value.newBuilder().setNullValue(NullValue.NULL_VALUE).build();
         }
     }

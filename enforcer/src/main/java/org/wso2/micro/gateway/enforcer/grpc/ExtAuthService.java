@@ -105,7 +105,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
                     .build();
             responseBuilder.addHeaders(headerValueOption);
-            if (responseObject.getApiConfig() != null && responseObject.getApiConfig().getApiType().equals(APIConstants.ApiType.WEB_SOCKET)){
+            if (responseObject.getApiConfig() != null && responseObject.getApiConfig().getApiType()
+                    .equals(APIConstants.ApiType.WEB_SOCKET)) {
                 return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
                         .setOkResponse(okResponseBuilder.build())
                         .setDynamicMetadata(responseObject.getMetadataStruct()).build();

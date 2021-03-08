@@ -65,12 +65,12 @@ public class APIFactory {
 
         //TODO: (Lahiru) Check apiType field of API to differentiate WebSocket APIs
         for (Api api : apis) {
-            if(api.getResourcesCount() != 0){
+            if (api.getResourcesCount() != 0) {
                 RestAPI enforcerApi = new RestAPI();
                 enforcerApi.init(api);
                 String apiKey = getApiKey(enforcerApi);
                 newApis.put(apiKey, enforcerApi);
-            }else{
+            } else {
                 WebSocketAPI webSocketAPI = new WebSocketAPI();
                 webSocketAPI.init(api);
                 String apiKey = getApiKey(webSocketAPI);
@@ -101,12 +101,13 @@ public class APIFactory {
         return apis.get(apiKey);
     }
 
-    public WebSocketAPI getMatchedAPI(RateLimitRequest rateLimitRequest){
-        String basePath = rateLimitRequest.getMetadataContext().getFilterMetadataMap().
-                get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.GW_BASE_PATH_PARAM).getStringValue();
+    public WebSocketAPI getMatchedAPI(RateLimitRequest rateLimitRequest) {
+        String basePath = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
+                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.GW_BASE_PATH_PARAM)
+                .getStringValue();
         String version = rateLimitRequest.getMetadataContext().getFilterMetadataMap().
                 get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.GW_VERSION_PARAM).getStringValue();
-        String apiKey = basePath+ '/' + version;
+        String apiKey = basePath + '/' + version;
         if (logger.isDebugEnabled()) {
             logger.debug("Looking for matching API with basepath: {} and version: {}", basePath, version);
         }
@@ -121,9 +122,9 @@ public class APIFactory {
                                 .equals(ResourceConfig.HttpMethods.valueOf(method))).findFirst().orElse(null);
     }
 
-    public ResourceConfig getMatchedBasePath(API api, String basePath){
+    public ResourceConfig getMatchedBasePath(API api, String basePath) {
         ResourceConfig resourceConfig = new ResourceConfig();
-        if(api.getAPIConfig().getBasePath().equals(basePath)){
+        if (api.getAPIConfig().getBasePath().equals(basePath)) {
             resourceConfig.setPath(basePath);
             resourceConfig.setMethod(ResourceConfig.HttpMethods.GET);
         }

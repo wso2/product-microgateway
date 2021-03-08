@@ -29,7 +29,7 @@ import java.util.TreeMap;
  * Holds the set of meta data related to current request flowing through the gateway. This context should be shared
  * through out the complete request flow through the gateway enforcer.
  */
-public class RequestContext{
+public class RequestContext {
 
     private API mathedAPI;
     private String requestPath;
@@ -109,7 +109,7 @@ public class RequestContext{
             return this;
         }
 
-        public Builder webSocketMetadataContext(WebSocketMetadataContext webSocketMetadataContext){
+        public Builder webSocketMetadataContext(WebSocketMetadataContext webSocketMetadataContext) {
             this.webSocketMetadataContext = webSocketMetadataContext;
             return this;
         }
@@ -130,7 +130,7 @@ public class RequestContext{
             if (!StringUtils.isEmpty(prodClusterHeader) && !StringUtils.isEmpty(sandClusterHeader)) {
                 requestContext.clusterHeaderEnabled = true;
             }
-            if(this.webSocketMetadataContext != null){
+            if (this.webSocketMetadataContext != null) {
                 requestContext.webSocketMetadataContext = this.webSocketMetadataContext;
             }
             return requestContext;
