@@ -6,7 +6,7 @@
 [adapter.server]
   host = "0.0.0.0"
   port = "9843"
-  tokenDuration = "1h"
+  tokenTTL = "1h"
   tokenPrivateKeyPath = "/home/wso2/security/keystore/mg.key"
   [[adapter.server.users]]
     username = "admin"

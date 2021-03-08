@@ -78,10 +78,14 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	}
 
 	api.BearerTokenAuth = func(token string, scopes []string) (*models.Principal, error) {
-		valid, err := auth.ValidateToken(token, scopes)
-		if err != nil || !valid {
-			logger.LoggerAPI.Info("The provided token is not valid or server error")
-			return nil, errors.Unauthenticated("The provided token is not valid or server error")
+		valid, err := auth.ValidateToken(token, scopes, mgwConfig)
+		if err != nil {
+			logger.LoggerAPI.Error(err.Error())
+			return nil, errors.New(500, "error occured while reading the token")
+		}
+		if !valid {
+			logger.LoggerAPI.Info("The provided token is not valid")
+			return nil, errors.Unauthenticated("The provided token is not valid")
 		}
 		p := models.Principal{
 			Token:    token,

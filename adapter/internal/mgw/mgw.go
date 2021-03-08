@@ -132,7 +132,7 @@ func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server,
 
 	go func() {
 		if err = auth.Init(); err != nil {
-			logger.LoggerMgw.Error("error while initializing autherization component.", err)
+			logger.LoggerMgw.Error("Error while initializing autherization component.", err)
 		}
 	}()
 }

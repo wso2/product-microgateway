@@ -73,7 +73,7 @@ type Config struct {
 			// APICTL Users
 			Users []APICtlUser `toml:"users"`
 			// Access token validity duration
-			TokenDuration string
+			TokenTTL string
 			// Private key to sign the token
 			TokenPrivateKeyPath string
 		}
@@ -198,8 +198,8 @@ type jwtGenerator struct {
 }
 
 type claimMapping struct {
-    RemoteClaim string
-    LocalClaim string
+	RemoteClaim string
+	LocalClaim  string
 }
 
 type cache struct {

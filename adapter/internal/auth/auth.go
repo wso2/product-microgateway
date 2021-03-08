@@ -54,6 +54,16 @@ func ValidateCredentials(username, password string, config *config.Config) bool 
 	return valid
 }
 
+func validateUser(username string, config *config.Config) bool {
+	valid := false
+	for _, regUser := range config.Adapter.Server.Users {
+		if username == regUser.Username {
+			valid = true
+		}
+	}
+	return valid
+}
+
 // Init prepares a private key to sign access tokens, and sets token duration
 func Init() (err error) {
 	conf, _ := config.ReadConfigs()
@@ -79,7 +89,7 @@ func preparePrivateKey(conf *config.Config) (err error) {
 }
 
 func setTokenDuration(conf *config.Config) {
-	tokenDurationString := conf.Adapter.Server.TokenDuration
+	tokenDurationString := conf.Adapter.Server.TokenTTL
 	if tokenDurationString == "" {
 		loggers.LoggerAuth.Warn("Token duration not set. Set to default value: 1h")
 		tokenDurationString = "1h"
@@ -122,7 +132,9 @@ func GenerateToken(username string) (accessToken string, err error) {
 }
 
 // ValidateToken verifies the signature and validates the access token
-func ValidateToken(accessToken string, resourceScopes []string) (valid bool, err error) {
+func ValidateToken(accessToken string, resourceScopes []string, conf *config.Config) (
+	valid bool, err error) {
+
 	privateKey, err := getPrivateKey()
 	if err != nil {
 		loggers.LoggerAuth.Errorf("Failed to retrive private key: %s", err)
@@ -135,7 +147,12 @@ func ValidateToken(accessToken string, resourceScopes []string) (valid bool, err
 	)
 	if err != nil {
 		loggers.LoggerAPI.Errorf("Failed to parse JWT token: %s", err)
-		return false, err
+		return false, nil
+	}
+	tokenUser, _ := token.Get("username")
+	if !validateUser(tokenUser.(string), conf) {
+		loggers.LoggerAPI.Error("Invalid username in token.")
+		return false, nil
 	}
 	tokenScope, _ := token.Get("scope")
 	if !stringInSlice(tokenScope.(string), resourceScopes) {
