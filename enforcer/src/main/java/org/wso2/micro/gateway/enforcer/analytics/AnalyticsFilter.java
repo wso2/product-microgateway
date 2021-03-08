@@ -19,6 +19,7 @@
 package org.wso2.micro.gateway.enforcer.analytics;
 
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.Filter;
@@ -34,8 +35,9 @@ import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 public class AnalyticsFilter implements Filter {
     private static final Logger logger = LogManager.getLogger(AnalyticsFilter.class);
     private static AnalyticsFilter analyticsFilter;
+    private static final String DEFAULT_FOR_UNASSIGNED = "UnAssigned";
 
-    private AnalyticsFilter () {
+    private AnalyticsFilter() {
     }
 
     public static AnalyticsFilter getInstance() {
@@ -60,25 +62,37 @@ public class AnalyticsFilter implements Filter {
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
+        String apiName = requestContext.getMathedAPI().getAPIConfig().getName();
+        String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
         // TODO: (VirajSalaka) Decide on whether to include/exclude the options requests, Cors requests
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
 
-        requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY, authContext.getApiUUID());
-        requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_KEY, authContext.getApiPublisher());
-        requestContext.addMetadataToMap(MetadataConstants.API_NAME_KEY, authContext.getApiName());
-        requestContext.addMetadataToMap(MetadataConstants.API_VERSION_KEY, authContext.getApiVersion());
+        requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY,
+                authContext.getApiUUID() != null ? authContext.getApiUUID() : generateHash(apiName, apiVersion));
+        requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_KEY,
+                setDefaultIfNull(authContext.getApiPublisher()));
+        requestContext.addMetadataToMap(MetadataConstants.API_NAME_KEY, apiName);
+        requestContext.addMetadataToMap(MetadataConstants.API_VERSION_KEY, apiVersion);
+        // TODO: (VirajSalaka) Retrieve from APIConfig
         requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, "HTTP");
+        // TODO: (VirajSalaka) Retrieve From Configuration
         requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY, "carbon.super");
 
-        requestContext.addMetadataToMap(MetadataConstants.APP_KEY_TYPE_KEY, authContext.getKeyType());
-        requestContext.addMetadataToMap(MetadataConstants.APP_ID_KEY, authContext.getApplicationId());
-        requestContext.addMetadataToMap(MetadataConstants.APP_NAME_KEY, authContext.getApplicationName());
-        requestContext.addMetadataToMap(MetadataConstants.APP_OWNER_KEY, authContext.getSubscriber());
+        // Default Value would be PRODUCTION
+        requestContext.addMetadataToMap(MetadataConstants.APP_KEY_TYPE_KEY,
+                authContext.getKeyType() == null ? APIConstants.API_KEY_TYPE_PRODUCTION : authContext.getKeyType());
+        // TODO: (VirajSalaka) Come up with creative scheme
+        requestContext.addMetadataToMap(MetadataConstants.APP_ID_KEY,
+                setDefaultIfNull(authContext.getApplicationId()));
+        requestContext.addMetadataToMap(MetadataConstants.APP_NAME_KEY,
+                setDefaultIfNull(authContext.getApplicationName()));
+        requestContext.addMetadataToMap(MetadataConstants.APP_OWNER_KEY,
+                setDefaultIfNull(authContext.getSubscriber()));
 
         requestContext.addMetadataToMap(MetadataConstants.CORRELATION_ID_KEY, requestContext.getCorrelationID());
         // TODO: (VirajSalaka) Move this out of this method as these remain static
-        requestContext.addMetadataToMap(MetadataConstants.REGION_KEY, "not implemented");
-        requestContext.addMetadataToMap("GatewayType", "SYNAPSE");
+        requestContext.addMetadataToMap(MetadataConstants.REGION_KEY, setDefaultIfNull(null));
+        requestContext.addMetadataToMap("GatewayType", "ENVOY");
 
         // As in the matched API, only the resources under the matched resource template are selected.
         requestContext.addMetadataToMap(MetadataConstants.API_RESOURCE_TEMPLATE_KEY,
@@ -89,5 +103,13 @@ public class AnalyticsFilter implements Filter {
                     requestContext.getProperties().get(APIConstants.MessageFormat.STATUS_CODE).toString());
         }
         return true;
+    }
+
+    private String generateHash(String apiName, String apiVersion) {
+        return DigestUtils.md5Hex(apiName + ":" + apiVersion);
+    }
+
+    private String setDefaultIfNull(String value) {
+        return value == null ? DEFAULT_FOR_UNASSIGNED : value;
     }
 }
