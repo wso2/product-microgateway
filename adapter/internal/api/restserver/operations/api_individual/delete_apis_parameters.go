@@ -50,17 +50,25 @@ type DeleteApisParams struct {
 	/*Name of the API
 
 	  Required: true
+	  Max Length: 255
+	  Min Length: 3
+	  Pattern: ^[a-zA-Z0-9_~.-]*$
 	  In: query
 	*/
 	APIName string
 	/*version of the API
 
 	  Required: true
+	  Max Length: 15
+	  Min Length: 1
+	  Pattern: ^[a-zA-Z0-9_.-]*$
 	  In: query
 	*/
 	Version string
 	/*Virtual Host of the API
 
+	  Max Length: 255
+	  Pattern: \b((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\b
 	  In: query
 	*/
 	Vhost *string
@@ -115,6 +123,28 @@ func (o *DeleteApisParams) bindAPIName(rawData []string, hasKey bool, formats st
 	}
 	o.APIName = raw
 
+	if err := o.validateAPIName(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateAPIName carries on validations for parameter APIName
+func (o *DeleteApisParams) validateAPIName(formats strfmt.Registry) error {
+
+	if err := validate.MinLength("apiName", "query", o.APIName, 3); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("apiName", "query", o.APIName, 255); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("apiName", "query", o.APIName, `^[a-zA-Z0-9_~.-]*$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -136,6 +166,28 @@ func (o *DeleteApisParams) bindVersion(rawData []string, hasKey bool, formats st
 	}
 	o.Version = raw
 
+	if err := o.validateVersion(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateVersion carries on validations for parameter Version
+func (o *DeleteApisParams) validateVersion(formats strfmt.Registry) error {
+
+	if err := validate.MinLength("version", "query", o.Version, 1); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("version", "query", o.Version, 15); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("version", "query", o.Version, `^[a-zA-Z0-9_.-]*$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -153,6 +205,24 @@ func (o *DeleteApisParams) bindVhost(rawData []string, hasKey bool, formats strf
 		return nil
 	}
 	o.Vhost = &raw
+
+	if err := o.validateVhost(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateVhost carries on validations for parameter Vhost
+func (o *DeleteApisParams) validateVhost(formats strfmt.Registry) error {
+
+	if err := validate.MaxLength("vhost", "query", *o.Vhost, 255); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("vhost", "query", *o.Vhost, `\b((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\b`); err != nil {
+		return err
+	}
 
 	return nil
 }

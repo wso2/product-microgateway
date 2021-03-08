@@ -220,7 +220,7 @@ func UpdateAPI(apiContent config.APIContent) {
 		mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
 	}
 
-	apiIdentifier := apiContent.VHost + ":" + apiContent.Name + ":" + apiContent.Version // TODO: (SuKSW) update once vhost feature added
+	apiIdentifier := GenerateIdentifierForAPI(apiContent.VHost, apiContent.Name, apiContent.Version)
 	//TODO: Uncomment the below section depending on MgwSwagger.Resource ids
 	//existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
 	// if exists {
@@ -652,6 +652,7 @@ func ListApis(apiType string, limit *int64) *apiModel.APIMeta {
 			apiMetaListItem.APIName = mgwSwagger.GetTitle()
 			apiMetaListItem.Version = mgwSwagger.GetVersion()
 			apiMetaListItem.APIType = mgwSwagger.GetAPIType()
+			apiMetaListItem.Context = mgwSwagger.GetXWso2Basepath()
 			apiMetaListItem.GatewayEnvs = openAPIEnvoyMap[apiIdentifier]
 			apisArray = append(apisArray, &apiMetaListItem)
 			i++

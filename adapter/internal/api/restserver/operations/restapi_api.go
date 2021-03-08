@@ -37,6 +37,7 @@ import (
 	"github.com/wso2/micro-gw/internal/api/models"
 	"github.com/wso2/micro-gw/internal/api/restserver/operations/api_collection"
 	"github.com/wso2/micro-gw/internal/api/restserver/operations/api_individual"
+	"github.com/wso2/micro-gw/internal/api/restserver/operations/authorization"
 )
 
 // NewRestapiAPI creates a new Restapi instance
@@ -71,10 +72,16 @@ func NewRestapiAPI(spec *loads.Document) *RestapiAPI {
 		APIIndividualPostApisHandler: api_individual.PostApisHandlerFunc(func(params api_individual.PostApisParams, principal *models.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation api_individual.PostApis has not yet been implemented")
 		}),
+		AuthorizationPostOauth2TokenHandler: authorization.PostOauth2TokenHandlerFunc(func(params authorization.PostOauth2TokenParams) middleware.Responder {
+			return middleware.NotImplemented("operation authorization.PostOauth2Token has not yet been implemented")
+		}),
 
 		// Applies when the Authorization header is set with the Basic scheme
 		BasicAuthAuth: func(user string, pass string) (*models.Principal, error) {
 			return nil, errors.NotImplemented("basic auth  (BasicAuth) has not yet been implemented")
+		},
+		BearerTokenAuth: func(token string, scopes []string) (*models.Principal, error) {
+			return nil, errors.NotImplemented("oauth2 bearer auth (BearerToken) has not yet been implemented")
 		},
 		// default authorizer is authorized meaning no requests are blocked
 		APIAuthorizer: security.Authorized(),
@@ -122,6 +129,10 @@ type RestapiAPI struct {
 	// it performs authentication with basic auth
 	BasicAuthAuth func(string, string) (*models.Principal, error)
 
+	// BearerTokenAuth registers a function that takes an access token and a collection of required scopes and returns a principal
+	// it performs authentication based on an oauth2 bearer token provided in the request
+	BearerTokenAuth func(string, []string) (*models.Principal, error)
+
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
@@ -131,6 +142,8 @@ type RestapiAPI struct {
 	APICollectionGetApisHandler api_collection.GetApisHandler
 	// APIIndividualPostApisHandler sets the operation handler for the post apis operation
 	APIIndividualPostApisHandler api_individual.PostApisHandler
+	// AuthorizationPostOauth2TokenHandler sets the operation handler for the post oauth2 token operation
+	AuthorizationPostOauth2TokenHandler authorization.PostOauth2TokenHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -214,6 +227,9 @@ func (o *RestapiAPI) Validate() error {
 	if o.BasicAuthAuth == nil {
 		unregistered = append(unregistered, "BasicAuthAuth")
 	}
+	if o.BearerTokenAuth == nil {
+		unregistered = append(unregistered, "BearerTokenAuth")
+	}
 
 	if o.APIIndividualDeleteApisHandler == nil {
 		unregistered = append(unregistered, "api_individual.DeleteApisHandler")
@@ -223,6 +239,9 @@ func (o *RestapiAPI) Validate() error {
 	}
 	if o.APIIndividualPostApisHandler == nil {
 		unregistered = append(unregistered, "api_individual.PostApisHandler")
+	}
+	if o.AuthorizationPostOauth2TokenHandler == nil {
+		unregistered = append(unregistered, "authorization.PostOauth2TokenHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -245,6 +264,11 @@ func (o *RestapiAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) m
 		case "BasicAuth":
 			result[name] = o.BasicAuthenticator(func(username, password string) (interface{}, error) {
 				return o.BasicAuthAuth(username, password)
+			})
+
+		case "BearerToken":
+			result[name] = o.BearerAuthenticator(name, func(token string, scopes []string) (interface{}, error) {
+				return o.BearerTokenAuth(token, scopes)
 			})
 
 		}
@@ -336,6 +360,10 @@ func (o *RestapiAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/apis"] = api_individual.NewPostApis(o.context, o.APIIndividualPostApisHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/oauth2/token"] = authorization.NewPostOauth2Token(o.context, o.AuthorizationPostOauth2TokenHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP
