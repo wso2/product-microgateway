@@ -91,7 +91,7 @@ apictl mg login dev -u admin -p admin -k
 ```
 
 
-1. Now let's deploy our first API to Microgateway using the project created in the step 3. Navigate to the location where the petstore project was initialized. Execute the following command to deploy the API in the microgateway.
+8. Now let's deploy our first API to Microgateway using the project created in the step 3. Navigate to the location where the petstore project was initialized. Execute the following command to deploy the API in the microgateway.
 
 ```
 apictl mg deploy api -f petstore -e dev -k
