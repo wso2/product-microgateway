@@ -120,6 +120,50 @@ func (o *DeleteApisBadRequest) WriteResponse(rw http.ResponseWriter, producer ru
 	}
 }
 
+// DeleteApisUnauthorizedCode is the HTTP code returned for type DeleteApisUnauthorized
+const DeleteApisUnauthorizedCode int = 401
+
+/*DeleteApisUnauthorized Unauthorized. Invalid authentication credentials.
+
+swagger:response deleteApisUnauthorized
+*/
+type DeleteApisUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewDeleteApisUnauthorized creates DeleteApisUnauthorized with default headers values
+func NewDeleteApisUnauthorized() *DeleteApisUnauthorized {
+
+	return &DeleteApisUnauthorized{}
+}
+
+// WithPayload adds the payload to the delete apis unauthorized response
+func (o *DeleteApisUnauthorized) WithPayload(payload *models.Error) *DeleteApisUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete apis unauthorized response
+func (o *DeleteApisUnauthorized) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteApisUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteApisNotFoundCode is the HTTP code returned for type DeleteApisNotFound
 const DeleteApisNotFoundCode int = 404
 
@@ -158,6 +202,50 @@ func (o *DeleteApisNotFound) SetPayload(payload *models.Error) {
 func (o *DeleteApisNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(404)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// DeleteApisInternalServerErrorCode is the HTTP code returned for type DeleteApisInternalServerError
+const DeleteApisInternalServerErrorCode int = 500
+
+/*DeleteApisInternalServerError Internal Server Error.
+
+swagger:response deleteApisInternalServerError
+*/
+type DeleteApisInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewDeleteApisInternalServerError creates DeleteApisInternalServerError with default headers values
+func NewDeleteApisInternalServerError() *DeleteApisInternalServerError {
+
+	return &DeleteApisInternalServerError{}
+}
+
+// WithPayload adds the payload to the delete apis internal server error response
+func (o *DeleteApisInternalServerError) WithPayload(payload *models.Error) *DeleteApisInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete apis internal server error response
+func (o *DeleteApisInternalServerError) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteApisInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(500)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

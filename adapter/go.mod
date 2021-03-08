@@ -20,8 +20,9 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/google/uuid v1.1.2
 	github.com/jessevdk/go-flags v1.4.0
+	github.com/lestrrat-go/jwx v1.1.3
 	github.com/mitchellh/mapstructure v1.3.2
-	github.com/pavel-v-chernykh/keystore-go/v3 v3.0.4
+	github.com/pavel-v-chernykh/keystore-go/v3 v3.0.4 // indirect
 	github.com/pelletier/go-toml v1.8.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/streadway/amqp v1.0.0
@@ -30,7 +31,7 @@ require (
 	golang.org/x/net v0.0.0-20201201195509-5d6afe98e0b7
 	golang.org/x/tools v0.1.0 // indirect
 	google.golang.org/appengine v1.6.1 // indirect
-	google.golang.org/genproto v0.0.0-20201201144952-b05cb90ed32e
+	google.golang.org/genproto v0.0.0-20201201144952-b05cb90ed32e // indirect
 	google.golang.org/grpc v1.33.2
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
