@@ -322,8 +322,6 @@ definitions:
     properties:
       username:
         type: string
-      tenant:
-        type: string
       token:
         type: string
   APIMeta:

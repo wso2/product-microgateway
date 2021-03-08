@@ -67,12 +67,8 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 			logger.LoggerAPI.Info("Credentials provided for basic auth are invalid")
 			return nil, errors.New(401, "Credentials are invalid")
 		}
-		// TODO: implement authentication principal
-		p := models.Principal{
-			Token:    "xxxx",
-			Tenant:   "xxxx",
-			Username: username,
-		}
+		p := models.Principal{}
+		p.Username = username
 		logger.LoggerAPI.Debugf("Principal : %v", p)
 		return &p, nil
 	}
@@ -87,11 +83,8 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 			logger.LoggerAPI.Info("The provided token is not valid")
 			return nil, errors.Unauthenticated("The provided token is not valid")
 		}
-		p := models.Principal{
-			Token:    token,
-			Tenant:   "xxxx",
-			Username: "xxxx",
-		}
+		p := models.Principal{}
+		p.Token = token
 		return &p, nil
 	}
 

@@ -28,10 +28,10 @@ Let's host our first API on a Microgateway. We will be exposing the publicly ava
 
 1. First download the CLI tool(APICTL) and the microgateway distributions
 and extract them to a folder of your choice.
-  * [CLI (APICTL)](https://github.com/wso2/product-apim-tooling/releases/tag/v4.0.0-M8)
+  * [CLI (APICTL) Alpha 2](https://github.com/wso2/product-apim-tooling/releases/tag/v4.0.0-alpha2)
   * [Microgateway Distribution](https://github.com/wso2/product-microgateway/releases/tag/v4.0.0-m7)
   
-Note: WSO2 Microgateway v4.0.0-m7 is compatible with APICTL 4.0.0-M8.
+Note: WSO2 Microgateway v4.0.0-m7 is compatible with APICTL 4.0.0-alpha2.
 
 CLI tool extracted location will be referred as `CLI_HOME` and Microgateway distribution extracted location would be 
 referred as `MG_HOME`.
@@ -42,6 +42,10 @@ export PATH=$PATH:<CLI_HOME>
 ```
 
 3. Let's create our first project with name "petstore" by adding the [open API definition](https://petstore.swagger.io/v2/swagger.json) of the petstore . You can do that by executing the following command using your command line tool.
+
+  NOTE: If you have used a previous version of apictl before, remember to delete the directories
+ .wso2apictl and .wso2apictl.local that are located in `/home/<your-pc-username>`. Deleting them will make the newer apictl create them again, with content compatible with the current version.
+
 ```
 apictl init petstore --oas https://petstore.swagger.io/v2/swagger.json
 ```
@@ -60,18 +64,36 @@ Once containers are up and running, we can monitor the status of the containers 
 ```
 docker ps | grep mg-
 ```
-
-6. Now let's deploy our first API to Microgateway using the project created in the step 3. Navigate to the location where the petstore project was initialized.
-Execute the following command to deploy the API in the microgateway
-
-```
-apictl mg deploy --host https://localhost:9843 --file petstore  -u admin -p admin -k
-```
-
 The user credentials can be configured in the configurations of the `MG_HOME` distribution. `admin:admin` is the default accepted credentials by the 
 microgateway adapter..
 
-7. The next step would be to invoke the API using a REST tool. Since APIs on the Microgateway are by default secured. We need a valid token in order to invoke the API. 
+6. To use apictl with Microgateway, let's first add a environment specifically for our microgateway. The environment will hold the adapter URL for further commands.
+
+```
+apictl mg add env dev --adapter https://localhost:9843
+```
+
+7. Next you can use the following command to login to the above microgateway cluster (in other words login to the microgateway adapter).
+
+```
+apictl mg login dev 
+```
+or
+```
+apictl mg login dev -u admin -p admin
+```
+
+NOTE: Remember to add the cert of Microgateway into `/home/<your-pc-username>/.wso2apictl/certs` to communicate via https (to avoid having to use insecure mode with -k or --insecure).
+
+8. Now let's deploy our first API to Microgateway using the project created in the step 3. Navigate to the location where the petstore project was initialized. Execute the following command to deploy the API in the microgateway.
+
+NOTE: Include the path to the apictl executable to 
+
+```
+apictl mg deploy api -f petstore -e dev
+```
+
+9. The next step would be to invoke the API using a REST tool. Since APIs on the Microgateway are by default secured. We need a valid token in order to invoke the API. 
 Use the following sample token accepted by the microgateway to access the API. Lets set the token to command line as a variable
 
 
@@ -79,11 +101,17 @@ Use the following sample token accepted by the microgateway to access the API. L
 TOKEN=eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNNV0kyTkRBelpHUXpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XSTBaV05tTkRjeE5HWXdZbU00WlRBM01XSTJOREF6WkdRek5HTTBaR1JsTmpKa09ERmtaRFJpT1RGa01XRmhNelUyWkdWbE5nX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ==.eyJhdWQiOiJBT2syNFF6WndRXzYyb2QyNDdXQnVtd0VFZndhIiwic3ViIjoiYWRtaW5AY2FyYm9uLnN1cGVyIiwibmJmIjoxNTk2MDA5NTU2LCJhenAiOiJBT2syNFF6WndRXzYyb2QyNDdXQnVtd0VFZndhIiwic2NvcGUiOiJhbV9hcHBsaWNhdGlvbl9zY29wZSBkZWZhdWx0IiwiaXNzIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6OTQ0My9vYXV0aDIvdG9rZW4iLCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsImV4cCI6MTYyNzU0NTU1NiwiaWF0IjoxNTk2MDA5NTU2LCJqdGkiOiIyN2ZkMWY4Ny01ZTI1LTQ1NjktYTJkYi04MDA3MTFlZTJjZWMifQ==.otDREOsUUmXuSbIVII7FR59HAWqtXh6WWCSX6NDylVIFfED3GbLkopo6rwCh2EX6yiP-vGTqX8sB9Zfn784cIfD3jz2hCZqOqNzSUrzamZrWui4hlYC6qt4YviMbR9LNtxxu7uQD7QMbpZQiJ5owslaASWQvFTJgBmss5t7cnurrfkatj5AkzVdKOTGxcZZPX8WrV_Mo2-rLbYMslgb2jCptgvi29VMPo9GlAFecoMsSwywL8sMyf7AJ3y4XW5Uzq7vDGxojDam7jI5W8uLVVolZPDstqqZYzxpPJ2hBFC_OZgWG3LqhUgsYNReDKKeWUIEieK7QPgjetOZ5Geb1mA==
 ``` 
 
-8. We can now invoke the API running on the microgateway using cURL as below.
+10. We can now invoke the API running on the microgateway using cURL as below.
 ```
 curl -X GET "https://localhost:9095/v2/pet/findByStatus?status=available" -H "accept: application/json" -H "Authorization:Bearer $TOKEN" -k
 ```
 
+11. Try out the following commands with apictl. 
+
+list APIs     - `apictl mg get apis -e dev`
+undeploy API  - `apictl mg undeploy api -n SwaggerPetstore -v 1.0.5 -e dev`
+logout        - `apictl mg logout dev`
+remove environment - `apictl mg remove env`
 
 #### Microgateway Components
 - **APICTL** : The APICTL is used to initiate Microgateway projects as well as to deploy APIs in to Microgateway. This is a developer tool used
@@ -107,17 +135,17 @@ as exposing APIs from [WSO2 API Manager](https://wso2.com/api-management/).
 
 #### WSO2 API Microgateway APICTL commands
 
-Following are the basic commands in APICTL which is used to deploy/update APIs in Microgateway
+Following are the basic commands in APICTL which is used to handle APIs in Microgateway
 
 Note: Before you execute any of the commands below you need to add the path to the `<CLI_HOME` directory to the PATH environment variable. Ex: /home/dev/wso2am-micro-gw/bin
 
 ##### Init
 
-`$ apictl init <project_name> --oas <filePathToOpenAPI_or_openAPIUrl`
+`$ apictl init <project_name> --oas <filePathToOpenAPI_or_openAPIUrl>`
 
 The "apictl init" command is used to initialize a project structure with artifacts required to deploy API in Microgateway. This will create a **api_definitions**  directory.
 
-Execute `apictl help init` to get more detailed information regarding the setup command.
+Execute `apictl init -h` to get more detailed information regarding the setup command.
 
 Example
 
@@ -125,21 +153,26 @@ Example
 
 Let's see how we can expose the [petstore swagger](samples/petstore_swagger3.yaml) using the micro-gw.
 
-##### Deploy
-
-`$ apictl mg deploy --host <url_of_adaptor> --file <file_path_of_project_initiated_from_apictl>  --username <Username> --password <Password> -k`
-
-Upon execution of this command, CLI tool deploy the API described with open API in the Microgateway.
+##### Add Environment and Login
 ```
- --host - Service url in which the Microgateway adapter is exposed.
- --file - File path of the project intitiated from apictl tool.
- --username - A valid username in order to communicate with the adapter (ex: admin)
- --password - The password of the user.
+apictl mg add env <mgw_environement> --adapter <adapter_url>
+apictl mg login <mgw_environement> -u <username> -p <password>
 ```
-Example
 
-	$ apictl mg deploy --host https://localhost:9843 --file petstore.zip  --username admin --password admin
+NOTE: use `apictl mg login -h` to view more ways to include credentials
 
+##### Deploy, Update, List, and Undeploy
+
+Deploy - `apictl mg deploy api -f <file_path_of_API_project_created> -e <mgw_environement>`
+Update - `apictl mg deploy api -f <file_path_of_API_project_created> -e <mgw_environement> -o`
+List   - `apictl mg get apis -e <mgw_environement>`
+Undeploy - `apictl mg undeploy api -n <API_name_without spaces> -v <API_version> -e <mgw_environement>`
+
+##### Logout and Remove environement
+```
+apictl mg logout <mgw_environement>
+apictl mg remove env <mgw_environement>
+```
 
 #### Invoke API exposed via microgateway
 Once APIs are exposed we can invoke API with a valid jwt token or an opaque access token.

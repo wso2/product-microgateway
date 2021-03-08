@@ -72,7 +72,7 @@ type Config struct {
 			Port string
 			// APICTL Users
 			Users []APICtlUser `toml:"users"`
-			// Access token validity duration
+			// Access token validity duration. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". eg: "2h45m"
 			TokenTTL string
 			// Private key to sign the token
 			TokenPrivateKeyPath string

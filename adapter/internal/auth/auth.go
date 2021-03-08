@@ -32,6 +32,11 @@ import (
 	"github.com/wso2/micro-gw/loggers"
 )
 
+const (
+	usernameConst string = "username"
+	scopeConst    string = "scope"
+)
+
 var storedPrivateKey *rsa.PrivateKey
 var authTokenDuration *time.Duration
 
@@ -48,7 +53,7 @@ func ValidateCredentials(username, password string, config *config.Config) bool 
 	valid := false
 	for _, regUser := range config.Adapter.Server.Users {
 		if username == regUser.Username && password == regUser.Password {
-			valid = true
+			return true
 		}
 	}
 	return valid
@@ -58,7 +63,7 @@ func validateUser(username string, config *config.Config) bool {
 	valid := false
 	for _, regUser := range config.Adapter.Server.Users {
 		if username == regUser.Username {
-			valid = true
+			return true
 		}
 	}
 	return valid
@@ -116,8 +121,8 @@ func GenerateToken(username string) (accessToken string, err error) {
 	var payload []byte
 	// Create signed payload
 	token := jwt.New()
-	token.Set("username", username)
-	token.Set("scope", "admin")
+	token.Set(usernameConst, username)
+	token.Set(scopeConst, "admin")
 	expiresAt := time.Now().Add(*authTokenDuration)
 	token.Set(jwt.ExpirationKey, expiresAt)
 
@@ -149,12 +154,12 @@ func ValidateToken(accessToken string, resourceScopes []string, conf *config.Con
 		loggers.LoggerAPI.Errorf("Failed to parse JWT token: %s", err)
 		return false, nil
 	}
-	tokenUser, _ := token.Get("username")
+	tokenUser, _ := token.Get(usernameConst)
 	if !validateUser(tokenUser.(string), conf) {
 		loggers.LoggerAPI.Error("Invalid username in token.")
 		return false, nil
 	}
-	tokenScope, _ := token.Get("scope")
+	tokenScope, _ := token.Get(scopeConst)
 	if !stringInSlice(tokenScope.(string), resourceScopes) {
 		loggers.LoggerAPI.Error("Invalid scope in token.")
 		return false, nil

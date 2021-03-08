@@ -422,9 +422,6 @@ func init() {
     "Principal": {
       "type": "object",
       "properties": {
-        "tenant": {
-          "type": "string"
-        },
         "token": {
           "type": "string"
         },
@@ -877,9 +874,6 @@ func init() {
     "Principal": {
       "type": "object",
       "properties": {
-        "tenant": {
-          "type": "string"
-        },
         "token": {
           "type": "string"
         },
