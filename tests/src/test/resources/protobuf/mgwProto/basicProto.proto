@@ -29,7 +29,7 @@ service TestService {
 service JwtAuthTestService {
     rpc testCall(TestRequest) returns (TestResponse);
 
-    rpc testCallWithScopes(TestRequest) returns (TestResponse){
+    rpc testCallWithScopes(TestRequest) returns (TestResponse) {
         option (wso2.method_scopes) = "scope_1";
     };
 

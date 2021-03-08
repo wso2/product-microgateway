@@ -911,6 +911,13 @@ public class OpenAPICodegenUtils {
         return new String[]{securitySchemas, scopes};
     }
 
+    /**
+     * Get resource level auth providers as a list of strings.
+     *
+     * @param operation   operation {@link Operation}
+     * @param appSecurity Application security object {@link ApplicationSecurity}
+     * @return auth provider array
+     */
     public static List<String> getMgwResourceSecurity(Operation operation, ApplicationSecurity appSecurity) {
         String securitySchemas = generateMgwSecuritySchemasAndScopes(operation.getSecurity())[0];
         return getAuthProviders(securitySchemas, appSecurity);

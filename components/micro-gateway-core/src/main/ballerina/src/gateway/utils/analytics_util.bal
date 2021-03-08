@@ -118,8 +118,8 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
     eventDto.apiCreatorTenantDomain = getTenantDomain(context);
     eventDto.hostName = retrieveHostname(DATACENTER_ID, <string>context.attributes[HOSTNAME_PROPERTY]);
     eventDto.protocol = <string>context.attributes[PROTOCOL_PROPERTY];
-
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+
     if (isSecured && invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
         AuthenticationContext authContext = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
         metaInfo["keyType"] = authContext.keyType;
@@ -160,7 +160,6 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
     }
     return eventDto;
 }
-
 
 function getAnalyticsEnableConfig() {
     isAnalyticsEnabled = <boolean>getConfigBooleanValue(FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_ENABLE, DEFAULT_ANALYTICS_ENABLED);

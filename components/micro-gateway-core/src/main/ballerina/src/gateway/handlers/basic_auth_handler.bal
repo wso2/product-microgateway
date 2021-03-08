@@ -24,7 +24,6 @@ import ballerina/stringutils;
 public type BasicAuthHandler object {
 
     *http:InboundAuthHandler;
-
     public BasicAuthProvider basicAuthProvider;
 
     public function __init(BasicAuthProvider basicAuthProvider) {
