@@ -27,8 +27,8 @@ public class WebSocketEndPointTestCase extends BaseTestCase {
     public void beforeClass() throws Exception{
         super.startMGW();
 
-        String prodSandApiZipfile = ApiProjectGenerator.createApictlProjZip(null, null,
-                "apis/openApis/mockWebSocketAPIProdSand.yaml");
+        String prodSandApiZipfile = ApiProjectGenerator.createApictlProjZip("apis/openApis/mockWebSocketAPIProdSand.yaml", null,
+                null);
         ApiDeployment.deployAPI(prodSandApiZipfile);
 
         API api = new API();

@@ -199,7 +199,7 @@ public class JWTAuthenticator implements Authenticator {
 
                 AuthenticationContext authenticationContext = FilterUtils
                         .generateAuthenticationContext(jwtTokenIdentifier, validationInfo, apiKeyValidationInfoDTO,
-                                endUserToken, true);
+                                endUserToken, true, requestContext);
                 //TODO: (VirajSalaka) Place the keytype population logic properly for self contained token
                 if (claims.getClaim("keytype") != null) {
                     authenticationContext.setKeyType(claims.getClaim("keytype").toString());

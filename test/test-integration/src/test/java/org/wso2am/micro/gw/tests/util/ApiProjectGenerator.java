@@ -42,9 +42,9 @@ public class ApiProjectGenerator {
 
     /**
      * Create apictl project zip file.
-     *
-     * @param openAPIYamlPath openapi file path.
-     *
+     * @param apiYamlPath - api.yaml file path
+     * @param swaggerPath - swagger.yaml file path
+     * @return
      * @throws MicroGWTestException
      */
     public static String createApictlProjZip(String apiYamlPath, String swaggerPath) throws MicroGWTestException {
@@ -65,19 +65,18 @@ public class ApiProjectGenerator {
                 getLocation().getPath());
         String targetDir = targetClassesDir.getParentFile().toString();
 
-        String filename = getFileName(openAPIYamlPath, apiYamlPath);
+        String filename = apiYamlPath.split(Pattern.quote("."))[0];
         String apisZipPath = ApiProjectGenerator.class.getClassLoader()
                 .getResource("apis").getPath() + File.separator + "apiProjects" + File.separator + filename;
-        if(openAPIYamlPath != null){
-            createDirectory(apisZipPath);
-            createDirectory(apisZipPath + File.separator + definitions);
-            createDirectory(apisZipPath + File.separator + instruct);
-            createDirectory(apisZipPath + File.separator + sequences);
-            createDirectory(apisZipPath + File.separator + libs);
-            createDirectory(apisZipPath + File.separator + interceptors);
-            createDirectory(apisZipPath + File.separator + image);
-            createDirectory(apisZipPath + File.separator + docs);
-            createDirectory(apisZipPath + File.separator + endpointCertificates);
+        createDirectory(apisZipPath);
+        createDirectory(apisZipPath + File.separator + definitions);
+        createDirectory(apisZipPath + File.separator + instruct);
+        createDirectory(apisZipPath + File.separator + sequences);
+        createDirectory(apisZipPath + File.separator + libs);
+        createDirectory(apisZipPath + File.separator + interceptors);
+        createDirectory(apisZipPath + File.separator + image);
+        createDirectory(apisZipPath + File.separator + docs);
+        createDirectory(apisZipPath + File.separator + endpointCertificates);
 
         String testResourcesPath = targetDir + File.separator  + "test-classes" + File.separator;
 
@@ -86,23 +85,25 @@ public class ApiProjectGenerator {
             apiYamlFile);
         
         //swagger.yaml
-        Utils.copyFile(testResourcesPath + swaggerPath, apisZipPath + File.separator + definitions + File.separator +
-            openAPIFile);
+        if(swaggerPath != null){
+            Utils.copyFile(testResourcesPath + swaggerPath, apisZipPath + File.separator + definitions + File.separator +
+                    openAPIFile);
+        }
 
         if (certificatePath != null) {
             Utils.copyFile(testResourcesPath + certificatePath, 
                 apisZipPath + File.separator + endpointCertificates + File.separator + "backend.crt");
         }
-        if(apiYamlPath != null){
-            createDirectory(apisZipPath);
-            String apiPath = targetDir + File.separator + "test-classes" + File.separator + apiYamlPath;
-            Utils.copyFile(apiPath, apisZipPath + File.separator + apiYamlFile);
-            if (certificatePath != null) {
-                String certPath = targetDir + File.separator  + "test-classes" + File.separator + certificatePath;
-                Utils.copyFile(certPath, apisZipPath + File.separator + endpointCertificates +
-                        File.separator + "backend.crt");
-            }
-        }
+//        if(apiYamlPath != null){
+//            createDirectory(apisZipPath);
+//            String apiPath = targetDir + File.separator + "test-classes" + File.separator + apiYamlPath;
+//            Utils.copyFile(apiPath, apisZipPath + File.separator + apiYamlFile);
+//            if (certificatePath != null) {
+//                String certPath = targetDir + File.separator  + "test-classes" + File.separator + certificatePath;
+//                Utils.copyFile(certPath, apisZipPath + File.separator + endpointCertificates +
+//                        File.separator + "backend.crt");
+//            }
+//        }
 
         ZipDir.createZipFile(apisZipPath);
         return apisZipPath + ".zip";

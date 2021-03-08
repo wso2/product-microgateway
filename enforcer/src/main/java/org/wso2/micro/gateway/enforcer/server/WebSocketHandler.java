@@ -26,6 +26,11 @@ public class WebSocketHandler implements RequestHandler<RateLimitRequest, Authen
     }
 
     private RequestContext buildRequestContext(WebSocketAPI api, RateLimitRequest rateLimitRequest){
+        try{
+            logger.info("contextString:"+ rateLimitRequest.getMetadataContext().getFilterMetadataMap().toString());
+        }catch (Exception e){
+            logger.error(e);
+        }
         String streamId = rateLimitRequest.getMetadataContext().getFilterMetadataMap().
                 get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.WEBSOCKET_STREAM_ID).getStringValue();
         String apiName = rateLimitRequest.getMetadataContext().getFilterMetadataMap().get(APIConstants.EXT_AUTHZ_METADATA)
@@ -105,11 +110,7 @@ public class WebSocketHandler implements RequestHandler<RateLimitRequest, Authen
                 setAuthenticationContext(authenticationContext).setFrameLength(frameLength).setUpstreamHost(upstreamHost).build();
 
 
-        try{
-            logger.info("contextString:"+ rateLimitRequest.getMetadataContext().getFilterMetadataMap().toString());
-        }catch (Exception e){
-            logger.error(e);
-        }
+
         return new RequestContext.Builder(apiBasepath).matchedAPI(api).authenticationContext(authenticationContext)
                 .webSocketMetadataContext(webSocketMetadataContext).build();
     }

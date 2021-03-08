@@ -32,8 +32,8 @@ public class WebSocketDeployTestCase extends BaseTestCase {
 
     @Test(description = "Test to check websocket API deployment with apis/openApis/mockWebSocketApiProdSand.yaml")
     public void webSocketDeployTest() throws Exception{
-        String apiZipFile = ApiProjectGenerator.createApictlProjZip(null,null,
-                "apis/openApis/mockWebSocketAPIProdSand.yaml");
+        String apiZipFile = ApiProjectGenerator.createApictlProjZip("apis/openApis/mockWebSocketAPIProdSand.yaml",null,
+                null);
         // Set header
         Map<String, String> headers = new HashMap<String,String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic YWRtaW46YWRtaW4=");

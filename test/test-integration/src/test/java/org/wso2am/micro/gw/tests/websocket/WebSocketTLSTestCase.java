@@ -22,8 +22,8 @@ public class WebSocketTLSTestCase extends BaseTestCase {
     public void beforeClass() throws Exception{
         super.startMGW(null, true);
 
-        String prodSandApiZipfile = ApiProjectGenerator.createApictlProjZip(null, "backendtls/backend.crt",
-                "apis/openApis/mockWebSocketAPITLS.yaml");
+        String prodSandApiZipfile = ApiProjectGenerator.createApictlProjZip("apis/openApis/mockWebSocketAPITLS.yaml", null,
+                "backendtls/backend.crt");
         ApiDeployment.deployAPI(prodSandApiZipfile);
 
         API api = new API();
