@@ -72,6 +72,6 @@ public class RequestHandler {
         ResourceConfig resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api).headers(headers).prodClusterHeader(prodCluster).sandClusterHeader(sandCluster)
-                .build();
+                .pathTemplate(res).build();
     }
 }

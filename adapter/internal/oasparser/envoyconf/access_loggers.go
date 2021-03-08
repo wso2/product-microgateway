@@ -102,8 +102,8 @@ func getGRPCAccessLogConfigs() *config_access_logv3.AccessLog {
 
 // getAccessLogs provides access logs for envoy
 func getAccessLogs() []*config_access_logv3.AccessLog {
-	// TODO (amalimatharaarachchi) read and enable according to analytics config
-	analytics := true
+	conf, _ := config.ReadConfigs()
+	analytics := conf.Enforcer.Analytics.Enabled
 	if analytics {
 		return []*config_access_logv3.AccessLog{getFileAccessLogConfigs(), getGRPCAccessLogConfigs()}
 	}

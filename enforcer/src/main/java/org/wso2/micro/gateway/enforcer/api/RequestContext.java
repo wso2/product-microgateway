@@ -49,6 +49,7 @@ public class RequestContext {
     private final String correlationID;
     private Map<String, String> metadataMap = new HashMap<>();
     private AuthenticationContext authenticationContext;
+    private String requestPathTemplate;
 
     private RequestContext() {
         correlationID = UUID.randomUUID().toString();
@@ -79,6 +80,10 @@ public class RequestContext {
         this.authenticationContext = authenticationContext;
     }
 
+    public String getRequestPathTemplate() {
+        return requestPathTemplate;
+    }
+
     /**
      * Implements builder pattern to build an {@link RequestContext} object.
      */
@@ -86,6 +91,7 @@ public class RequestContext {
         private API mathedAPI;
         private String requestPath;
         private String requestMethod;
+        private String requestPathTemplate;
         private ResourceConfig matchedResourceConfig;
         private Map<String, String> headers;
         private String prodClusterHeader;
@@ -140,12 +146,22 @@ public class RequestContext {
             requestContext.prodClusterHeader = this.prodClusterHeader;
             requestContext.sandClusterHeader = this.sandClusterHeader;
             requestContext.properties = this.properties;
+            requestContext.requestPathTemplate = this.requestPathTemplate;
 
             // Adapter assigns header based routing only if both type of endpoints are present.
             if (!StringUtils.isEmpty(prodClusterHeader) && !StringUtils.isEmpty(sandClusterHeader)) {
                 requestContext.clusterHeaderEnabled = true;
             }
             return requestContext;
+        }
+
+        public String getRequestPathTemplate() {
+            return requestPathTemplate;
+        }
+
+        public Builder pathTemplate(String requestPathTemplate) {
+            this.requestPathTemplate = requestPathTemplate;
+            return this;
         }
     }
 

@@ -19,6 +19,7 @@
 package org.wso2.micro.gateway.enforcer.config;
 
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.AnalyticsDTO;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
@@ -41,6 +42,7 @@ public class EnforcerConfig {
     private CacheDto cacheDto;
     private String publicCertificatePath = "";
     private String privateKeyPath = "";
+    private AnalyticsDTO analyticsConfig;
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -104,6 +106,14 @@ public class EnforcerConfig {
 
     public String getPrivateKeyPath() {
         return privateKeyPath;
+    }
+
+    public AnalyticsDTO getAnalyticsConfig() {
+        return analyticsConfig;
+    }
+
+    public void setAnalyticsConfig(AnalyticsDTO analyticsConfig) {
+        this.analyticsConfig = analyticsConfig;
     }
 }
 

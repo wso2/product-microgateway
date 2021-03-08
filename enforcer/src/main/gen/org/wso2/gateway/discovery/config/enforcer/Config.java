@@ -168,11 +168,11 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 82: {
-            org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.Builder subBuilder = null;
+            org.wso2.gateway.discovery.config.enforcer.Analytics.Builder subBuilder = null;
             if (analytics_ != null) {
               subBuilder = analytics_.toBuilder();
             }
-            analytics_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.parser(), extensionRegistry);
+            analytics_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.Analytics.parser(), extensionRegistry);
             if (subBuilder != null) {
               subBuilder.mergeFrom(analytics_);
               analytics_ = subBuilder.buildPartial();
@@ -464,7 +464,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int ANALYTICS_FIELD_NUMBER = 10;
-  private org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics analytics_;
+  private org.wso2.gateway.discovery.config.enforcer.Analytics analytics_;
   /**
    * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
    * @return Whether the analytics field is set.
@@ -478,14 +478,14 @@ private static final long serialVersionUID = 0L;
    * @return The analytics.
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics getAnalytics() {
-    return analytics_ == null ? org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.getDefaultInstance() : analytics_;
+  public org.wso2.gateway.discovery.config.enforcer.Analytics getAnalytics() {
+    return analytics_ == null ? org.wso2.gateway.discovery.config.enforcer.Analytics.getDefaultInstance() : analytics_;
   }
   /**
    * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.AnalyticsOrBuilder getAnalyticsOrBuilder() {
+  public org.wso2.gateway.discovery.config.enforcer.AnalyticsOrBuilder getAnalyticsOrBuilder() {
     return getAnalytics();
   }
 
@@ -2297,9 +2297,9 @@ private static final long serialVersionUID = 0L;
       return cacheBuilder_;
     }
 
-    private org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics analytics_;
+    private org.wso2.gateway.discovery.config.enforcer.Analytics analytics_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics, org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.Builder, org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.AnalyticsOrBuilder> analyticsBuilder_;
+        org.wso2.gateway.discovery.config.enforcer.Analytics, org.wso2.gateway.discovery.config.enforcer.Analytics.Builder, org.wso2.gateway.discovery.config.enforcer.AnalyticsOrBuilder> analyticsBuilder_;
     /**
      * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
      * @return Whether the analytics field is set.
@@ -2311,9 +2311,9 @@ private static final long serialVersionUID = 0L;
      * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
      * @return The analytics.
      */
-    public org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics getAnalytics() {
+    public org.wso2.gateway.discovery.config.enforcer.Analytics getAnalytics() {
       if (analyticsBuilder_ == null) {
-        return analytics_ == null ? org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.getDefaultInstance() : analytics_;
+        return analytics_ == null ? org.wso2.gateway.discovery.config.enforcer.Analytics.getDefaultInstance() : analytics_;
       } else {
         return analyticsBuilder_.getMessage();
       }
@@ -2321,7 +2321,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
      */
-    public Builder setAnalytics(org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics value) {
+    public Builder setAnalytics(org.wso2.gateway.discovery.config.enforcer.Analytics value) {
       if (analyticsBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -2338,7 +2338,7 @@ private static final long serialVersionUID = 0L;
      * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
      */
     public Builder setAnalytics(
-        org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.Builder builderForValue) {
+        org.wso2.gateway.discovery.config.enforcer.Analytics.Builder builderForValue) {
       if (analyticsBuilder_ == null) {
         analytics_ = builderForValue.build();
         onChanged();
@@ -2351,11 +2351,11 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
      */
-    public Builder mergeAnalytics(org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics value) {
+    public Builder mergeAnalytics(org.wso2.gateway.discovery.config.enforcer.Analytics value) {
       if (analyticsBuilder_ == null) {
         if (analytics_ != null) {
           analytics_ =
-            org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.newBuilder(analytics_).mergeFrom(value).buildPartial();
+            org.wso2.gateway.discovery.config.enforcer.Analytics.newBuilder(analytics_).mergeFrom(value).buildPartial();
         } else {
           analytics_ = value;
         }
@@ -2383,7 +2383,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.Builder getAnalyticsBuilder() {
+    public org.wso2.gateway.discovery.config.enforcer.Analytics.Builder getAnalyticsBuilder() {
       
       onChanged();
       return getAnalyticsFieldBuilder().getBuilder();
@@ -2391,23 +2391,23 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.AnalyticsOrBuilder getAnalyticsOrBuilder() {
+    public org.wso2.gateway.discovery.config.enforcer.AnalyticsOrBuilder getAnalyticsOrBuilder() {
       if (analyticsBuilder_ != null) {
         return analyticsBuilder_.getMessageOrBuilder();
       } else {
         return analytics_ == null ?
-            org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.getDefaultInstance() : analytics_;
+            org.wso2.gateway.discovery.config.enforcer.Analytics.getDefaultInstance() : analytics_;
       }
     }
     /**
      * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics, org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.Builder, org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.AnalyticsOrBuilder> 
+        org.wso2.gateway.discovery.config.enforcer.Analytics, org.wso2.gateway.discovery.config.enforcer.Analytics.Builder, org.wso2.gateway.discovery.config.enforcer.AnalyticsOrBuilder> 
         getAnalyticsFieldBuilder() {
       if (analyticsBuilder_ == null) {
         analyticsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics, org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.Analytics.Builder, org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.AnalyticsOrBuilder>(
+            org.wso2.gateway.discovery.config.enforcer.Analytics, org.wso2.gateway.discovery.config.enforcer.Analytics.Builder, org.wso2.gateway.discovery.config.enforcer.AnalyticsOrBuilder>(
                 getAnalytics(),
                 getParentForChildren(),
                 isClean());

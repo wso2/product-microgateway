@@ -61,8 +61,7 @@ public class AuthServer {
 
             // Enable global filters
             // TODO (amalimatharaarachchi) enable analytics according to config
-            boolean analytics = true;
-            if (analytics) {
+            if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {
                 logger.info("analytics filter enabled");
                 AccessLoggingService accessLoggingService = new AccessLoggingService();
                 if (accessLoggingService.init()) {
