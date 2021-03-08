@@ -43,8 +43,9 @@ export PATH=$PATH:<CLI_HOME>
 
 3. Let's create our first project with name "petstore" by adding the [open API definition](https://petstore.swagger.io/v2/swagger.json) of the petstore . You can do that by executing the following command using your command line tool.
 
-  NOTE: If you have used a previous version of apictl before, remember to delete the directories
- .wso2apictl and .wso2apictl.local that are located in `/home/<your-pc-username>`. Deleting them will make the newer apictl create them again, with content compatible with the current version. You can backup the files before deleting them, in case you had to refer them later.
+!!! NOTE:
+
+    If you have used a previous version of apictl before, remember to delete the directories  .wso2apictl and .wso2apictl.local that are located in `/home/<your-pc-username>`. Deleting them will make the newer apictl create them again, with content compatible with the current version. You can backup the files before deleting them, in case you had to refer them later.
 
 ```
 apictl init petstore --oas https://petstore.swagger.io/v2/swagger.json
@@ -65,7 +66,13 @@ Once containers are up and running, we can monitor the status of the containers 
 docker ps | grep mg-
 ```
 The user credentials can be configured in the configurations of the `MG_HOME` distribution. `admin:admin` is the default accepted credentials by the 
-microgateway adapter..
+microgateway adapter.
+
+!!! NOTE:
+
+    Following apictl commands are being executed with -k flag to avoid SSL verification with the microgateway.
+    
+    To communicate via https without skipping SSL verification (without -k flag), add the cert of Microgateway into `/home/<your-pc-username>/.wso2apictl/certs` .
 
 6. To use apictl with Microgateway, let's first add a environment specifically for our microgateway. The environment will hold the adapter URL for further commands.
 
@@ -76,19 +83,18 @@ apictl mg add env dev --adapter https://localhost:9843
 7. Next you can use the following command to login to the above microgateway cluster (in other words login to the microgateway adapter).
 
 ```
-apictl mg login dev 
+apictl mg login dev -k
 ```
 or
 ```
-apictl mg login dev -u admin -p admin
+apictl mg login dev -u admin -p admin -k
 ```
 
-NOTE: Remember to add the cert of Microgateway into `/home/<your-pc-username>/.wso2apictl/certs` to communicate via https (to avoid having to use insecure mode with -k or --insecure).
 
-8. Now let's deploy our first API to Microgateway using the project created in the step 3. Navigate to the location where the petstore project was initialized. Execute the following command to deploy the API in the microgateway.
+1. Now let's deploy our first API to Microgateway using the project created in the step 3. Navigate to the location where the petstore project was initialized. Execute the following command to deploy the API in the microgateway.
 
 ```
-apictl mg deploy api -f petstore -e dev
+apictl mg deploy api -f petstore -e dev -k
 ```
 
 9. The next step would be to invoke the API using a REST tool. Since APIs on the Microgateway are by default secured. We need a valid token in order to invoke the API. 
