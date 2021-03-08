@@ -912,7 +912,7 @@ public class OpenAPICodegenUtils {
     }
 
     /**
-     * Get resource level auth providers as a string array.
+     * Get resource level auth providers as a list of strings.
      *
      * @param operation   operation {@link Operation}
      * @param appSecurity Application security object {@link ApplicationSecurity}
