@@ -119,6 +119,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
     eventDto.hostName = retrieveHostname(DATACENTER_ID, <string>context.attributes[HOSTNAME_PROPERTY]);
     eventDto.protocol = <string>context.attributes[PROTOCOL_PROPERTY];
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+
     if (isSecured && invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
         AuthenticationContext authContext = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
         metaInfo["keyType"] = authContext.keyType;
