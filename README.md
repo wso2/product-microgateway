@@ -44,7 +44,7 @@ export PATH=$PATH:<CLI_HOME>
 3. Let's create our first project with name "petstore" by adding the [open API definition](https://petstore.swagger.io/v2/swagger.json) of the petstore . You can do that by executing the following command using your command line tool.
 
   NOTE: If you have used a previous version of apictl before, remember to delete the directories
- .wso2apictl and .wso2apictl.local that are located in `/home/<your-pc-username>`. Deleting them will make the newer apictl create them again, with content compatible with the current version.
+ .wso2apictl and .wso2apictl.local that are located in `/home/<your-pc-username>`. Deleting them will make the newer apictl create them again, with content compatible with the current version. You can backup the files before deleting them, in case you had to refer them later.
 
 ```
 apictl init petstore --oas https://petstore.swagger.io/v2/swagger.json
@@ -87,8 +87,6 @@ NOTE: Remember to add the cert of Microgateway into `/home/<your-pc-username>/.w
 
 8. Now let's deploy our first API to Microgateway using the project created in the step 3. Navigate to the location where the petstore project was initialized. Execute the following command to deploy the API in the microgateway.
 
-NOTE: Include the path to the apictl executable to 
-
 ```
 apictl mg deploy api -f petstore -e dev
 ```
@@ -108,9 +106,9 @@ curl -X GET "https://localhost:9095/v2/pet/findByStatus?status=available" -H "ac
 
 11. Try out the following commands with apictl. 
 
-list APIs     - `apictl mg get apis -e dev`
-undeploy API  - `apictl mg undeploy api -n SwaggerPetstore -v 1.0.5 -e dev`
-logout        - `apictl mg logout dev`
+list APIs     - `apictl mg get apis -e dev`   
+undeploy API  - `apictl mg undeploy api -n SwaggerPetstore -v 1.0.5 -e dev`    
+logout        - `apictl mg logout dev`    
 remove environment - `apictl mg remove env`
 
 #### Microgateway Components
@@ -156,17 +154,31 @@ Let's see how we can expose the [petstore swagger](samples/petstore_swagger3.yam
 ##### Add Environment and Login
 ```
 apictl mg add env <mgw_environement> --adapter <adapter_url>
+```
+```
 apictl mg login <mgw_environement> -u <username> -p <password>
 ```
 
 NOTE: use `apictl mg login -h` to view more ways to include credentials
 
-##### Deploy, Update, List, and Undeploy
+##### Deploy
 
-Deploy - `apictl mg deploy api -f <file_path_of_API_project_created> -e <mgw_environement>`
-Update - `apictl mg deploy api -f <file_path_of_API_project_created> -e <mgw_environement> -o`
-List   - `apictl mg get apis -e <mgw_environement>`
-Undeploy - `apictl mg undeploy api -n <API_name_without spaces> -v <API_version> -e <mgw_environement>`
+```
+apictl mg deploy api -f <file_path_of_API_project_created> -e <mgw_environement>
+```
+
+##### Update 
+```
+apictl mg deploy api -f <file_path_of_API_project_created> -e <mgw_environement> -o
+```  
+##### List
+```
+apictl mg get apis -e <mgw_environement>
+```    
+##### Undeploy
+```
+apictl mg undeploy api -n <API_name_without spaces> -v <API_version> -e <mgw_environement>
+```   
 
 ##### Logout and Remove environement
 ```
