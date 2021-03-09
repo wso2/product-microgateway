@@ -42,8 +42,6 @@ services:
     ports:
       - "18000:18000"
       - "9843:9843"
-    extra_hosts:
-      - "localhost:172.17.0.1"
   enforcer:
     image: wso2/mg-enforcer:4.0.0-m8-SNAPSHOT
     logging:
