@@ -61,6 +61,14 @@ public class APIConstants {
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_PAYLOAD = "event";
 
+    public static final String NOT_FOUND_MESSAGE = "Not Found";
+    public static final String NOT_FOUND_DESCRIPTION = "The requested resource is not available.";
+
+    //headers and values
+    public static final String CONTENT_TYPE_HEADER = "Content-type";
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String API_TRACE_KEY = "X-TRACE-KEY";
+
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
      */
@@ -203,5 +211,41 @@ public class APIConstants {
         public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
         public static final String TOPIC_KEY_MANAGER = "keyManager";
         public static final String TOPIC_NOTIFICATION = "notification";
+    }
+
+    /**
+     * Holds the constants related to attributes to be sent in the response in case of an error
+     * scenario raised within the enforcer.
+     */
+    public static class MessageFormat {
+        public static final String STATUS_CODE = "status_code";
+        public static final String ERROR_CODE = "code";
+        public static final String ERROR_MESSAGE = "error_message";
+        public static final String ERROR_DESCRIPTION = "error_description";
+    }
+
+    /**
+     * Holds the values related http status codes.
+     */
+    public enum StatusCodes {
+        OK("200", 200),
+        UNAUTHENTICATED("401", 401),
+        UNAUTHORIZED("403", 403),
+        NOTFOUND("404", 404);
+
+        private String value;
+        private int code;
+        private  StatusCodes(String value, int code) {
+            this.value = value;
+            this.code = code;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+
+        public int getCode() {
+            return this.code;
+        }
     }
 }

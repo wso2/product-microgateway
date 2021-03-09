@@ -19,7 +19,6 @@ package org.wso2.micro.gateway.enforcer.server;
 
 import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import io.envoyproxy.envoy.service.auth.v3.CheckResponse;
-import io.envoyproxy.envoy.type.v3.StatusCode;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,8 +44,11 @@ public class RequestHandler {
 
         if (matchedAPI == null) {
             ResponseObject responseObject = new ResponseObject();
-            responseObject.setStatusCode(StatusCode.NotFound_VALUE);
-            responseObject.setErrorDescription("API not found");
+            responseObject.setStatusCode(APIConstants.StatusCodes.NOTFOUND.getCode());
+            responseObject.setErrorCode(APIConstants.StatusCodes.NOTFOUND.getValue());
+            responseObject.setDirectResponse(true);
+            responseObject.setErrorMessage(APIConstants.NOT_FOUND_MESSAGE);
+            responseObject.setErrorDescription(APIConstants.NOT_FOUND_DESCRIPTION);
             return responseObject;
         } else if (logger.isDebugEnabled()) {
             APIConfig api = matchedAPI.getAPIConfig();

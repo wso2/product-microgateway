@@ -17,10 +17,10 @@
  */
 package org.wso2.micro.gateway.enforcer.api;
 
-import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.api.Api;
+import org.wso2.gateway.discovery.api.Operation;
 import org.wso2.gateway.discovery.api.Resource;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
@@ -32,6 +32,7 @@ import org.wso2.micro.gateway.enforcer.filters.ThrottleFilter;
 import org.wso2.micro.gateway.enforcer.security.AuthFilter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,17 +50,6 @@ public class RestAPI implements API {
         return filters;
     }
 
-    @Override
-    public String init(CheckRequest request) {
-        String basePath = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_BASE_PATH_PARAM);
-        String name = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_API_NAME_PARAM);
-        String version = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_VERSION_PARAM);
-        List<ResourceConfig> resources = extractResourceConfig(request.getAttributes().getContextExtensionsMap());
-        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).build();
-
-        initFilters();
-        return basePath;
-    }
 
     @Override
     public String init(Api api) {
@@ -68,15 +58,13 @@ public class RestAPI implements API {
         String version = api.getVersion();
         List<ResourceConfig> resources = new ArrayList<>();
         for (Resource res: api.getResourcesList()) {
-            // TODO: (Praminda) handle multiple methods for a resource
             // TODO: (Praminda) handle all fields of resource
-            String method = res.getMethods(0);
-            ResourceConfig resConfig = buildResource(res.getPath(), method);
-
-            resources.add(resConfig);
+            for (Operation operation : res.getMethodsList()) {
+                ResourceConfig resConfig = buildResource(operation, res.getPath());
+                resources.add(resConfig);
+            }
         }
         this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).build();
-
         initFilters();
         return basePath;
     }
@@ -85,20 +73,26 @@ public class RestAPI implements API {
     public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject();
         if (executeFilterChain(requestContext)) {
-            responseObject.setStatusCode(200);
+            responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
             if (requestContext.getResponseHeaders() != null) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
         } else {
             // If a enforcer stops with a false, it will be passed directly to the client.
             responseObject.setDirectResponse(true);
-            responseObject.setStatusCode(Integer.parseInt(requestContext.getProperties().get("code").toString()));
-            if (requestContext.getProperties().get("error_code") != null) {
-                responseObject.setErrorCode(requestContext.getProperties().get("error_code").toString());
+            responseObject.setStatusCode(Integer.parseInt(
+                    requestContext.getProperties().get(APIConstants.MessageFormat.STATUS_CODE).toString()));
+            if (requestContext.getProperties().get(APIConstants.MessageFormat.ERROR_CODE) != null) {
+                responseObject.setErrorCode(
+                        requestContext.getProperties().get(APIConstants.MessageFormat.ERROR_CODE).toString());
             }
-            if (requestContext.getProperties().get("error_code") != null) {
+            if (requestContext.getProperties().get(APIConstants.MessageFormat.ERROR_MESSAGE) != null) {
+                responseObject.setErrorMessage(requestContext.getProperties()
+                        .get(APIConstants.MessageFormat.ERROR_MESSAGE).toString());
+            }
+            if (requestContext.getProperties().get(APIConstants.MessageFormat.ERROR_DESCRIPTION) != null) {
                 responseObject.setErrorDescription(requestContext.getProperties()
-                        .get("error_description").toString());
+                        .get(APIConstants.MessageFormat.ERROR_DESCRIPTION).toString());
             }
             if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
@@ -112,30 +106,19 @@ public class RestAPI implements API {
         return this.apiConfig;
     }
 
-    /**
-     * Extract elected resource details from the request attributes.
-     *
-     * @param attributes request attributes
-     * @return resource configuration identified by the request
-     */
-    private List<ResourceConfig> extractResourceConfig(Map<String, String> attributes) {
-        // TODO: (Praminda) cover error cases
-        String resPath = attributes.get(APIConstants.GW_RES_PATH_PARAM);
-        String[] methods = attributes.get(APIConstants.GW_RES_METHOD_PARAM).split(" ");
-        List<ResourceConfig> resources = new ArrayList<>(1);
-
-        for (String m : methods) {
-            resources.add(buildResource(resPath, m));
-        }
-
-        return resources;
-    }
-
-    private ResourceConfig buildResource(String resPath, String resMethod) {
+    private ResourceConfig buildResource(Operation operation, String resPath) {
         ResourceConfig resource = new ResourceConfig();
         resource.setPath(resPath);
-        resource.setMethod(ResourceConfig.HttpMethods.valueOf(resMethod.toUpperCase()));
-
+        resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
+        Map<String, List<String>> securityMap = new HashMap<>();
+        operation.getSecurityList().forEach(securityList -> securityList.getScopeListMap().forEach((key, security) -> {
+            List<String> scopeList = new ArrayList<>();
+            if (security != null && security.getScopesList() != null) {
+                scopeList.addAll(security.getScopesList());
+                securityMap.put(key, scopeList);
+            }
+        }));
+        resource.setSecuritySchemas(securityMap);
         return resource;
     }
 
@@ -146,7 +129,7 @@ public class RestAPI implements API {
         this.filters.add(corsFilter);
         this.filters.add(authFilter);
         // enable throttle filter
-        if (ConfigHolder.getInstance().getThrottleAgentConfig().isEnabled()) {
+        if (ConfigHolder.getInstance().getConfig().getThrottleAgentConfig().isEnabled()) {
             ThrottleFilter throttleFilter = new ThrottleFilter();
             throttleFilter.init(apiConfig);
             this.filters.add(throttleFilter);

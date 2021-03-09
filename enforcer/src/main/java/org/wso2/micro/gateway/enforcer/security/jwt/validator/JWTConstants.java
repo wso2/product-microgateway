@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -27,4 +27,6 @@ public class JWTConstants {
     public static final String UNAVAILABLE = "Token is not available in cache";
     public static final String VALID = "valid";
     public static final String INVALID = "invalid";
+    public static final String DEFAULT_JWT_GENERATOR_CLASS_NAME = "org.wso2.carbon.apimgt.common.gateway." +
+            "jwtgenerator.APIMgtGatewayJWTGeneratorImpl";
 }

@@ -1,23 +1,22 @@
 /*
-*  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.micro.gateway.enforcer.globalthrottle.databridge.agent.util;
-
-
 
 import org.wso2.micro.gateway.enforcer.globalthrottle.databridge.agent.conf.DataEndpointConfiguration;
 import org.wso2.micro.gateway.enforcer.globalthrottle.databridge.agent.exception.DataEndpointConfigurationException;
@@ -29,14 +28,12 @@ import java.util.regex.Pattern;
 /**
  * A Util class which holds all the utility processing methods in the data publisher operation.
  */
-
 public class DataPublisherUtil {
 
     /**
      * Making as private to avoid the instantiation of the class.
      */
-    private DataPublisherUtil() {
-    }
+    private DataPublisherUtil() {}
 
     /**
      * Process and extracts the receiver Groups from the string of URL set pattern passed in.
@@ -62,7 +59,6 @@ public class DataPublisherUtil {
         }
         return endPointGroups;
     }
-
 
     /**
      * Returns an object array which has first element as boolean
@@ -102,7 +98,6 @@ public class DataPublisherUtil {
         return endpoint;
     }
 
-
     /**
      * Validate whether the receiverGroup and authenticationGroups are matching with pattern.
      * Basically if the receiver groups has been configured to be in the failover pattern,
@@ -141,7 +136,6 @@ public class DataPublisherUtil {
                     + authGroups.size());
         }
     }
-
 
     /**
      * Returns the URL set string based on the URLs provided. The first element of the array is

@@ -18,10 +18,13 @@
 
 package org.wso2.micro.gateway.enforcer.config;
 
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.dto.ThrottleAgentConfigDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +38,11 @@ public class EnforcerConfig {
     private EventHubConfigurationDto eventHub;
     private Map<String, TokenIssuerDto> issuersMap = new HashMap<>();
     private CredentialDto apimCredentials;
+    private ThrottleAgentConfigDTO throttleAgentConfig;
+    private JWTConfigurationDto jwtConfigurationDto;
+    private CacheDto cacheDto;
+    private String publicCertificatePath = "";
+    private String privateKeyPath = "";
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -66,6 +74,46 @@ public class EnforcerConfig {
 
     public void setApimCredentials(CredentialDto apimCredentials) {
         this.apimCredentials = apimCredentials;
+    }
+
+    public ThrottleAgentConfigDTO getThrottleAgentConfig() {
+        return throttleAgentConfig;
+    }
+
+    public void setThrottleAgentConfig(ThrottleAgentConfigDTO throttleAgentConfig) {
+        this.throttleAgentConfig = throttleAgentConfig;
+    }
+
+    public void setJwtConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {
+        this.jwtConfigurationDto = jwtConfigurationDto;
+    }
+
+    public JWTConfigurationDto getJwtConfigurationDto() {
+        return jwtConfigurationDto;
+    }
+
+    public CacheDto getCacheDto() {
+        return cacheDto;
+    }
+
+    public void setCacheDto(CacheDto cacheDto) {
+        this.cacheDto = cacheDto;
+    }
+
+    public void setPublicCertificatePath(String certPath) {
+        this.publicCertificatePath = certPath;
+    }
+
+    public String getPublicCertificatePath() {
+        return publicCertificatePath;
+    }
+
+    public void setPrivateKeyPath(String keyPath) {
+        this.privateKeyPath = keyPath;
+    }
+
+    public String getPrivateKeyPath() {
+        return privateKeyPath;
     }
 }
 
