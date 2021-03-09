@@ -122,6 +122,7 @@ public class APIFactory {
                                 .equals(ResourceConfig.HttpMethods.valueOf(method))).findFirst().orElse(null);
     }
 
+    // For WebSocket APIs since there are no resources in WebSocket APIs.
     public ResourceConfig getMatchedBasePath(API api, String basePath) {
         ResourceConfig resourceConfig = new ResourceConfig();
         if (api.getAPIConfig().getBasePath().equals(basePath)) {

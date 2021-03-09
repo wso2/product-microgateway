@@ -42,7 +42,6 @@ public class WebSocketMetadataContext {
         this.basepath = builder.basepath;
         this.authenticationContext = builder.authenticationContext;
 
-
     }
 
     /**

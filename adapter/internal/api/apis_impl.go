@@ -139,7 +139,6 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 		}
 	}
 	if apiProject.APIJsn == nil {
-		// TODO : (LahiruUdayanga) Handle the default behaviour after when the APIDeployTestCase test is fixed.
 		// If no api.yaml file is included in the zip folder, return with error.
 		err := errors.New("Could not find api.yaml or api.json")
 		loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())

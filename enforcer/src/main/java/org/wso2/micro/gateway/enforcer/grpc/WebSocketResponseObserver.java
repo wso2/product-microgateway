@@ -37,7 +37,6 @@ public class WebSocketResponseObserver implements StreamObserver<RateLimitReques
     private final StreamObserver<RateLimitResponse> responseStreamObserver;
     private final WebSocketHandler webSocketHandler = new WebSocketHandler();
     private String streamId;
-    private int count;
 
     public WebSocketResponseObserver(StreamObserver<RateLimitResponse> responseStreamObserver) {
         this.responseStreamObserver = responseStreamObserver;
@@ -45,20 +44,11 @@ public class WebSocketResponseObserver implements StreamObserver<RateLimitReques
 
     @Override
     public void onNext(RateLimitRequest rateLimitRequest) {
-        count++;
         authenticationContext = webSocketHandler.process(rateLimitRequest);
         streamId = getStreamId(rateLimitRequest);
         WebSocketMetadataService.addObserver(streamId, this);
-        // Demo rate limit scenario
-        if (count > 10 && count < 15) {
-            RateLimitResponse response = RateLimitResponse.newBuilder()
-                    .setOverallCode(RateLimitResponse.Code.OVER_LIMIT).build();
-            responseStreamObserver.onNext(response);
-        } else {
-            RateLimitResponse response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.OK)
-                    .build();
-            responseStreamObserver.onNext(response);
-        }
+        RateLimitResponse response = RateLimitResponse.newBuilder().setOverallCode(RateLimitResponse.Code.OK).build();
+        responseStreamObserver.onNext(response);
     }
 
     @Override

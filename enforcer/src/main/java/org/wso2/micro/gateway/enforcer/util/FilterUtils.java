@@ -169,7 +169,6 @@ public class FilterUtils {
     public static AuthenticationContext generateAuthenticationContext(String jti, JWTValidationInfo jwtValidationInfo,
             APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String endUserToken, boolean isOauth,
             RequestContext requestContext) {
-        log.info("generateAuthenticationContext");
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
         authContext.setAuthenticated(true);
         authContext.setApiKey(jti);

@@ -103,17 +103,9 @@ public class JWTAuthenticator implements Authenticator {
         } catch (ParseException | IllegalArgumentException e) {
             throw new SecurityException("Not a JWT token. Failed to decode the token header.", e);
         }
-        ObjectMapper objectMapper = new ObjectMapper();
         JWTClaimsSet claims = signedJWTInfo.getJwtClaimsSet();
-        try {
-            log.info("Claims:" + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(claims));
-        } catch (Exception e) {
-            log.error(new Error(e));
-        }
         String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
-        log.info("jwtTokenIdentifier:" + jwtTokenIdentifier);
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
-        log.info("jwtHeader:" + jwtHeader);
         if (StringUtils.isNotEmpty(jwtTokenIdentifier)) {
             if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jwtTokenIdentifier)) {
                 if (log.isDebugEnabled()) {
@@ -126,14 +118,7 @@ public class JWTAuthenticator implements Authenticator {
 
         }
 
-        JWTValidationInfo validationInfo =
-                getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
-        try {
-            log.info("validationInfo:" + objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(validationInfo));
-        } catch (Exception e) {
-            log.error(new Error(e));
-        }
+        JWTValidationInfo validationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
         if (validationInfo != null) {
             if (validationInfo.isValid()) {
 
@@ -151,12 +136,6 @@ public class JWTAuthenticator implements Authenticator {
                                     + validationInfo.getKeyManager());
                         }
                         apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, validationInfo);
-                        try {
-                            log.info("apiKeyValidationInfoDTO" + objectMapper.writerWithDefaultPrettyPrinter()
-                                    .writeValueAsString(apiKeyValidationInfoDTO));
-                        } catch (Exception e) {
-                            log.error(new Error(e));
-                        }
                         if (log.isDebugEnabled()) {
                             log.debug("Subscription validation via Key Manager. Status: " + apiKeyValidationInfoDTO
                                     .isAuthorized());
@@ -340,9 +319,7 @@ public class JWTAuthenticator implements Authenticator {
         String tenantDomain = "carbon.super"; //TODO : get correct tenant domain
 
         String consumerKey = jwtValidationInfo.getConsumerKey();
-        log.info("consumerKey:" + consumerKey);
         String keyManager = jwtValidationInfo.getKeyManager();
-        log.info("keyManager:" + keyManager);
         if (consumerKey != null && keyManager != null) {
             return ReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain)
                     .validateSubscription(apiContext, apiVersion, consumerKey, keyManager);
