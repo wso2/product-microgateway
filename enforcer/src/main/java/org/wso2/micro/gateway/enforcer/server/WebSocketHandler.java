@@ -155,8 +155,6 @@ public class WebSocketHandler implements RequestHandler<RateLimitRequest, Authen
                 .setAuthenticationContext(authenticationContext).setFrameLength(frameLength)
                 .setUpstreamHost(upstreamHost).build();
 
-
-
         return new RequestContext.Builder(apiBasepath).matchedAPI(api).authenticationContext(authenticationContext)
                 .webSocketMetadataContext(webSocketMetadataContext).build();
     }

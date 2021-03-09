@@ -3,7 +3,6 @@ module github.com/wso2/micro-gw
 go 1.15
 
 require (
-	github.com/NomadXD/websocketconf v0.0.0-20210207174403-77b20981861c
 	github.com/cncf/udpa/go v0.0.0-20201211205326-cc1b757b3edd
 	github.com/envoyproxy/go-control-plane v0.9.8
 	github.com/envoyproxy/protoc-gen-validate v0.4.1
