@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -94,16 +94,6 @@ public class ApiProjectGenerator {
             Utils.copyFile(testResourcesPath + certificatePath, 
                 apisZipPath + File.separator + endpointCertificates + File.separator + "backend.crt");
         }
-//        if(apiYamlPath != null){
-//            createDirectory(apisZipPath);
-//            String apiPath = targetDir + File.separator + "test-classes" + File.separator + apiYamlPath;
-//            Utils.copyFile(apiPath, apisZipPath + File.separator + apiYamlFile);
-//            if (certificatePath != null) {
-//                String certPath = targetDir + File.separator  + "test-classes" + File.separator + certificatePath;
-//                Utils.copyFile(certPath, apisZipPath + File.separator + endpointCertificates +
-//                        File.separator + "backend.crt");
-//            }
-//        }
 
         ZipDir.createZipFile(apisZipPath);
         return apisZipPath + ".zip";
