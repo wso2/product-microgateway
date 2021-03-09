@@ -88,12 +88,16 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .build();
             responseBuilder.addHeaders(headerValueOption);
 
+            Struct.Builder structBuilder = Struct.newBuilder();
+            if (responseObject.getMetaDataMap() != null) {
+                responseObject.getMetaDataMap().forEach((key, value) ->
+                        structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
+            }
+
             return CheckResponse.newBuilder()
                     .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                     .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
-                    .setDynamicMetadata(Struct.newBuilder().putFields("correlationID",
-                            Value.newBuilder().setStringValue(responseObject.getCorrelationID()).build())
-                            .build())
+                    .setDynamicMetadata(structBuilder.build())
                     .build();
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();

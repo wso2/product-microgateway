@@ -66,6 +66,12 @@ public class AnalyticsFilter implements Filter {
         String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
         // TODO: (VirajSalaka) Decide on whether to include/exclude the options requests, Cors requests
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
+        // TODO: (VirajSalaka) Handle properly
+        // When authentication failure happens authContext remains null
+        if (authContext == null) {
+            authContext = new AuthenticationContext();
+            authContext.setAuthenticated(false);
+        }
 
         requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY,
                 authContext.getApiUUID() != null ? authContext.getApiUUID() : generateHash(apiName, apiVersion));

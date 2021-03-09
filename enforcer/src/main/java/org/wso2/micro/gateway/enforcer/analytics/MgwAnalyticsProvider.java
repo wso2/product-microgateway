@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.Faul
 import org.wso2.micro.gateway.enforcer.api.APIFactory;
 import org.wso2.micro.gateway.enforcer.constants.MetadataConstants;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -182,7 +183,7 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         MetaInfo metaInfo = new MetaInfo();
         metaInfo.setCorrelationId(getValueAsString(fieldsMap, MetadataConstants.CORRELATION_ID_KEY));
         // TODO: (VirajSalaka) Introduce Constant
-        metaInfo.setGatewayType("SYNAPSE");
+        metaInfo.setGatewayType("ENVOY");
         metaInfo.setRegionId(getValueAsString(fieldsMap, MetadataConstants.REGION_KEY));
         return metaInfo;
     }
@@ -231,10 +232,19 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     }
 
     private String getValueAsString(Map<String, Value> fieldsMap, String key) {
+        if (fieldsMap == null || fieldsMap.get(key) == null) {
+            return null;
+        }
         return fieldsMap.get(key).getStringValue();
     }
 
     private Map<String, Value> getFieldsMapFromLogEntry() {
+        if ((logEntry.getCommonProperties().getMetadata() == null
+                && logEntry.getCommonProperties().getMetadata().getFilterMetadataMap() == null)
+                 || !logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
+                .containsKey(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY)) {
+            return new HashMap<>(0);
+        }
         return logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
                 .get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY).getFieldsMap();
     }

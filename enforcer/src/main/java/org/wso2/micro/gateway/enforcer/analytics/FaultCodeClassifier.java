@@ -81,7 +81,10 @@ public class FaultCodeClassifier {
             case APISecurityConstants.SUBSCRIPTION_INACTIVE:
                 return FaultSubCategories.Authentication.SUBSCRIPTION_VALIDATION_FAILURE;
             default:
-                return FaultSubCategories.TargetConnectivity.OTHER;
+                // TODO: (VirajSalaka) Temporary workaround.
+                // Apply the uncommented code once https://github.com/envoyproxy/envoy/pull/15058 is available.
+                // return FaultSubCategories.TargetConnectivity.OTHER;
+                return FaultSubCategories.Authentication.AUTHENTICATION_FAILURE;
         }
     }
 
@@ -152,9 +155,13 @@ public class FaultCodeClassifier {
 
     private int getErrorCodeFromMetadata() {
         int errorCode = -1;
-        // TODO: (VirajSalaka) Handle possible null pointer exception
-        if (logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
-                .containsKey(MetadataConstants.ERROR_CODE_KEY)) {
+        if (logEntry.getCommonProperties().getMetadata() != null
+                && logEntry.getCommonProperties().getMetadata().getFilterMetadataMap() != null
+                && logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
+                .containsKey(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY)
+                && logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
+                .get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY).getFieldsMap()
+                .get(MetadataConstants.ERROR_CODE_KEY) != null) {
             errorCode = Integer.parseInt(logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
                     .get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY).getFieldsMap()
                     .get(MetadataConstants.ERROR_CODE_KEY)
