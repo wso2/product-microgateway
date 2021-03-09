@@ -17,7 +17,6 @@
  */
 package org.wso2.micro.gateway.enforcer.security.jwt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.LoadingCache;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;

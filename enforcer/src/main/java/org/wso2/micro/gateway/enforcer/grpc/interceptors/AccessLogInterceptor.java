@@ -28,7 +28,8 @@ import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.websocket.RateLimitRequest;
 
 /**
  * Intercepts the gRPC request comes to the enforcer and logs the request access data.
@@ -49,6 +50,13 @@ public class AccessLogInterceptor implements ServerInterceptor {
                         CheckRequest checkRequest = (CheckRequest) message;
                         enforcerServerCall.setStartTime(System.currentTimeMillis());
                         enforcerServerCall.setTraceId(checkRequest.getAttributes().getRequest().getHttp().getId());
+                        super.onMessage(message);
+                    } else if (message instanceof RateLimitRequest) {
+                        RateLimitRequest rateLimitRequest = (RateLimitRequest) message;
+                        enforcerServerCall.setStartTime(System.currentTimeMillis());
+                        enforcerServerCall.setTraceId(rateLimitRequest.getMetadataContext().getFilterMetadataMap()
+                                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap()
+                                .get(APIConstants.WEBSOCKET_STREAM_ID).toString());
                         super.onMessage(message);
                     }
                 }
