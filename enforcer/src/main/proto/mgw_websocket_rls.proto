@@ -58,5 +58,4 @@ service WebSocketMetadataService{
   rpc publishMetadata(stream RateLimitRequest) returns (stream RateLimitResponse){
 
   }
-
 }
