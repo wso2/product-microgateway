@@ -20,6 +20,10 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private Throttling() {
+    jmsConnectionInitialContextFactory_ = "";
+    jmsConnectionProviderUrl_ = "";
+    jmsConnectionUsername_ = "";
+    jmsConnectionPassword_ = "";
   }
 
   @java.lang.Override
@@ -52,7 +56,51 @@ private static final long serialVersionUID = 0L;
           case 0:
             done = true;
             break;
-          case 10: {
+          case 8: {
+
+            enableGlobalEventPublishing_ = input.readBool();
+            break;
+          }
+          case 16: {
+
+            enableHeaderConditions_ = input.readBool();
+            break;
+          }
+          case 24: {
+
+            enableQueryParamConditions_ = input.readBool();
+            break;
+          }
+          case 32: {
+
+            enableJwtClaimConditions_ = input.readBool();
+            break;
+          }
+          case 42: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            jmsConnectionInitialContextFactory_ = s;
+            break;
+          }
+          case 50: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            jmsConnectionProviderUrl_ = s;
+            break;
+          }
+          case 58: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            jmsConnectionUsername_ = s;
+            break;
+          }
+          case 66: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            jmsConnectionPassword_ = s;
+            break;
+          }
+          case 74: {
             org.wso2.gateway.discovery.config.enforcer.BinaryThrottling.Builder subBuilder = null;
             if (binary_ != null) {
               subBuilder = binary_.toBuilder();
@@ -97,10 +145,206 @@ private static final long serialVersionUID = 0L;
             org.wso2.gateway.discovery.config.enforcer.Throttling.class, org.wso2.gateway.discovery.config.enforcer.Throttling.Builder.class);
   }
 
-  public static final int BINARY_FIELD_NUMBER = 1;
+  public static final int ENABLE_GLOBAL_EVENT_PUBLISHING_FIELD_NUMBER = 1;
+  private boolean enableGlobalEventPublishing_;
+  /**
+   * <code>bool enable_global_event_publishing = 1;</code>
+   * @return The enableGlobalEventPublishing.
+   */
+  @java.lang.Override
+  public boolean getEnableGlobalEventPublishing() {
+    return enableGlobalEventPublishing_;
+  }
+
+  public static final int ENABLE_HEADER_CONDITIONS_FIELD_NUMBER = 2;
+  private boolean enableHeaderConditions_;
+  /**
+   * <code>bool enable_header_conditions = 2;</code>
+   * @return The enableHeaderConditions.
+   */
+  @java.lang.Override
+  public boolean getEnableHeaderConditions() {
+    return enableHeaderConditions_;
+  }
+
+  public static final int ENABLE_QUERY_PARAM_CONDITIONS_FIELD_NUMBER = 3;
+  private boolean enableQueryParamConditions_;
+  /**
+   * <code>bool enable_query_param_conditions = 3;</code>
+   * @return The enableQueryParamConditions.
+   */
+  @java.lang.Override
+  public boolean getEnableQueryParamConditions() {
+    return enableQueryParamConditions_;
+  }
+
+  public static final int ENABLE_JWT_CLAIM_CONDITIONS_FIELD_NUMBER = 4;
+  private boolean enableJwtClaimConditions_;
+  /**
+   * <code>bool enable_jwt_claim_conditions = 4;</code>
+   * @return The enableJwtClaimConditions.
+   */
+  @java.lang.Override
+  public boolean getEnableJwtClaimConditions() {
+    return enableJwtClaimConditions_;
+  }
+
+  public static final int JMS_CONNECTION_INITIAL_CONTEXT_FACTORY_FIELD_NUMBER = 5;
+  private volatile java.lang.Object jmsConnectionInitialContextFactory_;
+  /**
+   * <code>string jms_connection_initial_context_factory = 5;</code>
+   * @return The jmsConnectionInitialContextFactory.
+   */
+  @java.lang.Override
+  public java.lang.String getJmsConnectionInitialContextFactory() {
+    java.lang.Object ref = jmsConnectionInitialContextFactory_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      jmsConnectionInitialContextFactory_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string jms_connection_initial_context_factory = 5;</code>
+   * @return The bytes for jmsConnectionInitialContextFactory.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getJmsConnectionInitialContextFactoryBytes() {
+    java.lang.Object ref = jmsConnectionInitialContextFactory_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      jmsConnectionInitialContextFactory_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int JMS_CONNECTION_PROVIDER_URL_FIELD_NUMBER = 6;
+  private volatile java.lang.Object jmsConnectionProviderUrl_;
+  /**
+   * <code>string jms_connection_provider_url = 6;</code>
+   * @return The jmsConnectionProviderUrl.
+   */
+  @java.lang.Override
+  public java.lang.String getJmsConnectionProviderUrl() {
+    java.lang.Object ref = jmsConnectionProviderUrl_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      jmsConnectionProviderUrl_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string jms_connection_provider_url = 6;</code>
+   * @return The bytes for jmsConnectionProviderUrl.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getJmsConnectionProviderUrlBytes() {
+    java.lang.Object ref = jmsConnectionProviderUrl_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      jmsConnectionProviderUrl_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int JMS_CONNECTION_USERNAME_FIELD_NUMBER = 7;
+  private volatile java.lang.Object jmsConnectionUsername_;
+  /**
+   * <code>string jms_connection_username = 7;</code>
+   * @return The jmsConnectionUsername.
+   */
+  @java.lang.Override
+  public java.lang.String getJmsConnectionUsername() {
+    java.lang.Object ref = jmsConnectionUsername_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      jmsConnectionUsername_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string jms_connection_username = 7;</code>
+   * @return The bytes for jmsConnectionUsername.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getJmsConnectionUsernameBytes() {
+    java.lang.Object ref = jmsConnectionUsername_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      jmsConnectionUsername_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int JMS_CONNECTION_PASSWORD_FIELD_NUMBER = 8;
+  private volatile java.lang.Object jmsConnectionPassword_;
+  /**
+   * <code>string jms_connection_password = 8;</code>
+   * @return The jmsConnectionPassword.
+   */
+  @java.lang.Override
+  public java.lang.String getJmsConnectionPassword() {
+    java.lang.Object ref = jmsConnectionPassword_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      jmsConnectionPassword_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string jms_connection_password = 8;</code>
+   * @return The bytes for jmsConnectionPassword.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getJmsConnectionPasswordBytes() {
+    java.lang.Object ref = jmsConnectionPassword_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      jmsConnectionPassword_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int BINARY_FIELD_NUMBER = 9;
   private org.wso2.gateway.discovery.config.enforcer.BinaryThrottling binary_;
   /**
-   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
    * @return Whether the binary field is set.
    */
   @java.lang.Override
@@ -108,7 +352,7 @@ private static final long serialVersionUID = 0L;
     return binary_ != null;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
    * @return The binary.
    */
   @java.lang.Override
@@ -116,7 +360,7 @@ private static final long serialVersionUID = 0L;
     return binary_ == null ? org.wso2.gateway.discovery.config.enforcer.BinaryThrottling.getDefaultInstance() : binary_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.config.enforcer.BinaryThrottlingOrBuilder getBinaryOrBuilder() {
@@ -137,8 +381,32 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
+    if (enableGlobalEventPublishing_ != false) {
+      output.writeBool(1, enableGlobalEventPublishing_);
+    }
+    if (enableHeaderConditions_ != false) {
+      output.writeBool(2, enableHeaderConditions_);
+    }
+    if (enableQueryParamConditions_ != false) {
+      output.writeBool(3, enableQueryParamConditions_);
+    }
+    if (enableJwtClaimConditions_ != false) {
+      output.writeBool(4, enableJwtClaimConditions_);
+    }
+    if (!getJmsConnectionInitialContextFactoryBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 5, jmsConnectionInitialContextFactory_);
+    }
+    if (!getJmsConnectionProviderUrlBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 6, jmsConnectionProviderUrl_);
+    }
+    if (!getJmsConnectionUsernameBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 7, jmsConnectionUsername_);
+    }
+    if (!getJmsConnectionPasswordBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 8, jmsConnectionPassword_);
+    }
     if (binary_ != null) {
-      output.writeMessage(1, getBinary());
+      output.writeMessage(9, getBinary());
     }
     unknownFields.writeTo(output);
   }
@@ -149,9 +417,37 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
+    if (enableGlobalEventPublishing_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(1, enableGlobalEventPublishing_);
+    }
+    if (enableHeaderConditions_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(2, enableHeaderConditions_);
+    }
+    if (enableQueryParamConditions_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(3, enableQueryParamConditions_);
+    }
+    if (enableJwtClaimConditions_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(4, enableJwtClaimConditions_);
+    }
+    if (!getJmsConnectionInitialContextFactoryBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, jmsConnectionInitialContextFactory_);
+    }
+    if (!getJmsConnectionProviderUrlBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, jmsConnectionProviderUrl_);
+    }
+    if (!getJmsConnectionUsernameBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, jmsConnectionUsername_);
+    }
+    if (!getJmsConnectionPasswordBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, jmsConnectionPassword_);
+    }
     if (binary_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(1, getBinary());
+        .computeMessageSize(9, getBinary());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -168,6 +464,22 @@ private static final long serialVersionUID = 0L;
     }
     org.wso2.gateway.discovery.config.enforcer.Throttling other = (org.wso2.gateway.discovery.config.enforcer.Throttling) obj;
 
+    if (getEnableGlobalEventPublishing()
+        != other.getEnableGlobalEventPublishing()) return false;
+    if (getEnableHeaderConditions()
+        != other.getEnableHeaderConditions()) return false;
+    if (getEnableQueryParamConditions()
+        != other.getEnableQueryParamConditions()) return false;
+    if (getEnableJwtClaimConditions()
+        != other.getEnableJwtClaimConditions()) return false;
+    if (!getJmsConnectionInitialContextFactory()
+        .equals(other.getJmsConnectionInitialContextFactory())) return false;
+    if (!getJmsConnectionProviderUrl()
+        .equals(other.getJmsConnectionProviderUrl())) return false;
+    if (!getJmsConnectionUsername()
+        .equals(other.getJmsConnectionUsername())) return false;
+    if (!getJmsConnectionPassword()
+        .equals(other.getJmsConnectionPassword())) return false;
     if (hasBinary() != other.hasBinary()) return false;
     if (hasBinary()) {
       if (!getBinary()
@@ -184,6 +496,26 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
+    hash = (37 * hash) + ENABLE_GLOBAL_EVENT_PUBLISHING_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getEnableGlobalEventPublishing());
+    hash = (37 * hash) + ENABLE_HEADER_CONDITIONS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getEnableHeaderConditions());
+    hash = (37 * hash) + ENABLE_QUERY_PARAM_CONDITIONS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getEnableQueryParamConditions());
+    hash = (37 * hash) + ENABLE_JWT_CLAIM_CONDITIONS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getEnableJwtClaimConditions());
+    hash = (37 * hash) + JMS_CONNECTION_INITIAL_CONTEXT_FACTORY_FIELD_NUMBER;
+    hash = (53 * hash) + getJmsConnectionInitialContextFactory().hashCode();
+    hash = (37 * hash) + JMS_CONNECTION_PROVIDER_URL_FIELD_NUMBER;
+    hash = (53 * hash) + getJmsConnectionProviderUrl().hashCode();
+    hash = (37 * hash) + JMS_CONNECTION_USERNAME_FIELD_NUMBER;
+    hash = (53 * hash) + getJmsConnectionUsername().hashCode();
+    hash = (37 * hash) + JMS_CONNECTION_PASSWORD_FIELD_NUMBER;
+    hash = (53 * hash) + getJmsConnectionPassword().hashCode();
     if (hasBinary()) {
       hash = (37 * hash) + BINARY_FIELD_NUMBER;
       hash = (53 * hash) + getBinary().hashCode();
@@ -325,6 +657,22 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      enableGlobalEventPublishing_ = false;
+
+      enableHeaderConditions_ = false;
+
+      enableQueryParamConditions_ = false;
+
+      enableJwtClaimConditions_ = false;
+
+      jmsConnectionInitialContextFactory_ = "";
+
+      jmsConnectionProviderUrl_ = "";
+
+      jmsConnectionUsername_ = "";
+
+      jmsConnectionPassword_ = "";
+
       if (binaryBuilder_ == null) {
         binary_ = null;
       } else {
@@ -357,6 +705,14 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.gateway.discovery.config.enforcer.Throttling buildPartial() {
       org.wso2.gateway.discovery.config.enforcer.Throttling result = new org.wso2.gateway.discovery.config.enforcer.Throttling(this);
+      result.enableGlobalEventPublishing_ = enableGlobalEventPublishing_;
+      result.enableHeaderConditions_ = enableHeaderConditions_;
+      result.enableQueryParamConditions_ = enableQueryParamConditions_;
+      result.enableJwtClaimConditions_ = enableJwtClaimConditions_;
+      result.jmsConnectionInitialContextFactory_ = jmsConnectionInitialContextFactory_;
+      result.jmsConnectionProviderUrl_ = jmsConnectionProviderUrl_;
+      result.jmsConnectionUsername_ = jmsConnectionUsername_;
+      result.jmsConnectionPassword_ = jmsConnectionPassword_;
       if (binaryBuilder_ == null) {
         result.binary_ = binary_;
       } else {
@@ -410,6 +766,34 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.wso2.gateway.discovery.config.enforcer.Throttling other) {
       if (other == org.wso2.gateway.discovery.config.enforcer.Throttling.getDefaultInstance()) return this;
+      if (other.getEnableGlobalEventPublishing() != false) {
+        setEnableGlobalEventPublishing(other.getEnableGlobalEventPublishing());
+      }
+      if (other.getEnableHeaderConditions() != false) {
+        setEnableHeaderConditions(other.getEnableHeaderConditions());
+      }
+      if (other.getEnableQueryParamConditions() != false) {
+        setEnableQueryParamConditions(other.getEnableQueryParamConditions());
+      }
+      if (other.getEnableJwtClaimConditions() != false) {
+        setEnableJwtClaimConditions(other.getEnableJwtClaimConditions());
+      }
+      if (!other.getJmsConnectionInitialContextFactory().isEmpty()) {
+        jmsConnectionInitialContextFactory_ = other.jmsConnectionInitialContextFactory_;
+        onChanged();
+      }
+      if (!other.getJmsConnectionProviderUrl().isEmpty()) {
+        jmsConnectionProviderUrl_ = other.jmsConnectionProviderUrl_;
+        onChanged();
+      }
+      if (!other.getJmsConnectionUsername().isEmpty()) {
+        jmsConnectionUsername_ = other.jmsConnectionUsername_;
+        onChanged();
+      }
+      if (!other.getJmsConnectionPassword().isEmpty()) {
+        jmsConnectionPassword_ = other.jmsConnectionPassword_;
+        onChanged();
+      }
       if (other.hasBinary()) {
         mergeBinary(other.getBinary());
       }
@@ -442,18 +826,446 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
+    private boolean enableGlobalEventPublishing_ ;
+    /**
+     * <code>bool enable_global_event_publishing = 1;</code>
+     * @return The enableGlobalEventPublishing.
+     */
+    @java.lang.Override
+    public boolean getEnableGlobalEventPublishing() {
+      return enableGlobalEventPublishing_;
+    }
+    /**
+     * <code>bool enable_global_event_publishing = 1;</code>
+     * @param value The enableGlobalEventPublishing to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEnableGlobalEventPublishing(boolean value) {
+      
+      enableGlobalEventPublishing_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool enable_global_event_publishing = 1;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearEnableGlobalEventPublishing() {
+      
+      enableGlobalEventPublishing_ = false;
+      onChanged();
+      return this;
+    }
+
+    private boolean enableHeaderConditions_ ;
+    /**
+     * <code>bool enable_header_conditions = 2;</code>
+     * @return The enableHeaderConditions.
+     */
+    @java.lang.Override
+    public boolean getEnableHeaderConditions() {
+      return enableHeaderConditions_;
+    }
+    /**
+     * <code>bool enable_header_conditions = 2;</code>
+     * @param value The enableHeaderConditions to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEnableHeaderConditions(boolean value) {
+      
+      enableHeaderConditions_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool enable_header_conditions = 2;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearEnableHeaderConditions() {
+      
+      enableHeaderConditions_ = false;
+      onChanged();
+      return this;
+    }
+
+    private boolean enableQueryParamConditions_ ;
+    /**
+     * <code>bool enable_query_param_conditions = 3;</code>
+     * @return The enableQueryParamConditions.
+     */
+    @java.lang.Override
+    public boolean getEnableQueryParamConditions() {
+      return enableQueryParamConditions_;
+    }
+    /**
+     * <code>bool enable_query_param_conditions = 3;</code>
+     * @param value The enableQueryParamConditions to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEnableQueryParamConditions(boolean value) {
+      
+      enableQueryParamConditions_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool enable_query_param_conditions = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearEnableQueryParamConditions() {
+      
+      enableQueryParamConditions_ = false;
+      onChanged();
+      return this;
+    }
+
+    private boolean enableJwtClaimConditions_ ;
+    /**
+     * <code>bool enable_jwt_claim_conditions = 4;</code>
+     * @return The enableJwtClaimConditions.
+     */
+    @java.lang.Override
+    public boolean getEnableJwtClaimConditions() {
+      return enableJwtClaimConditions_;
+    }
+    /**
+     * <code>bool enable_jwt_claim_conditions = 4;</code>
+     * @param value The enableJwtClaimConditions to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEnableJwtClaimConditions(boolean value) {
+      
+      enableJwtClaimConditions_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool enable_jwt_claim_conditions = 4;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearEnableJwtClaimConditions() {
+      
+      enableJwtClaimConditions_ = false;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object jmsConnectionInitialContextFactory_ = "";
+    /**
+     * <code>string jms_connection_initial_context_factory = 5;</code>
+     * @return The jmsConnectionInitialContextFactory.
+     */
+    public java.lang.String getJmsConnectionInitialContextFactory() {
+      java.lang.Object ref = jmsConnectionInitialContextFactory_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        jmsConnectionInitialContextFactory_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string jms_connection_initial_context_factory = 5;</code>
+     * @return The bytes for jmsConnectionInitialContextFactory.
+     */
+    public com.google.protobuf.ByteString
+        getJmsConnectionInitialContextFactoryBytes() {
+      java.lang.Object ref = jmsConnectionInitialContextFactory_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        jmsConnectionInitialContextFactory_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string jms_connection_initial_context_factory = 5;</code>
+     * @param value The jmsConnectionInitialContextFactory to set.
+     * @return This builder for chaining.
+     */
+    public Builder setJmsConnectionInitialContextFactory(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      jmsConnectionInitialContextFactory_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string jms_connection_initial_context_factory = 5;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearJmsConnectionInitialContextFactory() {
+      
+      jmsConnectionInitialContextFactory_ = getDefaultInstance().getJmsConnectionInitialContextFactory();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string jms_connection_initial_context_factory = 5;</code>
+     * @param value The bytes for jmsConnectionInitialContextFactory to set.
+     * @return This builder for chaining.
+     */
+    public Builder setJmsConnectionInitialContextFactoryBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      jmsConnectionInitialContextFactory_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object jmsConnectionProviderUrl_ = "";
+    /**
+     * <code>string jms_connection_provider_url = 6;</code>
+     * @return The jmsConnectionProviderUrl.
+     */
+    public java.lang.String getJmsConnectionProviderUrl() {
+      java.lang.Object ref = jmsConnectionProviderUrl_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        jmsConnectionProviderUrl_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string jms_connection_provider_url = 6;</code>
+     * @return The bytes for jmsConnectionProviderUrl.
+     */
+    public com.google.protobuf.ByteString
+        getJmsConnectionProviderUrlBytes() {
+      java.lang.Object ref = jmsConnectionProviderUrl_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        jmsConnectionProviderUrl_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string jms_connection_provider_url = 6;</code>
+     * @param value The jmsConnectionProviderUrl to set.
+     * @return This builder for chaining.
+     */
+    public Builder setJmsConnectionProviderUrl(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      jmsConnectionProviderUrl_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string jms_connection_provider_url = 6;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearJmsConnectionProviderUrl() {
+      
+      jmsConnectionProviderUrl_ = getDefaultInstance().getJmsConnectionProviderUrl();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string jms_connection_provider_url = 6;</code>
+     * @param value The bytes for jmsConnectionProviderUrl to set.
+     * @return This builder for chaining.
+     */
+    public Builder setJmsConnectionProviderUrlBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      jmsConnectionProviderUrl_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object jmsConnectionUsername_ = "";
+    /**
+     * <code>string jms_connection_username = 7;</code>
+     * @return The jmsConnectionUsername.
+     */
+    public java.lang.String getJmsConnectionUsername() {
+      java.lang.Object ref = jmsConnectionUsername_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        jmsConnectionUsername_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string jms_connection_username = 7;</code>
+     * @return The bytes for jmsConnectionUsername.
+     */
+    public com.google.protobuf.ByteString
+        getJmsConnectionUsernameBytes() {
+      java.lang.Object ref = jmsConnectionUsername_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        jmsConnectionUsername_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string jms_connection_username = 7;</code>
+     * @param value The jmsConnectionUsername to set.
+     * @return This builder for chaining.
+     */
+    public Builder setJmsConnectionUsername(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      jmsConnectionUsername_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string jms_connection_username = 7;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearJmsConnectionUsername() {
+      
+      jmsConnectionUsername_ = getDefaultInstance().getJmsConnectionUsername();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string jms_connection_username = 7;</code>
+     * @param value The bytes for jmsConnectionUsername to set.
+     * @return This builder for chaining.
+     */
+    public Builder setJmsConnectionUsernameBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      jmsConnectionUsername_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object jmsConnectionPassword_ = "";
+    /**
+     * <code>string jms_connection_password = 8;</code>
+     * @return The jmsConnectionPassword.
+     */
+    public java.lang.String getJmsConnectionPassword() {
+      java.lang.Object ref = jmsConnectionPassword_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        jmsConnectionPassword_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string jms_connection_password = 8;</code>
+     * @return The bytes for jmsConnectionPassword.
+     */
+    public com.google.protobuf.ByteString
+        getJmsConnectionPasswordBytes() {
+      java.lang.Object ref = jmsConnectionPassword_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        jmsConnectionPassword_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string jms_connection_password = 8;</code>
+     * @param value The jmsConnectionPassword to set.
+     * @return This builder for chaining.
+     */
+    public Builder setJmsConnectionPassword(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      jmsConnectionPassword_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string jms_connection_password = 8;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearJmsConnectionPassword() {
+      
+      jmsConnectionPassword_ = getDefaultInstance().getJmsConnectionPassword();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string jms_connection_password = 8;</code>
+     * @param value The bytes for jmsConnectionPassword to set.
+     * @return This builder for chaining.
+     */
+    public Builder setJmsConnectionPasswordBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      jmsConnectionPassword_ = value;
+      onChanged();
+      return this;
+    }
+
     private org.wso2.gateway.discovery.config.enforcer.BinaryThrottling binary_;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.BinaryThrottling, org.wso2.gateway.discovery.config.enforcer.BinaryThrottling.Builder, org.wso2.gateway.discovery.config.enforcer.BinaryThrottlingOrBuilder> binaryBuilder_;
     /**
-     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
      * @return Whether the binary field is set.
      */
     public boolean hasBinary() {
       return binaryBuilder_ != null || binary_ != null;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
      * @return The binary.
      */
     public org.wso2.gateway.discovery.config.enforcer.BinaryThrottling getBinary() {
@@ -464,7 +1276,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
      */
     public Builder setBinary(org.wso2.gateway.discovery.config.enforcer.BinaryThrottling value) {
       if (binaryBuilder_ == null) {
@@ -480,7 +1292,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
      */
     public Builder setBinary(
         org.wso2.gateway.discovery.config.enforcer.BinaryThrottling.Builder builderForValue) {
@@ -494,7 +1306,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
      */
     public Builder mergeBinary(org.wso2.gateway.discovery.config.enforcer.BinaryThrottling value) {
       if (binaryBuilder_ == null) {
@@ -512,7 +1324,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
      */
     public Builder clearBinary() {
       if (binaryBuilder_ == null) {
@@ -526,7 +1338,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.BinaryThrottling.Builder getBinaryBuilder() {
       
@@ -534,7 +1346,7 @@ private static final long serialVersionUID = 0L;
       return getBinaryFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.BinaryThrottlingOrBuilder getBinaryOrBuilder() {
       if (binaryBuilder_ != null) {
@@ -545,7 +1357,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.BinaryThrottling, org.wso2.gateway.discovery.config.enforcer.BinaryThrottling.Builder, org.wso2.gateway.discovery.config.enforcer.BinaryThrottlingOrBuilder> 

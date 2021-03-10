@@ -14,7 +14,6 @@ option java_multiple_files = true;
 // [#protodoc-title: BinaryThrottling]
 
 message BinaryThrottling {
-    bool enabled = 1;
     string username = 2;
     string password = 3;
     repeated TMURLGroup urlGroup = 4;

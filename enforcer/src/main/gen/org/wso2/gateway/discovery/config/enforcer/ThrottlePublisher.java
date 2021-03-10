@@ -4,6 +4,10 @@
 package org.wso2.gateway.discovery.config.enforcer;
 
 /**
+ * <pre>
+ * Throttle Publisher configuration model
+ * </pre>
+ *
  * Protobuf type {@code wso2.discovery.config.enforcer.ThrottlePublisher}
  */
 public final class ThrottlePublisher extends
@@ -360,6 +364,10 @@ private static final long serialVersionUID = 0L;
     return builder;
   }
   /**
+   * <pre>
+   * Throttle Publisher configuration model
+   * </pre>
+   *
    * Protobuf type {@code wso2.discovery.config.enforcer.ThrottlePublisher}
    */
   public static final class Builder extends

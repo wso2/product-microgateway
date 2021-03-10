@@ -31,13 +31,20 @@ public final class ThrottlingProto {
       "\n/wso2/discovery/config/enforcer/throttl" +
       "ing.proto\022\036wso2.discovery.config.enforce" +
       "r\0326wso2/discovery/config/enforcer/binary" +
-      "_throttling.proto\"N\n\nThrottling\022@\n\006binar" +
-      "y\030\001 \001(\01320.wso2.discovery.config.enforcer" +
-      ".BinaryThrottlingB\217\001\n*org.wso2.gateway.d" +
-      "iscovery.config.enforcerB\017ThrottlingProt" +
-      "oP\001ZNgithub.com/envoyproxy/go-control-pl" +
-      "ane/wso2/discovery/config/enforcer;enfor" +
-      "cerb\006proto3"
+      "_throttling.proto\"\373\002\n\nThrottling\022&\n\036enab" +
+      "le_global_event_publishing\030\001 \001(\010\022 \n\030enab" +
+      "le_header_conditions\030\002 \001(\010\022%\n\035enable_que" +
+      "ry_param_conditions\030\003 \001(\010\022#\n\033enable_jwt_" +
+      "claim_conditions\030\004 \001(\010\022.\n&jms_connection" +
+      "_initial_context_factory\030\005 \001(\t\022#\n\033jms_co" +
+      "nnection_provider_url\030\006 \001(\t\022\037\n\027jms_conne" +
+      "ction_username\030\007 \001(\t\022\037\n\027jms_connection_p" +
+      "assword\030\010 \001(\t\022@\n\006binary\030\t \001(\01320.wso2.dis" +
+      "covery.config.enforcer.BinaryThrottlingB" +
+      "\217\001\n*org.wso2.gateway.discovery.config.en" +
+      "forcerB\017ThrottlingProtoP\001ZNgithub.com/en" +
+      "voyproxy/go-control-plane/wso2/discovery" +
+      "/config/enforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -49,7 +56,7 @@ public final class ThrottlingProto {
     internal_static_wso2_discovery_config_enforcer_Throttling_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Throttling_descriptor,
-        new java.lang.String[] { "Binary", });
+        new java.lang.String[] { "EnableGlobalEventPublishing", "EnableHeaderConditions", "EnableQueryParamConditions", "EnableJwtClaimConditions", "JmsConnectionInitialContextFactory", "JmsConnectionProviderUrl", "JmsConnectionUsername", "JmsConnectionPassword", "Binary", });
     org.wso2.gateway.discovery.config.enforcer.BinaryThrottlingProto.getDescriptor();
   }
 

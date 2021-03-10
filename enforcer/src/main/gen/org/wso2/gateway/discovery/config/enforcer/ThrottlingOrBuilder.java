@@ -8,17 +8,89 @@ public interface ThrottlingOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+   * <code>bool enable_global_event_publishing = 1;</code>
+   * @return The enableGlobalEventPublishing.
+   */
+  boolean getEnableGlobalEventPublishing();
+
+  /**
+   * <code>bool enable_header_conditions = 2;</code>
+   * @return The enableHeaderConditions.
+   */
+  boolean getEnableHeaderConditions();
+
+  /**
+   * <code>bool enable_query_param_conditions = 3;</code>
+   * @return The enableQueryParamConditions.
+   */
+  boolean getEnableQueryParamConditions();
+
+  /**
+   * <code>bool enable_jwt_claim_conditions = 4;</code>
+   * @return The enableJwtClaimConditions.
+   */
+  boolean getEnableJwtClaimConditions();
+
+  /**
+   * <code>string jms_connection_initial_context_factory = 5;</code>
+   * @return The jmsConnectionInitialContextFactory.
+   */
+  java.lang.String getJmsConnectionInitialContextFactory();
+  /**
+   * <code>string jms_connection_initial_context_factory = 5;</code>
+   * @return The bytes for jmsConnectionInitialContextFactory.
+   */
+  com.google.protobuf.ByteString
+      getJmsConnectionInitialContextFactoryBytes();
+
+  /**
+   * <code>string jms_connection_provider_url = 6;</code>
+   * @return The jmsConnectionProviderUrl.
+   */
+  java.lang.String getJmsConnectionProviderUrl();
+  /**
+   * <code>string jms_connection_provider_url = 6;</code>
+   * @return The bytes for jmsConnectionProviderUrl.
+   */
+  com.google.protobuf.ByteString
+      getJmsConnectionProviderUrlBytes();
+
+  /**
+   * <code>string jms_connection_username = 7;</code>
+   * @return The jmsConnectionUsername.
+   */
+  java.lang.String getJmsConnectionUsername();
+  /**
+   * <code>string jms_connection_username = 7;</code>
+   * @return The bytes for jmsConnectionUsername.
+   */
+  com.google.protobuf.ByteString
+      getJmsConnectionUsernameBytes();
+
+  /**
+   * <code>string jms_connection_password = 8;</code>
+   * @return The jmsConnectionPassword.
+   */
+  java.lang.String getJmsConnectionPassword();
+  /**
+   * <code>string jms_connection_password = 8;</code>
+   * @return The bytes for jmsConnectionPassword.
+   */
+  com.google.protobuf.ByteString
+      getJmsConnectionPasswordBytes();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
    * @return Whether the binary field is set.
    */
   boolean hasBinary();
   /**
-   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
    * @return The binary.
    */
   org.wso2.gateway.discovery.config.enforcer.BinaryThrottling getBinary();
   /**
-   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.BinaryThrottlingOrBuilder getBinaryOrBuilder();
 }

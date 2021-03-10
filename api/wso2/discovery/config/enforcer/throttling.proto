@@ -13,5 +13,13 @@ option java_multiple_files = true;
 
 // Throttling model
 message Throttling {
-    BinaryThrottling binary = 1;
+    bool enable_global_event_publishing = 1;
+    bool enable_header_conditions = 2;
+    bool enable_query_param_conditions = 3;
+    bool enable_jwt_claim_conditions = 4;
+    string jms_connection_initial_context_factory = 5;
+    string jms_connection_provider_url = 6;
+    string jms_connection_username = 7;
+    string jms_connection_password = 8;
+    BinaryThrottling binary = 9;
 }

@@ -9,6 +9,7 @@ option java_multiple_files = true;
 
 // [#protodoc-title: ThrottlePublisher]
 
+// Throttle Publisher configuration model
 message ThrottlePublisher {
    int32 maxIdleDataPublishingAgents = 1;
    int32 initIdleObjectDataPublishingAgents = 2;
