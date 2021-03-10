@@ -43,6 +43,7 @@ import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -339,6 +340,22 @@ public class FilterUtils {
                 .getAuthenticationFailureMessage(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS));
         requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_DESCRIPTION);
+    }
+
+    /**
+     * Set the throttle error related details to the {@code RequestContext}.
+     *
+     * @param context   request context object to set the details.
+     * @param errorCode internal wso2 throttle error code.
+     * @param msg       wso2 throttle error message.
+     * @param desc      description of throttle decision.
+     */
+    public static void setThrottleErrorToContext(RequestContext context, int errorCode, String msg, String desc) {
+        context.getProperties().put(APIConstants.MessageFormat.ERROR_CODE, errorCode);
+        context.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
+                APIConstants.StatusCodes.THROTTLED.getCode());
+        context.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE, msg);
+        context.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION, desc);
     }
 
 }

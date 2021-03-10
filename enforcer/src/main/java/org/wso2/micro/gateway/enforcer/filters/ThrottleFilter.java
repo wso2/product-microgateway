@@ -96,18 +96,31 @@ public class ThrottleFilter implements Filter {
             String subTier = authContext.getTier();
             String appTier = authContext.getApplicationTier();
 
+            if (isAPILevelThrottled(apiThrottleKey, apiTier)) {
+                FilterUtils.setThrottleErrorToContext(reqContext,
+                        ThrottleConstants.API_THROTTLE_OUT_ERROR_CODE,
+                        ThrottleConstants.THROTTLE_OUT_MESSAGE,
+                        ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
+                reqContext.getProperties().put(APIConstants.THROTTLE_OUT_REASON,
+                        ThrottleConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED);
+                return true;
+            } else if (isResourceLevelThrottled(resourceThrottleKey, resourceTier)) {
+                FilterUtils.setThrottleErrorToContext(reqContext,
+                        ThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE,
+                        ThrottleConstants.THROTTLE_OUT_MESSAGE,
+                        ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
+                reqContext.getProperties().put(APIConstants.THROTTLE_OUT_REASON,
+                        ThrottleConstants.THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED);
+                return true;
+            }
             String subThrottleKey = getSubscriptionThrottleKey(appId, apiContext, apiVersion);
             boolean isSubscriptionThrottled = isSubscriptionLevelThrottled(subThrottleKey, subTier);
             if (isSubscriptionThrottled) {
                 if (authContext.isStopOnQuotaReach()) {
                     log.debug("Setting subscription throttle out response");
-                    reqContext.getProperties().put(APIConstants.MessageFormat.ERROR_CODE,
-                            ThrottleConstants.SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE);
-                    reqContext.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
-                            APIConstants.StatusCodes.THROTTLED.getCode());
-                    reqContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
-                            ThrottleConstants.THROTTLE_OUT_MESSAGE);
-                    reqContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                    FilterUtils.setThrottleErrorToContext(reqContext,
+                            ThrottleConstants.SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
+                            ThrottleConstants.THROTTLE_OUT_MESSAGE,
                             ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                     reqContext.getProperties().put(APIConstants.THROTTLE_OUT_REASON,
                             ThrottleConstants.THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
@@ -120,13 +133,9 @@ public class ThrottleFilter implements Filter {
             boolean isAppThrottled = isAppLevelThrottled(appThrottleKey, appTier);
             if (isAppThrottled) {
                 log.debug("Setting application throttle out response");
-                reqContext.getProperties().put(APIConstants.MessageFormat.ERROR_CODE,
-                        ThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE);
-                reqContext.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
-                        APIConstants.StatusCodes.THROTTLED.getCode());
-                reqContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
-                        ThrottleConstants.THROTTLE_OUT_MESSAGE);
-                reqContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                FilterUtils.setThrottleErrorToContext(reqContext,
+                        ThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE,
+                        ThrottleConstants.THROTTLE_OUT_MESSAGE,
                         ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                 reqContext.getProperties().put(APIConstants.THROTTLE_OUT_REASON,
                         ThrottleConstants.THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
