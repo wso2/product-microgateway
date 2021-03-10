@@ -6,7 +6,7 @@
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.enforcer.dto;
+package org.wso2.micro.gateway.enforcer.config.dto;
 
 import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.micro.gateway.enforcer.throttle.databridge.publisher.PublisherConfiguration;
@@ -27,11 +27,11 @@ import java.util.List;
 /**
  * This contains throttle configurations.
  */
-public class ThrottleAgentConfigDTO {
+public class ThrottleAgentConfigDto {
     boolean enabled = false;
     String username;
     String password;
-    List<ThrottleURLGroupDTO> urlGroup = new ArrayList<>();
+    List<ThrottleURLGroupDto> urlGroup = new ArrayList<>();
     PublisherConfiguration publisher;
     AgentConfiguration agent;
 
@@ -59,11 +59,11 @@ public class ThrottleAgentConfigDTO {
         this.password = password;
     }
 
-    public List<ThrottleURLGroupDTO> getUrlGroup() {
+    public List<ThrottleURLGroupDto> getUrlGroup() {
         return urlGroup;
     }
 
-    public void setUrlGroup(List<ThrottleURLGroupDTO> urlGroup) {
+    public void setUrlGroup(List<ThrottleURLGroupDto> urlGroup) {
         this.urlGroup = urlGroup;
     }
 

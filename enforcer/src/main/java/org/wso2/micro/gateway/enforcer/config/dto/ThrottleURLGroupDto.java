@@ -6,7 +6,7 @@
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -16,12 +16,12 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.enforcer.dto;
+package org.wso2.micro.gateway.enforcer.config.dto;
 
 /**
  * Throttle URL groups configurations.
  */
-public class ThrottleURLGroupDTO {
+public class ThrottleURLGroupDto {
     String[] receiverURLs;
     String[] authURLs;
     String type;
