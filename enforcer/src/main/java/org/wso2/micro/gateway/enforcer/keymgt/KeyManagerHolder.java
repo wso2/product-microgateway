@@ -73,6 +73,11 @@ public class KeyManagerHolder {
     }
 
     public void populateKMIssuerConfiguration(List<KeyManagerConfig> kmIssuers) {
+        Map<String, ExtendedTokenIssuerDto> kmIssuerMap =  getAllKmIssuers(kmIssuers);
+        updateIssuerMap(kmIssuerMap);
+    }
+
+    public Map<String, ExtendedTokenIssuerDto> getAllKmIssuers(List<KeyManagerConfig> kmIssuers) {
         Map<String, ExtendedTokenIssuerDto> kmIssuerMap = new HashMap<>();
         for (KeyManagerConfig keyManagerConfig : kmIssuers) {
             JSONObject configObj = new JSONObject(keyManagerConfig.getConfiguration());
@@ -85,21 +90,22 @@ public class KeyManagerHolder {
             }
 
             if (keyManagerConfig.getEnabled()) {
-                addKMTokenIssuers(configuration, kmIssuerMap);
+                addKMTokenIssuers(keyManagerConfig.getName(), configuration, kmIssuerMap);
             }
         }
-        updateIssuerMapWithConfigIssuers(kmIssuerMap);
-        // add the updated issuer list replacing the existing one
-        tokenIssuerMap.clear();
-        tokenIssuerMap.putAll(kmIssuerMap);
+        return kmIssuerMap;
     }
 
-    public void addKMTokenIssuers(Map<String, Object> configuration, Map<String, ExtendedTokenIssuerDto> kmIssuerMap) {
+
+    public void addKMTokenIssuers(String keyManagerName, Map<String, Object> configuration,
+                                  Map<String, ExtendedTokenIssuerDto> kmIssuerMap) {
         Object selfValidateJWT = configuration.get(APIConstants.KeyManager.SELF_VALIDATE_JWT);
         if (selfValidateJWT != null && (Boolean) selfValidateJWT) {
             Object issuer = configuration.get(APIConstants.KeyManager.ISSUER);
             if (issuer != null) {
                 ExtendedTokenIssuerDto tokenIssuerDto = new ExtendedTokenIssuerDto((String) issuer);
+                tokenIssuerDto.setName(keyManagerName);
+                tokenIssuerDto.setValidateSubscriptions(true);
                 Object claimMappings = configuration.get(APIConstants.KeyManager.CLAIM_MAPPING);
                 if (claimMappings instanceof JSONArray) {
                     Gson gson = new Gson();
@@ -153,16 +159,19 @@ public class KeyManagerHolder {
         }
     }
 
-    public void updateIssuerMapWithConfigIssuers(Map<String, ExtendedTokenIssuerDto> kmIssuerMap) {
+    public void updateIssuerMap(Map<String, ExtendedTokenIssuerDto> kmIssuerMap) {
         ArrayList<ExtendedTokenIssuerDto> configIssuerList = ConfigHolder.getInstance().getConfigIssuerList();
         for (ExtendedTokenIssuerDto configTokenIssuer : configIssuerList) {
-            if (kmIssuerMap.containsKey(configTokenIssuer.getIssuer())) {
-                logger.warn("token issuer " + configTokenIssuer.getIssuer() + " already exists in config map. " +
-                        "Existing configurations will be replaced by KeyManager configuration");
-            } else {
-                //add issuer from config if they are not present in external km response
+            if (!kmIssuerMap.containsKey(configTokenIssuer.getIssuer())) {
+                //add issuer from config if they are not presenting at external km response
                 kmIssuerMap.put(configTokenIssuer.getIssuer(), configTokenIssuer);
+            } else {
+                logger.warn("token issuer " + configTokenIssuer.getIssuer() + " already exists in config map. " +
+                        "Existing configurations will be replaced by external KeyManager configurations");
             }
         }
+        // add the updated issuer list replacing the existing one
+        tokenIssuerMap.clear();
+        tokenIssuerMap.putAll(kmIssuerMap);
     }
 }
