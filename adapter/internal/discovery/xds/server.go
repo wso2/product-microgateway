@@ -353,9 +353,6 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	conf, _ := config.ReadConfigs()
 	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
 	if enableJwtIssuer {
-		addressToken := envoyconf.CreateAddress("enforcer", 8082)
-		clusterToken := envoyconf.CreateCluster(addressToken, "tokenCluster", "HTTP", nil)
-		clusterArray = append(clusterArray, clusterToken)
 		routeToken := envoyconf.CreateTokenRoute()
 		routeArray = append(routeArray, routeToken)
 	}

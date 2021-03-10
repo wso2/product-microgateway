@@ -589,7 +589,7 @@ func CreateTokenRoute() *routev3.Route {
 	}
 
 	directClusterSpecifier := &routev3.RouteAction_Cluster{
-	Cluster: "tokenCluster",
+	Cluster: "token_cluster",
 	}
 	action.Route.ClusterSpecifier = directClusterSpecifier
 
