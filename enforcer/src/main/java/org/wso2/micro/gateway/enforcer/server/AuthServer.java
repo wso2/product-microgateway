@@ -63,9 +63,10 @@ public class AuthServer {
             CacheProvider.init();
 
             // TODO: (Praminda) do this only if throttling is enabled
-            // ConfigHolder.getInstance().getConfig().getThrottleAgentConfig().isEnabled()
-            ThrottleAgent.startThrottlePublisherPool();
-            ThrottleEventListener.init();
+            if (ConfigHolder.getInstance().getConfig().getThrottleAgentConfig().isEnabled()) {
+                ThrottleAgent.startThrottlePublisherPool();
+                ThrottleEventListener.init();
+            }
 
             // Start the server
             server.start();

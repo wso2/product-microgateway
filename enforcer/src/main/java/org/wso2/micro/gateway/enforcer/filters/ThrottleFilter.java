@@ -24,10 +24,13 @@ import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
-import org.wso2.micro.gateway.enforcer.throttle.ThrottleAgent;
-import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.util.ThrottleEventConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleAgent;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleDataHolder;
+import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.util.ThrottleEventConstants;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.net.Inet4Address;
@@ -42,18 +45,106 @@ import java.util.Map;
  */
 public class ThrottleFilter implements Filter {
     private static final Logger log = LogManager.getLogger(ThrottleFilter.class);
-    private APIConfig apiConfig;
 
-    @Override
-    public void init(APIConfig apiConfig) {
-        this.apiConfig = apiConfig;
+    private final boolean isGlobalThrottlingEnabled;
+    private final ThrottleDataHolder dataHolder;
+
+    public ThrottleFilter() {
+        this.dataHolder = ThrottleDataHolder.getInstance();
+        this.isGlobalThrottlingEnabled = ConfigHolder.getInstance().getConfig().getThrottleAgentConfig().isEnabled();
     }
 
     @Override
+    public void init(APIConfig apiConfig) {}
+
+    @Override
     public boolean handleRequest(RequestContext requestContext) {
-        log.info("handle request called");
+        log.debug("Throttle filter received the request");
+
+        if (doThrottle(requestContext)) {
+            // breaking filter chain since request is throttled
+            return false;
+        }
+
+        // publish throttle event and continue the filter chain
         ThrottleAgent.publishNonThrottledEvent(getThrottleEventMap(requestContext));
         return true;
+    }
+
+    /**
+     * Evaluate the throttle policies to find out if the request is throttled at any supported throttling level.
+     *
+     * @param reqContext request context with all request related details,
+     *                   including the authentication details
+     * @return {@code true} if the request is throttled, otherwise {@code false}
+     */
+    private boolean doThrottle(RequestContext reqContext) {
+        AuthenticationContext authContext = reqContext.getAuthenticationContext();
+
+        // TODO: (Praminda) Handle unauthenticated + subscription validation false scenarios
+        if (reqContext.getAuthenticationContext() != null) {
+            log.debug("Found AuthenticationContext for the request");
+            APIConfig api = reqContext.getMathedAPI().getAPIConfig();
+            String apiContext = api.getBasePath();
+            String apiVersion = api.getVersion();
+            String appId = authContext.getApplicationId();
+            String apiTier = authContext.getApiTier();
+            String apiThrottleKey = getApiThrottleKey(apiContext, apiVersion);
+            String resourceTier = getResourceTier(reqContext.getMatchedResourcePath());
+            String resourceThrottleKey = getResourceThrottleKey(reqContext, apiContext, apiVersion);
+            String subTier = authContext.getTier();
+            String appTier = authContext.getApplicationTier();
+
+            String subThrottleKey = getSubscriptionThrottleKey(appId, apiContext, apiVersion);
+            boolean isSubscriptionThrottled = isSubscriptionLevelThrottled(subThrottleKey, subTier);
+            if (isSubscriptionThrottled) {
+                if (authContext.isStopOnQuotaReach()) {
+                    log.debug("Setting subscription throttle out response");
+                    reqContext.getProperties().put(APIConstants.MessageFormat.ERROR_CODE,
+                            ThrottleConstants.SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE);
+                    reqContext.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
+                            APIConstants.StatusCodes.THROTTLED.getCode());
+                    reqContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                            ThrottleConstants.THROTTLE_OUT_MESSAGE);
+                    reqContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                            ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
+                    reqContext.getProperties().put(APIConstants.THROTTLE_OUT_REASON,
+                            ThrottleConstants.THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
+                    return true;
+                }
+                log.debug("Proceeding since stopOnQuotaReach is false");
+            }
+
+            String appThrottleKey = appId + ':' + authContext.getUsername();
+            boolean isAppThrottled = isAppLevelThrottled(appThrottleKey, appTier);
+            if (isAppThrottled) {
+                log.debug("Setting application throttle out response");
+                reqContext.getProperties().put(APIConstants.MessageFormat.ERROR_CODE,
+                        ThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE);
+                reqContext.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
+                        APIConstants.StatusCodes.THROTTLED.getCode());
+                reqContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                        ThrottleConstants.THROTTLE_OUT_MESSAGE);
+                reqContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                        ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
+                reqContext.getProperties().put(APIConstants.THROTTLE_OUT_REASON,
+                        ThrottleConstants.THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isSubscriptionLevelThrottled(String throttleKey, String tier) {
+        boolean isThrottled = dataHolder.isThrottled(throttleKey);
+        log.debug("Subscription Level throttle decision is {} for key:tier {}:{}", isThrottled, throttleKey, tier);
+        return isThrottled;
+    }
+
+    private boolean isAppLevelThrottled(String throttleKey, String tier) {
+        boolean isThrottled = dataHolder.isThrottled(throttleKey);
+        log.debug("Application Level throttle decision is {} for key:tier {}:{}", isThrottled, throttleKey, tier);
+        return isThrottled;
     }
 
     //TODO (amaliMatharaarachchi) Add default values to keys.
@@ -72,7 +163,7 @@ public class ThrottleFilter implements Filter {
 
         String basePath = requestContext.getMathedAPI().getAPIConfig().getBasePath();
         String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
-        String apiContext = basePath + ":" + apiVersion;
+        String apiContext = basePath + ':' + apiVersion;
         String apiName = requestContext.getMathedAPI().getAPIConfig().getName();
         String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
         if (tenantDomain == null) {
@@ -93,12 +184,12 @@ public class ThrottleFilter implements Filter {
 
 
         throttleEvent.put(ThrottleEventConstants.MESSAGE_ID, requestContext.getRequestID());
-        throttleEvent.put(ThrottleEventConstants.APP_KEY, authenticationContext.getApplicationId() + ":" +
+        throttleEvent.put(ThrottleEventConstants.APP_KEY, authenticationContext.getApplicationId() + ':' +
                 authenticationContext.getUsername());
         throttleEvent.put(ThrottleEventConstants.APP_TIER, authenticationContext.getApplicationTier());
         throttleEvent.put(ThrottleEventConstants.API_KEY, apiContext);
         throttleEvent.put(ThrottleEventConstants.API_TIER, authenticationContext.getApiTier());
-        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authenticationContext.getApplicationId() + ":" +
+        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authenticationContext.getApplicationId() + ':' +
                 apiContext);
         throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_TIER, authenticationContext.getTier());
         throttleEvent.put(ThrottleEventConstants.RESOURCE_KEY, resourceKey);
@@ -115,13 +206,29 @@ public class ThrottleFilter implements Filter {
     }
 
     private String getResourceThrottleKey(RequestContext requestContext, String apiContext, String apiVersion) {
-        String resourceLevelThrottleKey = apiContext;
+        String resourceThrottleKey = apiContext;
         if (!apiVersion.isBlank()) {
-            resourceLevelThrottleKey += "/" + apiVersion;
+            resourceThrottleKey += "/" + apiVersion;
         }
-        resourceLevelThrottleKey += requestContext.getMatchedResourcePath().getPath() + ":" +
+        resourceThrottleKey += requestContext.getMatchedResourcePath().getPath() + ':' +
                 requestContext.getRequestMethod();
-        return resourceLevelThrottleKey;
+        return resourceThrottleKey;
+    }
+
+    private String getApiThrottleKey(String apiContext, String apiVersion) {
+        String apiThrottleKey = apiContext;
+        if (!apiVersion.isBlank()) {
+            apiThrottleKey += ':' + apiVersion;
+        }
+        return apiThrottleKey;
+    }
+
+    private String getSubscriptionThrottleKey(String appId, String apiContext, String apiVersion) {
+        String subThrottleKey = appId + ':' + apiContext;
+        if (!apiVersion.isBlank()) {
+            subThrottleKey += ':' + apiVersion;
+        }
+        return subThrottleKey;
     }
 
     private String getResourceTier(ResourceConfig resourceConfig) {
@@ -147,7 +254,7 @@ public class ThrottleFilter implements Filter {
                 }
             } catch (UnknownHostException e) {
                 //send empty value as ip
-                log.error("Error while parsing host IP " + remoteIP, e);
+                log.error("Error while parsing host IP {}", remoteIP, e);
                 jsonObMap.put(APIConstants.IPV6, 0);
                 jsonObMap.put(APIConstants.IP, 0);
             }

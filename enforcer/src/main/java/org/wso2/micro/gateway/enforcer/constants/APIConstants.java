@@ -69,6 +69,7 @@ public class APIConstants {
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
 
     public static final String THROTTLE_KEY = "throttleKey";
+    public static final String THROTTLE_OUT_REASON = "THROTTLED_OUT_REASON";
 
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
@@ -232,7 +233,8 @@ public class APIConstants {
         OK("200", 200),
         UNAUTHENTICATED("401", 401),
         UNAUTHORIZED("403", 403),
-        NOTFOUND("404", 404);
+        NOTFOUND("404", 404),
+        THROTTLED("429", 429);
 
         private String value;
         private int code;

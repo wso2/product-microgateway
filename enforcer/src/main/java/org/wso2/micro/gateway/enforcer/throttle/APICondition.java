@@ -37,4 +37,9 @@ public class APICondition {
     public String getName() {
         return name;
     }
+
+    @Override
+    public String toString() {
+        return "resourceKey='" + resourceKey + "', name='" + name + '\'';
+    }
 }

@@ -38,7 +38,7 @@ public class ThrottleDataHolder {
     private final Map<String, Map<String, List<ThrottleCondition>>> conditionDtoMap = new ConcurrentHashMap<>();
 
     private ThrottleDataHolder() {
-        throttleDataMap = new ConcurrentHashMap<String, Long>();
+        throttleDataMap = new ConcurrentHashMap<>();
     }
 
     public static ThrottleDataHolder getInstance() {
@@ -57,8 +57,8 @@ public class ThrottleDataHolder {
      * @param conditionValue conditions to be added to the map
      */
     public void addThrottledConditions(String key, String conditionKey, List<ThrottleCondition> conditionValue) {
-
         Map<String, List<ThrottleCondition>> conditionMap;
+
         if (conditionDtoMap.containsKey(key)) {
             conditionMap = conditionDtoMap.get(key);
         } else {
@@ -103,6 +103,31 @@ public class ThrottleDataHolder {
      */
     public void removeThrottleData(String key) {
         throttleDataMap.remove(key);
+    }
+
+    /**
+     * This method will check given key in throttle data Map. A key is considered throttled if,
+     * <ol>
+     *     <li>A values for the given @{code key} exists in the throttle data map</li>
+     *     <li>Validity timestamp for the provided key is not passed already</li>
+     * </ol>
+     *
+     * @param key throttle key
+     * @return {@code true} if event is throttled {@code false} if event is not throttled.
+     */
+    public boolean isThrottled(String key) {
+        boolean isThrottled = this.throttleDataMap.containsKey(key);
+
+        if (isThrottled) {
+            long currentTime = System.currentTimeMillis();
+            long timestamp = this.throttleDataMap.get(key);
+            if (timestamp < currentTime) {
+                this.throttleDataMap.remove(key);
+                isThrottled = false;
+            }
+        }
+
+        return isThrottled;
     }
 
 }

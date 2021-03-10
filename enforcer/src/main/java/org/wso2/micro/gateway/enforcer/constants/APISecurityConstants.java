@@ -69,19 +69,6 @@ public class APISecurityConstants {
     public static final int API_AUTH_MISSING_OPEN_API_DEF = 900911;
     public static final String API_AUTH_MISSING_OPEN_API_DEF_ERROR_MESSAGE = "Internal Server Error";
 
-    public static final int GRAPHQL_QUERY_TOO_DEEP = 900912;
-    public static final String GRAPHQL_QUERY_TOO_DEEP_MESSAGE = "QUERY TOO DEEP";
-
-    public static final int GRAPHQL_QUERY_TOO_COMPLEX = 900913;
-    public static final String GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE = "QUERY TOO COMPLEX";
-
-    public static final int GRAPHQL_INVALID_QUERY = 900422;
-    public static final String GRAPHQL_API_FAILURE_HANDLER = "_graphql_failure_handler";
-    public static final String GRAPHQL_INVALID_QUERY_MESSAGE = "INVALID QUERY";
-
-    public static final int OAUTH_TEMPORARY_SERVER_ERROR = 900424;
-    public static final String OAUTH_TEMPORARY_SERVER_ERROR_MESSAGE = "Temporary Server Error";
-
     // We have added this because we need to add an additional description to the original one and we need to
     // separate the 2 messages
     public static final String DESCRIPTION_SEPARATOR = ". ";

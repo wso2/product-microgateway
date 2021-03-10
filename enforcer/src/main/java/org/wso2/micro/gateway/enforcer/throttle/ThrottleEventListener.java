@@ -18,8 +18,8 @@
 
 package org.wso2.micro.gateway.enforcer.throttle;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 
 import java.util.Date;
@@ -48,7 +48,7 @@ import javax.naming.NamingException;
  * JMS event listener for throttle data.
  */
 public class ThrottleEventListener implements MessageListener {
-    private static final Log log = LogFactory.getLog(ThrottleEventListener.class);
+    private static final Logger log = LogManager.getLogger(ThrottleEventListener.class);
 
     // These patterns will be used to determine for which type of keys the throttling condition has occurred.
     private final Pattern apiPattern = Pattern.compile("/.*/(.*):\\1_(condition_(\\d*)|default)");
@@ -139,11 +139,10 @@ public class ThrottleEventListener implements MessageListener {
         }
 
         if (APIConstants.AdvancedThrottleConstants.TRUE.equalsIgnoreCase(throttleState)) {
+
             dataHolder.addThrottleData(throttleKey, timeStamp);
             APICondition extractedKey = extractAPIorResourceKey(throttleKey);
-            if (log.isDebugEnabled()) {
-                log.debug("Adding throttling key : " + extractedKey);
-            }
+            log.debug("Adding throttling key : {}",  extractedKey);
 
             if (extractedKey != null) {
                 if (evaluatedConditionObject != null) {
