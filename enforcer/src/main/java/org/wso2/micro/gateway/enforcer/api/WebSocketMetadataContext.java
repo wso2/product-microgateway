@@ -33,6 +33,7 @@ public class WebSocketMetadataContext {
     private final int frameLength;
     private final String upstreamHost;
     private final String basepath;
+    private final String remoteIp;
     private final AuthenticationContext authenticationContext;
 
     private WebSocketMetadataContext(Builder builder) {
@@ -41,6 +42,7 @@ public class WebSocketMetadataContext {
         this.upstreamHost = builder.upstreamHost;
         this.basepath = builder.basepath;
         this.authenticationContext = builder.authenticationContext;
+        this.remoteIp = builder.remoteIp;
 
     }
 
@@ -52,6 +54,7 @@ public class WebSocketMetadataContext {
         private int frameLength;
         private String upstreamHost;
         private String basepath;
+        private String remoteIp;
         private AuthenticationContext authenticationContext;
 
         public Builder(String streamId) {
@@ -75,6 +78,11 @@ public class WebSocketMetadataContext {
 
         public Builder setAuthenticationContext(AuthenticationContext authenticationContext) {
             this.authenticationContext = authenticationContext;
+            return this;
+        }
+
+        public Builder setRemoteIp(String remoteIp) {
+            this.remoteIp = remoteIp;
             return this;
         }
 
@@ -102,5 +110,9 @@ public class WebSocketMetadataContext {
 
     public AuthenticationContext getAuthenticationContext() {
         return authenticationContext;
+    }
+
+    public String getRemoteIp() {
+        return remoteIp;
     }
 }

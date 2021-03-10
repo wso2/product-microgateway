@@ -66,7 +66,7 @@ public class WebSocketEndPointTestCase extends BaseTestCase {
     }
 
     @Test (description = "Test WebSocket endpoints by sending a request")
-    public void invokeProdSandEndpoints() throws Exception {
+    public void invokeWebSocketEndpoints() throws Exception {
         Object lock = new Object();
         Timer timer = new Timer();
 

@@ -73,6 +73,7 @@ public class APIConstants {
     public static final String MGW_WEB_SOCKET = "envoy.filters.http.mgw_websocket";
     public static final String FRAME_LENGTH = "frame_length";
     public static final String UPSTREAM_HOST = "upstream_host";
+    public static final String REMOTE_IP = "remote_ip";
 
 
     /**

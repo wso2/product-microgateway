@@ -17,6 +17,7 @@
  */
 package org.wso2.micro.gateway.enforcer.server;
 
+import com.google.protobuf.Struct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.api.APIFactory;
@@ -54,79 +55,51 @@ public class WebSocketHandler implements RequestHandler<RateLimitRequest, Authen
         } catch (Exception e) {
             logger.error(e);
         }
-        String streamId = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.WEBSOCKET_STREAM_ID)
-                .getStringValue();
-        String apiName = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.GW_API_NAME_PARAM)
-                .getStringValue();
-        String apiVersion = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.GW_VERSION_PARAM)
-                .getStringValue();
-        String apiBasepath = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.GW_BASE_PATH_PARAM)
-                .getStringValue();
-        String username = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.USERNAME)
-                .getStringValue();
-        String appTier = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.APP_TIER)
-                .getStringValue();
-        String tier = rateLimitRequest.getMetadataContext().getFilterMetadataMap().get(APIConstants.EXT_AUTHZ_METADATA)
-                .getFieldsMap().get(AuthenticationConstants.TIER).getStringValue();
-        String apiTier = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.API_TIER)
-                .getStringValue();
-        boolean isContentAwareTierPresent = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap()
+        // google.protobuf.struct that holds the dynamic metadata from ext_auth filter
+        Struct externalAuthMetadata = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
+                .get(APIConstants.EXT_AUTHZ_METADATA);
+        // google.protobuf.struct that holds dynamic metadata from mgw_websocket filter
+        Struct mgwWebSocketMetadata = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
+                .get(APIConstants.MGW_WEB_SOCKET);
+        String streamId = externalAuthMetadata.getFieldsMap().get(APIConstants.WEBSOCKET_STREAM_ID).getStringValue();
+        String apiName = externalAuthMetadata.getFieldsMap().get(APIConstants.GW_API_NAME_PARAM).getStringValue();
+        String apiVersion = externalAuthMetadata.getFieldsMap().get(APIConstants.GW_VERSION_PARAM).getStringValue();
+        String apiBasepath = externalAuthMetadata.getFieldsMap().get(APIConstants.GW_BASE_PATH_PARAM).getStringValue();
+        String username = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.USERNAME).getStringValue();
+        String appTier = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.APP_TIER).getStringValue();
+        String tier = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.TIER).getStringValue();
+        String apiTier = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.API_TIER).getStringValue();
+        boolean isContentAwareTierPresent = externalAuthMetadata.getFieldsMap()
                 .get(AuthenticationConstants.CONTENT_AWARE_TIER_PRESENT).getBoolValue();
-        String apiKey = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.API_KEY)
+        String apiKey = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.API_KEY).getStringValue();
+        String keyType = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.KEY_TYPE).getStringValue();
+        String callerToken = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.CALLER_TOKEN)
                 .getStringValue();
-        String keyType = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.KEY_TYPE)
+        String applicationId = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.APP_ID).getStringValue();
+        String applicationName = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.APP_NAME)
                 .getStringValue();
-        String callerToken = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.CALLER_TOKEN)
+        String consumerKey = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.CONSUMER_KEY)
                 .getStringValue();
-        String applicationId = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.APP_ID)
+        String subscriber = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.SUBSCRIBER)
                 .getStringValue();
-        String applicationName = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.APP_NAME)
-                .getStringValue();
-        String consumerKey = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.CONSUMER_KEY)
-                .getStringValue();
-        String subscriber = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.SUBSCRIBER)
-                .getStringValue();
-        int spikeArrestLimit = (int) rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.SPIKE_ARREST_LIMIT)
+        int spikeArrestLimit = (int) externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.SPIKE_ARREST_LIMIT)
                 .getNumberValue();
-        String subscriberTenantDomain = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap()
+        String subscriberTenantDomain = externalAuthMetadata.getFieldsMap()
                 .get(AuthenticationConstants.SUBSCRIBER_TENANT_DOMAIN).getStringValue();
-        String spikeArrestUnit = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.SPIKE_ARREST_UNIT)
+        String spikeArrestUnit = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.SPIKE_ARREST_UNIT)
                 .getStringValue();
-        boolean stopOnQuota = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.STOP_ON_QUOTA)
+        boolean stopOnQuota = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.STOP_ON_QUOTA)
                 .getBoolValue();
-        String productName = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.PRODUCT_NAME)
+        String productName = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.PRODUCT_NAME)
                 .getStringValue();
-        String productProvider = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.PRODUCT_PROVIDER)
+        String productProvider = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.PRODUCT_PROVIDER)
                 .getStringValue();
-        String apiPublisher = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(AuthenticationConstants.API_PUBLISHER)
+        String apiPublisher = externalAuthMetadata.getFieldsMap().get(AuthenticationConstants.API_PUBLISHER)
                 .getStringValue();
 
-        int frameLength = (int) rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.MGW_WEB_SOCKET).getFieldsMap().get(APIConstants.FRAME_LENGTH).getNumberValue();
-        String upstreamHost = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
-                .get(APIConstants.MGW_WEB_SOCKET).getFieldsMap().get(APIConstants.UPSTREAM_HOST).getStringValue();
+        int frameLength = (int) mgwWebSocketMetadata.getFieldsMap().get(APIConstants.FRAME_LENGTH).getNumberValue();
+        String upstreamHost = mgwWebSocketMetadata.getFieldsMap().get(APIConstants.UPSTREAM_HOST).getStringValue();
+        String remoteIp = mgwWebSocketMetadata.getFieldsMap().get(APIConstants.REMOTE_IP).getStringValue();
 
         AuthenticationContext authenticationContext = new AuthenticationContext();
         authenticationContext.setApiName(apiName);
@@ -152,7 +125,7 @@ public class WebSocketHandler implements RequestHandler<RateLimitRequest, Authen
         authenticationContext.setApiPublisher(apiPublisher);
 
         WebSocketMetadataContext webSocketMetadataContext = new WebSocketMetadataContext.Builder(streamId)
-                .setAuthenticationContext(authenticationContext).setFrameLength(frameLength)
+                .setAuthenticationContext(authenticationContext).setFrameLength(frameLength).setRemoteIp(remoteIp)
                 .setUpstreamHost(upstreamHost).build();
 
         return new RequestContext.Builder(apiBasepath).matchedAPI(api).authenticationContext(authenticationContext)
