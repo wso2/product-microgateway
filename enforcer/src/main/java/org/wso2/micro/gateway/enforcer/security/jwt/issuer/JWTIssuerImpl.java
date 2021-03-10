@@ -33,6 +33,7 @@ import java.util.Map;
 public class JWTIssuerImpl extends AbstractJWTIssuer {
     private static final Log log = LogFactory.getLog(JWTIssuerImpl.class);
     private static final String KEY_TYPE = "PRODUCTION";
+    private static final String AUD_VALUE = "http://org.wso2.apimgt/gateway";
 
     @Override
     public Map<String, String> populateStandardClaims(TokenValidationContext validationContext)
@@ -43,15 +44,23 @@ public class JWTIssuerImpl extends AbstractJWTIssuer {
         long expireIn = currentTime + super.jwtIssuerConfigurationDto.getTtl() * 1000;
         Map<String, String> claims = new LinkedHashMap<String, String>(20);
 
+        String dialect = getDialectURI();
+
+        // dialect is either empty or '/' do not append a backslash. otherwise append a backslash '/'
+        if (!"".equals(dialect) && !"/".equals(dialect)) {
+            dialect = dialect + "/";
+        }
+
         claims.put("iss", super.jwtIssuerConfigurationDto.getIssuer());
         claims.put("exp", String.valueOf(expireIn));
         claims.put("iat", String.valueOf(currentTime));
-        claims.put("keytype", KEY_TYPE);
+        claims.put("aud", AUD_VALUE);
+        claims.put(dialect + "keytype", KEY_TYPE);
 
         String endUserName = validationContext.getValidationInfoDTO().getEndUserName();
 
         if (StringUtils.isNotEmpty(endUserName)) {
-            claims.put("sub", endUserName);
+            claims.put(dialect + "sub", endUserName);
         }
         return claims;
     }

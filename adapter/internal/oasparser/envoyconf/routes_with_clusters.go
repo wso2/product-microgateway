@@ -524,7 +524,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	return &router
 }
 
-// CreateTokenRoute generates a route for the jwt /token endpoint
+// CreateTokenRoute generates a route for the jwt /testkey endpoint
 func CreateTokenRoute() *routev3.Route {
 	var (
 		router routev3.Route
@@ -541,7 +541,7 @@ func CreateTokenRoute() *routev3.Route {
 						MaxProgramSize: nil,
 					},
 				},
-				Regex: "/token",
+				Regex: "/testkey",
 			},
 		},
 	}
@@ -553,7 +553,7 @@ func CreateTokenRoute() *routev3.Route {
 	}
 
 	decorator = &routev3.Decorator{
-		Operation: "/token",
+		Operation: "/testkey",
 	}
 
 	perFilterConfig := extAuthService.ExtAuthzPerRoute{
@@ -581,7 +581,7 @@ func CreateTokenRoute() *routev3.Route {
 	MaxProgramSize: nil,
 	},
 	},
-	Regex: "/token",
+	Regex: "/testkey",
 	},
 	Substitution: "/",
 	},
@@ -595,7 +595,7 @@ func CreateTokenRoute() *routev3.Route {
 
 
 	router = routev3.Route{
-	Name:      "/token", //Categorize routes with same base path
+	Name:      "/testkey", //Categorize routes with same base path
 	Match:     match,
 	Action:    action,
 	Metadata:  nil,

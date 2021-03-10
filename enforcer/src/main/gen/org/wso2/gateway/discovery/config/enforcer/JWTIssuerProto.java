@@ -30,26 +30,31 @@ public final class JWTIssuerProto {
     java.lang.String[] descriptorData = {
       "\n/wso2/discovery/config/enforcer/jwt_iss" +
       "uer.proto\022\036wso2.discovery.config.enforce" +
-      "r\"\253\001\n\tJWTIssuer\022\017\n\007enabled\030\001 \001(\010\022\016\n\006issu" +
-      "er\030\002 \001(\t\022\020\n\010encoding\030\003 \001(\t\022\025\n\rclaim_dial" +
-      "ect\030\004 \001(\t\022\031\n\021signing_algorithm\030\005 \001(\t\022\037\n\027" +
-      "public_certificate_path\030\006 \001(\t\022\030\n\020private" +
-      "_key_path\030\007 \001(\tB\216\001\n*org.wso2.gateway.dis" +
-      "covery.config.enforcerB\016JWTIssuerProtoP\001" +
-      "ZNgithub.com/envoyproxy/go-control-plane" +
-      "/wso2/discovery/config/enforcer;enforcer" +
-      "b\006proto3"
+      "r\032-wso2/discovery/config/enforcer/jwt_us" +
+      "er.proto\"\200\002\n\tJWTIssuer\022\017\n\007enabled\030\001 \001(\010\022" +
+      "\016\n\006issuer\030\002 \001(\t\022\020\n\010encoding\030\003 \001(\t\022\025\n\rcla" +
+      "im_dialect\030\004 \001(\t\022\031\n\021signing_algorithm\030\005 " +
+      "\001(\t\022\037\n\027public_certificate_path\030\006 \001(\t\022\030\n\020" +
+      "private_key_path\030\007 \001(\t\022\027\n\017validity_perio" +
+      "d\030\010 \001(\005\022:\n\tjwt_users\030\t \003(\0132\'.wso2.discov" +
+      "ery.config.enforcer.JWTUserB\216\001\n*org.wso2" +
+      ".gateway.discovery.config.enforcerB\016JWTI" +
+      "ssuerProtoP\001ZNgithub.com/envoyproxy/go-c" +
+      "ontrol-plane/wso2/discovery/config/enfor" +
+      "cer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
+          org.wso2.gateway.discovery.config.enforcer.JWTUserProto.getDescriptor(),
         });
     internal_static_wso2_discovery_config_enforcer_JWTIssuer_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_wso2_discovery_config_enforcer_JWTIssuer_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_JWTIssuer_descriptor,
-        new java.lang.String[] { "Enabled", "Issuer", "Encoding", "ClaimDialect", "SigningAlgorithm", "PublicCertificatePath", "PrivateKeyPath", });
+        new java.lang.String[] { "Enabled", "Issuer", "Encoding", "ClaimDialect", "SigningAlgorithm", "PublicCertificatePath", "PrivateKeyPath", "ValidityPeriod", "JwtUsers", });
+    org.wso2.gateway.discovery.config.enforcer.JWTUserProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

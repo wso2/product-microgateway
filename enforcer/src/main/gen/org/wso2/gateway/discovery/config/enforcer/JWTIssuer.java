@@ -26,6 +26,7 @@ private static final long serialVersionUID = 0L;
     signingAlgorithm_ = "";
     publicCertificatePath_ = "";
     privateKeyPath_ = "";
+    jwtUsers_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -48,6 +49,7 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
+    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -99,6 +101,20 @@ private static final long serialVersionUID = 0L;
             privateKeyPath_ = s;
             break;
           }
+          case 64: {
+
+            validityPeriod_ = input.readInt32();
+            break;
+          }
+          case 74: {
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              jwtUsers_ = new java.util.ArrayList<org.wso2.gateway.discovery.config.enforcer.JWTUser>();
+              mutable_bitField0_ |= 0x00000001;
+            }
+            jwtUsers_.add(
+                input.readMessage(org.wso2.gateway.discovery.config.enforcer.JWTUser.parser(), extensionRegistry));
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -114,6 +130,9 @@ private static final long serialVersionUID = 0L;
       throw new com.google.protobuf.InvalidProtocolBufferException(
           e).setUnfinishedMessage(this);
     } finally {
+      if (((mutable_bitField0_ & 0x00000001) != 0)) {
+        jwtUsers_ = java.util.Collections.unmodifiableList(jwtUsers_);
+      }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
     }
@@ -370,6 +389,57 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int VALIDITY_PERIOD_FIELD_NUMBER = 8;
+  private int validityPeriod_;
+  /**
+   * <code>int32 validity_period = 8;</code>
+   * @return The validityPeriod.
+   */
+  @java.lang.Override
+  public int getValidityPeriod() {
+    return validityPeriod_;
+  }
+
+  public static final int JWT_USERS_FIELD_NUMBER = 9;
+  private java.util.List<org.wso2.gateway.discovery.config.enforcer.JWTUser> jwtUsers_;
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+   */
+  @java.lang.Override
+  public java.util.List<org.wso2.gateway.discovery.config.enforcer.JWTUser> getJwtUsersList() {
+    return jwtUsers_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.JWTUserOrBuilder> 
+      getJwtUsersOrBuilderList() {
+    return jwtUsers_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+   */
+  @java.lang.Override
+  public int getJwtUsersCount() {
+    return jwtUsers_.size();
+  }
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.JWTUser getJwtUsers(int index) {
+    return jwtUsers_.get(index);
+  }
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.JWTUserOrBuilder getJwtUsersOrBuilder(
+      int index) {
+    return jwtUsers_.get(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -405,6 +475,12 @@ private static final long serialVersionUID = 0L;
     if (!getPrivateKeyPathBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 7, privateKeyPath_);
     }
+    if (validityPeriod_ != 0) {
+      output.writeInt32(8, validityPeriod_);
+    }
+    for (int i = 0; i < jwtUsers_.size(); i++) {
+      output.writeMessage(9, jwtUsers_.get(i));
+    }
     unknownFields.writeTo(output);
   }
 
@@ -436,6 +512,14 @@ private static final long serialVersionUID = 0L;
     if (!getPrivateKeyPathBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, privateKeyPath_);
     }
+    if (validityPeriod_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(8, validityPeriod_);
+    }
+    for (int i = 0; i < jwtUsers_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(9, jwtUsers_.get(i));
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -465,6 +549,10 @@ private static final long serialVersionUID = 0L;
         .equals(other.getPublicCertificatePath())) return false;
     if (!getPrivateKeyPath()
         .equals(other.getPrivateKeyPath())) return false;
+    if (getValidityPeriod()
+        != other.getValidityPeriod()) return false;
+    if (!getJwtUsersList()
+        .equals(other.getJwtUsersList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -491,6 +579,12 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getPublicCertificatePath().hashCode();
     hash = (37 * hash) + PRIVATE_KEY_PATH_FIELD_NUMBER;
     hash = (53 * hash) + getPrivateKeyPath().hashCode();
+    hash = (37 * hash) + VALIDITY_PERIOD_FIELD_NUMBER;
+    hash = (53 * hash) + getValidityPeriod();
+    if (getJwtUsersCount() > 0) {
+      hash = (37 * hash) + JWT_USERS_FIELD_NUMBER;
+      hash = (53 * hash) + getJwtUsersList().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -623,6 +717,7 @@ private static final long serialVersionUID = 0L;
     private void maybeForceBuilderInitialization() {
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
+        getJwtUsersFieldBuilder();
       }
     }
     @java.lang.Override
@@ -642,6 +737,14 @@ private static final long serialVersionUID = 0L;
 
       privateKeyPath_ = "";
 
+      validityPeriod_ = 0;
+
+      if (jwtUsersBuilder_ == null) {
+        jwtUsers_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+      } else {
+        jwtUsersBuilder_.clear();
+      }
       return this;
     }
 
@@ -668,6 +771,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.gateway.discovery.config.enforcer.JWTIssuer buildPartial() {
       org.wso2.gateway.discovery.config.enforcer.JWTIssuer result = new org.wso2.gateway.discovery.config.enforcer.JWTIssuer(this);
+      int from_bitField0_ = bitField0_;
       result.enabled_ = enabled_;
       result.issuer_ = issuer_;
       result.encoding_ = encoding_;
@@ -675,6 +779,16 @@ private static final long serialVersionUID = 0L;
       result.signingAlgorithm_ = signingAlgorithm_;
       result.publicCertificatePath_ = publicCertificatePath_;
       result.privateKeyPath_ = privateKeyPath_;
+      result.validityPeriod_ = validityPeriod_;
+      if (jwtUsersBuilder_ == null) {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          jwtUsers_ = java.util.Collections.unmodifiableList(jwtUsers_);
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.jwtUsers_ = jwtUsers_;
+      } else {
+        result.jwtUsers_ = jwtUsersBuilder_.build();
+      }
       onBuilt();
       return result;
     }
@@ -750,6 +864,35 @@ private static final long serialVersionUID = 0L;
         privateKeyPath_ = other.privateKeyPath_;
         onChanged();
       }
+      if (other.getValidityPeriod() != 0) {
+        setValidityPeriod(other.getValidityPeriod());
+      }
+      if (jwtUsersBuilder_ == null) {
+        if (!other.jwtUsers_.isEmpty()) {
+          if (jwtUsers_.isEmpty()) {
+            jwtUsers_ = other.jwtUsers_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureJwtUsersIsMutable();
+            jwtUsers_.addAll(other.jwtUsers_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.jwtUsers_.isEmpty()) {
+          if (jwtUsersBuilder_.isEmpty()) {
+            jwtUsersBuilder_.dispose();
+            jwtUsersBuilder_ = null;
+            jwtUsers_ = other.jwtUsers_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+            jwtUsersBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getJwtUsersFieldBuilder() : null;
+          } else {
+            jwtUsersBuilder_.addAllMessages(other.jwtUsers_);
+          }
+        }
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -778,6 +921,7 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
+    private int bitField0_;
 
     private boolean enabled_ ;
     /**
@@ -1264,6 +1408,277 @@ private static final long serialVersionUID = 0L;
       privateKeyPath_ = value;
       onChanged();
       return this;
+    }
+
+    private int validityPeriod_ ;
+    /**
+     * <code>int32 validity_period = 8;</code>
+     * @return The validityPeriod.
+     */
+    @java.lang.Override
+    public int getValidityPeriod() {
+      return validityPeriod_;
+    }
+    /**
+     * <code>int32 validity_period = 8;</code>
+     * @param value The validityPeriod to set.
+     * @return This builder for chaining.
+     */
+    public Builder setValidityPeriod(int value) {
+      
+      validityPeriod_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int32 validity_period = 8;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearValidityPeriod() {
+      
+      validityPeriod_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private java.util.List<org.wso2.gateway.discovery.config.enforcer.JWTUser> jwtUsers_ =
+      java.util.Collections.emptyList();
+    private void ensureJwtUsersIsMutable() {
+      if (!((bitField0_ & 0x00000001) != 0)) {
+        jwtUsers_ = new java.util.ArrayList<org.wso2.gateway.discovery.config.enforcer.JWTUser>(jwtUsers_);
+        bitField0_ |= 0x00000001;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.JWTUser, org.wso2.gateway.discovery.config.enforcer.JWTUser.Builder, org.wso2.gateway.discovery.config.enforcer.JWTUserOrBuilder> jwtUsersBuilder_;
+
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public java.util.List<org.wso2.gateway.discovery.config.enforcer.JWTUser> getJwtUsersList() {
+      if (jwtUsersBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(jwtUsers_);
+      } else {
+        return jwtUsersBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public int getJwtUsersCount() {
+      if (jwtUsersBuilder_ == null) {
+        return jwtUsers_.size();
+      } else {
+        return jwtUsersBuilder_.getCount();
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.JWTUser getJwtUsers(int index) {
+      if (jwtUsersBuilder_ == null) {
+        return jwtUsers_.get(index);
+      } else {
+        return jwtUsersBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public Builder setJwtUsers(
+        int index, org.wso2.gateway.discovery.config.enforcer.JWTUser value) {
+      if (jwtUsersBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureJwtUsersIsMutable();
+        jwtUsers_.set(index, value);
+        onChanged();
+      } else {
+        jwtUsersBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public Builder setJwtUsers(
+        int index, org.wso2.gateway.discovery.config.enforcer.JWTUser.Builder builderForValue) {
+      if (jwtUsersBuilder_ == null) {
+        ensureJwtUsersIsMutable();
+        jwtUsers_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        jwtUsersBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public Builder addJwtUsers(org.wso2.gateway.discovery.config.enforcer.JWTUser value) {
+      if (jwtUsersBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureJwtUsersIsMutable();
+        jwtUsers_.add(value);
+        onChanged();
+      } else {
+        jwtUsersBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public Builder addJwtUsers(
+        int index, org.wso2.gateway.discovery.config.enforcer.JWTUser value) {
+      if (jwtUsersBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureJwtUsersIsMutable();
+        jwtUsers_.add(index, value);
+        onChanged();
+      } else {
+        jwtUsersBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public Builder addJwtUsers(
+        org.wso2.gateway.discovery.config.enforcer.JWTUser.Builder builderForValue) {
+      if (jwtUsersBuilder_ == null) {
+        ensureJwtUsersIsMutable();
+        jwtUsers_.add(builderForValue.build());
+        onChanged();
+      } else {
+        jwtUsersBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public Builder addJwtUsers(
+        int index, org.wso2.gateway.discovery.config.enforcer.JWTUser.Builder builderForValue) {
+      if (jwtUsersBuilder_ == null) {
+        ensureJwtUsersIsMutable();
+        jwtUsers_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        jwtUsersBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public Builder addAllJwtUsers(
+        java.lang.Iterable<? extends org.wso2.gateway.discovery.config.enforcer.JWTUser> values) {
+      if (jwtUsersBuilder_ == null) {
+        ensureJwtUsersIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, jwtUsers_);
+        onChanged();
+      } else {
+        jwtUsersBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public Builder clearJwtUsers() {
+      if (jwtUsersBuilder_ == null) {
+        jwtUsers_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+      } else {
+        jwtUsersBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public Builder removeJwtUsers(int index) {
+      if (jwtUsersBuilder_ == null) {
+        ensureJwtUsersIsMutable();
+        jwtUsers_.remove(index);
+        onChanged();
+      } else {
+        jwtUsersBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.JWTUser.Builder getJwtUsersBuilder(
+        int index) {
+      return getJwtUsersFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.JWTUserOrBuilder getJwtUsersOrBuilder(
+        int index) {
+      if (jwtUsersBuilder_ == null) {
+        return jwtUsers_.get(index);  } else {
+        return jwtUsersBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.JWTUserOrBuilder> 
+         getJwtUsersOrBuilderList() {
+      if (jwtUsersBuilder_ != null) {
+        return jwtUsersBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(jwtUsers_);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.JWTUser.Builder addJwtUsersBuilder() {
+      return getJwtUsersFieldBuilder().addBuilder(
+          org.wso2.gateway.discovery.config.enforcer.JWTUser.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.JWTUser.Builder addJwtUsersBuilder(
+        int index) {
+      return getJwtUsersFieldBuilder().addBuilder(
+          index, org.wso2.gateway.discovery.config.enforcer.JWTUser.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+     */
+    public java.util.List<org.wso2.gateway.discovery.config.enforcer.JWTUser.Builder> 
+         getJwtUsersBuilderList() {
+      return getJwtUsersFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.JWTUser, org.wso2.gateway.discovery.config.enforcer.JWTUser.Builder, org.wso2.gateway.discovery.config.enforcer.JWTUserOrBuilder> 
+        getJwtUsersFieldBuilder() {
+      if (jwtUsersBuilder_ == null) {
+        jwtUsersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.JWTUser, org.wso2.gateway.discovery.config.enforcer.JWTUser.Builder, org.wso2.gateway.discovery.config.enforcer.JWTUserOrBuilder>(
+                jwtUsers_,
+                ((bitField0_ & 0x00000001) != 0),
+                getParentForChildren(),
+                isClean());
+        jwtUsers_ = null;
+      }
+      return jwtUsersBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

@@ -324,6 +324,14 @@ public class ConfigHolder {
         } catch (MGWException | CertificateException | IOException e) {
             logger.error("Error in loading public cert or private key", e);
         }
+        jwtIssuerConfigurationDto.setTtl(jwtIssuer.getValidityPeriod());
+        CredentialDto[] credentialDtos = new CredentialDto[jwtIssuer.getJwtUsersList().size()];
+        for (int index = 0; index < jwtIssuer.getJwtUsersList().size(); index++) {
+            CredentialDto credentialDto = new CredentialDto(jwtIssuer.getJwtUsers(index).getUsername(),
+                    jwtIssuer.getJwtUsers(index).getPassword().toCharArray());
+            credentialDtos[index] = credentialDto;
+        }
+        config.setJwtUsersCredentials(credentialDtos);
         config.setJwtIssuerConfigurationDto(jwtIssuerConfigurationDto);
     }
 

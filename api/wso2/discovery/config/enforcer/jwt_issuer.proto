@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package wso2.discovery.config.enforcer;
 
+import "wso2/discovery/config/enforcer/jwt_user.proto";
+
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
 option java_package = "org.wso2.gateway.discovery.config.enforcer";
 option java_outer_classname = "JWTIssuerProto";
@@ -25,4 +27,8 @@ message JWTIssuer {
     string public_certificate_path = 6;
 
     string private_key_path = 7;
+
+    int32 validity_period = 8;
+
+    repeated JWTUser jwt_users = 9;
 }

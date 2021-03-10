@@ -84,4 +84,34 @@ public interface JWTIssuerOrBuilder extends
    */
   com.google.protobuf.ByteString
       getPrivateKeyPathBytes();
+
+  /**
+   * <code>int32 validity_period = 8;</code>
+   * @return The validityPeriod.
+   */
+  int getValidityPeriod();
+
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+   */
+  java.util.List<org.wso2.gateway.discovery.config.enforcer.JWTUser> 
+      getJwtUsersList();
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.JWTUser getJwtUsers(int index);
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+   */
+  int getJwtUsersCount();
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+   */
+  java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.JWTUserOrBuilder> 
+      getJwtUsersOrBuilderList();
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.JWTUser jwt_users = 9;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.JWTUserOrBuilder getJwtUsersOrBuilder(
+      int index);
 }

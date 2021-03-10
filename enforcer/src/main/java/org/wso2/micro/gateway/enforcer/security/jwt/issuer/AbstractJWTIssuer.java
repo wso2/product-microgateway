@@ -63,10 +63,6 @@ public abstract class AbstractJWTIssuer implements TokenIssuer {
     public void setJWTConfigurationDto() {
         this.jwtIssuerConfigurationDto = ConfigHolder.getInstance().getConfig().getJwtIssuerConfigurationDto();
         dialectURI = jwtIssuerConfigurationDto.getConsumerDialectUri();
-        jwtIssuerConfigurationDto.setTtl(getTTL());
-        if (dialectURI == null) {
-            dialectURI = "http://wso2.org/claims";
-        }
         signatureAlgorithm = jwtIssuerConfigurationDto.getSignatureAlgorithm();
         if (signatureAlgorithm == null || !(NONE.equals(signatureAlgorithm)
                 || SHA256_WITH_RSA.equals(signatureAlgorithm))) {
@@ -176,8 +172,12 @@ public abstract class AbstractJWTIssuer implements TokenIssuer {
     }
 
     public long getTTL() {
-        // 15 * 60 (convert 15 minutes to seconds)
-        ttl = Long.valueOf(900);
+        if (jwtIssuerConfigurationDto.getTtl() != 0) {
+            ttl = jwtIssuerConfigurationDto.getTtl();
+        } else {
+            // 60 * 60 (convert 60 minutes to seconds)
+            ttl = Long.valueOf(3600);
+        }
         return ttl;
     }
 

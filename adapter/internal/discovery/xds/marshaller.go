@@ -39,6 +39,15 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
     	issuers = append(issuers, jwtConfig)
     }
 
+	jwtUsers := []*enforcer.JWTUser{}
+	for _, user := range config.Enforcer.JwtIssuer.JwtUsers {
+		jwtUser := &enforcer.JWTUser{
+			Username:  user.Username,
+			Password:  user.Password,
+		}
+		jwtUsers = append(jwtUsers, jwtUser)
+	}
+
 	authService := &enforcer.AuthService{
 		KeepAliveTime:  config.Enforcer.AuthService.KeepAliveTime,
 		MaxHeaderLimit: config.Enforcer.AuthService.MaxHeaderLimit,
@@ -84,6 +93,8 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 			SigningAlgorithm:      config.Enforcer.JwtIssuer.SigningAlgorithm,
 			PublicCertificatePath: config.Enforcer.JwtIssuer.PublicCertificatePath,
 			PrivateKeyPath:        config.Enforcer.JwtIssuer.PrivateKeyPath,
+			ValidityPeriod:        config.Enforcer.JwtIssuer.ValidityPeriod,
+			JwtUsers: jwtUsers,
 		},
 		AuthService:    authService,
 		JwtTokenConfig: issuers,

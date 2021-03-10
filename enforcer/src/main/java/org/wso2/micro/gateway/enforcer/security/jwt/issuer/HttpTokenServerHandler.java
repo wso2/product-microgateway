@@ -30,8 +30,14 @@ import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpRequest;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.enforcer.security.TokenValidationContext;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import static io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH;
 import static io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderValues.CLOSE;
@@ -40,12 +46,14 @@ import static io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaderValues.
 import static io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
 import static io.grpc.netty.shaded.io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus.OK;
+import static io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus.UNAUTHORIZED;
 
 /**
  * This is the http token server handler implementation.
  */
 public class HttpTokenServerHandler extends SimpleChannelInboundHandler<HttpObject> {
     private static TokenIssuer tokenIssuer;
+    private static boolean isAuthorized = false;
     private static final Logger logger = LogManager.getLogger(HttpTokenServerHandler.class);
 
     @Override
@@ -55,23 +63,57 @@ public class HttpTokenServerHandler extends SimpleChannelInboundHandler<HttpObje
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
+        FullHttpResponse response = null;
+
         if (msg instanceof HttpRequest) {
             HttpRequest req = (HttpRequest) msg;
-
-            tokenIssuer = new JWTIssuerImpl();
-
-            TokenValidationContext validationContext = new TokenValidationContext();
-            validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
-            validationContext.getValidationInfoDTO().setEndUserName("admin");
-            String jwt = tokenIssuer.generateToken(validationContext);
-
             boolean keepAlive = HttpUtil.isKeepAlive(req);
-            FullHttpResponse response = new DefaultFullHttpResponse(req.protocolVersion(), OK,
-                    Unpooled.wrappedBuffer(jwt.getBytes()));
-            response.headers()
-                    .set(CONTENT_TYPE, TEXT_PLAIN)
-                    .setInt(CONTENT_LENGTH, response.content().readableBytes());
 
+            String authHeader = req.headers().get("Authorization");
+
+            if (authHeader == null) {
+                isAuthorized = false;
+                response = new DefaultFullHttpResponse(req.protocolVersion(), UNAUTHORIZED);
+                response.headers().set(CONTENT_TYPE, TEXT_PLAIN);
+                logger.error(APIConstants.StatusCodes.UNAUTHORIZED.getCode() +
+                        " User is NOT authorized to generate a token. " +
+                                "Please provide a valid Authorization header to continue.");
+            } else if (authHeader.toLowerCase().startsWith("basic")) {
+                    // Authorization: Basic base64credentials
+                    String base64Credentials = authHeader.substring("Basic".length()).trim();
+                    byte[] credDecoded = Base64.getDecoder().decode(base64Credentials);
+                    String credentials = new String(credDecoded, StandardCharsets.UTF_8);
+                    // credentials = username:password
+                    final String[] values = credentials.split(":", 2);
+
+                    CredentialDto[] predefinedCredentials = ConfigHolder.getInstance().getConfig()
+                            .getJwtUsersCredentials();
+                    for (CredentialDto cred: predefinedCredentials) {
+                        if (values[0].equals(cred.getUsername()) && values[1].equals(new String(cred.getPwd()))) {
+                            isAuthorized = true;
+                        } else {
+                            isAuthorized = false;
+                            response = new DefaultFullHttpResponse(req.protocolVersion(), UNAUTHORIZED);
+                            response.headers().set(CONTENT_TYPE, TEXT_PLAIN);
+                            logger.error(APIConstants.StatusCodes.UNAUTHORIZED.getCode() +
+                                    " Wrong username or password. Please provide valid credentials to continue.");
+                        }
+                    }
+            }
+
+            if (isAuthorized) {
+                tokenIssuer = new JWTIssuerImpl();
+                TokenValidationContext validationContext = new TokenValidationContext();
+                validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
+                validationContext.getValidationInfoDTO().setEndUserName("admin");
+                String jwt = tokenIssuer.generateToken(validationContext);
+
+                response = new DefaultFullHttpResponse(req.protocolVersion(), OK,
+                        Unpooled.wrappedBuffer(jwt.getBytes()));
+                response.headers()
+                        .set(CONTENT_TYPE, TEXT_PLAIN)
+                        .setInt(CONTENT_LENGTH, response.content().readableBytes());
+            }
             if (keepAlive) {
                 if (!req.protocolVersion().isKeepAliveDefault()) {
                     response.headers().set(CONNECTION, KEEP_ALIVE);
@@ -80,9 +122,7 @@ public class HttpTokenServerHandler extends SimpleChannelInboundHandler<HttpObje
                 // Tell the client we're going to close the connection.
                 response.headers().set(CONNECTION, CLOSE);
             }
-
             ChannelFuture f = ctx.write(response);
-
             if (!keepAlive) {
                 f.addListener(ChannelFutureListener.CLOSE);
             }

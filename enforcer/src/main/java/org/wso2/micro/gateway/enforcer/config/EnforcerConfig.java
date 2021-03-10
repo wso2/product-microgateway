@@ -42,6 +42,7 @@ public class EnforcerConfig {
     private JWTConfigurationDto jwtConfigurationDto;
     private CacheDto cacheDto;
     private JWTIssuerConfigurationDto jwtIssuerConfigurationDto;
+    private CredentialDto[] jwtUsersCredentials;
     private String publicCertificatePath = "";
     private String privateKeyPath = "";
     private Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
@@ -88,6 +89,14 @@ public class EnforcerConfig {
 
     public JWTIssuerConfigurationDto getJwtIssuerConfigurationDto() {
         return jwtIssuerConfigurationDto;
+    }
+
+    public void setJwtUsersCredentials(CredentialDto[] credentialDtos) {
+        this.jwtUsersCredentials = credentialDtos;
+    }
+
+    public CredentialDto[] getJwtUsersCredentials() {
+        return jwtUsersCredentials;
     }
 
     public JWTConfigurationDto getJwtConfigurationDto() {
