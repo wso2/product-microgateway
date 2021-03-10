@@ -33,7 +33,7 @@ import org.wso2.micro.gateway.enforcer.constants.MetadataConstants;
  */
 public class FaultCodeClassifier {
     private static final Logger log = LogManager.getLogger(FaultCodeClassifier.class);
-    private final HTTPAccessLogEntry logEntry;
+    private HTTPAccessLogEntry logEntry;
     private int errorCode;
 
     public static final int NHTTP_CONNECTION_TIMEOUT = 101504;
@@ -51,6 +51,11 @@ public class FaultCodeClassifier {
         errorCode = errorCodeFromEntry;
     }
 
+    //
+    public FaultCodeClassifier(int errorCode) {
+        this.errorCode = errorCode;
+    }
+
     public FaultSubCategory getFaultSubCategory(FaultCategory faultCategory) {
         switch (faultCategory) {
             case AUTH:
@@ -66,7 +71,7 @@ public class FaultCodeClassifier {
     }
 
     protected FaultSubCategory getAuthFaultSubCategory() {
-        switch (getErrorCodeFromMetadata()) {
+        switch (errorCode) {
             case APISecurityConstants.API_AUTH_GENERAL_ERROR:
             case APISecurityConstants.API_AUTH_INVALID_CREDENTIALS:
             case APISecurityConstants.API_AUTH_MISSING_CREDENTIALS:
@@ -89,7 +94,7 @@ public class FaultCodeClassifier {
     }
 
     protected FaultSubCategory getTargetFaultSubCategory() {
-        switch (getErrorCodeFromMetadata()) {
+        switch (errorCode) {
             case NHTTP_CONNECTION_TIMEOUT:
             case NHTTP_CONNECT_TIMEOUT:
                 return FaultSubCategories.TargetConnectivity.CONNECTION_TIMEOUT;
@@ -102,7 +107,7 @@ public class FaultCodeClassifier {
 
     protected FaultSubCategory getThrottledFaultSubCategory() {
         // TODO: (VirajSalaka) Complete function body.
-        switch (getErrorCodeFromMetadata()) {
+        switch (errorCode) {
 //            case APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE:
 //                return FaultSubCategories.Throttling.API_LEVEL_LIMIT_EXCEEDED;
 //            case APIThrottleConstants.HARD_LIMIT_EXCEEDED_ERROR_CODE:
@@ -130,10 +135,10 @@ public class FaultCodeClassifier {
 
     protected FaultSubCategory getOtherFaultSubCategory() {
         if (isMethodNotAllowed()) {
-            errorCode = 404;
+            errorCode = 405;
             return FaultSubCategories.Other.METHOD_NOT_ALLOWED;
         } else if (isResourceNotFound()) {
-            errorCode = 405;
+            errorCode = 404;
             return FaultSubCategories.Other.RESOURCE_NOT_FOUND;
         } else {
             return FaultSubCategories.Other.UNCLASSIFIED;
@@ -219,10 +224,11 @@ public class FaultCodeClassifier {
 //        // Indicates that request or connection exceeded the downstream connection duration.
 //        DurationTimeout
 
-        ResponseFlags responseFlags = logEntry.getCommonProperties().getResponseFlags();
-        if (responseFlags == null) {
+        if (logEntry == null || logEntry.getCommonProperties().getResponseFlags() == null) {
             return -1;
         }
+        ResponseFlags responseFlags = logEntry.getCommonProperties().getResponseFlags();
+
         if (responseFlags.getFailedLocalHealthcheck() || responseFlags.getNoHealthyUpstream()) {
             return 101503;
         }

@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsConfigurationHol
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.server.EnforcerThreadPoolExecutor;
 import org.wso2.micro.gateway.enforcer.server.NativeThreadFactory;
@@ -75,6 +76,10 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
                 for (int i = 0; i < message.getHttpLogs().getLogEntryCount(); i++) {
                     HTTPAccessLogEntry logEntry = message.getHttpLogs().getLogEntry(i);
                     AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
+                    if (provider.getFaultType() == FaultCategory.AUTH
+                            || provider.getFaultType() == FaultCategory.THROTTLED) {
+                        continue;
+                    }
                     GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
                     try {
                         dataCollector.collectData();

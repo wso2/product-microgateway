@@ -113,7 +113,8 @@ public class JWTAuthenticator implements Authenticator {
                             + FilterUtils.getMaskedToken(jwtHeader));
                 }
                 log.error("Invalid JWT token. " + FilterUtils.getMaskedToken(jwtHeader));
-                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
             }
 
         }
@@ -328,7 +329,8 @@ public class JWTAuthenticator implements Authenticator {
         log.debug("Cannot call Key Manager to validate subscription. "
                 + "Payload of the token does not contain the Authorized party - the party to which the ID Token was "
                 + "issued");
-        throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                APISecurityConstants.API_AUTH_FORBIDDEN,
                 APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
     }
 
@@ -436,7 +438,8 @@ public class JWTAuthenticator implements Authenticator {
                 }
                 return jwtValidationInfo;
             } catch (MGWException e) {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR,
                         APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
             }
         }

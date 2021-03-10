@@ -19,9 +19,10 @@
 package org.wso2.micro.gateway.enforcer.analytics;
 
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
@@ -35,7 +36,6 @@ import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 public class AnalyticsFilter implements Filter {
     private static final Logger logger = LogManager.getLogger(AnalyticsFilter.class);
     private static AnalyticsFilter analyticsFilter;
-    private static final String DEFAULT_FOR_UNASSIGNED = "UnAssigned";
 
     private AnalyticsFilter() {
     }
@@ -65,18 +65,11 @@ public class AnalyticsFilter implements Filter {
         String apiName = requestContext.getMathedAPI().getAPIConfig().getName();
         String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
         // TODO: (VirajSalaka) Decide on whether to include/exclude the options requests, Cors requests
-        AuthenticationContext authContext = requestContext.getAuthenticationContext();
-        // TODO: (VirajSalaka) Handle properly
-        // When authentication failure happens authContext remains null
-        if (authContext == null) {
-            authContext = new AuthenticationContext();
-            authContext.setAuthenticated(false);
-        }
+        AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
 
-        requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY,
-                authContext.getApiUUID() != null ? authContext.getApiUUID() : generateHash(apiName, apiVersion));
+        requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY, AnalyticsUtils.getAPIId(requestContext));
         requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_KEY,
-                setDefaultIfNull(authContext.getApiPublisher()));
+                AnalyticsUtils.setDefaultIfNull(authContext.getApiPublisher()));
         requestContext.addMetadataToMap(MetadataConstants.API_NAME_KEY, apiName);
         requestContext.addMetadataToMap(MetadataConstants.API_VERSION_KEY, apiVersion);
         // TODO: (VirajSalaka) Retrieve from APIConfig
@@ -89,33 +82,31 @@ public class AnalyticsFilter implements Filter {
                 authContext.getKeyType() == null ? APIConstants.API_KEY_TYPE_PRODUCTION : authContext.getKeyType());
         // TODO: (VirajSalaka) Come up with creative scheme
         requestContext.addMetadataToMap(MetadataConstants.APP_ID_KEY,
-                setDefaultIfNull(authContext.getApplicationId()));
+                AnalyticsUtils.setDefaultIfNull(authContext.getApplicationId()));
         requestContext.addMetadataToMap(MetadataConstants.APP_NAME_KEY,
-                setDefaultIfNull(authContext.getApplicationName()));
+                AnalyticsUtils.setDefaultIfNull(authContext.getApplicationName()));
         requestContext.addMetadataToMap(MetadataConstants.APP_OWNER_KEY,
-                setDefaultIfNull(authContext.getSubscriber()));
+                AnalyticsUtils.setDefaultIfNull(authContext.getSubscriber()));
 
         requestContext.addMetadataToMap(MetadataConstants.CORRELATION_ID_KEY, requestContext.getCorrelationID());
         // TODO: (VirajSalaka) Move this out of this method as these remain static
-        requestContext.addMetadataToMap(MetadataConstants.REGION_KEY, setDefaultIfNull(null));
+        requestContext.addMetadataToMap(MetadataConstants.REGION_KEY, AnalyticsUtils.setDefaultIfNull(null));
         requestContext.addMetadataToMap("GatewayType", "ENVOY");
 
         // As in the matched API, only the resources under the matched resource template are selected.
         requestContext.addMetadataToMap(MetadataConstants.API_RESOURCE_TEMPLATE_KEY,
                 requestContext.getMatchedResourcePath().getPath());
 
-        if (requestContext.getProperties().containsKey(APIConstants.MessageFormat.STATUS_CODE)) {
-            requestContext.addMetadataToMap(MetadataConstants.ERROR_CODE_KEY,
-                    requestContext.getProperties().get(APIConstants.MessageFormat.STATUS_CODE).toString());
-        }
         return true;
     }
 
-    private String generateHash(String apiName, String apiVersion) {
-        return DigestUtils.md5Hex(apiName + ":" + apiVersion);
-    }
-
-    private String setDefaultIfNull(String value) {
-        return value == null ? DEFAULT_FOR_UNASSIGNED : value;
+    public void handleFailureRequest(RequestContext requestContext) {
+        MgwFaultAnalyticsProvider provider = new MgwFaultAnalyticsProvider(requestContext);
+        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+        try {
+            dataCollector.collectData();
+        } catch (AnalyticsException e) {
+            logger.error("Analtytics Error. ", e);
+        }
     }
 }

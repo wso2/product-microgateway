@@ -239,9 +239,9 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     }
 
     private Map<String, Value> getFieldsMapFromLogEntry() {
-        if ((logEntry.getCommonProperties().getMetadata() == null
-                && logEntry.getCommonProperties().getMetadata().getFilterMetadataMap() == null)
-                 || !logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
+        if (logEntry.getCommonProperties().getMetadata() == null
+                || logEntry.getCommonProperties().getMetadata().getFilterMetadataMap() == null
+                || !logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
                 .containsKey(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY)) {
             return new HashMap<>(0);
         }

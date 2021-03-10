@@ -72,11 +72,16 @@ public class RestAPI implements API {
     @Override
     public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject(requestContext.getCorrelationID());
+        boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
         if (executeFilterChain(requestContext)) {
 
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
             if (requestContext.getResponseHeaders() != null) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
+            }
+            if (analyticsEnabled) {
+                AnalyticsFilter.getInstance().handleRequest(requestContext);
+                responseObject.setMetaDataMap(requestContext.getMetadataMap());
             }
         } else {
             // If a enforcer stops with a false, it will be passed directly to the client.
@@ -98,12 +103,12 @@ public class RestAPI implements API {
             if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
+            if (analyticsEnabled) {
+                AnalyticsFilter.getInstance().handleFailureRequest(requestContext);
+                responseObject.setMetaDataMap(new HashMap<>(0));
+            }
         }
-        boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
-        if (analyticsEnabled) {
-            AnalyticsFilter.getInstance().handleRequest(requestContext);
-            responseObject.setMetaDataMap(requestContext.getMetadataMap());
-        }
+
         return responseObject;
     }
 
