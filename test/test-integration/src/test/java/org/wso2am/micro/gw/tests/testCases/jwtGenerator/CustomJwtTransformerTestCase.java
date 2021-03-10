@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2am.micro.gw.tests.jwtGenerator;
+package org.wso2am.micro.gw.tests.testCases.jwtGenerator;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
