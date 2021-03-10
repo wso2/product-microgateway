@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2am.micro.gw.tests.security;
+package org.wso2am.micro.gw.tests.testCases.security;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
