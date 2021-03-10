@@ -180,11 +180,18 @@ type eventHub struct {
 }
 
 type throttlingConfig struct {
-	Binary binaryThrottleConfig
+	EnableGlobalEventPublishing        bool   `toml:"enableGlobalEventPublishing"`
+	EnableHeaderConditions             bool   `toml:"enableHeaderConditions"`
+	EnableQueryParamConditions         bool   `toml:"enableQueryParamConditions"`
+	EnableJwtClaimConditions           bool   `toml:"enableJwtClaimConditions"`
+	JmsConnectioninitialContextFactory string `toml:"jmsConnectioninitialContextFactory"`
+	JmsConnectionProviderURL           string `toml:"jmsConnectionProviderUrl"`
+	JmsConnectionUsername              string `toml:"jmsConnectionUsername"`
+	JmsConnectionPassword              string `toml:"jmsConnectionPassword"`
+	Binary                             binaryThrottleConfig
 }
 
 type binaryThrottleConfig struct {
-	Enabled   bool
 	Username  string
 	Password  string
 	URLGroup  []urlGroup `toml:"urlGroup"`

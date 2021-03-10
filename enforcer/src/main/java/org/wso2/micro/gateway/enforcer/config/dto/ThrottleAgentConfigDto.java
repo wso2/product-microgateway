@@ -28,20 +28,11 @@ import java.util.List;
  * This contains throttle configurations.
  */
 public class ThrottleAgentConfigDto {
-    boolean enabled = false;
     String username;
     String password;
     List<ThrottleURLGroupDto> urlGroup = new ArrayList<>();
     PublisherConfiguration publisher;
     AgentConfiguration agent;
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
 
     public String getUsername() {
         return username;

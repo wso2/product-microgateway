@@ -20,6 +20,8 @@ package org.wso2.micro.gateway.enforcer.throttle;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 
 import java.util.Date;
@@ -62,10 +64,11 @@ public class ThrottleEventListener implements MessageListener {
     private ThrottleEventListener() {}
 
     public static void init() {
-        String initialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
+        ThrottleConfigDto throttleConf = ConfigHolder.getInstance().getConfig().getThrottleConfig();
+        String initialContextFactory = throttleConf.getJmsConnectionInitialContextFactory();
         String connectionFactoryNamePrefix = "connectionfactory.";
         String connectionFactoryName = "qpidConnectionfactory";
-        String eventReceiverURL = "amqp://admin:admin@clientid/carbon?brokerlist='tcp://localhost:5672'";
+        String eventReceiverURL = throttleConf.getJmsConnectionProviderUrl();
         Runnable runnable = () -> {
             try {
                 TopicConnection topicConnection;

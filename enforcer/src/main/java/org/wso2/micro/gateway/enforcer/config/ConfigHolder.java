@@ -33,15 +33,17 @@ import org.wso2.gateway.discovery.config.enforcer.JWTGenerator;
 import org.wso2.gateway.discovery.config.enforcer.TMURLGroup;
 import org.wso2.gateway.discovery.config.enforcer.ThrottleAgent;
 import org.wso2.gateway.discovery.config.enforcer.ThrottlePublisher;
+import org.wso2.gateway.discovery.config.enforcer.Throttling;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottleAgentConfigDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
-import org.wso2.micro.gateway.enforcer.dto.ThrottleAgentConfigDTO;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.micro.gateway.enforcer.throttle.databridge.publisher.PublisherConfiguration;
@@ -120,7 +122,7 @@ public class ConfigHolder {
         populateAPIMCredentials(config.getApimCredentials());
 
         // Read throttle publisher configurations
-        populateTMBinaryConfig(config.getThrottlingConfig().getBinary());
+        populateThrottlingConfig(config.getThrottlingConfig());
 
         // Read backend jwt generation configurations
         populateJWTGeneratorConfigurations(config.getJwtGenerator());
@@ -193,6 +195,20 @@ public class ConfigHolder {
         }
     }
 
+    private void populateThrottlingConfig(Throttling throttling) {
+        ThrottleConfigDto throttleConfig = new ThrottleConfigDto();
+        throttleConfig.setGlobalPublishingEnabled(throttling.getEnableGlobalEventPublishing());
+        throttleConfig.setHeaderConditionsEnabled(throttling.getEnableHeaderConditions());
+        throttleConfig.setQueryConditionsEnabled(throttling.getEnableQueryParamConditions());
+        throttleConfig.setJwtClaimConditionsEnabled(throttling.getEnableJwtClaimConditions());
+        throttleConfig.setJmsConnectionInitialContextFactory(throttling.getJmsConnectionInitialContextFactory());
+        throttleConfig.setJmsConnectionProviderUrl(throttling.getJmsConnectionProviderUrl());
+        throttleConfig.setJmsConnectionUsername(throttling.getJmsConnectionUsername());
+        throttleConfig.setJmsConnectionPassword(throttling.getJmsConnectionPassword());
+        config.setThrottleConfig(throttleConfig);
+        populateTMBinaryConfig(throttling.getBinary());
+    }
+
     private void populateTMBinaryConfig(BinaryThrottling binary) {
         ThrottleAgent binaryAgent = binary.getAgent();
         AgentConfiguration agentConf = AgentConfiguration.getInstance();
@@ -227,13 +243,12 @@ public class ConfigHolder {
 
         processTMPublisherURLGroup(binary.getUrlGroupList(), pubConf);
 
-        ThrottleAgentConfigDTO throttleAgent = new ThrottleAgentConfigDTO();
+        ThrottleAgentConfigDto throttleAgent = new ThrottleAgentConfigDto();
         throttleAgent.setAgent(agentConf);
-        throttleAgent.setEnabled(binary.getEnabled());
         throttleAgent.setUsername(binary.getUsername());
         throttleAgent.setPassword(binary.getPassword());
         throttleAgent.setPublisher(pubConf);
-        config.setThrottleAgentConfig(throttleAgent);
+        config.getThrottleConfig().setThrottleAgent(throttleAgent);
     }
 
     private void loadTrustStore() {

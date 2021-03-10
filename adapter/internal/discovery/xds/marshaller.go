@@ -86,8 +86,15 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 			},
 		},
 		ThrottlingConfig: &enforcer.Throttling{
+			EnableGlobalEventPublishing:        config.Enforcer.ThrottlingConfig.EnableGlobalEventPublishing,
+			EnableHeaderConditions:             config.Enforcer.ThrottlingConfig.EnableHeaderConditions,
+			EnableQueryParamConditions:         config.Enforcer.ThrottlingConfig.EnableQueryParamConditions,
+			EnableJwtClaimConditions:           config.Enforcer.ThrottlingConfig.EnableJwtClaimConditions,
+			JmsConnectionInitialContextFactory: config.Enforcer.ThrottlingConfig.JmsConnectioninitialContextFactory,
+			JmsConnectionProviderUrl:           config.Enforcer.ThrottlingConfig.JmsConnectionProviderURL,
+			JmsConnectionUsername:              config.Enforcer.ThrottlingConfig.JmsConnectionUsername,
+			JmsConnectionPassword:              config.Enforcer.ThrottlingConfig.JmsConnectionPassword,
 			Binary: &enforcer.BinaryThrottling{
-				Enabled:  config.Enforcer.ThrottlingConfig.Binary.Enabled,
 				Username: config.Enforcer.ThrottlingConfig.Binary.Username,
 				Password: config.Enforcer.ThrottlingConfig.Binary.Password,
 				UrlGroup: urlGroups,

@@ -51,7 +51,8 @@ public class ThrottleFilter implements Filter {
 
     public ThrottleFilter() {
         this.dataHolder = ThrottleDataHolder.getInstance();
-        this.isGlobalThrottlingEnabled = ConfigHolder.getInstance().getConfig().getThrottleAgentConfig().isEnabled();
+        this.isGlobalThrottlingEnabled = ConfigHolder.getInstance().getConfig().getThrottleConfig()
+                .isGlobalPublishingEnabled();
     }
 
     @Override

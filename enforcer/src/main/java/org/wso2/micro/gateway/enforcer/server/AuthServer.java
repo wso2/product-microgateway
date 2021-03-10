@@ -62,8 +62,7 @@ public class AuthServer {
             //Initialise cache objects
             CacheProvider.init();
 
-            // TODO: (Praminda) do this only if throttling is enabled
-            if (ConfigHolder.getInstance().getConfig().getThrottleAgentConfig().isEnabled()) {
+            if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
                 ThrottleAgent.startThrottlePublisherPool();
                 ThrottleEventListener.init();
             }
