@@ -16,40 +16,43 @@
  * under the License.
  */
 
-package org.wso2am.micro.gw.tests.backendtls;
+package org.wso2am.micro.gw.tests.testCases.jwtValidator;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.common.model.API;
 import org.wso2am.micro.gw.tests.common.model.ApplicationDTO;
-import org.wso2am.micro.gw.tests.util.ApiDeployment;
-import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
-import org.wso2am.micro.gw.tests.util.HttpResponse;
-import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
-import org.wso2am.micro.gw.tests.util.TestConstant;
-
+import org.wso2am.micro.gw.tests.util.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BackendTLSTestcase extends BaseTestCase {
+
+/**
+ * Jwt test cases.
+ *
+ */
+public class JwtTestCase extends BaseTestCase {
+
     protected String jwtTokenProd;
+    protected String jwtWithoutScope;
+    protected String jwtWithScope;
+    protected String jwtWithMultipleScopes;
+    protected String jwtWithMultipleInvalidScopes;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        super.startMGW(null, true);
+        super.startMGW();
 
         //deploy the api
         //api yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("backendtls/api.yaml",
-            "backendtls/swagger.yaml", "backendtls/backend.crt");
+        String apiZipfile = ApiProjectGenerator.createApictlProjZip("/apis/openApis/api.yaml",
+            "/apis/openApis/swagger.yaml");
+
         ApiDeployment.deployAPI(apiZipfile);
 
-        //TODO: (VirajSalaka) change the token
         //generate JWT token from APIM
         API api = new API();
         api.setName("PetStoreAPI");
@@ -64,29 +67,21 @@ public class BackendTLSTestcase extends BaseTestCase {
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
 
-        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, "write:pets");
+        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, null);
+        jwtWithoutScope = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, null);
+        jwtWithScope = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, "write:pets");
+        jwtWithMultipleScopes = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, "write:pets read:pets");
+        jwtWithMultipleInvalidScopes = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, "foo bar");
     }
+
 
     @AfterClass(description = "stop the setup")
     void stop() {
         super.stopMGW();
     }
 
-    @Test(description = "Invoke HTTP endpoint")
-    public void invokeHttpEndpointSuccess() throws Exception {
-
-        // Set header
-        Map<String, String> headers = new HashMap<String, String>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
-                "/v2/pet/findByStatus") , headers);
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
-    }
-
-    @Test(description = "Invoke Https endpoint")
-    public void invokeHttpsEndpointSuccess() throws Exception {
+    @Test(description = "Test to check the JWT auth working")
+    public void invokeJWTHeaderSuccessTest() throws Exception {
 
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
@@ -98,16 +93,31 @@ public class BackendTLSTestcase extends BaseTestCase {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
     }
 
-    @Test(description = "Test to check the JWT auth working")
-    public void invokeMTLSEndpointSuccess() throws Exception {
+    @Test(description = "Test to check the JWT auth validate invalida signature token")
+    public void invokeJWTHeaderInvalidTokenTest() throws Exception {
 
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + TestConstant.INVALID_JWT_TOKEN);
         HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
-                "/v2/pet/findByTags") , headers);
+                "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,
+                "Response code mismatched");
+    }
+
+    @Test(description = "Test to check the JWT auth validate expired token")
+    public void invokeJWTHeaderExpiredTokenTest() throws Exception {
+
+        // Set header
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + TestConstant.EXPIRED_JWT_TOKEN);
+        HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
+                "/v2/pet/2") , headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,
+                "Response code mismatched");
     }
 }

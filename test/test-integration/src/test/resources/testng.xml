@@ -30,13 +30,13 @@
 
     <test name="micro-gw-integration-tests" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2am.micro.gw.tests.apiDeploy.APiDeployTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.security.CorsTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.jwtValidator.ScopeTest"/>
-            <class name="org.wso2am.micro.gw.tests.backendtls.BackendTLSTestcase"/>
-            <class name="org.wso2am.micro.gw.tests.jwtGenerator.JwtTransformerTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.jwtGenerator.CustomJwtTransformerTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.endpoints.ProductionSandboxTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.security.CorsTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.ScopeTest"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.backendtls.BackendTLSTestcase"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.JwtTransformerTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.CustomJwtTransformerTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.endpoints.ProductionSandboxTestCase"/>
         </classes>
     </test>
 </suite>
