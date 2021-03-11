@@ -144,8 +144,7 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public long getRequestTime() {
-        // TODO: (VirajSalaka) Fetch the information from checkrequest
-        return System.currentTimeMillis();
+        return requestContext.getRequestTimeStamp();
     }
 
     @Override

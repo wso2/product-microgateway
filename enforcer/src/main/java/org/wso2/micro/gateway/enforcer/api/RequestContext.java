@@ -51,6 +51,9 @@ public class RequestContext {
     private AuthenticationContext authenticationContext;
     private String requestPathTemplate;
 
+    // Request Timestamp is required for analytics
+    private long requestTimeStamp;
+
     private RequestContext() {
         correlationID = UUID.randomUUID().toString();
     }
@@ -84,6 +87,10 @@ public class RequestContext {
         return requestPathTemplate;
     }
 
+    public long getRequestTimeStamp() {
+        return requestTimeStamp;
+    }
+
     /**
      * Implements builder pattern to build an {@link RequestContext} object.
      */
@@ -96,7 +103,9 @@ public class RequestContext {
         private Map<String, String> headers;
         private String prodClusterHeader;
         private String sandClusterHeader;
+        private long requestTimeStamp;
         private Map<String, Object> properties = new HashMap();
+
 
         public Builder(String requestPath) {
             this.requestPath = requestPath;
@@ -136,6 +145,11 @@ public class RequestContext {
             return this;
         }
 
+        public Builder requestTimeStamp(long requestTimeStampInMillies) {
+            this.requestTimeStamp = requestTimeStampInMillies;
+            return this;
+        }
+
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
@@ -147,6 +161,7 @@ public class RequestContext {
             requestContext.sandClusterHeader = this.sandClusterHeader;
             requestContext.properties = this.properties;
             requestContext.requestPathTemplate = this.requestPathTemplate;
+            requestContext.requestTimeStamp = this.requestTimeStamp;
 
             // Adapter assigns header based routing only if both type of endpoints are present.
             if (!StringUtils.isEmpty(prodClusterHeader) && !StringUtils.isEmpty(sandClusterHeader)) {

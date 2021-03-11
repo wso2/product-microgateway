@@ -102,6 +102,10 @@ public class AnalyticsFilter implements Filter {
 
     public void handleFailureRequest(RequestContext requestContext) {
         MgwFaultAnalyticsProvider provider = new MgwFaultAnalyticsProvider(requestContext);
+        // To avoid incrementing counter for options call
+        if (provider.getProxyResponseCode() >= 200 && provider.getProxyResponseCode() < 300) {
+            return;
+        }
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
         try {
             dataCollector.collectData();
