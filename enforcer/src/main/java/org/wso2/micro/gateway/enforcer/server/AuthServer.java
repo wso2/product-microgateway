@@ -69,7 +69,7 @@ public class AuthServer {
             // Create a new server to listen on port 8082
             TokenServer tokenServer = new TokenServer();
             tokenServer.initToken();
-            logger.info("Token server started Listening in port : " + 8082);
+            logger.info("Token endpoint started Listening in port : " + 8082);
 
             //TODO: Get the tenant domain from config
             SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().initializeStore();

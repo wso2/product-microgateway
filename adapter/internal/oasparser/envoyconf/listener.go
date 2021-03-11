@@ -179,8 +179,8 @@ func CreateVirtualHost(vHostName string, routes []*routev3.Route) *routev3.Virtu
 	return &virtualHost
 }
 
-// CreateAddress generates an address from the given host and port
-func CreateAddress(remoteHost string, port uint32) *corev3.Address {
+// createAddress generates an address from the given host and port
+func createAddress(remoteHost string, port uint32) *corev3.Address {
 	address := corev3.Address{Address: &corev3.Address_SocketAddress{
 		SocketAddress: &corev3.SocketAddress{
 			Address:  remoteHost,

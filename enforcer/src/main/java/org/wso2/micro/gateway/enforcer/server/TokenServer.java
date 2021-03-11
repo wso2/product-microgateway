@@ -72,7 +72,6 @@ public class TokenServer {
                     .childHandler(new HttpTokenServerInitializer(sslCtx));
 
             Channel ch = b.bind(PORT).sync().channel();
-            logger.info("Open your web browser and navigate to https://localhost:" + PORT + '/');
             // Wait until server socket is closed
             ch.closeFuture().sync();
         } finally {
