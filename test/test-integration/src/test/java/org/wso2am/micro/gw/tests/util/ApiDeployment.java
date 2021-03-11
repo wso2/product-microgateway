@@ -22,7 +22,6 @@ import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -49,7 +48,7 @@ public class ApiDeployment {
         // Set header
         Map<String, String> headers = new HashMap<String,String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic YWRtaW46YWRtaW4=");
-        HttpsPostMultipart multipart = new HttpsPostMultipart(BaseTestCase.getImportAPIServiceURLHttps(
+        HttpsPostMultipart multipart = new HttpsPostMultipart(URLs.getImportAPIServiceURLHttps(
                 TestConstant.ADAPTER_IMPORT_API_RESOURCE) , headers);
         multipart.addFilePart("file", new File(apiZipFilePath));
         HttpResponse response = multipart.getResponse();
@@ -78,7 +77,7 @@ public class ApiDeployment {
 
         int tries = 0;
         while (true){
-            response = HttpsClientRequest.doGet(BaseTestCase.getServiceURLHttps(
+            response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                     "/v2/pet/2") , headers);
 
             tries += 1;

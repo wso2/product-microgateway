@@ -21,55 +21,21 @@ package org.wso2am.micro.gw.tests.testCases.backendtls;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2am.micro.gw.tests.common.BaseTestCase;
-import org.wso2am.micro.gw.tests.common.model.API;
-import org.wso2am.micro.gw.tests.common.model.ApplicationDTO;
-import org.wso2am.micro.gw.tests.util.ApiDeployment;
-import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
-import org.wso2am.micro.gw.tests.util.HttpResponse;
-import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
-import org.wso2am.micro.gw.tests.util.TestConstant;
+import org.wso2am.micro.gw.tests.util.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class BackendTLSTestcase extends BaseTestCase {
+@Test(groups = { TestGroup.MGW_WITH_BACKEND_TLS_AND_API })
+public class BackendTLSTestcase {
     protected String jwtTokenProd;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        super.startMGW(null, true);
-
-        //deploy the api
-        //api yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("backendtls/api.yaml",
-            "backendtls/swagger.yaml", "backendtls/backend.crt");
-        ApiDeployment.deployAPI(apiZipfile);
-
         //TODO: (VirajSalaka) change the token
-        //generate JWT token from APIM
-        API api = new API();
-        api.setName("PetStoreAPI");
-        api.setContext("petstore/v1");
-        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
-        api.setVersion("1.0.0");
-        api.setProvider("admin");
-
-        //Define application info
-        ApplicationDTO application = new ApplicationDTO();
-        application.setName("jwtApp");
-        application.setTier("Unlimited");
-        application.setId((int) (Math.random() * 1000));
-
-        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, "write:pets");
-    }
-
-    @AfterClass(description = "stop the setup")
-    void stop() {
-        super.stopMGW();
+        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets");
     }
 
     @Test(description = "Invoke HTTP endpoint")
@@ -78,7 +44,7 @@ public class BackendTLSTestcase extends BaseTestCase {
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/pet/findByStatus") , headers);
 
         Assert.assertNotNull(response);
@@ -91,7 +57,7 @@ public class BackendTLSTestcase extends BaseTestCase {
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
@@ -104,7 +70,7 @@ public class BackendTLSTestcase extends BaseTestCase {
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/pet/findByTags") , headers);
 
         Assert.assertNotNull(response);
