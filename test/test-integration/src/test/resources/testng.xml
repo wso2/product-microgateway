@@ -28,15 +28,36 @@
         <listener class-name="org.wso2am.micro.gw.tests.listener.TestNGListener"/>
     </listeners>
 
-    <test name="micro-gw-integration-tests" preserve-order="true" parallel="false">
+    <!-- Note: the name of the test tag has nothing to do with the group names  -->
+    <test name="micro-gw-with-no-apis" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.security.CorsTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.ScopeTest"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.backendtls.BackendTLSTestcase"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.JwtTransformerTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.CustomJwtTransformerTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithNoAPIs"/>
             <class name="org.wso2am.micro.gw.tests.testCases.endpoints.ProductionSandboxTestCase"/>
+        </classes>
+    </test>
+    <test name="micro-gw-with-one-api" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithOneAPI"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.ScopeTest"/>
+        </classes>
+    </test>
+    <test name="micro-gw-with-backend-tls-and-api" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithBackendTlsAndAPI"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.backendtls.BackendTLSTestcase"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.security.CorsTestCase"/>
+        </classes>
+    </test>
+    <test name="micro-gw-with-jwt-config-and-api" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithJwtConfigAndAPI"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.JwtTransformerTestCase"/>
+        </classes>
+    </test>
+    <test name="micro-gw-with-jwt-config-and-transformer" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithJwtConfigAndTransformer"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.CustomJwtTransformerTestCase"/>
         </classes>
     </test>
 </suite>

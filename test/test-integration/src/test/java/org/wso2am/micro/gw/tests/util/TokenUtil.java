@@ -18,8 +18,12 @@
 
 package org.wso2am.micro.gw.tests.util;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.wso2am.micro.gw.tests.common.model.API;
 import org.wso2am.micro.gw.tests.common.model.ApplicationDTO;
+import org.wso2am.micro.gw.tests.common.model.SubscribedApiDTO;
+
 import java.io.FileInputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +31,7 @@ import java.security.Key;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Signature;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
@@ -101,5 +106,48 @@ public class TokenUtil {
             jwtTokenInfo.put(entry.getKey(), entry.getValue());
         }
         return getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod, null);
+    }
+
+    /**
+     * get a jwt token.
+     *
+     * @param api            api
+     * @param applicationDTO application dto
+     * @param tier           tier
+     * @param keyType        keytype
+     * @param validityPeriod validityPeriod
+     * @throws Exception
+     * @return JWT
+     */
+    public static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType,
+                                int validityPeriod, String scopes) throws Exception {
+        SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
+        subscribedApiDTO.setContext(api.getContext() + "/" + api.getVersion());
+        subscribedApiDTO.setName(api.getName());
+        subscribedApiDTO.setVersion(api.getVersion());
+        subscribedApiDTO.setPublisher("admin");
+
+        subscribedApiDTO.setSubscriptionTier(tier);
+        subscribedApiDTO.setSubscriberTenantDomain("carbon.super");
+
+        JSONObject jwtTokenInfo = new JSONObject();
+        jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(subscribedApiDTO)));
+        return TokenUtil.getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod, scopes);
+    }
+
+    public static String getJwtForPetstore(String keyType, String scopes) throws Exception {
+        API api = new API();
+        api.setName("PetStoreAPI");
+        api.setContext("petstore/v1");
+        api.setProdEndpoint(URLs.getMockServiceURLHttp("/echo/prod"));
+        api.setVersion("1.0.0");
+        api.setProvider("admin");
+
+        //Define application info
+        ApplicationDTO application = new ApplicationDTO();
+        application.setName("jwtApp");
+        application.setTier("Unlimited");
+        application.setId((int) (Math.random() * 1000));
+        return getJWT(api, application, "Unlimited", keyType, 3600, scopes);
     }
 }

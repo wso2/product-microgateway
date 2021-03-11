@@ -23,7 +23,9 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.mockbackend.ResponseConstants;
+import org.wso2am.micro.gw.tests.util.HttpClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
+import org.wso2am.micro.gw.tests.util.URLs;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +39,7 @@ public class ScopeTest extends JwtTestCase {
     public void testScopeProtectedResourceInvalidJWT() throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithoutScope);
-        HttpResponse response = retryGetRequestUntilDeployed(getServiceURLHttps(
+        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(URLs.getServiceURLHttps(
                 "/v2/pets/findByTags"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN, "Response code mismatched");
@@ -50,7 +52,7 @@ public class ScopeTest extends JwtTestCase {
     public void testScopeProtectedResourceValidJWT() throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithScope);
-        HttpResponse response = retryGetRequestUntilDeployed(getServiceURLHttps("/v2/pet/findByStatus"), headers);
+        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(URLs.getServiceURLHttps("/v2/pet/findByStatus"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertEquals(response.getData(), ResponseConstants.RESPONSE_BODY,
@@ -61,7 +63,7 @@ public class ScopeTest extends JwtTestCase {
     public void testMultipleScopeProtectedResourceValidJWT() throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithScope);
-        HttpResponse response = retryGetRequestUntilDeployed(getServiceURLHttps("/v2/pets/findByTags"), headers);
+        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(URLs.getServiceURLHttps("/v2/pets/findByTags"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertEquals(response.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
@@ -72,7 +74,7 @@ public class ScopeTest extends JwtTestCase {
     public void testMultipleScopeProtectedResourceValidMultiScopeJWT() throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithMultipleScopes);
-        HttpResponse response = retryGetRequestUntilDeployed(getServiceURLHttps("/v2/pets/findByTags"), headers);
+        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(URLs.getServiceURLHttps("/v2/pets/findByTags"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         Assert.assertEquals(response.getData(), ResponseConstants.PET_BY_ID_RESPONSE,
@@ -83,7 +85,7 @@ public class ScopeTest extends JwtTestCase {
     public void testMultipleScopeProtectedResourceInvalidMultiScopeJWT() throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithMultipleInvalidScopes);
-        HttpResponse response = retryGetRequestUntilDeployed(getServiceURLHttps("/v2/pets/findByTags"), headers);
+        HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(URLs.getServiceURLHttps("/v2/pets/findByTags"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_FORBIDDEN,"Response code mismatched");
         Assert.assertTrue(

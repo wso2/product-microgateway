@@ -22,9 +22,6 @@ import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.*;
-import org.wso2am.micro.gw.tests.common.BaseTestCase;
-import org.wso2am.micro.gw.tests.common.model.API;
-import org.wso2am.micro.gw.tests.common.model.ApplicationDTO;
 import org.wso2am.micro.gw.tests.util.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,9 +31,9 @@ import java.util.Map;
  * Jwt test cases.
  *
  */
-public class JwtTestCase extends BaseTestCase {
+@Test(groups = { TestGroup.MGW_WITH_ONE_API })
+public class JwtTestCase {
 
-    protected String jwtTokenProd;
     protected String jwtWithoutScope;
     protected String jwtWithScope;
     protected String jwtWithMultipleScopes;
@@ -44,40 +41,10 @@ public class JwtTestCase extends BaseTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        super.startMGW();
-
-        //deploy the api
-        //api yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("/apis/openApis/api.yaml",
-            "/apis/openApis/swagger.yaml");
-
-        ApiDeployment.deployAPI(apiZipfile);
-
-        //generate JWT token from APIM
-        API api = new API();
-        api.setName("PetStoreAPI");
-        api.setContext("petstore/v1");
-        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
-        api.setVersion("1.0.0");
-        api.setProvider("admin");
-
-        //Define application info
-        ApplicationDTO application = new ApplicationDTO();
-        application.setName("jwtApp");
-        application.setTier("Unlimited");
-        application.setId((int) (Math.random() * 1000));
-
-        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, null);
-        jwtWithoutScope = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, null);
-        jwtWithScope = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, "write:pets");
-        jwtWithMultipleScopes = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, "write:pets read:pets");
-        jwtWithMultipleInvalidScopes = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, "foo bar");
-    }
-
-
-    @AfterClass(description = "stop the setup")
-    void stop() {
-        super.stopMGW();
+        jwtWithoutScope = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null);
+        jwtWithScope = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets");
+        jwtWithMultipleScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets read:pets");
+        jwtWithMultipleInvalidScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "foo bar");
     }
 
     @Test(description = "Test to check the JWT auth working")
@@ -85,8 +52,8 @@ public class JwtTestCase extends BaseTestCase {
 
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtWithoutScope);
+        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
@@ -99,7 +66,7 @@ public class JwtTestCase extends BaseTestCase {
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + TestConstant.INVALID_JWT_TOKEN);
-        HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
@@ -113,7 +80,7 @@ public class JwtTestCase extends BaseTestCase {
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + TestConstant.EXPIRED_JWT_TOKEN);
-        HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);

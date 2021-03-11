@@ -18,6 +18,9 @@
 
 package org.wso2am.micro.gw.tests.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
@@ -37,7 +40,10 @@ import java.util.Map;
  * This class can be used to send http request.
  */
 public class HttpClientRequest {
+    private static int maxRetryCount = 10;
+    private static int retryIntervalMillis = 3000;
 
+    private static final Logger log = LoggerFactory.getLogger(HttpClientRequest.class);
 
     /**
      * Sends an HTTP GET request to a url.
@@ -257,5 +263,40 @@ public class HttpClientRequest {
         httpResponse = new HttpResponse(sb.toString(), conn.getResponseCode(), responseHeaders);
         httpResponse.setResponseMessage(conn.getResponseMessage());
         return httpResponse;
+    }
+
+    public static HttpResponse retryPostRequestUntilDeployed(String requestUrl, Map<String, String> headers,
+                                                             String body) throws IOException, InterruptedException {
+        HttpResponse response;
+        int retryCount = 0;
+        do {
+            log.info("Trying request with url : " + requestUrl);
+            response = HttpsClientRequest.doPost(requestUrl, body, headers);
+            retryCount++;
+        } while (response != null && response.getResponseCode() == 404 && response.getResponseMessage()
+                .contains("Not Found") && retry(retryCount));
+        return response;
+    }
+
+    public static HttpResponse retryGetRequestUntilDeployed(String requestUrl, Map<String, String> headers)
+            throws IOException, InterruptedException {
+        HttpResponse response;
+        int retryCount = 0;
+        do {
+            log.info("Trying request with url : " + requestUrl);
+            response = HttpsClientRequest.doGet(requestUrl, headers);
+            retryCount++;
+        } while (response != null && response.getResponseCode() == 404 && response.getResponseMessage()
+                .contains("Not Found") && retry(retryCount));
+        return response;
+    }
+
+    private static boolean retry(int retryCount) throws InterruptedException {
+        if(retryCount >= maxRetryCount) {
+            log.info("Retrying of the request is finished");
+            return false;
+        }
+        Thread.sleep(retryIntervalMillis);
+        return true;
     }
 }

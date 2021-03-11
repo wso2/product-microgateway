@@ -23,29 +23,22 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2am.micro.gw.tests.common.BaseTestCase;
-import org.wso2am.micro.gw.tests.common.model.API;
-import org.wso2am.micro.gw.tests.common.model.ApplicationDTO;
-import org.wso2am.micro.gw.tests.util.ApiDeployment;
-import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
-import org.wso2am.micro.gw.tests.util.HttpResponse;
-import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
-import org.wso2am.micro.gw.tests.util.TestConstant;
+import org.wso2am.micro.gw.tests.util.*;
 import org.wso2am.micro.gw.mockbackend.ResponseConstants;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ProductionSandboxTestCase extends BaseTestCase {
+@Test(groups = { TestGroup.MGW_WITH_NO_APIS })
+public class ProductionSandboxTestCase {
     protected String jwtTokenProd;
     protected String jwtTokenSand;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        super.startMGW();
-
-        //deploy the api
-        //api yaml file should put to the resources/apis/openApis folder
+        // Note: Cannot use MGW_WITH_ONE_API group because although its API has a different name
+        // its base path overlaps with base path in prodSand_swagger.yaml. Therefore fails
+        // line 72 here.
         String prodSandApiZipfile = ApiProjectGenerator.createApictlProjZip(
                 "prod-sand/prodSand_api.yaml", "prod-sand/prodSand_swagger.yaml");
         String prodOnlyApiZipfile = ApiProjectGenerator.createApictlProjZip(
@@ -57,29 +50,15 @@ public class ProductionSandboxTestCase extends BaseTestCase {
         ApiDeployment.deployAPI(sandOnlyApiZipfile);
 
         //TODO: (VirajSalaka) change the token
-        //generate JWT token from APIM
-        API api = new API();
-        api.setName("PetStoreAPI");
-        api.setContext("petstore/v1");
-        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
-        api.setVersion("1.0.0");
-        api.setProvider("admin");
-
-        //Define application info
-        ApplicationDTO application = new ApplicationDTO();
-        application.setName("jwtApp");
-        application.setTier("Unlimited");
-        application.setId((int) (Math.random() * 1000));
-
-        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600, null);
-        jwtTokenSand = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_SANDBOX, 3600, null);
+        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null);
+        jwtTokenSand = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_SANDBOX, null);
     }
 
     @Test(description = "Invoke Production and Sandbox endpoint when both endpoints provided")
     public void invokeProdSandEndpoints() throws Exception {
         Map<String, String> prodHeaders = new HashMap<String, String>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse prodResponse = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse prodResponse = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/pet/findByStatus") , prodHeaders);
 
         Assert.assertNotNull(prodResponse);
@@ -89,7 +68,7 @@ public class ProductionSandboxTestCase extends BaseTestCase {
 
         Map<String, String> sandHeaders = new HashMap<String, String>();
         sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse sandResponse = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/pet/findByStatus"), sandHeaders);
 
         Assert.assertNotNull(sandResponse);
@@ -102,7 +81,7 @@ public class ProductionSandboxTestCase extends BaseTestCase {
     public void invokeSandboxEndpointOnly() throws Exception {
         Map<String, String> sandHeaders = new HashMap<String, String>();
         sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse sandResponse = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/sand/pet/findByStatus") , sandHeaders);
 
         Assert.assertNotNull(sandResponse, "Sandbox endpoint response should not be null");
@@ -112,7 +91,7 @@ public class ProductionSandboxTestCase extends BaseTestCase {
 
         Map<String, String> prodHeaders = new HashMap<String, String>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse prodResponse = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse prodResponse = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/sand/pet/findByStatus") , prodHeaders);
 
         Assert.assertNotNull(prodResponse, "Production endoint response should not be null");
@@ -125,7 +104,7 @@ public class ProductionSandboxTestCase extends BaseTestCase {
     public void invokeProdEndpointOnly() throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/prod/pet/findByStatus") , headers);
 
         Assert.assertNotNull(response, "Production endpoint response should not be null");
@@ -135,12 +114,11 @@ public class ProductionSandboxTestCase extends BaseTestCase {
 
         Map<String, String> sandHeaders = new HashMap<String, String>();
         sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse sandResponse = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/prod/pet/findByStatus"), sandHeaders);
 
         Assert.assertNotNull(sandResponse, "Sandbox endpoint response should not be null");
         Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
         Assert.assertTrue(sandResponse.getData().contains("Sandbox key offered to the API with no sandbox endpoint"));
     }
-
 }
