@@ -24,19 +24,20 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
 import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
+import org.wso2am.micro.gw.tests.util.URLs;
 
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JwtTransformerTestCase extends JwtGeneratorTestCase{
+public class JwtTransformerTestCase extends JwtGeneratorTestCase {
 
     @Test(description = "Test default jwt claim mapping")
     public void testDefaultJwtClaimMapping() throws Exception {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/jwttoken") , headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");

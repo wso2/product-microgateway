@@ -21,57 +21,21 @@ package org.wso2am.micro.gw.tests.testCases.jwtGenerator;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2am.micro.gw.tests.common.BaseTestCase;
-import org.wso2am.micro.gw.tests.common.model.API;
-import org.wso2am.micro.gw.tests.common.model.ApplicationDTO;
 import org.wso2am.micro.gw.tests.util.*;
 
-import java.io.File;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CustomJwtTransformerTestCase extends BaseTestCase {
+@Test(groups = { TestGroup.MGW_WITH_JWT_CONFIG_AND_TRANSFORMER })
+public class CustomJwtTransformerTestCase {
     protected String jwtTokenProd;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        String confPath = TestConstant.BASE_RESOURCE_DIR
-                + File.separator + "jwtGenerator" + File.separator + "config.toml";
-        super.startMGW(confPath, false, true);
-
-        //deploy the api
-        //api yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("/apis/openApis/api.yaml",
-                "/apis/openApis/swagger.yaml");
-
-        ApiDeployment.deployAPI(apiZipfile);
-
-        //generate JWT token from APIM
-        API api = new API();
-        api.setName("PetStoreAPI");
-        api.setContext("petstore/v1");
-        api.setProdEndpoint(getMockServiceURLHttp("/echo/prod"));
-        api.setVersion("1.0.0");
-        api.setProvider("admin");
-
-        //Define application info
-        ApplicationDTO application = new ApplicationDTO();
-        application.setName("jwtApp");
-        application.setTier("Unlimited");
-        application.setId((int) (Math.random() * 1000));
-
-        jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600,null);
-        System.out.println("@@@@@@@@@@@@");
-        System.out.println(jwtTokenProd);
-    }
-
-    @AfterClass(description = "stop the setup")
-    void stop() {
-        super.stopMGW();
+        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null);
     }
 
     @Test(description = "Test custom jwt claim mapping")
@@ -79,7 +43,7 @@ public class CustomJwtTransformerTestCase extends BaseTestCase {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/jwttoken") , headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
