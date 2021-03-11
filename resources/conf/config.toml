@@ -120,7 +120,6 @@ disableSslVerification = false
     [[enforcer.throttling.publisher.urlGroup]]
       receiverURLs = ["tcp://localhost:9611"]
       authURLs = ["ssl://localhost:9711"]
-      type = "loadbalance"
     # Data publisher object pool configurations
     [enforcer.throttling.publisher.pool]
       maxIdleDataPublishingAgents = 1000

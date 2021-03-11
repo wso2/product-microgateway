@@ -296,8 +296,8 @@ public class ConfigHolder {
             }
             restructuredReceiverURL.append(processSingleURLGroup(receiverUrls, urlType)).append(",");
             restructuredAuthURL.append(processSingleURLGroup(authUrls, urlType)).append(",");
-
         }
+
         //to remove the final ',' in the URLs and set to publisher config
         if (!restructuredReceiverURL.toString().isBlank() && !restructuredAuthURL.toString().isBlank()) {
             pubConfiguration.setReceiverUrlGroup(restructuredReceiverURL.substring(0,
