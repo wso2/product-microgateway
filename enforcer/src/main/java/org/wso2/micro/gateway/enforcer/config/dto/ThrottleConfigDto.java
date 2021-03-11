@@ -28,8 +28,6 @@ public class ThrottleConfigDto {
     private boolean isJwtClaimConditionsEnabled;
     private String jmsConnectionInitialContextFactory;
     private String jmsConnectionProviderUrl;
-    private String jmsConnectionUsername;
-    private String jmsConnectionPassword;
     private ThrottleAgentConfigDto throttleAgent;
 
     public boolean isGlobalPublishingEnabled() {
@@ -78,22 +76,6 @@ public class ThrottleConfigDto {
 
     public void setJmsConnectionProviderUrl(String jmsConnectionProviderUrl) {
         this.jmsConnectionProviderUrl = jmsConnectionProviderUrl;
-    }
-
-    public String getJmsConnectionUsername() {
-        return jmsConnectionUsername;
-    }
-
-    public void setJmsConnectionUsername(String jmsConnectionUsername) {
-        this.jmsConnectionUsername = jmsConnectionUsername;
-    }
-
-    public String getJmsConnectionPassword() {
-        return jmsConnectionPassword;
-    }
-
-    public void setJmsConnectionPassword(String jmsConnectionPassword) {
-        this.jmsConnectionPassword = jmsConnectionPassword;
     }
 
     public ThrottleAgentConfigDto getThrottleAgent() {

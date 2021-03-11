@@ -43,7 +43,6 @@ import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
-import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.math.BigInteger;
 import java.net.InetAddress;

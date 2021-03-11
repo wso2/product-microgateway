@@ -98,7 +98,7 @@ disableSslVerification = false
     privateKeyPath = "/home/wso2/security/keystore/mg.key"
 
 # Throttling configurations
-[enforcer.throttlingConfig]
+[enforcer.throttling]
   # Connect with the central traffic manager
   enableGlobalEventPublishing = false
   # Enable global advanced throttling based on request header conditions
@@ -111,29 +111,25 @@ disableSslVerification = false
   jmsConnectioninitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
   # The message broker connection URL
   jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
-  # The username used to establish  the message broker connection
-  jmsConnectionUsername = ""
-  # The password used to establish  the message broker connection
-  jmsConnectionPassword = ""
   # Throttling configurations related to event publishing using a binary connection
-  [enforcer.throttlingConfig.binary]
+  [enforcer.throttling.publisher]
     # Credentials required to establish connection between Traffic Manager
     username = "admin"
     password = "admin"
     # Receiver URL and the authentication URL of the Traffic manager node/nodes
-    [[enforcer.throttlingConfig.binary.urlGroup]]
+    [[enforcer.throttling.publisher.urlGroup]]
       receiverURLs = ["tcp://localhost:9611"]
       authURLs = ["ssl://localhost:9711"]
       type = "loadbalance"
     # Data publisher object pool configurations
-    [enforcer.throttlingConfig.binary.publisher]
+    [enforcer.throttling.publisher.pool]
       maxIdleDataPublishingAgents = 1000
       initIdleObjectDataPublishingAgents = 200
       # Data publisher thread pool configurations
       publisherThreadPoolCoreSize = 200
       publisherThreadPoolMaximumSize = 1000
       publisherThreadPoolKeepAliveTime = 200
-    [enforcer.throttlingConfig.binary.agent]
+    [enforcer.throttling.publisher.agent]
       # SSL Protocols
       sslEnabledProtocols = "TLSv1,TLSv1.1,TLSv1.2"
       # ciphers

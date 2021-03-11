@@ -56,41 +56,17 @@ public interface ThrottlingOrBuilder extends
       getJmsConnectionProviderUrlBytes();
 
   /**
-   * <code>string jms_connection_username = 7;</code>
-   * @return The jmsConnectionUsername.
+   * <code>.wso2.discovery.config.enforcer.BinaryPublisher publisher = 7;</code>
+   * @return Whether the publisher field is set.
    */
-  java.lang.String getJmsConnectionUsername();
+  boolean hasPublisher();
   /**
-   * <code>string jms_connection_username = 7;</code>
-   * @return The bytes for jmsConnectionUsername.
+   * <code>.wso2.discovery.config.enforcer.BinaryPublisher publisher = 7;</code>
+   * @return The publisher.
    */
-  com.google.protobuf.ByteString
-      getJmsConnectionUsernameBytes();
-
+  org.wso2.gateway.discovery.config.enforcer.BinaryPublisher getPublisher();
   /**
-   * <code>string jms_connection_password = 8;</code>
-   * @return The jmsConnectionPassword.
+   * <code>.wso2.discovery.config.enforcer.BinaryPublisher publisher = 7;</code>
    */
-  java.lang.String getJmsConnectionPassword();
-  /**
-   * <code>string jms_connection_password = 8;</code>
-   * @return The bytes for jmsConnectionPassword.
-   */
-  com.google.protobuf.ByteString
-      getJmsConnectionPasswordBytes();
-
-  /**
-   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
-   * @return Whether the binary field is set.
-   */
-  boolean hasBinary();
-  /**
-   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
-   * @return The binary.
-   */
-  org.wso2.gateway.discovery.config.enforcer.BinaryThrottling getBinary();
-  /**
-   * <code>.wso2.discovery.config.enforcer.BinaryThrottling binary = 9;</code>
-   */
-  org.wso2.gateway.discovery.config.enforcer.BinaryThrottlingOrBuilder getBinaryOrBuilder();
+  org.wso2.gateway.discovery.config.enforcer.BinaryPublisherOrBuilder getPublisherOrBuilder();
 }

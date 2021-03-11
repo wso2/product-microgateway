@@ -3,20 +3,20 @@ syntax = "proto3";
 package wso2.discovery.config.enforcer;
 
 import "wso2/discovery/config/enforcer/tm_url_group.proto";
-import "wso2/discovery/config/enforcer/throttle_publisher.proto";
+import "wso2/discovery/config/enforcer/throttle_publisher_pool.proto";
 import "wso2/discovery/config/enforcer/throttle_agent.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
 option java_package = "org.wso2.gateway.discovery.config.enforcer";
-option java_outer_classname = "BinaryThrottlingProto";
+option java_outer_classname = "BinaryPublisherProto";
 option java_multiple_files = true;
 
-// [#protodoc-title: BinaryThrottling]
+// [#protodoc-title: BinaryPublisher]
 
-message BinaryThrottling {
+message BinaryPublisher {
     string username = 2;
     string password = 3;
     repeated TMURLGroup urlGroup = 4;
-    ThrottlePublisher publisher = 5;
+    PublisherPool pool = 5;
     ThrottleAgent agent = 6;
 }

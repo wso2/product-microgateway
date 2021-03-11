@@ -4,13 +4,13 @@ package wso2.discovery.config.enforcer;
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
 option java_package = "org.wso2.gateway.discovery.config.enforcer";
-option java_outer_classname = "ThrottlePublishergProto";
+option java_outer_classname = "PublisherPoolProto";
 option java_multiple_files = true;
 
-// [#protodoc-title: ThrottlePublisher]
+// [#protodoc-title: PublisherPool]
 
-// Throttle Publisher configuration model
-message ThrottlePublisher {
+// Throttle Publisher pool configuration model
+message PublisherPool {
    int32 maxIdleDataPublishingAgents = 1;
    int32 initIdleObjectDataPublishingAgents = 2;
    int32 publisherThreadPoolCoreSize = 3;

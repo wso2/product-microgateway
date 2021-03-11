@@ -24,15 +24,15 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.gateway.discovery.config.enforcer.AmCredentials;
 import org.wso2.gateway.discovery.config.enforcer.AuthService;
-import org.wso2.gateway.discovery.config.enforcer.BinaryThrottling;
+import org.wso2.gateway.discovery.config.enforcer.BinaryPublisher;
 import org.wso2.gateway.discovery.config.enforcer.Cache;
 import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.config.enforcer.EventHub;
 import org.wso2.gateway.discovery.config.enforcer.Issuer;
 import org.wso2.gateway.discovery.config.enforcer.JWTGenerator;
+import org.wso2.gateway.discovery.config.enforcer.PublisherPool;
 import org.wso2.gateway.discovery.config.enforcer.TMURLGroup;
 import org.wso2.gateway.discovery.config.enforcer.ThrottleAgent;
-import org.wso2.gateway.discovery.config.enforcer.ThrottlePublisher;
 import org.wso2.gateway.discovery.config.enforcer.Throttling;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
@@ -122,7 +122,7 @@ public class ConfigHolder {
         populateAPIMCredentials(config.getApimCredentials());
 
         // Read throttle publisher configurations
-        populateThrottlingConfig(config.getThrottlingConfig());
+        populateThrottlingConfig(config.getThrottling());
 
         // Read backend jwt generation configurations
         populateJWTGeneratorConfigurations(config.getJwtGenerator());
@@ -203,13 +203,11 @@ public class ConfigHolder {
         throttleConfig.setJwtClaimConditionsEnabled(throttling.getEnableJwtClaimConditions());
         throttleConfig.setJmsConnectionInitialContextFactory(throttling.getJmsConnectionInitialContextFactory());
         throttleConfig.setJmsConnectionProviderUrl(throttling.getJmsConnectionProviderUrl());
-        throttleConfig.setJmsConnectionUsername(throttling.getJmsConnectionUsername());
-        throttleConfig.setJmsConnectionPassword(throttling.getJmsConnectionPassword());
         config.setThrottleConfig(throttleConfig);
-        populateTMBinaryConfig(throttling.getBinary());
+        populateTMBinaryConfig(throttling.getPublisher());
     }
 
-    private void populateTMBinaryConfig(BinaryThrottling binary) {
+    private void populateTMBinaryConfig(BinaryPublisher binary) {
         ThrottleAgent binaryAgent = binary.getAgent();
         AgentConfiguration agentConf = AgentConfiguration.getInstance();
         agentConf.setBatchSize(binaryAgent.getBatchSize());
@@ -231,15 +229,15 @@ public class ConfigHolder {
         agentConf.setSocketTimeoutMS(binaryAgent.getSocketTimeoutMS());
         agentConf.setTrustStore(trustStore);
 
-        ThrottlePublisher binaryPublisher = binary.getPublisher();
+        PublisherPool pool = binary.getPool();
         PublisherConfiguration pubConf = PublisherConfiguration.getInstance();
         pubConf.setUserName(binary.getUsername());
         pubConf.setPassword(binary.getPassword());
-        pubConf.setInitIdleObjectDataPublishingAgents(binaryPublisher.getInitIdleObjectDataPublishingAgents());
-        pubConf.setMaxIdleDataPublishingAgents(binaryPublisher.getMaxIdleDataPublishingAgents());
-        pubConf.setPublisherThreadPoolCoreSize(binaryPublisher.getPublisherThreadPoolCoreSize());
-        pubConf.setPublisherThreadPoolKeepAliveTime(binaryPublisher.getPublisherThreadPoolKeepAliveTime());
-        pubConf.setPublisherThreadPoolMaximumSize(binaryPublisher.getPublisherThreadPoolMaximumSize());
+        pubConf.setInitIdleObjectDataPublishingAgents(pool.getInitIdleObjectDataPublishingAgents());
+        pubConf.setMaxIdleDataPublishingAgents(pool.getMaxIdleDataPublishingAgents());
+        pubConf.setPublisherThreadPoolCoreSize(pool.getPublisherThreadPoolCoreSize());
+        pubConf.setPublisherThreadPoolKeepAliveTime(pool.getPublisherThreadPoolKeepAliveTime());
+        pubConf.setPublisherThreadPoolMaximumSize(pool.getPublisherThreadPoolMaximumSize());
 
         processTMPublisherURLGroup(binary.getUrlGroupList(), pubConf);
 
