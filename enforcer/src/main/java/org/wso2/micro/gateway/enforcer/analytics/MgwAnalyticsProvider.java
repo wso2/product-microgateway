@@ -53,15 +53,11 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public EventCategory getEventCategory() {
-        // TODO: (VirajSalaka) Decide if options call should be neglected.
-        // TODO: (VirajSalaka) Backend returns some error ?
-        if (logEntry.getResponse().getResponseCode().getValue() == 200
-                && logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
+        if (logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
             logger.info("Is success event");
             return EventCategory.SUCCESS;
             // TODO: (VirajSalaka) Finalize what is a fault
-        } else if (logEntry.getResponse().getResponseCode().getValue() != 200
-                && !logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
+        } else if (logEntry.getResponse().getResponseCode().getValue() != 200) {
             logger.info("Is fault event");
             return EventCategory.FAULT;
         } else {
@@ -77,39 +73,24 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public boolean isAuthenticated() {
-        return logEntry.getResponse().getResponseCode().getValue() != 401
-                && logEntry.getResponse().getResponseCode().getValue() != 403
-                && !logEntry.getResponse().getResponseCodeDetails().equals("ext_authz_denied");
+        // Authentication failed requests are already published.
+        return true;
     }
 
     @Override
     public FaultCategory getFaultType() {
-        if (isAuthFaultRequest()) {
-            return FaultCategory.AUTH;
-        } else if (isThrottledFaultRequest()) {
-            return FaultCategory.THROTTLED;
-        } else if (isTargetFaultRequest()) {
+        if (isTargetFaultRequest()) {
             return FaultCategory.TARGET_CONNECTIVITY;
         } else {
             return FaultCategory.OTHER;
         }
     }
 
-    private boolean isAuthFaultRequest() {
-        return (logEntry.getResponse().getResponseCode().getValue() == 401
-                || logEntry.getResponse().getResponseCode().getValue() == 403)
-                && logEntry.getResponse().getResponseCodeDetails().equals("ext_authz_denied");
-    }
-
-    public boolean isThrottledFaultRequest() {
-        return logEntry.getResponse().getResponseCode().getValue() == 429
-                && logEntry.getResponse().getResponseCodeDetails().equals("ext_authz_denied");
-    }
-
     public boolean isTargetFaultRequest() {
-        // TODO: (VirajSalaka) Response flags based check
+        // TODO: (VirajSalaka) CorsPreflight request
         return logEntry.getResponse().getResponseCode().getValue() != 200
-                && !logEntry.getResponse().getResponseCodeDetails().equals("via_upstream");
+                && !logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")
+                && !logEntry.getResponse().getResponseCodeDetails().equals("ext_auth_denied");
     }
 
     @Override
@@ -190,22 +171,17 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public int getProxyResponseCode() {
-        // TODO: (VirajSalaka) Needs to bring in status code modification
         // As the response is not modified
-        return logEntry.getResponse().getResponseCode().getValue();
+        return getTargetResponseCode();
     }
 
     @Override
     public int getTargetResponseCode() {
-        if (logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
-            return logEntry.getResponse().getResponseCode().getValue();
-        }
-        return 0;
+        return logEntry.getResponse().getResponseCode().getValue();
     }
 
     @Override
     public long getRequestTime() {
-        // TODO: (VirajSalaka) Findout if it is seconds or millies
         return logEntry.getCommonProperties().getStartTime().getSeconds() * 1000;
     }
 

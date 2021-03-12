@@ -28,13 +28,13 @@ import io.grpc.netty.shaded.io.netty.channel.EventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.stub.StreamObserver;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsConfigurationHolder;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.server.EnforcerThreadPoolExecutor;
 import org.wso2.micro.gateway.enforcer.server.NativeThreadFactory;
@@ -75,11 +75,10 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
                 logger.info("Received msg" + message.toString());
                 for (int i = 0; i < message.getHttpLogs().getLogEntryCount(); i++) {
                     HTTPAccessLogEntry logEntry = message.getHttpLogs().getLogEntry(i);
-                    AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
-                    if (provider.getFaultType() == FaultCategory.AUTH
-                            || provider.getFaultType() == FaultCategory.THROTTLED) {
+                    if (doNotPublishEvent(logEntry)) {
                         continue;
                     }
+                    AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
                     GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
                     try {
                         dataCollector.collectData();
@@ -125,5 +124,12 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
         }
         logger.info("Access loggers Sever started Listening in port : " + 18090);
         return true;
+    }
+
+    private boolean doNotPublishEvent(HTTPAccessLogEntry logEntry) {
+        // TODO: (VirajSalaka) Check if the response code details can be null
+        // If ext_auth_denied request comes, the event is already published from the enforcer.
+        return StringUtils.isEmpty(logEntry.getResponse().getResponseCodeDetails())
+                && logEntry.getResponse().getResponseCodeDetails().equals("ext_auth_denied");
     }
 }
