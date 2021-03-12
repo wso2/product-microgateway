@@ -101,7 +101,7 @@ public class ThrottleFilter implements Filter {
                         ThrottleConstants.API_THROTTLE_OUT_ERROR_CODE,
                         ThrottleConstants.THROTTLE_OUT_MESSAGE,
                         ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
-                reqContext.getProperties().put(APIConstants.THROTTLE_OUT_REASON,
+                reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                         ThrottleConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED);
                 return true;
             } else if (isResourceLevelThrottled(resourceThrottleKey, resourceTier)) {
@@ -109,7 +109,7 @@ public class ThrottleFilter implements Filter {
                         ThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE,
                         ThrottleConstants.THROTTLE_OUT_MESSAGE,
                         ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
-                reqContext.getProperties().put(APIConstants.THROTTLE_OUT_REASON,
+                reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                         ThrottleConstants.THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED);
                 return true;
             }
@@ -122,7 +122,7 @@ public class ThrottleFilter implements Filter {
                             ThrottleConstants.SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
                             ThrottleConstants.THROTTLE_OUT_MESSAGE,
                             ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
-                    reqContext.getProperties().put(APIConstants.THROTTLE_OUT_REASON,
+                    reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                             ThrottleConstants.THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
                     return true;
                 }
@@ -137,7 +137,7 @@ public class ThrottleFilter implements Filter {
                         ThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE,
                         ThrottleConstants.THROTTLE_OUT_MESSAGE,
                         ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
-                reqContext.getProperties().put(APIConstants.THROTTLE_OUT_REASON,
+                reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                         ThrottleConstants.THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
                 return true;
             }
@@ -182,7 +182,7 @@ public class ThrottleFilter implements Filter {
         String resourceTier;
         String resourceKey;
 
-        if (!APIConstants.UNLIMITED_TIER.equals(authenticationContext.getApiTier()) &&
+        if (!ThrottleConstants.UNLIMITED_TIER.equals(authenticationContext.getApiTier()) &&
                 authenticationContext.getApiTier() != null &&
                 !authenticationContext.getApiTier().isBlank()) {
             resourceTier = authenticationContext.getApiTier();
@@ -191,7 +191,6 @@ public class ThrottleFilter implements Filter {
             resourceTier = getResourceTier(requestContext.getMatchedResourcePath());
             resourceKey = getResourceThrottleKey(requestContext, apiContext, apiVersion);
         }
-
 
         throttleEvent.put(ThrottleEventConstants.MESSAGE_ID, requestContext.getRequestID());
         throttleEvent.put(ThrottleEventConstants.APP_KEY, authenticationContext.getApplicationId() + ':' +
@@ -245,7 +244,7 @@ public class ThrottleFilter implements Filter {
         if (!resourceConfig.getTier().isBlank()) {
             return resourceConfig.getTier();
         }
-        return APIConstants.UNLIMITED_TIER;
+        return ThrottleConstants.UNLIMITED_TIER;
     }
 
 
@@ -256,17 +255,17 @@ public class ThrottleFilter implements Filter {
             try {
                 InetAddress address = InetAddress.getByName(remoteIP);
                 if (address instanceof Inet4Address) {
-                    jsonObMap.put(APIConstants.IP, FilterUtils.ipToLong(remoteIP));
-                    jsonObMap.put(APIConstants.IPV6, 0);
+                    jsonObMap.put(ThrottleConstants.IP, FilterUtils.ipToLong(remoteIP));
+                    jsonObMap.put(ThrottleConstants.IPV6, 0);
                 } else if (address instanceof Inet6Address) {
-                    jsonObMap.put(APIConstants.IPV6, FilterUtils.ipToBigInteger(remoteIP));
-                    jsonObMap.put(APIConstants.IP, 0);
+                    jsonObMap.put(ThrottleConstants.IPV6, FilterUtils.ipToBigInteger(remoteIP));
+                    jsonObMap.put(ThrottleConstants.IP, 0);
                 }
             } catch (UnknownHostException e) {
                 //send empty value as ip
                 log.error("Error while parsing host IP {}", remoteIP, e);
-                jsonObMap.put(APIConstants.IPV6, 0);
-                jsonObMap.put(APIConstants.IP, 0);
+                jsonObMap.put(ThrottleConstants.IPV6, 0);
+                jsonObMap.put(ThrottleConstants.IP, 0);
             }
         }
         // TODO(amaliMatharaarachchi) Add advance throttling data to additional properties.

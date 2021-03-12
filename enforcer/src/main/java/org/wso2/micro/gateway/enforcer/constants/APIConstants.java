@@ -22,10 +22,6 @@ package org.wso2.micro.gateway.enforcer.constants;
  */
 public class APIConstants {
 
-    public static final String UNLIMITED_TIER = "Unlimited";
-    public static final String IP = "ip";
-    public static final String IPV6 = "ipv6";
-
     //open API extensions
     public static final String X_WSO2_BASE_PATH = "x-wso2-basepath";
 
@@ -67,9 +63,6 @@ public class APIConstants {
     public static final String CONTENT_TYPE_HEADER = "Content-type";
     public static final String APPLICATION_JSON = "application/json";
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
-
-    public static final String THROTTLE_KEY = "throttleKey";
-    public static final String THROTTLE_OUT_REASON = "THROTTLED_OUT_REASON";
 
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
@@ -203,19 +196,6 @@ public class APIConstants {
     }
 
     /**
-     * Topic Names.
-     */
-    public static class TopicNames {
-
-        //APIM default topic names
-        public static final String TOPIC_THROTTLE_DATA = "throttleData";
-        public static final String TOPIC_TOKEN_REVOCATION = "tokenRevocation";
-        public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
-        public static final String TOPIC_KEY_MANAGER = "keyManager";
-        public static final String TOPIC_NOTIFICATION = "notification";
-    }
-
-    /**
      * Holds the constants related to attributes to be sent in the response in case of an error
      * scenario raised within the enforcer.
      */
@@ -252,14 +232,4 @@ public class APIConstants {
         }
     }
 
-    /**
-     * Advanced Throttling related constants.
-     */
-    public static class AdvancedThrottleConstants {
-        public static final String IS_THROTTLED = "isThrottled";
-        public static final String THROTTLE_KEY = "throttleKey";
-        public static final String EXPIRY_TIMESTAMP = "expiryTimeStamp";
-        public static final String EVALUATED_CONDITIONS = "evaluatedConditions";
-        public static final String TRUE = "true";
-    }
 }

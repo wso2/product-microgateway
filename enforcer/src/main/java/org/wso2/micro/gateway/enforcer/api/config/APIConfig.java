@@ -17,7 +17,7 @@
  */
 package org.wso2.micro.gateway.enforcer.api.config;
 
-import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ public class APIConfig {
     private String basePath;
 
     private List<String> securitySchemas = new ArrayList<>();
-    private String tier = APIConstants.UNLIMITED_TIER;
+    private String tier = ThrottleConstants.UNLIMITED_TIER;
     private List<ResourceConfig> resources = new ArrayList<>();
 
     /**
@@ -44,7 +44,7 @@ public class APIConfig {
         private String basePath;
 
         private List<String> securitySchemas = new ArrayList<>();
-        private String tier = APIConstants.UNLIMITED_TIER;
+        private String tier = ThrottleConstants.UNLIMITED_TIER;
         private List<ResourceConfig> resources = new ArrayList<>();
 
         public Builder(String name) {
