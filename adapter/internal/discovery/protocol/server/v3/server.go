@@ -24,6 +24,7 @@ import (
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/api"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/config"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/keymgt"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/subscription"
 	"github.com/wso2/micro-gw/internal/discovery/protocol/resource/v3"
 	"github.com/wso2/micro-gw/internal/discovery/protocol/server/sotw/v3"
@@ -41,6 +42,8 @@ type Server interface {
 	subscription.ApplicationPolicyDiscoveryServiceServer
 	subscription.SubscriptionPolicyDiscoveryServiceServer
 	subscription.ApplicationKeyMappingDiscoveryServiceServer
+	keymgt.KMDiscoveryServiceServer
+	keymgt.RevokedTokenDiscoveryServiceServer
 
 	rest.Server
 	envoy_sotw.Server
@@ -65,6 +68,8 @@ type server struct {
 	subscription.UnimplementedApplicationPolicyDiscoveryServiceServer
 	subscription.UnimplementedSubscriptionPolicyDiscoveryServiceServer
 	subscription.UnimplementedApplicationKeyMappingDiscoveryServiceServer
+	keymgt.UnimplementedKMDiscoveryServiceServer
+	keymgt.UnimplementedRevokedTokenDiscoveryServiceServer
 	rest rest.Server
 	sotw envoy_sotw.Server
 }
@@ -105,6 +110,14 @@ func (s *server) StreamApplicationKeyMappings(stream subscription.ApplicationKey
 	return s.StreamHandler(stream, resource.ApplicationKeyMappingListType)
 }
 
+func (s *server) StreamKeyManagers(stream keymgt.KMDiscoveryService_StreamKeyManagersServer) error {
+	return s.StreamHandler(stream, resource.KeyManagerType)
+}
+
+func (s *server) StreamTokens(stream keymgt.RevokedTokenDiscoveryService_StreamTokensServer) error {
+	return s.StreamHandler(stream, resource.RevokedTokensType)
+}
+
 // Fetch is the universal fetch method.
 func (s *server) Fetch(ctx context.Context, req *discovery.DiscoveryRequest) (*discovery.DiscoveryResponse, error) {
 	return s.rest.Fetch(ctx, req)
@@ -123,5 +136,13 @@ func (s *server) FetchApis(ctx context.Context, req *discovery.DiscoveryRequest)
 		return nil, status.Error(codes.Unauthenticated, "empty request")
 	}
 	req.TypeUrl = resource.APIType
+	return s.Fetch(ctx, req)
+}
+
+func (s *server) FetchTokens(ctx context.Context, req *discovery.DiscoveryRequest) (*discovery.DiscoveryResponse, error) {
+	if req == nil {
+		return nil, status.Errorf(codes.Unavailable, "empty request")
+	}
+	req.TypeUrl = resource.RevokedTokensType
 	return s.Fetch(ctx, req)
 }

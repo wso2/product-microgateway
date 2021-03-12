@@ -29,6 +29,7 @@ private static final long serialVersionUID = 0L;
     sandboxUrls_ = java.util.Collections.emptyList();
     resources_ = java.util.Collections.emptyList();
     basePath_ = "";
+    apiLifeCycleStatus_ = "";
   }
 
   @java.lang.Override
@@ -136,6 +137,12 @@ private static final long serialVersionUID = 0L;
                 VendorExtensibleDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
             vendorExtensible_.getMutableMap().put(
                 vendorExtensible__.getKey(), vendorExtensible__.getValue());
+            break;
+          }
+          case 90: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            apiLifeCycleStatus_ = s;
             break;
           }
           default: {
@@ -620,6 +627,44 @@ private static final long serialVersionUID = 0L;
     return map.get(key);
   }
 
+  public static final int APILIFECYCLESTATUS_FIELD_NUMBER = 11;
+  private volatile java.lang.Object apiLifeCycleStatus_;
+  /**
+   * <code>string apiLifeCycleStatus = 11;</code>
+   * @return The apiLifeCycleStatus.
+   */
+  @java.lang.Override
+  public java.lang.String getApiLifeCycleStatus() {
+    java.lang.Object ref = apiLifeCycleStatus_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      apiLifeCycleStatus_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string apiLifeCycleStatus = 11;</code>
+   * @return The bytes for apiLifeCycleStatus.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getApiLifeCycleStatusBytes() {
+    java.lang.Object ref = apiLifeCycleStatus_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      apiLifeCycleStatus_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -667,6 +712,9 @@ private static final long serialVersionUID = 0L;
         internalGetVendorExtensible(),
         VendorExtensibleDefaultEntryHolder.defaultEntry,
         10);
+    if (!getApiLifeCycleStatusBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 11, apiLifeCycleStatus_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -716,6 +764,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(10, vendorExtensible__);
     }
+    if (!getApiLifeCycleStatusBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, apiLifeCycleStatus_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -751,6 +802,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getBasePath())) return false;
     if (!internalGetVendorExtensible().equals(
         other.internalGetVendorExtensible())) return false;
+    if (!getApiLifeCycleStatus()
+        .equals(other.getApiLifeCycleStatus())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -790,6 +843,8 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + VENDOREXTENSIBLE_FIELD_NUMBER;
       hash = (53 * hash) + internalGetVendorExtensible().hashCode();
     }
+    hash = (37 * hash) + APILIFECYCLESTATUS_FIELD_NUMBER;
+    hash = (53 * hash) + getApiLifeCycleStatus().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -983,6 +1038,8 @@ private static final long serialVersionUID = 0L;
       basePath_ = "";
 
       internalGetMutableVendorExtensible().clear();
+      apiLifeCycleStatus_ = "";
+
       return this;
     }
 
@@ -1045,6 +1102,7 @@ private static final long serialVersionUID = 0L;
       result.basePath_ = basePath_;
       result.vendorExtensible_ = internalGetVendorExtensible();
       result.vendorExtensible_.makeImmutable();
+      result.apiLifeCycleStatus_ = apiLifeCycleStatus_;
       onBuilt();
       return result;
     }
@@ -1197,6 +1255,10 @@ private static final long serialVersionUID = 0L;
       }
       internalGetMutableVendorExtensible().mergeFrom(
           other.internalGetVendorExtensible());
+      if (!other.getApiLifeCycleStatus().isEmpty()) {
+        apiLifeCycleStatus_ = other.apiLifeCycleStatus_;
+        onChanged();
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -2528,6 +2590,82 @@ private static final long serialVersionUID = 0L;
         java.util.Map<java.lang.String, com.google.protobuf.Any> values) {
       internalGetMutableVendorExtensible().getMutableMap()
           .putAll(values);
+      return this;
+    }
+
+    private java.lang.Object apiLifeCycleStatus_ = "";
+    /**
+     * <code>string apiLifeCycleStatus = 11;</code>
+     * @return The apiLifeCycleStatus.
+     */
+    public java.lang.String getApiLifeCycleStatus() {
+      java.lang.Object ref = apiLifeCycleStatus_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        apiLifeCycleStatus_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string apiLifeCycleStatus = 11;</code>
+     * @return The bytes for apiLifeCycleStatus.
+     */
+    public com.google.protobuf.ByteString
+        getApiLifeCycleStatusBytes() {
+      java.lang.Object ref = apiLifeCycleStatus_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        apiLifeCycleStatus_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string apiLifeCycleStatus = 11;</code>
+     * @param value The apiLifeCycleStatus to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApiLifeCycleStatus(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      apiLifeCycleStatus_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string apiLifeCycleStatus = 11;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearApiLifeCycleStatus() {
+      
+      apiLifeCycleStatus_ = getDefaultInstance().getApiLifeCycleStatus();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string apiLifeCycleStatus = 11;</code>
+     * @param value The bytes for apiLifeCycleStatus to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApiLifeCycleStatusBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      apiLifeCycleStatus_ = value;
+      onChanged();
       return this;
     }
     @java.lang.Override

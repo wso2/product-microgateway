@@ -138,4 +138,48 @@ public interface IssuerOrBuilder extends
    */
   com.google.protobuf.ByteString
       getCertificateFilePathBytes();
+
+  /**
+   * <pre>
+   * Claim mapping for the issuer
+   * </pre>
+   *
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
+   */
+  java.util.List<org.wso2.gateway.discovery.config.enforcer.ClaimMapping> 
+      getClaimMappingList();
+  /**
+   * <pre>
+   * Claim mapping for the issuer
+   * </pre>
+   *
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.ClaimMapping getClaimMapping(int index);
+  /**
+   * <pre>
+   * Claim mapping for the issuer
+   * </pre>
+   *
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
+   */
+  int getClaimMappingCount();
+  /**
+   * <pre>
+   * Claim mapping for the issuer
+   * </pre>
+   *
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
+   */
+  java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder> 
+      getClaimMappingOrBuilderList();
+  /**
+   * <pre>
+   * Claim mapping for the issuer
+   * </pre>
+   *
+   * <code>repeated .wso2.discovery.config.enforcer.ClaimMapping claimMapping = 8;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.ClaimMappingOrBuilder getClaimMappingOrBuilder(
+      int index);
 }

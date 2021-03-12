@@ -61,9 +61,10 @@ public class CorsTestCase extends BaseTestCase {
 
         //deploy the api
         //api yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("cors/mockApi.yaml");
+        String apiZipfile = ApiProjectGenerator.createApictlProjZip("cors/api.yaml", "cors/swagger.yaml");
         ApiDeployment.deployAPI(apiZipfile);
-        String apiZipfile2 = ApiProjectGenerator.createApictlProjZip("apis/openApis/mockApi.yaml");
+        String apiZipfile2 = ApiProjectGenerator.createApictlProjZip("apis/openApis/api.yaml",
+                "apis/openApis/swagger.yaml");
         ApiDeployment.deployAPI(apiZipfile2);
 
         //generate JWT token from APIM

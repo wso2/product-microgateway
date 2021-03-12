@@ -17,7 +17,7 @@
 
 export MGW_HOME=${PWD}/../resources
 go clean -testcache
-go test ./... 
+go test -race -coverprofile=./target/coverage.txt -covermode=atomic ./...
 if [ $? -ne 0 ]; then 
   echo "FAILED: Unit tests failure"
   exit 1

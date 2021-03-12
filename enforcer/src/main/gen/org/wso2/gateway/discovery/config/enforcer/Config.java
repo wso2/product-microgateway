@@ -167,6 +167,19 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
+          case 82: {
+            org.wso2.gateway.discovery.config.enforcer.JWTIssuer.Builder subBuilder = null;
+            if (jwtIssuer_ != null) {
+              subBuilder = jwtIssuer_.toBuilder();
+            }
+            jwtIssuer_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.JWTIssuer.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(jwtIssuer_);
+              jwtIssuer_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -450,6 +463,32 @@ private static final long serialVersionUID = 0L;
     return getCache();
   }
 
+  public static final int JWTISSUER_FIELD_NUMBER = 10;
+  private org.wso2.gateway.discovery.config.enforcer.JWTIssuer jwtIssuer_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * @return Whether the jwtIssuer field is set.
+   */
+  @java.lang.Override
+  public boolean hasJwtIssuer() {
+    return jwtIssuer_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * @return The jwtIssuer.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.JWTIssuer getJwtIssuer() {
+    return jwtIssuer_ == null ? org.wso2.gateway.discovery.config.enforcer.JWTIssuer.getDefaultInstance() : jwtIssuer_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.JWTIssuerOrBuilder getJwtIssuerOrBuilder() {
+    return getJwtIssuer();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -490,6 +529,9 @@ private static final long serialVersionUID = 0L;
     }
     if (cache_ != null) {
       output.writeMessage(9, getCache());
+    }
+    if (jwtIssuer_ != null) {
+      output.writeMessage(10, getJwtIssuer());
     }
     unknownFields.writeTo(output);
   }
@@ -535,6 +577,10 @@ private static final long serialVersionUID = 0L;
     if (cache_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(9, getCache());
+    }
+    if (jwtIssuer_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(10, getJwtIssuer());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -593,6 +639,11 @@ private static final long serialVersionUID = 0L;
       if (!getCache()
           .equals(other.getCache())) return false;
     }
+    if (hasJwtIssuer() != other.hasJwtIssuer()) return false;
+    if (hasJwtIssuer()) {
+      if (!getJwtIssuer()
+          .equals(other.getJwtIssuer())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -639,6 +690,10 @@ private static final long serialVersionUID = 0L;
     if (hasCache()) {
       hash = (37 * hash) + CACHE_FIELD_NUMBER;
       hash = (53 * hash) + getCache().hashCode();
+    }
+    if (hasJwtIssuer()) {
+      hash = (37 * hash) + JWTISSUER_FIELD_NUMBER;
+      hash = (53 * hash) + getJwtIssuer().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -832,6 +887,12 @@ private static final long serialVersionUID = 0L;
         cache_ = null;
         cacheBuilder_ = null;
       }
+      if (jwtIssuerBuilder_ == null) {
+        jwtIssuer_ = null;
+      } else {
+        jwtIssuer_ = null;
+        jwtIssuerBuilder_ = null;
+      }
       return this;
     }
 
@@ -907,6 +968,11 @@ private static final long serialVersionUID = 0L;
         result.cache_ = cache_;
       } else {
         result.cache_ = cacheBuilder_.build();
+      }
+      if (jwtIssuerBuilder_ == null) {
+        result.jwtIssuer_ = jwtIssuer_;
+      } else {
+        result.jwtIssuer_ = jwtIssuerBuilder_.build();
       }
       onBuilt();
       return result;
@@ -1005,6 +1071,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasCache()) {
         mergeCache(other.getCache());
+      }
+      if (other.hasJwtIssuer()) {
+        mergeJwtIssuer(other.getJwtIssuer());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -2226,6 +2295,125 @@ private static final long serialVersionUID = 0L;
         cache_ = null;
       }
       return cacheBuilder_;
+    }
+
+    private org.wso2.gateway.discovery.config.enforcer.JWTIssuer jwtIssuer_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.JWTIssuer, org.wso2.gateway.discovery.config.enforcer.JWTIssuer.Builder, org.wso2.gateway.discovery.config.enforcer.JWTIssuerOrBuilder> jwtIssuerBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     * @return Whether the jwtIssuer field is set.
+     */
+    public boolean hasJwtIssuer() {
+      return jwtIssuerBuilder_ != null || jwtIssuer_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     * @return The jwtIssuer.
+     */
+    public org.wso2.gateway.discovery.config.enforcer.JWTIssuer getJwtIssuer() {
+      if (jwtIssuerBuilder_ == null) {
+        return jwtIssuer_ == null ? org.wso2.gateway.discovery.config.enforcer.JWTIssuer.getDefaultInstance() : jwtIssuer_;
+      } else {
+        return jwtIssuerBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     */
+    public Builder setJwtIssuer(org.wso2.gateway.discovery.config.enforcer.JWTIssuer value) {
+      if (jwtIssuerBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        jwtIssuer_ = value;
+        onChanged();
+      } else {
+        jwtIssuerBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     */
+    public Builder setJwtIssuer(
+        org.wso2.gateway.discovery.config.enforcer.JWTIssuer.Builder builderForValue) {
+      if (jwtIssuerBuilder_ == null) {
+        jwtIssuer_ = builderForValue.build();
+        onChanged();
+      } else {
+        jwtIssuerBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     */
+    public Builder mergeJwtIssuer(org.wso2.gateway.discovery.config.enforcer.JWTIssuer value) {
+      if (jwtIssuerBuilder_ == null) {
+        if (jwtIssuer_ != null) {
+          jwtIssuer_ =
+            org.wso2.gateway.discovery.config.enforcer.JWTIssuer.newBuilder(jwtIssuer_).mergeFrom(value).buildPartial();
+        } else {
+          jwtIssuer_ = value;
+        }
+        onChanged();
+      } else {
+        jwtIssuerBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     */
+    public Builder clearJwtIssuer() {
+      if (jwtIssuerBuilder_ == null) {
+        jwtIssuer_ = null;
+        onChanged();
+      } else {
+        jwtIssuer_ = null;
+        jwtIssuerBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.JWTIssuer.Builder getJwtIssuerBuilder() {
+      
+      onChanged();
+      return getJwtIssuerFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.JWTIssuerOrBuilder getJwtIssuerOrBuilder() {
+      if (jwtIssuerBuilder_ != null) {
+        return jwtIssuerBuilder_.getMessageOrBuilder();
+      } else {
+        return jwtIssuer_ == null ?
+            org.wso2.gateway.discovery.config.enforcer.JWTIssuer.getDefaultInstance() : jwtIssuer_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.JWTIssuer, org.wso2.gateway.discovery.config.enforcer.JWTIssuer.Builder, org.wso2.gateway.discovery.config.enforcer.JWTIssuerOrBuilder> 
+        getJwtIssuerFieldBuilder() {
+      if (jwtIssuerBuilder_ == null) {
+        jwtIssuerBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.JWTIssuer, org.wso2.gateway.discovery.config.enforcer.JWTIssuer.Builder, org.wso2.gateway.discovery.config.enforcer.JWTIssuerOrBuilder>(
+                getJwtIssuer(),
+                getParentForChildren(),
+                isClean());
+        jwtIssuer_ = null;
+      }
+      return jwtIssuerBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

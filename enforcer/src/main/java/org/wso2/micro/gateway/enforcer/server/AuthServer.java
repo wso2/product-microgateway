@@ -34,6 +34,8 @@ import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.grpc.ExtAuthService;
 import org.wso2.micro.gateway.enforcer.grpc.interceptors.AccessLogInterceptor;
+import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerHolder;
+import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;
 import org.wso2.micro.gateway.enforcer.throttle.ThrottleAgent;
 import org.wso2.micro.gateway.enforcer.throttle.ThrottleEventListener;
@@ -59,7 +61,7 @@ public class AuthServer {
 
             // Create a new server to listen on port 8081
             Server server = initServer();
-            //Initialise cache objects
+            // Initialise cache objects
             CacheProvider.init();
 
             if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
@@ -71,19 +73,26 @@ public class AuthServer {
             server.start();
             logger.info("Sever started Listening in port : " + 8081);
 
+            // Create a new server to listen on port 8082
+            TokenServer tokenServer = new TokenServer();
+            tokenServer.initToken();
+            logger.info("Token endpoint started Listening in port : " + 8082);
+
             //TODO: Get the tenant domain from config
             SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().initializeStore();
+            KeyManagerHolder.getInstance().init();
+            RevokedJWTDataHolder.getInstance().init();
 
             // Don't exit the main thread. Wait until server is terminated.
             server.awaitTermination();
         } catch (IOException e) {
-            logger.error("Error while starting the enforcer gRPC server.", e);
+            logger.error("Error while starting the enforcer gRPC server or http server.", e);
             System.exit(1);
         } catch (InterruptedException e) {
             logger.error("Enforcer server main thread interrupted.", e);
             System.exit(1);
         } catch (Exception ex) {
-            // printing the stack trace in case logger might not have been initialized
+            // Printing the stack trace in case logger might not have been initialized
             ex.printStackTrace();
             System.exit(1);
         }

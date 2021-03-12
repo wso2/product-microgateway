@@ -30,6 +30,7 @@ public class APIConstants {
     public static final String GW_RES_METHOD_PARAM = "method";
     public static final String GW_VERSION_PARAM = "version";
     public static final String GW_API_NAME_PARAM = "name";
+    public static final String PROTOTYPED_LIFE_CYCLE_STATUS = "PROTOTYPED";
 
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "wso2carbon";
@@ -142,6 +143,101 @@ public class APIConstants {
         public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
         public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
 
+    }
+
+    /**
+     * Holds the common set of constants for validating the JWT tokens
+     */
+    public static class KeyManager {
+
+        public static final String SERVICE_URL = "ServiceURL";
+        public static final String INIT_DELAY = "InitDelay";
+        public static final String INTROSPECTION_ENDPOINT = "introspection_endpoint";
+        public static final String CLIENT_REGISTRATION_ENDPOINT = "client_registration_endpoint";
+        public static final String KEY_MANAGER_OPERATIONS_DCR_ENDPOINT = "/keymanager-operations/dcr/register";
+        public static final String KEY_MANAGER_OPERATIONS_USERINFO_ENDPOINT = "/keymanager-operations/user-info";
+        public static final String TOKEN_ENDPOINT = "token_endpoint";
+        public static final String REVOKE_ENDPOINT = "revoke_endpoint";
+        public static final String WELL_KNOWN_ENDPOINT = "well_known_endpoint";
+        public static final String SCOPE_MANAGEMENT_ENDPOINT = "scope_endpoint";
+        public static final String AVAILABLE_GRANT_TYPE = "grant_types";
+        public static final String ENABLE_TOKEN_GENERATION = "enable_token_generation";
+        public static final String ENABLE_TOKEN_HASH = "enable_token_hash";
+        public static final String ENABLE_TOKEN_ENCRYPTION = "enable_token_encryption";
+        public static final String ENABLE_OAUTH_APP_CREATION = "enable_oauth_app_creation";
+        public static final String DEFAULT_KEY_MANAGER = "Resident Key Manager";
+        public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
+        public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Resident Key Manager";
+
+        public static final String ISSUER = "issuer";
+        public static final String JWKS_ENDPOINT = "jwks_endpoint";
+        public static final String USERINFO_ENDPOINT = "userinfo_endpoint";
+        public static final String AUTHORIZE_ENDPOINT = "authorize_endpoint";
+        public static final String EVENT_HUB_CONFIGURATIONS = "EventHubConfigurations";
+        public static final String KEY_MANAGER = "KeyManager";
+        public static final String APPLICATION_CONFIGURATIONS = "ApplicationConfigurations";
+        public static final String EVENT_RECEIVER_CONFIGURATION = "EventReceiverConfiguration";
+
+        public static final String ENABLE = "Enable";
+        public static final String USERNAME = "Username";
+        public static final String PASSWORD = "Password";
+        public static final String SELF_VALIDATE_JWT = "self_validate_jwt";
+        public static final String CLAIM_MAPPING = "claim_mappings";
+        public static final String VALIDATION_TYPE = "validation_type";
+        public static final String VALIDATION_JWT = "jwt";
+        public static final String VALIDATION_REFERENCE = "reference";
+        public static final String VALIDATION_CUSTOM = "custom";
+        public static final String TOKEN_FORMAT_STRING = "token_format_string";
+        public static final String ENABLE_TOKEN_VALIDATION = "validation_enable";
+        public static final String VALIDATION_ENTRY_JWT_BODY = "body";
+        public static final String API_LEVEL_ALL_KEY_MANAGERS = "all";
+        public static final String REGISTERED_TENANT_DOMAIN = "tenantDomain";
+        public static final String ENABLE_MAP_OAUTH_CONSUMER_APPS = "enable_map_oauth_consumer_apps";
+        public static final String KEY_MANAGER_TYPE = "type";
+        public static final String UUID_REGEX = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F" +
+                "]{3}-[0-9a-fA-F]{12}";
+        public static final String CONSUMER_KEY_CLAIM = "consumer_key_claim";
+        public static final String SCOPES_CLAIM = "scopes_claim";
+        public static final String CERTIFICATE_TYPE = "certificate_type";
+        public static final String CERTIFICATE_VALUE = "certificate_value";
+        public static final String CERTIFICATE_TYPE_JWKS_ENDPOINT = "JWKS";
+        public static final String CERTIFICATE_TYPE_PEM_FILE = "PEM";
+        public static final String EVENT_PUBLISHER_CONFIGURATIONS = "EventPublisherConfiguration";
+        public static final String KEY_MANAGER_TYPE_HEADER = "X-WSO2-KEY-MANAGER";
+        public static final String ACCESS_TOKEN = "accessToken";
+        public static final String AUTH_CODE = "authCode";
+        public static final String CLAIM_DIALECT = "dialect";
+        public static final String DEFAULT_KEY_MANAGER_OPENID_CONNECT_DISCOVERY_ENDPOINT =
+                "/oauth2/token/.well-known/openid-configuration";
+        public static final String DEFAULT_JWKS_ENDPOINT = "/oauth2/jwks";
+        public static final String PRODUCTION_TOKEN_ENDPOINT = "production_token_endpoint";
+        public static final String SANDBOX_TOKEN_ENDPOINT = "sandbox_token_endpoint";
+        public static final String PRODUCTION_REVOKE_ENDPOINT = "production_revoke_endpoint";
+        public static final String SANDBOX_REVOKE_ENDPOINT = "sandbox_revoke_endpoint";
+        public static final String APPLICATION_ACCESS_TOKEN_EXPIRY_TIME = "application_access_token_expiry_time";
+        public static final String USER_ACCESS_TOKEN_EXPIRY_TIME = "user_access_token_expiry_time";
+        public static final String REFRESH_TOKEN_EXPIRY_TIME = "refresh_token_expiry_time";
+        public static final String ID_TOKEN_EXPIRY_TIME = "id_token_expiry_time";
+        public static final String NOT_APPLICABLE_VALUE = "N/A";
+
+        /**
+         * Holds the common set of constants for validating the JWT tokens
+         */
+        public static class KeyManagerEvent {
+
+            public static final String EVENT_TYPE = "event_type";
+            public static final String KEY_MANAGER_CONFIGURATION = "key_manager_configuration";
+            public static final String ACTION = "action";
+            public static final String NAME = "name";
+            public static final String ENABLED = "enabled";
+            public static final String VALUE = "value";
+            public static final String TENANT_DOMAIN = "tenantDomain";
+            public static final String ACTION_ADD = "add";
+            public static final String ACTION_UPDATE = "update";
+            public static final String ACTION_DELETE = "delete";
+            public static final String TYPE = "type";
+            public static final String KEY_MANAGER_STREAM_ID = "org.wso2.apimgt.keymgt.stream:1.0.0";
+        }
     }
 
     /**

@@ -35,6 +35,10 @@ public class Constants {
             "type.googleapis.com/wso2.discovery.subscription.SubscriptionPolicyList";
     public static final String APPLICATION_KEY_MAPPING_LIST_TYPE_URL =
             "type.googleapis.com/wso2.discovery.subscription.ApplicationKeyMappingList";
+    public static final String KEY_MANAGER_TYPE_URL =
+            "type.googleapis.com/wso2.discovery.keymgt.KeyManagerConfig";
+    public static final String REVOKED_TOKEN_TYPE_URL =
+            "type.googleapis.com/wso2.discovery.keymgt.RevokedToken";
     public static final int MAX_XDS_RETRIES = 3;
 
     // Config constants
@@ -48,6 +52,10 @@ public class Constants {
     public static final String FAILOVER = "failover";
     public static final String TM_BINARY_LOADBALANCE_SEPARATOR = ",";
     public static final String TM_BINARY_FAILOVER_SEPARATOR = "|";
-
     public static final String UNKNOWN_VALUE = "__unknown__";
+
+    public static final String OBJECT_THIS_NOTATION = "this$";
+    public static final String ENV_PREFIX = "$env{";
+    public static final String START_BRACKET = "{";
+    public static final String END_BRACKET = "}";
 }

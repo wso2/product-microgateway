@@ -47,11 +47,14 @@ type EventTokenRevocationNotification struct {
 type EventKeyManagerNotification struct {
 	Event struct {
 		PayloadData struct {
-			EventType string `json:"event_type"`
-			Action    string `json:"action"`
-			Type      string `json:"type"`
-			Enabled   bool   `json:"enabled"`
-			Value     string `json:"value"`
+			EventType    string `json:"event_type"`
+			Name         string `json:"name"`
+			Action       string `json:"action"`
+			Type         string `json:"type"`
+			Enabled      bool   `json:"enabled"`
+			Value        string `json:"value"`
+			TenantID     string `json:"tenantId,omitempty"`
+			TenantDomain string `json:"tenantDomain,omitempty"`
 		} `json:"payloadData"`
 	} `json:"event"`
 }

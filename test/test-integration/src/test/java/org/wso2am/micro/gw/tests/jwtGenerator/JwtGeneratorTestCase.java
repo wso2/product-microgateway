@@ -51,7 +51,8 @@ public class JwtGeneratorTestCase extends BaseTestCase {
 
         //deploy the api
         //api yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("/apis/openApis/mockApi.yaml");
+        String apiZipfile = ApiProjectGenerator.createApictlProjZip("/apis/openApis/api.yaml", 
+            "/apis/openApis/swagger.yaml");
 
         ApiDeployment.deployAPI(apiZipfile);
 
@@ -70,7 +71,6 @@ public class JwtGeneratorTestCase extends BaseTestCase {
         application.setId((int) (Math.random() * 1000));
 
         jwtTokenProd = getJWT(api, application, "Unlimited", TestConstant.KEY_TYPE_PRODUCTION, 3600,null);
-
     }
 
     @AfterClass(description = "stop the setup")
@@ -105,7 +105,6 @@ public class JwtGeneratorTestCase extends BaseTestCase {
         String strTokenBody = tokenFull.split("\\.")[1];
         String decodedTokenBody = new String(Base64.getUrlDecoder().decode(strTokenBody));
         JSONObject tokenBody = new JSONObject(decodedTokenBody);
-
         Assert.assertEquals(tokenBody.get("iss"), JWT_GENERATOR_ISSUER,
                 "Issuer is  not set correctly in JWT generator");
         Assert.assertEquals(tokenBody.get("keytype"), TestConstant.KEY_TYPE_PRODUCTION,

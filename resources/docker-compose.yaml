@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   router:
-    image: wso2/mg-router:4.0.0-m7-SNAPSHOT
+    image: wso2/mg-router:4.0.0-m8-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -28,7 +28,7 @@ services:
       - adapter
       - enforcer
   adapter:
-    image: wso2/mg-adapter:4.0.0-m7-SNAPSHOT
+    image: wso2/mg-adapter:4.0.0-m8-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -36,11 +36,14 @@ services:
     volumes:
       - ./resources/adapter/security:/home/wso2/security
       - ./resources/conf:/home/wso2/conf
+    environment:
+      - cp_admin_pwd=admin
+      - adapter_admin_pwd=admin
     ports:
       - "18000:18000"
       - "9843:9843"
   enforcer:
-    image: wso2/mg-enforcer:4.0.0-m7-SNAPSHOT
+    image: wso2/mg-enforcer:4.0.0-m8-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -61,6 +64,7 @@ services:
       - ENFORCER_LABEL=Production and Sandbox
       - XDS_MAX_MSG_SIZE=4194304
       - JAVA_OPTS=${JAVA_OPTS}
-
+      - apim_admin_pwd=admin
+      - enforcer_admin_pwd=admin
     ports:
       - "8081:8081"

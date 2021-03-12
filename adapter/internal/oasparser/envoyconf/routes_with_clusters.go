@@ -524,6 +524,88 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	return &router
 }
 
+// CreateTokenRoute generates a route for the jwt /testkey endpoint
+func CreateTokenRoute() *routev3.Route {
+	var (
+		router routev3.Route
+		action       *routev3.Route_Route
+		match        *routev3.RouteMatch
+		decorator    *routev3.Decorator
+	)
+
+	match = &routev3.RouteMatch{
+		PathSpecifier: &routev3.RouteMatch_SafeRegex{
+			SafeRegex: &envoy_type_matcherv3.RegexMatcher{
+				EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
+					GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
+						MaxProgramSize: nil,
+					},
+				},
+				Regex: "/testkey",
+			},
+		},
+	}
+
+	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
+		AutoHostRewrite: &wrapperspb.BoolValue{
+			Value: true,
+		},
+	}
+
+	decorator = &routev3.Decorator{
+		Operation: "/testkey",
+	}
+
+	perFilterConfig := extAuthService.ExtAuthzPerRoute{
+		Override: &extAuthService.ExtAuthzPerRoute_Disabled{
+			Disabled: true,
+		},
+	}
+
+	b := proto.NewBuffer(nil)
+	b.SetDeterministic(true)
+	_ = b.Marshal(&perFilterConfig)
+	filter := &any.Any{
+		TypeUrl: extAuthzPerRouteName,
+		Value:   b.Bytes(),
+	}
+
+	action = &routev3.Route_Route{
+		Route: &routev3.RouteAction{
+			HostRewriteSpecifier: hostRewriteSpecifier,
+			// TODO: (VirajSalaka) Provide prefix rewrite since it is simple
+			RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
+				Pattern: &envoy_type_matcherv3.RegexMatcher{
+					EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
+						GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
+							MaxProgramSize: nil,
+						},
+					},
+				Regex: "/testkey",
+				},
+				Substitution: "/",
+			},
+		},
+	}
+
+	directClusterSpecifier := &routev3.RouteAction_Cluster{
+		Cluster: "token_cluster",
+	}
+	action.Route.ClusterSpecifier = directClusterSpecifier
+
+	router = routev3.Route{
+		Name:      "/testkey", //Categorize routes with same base path
+		Match:     match,
+		Action:    action,
+		Metadata:  nil,
+		Decorator: decorator,
+		TypedPerFilterConfig: map[string]*any.Any{
+			wellknown.HTTPExternalAuthorization: filter,
+		},
+	}
+	return &router
+}
+
 // generateRoutePaths generates route paths for the api resources.
 func generateRoutePaths(xWso2Basepath, basePath, resourcePath string) string {
 	prefix := ""

@@ -23,12 +23,14 @@ import (
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
+	"github.com/wso2/micro-gw/internal/api/restserver"
+	"github.com/wso2/micro-gw/internal/auth"
 	apiservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/api"
 	configservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/config"
+	keymanagerservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/keymgt"
 	subscriptionservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/subscription"
-	"github.com/wso2/micro-gw/internal/api/restserver"
-	"github.com/wso2/micro-gw/internal/tlsutils"
 	wso2_server "github.com/wso2/micro-gw/internal/discovery/protocol/server/v3"
+	"github.com/wso2/micro-gw/internal/tlsutils"
 
 	"context"
 	"flag"
@@ -40,11 +42,11 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/micro-gw/internal/discovery/xds"
+	cb "github.com/wso2/micro-gw/internal/discovery/xds"
 	"github.com/wso2/micro-gw/internal/eventhub"
 	"github.com/wso2/micro-gw/internal/messaging"
-	cb "github.com/wso2/micro-gw/internal/discovery/xds"
-	"github.com/wso2/micro-gw/pkg/synchronizer"
-	"github.com/wso2/micro-gw/internal/discovery/xds"
+	"github.com/wso2/micro-gw/internal/synchronizer"
 	logger "github.com/wso2/micro-gw/loggers"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -65,6 +67,8 @@ var (
 
 const (
 	ads = "ads"
+	// DefaultGatewayLabelValue represents the default value for an environment
+	DefaultGatewayLabelValue string = "Production and Sandbox"
 )
 
 func init() {
@@ -80,7 +84,8 @@ const grpcMaxConcurrentStreams = 1000000
 
 func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server, enforcerSdsServer wso2_server.Server,
 	enforcerAppDsSrv wso2_server.Server, enforcerAPIDsSrv wso2_server.Server, enforcerAppPolicyDsSrv wso2_server.Server,
-	enforcerSubPolicyDsSrv wso2_server.Server, enforcerAppKeyMappingDsSrv wso2_server.Server, port uint) {
+	enforcerSubPolicyDsSrv wso2_server.Server, enforcerAppKeyMappingDsSrv wso2_server.Server,
+	enforcerKeyManagerDsSrv wso2_server.Server, enforcerRevokedTokenDsSrv wso2_server.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
 
@@ -117,11 +122,19 @@ func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server,
 	subscriptionservice.RegisterApplicationPolicyDiscoveryServiceServer(grpcServer, enforcerAppPolicyDsSrv)
 	subscriptionservice.RegisterSubscriptionPolicyDiscoveryServiceServer(grpcServer, enforcerSubPolicyDsSrv)
 	subscriptionservice.RegisterApplicationKeyMappingDiscoveryServiceServer(grpcServer, enforcerAppKeyMappingDsSrv)
+	keymanagerservice.RegisterKMDiscoveryServiceServer(grpcServer, enforcerKeyManagerDsSrv)
+	keymanagerservice.RegisterRevokedTokenDiscoveryServiceServer(grpcServer, enforcerRevokedTokenDsSrv)
 
 	logger.LoggerMgw.Info("port: ", port, " management server listening")
 	go func() {
 		if err = grpcServer.Serve(lis); err != nil {
 			logger.LoggerMgw.Error(err)
+		}
+	}()
+
+	go func() {
+		if err = auth.Init(); err != nil {
+			logger.LoggerMgw.Error("Error while initializing autherization component.", err)
 		}
 	}()
 }
@@ -154,6 +167,8 @@ func Run(conf *config.Config) {
 	enforcerApplicationPolicyCache := xds.GetEnforcerApplicationPolicyCache()
 	enforcerSubscriptionPolicyCache := xds.GetEnforcerSubscriptionPolicyCache()
 	enforcerApplicationKeyMappingCache := xds.GetEnforcerApplicationKeyMappingCache()
+	enforcerKeyManagerCache := xds.GetEnforcerKeyManagerCache()
+	enforcerRevokedTokenCache := xds.GetEnforcerRevokedTokenCache()
 
 	srv := xdsv3.NewServer(ctx, cache, nil)
 	enforcerXdsSrv := wso2_server.NewServer(ctx, enforcerCache, &cb.Callbacks{})
@@ -163,12 +178,30 @@ func Run(conf *config.Config) {
 	enforcerAppPolicyDsSrv := wso2_server.NewServer(ctx, enforcerApplicationPolicyCache, &cb.Callbacks{})
 	enforcerSubPolicyDsSrv := wso2_server.NewServer(ctx, enforcerSubscriptionPolicyCache, &cb.Callbacks{})
 	enforcerAppKeyMappingDsSrv := wso2_server.NewServer(ctx, enforcerApplicationKeyMappingCache, &cb.Callbacks{})
+	enforcerKeyManagerDsSrv := wso2_server.NewServer(ctx, enforcerKeyManagerCache, &cb.Callbacks{})
+	enforcerRevokedTokenDsSrv := wso2_server.NewServer(ctx, enforcerRevokedTokenCache, &cb.Callbacks{})
 
 	runManagementServer(srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
-		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, port)
+		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, enforcerKeyManagerDsSrv, enforcerRevokedTokenDsSrv, port)
 
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
+
+	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
+	if enableJwtIssuer {
+		// Take the configured labels
+		envs := conf.ControlPlane.EventHub.EnvironmentLabels
+
+		// If no environments are configured, default gateway label value is assigned.
+		if len(envs) == 0 {
+			envs = append(envs, DefaultGatewayLabelValue)
+		}
+		for _, env := range envs {
+			listeners, clusters, routes, endpoints, apis := xds.GenerateEnvoyResoucesForLabel(env)
+			xds.UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners)
+			xds.UpdateEnforcerApis(env, apis)
+		}
+	}
 
 	go restserver.StartRestServer(conf)
 
@@ -181,6 +214,10 @@ func Run(conf *config.Config) {
 
 		// Fetch APIs from control plane
 		fetchAPIsOnStartUp(conf)
+
+		synchronizer.UpdateRevokedTokens()
+		// Fetch Key Managers from APIM
+		synchronizer.FetchKeyManagersOnStartUp(conf)
 	}
 OUTER:
 	for {

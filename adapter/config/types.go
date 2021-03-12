@@ -64,7 +64,7 @@ func NewReceiver() chan string {
 type Config struct {
 	//Adapter related Configurations
 	Adapter struct {
-		// Server represents the configuration related to rest API (to which the apictl requests)
+		// Server represents the configuration related to REST API (to which the apictl requests)
 		Server struct {
 			// Host name of the server
 			Host string
@@ -72,6 +72,10 @@ type Config struct {
 			Port string
 			// APICTL Users
 			Users []APICtlUser `toml:"users"`
+			// Access token validity duration. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". eg: "2h45m"
+			TokenTTL string
+			// Private key to sign the token
+			TokenPrivateKeyPath string
 		}
 
 		//Consul represents the configuration required to connect to consul service discovery
@@ -127,6 +131,7 @@ type Config struct {
 		JwtGenerator    jwtGenerator
 		Cache           cache
 		Throttling      throttlingConfig
+		JwtIssuer       jwtIssuer
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
@@ -169,6 +174,7 @@ type jwtTokenConfig struct {
 	ValidateSubscription bool
 	ConsumerKeyClaim     string
 	CertificateFilePath  string
+	ClaimMapping         []claimMapping
 }
 
 type eventHub struct {
@@ -245,10 +251,33 @@ type jwtGenerator struct {
 	PrivateKeyPath        string `toml:"privateKeyPath"`
 }
 
+type claimMapping struct {
+	RemoteClaim string
+	LocalClaim  string
+}
+
 type cache struct {
 	Enabled     bool  `toml:"enabled"`
 	MaximumSize int32 `toml:"maximumSize"`
 	ExpiryTime  int32 `toml:"expiryTime"`
+}
+
+type jwtIssuer struct {
+	Enabled               bool      `toml:"enabled"`
+	Issuer                string    `toml:"issuer"`
+	Encoding              string    `toml:"encoding"`
+	ClaimDialect          string    `toml:"claimDialect"`
+	SigningAlgorithm      string    `toml:"signingAlgorithm"`
+	PublicCertificatePath string    `toml:"publicCertificatePath"`
+	PrivateKeyPath        string    `toml:"privateKeyPath"`
+	ValidityPeriod        int32     `toml:"validityPeriod"`
+	JwtUsers              []JwtUser `toml:"jwtUser"`
+}
+
+// JwtUser represents allowed users to generate JWT tokens
+type JwtUser struct {
+	Username string `toml:"username"`
+	Password string `toml:"password"`
 }
 
 // APICtlUser represents registered APICtl Users
@@ -272,4 +301,18 @@ type controlPlane struct {
 			EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
 		} `toml:"jmsConnectionParameters"`
 	} `toml:"eventHub"`
+}
+
+// APIContent contains everything necessary to create an API
+type APIContent struct {
+	VHost              string
+	Name               string
+	Version            string
+	APIType            string
+	LifeCycleStatus    string
+	APIDefinition      []byte
+	UpstreamCerts      []byte
+	Environments       []string
+	ProductionEndpoint string
+	SandboxEndpoint    string
 }

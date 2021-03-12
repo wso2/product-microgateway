@@ -150,4 +150,19 @@ public interface ConfigOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder getCacheOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * @return Whether the jwtIssuer field is set.
+   */
+  boolean hasJwtIssuer();
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * @return The jwtIssuer.
+   */
+  org.wso2.gateway.discovery.config.enforcer.JWTIssuer getJwtIssuer();
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.JWTIssuerOrBuilder getJwtIssuerOrBuilder();
 }
