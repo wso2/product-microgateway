@@ -157,10 +157,48 @@ public class ThrottleFilter implements Filter {
         return isThrottled;
     }
 
+    private boolean isAPILevelThrottled(String throttleKey, String tier) {
+        log.debug("Checking if request is throttled at API level for tier: {}", tier);
+
+        if (ThrottleConstants.UNLIMITED_TIER.equals(tier)) {
+            return false;
+        }
+
+        if (isGlobalThrottlingEnabled) {
+            // TODO: (Praminda) Check conditional throttling decisions
+            boolean isThrottled;
+            throttleKey += "_default";
+
+            isThrottled = dataHolder.isThrottled(throttleKey);
+            log.debug("API Level throttle decision: {}", isThrottled);
+            return isThrottled;
+        }
+        return false;
+    }
+
+    private boolean isResourceLevelThrottled(String throttleKey, String tier) {
+        log.debug("Checking if request is throttled at resource level for tier: " + tier);
+
+        if (ThrottleConstants.UNLIMITED_TIER.equals(tier)) {
+            return false;
+        }
+
+        if (isGlobalThrottlingEnabled) {
+            boolean isThrottled;
+            throttleKey += "_default";
+
+            isThrottled = dataHolder.isThrottled(throttleKey);
+            log.debug("Resource Level throttle decision: {}", isThrottled);
+            return isThrottled;
+        }
+        return false;
+    }
+
     //TODO (amaliMatharaarachchi) Add default values to keys.
     // Handle fault invocations.
     // Test all flows.
     // Add unit tests.
+
     /**
      * This will generate the throttling event map to be publish to the traffic manager.
      *
