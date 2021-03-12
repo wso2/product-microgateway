@@ -23,7 +23,14 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2am.micro.gw.tests.util.*;
+import org.wso2am.micro.gw.tests.util.ApiDeployment;
+import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
+import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
+import org.wso2am.micro.gw.tests.util.HttpResponse;
+import org.wso2am.micro.gw.tests.util.TestConstant;
+import org.wso2am.micro.gw.tests.util.TestGroup;
+import org.wso2am.micro.gw.tests.util.TokenUtil;
+import org.wso2am.micro.gw.tests.util.URLs;
 import org.wso2am.micro.gw.mockbackend.ResponseConstants;
 
 import java.util.HashMap;
@@ -59,7 +66,7 @@ public class ProductionSandboxTestCase {
         Map<String, String> prodHeaders = new HashMap<String, String>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         HttpResponse prodResponse = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
-                "/v2/pet/findByStatus") , prodHeaders);
+                "/v2/general/pet/findByStatus") , prodHeaders);
 
         Assert.assertNotNull(prodResponse);
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
@@ -69,7 +76,7 @@ public class ProductionSandboxTestCase {
         Map<String, String> sandHeaders = new HashMap<String, String>();
         sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
         HttpResponse sandResponse = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
-                "/v2/pet/findByStatus"), sandHeaders);
+                "/v2/general/pet/findByStatus"), sandHeaders);
 
         Assert.assertNotNull(sandResponse);
         Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");

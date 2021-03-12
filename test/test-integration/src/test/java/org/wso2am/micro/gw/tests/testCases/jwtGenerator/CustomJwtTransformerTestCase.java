@@ -23,7 +23,12 @@ import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2am.micro.gw.tests.util.*;
+import org.wso2am.micro.gw.tests.util.TestConstant;
+import org.wso2am.micro.gw.tests.util.TestGroup;
+import org.wso2am.micro.gw.tests.util.TokenUtil;
+import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
+import org.wso2am.micro.gw.tests.util.HttpResponse;
+import org.wso2am.micro.gw.tests.util.URLs;
 
 import java.util.Base64;
 import java.util.HashMap;

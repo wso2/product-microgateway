@@ -30,7 +30,12 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2am.micro.gw.tests.util.*;
+import org.wso2am.micro.gw.tests.util.ApiDeployment;
+import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
+import org.wso2am.micro.gw.tests.util.TestConstant;
+import org.wso2am.micro.gw.tests.util.TestGroup;
+import org.wso2am.micro.gw.tests.util.TokenUtil;
+import org.wso2am.micro.gw.tests.util.URLs;
 
 import java.io.IOException;
 

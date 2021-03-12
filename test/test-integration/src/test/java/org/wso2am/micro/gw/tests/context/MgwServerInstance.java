@@ -25,7 +25,10 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.wso2am.micro.gw.tests.mockbackend.MockBackendServer;
-import org.wso2am.micro.gw.tests.util.*;
+import org.wso2am.micro.gw.tests.util.Utils;
+import org.wso2am.micro.gw.tests.util.HttpClientRequest;
+import org.wso2am.micro.gw.tests.util.HttpResponse;
+import org.wso2am.micro.gw.tests.util.URLs;
 
 import java.io.File;
 import java.io.IOException;
