@@ -32,6 +32,7 @@
     <test name="micro-gw-with-no-apis" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithNoAPIs"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.endpoints.ProductionSandboxTestCase"/>
         </classes>
     </test>

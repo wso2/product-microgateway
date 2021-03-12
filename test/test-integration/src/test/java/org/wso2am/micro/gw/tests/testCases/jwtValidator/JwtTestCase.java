@@ -21,8 +21,14 @@ package org.wso2am.micro.gw.tests.testCases.jwtValidator;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
-import org.testng.annotations.*;
-import org.wso2am.micro.gw.tests.util.*;
+import org.testng.annotations.Test;
+import org.testng.annotations.BeforeClass;
+import org.wso2am.micro.gw.tests.util.HttpResponse;
+import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
+import org.wso2am.micro.gw.tests.util.TestConstant;
+import org.wso2am.micro.gw.tests.util.TestGroup;
+import org.wso2am.micro.gw.tests.util.TokenUtil;
+import org.wso2am.micro.gw.tests.util.URLs;
 import java.util.HashMap;
 import java.util.Map;
 
