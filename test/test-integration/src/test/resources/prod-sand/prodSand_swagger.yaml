@@ -11,6 +11,7 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 host: 'mockBackend:2383'
 basePath: /v2
+x-wso2-basePath: /v2/general
 tags:
   - name: pet
     description: Everything about your Pets
