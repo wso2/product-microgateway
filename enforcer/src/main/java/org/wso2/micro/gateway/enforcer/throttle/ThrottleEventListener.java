@@ -22,7 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
-import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 
 import java.util.Date;
 import java.util.Enumeration;
