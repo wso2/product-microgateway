@@ -26,6 +26,7 @@ public class AnalyticsDTO {
     private boolean isEnabled;
     private String authURL;
     private String authToken;
+    private AnalyticsReceiverConfigDTO serverConfig;
 
     public boolean isEnabled() {
         return isEnabled;
@@ -49,5 +50,13 @@ public class AnalyticsDTO {
 
     public void setAuthToken(String authToken) {
         this.authToken = authToken;
+    }
+
+    public AnalyticsReceiverConfigDTO getServerConfig() {
+        return serverConfig;
+    }
+
+    public void setServerConfig(AnalyticsReceiverConfigDTO serverConfig) {
+        this.serverConfig = serverConfig;
     }
 }

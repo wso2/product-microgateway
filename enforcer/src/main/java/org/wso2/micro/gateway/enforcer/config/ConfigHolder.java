@@ -24,18 +24,20 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.gateway.discovery.config.enforcer.AmCredentials;
 import org.wso2.gateway.discovery.config.enforcer.Analytics;
-import org.wso2.gateway.discovery.config.enforcer.AuthService;
 import org.wso2.gateway.discovery.config.enforcer.Cache;
 import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.config.enforcer.EventHub;
 import org.wso2.gateway.discovery.config.enforcer.Issuer;
 import org.wso2.gateway.discovery.config.enforcer.JWTGenerator;
+import org.wso2.gateway.discovery.config.enforcer.Service;
 import org.wso2.micro.gateway.enforcer.config.dto.AnalyticsDTO;
+import org.wso2.micro.gateway.enforcer.config.dto.AnalyticsReceiverConfigDTO;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.JWKSConfigurationDTO;
+import org.wso2.micro.gateway.enforcer.config.dto.ThreadPoolConfig;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
@@ -123,14 +125,14 @@ public class ConfigHolder {
         populateAnalyticsConfig(config.getAnalytics());
     }
 
-    private void populateAuthService(AuthService cdsAuth) {
+    private void populateAuthService(Service cdsAuth) {
         AuthServiceConfigurationDto authDto = new AuthServiceConfigurationDto();
         authDto.setKeepAliveTime(cdsAuth.getKeepAliveTime());
         authDto.setPort(cdsAuth.getPort());
         authDto.setMaxHeaderLimit(cdsAuth.getMaxHeaderLimit());
         authDto.setMaxMessageSize(cdsAuth.getMaxMessageSize());
 
-        AuthServiceConfigurationDto.ThreadPoolConfig threadPool = authDto.new ThreadPoolConfig();
+        ThreadPoolConfig threadPool = new ThreadPoolConfig();
         threadPool.setCoreSize(cdsAuth.getThreadPool().getCoreSize());
         threadPool.setKeepAliveTime(cdsAuth.getThreadPool().getKeepAliveTime());
         threadPool.setMaxSize(cdsAuth.getThreadPool().getMaxSize());
@@ -228,10 +230,25 @@ public class ConfigHolder {
     }
 
     private void populateAnalyticsConfig(Analytics analyticsConfig) {
+
+        AnalyticsReceiverConfigDTO serverConfig = new AnalyticsReceiverConfigDTO();
+        serverConfig.setKeepAliveTime(analyticsConfig.getService().getKeepAliveTime());
+        serverConfig.setMaxHeaderLimit(analyticsConfig.getService().getMaxHeaderLimit());
+        serverConfig.setMaxMessageSize(analyticsConfig.getService().getMaxMessageSize());
+        serverConfig.setPort(analyticsConfig.getService().getPort());
+
+        ThreadPoolConfig threadPoolConfig = new ThreadPoolConfig();
+        threadPoolConfig.setCoreSize(analyticsConfig.getService().getThreadPool().getCoreSize());
+        threadPoolConfig.setMaxSize(analyticsConfig.getService().getThreadPool().getMaxSize());
+        threadPoolConfig.setKeepAliveTime(analyticsConfig.getService().getThreadPool().getKeepAliveTime());
+        threadPoolConfig.setQueueSize(analyticsConfig.getService().getThreadPool().getQueueSize());
+        serverConfig.setThreadPoolConfig(threadPoolConfig);
+
         AnalyticsDTO analyticsDTO = new AnalyticsDTO();
         analyticsDTO.setEnabled(analyticsConfig.getEnabled());
         analyticsDTO.setAuthURL(analyticsConfig.getAuthUrl());
         analyticsDTO.setAuthToken(analyticsConfig.getAuthToken());
+        analyticsDTO.setServerConfig(serverConfig);
         config.setAnalyticsConfig(analyticsDTO);
     }
 

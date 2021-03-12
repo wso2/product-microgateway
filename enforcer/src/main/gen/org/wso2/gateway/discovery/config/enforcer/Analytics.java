@@ -67,6 +67,19 @@ private static final long serialVersionUID = 0L;
             authToken_ = s;
             break;
           }
+          case 34: {
+            org.wso2.gateway.discovery.config.enforcer.Service.Builder subBuilder = null;
+            if (service_ != null) {
+              subBuilder = service_.toBuilder();
+            }
+            service_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.Service.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(service_);
+              service_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -202,6 +215,44 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int SERVICE_FIELD_NUMBER = 4;
+  private org.wso2.gateway.discovery.config.enforcer.Service service_;
+  /**
+   * <pre>
+   * Receiver grpc Service Configuration
+   * </pre>
+   *
+   * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+   * @return Whether the service field is set.
+   */
+  @java.lang.Override
+  public boolean hasService() {
+    return service_ != null;
+  }
+  /**
+   * <pre>
+   * Receiver grpc Service Configuration
+   * </pre>
+   *
+   * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+   * @return The service.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.Service getService() {
+    return service_ == null ? org.wso2.gateway.discovery.config.enforcer.Service.getDefaultInstance() : service_;
+  }
+  /**
+   * <pre>
+   * Receiver grpc Service Configuration
+   * </pre>
+   *
+   * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder getServiceOrBuilder() {
+    return getService();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -225,6 +276,9 @@ private static final long serialVersionUID = 0L;
     if (!getAuthTokenBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, authToken_);
     }
+    if (service_ != null) {
+      output.writeMessage(4, getService());
+    }
     unknownFields.writeTo(output);
   }
 
@@ -243,6 +297,10 @@ private static final long serialVersionUID = 0L;
     }
     if (!getAuthTokenBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, authToken_);
+    }
+    if (service_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(4, getService());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -265,6 +323,11 @@ private static final long serialVersionUID = 0L;
         .equals(other.getAuthUrl())) return false;
     if (!getAuthToken()
         .equals(other.getAuthToken())) return false;
+    if (hasService() != other.hasService()) return false;
+    if (hasService()) {
+      if (!getService()
+          .equals(other.getService())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -283,6 +346,10 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getAuthUrl().hashCode();
     hash = (37 * hash) + AUTHTOKEN_FIELD_NUMBER;
     hash = (53 * hash) + getAuthToken().hashCode();
+    if (hasService()) {
+      hash = (37 * hash) + SERVICE_FIELD_NUMBER;
+      hash = (53 * hash) + getService().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -422,6 +489,12 @@ private static final long serialVersionUID = 0L;
 
       authToken_ = "";
 
+      if (serviceBuilder_ == null) {
+        service_ = null;
+      } else {
+        service_ = null;
+        serviceBuilder_ = null;
+      }
       return this;
     }
 
@@ -451,6 +524,11 @@ private static final long serialVersionUID = 0L;
       result.enabled_ = enabled_;
       result.authUrl_ = authUrl_;
       result.authToken_ = authToken_;
+      if (serviceBuilder_ == null) {
+        result.service_ = service_;
+      } else {
+        result.service_ = serviceBuilder_.build();
+      }
       onBuilt();
       return result;
     }
@@ -509,6 +587,9 @@ private static final long serialVersionUID = 0L;
       if (!other.getAuthToken().isEmpty()) {
         authToken_ = other.authToken_;
         onChanged();
+      }
+      if (other.hasService()) {
+        mergeService(other.getService());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -760,6 +841,161 @@ private static final long serialVersionUID = 0L;
       authToken_ = value;
       onChanged();
       return this;
+    }
+
+    private org.wso2.gateway.discovery.config.enforcer.Service service_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.Service, org.wso2.gateway.discovery.config.enforcer.Service.Builder, org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder> serviceBuilder_;
+    /**
+     * <pre>
+     * Receiver grpc Service Configuration
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     * @return Whether the service field is set.
+     */
+    public boolean hasService() {
+      return serviceBuilder_ != null || service_ != null;
+    }
+    /**
+     * <pre>
+     * Receiver grpc Service Configuration
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     * @return The service.
+     */
+    public org.wso2.gateway.discovery.config.enforcer.Service getService() {
+      if (serviceBuilder_ == null) {
+        return service_ == null ? org.wso2.gateway.discovery.config.enforcer.Service.getDefaultInstance() : service_;
+      } else {
+        return serviceBuilder_.getMessage();
+      }
+    }
+    /**
+     * <pre>
+     * Receiver grpc Service Configuration
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     */
+    public Builder setService(org.wso2.gateway.discovery.config.enforcer.Service value) {
+      if (serviceBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        service_ = value;
+        onChanged();
+      } else {
+        serviceBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <pre>
+     * Receiver grpc Service Configuration
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     */
+    public Builder setService(
+        org.wso2.gateway.discovery.config.enforcer.Service.Builder builderForValue) {
+      if (serviceBuilder_ == null) {
+        service_ = builderForValue.build();
+        onChanged();
+      } else {
+        serviceBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <pre>
+     * Receiver grpc Service Configuration
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     */
+    public Builder mergeService(org.wso2.gateway.discovery.config.enforcer.Service value) {
+      if (serviceBuilder_ == null) {
+        if (service_ != null) {
+          service_ =
+            org.wso2.gateway.discovery.config.enforcer.Service.newBuilder(service_).mergeFrom(value).buildPartial();
+        } else {
+          service_ = value;
+        }
+        onChanged();
+      } else {
+        serviceBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <pre>
+     * Receiver grpc Service Configuration
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     */
+    public Builder clearService() {
+      if (serviceBuilder_ == null) {
+        service_ = null;
+        onChanged();
+      } else {
+        service_ = null;
+        serviceBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <pre>
+     * Receiver grpc Service Configuration
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.Service.Builder getServiceBuilder() {
+      
+      onChanged();
+      return getServiceFieldBuilder().getBuilder();
+    }
+    /**
+     * <pre>
+     * Receiver grpc Service Configuration
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder getServiceOrBuilder() {
+      if (serviceBuilder_ != null) {
+        return serviceBuilder_.getMessageOrBuilder();
+      } else {
+        return service_ == null ?
+            org.wso2.gateway.discovery.config.enforcer.Service.getDefaultInstance() : service_;
+      }
+    }
+    /**
+     * <pre>
+     * Receiver grpc Service Configuration
+     * </pre>
+     *
+     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.Service, org.wso2.gateway.discovery.config.enforcer.Service.Builder, org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder> 
+        getServiceFieldBuilder() {
+      if (serviceBuilder_ == null) {
+        serviceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.Service, org.wso2.gateway.discovery.config.enforcer.Service.Builder, org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder>(
+                getService(),
+                getParentForChildren(),
+                isClean());
+        service_ = null;
+      }
+      return serviceBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

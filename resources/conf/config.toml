@@ -97,10 +97,20 @@ disableSslVerification = false
     publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
     privateKeyPath = "/home/wso2/security/keystore/mg.key"
 
-[enforcer.analytics]
-    enabled = false
-    authURL = "https://analytics-event-auth.st.choreo.dev/auth/v1"
-    authToken = "eyJ4NXQiOiJOVGd5TTJabE9XVTJOV00zWlRVeFpESTRNamsyTWpoa1pEVTFOak15TjJZMlpHRTBPV1ExTVRFek9HVmtabVl4WlRVMU9Ea3dOekV6TnpjNU9EVXpaZyIsImtpZCI6Ik5UZ3lNMlpsT1dVMk5XTTNaVFV4WkRJNE1qazJNamhrWkRVMU5qTXlOMlkyWkdFME9XUTFNVEV6T0dWa1ptWXhaVFUxT0Rrd056RXpOemM1T0RVelpnX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJ3c28yX2Rldl9hZG1pbiIsImF1dCI6IkFQUExJQ0FUSU9OX1VTRVIiLCJpc3MiOiJodHRwczpcL1wvaWQucHJlcHJvZC5jaG9yZW8uZGV2OjQ0M1wvb2F1dGgyXC90b2tlbiIsImdyb3VwcyI6WyJJbnRlcm5hbFwvZXZlcnlvbmUiLCJBTkFMWVRJQ1MtQVBJTS5DT01cL21vbmV0aXplIl0sImF1ZCI6Im5wRk9oVG1aZjRTSUtUMFJFcGZQaDc0QTJWa2EiLCJlbnZpcm9ubWVudCI6InByb2QiLCJuYmYiOjE2MTQxODQ5NTcsImF6cCI6Im5wRk9oVG1aZjRTSUtUMFJFcGZQaDc0QTJWa2EiLCJzY29wZSI6ImFuYWx5dGljc19hcGltIG9wZW5pZCIsImN1c3RvbWVySWQiOiJ3c28yIiwiZXhwIjoxNjE1NDgwOTU3LCJpYXQiOjE2MTQxODQ5NTcsImp0aSI6IjFiYzJjMTAxLWM5YTYtNGQwOS1iMjJmLTE0OWQxNmYyZjg1ZSJ9.hKFAsQpV_CTMaE_6l4IcjZ-ZWYQEFPEf_EBrru5D73LYz7qkWAF67rLJqn29DizPf8Q8PsRRoeXiIO8St2hfv7QI6GW35ex1ak0I9g_8228I96WlO6IhdydoNYTi9Mvrq2_ZWzF3RwWBqM6vTSiIdFZB9rSJ54TmeVCQdI0IzKSXGV7LVN-kP6uXSiTF83eqEXNTaVnIqKZ_VEtitiVdASW3PU45C1ksD7NLFXjhkJHEUfkuBXXXJJr1oNOdEXMXdoky2kbI0coZQxo0vZOOfxhXoMnE5H9qkyt89qbv13ZR7jZx83lcZb4dar8ImvKZVUxkYbUaR49aRZd22jULEQ"
+[enforcer.analyticsReceiver]
+    port = 18090
+    maxMessageSize = 1000000000
+    maxHeaderLimit = 8192
+    #keep alive time of the external authz connection
+    keepAliveTime = 600
+
+    [enforcer.analyticsReceiver.threadPool]
+        coreSize = 10
+        maxSize = 100
+        #keep alive time of threads in seconds
+        keepAliveTime = 600
+        queueSize = 1000
+
 
 [controlPlane]
 # Control plane's eventHub details
@@ -115,3 +125,9 @@ skipSSLVerification=true
 # Message broker connection URL of the control plane
 [controlPlane.eventHub.jmsConnectionParameters]
 eventListeningEndpoints = ["amqp://admin:admin@localhost:5672?retries='5'&connectdelay='30000'"]
+
+[controlPlane.analytics]
+    enabled = false
+    authURL = "https://analytics-event-auth.st.choreo.dev/auth/v1"
+    authToken = "eyJ4NXQiOiJOVGd5TTJabE9XVTJOV00zWlRVeFpESTRNamsyTWpoa1pEVTFOak15TjJZMlpHRTBPV1ExTVRFek9HVmtabVl4WlRVMU9Ea3dOekV6TnpjNU9EVXpaZyIsImtpZCI6Ik5UZ3lNMlpsT1dVMk5XTTNaVFV4WkRJNE1qazJNamhrWkRVMU5qTXlOMlkyWkdFME9XUTFNVEV6T0dWa1ptWXhaVFUxT0Rrd056RXpOemM1T0RVelpnX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJ3c28yX2Rldl9hZG1pbiIsImF1dCI6IkFQUExJQ0FUSU9OX1VTRVIiLCJpc3MiOiJodHRwczpcL1wvaWQucHJlcHJvZC5jaG9yZW8uZGV2OjQ0M1wvb2F1dGgyXC90b2tlbiIsImdyb3VwcyI6WyJJbnRlcm5hbFwvZXZlcnlvbmUiLCJBTkFMWVRJQ1MtQVBJTS5DT01cL21vbmV0aXplIl0sImF1ZCI6Im5wRk9oVG1aZjRTSUtUMFJFcGZQaDc0QTJWa2EiLCJlbnZpcm9ubWVudCI6InByb2QiLCJuYmYiOjE2MTQxODQ5NTcsImF6cCI6Im5wRk9oVG1aZjRTSUtUMFJFcGZQaDc0QTJWa2EiLCJzY29wZSI6ImFuYWx5dGljc19hcGltIG9wZW5pZCIsImN1c3RvbWVySWQiOiJ3c28yIiwiZXhwIjoxNjE1NDgwOTU3LCJpYXQiOjE2MTQxODQ5NTcsImp0aSI6IjFiYzJjMTAxLWM5YTYtNGQwOS1iMjJmLTE0OWQxNmYyZjg1ZSJ9.hKFAsQpV_CTMaE_6l4IcjZ-ZWYQEFPEf_EBrru5D73LYz7qkWAF67rLJqn29DizPf8Q8PsRRoeXiIO8St2hfv7QI6GW35ex1ak0I9g_8228I96WlO6IhdydoNYTi9Mvrq2_ZWzF3RwWBqM6vTSiIdFZB9rSJ54TmeVCQdI0IzKSXGV7LVN-kP6uXSiTF83eqEXNTaVnIqKZ_VEtitiVdASW3PU45C1ksD7NLFXjhkJHEUfkuBXXXJJr1oNOdEXMXdoky2kbI0coZQxo0vZOOfxhXoMnE5H9qkyt89qbv13ZR7jZx83lcZb4dar8ImvKZVUxkYbUaR49aRZd22jULEQ"
+

@@ -33,6 +33,7 @@ import org.wso2.micro.gateway.enforcer.api.APIFactory;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ThreadPoolConfig;
 import org.wso2.micro.gateway.enforcer.grpc.ExtAuthService;
 import org.wso2.micro.gateway.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;
@@ -103,7 +104,7 @@ public class AuthServer {
         final EventLoopGroup bossGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
         final EventLoopGroup workerGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors() * 2);
         AuthServiceConfigurationDto authServerConfig = ConfigHolder.getInstance().getConfig().getAuthService();
-        AuthServiceConfigurationDto.ThreadPoolConfig threadPoolConfig = authServerConfig.getThreadPool();
+        ThreadPoolConfig threadPoolConfig = authServerConfig.getThreadPool();
         EnforcerWorkerPool enforcerWorkerPool = new EnforcerWorkerPool(threadPoolConfig.getCoreSize(),
                 threadPoolConfig.getMaxSize(), threadPoolConfig.getKeepAliveTime(), threadPoolConfig.getQueueSize(),
                 Constants.EXTERNAL_AUTHZ_THREAD_GROUP, Constants.EXTERNAL_AUTHZ_THREAD_ID);
@@ -116,6 +117,5 @@ public class AuthServer {
                 .executor(enforcerWorkerPool.getExecutor()).sslContext(GrpcSslContexts.forServer(certFile, keyFile)
                         .trustManager(ConfigHolder.getInstance().getTrustManagerFactory())
                         .clientAuth(ClientAuth.REQUIRE).build()).build();
-
     }
 }

@@ -30,23 +30,28 @@ public final class AnalyticsProto {
     java.lang.String[] descriptorData = {
       "\n.wso2/discovery/config/enforcer/analyti" +
       "cs.proto\022\036wso2.discovery.config.enforcer" +
-      "\"@\n\tAnalytics\022\017\n\007enabled\030\001 \001(\010\022\017\n\007authUr" +
-      "l\030\002 \001(\t\022\021\n\tauthToken\030\003 \001(\tB\216\001\n*org.wso2." +
-      "gateway.discovery.config.enforcerB\016Analy" +
-      "ticsProtoP\001ZNgithub.com/envoyproxy/go-co" +
-      "ntrol-plane/wso2/discovery/config/enforc" +
-      "er;enforcerb\006proto3"
+      "\032,wso2/discovery/config/enforcer/service" +
+      ".proto\"z\n\tAnalytics\022\017\n\007enabled\030\001 \001(\010\022\017\n\007" +
+      "authUrl\030\002 \001(\t\022\021\n\tauthToken\030\003 \001(\t\0228\n\007serv" +
+      "ice\030\004 \001(\0132\'.wso2.discovery.config.enforc" +
+      "er.ServiceB\216\001\n*org.wso2.gateway.discover" +
+      "y.config.enforcerB\016AnalyticsProtoP\001ZNgit" +
+      "hub.com/envoyproxy/go-control-plane/wso2" +
+      "/discovery/config/enforcer;enforcerb\006pro" +
+      "to3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
+          org.wso2.gateway.discovery.config.enforcer.ServiceProto.getDescriptor(),
         });
     internal_static_wso2_discovery_config_enforcer_Analytics_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_wso2_discovery_config_enforcer_Analytics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Analytics_descriptor,
-        new java.lang.String[] { "Enabled", "AuthUrl", "AuthToken", });
+        new java.lang.String[] { "Enabled", "AuthUrl", "AuthToken", "Service", });
+    org.wso2.gateway.discovery.config.enforcer.ServiceProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

@@ -121,13 +121,13 @@ type Config struct {
 
 	// TODO: (VirajSalaka) Analytics config is shared among adapter and enforcer
 	Enforcer struct {
-		JwtTokenConfig  []jwtTokenConfig
-		EventHub        eventHub
-		ApimCredentials apimCredentials
-		AuthService     authService
-		JwtGenerator    jwtGenerator
-		Cache           cache
-		Analytics       analytics
+		JwtTokenConfig    []jwtTokenConfig
+		EventHub          eventHub
+		ApimCredentials   apimCredentials
+		AuthService       authService
+		JwtGenerator      jwtGenerator
+		Cache             cache
+		AnalyticsReceiver authService `toml:"analyticsReceiver"`
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
@@ -227,4 +227,5 @@ type controlPlane struct {
 			EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
 		} `toml:"jmsConnectionParameters"`
 	} `toml:"eventHub"`
+	Analytics analytics `toml:"analytics"`
 }

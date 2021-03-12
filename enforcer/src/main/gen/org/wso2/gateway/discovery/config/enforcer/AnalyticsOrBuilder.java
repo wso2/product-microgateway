@@ -52,4 +52,31 @@ public interface AnalyticsOrBuilder extends
    */
   com.google.protobuf.ByteString
       getAuthTokenBytes();
+
+  /**
+   * <pre>
+   * Receiver grpc Service Configuration
+   * </pre>
+   *
+   * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+   * @return Whether the service field is set.
+   */
+  boolean hasService();
+  /**
+   * <pre>
+   * Receiver grpc Service Configuration
+   * </pre>
+   *
+   * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+   * @return The service.
+   */
+  org.wso2.gateway.discovery.config.enforcer.Service getService();
+  /**
+   * <pre>
+   * Receiver grpc Service Configuration
+   * </pre>
+   *
+   * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder getServiceOrBuilder();
 }

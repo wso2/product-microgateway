@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -19,23 +19,14 @@
 package org.wso2.micro.gateway.enforcer.config.dto;
 
 /**
- * Holds the configurations related to gRPC netty server that implements the enforcer functionality.
+ * Holds the grpc analytics server related configurations.
  */
-public class AuthServiceConfigurationDto {
-
+public class AnalyticsReceiverConfigDTO {
     private int port;
     private int maxMessageSize;
     private int maxHeaderLimit;
     private int keepAliveTime;
-    private ThreadPoolConfig threadPool;
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
+    private ThreadPoolConfig threadPoolConfig;
 
     public int getMaxMessageSize() {
         return maxMessageSize;
@@ -43,6 +34,14 @@ public class AuthServiceConfigurationDto {
 
     public void setMaxMessageSize(int maxMessageSize) {
         this.maxMessageSize = maxMessageSize;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     public int getMaxHeaderLimit() {
@@ -61,12 +60,11 @@ public class AuthServiceConfigurationDto {
         this.keepAliveTime = keepAliveTime;
     }
 
-    public ThreadPoolConfig getThreadPool() {
-        return threadPool;
+    public ThreadPoolConfig getThreadPoolConfig() {
+        return threadPoolConfig;
     }
 
-    public void setThreadPool(ThreadPoolConfig threadPool) {
-        this.threadPool = threadPool;
+    public void setThreadPoolConfig(ThreadPoolConfig threadPoolConfig) {
+        this.threadPoolConfig = threadPoolConfig;
     }
 }
-

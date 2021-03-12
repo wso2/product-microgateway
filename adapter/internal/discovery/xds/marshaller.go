@@ -27,7 +27,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		issuers = append(issuers, jwtConfig)
 	}
 
-	authService := &enforcer.AuthService{
+	authService := &enforcer.Service{
 		KeepAliveTime:  config.Enforcer.AuthService.KeepAliveTime,
 		MaxHeaderLimit: config.Enforcer.AuthService.MaxHeaderLimit,
 		MaxMessageSize: config.Enforcer.AuthService.MaxMessageSize,
@@ -47,9 +47,21 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	}
 
 	analytics := &enforcer.Analytics{
-		Enabled:   config.Enforcer.Analytics.Enabled,
-		AuthUrl:   config.Enforcer.Analytics.AuthURL,
-		AuthToken: config.Enforcer.Analytics.AuthToken,
+		Enabled:   config.ControlPlane.Analytics.Enabled,
+		AuthUrl:   config.ControlPlane.Analytics.AuthURL,
+		AuthToken: config.ControlPlane.Analytics.AuthToken,
+		Service: &enforcer.Service{
+			Port:           config.Enforcer.AnalyticsReceiver.Port,
+			MaxHeaderLimit: config.Enforcer.AnalyticsReceiver.MaxHeaderLimit,
+			KeepAliveTime:  config.Enforcer.AnalyticsReceiver.KeepAliveTime,
+			MaxMessageSize: config.Enforcer.AnalyticsReceiver.MaxMessageSize,
+			ThreadPool: &enforcer.ThreadPool{
+				CoreSize:      config.Enforcer.AnalyticsReceiver.ThreadPool.CoreSize,
+				MaxSize:       config.Enforcer.AnalyticsReceiver.ThreadPool.MaxSize,
+				QueueSize:     config.Enforcer.AnalyticsReceiver.ThreadPool.QueueSize,
+				KeepAliveTime: config.Enforcer.AnalyticsReceiver.ThreadPool.KeepAliveTime,
+			},
+		},
 	}
 
 	return &enforcer.Config{

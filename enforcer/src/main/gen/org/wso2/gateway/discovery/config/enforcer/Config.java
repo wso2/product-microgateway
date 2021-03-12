@@ -103,11 +103,11 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 42: {
-            org.wso2.gateway.discovery.config.enforcer.AuthService.Builder subBuilder = null;
+            org.wso2.gateway.discovery.config.enforcer.Service.Builder subBuilder = null;
             if (authService_ != null) {
               subBuilder = authService_.toBuilder();
             }
-            authService_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.AuthService.parser(), extensionRegistry);
+            authService_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.Service.parser(), extensionRegistry);
             if (subBuilder != null) {
               subBuilder.mergeFrom(authService_);
               authService_ = subBuilder.buildPartial();
@@ -334,9 +334,9 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int AUTHSERVICE_FIELD_NUMBER = 5;
-  private org.wso2.gateway.discovery.config.enforcer.AuthService authService_;
+  private org.wso2.gateway.discovery.config.enforcer.Service authService_;
   /**
-   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
    * @return Whether the authService field is set.
    */
   @java.lang.Override
@@ -344,18 +344,18 @@ private static final long serialVersionUID = 0L;
     return authService_ != null;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
    * @return The authService.
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.AuthService getAuthService() {
-    return authService_ == null ? org.wso2.gateway.discovery.config.enforcer.AuthService.getDefaultInstance() : authService_;
+  public org.wso2.gateway.discovery.config.enforcer.Service getAuthService() {
+    return authService_ == null ? org.wso2.gateway.discovery.config.enforcer.Service.getDefaultInstance() : authService_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder getAuthServiceOrBuilder() {
+  public org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder getAuthServiceOrBuilder() {
     return getAuthService();
   }
 
@@ -1702,31 +1702,31 @@ private static final long serialVersionUID = 0L;
       return eventhubBuilder_;
     }
 
-    private org.wso2.gateway.discovery.config.enforcer.AuthService authService_;
+    private org.wso2.gateway.discovery.config.enforcer.Service authService_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.AuthService, org.wso2.gateway.discovery.config.enforcer.AuthService.Builder, org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder> authServiceBuilder_;
+        org.wso2.gateway.discovery.config.enforcer.Service, org.wso2.gateway.discovery.config.enforcer.Service.Builder, org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder> authServiceBuilder_;
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      * @return Whether the authService field is set.
      */
     public boolean hasAuthService() {
       return authServiceBuilder_ != null || authService_ != null;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      * @return The authService.
      */
-    public org.wso2.gateway.discovery.config.enforcer.AuthService getAuthService() {
+    public org.wso2.gateway.discovery.config.enforcer.Service getAuthService() {
       if (authServiceBuilder_ == null) {
-        return authService_ == null ? org.wso2.gateway.discovery.config.enforcer.AuthService.getDefaultInstance() : authService_;
+        return authService_ == null ? org.wso2.gateway.discovery.config.enforcer.Service.getDefaultInstance() : authService_;
       } else {
         return authServiceBuilder_.getMessage();
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
-    public Builder setAuthService(org.wso2.gateway.discovery.config.enforcer.AuthService value) {
+    public Builder setAuthService(org.wso2.gateway.discovery.config.enforcer.Service value) {
       if (authServiceBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -1740,10 +1740,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
     public Builder setAuthService(
-        org.wso2.gateway.discovery.config.enforcer.AuthService.Builder builderForValue) {
+        org.wso2.gateway.discovery.config.enforcer.Service.Builder builderForValue) {
       if (authServiceBuilder_ == null) {
         authService_ = builderForValue.build();
         onChanged();
@@ -1754,13 +1754,13 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
-    public Builder mergeAuthService(org.wso2.gateway.discovery.config.enforcer.AuthService value) {
+    public Builder mergeAuthService(org.wso2.gateway.discovery.config.enforcer.Service value) {
       if (authServiceBuilder_ == null) {
         if (authService_ != null) {
           authService_ =
-            org.wso2.gateway.discovery.config.enforcer.AuthService.newBuilder(authService_).mergeFrom(value).buildPartial();
+            org.wso2.gateway.discovery.config.enforcer.Service.newBuilder(authService_).mergeFrom(value).buildPartial();
         } else {
           authService_ = value;
         }
@@ -1772,7 +1772,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
     public Builder clearAuthService() {
       if (authServiceBuilder_ == null) {
@@ -1786,33 +1786,33 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.AuthService.Builder getAuthServiceBuilder() {
+    public org.wso2.gateway.discovery.config.enforcer.Service.Builder getAuthServiceBuilder() {
       
       onChanged();
       return getAuthServiceFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder getAuthServiceOrBuilder() {
+    public org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder getAuthServiceOrBuilder() {
       if (authServiceBuilder_ != null) {
         return authServiceBuilder_.getMessageOrBuilder();
       } else {
         return authService_ == null ?
-            org.wso2.gateway.discovery.config.enforcer.AuthService.getDefaultInstance() : authService_;
+            org.wso2.gateway.discovery.config.enforcer.Service.getDefaultInstance() : authService_;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.AuthService, org.wso2.gateway.discovery.config.enforcer.AuthService.Builder, org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder> 
+        org.wso2.gateway.discovery.config.enforcer.Service, org.wso2.gateway.discovery.config.enforcer.Service.Builder, org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder> 
         getAuthServiceFieldBuilder() {
       if (authServiceBuilder_ == null) {
         authServiceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.gateway.discovery.config.enforcer.AuthService, org.wso2.gateway.discovery.config.enforcer.AuthService.Builder, org.wso2.gateway.discovery.config.enforcer.AuthServiceOrBuilder>(
+            org.wso2.gateway.discovery.config.enforcer.Service, org.wso2.gateway.discovery.config.enforcer.Service.Builder, org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder>(
                 getAuthService(),
                 getParentForChildren(),
                 isClean());

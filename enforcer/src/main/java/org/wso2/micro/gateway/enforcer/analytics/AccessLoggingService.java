@@ -36,6 +36,8 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataP
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.config.dto.AnalyticsReceiverConfigDTO;
+import org.wso2.micro.gateway.enforcer.server.Constants;
 import org.wso2.micro.gateway.enforcer.server.EnforcerThreadPoolExecutor;
 import org.wso2.micro.gateway.enforcer.server.NativeThreadFactory;
 
@@ -108,17 +110,28 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
     }
 
     private boolean startAccessLoggingServer() {
-        // TODO: (VirajSalaka) Configuration
+        AnalyticsReceiverConfigDTO serverConfig =
+                ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getServerConfig();
         final EventLoopGroup bossGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
         final EventLoopGroup workerGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors() * 2);
-        int blockingQueueLength = 1000;
+        int blockingQueueLength = serverConfig.getThreadPoolConfig().getQueueSize();
         final BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue(blockingQueueLength);
-        final Executor executor = new EnforcerThreadPoolExecutor(400, 500, 30, TimeUnit.SECONDS,
-                blockingQueue, new NativeThreadFactory(new ThreadGroup("Analytics"), "analytics"));
+        final Executor executor =
+                new EnforcerThreadPoolExecutor(serverConfig.getThreadPoolConfig().getCoreSize(),
+                        serverConfig.getThreadPoolConfig().getMaxSize(),
+                        serverConfig.getThreadPoolConfig().getKeepAliveTime(),
+                        TimeUnit.SECONDS,
+                        blockingQueue,
+                        new NativeThreadFactory(new ThreadGroup(Constants.ANALYTICS_THREAD_GROUP),
+                                Constants.ANALYTICS_THREAD_ID));
 
-        Server accessLoggerService = NettyServerBuilder.forPort(18090).maxConcurrentCallsPerConnection(20)
-                .keepAliveTime(60, TimeUnit.SECONDS).maxInboundMessageSize(1000000000).bossEventLoopGroup(bossGroup)
-                .workerEventLoopGroup(workerGroup).addService(this)
+        Server accessLoggerService = NettyServerBuilder
+                .forPort(serverConfig.getPort())
+                .keepAliveTime(serverConfig.getKeepAliveTime(), TimeUnit.SECONDS)
+                .maxInboundMessageSize(serverConfig.getMaxMessageSize())
+                .bossEventLoopGroup(bossGroup)
+                .workerEventLoopGroup(workerGroup)
+                .addService(this)
                 .channelType(NioServerSocketChannel.class).executor(executor).build();
         // Start the server
         try {
@@ -127,7 +140,7 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
             logger.error("Error while starting the gRPC access logging server", e);
             return false;
         }
-        logger.info("Access loggers Sever started Listening in port : " + 18090);
+        logger.info("Access loggers Sever started Listening in port : " + serverConfig.getPort());
         return true;
     }
 
