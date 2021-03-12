@@ -59,6 +59,7 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
     private static final String AUTH_URL = "auth.api.url";
 
     public boolean init() {
+        // TODO: (VirajSalaka) Move this to a different method as the same publisher is used twice.
         Map<String, String> configuration = new HashMap<>(2);
         configuration.put(AUTH_TOKEN_KEY, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthToken());
         configuration.put(AUTH_URL, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthURL());
@@ -72,38 +73,42 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
         return new StreamObserver<>() {
             @Override
             public void onNext(StreamAccessLogsMessage message) {
-                logger.info("Received msg" + message.toString());
                 for (int i = 0; i < message.getHttpLogs().getLogEntryCount(); i++) {
                     HTTPAccessLogEntry logEntry = message.getHttpLogs().getLogEntry(i);
+                    logger.trace("Received logEntry from Router " + message.getIdentifier().getNode() +
+                            " : " + message.toString());
                     if (doNotPublishEvent(logEntry)) {
+                        logger.debug("LogEntry is ignored as it is already published by the enforcer.");
                         continue;
                     }
                     AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
                     GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
                     try {
                         dataCollector.collectData();
+                        logger.debug("Event is published.");
                     } catch (AnalyticsException e) {
-                        logger.error("Analtytics Error. ", e);
+                        logger.error("Error while publishing the event to the analytics portal.", e);
                     }
                 }
             }
 
             @Override
             public void onError(Throwable throwable) {
-                logger.info("Error in receiving access log from envoy" + throwable.getMessage());
+                logger.error("Error while receiving access log entries from router. " + throwable.getMessage());
                 responseObserver.onCompleted();
             }
 
             @Override
             public void onCompleted() {
-                logger.info("grpc logger completed");
                 responseObserver.onNext(StreamAccessLogsResponse.newBuilder().build());
                 responseObserver.onCompleted();
+                logger.info("Access Log processing is completed.");
             }
         };
     }
 
     private boolean startAccessLoggingServer() {
+        // TODO: (VirajSalaka) Configuration
         final EventLoopGroup bossGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
         final EventLoopGroup workerGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors() * 2);
         int blockingQueueLength = 1000;
@@ -127,7 +132,7 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
     }
 
     private boolean doNotPublishEvent(HTTPAccessLogEntry logEntry) {
-        // TODO: (VirajSalaka) Check if the response code details can be null
+        // TODO: (VirajSalaka) There is a possiblity that event is published but resulted in ext_auth_error.
         // If ext_auth_denied request comes, the event is already published from the enforcer.
         return StringUtils.isEmpty(logEntry.getResponse().getResponseCodeDetails())
                 && logEntry.getResponse().getResponseCodeDetails().equals("ext_auth_denied");

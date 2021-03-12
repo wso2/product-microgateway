@@ -53,11 +53,12 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public EventCategory getEventCategory() {
+        // TODO: (VirajSalaka) Filter out token endpoint calls
         if (logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
             logger.info("Is success event");
             return EventCategory.SUCCESS;
             // TODO: (VirajSalaka) Finalize what is a fault
-        } else if (logEntry.getResponse().getResponseCode().getValue() != 200) {
+        } else if (logEntry.getResponse().getResponseCode().getValue() != 204) {
             logger.info("Is fault event");
             return EventCategory.FAULT;
         } else {

@@ -37,6 +37,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 	logConf, errReadConfig := config.ReadLogConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
+		// TODO: (VirajSalaka) Panic
 	} else {
 		logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
 			LogFormat: &corev3.SubstitutionFormatString{
@@ -56,6 +57,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marsheling access log configs. ", err)
+		// TODO: (VirajSalaka) Panic
 	}
 
 	accessLog := config_access_logv3.AccessLog{
@@ -74,13 +76,14 @@ func getGRPCAccessLogConfigs() *config_access_logv3.AccessLog {
 	accessLogConf := &grpc_accesslogv3.HttpGrpcAccessLogConfig{
 		CommonConfig: &grpc_accesslogv3.CommonGrpcAccessLogConfig{
 			TransportApiVersion: corev3.ApiVersion_V3,
-			LogName:             "mgw_access_logs",
+			LogName:             grpcAccessLogLogName,
 			GrpcService: &corev3.GrpcService{
 				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
 					EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{
 						ClusterName: accessLoggerClusterName,
 					},
 				},
+				// TODO: (VirajSalaka) make timeout configurable.
 				Timeout: ptypes.DurationProto(20 * time.Second),
 			},
 		},
@@ -88,6 +91,7 @@ func getGRPCAccessLogConfigs() *config_access_logv3.AccessLog {
 	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marsheling gRPC access log configs. ", err)
+		// TODO:(VirajSalaka) Panic
 	}
 
 	accessLog := config_access_logv3.AccessLog{

@@ -32,6 +32,10 @@ import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 
 /**
  * This is the filter is for Analytics.
+ * If the request is failed at enforcer (due to throttling, authentication failures) the analytics event is
+ * published by the filter itself.
+ * If the request is allowed to proceed, the dynamic metadata will be populated so that the analytics event can be
+ * populated from grpc access logs within AccessLoggingService.
  */
 public class AnalyticsFilter implements Filter {
     private static final Logger logger = LogManager.getLogger(AnalyticsFilter.class);
@@ -52,7 +56,7 @@ public class AnalyticsFilter implements Filter {
     }
 
     public boolean handleMsg(StreamAccessLogsMessage message) {
-        // TODO (amalimatharaarachchi) process message and set analytics data'
+        // TODO: (VirajSalaka) Move the logic here from AccessLoggingService.
         return true;
     }
 
@@ -109,8 +113,10 @@ public class AnalyticsFilter implements Filter {
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
         try {
             dataCollector.collectData();
+            // TODO: (VirajSalaka) provide more information on the published event
+            logger.debug("Analytics event for failure event is pubished. ");
         } catch (AnalyticsException e) {
-            logger.error("Analtytics Error. ", e);
+            logger.error("Error while publishing the analytics event. ", e);
         }
     }
 }
