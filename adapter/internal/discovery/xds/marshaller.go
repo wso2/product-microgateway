@@ -17,6 +17,8 @@ import (
 // enfocer's CDS resource representation.
 func MarshalConfig(config *config.Config) *enforcer.Config {
 	issuers := []*enforcer.Issuer{}
+	urlGroups := []*enforcer.TMURLGroup{}
+
 	for _, issuer := range config.Enforcer.JwtTokenConfig {
 	    claimMaps := []*enforcer.ClaimMapping{}
 	    for _, claimMap := range issuer.ClaimMapping{
@@ -46,6 +48,15 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 			Password:  user.Password,
 		}
 		jwtUsers = append(jwtUsers, jwtUser)
+	}
+
+	for _, urlGroup := range config.Enforcer.Throttling.Publisher.URLGroup {
+		group := &enforcer.TMURLGroup{
+			AuthURLs:     urlGroup.AuthURLs,
+			ReceiverURLs: urlGroup.ReceiverURLs,
+			Type:         urlGroup.Type,
+		}
+		urlGroups = append(urlGroups, group)
 	}
 
 	authService := &enforcer.AuthService{
@@ -104,6 +115,45 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,
 			JmsConnectionParameters: &enforcer.JmsConnectionParameters{
 				EventListeningEndpoints: config.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints,
+			},
+		},
+		Throttling: &enforcer.Throttling{
+			EnableGlobalEventPublishing:        config.Enforcer.Throttling.EnableGlobalEventPublishing,
+			EnableHeaderConditions:             config.Enforcer.Throttling.EnableHeaderConditions,
+			EnableQueryParamConditions:         config.Enforcer.Throttling.EnableQueryParamConditions,
+			EnableJwtClaimConditions:           config.Enforcer.Throttling.EnableJwtClaimConditions,
+			JmsConnectionInitialContextFactory: config.Enforcer.Throttling.JmsConnectionInitialContextFactory,
+			JmsConnectionProviderUrl:           config.Enforcer.Throttling.JmsConnectionProviderURL,
+			Publisher: &enforcer.BinaryPublisher{
+				Username: config.Enforcer.Throttling.Publisher.Username,
+				Password: config.Enforcer.Throttling.Publisher.Password,
+				UrlGroup: urlGroups,
+				Pool: &enforcer.PublisherPool{
+					InitIdleObjectDataPublishingAgents: config.Enforcer.Throttling.Publisher.Pool.InitIdleObjectDataPublishingAgents,
+					MaxIdleDataPublishingAgents:        config.Enforcer.Throttling.Publisher.Pool.MaxIdleDataPublishingAgents,
+					PublisherThreadPoolCoreSize:        config.Enforcer.Throttling.Publisher.Pool.PublisherThreadPoolCoreSize,
+					PublisherThreadPoolKeepAliveTime:   config.Enforcer.Throttling.Publisher.Pool.PublisherThreadPoolKeepAliveTime,
+					PublisherThreadPoolMaximumSize:     config.Enforcer.Throttling.Publisher.Pool.PublisherThreadPoolMaximumSize,
+				},
+				Agent: &enforcer.ThrottleAgent{
+					BatchSize:                  config.Enforcer.Throttling.Publisher.Agent.BatchSize,
+					Ciphers:                    config.Enforcer.Throttling.Publisher.Agent.Ciphers,
+					CorePoolSize:               config.Enforcer.Throttling.Publisher.Agent.CorePoolSize,
+					EvictionTimePeriod:         config.Enforcer.Throttling.Publisher.Agent.EvictionTimePeriod,
+					KeepAliveTimeInPool:        config.Enforcer.Throttling.Publisher.Agent.KeepAliveTimeInPool,
+					MaxIdleConnections:         config.Enforcer.Throttling.Publisher.Agent.MaxIdleConnections,
+					MaxPoolSize:                config.Enforcer.Throttling.Publisher.Agent.MaxPoolSize,
+					MaxTransportPoolSize:       config.Enforcer.Throttling.Publisher.Agent.MaxTransportPoolSize,
+					MinIdleTimeInPool:          config.Enforcer.Throttling.Publisher.Agent.MinIdleTimeInPool,
+					QueueSize:                  config.Enforcer.Throttling.Publisher.Agent.QueueSize,
+					ReconnectionInterval:       config.Enforcer.Throttling.Publisher.Agent.ReconnectionInterval,
+					SecureEvictionTimePeriod:   config.Enforcer.Throttling.Publisher.Agent.SecureEvictionTimePeriod,
+					SecureMaxIdleConnections:   config.Enforcer.Throttling.Publisher.Agent.SecureMaxIdleConnections,
+					SecureMaxTransportPoolSize: config.Enforcer.Throttling.Publisher.Agent.SecureMaxTransportPoolSize,
+					SecureMinIdleTimeInPool:    config.Enforcer.Throttling.Publisher.Agent.SecureMinIdleTimeInPool,
+					SocketTimeoutMS:            config.Enforcer.Throttling.Publisher.Agent.SocketTimeoutMS,
+					SslEnabledProtocols:        config.Enforcer.Throttling.Publisher.Agent.SslEnabledProtocols,
+				},
 			},
 		},
 	}

@@ -34,17 +34,17 @@ public final class BinaryThrottlingProto {
       "/tm_url_group.proto\0327wso2/discovery/conf" +
       "ig/enforcer/throttle_publisher.proto\0323ws" +
       "o2/discovery/config/enforcer/throttle_ag" +
-      "ent.proto\"\211\002\n\020BinaryThrottling\022\017\n\007enable" +
-      "d\030\001 \001(\010\022\020\n\010username\030\002 \001(\t\022\020\n\010password\030\003 " +
-      "\001(\t\022<\n\010urlGroup\030\004 \003(\0132*.wso2.discovery.c" +
-      "onfig.enforcer.TMURLGroup\022D\n\tpublisher\030\005" +
-      " \001(\01321.wso2.discovery.config.enforcer.Th" +
-      "rottlePublisher\022<\n\005agent\030\006 \001(\0132-.wso2.di" +
-      "scovery.config.enforcer.ThrottleAgentB\225\001" +
-      "\n*org.wso2.gateway.discovery.config.enfo" +
-      "rcerB\025BinaryThrottlingProtoP\001ZNgithub.co" +
-      "m/envoyproxy/go-control-plane/wso2/disco" +
-      "very/config/enforcer;enforcerb\006proto3"
+      "ent.proto\"\370\001\n\020BinaryThrottling\022\020\n\010userna" +
+      "me\030\002 \001(\t\022\020\n\010password\030\003 \001(\t\022<\n\010urlGroup\030\004" +
+      " \003(\0132*.wso2.discovery.config.enforcer.TM" +
+      "URLGroup\022D\n\tpublisher\030\005 \001(\01321.wso2.disco" +
+      "very.config.enforcer.ThrottlePublisher\022<" +
+      "\n\005agent\030\006 \001(\0132-.wso2.discovery.config.en" +
+      "forcer.ThrottleAgentB\225\001\n*org.wso2.gatewa" +
+      "y.discovery.config.enforcerB\025BinaryThrot" +
+      "tlingProtoP\001ZNgithub.com/envoyproxy/go-c" +
+      "ontrol-plane/wso2/discovery/config/enfor" +
+      "cer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -58,7 +58,7 @@ public final class BinaryThrottlingProto {
     internal_static_wso2_discovery_config_enforcer_BinaryThrottling_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_BinaryThrottling_descriptor,
-        new java.lang.String[] { "Enabled", "Username", "Password", "UrlGroup", "Publisher", "Agent", });
+        new java.lang.String[] { "Username", "Password", "UrlGroup", "Publisher", "Agent", });
     org.wso2.gateway.discovery.config.enforcer.TMURLGroupProto.getDescriptor();
     org.wso2.gateway.discovery.config.enforcer.ThrottlePublishergProto.getDescriptor();
     org.wso2.gateway.discovery.config.enforcer.ThrottleAgentProto.getDescriptor();

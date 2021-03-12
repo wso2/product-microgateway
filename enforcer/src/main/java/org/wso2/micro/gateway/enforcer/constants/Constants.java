@@ -48,6 +48,12 @@ public class Constants {
     public static final String END_OF_PRIVATE_KEY = "-----END PRIVATE KEY-----";
     public static final String RSA = "RSA";
 
+    public static final String LOADBALANCE = "loadbalance";
+    public static final String FAILOVER = "failover";
+    public static final String TM_BINARY_LOADBALANCE_SEPARATOR = ",";
+    public static final String TM_BINARY_FAILOVER_SEPARATOR = "|";
+    public static final String UNKNOWN_VALUE = "__unknown__";
+
     public static final String OBJECT_THIS_NOTATION = "this$";
     public static final String ENV_PREFIX = "$env{";
     public static final String START_BRACKET = "{";

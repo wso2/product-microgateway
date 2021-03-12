@@ -40,10 +40,10 @@ import (
 	apiModel "github.com/wso2/micro-gw/internal/api/models"
 	eventhubTypes "github.com/wso2/micro-gw/internal/eventhub/types"
 	oasParser "github.com/wso2/micro-gw/internal/oasparser"
+	envoyconf "github.com/wso2/micro-gw/internal/oasparser/envoyconf"
 	mgw "github.com/wso2/micro-gw/internal/oasparser/model"
 	"github.com/wso2/micro-gw/internal/oasparser/operator"
 	logger "github.com/wso2/micro-gw/loggers"
-	envoyconf "github.com/wso2/micro-gw/internal/oasparser/envoyconf"
 )
 
 var (
@@ -335,7 +335,7 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 
 // GenerateEnvoyResoucesForLabel generates envoy resources for a given label
 func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Resource, []types.Resource,
-[]types.Resource, []types.Resource) {
+	[]types.Resource, []types.Resource) {
 	var clusterArray []*clusterv3.Cluster
 	var routeArray []*routev3.Route
 	var endpointArray []*corev3.Address
@@ -534,7 +534,7 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 
 // UpdateXdsCacheWithLock uses mutex and lock to avoid different go routines updating XDS at the same time
 func UpdateXdsCacheWithLock(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource,
-listeners []types.Resource) {
+	listeners []types.Resource) {
 	mutexForXdsUpdate.Lock()
 	defer mutexForXdsUpdate.Unlock()
 	updateXdsCache(label, endpoints, clusters, routes, listeners)

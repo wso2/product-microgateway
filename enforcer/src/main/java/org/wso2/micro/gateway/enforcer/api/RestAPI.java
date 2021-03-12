@@ -25,8 +25,10 @@ import org.wso2.gateway.discovery.api.Resource;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.cors.CorsFilter;
+import org.wso2.micro.gateway.enforcer.filters.ThrottleFilter;
 import org.wso2.micro.gateway.enforcer.security.AuthFilter;
 
 import java.util.ArrayList;
@@ -125,10 +127,18 @@ public class RestAPI implements API {
     private void initFilters() {
         CorsFilter corsFilter = new CorsFilter();
         this.filters.add(corsFilter);
+
         if (!APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(apiLifeCycleState)) {
             AuthFilter authFilter = new AuthFilter();
             authFilter.init(apiConfig);
             this.filters.add(authFilter);
+        }
+
+        // enable throttle filter
+        if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
+            ThrottleFilter throttleFilter = new ThrottleFilter();
+            throttleFilter.init(apiConfig);
+            this.filters.add(throttleFilter);
         }
     }
 }

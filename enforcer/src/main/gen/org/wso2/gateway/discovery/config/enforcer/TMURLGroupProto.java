@@ -30,12 +30,12 @@ public final class TMURLGroupProto {
     java.lang.String[] descriptorData = {
       "\n1wso2/discovery/config/enforcer/tm_url_" +
       "group.proto\022\036wso2.discovery.config.enfor" +
-      "cer\"4\n\nTMURLGroup\022\024\n\014receiverURLs\030\001 \003(\t\022" +
-      "\020\n\010authURLs\030\002 \003(\tB\217\001\n*org.wso2.gateway.d" +
-      "iscovery.config.enforcerB\017TMURLGroupProt" +
-      "oP\001ZNgithub.com/envoyproxy/go-control-pl" +
-      "ane/wso2/discovery/config/enforcer;enfor" +
-      "cerb\006proto3"
+      "cer\"B\n\nTMURLGroup\022\024\n\014receiverURLs\030\001 \003(\t\022" +
+      "\020\n\010authURLs\030\002 \003(\t\022\014\n\004type\030\003 \001(\tB\217\001\n*org." +
+      "wso2.gateway.discovery.config.enforcerB\017" +
+      "TMURLGroupProtoP\001ZNgithub.com/envoyproxy" +
+      "/go-control-plane/wso2/discovery/config/" +
+      "enforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -46,7 +46,7 @@ public final class TMURLGroupProto {
     internal_static_wso2_discovery_config_enforcer_TMURLGroup_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_TMURLGroup_descriptor,
-        new java.lang.String[] { "ReceiverURLs", "AuthURLs", });
+        new java.lang.String[] { "ReceiverURLs", "AuthURLs", "Type", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

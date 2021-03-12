@@ -115,11 +115,9 @@ public class JWTAuthenticator implements Authenticator {
 
         }
 
-        JWTValidationInfo validationInfo =
-                getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
+        JWTValidationInfo validationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
         if (validationInfo != null) {
             if (validationInfo.isValid()) {
-
                 // Validate subscriptions
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
                 EnforcerConfig configuration = ConfigHolder.getInstance().getConfig();
@@ -167,8 +165,8 @@ public class JWTAuthenticator implements Authenticator {
                 }
 
                 AuthenticationContext authenticationContext = FilterUtils
-                        .generateAuthenticationContext(jwtTokenIdentifier, validationInfo, apiKeyValidationInfoDTO,
-                                endUserToken, true);
+                        .generateAuthenticationContext(requestContext, jwtTokenIdentifier, validationInfo,
+                                apiKeyValidationInfoDTO, endUserToken, true);
                 //TODO: (VirajSalaka) Place the keytype population logic properly for self contained token
                 if (claims.getClaim("keytype") != null) {
                     authenticationContext.setKeyType(claims.getClaim("keytype").toString());
