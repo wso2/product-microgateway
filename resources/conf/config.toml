@@ -83,6 +83,19 @@
     remoteClaim = "sub"
     localClaim = "CUSTOM-CLAIM"
 
+# Issuer 2
+[[enforcer.jwtTokenConfig]]
+    name="MGW"
+    issuer = "https://localhost:9095/token"
+    certificateAlias = "mgw"
+    # URL of the JWKs endpoint
+    jwksURL = ""
+    # Validate subscribed APIs
+    validateSubscription = false
+    # The claim in which the consumer key of the application is coming
+    consumerKeyClaim = ""
+    # Certificate Filepath within enforcer
+    certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 [enforcer.apimCredentials]
   username="admin"
@@ -105,6 +118,19 @@
   claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
   publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
   privateKeyPath = "/home/wso2/security/keystore/mg.key"
+
+[enforcer.jwtIssuer]
+  enabled = true
+  issuer = "https://localhost:9095/token"
+  encoding = "base64" # base64,base64url
+  claimDialect = ""
+  signingAlgorithm = "SHA256withRSA"
+  publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
+  privateKeyPath = "/home/wso2/security/keystore/mg.key"
+  validityPeriod = 3600 # seconds
+  [[enforcer.jwtIssuer.jwtUser]]
+    username = "admin"
+    password = "admin"
 
 [controlPlane]
 

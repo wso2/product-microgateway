@@ -65,6 +65,6 @@ services:
       - XDS_MAX_MSG_SIZE=4194304
       - JAVA_OPTS=${JAVA_OPTS}
       - apim_admin_pwd=admin
-
+      - enforcer_admin_pwd=admin
     ports:
       - "8081:8081"

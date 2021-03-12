@@ -39,6 +39,15 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
     	issuers = append(issuers, jwtConfig)
     }
 
+	jwtUsers := []*enforcer.JWTUser{}
+	for _, user := range config.Enforcer.JwtIssuer.JwtUsers {
+		jwtUser := &enforcer.JWTUser{
+			Username:  user.Username,
+			Password:  user.Password,
+		}
+		jwtUsers = append(jwtUsers, jwtUser)
+	}
+
 	authService := &enforcer.AuthService{
 		KeepAliveTime:  config.Enforcer.AuthService.KeepAliveTime,
 		MaxHeaderLimit: config.Enforcer.AuthService.MaxHeaderLimit,
@@ -75,6 +84,17 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 			ClaimsExtractorImpl:   config.Enforcer.JwtGenerator.ClaimsExtractorImpl,
 			PublicCertificatePath: config.Enforcer.JwtGenerator.PublicCertificatePath,
 			PrivateKeyPath:        config.Enforcer.JwtGenerator.PrivateKeyPath,
+		},
+		JwtIssuer: &enforcer.JWTIssuer{
+			Enabled:               config.Enforcer.JwtIssuer.Enabled,
+			Issuer:                config.Enforcer.JwtIssuer.Issuer,
+			Encoding:              config.Enforcer.JwtIssuer.Encoding,
+			ClaimDialect:          config.Enforcer.JwtIssuer.ClaimDialect,
+			SigningAlgorithm:      config.Enforcer.JwtIssuer.SigningAlgorithm,
+			PublicCertificatePath: config.Enforcer.JwtIssuer.PublicCertificatePath,
+			PrivateKeyPath:        config.Enforcer.JwtIssuer.PrivateKeyPath,
+			ValidityPeriod:        config.Enforcer.JwtIssuer.ValidityPeriod,
+			JwtUsers: jwtUsers,
 		},
 		AuthService:    authService,
 		JwtTokenConfig: issuers,

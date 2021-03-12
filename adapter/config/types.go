@@ -130,6 +130,7 @@ type Config struct {
 		AuthService     authService
 		JwtGenerator    jwtGenerator
 		Cache           cache
+		JwtIssuer       jwtIssuer
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
@@ -206,6 +207,24 @@ type cache struct {
 	Enabled     bool  `toml:"enabled"`
 	MaximumSize int32 `toml:"maximumSize"`
 	ExpiryTime  int32 `toml:"expiryTime"`
+}
+
+type jwtIssuer struct {
+	Enabled               bool      `toml:"enabled"`
+	Issuer                string    `toml:"issuer"`
+	Encoding              string    `toml:"encoding"`
+	ClaimDialect          string    `toml:"claimDialect"`
+	SigningAlgorithm      string    `toml:"signingAlgorithm"`
+	PublicCertificatePath string    `toml:"publicCertificatePath"`
+	PrivateKeyPath        string    `toml:"privateKeyPath"`
+	ValidityPeriod        int32     `toml:"validityPeriod"`
+	JwtUsers              []JwtUser `toml:"jwtUser"`
+}
+
+// JwtUser represents allowed users to generate JWT tokens
+type JwtUser struct {
+	Username      string `toml:"username"`
+	Password      string `toml:"password"`
 }
 
 // APICtlUser represents registered APICtl Users

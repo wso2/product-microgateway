@@ -160,11 +160,11 @@ public class JWTUtil {
         }
     }
 
-    public static PrivateKey getPrivateKey() throws MGWException {
+    public static PrivateKey getPrivateKey(String filePath) throws MGWException {
         PrivateKey privateKey = null;
         try {
             String strKeyPEM = "";
-            Path keyPath = Paths.get(ConfigHolder.getInstance().getConfig().getPrivateKeyPath());
+            Path keyPath = Paths.get(filePath);
             String key = Files.readString(keyPath, Charset.defaultCharset());
             strKeyPEM = key
                     .replace(Constants.BEGINING_OF_PRIVATE_KEY, "")

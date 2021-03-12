@@ -32,14 +32,17 @@ import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.config.enforcer.EventHub;
 import org.wso2.gateway.discovery.config.enforcer.Issuer;
 import org.wso2.gateway.discovery.config.enforcer.JWTGenerator;
+import org.wso2.gateway.discovery.config.enforcer.JWTIssuer;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
+import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTUtil;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
@@ -125,9 +128,11 @@ public class ConfigHolder {
         // Read token caching configs
         populateCacheConfigs(config.getCache());
 
+        // Read jwt issuer configurations
+        populateJWTIssuerConfigurations(config.getJwtIssuer());
+
         // resolve string variables provided as environment variables.
         resolveConfigsWithEnvs(this.config);
-
     }
 
     private void populateAuthService(AuthService cdsAuth) {
@@ -233,8 +238,12 @@ public class ConfigHolder {
         jwtConfigurationDto.setSignatureAlgorithm(jwtGenerator.getSigningAlgorithm());
         jwtConfigurationDto.setEnableUserClaims(jwtGenerator.getEnableUserClaims());
         jwtConfigurationDto.setGatewayJWTGeneratorImpl(jwtGenerator.getGatewayGeneratorImpl());
-        config.setPublicCertificatePath(jwtGenerator.getPublicCertificatePath());
-        config.setPrivateKeyPath(jwtGenerator.getPrivateKeyPath());
+        try {
+            jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtGenerator.getPublicCertificatePath()));
+            jwtConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey(jwtGenerator.getPrivateKeyPath()));
+        } catch (MGWException | CertificateException | IOException e) {
+            logger.error("Error in loading public cert or private key", e);
+        }
         config.setJwtConfigurationDto(jwtConfigurationDto);
     }
 
@@ -301,6 +310,29 @@ public class ConfigHolder {
             }
         }
         return configValue;
+    }
+
+    private void populateJWTIssuerConfigurations(JWTIssuer jwtIssuer) {
+        JWTIssuerConfigurationDto jwtIssuerConfigurationDto = new JWTIssuerConfigurationDto();
+        jwtIssuerConfigurationDto.setEnabled(jwtIssuer.getEnabled());
+        jwtIssuerConfigurationDto.setIssuer(jwtIssuer.getIssuer());
+        jwtIssuerConfigurationDto.setConsumerDialectUri(jwtIssuer.getClaimDialect());
+        jwtIssuerConfigurationDto.setSignatureAlgorithm(jwtIssuer.getSigningAlgorithm());
+        try {
+            jwtIssuerConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey(jwtIssuer.getPrivateKeyPath()));
+            jwtIssuerConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtIssuer.getPublicCertificatePath()));
+        } catch (MGWException | CertificateException | IOException e) {
+            logger.error("Error in loading public cert or private key", e);
+        }
+        jwtIssuerConfigurationDto.setTtl(jwtIssuer.getValidityPeriod());
+        CredentialDto[] credentialDtos = new CredentialDto[jwtIssuer.getJwtUsersList().size()];
+        for (int index = 0; index < jwtIssuer.getJwtUsersList().size(); index++) {
+            CredentialDto credentialDto = new CredentialDto(jwtIssuer.getJwtUsers(index).getUsername(),
+                    jwtIssuer.getJwtUsers(index).getPassword().toCharArray());
+            credentialDtos[index] = credentialDto;
+        }
+        config.setJwtUsersCredentials(credentialDtos);
+        config.setJwtIssuerConfigurationDto(jwtIssuerConfigurationDto);
     }
 
     public EnforcerConfig getConfig() {

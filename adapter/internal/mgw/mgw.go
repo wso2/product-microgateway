@@ -67,6 +67,8 @@ var (
 
 const (
 	ads = "ads"
+	// DefaultGatewayLabelValue represents the default value for an environment
+	DefaultGatewayLabelValue string = "Production and Sandbox"
 )
 
 func init() {
@@ -184,6 +186,22 @@ func Run(conf *config.Config) {
 
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
+
+	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
+	if enableJwtIssuer {
+		// Take the configured labels
+		envs := conf.ControlPlane.EventHub.EnvironmentLabels
+
+		// If no environments are configured, default gateway label value is assigned.
+		if len(envs) == 0 {
+			envs = append(envs, DefaultGatewayLabelValue)
+		}
+		for _, env := range envs {
+			listeners, clusters, routes, endpoints, apis := xds.GenerateEnvoyResoucesForLabel(env)
+			xds.UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners)
+			xds.UpdateEnforcerApis(env, apis)
+		}
+	}
 
 	go restserver.StartRestServer(conf)
 
