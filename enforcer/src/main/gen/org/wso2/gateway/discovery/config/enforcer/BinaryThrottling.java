@@ -52,11 +52,6 @@ private static final long serialVersionUID = 0L;
           case 0:
             done = true;
             break;
-          case 8: {
-
-            enabled_ = input.readBool();
-            break;
-          }
           case 18: {
             java.lang.String s = input.readStringRequireUtf8();
 
@@ -137,17 +132,6 @@ private static final long serialVersionUID = 0L;
     return org.wso2.gateway.discovery.config.enforcer.BinaryThrottlingProto.internal_static_wso2_discovery_config_enforcer_BinaryThrottling_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             org.wso2.gateway.discovery.config.enforcer.BinaryThrottling.class, org.wso2.gateway.discovery.config.enforcer.BinaryThrottling.Builder.class);
-  }
-
-  public static final int ENABLED_FIELD_NUMBER = 1;
-  private boolean enabled_;
-  /**
-   * <code>bool enabled = 1;</code>
-   * @return The enabled.
-   */
-  @java.lang.Override
-  public boolean getEnabled() {
-    return enabled_;
   }
 
   public static final int USERNAME_FIELD_NUMBER = 2;
@@ -332,9 +316,6 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (enabled_ != false) {
-      output.writeBool(1, enabled_);
-    }
     if (!getUsernameBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 2, username_);
     }
@@ -359,10 +340,6 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (enabled_ != false) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(1, enabled_);
-    }
     if (!getUsernameBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, username_);
     }
@@ -396,8 +373,6 @@ private static final long serialVersionUID = 0L;
     }
     org.wso2.gateway.discovery.config.enforcer.BinaryThrottling other = (org.wso2.gateway.discovery.config.enforcer.BinaryThrottling) obj;
 
-    if (getEnabled()
-        != other.getEnabled()) return false;
     if (!getUsername()
         .equals(other.getUsername())) return false;
     if (!getPassword()
@@ -425,9 +400,6 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + ENABLED_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-        getEnabled());
     hash = (37 * hash) + USERNAME_FIELD_NUMBER;
     hash = (53 * hash) + getUsername().hashCode();
     hash = (37 * hash) + PASSWORD_FIELD_NUMBER;
@@ -578,8 +550,6 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      enabled_ = false;
-
       username_ = "";
 
       password_ = "";
@@ -629,7 +599,6 @@ private static final long serialVersionUID = 0L;
     public org.wso2.gateway.discovery.config.enforcer.BinaryThrottling buildPartial() {
       org.wso2.gateway.discovery.config.enforcer.BinaryThrottling result = new org.wso2.gateway.discovery.config.enforcer.BinaryThrottling(this);
       int from_bitField0_ = bitField0_;
-      result.enabled_ = enabled_;
       result.username_ = username_;
       result.password_ = password_;
       if (urlGroupBuilder_ == null) {
@@ -699,9 +668,6 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.wso2.gateway.discovery.config.enforcer.BinaryThrottling other) {
       if (other == org.wso2.gateway.discovery.config.enforcer.BinaryThrottling.getDefaultInstance()) return this;
-      if (other.getEnabled() != false) {
-        setEnabled(other.getEnabled());
-      }
       if (!other.getUsername().isEmpty()) {
         username_ = other.username_;
         onChanged();
@@ -771,37 +737,6 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     private int bitField0_;
-
-    private boolean enabled_ ;
-    /**
-     * <code>bool enabled = 1;</code>
-     * @return The enabled.
-     */
-    @java.lang.Override
-    public boolean getEnabled() {
-      return enabled_;
-    }
-    /**
-     * <code>bool enabled = 1;</code>
-     * @param value The enabled to set.
-     * @return This builder for chaining.
-     */
-    public Builder setEnabled(boolean value) {
-      
-      enabled_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>bool enabled = 1;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearEnabled() {
-      
-      enabled_ = false;
-      onChanged();
-      return this;
-    }
 
     private java.lang.Object username_ = "";
     /**

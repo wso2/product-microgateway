@@ -19,7 +19,7 @@
 package org.wso2.micro.gateway.enforcer.subscription;
 
 /**
- * This class holds tenant wise subscription data stores
+ * This class holds tenant wise subscription data stores.
  */
 public class SubscriptionDataHolder {
 

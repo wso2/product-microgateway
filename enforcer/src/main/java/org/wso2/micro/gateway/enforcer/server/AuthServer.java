@@ -37,6 +37,8 @@ import org.wso2.micro.gateway.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleAgent;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleEventListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,6 +63,11 @@ public class AuthServer {
             Server server = initServer();
             // Initialise cache objects
             CacheProvider.init();
+
+            if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
+                ThrottleAgent.startThrottlePublisherPool();
+                ThrottleEventListener.init();
+            }
 
             // Start the server
             server.start();

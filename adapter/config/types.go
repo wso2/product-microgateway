@@ -109,7 +109,7 @@ type Config struct {
 		KeyStore                keystore
 		ListenerTLSEnabled      bool
 
-		// Envoy Upstream Related Connfigurations
+		// Envoy Upstream Related Configurations
 		Upstream struct {
 			//UpstreamTLS related Configuration
 			TLS struct {
@@ -130,6 +130,7 @@ type Config struct {
 		AuthService     authService
 		JwtGenerator    jwtGenerator
 		Cache           cache
+		Throttling      throttlingConfig
 		JwtIssuer       jwtIssuer
 	}
 
@@ -184,6 +185,58 @@ type eventHub struct {
 	} `toml:"jmsConnectionParameters"`
 }
 
+type throttlingConfig struct {
+	EnableGlobalEventPublishing        bool   `toml:"enableGlobalEventPublishing"`
+	EnableHeaderConditions             bool   `toml:"enableHeaderConditions"`
+	EnableQueryParamConditions         bool   `toml:"enableQueryParamConditions"`
+	EnableJwtClaimConditions           bool   `toml:"enableJwtClaimConditions"`
+	JmsConnectionInitialContextFactory string `toml:"jmsConnectioninitialContextFactory"`
+	JmsConnectionProviderURL           string `toml:"jmsConnectionProviderUrl"`
+	Publisher                          binaryPublisher
+}
+
+type binaryPublisher struct {
+	Username string
+	Password string
+	URLGroup []urlGroup `toml:"urlGroup"`
+	Pool     publisherPool
+	Agent    binaryAgent
+}
+
+type urlGroup struct {
+	ReceiverURLs []string `toml:"receiverURLs"`
+	AuthURLs     []string `toml:"authURLs"`
+	Type         string   `toml:"type"`
+}
+
+type publisherPool struct {
+	MaxIdleDataPublishingAgents        int32
+	InitIdleObjectDataPublishingAgents int32
+	PublisherThreadPoolCoreSize        int32
+	PublisherThreadPoolMaximumSize     int32
+	PublisherThreadPoolKeepAliveTime   int32
+}
+
+type binaryAgent struct {
+	SslEnabledProtocols        string
+	Ciphers                    string
+	QueueSize                  int32
+	BatchSize                  int32
+	CorePoolSize               int32
+	SocketTimeoutMS            int32
+	MaxPoolSize                int32
+	KeepAliveTimeInPool        int32
+	ReconnectionInterval       int32
+	MaxTransportPoolSize       int32
+	MaxIdleConnections         int32
+	EvictionTimePeriod         int32
+	MinIdleTimeInPool          int32
+	SecureMaxTransportPoolSize int32
+	SecureMaxIdleConnections   int32
+	SecureEvictionTimePeriod   int32
+	SecureMinIdleTimeInPool    int32
+}
+
 type jwtGenerator struct {
 	Enable                bool   `toml:"enable"`
 	Encoding              string `toml:"encoding"`
@@ -223,8 +276,8 @@ type jwtIssuer struct {
 
 // JwtUser represents allowed users to generate JWT tokens
 type JwtUser struct {
-	Username      string `toml:"username"`
-	Password      string `toml:"password"`
+	Username string `toml:"username"`
+	Password string `toml:"password"`
 }
 
 // APICtlUser represents registered APICtl Users

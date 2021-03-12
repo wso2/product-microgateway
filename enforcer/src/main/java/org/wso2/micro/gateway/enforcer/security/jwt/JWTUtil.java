@@ -78,7 +78,7 @@ public class JWTUtil {
     private static volatile long ttl = -1L;
 
     /**
-     * This method used to retrieve JWKS keys from endpoint
+     * This method used to retrieve JWKS keys from endpoint.
      *
      * @param jwksEndpoint
      * @return
