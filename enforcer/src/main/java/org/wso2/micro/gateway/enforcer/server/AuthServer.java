@@ -32,10 +32,11 @@ import org.wso2.micro.gateway.enforcer.api.APIFactory;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
-import org.wso2.micro.gateway.enforcer.globalthrottle.ThrottleAgent;
 import org.wso2.micro.gateway.enforcer.grpc.ExtAuthService;
 import org.wso2.micro.gateway.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleAgent;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleEventListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,9 +62,10 @@ public class AuthServer {
             //Initialise cache objects
             CacheProvider.init();
 
-            // TODO: (Praminda) do this only if throttling is enabled
-            // ConfigHolder.getInstance().getConfig().getThrottleAgentConfig().isEnabled()
-            ThrottleAgent.startThrottlePublisherPool();
+            if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
+                ThrottleAgent.startThrottlePublisherPool();
+                ThrottleEventListener.init();
+            }
 
             // Start the server
             server.start();

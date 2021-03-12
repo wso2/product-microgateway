@@ -23,8 +23,8 @@ import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
-import org.wso2.micro.gateway.enforcer.dto.ThrottleAgentConfigDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class EnforcerConfig {
     private EventHubConfigurationDto eventHub;
     private Map<String, TokenIssuerDto> issuersMap = new HashMap<>();
     private CredentialDto apimCredentials;
-    private ThrottleAgentConfigDTO throttleAgentConfig;
+    private ThrottleConfigDto throttleConfig;
     private JWTConfigurationDto jwtConfigurationDto;
     private CacheDto cacheDto;
     private String publicCertificatePath = "";
@@ -76,12 +76,12 @@ public class EnforcerConfig {
         this.apimCredentials = apimCredentials;
     }
 
-    public ThrottleAgentConfigDTO getThrottleAgentConfig() {
-        return throttleAgentConfig;
+    public ThrottleConfigDto getThrottleConfig() {
+        return throttleConfig;
     }
 
-    public void setThrottleAgentConfig(ThrottleAgentConfigDTO throttleAgentConfig) {
-        this.throttleAgentConfig = throttleAgentConfig;
+    public void setThrottleConfig(ThrottleConfigDto throttleConfig) {
+        this.throttleConfig = throttleConfig;
     }
 
     public void setJwtConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {

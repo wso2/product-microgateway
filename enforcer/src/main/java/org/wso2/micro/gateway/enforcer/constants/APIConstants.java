@@ -22,10 +22,6 @@ package org.wso2.micro.gateway.enforcer.constants;
  */
 public class APIConstants {
 
-    public static final String UNLIMITED_TIER = "Unlimited";
-    public static final String IP = "ip";
-    public static final String IPV6 = "ipv6";
-
     //open API extensions
     public static final String X_WSO2_BASE_PATH = "x-wso2-basepath";
 
@@ -34,7 +30,6 @@ public class APIConstants {
     public static final String GW_RES_METHOD_PARAM = "method";
     public static final String GW_VERSION_PARAM = "version";
     public static final String GW_API_NAME_PARAM = "name";
-
 
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "wso2carbon";
@@ -201,19 +196,6 @@ public class APIConstants {
     }
 
     /**
-     * Topic Names.
-     */
-    public static class TopicNames {
-
-        //APIM default topic names
-        public static final String TOPIC_THROTTLE_DATA = "throttleData";
-        public static final String TOPIC_TOKEN_REVOCATION = "tokenRevocation";
-        public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
-        public static final String TOPIC_KEY_MANAGER = "keyManager";
-        public static final String TOPIC_NOTIFICATION = "notification";
-    }
-
-    /**
      * Holds the constants related to attributes to be sent in the response in case of an error
      * scenario raised within the enforcer.
      */
@@ -231,7 +213,8 @@ public class APIConstants {
         OK("200", 200),
         UNAUTHENTICATED("401", 401),
         UNAUTHORIZED("403", 403),
-        NOTFOUND("404", 404);
+        NOTFOUND("404", 404),
+        THROTTLED("429", 429);
 
         private String value;
         private int code;
@@ -248,4 +231,5 @@ public class APIConstants {
             return this.code;
         }
     }
+
 }

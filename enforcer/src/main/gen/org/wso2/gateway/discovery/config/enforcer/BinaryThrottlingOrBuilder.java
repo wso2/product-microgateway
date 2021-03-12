@@ -8,12 +8,6 @@ public interface BinaryThrottlingOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>bool enabled = 1;</code>
-   * @return The enabled.
-   */
-  boolean getEnabled();
-
-  /**
    * <code>string username = 2;</code>
    * @return The username.
    */

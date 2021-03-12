@@ -11,7 +11,7 @@ option java_multiple_files = true;
 
 // URLMapping data model
 message URLMapping {
-    string authScheme = 1;
+	string authScheme = 1;
 	string httpMethod = 2;
 	string urlPattern = 3;
 	repeated string scopes = 4;

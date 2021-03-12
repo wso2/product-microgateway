@@ -18,6 +18,9 @@
 
 package org.wso2.micro.gateway.enforcer.security;
 
+import org.wso2.micro.gateway.enforcer.constants.Constants;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
+
 import java.util.List;
 
 /**
@@ -49,6 +52,19 @@ public class AuthenticationContext {
     private String apiName;
     private String apiPublisher;
     private String apiVersion;
+
+    public AuthenticationContext() {
+        this.applicationId = Constants.UNKNOWN_VALUE;
+        this.apiPublisher = Constants.UNKNOWN_VALUE;
+        this.apiTier = "";
+        this.applicationId = Constants.UNKNOWN_VALUE;
+        this.applicationName = Constants.UNKNOWN_VALUE;
+        this.applicationTier = ThrottleConstants.UNLIMITED_TIER;
+        this.consumerKey = Constants.UNKNOWN_VALUE;
+        this.spikeArrestUnit = "";
+        this.subscriber = Constants.UNKNOWN_VALUE;
+        this.subscriberTenantDomain = Constants.UNKNOWN_VALUE;
+    }
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;

@@ -37,7 +37,7 @@ public class RequestContext {
     private ResourceConfig matchedResourcePath;
     private Map<String, String> headers;
     private Map<String, Object> properties = new HashMap();
-    private AuthenticationContext authenticationContext = new AuthenticationContext();
+    private AuthenticationContext authenticationContext;
     private String requestID;
     private String address;
     // Denotes the cluster header name for each environment. Both properties can be null if

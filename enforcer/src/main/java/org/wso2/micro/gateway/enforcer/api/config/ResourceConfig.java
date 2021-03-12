@@ -17,7 +17,7 @@
  */
 package org.wso2.micro.gateway.enforcer.api.config;
 
-import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +32,7 @@ public class ResourceConfig {
     private String path;
     private HttpMethods method;
     private Map<String, List<String>> securitySchemas = new HashMap();
-    private String tier = APIConstants.UNLIMITED_TIER;
+    private String tier = ThrottleConstants.UNLIMITED_TIER;
 
     public String getPath() {
         return path;

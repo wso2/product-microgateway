@@ -34,7 +34,7 @@ message Config {
 
     JWTGenerator jwtGenerator = 7;
 
-    Throttling throttlingConfig = 8;
+    Throttling throttling = 8;
 
     Cache cache = 9;
 }

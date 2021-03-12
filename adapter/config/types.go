@@ -105,7 +105,7 @@ type Config struct {
 		KeyStore                keystore
 		ListenerTLSEnabled      bool
 
-		// Envoy Upstream Related Connfigurations
+		// Envoy Upstream Related Configurations
 		Upstream struct {
 			//UpstreamTLS related Configuration
 			TLS struct {
@@ -120,13 +120,13 @@ type Config struct {
 	}
 
 	Enforcer struct {
-		JwtTokenConfig   []jwtTokenConfig
-		EventHub         eventHub
-		ApimCredentials  apimCredentials
-		AuthService      authService
-		JwtGenerator     jwtGenerator
-		Cache            cache
-		ThrottlingConfig throttlingConfig
+		JwtTokenConfig  []jwtTokenConfig
+		EventHub        eventHub
+		ApimCredentials apimCredentials
+		AuthService     authService
+		JwtGenerator    jwtGenerator
+		Cache           cache
+		Throttling      throttlingConfig
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
@@ -180,16 +180,21 @@ type eventHub struct {
 }
 
 type throttlingConfig struct {
-	Binary binaryThrottleConfig
+	EnableGlobalEventPublishing        bool   `toml:"enableGlobalEventPublishing"`
+	EnableHeaderConditions             bool   `toml:"enableHeaderConditions"`
+	EnableQueryParamConditions         bool   `toml:"enableQueryParamConditions"`
+	EnableJwtClaimConditions           bool   `toml:"enableJwtClaimConditions"`
+	JmsConnectionInitialContextFactory string `toml:"jmsConnectioninitialContextFactory"`
+	JmsConnectionProviderURL           string `toml:"jmsConnectionProviderUrl"`
+	Publisher                          binaryPublisher
 }
 
-type binaryThrottleConfig struct {
-	Enabled   bool
-	Username  string
-	Password  string
-	URLGroup  []urlGroup `toml:"urlGroup"`
-	Publisher binaryPublisher
-	Agent     binaryAgent
+type binaryPublisher struct {
+	Username string
+	Password string
+	URLGroup []urlGroup `toml:"urlGroup"`
+	Pool     publisherPool
+	Agent    binaryAgent
 }
 
 type urlGroup struct {
@@ -198,7 +203,7 @@ type urlGroup struct {
 	Type         string   `toml:"type"`
 }
 
-type binaryPublisher struct {
+type publisherPool struct {
 	MaxIdleDataPublishingAgents        int32
 	InitIdleObjectDataPublishingAgents int32
 	PublisherThreadPoolCoreSize        int32

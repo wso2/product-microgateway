@@ -44,9 +44,10 @@ public class Constants {
     public static final String END_OF_PRIVATE_KEY = "-----END PRIVATE KEY-----";
     public static final String RSA = "RSA";
 
-    //Throttle config constants
     public static final String LOADBALANCE = "loadbalance";
     public static final String FAILOVER = "failover";
     public static final String TM_BINARY_LOADBALANCE_SEPARATOR = ",";
     public static final String TM_BINARY_FAILOVER_SEPARATOR = "|";
+
+    public static final String UNKNOWN_VALUE = "__unknown__";
 }
