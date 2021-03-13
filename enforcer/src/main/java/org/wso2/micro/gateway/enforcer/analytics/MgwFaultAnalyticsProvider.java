@@ -18,10 +18,7 @@
 
 package org.wso2.micro.gateway.enforcer.analytics;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.DataNotFoundException;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Error;
@@ -32,7 +29,6 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
-import org.wso2.micro.gateway.enforcer.api.APIFactory;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
@@ -41,8 +37,7 @@ import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
  * Generate FaultDTO for the errors generated from enforcer.
  */
 public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
-    private static final Logger logger = LogManager.getLogger(APIFactory.class);
-    private RequestContext requestContext;
+    private final RequestContext requestContext;
 
     public MgwFaultAnalyticsProvider(RequestContext requestContext) {
         this.requestContext = requestContext;
@@ -84,13 +79,13 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public API getApi() throws DataNotFoundException {
+    public API getApi() {
         API api = new API();
         api.setApiId(AnalyticsUtils.getAPIId(requestContext));
         api.setApiCreator(AnalyticsUtils.setDefaultIfNull(
                 requestContext.getAuthenticationContext() == null
                         ? null : requestContext.getAuthenticationContext().getApiPublisher()));
-        api.setApiType("HTTP");
+        api.setApiType(requestContext.getMathedAPI().getAPIConfig().getApiType());
         api.setApiName(requestContext.getMathedAPI().getAPIConfig().getName());
         api.setApiVersion(requestContext.getMathedAPI().getAPIConfig().getVersion());
         api.setApiCreatorTenantDomain("carbon.super");
@@ -98,7 +93,7 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public Application getApplication() throws DataNotFoundException {
+    public Application getApplication() {
         AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
         Application application = new Application();
         // Default Value would be PRODUCTION
@@ -111,9 +106,9 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public Operation getOperation() throws DataNotFoundException {
+    public Operation getOperation() {
         // This could be null if  OPTIONS request comes
-        // TODO: (VirajSalaka) handle method not found operation
+        // TODO: (VirajSalaka) handle method not found operation (discuss)
         if (requestContext.getMatchedResourcePath() != null) {
             Operation operation = new Operation();
             operation.setApiMethod(requestContext.getMatchedResourcePath().getMethod().name());
