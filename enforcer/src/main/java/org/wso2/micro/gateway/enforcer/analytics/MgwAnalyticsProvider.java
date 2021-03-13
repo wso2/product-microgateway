@@ -132,14 +132,14 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public Target getTarget() {
+        Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
         Target target = new Target();
         // As response caching is not configured at the moment.
         target.setResponseCacheHit(false);
         target.setTargetResponseCode(logEntry.getResponse().getResponseCode().getValue());
         // TODO: (VirajSalaka) get destination in the format of url
         // TODO: (VirajSalaka) add backend basepath
-        target.setDestination(logEntry.getCommonProperties().getUpstreamRemoteAddress().getSocketAddress()
-                .getAddress());
+        target.setDestination(getValueAsString(fieldsMap, MetadataConstants.DESTINATION));
         logger.info(" Target Event: " + target.toString());
         return target;
     }

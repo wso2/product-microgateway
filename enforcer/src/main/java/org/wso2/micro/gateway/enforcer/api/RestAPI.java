@@ -20,6 +20,7 @@ package org.wso2.micro.gateway.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.api.Api;
+import org.wso2.gateway.discovery.api.Endpoint;
 import org.wso2.gateway.discovery.api.Operation;
 import org.wso2.gateway.discovery.api.Resource;
 import org.wso2.micro.gateway.enforcer.Filter;
@@ -57,6 +58,8 @@ public class RestAPI implements API {
         String name = api.getTitle();
         String version = api.getVersion();
         String apiType = api.getApiType();
+        List<String> productionUrls = processEndpoints(api.getProductionUrlsList());
+        List<String> sandboxUrls = processEndpoints(api.getSandboxUrlsList());
         List<ResourceConfig> resources = new ArrayList<>();
         for (Resource res: api.getResourcesList()) {
             // TODO: (Praminda) handle all fields of resource
@@ -65,10 +68,29 @@ public class RestAPI implements API {
                 resources.add(resConfig);
             }
         }
-        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources)
-                .apiType(apiType).build();
+        this.apiConfig = new APIConfig.Builder(name)
+                .basePath(basePath)
+                .version(version)
+                .resources(resources)
+                .apiType(apiType)
+                .productionUrls(productionUrls)
+                .sandboxUrls(sandboxUrls)
+                .build();
         initFilters();
         return basePath;
+    }
+
+    private List<String> processEndpoints(List<Endpoint> endpoints) {
+        if (endpoints == null || endpoints.size() == 0) {
+            return null;
+        }
+        List<String> urls = new ArrayList<>(1);
+        endpoints.forEach(endpoint -> {
+            String url = endpoint.getURLType().toLowerCase() + "://" +
+                    endpoint.getHost() + ":" + endpoint.getPort() + endpoint.getBasepath();
+            urls.add(url);
+        });
+        return urls;
     }
 
     @Override

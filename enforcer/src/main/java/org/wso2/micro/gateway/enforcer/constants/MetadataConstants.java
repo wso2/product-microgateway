@@ -41,5 +41,7 @@ public class MetadataConstants {
 
     public static final String API_RESOURCE_TEMPLATE_KEY = "ApiResourceTemplate";
 
+    public static final String DESTINATION = "Destination";
+
     public static final String ERROR_CODE_KEY = "ErrorCode";
 }

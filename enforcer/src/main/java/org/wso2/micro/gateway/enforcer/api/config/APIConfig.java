@@ -30,6 +30,8 @@ public class APIConfig {
     private String version;
     private String basePath;
     private String apiType;
+    private List<String> productionUrls;
+    private List<String> sandboxUrls;
 
     private List<String> securitySchemas = new ArrayList<>();
     private String tier = APIConstants.UNLIMITED_TIER;
@@ -37,6 +39,14 @@ public class APIConfig {
 
     public String getApiType() {
         return apiType;
+    }
+
+    public List<String> getProductionUrls() {
+        return productionUrls;
+    }
+
+    public List<String> getSandboxUrls() {
+        return sandboxUrls;
     }
 
     /**
@@ -48,6 +58,8 @@ public class APIConfig {
         private String version;
         private String basePath;
         private String apiType;
+        private List<String> productionUrls;
+        private List<String> sandboxUrls;
 
         private List<String> securitySchemas = new ArrayList<>();
         private String tier = APIConstants.UNLIMITED_TIER;
@@ -77,6 +89,16 @@ public class APIConfig {
             return this;
         }
 
+        public Builder productionUrls(List<String> productionUrls) {
+            this.productionUrls = productionUrls;
+            return this;
+        }
+
+        public Builder sandboxUrls(List<String> sandboxUrls) {
+            this.sandboxUrls = sandboxUrls;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -84,6 +106,8 @@ public class APIConfig {
             apiConfig.version = this.version;
             apiConfig.resources = this.resources;
             apiConfig.apiType = this.apiType;
+            apiConfig.productionUrls = this.productionUrls;
+            apiConfig.sandboxUrls = this.sandboxUrls;
             return apiConfig;
         }
     }

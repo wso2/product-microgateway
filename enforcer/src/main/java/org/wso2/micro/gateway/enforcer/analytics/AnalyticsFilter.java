@@ -101,7 +101,22 @@ public class AnalyticsFilter implements Filter {
         requestContext.addMetadataToMap(MetadataConstants.API_RESOURCE_TEMPLATE_KEY,
                 requestContext.getMatchedResourcePath().getPath());
 
+        requestContext.addMetadataToMap(MetadataConstants.DESTINATION, resolveEndpoint(requestContext));
         return true;
+    }
+
+    private String resolveEndpoint(RequestContext requestContext) {
+        AuthenticationContext authContext = requestContext.getAuthenticationContext();
+        // KeyType could be sandbox only if the keytype is set fetched from the Eventhub
+        if (authContext != null && authContext.getKeyType() != null
+                && authContext.getKeyType().equals(APIConstants.API_KEY_TYPE_SANDBOX)) {
+            // keyType is sandbox but the sandbox endpoints are null this will result in authentication failure.
+            // Hence null scenario is impossible to occur.
+            return requestContext.getMathedAPI().getAPIConfig().getSandboxUrls() != null ?
+                    requestContext.getMathedAPI().getAPIConfig().getSandboxUrls().get(0) : "";
+        }
+        // This does not cause problems at the moment Since the current microgateway supports only one URL
+        return requestContext.getMathedAPI().getAPIConfig().getProductionUrls().get(0);
     }
 
     public void handleFailureRequest(RequestContext requestContext) {
