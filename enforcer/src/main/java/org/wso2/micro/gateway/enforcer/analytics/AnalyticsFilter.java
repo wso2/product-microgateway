@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,17 +18,23 @@
 
 package org.wso2.micro.gateway.enforcer.analytics;
 
+import io.envoyproxy.envoy.data.accesslog.v3.HTTPAccessLogEntry;
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsConfigurationHolder;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
-import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
-import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.MetadataConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This is the filter is for Analytics.
@@ -37,11 +43,17 @@ import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
  * If the request is allowed to proceed, the dynamic metadata will be populated so that the analytics event can be
  * populated from grpc access logs within AccessLoggingService.
  */
-public class AnalyticsFilter implements Filter {
+public class AnalyticsFilter {
     private static final Logger logger = LogManager.getLogger(AnalyticsFilter.class);
     private static AnalyticsFilter analyticsFilter;
+    private static final String AUTH_TOKEN_KEY = "auth.api.token";
+    private static final String AUTH_URL = "auth.api.url";
 
     private AnalyticsFilter() {
+        Map<String, String> configuration = new HashMap<>(2);
+        configuration.put(AUTH_TOKEN_KEY, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthToken());
+        configuration.put(AUTH_URL, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthURL());
+        AnalyticsConfigurationHolder.getInstance().setConfigurations(configuration);
     }
 
     public static AnalyticsFilter getInstance() {
@@ -55,17 +67,27 @@ public class AnalyticsFilter implements Filter {
         return analyticsFilter;
     }
 
-    public boolean handleMsg(StreamAccessLogsMessage message) {
-        // TODO: (VirajSalaka) Move the logic here from AccessLoggingService.
-        return true;
+    public void handleMsg(StreamAccessLogsMessage message) {
+        for (int i = 0; i < message.getHttpLogs().getLogEntryCount(); i++) {
+            HTTPAccessLogEntry logEntry = message.getHttpLogs().getLogEntry(i);
+            logger.trace("Received logEntry from Router " + message.getIdentifier().getNode() +
+                    " : " + message.toString());
+            if (doNotPublishEvent(logEntry)) {
+                logger.debug("LogEntry is ignored as it is already published by the enforcer.");
+                continue;
+            }
+            AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
+            GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+            try {
+                dataCollector.collectData();
+                logger.debug("Event is published.");
+            } catch (AnalyticsException e) {
+                logger.error("Error while publishing the event to the analytics portal.", e);
+            }
+        }
     }
 
-    @Override
-    public void init(APIConfig apiConfig) {
-    }
-
-    @Override
-    public boolean handleRequest(RequestContext requestContext) {
+    public void handleSuccessRequest(RequestContext requestContext) {
         String apiName = requestContext.getMathedAPI().getAPIConfig().getName();
         String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
         String apiType = requestContext.getMathedAPI().getAPIConfig().getApiType();
@@ -102,7 +124,6 @@ public class AnalyticsFilter implements Filter {
                 requestContext.getMatchedResourcePath().getPath());
 
         requestContext.addMetadataToMap(MetadataConstants.DESTINATION, resolveEndpoint(requestContext));
-        return true;
     }
 
     private String resolveEndpoint(RequestContext requestContext) {
@@ -129,9 +150,17 @@ public class AnalyticsFilter implements Filter {
         try {
             dataCollector.collectData();
             // TODO: (VirajSalaka) provide more information on the published event
-            logger.debug("Analytics event for failure event is pubished. ");
+            logger.debug("Analytics event for failure event is published. ");
         } catch (AnalyticsException e) {
             logger.error("Error while publishing the analytics event. ", e);
         }
+    }
+
+
+    private boolean doNotPublishEvent(HTTPAccessLogEntry logEntry) {
+        // TODO: (VirajSalaka) There is a possiblity that event is published but resulted in ext_auth_error.
+        // If ext_auth_denied request comes, the event is already published from the enforcer.
+        return StringUtils.isEmpty(logEntry.getResponse().getResponseCodeDetails())
+                && logEntry.getResponse().getResponseCodeDetails().equals("ext_auth_denied");
     }
 }

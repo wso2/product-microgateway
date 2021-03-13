@@ -104,7 +104,7 @@ public class RestAPI implements API {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
             if (analyticsEnabled) {
-                AnalyticsFilter.getInstance().handleRequest(requestContext);
+                AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
                 responseObject.setMetaDataMap(requestContext.getMetadataMap());
             }
         } else {

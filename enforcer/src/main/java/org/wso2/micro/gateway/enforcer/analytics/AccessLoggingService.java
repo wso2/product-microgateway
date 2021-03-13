@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +18,6 @@
 
 package org.wso2.micro.gateway.enforcer.analytics;
 
-import io.envoyproxy.envoy.data.accesslog.v3.HTTPAccessLogEntry;
 import io.envoyproxy.envoy.service.accesslog.v3.AccessLogServiceGrpc;
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsResponse;
@@ -28,13 +27,8 @@ import io.grpc.netty.shaded.io.netty.channel.EventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.stub.StreamObserver;
-import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsConfigurationHolder;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
-import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.AnalyticsReceiverConfigDTO;
 import org.wso2.micro.gateway.enforcer.server.Constants;
@@ -42,8 +36,6 @@ import org.wso2.micro.gateway.enforcer.server.EnforcerThreadPoolExecutor;
 import org.wso2.micro.gateway.enforcer.server.NativeThreadFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -61,11 +53,6 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
     private static final String AUTH_URL = "auth.api.url";
 
     public boolean init() {
-        // TODO: (VirajSalaka) Move this to a different method as the same publisher is used twice.
-        Map<String, String> configuration = new HashMap<>(2);
-        configuration.put(AUTH_TOKEN_KEY, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthToken());
-        configuration.put(AUTH_URL, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthURL());
-        AnalyticsConfigurationHolder.getInstance().setConfigurations(configuration);
         return startAccessLoggingServer();
     }
 
@@ -75,23 +62,7 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
         return new StreamObserver<>() {
             @Override
             public void onNext(StreamAccessLogsMessage message) {
-                for (int i = 0; i < message.getHttpLogs().getLogEntryCount(); i++) {
-                    HTTPAccessLogEntry logEntry = message.getHttpLogs().getLogEntry(i);
-                    logger.trace("Received logEntry from Router " + message.getIdentifier().getNode() +
-                            " : " + message.toString());
-                    if (doNotPublishEvent(logEntry)) {
-                        logger.debug("LogEntry is ignored as it is already published by the enforcer.");
-                        continue;
-                    }
-                    AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
-                    GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-                    try {
-                        dataCollector.collectData();
-                        logger.debug("Event is published.");
-                    } catch (AnalyticsException e) {
-                        logger.error("Error while publishing the event to the analytics portal.", e);
-                    }
-                }
+                AnalyticsFilter.getInstance().handleMsg(message);
             }
 
             @Override
@@ -142,12 +113,5 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
         }
         logger.info("Access loggers Sever started Listening in port : " + serverConfig.getPort());
         return true;
-    }
-
-    private boolean doNotPublishEvent(HTTPAccessLogEntry logEntry) {
-        // TODO: (VirajSalaka) There is a possiblity that event is published but resulted in ext_auth_error.
-        // If ext_auth_denied request comes, the event is already published from the enforcer.
-        return StringUtils.isEmpty(logEntry.getResponse().getResponseCodeDetails())
-                && logEntry.getResponse().getResponseCodeDetails().equals("ext_auth_denied");
     }
 }
