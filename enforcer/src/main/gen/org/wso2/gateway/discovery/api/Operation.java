@@ -22,6 +22,7 @@ private static final long serialVersionUID = 0L;
   private Operation() {
     method_ = "";
     security_ = java.util.Collections.emptyList();
+    tier_ = "";
   }
 
   @java.lang.Override
@@ -68,6 +69,12 @@ private static final long serialVersionUID = 0L;
             }
             security_.add(
                 input.readMessage(org.wso2.gateway.discovery.api.SecurityList.parser(), extensionRegistry));
+            break;
+          }
+          case 26: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            tier_ = s;
             break;
           }
           default: {
@@ -183,6 +190,44 @@ private static final long serialVersionUID = 0L;
     return security_.get(index);
   }
 
+  public static final int TIER_FIELD_NUMBER = 3;
+  private volatile java.lang.Object tier_;
+  /**
+   * <code>string tier = 3;</code>
+   * @return The tier.
+   */
+  @java.lang.Override
+  public java.lang.String getTier() {
+    java.lang.Object ref = tier_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      tier_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string tier = 3;</code>
+   * @return The bytes for tier.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getTierBytes() {
+    java.lang.Object ref = tier_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      tier_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -203,6 +248,9 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < security_.size(); i++) {
       output.writeMessage(2, security_.get(i));
     }
+    if (!getTierBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, tier_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -218,6 +266,9 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < security_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(2, security_.get(i));
+    }
+    if (!getTierBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, tier_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -238,6 +289,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getMethod())) return false;
     if (!getSecurityList()
         .equals(other.getSecurityList())) return false;
+    if (!getTier()
+        .equals(other.getTier())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -255,6 +308,8 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + SECURITY_FIELD_NUMBER;
       hash = (53 * hash) + getSecurityList().hashCode();
     }
+    hash = (37 * hash) + TIER_FIELD_NUMBER;
+    hash = (53 * hash) + getTier().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -401,6 +456,8 @@ private static final long serialVersionUID = 0L;
       } else {
         securityBuilder_.clear();
       }
+      tier_ = "";
+
       return this;
     }
 
@@ -438,6 +495,7 @@ private static final long serialVersionUID = 0L;
       } else {
         result.security_ = securityBuilder_.build();
       }
+      result.tier_ = tier_;
       onBuilt();
       return result;
     }
@@ -515,6 +573,10 @@ private static final long serialVersionUID = 0L;
             securityBuilder_.addAllMessages(other.security_);
           }
         }
+      }
+      if (!other.getTier().isEmpty()) {
+        tier_ = other.tier_;
+        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -860,6 +922,82 @@ private static final long serialVersionUID = 0L;
         security_ = null;
       }
       return securityBuilder_;
+    }
+
+    private java.lang.Object tier_ = "";
+    /**
+     * <code>string tier = 3;</code>
+     * @return The tier.
+     */
+    public java.lang.String getTier() {
+      java.lang.Object ref = tier_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        tier_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string tier = 3;</code>
+     * @return The bytes for tier.
+     */
+    public com.google.protobuf.ByteString
+        getTierBytes() {
+      java.lang.Object ref = tier_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        tier_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string tier = 3;</code>
+     * @param value The tier to set.
+     * @return This builder for chaining.
+     */
+    public Builder setTier(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      tier_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string tier = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearTier() {
+      
+      tier_ = getDefaultInstance().getTier();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string tier = 3;</code>
+     * @param value The bytes for tier to set.
+     * @return This builder for chaining.
+     */
+    public Builder setTierBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      tier_ = value;
+      onChanged();
+      return this;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

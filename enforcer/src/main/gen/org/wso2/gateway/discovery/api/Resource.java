@@ -128,41 +128,28 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 74: {
+            java.lang.String s = input.readStringRequireUtf8();
             if (!((mutable_bitField0_ & 0x00000010) != 0)) {
-              vendorExtensible_ = com.google.protobuf.MapField.newMapField(
-                  VendorExtensibleDefaultEntryHolder.defaultEntry);
+              consumes_ = new com.google.protobuf.LazyStringArrayList();
               mutable_bitField0_ |= 0x00000010;
             }
-            com.google.protobuf.MapEntry<java.lang.String, com.google.protobuf.Any>
-            vendorExtensible__ = input.readMessage(
-                VendorExtensibleDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-            vendorExtensible_.getMutableMap().put(
-                vendorExtensible__.getKey(), vendorExtensible__.getValue());
+            consumes_.add(s);
             break;
           }
           case 82: {
             java.lang.String s = input.readStringRequireUtf8();
             if (!((mutable_bitField0_ & 0x00000020) != 0)) {
-              consumes_ = new com.google.protobuf.LazyStringArrayList();
+              schemes_ = new com.google.protobuf.LazyStringArrayList();
               mutable_bitField0_ |= 0x00000020;
             }
-            consumes_.add(s);
+            schemes_.add(s);
             break;
           }
           case 90: {
             java.lang.String s = input.readStringRequireUtf8();
             if (!((mutable_bitField0_ & 0x00000040) != 0)) {
-              schemes_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000040;
-            }
-            schemes_.add(s);
-            break;
-          }
-          case 98: {
-            java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000080) != 0)) {
               tags_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000080;
+              mutable_bitField0_ |= 0x00000040;
             }
             tags_.add(s);
             break;
@@ -191,13 +178,13 @@ private static final long serialVersionUID = 0L;
       if (((mutable_bitField0_ & 0x00000004) != 0)) {
         sandboxUrls_ = java.util.Collections.unmodifiableList(sandboxUrls_);
       }
-      if (((mutable_bitField0_ & 0x00000020) != 0)) {
+      if (((mutable_bitField0_ & 0x00000010) != 0)) {
         consumes_ = consumes_.getUnmodifiableView();
       }
-      if (((mutable_bitField0_ & 0x00000040) != 0)) {
+      if (((mutable_bitField0_ & 0x00000020) != 0)) {
         schemes_ = schemes_.getUnmodifiableView();
       }
-      if (((mutable_bitField0_ & 0x00000080) != 0)) {
+      if (((mutable_bitField0_ & 0x00000040) != 0)) {
         tags_ = tags_.getUnmodifiableView();
       }
       this.unknownFields = unknownFields.build();
@@ -216,8 +203,6 @@ private static final long serialVersionUID = 0L;
     switch (number) {
       case 8:
         return internalGetSecurity();
-      case 9:
-        return internalGetVendorExtensible();
       default:
         throw new RuntimeException(
             "Invalid map field number: " + number);
@@ -584,91 +569,10 @@ private static final long serialVersionUID = 0L;
     return map.get(key);
   }
 
-  public static final int VENDOREXTENSIBLE_FIELD_NUMBER = 9;
-  private static final class VendorExtensibleDefaultEntryHolder {
-    static final com.google.protobuf.MapEntry<
-        java.lang.String, com.google.protobuf.Any> defaultEntry =
-            com.google.protobuf.MapEntry
-            .<java.lang.String, com.google.protobuf.Any>newDefaultInstance(
-                org.wso2.gateway.discovery.api.ResourceProto.internal_static_wso2_discovery_api_Resource_VendorExtensibleEntry_descriptor, 
-                com.google.protobuf.WireFormat.FieldType.STRING,
-                "",
-                com.google.protobuf.WireFormat.FieldType.MESSAGE,
-                com.google.protobuf.Any.getDefaultInstance());
-  }
-  private com.google.protobuf.MapField<
-      java.lang.String, com.google.protobuf.Any> vendorExtensible_;
-  private com.google.protobuf.MapField<java.lang.String, com.google.protobuf.Any>
-  internalGetVendorExtensible() {
-    if (vendorExtensible_ == null) {
-      return com.google.protobuf.MapField.emptyMapField(
-          VendorExtensibleDefaultEntryHolder.defaultEntry);
-    }
-    return vendorExtensible_;
-  }
-
-  public int getVendorExtensibleCount() {
-    return internalGetVendorExtensible().getMap().size();
-  }
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-   */
-
-  @java.lang.Override
-  public boolean containsVendorExtensible(
-      java.lang.String key) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    return internalGetVendorExtensible().getMap().containsKey(key);
-  }
-  /**
-   * Use {@link #getVendorExtensibleMap()} instead.
-   */
-  @java.lang.Override
-  @java.lang.Deprecated
-  public java.util.Map<java.lang.String, com.google.protobuf.Any> getVendorExtensible() {
-    return getVendorExtensibleMap();
-  }
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-   */
-  @java.lang.Override
-
-  public java.util.Map<java.lang.String, com.google.protobuf.Any> getVendorExtensibleMap() {
-    return internalGetVendorExtensible().getMap();
-  }
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-   */
-  @java.lang.Override
-
-  public com.google.protobuf.Any getVendorExtensibleOrDefault(
-      java.lang.String key,
-      com.google.protobuf.Any defaultValue) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-        internalGetVendorExtensible().getMap();
-    return map.containsKey(key) ? map.get(key) : defaultValue;
-  }
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-   */
-  @java.lang.Override
-
-  public com.google.protobuf.Any getVendorExtensibleOrThrow(
-      java.lang.String key) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-        internalGetVendorExtensible().getMap();
-    if (!map.containsKey(key)) {
-      throw new java.lang.IllegalArgumentException();
-    }
-    return map.get(key);
-  }
-
-  public static final int CONSUMES_FIELD_NUMBER = 10;
+  public static final int CONSUMES_FIELD_NUMBER = 9;
   private com.google.protobuf.LazyStringList consumes_;
   /**
-   * <code>repeated string consumes = 10;</code>
+   * <code>repeated string consumes = 9;</code>
    * @return A list containing the consumes.
    */
   public com.google.protobuf.ProtocolStringList
@@ -676,14 +580,14 @@ private static final long serialVersionUID = 0L;
     return consumes_;
   }
   /**
-   * <code>repeated string consumes = 10;</code>
+   * <code>repeated string consumes = 9;</code>
    * @return The count of consumes.
    */
   public int getConsumesCount() {
     return consumes_.size();
   }
   /**
-   * <code>repeated string consumes = 10;</code>
+   * <code>repeated string consumes = 9;</code>
    * @param index The index of the element to return.
    * @return The consumes at the given index.
    */
@@ -691,7 +595,7 @@ private static final long serialVersionUID = 0L;
     return consumes_.get(index);
   }
   /**
-   * <code>repeated string consumes = 10;</code>
+   * <code>repeated string consumes = 9;</code>
    * @param index The index of the value to return.
    * @return The bytes of the consumes at the given index.
    */
@@ -700,10 +604,10 @@ private static final long serialVersionUID = 0L;
     return consumes_.getByteString(index);
   }
 
-  public static final int SCHEMES_FIELD_NUMBER = 11;
+  public static final int SCHEMES_FIELD_NUMBER = 10;
   private com.google.protobuf.LazyStringList schemes_;
   /**
-   * <code>repeated string schemes = 11;</code>
+   * <code>repeated string schemes = 10;</code>
    * @return A list containing the schemes.
    */
   public com.google.protobuf.ProtocolStringList
@@ -711,14 +615,14 @@ private static final long serialVersionUID = 0L;
     return schemes_;
   }
   /**
-   * <code>repeated string schemes = 11;</code>
+   * <code>repeated string schemes = 10;</code>
    * @return The count of schemes.
    */
   public int getSchemesCount() {
     return schemes_.size();
   }
   /**
-   * <code>repeated string schemes = 11;</code>
+   * <code>repeated string schemes = 10;</code>
    * @param index The index of the element to return.
    * @return The schemes at the given index.
    */
@@ -726,7 +630,7 @@ private static final long serialVersionUID = 0L;
     return schemes_.get(index);
   }
   /**
-   * <code>repeated string schemes = 11;</code>
+   * <code>repeated string schemes = 10;</code>
    * @param index The index of the value to return.
    * @return The bytes of the schemes at the given index.
    */
@@ -735,10 +639,10 @@ private static final long serialVersionUID = 0L;
     return schemes_.getByteString(index);
   }
 
-  public static final int TAGS_FIELD_NUMBER = 12;
+  public static final int TAGS_FIELD_NUMBER = 11;
   private com.google.protobuf.LazyStringList tags_;
   /**
-   * <code>repeated string tags = 12;</code>
+   * <code>repeated string tags = 11;</code>
    * @return A list containing the tags.
    */
   public com.google.protobuf.ProtocolStringList
@@ -746,14 +650,14 @@ private static final long serialVersionUID = 0L;
     return tags_;
   }
   /**
-   * <code>repeated string tags = 12;</code>
+   * <code>repeated string tags = 11;</code>
    * @return The count of tags.
    */
   public int getTagsCount() {
     return tags_.size();
   }
   /**
-   * <code>repeated string tags = 12;</code>
+   * <code>repeated string tags = 11;</code>
    * @param index The index of the element to return.
    * @return The tags at the given index.
    */
@@ -761,7 +665,7 @@ private static final long serialVersionUID = 0L;
     return tags_.get(index);
   }
   /**
-   * <code>repeated string tags = 12;</code>
+   * <code>repeated string tags = 11;</code>
    * @param index The index of the value to return.
    * @return The bytes of the tags at the given index.
    */
@@ -811,20 +715,14 @@ private static final long serialVersionUID = 0L;
         internalGetSecurity(),
         SecurityDefaultEntryHolder.defaultEntry,
         8);
-    com.google.protobuf.GeneratedMessageV3
-      .serializeStringMapTo(
-        output,
-        internalGetVendorExtensible(),
-        VendorExtensibleDefaultEntryHolder.defaultEntry,
-        9);
     for (int i = 0; i < consumes_.size(); i++) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 10, consumes_.getRaw(i));
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 9, consumes_.getRaw(i));
     }
     for (int i = 0; i < schemes_.size(); i++) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 11, schemes_.getRaw(i));
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 10, schemes_.getRaw(i));
     }
     for (int i = 0; i < tags_.size(); i++) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 12, tags_.getRaw(i));
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 11, tags_.getRaw(i));
     }
     unknownFields.writeTo(output);
   }
@@ -868,16 +766,6 @@ private static final long serialVersionUID = 0L;
           .build();
       size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(8, security__);
-    }
-    for (java.util.Map.Entry<java.lang.String, com.google.protobuf.Any> entry
-         : internalGetVendorExtensible().getMap().entrySet()) {
-      com.google.protobuf.MapEntry<java.lang.String, com.google.protobuf.Any>
-      vendorExtensible__ = VendorExtensibleDefaultEntryHolder.defaultEntry.newBuilderForType()
-          .setKey(entry.getKey())
-          .setValue(entry.getValue())
-          .build();
-      size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(9, vendorExtensible__);
     }
     {
       int dataSize = 0;
@@ -934,8 +822,6 @@ private static final long serialVersionUID = 0L;
         .equals(other.getSandboxUrlsList())) return false;
     if (!internalGetSecurity().equals(
         other.internalGetSecurity())) return false;
-    if (!internalGetVendorExtensible().equals(
-        other.internalGetVendorExtensible())) return false;
     if (!getConsumesList()
         .equals(other.getConsumesList())) return false;
     if (!getSchemesList()
@@ -976,10 +862,6 @@ private static final long serialVersionUID = 0L;
     if (!internalGetSecurity().getMap().isEmpty()) {
       hash = (37 * hash) + SECURITY_FIELD_NUMBER;
       hash = (53 * hash) + internalGetSecurity().hashCode();
-    }
-    if (!internalGetVendorExtensible().getMap().isEmpty()) {
-      hash = (37 * hash) + VENDOREXTENSIBLE_FIELD_NUMBER;
-      hash = (53 * hash) + internalGetVendorExtensible().hashCode();
     }
     if (getConsumesCount() > 0) {
       hash = (37 * hash) + CONSUMES_FIELD_NUMBER;
@@ -1110,8 +992,6 @@ private static final long serialVersionUID = 0L;
       switch (number) {
         case 8:
           return internalGetSecurity();
-        case 9:
-          return internalGetVendorExtensible();
         default:
           throw new RuntimeException(
               "Invalid map field number: " + number);
@@ -1123,8 +1003,6 @@ private static final long serialVersionUID = 0L;
       switch (number) {
         case 8:
           return internalGetMutableSecurity();
-        case 9:
-          return internalGetMutableVendorExtensible();
         default:
           throw new RuntimeException(
               "Invalid map field number: " + number);
@@ -1186,13 +1064,12 @@ private static final long serialVersionUID = 0L;
         sandboxUrlsBuilder_.clear();
       }
       internalGetMutableSecurity().clear();
-      internalGetMutableVendorExtensible().clear();
       consumes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000020);
+      bitField0_ = (bitField0_ & ~0x00000010);
       schemes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000040);
+      bitField0_ = (bitField0_ & ~0x00000020);
       tags_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000080);
+      bitField0_ = (bitField0_ & ~0x00000040);
       return this;
     }
 
@@ -1253,21 +1130,19 @@ private static final long serialVersionUID = 0L;
       }
       result.security_ = internalGetSecurity();
       result.security_.makeImmutable();
-      result.vendorExtensible_ = internalGetVendorExtensible();
-      result.vendorExtensible_.makeImmutable();
-      if (((bitField0_ & 0x00000020) != 0)) {
+      if (((bitField0_ & 0x00000010) != 0)) {
         consumes_ = consumes_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000010);
       }
       result.consumes_ = consumes_;
-      if (((bitField0_ & 0x00000040) != 0)) {
+      if (((bitField0_ & 0x00000020) != 0)) {
         schemes_ = schemes_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000040);
+        bitField0_ = (bitField0_ & ~0x00000020);
       }
       result.schemes_ = schemes_;
-      if (((bitField0_ & 0x00000080) != 0)) {
+      if (((bitField0_ & 0x00000040) != 0)) {
         tags_ = tags_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000080);
+        bitField0_ = (bitField0_ & ~0x00000040);
       }
       result.tags_ = tags_;
       onBuilt();
@@ -1414,12 +1289,10 @@ private static final long serialVersionUID = 0L;
       }
       internalGetMutableSecurity().mergeFrom(
           other.internalGetSecurity());
-      internalGetMutableVendorExtensible().mergeFrom(
-          other.internalGetVendorExtensible());
       if (!other.consumes_.isEmpty()) {
         if (consumes_.isEmpty()) {
           consumes_ = other.consumes_;
-          bitField0_ = (bitField0_ & ~0x00000020);
+          bitField0_ = (bitField0_ & ~0x00000010);
         } else {
           ensureConsumesIsMutable();
           consumes_.addAll(other.consumes_);
@@ -1429,7 +1302,7 @@ private static final long serialVersionUID = 0L;
       if (!other.schemes_.isEmpty()) {
         if (schemes_.isEmpty()) {
           schemes_ = other.schemes_;
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000020);
         } else {
           ensureSchemesIsMutable();
           schemes_.addAll(other.schemes_);
@@ -1439,7 +1312,7 @@ private static final long serialVersionUID = 0L;
       if (!other.tags_.isEmpty()) {
         if (tags_.isEmpty()) {
           tags_ = other.tags_;
-          bitField0_ = (bitField0_ & ~0x00000080);
+          bitField0_ = (bitField0_ & ~0x00000040);
         } else {
           ensureTagsIsMutable();
           tags_.addAll(other.tags_);
@@ -2628,143 +2501,15 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private com.google.protobuf.MapField<
-        java.lang.String, com.google.protobuf.Any> vendorExtensible_;
-    private com.google.protobuf.MapField<java.lang.String, com.google.protobuf.Any>
-    internalGetVendorExtensible() {
-      if (vendorExtensible_ == null) {
-        return com.google.protobuf.MapField.emptyMapField(
-            VendorExtensibleDefaultEntryHolder.defaultEntry);
-      }
-      return vendorExtensible_;
-    }
-    private com.google.protobuf.MapField<java.lang.String, com.google.protobuf.Any>
-    internalGetMutableVendorExtensible() {
-      onChanged();;
-      if (vendorExtensible_ == null) {
-        vendorExtensible_ = com.google.protobuf.MapField.newMapField(
-            VendorExtensibleDefaultEntryHolder.defaultEntry);
-      }
-      if (!vendorExtensible_.isMutable()) {
-        vendorExtensible_ = vendorExtensible_.copy();
-      }
-      return vendorExtensible_;
-    }
-
-    public int getVendorExtensibleCount() {
-      return internalGetVendorExtensible().getMap().size();
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-     */
-
-    @java.lang.Override
-    public boolean containsVendorExtensible(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      return internalGetVendorExtensible().getMap().containsKey(key);
-    }
-    /**
-     * Use {@link #getVendorExtensibleMap()} instead.
-     */
-    @java.lang.Override
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, com.google.protobuf.Any> getVendorExtensible() {
-      return getVendorExtensibleMap();
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-     */
-    @java.lang.Override
-
-    public java.util.Map<java.lang.String, com.google.protobuf.Any> getVendorExtensibleMap() {
-      return internalGetVendorExtensible().getMap();
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-     */
-    @java.lang.Override
-
-    public com.google.protobuf.Any getVendorExtensibleOrDefault(
-        java.lang.String key,
-        com.google.protobuf.Any defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-          internalGetVendorExtensible().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-     */
-    @java.lang.Override
-
-    public com.google.protobuf.Any getVendorExtensibleOrThrow(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-          internalGetVendorExtensible().getMap();
-      if (!map.containsKey(key)) {
-        throw new java.lang.IllegalArgumentException();
-      }
-      return map.get(key);
-    }
-
-    public Builder clearVendorExtensible() {
-      internalGetMutableVendorExtensible().getMutableMap()
-          .clear();
-      return this;
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-     */
-
-    public Builder removeVendorExtensible(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      internalGetMutableVendorExtensible().getMutableMap()
-          .remove(key);
-      return this;
-    }
-    /**
-     * Use alternate mutation accessors instead.
-     */
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, com.google.protobuf.Any>
-    getMutableVendorExtensible() {
-      return internalGetMutableVendorExtensible().getMutableMap();
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-     */
-    public Builder putVendorExtensible(
-        java.lang.String key,
-        com.google.protobuf.Any value) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      if (value == null) { throw new java.lang.NullPointerException(); }
-      internalGetMutableVendorExtensible().getMutableMap()
-          .put(key, value);
-      return this;
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-     */
-
-    public Builder putAllVendorExtensible(
-        java.util.Map<java.lang.String, com.google.protobuf.Any> values) {
-      internalGetMutableVendorExtensible().getMutableMap()
-          .putAll(values);
-      return this;
-    }
-
     private com.google.protobuf.LazyStringList consumes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     private void ensureConsumesIsMutable() {
-      if (!((bitField0_ & 0x00000020) != 0)) {
+      if (!((bitField0_ & 0x00000010) != 0)) {
         consumes_ = new com.google.protobuf.LazyStringArrayList(consumes_);
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000010;
        }
     }
     /**
-     * <code>repeated string consumes = 10;</code>
+     * <code>repeated string consumes = 9;</code>
      * @return A list containing the consumes.
      */
     public com.google.protobuf.ProtocolStringList
@@ -2772,14 +2517,14 @@ private static final long serialVersionUID = 0L;
       return consumes_.getUnmodifiableView();
     }
     /**
-     * <code>repeated string consumes = 10;</code>
+     * <code>repeated string consumes = 9;</code>
      * @return The count of consumes.
      */
     public int getConsumesCount() {
       return consumes_.size();
     }
     /**
-     * <code>repeated string consumes = 10;</code>
+     * <code>repeated string consumes = 9;</code>
      * @param index The index of the element to return.
      * @return The consumes at the given index.
      */
@@ -2787,7 +2532,7 @@ private static final long serialVersionUID = 0L;
       return consumes_.get(index);
     }
     /**
-     * <code>repeated string consumes = 10;</code>
+     * <code>repeated string consumes = 9;</code>
      * @param index The index of the value to return.
      * @return The bytes of the consumes at the given index.
      */
@@ -2796,7 +2541,7 @@ private static final long serialVersionUID = 0L;
       return consumes_.getByteString(index);
     }
     /**
-     * <code>repeated string consumes = 10;</code>
+     * <code>repeated string consumes = 9;</code>
      * @param index The index to set the value at.
      * @param value The consumes to set.
      * @return This builder for chaining.
@@ -2812,7 +2557,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated string consumes = 10;</code>
+     * <code>repeated string consumes = 9;</code>
      * @param value The consumes to add.
      * @return This builder for chaining.
      */
@@ -2827,7 +2572,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated string consumes = 10;</code>
+     * <code>repeated string consumes = 9;</code>
      * @param values The consumes to add.
      * @return This builder for chaining.
      */
@@ -2840,17 +2585,17 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated string consumes = 10;</code>
+     * <code>repeated string consumes = 9;</code>
      * @return This builder for chaining.
      */
     public Builder clearConsumes() {
       consumes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000020);
+      bitField0_ = (bitField0_ & ~0x00000010);
       onChanged();
       return this;
     }
     /**
-     * <code>repeated string consumes = 10;</code>
+     * <code>repeated string consumes = 9;</code>
      * @param value The bytes of the consumes to add.
      * @return This builder for chaining.
      */
@@ -2868,13 +2613,13 @@ private static final long serialVersionUID = 0L;
 
     private com.google.protobuf.LazyStringList schemes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     private void ensureSchemesIsMutable() {
-      if (!((bitField0_ & 0x00000040) != 0)) {
+      if (!((bitField0_ & 0x00000020) != 0)) {
         schemes_ = new com.google.protobuf.LazyStringArrayList(schemes_);
-        bitField0_ |= 0x00000040;
+        bitField0_ |= 0x00000020;
        }
     }
     /**
-     * <code>repeated string schemes = 11;</code>
+     * <code>repeated string schemes = 10;</code>
      * @return A list containing the schemes.
      */
     public com.google.protobuf.ProtocolStringList
@@ -2882,14 +2627,14 @@ private static final long serialVersionUID = 0L;
       return schemes_.getUnmodifiableView();
     }
     /**
-     * <code>repeated string schemes = 11;</code>
+     * <code>repeated string schemes = 10;</code>
      * @return The count of schemes.
      */
     public int getSchemesCount() {
       return schemes_.size();
     }
     /**
-     * <code>repeated string schemes = 11;</code>
+     * <code>repeated string schemes = 10;</code>
      * @param index The index of the element to return.
      * @return The schemes at the given index.
      */
@@ -2897,7 +2642,7 @@ private static final long serialVersionUID = 0L;
       return schemes_.get(index);
     }
     /**
-     * <code>repeated string schemes = 11;</code>
+     * <code>repeated string schemes = 10;</code>
      * @param index The index of the value to return.
      * @return The bytes of the schemes at the given index.
      */
@@ -2906,7 +2651,7 @@ private static final long serialVersionUID = 0L;
       return schemes_.getByteString(index);
     }
     /**
-     * <code>repeated string schemes = 11;</code>
+     * <code>repeated string schemes = 10;</code>
      * @param index The index to set the value at.
      * @param value The schemes to set.
      * @return This builder for chaining.
@@ -2922,7 +2667,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated string schemes = 11;</code>
+     * <code>repeated string schemes = 10;</code>
      * @param value The schemes to add.
      * @return This builder for chaining.
      */
@@ -2937,7 +2682,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated string schemes = 11;</code>
+     * <code>repeated string schemes = 10;</code>
      * @param values The schemes to add.
      * @return This builder for chaining.
      */
@@ -2950,17 +2695,17 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated string schemes = 11;</code>
+     * <code>repeated string schemes = 10;</code>
      * @return This builder for chaining.
      */
     public Builder clearSchemes() {
       schemes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000040);
+      bitField0_ = (bitField0_ & ~0x00000020);
       onChanged();
       return this;
     }
     /**
-     * <code>repeated string schemes = 11;</code>
+     * <code>repeated string schemes = 10;</code>
      * @param value The bytes of the schemes to add.
      * @return This builder for chaining.
      */
@@ -2978,13 +2723,13 @@ private static final long serialVersionUID = 0L;
 
     private com.google.protobuf.LazyStringList tags_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     private void ensureTagsIsMutable() {
-      if (!((bitField0_ & 0x00000080) != 0)) {
+      if (!((bitField0_ & 0x00000040) != 0)) {
         tags_ = new com.google.protobuf.LazyStringArrayList(tags_);
-        bitField0_ |= 0x00000080;
+        bitField0_ |= 0x00000040;
        }
     }
     /**
-     * <code>repeated string tags = 12;</code>
+     * <code>repeated string tags = 11;</code>
      * @return A list containing the tags.
      */
     public com.google.protobuf.ProtocolStringList
@@ -2992,14 +2737,14 @@ private static final long serialVersionUID = 0L;
       return tags_.getUnmodifiableView();
     }
     /**
-     * <code>repeated string tags = 12;</code>
+     * <code>repeated string tags = 11;</code>
      * @return The count of tags.
      */
     public int getTagsCount() {
       return tags_.size();
     }
     /**
-     * <code>repeated string tags = 12;</code>
+     * <code>repeated string tags = 11;</code>
      * @param index The index of the element to return.
      * @return The tags at the given index.
      */
@@ -3007,7 +2752,7 @@ private static final long serialVersionUID = 0L;
       return tags_.get(index);
     }
     /**
-     * <code>repeated string tags = 12;</code>
+     * <code>repeated string tags = 11;</code>
      * @param index The index of the value to return.
      * @return The bytes of the tags at the given index.
      */
@@ -3016,7 +2761,7 @@ private static final long serialVersionUID = 0L;
       return tags_.getByteString(index);
     }
     /**
-     * <code>repeated string tags = 12;</code>
+     * <code>repeated string tags = 11;</code>
      * @param index The index to set the value at.
      * @param value The tags to set.
      * @return This builder for chaining.
@@ -3032,7 +2777,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated string tags = 12;</code>
+     * <code>repeated string tags = 11;</code>
      * @param value The tags to add.
      * @return This builder for chaining.
      */
@@ -3047,7 +2792,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated string tags = 12;</code>
+     * <code>repeated string tags = 11;</code>
      * @param values The tags to add.
      * @return This builder for chaining.
      */
@@ -3060,17 +2805,17 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated string tags = 12;</code>
+     * <code>repeated string tags = 11;</code>
      * @return This builder for chaining.
      */
     public Builder clearTags() {
       tags_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000080);
+      bitField0_ = (bitField0_ & ~0x00000040);
       onChanged();
       return this;
     }
     /**
-     * <code>repeated string tags = 12;</code>
+     * <code>repeated string tags = 11;</code>
      * @param value The bytes of the tags to add.
      * @return This builder for chaining.
      */

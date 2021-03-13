@@ -39,6 +39,7 @@ type MgwSwagger struct {
 	xWso2Basepath    string
 	xWso2Cors        *CorsConfig
 	securityScheme   []string
+	xThrottlingTier  string
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -122,6 +123,11 @@ func (swagger *MgwSwagger) GetDescription() string {
 	return swagger.description
 }
 
+// GetXThrottlingTier returns the Throttling tier via the vendor extension.
+func (swagger *MgwSwagger) GetXThrottlingTier() string {
+	return swagger.xThrottlingTier
+}
+
 // GetID returns the Id of the API
 func (swagger *MgwSwagger) GetID() string {
 	return swagger.id
@@ -159,6 +165,7 @@ func (swagger *MgwSwagger) SetXWso2Extenstions() {
 	swagger.setXWso2PrdoductionEndpoint()
 	swagger.setXWso2SandboxEndpoint()
 	swagger.setXWso2Cors()
+	swagger.setXThrottlingTier()
 }
 
 // SetXWso2SandboxEndpointForMgwSwagger set the MgwSwagger object with the SandboxEndpoint when
@@ -204,6 +211,13 @@ func (swagger *MgwSwagger) setXWso2SandboxEndpoint() {
 		if xwso2ResourceEndpoints != nil {
 			swagger.resources[i].sandboxUrls = xwso2ResourceEndpoints
 		}
+	}
+}
+
+func (swagger *MgwSwagger) setXThrottlingTier() {
+	tier := ResolveXThrottlingTier(swagger.vendorExtensions)
+	if tier != "" {
+		swagger.xThrottlingTier = tier
 	}
 }
 
@@ -287,4 +301,16 @@ func (swagger *MgwSwagger) setXWso2Cors() {
 		logger.LoggerOasparser.Errorf("Error while parsing %v .", xWso2Cors)
 	}
 
+}
+
+// ResolveXThrottlingTier extracts the value of x-throttling-tier extension.
+// if the property is not available, an empty string is returned.
+func ResolveXThrottlingTier(vendorExtensions map[string]interface{}) string {
+	xTier := ""
+	if y, found := vendorExtensions[xThrottlingTier]; found {
+		if val, ok := y.(string); ok {
+			xTier = val
+		}
+	}
+	return xTier
 }
