@@ -68,6 +68,7 @@ public class AnalyticsFilter implements Filter {
     public boolean handleRequest(RequestContext requestContext) {
         String apiName = requestContext.getMathedAPI().getAPIConfig().getName();
         String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
+        String apiType = requestContext.getMathedAPI().getAPIConfig().getApiType();
         // TODO: (VirajSalaka) Decide on whether to include/exclude the options requests, Cors requests
         AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
 
@@ -76,8 +77,7 @@ public class AnalyticsFilter implements Filter {
                 AnalyticsUtils.setDefaultIfNull(authContext.getApiPublisher()));
         requestContext.addMetadataToMap(MetadataConstants.API_NAME_KEY, apiName);
         requestContext.addMetadataToMap(MetadataConstants.API_VERSION_KEY, apiVersion);
-        // TODO: (VirajSalaka) Retrieve from APIConfig
-        requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, "HTTP");
+        requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, apiType);
         // TODO: (VirajSalaka) Retrieve From Configuration
         requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY, "carbon.super");
 

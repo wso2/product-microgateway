@@ -132,6 +132,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger) *api.Api {
 		Description:    mgwSwagger.GetDescription(),
 		BasePath:       mgwSwagger.GetXWso2Basepath(),
 		Version:        mgwSwagger.GetVersion(),
+		ApiType:        mgwSwagger.GetAPIType(),
 		ProductionUrls: prodUrls,
 		SandboxUrls:    sandUrls,
 		Resources:      resources,

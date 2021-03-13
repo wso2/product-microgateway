@@ -29,10 +29,15 @@ public class APIConfig {
     private String name;
     private String version;
     private String basePath;
+    private String apiType;
 
     private List<String> securitySchemas = new ArrayList<>();
     private String tier = APIConstants.UNLIMITED_TIER;
     private List<ResourceConfig> resources = new ArrayList<>();
+
+    public String getApiType() {
+        return apiType;
+    }
 
     /**
      * Implements builder pattern to build an API Config object.
@@ -42,6 +47,7 @@ public class APIConfig {
         private String name;
         private String version;
         private String basePath;
+        private String apiType;
 
         private List<String> securitySchemas = new ArrayList<>();
         private String tier = APIConstants.UNLIMITED_TIER;
@@ -61,6 +67,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder apiType(String apiType) {
+            this.apiType = apiType;
+            return this;
+        }
+
         public Builder resources(List<ResourceConfig> resources) {
             this.resources = resources;
             return this;
@@ -72,6 +83,7 @@ public class APIConfig {
             apiConfig.basePath = this.basePath;
             apiConfig.version = this.version;
             apiConfig.resources = this.resources;
+            apiConfig.apiType = this.apiType;
             return apiConfig;
         }
     }

@@ -56,6 +56,7 @@ public class RestAPI implements API {
         String basePath = api.getBasePath();
         String name = api.getTitle();
         String version = api.getVersion();
+        String apiType = api.getApiType();
         List<ResourceConfig> resources = new ArrayList<>();
         for (Resource res: api.getResourcesList()) {
             // TODO: (Praminda) handle all fields of resource
@@ -64,7 +65,8 @@ public class RestAPI implements API {
                 resources.add(resConfig);
             }
         }
-        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).build();
+        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources)
+                .apiType(apiType).build();
         initFilters();
         return basePath;
     }
