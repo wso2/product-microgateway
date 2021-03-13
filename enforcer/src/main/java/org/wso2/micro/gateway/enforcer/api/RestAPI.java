@@ -28,8 +28,8 @@ import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.cors.CorsFilter;
-import org.wso2.micro.gateway.enforcer.filters.ThrottleFilter;
 import org.wso2.micro.gateway.enforcer.security.AuthFilter;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleFilter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
