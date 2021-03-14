@@ -34,6 +34,7 @@ import org.wso2.micro.gateway.enforcer.config.dto.AnalyticsReceiverConfigDTO;
 import org.wso2.micro.gateway.enforcer.server.Constants;
 import org.wso2.micro.gateway.enforcer.server.EnforcerThreadPoolExecutor;
 import org.wso2.micro.gateway.enforcer.server.NativeThreadFactory;
+import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
@@ -49,11 +50,9 @@ import java.util.concurrent.TimeUnit;
 public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceImplBase {
 
     private static final Logger logger = LogManager.getLogger(AccessLoggingService.class);
-    private static final String AUTH_TOKEN_KEY = "auth.api.token";
-    private static final String AUTH_URL = "auth.api.url";
 
-    public boolean init() {
-        return startAccessLoggingServer();
+    public void init() throws IOException {
+        startAccessLoggingServer();
     }
 
     @Override
@@ -80,7 +79,7 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
         };
     }
 
-    private boolean startAccessLoggingServer() {
+    private void startAccessLoggingServer() throws IOException {
         AnalyticsReceiverConfigDTO serverConfig =
                 ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getServerConfig();
         final EventLoopGroup bossGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
@@ -103,15 +102,10 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
                 .bossEventLoopGroup(bossGroup)
                 .workerEventLoopGroup(workerGroup)
                 .addService(this)
+                .sslContext(TLSUtils.buildGRPCServerSSLContext())
                 .channelType(NioServerSocketChannel.class).executor(executor).build();
-        // Start the server
-        try {
-            accessLoggerService.start();
-        } catch (IOException e) {
-            logger.error("Error while starting the gRPC access logging server", e);
-            return false;
-        }
-        logger.info("Access loggers Sever started Listening in port : " + serverConfig.getPort());
-        return true;
+
+        accessLoggerService.start();
+        logger.info("Access log Receiver started Listening in port : " + serverConfig.getPort());
     }
 }
