@@ -17,8 +17,6 @@
  */
 package org.wso2.micro.gateway.enforcer.api;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.api.Api;
 import org.wso2.gateway.discovery.api.Operation;
 import org.wso2.gateway.discovery.api.Resource;
@@ -40,11 +38,9 @@ import java.util.Map;
  * Specific implementation for a Rest API type APIs.
  */
 public class RestAPI implements API {
-    private static final Logger logger = LogManager.getLogger(RestAPI.class);
-
+    private final List<Filter> filters = new ArrayList<>();
     private APIConfig apiConfig;
     private String apiLifeCycleState;
-    private List<Filter> filters = new ArrayList<>();
 
     @Override
     public List<Filter> getFilters() {
@@ -60,16 +56,15 @@ public class RestAPI implements API {
         List<ResourceConfig> resources = new ArrayList<>();
 
         for (Resource res: api.getResourcesList()) {
-            // TODO: (Praminda) handle all fields of resource
             for (Operation operation : res.getMethodsList()) {
                 ResourceConfig resConfig = buildResource(operation, res.getPath());
                 resources.add(resConfig);
             }
         }
 
-        this.apiLifeCycleState = api.getApiLifeCycleState();
+        this.apiLifeCycleState = api.getApiLifeCycleStatus();
         this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).
-                apiLifeCycleState(apiLifeCycleState).securitySchema(securitySchemes).build();
+                apiLifeCycleState(apiLifeCycleState).securitySchema(securitySchemes).tier(api.getTier()).build();
         initFilters();
         return basePath;
     }
@@ -115,11 +110,11 @@ public class RestAPI implements API {
         ResourceConfig resource = new ResourceConfig();
         resource.setPath(resPath);
         resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
+        resource.setTier(operation.getTier());
         Map<String, List<String>> securityMap = new HashMap<>();
         operation.getSecurityList().forEach(securityList -> securityList.getScopeListMap().forEach((key, security) -> {
-            List<String> scopeList = new ArrayList<>();
-            if (security != null && security.getScopesList() != null) {
-                scopeList.addAll(security.getScopesList());
+            if (security != null && security.getScopesList().size() > 0) {
+                List<String> scopeList = new ArrayList<>(security.getScopesList());
                 securityMap.put(key, scopeList);
             }
         }));
@@ -135,6 +130,7 @@ public class RestAPI implements API {
             AuthFilter authFilter = new AuthFilter();
             authFilter.init(apiConfig);
             this.filters.add(authFilter);
+
         }
 
         // enable throttle filter

@@ -83,10 +83,10 @@ public class ThrottleFilter implements Filter {
         if (reqContext.getAuthenticationContext() != null) {
             log.debug("Found AuthenticationContext for the request");
             APIConfig api = reqContext.getMathedAPI().getAPIConfig();
-            String apiContext = api.getBasePath();
+            String apiContext = api.getBasePath() + '/' + api.getVersion();
             String apiVersion = api.getVersion();
             String appId = authContext.getApplicationId();
-            String apiTier = authContext.getApiTier();
+            String apiTier = getApiTier(api, authContext.getTier());
             String apiThrottleKey = getApiThrottleKey(apiContext, apiVersion);
             String resourceTier = getResourceTier(reqContext.getMatchedResourcePath());
             String resourceThrottleKey = getResourceThrottleKey(reqContext, apiContext, apiVersion);
@@ -205,11 +205,13 @@ public class ThrottleFilter implements Filter {
     private Map<String, String> getThrottleEventMap(RequestContext requestContext) {
         AuthenticationContext authenticationContext = requestContext.getAuthenticationContext();
         Map<String, String> throttleEvent = new HashMap<>();
+        APIConfig api = requestContext.getMathedAPI().getAPIConfig();
 
-        String basePath = requestContext.getMathedAPI().getAPIConfig().getBasePath();
-        String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
-        String apiContext = basePath + ':' + apiVersion;
-        String apiName = requestContext.getMathedAPI().getAPIConfig().getName();
+        String basePath = api.getBasePath();
+        String apiVersion = api.getVersion();
+        String apiContext = basePath + '/' + apiVersion;
+        String apiName = api.getName();
+        String apiTier = getApiTier(api, authenticationContext.getApiTier());
         String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
         if (tenantDomain == null) {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -217,10 +219,8 @@ public class ThrottleFilter implements Filter {
         String resourceTier;
         String resourceKey;
 
-        if (!ThrottleConstants.UNLIMITED_TIER.equals(authenticationContext.getApiTier()) &&
-                authenticationContext.getApiTier() != null &&
-                !authenticationContext.getApiTier().isBlank()) {
-            resourceTier = authenticationContext.getApiTier();
+        if (!ThrottleConstants.UNLIMITED_TIER.equals(apiTier) && apiTier != null && !apiTier.isBlank()) {
+            resourceTier = apiTier;
             resourceKey = apiContext;
         } else {
             resourceTier = getResourceTier(requestContext.getMatchedResourcePath());
@@ -232,7 +232,7 @@ public class ThrottleFilter implements Filter {
                 authenticationContext.getUsername());
         throttleEvent.put(ThrottleEventConstants.APP_TIER, authenticationContext.getApplicationTier());
         throttleEvent.put(ThrottleEventConstants.API_KEY, apiContext);
-        throttleEvent.put(ThrottleEventConstants.API_TIER, authenticationContext.getApiTier());
+        throttleEvent.put(ThrottleEventConstants.API_TIER, apiTier);
         throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authenticationContext.getApplicationId() + ':' +
                 apiContext);
         throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_TIER, authenticationContext.getTier());
@@ -262,7 +262,7 @@ public class ThrottleFilter implements Filter {
     private String getApiThrottleKey(String apiContext, String apiVersion) {
         String apiThrottleKey = apiContext;
         if (!apiVersion.isBlank()) {
-            apiThrottleKey += ':' + apiVersion;
+            apiThrottleKey += '/' + apiVersion;
         }
         return apiThrottleKey;
     }
@@ -282,6 +282,12 @@ public class ThrottleFilter implements Filter {
         return ThrottleConstants.UNLIMITED_TIER;
     }
 
+    private String getApiTier(APIConfig apiConfig, String tier) {
+        if (!apiConfig.getTier().isBlank()) {
+            return apiConfig.getTier();
+        }
+        return tier;
+    }
 
     private JSONObject getProperties(RequestContext requestContext) {
         String remoteIP = requestContext.getAddress();
