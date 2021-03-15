@@ -128,7 +128,6 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
         Operation operation = new Operation();
         operation.setApiResourceTemplate(getValueAsString(fieldsMap, MetadataConstants.API_RESOURCE_TEMPLATE_KEY));
-        // TODO: (VirajSalaka) read from context
         operation.setApiMethod(logEntry.getRequest().getRequestMethod().name());
         return operation;
     }
@@ -140,8 +139,6 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         // As response caching is not configured at the moment.
         target.setResponseCacheHit(false);
         target.setTargetResponseCode(logEntry.getResponse().getResponseCode().getValue());
-        // TODO: (VirajSalaka) get destination in the format of url
-        // TODO: (VirajSalaka) add backend basepath
         target.setDestination(getValueAsString(fieldsMap, MetadataConstants.DESTINATION));
         return target;
     }
@@ -150,7 +147,6 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     public Latencies getLatencies() {
         AccessLogCommon properties = logEntry.getCommonProperties();
         Latencies latencies = new Latencies();
-        // TODO: (VirajSalaka) If connection error happens these won't be available
         // TODO: (VirajSalaka) Finalize the correctness after discussion
         latencies.setBackendLatency(properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000 -
                 properties.getTimeToFirstUpstreamTxByte().getNanos() / 1000000);
