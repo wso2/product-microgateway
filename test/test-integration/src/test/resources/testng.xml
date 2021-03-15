@@ -21,7 +21,7 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="Micro-GW-ServiceDiscovery-Test-Suite">
+<suite name="Micro-GW-ServiceDiscovery-Test-Suite" parallel="false">
     <listeners>
         <!--Disabled since there are no any pre configured apis -->
         <!--<listener class-name="org.wso2.micro.gateway.tests.listener.TestExecutionListener"/>-->
