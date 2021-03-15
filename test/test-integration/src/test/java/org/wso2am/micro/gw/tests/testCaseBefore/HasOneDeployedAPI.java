@@ -17,16 +17,14 @@
  */
 package org.wso2am.micro.gw.tests.testCaseBefore;
 
-import org.testng.annotations.*;
-import org.wso2am.micro.gw.tests.common.BaseTestCase;
+import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.util.ApiDeployment;
 import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
 
-public class HasOneDeployedAPI extends BaseTestCase {
+public class HasOneDeployedAPI {
 
     @Test(description = "initialise the setup")
     void start() throws Exception {
-
         String apiZipfile = ApiProjectGenerator.createApictlProjZip("/apis/openApis/api.yaml",
                 "/apis/openApis/swagger.yaml");
         ApiDeployment.deployAPI(apiZipfile);
