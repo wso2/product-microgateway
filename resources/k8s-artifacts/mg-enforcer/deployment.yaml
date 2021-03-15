@@ -52,7 +52,7 @@ spec:
               name: logconfig-toml-vol
             - mountPath: /home/wso2/lib/dropins
               name: dropins-vol
-          image: wso2/mg-enforcer:4.0.0-m8-SNAPSHOT
+          image: wso2/mg-enforcer:4.0.0-m8
           imagePullPolicy: Always
           env:
             - name: ENFORCER_PRIVATE_KEY_PATH
