@@ -15,13 +15,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2am.micro.gw.tests.util;
+package org.wso2am.micro.gw.tests.testCaseBefore;
 
-public class TestGroup {
-    public static final String MGW_WITH_NO_APIS = "MgwWithNoAPIs";
-    public static final String MGW_WITH_ONE_API = "MgwWithOneAPI";
-    public static final String MGW_WITH_BACKEND_TLS_AND_API = "MgwWithBackendTlsAndAPI";
-    public static final String MGW_WITH_JWT_CONFIG_AND_API = "MgwWithJwtConfigAndAPI";
-    public static final String MGW_WITH_JWT_CONFIG_AND_TRANSFORMER = "MgwWithJwtConfigAndTransformer";
+import org.testng.annotations.*;
+import org.wso2am.micro.gw.tests.common.BaseTestCase;
+import org.wso2am.micro.gw.tests.util.ApiDeployment;
+import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
+
+public class HasOneDeployedAPI extends BaseTestCase {
+
+    @Test(description = "initialise the setup")
+    void start() throws Exception {
+
+        String apiZipfile = ApiProjectGenerator.createApictlProjZip("/apis/openApis/api.yaml",
+                "/apis/openApis/swagger.yaml");
+        ApiDeployment.deployAPI(apiZipfile);
+   }
 }
-

@@ -21,11 +21,10 @@ package org.wso2am.micro.gw.tests.testCases.jwtValidator;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.mockbackend.ResponseConstants;
-import org.wso2am.micro.gw.tests.util.HttpClientRequest;
-import org.wso2am.micro.gw.tests.util.HttpResponse;
-import org.wso2am.micro.gw.tests.util.URLs;
+import org.wso2am.micro.gw.tests.util.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +32,19 @@ import java.util.Map;
 /**
  * Scope validation related test cases.
  */
-public class ScopeTest extends JwtTestCase {
+public class ScopeTest {
+    private String jwtWithoutScope;
+    private String jwtWithScope;
+    private String jwtWithMultipleScopes;
+    private String jwtWithMultipleInvalidScopes;
+
+    @BeforeClass(description = "initialise the setup")
+    void start() throws Exception {
+        jwtWithoutScope = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null);
+        jwtWithScope = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets");
+        jwtWithMultipleScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets read:pets");
+        jwtWithMultipleInvalidScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "foo bar");
+    }
 
     @Test(description = "Test to invoke resource with scopes with a jwt without the proper scope")
     public void testScopeProtectedResourceInvalidJWT() throws Exception {

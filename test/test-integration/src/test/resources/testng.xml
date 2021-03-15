@@ -28,17 +28,13 @@
         <listener class-name="org.wso2am.micro.gw.tests.listener.TestNGListener"/>
     </listeners>
 
-    <!-- Note: the name of the test tag has nothing to do with the group names  -->
     <test name="micro-gw-with-no-apis" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithNoAPIs"/>
             <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.endpoints.ProductionSandboxTestCase"/>
-        </classes>
-    </test>
-    <test name="micro-gw-with-one-api" preserve-order="true" parallel="false">
-        <classes>
-            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithOneAPI"/>
+            <class name="org.wso2am.micro.gw.tests.testCaseBefore.HasOneDeployedAPI"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.JwtTestCase"></class>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.ScopeTest"/>
         </classes>
     </test>
@@ -52,6 +48,7 @@
     <test name="micro-gw-with-jwt-config-and-api" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithJwtConfigAndAPI"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.JwtGeneratorTestCase"></class>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.JwtTransformerTestCase"/>
         </classes>
     </test>

@@ -26,7 +26,6 @@ import org.testng.annotations.Test;
 import org.wso2am.micro.gw.mockbackend.ResponseConstants;
 import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
-import org.wso2am.micro.gw.tests.util.TestGroup;
 import org.wso2am.micro.gw.tests.util.TestConstant;
 import org.wso2am.micro.gw.tests.util.TokenUtil;
 import org.wso2am.micro.gw.tests.util.URLs;
@@ -38,11 +37,10 @@ import java.util.Map;
 /**
  * Jwt generator test cases.
  */
-@Test(groups = { TestGroup.MGW_WITH_JWT_CONFIG_AND_API })
 public class JwtGeneratorTestCase {
     private static final String JWT_GENERATOR_ISSUER = "wso2.org/products/am";
 
-    protected String jwtTokenProd;
+    private String jwtTokenProd;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
