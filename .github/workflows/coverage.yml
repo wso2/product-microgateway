@@ -6,7 +6,7 @@ on:
       - envoy-gw
   workflow_dispatch:
     branches:
-      - envoy-gw
+      - adapter-unit-testing
 jobs:
   build:
     runs-on: ubuntu-latest
