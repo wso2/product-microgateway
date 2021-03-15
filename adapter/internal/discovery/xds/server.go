@@ -20,6 +20,7 @@ package xds
 import (
 	"errors"
 	"fmt"
+	"github.com/golang/protobuf/ptypes"
 	"math/rand"
 	"reflect"
 	"sync"
@@ -45,8 +46,9 @@ import (
 )
 
 var (
-	version           int32
-	mutexForXdsUpdate sync.Mutex
+	version             int32
+	mutexForXdsUpdate   sync.Mutex
+	onceUpdateMeshCerts sync.Once
 
 	cache                              envoy_cachev3.SnapshotCache
 	enforcerCache                      wso2_cache.SnapshotCache
@@ -73,7 +75,7 @@ var (
 
 	// Common Enforcer Label as map key
 	enforcerConfigMap                map[string][]types.Resource
-	enforcerKeyManagerMap 			 map[string][]types.Resource
+	enforcerKeyManagerMap            map[string][]types.Resource
 	enforcerSubscriptionMap          map[string][]types.Resource
 	enforcerApplicationMap           map[string][]types.Resource
 	enforcerAPIListMap               map[string][]types.Resource
@@ -521,6 +523,9 @@ func startConsulServiceDiscovery() {
 		for _, cluster := range clusterList {
 			if consulSyntax, ok := svcdiscovery.ClusterConsulKeyMap[cluster.Name]; ok {
 				svcdiscovery.InitConsul() //initialize consul client and load certs
+				onceUpdateMeshCerts.Do(func() {
+					go listenForMeshCertUpdates() //runs in background
+				})
 				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
 				if errConSyn != nil {
 					logger.LoggerXds.Error("consul syntax parse error ", errConSyn)
@@ -530,6 +535,47 @@ func startConsulServiceDiscovery() {
 				go getServiceDiscoveryData(query, cluster.Name, apiKey)
 			}
 		}
+	}
+}
+
+func listenForMeshCertUpdates() {
+	for {
+		select {
+		case <-svcdiscovery.MeshUpdateSignal:
+			updateCertsForServiceMesh()
+		}
+	}
+}
+
+func updateCertsForServiceMesh() {
+	transportSocketName := "envoy.transport_sockets.tls"
+
+	//update each cluster with new certs
+	for _, clusters := range openAPIClustersMap {
+		for _, cluster := range clusters { //iterate through all clusters
+			if cluster.TransportSocket != nil { //has transport socket==> https/wss
+				logger.LoggerXds.Println(svcdiscovery.MeshCACerts, "svcdiscovery.MeshCACerts")
+				upstreamTLSContext := svcdiscovery.CreateUpstreamTLSContext(svcdiscovery.MeshCACerts,
+					svcdiscovery.MeshServiceKey, svcdiscovery.MeshServiceCert)
+				marshalledTLSContext, err := ptypes.MarshalAny(upstreamTLSContext)
+				if err != nil {
+					logger.LoggerXds.Error("Internal Error while marshalling the upstream TLS Context.")
+				} else {
+					upstreamTransportSocket := &corev3.TransportSocket{
+						Name: transportSocketName,
+						ConfigType: &corev3.TransportSocket_TypedConfig{
+							TypedConfig: marshalledTLSContext,
+						},
+					}
+					cluster.TransportSocket = upstreamTransportSocket
+				}
+			}
+		}
+	}
+
+	//send the update to envoy
+	for apiKey := range openAPIClustersMap {
+		updateXDSRouteCacheForServiceDiscovery(apiKey)
 	}
 }
 
@@ -552,7 +598,7 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 				}
 			} else {
 				logger.LoggerXds.Debugln("updating cluster from the consul service registry, removed the default host")
-				svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList
+				svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList //todo concurrent map writes panic
 				updateRoute(apiKey, clusterName, queryResultsList)
 			}
 		}

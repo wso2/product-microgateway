@@ -23,17 +23,33 @@ import (
 	"encoding/json"
 	logger "github.com/wso2/micro-gw/loggers"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 const (
-	apiPath           = "v1/health/service/"
+	apiVersion        = "v1"
+	apiCatalogPath    = "/health/service/"
+	apiMeshPath       = "/health/connect/"
+	apiRootCertPath   = "/agent/connect/ca/roots"
+	apiLeafCertPath   = "/agent/connect/ca/leaf/"
+	consulTokenHeader = "X-Consul-Token"
+	consulIndexHeader = "X-Consul-Index"
 	datacenter        = "dc"
 	passing           = "passing"
 	passingVal        = "1"
 	namespace         = "nc"
-	consulTokenHeader = "X-Consul-Token"
+	indexQueryParam   = "index"
+	waitQueryParam    = "wait"
+	get               = "GET"
+	longPollInterval  = 60 //in seconds, default = 300s
+)
+
+var (
+	caReqLastIndex   = 0
+	leafReqLastIndex = 0
 )
 
 type node struct {
@@ -47,6 +63,8 @@ type service struct {
 	Address         string
 	TaggedAddresses interface{}
 	Port            int
+	ID              string
+	Proxy           Proxy
 }
 
 //result is used to unmarshal the required components from the consul server's response
@@ -59,6 +77,15 @@ type result struct {
 type Upstream struct {
 	Address     string
 	ServicePort int
+	ID          string
+	InMesh      bool
+}
+
+//Proxy side car proxy information
+type Proxy struct {
+	DestinationServiceID string
+	LocalServiceAddress  string
+	LocalServicePort     int
 }
 
 //Query query structure for a consul string syntax
@@ -67,6 +94,25 @@ type Query struct {
 	ServiceName string
 	Namespace   string
 	Tags        []string
+}
+
+//Root contains root certificates
+type Root struct {
+	RootCert          string
+	IntermediateCerts []string
+	Active            bool
+}
+
+//RootCertResp structure of a response to a request to get the root certificates
+type RootCertResp struct {
+	TrustDomain string
+	Roots       []Root
+}
+
+//ServiceCertResp structure of a response to get a service's certificate and private key
+type ServiceCertResp struct {
+	CertPEM       string
+	PrivateKeyPEM string
 }
 
 //newHTTPClient is a golang http client with request timeout
@@ -97,21 +143,23 @@ func newHTTPTransport() http.Transport {
 
 //ConsulClient wraps the HTTP API
 type ConsulClient struct {
-	client       http.Client //Health checks + all other functionalities
-	scheme       string
-	host         string
-	aclToken     string
-	pollInterval time.Duration
+	client         http.Client //for upstreams
+	longPollClient http.Client //for certs
+	scheme         string
+	host           string
+	aclToken       string
+	pollInterval   time.Duration
 }
 
 //NewConsulClient constructor for ConsulClient
-func NewConsulClient(api http.Client, scheme string, host string, aclToken string) ConsulClient {
+func NewConsulClient(api http.Client, longPollClient http.Client, scheme string, host string, aclToken string) ConsulClient {
 	return ConsulClient{
-		client:       api,
-		scheme:       scheme,
-		host:         host,
-		pollInterval: api.Timeout,
-		aclToken:     aclToken,
+		client:         api,
+		longPollClient: longPollClient,
+		scheme:         scheme,
+		host:           host,
+		pollInterval:   api.Timeout,
+		aclToken:       aclToken,
 	}
 }
 
@@ -127,17 +175,24 @@ func contains(source []string, elements []string) bool {
 	return false
 }
 
+// construct a URL from it's elements
+func constructURL(scheme, host, apiV string, otherPaths ...string) string {
+	url := scheme + "://" + host
+	if host[len(host)-1:] != "/" {
+		url += "/"
+	}
+	url += apiV
+	for _, path := range otherPaths {
+		url += path
+	}
+	return url
+}
+
 //sends a get request to a consul-client
 //parses the response into []Upstream
 func (c ConsulClient) get(path string, dc string, nc string, tags []string) ([]Upstream, error) {
-	url := c.scheme + "://" + c.host
-	if c.host[len(c.host)-1:] != "/" {
-		url += "/"
-	}
-	url += apiPath
-	url += path
-
-	req, _ := http.NewRequest("GET", url, nil)
+	url := constructURL(c.scheme, c.host, apiVersion, apiCatalogPath, path)
+	req, _ := http.NewRequest(get, url, nil)
 
 	//add query parameters
 	q := req.URL.Query()
@@ -146,7 +201,6 @@ func (c ConsulClient) get(path string, dc string, nc string, tags []string) ([]U
 	if nc != "" {              //namespace, an enterprise feature
 		q.Add(namespace, nc)
 	}
-
 	req.URL.RawQuery = q.Encode()
 	response, errHTTP := c.client.Do(req)
 	if errHTTP != nil {
@@ -169,6 +223,8 @@ func (c ConsulClient) get(path string, dc string, nc string, tags []string) ([]U
 		res := Upstream{
 			Address:     address,
 			ServicePort: r.Service.Port,
+			ID:          r.Service.ID,
+			InMesh:      false,
 		}
 		if contains(r.Service.Tags, tags) {
 			out = append(out, res)
@@ -180,11 +236,50 @@ func (c ConsulClient) get(path string, dc string, nc string, tags []string) ([]U
 	return out, errUnmarshal
 }
 
+//sends a get request to a consul-client
+//parses the response into []Upstream
+//gets upstreams that only belongs to service mesh
+func (c ConsulClient) getMeshUpstreams(path string) ([]Upstream, error) {
+	url := constructURL(c.scheme, c.host, apiVersion, apiMeshPath, path)
+	req, _ := http.NewRequest(get, url, nil)
+
+	//add query parameters
+	q := req.URL.Query()
+	q.Add(passing, passingVal) // health checks passing only
+	req.URL.RawQuery = q.Encode()
+	response, errHTTP := c.client.Do(req)
+	if errHTTP != nil {
+		return []Upstream{}, errHTTP
+	}
+	//set headers
+	req.Header.Set(consulTokenHeader, c.aclToken)
+	var result []result
+	body, errRead := ioutil.ReadAll(response.Body)
+	if errRead != nil {
+		return []Upstream{}, errRead
+	}
+	errUnmarshal := json.Unmarshal(body, &result)
+	var out []Upstream
+	for _, r := range result {
+		address := r.Service.Address
+		if address == "" {
+			address = r.Service.Proxy.LocalServiceAddress
+		}
+		res := Upstream{
+			Address:     address,
+			ServicePort: r.Service.Port,
+			ID:          r.Service.ID,
+			InMesh:      true,
+		}
+		out = append(out, res)
+	}
+	return out, errUnmarshal
+}
+
 //gets the upstreams for single query(ex: [dc1,dc2].namespace.serviceA.[tag1,tag2])
 //there can be many upstreams per query
 //sends the respective upstreams through resultChan
 func (c ConsulClient) getUpstreams(query Query, resultChan chan []Upstream) {
-
 	defer func() {
 		if r := recover(); r != nil {
 			logger.LoggerSvcDiscovery.Error("Recovered from a panic: ", r)
@@ -203,11 +298,27 @@ func (c ConsulClient) getUpstreams(query Query, resultChan chan []Upstream) {
 	}
 
 	if len(result) == 0 {
-		logger.LoggerSvcDiscovery.Error("Consul service registry query came up with empty result. Service registry unreachable")
+		logger.LoggerSvcDiscovery.Debugln("Consul service registry query came up with empty result")
 	} else {
+		if MeshEnabled { //replace the actual address and port with proxy's address and port
+			resMesh, errGet := c.getMeshUpstreams(query.ServiceName)
+			log.Println("Got mesh upstreams", resMesh)
+			if errGet == nil {
+				//result = append(result, res...)
+				for i := range resMesh {
+					for j := range result {
+						if resMesh[i].ID == result[j].ID {
+							result[j].Address = resMesh[i].Address
+							result[j].ServicePort = resMesh[i].ServicePort
+						}
+					}
+				}
+			} else {
+				logger.LoggerSvcDiscovery.Error("Service registry unreachable ", errGet)
+			}
+		}
 		resultChan <- result
 	}
-
 }
 
 //Poll periodically poll consul for updates using getUpstreams() func.
@@ -250,4 +361,150 @@ func (c ConsulClient) Poll(query Query, doneChan <-chan bool) <-chan []Upstream 
 	}()
 
 	return resultChan
+}
+
+func updateCAIndex(currentIndex int) bool {
+	log.Println("CA ", currentIndex, caReqLastIndex)
+	if caReqLastIndex > currentIndex {
+		caReqLastIndex = 0 //Reset in case Consul's indexing messes up
+		return true
+	} else if caReqLastIndex < currentIndex {
+		caReqLastIndex = currentIndex
+		return true
+	}
+	return false
+}
+
+func updateLeafIndex(currentIndex int) bool {
+	log.Println("Leaf ", currentIndex, leafReqLastIndex)
+	if leafReqLastIndex > currentIndex {
+		leafReqLastIndex = 0 //Reset
+		return true
+	} else if leafReqLastIndex < currentIndex {
+		leafReqLastIndex = currentIndex
+		return true
+	}
+	return false
+}
+
+func (c ConsulClient) getCertRequest(url string, lastIndex int) (*http.Response, error) {
+	log.Println(url)
+	request, errReq := http.NewRequest(get, url, nil)
+	if errReq != nil {
+		return nil, errReq
+	}
+	request.Header.Set(consulTokenHeader, aclToken)
+	//send the last index to activate long polling from serverside
+	query := request.URL.Query()
+	query.Add(indexQueryParam, strconv.Itoa(lastIndex))
+	log.Println("Requesting index: ", lastIndex)
+	query.Add(waitQueryParam, strconv.Itoa(longPollInterval/60)+"s")
+	request.URL.RawQuery = query.Encode()
+	response, errClient := c.longPollClient.Do(request)
+	if errClient != nil {
+		return nil, errClient
+	}
+	return response, nil
+}
+
+func (c ConsulClient) getRootCert(signal chan bool) {
+	url := constructURL(c.scheme, c.host, apiVersion, apiRootCertPath)
+	result := RootCertResp{}
+	response, errReq := c.getCertRequest(url, caReqLastIndex)
+	if errReq != nil {
+		log.Println(errReq)
+		return
+	}
+	body, errRead := ioutil.ReadAll(response.Body)
+	if errRead != nil {
+		log.Println(errRead)
+		return
+	}
+	errUnmarshal := json.Unmarshal(body, &result)
+	if errUnmarshal != nil {
+		return
+	}
+	//log.Println("Root cert: ", result.Roots[0].RootCert, errUnmarshal)
+	index, errStrConv := strconv.Atoi(response.Header.Get(consulIndexHeader))
+	if errStrConv != nil {
+		return
+	}
+	shouldUpdateRouter := updateCAIndex(index)
+	if shouldUpdateRouter {
+		MeshCACerts = make([]string, 1) //remove old certs
+		//normally there is only one root CA cert
+		for _, root := range result.Roots {
+			MeshCACerts = append(MeshCACerts, root.RootCert)
+			//while in the cert rotation process, there can be an old root, a new root, and an intermediate root
+			if root.IntermediateCerts != nil && len(root.IntermediateCerts) > 0 {
+				MeshCACerts = append(MeshCACerts, root.IntermediateCerts[0]) //ony one intermediate cert is generated by Consul
+			}
+		}
+		//log.Println(MeshCACerts)
+		signal <- true
+	}
+}
+
+func (c ConsulClient) getServiceCertAndKey(signal chan bool) {
+	url := constructURL(c.scheme, c.host, apiVersion, apiLeafCertPath, mgwServiceName)
+	result := ServiceCertResp{}
+	response, errReq := c.getCertRequest(url, leafReqLastIndex)
+	if errReq != nil {
+		log.Println(errReq)
+		return
+	}
+	body, errRead := ioutil.ReadAll(response.Body)
+	if errRead != nil {
+		log.Println(errRead)
+		return
+	}
+	errUnmarshal := json.Unmarshal(body, &result)
+	if errUnmarshal != nil {
+		return
+	}
+	log.Println("Client certs")
+	//log.Println(result.CertPEM, errUnmarshal)
+	//log.Println(result.PrivateKeyPEM, errUnmarshal)
+	index, errStrConv := strconv.Atoi(response.Header.Get(consulIndexHeader))
+	if errStrConv != nil {
+		return
+	}
+	shouldUpdateRouter := updateLeafIndex(index)
+	if shouldUpdateRouter {
+		MeshServiceCert = result.CertPEM
+		MeshServiceKey = result.PrivateKeyPEM
+		signal <- true
+	}
+}
+
+//LongPollRootCert starts long polling root certificate
+func (c ConsulClient) LongPollRootCert(signal chan bool) {
+	go func(signal chan bool) {
+		c.getRootCert(signal)
+		ticker := time.NewTicker(longPollInterval * time.Second)
+		intervalChan := ticker.C //emits a signal every longPollInterval
+		defer ticker.Stop()
+		for {
+			select {
+			case <-intervalChan:
+				c.getRootCert(signal)
+			}
+		}
+	}(signal)
+}
+
+//LongPollServiceCertAndKey starts long polling for service cert and key
+func (c ConsulClient) LongPollServiceCertAndKey(signal chan bool) {
+	go func(signal chan bool) {
+		c.getServiceCertAndKey(signal)
+		ticker := time.NewTicker(longPollInterval * time.Second)
+		intervalChan := ticker.C //emits a signal every longPollInterval
+		defer ticker.Stop()
+		for {
+			select {
+			case <-intervalChan:
+				c.getServiceCertAndKey(signal)
+			}
+		}
+	}(signal)
 }
