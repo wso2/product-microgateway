@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.Faul
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.constants.AnalyticsConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 
 /**
@@ -138,7 +139,7 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
     public MetaInfo getMetaInfo() {
         MetaInfo metaInfo = new MetaInfo();
         metaInfo.setRegionId("UnAssigned");
-        metaInfo.setGatewayType("Envoy");
+        metaInfo.setGatewayType(AnalyticsConstants.GATEWAY_LABEL);
         metaInfo.setCorrelationId(requestContext.getCorrelationID());
         return metaInfo;
     }

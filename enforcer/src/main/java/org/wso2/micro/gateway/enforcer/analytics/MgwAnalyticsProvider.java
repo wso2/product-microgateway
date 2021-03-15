@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.Even
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.micro.gateway.enforcer.api.APIFactory;
+import org.wso2.micro.gateway.enforcer.constants.AnalyticsConstants;
 import org.wso2.micro.gateway.enforcer.constants.MetadataConstants;
 
 import java.util.HashMap;
@@ -54,15 +55,16 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public EventCategory getEventCategory() {
         // TODO: (VirajSalaka) Filter out token endpoint calls
-        if (logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")) {
-            logger.info("Is success event");
+        if (logEntry.getResponse().getResponseCodeDetails()
+                .equals(AnalyticsConstants.UPSTREAM_SUCCESS_RESPONSE_DETAIL)) {
+            logger.debug("Is success event");
             return EventCategory.SUCCESS;
-            // TODO: (VirajSalaka) Finalize what is a fault
-        } else if (logEntry.getResponse().getResponseCode().getValue() != 204) {
-            logger.info("Is fault event");
+        } else if (logEntry.getResponse().getResponseCode().getValue() != 200
+                && logEntry.getResponse().getResponseCode().getValue() != 204) {
+            logger.debug("Is fault event");
             return EventCategory.FAULT;
         } else {
-            logger.info("Is invalid event");
+            logger.debug("Is invalid event");
             return EventCategory.INVALID;
         }
     }
@@ -89,9 +91,10 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     public boolean isTargetFaultRequest() {
         // TODO: (VirajSalaka) CorsPreflight request
-        return logEntry.getResponse().getResponseCode().getValue() != 200
-                && !logEntry.getResponse().getResponseCodeDetails().equals("via_upstream")
-                && !logEntry.getResponse().getResponseCodeDetails().equals("ext_auth_denied");
+        return !logEntry.getResponse().getResponseCodeDetails()
+                .equals(AnalyticsConstants.UPSTREAM_SUCCESS_RESPONSE_DETAIL)
+                && !logEntry.getResponse().getResponseCodeDetails()
+                .equals(AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL);
     }
 
     @Override
@@ -140,7 +143,6 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         // TODO: (VirajSalaka) get destination in the format of url
         // TODO: (VirajSalaka) add backend basepath
         target.setDestination(getValueAsString(fieldsMap, MetadataConstants.DESTINATION));
-        logger.info(" Target Event: " + target.toString());
         return target;
     }
 
@@ -164,8 +166,7 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
         MetaInfo metaInfo = new MetaInfo();
         metaInfo.setCorrelationId(getValueAsString(fieldsMap, MetadataConstants.CORRELATION_ID_KEY));
-        // TODO: (VirajSalaka) Introduce Constant
-        metaInfo.setGatewayType("ENVOY");
+        metaInfo.setGatewayType(AnalyticsConstants.GATEWAY_LABEL);
         metaInfo.setRegionId(getValueAsString(fieldsMap, MetadataConstants.REGION_KEY));
         return metaInfo;
     }
