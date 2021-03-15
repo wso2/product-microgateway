@@ -77,7 +77,7 @@ public class ApplicationDiscoveryClient {
         this.subscriptionDataStore = SubscriptionDataStoreImpl.getInstance();
         this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
         this.stub = ApplicationDiscoveryServiceGrpc.newStub(channel);
-        this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;;
+        this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
     }
 

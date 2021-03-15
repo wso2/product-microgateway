@@ -17,7 +17,7 @@
  */
 package org.wso2.micro.gateway.enforcer.api.config;
 
-import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +32,10 @@ public class APIConfig {
     private String apiType;
     private List<String> productionUrls;
     private List<String> sandboxUrls;
+    private String apiLifeCycleState;
 
     private List<String> securitySchemas = new ArrayList<>();
-    private String tier = APIConstants.UNLIMITED_TIER;
+    private String tier = ThrottleConstants.UNLIMITED_TIER;
     private List<ResourceConfig> resources = new ArrayList<>();
 
     public String getApiType() {
@@ -60,9 +61,10 @@ public class APIConfig {
         private String apiType;
         private List<String> productionUrls;
         private List<String> sandboxUrls;
+        private String apiLifeCycleState;
 
         private List<String> securitySchemas = new ArrayList<>();
-        private String tier = APIConstants.UNLIMITED_TIER;
+        private String tier = ThrottleConstants.UNLIMITED_TIER;
         private List<ResourceConfig> resources = new ArrayList<>();
 
         public Builder(String name) {
@@ -81,6 +83,11 @@ public class APIConfig {
 
         public Builder apiType(String apiType) {
             this.apiType = apiType;
+            return this;
+        }
+
+        public Builder apiLifeCycleState(String apiLifeCycleState) {
+            this.apiLifeCycleState = apiLifeCycleState;
             return this;
         }
 
@@ -104,6 +111,7 @@ public class APIConfig {
             apiConfig.name = this.name;
             apiConfig.basePath = this.basePath;
             apiConfig.version = this.version;
+            apiConfig.apiLifeCycleState = this.apiLifeCycleState;
             apiConfig.resources = this.resources;
             apiConfig.apiType = this.apiType;
             apiConfig.productionUrls = this.productionUrls;
@@ -125,6 +133,10 @@ public class APIConfig {
 
     public String getBasePath() {
         return basePath;
+    }
+
+    public String getApiLifeCycleState() {
+        return apiLifeCycleState;
     }
 
     public List<String> getSecuritySchemas() {

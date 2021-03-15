@@ -50,7 +50,9 @@ spec:
             - mountPath: /home/wso2/conf/log_config.toml
               subPath: log_config.toml
               name: logconfig-toml-vol
-          image: wso2/mg-enforcer:4.0.0-m6
+            - mountPath: /home/wso2/lib/dropins
+              name: dropins-vol
+          image: wso2/mg-enforcer:4.0.0-m8-SNAPSHOT
           imagePullPolicy: Always
           env:
             - name: ENFORCER_PRIVATE_KEY_PATH
@@ -71,6 +73,8 @@ spec:
               value: "4194304"
             - name: JAVA_OPTS
               value: ""
+            - name: apim_admin_pwd
+              value: "admin"
           resources:
             requests:
               memory: "250Mi"
@@ -106,4 +110,6 @@ spec:
         - name: logconfig-toml-vol
           configMap:
             name: logconfig-toml
+        - name: dropins-vol
+          emptyDir: {}
       restartPolicy: Always

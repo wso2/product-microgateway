@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -33,6 +33,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.constants.JwtConstants;
@@ -43,6 +44,7 @@ import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
@@ -61,7 +63,9 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -74,7 +78,7 @@ public class JWTUtil {
     private static volatile long ttl = -1L;
 
     /**
-     * This method used to retrieve JWKS keys from endpoint
+     * This method used to retrieve JWKS keys from endpoint.
      *
      * @param jwksEndpoint
      * @return
@@ -156,11 +160,11 @@ public class JWTUtil {
         }
     }
 
-    public static PrivateKey getPrivateKey() throws MGWException {
+    public static PrivateKey getPrivateKey(String filePath) throws MGWException {
         PrivateKey privateKey = null;
         try {
             String strKeyPEM = "";
-            Path keyPath = Paths.get(ConfigHolder.getInstance().getConfig().getPrivateKeyPath());
+            Path keyPath = Paths.get(filePath);
             String key = Files.readString(keyPath, Charset.defaultCharset());
             strKeyPEM = key
                     .replace(Constants.BEGINING_OF_PRIVATE_KEY, "")
@@ -245,6 +249,50 @@ public class JWTUtil {
             }
         }
         return jarFilesList;
+    }
+
+    public static Map<String, JWTTransformer> loadJWTTransformers() {
+        JWTTransformer jwtTransformer = null;
+        List<String> jarFilesList = getJarFilesList();
+        Map<String, JWTTransformer> jwtTransformersMap = new HashMap<>();
+        for (int fileIndex = 0; fileIndex < jarFilesList.size(); fileIndex++) {
+            try {
+                String pathToJar = JwtConstants.DROPINS_FOLDER + jarFilesList.get(fileIndex);
+                JarFile jarFile = new JarFile(pathToJar);
+                Enumeration<JarEntry> e = jarFile.entries();
+
+                URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
+                URLClassLoader cl = URLClassLoader.newInstance(urls);
+                while (e.hasMoreElements()) {
+                    JarEntry je = e.nextElement();
+                    if (je.isDirectory() || !je.getName().endsWith(JwtConstants.CLASS)) {
+                        continue;
+                    }
+                    // -6 because of .class
+                    String className = je.getName().substring(0, je.getName().length() - 6);
+                    className = className.replace('/', '.');
+                    Class classInJar = cl.loadClass(className);
+                    try {
+                        Annotation[] annotations = classInJar.getAnnotations();
+                        for (Annotation annotation : annotations) {
+                            if (annotation instanceof JwtTransformerAnnotation) {
+                                JwtTransformerAnnotation jwtTransformerAnnotation =
+                                        (JwtTransformerAnnotation) annotation;
+                                if (jwtTransformerAnnotation.enabled() == true) {
+                                    jwtTransformer = (JWTTransformer) classInJar.newInstance();
+                                    jwtTransformersMap.put(jwtTransformerAnnotation.issuer(), jwtTransformer);
+                                }
+                            }
+                        }
+                    } catch (InstantiationException | IllegalAccessException exception) {
+                        log.debug("Error in generating an object from the class", exception);
+                    }
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                log.debug("Error in loading class", e);
+            }
+        }
+        return jwtTransformersMap;
     }
 }
 

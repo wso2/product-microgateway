@@ -38,6 +38,9 @@ public class RequestContext {
     private ResourceConfig matchedResourcePath;
     private Map<String, String> headers;
     private Map<String, Object> properties = new HashMap();
+    private AuthenticationContext authenticationContext;
+    private String requestID;
+    private String address;
     // Denotes the cluster header name for each environment. Both properties can be null if
     // the openAPI has production endpoints alone.
     private String prodClusterHeader;
@@ -45,27 +48,11 @@ public class RequestContext {
     private boolean clusterHeaderEnabled = false;
     //Denotes the specific headers which needs to be passed to response object
     private Map<String, String> responseHeaders;
-    //Correlation ID
-    private final String correlationID;
     private Map<String, String> metadataMap = new HashMap<>();
-    private AuthenticationContext authenticationContext;
     private String requestPathTemplate;
 
     // Request Timestamp is required for analytics
     private long requestTimeStamp;
-
-    private RequestContext() {
-        correlationID = UUID.randomUUID().toString();
-    }
-
-    /**
-     * Returns the correlation ID for the request.
-     *
-     * @return correlation ID
-     */
-    public String getCorrelationID() {
-        return correlationID;
-    }
 
     public Map<String, String> getMetadataMap() {
         return metadataMap;
@@ -105,6 +92,9 @@ public class RequestContext {
         private String sandClusterHeader;
         private long requestTimeStamp;
         private Map<String, Object> properties = new HashMap();
+        private AuthenticationContext authenticationContext = new AuthenticationContext();
+        private String requestID;
+        private String address;
 
 
         public Builder(String requestPath) {
@@ -150,6 +140,21 @@ public class RequestContext {
             return this;
         }
 
+        public Builder authenticationContext(AuthenticationContext authenticationContext) {
+            this.authenticationContext = authenticationContext;
+            return this;
+        }
+
+        public Builder requestID(String requestID) {
+            this.requestID = requestID;
+            return this;
+        }
+
+        public Builder address(String address) {
+            this.address = address;
+            return this;
+        }
+
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
@@ -162,6 +167,9 @@ public class RequestContext {
             requestContext.properties = this.properties;
             requestContext.requestPathTemplate = this.requestPathTemplate;
             requestContext.requestTimeStamp = this.requestTimeStamp;
+            requestContext.authenticationContext = this.authenticationContext;
+            requestContext.requestID = this.requestID;
+            requestContext.address = this.address;
 
             // Adapter assigns header based routing only if both type of endpoints are present.
             if (!StringUtils.isEmpty(prodClusterHeader) && !StringUtils.isEmpty(sandClusterHeader)) {
@@ -178,6 +186,14 @@ public class RequestContext {
             this.requestPathTemplate = requestPathTemplate;
             return this;
         }
+    }
+
+    public String getRequestID() {
+        return requestID;
+    }
+
+    public String getAddress() {
+        return address;
     }
 
     public API getMathedAPI() {

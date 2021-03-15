@@ -145,16 +145,14 @@ public class TLSUtils {
         }
     }
 
-    public static Certificate getCertificate() throws CertificateException, IOException {
+    public static Certificate getCertificate(String filePath) throws CertificateException, IOException {
         Certificate certificate = null;
         CertificateFactory fact = CertificateFactory.getInstance(X509);
-        FileInputStream is = new FileInputStream(ConfigHolder.getInstance().getConfig().
-                getPublicCertificatePath());
+        FileInputStream is = new FileInputStream(filePath);
         X509Certificate cert = (X509Certificate) fact.generateCertificate(is);
         certificate = (Certificate) cert;
         return certificate;
     }
-
 
     /**
      * Generate the gRPC Server SSL Context where the mutual SSL is also enabled.
@@ -169,5 +167,20 @@ public class TLSUtils {
                 .trustManager(ConfigHolder.getInstance().getTrustManagerFactory())
                 .clientAuth(ClientAuth.REQUIRE)
                 .build();
+    }
+
+    public static javax.security.cert.Certificate convertCertificate(Certificate cert) {
+        javax.security.cert.Certificate certificate = null;
+        try {
+            InputStream inputStream = new ByteArrayInputStream(cert.getEncoded());
+            javax.security.cert.X509Certificate x509Certificate = javax.security.cert.X509Certificate.
+                    getInstance(inputStream);
+            certificate = (javax.security.cert.Certificate) x509Certificate;
+            return certificate;
+
+        } catch (javax.security.cert.CertificateException | java.security.cert.CertificateEncodingException e) {
+            log.debug("Error in loading certificate");
+        }
+        return certificate;
     }
 }

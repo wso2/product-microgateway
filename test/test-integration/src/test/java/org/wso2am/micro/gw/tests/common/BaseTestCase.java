@@ -84,6 +84,20 @@ public class BaseTestCase {
     }
 
     /**
+     * start the mgw docker environment and mock backend.
+     *
+     * @param confPath   external conf.toml file location
+     * @param tlsEnabled true if the tls based backend server is required additionally
+     * @throws MicroGWTestException
+     * @throws IOException
+     */
+    public void startMGW(String confPath, boolean tlsEnabled, boolean customJwtTransformerEnabled) throws MicroGWTestException, IOException,
+            InterruptedException {
+        microGWServer = new MgwServerInstance(confPath, tlsEnabled, customJwtTransformerEnabled);
+        microGWServer.startMGW();
+    }
+
+    /**
      * stop the mgw docker environment.
      */
     public void stopMGW() {

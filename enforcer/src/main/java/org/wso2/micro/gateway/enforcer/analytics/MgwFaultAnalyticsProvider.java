@@ -140,7 +140,7 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
         MetaInfo metaInfo = new MetaInfo();
         metaInfo.setRegionId("UnAssigned");
         metaInfo.setGatewayType(AnalyticsConstants.GATEWAY_LABEL);
-        metaInfo.setCorrelationId(requestContext.getCorrelationID());
+        metaInfo.setCorrelationId(requestContext.getRequestID());
         return metaInfo;
     }
 

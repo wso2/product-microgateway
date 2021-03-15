@@ -55,6 +55,10 @@
             <outputDirectory>wso2am-micro-gw-${project.version}</outputDirectory>
         </file>
         <file>
+            <source>../resources/apim/docker-compose.yaml</source>
+            <outputDirectory>wso2am-micro-gw-${project.version}/docker-with-apim</outputDirectory>
+        </file>
+        <file>
             <source>../resources/security/mg.key</source>
             <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security/keystore</outputDirectory>
         </file>
@@ -89,6 +93,10 @@
         <file>
             <source>../resources/security/mg.pem</source>
             <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security/truststore</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/apim/conf/deployment.toml</source>
+            <outputDirectory>wso2am-micro-gw-${project.version}/resources/apim/</outputDirectory>
         </file>
     </files>
 </assembly>

@@ -56,4 +56,16 @@ public interface TMURLGroupOrBuilder extends
    */
   com.google.protobuf.ByteString
       getAuthURLsBytes(int index);
+
+  /**
+   * <code>string type = 3;</code>
+   * @return The type.
+   */
+  java.lang.String getType();
+  /**
+   * <code>string type = 3;</code>
+   * @return The bytes for type.
+   */
+  com.google.protobuf.ByteString
+      getTypeBytes();
 }

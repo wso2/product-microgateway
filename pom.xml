@@ -21,7 +21,7 @@
     <groupId>org.wso2.am.microgw</groupId>
     <artifactId>micro-gateway-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.0-m7-SNAPSHOT</version>
+    <version>4.0.0-m8-SNAPSHOT</version>
     <name>Micro Gateway - Parent</name>
 
     <url>https://wso2.org</url>
@@ -275,6 +275,31 @@
                 <artifactId>testng</artifactId>
                 <version>${testng.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.databridge.commons</artifactId>
+                <version>${analytics.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.databridge.commons.binary</artifactId>
+                <version>${analytics.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-pool.wso2</groupId>
+                <artifactId>commons-pool</artifactId>
+                <version>${apache.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.lmax</groupId>
+                <artifactId>disruptor</artifactId>
+                <version>${lmax.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
+                <version>${apim.common.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -282,6 +307,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <andes.client.version>3.3.12</andes.client.version>
+        <apim.common.version>9.0.17</apim.common.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
         <commons.io.version>2.6</commons.io.version>
@@ -310,8 +336,12 @@
         <swagger.v3.parser.version>2.0.12</swagger.v3.parser.version>
         <swagger.v3.models.version>2.0.8</swagger.v3.models.version>
         <testcontainers.version>1.15.0</testcontainers.version>
+        <ryuk.image.version>0.3.0</ryuk.image.version>
         <testng.version>6.11</testng.version>
         <tomcat.annotations.api.version>6.0.53</tomcat.annotations.api.version>
         <toml4j.version>0.7.2</toml4j.version>
+        <analytics.common.version>6.1.45</analytics.common.version>
+        <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
+        <lmax.version>3.4.2.wso2v1</lmax.version>
     </properties>
 </project>

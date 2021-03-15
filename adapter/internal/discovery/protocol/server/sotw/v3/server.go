@@ -56,6 +56,8 @@ type watches struct {
 	applicationPolicyList     chan cache.Response
 	subscriptionPolicyList    chan cache.Response
 	applicationKeyMappingList chan cache.Response
+	keyManagers               chan cache.Response
+	revokedTokens             chan cache.Response
 
 	configCancel                    func()
 	apiCancel                       func()
@@ -65,6 +67,8 @@ type watches struct {
 	applicationPolicyListCancel     func()
 	subscriptionPolicyListCancel    func()
 	applicationKeyMappingListCancel func()
+	keyManagerCancel                func()
+	revokedTokenCancel              func()
 
 	configNonce                    string
 	apiNonce                       string
@@ -74,6 +78,8 @@ type watches struct {
 	applicationPolicyListNonce     string
 	subscriptionPolicyListNonce    string
 	applicationKeyMappingListNonce string
+	keyManagerNonce                string
+	revokedTokenNonce              string
 
 	// Opaque resources share a muxed channel. Nonces and watch cancellations are indexed by type URL.
 	responses     chan cache.Response
@@ -85,7 +91,7 @@ type watches struct {
 // Initialize all watches
 func (values *watches) Init() {
 	// muxed channel needs a buffer to release go-routines populating it
-	values.responses = make(chan cache.Response, 5)
+	values.responses = make(chan cache.Response, 10)
 	values.cancellations = make(map[string]func())
 	values.nonces = make(map[string]string)
 	values.terminations = make(map[string]chan struct{})
@@ -119,6 +125,12 @@ func (values *watches) Cancel() {
 	}
 	if values.applicationKeyMappingListCancel != nil {
 		values.applicationKeyMappingListCancel()
+	}
+	if values.keyManagerCancel != nil {
+		values.keyManagerCancel()
+	}
+	if values.revokedTokenCancel != nil {
+		values.revokedTokenCancel()
 	}
 
 	for _, cancel := range values.cancellations {
@@ -264,6 +276,26 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			}
 			values.applicationKeyMappingListNonce = nonce
 
+		case resp, more := <-values.keyManagers:
+			if !more {
+				return status.Errorf(codes.Unavailable, "keyManagers watch failed")
+			}
+			nonce, err := send(resp, resource.KeyManagerType)
+			if err != nil {
+				return err
+			}
+			values.keyManagerNonce = nonce
+
+		case resp, more := <-values.revokedTokens:
+			if !more {
+				return status.Errorf(codes.Unavailable, "revoked tokens watch failed")
+			}
+			nonce, err := send(resp, resource.RevokedTokensType)
+			if err != nil {
+				return err
+			}
+			values.revokedTokenNonce = nonce
+
 		case resp, more := <-values.responses:
 			if more {
 				if resp == errorResponse {
@@ -369,6 +401,20 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 						values.applicationKeyMappingListCancel()
 					}
 					values.applicationKeyMappingList, values.applicationKeyMappingListCancel = s.cache.CreateWatch(req)
+				}
+			case req.TypeUrl == resource.KeyManagerType:
+				if values.keyManagerNonce == "" || values.keyManagerNonce == nonce {
+					if values.keyManagerCancel != nil {
+						values.keyManagerCancel()
+					}
+					values.keyManagers, values.keyManagerCancel = s.cache.CreateWatch(req)
+				}
+			case req.TypeUrl == resource.RevokedTokensType:
+				if values.revokedTokenNonce == "" || values.revokedTokenNonce == nonce {
+					if values.revokedTokenCancel != nil {
+						values.revokedTokenCancel()
+					}
+					values.revokedTokens, values.revokedTokenCancel = s.cache.CreateWatch(req)
 				}
 			default:
 				typeUrl := req.TypeUrl

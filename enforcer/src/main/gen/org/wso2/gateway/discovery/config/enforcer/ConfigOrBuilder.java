@@ -122,19 +122,19 @@ public interface ConfigOrBuilder extends
   org.wso2.gateway.discovery.config.enforcer.JWTGeneratorOrBuilder getJwtGeneratorOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
-   * @return Whether the throttlingConfig field is set.
+   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+   * @return Whether the throttling field is set.
    */
-  boolean hasThrottlingConfig();
+  boolean hasThrottling();
   /**
-   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
-   * @return The throttlingConfig.
+   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+   * @return The throttling.
    */
-  org.wso2.gateway.discovery.config.enforcer.Throttling getThrottlingConfig();
+  org.wso2.gateway.discovery.config.enforcer.Throttling getThrottling();
   /**
-   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
    */
-  org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder getThrottlingConfigOrBuilder();
+  org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder getThrottlingOrBuilder();
 
   /**
    * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
@@ -152,17 +152,32 @@ public interface ConfigOrBuilder extends
   org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder getCacheOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * @return Whether the jwtIssuer field is set.
+   */
+  boolean hasJwtIssuer();
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * @return The jwtIssuer.
+   */
+  org.wso2.gateway.discovery.config.enforcer.JWTIssuer getJwtIssuer();
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.JWTIssuerOrBuilder getJwtIssuerOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
    * @return Whether the analytics field is set.
    */
   boolean hasAnalytics();
   /**
-   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
    * @return The analytics.
    */
   org.wso2.gateway.discovery.config.enforcer.Analytics getAnalytics();
   /**
-   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 10;</code>
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.AnalyticsOrBuilder getAnalyticsOrBuilder();
 }

@@ -30,6 +30,7 @@ import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.cors.CorsFilter;
+import org.wso2.micro.gateway.enforcer.filters.ThrottleFilter;
 import org.wso2.micro.gateway.enforcer.security.AuthFilter;
 
 import java.util.ArrayList;
@@ -44,13 +45,13 @@ public class RestAPI implements API {
     private static final Logger logger = LogManager.getLogger(RestAPI.class);
 
     private APIConfig apiConfig;
+    private String apiLifeCycleState;
     private List<Filter> filters = new ArrayList<>();
 
     @Override
     public List<Filter> getFilters() {
         return filters;
     }
-
 
     @Override
     public String init(Api api) {
@@ -68,6 +69,7 @@ public class RestAPI implements API {
                 resources.add(resConfig);
             }
         }
+
         this.apiConfig = new APIConfig.Builder(name)
                 .basePath(basePath)
                 .version(version)
@@ -75,7 +77,9 @@ public class RestAPI implements API {
                 .apiType(apiType)
                 .productionUrls(productionUrls)
                 .sandboxUrls(sandboxUrls)
+                .apiLifeCycleState(apiLifeCycleState)
                 .build();
+        this.apiLifeCycleState = api.getApiLifeCycleStatus();
         initFilters();
         return basePath;
     }
@@ -95,7 +99,7 @@ public class RestAPI implements API {
 
     @Override
     public ResponseObject process(RequestContext requestContext) {
-        ResponseObject responseObject = new ResponseObject(requestContext.getCorrelationID());
+        ResponseObject responseObject = new ResponseObject(requestContext.getRequestID());
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
         if (executeFilterChain(requestContext)) {
 
@@ -160,10 +164,20 @@ public class RestAPI implements API {
     }
 
     private void initFilters() {
-        AuthFilter authFilter = new AuthFilter();
-        authFilter.init(apiConfig);
         CorsFilter corsFilter = new CorsFilter();
         this.filters.add(corsFilter);
-        this.filters.add(authFilter);
+
+        if (!APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(apiLifeCycleState)) {
+            AuthFilter authFilter = new AuthFilter();
+            authFilter.init(apiConfig);
+            this.filters.add(authFilter);
+        }
+
+        // enable throttle filter
+        if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
+            ThrottleFilter throttleFilter = new ThrottleFilter();
+            throttleFilter.init(apiConfig);
+            this.filters.add(throttleFilter);
+        }
     }
 }

@@ -114,7 +114,7 @@ public class AnalyticsFilter {
         requestContext.addMetadataToMap(MetadataConstants.APP_OWNER_KEY,
                 AnalyticsUtils.setDefaultIfNull(authContext.getSubscriber()));
 
-        requestContext.addMetadataToMap(MetadataConstants.CORRELATION_ID_KEY, requestContext.getCorrelationID());
+        requestContext.addMetadataToMap(MetadataConstants.CORRELATION_ID_KEY, requestContext.getRequestID());
         // TODO: (VirajSalaka) Move this out of this method as these remain static
         requestContext.addMetadataToMap(MetadataConstants.REGION_KEY, AnalyticsUtils.setDefaultIfNull(null));
         requestContext.addMetadataToMap("GatewayType", "ENVOY");
