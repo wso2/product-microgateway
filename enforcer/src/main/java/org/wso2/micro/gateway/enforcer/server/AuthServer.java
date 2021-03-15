@@ -73,15 +73,15 @@ public class AuthServer {
             server.start();
             logger.info("Sever started Listening in port : " + 8081);
 
-            // Create a new server to listen on port 8082
-            TokenServer tokenServer = new TokenServer();
-            tokenServer.initToken();
-            logger.info("Token endpoint started Listening in port : " + 8082);
-
             //TODO: Get the tenant domain from config
             SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().initializeStore();
             KeyManagerHolder.getInstance().init();
             RevokedJWTDataHolder.getInstance().init();
+
+            // Create a new server to listen on port 8082
+            TokenServer tokenServer = new TokenServer();
+            tokenServer.initToken();
+            logger.info("Token endpoint started Listening in port : " + 8082);
 
             // Don't exit the main thread. Wait until server is terminated.
             server.awaitTermination();
