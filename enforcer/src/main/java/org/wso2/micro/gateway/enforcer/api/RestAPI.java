@@ -132,6 +132,7 @@ public class RestAPI implements API {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
             // TODO: (VirajSalaka) Finalize.  (In preflight request and normal OPTIONS call)
+            // TODO: (VirajSalaka) Remove redundant check
             // to avoid publishing OPTIONS call.
             if (analyticsEnabled && responseObject.getStatusCode() != 204) {
                 AnalyticsFilter.getInstance().handleFailureRequest(requestContext);

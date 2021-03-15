@@ -55,6 +55,7 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public EventCategory getEventCategory() {
         // TODO: (VirajSalaka) Filter out token endpoint calls
+        // TODO: (VirajSalaka) change the order for .equals to avoid NPE
         if (logEntry.getResponse().getResponseCodeDetails()
                 .equals(AnalyticsConstants.UPSTREAM_SUCCESS_RESPONSE_DETAIL)) {
             logger.debug("Is success event");
@@ -71,6 +72,7 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public boolean isAnonymous() {
+        // TODO: (VirajSalaka) evaluate
         return false;
     }
 
@@ -91,6 +93,7 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     public boolean isTargetFaultRequest() {
         // TODO: (VirajSalaka) CorsPreflight request
+        // TODO: (VirajSalaka) Change order (redundant check, check if this logic could be avoided)
         return !logEntry.getResponse().getResponseCodeDetails()
                 .equals(AnalyticsConstants.UPSTREAM_SUCCESS_RESPONSE_DETAIL)
                 && !logEntry.getResponse().getResponseCodeDetails()
@@ -147,11 +150,11 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     public Latencies getLatencies() {
         AccessLogCommon properties = logEntry.getCommonProperties();
         Latencies latencies = new Latencies();
-        // TODO: (VirajSalaka) Finalize the correctness after discussion
+        // TODO: (VirajSalaka) Introduce method local variables
         latencies.setBackendLatency(properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000 -
                 properties.getTimeToFirstUpstreamTxByte().getNanos() / 1000000);
         latencies.setResponseLatency(properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000);
-        latencies.setRequestMediationLatency(properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000);
+        latencies.setRequestMediationLatency(properties.getTimeToLastUpstreamTxByte().getNanos() / 1000000);
         latencies.setResponseMediationLatency(properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000 -
                 properties.getTimeToFirstUpstreamRxByte().getNanos() / 1000000);
         return latencies;
@@ -163,6 +166,7 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         MetaInfo metaInfo = new MetaInfo();
         metaInfo.setCorrelationId(getValueAsString(fieldsMap, MetadataConstants.CORRELATION_ID_KEY));
         metaInfo.setGatewayType(AnalyticsConstants.GATEWAY_LABEL);
+        // TODO: (VirajSalaka) Env variable or config
         metaInfo.setRegionId(getValueAsString(fieldsMap, MetadataConstants.REGION_KEY));
         return metaInfo;
     }

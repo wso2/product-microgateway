@@ -44,6 +44,7 @@ public class FaultCodeClassifier {
 
     public FaultCodeClassifier(HTTPAccessLogEntry logEntry) {
         this.logEntry = logEntry;
+        // TODO: (VirajSalaka) Comment the metadata related error code as it is unused at the moment
         int errorCodeFromEntry = getErrorCodeFromMetadata();
         if (errorCodeFromEntry == -1) {
             errorCodeFromEntry = getErrorCodeFromFlags();
@@ -86,9 +87,6 @@ public class FaultCodeClassifier {
             case APISecurityConstants.SUBSCRIPTION_INACTIVE:
                 return FaultSubCategories.Authentication.SUBSCRIPTION_VALIDATION_FAILURE;
             default:
-                // TODO: (VirajSalaka) Temporary workaround.
-                // Apply the uncommented code once https://github.com/envoyproxy/envoy/pull/15058 is available.
-                // return FaultSubCategories.TargetConnectivity.OTHER;
                 return FaultSubCategories.Authentication.AUTHENTICATION_FAILURE;
         }
     }
@@ -154,7 +152,7 @@ public class FaultCodeClassifier {
     }
 
     public boolean isMethodNotAllowed() {
-        // TODO: (VirajSalaka) Implement method not allowed
+        // TODO: (VirajSalaka) Not implemented due to design complexity
         return false;
     }
 
@@ -223,6 +221,8 @@ public class FaultCodeClassifier {
 //        NoFilterConfigFound
 //        // Indicates that request or connection exceeded the downstream connection duration.
 //        DurationTimeout
+
+        // TODO: (VirajSalaka) introduce constants. Simplify such that errorcodes are categorized correctly
 
         if (logEntry == null || logEntry.getCommonProperties().getResponseFlags() == null) {
             return -1;

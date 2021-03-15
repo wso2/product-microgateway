@@ -27,7 +27,7 @@ import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
  * Common Utility functions
  */
 public class AnalyticsUtils {
-    private static final String DEFAULT_FOR_UNASSIGNED = "UnAssigned";
+    private static final String DEFAULT_FOR_UNASSIGNED = "UNKNOWN";
 
     public static String getAPIId(RequestContext requestContext) {
         AuthenticationContext authContext = requestContext.getAuthenticationContext();

@@ -77,6 +77,7 @@ func getGRPCAccessLogConfigs() *config_access_logv3.AccessLog {
 		CommonConfig: &grpc_accesslogv3.CommonGrpcAccessLogConfig{
 			TransportApiVersion: corev3.ApiVersion_V3,
 			LogName:             grpcAccessLogLogName,
+			// TODO: (VirajSalaka) Make the buffer flush configurable
 			GrpcService: &corev3.GrpcService{
 				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
 					EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{

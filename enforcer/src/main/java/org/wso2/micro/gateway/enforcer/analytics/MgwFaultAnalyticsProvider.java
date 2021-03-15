@@ -89,6 +89,7 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
         api.setApiType(requestContext.getMathedAPI().getAPIConfig().getApiType());
         api.setApiName(requestContext.getMathedAPI().getAPIConfig().getName());
         api.setApiVersion(requestContext.getMathedAPI().getAPIConfig().getVersion());
+        // TODO: (VirajSalaka) pick tenant from subscription detail straightaway.
         api.setApiCreatorTenantDomain("carbon.super");
         return api;
     }
@@ -109,7 +110,6 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public Operation getOperation() {
         // This could be null if  OPTIONS request comes
-        // TODO: (VirajSalaka) handle method not found operation (discuss)
         if (requestContext.getMatchedResourcePath() != null) {
             Operation operation = new Operation();
             operation.setApiMethod(requestContext.getMatchedResourcePath().getMethod().name());
@@ -180,6 +180,7 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public String getUserAgentHeader() {
         // User agent is not required for fault scenario
+        // TODO: (VirajSalaka) Throw exception
         return null;
     }
 

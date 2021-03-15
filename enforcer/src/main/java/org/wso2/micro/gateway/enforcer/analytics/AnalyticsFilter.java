@@ -54,6 +54,7 @@ public class AnalyticsFilter {
         configuration.put(AUTH_TOKEN_KEY, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthToken());
         configuration.put(AUTH_URL, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthURL());
         AnalyticsConfigurationHolder.getInstance().setConfigurations(configuration);
+        // TODO: (VirajSalaka) Load Class
     }
 
     public static AnalyticsFilter getInstance() {
@@ -67,6 +68,7 @@ public class AnalyticsFilter {
         return analyticsFilter;
     }
 
+    // TODO: (VirajSalaka) change function name
     public void handleMsg(StreamAccessLogsMessage message) {
         for (int i = 0; i < message.getHttpLogs().getLogEntryCount(); i++) {
             HTTPAccessLogEntry logEntry = message.getHttpLogs().getLogEntry(i);

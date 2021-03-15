@@ -34,6 +34,7 @@ ENV ADAPTER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
 ENV ENFORCER_HOST=enforcer
 ENV ENFORCER_PORT=8081
 ENV ENFORCER_ANALYTICS_RECEIVER_PORT=18090
+# Enforcer Analytics host
 ENV ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
 
 ENV TRAILING_ARGS=

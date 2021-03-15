@@ -194,6 +194,7 @@
       secureEvictionTimePeriod = 5500
       secureMinIdleTimeInPool = 5000
 
+# remove this from config and assign default values
 [enforcer.analyticsReceiver]
     port = 18090
     maxMessageSize = 1000000000
@@ -207,7 +208,6 @@
         #keep alive time of threads in seconds
         keepAliveTime = 600
         queueSize = 1000
-
 
 [controlPlane]
 # Control plane's eventHub details
