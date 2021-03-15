@@ -36,6 +36,7 @@ import java.util.Map;
  * Jwt test cases.
  *
  */
+@Test
 public class JwtTestCase {
     private String jwtWithoutScope;
     private String jwtWithScope;

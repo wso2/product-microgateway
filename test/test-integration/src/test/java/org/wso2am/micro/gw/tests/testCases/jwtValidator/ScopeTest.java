@@ -36,6 +36,7 @@ import java.util.Map;
 /**
  * Scope validation related test cases.
  */
+@Test
 public class ScopeTest {
     private String jwtWithoutScope;
     private String jwtWithScope;

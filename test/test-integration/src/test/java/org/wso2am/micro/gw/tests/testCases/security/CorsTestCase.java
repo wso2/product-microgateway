@@ -38,6 +38,7 @@ import org.wso2am.micro.gw.tests.util.URLs;
 
 import java.io.IOException;
 
+@Test
 public class CorsTestCase {
     protected String jwtTokenProd;
     private String allowedOrigin1 = "http://test1.com";

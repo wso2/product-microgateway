@@ -35,6 +35,7 @@ import org.wso2am.micro.gw.mockbackend.ResponseConstants;
 import java.util.HashMap;
 import java.util.Map;
 
+@Test
 public class ProductionSandboxTestCase {
     protected String jwtTokenProd;
     protected String jwtTokenSand;

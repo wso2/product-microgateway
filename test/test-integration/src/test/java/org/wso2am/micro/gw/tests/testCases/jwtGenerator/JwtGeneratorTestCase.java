@@ -37,6 +37,7 @@ import java.util.Map;
 /**
  * Jwt generator test cases.
  */
+@Test
 public class JwtGeneratorTestCase {
     private static final String JWT_GENERATOR_ISSUER = "wso2.org/products/am";
 

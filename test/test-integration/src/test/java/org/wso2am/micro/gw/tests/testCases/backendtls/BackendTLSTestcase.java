@@ -32,6 +32,7 @@ import org.wso2am.micro.gw.tests.util.URLs;
 import java.util.HashMap;
 import java.util.Map;
 
+@Test
 public class BackendTLSTestcase {
     protected String jwtTokenProd;
 

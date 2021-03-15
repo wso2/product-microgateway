@@ -38,6 +38,7 @@ import java.util.Map;
  * Api deploy test cases.
  *
  */
+@Test
 public class APiDeployTestCase extends BaseTestCase {
 
     @Test(description = "Test to check the api deployment is working")
