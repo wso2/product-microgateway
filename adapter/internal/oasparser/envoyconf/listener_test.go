@@ -38,6 +38,28 @@ func TestCreateListenerWithRds(t *testing.T) {
 func TestCreateVirtualHost(t *testing.T) {
 	// TODO: (Vajira) Add more test scenarios
 
+	vHostName := "default"
+	vHost := CreateVirtualHost(vHostName, testCreateRoutesForUnitTests(t))
+
+	assert.NotNil(t, vHost, "Virtual Host creation failed")
+	assert.Equal(t, vHost.Name, vHostName, "VirtualHost name not match")
+
+}
+
+func TestCreateRoutesConfigForRds(t *testing.T) {
+	// TODO: (Vajira) Add more test scenarios
+	vHostName := "default"
+	vHost := CreateVirtualHost(vHostName, testCreateRoutesForUnitTests(t))
+	rConfig := CreateRoutesConfigForRds(vHost)
+
+	assert.NotNil(t, rConfig, "CreateRoutesConfigForRds is failed")
+	if rConfig.Validate() != nil {
+		t.Errorf("rConfig Validation failed")
+	}
+}
+
+//Create some routes to perform unit tests
+func testCreateRoutesForUnitTests(t *testing.T) []*routev3.Route {
 	//cors configuration
 	corsConfigModel3 := &model.CorsConfig{
 		Enabled:                   true,
@@ -59,10 +81,5 @@ func TestCreateVirtualHost(t *testing.T) {
 		assert.NotNil(t, r.GetRoute().Cors, "Cors Configuration should not be null.")
 	}
 
-	vHostName := "default"
-	vHost := CreateVirtualHost(vHostName, routes)
-
-	assert.NotNil(t, vHost, "Virtual Host creation failed")
-	assert.Equal(t, vHost.Name, vHostName, "VirtualHost name not match")
-
+	return routes
 }
