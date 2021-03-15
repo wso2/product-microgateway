@@ -19,10 +19,12 @@ package org.wso2am.micro.gw.tests.testCaseBefore;
 
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.util.ApiDeployment;
 import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
 
+@Test
 public class MgwWithBackendTlsAndAPI extends BaseTestCase {
 
     @BeforeTest(description = "initialise the setup")

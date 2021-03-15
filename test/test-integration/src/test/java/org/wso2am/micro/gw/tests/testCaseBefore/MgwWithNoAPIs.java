@@ -19,8 +19,10 @@ package org.wso2am.micro.gw.tests.testCaseBefore;
 
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 
+@Test
 public class MgwWithNoAPIs extends BaseTestCase {
 
     @BeforeTest(description = "initialise the setup")
