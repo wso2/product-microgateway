@@ -151,10 +151,54 @@ func TestSetXWso2PrdoductionEndpoint(t *testing.T) {
 			},
 			message: "when resource level endpoints exist",
 		},
+
+		{
+			input: MgwSwagger{
+				vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
+					"type": "https", "urls": []interface{}{"https://www.youtube.com:80/base"}}},
+				resources: []Resource{
+					{
+						vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
+							"type": "https", "urls": []interface{}{"https://resource.endpoint:80/base"}}},
+					},
+				},
+				xWso2Cors: &CorsConfig{
+					Enabled:                       true,
+					AccessControlAllowCredentials: true,
+					AccessControlAllowHeaders:     []string{"Authorization"},
+					AccessControlAllowMethods:     []string{"GET"},
+					AccessControlAllowOrigins:     []string{"http://test1.com", "http://test2.com"},
+				},
+			},
+			result: MgwSwagger{
+				productionUrls: []Endpoint{
+					{
+						Host:     "www.youtube.com",
+						Port:     80,
+						URLType:  "https",
+						Basepath: "/base",
+					},
+				},
+				resources: []Resource{
+					{
+						productionUrls: []Endpoint{
+							{
+								Host:     "resource.endpoint",
+								Port:     80,
+								URLType:  "https",
+								Basepath: "/base",
+							},
+						},
+					},
+				},
+			},
+			message: "when resource level endpoints exist",
+		},
 	}
 
 	for _, item := range dataItems {
 		mgwSwag := item.input
+		t.Log(mgwSwag.xWso2Cors)
 		mgwSwag.SetXWso2Extenstions()
 		assert.Equal(t, item.result.productionUrls, mgwSwag.productionUrls, item.message)
 		if mgwSwag.resources != nil {
