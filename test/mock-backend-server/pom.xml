@@ -21,11 +21,11 @@
     <parent>
         <artifactId>micro-gateway-tests</artifactId>
         <groupId>org.wso2.am.microgw</groupId>
-        <version>4.0.0-m9-SNAPSHOT</version>
+        <version>4.0.0-m8</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <version>4.0.0-m9-SNAPSHOT</version>
+    <version>4.0.0-m8</version>
     <dependencies>
         <dependency>
             <groupId>io.grpc</groupId>
