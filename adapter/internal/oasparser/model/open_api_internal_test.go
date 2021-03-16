@@ -25,6 +25,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/micro-gw/config"
 )
 
 func TestSetInfoOpenAPI(t *testing.T) {
@@ -173,10 +174,10 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 func TestGetXWso2Label(t *testing.T) {
 	// TODO: (Vajira) add more test scenarios
 	//newLabels := GetXWso2Label(openAPIV3Struct.ExtensionProps)
-
-	swagger, err := openapi3.NewSwaggerLoader().LoadSwaggerFromFile("/home/vajira/WSO2-dev/product-microgateway/adapter/test-resources/envoycodegen/openapi_with_xwso2label.yaml")
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_xwso2label.yaml"
+	swagger, err := openapi3.NewSwaggerLoader().LoadSwaggerFromFile(apiYamlFilePath)
 	assert.Nil(t, err, "Swagger loader failed")
-	t.Log(swagger)
+
 	assert.Nil(t, swagger.Validate(context.Background()), "Swagger Validation Failed")
 
 	wso2Label := GetXWso2Label(swagger.ExtensionProps)
