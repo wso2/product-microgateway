@@ -18,6 +18,8 @@
 
 package org.wso2.micro.gateway.enforcer.grpc;
 
+import com.google.protobuf.Struct;
+import com.google.protobuf.Value;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.envoyproxy.envoy.config.core.v3.HeaderValue;
@@ -69,6 +71,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 return CheckResponse.newBuilder()
                         .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                         .setDeniedResponse(responseBuilder.setStatus(status).build())
+                        .setDynamicMetadata(Struct.newBuilder().putFields("correlationID",
+                                Value.newBuilder().setStringValue(responseObject.getCorrelationID()).build())
+                                .build())
                         .build();
             }
             // Error handling
@@ -83,9 +88,16 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                     .build();
             responseBuilder.addHeaders(headerValueOption);
 
+            Struct.Builder structBuilder = Struct.newBuilder();
+            if (responseObject.getMetaDataMap() != null) {
+                responseObject.getMetaDataMap().forEach((key, value) ->
+                        structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
+            }
+
             return CheckResponse.newBuilder()
                     .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                     .setDeniedResponse(responseBuilder.setBody(responseJson.toString()).setStatus(status).build())
+                    .setDynamicMetadata(structBuilder.build())
                     .build();
         } else {
             OkHttpResponse.Builder okResponseBuilder = OkHttpResponse.newBuilder();
@@ -98,12 +110,20 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         }
                 );
             }
+            Struct.Builder structBuilder = Struct.newBuilder();
+            if (responseObject.getMetaDataMap() != null) {
+                responseObject.getMetaDataMap().forEach((key, value) ->
+                        structBuilder.putFields(key, Value.newBuilder().setStringValue(value).build()));
+            }
             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                     .setHeader(HeaderValue.newBuilder().setKey(APIConstants.API_TRACE_KEY).setValue(traceKey).build())
                     .build();
             responseBuilder.addHeaders(headerValueOption);
+
             return CheckResponse.newBuilder().setStatus(Status.newBuilder().setCode(Code.OK_VALUE).build())
-                    .setOkResponse(okResponseBuilder.build()).build();
+                    .setOkResponse(okResponseBuilder.build())
+                    .setDynamicMetadata(structBuilder.build())
+                    .build();
         }
     }
 

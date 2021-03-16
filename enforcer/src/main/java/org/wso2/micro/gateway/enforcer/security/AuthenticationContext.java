@@ -52,6 +52,7 @@ public class AuthenticationContext {
     private String apiName;
     private String apiPublisher;
     private String apiVersion;
+    private String apiUUID;
 
     public AuthenticationContext() {
         this.applicationId = Constants.UNKNOWN_VALUE;
@@ -252,5 +253,12 @@ public class AuthenticationContext {
         this.apiVersion = apiVersion;
     }
 
+    public String getApiUUID() {
+        return apiUUID;
+    }
+
+    public void setApiUUID(String apiUUID) {
+        this.apiUUID = apiUUID;
+    }
 }
 

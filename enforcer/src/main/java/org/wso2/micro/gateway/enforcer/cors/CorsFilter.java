@@ -44,15 +44,19 @@ public class CorsFilter implements Filter {
         // Options request is served here.
         // Preflight success request does not reach here.
         if (requestContext.getRequestMethod().contains(HttpConstants.OPTIONS)) {
+            // If the OPTIONS method is provided under the resource, microgateway do not respond
+            if (requestContext.getMatchedResourcePath() != null) {
+                logger.debug("OPTIONS method is listed under the resource. Hence OPTIONS request will" +
+                        "be responded from the upstream");
+                return true;
+            }
             StringBuilder allowedMethodsBuilder = new StringBuilder(HttpConstants.OPTIONS);
+            // TODO: (VirajSalaka) API Resources are iterated twice
             for (ResourceConfig resourceConfig : requestContext.getMathedAPI().getAPIConfig().getResources()) {
-                if (resourceConfig.getMethod() == ResourceConfig.HttpMethods.OPTIONS) {
-                    logger.debug("OPTIONS method is listed under the resource. Hence OPTIONS request will" +
-                            "be responded from the upstream");
-                    return true;
-                } else {
-                    allowedMethodsBuilder.append(", ").append(resourceConfig.getMethod().name());
+                if (!resourceConfig.getPath().equals(requestContext.getRequestPathTemplate())) {
+                    continue;
                 }
+                allowedMethodsBuilder.append(", ").append(resourceConfig.getMethod().name());
             }
             requestContext.getProperties()
                     .put(APIConstants.MessageFormat.STATUS_CODE, HttpConstants.NO_CONTENT_STATUS_CODE);

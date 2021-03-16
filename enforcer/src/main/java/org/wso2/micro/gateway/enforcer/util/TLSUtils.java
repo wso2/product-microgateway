@@ -18,12 +18,17 @@
 
 package org.wso2.micro.gateway.enforcer.util;
 
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +43,8 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.SSLException;
 
 /**
  * Utility Functions related to TLS Certificates.
@@ -145,6 +152,21 @@ public class TLSUtils {
         X509Certificate cert = (X509Certificate) fact.generateCertificate(is);
         certificate = (Certificate) cert;
         return certificate;
+    }
+
+    /**
+     * Generate the gRPC Server SSL Context where the mutual SSL is also enabled.
+     * @return {@code SsLContext} generated SSL Context
+     * @throws SSLException
+     */
+    public static SslContext buildGRPCServerSSLContext() throws SSLException {
+        File certFile = Paths.get(ConfigHolder.getInstance().getEnvVarConfig().getEnforcerPublicKeyPath()).toFile();
+        File keyFile = Paths.get(ConfigHolder.getInstance().getEnvVarConfig().getEnforcerPrivateKeyPath()).toFile();
+
+        return GrpcSslContexts.forServer(certFile, keyFile)
+                .trustManager(ConfigHolder.getInstance().getTrustManagerFactory())
+                .clientAuth(ClientAuth.REQUIRE)
+                .build();
     }
 
     public static javax.security.cert.Certificate convertCertificate(Certificate cert) {

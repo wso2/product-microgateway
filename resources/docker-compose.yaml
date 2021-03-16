@@ -18,6 +18,7 @@ services:
       - ADAPTER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
       - ENFORCER_HOST=enforcer
       - ENFORCER_PORT=8081
+      - ENFORCER_ANALYTICS_RECEIVER_PORT=18090
       - ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
     volumes:
       - ./resources/router/security:/home/wso2/security

@@ -20,9 +20,11 @@ package org.wso2.micro.gateway.enforcer.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.api.Api;
+import org.wso2.gateway.discovery.api.Endpoint;
 import org.wso2.gateway.discovery.api.Operation;
 import org.wso2.gateway.discovery.api.Resource;
 import org.wso2.micro.gateway.enforcer.Filter;
+import org.wso2.micro.gateway.enforcer.analytics.AnalyticsFilter;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
@@ -56,6 +58,9 @@ public class RestAPI implements API {
         String basePath = api.getBasePath();
         String name = api.getTitle();
         String version = api.getVersion();
+        String apiType = api.getApiType();
+        List<String> productionUrls = processEndpoints(api.getProductionUrlsList());
+        List<String> sandboxUrls = processEndpoints(api.getSandboxUrlsList());
         List<ResourceConfig> resources = new ArrayList<>();
         for (Resource res: api.getResourcesList()) {
             // TODO: (Praminda) handle all fields of resource
@@ -64,20 +69,47 @@ public class RestAPI implements API {
                 resources.add(resConfig);
             }
         }
-        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).
-                apiLifeCycleState(apiLifeCycleState).build();
+
+        this.apiConfig = new APIConfig.Builder(name)
+                .basePath(basePath)
+                .version(version)
+                .resources(resources)
+                .apiType(apiType)
+                .productionUrls(productionUrls)
+                .sandboxUrls(sandboxUrls)
+                .apiLifeCycleState(apiLifeCycleState)
+                .build();
         this.apiLifeCycleState = api.getApiLifeCycleStatus();
         initFilters();
         return basePath;
     }
 
+    private List<String> processEndpoints(List<Endpoint> endpoints) {
+        if (endpoints == null || endpoints.size() == 0) {
+            return null;
+        }
+        List<String> urls = new ArrayList<>(1);
+        endpoints.forEach(endpoint -> {
+            String url = endpoint.getURLType().toLowerCase() + "://" +
+                    endpoint.getHost() + ":" + endpoint.getPort() + endpoint.getBasepath();
+            urls.add(url);
+        });
+        return urls;
+    }
+
     @Override
     public ResponseObject process(RequestContext requestContext) {
-        ResponseObject responseObject = new ResponseObject();
+        ResponseObject responseObject = new ResponseObject(requestContext.getRequestID());
+        boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
         if (executeFilterChain(requestContext)) {
+
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
             if (requestContext.getResponseHeaders() != null) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
+            }
+            if (analyticsEnabled) {
+                AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
+                responseObject.setMetaDataMap(requestContext.getMetadataMap());
             }
         } else {
             // If a enforcer stops with a false, it will be passed directly to the client.
@@ -99,7 +131,15 @@ public class RestAPI implements API {
             if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
+            // TODO: (VirajSalaka) Finalize.  (In preflight request and normal OPTIONS call)
+            // TODO: (VirajSalaka) Remove redundant check
+            // to avoid publishing OPTIONS call.
+            if (analyticsEnabled && responseObject.getStatusCode() != 204) {
+                AnalyticsFilter.getInstance().handleFailureRequest(requestContext);
+                responseObject.setMetaDataMap(new HashMap<>(0));
+            }
         }
+
         return responseObject;
     }
 

@@ -59,7 +59,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		urlGroups = append(urlGroups, group)
 	}
 
-	authService := &enforcer.AuthService{
+	authService := &enforcer.Service{
 		KeepAliveTime:  config.Enforcer.AuthService.KeepAliveTime,
 		MaxHeaderLimit: config.Enforcer.AuthService.MaxHeaderLimit,
 		MaxMessageSize: config.Enforcer.AuthService.MaxMessageSize,
@@ -76,6 +76,24 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		Enable:      config.Enforcer.Cache.Enabled,
 		MaximumSize: config.Enforcer.Cache.MaximumSize,
 		ExpiryTime:  config.Enforcer.Cache.ExpiryTime,
+	}
+
+	analytics := &enforcer.Analytics{
+		Enabled:   config.ControlPlane.Analytics.Enabled,
+		AuthUrl:   config.ControlPlane.Analytics.AuthURL,
+		AuthToken: config.ControlPlane.Analytics.AuthToken,
+		Service: &enforcer.Service{
+			Port:           config.Enforcer.AnalyticsReceiver.Port,
+			MaxHeaderLimit: config.Enforcer.AnalyticsReceiver.MaxHeaderLimit,
+			KeepAliveTime:  config.Enforcer.AnalyticsReceiver.KeepAliveTime,
+			MaxMessageSize: config.Enforcer.AnalyticsReceiver.MaxMessageSize,
+			ThreadPool: &enforcer.ThreadPool{
+				CoreSize:      config.Enforcer.AnalyticsReceiver.ThreadPool.CoreSize,
+				MaxSize:       config.Enforcer.AnalyticsReceiver.ThreadPool.MaxSize,
+				QueueSize:     config.Enforcer.AnalyticsReceiver.ThreadPool.QueueSize,
+				KeepAliveTime: config.Enforcer.AnalyticsReceiver.ThreadPool.KeepAliveTime,
+			},
+		},
 	}
 
 	return &enforcer.Config{
@@ -110,6 +128,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		AuthService:    authService,
 		JwtTokenConfig: issuers,
 		Cache:          cache,
+		Analytics:      analytics,
 		Eventhub: &enforcer.EventHub{
 			Enabled:    config.ControlPlane.EventHub.Enabled,
 			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,
@@ -222,6 +241,7 @@ func MarshalAPIList(apiList *types.APIList) *subscription.APIList {
 			Context:          api.Context,
 			Policy:           api.Policy,
 			ApiType:          api.APIType,
+			Uuid:             api.UUID,
 			IsDefaultVersion: api.IsDefaultVersion,
 		}
 		apis = append(apis, newAPI)

@@ -127,15 +127,16 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleStatus string) *api.Ap
 	}
 
 	return &api.Api{
-		Id:                mgwSwagger.GetID(),
-		Title:             mgwSwagger.GetTitle(),
-		Description:       mgwSwagger.GetDescription(),
-		BasePath:          mgwSwagger.GetXWso2Basepath(),
-		Version:           mgwSwagger.GetVersion(),
-		ProductionUrls:    prodUrls,
-		SandboxUrls:       sandUrls,
-		Resources:         resources,
-		ApiLifeCycleState: lifeCycleStatus,
+		Id:                 mgwSwagger.GetID(),
+		Title:              mgwSwagger.GetTitle(),
+		Description:        mgwSwagger.GetDescription(),
+		BasePath:           mgwSwagger.GetXWso2Basepath(),
+		Version:            mgwSwagger.GetVersion(),
+		ApiType:            mgwSwagger.GetAPIType(),
+		ProductionUrls:     prodUrls,
+		SandboxUrls:        sandUrls,
+		Resources:          resources,
+		ApiLifeCycleStatus: lifeCycleStatus,
 	}
 }
 

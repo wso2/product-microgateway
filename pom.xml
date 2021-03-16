@@ -307,11 +307,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <andes.client.version>3.3.12</andes.client.version>
-        <apim.common.version>9.0.0</apim.common.version>
+        <apim.common.version>9.0.55</apim.common.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
         <commons.io.version>2.6</commons.io.version>
-        <envoy.controlplane.api.version>0.1.23</envoy.controlplane.api.version>
+        <envoy.controlplane.api.version>0.1.27</envoy.controlplane.api.version>
         <geronimo.jms11.spec.version>1.1.1.wso2v1</geronimo.jms11.spec.version>
         <grpc.netty.shaded.version>1.32.1</grpc.netty.shaded.version>
         <grpc.protobuf.version>1.32.1</grpc.protobuf.version>

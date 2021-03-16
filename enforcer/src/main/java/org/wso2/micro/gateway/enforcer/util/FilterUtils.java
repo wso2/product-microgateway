@@ -189,12 +189,14 @@ public class FilterUtils {
             authContext.setTier(apiKeyValidationInfoDTO.getTier());
             authContext.setSubscriberTenantDomain(apiKeyValidationInfoDTO.getSubscriberTenantDomain());
             authContext.setApiName(apiKeyValidationInfoDTO.getApiName());
+            authContext.setApiVersion(apiKeyValidationInfoDTO.getApiVersion());
             authContext.setApiPublisher(apiKeyValidationInfoDTO.getApiPublisher());
             authContext.setStopOnQuotaReach(apiKeyValidationInfoDTO.isStopOnQuotaReach());
             authContext.setSpikeArrestLimit(apiKeyValidationInfoDTO.getSpikeArrestLimit());
             authContext.setSpikeArrestUnit(apiKeyValidationInfoDTO.getSpikeArrestUnit());
             authContext.setConsumerKey(apiKeyValidationInfoDTO.getConsumerKey());
             authContext.setIsContentAware(apiKeyValidationInfoDTO.isContentAware());
+            authContext.setApiUUID(apiKeyValidationInfoDTO.getApiUUID());
         }
         if (isOauth) {
             authContext.setConsumerKey(jwtValidationInfo.getConsumerKey());

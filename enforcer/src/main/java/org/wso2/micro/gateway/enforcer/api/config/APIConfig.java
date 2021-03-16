@@ -29,11 +29,26 @@ public class APIConfig {
     private String name;
     private String version;
     private String basePath;
+    private String apiType;
+    private List<String> productionUrls;
+    private List<String> sandboxUrls;
     private String apiLifeCycleState;
 
     private List<String> securitySchemas = new ArrayList<>();
     private String tier = ThrottleConstants.UNLIMITED_TIER;
     private List<ResourceConfig> resources = new ArrayList<>();
+
+    public String getApiType() {
+        return apiType;
+    }
+
+    public List<String> getProductionUrls() {
+        return productionUrls;
+    }
+
+    public List<String> getSandboxUrls() {
+        return sandboxUrls;
+    }
 
     /**
      * Implements builder pattern to build an API Config object.
@@ -43,6 +58,9 @@ public class APIConfig {
         private String name;
         private String version;
         private String basePath;
+        private String apiType;
+        private List<String> productionUrls;
+        private List<String> sandboxUrls;
         private String apiLifeCycleState;
 
         private List<String> securitySchemas = new ArrayList<>();
@@ -63,6 +81,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder apiType(String apiType) {
+            this.apiType = apiType;
+            return this;
+        }
+
         public Builder apiLifeCycleState(String apiLifeCycleState) {
             this.apiLifeCycleState = apiLifeCycleState;
             return this;
@@ -73,6 +96,16 @@ public class APIConfig {
             return this;
         }
 
+        public Builder productionUrls(List<String> productionUrls) {
+            this.productionUrls = productionUrls;
+            return this;
+        }
+
+        public Builder sandboxUrls(List<String> sandboxUrls) {
+            this.sandboxUrls = sandboxUrls;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -80,6 +113,9 @@ public class APIConfig {
             apiConfig.version = this.version;
             apiConfig.apiLifeCycleState = this.apiLifeCycleState;
             apiConfig.resources = this.resources;
+            apiConfig.apiType = this.apiType;
+            apiConfig.productionUrls = this.productionUrls;
+            apiConfig.sandboxUrls = this.sandboxUrls;
             return apiConfig;
         }
     }

@@ -194,8 +194,22 @@
       secureEvictionTimePeriod = 5500
       secureMinIdleTimeInPool = 5000
 
-[controlPlane]
+# remove this from config and assign default values
+[enforcer.analyticsReceiver]
+    port = 18090
+    maxMessageSize = 1000000000
+    maxHeaderLimit = 8192
+    #keep alive time of the external authz connection
+    keepAliveTime = 600
 
+    [enforcer.analyticsReceiver.threadPool]
+        coreSize = 10
+        maxSize = 100
+        #keep alive time of threads in seconds
+        keepAliveTime = 600
+        queueSize = 1000
+
+[controlPlane]
 # Control plane's eventHub details
 [controlPlane.eventHub]
   enabled = false
@@ -208,3 +222,8 @@
   # Message broker connection URL of the control plane
   [controlPlane.eventHub.jmsConnectionParameters]
     eventListeningEndpoints = ["amqp://admin:admin@apim:5672?retries='5'&connectdelay='30000'"]
+
+  [controlPlane.analytics]
+      enabled = false
+      authURL = "https://analytics-event-auth.st.choreo.dev/auth/v1"
+      authToken = ""

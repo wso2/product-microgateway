@@ -123,15 +123,17 @@ type Config struct {
 		}
 	}
 
+	// TODO: (VirajSalaka) Analytics config is shared among adapter and enforcer
 	Enforcer struct {
-		JwtTokenConfig  []jwtTokenConfig
-		EventHub        eventHub
-		ApimCredentials apimCredentials
-		AuthService     authService
-		JwtGenerator    jwtGenerator
-		Cache           cache
-		Throttling      throttlingConfig
-		JwtIssuer       jwtIssuer
+		JwtTokenConfig    []jwtTokenConfig
+		EventHub          eventHub
+		ApimCredentials   apimCredentials
+		AuthService       authService
+		JwtGenerator      jwtGenerator
+		Cache             cache
+		Throttling        throttlingConfig
+		JwtIssuer         jwtIssuer
+		AnalyticsReceiver authService `toml:"analyticsReceiver"`
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
@@ -262,6 +264,12 @@ type cache struct {
 	ExpiryTime  int32 `toml:"expiryTime"`
 }
 
+type analytics struct {
+	Enabled   bool   `toml:"enabled"`
+	AuthURL   string `toml:"authURL"`
+	AuthToken string `toml:"authToken"`
+}
+
 type jwtIssuer struct {
 	Enabled               bool      `toml:"enabled"`
 	Issuer                string    `toml:"issuer"`
@@ -301,6 +309,7 @@ type controlPlane struct {
 			EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
 		} `toml:"jmsConnectionParameters"`
 	} `toml:"eventHub"`
+	Analytics analytics `toml:"analytics"`
 }
 
 // APIContent contains everything necessary to create an API

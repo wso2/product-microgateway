@@ -24,12 +24,22 @@ import java.util.Map;
  * Holds the response data to build the response object to be sent to the envoy proxy.
  */
 public class ResponseObject {
+    private final String correlationID;
     private int statusCode;
     private String errorCode;
     private String errorMessage;
     private String errorDescription;
     private Map<String, String> headerMap;
+    private Map<String, String> metaDataMap;
     private boolean isDirectResponse = false;
+
+    public ResponseObject(String correlationID) {
+        this.correlationID = correlationID;
+    }
+
+    public ResponseObject() {
+        this.correlationID = "xxxxx";
+    }
 
     public void setHeaderMap(Map<String, String> headerMap) {
         this.headerMap = headerMap;
@@ -77,5 +87,17 @@ public class ResponseObject {
 
     public void setDirectResponse(boolean directResponse) {
         isDirectResponse = directResponse;
+    }
+
+    public String getCorrelationID() {
+        return correlationID;
+    }
+
+    public Map<String, String> getMetaDataMap() {
+        return metaDataMap;
+    }
+
+    public void setMetaDataMap(Map<String, String> metaDataMap) {
+        this.metaDataMap = metaDataMap;
     }
 }
