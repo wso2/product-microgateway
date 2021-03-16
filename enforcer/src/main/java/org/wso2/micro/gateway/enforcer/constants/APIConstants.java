@@ -31,9 +31,11 @@ public class APIConstants {
     public static final String GW_VERSION_PARAM = "version";
     public static final String GW_API_NAME_PARAM = "name";
     public static final String PROTOTYPED_LIFE_CYCLE_STATUS = "PROTOTYPED";
+    public static final String PUBLISHED_LIFE_CYCLE_STATUS = "PUBLISHED";
+
 
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
-    public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "wso2carbon";
+    public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
     public static final String HTTPS_PROTOCOL = "https";
     public static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
     public static final String BANDWIDTH_TYPE = "bandwidthVolume";
@@ -129,7 +131,7 @@ public class APIConstants {
         public static final String EXPIRY_TIME = "exp";
         public static final String JWT_KID = "kid";
         public static final String SIGNATURE_ALGORITHM = "alg";
-        public static final String TOKEN_TYPE = "typ";
+        public static final String TOKEN_TYPE = "token_type";
         public static final String BACKEND_TOKEN = "backendJwt";
         public static final String SUBSCRIBED_APIS = "subscribedAPIs";
         public static final String API_CONTEXT = "context";
@@ -142,6 +144,8 @@ public class APIConstants {
         public static final String PERMITTED_REFERER = "permittedReferer";
         public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
         public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
+        public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
+        public static final String INTERNAL_KEY = "internal-key";
 
     }
 

@@ -25,6 +25,7 @@ import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
 import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
+import org.wso2.micro.gateway.enforcer.security.jwt.InternalAPIKeyAuthenticator;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTAuthenticator;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
@@ -39,31 +40,57 @@ public class AuthFilter implements Filter {
 
     @Override
     public void init(APIConfig apiConfig) {
-        //TODO: Check security schema and add relevant authenticators .
-        Authenticator jwtAuthenticator = new JWTAuthenticator();
-        authenticators.add(jwtAuthenticator);
+        initializeAuthenticators(apiConfig);
+    }
+
+    private void initializeAuthenticators(APIConfig apiConfig) {
+        //TODO: Check security schema and add relevant authenticators.
+        if (APIConstants.PUBLISHED_LIFE_CYCLE_STATUS.equals(apiConfig.getApiLifeCycleState())) {
+            Authenticator jwtAuthenticator = new JWTAuthenticator();
+            authenticators.add(jwtAuthenticator);
+        }
+        Authenticator internalAPIKeyAuthenticator = new
+                InternalAPIKeyAuthenticator(APIConstants.JwtTokenConstants.INTERNAL_KEY);
+        authenticators.add(internalAPIKeyAuthenticator);
     }
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
-        try {
-            for (Authenticator authenticator : authenticators) {
-                if (authenticator.canAuthenticate(requestContext)) {
-                    AuthenticationContext authenticate = authenticator.authenticate(requestContext);
-                    if (authenticate.isAuthenticated()) {
-                        updateClusterHeaderAndCheckEnv(requestContext, authenticate);
-                        return true;
-                    }
+        for (Authenticator authenticator : authenticators) {
+            if (authenticator.canAuthenticate(requestContext)) {
+                AuthenticationResponse authenticate = authenticate(authenticator, requestContext);
+                if (authenticate.isAuthenticated()) {
+                    return true;
+                }
+
+                if (authenticate.getException() != null) {
+                    FilterUtils.setErrorToContext(requestContext, authenticate.getException());
+                    return false;
                 }
             }
-        } catch (APISecurityException e) {
-            //TODO: (VirajSalaka) provide the error code properly based on exception (401, 403, 429 etc)
-            FilterUtils.setErrorToContext(requestContext, e);
-            return false;
         }
         FilterUtils.setUnauthenticatedErrorToContext(requestContext);
         return false;
     }
+
+    private AuthenticationResponse authenticate(Authenticator authenticator, RequestContext requestContext) {
+        try {
+            AuthenticationContext  authenticate = authenticator.authenticate(requestContext);
+            if (authenticate.isAuthenticated()) {
+                updateClusterHeaderAndCheckEnv(requestContext, authenticate);
+                return new AuthenticationResponse(true, false,
+                        false, null);
+            }
+        } catch (APISecurityException e) {
+            //TODO: (VirajSalaka) provide the error code properly based on exception (401, 403, 429 etc)
+            return new AuthenticationResponse(false, false,
+                    true, e);
+        }
+        return new AuthenticationResponse(false, false, true,
+                null);
+    }
+
+
 
     /**
      * Update the cluster header based on the keyType and authenticate the token against its respective endpoint
