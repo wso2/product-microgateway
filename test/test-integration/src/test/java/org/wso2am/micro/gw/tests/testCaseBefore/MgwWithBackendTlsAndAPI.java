@@ -22,11 +22,10 @@ import org.testng.annotations.BeforeTest;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.util.ApiDeployment;
 import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
-import org.wso2am.micro.gw.tests.util.TestGroup;
 
 public class MgwWithBackendTlsAndAPI extends BaseTestCase {
 
-    @BeforeTest(groups = TestGroup.MGW_WITH_BACKEND_TLS_AND_API, description = "initialise the setup")
+    @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
         super.startMGW(null, true);
 
@@ -36,7 +35,7 @@ public class MgwWithBackendTlsAndAPI extends BaseTestCase {
         ApiDeployment.deployAPI(apiZipfile);
     }
 
-    @AfterTest(groups = TestGroup.MGW_WITH_BACKEND_TLS_AND_API, description = "stop the setup")
+    @AfterTest(description = "stop the setup")
     void stop() {
         super.stopMGW();
     }

@@ -21,16 +21,25 @@ package org.wso2am.micro.gw.tests.testCases.jwtGenerator;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
 import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
+import org.wso2am.micro.gw.tests.util.TestConstant;
+import org.wso2am.micro.gw.tests.util.TokenUtil;
 import org.wso2am.micro.gw.tests.util.URLs;
 
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JwtTransformerTestCase extends JwtGeneratorTestCase {
+public class JwtTransformerTestCase {
+    protected String jwtTokenProd;
+
+    @BeforeClass(description = "initialise the setup")
+    void start() throws Exception {
+        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null);
+    }
 
     @Test(description = "Test default jwt claim mapping")
     public void testDefaultJwtClaimMapping() throws Exception {

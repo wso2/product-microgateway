@@ -20,16 +20,15 @@ package org.wso2am.micro.gw.tests.testCaseBefore;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
-import org.wso2am.micro.gw.tests.util.TestGroup;
 
 public class MgwWithNoAPIs extends BaseTestCase {
 
-    @BeforeTest(groups = { TestGroup.MGW_WITH_NO_APIS }, description = "initialise the setup")
+    @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
         super.startMGW();
     }
 
-    @AfterTest(groups = { TestGroup.MGW_WITH_NO_APIS }, description = "stop the setup")
+    @AfterTest(description = "stop the setup")
     void stop() {
         super.stopMGW();
     }

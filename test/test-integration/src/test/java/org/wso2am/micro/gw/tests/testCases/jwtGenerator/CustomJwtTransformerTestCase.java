@@ -24,7 +24,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.util.TestConstant;
-import org.wso2am.micro.gw.tests.util.TestGroup;
 import org.wso2am.micro.gw.tests.util.TokenUtil;
 import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
@@ -34,9 +33,8 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-@Test(groups = { TestGroup.MGW_WITH_JWT_CONFIG_AND_TRANSFORMER })
 public class CustomJwtTransformerTestCase {
-    protected String jwtTokenProd;
+    private String jwtTokenProd;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {

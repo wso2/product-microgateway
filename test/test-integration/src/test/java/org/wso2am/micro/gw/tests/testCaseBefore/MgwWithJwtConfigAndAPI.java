@@ -23,13 +23,12 @@ import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.util.ApiDeployment;
 import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
 import org.wso2am.micro.gw.tests.util.TestConstant;
-import org.wso2am.micro.gw.tests.util.TestGroup;
 
 import java.io.File;
 
 public class MgwWithJwtConfigAndAPI extends BaseTestCase {
 
-    @BeforeTest(groups = { TestGroup.MGW_WITH_JWT_CONFIG_AND_API }, description = "initialise the setup")
+    @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
         String confPath = TestConstant.BASE_RESOURCE_DIR
                 + File.separator + "jwtGenerator" + File.separator + "config.toml";
@@ -40,7 +39,7 @@ public class MgwWithJwtConfigAndAPI extends BaseTestCase {
         ApiDeployment.deployAPI(apiZipfile);
     }
 
-    @AfterTest(groups = { TestGroup.MGW_WITH_JWT_CONFIG_AND_API }, description = "stop the setup")
+    @AfterTest(description = "stop the setup")
     void stop() {
         super.stopMGW();
     }

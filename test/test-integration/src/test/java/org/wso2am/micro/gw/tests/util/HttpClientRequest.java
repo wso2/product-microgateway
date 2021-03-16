@@ -18,6 +18,8 @@
 
 package org.wso2am.micro.gw.tests.util;
 
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,21 +29,21 @@ import java.io.BufferedReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.net.HttpURLConnection;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * This class can be used to send http request.
  */
 public class HttpClientRequest {
-    private static int maxRetryCount = 10;
-    private static int retryIntervalMillis = 3000;
+    private static final int maxRetryCount = 10;
+    private static final int retryIntervalMillis = 3000;
 
     private static final Logger log = LoggerFactory.getLogger(HttpClientRequest.class);
 
@@ -84,16 +86,10 @@ public class HttpClientRequest {
         try {
             urlConnection = getURLConnection(endpoint);
             setHeadersAndMethod(urlConnection, headers, TestConstant.HTTP_METHOD_POST);
-            OutputStream out = urlConnection.getOutputStream();
-            try {
+            try (OutputStream out = urlConnection.getOutputStream()) {
                 Writer writer = new OutputStreamWriter(out, TestConstant.CHARSET_NAME);
                 writer.write(postBody);
                 writer.close();
-
-            } finally {
-                if (out != null) {
-                    out.close();
-                }
             }
             return buildResponse(urlConnection);
         } finally {
@@ -118,15 +114,10 @@ public class HttpClientRequest {
         try {
             urlConnection = getURLConnection(endpoint);
             setHeadersAndMethod(urlConnection, headers, TestConstant.HTTP_METHOD_PUT);
-            OutputStream out = urlConnection.getOutputStream();
-            try {
+            try (OutputStream out = urlConnection.getOutputStream()) {
                 Writer writer = new OutputStreamWriter(out, TestConstant.CHARSET_NAME);
                 writer.write(putBody);
                 writer.close();
-            } finally {
-                if (out != null) {
-                    out.close();
-                }
             }
             return buildResponse(urlConnection);
         } finally {
@@ -134,6 +125,27 @@ public class HttpClientRequest {
                 urlConnection.disconnect();
             }
         }
+    }
+
+    /**
+     * Sends an HTTP DELETE request to a url.
+     * @param endpoint - The endpoint of the resource
+     * @param queryParams - Query parameters to be included in the url
+     * @param headers - HTTP request headers map
+     * @return HttpResponse
+     * @throws IOException If an error occurs while sending the DELETE request
+     */
+    public static HttpResponse doDelete(String endpoint, Map<String, String> queryParams, Map<String, String> headers)
+            throws IOException {
+        headers.put("Accept", "application/json");
+
+        List<BasicNameValuePair> nameValuePairs = queryParams.entrySet().stream()
+                .map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+
+        String params = URLEncodedUtils.format(nameValuePairs, TestConstant.CHARSET_NAME);
+        String requestUrl = endpoint + "?" + params;
+        return executeRequestWithoutRequestBody(TestConstant.HTTP_METHOD_DELETE, requestUrl, headers);
     }
 
     /**

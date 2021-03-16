@@ -24,11 +24,12 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
+import org.wso2am.micro.gw.tests.util.HttpClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
 import org.wso2am.micro.gw.tests.util.HttpsPostMultipart;
 import org.wso2am.micro.gw.tests.util.TestConstant;
-import org.wso2am.micro.gw.tests.util.TestGroup;
 import org.wso2am.micro.gw.tests.util.URLs;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +38,6 @@ import java.util.Map;
  * Api deploy test cases.
  *
  */
-@Test(groups = { TestGroup.MGW_WITH_NO_APIS })
 public class APiDeployTestCase extends BaseTestCase {
 
     @Test(description = "Test to check the api deployment is working")
@@ -50,11 +50,29 @@ public class APiDeployTestCase extends BaseTestCase {
         // Set header
         Map<String, String> headers = new HashMap<String,String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic YWRtaW46YWRtaW4=");
-        HttpsPostMultipart multipart = new HttpsPostMultipart(URLs.getImportAPIServiceURLHttps(
-                TestConstant.ADAPTER_IMPORT_API_RESOURCE) , headers);
+        HttpsPostMultipart multipart = new HttpsPostMultipart(URLs.getAdapterServiceURLHttps(
+                TestConstant.ADAPTER_APIS_RESOURCE) , headers);
         multipart.addFilePart("file", new File(apiZipfile));
         HttpResponse response = multipart.getResponse();
 
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+    }
+
+    @Test(dependsOnMethods = "apiDeployTest", description = "Test undeploy API")
+    public void apiDeleteTest() throws Exception {
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("apiName", "SwaggerPetstore");
+        queryParams.put("version", "1.0.5");
+
+        // Set header
+        Map<String, String> headers = new HashMap<String,String>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic YWRtaW46YWRtaW4=");
+
+        HttpResponse response = HttpClientRequest.doDelete(URLs.getAdapterServiceURLHttps(
+                TestConstant.ADAPTER_APIS_RESOURCE), queryParams, headers);
+        System.out.println("heyyy");
+        System.out.println(response.getResponseMessage());
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
     }

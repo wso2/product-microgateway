@@ -26,7 +26,6 @@ import org.testng.annotations.BeforeClass;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
 import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
 import org.wso2am.micro.gw.tests.util.TestConstant;
-import org.wso2am.micro.gw.tests.util.TestGroup;
 import org.wso2am.micro.gw.tests.util.TokenUtil;
 import org.wso2am.micro.gw.tests.util.URLs;
 import java.util.HashMap;
@@ -37,13 +36,11 @@ import java.util.Map;
  * Jwt test cases.
  *
  */
-@Test(groups = { TestGroup.MGW_WITH_ONE_API })
 public class JwtTestCase {
-
-    protected String jwtWithoutScope;
-    protected String jwtWithScope;
-    protected String jwtWithMultipleScopes;
-    protected String jwtWithMultipleInvalidScopes;
+    private String jwtWithoutScope;
+    private String jwtWithScope;
+    private String jwtWithMultipleScopes;
+    private String jwtWithMultipleInvalidScopes;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {

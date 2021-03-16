@@ -22,6 +22,8 @@ import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.micro.gateway.enforcer.exception.MGWException;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -48,13 +50,14 @@ public class ApiDeployment {
         // Set header
         Map<String, String> headers = new HashMap<String,String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic YWRtaW46YWRtaW4=");
-        HttpsPostMultipart multipart = new HttpsPostMultipart(URLs.getImportAPIServiceURLHttps(
-                TestConstant.ADAPTER_IMPORT_API_RESOURCE) , headers);
+        HttpsPostMultipart multipart = new HttpsPostMultipart(URLs.getAdapterServiceURLHttps(
+                TestConstant.ADAPTER_APIS_RESOURCE) , headers);
         multipart.addFilePart("file", new File(apiZipFilePath));
         HttpResponse response = multipart.getResponse();
 
         if (response.getResponseCode() != HttpStatus.SC_SUCCESS) {
             log.error("Api deployment is failed");
+            throw new MGWException("Failed to deploy API at " + apiZipFilePath);
         }
 
         TimeUnit.SECONDS.sleep(5);

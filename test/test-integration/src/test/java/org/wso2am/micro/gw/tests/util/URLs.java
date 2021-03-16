@@ -21,8 +21,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class URLs {
-    public static String getImportAPIServiceURLHttps(String servicePath) throws MalformedURLException {
-        return new URL(new URL("https://localhost:" + TestConstant.ADAPTER_IMPORT_API_PORT), servicePath)
+    public static String getAdapterServiceURLHttps(String servicePath) throws MalformedURLException {
+        return new URL(new URL("https://localhost:" + TestConstant.ADAPTER_PORT), servicePath)
                 .toString();
     }
 

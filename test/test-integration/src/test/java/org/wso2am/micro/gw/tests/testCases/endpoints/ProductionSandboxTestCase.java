@@ -28,7 +28,6 @@ import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
 import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
 import org.wso2am.micro.gw.tests.util.TestConstant;
-import org.wso2am.micro.gw.tests.util.TestGroup;
 import org.wso2am.micro.gw.tests.util.TokenUtil;
 import org.wso2am.micro.gw.tests.util.URLs;
 import org.wso2am.micro.gw.mockbackend.ResponseConstants;
@@ -36,16 +35,12 @@ import org.wso2am.micro.gw.mockbackend.ResponseConstants;
 import java.util.HashMap;
 import java.util.Map;
 
-@Test(groups = { TestGroup.MGW_WITH_NO_APIS })
 public class ProductionSandboxTestCase {
     protected String jwtTokenProd;
     protected String jwtTokenSand;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        // Note: Cannot use MGW_WITH_ONE_API group because although its API has a different name
-        // its base path overlaps with base path in prodSand_swagger.yaml. Therefore fails
-        // line 72 here.
         String prodSandApiZipfile = ApiProjectGenerator.createApictlProjZip(
                 "prod-sand/prodSand_api.yaml", "prod-sand/prodSand_swagger.yaml");
         String prodOnlyApiZipfile = ApiProjectGenerator.createApictlProjZip(
