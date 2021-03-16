@@ -80,8 +80,8 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) []Resource {
 	if openAPI.Paths != nil {
 		for path, pathItem := range openAPI.Paths {
 			methodsArray := make([]Operation, len(pathItem.Operations()))
-			var arrayIndex int =0
-			for httpMethod,operation := range pathItem.Operations() {
+			var arrayIndex int = 0
+			for httpMethod, operation := range pathItem.Operations() {
 				if operation != nil {
 					methodsArray[arrayIndex] = getOperationLevelDetails(operation, httpMethod)
 					arrayIndex++

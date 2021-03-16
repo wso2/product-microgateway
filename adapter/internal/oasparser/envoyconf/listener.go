@@ -18,8 +18,6 @@
 package envoyconf
 
 import (
-	"io/ioutil"
-
 	access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
@@ -258,12 +256,4 @@ func generateTLSCert(privateKeyPath string, publicKeyPath string) *tlsv3.TlsCert
 		},
 	}
 	return &tlsCert
-}
-
-func readFileAsByteArray(filepath string) ([]byte, error) {
-	content, readErr := ioutil.ReadFile(filepath)
-	if readErr != nil {
-		logger.LoggerOasparser.Errorf("Error reading File : %v , %v", filepath, readErr)
-	}
-	return content, readErr
 }

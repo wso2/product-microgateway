@@ -18,6 +18,7 @@
 package model
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -167,4 +168,19 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 		resultResources := getHostandBasepathandPort(item.input)
 		assert.Equal(t, item.result, resultResources, item.message)
 	}
+}
+
+func TestGetXWso2Label(t *testing.T) {
+	// TODO: (Vajira) add more test scenarios
+	//newLabels := GetXWso2Label(openAPIV3Struct.ExtensionProps)
+
+	swagger, err := openapi3.NewSwaggerLoader().LoadSwaggerFromFile("/home/vajira/WSO2-dev/product-microgateway/adapter/test-resources/envoycodegen/openapi_with_xwso2label.yaml")
+	assert.Nil(t, err, "Swagger loader failed")
+	t.Log(swagger)
+	assert.Nil(t, swagger.Validate(context.Background()), "Swagger Validation Failed")
+
+	wso2Label := GetXWso2Label(swagger.ExtensionProps)
+
+	assert.NotNil(t, wso2Label, "Lable should at leaset be default")
+
 }
