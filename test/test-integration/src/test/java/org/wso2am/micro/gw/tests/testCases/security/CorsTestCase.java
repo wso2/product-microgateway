@@ -30,12 +30,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2am.micro.gw.tests.util.ApiDeployment;
-import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
-import org.wso2am.micro.gw.tests.util.TestConstant;
-import org.wso2am.micro.gw.tests.util.TokenUtil;
-import org.wso2am.micro.gw.tests.util.URLs;
+import org.wso2am.micro.gw.tests.util.*;
 
+import java.io.File;
 import java.io.IOException;
 
 public class CorsTestCase {
@@ -54,7 +51,8 @@ public class CorsTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("cors/api.yaml", "cors/swagger.yaml");
+        String apiZipfile = ApictlUtils.createProjectZip( "cors_openAPI.yaml",
+                "cors_petstore", null);
         ApiDeployment.deployAPI(apiZipfile);
 
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null);

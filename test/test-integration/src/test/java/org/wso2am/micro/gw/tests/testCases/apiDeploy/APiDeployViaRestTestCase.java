@@ -23,12 +23,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
-import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
-import org.wso2am.micro.gw.tests.util.HttpClientRequest;
-import org.wso2am.micro.gw.tests.util.HttpResponse;
-import org.wso2am.micro.gw.tests.util.HttpsPostMultipart;
-import org.wso2am.micro.gw.tests.util.TestConstant;
-import org.wso2am.micro.gw.tests.util.URLs;
+import org.wso2am.micro.gw.tests.util.*;
 
 import java.io.File;
 import java.util.HashMap;
@@ -38,14 +33,12 @@ import java.util.Map;
  * Api deploy test cases.
  *
  */
-public class APiDeployTestCase extends BaseTestCase {
+public class APiDeployViaRestTestCase extends BaseTestCase {
 
     @Test(description = "Test to check the api deployment is working")
     public void apiDeployTest() throws Exception {
-
-        //api yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("deploy/api.yaml",
-                "deploy/swagger.yaml");
+        String apiZipfile = ApictlUtils.createProjectZip( "deploy_openAPI.yaml",
+                "deploy_petstore", null);
 
         // Set header
         Map<String, String> headers = new HashMap<String,String>();

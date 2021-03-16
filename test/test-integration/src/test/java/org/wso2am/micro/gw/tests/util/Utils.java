@@ -23,6 +23,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.wso2am.micro.gw.tests.context.MgwServerInstance;
 import org.wso2am.micro.gw.tests.context.MicroGWTestException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +34,7 @@ import java.net.Socket;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -343,5 +345,11 @@ public class Utils {
         } catch (IOException e) {
             throw new MicroGWTestException("error while copying config file. ");
         }
+    }
+
+    public static String getTargetDirPath() {
+        File targetClassesDir = new File(Utils.class.getProtectionDomain().getCodeSource().
+                getLocation().getPath());
+        return targetClassesDir.getParentFile().toString();
     }
 }

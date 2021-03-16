@@ -19,10 +19,9 @@ package org.wso2am.micro.gw.tests.testCaseBefore;
 
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.util.ApiDeployment;
-import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
+import org.wso2am.micro.gw.tests.util.ApictlUtils;
 import org.wso2am.micro.gw.tests.util.TestConstant;
 
 import java.io.File;
@@ -36,8 +35,8 @@ public class MgwWithJwtConfigAndTransformer extends BaseTestCase {
                 + File.separator + "jwtGenerator" + File.separator + "config.toml";
         super.startMGW(confPath, false, true);
 
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("apis/openApis/api.yaml",
-                "apis/openApis/swagger.yaml");
+        String apiZipfile = ApictlUtils.createProjectZip( "openAPI.yaml",
+                "petstore", null);
         ApiDeployment.deployAPI(apiZipfile);
         TimeUnit.SECONDS.sleep(5);
     }

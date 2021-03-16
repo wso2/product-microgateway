@@ -71,4 +71,9 @@ public class TestConstant {
 
     public static final String LINE = "\r\n";
     public static final String MOCK_BACKEND_DOCKER_IMAGE = "wso2/mg-mock-backend";
+
+    public static final String APICTL_PATH = File.separator + "apictl" + File.separator + "apictl";
+    public static final String API_PROJECTS_PATH = File.separator + "apiProjects";
+    public static final String TEST_RESOURCES_PATH = File.separator  + "test-classes";
+    public static final String ENDPOINT_CERTIFICATES = "Endpoint-certificates";
 }

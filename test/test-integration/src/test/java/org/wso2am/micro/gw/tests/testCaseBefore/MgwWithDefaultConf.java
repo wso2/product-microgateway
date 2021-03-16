@@ -19,11 +19,11 @@ package org.wso2am.micro.gw.tests.testCaseBefore;
 
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.util.ApiDeployment;
-import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
+import org.wso2am.micro.gw.tests.util.ApictlUtils;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 public class MgwWithDefaultConf extends BaseTestCase {
@@ -31,14 +31,14 @@ public class MgwWithDefaultConf extends BaseTestCase {
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
         super.startMGW();
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("apis/openApis/api.yaml",
-                "apis/openApis/swagger.yaml");
-        String prodSandApiZipfile = ApiProjectGenerator.createApictlProjZip(
-                "prod-sand/prodSand_api.yaml", "prod-sand/prodSand_swagger.yaml");
-        String prodOnlyApiZipfile = ApiProjectGenerator.createApictlProjZip(
-                "prod-sand/prod_api.yaml", "prod-sand/prod_swagger.yaml");
-        String sandOnlyApiZipfile = ApiProjectGenerator.createApictlProjZip(
-                "prod-sand/sand_api.yaml", "prod-sand/sand_swagger.yaml");
+        String apiZipfile = ApictlUtils.createProjectZip( "openAPI.yaml",
+                "petstore", null);
+        String prodSandApiZipfile = ApictlUtils.createProjectZip( "prod_and_sand_openAPI.yaml",
+                "prod_and_sand_petstore", null);
+        String prodOnlyApiZipfile = ApictlUtils.createProjectZip( "prod_openAPI.yaml",
+                "prod_petstore", null);
+        String sandOnlyApiZipfile = ApictlUtils.createProjectZip( "sand_openAPI.yaml",
+                "sand_petstore", null);
         ApiDeployment.deployAPI(apiZipfile);
         ApiDeployment.deployAPI(prodSandApiZipfile);
         ApiDeployment.deployAPI(prodOnlyApiZipfile);

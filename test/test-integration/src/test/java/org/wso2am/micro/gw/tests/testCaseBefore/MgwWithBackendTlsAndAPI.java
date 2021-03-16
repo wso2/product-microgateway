@@ -19,11 +19,13 @@ package org.wso2am.micro.gw.tests.testCaseBefore;
 
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.util.ApiDeployment;
 import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
+import org.wso2am.micro.gw.tests.util.ApictlUtils;
+import org.wso2am.micro.gw.tests.util.Utils;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 public class MgwWithBackendTlsAndAPI extends BaseTestCase {
@@ -32,9 +34,9 @@ public class MgwWithBackendTlsAndAPI extends BaseTestCase {
     void start() throws Exception {
         super.startMGW(null, true);
 
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip(
-                "backendtls/api.yaml","backendtls/swagger.yaml",
-                "backendtls/backend.crt");
+        String apiZipfile = ApictlUtils.createProjectZip("backend_tsl_openAPI.yaml",
+                "backend_tsl_petstore", "backend_tls.crt");
+
         ApiDeployment.deployAPI(apiZipfile);
         TimeUnit.SECONDS.sleep(5);
     }
