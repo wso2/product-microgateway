@@ -48,8 +48,8 @@ public class ConfigDiscoveryClient {
     private static final Logger log = LogManager.getLogger(ConfigDiscoveryClient.class);
     private final ManagedChannel channel;
     private final ConfigDiscoveryServiceGrpc.ConfigDiscoveryServiceBlockingStub blockingStub;
-    private String nodeId;
-    private int maxRetries;
+    private final String nodeId;
+    private final int maxRetries;
 
     public ConfigDiscoveryClient(EnvVarConfig envVarConfig, TrustManagerFactory trustManagerFactory) {
         File certFile = Paths.get(envVarConfig.getEnforcerPublicKeyPath()).toFile();

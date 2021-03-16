@@ -18,9 +18,8 @@
 
 package org.wso2.micro.gateway.enforcer.throttle;
 
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * required methods to evaluate throttle state of a given throttling key.
  */
 public class ThrottleDataHolder {
-    private static final Log log = LogFactory.getLog(ThrottleDataHolder.class);
+    private static final Logger log = LogManager.getLogger(ThrottleDataHolder.class);
 
     private final Map<String, Long> throttleDataMap;
     private static ThrottleDataHolder instance;

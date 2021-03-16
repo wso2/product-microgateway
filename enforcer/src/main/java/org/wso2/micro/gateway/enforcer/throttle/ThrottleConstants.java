@@ -52,15 +52,9 @@ public class ThrottleConstants {
     public static final String THROTTLE_KEY = "throttleKey";
     public static final String THROTTLE_OUT_REASON = "THROTTLED_OUT_REASON";
     public static final String TOPIC_THROTTLE_DATA = "throttleData";
-
-    /**
-     * Advanced Throttling related constants.
-     */
-    public static class AdvancedThrottleConstants {
-        public static final String IS_THROTTLED = "isThrottled";
-        public static final String THROTTLE_KEY = "throttleKey";
-        public static final String EXPIRY_TIMESTAMP = "expiryTimeStamp";
-        public static final String EVALUATED_CONDITIONS = "evaluatedConditions";
-        public static final String TRUE = "true";
-    }
+    public static final String IS_THROTTLED = "isThrottled";
+    public static final String EXPIRY_TIMESTAMP = "expiryTimeStamp";
+    public static final String EVALUATED_CONDITIONS = "evaluatedConditions";
+    public static final String TRUE = "true";
+    public static final String DEFAULT_THROTTLE_CONDITION = "default";
 }

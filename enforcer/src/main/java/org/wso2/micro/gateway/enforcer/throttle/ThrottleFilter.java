@@ -25,6 +25,7 @@ import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.util.ThrottleEventConstants;
@@ -53,7 +54,8 @@ public class ThrottleFilter implements Filter {
     }
 
     @Override
-    public void init(APIConfig apiConfig) {}
+    public void init(APIConfig apiConfig) {
+    }
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
@@ -290,8 +292,10 @@ public class ThrottleFilter implements Filter {
     }
 
     private JSONObject getProperties(RequestContext requestContext) {
-        String remoteIP = requestContext.getAddress();
+        String remoteIP = requestContext.getClientIp();
         JSONObject jsonObMap = new JSONObject();
+        ThrottleConfigDto config = ConfigHolder.getInstance().getConfig().getThrottleConfig();
+
         if (remoteIP != null && remoteIP.length() > 0) {
             try {
                 InetAddress address = InetAddress.getByName(remoteIP);
@@ -309,7 +313,29 @@ public class ThrottleFilter implements Filter {
                 jsonObMap.put(ThrottleConstants.IP, 0);
             }
         }
-        // TODO(amaliMatharaarachchi) Add advance throttling data to additional properties.
+
+        if (config.isHeaderConditionsEnabled()) {
+            Map<String, String> headers = requestContext.getHeaders();
+            for (String name : headers.keySet()) {
+                jsonObMap.put(name, headers.get(name));
+            }
+        }
+
+        if (config.isQueryConditionsEnabled()) {
+            Map<String, String> params = requestContext.getQueryParameters();
+            for (String name : params.keySet()) {
+                jsonObMap.put(name, params.get(name));
+            }
+        }
+
+        String callerToken = requestContext.getAuthenticationContext().getCallerToken();
+        if (config.isJwtClaimConditionsEnabled() && callerToken != null) {
+            Map<String, String> claims = ThrottleUtils.getJWTClaims(callerToken);
+            for (String key : claims.keySet()) {
+                jsonObMap.put(key, claims.get(key));
+            }
+        }
+
         return jsonObMap;
     }
 }
