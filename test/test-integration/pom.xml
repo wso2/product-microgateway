@@ -25,7 +25,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>test</artifactId>
+    <artifactId>test-integration</artifactId>
     <name>Micro Gateway - Test-Integration</name>
 
     <build>
@@ -37,7 +37,7 @@
                 <configuration>
                     <systemPropertyVariables>
                         <jwt_transformer_jar>
-                            ${basedir}/target/test-${project.version}.jar
+                            ${basedir}/target/test-integration-${project.version}.jar
                         </jwt_transformer_jar>
                     </systemPropertyVariables>
                     <suiteXmlFiles>
@@ -108,6 +108,24 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>download-apictl</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://wso2.org/jenkins/job/platform-builds/job/product-apim-tooling/lastSuccessfulBuild/artifact/archive/${apictl.package}</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${basedir}/../test-integration/target/</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -162,7 +180,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <scope>test</scope>
+<!--            <scope>test</scope>-->
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -204,4 +222,75 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>mac-x64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <properties>
+                <host.os>mac-x64</host.os>
+                <apictl.package>apictl-${apictl.version}-macosx-x64.tar.gz</apictl.package>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-x64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <properties>
+                <host.os>linux-x64</host.os>
+                <apictl.package>apictl-${apictl.version}-linux-x64.tar.gz</apictl.package>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-i586</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>i586</arch>
+                </os>
+            </activation>
+            <properties>
+                <host.os>linux-i586</host.os>
+                <apictl.package>apictl-${apictl.version}-linux-i586.tar.gz</apictl.package>
+            </properties>
+        </profile>
+        <profile>
+            <id>windows-x64</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <properties>
+                <host.os>windows-x64</host.os>
+                <apictl.package>apictl-${apictl.version}-windows-x64.zip</apictl.package>
+            </properties>
+        </profile>
+        <profile>
+            <id>windows-i586</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                    <arch>i586</arch>
+                </os>
+            </activation>
+            <properties>
+                <host.os>windows-i586</host.os>
+                <apictl.package>apictl-${apictl.version}-windows-i586.zip</apictl.package>
+            </properties>
+        </profile>
+    </profiles>
+
+    <properties>
+        <apictl.package>default-package-to-be-overridden</apictl.package>
+    </properties>
 </project>
