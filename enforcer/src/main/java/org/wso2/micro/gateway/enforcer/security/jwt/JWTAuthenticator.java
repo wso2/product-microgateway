@@ -399,10 +399,15 @@ public class JWTAuthenticator implements Authenticator {
                             + FilterUtils.getMaskedToken(jwtHeader));
                 }
                 log.error("Invalid JWT token. " + FilterUtils.getMaskedToken(jwtHeader));
-
-                jwtValidationInfo = new JWTValidationInfo();
-                jwtValidationInfo.setValidationCode(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
-                jwtValidationInfo.setValid(false);
+                if (CacheProvider.getGatewayKeyCache().getIfPresent(jti) != null) {
+                    jwtValidationInfo = (JWTValidationInfo) CacheProvider.getGatewayKeyCache().getIfPresent(jti);
+                } else {
+                    log.warn("Token retrieved from the invalid token cache. But the validation info not found "
+                            + "in the key cache for the Token: " + FilterUtils.getMaskedToken(jwtHeader));
+                    jwtValidationInfo = new JWTValidationInfo();
+                    jwtValidationInfo.setValidationCode(APISecurityConstants.API_AUTH_GENERAL_ERROR);
+                    jwtValidationInfo.setValid(false);
+                }
             }
         }
         if (jwtValidationInfo == null) {
@@ -413,10 +418,10 @@ public class JWTAuthenticator implements Authenticator {
                     // Add token to tenant token cache
                     if (jwtValidationInfo.isValid()) {
                         CacheProvider.getGatewayTokenCache().put(jti, true);
-                        CacheProvider.getGatewayKeyCache().put(jti, jwtValidationInfo);
                     } else {
                         CacheProvider.getInvalidTokenCache().put(jti, true);
                     }
+                    CacheProvider.getGatewayKeyCache().put(jti, jwtValidationInfo);
 
                 }
                 return jwtValidationInfo;
