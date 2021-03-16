@@ -82,7 +82,6 @@ public class ApiDeployment {
         while (true){
             response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                     route) , headers);
-            System.out.println("@@@@@@@@@@@@@@@");
             tries += 1;
             if(response != null) {
                 //TODO: Need to correctly validate the response cde missmatch
