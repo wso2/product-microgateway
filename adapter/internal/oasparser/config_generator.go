@@ -135,7 +135,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string) *api.Api
 		ProductionUrls:     prodUrls,
 		SandboxUrls:        sandUrls,
 		Resources:          resources,
-		ApiLifeCycleStatus: lifeCycleStatus,
+		ApiLifeCycleState:  lifeCycleState,
 		Tier:               mgwSwagger.GetXThrottlingTier(),
 		SecurityScheme:     mgwSwagger.GetSetSecurityScheme(),
 	}

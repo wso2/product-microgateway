@@ -137,7 +137,8 @@ public class RequestContext {
             requestContext.authenticationContext = this.authenticationContext;
             requestContext.requestID = this.requestID;
             requestContext.clientIp = this.clientIp;
-            String queryPrams = this.requestPath.split("\\?")[1];
+            String[] queryParts = this.requestPath.split("\\?");
+            String queryPrams = queryParts.length > 1 ? queryParts[1] : "";
 
             requestContext.queryParameters = new HashMap<>();
             List<NameValuePair> queryParams = URLEncodedUtils.parse(queryPrams, StandardCharsets.UTF_8);

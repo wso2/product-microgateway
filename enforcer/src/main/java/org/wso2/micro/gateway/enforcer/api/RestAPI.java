@@ -62,7 +62,7 @@ public class RestAPI implements API {
             }
         }
 
-        this.apiLifeCycleState = api.getApiLifeCycleStatus();
+        this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).
                 apiLifeCycleState(apiLifeCycleState).securitySchema(securitySchemes).tier(api.getTier()).build();
         initFilters();
