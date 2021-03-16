@@ -27,12 +27,14 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsServiceReference
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.AnalyticsConstants;
 import org.wso2.micro.gateway.enforcer.constants.MetadataConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
+import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -69,8 +71,7 @@ public class AnalyticsFilter {
         return analyticsFilter;
     }
 
-    // TODO: (VirajSalaka) change function name
-    public void handleMsg(StreamAccessLogsMessage message) {
+    public void handleGRPCLogMsg(StreamAccessLogsMessage message) {
         for (int i = 0; i < message.getHttpLogs().getLogEntryCount(); i++) {
             HTTPAccessLogEntry logEntry = message.getHttpLogs().getLogEntry(i);
             logger.trace("Received logEntry from Router " + message.getIdentifier().getNode() +
@@ -80,6 +81,11 @@ public class AnalyticsFilter {
                 continue;
             }
             AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
+            // If the APIName is not available, the event should not be published.
+            // 404 errors are not logged due to this.
+            if (provider.getFaultType() == FaultCategory.OTHER) {
+                continue;
+            }
             GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
             try {
                 dataCollector.collectData();
@@ -94,7 +100,6 @@ public class AnalyticsFilter {
         String apiName = requestContext.getMathedAPI().getAPIConfig().getName();
         String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
         String apiType = requestContext.getMathedAPI().getAPIConfig().getApiType();
-        // TODO: (VirajSalaka) Decide on whether to include/exclude the options requests, Cors requests
         AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
 
         requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY, AnalyticsUtils.getAPIId(requestContext));
@@ -103,13 +108,15 @@ public class AnalyticsFilter {
         requestContext.addMetadataToMap(MetadataConstants.API_NAME_KEY, apiName);
         requestContext.addMetadataToMap(MetadataConstants.API_VERSION_KEY, apiVersion);
         requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, apiType);
-        // TODO: (VirajSalaka) Retrieve From Configuration
-        requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY, "carbon.super");
+        requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY,
+                FilterUtils.getTenantDomainFromRequestURL(
+                        requestContext.getMathedAPI().getAPIConfig().getBasePath()) == null
+                        ? APIConstants.SUPER_TENANT_DOMAIN_NAME
+                        : requestContext.getMathedAPI().getAPIConfig().getBasePath());
 
         // Default Value would be PRODUCTION
         requestContext.addMetadataToMap(MetadataConstants.APP_KEY_TYPE_KEY,
                 authContext.getKeyType() == null ? APIConstants.API_KEY_TYPE_PRODUCTION : authContext.getKeyType());
-        // TODO: (VirajSalaka) Come up with creative scheme
         requestContext.addMetadataToMap(MetadataConstants.APP_ID_KEY,
                 AnalyticsUtils.setDefaultIfNull(authContext.getApplicationId()));
         requestContext.addMetadataToMap(MetadataConstants.APP_NAME_KEY,
@@ -120,7 +127,6 @@ public class AnalyticsFilter {
         requestContext.addMetadataToMap(MetadataConstants.CORRELATION_ID_KEY, requestContext.getRequestID());
         // TODO: (VirajSalaka) Move this out of this method as these remain static
         requestContext.addMetadataToMap(MetadataConstants.REGION_KEY, AnalyticsUtils.setDefaultIfNull(null));
-        requestContext.addMetadataToMap("GatewayType", "ENVOY");
 
         // As in the matched API, only the resources under the matched resource template are selected.
         requestContext.addMetadataToMap(MetadataConstants.API_RESOURCE_TEMPLATE_KEY,
@@ -146,24 +152,27 @@ public class AnalyticsFilter {
     public void handleFailureRequest(RequestContext requestContext) {
         MgwFaultAnalyticsProvider provider = new MgwFaultAnalyticsProvider(requestContext);
         // To avoid incrementing counter for options call
-        if (provider.getProxyResponseCode() >= 200 && provider.getProxyResponseCode() < 300) {
+        if (provider.getProxyResponseCode() == 200 || provider.getProxyResponseCode() == 204) {
             return;
         }
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
         try {
             dataCollector.collectData();
-            // TODO: (VirajSalaka) provide more information on the published event
-            logger.debug("Analytics event for failure event is published. ");
+            logger.debug("Analytics event for failure event is published.");
         } catch (AnalyticsException e) {
             logger.error("Error while publishing the analytics event. ", e);
         }
     }
 
     private boolean doNotPublishEvent(HTTPAccessLogEntry logEntry) {
-        // TODO: (VirajSalaka) There is a possiblity that event is published but resulted in ext_auth_error.
         // If ext_auth_denied request comes, the event is already published from the enforcer.
+        // There is a chance that the analytics event is published from enforcer and then result in ext_authz_error
+        // responseCodeDetail due to some error/exception within enforcer implementation. This scenario is not
+        // handled as it should be fixed from enforcer.
         return (!StringUtils.isEmpty(logEntry.getResponse().getResponseCodeDetails()))
                 && logEntry.getResponse().getResponseCodeDetails()
-                .equals(AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL);
+                .equals(AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL)
+                // Token endpoint calls needs to be removed as well
+                && (!AnalyticsConstants.TOKEN_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()));
     }
 }

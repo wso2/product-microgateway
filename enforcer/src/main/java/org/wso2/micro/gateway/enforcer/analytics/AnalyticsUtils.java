@@ -21,13 +21,13 @@ package org.wso2.micro.gateway.enforcer.analytics;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
+import org.wso2.micro.gateway.enforcer.constants.AnalyticsConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 
 /**
  * Common Utility functions
  */
 public class AnalyticsUtils {
-    private static final String DEFAULT_FOR_UNASSIGNED = "UNKNOWN";
 
     public static String getAPIId(RequestContext requestContext) {
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
@@ -43,12 +43,18 @@ public class AnalyticsUtils {
     }
 
     public static String setDefaultIfNull(String value) {
-        return value == null ? DEFAULT_FOR_UNASSIGNED : value;
+        return value == null ? AnalyticsConstants.DEFAULT_FOR_UNASSIGNED : value;
     }
 
+    /**
+     * Extracts Authentication Context from the request Context. If Authentication Context is not available,
+     * new Authentication Context object will be created with authenticated property is set to false.
+     *
+     * @param requestContext {@code RequestContext} object
+     * @return {@code AuthenticationContext} object
+     */
     public static AuthenticationContext getAuthenticationContext(RequestContext requestContext) {
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
-        // TODO: (VirajSalaka) Handle properly
         // When authentication failure happens authContext remains null
         if (authContext == null) {
             authContext = new AuthenticationContext();

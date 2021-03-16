@@ -61,7 +61,7 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
         return new StreamObserver<>() {
             @Override
             public void onNext(StreamAccessLogsMessage message) {
-                AnalyticsFilter.getInstance().handleMsg(message);
+                AnalyticsFilter.getInstance().handleGRPCLogMsg(message);
             }
 
             @Override

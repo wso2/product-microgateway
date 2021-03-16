@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.Faul
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
 import org.wso2.micro.gateway.enforcer.constants.AnalyticsConstants;
-import org.wso2.micro.gateway.enforcer.constants.MetadataConstants;
 
 /**
  * FaultCodeClassifier classifies the fault and returns error code.
@@ -37,23 +36,11 @@ public class FaultCodeClassifier {
     private HTTPAccessLogEntry logEntry;
     private int errorCode;
 
-    public static final int NHTTP_CONNECTION_TIMEOUT = 101504;
-    public static final int NHTTP_CONNECT_TIMEOUT = 101508;
-    // TODO: (VirajSalaka) Not used
-    public static final int ENDPOINT_SUSPENDED_ERROR_CODE = 303001;
-
-
     public FaultCodeClassifier(HTTPAccessLogEntry logEntry) {
         this.logEntry = logEntry;
-        // TODO: (VirajSalaka) Comment the metadata related error code as it is unused at the moment
-        int errorCodeFromEntry = getErrorCodeFromMetadata();
-        if (errorCodeFromEntry == -1) {
-            errorCodeFromEntry = getErrorCodeFromFlags();
-        }
-        errorCode = errorCodeFromEntry;
+        errorCode = getErrorCodeFromFlags();
     }
 
-    //
     public FaultCodeClassifier(int errorCode) {
         this.errorCode = errorCode;
     }
@@ -88,17 +75,15 @@ public class FaultCodeClassifier {
             case APISecurityConstants.SUBSCRIPTION_INACTIVE:
                 return FaultSubCategories.Authentication.SUBSCRIPTION_VALIDATION_FAILURE;
             default:
-                return FaultSubCategories.Authentication.AUTHENTICATION_FAILURE;
+                return FaultSubCategories.TargetConnectivity.OTHER;
         }
     }
 
     protected FaultSubCategory getTargetFaultSubCategory() {
         switch (errorCode) {
-            case NHTTP_CONNECTION_TIMEOUT:
-            case NHTTP_CONNECT_TIMEOUT:
+            case AnalyticsConstants.NHTTP_CONNECTION_TIMEOUT:
+            case AnalyticsConstants.NHTTP_CONNECT_TIMEOUT:
                 return FaultSubCategories.TargetConnectivity.CONNECTION_TIMEOUT;
-            case ENDPOINT_SUSPENDED_ERROR_CODE:
-                return FaultSubCategories.TargetConnectivity.CONNECTION_SUSPENDED;
             default:
                 return FaultSubCategories.TargetConnectivity.OTHER;
         }
@@ -146,121 +131,70 @@ public class FaultCodeClassifier {
     }
 
     public boolean isMethodNotAllowed() {
-        // TODO: (VirajSalaka) Not implemented due to design complexity
+        // Method not allowed event will be as same as resource not found in microgateway case
+        // To implement method not allowed involves a design complexity as well as can cause a performance hit
+        // to the enforcer because the method validation needs to be done at enforcer level if we are to support
+        // this specifically.
         return false;
     }
 
-    private int getErrorCodeFromMetadata() {
-        int errorCode = -1;
-        if (logEntry.getCommonProperties().getMetadata() != null
-                && logEntry.getCommonProperties().getMetadata().getFilterMetadataMap() != null
-                && logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
-                .containsKey(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY)
-                && logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
-                .get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY).getFieldsMap()
-                .get(MetadataConstants.ERROR_CODE_KEY) != null) {
-            errorCode = Integer.parseInt(logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
-                    .get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY).getFieldsMap()
-                    .get(MetadataConstants.ERROR_CODE_KEY)
-                    .getStringValue());
-        }
-        return errorCode;
-    }
+    // TODO: (VirajSalaka) Following method will be reused with next release of envoy
+//    private int getErrorCodeFromMetadata() {
+//        int errorCode = -1;
+//        if (logEntry.getCommonProperties().getMetadata() != null
+//                && logEntry.getCommonProperties().getMetadata().getFilterMetadataMap() != null
+//                && logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
+//                .containsKey(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY)
+//                && logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
+//                .get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY).getFieldsMap()
+//                .get(MetadataConstants.ERROR_CODE_KEY) != null) {
+//            errorCode = Integer.parseInt(logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
+//                    .get(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY).getFieldsMap()
+//                    .get(MetadataConstants.ERROR_CODE_KEY)
+//                    .getStringValue());
+//        }
+//        return errorCode;
+//    }
 
     private int getErrorCodeFromFlags() {
-//        // Indicates local server healthcheck failed.
-//        FailedLocalHealthcheck
-//        // Indicates there was no healthy upstream.
-//        NoHealthyUpstream
-//        // Indicates an there was an upstream request timeout.
-//        UpstreamRequestTimeout
-//        // Indicates local codec level reset was sent on the stream.
-//        LocalReset
-//        // Indicates remote codec level reset was received on the stream.
-//        UpstreamRemoteReset
-//        // Indicates there was a local reset by a connection pool due to an initial connection failure.
-//        UpstreamConnectionFailure
-//        // Indicates the stream was reset due to an upstream connection termination.
-//        UpstreamConnectionTermination
-//        // Indicates the stream was reset because of a resource overflow.
-//        UpstreamOverflow
-//        // Indicates no route was found for the request.
-//        NoRouteFound
-//        // Indicates that the request was delayed before proxying.
-//        DelayInjected
-//        // Indicates that the request was aborted with an injected error code.
-//        FaultInjected
-//        // Indicates that the request was rate-limited locally.
-//        RateLimited
-//        // Indicates if the request was deemed unauthorized and the reason for it.
-//        UnauthorizedDetails
-//        // Indicates that the request was rejected because there was an error in rate limit service.
-//        RateLimitServiceError
-//        // Indicates the stream was reset due to a downstream connection termination.
-//        DownstreamConnectionTermination
-//        // Indicates that the upstream retry limit was exceeded, resulting in a downstream error.
-//        UpstreamRetryLimitExceeded
-//        // Indicates that the stream idle timeout was hit, resulting in a downstream 408.
-//        StreamIdleTimeout
-//        // Indicates that the request was rejected because an envoy request header failed strict
-//        // validation.
-//        InvalidEnvoyRequestHeaders
-//        // Indicates there was an HTTP protocol error on the downstream request.
-//        DownstreamProtocolError
-//        // Indicates there was a max stream duration reached on the upstream request.
-//        UpstreamMaxStreamDurationReached
-//        // Indicates the response was served from a cache filter.
-//        ResponseFromCacheFilter
-//        // Indicates that a filter configuration is not available.
-//        NoFilterConfigFound
-//        // Indicates that request or connection exceeded the downstream connection duration.
-//        DurationTimeout
-
-        // TODO: (VirajSalaka) introduce constants. Simplify such that errorcodes are categorized correctly
         if (logEntry == null || logEntry.getCommonProperties().getResponseFlags() == null) {
             return -1;
         }
         ResponseFlags responseFlags = logEntry.getCommonProperties().getResponseFlags();
 
         if (responseFlags.getFailedLocalHealthcheck() || responseFlags.getNoHealthyUpstream()) {
-            return 101503;
+            return AnalyticsConstants.NHTTP_CONNECTION_FAILED;
         }
         if (responseFlags.getUpstreamRequestTimeout()) {
-            return 101504;
+            return AnalyticsConstants.NHTTP_CONNECTION_TIMEOUT;
         }
-        // TODO: (VirajSalaka) Confirm ?
         if (responseFlags.getLocalReset()) {
-            return 101001;
+            return AnalyticsConstants.NHTTP_RECEIVER_INPUT_OUTPUT_ERROR_RECEIVING;
         }
-        // TODO: (VirajSalaka) Confirm ?
         if (responseFlags.getUpstreamRemoteReset()) {
-            return 101503;
+            return AnalyticsConstants.NHTTP_CONNECTION_FAILED;
         }
         if (responseFlags.getUpstreamConnectionFailure()) {
-            return 101500;
+            return AnalyticsConstants.NHTTP_SENDER_INPUT_OUTPUT_ERROR_SENDING;
         }
         if (responseFlags.getUpstreamConnectionTermination()) {
-            return 101505;
-        }
-        // TODO: (VirajSalaka) Decide if it is required to move it to somewhere else
-        if (responseFlags.getNoRouteFound()) {
-            return 900906;
+            return AnalyticsConstants.NHTTP_CONNECTION_CLOSED;
         }
         if (responseFlags.getDownstreamConnectionTermination()) {
-            return 101001;
+            return AnalyticsConstants.NHTTP_RECEIVER_INPUT_OUTPUT_ERROR_RECEIVING;
         }
         if (responseFlags.getStreamIdleTimeout()) {
-            return 101504;
+            return AnalyticsConstants.NHTTP_CONNECTION_TIMEOUT;
         }
         if (responseFlags.getDownstreamProtocolError()) {
-            return 101506;
+            return AnalyticsConstants.NHTTP_PROTOCOL_VIOLATION;
         }
         // https://www.envoyproxy.io/docs/envoy/latest/faq/configuration/timeouts
         if (responseFlags.getUpstreamMaxStreamDurationReached()) {
-            return 101504;
+            return AnalyticsConstants.NHTTP_CONNECTION_TIMEOUT;
         }
         if (responseFlags.getDurationTimeout()) {
-            return 101000;
+            return AnalyticsConstants.NHTTP_RECEIVER_INPUT_OUTPUT_ERROR_SENDING;
         }
         return -1;
 
@@ -273,6 +207,7 @@ public class FaultCodeClassifier {
         // UpstreamRetryLimitExceeded
         // InvalidEnvoyRequestHeaders
         // ResponseFromCacheFilter
+        // NoRouteFound // Not used under connectivity issues
     }
 
     public int getErrorCode() {

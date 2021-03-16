@@ -24,18 +24,28 @@ package org.wso2.micro.gateway.enforcer.constants;
 public class AnalyticsConstants {
     public static final String UPSTREAM_SUCCESS_RESPONSE_DETAIL = "via_upstream";
     public static final String EXT_AUTH_DENIED_RESPONSE_DETAIL = "ext_authz_denied";
+    public static final String EXT_AUTH_ERROR_RESPONSE_DETAIL = "ext_authz_error";
+    public static final String ROUTE_NOT_FOUND_RESPONSE_DETAIL = "route_not_found";
     public static final String GATEWAY_LABEL = "ENVOY";
+
+    public static final String TOKEN_ENDPOINT_PATH = "/token";
+
+    public static final String DEFAULT_FOR_UNASSIGNED = "UNKNOWN";
 
     public static final int API_THROTTLE_OUT_ERROR_CODE = 900800;
     public static final int HARD_LIMIT_EXCEEDED_ERROR_CODE = 900801;
     public static final int RESOURCE_THROTTLE_OUT_ERROR_CODE = 900802;
     public static final int APPLICATION_THROTTLE_OUT_ERROR_CODE = 900803;
     public static final int SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE = 900804;
-    public static final int SUBSCRIPTION_BURST_THROTTLE_OUT_ERROR_CODE = 900807;
     public static final int BLOCKED_ERROR_CODE = 900805;
     public static final int CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE = 900806;
-    public static final int CONNECTIONS_COUNT_THROTTLE_OUT_ERROR_CODE = 900808;
-    public static final int EVENTS_COUNT_THROTTLE_OUT_ERROR_CODE = 900808;
-    public static final int GRAPHQL_QUERY_TOO_DEEP = 900820;
-    public static final int GRAPHQL_QUERY_TOO_COMPLEX = 900821;
+
+    public static final int NHTTP_RECEIVER_INPUT_OUTPUT_ERROR_SENDING = 101000;
+    public static final int NHTTP_RECEIVER_INPUT_OUTPUT_ERROR_RECEIVING = 101001;
+    public static final int NHTTP_SENDER_INPUT_OUTPUT_ERROR_SENDING = 101500;
+    public static final int NHTTP_CONNECTION_FAILED = 101503;
+    public static final int NHTTP_CONNECTION_TIMEOUT = 101504;
+    public static final int NHTTP_CONNECTION_CLOSED = 101505;
+    public static final int NHTTP_PROTOCOL_VIOLATION = 101506;
+    public static final int NHTTP_CONNECT_TIMEOUT = 101508;
 }

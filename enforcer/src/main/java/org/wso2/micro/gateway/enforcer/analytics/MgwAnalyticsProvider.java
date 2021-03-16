@@ -54,13 +54,13 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public EventCategory getEventCategory() {
-        // TODO: (VirajSalaka) Filter out token endpoint calls
-        // TODO: (VirajSalaka) change the order for .equals to avoid NPE
-        if (logEntry.getResponse().getResponseCodeDetails()
-                .equals(AnalyticsConstants.UPSTREAM_SUCCESS_RESPONSE_DETAIL)) {
+        if (logEntry.getResponse() != null && AnalyticsConstants.UPSTREAM_SUCCESS_RESPONSE_DETAIL.equals(
+                logEntry.getResponse().getResponseCodeDetails())) {
             logger.debug("Is success event");
             return EventCategory.SUCCESS;
-        } else if (logEntry.getResponse().getResponseCode().getValue() != 200
+        } else if (logEntry.getResponse() != null
+                && logEntry.getResponse().getResponseCode() != null
+                && logEntry.getResponse().getResponseCode().getValue() != 200
                 && logEntry.getResponse().getResponseCode().getValue() != 204) {
             logger.debug("Is fault event");
             return EventCategory.FAULT;
@@ -72,8 +72,10 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public boolean isAnonymous() {
-        // TODO: (VirajSalaka) evaluate
-        return false;
+        Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
+        // If appId is unknown, subscriptions are not validated.
+        return !AnalyticsConstants.DEFAULT_FOR_UNASSIGNED
+                .equals(getValueAsString(fieldsMap, MetadataConstants.APP_ID_KEY));
     }
 
     @Override
@@ -92,17 +94,15 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     }
 
     public boolean isTargetFaultRequest() {
-        // TODO: (VirajSalaka) CorsPreflight request
-        // TODO: (VirajSalaka) Change order (redundant check, check if this logic could be avoided)
-        return !logEntry.getResponse().getResponseCodeDetails()
-                .equals(AnalyticsConstants.UPSTREAM_SUCCESS_RESPONSE_DETAIL)
-                && !logEntry.getResponse().getResponseCodeDetails()
-                .equals(AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL);
+        String responseCodeDetail = logEntry.getResponse().getResponseCodeDetails();
+        return (!AnalyticsConstants.UPSTREAM_SUCCESS_RESPONSE_DETAIL.equals(responseCodeDetail))
+                && (!AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL.equals(responseCodeDetail))
+                && (!AnalyticsConstants.EXT_AUTH_ERROR_RESPONSE_DETAIL.equals(responseCodeDetail))
+                && (!AnalyticsConstants.ROUTE_NOT_FOUND_RESPONSE_DETAIL.equals(responseCodeDetail));
     }
 
     @Override
     public API getApi() {
-        // TODO: (VirajSalaka) Null check (If enforcer connection is failed)
         Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
         API api = new API();
         api.setApiId(getValueAsString(fieldsMap, MetadataConstants.API_ID_KEY));
@@ -116,7 +116,6 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public Application getApplication() {
-        // TODO: (VirajSalaka) Null check (If enforcer connection is failed)
         Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
         Application application = new Application();
         application.setApplicationOwner(getValueAsString(fieldsMap, MetadataConstants.APP_OWNER_KEY));
@@ -148,15 +147,17 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public Latencies getLatencies() {
+        // This method is only invoked for success requests. Hence all these properties will be available.
+        // The cors requests responded from the CORS filter are already filtered at this point.
         AccessLogCommon properties = logEntry.getCommonProperties();
+        long backendResponseRecvTimestamp = properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000;
+        long backendRequestSendTimestamp = properties.getTimeToFirstUpstreamTxByte().getNanos() / 1000000;
+        long downstreamResponseSendTimestamp = properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000;
         Latencies latencies = new Latencies();
-        // TODO: (VirajSalaka) Introduce method local variables
-        latencies.setBackendLatency(properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000 -
-                properties.getTimeToFirstUpstreamTxByte().getNanos() / 1000000);
-        latencies.setResponseLatency(properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000);
-        latencies.setRequestMediationLatency(properties.getTimeToLastUpstreamTxByte().getNanos() / 1000000);
-        latencies.setResponseMediationLatency(properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000 -
-                properties.getTimeToFirstUpstreamRxByte().getNanos() / 1000000);
+        latencies.setBackendLatency(backendResponseRecvTimestamp - backendRequestSendTimestamp);
+        latencies.setResponseLatency(downstreamResponseSendTimestamp);
+        latencies.setRequestMediationLatency(backendRequestSendTimestamp);
+        latencies.setResponseMediationLatency(downstreamResponseSendTimestamp - backendResponseRecvTimestamp);
         return latencies;
     }
 
@@ -210,14 +211,15 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     }
 
     private String getValueAsString(Map<String, Value> fieldsMap, String key) {
-        if (fieldsMap == null || fieldsMap.get(key) == null) {
+        if (fieldsMap == null || !fieldsMap.containsKey(key)) {
             return null;
         }
         return fieldsMap.get(key).getStringValue();
     }
 
     private Map<String, Value> getFieldsMapFromLogEntry() {
-        if (logEntry.getCommonProperties().getMetadata() == null
+        if (logEntry.getCommonProperties() == null
+                || logEntry.getCommonProperties().getMetadata() == null
                 || logEntry.getCommonProperties().getMetadata().getFilterMetadataMap() == null
                 || !logEntry.getCommonProperties().getMetadata().getFilterMetadataMap()
                 .containsKey(MetadataConstants.EXT_AUTH_METADATA_CONTEXT_KEY)) {

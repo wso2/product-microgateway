@@ -18,6 +18,8 @@
 
 package org.wso2.micro.gateway.enforcer.analytics;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
@@ -30,6 +32,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.Even
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.AnalyticsConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
@@ -39,6 +42,7 @@ import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
  */
 public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
     private final RequestContext requestContext;
+    private static final Logger logger = LogManager.getLogger(MgwFaultAnalyticsProvider.class);
 
     public MgwFaultAnalyticsProvider(RequestContext requestContext) {
         this.requestContext = requestContext;
@@ -51,8 +55,7 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public boolean isAnonymous() {
-        // TODO: (VirajSalaka) fix
-        return false;
+        return !ConfigHolder.getInstance().getConfig().getEventHub().isEnabled();
     }
 
     @Override
@@ -180,12 +183,13 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public String getUserAgentHeader() {
         // User agent is not required for fault scenario
-        // TODO: (VirajSalaka) Throw exception
+        logger.error("Internal Error: User agent header is not required for fault events");
         return null;
     }
 
     @Override
     public String getEndUserIP() {
+        logger.error("Internal Error: End User IPAddress is not required for fault events");
         // EndUserIP is not required for fault event type
         return null;
     }
