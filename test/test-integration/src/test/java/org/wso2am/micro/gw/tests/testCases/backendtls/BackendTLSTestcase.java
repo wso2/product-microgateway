@@ -24,7 +24,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.util.TestConstant;
-import org.wso2am.micro.gw.tests.util.TestGroup;
 import org.wso2am.micro.gw.tests.util.TokenUtil;
 import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
@@ -33,7 +32,6 @@ import org.wso2am.micro.gw.tests.util.URLs;
 import java.util.HashMap;
 import java.util.Map;
 
-@Test(groups = { TestGroup.MGW_WITH_BACKEND_TLS_AND_API })
 public class BackendTLSTestcase {
     protected String jwtTokenProd;
 

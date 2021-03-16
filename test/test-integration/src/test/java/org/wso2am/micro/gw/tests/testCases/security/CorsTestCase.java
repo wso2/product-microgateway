@@ -33,13 +33,11 @@ import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.util.ApiDeployment;
 import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
 import org.wso2am.micro.gw.tests.util.TestConstant;
-import org.wso2am.micro.gw.tests.util.TestGroup;
 import org.wso2am.micro.gw.tests.util.TokenUtil;
 import org.wso2am.micro.gw.tests.util.URLs;
 
 import java.io.IOException;
 
-@Test(groups = { TestGroup.MGW_WITH_BACKEND_TLS_AND_API })
 public class CorsTestCase {
     protected String jwtTokenProd;
     private String allowedOrigin1 = "http://test1.com";

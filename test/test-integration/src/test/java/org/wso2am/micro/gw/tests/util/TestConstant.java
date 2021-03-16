@@ -29,9 +29,10 @@ public class TestConstant {
     public static final String HTTP_METHOD_GET = "GET";
     public static final String HTTP_METHOD_POST = "POST";
     public static final String HTTP_METHOD_PUT = "PUT";
+    public static final String HTTP_METHOD_DELETE = "DELETE";
     public static final String HTTP_METHOD_OPTIONS = "OPTIONS";
     public static final String HTTP_METHOD_HEAD = "HEAD";
-    public static final String ADAPTER_IMPORT_API_RESOURCE = "/api/mgw/adapter/0.1/apis";
+    public static final String ADAPTER_APIS_RESOURCE = "/api/mgw/adapter/0.1/apis";
 
     public static final String KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String KEY_TYPE_SANDBOX = "SANDBOX";
@@ -60,7 +61,7 @@ public class TestConstant {
             "KcdFXFwDUzpLfyAsg8qHDGiMcM88sUc10cvMYQqRYw66SF3EqYWQ";
 
     public static final int GATEWAY_LISTENER_HTTPS_PORT = 9095;
-    public static final int ADAPTER_IMPORT_API_PORT = 9843;
+    public static final int ADAPTER_PORT = 9843;
     public final static int MOCK_SERVER_PORT = 2383;
 
 
