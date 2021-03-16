@@ -21,7 +21,7 @@
     <groupId>org.wso2.am.microgw</groupId>
     <artifactId>micro-gateway-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.0-m9-SNAPSHOT</version>
+    <version>4.0.0-m8-SNAPSHOT</version>
     <name>Micro Gateway - Parent</name>
 
     <url>https://wso2.org</url>
