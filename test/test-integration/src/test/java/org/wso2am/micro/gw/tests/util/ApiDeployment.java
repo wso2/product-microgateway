@@ -60,7 +60,7 @@ public class ApiDeployment {
             throw new MGWException("Failed to deploy API at " + apiZipFilePath);
         }
 
-        TimeUnit.SECONDS.sleep(5);
+        //TimeUnit.SECONDS.sleep(5);
         //TODO: call this method method after implementing default listener in the router
         //waitTillRoutesAreAvailable();
     }
@@ -72,7 +72,7 @@ public class ApiDeployment {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static void waitTillRoutesAreAvailable() throws IOException, InterruptedException {
+    public static void waitTillRoutesAreAvailable(String route) throws IOException, InterruptedException {
 
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + "test-token");
@@ -81,8 +81,8 @@ public class ApiDeployment {
         int tries = 0;
         while (true){
             response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
-                    "/v2/pet/2") , headers);
-
+                    route) , headers);
+            System.out.println("@@@@@@@@@@@@@@@");
             tries += 1;
             if(response != null) {
                 //TODO: Need to correctly validate the response cde missmatch

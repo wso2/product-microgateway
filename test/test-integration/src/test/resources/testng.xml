@@ -21,7 +21,7 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="Micro-GW-ServiceDiscovery-Test-Suite">
+<suite name="Micro-GW-ServiceDiscovery-Test-Suite" parallel="false">
     <listeners>
         <!--Disabled since there are no any pre configured apis -->
         <!--<listener class-name="org.wso2.micro.gateway.tests.listener.TestExecutionListener"/>-->
@@ -30,10 +30,9 @@
 
     <test name="micro-gw-with-no-apis" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithNoAPIs"/>
+            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithDefaultConf"/>
             <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.endpoints.ProductionSandboxTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.testCaseBefore.HasOneDeployedAPI"/>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.JwtTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.ScopeTest"/>
         </classes>

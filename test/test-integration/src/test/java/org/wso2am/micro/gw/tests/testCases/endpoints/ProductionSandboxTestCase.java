@@ -23,8 +23,6 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2am.micro.gw.tests.util.ApiDeployment;
-import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
 import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
 import org.wso2am.micro.gw.tests.util.TestConstant;
@@ -41,15 +39,7 @@ public class ProductionSandboxTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        String prodSandApiZipfile = ApiProjectGenerator.createApictlProjZip(
-                "prod-sand/prodSand_api.yaml", "prod-sand/prodSand_swagger.yaml");
-        String prodOnlyApiZipfile = ApiProjectGenerator.createApictlProjZip(
-                "prod-sand/prod_api.yaml", "prod-sand/prod_swagger.yaml");
-        String sandOnlyApiZipfile = ApiProjectGenerator.createApictlProjZip(
-                "prod-sand/sand_api.yaml", "prod-sand/sand_swagger.yaml");
-        ApiDeployment.deployAPI(prodSandApiZipfile);
-        ApiDeployment.deployAPI(prodOnlyApiZipfile);
-        ApiDeployment.deployAPI(sandOnlyApiZipfile);
+        //ApiDeployment.waitTillRoutesAreAvailable("/v2/general/pet/findByStatus");
 
         //TODO: (VirajSalaka) change the token
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null);
@@ -62,6 +52,10 @@ public class ProductionSandboxTestCase {
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         HttpResponse prodResponse = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
                 "/v2/general/pet/findByStatus") , prodHeaders);
+        System.out.println("heyy");
+        System.out.println(prodResponse.getData());
+        System.out.println(prodResponse.getResponseMessage());
+        System.out.println(prodResponse.getHeaders());
 
         Assert.assertNotNull(prodResponse);
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");

@@ -44,8 +44,8 @@ public class APiDeployTestCase extends BaseTestCase {
     public void apiDeployTest() throws Exception {
 
         //api yaml file should put to the resources/apis/openApis folder
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip("apis/openApis/api.yaml",
-                "apis/openApis/swagger.yaml");
+        String apiZipfile = ApiProjectGenerator.createApictlProjZip("deploy/api.yaml",
+                "deploy/swagger.yaml");
 
         // Set header
         Map<String, String> headers = new HashMap<String,String>();
@@ -62,7 +62,7 @@ public class APiDeployTestCase extends BaseTestCase {
     @Test(dependsOnMethods = "apiDeployTest", description = "Test undeploy API")
     public void apiDeleteTest() throws Exception {
         Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("apiName", "SwaggerPetstore");
+        queryParams.put("apiName", "SwaggerPetstoreDeploy");
         queryParams.put("version", "1.0.5");
 
         // Set header
@@ -71,8 +71,6 @@ public class APiDeployTestCase extends BaseTestCase {
 
         HttpResponse response = HttpClientRequest.doDelete(URLs.getAdapterServiceURLHttps(
                 TestConstant.ADAPTER_APIS_RESOURCE), queryParams, headers);
-        System.out.println("heyyy");
-        System.out.println(response.getResponseMessage());
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
     }
