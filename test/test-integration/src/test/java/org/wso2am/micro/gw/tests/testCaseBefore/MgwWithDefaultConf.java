@@ -26,16 +26,23 @@ import org.wso2am.micro.gw.tests.util.ApiProjectGenerator;
 
 import java.util.concurrent.TimeUnit;
 
-public class MgwWithBackendTlsAndAPI extends BaseTestCase {
+public class MgwWithDefaultConf extends BaseTestCase {
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        super.startMGW(null, true);
-
-        String apiZipfile = ApiProjectGenerator.createApictlProjZip(
-                "backendtls/api.yaml","backendtls/swagger.yaml",
-                "backendtls/backend.crt");
+        super.startMGW();
+        String apiZipfile = ApiProjectGenerator.createApictlProjZip("apis/openApis/api.yaml",
+                "apis/openApis/swagger.yaml");
+        String prodSandApiZipfile = ApiProjectGenerator.createApictlProjZip(
+                "prod-sand/prodSand_api.yaml", "prod-sand/prodSand_swagger.yaml");
+        String prodOnlyApiZipfile = ApiProjectGenerator.createApictlProjZip(
+                "prod-sand/prod_api.yaml", "prod-sand/prod_swagger.yaml");
+        String sandOnlyApiZipfile = ApiProjectGenerator.createApictlProjZip(
+                "prod-sand/sand_api.yaml", "prod-sand/sand_swagger.yaml");
         ApiDeployment.deployAPI(apiZipfile);
+        ApiDeployment.deployAPI(prodSandApiZipfile);
+        ApiDeployment.deployAPI(prodOnlyApiZipfile);
+        ApiDeployment.deployAPI(sandOnlyApiZipfile);
         TimeUnit.SECONDS.sleep(5);
     }
 
