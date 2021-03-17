@@ -21,7 +21,7 @@
     <groupId>org.wso2.am.microgw</groupId>
     <artifactId>micro-gateway-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.0-m9</version>
+    <version>4.0.0-m10-SNAPSHOT</version>
     <name>Micro Gateway - Parent</name>
 
     <url>https://wso2.org</url>
@@ -40,7 +40,7 @@
         <url>https://github.com/wso2/product-microgateway.git</url>
         <developerConnection>scm:git:https://github.com/wso2/product-microgateway.git</developerConnection>
         <connection>scm:git:https://github.com/wso2/product-microgateway.git</connection>
-        <tag>v4.0.0-m9</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <modules>
