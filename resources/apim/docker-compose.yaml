@@ -1,4 +1,4 @@
-version: "3.7"
+version: "2.4"
 services:
   router:
     image: wso2/mg-router:4.0.0-m9-SNAPSHOT
@@ -78,7 +78,6 @@ services:
     healthcheck:
       test: ["CMD", "nc", "-z","localhost", "9443"]
       interval: 10s
-      start_period: 120s
       retries: 50
     ports:
       - "9763:9763"
