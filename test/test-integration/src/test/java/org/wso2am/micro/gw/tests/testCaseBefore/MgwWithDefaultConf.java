@@ -17,16 +17,24 @@
  */
 package org.wso2am.micro.gw.tests.testCaseBefore;
 
+import org.testng.Assert;
 import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.util.ApiDeployment;
 import org.wso2am.micro.gw.tests.util.ApictlUtils;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class MgwWithDefaultConf extends BaseTestCase {
+
+    @BeforeSuite
+    public void checkVersion() throws IOException {
+        String versionByApictl = ApictlUtils.getVersion();
+        Assert.assertEquals(versionByApictl, "4.0.0-alpha2","Expected apictl version is not downloaded");
+    }
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {

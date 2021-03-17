@@ -1,24 +1,36 @@
 package org.wso2am.micro.gw.tests.testCases.apiDeploy;
 
-import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.context.MicroGWTestException;
 import org.wso2am.micro.gw.tests.util.ApictlUtils;
 
-import java.io.File;
 import java.io.IOException;
 
 public class APiDeployViaApictlTestCase {
 
-    @Test
-    public void checkVersion() throws IOException {
-        String versionByApictl = ApictlUtils.getVersion();
-        Assert.assertEquals(versionByApictl, "4.0.0-alpha2","Expected apictl version not downloaded");
+    @BeforeClass
+    public void createApiProject() throws IOException, MicroGWTestException {
+        ApictlUtils.createProject( "deploy_openAPI.yaml",
+                "apictl_petstore", null);
+        ApictlUtils.addEnv("test");
     }
 
     @Test
-    public void createApiProject() throws IOException, MicroGWTestException {
-        ApictlUtils.createProject( "openAPI.yaml",
-                "petstore", null);
+    public void deployAPI() throws MicroGWTestException {
+        ApictlUtils.login("test");
+        ApictlUtils.deployAPI("apictl_petstore", "test");
+    }
+
+    @Test
+    public void undeployAPI() throws MicroGWTestException {
+        ApictlUtils.undeployAPI("SwaggerPetstoreDeploy", "1.0.5", "test");
+    }
+
+    @AfterClass
+    public void logoutAndRemoveEnv() throws MicroGWTestException {
+        ApictlUtils.logout("test");
+        ApictlUtils.removeEnv("test");
     }
 }

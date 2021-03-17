@@ -32,6 +32,7 @@
         <classes>
             <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithDefaultConf"/>
             <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployViaRestTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployViaApictlTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.endpoints.ProductionSandboxTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.JwtTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.ScopeTest"/>

@@ -114,7 +114,7 @@ Use the following sample token accepted by the microgateway to access the API. L
     list APIs     - `apictl mg get apis -e dev`   
     undeploy API  - `apictl mg undeploy api -n SwaggerPetstore -v 1.0.5 -e dev`    
     logout        - `apictl mg logout dev`    
-    remove environment - `apictl mg remove env`
+    remove environment - `apictl mg remove env dev`
 
 ## Microgateway Components
 - **APICTL** : The APICTL is used to initiate Microgateway projects as well as to deploy APIs in to Microgateway. This is a developer tool used

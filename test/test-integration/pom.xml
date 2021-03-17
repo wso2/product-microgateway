@@ -232,7 +232,6 @@
                 </os>
             </activation>
             <properties>
-                <host.os>mac-x64</host.os>
                 <apictl.package>apictl-${apictl.version}-macosx-x64.tar.gz</apictl.package>
             </properties>
         </profile>
@@ -245,7 +244,18 @@
                 </os>
             </activation>
             <properties>
-                <host.os>linux-x64</host.os>
+                <apictl.package>apictl-${apictl.version}-linux-x64.tar.gz</apictl.package>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux-x86_64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <properties>
                 <apictl.package>apictl-${apictl.version}-linux-x64.tar.gz</apictl.package>
             </properties>
         </profile>
@@ -258,7 +268,6 @@
                 </os>
             </activation>
             <properties>
-                <host.os>linux-i586</host.os>
                 <apictl.package>apictl-${apictl.version}-linux-i586.tar.gz</apictl.package>
             </properties>
         </profile>
@@ -271,7 +280,18 @@
                 </os>
             </activation>
             <properties>
-                <host.os>windows-x64</host.os>
+                <apictl.package>apictl-${apictl.version}-windows-x64.zip</apictl.package>
+            </properties>
+        </profile>
+        <profile>
+            <id>windows-x86_64</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <properties>
                 <apictl.package>apictl-${apictl.version}-windows-x64.zip</apictl.package>
             </properties>
         </profile>
@@ -284,7 +304,6 @@
                 </os>
             </activation>
             <properties>
-                <host.os>windows-i586</host.os>
                 <apictl.package>apictl-${apictl.version}-windows-i586.zip</apictl.package>
             </properties>
         </profile>
