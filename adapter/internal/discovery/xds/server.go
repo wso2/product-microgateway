@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
+	"log"
 	"math/rand"
 	"reflect"
 	"sync"
@@ -524,9 +525,12 @@ func startConsulServiceDiscovery() {
 			if consulSyntax, ok := svcdiscovery.ClusterConsulKeyMap[cluster.Name]; ok {
 				svcdiscovery.InitConsul() //initialize consul client and load certs
 				onceUpdateMeshCerts.Do(func() {
-					go listenForMeshCertUpdates() //runs in background
+					if svcdiscovery.MeshEnabled {
+						go listenForMeshCertUpdates() //runs in background
+					}
 				})
 				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
+				log.Println("consul syntax: ", consulSyntax)
 				if errConSyn != nil {
 					logger.LoggerXds.Error("consul syntax parse error ", errConSyn)
 					return
@@ -554,8 +558,8 @@ func updateCertsForServiceMesh() {
 	for _, clusters := range openAPIClustersMap {
 		for _, cluster := range clusters { //iterate through all clusters
 			if cluster.TransportSocket != nil { //has transport socket==> https/wss
-				logger.LoggerXds.Println(svcdiscovery.MeshCACerts, "svcdiscovery.MeshCACerts")
-				upstreamTLSContext := svcdiscovery.CreateUpstreamTLSContext(svcdiscovery.MeshCACerts,
+				logger.LoggerXds.Println(svcdiscovery.MeshCACert, "svcdiscovery.MeshCACert")
+				upstreamTLSContext := svcdiscovery.CreateUpstreamTLSContext(svcdiscovery.MeshCACert,
 					svcdiscovery.MeshServiceKey, svcdiscovery.MeshServiceCert)
 				marshalledTLSContext, err := ptypes.MarshalAny(upstreamTLSContext)
 				if err != nil {
@@ -580,6 +584,7 @@ func updateCertsForServiceMesh() {
 }
 
 func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKey string) {
+	logger.LoggerXds.Println("get service discovery data")
 	doneChan := make(chan bool)
 	svcdiscovery.ClusterConsulDoneChanMap[clusterName] = doneChan
 	resultChan := svcdiscovery.ConsulClientInstance.Poll(query, doneChan)
@@ -590,15 +595,17 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 				logger.LoggerXds.Debugln("closed the result channel for cluster name: ", clusterName)
 				return
 			}
-			if val, ok := svcdiscovery.ClusterConsulResultMap[clusterName]; ok {
+			logger.LoggerXds.Println("Results: ", queryResultsList)
+			val := svcdiscovery.GetClusterConsulResultMap(clusterName)
+			if val != nil {
 				if !reflect.DeepEqual(val, queryResultsList) {
-					svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList
+					svcdiscovery.SetClusterConsulResultMap(clusterName, queryResultsList)
 					//update the envoy cluster
 					updateRoute(apiKey, clusterName, queryResultsList)
 				}
 			} else {
 				logger.LoggerXds.Debugln("updating cluster from the consul service registry, removed the default host")
-				svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList //todo concurrent map writes panic
+				svcdiscovery.SetClusterConsulResultMap(clusterName, queryResultsList)
 				updateRoute(apiKey, clusterName, queryResultsList)
 			}
 		}
@@ -650,7 +657,7 @@ func updateXDSRouteCacheForServiceDiscovery(apiKey string) {
 			for _, label := range envoyLabelList {
 				listeners, clusters, routes, endpoints, _ := generateEnvoyResoucesForLabel(label)
 				updateXdsCacheWithLock(label, endpoints, clusters, routes, listeners)
-				logger.LoggerXds.Info("Updated XDS cache by consul service discovery")
+				logger.LoggerXds.Info("Updated XDS cache by consul service discovery for API: ", apiKey)
 			}
 		}
 	}

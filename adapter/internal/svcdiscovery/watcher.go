@@ -23,6 +23,7 @@ import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	"io/ioutil"
+	"log"
 	"net/url"
 	"strings"
 	"sync"
@@ -36,14 +37,15 @@ var (
 	//IsServiceDiscoveryEnabled whether Consul service discovery should be enabled
 	IsServiceDiscoveryEnabled bool
 	onceConfigLoad            sync.Once
+	mutexForResultMap         sync.RWMutex
 	conf                      *config.Config
 	pollInterval              time.Duration
 	errConfLoad               error
 	//MeshEnabled whether Consul service mesh is enabled or not
 	MeshEnabled    bool
 	mgwServiceName string
-	//MeshCACerts a CA cert of Consul Mesh
-	MeshCACerts []string
+	//MeshCACert a CA cert of Consul Mesh
+	MeshCACert string
 	//MeshServiceCert public cert of Router
 	MeshServiceCert string
 	//MeshServiceKey private key of Router
@@ -79,7 +81,20 @@ func init() {
 	mgwServiceName = conf.Adapter.Consul.MgwServiceName
 	MeshEnabled = conf.Adapter.Consul.ServiceMeshEnabled
 	MeshUpdateSignal = make(chan bool)
-	MeshCACerts = make([]string, 1)
+}
+
+//SetClusterConsulResultMap avoid concurrent map writes when writing to ClusterConsulResultMap
+func SetClusterConsulResultMap(key string, value []Upstream) {
+	mutexForResultMap.Lock()
+	defer mutexForResultMap.Unlock()
+	ClusterConsulResultMap[key] = value
+}
+
+//GetClusterConsulResultMap avoid concurrent map reads/writes when reading from ClusterConsulResultMap
+func GetClusterConsulResultMap(key string) []Upstream {
+	mutexForResultMap.RLock()
+	defer mutexForResultMap.RUnlock()
+	return ClusterConsulResultMap[key]
 }
 
 //read the certs and access token required for tls into respective global variables
@@ -110,6 +125,7 @@ func readCerts() error {
 //InitConsul loads certs and initialize a ConsulClient
 //lazy loading
 func InitConsul() {
+	log.Print("Init consul")
 	onceConfigLoad.Do(func() {
 		conf, errConfLoad = config.ReadConfigs()
 		if errConfLoad != nil {
@@ -174,14 +190,13 @@ func generateTLSCertWithStr(privateKey string, publicKey string) *tlsv3.TlsCerti
 }
 
 //CreateUpstreamTLSContext create a new TLS context using CA, private key and public key
-func CreateUpstreamTLSContext(upstreamCACerts []string, privateKey, publicKey string) *tlsv3.UpstreamTlsContext {
+func CreateUpstreamTLSContext(upstreamCACert, privateKey, publicKey string) *tlsv3.UpstreamTlsContext {
 	tlsCert := generateTLSCertWithStr(privateKey, publicKey)
 	// Convert the cipher string to a string array
 	ciphersArray := strings.Split(conf.Envoy.Upstream.TLS.Ciphers, ",")
 	for i := range ciphersArray {
 		ciphersArray[i] = strings.TrimSpace(ciphersArray[i])
 	}
-
 	upstreamTLSContext := &tlsv3.UpstreamTlsContext{
 		CommonTlsContext: &tlsv3.CommonTlsContext{
 			TlsParams: &tlsv3.TlsParameters{
@@ -192,60 +207,22 @@ func CreateUpstreamTLSContext(upstreamCACerts []string, privateKey, publicKey st
 			TlsCertificates: []*tlsv3.TlsCertificate{tlsCert},
 		},
 	}
-
-	// Sni should be assigned when there is a hostname
-	//if net.ParseIP(address.GetSocketAddress().GetAddress()) == nil {
-	//	upstreamTLSContext.Sni = address.GetSocketAddress().GetAddress()
-	//}
-
 	if !conf.Envoy.Upstream.TLS.DisableSSLVerification {
 		var trustedCASrc *corev3.DataSource
-
-		logger.LoggerSvcDiscovery.Println("upstream ca cert: ", upstreamCACerts)
-		//if upstreamCACert != "" {
-
-		for _, upstreamCACert := range upstreamCACerts {
-			trustedCASrc = &corev3.DataSource{
-				Specifier: &corev3.DataSource_InlineString{
-					InlineString: upstreamCACert,
-				},
-			}
+		trustedCASrc = &corev3.DataSource{
+			Specifier: &corev3.DataSource_InlineString{
+				InlineString: upstreamCACert,
+			},
 		}
-		//} else {
-		//	//todo remove log
-		//	logger.LoggerXds.Println("CA from file")
-		//	trustedCASrc = &corev3.DataSource{
-		//		Specifier: &corev3.DataSource_Filename{
-		//			Filename: conf.Envoy.Upstream.TLS.CACrtPath,
-		//		},
-		//	}
-		//}
-
 		upstreamTLSContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_ValidationContext{
 			ValidationContext: &tlsv3.CertificateValidationContext{
 				TrustedCa: trustedCASrc,
 			},
 		}
-	} else {
-		//todo remove else
-		logger.LoggerXds.Println("SSL verification disabled")
 	}
-
-	if conf.Envoy.Upstream.TLS.VerifyHostName && !conf.Envoy.Upstream.TLS.DisableSSLVerification {
-		//addressString := address.GetSocketAddress().GetAddress()
-		//addressString := "consul"
-		//subjectAltNames := []*envoy_type_matcherv3.StringMatcher{
-		//	{
-		//		MatchPattern: &envoy_type_matcherv3.StringMatcher_Suffix{
-		//			Suffix: addressString,
-		//		},
-		//	},
-		//}
-		//upstreamTLSContext.CommonTlsContext.GetValidationContext().MatchSubjectAltNames = subjectAltNames
-	} else {
-		//todo remove else
-		logger.LoggerSvcDiscovery.Println("Verify host name disabled")
-	}
+	//Note: trusted CA verification is enough
+	//A CN is available in certs but no SNI
+	//Therefore hostname verification is ignored
 	return upstreamTLSContext
 }
 
