@@ -168,10 +168,10 @@ func InitConsul() {
 			longPollClient := newHTTPClient(&transport, time.Duration(longPollInterval*2)*time.Second)
 			ConsulClientInstance = NewConsulClient(client, longPollClient, urlStructure.Scheme, urlStructure.Host, aclToken)
 		}
-
 	})
 }
 
+//generate TLS certs as inline strings
 func generateTLSCertWithStr(privateKey string, publicKey string) *tlsv3.TlsCertificate {
 	var tlsCert tlsv3.TlsCertificate
 	tlsCert = tlsv3.TlsCertificate{
@@ -220,12 +220,14 @@ func CreateUpstreamTLSContext(upstreamCACert, privateKey, publicKey string) *tls
 			},
 		}
 	}
-	//Note: trusted CA verification is enough
-	//A CN is available in certs but no SNI
+	//Note: Cert verification done through CA root
+	//A CN is available in Consul generated certs but no SNI
 	//Therefore hostname verification is ignored
 	return upstreamTLSContext
 }
 
+//copied from oasparser/envoyconf/routes_with_clusters.go
+//reason: to avoid cyclic import
 func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol {
 	switch tlsVersion {
 	case "TLS1_0":

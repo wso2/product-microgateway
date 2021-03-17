@@ -105,8 +105,7 @@ type Root struct {
 
 //RootCertResp structure of a response to a request to get the root certificates
 type RootCertResp struct {
-	TrustDomain string
-	Roots       []Root
+	Roots []Root
 }
 
 //ServiceCertResp structure of a response to get a service's certificate and private key

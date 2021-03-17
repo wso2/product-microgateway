@@ -20,13 +20,9 @@ package xds
 import (
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/ptypes"
-	"log"
 	"math/rand"
-	"reflect"
 	"sync"
 
-	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
 	wso2_cache "github.com/wso2/micro-gw/internal/discovery/protocol/cache/v3"
 	"github.com/wso2/micro-gw/internal/svcdiscovery"
@@ -47,9 +43,8 @@ import (
 )
 
 var (
-	version             int32
-	mutexForXdsUpdate   sync.Mutex
-	onceUpdateMeshCerts sync.Once
+	version           int32
+	mutexForXdsUpdate sync.Mutex
 
 	cache                              envoy_cachev3.SnapshotCache
 	enforcerCache                      wso2_cache.SnapshotCache
@@ -516,157 +511,6 @@ func updateXdsCacheWithLock(label string, endpoints []types.Resource, clusters [
 	mutexForXdsUpdate.Lock()
 	defer mutexForXdsUpdate.Unlock()
 	updateXdsCache(label, endpoints, clusters, routes, listeners)
-}
-
-func startConsulServiceDiscovery() {
-	//label := "default"
-	for apiKey, clusterList := range openAPIClustersMap {
-		for _, cluster := range clusterList {
-			if consulSyntax, ok := svcdiscovery.ClusterConsulKeyMap[cluster.Name]; ok {
-				svcdiscovery.InitConsul() //initialize consul client and load certs
-				onceUpdateMeshCerts.Do(func() {
-					if svcdiscovery.MeshEnabled {
-						go listenForMeshCertUpdates() //runs in background
-					}
-				})
-				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
-				log.Println("consul syntax: ", consulSyntax)
-				if errConSyn != nil {
-					logger.LoggerXds.Error("consul syntax parse error ", errConSyn)
-					return
-				}
-				logger.LoggerXds.Debugln(query)
-				go getServiceDiscoveryData(query, cluster.Name, apiKey)
-			}
-		}
-	}
-}
-
-func listenForMeshCertUpdates() {
-	for {
-		select {
-		case <-svcdiscovery.MeshUpdateSignal:
-			updateCertsForServiceMesh()
-		}
-	}
-}
-
-func updateCertsForServiceMesh() {
-	transportSocketName := "envoy.transport_sockets.tls"
-
-	//update each cluster with new certs
-	for _, clusters := range openAPIClustersMap {
-		for _, cluster := range clusters { //iterate through all clusters
-			if cluster.TransportSocket != nil { //has transport socket==> https/wss
-				logger.LoggerXds.Println(svcdiscovery.MeshCACert, "svcdiscovery.MeshCACert")
-				upstreamTLSContext := svcdiscovery.CreateUpstreamTLSContext(svcdiscovery.MeshCACert,
-					svcdiscovery.MeshServiceKey, svcdiscovery.MeshServiceCert)
-				marshalledTLSContext, err := ptypes.MarshalAny(upstreamTLSContext)
-				if err != nil {
-					logger.LoggerXds.Error("Internal Error while marshalling the upstream TLS Context.")
-				} else {
-					upstreamTransportSocket := &corev3.TransportSocket{
-						Name: transportSocketName,
-						ConfigType: &corev3.TransportSocket_TypedConfig{
-							TypedConfig: marshalledTLSContext,
-						},
-					}
-					cluster.TransportSocket = upstreamTransportSocket
-				}
-			}
-		}
-	}
-
-	//send the update to envoy
-	for apiKey := range openAPIClustersMap {
-		updateXDSRouteCacheForServiceDiscovery(apiKey)
-	}
-}
-
-func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKey string) {
-	logger.LoggerXds.Println("get service discovery data")
-	doneChan := make(chan bool)
-	svcdiscovery.ClusterConsulDoneChanMap[clusterName] = doneChan
-	resultChan := svcdiscovery.ConsulClientInstance.Poll(query, doneChan)
-	for {
-		select {
-		case queryResultsList, ok := <-resultChan:
-			if !ok { //ok==false --> result chan is closed
-				logger.LoggerXds.Debugln("closed the result channel for cluster name: ", clusterName)
-				return
-			}
-			logger.LoggerXds.Println("Results: ", queryResultsList)
-			val := svcdiscovery.GetClusterConsulResultMap(clusterName)
-			if val != nil {
-				if !reflect.DeepEqual(val, queryResultsList) {
-					svcdiscovery.SetClusterConsulResultMap(clusterName, queryResultsList)
-					//update the envoy cluster
-					updateRoute(apiKey, clusterName, queryResultsList)
-				}
-			} else {
-				logger.LoggerXds.Debugln("updating cluster from the consul service registry, removed the default host")
-				svcdiscovery.SetClusterConsulResultMap(clusterName, queryResultsList)
-				updateRoute(apiKey, clusterName, queryResultsList)
-			}
-		}
-	}
-}
-
-func updateRoute(apiKey string, clusterName string, queryResultsList []svcdiscovery.Upstream) {
-	if clusterList, available := openAPIClustersMap[apiKey]; available {
-		for i := range clusterList {
-			if clusterList[i].Name == clusterName {
-				var lbEndpointList []*endpointv3.LbEndpoint
-				for _, result := range queryResultsList {
-					address := &corev3.Address{Address: &corev3.Address_SocketAddress{
-						SocketAddress: &corev3.SocketAddress{
-							Address:  result.Address,
-							Protocol: corev3.SocketAddress_TCP,
-							PortSpecifier: &corev3.SocketAddress_PortValue{
-								PortValue: uint32(result.ServicePort),
-							},
-						},
-					}}
-
-					lbEndPoint := &endpointv3.LbEndpoint{
-						HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
-							Endpoint: &endpointv3.Endpoint{
-								Address: address,
-							},
-						},
-					}
-					lbEndpointList = append(lbEndpointList, lbEndPoint)
-				}
-				clusterList[i].LoadAssignment = &endpointv3.ClusterLoadAssignment{
-					ClusterName: clusterName,
-					Endpoints: []*endpointv3.LocalityLbEndpoints{
-						{
-							LbEndpoints: lbEndpointList,
-						},
-					},
-				}
-				updateXDSRouteCacheForServiceDiscovery(apiKey)
-			}
-		}
-	}
-}
-
-func updateXDSRouteCacheForServiceDiscovery(apiKey string) {
-	for key, envoyLabelList := range openAPIEnvoyMap {
-		if key == apiKey {
-			for _, label := range envoyLabelList {
-				listeners, clusters, routes, endpoints, _ := generateEnvoyResoucesForLabel(label)
-				updateXdsCacheWithLock(label, endpoints, clusters, routes, listeners)
-				logger.LoggerXds.Info("Updated XDS cache by consul service discovery for API: ", apiKey)
-			}
-		}
-	}
-}
-
-func stopConsulDiscoveryFor(clusterName string) {
-	if doneChan, available := svcdiscovery.ClusterConsulDoneChanMap[clusterName]; available {
-		close(doneChan)
-	}
 }
 
 // ListApis returns a list of objects that holds info about each API
