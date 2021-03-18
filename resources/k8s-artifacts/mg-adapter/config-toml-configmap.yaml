@@ -90,7 +90,7 @@ data:
     # Issuer 1
     [[enforcer.jwtTokenConfig]]
         name="Resident Key Manager"
-        issuer = "https://localhost:9443/oauth2/token"
+        issuer = "https://wso2apim:9443/oauth2/token"
         certificateAlias = "wso2carbon"
         # URL of the JWKs endpoint
         jwksURL = ""
@@ -131,7 +131,7 @@ data:
     # Control plane's eventHub details
     [controlPlane.eventHub]
     enabled = false
-    serviceUrl = "https://localhost:9443/"
+    serviceUrl = "https://wso2apim:9443/"
     username="admin"
     password="$env{cp_admin_pwd}"
     environmentLabels = ["Production and Sandbox"]
@@ -139,4 +139,4 @@ data:
     skipSSLVerification=true
     # Message broker connection URL of the control plane
     [controlPlane.eventHub.jmsConnectionParameters]
-    eventListeningEndpoints = ["amqp://admin:admin@localhost:5672?retries='5'&connectdelay='30000'"]
+    eventListeningEndpoints = ["amqp://admin:admin@wso2apim:5672?retries='5'&connectdelay='30000'"]

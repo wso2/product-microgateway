@@ -1,0 +1,54 @@
+# Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: wso2apim
+spec:
+  type: NodePort
+  # label keys and values that must match in order to receive traffic for this service
+  selector:
+    deployment: wso2apim
+  ports:
+    # ports that this service should serve on
+    - name: pass-through-http
+      port: 8280
+      targetPort: 8280
+      nodePort: 32004
+    - name: pass-through-https
+      port: 8243
+      targetPort: 8243
+      nodePort: 32003
+    - name: servlet-http
+      port: 9763
+      targetPort: 9763
+      nodePort: 32002
+    - name: servlet-https
+      port: 9443
+      targetPort: 9443
+      nodePort: 32001
+    - name: jms-port
+      port: 5672
+      targetPort: 5672
+      nodePort: 32005
+    - name: binary-receiver
+      port: 9611
+      targetPort: 9611
+      nodePort: 32006
+    - name: binary-auth
+      port: 9711
+      targetPort: 9711
+      nodePort: 32007
+      
