@@ -20,32 +20,32 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	urlGroups := []*enforcer.TMURLGroup{}
 
 	for _, issuer := range config.Enforcer.JwtTokenConfig {
-	    claimMaps := []*enforcer.ClaimMapping{}
-	    for _, claimMap := range issuer.ClaimMapping{
-	        claim := &enforcer.ClaimMapping{
-	            RemoteClaim:    claimMap.RemoteClaim,
-	            LocalClaim:     claimMap.LocalClaim,
-        	}
-        	claimMaps = append(claimMaps,claim)
-        }
-    	jwtConfig := &enforcer.Issuer{
-            CertificateAlias:     issuer.CertificateAlias,
-    		ConsumerKeyClaim:     issuer.ConsumerKeyClaim,
-    		Issuer:               issuer.Issuer,
-    		Name:                 issuer.Name,
-    		ValidateSubscription: issuer.ValidateSubscription,
-    		JwksURL:              issuer.JwksURL,
-    		CertificateFilePath:  issuer.CertificateFilePath,
-    		ClaimMapping:         claimMaps,
-    	}
-    	issuers = append(issuers, jwtConfig)
-    }
+		claimMaps := []*enforcer.ClaimMapping{}
+		for _, claimMap := range issuer.ClaimMapping {
+			claim := &enforcer.ClaimMapping{
+				RemoteClaim: claimMap.RemoteClaim,
+				LocalClaim:  claimMap.LocalClaim,
+			}
+			claimMaps = append(claimMaps, claim)
+		}
+		jwtConfig := &enforcer.Issuer{
+			CertificateAlias:     issuer.CertificateAlias,
+			ConsumerKeyClaim:     issuer.ConsumerKeyClaim,
+			Issuer:               issuer.Issuer,
+			Name:                 issuer.Name,
+			ValidateSubscription: issuer.ValidateSubscription,
+			JwksURL:              issuer.JwksURL,
+			CertificateFilePath:  issuer.CertificateFilePath,
+			ClaimMapping:         claimMaps,
+		}
+		issuers = append(issuers, jwtConfig)
+	}
 
 	jwtUsers := []*enforcer.JWTUser{}
 	for _, user := range config.Enforcer.JwtIssuer.JwtUsers {
 		jwtUser := &enforcer.JWTUser{
-			Username:  user.Username,
-			Password:  user.Password,
+			Username: user.Username,
+			Password: user.Password,
 		}
 		jwtUsers = append(jwtUsers, jwtUser)
 	}
@@ -83,15 +83,15 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		AuthUrl:   config.ControlPlane.Analytics.AuthURL,
 		AuthToken: config.ControlPlane.Analytics.AuthToken,
 		Service: &enforcer.Service{
-			Port:           config.Enforcer.AnalyticsReceiver.Port,
-			MaxHeaderLimit: config.Enforcer.AnalyticsReceiver.MaxHeaderLimit,
-			KeepAliveTime:  config.Enforcer.AnalyticsReceiver.KeepAliveTime,
-			MaxMessageSize: config.Enforcer.AnalyticsReceiver.MaxMessageSize,
+			Port:           config.ControlPlane.Analytics.EnforcerLogReceiver.Port,
+			MaxHeaderLimit: config.ControlPlane.Analytics.EnforcerLogReceiver.MaxHeaderLimit,
+			KeepAliveTime:  config.ControlPlane.Analytics.EnforcerLogReceiver.KeepAliveTime,
+			MaxMessageSize: config.ControlPlane.Analytics.EnforcerLogReceiver.MaxMessageSize,
 			ThreadPool: &enforcer.ThreadPool{
-				CoreSize:      config.Enforcer.AnalyticsReceiver.ThreadPool.CoreSize,
-				MaxSize:       config.Enforcer.AnalyticsReceiver.ThreadPool.MaxSize,
-				QueueSize:     config.Enforcer.AnalyticsReceiver.ThreadPool.QueueSize,
-				KeepAliveTime: config.Enforcer.AnalyticsReceiver.ThreadPool.KeepAliveTime,
+				CoreSize:      config.ControlPlane.Analytics.EnforcerLogReceiver.ThreadPool.CoreSize,
+				MaxSize:       config.ControlPlane.Analytics.EnforcerLogReceiver.ThreadPool.MaxSize,
+				QueueSize:     config.ControlPlane.Analytics.EnforcerLogReceiver.ThreadPool.QueueSize,
+				KeepAliveTime: config.ControlPlane.Analytics.EnforcerLogReceiver.ThreadPool.KeepAliveTime,
 			},
 		},
 	}
@@ -123,7 +123,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 			PublicCertificatePath: config.Enforcer.JwtIssuer.PublicCertificatePath,
 			PrivateKeyPath:        config.Enforcer.JwtIssuer.PrivateKeyPath,
 			ValidityPeriod:        config.Enforcer.JwtIssuer.ValidityPeriod,
-			JwtUsers: jwtUsers,
+			JwtUsers:              jwtUsers,
 		},
 		AuthService:    authService,
 		JwtTokenConfig: issuers,

@@ -145,7 +145,7 @@
   # The message broker context factory
   jmsConnectioninitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
   # The message broker connection URL
-  jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
+  jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://apim:5672'"
   # Throttling configurations related to event publishing using a binary connection
   [enforcer.throttling.publisher]
     # Credentials required to establish connection between Traffic Manager
@@ -153,8 +153,8 @@
     password = "admin"
     # Receiver URL and the authentication URL of the Traffic manager node/nodes
     [[enforcer.throttling.publisher.urlGroup]]
-      receiverURLs = ["tcp://localhost:9611"]
-      authURLs = ["ssl://localhost:9711"]
+      receiverURLs = ["tcp://apim:9611"]
+      authURLs = ["ssl://apim:9711"]
     # Data publisher object pool configurations
     [enforcer.throttling.publisher.pool]
       maxIdleDataPublishingAgents = 1000
@@ -220,9 +220,28 @@
   retryInterval = 5
   skipSSLVerification=true
   # Message broker connection URL of the control plane
-  [controlPlane.eventHub.jmsConnectionParameters]
-    eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
+    [controlPlane.eventHub.jmsConnectionParameters]
+        eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
     [controlPlane.analytics]
-          enabled = false
-          authURL = "https://analytics-event-auth.st.choreo.dev/auth/v1"
-          authToken = ""
+        enabled = false
+        authURL = "https://analytics-event-auth.st.choreo.dev/auth/v1"
+        authToken = ""
+
+        [controlPlane.analytics.envoyLogPublisher]
+            bufferFlushInterval = "1s"
+            bufferSizeBytes = 16384
+            gRPCRequestTimeout = "20s"
+
+        [controlPlane.analytics.enforcerLogReceiver]
+            port = 18090
+            maxMessageSize = 1000000000
+            maxHeaderLimit = 8192
+            #keep alive time of the external authz connection
+            keepAliveTime = 600
+
+            [controlPlane.analytics.enforcerLogReceiver.threadPool]
+                coreSize = 10
+                maxSize = 100
+                #keep alive time of threads in seconds
+                keepAliveTime = 600
+                queueSize = 1000

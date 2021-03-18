@@ -18,6 +18,7 @@
 
 package org.wso2.micro.gateway.enforcer.analytics;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
@@ -55,7 +56,8 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public boolean isAnonymous() {
-        return !ConfigHolder.getInstance().getConfig().getEventHub().isEnabled();
+        return requestContext.getAuthenticationContext() == null ||
+                StringUtils.isEmpty(requestContext.getAuthenticationContext().getApplicationId());
     }
 
     @Override

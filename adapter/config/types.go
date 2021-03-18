@@ -125,15 +125,14 @@ type Config struct {
 
 	// TODO: (VirajSalaka) Analytics config is shared among adapter and enforcer
 	Enforcer struct {
-		JwtTokenConfig    []jwtTokenConfig
-		EventHub          eventHub
-		ApimCredentials   apimCredentials
-		AuthService       authService
-		JwtGenerator      jwtGenerator
-		Cache             cache
-		Throttling        throttlingConfig
-		JwtIssuer         jwtIssuer
-		AnalyticsReceiver authService `toml:"analyticsReceiver"`
+		JwtTokenConfig  []jwtTokenConfig
+		EventHub        eventHub
+		ApimCredentials apimCredentials
+		AuthService     authService
+		JwtGenerator    jwtGenerator
+		Cache           cache
+		Throttling      throttlingConfig
+		JwtIssuer       jwtIssuer
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
@@ -265,9 +264,17 @@ type cache struct {
 }
 
 type analytics struct {
-	Enabled   bool   `toml:"enabled"`
-	AuthURL   string `toml:"authURL"`
-	AuthToken string `toml:"authToken"`
+	Enabled             bool              `toml:"enabled"`
+	AuthURL             string            `toml:"authURL"`
+	AuthToken           string            `toml:"authToken"`
+	EnforcerLogReceiver authService       `toml:"enforcerLogReceiver"`
+	EnvoyLogPublisher   envoyLogPublisher `toml:"envoyLogPublisher"`
+}
+
+type envoyLogPublisher struct {
+	BufferFlushInterval time.Duration `toml:"bufferFlushInterval"`
+	BufferSizeBytes     uint32        `toml:"bufferSizeBytes"`
+	GRPCRequestTimeout  time.Duration `toml:"gRPCRequestTimeout"`
 }
 
 type jwtIssuer struct {
