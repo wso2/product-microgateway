@@ -616,3 +616,11 @@ public const string SERVER_HEADER_OVERRIDE_VALUE = "overrideValue";
 public const string APIM_CREDENTIALS_INSTANCE_ID = "apim.credentials";
 public const string APIM_CREDENTIALS_USERNAME = "username";
 public const string APIM_CREDENTIALS_PASSWORD = "password";
+
+// JWT generator method/class names
+public const LOAD_JWT_GENERATOR_METHOD_NAME = "loadJWTGeneratorClass";
+public const INVOKE_GET_KEY_STORE_PATH_METHOD_NAME = "invokeGetKeystorePath";
+public const INVOKE_GENERATE_TOKEN_METHOD_NAME = "invokeGenerateToken";
+public const LOAD_CLAIM_RETRIEVER_CLASS_METHOD_NAME = "loadClaimRetrieverClass";
+public const GET_RETRIEVED_CLAIMS_METHOD_NAME = "getRetrievedClaims";
+public const JWT_GENERATOR_INVOKER_CLASS_PATH = "org.wso2.micro.gateway.core.jwt.generator.MGWJWTGeneratorInvoker";

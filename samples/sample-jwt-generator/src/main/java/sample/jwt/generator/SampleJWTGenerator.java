@@ -25,30 +25,12 @@ import java.util.Map;
 import java.util.UUID;
 
 public class SampleJWTGenerator extends AbstractMGWJWTGenerator {
-    public SampleJWTGenerator(String dialectURI,
-                                String signatureAlgorithm,
-                                String keyStorePath,
-                                String keyStorePassword,
-                                String certificateAlias,
-                                String privateKeyAlias,
-                                int jwtExpiryTime,
-                                String[] restrictedClaims,
-                                boolean cacheEnabled,
-                                int cacheExpiry,
-                                String tokenIssuer,
-                                String[] tokenAudience) {
-        super(dialectURI,
-                signatureAlgorithm,
-                keyStorePath,
-                keyStorePassword,
-                certificateAlias,
-                privateKeyAlias,
-                jwtExpiryTime,
-                restrictedClaims,
-                cacheEnabled,
-                cacheExpiry,
-                tokenIssuer,
-                tokenAudience);
+    public SampleJWTGenerator(String dialectURI, String signatureAlgorithm, String keyStorePath,
+                              String keyStorePassword, String certificateAlias, String privateKeyAlias,
+                              int jwtExpiryTime, String[] restrictedClaims, boolean cacheEnabled, int cacheExpiry,
+                              String tokenIssuer, String[] tokenAudience) {
+        super(dialectURI, signatureAlgorithm, keyStorePath, keyStorePassword, certificateAlias, privateKeyAlias,
+                jwtExpiryTime, restrictedClaims, cacheEnabled, cacheExpiry, tokenIssuer, tokenAudience);
     }
 
     @Override
@@ -80,10 +62,10 @@ public class SampleJWTGenerator extends AbstractMGWJWTGenerator {
     @Override
     public Map<String, Object> populateCustomClaims(Map<String, Object> jwtInfo, ArrayList<String> restrictedClaims) {
         Map<String, Object> claims = new HashMap();
-        for (String key: jwtInfo.keySet()) {
+        for (String key : jwtInfo.keySet()) {
             if (key.equals("customClaims")) {
                 Map<String, Object> customClaims = (Map<String, Object>) jwtInfo.get(key);
-                for (String subKey: customClaims.keySet()) {
+                for (String subKey : customClaims.keySet()) {
                     if (!restrictedClaims.contains(subKey)) {
                         claims.put(subKey, customClaims.get(subKey));
                     }
