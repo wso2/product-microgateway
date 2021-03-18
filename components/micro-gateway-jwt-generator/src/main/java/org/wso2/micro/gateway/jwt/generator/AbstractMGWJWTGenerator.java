@@ -245,27 +245,25 @@ public abstract class AbstractMGWJWTGenerator {
      * Used to sign the JWT using the keystore.
      */
     public byte[] signJWT(String assertion) throws Exception {
-        FileInputStream is;
-        is = new FileInputStream(keyStorePath);
-        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-        keystore.load(is, keyStorePassword.toCharArray());
-        Key key = keystore.getKey(privateKeyAlias, keyStorePassword.toCharArray());
-        Key privateKey = null;
-        if (key instanceof PrivateKey) {
-            privateKey = key;
+        try (FileInputStream is = new FileInputStream(keyStorePath)) {
+            KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keystore.load(is, keyStorePassword.toCharArray());
+            Key key = keystore.getKey(privateKeyAlias, keyStorePassword.toCharArray());
+            Key privateKey = null;
+            if (key instanceof PrivateKey) {
+                privateKey = key;
+            }
+            //initialize signature with private key and algorithm
+            Signature signature = Signature.getInstance(signatureAlgorithm);
+            signature.initSign((PrivateKey) privateKey);
+            //update signature with data to be signed
+            byte[] dataInBytes = assertion.getBytes(Charset.defaultCharset());
+            signature.update(dataInBytes);
+            // close the file stream
+            is.close();
+            //sign the assertion and return the signature
+            return signature.sign();
         }
-        //initialize signature with private key and algorithm
-        Signature signature = Signature.getInstance(signatureAlgorithm);
-        signature.initSign((PrivateKey) privateKey);
-        //update signature with data to be signed
-        byte[] dataInBytes = assertion.getBytes(Charset.defaultCharset());
-        signature.update(dataInBytes);
-
-        // close the file stream
-        is.close();
-
-        //sign the assertion and return the signature
-        return signature.sign();
     }
 
     /**
