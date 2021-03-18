@@ -216,7 +216,7 @@ func testGetOpenAPIV3Struct(t *testing.T, apiYamlFilePath string) {
 
 	mgwSwagger, _ := operator.GetOpenAPIV3Struct(apiJsn)
 
-	assert.Nil(t, mgwSwagger.Validate(context.Background()), "MgwSwagger validation failed for : %v", apiYamlFilePath)
+	assert.NotNil(t, mgwSwagger.Validate(context.Background()), "MgwSwagger validation failed for : %v", apiYamlFilePath)
 
 }
 
