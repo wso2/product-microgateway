@@ -115,4 +115,3 @@ spec:
         - name: dropins-vol
           emptyDir: {}
       restartPolicy: Always
-  
