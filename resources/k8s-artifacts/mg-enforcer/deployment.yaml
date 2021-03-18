@@ -71,6 +71,8 @@ spec:
               value: "Production and Sandbox"
             - name: XDS_MAX_MSG_SIZE
               value: "4194304"
+            - name: XDS_MAX_RETRIES
+              value: "3"
             - name: JAVA_OPTS
               value: ""
             - name: apim_admin_pwd

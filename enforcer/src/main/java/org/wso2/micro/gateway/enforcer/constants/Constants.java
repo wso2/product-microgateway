@@ -39,6 +39,8 @@ public class Constants {
             "type.googleapis.com/wso2.discovery.keymgt.KeyManagerConfig";
     public static final String REVOKED_TOKEN_TYPE_URL =
             "type.googleapis.com/wso2.discovery.keymgt.RevokedToken";
+
+    // xDS constants
     public static final int MAX_XDS_RETRIES = 3;
 
     // Config constants
