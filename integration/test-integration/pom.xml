@@ -19,7 +19,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
-        <artifactId>micro-gateway-tests</artifactId>
+        <artifactId>integration</artifactId>
         <version>4.0.0-m10-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -39,6 +39,7 @@
                         <jwt_transformer_jar>
                             ${basedir}/target/test-integration-${project.version}.jar
                         </jwt_transformer_jar>
+                        <apictl_version>${apictl.version}</apictl_version>
                     </systemPropertyVariables>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
@@ -119,9 +120,9 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://wso2.org/jenkins/job/platform-builds/job/product-apim-tooling/lastSuccessfulBuild/artifact/archive/${apictl.package}</url>
+                            <url>https://github.com/wso2/product-apim-tooling/releases/download/v${apictl.version}/${apictl.package}</url>
                             <unpack>true</unpack>
-                            <outputDirectory>${basedir}/../test-integration/target/</outputDirectory>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -180,7 +181,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-<!--            <scope>test</scope>-->
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

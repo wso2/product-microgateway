@@ -222,7 +222,8 @@ func UpdateAPI(apiContent config.APIContent) {
 	}
 
 	apiIdentifier := GenerateIdentifierForAPI(apiContent.VHost, apiContent.Name, apiContent.Version)
-	//TODO: Uncomment the below section depending on MgwSwagger.Resource ids
+	//TODO: (SuKSW) Uncomment the below section depending on MgwSwagger.Resource ids
+	//TODO: (SuKSW) Update the existing API if the basepath already exists
 	//existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
 	// if exists {
 	// 	if reflect.DeepEqual(mgwSwagger, existingMgwSwagger) {

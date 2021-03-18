@@ -30,9 +30,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2am.micro.gw.tests.util.*;
+import org.wso2am.micro.gw.tests.util.TestConstant;
+import org.wso2am.micro.gw.tests.util.TokenUtil;
+import org.wso2am.micro.gw.tests.util.Utils;
 
-import java.io.File;
 import java.io.IOException;
 
 public class CorsTestCase {
@@ -51,10 +52,6 @@ public class CorsTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        String apiZipfile = ApictlUtils.createProjectZip( "cors_openAPI.yaml",
-                "cors_petstore", null);
-        ApiDeployment.deployAPI(apiZipfile);
-
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null);
     }
 
@@ -62,7 +59,7 @@ public class CorsTestCase {
     public void testCORSHeadersInPreFlightResponse() throws Exception {
         // AccessControlAllowCredentials set to true
         HttpClient httpclient = HttpClientBuilder.create().build();
-        HttpUriRequest option = new HttpOptions(URLs.getServiceURLHttps("/cors/pet/1"));
+        HttpUriRequest option = new HttpOptions(Utils.getServiceURLHttps("/cors/pet/1"));
         option.addHeader(ORIGIN_HEADER, "http://test1.com");
         option.addHeader(ACCESS_CONTROL_REQUEST_METHOD_HEADER, "POST");
         HttpResponse response = httpclient.execute(option);
@@ -95,7 +92,7 @@ public class CorsTestCase {
     public void testCORSHeadersInSimpleResponse() throws IOException {
 
         HttpClient httpclient = HttpClientBuilder.create().build();
-        HttpUriRequest getRequest = new HttpGet(URLs.getServiceURLHttps("/cors/pet/1"));
+        HttpUriRequest getRequest = new HttpGet(Utils.getServiceURLHttps("/cors/pet/1"));
         getRequest.addHeader(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         getRequest.addHeader(ORIGIN_HEADER, "http://test2.com");
         HttpResponse response = httpclient.execute(getRequest);
@@ -120,7 +117,7 @@ public class CorsTestCase {
     @Test(description = "Invalid Origin, CORS simple request")
     public void testSimpleReqInvalidOrigin() throws IOException {
         HttpClient httpclient = HttpClientBuilder.create().build();
-        HttpUriRequest getRequest = new HttpGet(URLs.getServiceURLHttps("/cors/pet/1"));
+        HttpUriRequest getRequest = new HttpGet(Utils.getServiceURLHttps("/cors/pet/1"));
         getRequest.addHeader(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         getRequest.addHeader(ORIGIN_HEADER, "http://notAllowedOrigin.com");
         HttpResponse response = httpclient.execute(getRequest);
@@ -134,7 +131,7 @@ public class CorsTestCase {
     @Test(description = "Invalid Origin, CORS preflight request")
     public void testPreflightReqInvalidOrigin() throws IOException {
         HttpClient httpclient = HttpClientBuilder.create().build();
-        HttpUriRequest option = new HttpOptions(URLs.getServiceURLHttps("/cors/pet/1"));
+        HttpUriRequest option = new HttpOptions(Utils.getServiceURLHttps("/cors/pet/1"));
         option.addHeader(ORIGIN_HEADER, "http://notAllowedOrigin.com");
         option.addHeader(ACCESS_CONTROL_REQUEST_METHOD_HEADER, "POST");
         HttpResponse response = httpclient.execute(option);
@@ -158,7 +155,7 @@ public class CorsTestCase {
     @Test(description = "CORS preflight request against a resource without CORS")
     public void testPreflightReqResourceWithoutCors() throws IOException {
         HttpClient httpclient = HttpClientBuilder.create().build();
-        HttpUriRequest option = new HttpOptions(URLs.getServiceURLHttps("/v2/pet/1"));
+        HttpUriRequest option = new HttpOptions(Utils.getServiceURLHttps("/v2/pet/1"));
         option.addHeader(ORIGIN_HEADER, "http://notAllowedOrigin.com");
         option.addHeader(ACCESS_CONTROL_REQUEST_METHOD_HEADER, "POST");
         HttpResponse response = httpclient.execute(option);
@@ -183,7 +180,7 @@ public class CorsTestCase {
     @Test(description = "Invalid Origin, CORS preflight request")
     public void testPreflightReqInvalidReqMethod() throws IOException {
         HttpClient httpclient = HttpClientBuilder.create().build();
-        HttpUriRequest option = new HttpOptions(URLs.getServiceURLHttps("/cors/pet/1"));
+        HttpUriRequest option = new HttpOptions(Utils.getServiceURLHttps("/cors/pet/1"));
         option.addHeader(ORIGIN_HEADER, "http://test1.com");
         option.addHeader(ACCESS_CONTROL_REQUEST_METHOD_HEADER, "DELETE");
         HttpResponse response = httpclient.execute(option);

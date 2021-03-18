@@ -139,7 +139,7 @@ public class TokenUtil {
         API api = new API();
         api.setName("PetStoreAPI");
         api.setContext("petstore/v1");
-        api.setProdEndpoint(URLs.getMockServiceURLHttp("/echo/prod"));
+        api.setProdEndpoint(Utils.getMockServiceURLHttp("/echo/prod"));
         api.setVersion("1.0.0");
         api.setProvider("admin");
 

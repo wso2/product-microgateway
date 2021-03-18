@@ -33,7 +33,8 @@ public class MgwWithDefaultConf extends BaseTestCase {
     @BeforeSuite
     public void checkVersion() throws IOException {
         String versionByApictl = ApictlUtils.getVersion();
-        Assert.assertEquals(versionByApictl, "4.0.0-alpha2","Expected apictl version is not downloaded");
+        String versionFromPomXml = System.getProperty("apictl_version");
+        Assert.assertEquals(versionByApictl, versionFromPomXml,"Expected apictl version is not downloaded");
     }
 
     @BeforeTest(description = "initialise the setup")

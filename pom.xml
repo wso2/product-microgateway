@@ -48,7 +48,7 @@
         <module>enforcer</module>
         <module>router</module>
         <module>distribution</module>
-        <module>test</module>
+        <module>integration</module>
     </modules>
     <build>
         <pluginManagement>

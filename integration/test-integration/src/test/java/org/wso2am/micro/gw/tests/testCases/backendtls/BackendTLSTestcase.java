@@ -27,7 +27,7 @@ import org.wso2am.micro.gw.tests.util.TestConstant;
 import org.wso2am.micro.gw.tests.util.TokenUtil;
 import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
-import org.wso2am.micro.gw.tests.util.URLs;
+import org.wso2am.micro.gw.tests.util.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +47,7 @@ public class BackendTLSTestcase {
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/v2/pet/findByStatus") , headers);
 
         Assert.assertNotNull(response);
@@ -60,7 +60,7 @@ public class BackendTLSTestcase {
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
@@ -73,7 +73,7 @@ public class BackendTLSTestcase {
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/v2/pet/findByTags") , headers);
 
         Assert.assertNotNull(response);

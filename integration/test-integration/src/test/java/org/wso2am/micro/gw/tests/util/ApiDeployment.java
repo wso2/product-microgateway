@@ -50,7 +50,7 @@ public class ApiDeployment {
         // Set header
         Map<String, String> headers = new HashMap<String,String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic YWRtaW46YWRtaW4=");
-        HttpsPostMultipart multipart = new HttpsPostMultipart(URLs.getAdapterServiceURLHttps(
+        HttpsPostMultipart multipart = new HttpsPostMultipart(Utils.getAdapterServiceURLHttps(
                 TestConstant.ADAPTER_APIS_RESOURCE) , headers);
         multipart.addFilePart("file", new File(apiZipFilePath));
         HttpResponse response = multipart.getResponse();
@@ -59,8 +59,6 @@ public class ApiDeployment {
             log.error("Api deployment is failed");
             throw new MGWException("Failed to deploy API at " + apiZipFilePath);
         }
-
-        //TimeUnit.SECONDS.sleep(5);
         //TODO: call this method method after implementing default listener in the router
         //waitTillRoutesAreAvailable();
     }
@@ -80,7 +78,7 @@ public class ApiDeployment {
 
         int tries = 0;
         while (true){
-            response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
+            response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                     route) , headers);
             tries += 1;
             if(response != null) {

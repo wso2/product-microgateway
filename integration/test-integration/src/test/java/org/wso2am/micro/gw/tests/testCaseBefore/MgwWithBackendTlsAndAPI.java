@@ -36,8 +36,11 @@ public class MgwWithBackendTlsAndAPI extends BaseTestCase {
 
         String apiZipfile = ApictlUtils.createProjectZip("backend_tsl_openAPI.yaml",
                 "backend_tsl_petstore", "backend_tls.crt");
+        String corsApiZipfile = ApictlUtils.createProjectZip( "cors_openAPI.yaml",
+                "cors_petstore", null);
 
         ApiDeployment.deployAPI(apiZipfile);
+        ApiDeployment.deployAPI(corsApiZipfile);
         TimeUnit.SECONDS.sleep(5);
     }
 

@@ -27,7 +27,7 @@ import org.wso2am.micro.gw.tests.util.HttpResponse;
 import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
 import org.wso2am.micro.gw.tests.util.TestConstant;
 import org.wso2am.micro.gw.tests.util.TokenUtil;
-import org.wso2am.micro.gw.tests.util.URLs;
+import org.wso2am.micro.gw.tests.util.Utils;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ public class JwtTransformerTestCase {
         Map<String, String> headers = new HashMap<>();
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/v2/jwttoken") , headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");

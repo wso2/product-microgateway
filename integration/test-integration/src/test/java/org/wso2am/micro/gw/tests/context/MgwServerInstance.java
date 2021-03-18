@@ -28,7 +28,7 @@ import org.wso2am.micro.gw.tests.mockbackend.MockBackendServer;
 import org.wso2am.micro.gw.tests.util.Utils;
 import org.wso2am.micro.gw.tests.util.HttpClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
-import org.wso2am.micro.gw.tests.util.URLs;
+import org.wso2am.micro.gw.tests.util.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -171,7 +171,7 @@ public class MgwServerInstance implements MgwServer {
 
         int tries = 0;
         while (true){
-            response= HttpClientRequest.doGet(URLs.getMockServiceURLHttp(
+            response= HttpClientRequest.doGet(Utils.getMockServiceURLHttp(
                     "/v2/pet/3") , headers);
             tries += 1;
             if(response != null) {

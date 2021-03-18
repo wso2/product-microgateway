@@ -23,7 +23,12 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
-import org.wso2am.micro.gw.tests.util.*;
+import org.wso2am.micro.gw.tests.util.ApictlUtils;
+import org.wso2am.micro.gw.tests.util.HttpClientRequest;
+import org.wso2am.micro.gw.tests.util.HttpResponse;
+import org.wso2am.micro.gw.tests.util.HttpsPostMultipart;
+import org.wso2am.micro.gw.tests.util.TestConstant;
+import org.wso2am.micro.gw.tests.util.Utils;
 
 import java.io.File;
 import java.util.HashMap;
@@ -43,7 +48,7 @@ public class APiDeployViaRestTestCase extends BaseTestCase {
         // Set header
         Map<String, String> headers = new HashMap<String,String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic YWRtaW46YWRtaW4=");
-        HttpsPostMultipart multipart = new HttpsPostMultipart(URLs.getAdapterServiceURLHttps(
+        HttpsPostMultipart multipart = new HttpsPostMultipart(Utils.getAdapterServiceURLHttps(
                 TestConstant.ADAPTER_APIS_RESOURCE) , headers);
         multipart.addFilePart("file", new File(apiZipfile));
         HttpResponse response = multipart.getResponse();
@@ -62,7 +67,7 @@ public class APiDeployViaRestTestCase extends BaseTestCase {
         Map<String, String> headers = new HashMap<String,String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Basic YWRtaW46YWRtaW4=");
 
-        HttpResponse response = HttpClientRequest.doDelete(URLs.getAdapterServiceURLHttps(
+        HttpResponse response = HttpClientRequest.doDelete(Utils.getAdapterServiceURLHttps(
                 TestConstant.ADAPTER_APIS_RESOURCE), queryParams, headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");

@@ -27,7 +27,7 @@ import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
 import org.wso2am.micro.gw.tests.util.TestConstant;
 import org.wso2am.micro.gw.tests.util.TokenUtil;
-import org.wso2am.micro.gw.tests.util.URLs;
+import org.wso2am.micro.gw.tests.util.Utils;
 import org.wso2am.micro.gw.mockbackend.ResponseConstants;
 
 import java.util.HashMap;
@@ -50,12 +50,8 @@ public class ProductionSandboxTestCase {
     public void invokeProdSandEndpoints() throws Exception {
         Map<String, String> prodHeaders = new HashMap<String, String>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse prodResponse = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
+        HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/v2/general/pet/findByStatus") , prodHeaders);
-        System.out.println("heyy");
-        System.out.println(prodResponse.getData());
-        System.out.println(prodResponse.getResponseMessage());
-        System.out.println(prodResponse.getHeaders());
 
         Assert.assertNotNull(prodResponse);
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
@@ -64,7 +60,7 @@ public class ProductionSandboxTestCase {
 
         Map<String, String> sandHeaders = new HashMap<String, String>();
         sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
+        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/v2/general/pet/findByStatus"), sandHeaders);
 
         Assert.assertNotNull(sandResponse);
@@ -77,7 +73,7 @@ public class ProductionSandboxTestCase {
     public void invokeSandboxEndpointOnly() throws Exception {
         Map<String, String> sandHeaders = new HashMap<String, String>();
         sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
+        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/v2/sand/pet/findByStatus") , sandHeaders);
 
         Assert.assertNotNull(sandResponse, "Sandbox endpoint response should not be null");
@@ -87,7 +83,7 @@ public class ProductionSandboxTestCase {
 
         Map<String, String> prodHeaders = new HashMap<String, String>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse prodResponse = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
+        HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/v2/sand/pet/findByStatus") , prodHeaders);
 
         Assert.assertNotNull(prodResponse, "Production endoint response should not be null");
@@ -100,7 +96,7 @@ public class ProductionSandboxTestCase {
     public void invokeProdEndpointOnly() throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
-        HttpResponse response = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/v2/prod/pet/findByStatus") , headers);
 
         Assert.assertNotNull(response, "Production endpoint response should not be null");
@@ -110,7 +106,7 @@ public class ProductionSandboxTestCase {
 
         Map<String, String> sandHeaders = new HashMap<String, String>();
         sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
-        HttpResponse sandResponse = HttpsClientRequest.doGet(URLs.getServiceURLHttps(
+        HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
                 "/v2/prod/pet/findByStatus"), sandHeaders);
 
         Assert.assertNotNull(sandResponse, "Sandbox endpoint response should not be null");

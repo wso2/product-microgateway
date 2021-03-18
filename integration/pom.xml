@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <artifactId>integration</artifactId>
-    <name>Micro Gateway - Test-Parent</name>
+    <name>Micro Gateway - Integration</name>
 
     <modules>
         <module>mock-backend-server</module>

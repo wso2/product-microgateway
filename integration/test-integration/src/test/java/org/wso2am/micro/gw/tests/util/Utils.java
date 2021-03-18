@@ -30,7 +30,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URL;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -351,5 +353,19 @@ public class Utils {
         File targetClassesDir = new File(Utils.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());
         return targetClassesDir.getParentFile().toString();
+    }
+
+    public static String getAdapterServiceURLHttps(String servicePath) throws MalformedURLException {
+        return new URL(new URL("https://localhost:" + TestConstant.ADAPTER_PORT), servicePath)
+                .toString();
+    }
+
+    public static String getServiceURLHttps(String servicePath) throws MalformedURLException {
+        return new URL(new URL("https://localhost:" + TestConstant.GATEWAY_LISTENER_HTTPS_PORT), servicePath)
+                .toString();
+    }
+
+    public static String getMockServiceURLHttp(String servicePath) throws MalformedURLException {
+        return new URL(new URL("http://localhost:" + TestConstant.MOCK_SERVER_PORT), servicePath).toString();
     }
 }
