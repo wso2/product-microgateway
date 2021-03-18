@@ -370,7 +370,6 @@ public class BuildCmd implements LauncherCmd {
         }
     }
 
-
     /**
      * This method will do the call home functionality in a separate thread.
      *
