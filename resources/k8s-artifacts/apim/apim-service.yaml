@@ -51,4 +51,3 @@ spec:
       port: 9711
       targetPort: 9711
       nodePort: 32007
-      
