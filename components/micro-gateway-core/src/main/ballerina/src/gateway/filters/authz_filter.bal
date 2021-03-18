@@ -41,9 +41,8 @@ public type OAuthzFilter object {
         boolean result = true;
         if (authContext is runtime:AuthenticationContext) {
             string? authScheme = authContext?.scheme;
-            // scope validation is done in authn filter for oauth2, hence we only need to
-            //validate scopes if auth scheme is jwt.
-            if (authScheme is string && authScheme == AUTH_SCHEME_JWT) {
+            //validate scopes if auth scheme is not equal to apikey.
+            if (authScheme is string && authScheme != AUTH_SCHEME_API_KEY) {
                 printDebug(KEY_AUTHZ_FILTER, "Auth scheme was resolved as : " + authScheme);
                 //Start a new child span for the span.
                 int | error | () balSpan = startSpan(BALLERINA_AUTHZ_FILTER);

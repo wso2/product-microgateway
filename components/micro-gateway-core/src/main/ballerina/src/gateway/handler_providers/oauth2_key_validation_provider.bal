@@ -219,6 +219,27 @@ public type OAuth2KeyValidationProvider object {
 
     }
 
+    public function setScopesToPrincipalComponent(xml responseXml) {
+            string[] scopes = [];
+            int index = 0;
+            // Iterate through scopes.
+            foreach xml|string scope in responseXml/<apim:scopes>/* {
+                if (scope is xml) {
+                    //Add scopes into a string array.
+                    scopes[index] = scope.toString();
+                    index = index + 1;
+                } else {
+                    string errorMessage = "Error occurred while adding scopes to the principal component: Expected xml found string";
+                    printDebug(KEY_OAUTH_PROVIDER, errorMessage);
+                }
+            }
+            if (scopes.length() != 0) {
+                // Set the scopes to the principal component.
+                runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+                invocationContext.principal.scopes = scopes;
+            }
+        }
+
     public function invokeKeyValidation(APIRequestMetaDataDto apiRequestMetaDataDto) returns @tainted [boolean,
  APIKeyValidationDto] {
         APIKeyValidationDto apiKeyValidationDto = {};
@@ -232,6 +253,8 @@ public type OAuth2KeyValidationProvider object {
         if (keyValidationResponseXML is xml) {
             printTrace(KEY_OAUTH_PROVIDER, "key Validation json " + keyValidationResponseXML.toString());
             xml keyValidationInfoXML = keyValidationResponseXML/<soapenv:Body>/<xsd:validateKeyResponse>/<xsd:'return>;
+            // Set the scopes in the key validation result to the principal component.
+            self.setScopesToPrincipalComponent(keyValidationInfoXML);
             string authorizeValue = (keyValidationInfoXML/<apim:authorized>/*).toString();
             boolean auth = stringutils:toBoolean(authorizeValue);
             printDebug(KEY_OAUTH_PROVIDER, "Authorized value from key validation service: " + auth.toString());

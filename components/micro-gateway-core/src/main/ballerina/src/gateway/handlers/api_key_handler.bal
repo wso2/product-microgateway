@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/runtime;
 import ballerina/stringutils;
 
 # Representation of the api key validating handler
@@ -77,18 +76,6 @@ public type APIKeyHandler object {
         printDebug(KEY_AUTHN_FILTER, "credentials: " + credentials);
         var authenticationResult = self.apiKeyProvider.authenticate(<@untainted>credentials);
         if (authenticationResult is boolean) {
-            if(authenticationResult) {
-                runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-                string resourceName = invocationContext.attributes[http:RESOURCE_NAME].toString();
-                http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
-                if (httpResourceConfig is http:HttpResourceConfig) {
-                    // we are explicitly setting the scopes to principal, because api key auth mechanism should not
-                    //enforce the concept of scopes. But ballerina auth module calls the authorization filter
-                    //irrespective of the handler type. Hence we need to explicitly skip scope validation
-                    //for the api key handler
-                    setResourceScopesToPrincipal(httpResourceConfig, invocationContext, credentials);
-                }
-            }
             return authenticationResult;
         } else {
             return prepareAuthenticationError("Failed to authenticate with api key handler.", authenticationResult);
