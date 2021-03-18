@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsServiceReference
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
@@ -83,7 +84,8 @@ public class AnalyticsFilter {
             AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
             // If the APIName is not available, the event should not be published.
             // 404 errors are not logged due to this.
-            if (provider.getFaultType() == FaultCategory.OTHER) {
+            if (provider.getEventCategory() == EventCategory.FAULT
+                    && provider.getFaultType() == FaultCategory.OTHER) {
                 continue;
             }
             GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
@@ -125,8 +127,8 @@ public class AnalyticsFilter {
                 AnalyticsUtils.setDefaultIfNull(authContext.getSubscriber()));
 
         requestContext.addMetadataToMap(MetadataConstants.CORRELATION_ID_KEY, requestContext.getRequestID());
-        // TODO: (VirajSalaka) Move this out of this method as these remain static
-        requestContext.addMetadataToMap(MetadataConstants.REGION_KEY, AnalyticsUtils.setDefaultIfNull(null));
+        requestContext.addMetadataToMap(MetadataConstants.REGION_KEY,
+                ConfigHolder.getInstance().getEnvVarConfig().getEnforcerRegionId());
 
         // As in the matched API, only the resources under the matched resource template are selected.
         requestContext.addMetadataToMap(MetadataConstants.API_RESOURCE_TEMPLATE_KEY,
