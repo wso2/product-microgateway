@@ -52,7 +52,7 @@ spec:
               name: logconfig-toml-vol
             - mountPath: /home/wso2/lib/dropins
               name: dropins-vol
-          image: wso2/mg-enforcer:4.0.0-m8-SNAPSHOT
+          image: wso2/mg-enforcer:4.0.0-m10-SNAPSHOT
           imagePullPolicy: Always
           env:
             - name: ENFORCER_PRIVATE_KEY_PATH
@@ -71,6 +71,8 @@ spec:
               value: "Production and Sandbox"
             - name: XDS_MAX_MSG_SIZE
               value: "4194304"
+            - name: XDS_MAX_RETRIES
+              value: "3"
             - name: JAVA_OPTS
               value: ""
             - name: apim_admin_pwd

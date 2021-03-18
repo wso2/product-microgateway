@@ -221,9 +221,8 @@
   skipSSLVerification=true
   # Message broker connection URL of the control plane
   [controlPlane.eventHub.jmsConnectionParameters]
-    eventListeningEndpoints = ["amqp://admin:admin@apim:5672?retries='5'&connectdelay='30000'"]
-
-  [controlPlane.analytics]
-      enabled = false
-      authURL = "https://analytics-event-auth.st.choreo.dev/auth/v1"
-      authToken = ""
+    eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
+    [controlPlane.analytics]
+          enabled = false
+          authURL = "https://analytics-event-auth.st.choreo.dev/auth/v1"
+          authToken = ""

@@ -19,6 +19,7 @@
 package org.wso2.micro.gateway.enforcer.config;
 
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.micro.gateway.enforcer.constants.Constants;
 
 /**
  * Holds and returns the configuration values retrieved from the environment variables.
@@ -33,6 +34,7 @@ public class EnvVarConfig {
     private static final String ENFORCER_LABEL = "ENFORCER_LABEL";
     private static final String ENFORCER_REGION_ID = "ENFORCER_REGION";
     public static final String XDS_MAX_MSG_SIZE = "XDS_MAX_MSG_SIZE";
+    public static final String XDS_MAX_RETRIES = "XDS_MAX_RETRIES";
 
     // Since the container is running in linux container, path separator is not needed.
     private static final String DEFAULT_TRUSTED_CA_CERTS_PATH = "/home/wso2/security/truststore";
@@ -44,6 +46,7 @@ public class EnvVarConfig {
     private static final String DEFAULT_ADAPTER_XDS_PORT = "18000";
     private static final String DEFAULT_ENFORCER_LABEL = "enforcer";
     public static final String DEFAULT_XDS_MAX_MSG_SIZE = "4194304";
+    public static final String DEFAULT_XDS_MAX_RETRIES = Integer.toString(Constants.MAX_XDS_RETRIES);
 
     private final String trustedAdapterCertsPath;
     private final String enforcerPrivateKeyPath;
@@ -56,6 +59,7 @@ public class EnvVarConfig {
     // is updated.
     private final String enforcerRegionId;
     private final String xdsMaxMsgSize;
+    private final String xdsMaxRetries;
 
     public EnvVarConfig() {
         trustedAdapterCertsPath = retrieveEnvVarOrDefault(TRUSTED_CA_CERTS_PATH,
@@ -70,6 +74,7 @@ public class EnvVarConfig {
         adapterXdsPort = retrieveEnvVarOrDefault(ADAPTER_XDS_PORT, DEFAULT_ADAPTER_XDS_PORT);
         xdsMaxMsgSize = retrieveEnvVarOrDefault(XDS_MAX_MSG_SIZE, DEFAULT_XDS_MAX_MSG_SIZE);
         enforcerRegionId = retrieveEnvVarOrDefault(ENFORCER_REGION_ID, DEFAULT_ENFORCER_REGION_ID);
+        xdsMaxRetries = retrieveEnvVarOrDefault(XDS_MAX_RETRIES, DEFAULT_XDS_MAX_RETRIES);
     }
 
     private String retrieveEnvVarOrDefault(String variable, String defaultValue) {
@@ -111,7 +116,12 @@ public class EnvVarConfig {
         return xdsMaxMsgSize;
     }
 
+
     public String getEnforcerRegionId() {
         return enforcerRegionId;
+    }
+
+    public String getXdsMaxRetries() {
+        return xdsMaxRetries;
     }
 }
