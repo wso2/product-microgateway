@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package envoyconf
+package envoyconf_test
 
 import (
 	"io/ioutil"
@@ -25,8 +25,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/micro-gw/config"
-
-	//envoy "github.com/wso2/micro-gw/internal/oasparser/envoyconf"
+	envoy "github.com/wso2/micro-gw/internal/oasparser/envoyconf"
 	"github.com/wso2/micro-gw/internal/oasparser/operator"
 )
 
@@ -68,8 +67,7 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
-	//routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil)
-	routes, clusters, _ := CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil)
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil)
 
 	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
 	// As the first cluster is always related to API level cluster
@@ -122,8 +120,7 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
 	mgwSwagger := operator.GetMgwSwaggerWebSocket(apiJsn)
-	//routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil)
-	routes, clusters, _ := CreateRoutesWithClusters(mgwSwagger, nil)
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil)
 
 	if strings.HasSuffix(apiYamlFilePath, "api.yaml") {
 		assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
@@ -273,9 +270,7 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
 	mgwSwagger := operator.GetMgwSwaggerWebSocket(apiJsn)
 	//routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil)
-	routes, clusters, _ := CreateRoutesWithClusters(mgwSwagger, nil)
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil)
 	t.Log(routes)
 	t.Log(clusters)
 }
-
-// func TestCreateCluster()
