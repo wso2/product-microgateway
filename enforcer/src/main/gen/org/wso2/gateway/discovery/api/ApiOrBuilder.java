@@ -186,14 +186,39 @@ public interface ApiOrBuilder extends
       java.lang.String key);
 
   /**
-   * <code>string apiLifeCycleStatus = 11;</code>
-   * @return The apiLifeCycleStatus.
+   * <code>string apiLifeCycleState = 11;</code>
+   * @return The apiLifeCycleState.
    */
-  java.lang.String getApiLifeCycleStatus();
+  java.lang.String getApiLifeCycleState();
   /**
-   * <code>string apiLifeCycleStatus = 11;</code>
-   * @return The bytes for apiLifeCycleStatus.
+   * <code>string apiLifeCycleState = 11;</code>
+   * @return The bytes for apiLifeCycleState.
    */
   com.google.protobuf.ByteString
-      getApiLifeCycleStatusBytes();
+      getApiLifeCycleStateBytes();
+
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @return A list containing the securityScheme.
+   */
+  java.util.List<java.lang.String>
+      getSecuritySchemeList();
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @return The count of securityScheme.
+   */
+  int getSecuritySchemeCount();
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @param index The index of the element to return.
+   * @return The securityScheme at the given index.
+   */
+  java.lang.String getSecurityScheme(int index);
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the securityScheme at the given index.
+   */
+  com.google.protobuf.ByteString
+      getSecuritySchemeBytes(int index);
 }

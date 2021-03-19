@@ -15,8 +15,6 @@
  */
 package org.wso2.micro.gateway.enforcer.security;
 
-import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
-
 /**
  * AuthenticationResponse object contains the authentication status of the request when it passed
  * through an authenticator.
@@ -25,22 +23,16 @@ public class AuthenticationResponse {
     private boolean authenticated;
     private boolean mandatoryAuthentication;
     private boolean continueToNextAuthenticator;
-    private APISecurityException exception;
 
     public AuthenticationResponse(boolean authenticated, boolean mandatoryAuthentication,
-                                  boolean continueToNextAuthenticator, APISecurityException exception) {
+                                  boolean continueToNextAuthenticator) {
         this.authenticated = authenticated;
         this.mandatoryAuthentication = mandatoryAuthentication;
         this.continueToNextAuthenticator = continueToNextAuthenticator;
-        this.exception = exception;
     }
 
     public boolean isAuthenticated() {
         return authenticated;
-    }
-
-    public APISecurityException getException() {
-        return exception;
     }
 
     public boolean isMandatoryAuthentication() {

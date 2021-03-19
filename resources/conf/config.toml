@@ -70,7 +70,7 @@
 [[enforcer.jwtTokenConfig]]
   name="Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
-  certificateAlias = "gateway_certificate_alias"
+  certificateAlias = ""
   # URL of the JWKs endpoint
   jwksURL = ""
   # Validate subscribed APIs

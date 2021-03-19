@@ -30,6 +30,7 @@ import org.wso2.micro.gateway.enforcer.security.jwt.JWTAuthenticator;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -45,31 +46,65 @@ public class AuthFilter implements Filter {
 
     private void initializeAuthenticators(APIConfig apiConfig) {
         //TODO: Check security schema and add relevant authenticators.
-        if (APIConstants.PUBLISHED_LIFE_CYCLE_STATUS.equals(apiConfig.getApiLifeCycleState())) {
+        boolean isOAuthProtected = true;
+        boolean isMutualSSLProtected = false;
+        boolean isBasicAuthProtected = false;
+        boolean isApiKeyProtected = false;
+        boolean isMutualSSLMandatory = false;
+        boolean isOAuthBasicAuthMandatory = false;
+
+        // Set security conditions
+        if (apiConfig.getSecuritySchemas() == null) {
+            isOAuthProtected = true;
+        } else {
+            for (String apiSecurityLevel : apiConfig.getSecuritySchemas()) {
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                    isOAuthProtected = true;
+                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                    isMutualSSLProtected = true;
+                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_BASIC_AUTH)) {
+                    isBasicAuthProtected = true;
+                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
+                    isMutualSSLMandatory = true;
+                } else if (apiSecurityLevel.trim().
+                        equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
+                    isOAuthBasicAuthMandatory = true;
+                } else if (apiSecurityLevel.trim().equalsIgnoreCase((APIConstants.API_SECURITY_API_KEY))) {
+                    isApiKeyProtected = true;
+                }
+            }
+        }
+
+        // TODO: Set authenticators for isMutualSSLProtected, isBasicAuthProtected, isApiKeyProtected
+        if (isOAuthProtected) {
             Authenticator jwtAuthenticator = new JWTAuthenticator();
             authenticators.add(jwtAuthenticator);
         }
-        Authenticator internalAPIKeyAuthenticator = new
-                InternalAPIKeyAuthenticator(APIConstants.JwtTokenConstants.INTERNAL_KEY);
-        authenticators.add(internalAPIKeyAuthenticator);
+        Authenticator authenticator = new InternalAPIKeyAuthenticator(APIConstants.JwtTokenConstants.INTERNAL_KEY);
+        authenticators.add(authenticator);
+        authenticators.sort(new Comparator<Authenticator>() {
+            @Override
+            public int compare(Authenticator o1, Authenticator o2) {
+                return (o1.getPriority() - o2.getPriority());
+            }
+        });
     }
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
+        boolean canAuthenticated = false;
         for (Authenticator authenticator : authenticators) {
             if (authenticator.canAuthenticate(requestContext)) {
-                AuthenticationResponse authenticate = authenticate(authenticator, requestContext);
-                if (authenticate.isAuthenticated()) {
+                canAuthenticated = true;
+                AuthenticationResponse authenticateResponse = authenticate(authenticator, requestContext);
+                if (authenticateResponse.isAuthenticated() && !authenticateResponse.isContinueToNextAuthenticator()) {
                     return true;
-                }
-
-                if (authenticate.getException() != null) {
-                    FilterUtils.setErrorToContext(requestContext, authenticate.getException());
-                    return false;
                 }
             }
         }
-        FilterUtils.setUnauthenticatedErrorToContext(requestContext);
+        if (!canAuthenticated) {
+            FilterUtils.setUnauthenticatedErrorToContext(requestContext);
+        }
         return false;
     }
 
@@ -79,15 +114,13 @@ public class AuthFilter implements Filter {
             if (authenticate.isAuthenticated()) {
                 updateClusterHeaderAndCheckEnv(requestContext, authenticate);
                 return new AuthenticationResponse(true, false,
-                        false, null);
+                        false);
             }
         } catch (APISecurityException e) {
             //TODO: (VirajSalaka) provide the error code properly based on exception (401, 403, 429 etc)
-            return new AuthenticationResponse(false, false,
-                    true, e);
+            FilterUtils.setErrorToContext(requestContext, e);
         }
-        return new AuthenticationResponse(false, false, true,
-                null);
+        return new AuthenticationResponse(false, false, true);
     }
 
 

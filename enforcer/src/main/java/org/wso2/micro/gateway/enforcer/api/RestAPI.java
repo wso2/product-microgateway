@@ -56,7 +56,9 @@ public class RestAPI implements API {
         String basePath = api.getBasePath();
         String name = api.getTitle();
         String version = api.getVersion();
+        List<String> securitySchemes = api.getSecuritySchemeList();
         List<ResourceConfig> resources = new ArrayList<>();
+
         for (Resource res: api.getResourcesList()) {
             // TODO: (Praminda) handle all fields of resource
             for (Operation operation : res.getMethodsList()) {
@@ -64,9 +66,10 @@ public class RestAPI implements API {
                 resources.add(resConfig);
             }
         }
-        this.apiLifeCycleState = api.getApiLifeCycleStatus();
+
+        this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).
-                apiLifeCycleState(apiLifeCycleState).build();
+                apiLifeCycleState(apiLifeCycleState).securitySchema(securitySchemes).build();
         initFilters();
         return basePath;
     }
@@ -127,7 +130,7 @@ public class RestAPI implements API {
     private void initFilters() {
         CorsFilter corsFilter = new CorsFilter();
         this.filters.add(corsFilter);
-
+        // TODO : re-vist the logic with apim prototype implemetation
         if (!APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(apiLifeCycleState)) {
             AuthFilter authFilter = new AuthFilter();
             authFilter.init(apiConfig);

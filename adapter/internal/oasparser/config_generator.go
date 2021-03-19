@@ -88,7 +88,7 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, routes []*route
 }
 
 // GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition.
-func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleStatus string) *api.Api {
+func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string) *api.Api {
 	prodUrls := []*api.Endpoint{}
 	sandUrls := []*api.Endpoint{}
 	resources := []*api.Resource{}
@@ -135,7 +135,8 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleStatus string) *api.Ap
 		ProductionUrls:    prodUrls,
 		SandboxUrls:       sandUrls,
 		Resources:         resources,
-		ApiLifeCycleState: lifeCycleStatus,
+		ApiLifeCycleState: lifeCycleState,
+		SecurityScheme:    mgwSwagger.GetSetSecurityScheme(),
 	}
 }
 

@@ -209,6 +209,7 @@ func UpdateAPI(apiContent config.APIContent) {
 		mgwSwagger = operator.GetMgwSwagger(apiContent.APIDefinition)
 		mgwSwagger.SetName(apiContent.Name)
 		mgwSwagger.SetVersion(apiContent.Version)
+		mgwSwagger.SetSecurityScheme(apiContent.SecurityScheme)
 	} else if apiContent.APIType == mgw.WS {
 		mgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
 	} else {
