@@ -72,12 +72,14 @@ func (o *GetApisOK) WriteResponse(rw http.ResponseWriter, producer runtime.Produ
 	}
 }
 
-/*GetApisDefault Unexpected error
+// GetApisUnauthorizedCode is the HTTP code returned for type GetApisUnauthorized
+const GetApisUnauthorizedCode int = 401
 
-swagger:response getApisDefault
+/*GetApisUnauthorized Unauthorized. Invalid authentication credentials.
+
+swagger:response getApisUnauthorized
 */
-type GetApisDefault struct {
-	_statusCode int
+type GetApisUnauthorized struct {
 
 	/*
 	  In: Body
@@ -85,43 +87,71 @@ type GetApisDefault struct {
 	Payload *models.Error `json:"body,omitempty"`
 }
 
-// NewGetApisDefault creates GetApisDefault with default headers values
-func NewGetApisDefault(code int) *GetApisDefault {
-	if code <= 0 {
-		code = 500
-	}
+// NewGetApisUnauthorized creates GetApisUnauthorized with default headers values
+func NewGetApisUnauthorized() *GetApisUnauthorized {
 
-	return &GetApisDefault{
-		_statusCode: code,
-	}
+	return &GetApisUnauthorized{}
 }
 
-// WithStatusCode adds the status to the get apis default response
-func (o *GetApisDefault) WithStatusCode(code int) *GetApisDefault {
-	o._statusCode = code
-	return o
-}
-
-// SetStatusCode sets the status to the get apis default response
-func (o *GetApisDefault) SetStatusCode(code int) {
-	o._statusCode = code
-}
-
-// WithPayload adds the payload to the get apis default response
-func (o *GetApisDefault) WithPayload(payload *models.Error) *GetApisDefault {
+// WithPayload adds the payload to the get apis unauthorized response
+func (o *GetApisUnauthorized) WithPayload(payload *models.Error) *GetApisUnauthorized {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the get apis default response
-func (o *GetApisDefault) SetPayload(payload *models.Error) {
+// SetPayload sets the payload to the get apis unauthorized response
+func (o *GetApisUnauthorized) SetPayload(payload *models.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetApisDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetApisUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(o._statusCode)
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetApisInternalServerErrorCode is the HTTP code returned for type GetApisInternalServerError
+const GetApisInternalServerErrorCode int = 500
+
+/*GetApisInternalServerError Internal Server Error.
+
+swagger:response getApisInternalServerError
+*/
+type GetApisInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewGetApisInternalServerError creates GetApisInternalServerError with default headers values
+func NewGetApisInternalServerError() *GetApisInternalServerError {
+
+	return &GetApisInternalServerError{}
+}
+
+// WithPayload adds the payload to the get apis internal server error response
+func (o *GetApisInternalServerError) WithPayload(payload *models.Error) *GetApisInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get apis internal server error response
+func (o *GetApisInternalServerError) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetApisInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(500)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

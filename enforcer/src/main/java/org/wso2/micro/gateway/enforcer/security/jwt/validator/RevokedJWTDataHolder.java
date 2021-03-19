@@ -20,18 +20,27 @@ package org.wso2.micro.gateway.enforcer.security.jwt.validator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.discovery.RevokedTokenDiscoveryClient;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *  Singleton which stores the revoked JWT map
+ *  Singleton which stores the revoked JWT map.
  */
 public class RevokedJWTDataHolder {
 
     private static final Logger log = LogManager.getLogger(RevokedJWTDataHolder.class);
     private static Map<String, Long> revokedJWTMap = new ConcurrentHashMap<>();
     private static RevokedJWTDataHolder instance = new RevokedJWTDataHolder();
+
+    public void init() {
+        if (ConfigHolder.getInstance().getConfig().getEventHub().isEnabled()) {
+            RevokedTokenDiscoveryClient revokedTokenDs =  RevokedTokenDiscoveryClient.getInstance();
+            revokedTokenDs.watchRevokedTokens();
+        }
+    }
 
     /**
      * Adds a given key,value pair to the revoke map.

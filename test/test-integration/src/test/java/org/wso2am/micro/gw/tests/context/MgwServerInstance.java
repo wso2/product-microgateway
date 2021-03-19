@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -28,6 +28,7 @@ import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.mockbackend.MockBackendServer;
 import org.wso2am.micro.gw.tests.util.HttpClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
+import org.wso2am.micro.gw.tests.util.TestConstant;
 import org.wso2am.micro.gw.tests.util.Utils;
 
 import java.io.File;
@@ -54,7 +55,7 @@ public class MgwServerInstance implements MgwServer {
      * @throws MicroGWTestException
      */
     public MgwServerInstance() throws IOException, MicroGWTestException {
-        this(null, false);
+        this(null, false, false);
 
     }
 
@@ -67,7 +68,19 @@ public class MgwServerInstance implements MgwServer {
      * @throws MicroGWTestException
      */
     public MgwServerInstance(String confPath) throws IOException, MicroGWTestException {
-        this(confPath, false);
+        this(confPath, false, false);
+    }
+
+    /**
+     * initialize a docker environment using docker compose.
+     *
+     * @param confPath external conf.toml path
+     *
+     * @throws IOException
+     * @throws MicroGWTestException
+     */
+    public MgwServerInstance(String confPath, boolean tlsEnabled) throws IOException, MicroGWTestException {
+        this(confPath, tlsEnabled, false);
     }
 
     /**
@@ -79,8 +92,8 @@ public class MgwServerInstance implements MgwServer {
      * @throws IOException
      * @throws MicroGWTestException
      */
-    public MgwServerInstance(String confPath, boolean tlsEnabled) throws IOException, MicroGWTestException {
-        createTmpMgwSetup();
+    public MgwServerInstance(String confPath, boolean tlsEnabled, boolean customJwtTransformerEnabled) throws IOException, MicroGWTestException {
+        createTmpMgwSetup(customJwtTransformerEnabled);
         File targetClassesDir = new File(MgwServerInstance.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());
         String mgwServerPath = targetClassesDir.getParentFile().toString() + File.separator + "server-tmp";
@@ -128,7 +141,7 @@ public class MgwServerInstance implements MgwServer {
      * @throws IOException
      * @throws MicroGWTestException
      */
-    public static void createTmpMgwSetup() throws IOException, MicroGWTestException {
+    public static void createTmpMgwSetup(boolean customJwtTransformerEnabled) throws IOException, MicroGWTestException {
         File targetClassesDir = new File(MgwServerInstance.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());
         String targetDir = targetClassesDir.getParentFile().toString();
@@ -138,6 +151,13 @@ public class MgwServerInstance implements MgwServer {
         Utils.copyDirectory(targetDir + File.separator + "micro-gwtmp" +  File.separator +
                 "wso2am-micro-gw-" + properties.getProperty("version"), targetDir +
                 File.separator + "server-tmp");
+
+        String jarLocation = System.getProperty("jwt_transformer_jar");
+        if (customJwtTransformerEnabled) {
+            Utils.copyFile(jarLocation, targetDir +
+                    File.separator + "server-tmp" + File.separator + "resources" + File.separator + "enforcer" +
+                    File.separator + "dropins" + File.separator + "jwt-transformer.jar");
+        }
     }
 
     /**

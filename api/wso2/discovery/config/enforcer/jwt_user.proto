@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package wso2.discovery.config.enforcer;
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
+option java_package = "org.wso2.gateway.discovery.config.enforcer";
+option java_outer_classname = "JWTUserProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: JWTUser]
+
+// JWT User model
+message JWTUser {
+
+    string username = 1;
+
+    string password = 2;
+}

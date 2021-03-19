@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -38,24 +38,30 @@ import (
 
 // API Controller related constants
 const (
-	openAPIDir            string = "Definitions"
-	openAPIFilename       string = "swagger."
-	apiDefinitionFilename string = "api.yaml"
-	endpointCertDir       string = "Endpoint-certificates"
-	crtExtension          string = ".crt"
-	pemExtension          string = ".pem"
-	defaultEnv            string = "Production and Sandbox" //Todo: (SuKSW) update to `default` once APIM side changes.
-	defaultVHost          string = "default"
-	apiTypeFilterKey      string = "type"
-	apiTypeYamlKey        string = "type"
+	openAPIDir                 string = "Definitions"
+	openAPIFilename            string = "swagger."
+	apiYAMLFile                string = "api.yaml"
+	apiJSONFile                string = "api.json"
+	endpointCertDir            string = "Endpoint-certificates"
+	crtExtension               string = ".crt"
+	pemExtension               string = ".pem"
+	defaultEnv                 string = "Production and Sandbox" //Todo: (SuKSW) update to `default` once APIM side changes.
+	defaultVHost               string = "default"
+	apiTypeFilterKey           string = "type"
+	apiTypeYamlKey             string = "type"
+	lifeCycleStatus            string = "lifeCycleStatus"
+	endpointImplementationType string = "endpointImplementationType"
 )
 
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
-	APIJsn        []byte
-	SwaggerJsn    []byte
-	UpstreamCerts []byte
-	APIType       string
+	APIJsn             []byte
+	SwaggerJsn         []byte // TODO: (SuKSW) change to OpenAPIJsn
+	UpstreamCerts      []byte
+	APIType            string
+	APILifeCycleStatus string
+	ProductionEndpoint string
+	SandboxEndpoint    string
 }
 
 // extractAPIProject accepts the API project as a zip file and returns the extracted content
@@ -102,7 +108,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			}
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
-		} else if strings.Contains(file.Name, apiDefinitionFilename) {
+		} else if strings.Contains(file.Name, apiYAMLFile) || strings.Contains(file.Name, apiJSONFile) {
 			loggers.LoggerAPI.Debugf("fileName : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
@@ -114,19 +120,27 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 				loggers.LoggerAPI.Errorf("Error occured converting api file to json: %v", conversionErr.Error())
 				return apiProject, conversionErr
 			}
-			apiType, err := getAPIType(apiJsn)
-			if err != nil {
-				loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
+
+			apiType, lifeCycleStatus, productionEndpoint, sandboxEndpoint, endpointImplementationType, err :=
+				extractAPIInformation(apiJsn)
+
+			if endpointImplementationType == "INLINE" {
+				errMsg := "Inline endpointImplementationType is not currently supported with WSO2 micro-gateway"
+				loggers.LoggerAPI.Infof(errMsg)
+				err = errors.New(errMsg)
 				return apiProject, err
 			}
 			apiProject.APIJsn = apiJsn
 			apiProject.APIType = apiType
+			apiProject.APILifeCycleStatus = lifeCycleStatus
+			apiProject.ProductionEndpoint = productionEndpoint
+			apiProject.SandboxEndpoint = sandboxEndpoint
 		}
 	}
 	if apiProject.APIJsn == nil {
 		// TODO : (LahiruUdayanga) Handle the default behaviour after when the APIDeployTestCase test is fixed.
 		// If no api.yaml file is included in the zip folder, return with error.
-		err := errors.New("Could not find api.yaml file")
+		err := errors.New("Could not find api.yaml or api.json")
 		loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
 		return apiProject, err
 	} else if apiProject.APIType != mgw.HTTP && apiProject.APIType != mgw.WS {
@@ -190,8 +204,12 @@ func updateAPI(name, version string, apiProject ProjectAPI, environments []strin
 	apiContent.Name = name
 	apiContent.Version = version
 	apiContent.APIType = apiProject.APIType
+	apiContent.LifeCycleStatus = apiProject.APILifeCycleStatus
 	apiContent.UpstreamCerts = apiProject.UpstreamCerts
 	apiContent.Environments = environments
+	apiContent.ProductionEndpoint = apiProject.ProductionEndpoint
+	apiContent.SandboxEndpoint = apiProject.SandboxEndpoint
+
 	if apiProject.APIType == mgw.HTTP {
 		apiContent.APIDefinition = apiProject.SwaggerJsn
 		xds.UpdateAPI(apiContent)
@@ -199,6 +217,32 @@ func updateAPI(name, version string, apiProject ProjectAPI, environments []strin
 		apiContent.APIDefinition = apiProject.APIJsn
 		xds.UpdateAPI(apiContent)
 	}
+}
+
+func extractAPIInformation(apiJsn []byte) (apiType, apiLifeCycleStatus, productionEndpoint, sandboxEndpoint,
+	apiEndpointImplementationType string, err error) {
+
+	var apiDef map[string]interface{}
+	unmarshalErr := json.Unmarshal(apiJsn, &apiDef)
+	if unmarshalErr != nil {
+		loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml %v", unmarshalErr.Error())
+		return "", "", "", "", "", unmarshalErr
+	}
+	data := apiDef["data"].(map[string]interface{})
+	apiType = strings.ToUpper(data[apiTypeYamlKey].(string))
+	apiLifeCycleStatus = strings.ToUpper(data[lifeCycleStatus].(string))
+	apiEndpointImplementationType = data[endpointImplementationType].(string)
+	endpointConfig := data["endpointConfig"].(map[string]interface{})
+
+	if endpointConfig["sandbox_endpoints"] != nil {
+		sandboxEndpoints := endpointConfig["sandbox_endpoints"].(map[string]interface{})
+		sandboxEndpoint = sandboxEndpoints["url"].(string)
+	}
+	if endpointConfig["production_endpoints"] != nil {
+		productionEndpoints := endpointConfig["production_endpoints"].(map[string]interface{})
+		productionEndpoint = productionEndpoints["url"].(string)
+	}
+	return apiType, apiLifeCycleStatus, productionEndpoint, sandboxEndpoint, apiEndpointImplementationType, nil
 }
 
 // DeleteAPI calls the DeleteAPI method in xds_server.go
@@ -230,19 +274,6 @@ func readZipFile(zf *zip.File) ([]byte, error) {
 	}
 	defer f.Close()
 	return ioutil.ReadAll(f)
-}
-
-func getAPIType(apiJsn []byte) (string, error) {
-	var apiDef map[string]interface{}
-	unmarshalErr := json.Unmarshal(apiJsn, &apiDef)
-	if unmarshalErr != nil {
-		loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml %v", unmarshalErr.Error())
-		return "", unmarshalErr
-	}
-	data := apiDef["data"].(map[string]interface{})
-	apiType := strings.ToUpper(data[apiTypeYamlKey].(string))
-
-	return apiType, nil
 }
 
 func getAPINameAndVersion(apiJsn []byte) (name string, version string, err error) {

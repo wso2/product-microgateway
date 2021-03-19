@@ -30,27 +30,33 @@ public final class ThrottlingProto {
     java.lang.String[] descriptorData = {
       "\n/wso2/discovery/config/enforcer/throttl" +
       "ing.proto\022\036wso2.discovery.config.enforce" +
-      "r\0326wso2/discovery/config/enforcer/binary" +
-      "_throttling.proto\"N\n\nThrottling\022@\n\006binar" +
-      "y\030\001 \001(\01320.wso2.discovery.config.enforcer" +
-      ".BinaryThrottlingB\217\001\n*org.wso2.gateway.d" +
-      "iscovery.config.enforcerB\017ThrottlingProt" +
-      "oP\001ZNgithub.com/envoyproxy/go-control-pl" +
-      "ane/wso2/discovery/config/enforcer;enfor" +
-      "cerb\006proto3"
+      "r\0325wso2/discovery/config/enforcer/binary" +
+      "_publisher.proto\"\273\002\n\nThrottling\022&\n\036enabl" +
+      "e_global_event_publishing\030\001 \001(\010\022 \n\030enabl" +
+      "e_header_conditions\030\002 \001(\010\022%\n\035enable_quer" +
+      "y_param_conditions\030\003 \001(\010\022#\n\033enable_jwt_c" +
+      "laim_conditions\030\004 \001(\010\022.\n&jms_connection_" +
+      "initial_context_factory\030\005 \001(\t\022#\n\033jms_con" +
+      "nection_provider_url\030\006 \001(\t\022B\n\tpublisher\030" +
+      "\007 \001(\0132/.wso2.discovery.config.enforcer.B" +
+      "inaryPublisherB\217\001\n*org.wso2.gateway.disc" +
+      "overy.config.enforcerB\017ThrottlingProtoP\001" +
+      "ZNgithub.com/envoyproxy/go-control-plane" +
+      "/wso2/discovery/config/enforcer;enforcer" +
+      "b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          org.wso2.gateway.discovery.config.enforcer.BinaryThrottlingProto.getDescriptor(),
+          org.wso2.gateway.discovery.config.enforcer.BinaryPublisherProto.getDescriptor(),
         });
     internal_static_wso2_discovery_config_enforcer_Throttling_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_wso2_discovery_config_enforcer_Throttling_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Throttling_descriptor,
-        new java.lang.String[] { "Binary", });
-    org.wso2.gateway.discovery.config.enforcer.BinaryThrottlingProto.getDescriptor();
+        new java.lang.String[] { "EnableGlobalEventPublishing", "EnableHeaderConditions", "EnableQueryParamConditions", "EnableJwtClaimConditions", "JmsConnectionInitialContextFactory", "JmsConnectionProviderUrl", "Publisher", });
+    org.wso2.gateway.discovery.config.enforcer.BinaryPublisherProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

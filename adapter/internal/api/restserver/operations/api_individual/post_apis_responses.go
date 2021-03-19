@@ -77,9 +77,7 @@ func (o *PostApisOK) WriteResponse(rw http.ResponseWriter, producer runtime.Prod
 // PostApisUnauthorizedCode is the HTTP code returned for type PostApisUnauthorized
 const PostApisUnauthorizedCode int = 401
 
-/*PostApisUnauthorized Unautherized
-Not Authorized to deploy or update.
-
+/*PostApisUnauthorized Unauthorized. Invalid authentication credentials.
 
 swagger:response postApisUnauthorized
 */

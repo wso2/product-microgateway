@@ -27,10 +27,12 @@ data:
     [adapter.server]
     host = "0.0.0.0"
     port = "9843"
+    tokenTTL = "1h"
+    tokenPrivateKeyPath = "/home/wso2/security/keystore/mg.key"
 
     [[adapter.server.users]]
     username = "admin"
-    password = "admin"
+    password = "$env{adapter_admin_pwd}"
 
     [adapter.keystore]
     certPath = "/home/wso2/security/keystore/mg.pem"
@@ -88,7 +90,7 @@ data:
     # Issuer 1
     [[enforcer.jwtTokenConfig]]
         name="Resident Key Manager"
-        issuer = "https://localhost:9443/oauth2/token"
+        issuer = "https://wso2apim:9443/oauth2/token"
         certificateAlias = "wso2carbon"
         # URL of the JWKs endpoint
         jwksURL = ""
@@ -98,10 +100,19 @@ data:
         consumerKeyClaim = "azp"
         # Certificate Filepath within enforcer
         certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+        [[enforcer.jwtTokenConfig.claimMapping]]
+            remoteClaim = "sub"
+            localClaim = "CUSTOM-CLAIM"
+
 
     [enforcer.apimCredentials]
         username="admin"
-        password="admin"
+        password="$env{apim_admin_pwd}"
+
+    [enforcer.cache]
+      enabled = true
+      maximumSize = 10000
+      expiryTime = 15
 
     [enforcer.jwtGenerator]
         enable = false
@@ -120,12 +131,12 @@ data:
     # Control plane's eventHub details
     [controlPlane.eventHub]
     enabled = false
-    serviceUrl = "https://localhost:9443/"
+    serviceUrl = "https://wso2apim:9443/"
     username="admin"
-    password="admin"
+    password="$env{cp_admin_pwd}"
     environmentLabels = ["Production and Sandbox"]
     retryInterval = 5
     skipSSLVerification=true
     # Message broker connection URL of the control plane
     [controlPlane.eventHub.jmsConnectionParameters]
-    eventListeningEndpoints = "amqp://admin:admin@localhost:5672/"
+    eventListeningEndpoints = ["amqp://admin:admin@wso2apim:5672?retries='5'&connectdelay='30000'"]

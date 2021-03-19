@@ -48,8 +48,13 @@ spec:
             - mountPath: /home/wso2/conf/log_config.toml
               subPath: log_config.toml
               name: logconfig-toml-vol
-          image: wso2/mg-adapter:4.0.0-m6
+          image: wso2/mg-adapter:4.0.0-m10-SNAPSHOT
           imagePullPolicy: Always
+          env:
+            - name: cp_admin_pwd
+              value: "admin"
+            - name: adapter_admin_pwd
+              value: "admin"
           resources:
             requests:
               memory: "250Mi"

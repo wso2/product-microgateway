@@ -18,8 +18,8 @@ package model
 
 import (
 	parser "github.com/mitchellh/mapstructure"
-	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/internal/svcdiscovery"
+	logger "github.com/wso2/micro-gw/loggers"
 )
 
 // MgwSwagger represents the object structure holding the information related to the
@@ -148,6 +148,22 @@ func (swagger *MgwSwagger) SetXWso2Extenstions() {
 	swagger.setXWso2PrdoductionEndpoint()
 	swagger.setXWso2SandboxEndpoint()
 	swagger.setXWso2Cors()
+}
+
+// SetXWso2SandboxEndpointForMgwSwagger set the MgwSwagger object with the SandboxEndpoint when
+// it is not populated by SetXWso2Extenstions
+func (swagger *MgwSwagger) SetXWso2SandboxEndpointForMgwSwagger(sandBoxURL string) {
+	var sandboxEndpoints []Endpoint
+	sandboxEndpoints = append(sandboxEndpoints, getHostandBasepathandPort(sandBoxURL))
+	swagger.sandboxUrls = sandboxEndpoints
+}
+
+// SetXWso2ProductionEndpointMgwSwagger set the MgwSwagger object with the productionEndpoint when
+// it is not populated by SetXWso2Extenstions
+func (swagger *MgwSwagger) SetXWso2ProductionEndpointMgwSwagger(productionURL string) {
+	var productionEndpoints []Endpoint
+	productionEndpoints = append(productionEndpoints, getHostandBasepathandPort(productionURL))
+	swagger.productionUrls = productionEndpoints
 }
 
 func (swagger *MgwSwagger) setXWso2PrdoductionEndpoint() {

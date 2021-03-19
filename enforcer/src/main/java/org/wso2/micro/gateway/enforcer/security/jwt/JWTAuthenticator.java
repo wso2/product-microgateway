@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -37,7 +37,7 @@ import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.common.ReferenceHolder;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.EnforcerConfig;
-import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
 import org.wso2.micro.gateway.enforcer.constants.JwtConstants;
@@ -50,10 +50,7 @@ import org.wso2.micro.gateway.enforcer.security.TokenValidationContext;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
-import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
-import java.io.IOException;
-import java.security.cert.CertificateException;
 import java.text.ParseException;
 import java.util.Base64;
 import java.util.Date;
@@ -118,15 +115,13 @@ public class JWTAuthenticator implements Authenticator {
 
         }
 
-        JWTValidationInfo validationInfo =
-                getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
+        JWTValidationInfo validationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
         if (validationInfo != null) {
             if (validationInfo.isValid()) {
-
                 // Validate subscriptions
                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
                 EnforcerConfig configuration = ConfigHolder.getInstance().getConfig();
-                TokenIssuerDto issuerDto = configuration.getIssuersMap().get(validationInfo.getIssuer());
+                ExtendedTokenIssuerDto issuerDto = configuration.getIssuersMap().get(validationInfo.getIssuer());
                   //TODO: enable subscription validation
                 if (issuerDto.isValidateSubscriptions()) {
 
@@ -159,16 +154,6 @@ public class JWTAuthenticator implements Authenticator {
                 JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().
                         getJwtConfigurationDto();
                 if (jwtConfigurationDto.isEnabled()) {
-                    try {
-                        // Set public certificate
-                        jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate());
-                        //Set private key
-                        jwtConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey());
-                    } catch (MGWException | CertificateException | IOException e) {
-                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                                APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
-                    }
                     // Set ttl
                     jwtConfigurationDto.setTtl(JWTUtil.getTTL());
 
@@ -180,8 +165,8 @@ public class JWTAuthenticator implements Authenticator {
                 }
 
                 AuthenticationContext authenticationContext = FilterUtils
-                        .generateAuthenticationContext(jwtTokenIdentifier, validationInfo, apiKeyValidationInfoDTO,
-                                endUserToken, true);
+                        .generateAuthenticationContext(requestContext, jwtTokenIdentifier, validationInfo,
+                                apiKeyValidationInfoDTO, endUserToken, true);
                 //TODO: (VirajSalaka) Place the keytype population logic properly for self contained token
                 if (claims.getClaim("keytype") != null) {
                     authenticationContext.setKeyType(claims.getClaim("keytype").toString());
@@ -205,7 +190,7 @@ public class JWTAuthenticator implements Authenticator {
 
         String endUserToken = null;
         boolean valid = false;
-        String jwtTokenCacheKey = jwtInfoDto.getApicontext().concat(":").concat(jwtInfoDto.getVersion()).concat(":")
+        String jwtTokenCacheKey = jwtInfoDto.getApiContext().concat(":").concat(jwtInfoDto.getVersion()).concat(":")
                 .concat(tokenSignature);
         JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().getJwtConfigurationDto();
         // Get the jwt generator class (Default jwt generator class)
@@ -414,10 +399,15 @@ public class JWTAuthenticator implements Authenticator {
                             + FilterUtils.getMaskedToken(jwtHeader));
                 }
                 log.error("Invalid JWT token. " + FilterUtils.getMaskedToken(jwtHeader));
-
-                jwtValidationInfo = new JWTValidationInfo();
-                jwtValidationInfo.setValidationCode(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
-                jwtValidationInfo.setValid(false);
+                if (CacheProvider.getGatewayKeyCache().getIfPresent(jti) != null) {
+                    jwtValidationInfo = (JWTValidationInfo) CacheProvider.getGatewayKeyCache().getIfPresent(jti);
+                } else {
+                    log.warn("Token retrieved from the invalid token cache. But the validation info not found "
+                            + "in the key cache for the Token: " + FilterUtils.getMaskedToken(jwtHeader));
+                    jwtValidationInfo = new JWTValidationInfo();
+                    jwtValidationInfo.setValidationCode(APISecurityConstants.API_AUTH_GENERAL_ERROR);
+                    jwtValidationInfo.setValid(false);
+                }
             }
         }
         if (jwtValidationInfo == null) {
@@ -428,10 +418,10 @@ public class JWTAuthenticator implements Authenticator {
                     // Add token to tenant token cache
                     if (jwtValidationInfo.isValid()) {
                         CacheProvider.getGatewayTokenCache().put(jti, true);
-                        CacheProvider.getGatewayKeyCache().put(jti, jwtValidationInfo);
                     } else {
                         CacheProvider.getInvalidTokenCache().put(jti, true);
                     }
+                    CacheProvider.getGatewayKeyCache().put(jti, jwtValidationInfo);
 
                 }
                 return jwtValidationInfo;

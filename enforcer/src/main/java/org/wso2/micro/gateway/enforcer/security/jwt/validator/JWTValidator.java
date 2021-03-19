@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -28,12 +28,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
-import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
-import org.wso2.micro.gateway.enforcer.security.jwt.DefaultJWTTransformer;
-import org.wso2.micro.gateway.enforcer.security.jwt.JWTTransformer;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTUtil;
 import org.wso2.micro.gateway.enforcer.security.jwt.SignedJWTInfo;
 
@@ -51,25 +52,25 @@ import java.util.Map;
  */
 public class JWTValidator {
     private static final Logger logger = LogManager.getLogger(JWTValidator.class);
-    private Map<String, TokenIssuerDto> tokenIssuers;
-    private TokenIssuerDto tokenIssuer;
+    private ExtendedTokenIssuerDto tokenIssuer;
     private JWTTransformer jwtTransformer;
     private JWKSet jwkSet;
 
     public JWTValidator() {
-        loadTokenIssuerConfiguration();
     }
 
-    public void loadTokenIssuerConfiguration() {
-        tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
-        this.jwtTransformer = new DefaultJWTTransformer();
-    }
 
     public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws MGWException {
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
+        Map<String, ExtendedTokenIssuerDto> tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
+
         if (StringUtils.isNotEmpty(issuer) && tokenIssuers.containsKey(issuer)) {
-            this.tokenIssuer = this.tokenIssuers.get(issuer);
+            this.tokenIssuer = tokenIssuers.get(issuer);
+            this.jwtTransformer = ConfigHolder.getInstance().getConfig().getJwtTransformerMap().get(issuer);
+            if (this.jwtTransformer == null) {
+                this.jwtTransformer = new DefaultJWTTransformer();
+            }
             this.jwtTransformer.loadConfiguration(tokenIssuer);
             return validateToken(signedJWTInfo);
         }
@@ -105,7 +106,7 @@ public class JWTValidator {
                 jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 return jwtValidationInfo;
             }
-        } catch (ParseException e) {
+        } catch (ParseException | JWTGeneratorException e) {
             throw new MGWException("Error while parsing JWT", e);
         }
     }
@@ -163,24 +164,23 @@ public class JWTValidator {
         return jwkSet;
     }
 
-    protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws MGWException {
+    protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.getTransformedConsumerKey(jwtClaimsSet);
     }
 
-    protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws MGWException {
+    protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.getTransformedScopes(jwtClaimsSet);
     }
 
-    protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) throws MGWException {
+    protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.transform(jwtClaimsSet);
     }
 
     private void createJWTValidationInfoFromJWT(JWTValidationInfo jwtValidationInfo, JWTClaimsSet jwtClaimsSet)
             throws ParseException {
-
         jwtValidationInfo.setIssuer(jwtClaimsSet.getIssuer());
         jwtValidationInfo.setValid(true);
         jwtValidationInfo.setClaims(jwtClaimsSet.getClaims());
@@ -193,4 +193,6 @@ public class JWTValidator {
                     .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER)));
         }
     }
+
+
 }

@@ -17,7 +17,7 @@
  */
 package org.wso2.micro.gateway.enforcer.api.config;
 
-import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +29,10 @@ public class APIConfig {
     private String name;
     private String version;
     private String basePath;
+    private String apiLifeCycleState;
 
     private List<String> securitySchemas = new ArrayList<>();
-    private String tier = APIConstants.UNLIMITED_TIER;
+    private String tier = ThrottleConstants.UNLIMITED_TIER;
     private List<ResourceConfig> resources = new ArrayList<>();
 
     /**
@@ -42,9 +43,10 @@ public class APIConfig {
         private String name;
         private String version;
         private String basePath;
+        private String apiLifeCycleState;
 
         private List<String> securitySchemas = new ArrayList<>();
-        private String tier = APIConstants.UNLIMITED_TIER;
+        private String tier = ThrottleConstants.UNLIMITED_TIER;
         private List<ResourceConfig> resources = new ArrayList<>();
 
         public Builder(String name) {
@@ -61,6 +63,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder apiLifeCycleState(String apiLifeCycleState) {
+            this.apiLifeCycleState = apiLifeCycleState;
+            return this;
+        }
+
         public Builder resources(List<ResourceConfig> resources) {
             this.resources = resources;
             return this;
@@ -71,6 +78,7 @@ public class APIConfig {
             apiConfig.name = this.name;
             apiConfig.basePath = this.basePath;
             apiConfig.version = this.version;
+            apiConfig.apiLifeCycleState = this.apiLifeCycleState;
             apiConfig.resources = this.resources;
             return apiConfig;
         }
@@ -89,6 +97,10 @@ public class APIConfig {
 
     public String getBasePath() {
         return basePath;
+    }
+
+    public String getApiLifeCycleState() {
+        return apiLifeCycleState;
     }
 
     public List<String> getSecuritySchemas() {

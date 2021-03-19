@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -19,11 +19,14 @@
 package org.wso2.micro.gateway.enforcer.config;
 
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
-import org.wso2.micro.gateway.enforcer.config.dto.TokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.JWTIssuerConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,12 +38,16 @@ public class EnforcerConfig {
 
     private AuthServiceConfigurationDto authService;
     private EventHubConfigurationDto eventHub;
-    private Map<String, TokenIssuerDto> issuersMap = new HashMap<>();
+    private Map<String, ExtendedTokenIssuerDto> issuersMap = new HashMap<>();
     private CredentialDto apimCredentials;
+    private ThrottleConfigDto throttleConfig;
     private JWTConfigurationDto jwtConfigurationDto;
     private CacheDto cacheDto;
+    private JWTIssuerConfigurationDto jwtIssuerConfigurationDto;
+    private CredentialDto[] jwtUsersCredentials;
     private String publicCertificatePath = "";
     private String privateKeyPath = "";
+    private Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -58,11 +65,11 @@ public class EnforcerConfig {
         this.eventHub = eventHub;
     }
 
-    public Map<String, TokenIssuerDto> getIssuersMap() {
+    public Map<String, ExtendedTokenIssuerDto> getIssuersMap() {
         return issuersMap;
     }
 
-    public void setIssuersMap(Map<String, TokenIssuerDto> issuersMap) {
+    public void setIssuersMap(Map<String, ExtendedTokenIssuerDto> issuersMap) {
         this.issuersMap = issuersMap;
     }
 
@@ -74,8 +81,32 @@ public class EnforcerConfig {
         this.apimCredentials = apimCredentials;
     }
 
+    public ThrottleConfigDto getThrottleConfig() {
+        return throttleConfig;
+    }
+
+    public void setThrottleConfig(ThrottleConfigDto throttleConfig) {
+        this.throttleConfig = throttleConfig;
+    }
+
     public void setJwtConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {
         this.jwtConfigurationDto = jwtConfigurationDto;
+    }
+
+    public void setJwtIssuerConfigurationDto(JWTIssuerConfigurationDto jwtIssuerConfigurationDto) {
+        this.jwtIssuerConfigurationDto = jwtIssuerConfigurationDto;
+    }
+
+    public JWTIssuerConfigurationDto getJwtIssuerConfigurationDto() {
+        return jwtIssuerConfigurationDto;
+    }
+
+    public void setJwtUsersCredentials(CredentialDto[] credentialDtos) {
+        this.jwtUsersCredentials = credentialDtos;
+    }
+
+    public CredentialDto[] getJwtUsersCredentials() {
+        return jwtUsersCredentials;
     }
 
     public JWTConfigurationDto getJwtConfigurationDto() {
@@ -105,5 +136,12 @@ public class EnforcerConfig {
     public String getPrivateKeyPath() {
         return privateKeyPath;
     }
-}
 
+    public Map<String, JWTTransformer> getJwtTransformerMap() {
+        return jwtTransformerMap;
+    }
+
+    public void setJwtTransformerMap(Map<String, JWTTransformer> jwtTransformerMap) {
+        this.jwtTransformerMap = jwtTransformerMap;
+    }
+}

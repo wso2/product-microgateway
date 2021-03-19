@@ -101,7 +101,7 @@ public class AccessTokenInfo {
     }
 
     /**
-     * Get consumer secret corresponding to the access token
+     * Get consumer secret corresponding to the access token.
      *
      * @return consumer secret
      */
@@ -110,7 +110,7 @@ public class AccessTokenInfo {
     }
 
     /**
-     * Set consumer secret corresponding to the access token
+     * Set consumer secret corresponding to the access token.
      *
      * @param consumerSecret consumer secret to set
      */

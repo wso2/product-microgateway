@@ -29,4 +29,6 @@ public class JWTConstants {
     public static final String INVALID = "invalid";
     public static final String DEFAULT_JWT_GENERATOR_CLASS_NAME = "org.wso2.carbon.apimgt.common.gateway." +
             "jwtgenerator.APIMgtGatewayJWTGeneratorImpl";
+    public static final String DEFAULT_JWT_TRANSFORMER_CLASS_NAME = "org.wso2.carbon.apimgt.common.gateway." +
+            "jwttransformer.DefaultJWTTransformer";
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -44,6 +44,9 @@ import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -72,7 +75,7 @@ public class FilterUtils {
     }
 
     /**
-     * Return a http client instance
+     * Return a http client instance.
      *
      * @param protocol - service endpoint protocol http/https
      * @return
@@ -99,7 +102,7 @@ public class FilterUtils {
     }
 
     /**
-     * Return a PoolingHttpClientConnectionManager instance
+     * Return a PoolingHttpClientConnectionManager instance.
      *
      * @param protocol- service endpoint protocol. It can be http/https
      * @return PoolManager
@@ -166,10 +169,12 @@ public class FilterUtils {
         return domain;
     }
 
-    public static AuthenticationContext generateAuthenticationContext(String jti, JWTValidationInfo jwtValidationInfo,
-            APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String endUserToken, boolean isOauth) {
+    public static AuthenticationContext generateAuthenticationContext(RequestContext requestContext, String jti,
+                                                                      JWTValidationInfo jwtValidationInfo,
+                                                                      APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
+                                                                      String endUserToken, boolean isOauth) {
 
-        AuthenticationContext authContext = new AuthenticationContext();
+        AuthenticationContext authContext = requestContext.getAuthenticationContext();
         authContext.setAuthenticated(true);
         authContext.setApiKey(jti);
         authContext.setUsername(jwtValidationInfo.getUser());
@@ -202,6 +207,43 @@ public class FilterUtils {
         return authContext;
     }
 
+    public static long ipToLong(String ipAddress) {
+
+        long result = 0;
+        String[] ipAddressInArray = ipAddress.split("\\.");
+        for (int i = 3; i >= 0; i--) {
+            long ip = Long.parseLong(ipAddressInArray[3 - i]);
+            //left shifting 24,16,8,0 and bitwise OR
+            //1. 192 << 24
+            //1. 168 << 16
+            //1. 1   << 8
+            //1. 2   << 0
+            result |= ip << (i * 8);
+
+        }
+        return result;
+    }
+
+    /**
+     * This method provides the BigInteger value for the given IP address. This supports both IPv4 and IPv6 address
+     *
+     * @param ipAddress ip address
+     * @return BigInteger value for the given ip address. returns 0 for unknown host
+     */
+    public static BigInteger ipToBigInteger(String ipAddress) {
+
+        InetAddress address;
+        try {
+            address = InetAddress.getByName(ipAddress);
+            byte[] bytes = address.getAddress();
+            return new BigInteger(1, bytes);
+        } catch (UnknownHostException e) {
+            //ignore the error and log it
+            log.error("Error while parsing host IP " + ipAddress, e);
+        }
+        return BigInteger.ZERO;
+    }
+
     public static JWTInfoDto generateJWTInfoDto(JSONObject subscribedAPI, JWTValidationInfo jwtValidationInfo,
                                                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
                                                 RequestContext requestContext) {
@@ -210,7 +252,7 @@ public class FilterUtils {
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
         String apiContext = requestContext.getMathedAPI().getAPIConfig().getBasePath();
         String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
-        jwtInfoDto.setApicontext(apiContext);
+        jwtInfoDto.setApiContext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
         constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
         return jwtInfoDto;
@@ -220,15 +262,15 @@ public class FilterUtils {
                                             APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
 
         if (apiKeyValidationInfoDTO != null) {
-            jwtInfoDto.setApplicationid(apiKeyValidationInfoDTO.getApplicationId());
-            jwtInfoDto.setApplicationname(apiKeyValidationInfoDTO.getApplicationName());
-            jwtInfoDto.setApplicationtier(apiKeyValidationInfoDTO.getApplicationTier());
-            jwtInfoDto.setKeytype(apiKeyValidationInfoDTO.getType());
+            jwtInfoDto.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
+            jwtInfoDto.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
+            jwtInfoDto.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
+            jwtInfoDto.setKeyType(apiKeyValidationInfoDTO.getType());
             jwtInfoDto.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
             jwtInfoDto.setSubscriptionTier(apiKeyValidationInfoDTO.getTier());
             jwtInfoDto.setApiName(apiKeyValidationInfoDTO.getApiName());
-            jwtInfoDto.setEndusertenantid(0);
-            jwtInfoDto.setApplicationuuid(apiKeyValidationInfoDTO.getApplicationUUID());
+            jwtInfoDto.setEndUserTenantId(0);
+            jwtInfoDto.setApplicationUUId(apiKeyValidationInfoDTO.getApplicationUUID());
             jwtInfoDto.setAppAttributes(apiKeyValidationInfoDTO.getAppAttributes());
         } else if (subscribedAPI != null) {
             // If the user is subscribed to the API
@@ -238,23 +280,22 @@ public class FilterUtils {
             String subscriptionTenantDomain =
                     subscribedAPI.getAsString(JwtConstants.SUBSCRIBER_TENANT_DOMAIN);
             jwtInfoDto.setSubscriptionTier(subscriptionTier);
-            jwtInfoDto.setEndusertenantid(0);
+            jwtInfoDto.setEndUserTenantId(0);
 
             Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
             if (claims.get(JwtConstants.APPLICATION) != null) {
                 JSONObject
                         applicationObj = (JSONObject) claims.get(JwtConstants.APPLICATION);
-                jwtInfoDto.setApplicationid(
+                jwtInfoDto.setApplicationId(
                         String.valueOf(applicationObj.getAsNumber(JwtConstants.APPLICATION_ID)));
                 jwtInfoDto
-                        .setApplicationname(applicationObj.getAsString(JwtConstants.APPLICATION_NAME));
+                        .setApplicationName(applicationObj.getAsString(JwtConstants.APPLICATION_NAME));
                 jwtInfoDto
-                        .setApplicationtier(applicationObj.getAsString(JwtConstants.APPLICATION_TIER));
+                        .setApplicationTier(applicationObj.getAsString(JwtConstants.APPLICATION_TIER));
                 jwtInfoDto.setSubscriber(applicationObj.getAsString(JwtConstants.APPLICATION_OWNER));
             }
         }
     }
-
     /**
      * Set the error code, message and description to the request context. The enforcer response will
      * retrieve this error details from the request context. Make sure to call this method and set the proper error
@@ -297,6 +338,22 @@ public class FilterUtils {
                 .getAuthenticationFailureMessage(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS));
         requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_DESCRIPTION);
+    }
+
+    /**
+     * Set the throttle error related details to the {@code RequestContext}.
+     *
+     * @param context   request context object to set the details.
+     * @param errorCode internal wso2 throttle error code.
+     * @param msg       wso2 throttle error message.
+     * @param desc      description of throttle decision.
+     */
+    public static void setThrottleErrorToContext(RequestContext context, int errorCode, String msg, String desc) {
+        context.getProperties().put(APIConstants.MessageFormat.ERROR_CODE, errorCode);
+        context.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
+                APIConstants.StatusCodes.THROTTLED.getCode());
+        context.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE, msg);
+        context.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION, desc);
     }
 
 }
