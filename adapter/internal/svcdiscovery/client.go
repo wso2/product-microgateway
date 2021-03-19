@@ -224,8 +224,6 @@ func (c ConsulClient) get(path string, dc string, nc string, tags []string) ([]U
 			ID:          r.Service.ID,
 			InMesh:      false,
 		}
-
-		logger.LoggerSvcDiscovery.Println("Result: ", res)
 		if contains(r.Service.Tags, tags) {
 			out = append(out, res)
 			//tags haven't been defined
