@@ -31,6 +31,7 @@ import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.util.ThrottleEventConstants;
 import org.wso2.micro.gateway.enforcer.throttle.dto.Decision;
+import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.net.Inet4Address;
@@ -96,6 +97,8 @@ public class ThrottleFilter implements Filter {
             String resourceThrottleKey = getResourceThrottleKey(reqContext, apiContext, apiVersion);
             String subTier = authContext.getTier();
             String appTier = authContext.getApplicationTier();
+            String authorizedUser = authContext.getUsername();
+            String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
             boolean isApiLevelTriggered = false;
 
             if (!StringUtils.isEmpty(apiTier) && !ThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(apiTier)) {
@@ -122,6 +125,7 @@ public class ThrottleFilter implements Filter {
                 return true;
             }
 
+            // Checking subscription level throttling
             String subThrottleKey = getSubscriptionThrottleKey(appId, apiContext, apiVersion);
             Decision subDecision = checkSubscriptionLevelThrottled(subThrottleKey, subTier);
             if (subDecision.isThrottled()) {
@@ -139,6 +143,7 @@ public class ThrottleFilter implements Filter {
                 log.debug("Proceeding since stopOnQuotaReach is false");
             }
 
+            // Checking Application level throttling
             String appThrottleKey = appId + ':' + authContext.getUsername();
             Decision appDecision = checkAppLevelThrottled(appThrottleKey, appTier);
             if (appDecision.isThrottled()) {
@@ -150,6 +155,22 @@ public class ThrottleFilter implements Filter {
                 reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                         ThrottleConstants.THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
                 ThrottleUtils.setRetryAfterHeader(reqContext, appDecision.getResetAt());
+                return true;
+            }
+
+            // Checking Custom policy throttling
+            String appTenant = authContext.getSubscriberTenantDomain();
+            String clientIp = reqContext.getClientIp();
+            Decision customDecision = dataHolder.isThrottledByCustomPolicy(authorizedUser, resourceThrottleKey,
+                    apiContext, apiVersion, appTenant, apiTenantDomain, appId, clientIp);
+            if (customDecision.isThrottled()) {
+                log.debug("Setting custom policy throttle out response");
+                FilterUtils.setThrottleErrorToContext(reqContext,
+                        ThrottleConstants.CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE,
+                        ThrottleConstants.THROTTLE_OUT_MESSAGE,
+                        ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
+                reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
+                        ThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED);
                 return true;
             }
         }
@@ -228,6 +249,7 @@ public class ThrottleFilter implements Filter {
         throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_TIER, authenticationContext.getTier());
         throttleEvent.put(ThrottleEventConstants.RESOURCE_KEY, resourceKey);
         throttleEvent.put(ThrottleEventConstants.RESOURCE_TIER, resourceTier);
+        // TODO: (Praminda) should publish with tenant domain?
         throttleEvent.put(ThrottleEventConstants.USER_ID, authenticationContext.getUsername());
         throttleEvent.put(ThrottleEventConstants.API_CONTEXT, basePath);
         throttleEvent.put(ThrottleEventConstants.API_VERSION, apiVersion);
