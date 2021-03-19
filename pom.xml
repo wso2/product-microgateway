@@ -313,7 +313,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <andes.client.version>3.3.12</andes.client.version>
-        <apim.common.version>9.0.0</apim.common.version>
+        <apim.common.version>9.0.70</apim.common.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
         <commons.io.version>2.6</commons.io.version>

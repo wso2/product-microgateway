@@ -252,7 +252,7 @@ public class FilterUtils {
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
         String apiContext = requestContext.getMathedAPI().getAPIConfig().getBasePath();
         String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
-        jwtInfoDto.setApicontext(apiContext);
+        jwtInfoDto.setApiContext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
         constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
         return jwtInfoDto;
@@ -262,15 +262,15 @@ public class FilterUtils {
                                             APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
 
         if (apiKeyValidationInfoDTO != null) {
-            jwtInfoDto.setApplicationid(apiKeyValidationInfoDTO.getApplicationId());
-            jwtInfoDto.setApplicationname(apiKeyValidationInfoDTO.getApplicationName());
-            jwtInfoDto.setApplicationtier(apiKeyValidationInfoDTO.getApplicationTier());
-            jwtInfoDto.setKeytype(apiKeyValidationInfoDTO.getType());
+            jwtInfoDto.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
+            jwtInfoDto.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
+            jwtInfoDto.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
+            jwtInfoDto.setKeyType(apiKeyValidationInfoDTO.getType());
             jwtInfoDto.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
             jwtInfoDto.setSubscriptionTier(apiKeyValidationInfoDTO.getTier());
             jwtInfoDto.setApiName(apiKeyValidationInfoDTO.getApiName());
-            jwtInfoDto.setEndusertenantid(0);
-            jwtInfoDto.setApplicationuuid(apiKeyValidationInfoDTO.getApplicationUUID());
+            jwtInfoDto.setEndUserTenantId(0);
+            jwtInfoDto.setApplicationUUId(apiKeyValidationInfoDTO.getApplicationUUID());
             jwtInfoDto.setAppAttributes(apiKeyValidationInfoDTO.getAppAttributes());
         } else if (subscribedAPI != null) {
             // If the user is subscribed to the API
@@ -280,18 +280,18 @@ public class FilterUtils {
             String subscriptionTenantDomain =
                     subscribedAPI.getAsString(JwtConstants.SUBSCRIBER_TENANT_DOMAIN);
             jwtInfoDto.setSubscriptionTier(subscriptionTier);
-            jwtInfoDto.setEndusertenantid(0);
+            jwtInfoDto.setEndUserTenantId(0);
 
             Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
             if (claims.get(JwtConstants.APPLICATION) != null) {
                 JSONObject
                         applicationObj = (JSONObject) claims.get(JwtConstants.APPLICATION);
-                jwtInfoDto.setApplicationid(
+                jwtInfoDto.setApplicationId(
                         String.valueOf(applicationObj.getAsNumber(JwtConstants.APPLICATION_ID)));
                 jwtInfoDto
-                        .setApplicationname(applicationObj.getAsString(JwtConstants.APPLICATION_NAME));
+                        .setApplicationName(applicationObj.getAsString(JwtConstants.APPLICATION_NAME));
                 jwtInfoDto
-                        .setApplicationtier(applicationObj.getAsString(JwtConstants.APPLICATION_TIER));
+                        .setApplicationTier(applicationObj.getAsString(JwtConstants.APPLICATION_TIER));
                 jwtInfoDto.setSubscriber(applicationObj.getAsString(JwtConstants.APPLICATION_OWNER));
             }
         }
