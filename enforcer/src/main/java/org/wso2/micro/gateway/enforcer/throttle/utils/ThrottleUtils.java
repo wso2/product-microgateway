@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.enforcer.throttle;
+package org.wso2.micro.gateway.enforcer.throttle.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -25,6 +25,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
+import org.wso2.micro.gateway.enforcer.throttle.PolicyConstants;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleCondition;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;

@@ -42,6 +42,7 @@ public class ThrottleConstants {
     public static final String THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED = "RESOURCE_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED = "SUBSCRIPTION_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED = "APPLICATION_LIMIT_EXCEEDED";
+    public static final String CUSTOM_POLICY_LIMIT_EXCEED = "CUSTOM_POLICY_LIMIT_EXCEED";
     public static final String POLICY_NOT_FOUND_DESCRIPTION = "POLICY ENFORCEMENT ERROR";
 
     public static final String UNLIMITED_TIER = "Unlimited";
@@ -49,6 +50,7 @@ public class ThrottleConstants {
     public static final String IPV6 = "ipv6";
     public static final String BLOCKING_CONDITION_KEY = "blockingCondition";
     public static final String POLICY_TEMPLATE_KEY = "keyTemplateValue";
+    public static final String TEMPLATE_KEY_STATE = "keyTemplateState";
     public static final String THROTTLE_KEY = "throttleKey";
     public static final String THROTTLE_OUT_REASON = "THROTTLED_OUT_REASON";
     public static final String TOPIC_THROTTLE_DATA = "throttleData";
@@ -56,6 +58,7 @@ public class ThrottleConstants {
     public static final String EXPIRY_TIMESTAMP = "expiryTimeStamp";
     public static final String EVALUATED_CONDITIONS = "evaluatedConditions";
     public static final String TRUE = "true";
+    public static final String ADD = "add";
     public static final String DEFAULT_THROTTLE_CONDITION = "default";
     public static final String HEADER_RETRY_AFTER = "Retry-After";
     public static final String GMT = "GMT";
