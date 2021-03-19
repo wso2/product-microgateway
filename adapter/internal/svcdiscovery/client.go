@@ -468,6 +468,7 @@ func (c ConsulClient) getServiceCertAndKey(signal chan bool) {
 	//log.Println(result.CertPEM, errUnmarshal)
 	//log.Println(result.PrivateKeyPEM, errUnmarshal)
 	index, errStrConv := strconv.Atoi(response.Header.Get(consulIndexHeader))
+	log.Println("Got Leaf index: ", index)
 	if errStrConv != nil {
 		return
 	}

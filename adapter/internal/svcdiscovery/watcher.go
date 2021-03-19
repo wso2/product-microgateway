@@ -68,12 +68,15 @@ var (
 	//ClusterConsulDoneChanMap Cluster Name -> doneChan for respective go routine
 	//when the cluster is removed we can stop the respective go routine to stop polling and release resources
 	ClusterConsulDoneChanMap map[string]chan bool
+	//ServiceConsulMeshMap Service -> whether in Mesh
+	ServiceConsulMeshMap map[string]bool
 )
 
 func init() {
 	ClusterConsulKeyMap = make(map[string]string)
 	ClusterConsulResultMap = make(map[string][]Upstream)
 	ClusterConsulDoneChanMap = make(map[string]chan bool)
+	ServiceConsulMeshMap = make(map[string]bool)
 	//Read config
 	conf, errConfLoad = config.ReadConfigs()
 	IsServiceDiscoveryEnabled = conf.Adapter.Consul.Enable

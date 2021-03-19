@@ -73,6 +73,10 @@ func updateCertsForServiceMesh() {
 		for _, cluster := range clusters { //iterate through all clusters
 			if cluster.TransportSocket != nil { //has transport socket==> https/wss
 				logger.LoggerXds.Println(svcdiscovery.MeshCACert, "svcdiscovery.MeshCACert")
+				if svcdiscovery.MeshCACert == "" || svcdiscovery.MeshServiceKey == "" || svcdiscovery.MeshServiceCert == "" {
+					logger.LoggerXds.Warn("Mesh certs are empty")
+					return
+				}
 				upstreamTLSContext := svcdiscovery.CreateUpstreamTLSContext(svcdiscovery.MeshCACert,
 					svcdiscovery.MeshServiceKey, svcdiscovery.MeshServiceCert)
 				marshalledTLSContext, err := ptypes.MarshalAny(upstreamTLSContext)
@@ -108,6 +112,13 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 		case queryResultsList, ok := <-resultChan:
 			if !ok { //ok==false --> result chan is closed
 				logger.LoggerXds.Debugln("closed the result channel for cluster name: ", clusterName)
+				return
+			}
+			//stop the process when API is deleted
+			if _, clusterExists := openAPIClustersMap[apiKey]; !clusterExists {
+				logger.LoggerXds.Debugln("Consul service discovery stopped for cluster ", clusterName, " in API ",
+					apiKey, " upon API removal")
+				stopConsulDiscoveryFor(clusterName)
 				return
 			}
 			logger.LoggerXds.Println("Results: ", queryResultsList)
@@ -182,4 +193,6 @@ func stopConsulDiscoveryFor(clusterName string) {
 	if doneChan, available := svcdiscovery.ClusterConsulDoneChanMap[clusterName]; available {
 		close(doneChan)
 	}
+	delete(svcdiscovery.ClusterConsulResultMap, clusterName)
+	delete(svcdiscovery.ClusterConsulKeyMap, clusterName)
 }
