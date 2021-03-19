@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	logger "github.com/wso2/micro-gw/loggers"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -213,7 +212,6 @@ func (c ConsulClient) get(path string, dc string, nc string, tags []string) ([]U
 		return []Upstream{}, errRead
 	}
 	errUnmarshal := json.Unmarshal(body, &results)
-	//logger.LoggerSvcDiscovery.Println("Result HTTP: ",results, "error unmarshal ",errUnmarshal)
 	var out []Upstream
 	for _, r := range results {
 		address := r.Service.Address
@@ -304,12 +302,9 @@ func (c ConsulClient) getUpstreams(query Query, resultChan chan []Upstream) {
 	} else {
 		if MeshEnabled { //replace the actual address and port with proxy's address and port
 			resMesh, errGet := c.getMeshUpstreams(query.ServiceName)
-			//log.Println("Got mesh upstreams", resMesh)
 			if errGet == nil {
-				//result = append(result, res...)
 				for i := range resMesh {
 					for j := range result {
-						//log.Println(resMesh[i].ID,result[j].ID)
 						if resMesh[i].ID == result[j].ID {
 							result[j].Address = resMesh[i].Address
 							result[j].ServicePort = resMesh[i].ServicePort
@@ -320,7 +315,6 @@ func (c ConsulClient) getUpstreams(query Query, resultChan chan []Upstream) {
 				logger.LoggerSvcDiscovery.Error("Service registry unreachable ", errGet)
 			}
 		}
-		log.Println("Get upstreams")
 		resultChan <- result
 	}
 }
@@ -359,7 +353,6 @@ func (c ConsulClient) Poll(query Query, doneChan <-chan bool) <-chan []Upstream 
 				logger.LoggerSvcDiscovery.Info("Consul stopped polling for query :", query)
 				return
 			case <-intervalChan:
-				//logger.LoggerSvcDiscovery.Println("Ticker....")
 				c.getUpstreams(query, resultChan)
 			}
 		}
@@ -369,7 +362,6 @@ func (c ConsulClient) Poll(query Query, doneChan <-chan bool) <-chan []Upstream 
 }
 
 func updateCAIndex(currentIndex int) bool {
-	log.Println("CA ", currentIndex, caReqLastIndex)
 	if caReqLastIndex > currentIndex {
 		caReqLastIndex = 0 //Reset in case Consul's indexing messes up
 		return true
@@ -381,7 +373,6 @@ func updateCAIndex(currentIndex int) bool {
 }
 
 func updateLeafIndex(currentIndex int) bool {
-	log.Println("Leaf ", currentIndex, leafReqLastIndex)
 	if leafReqLastIndex > currentIndex {
 		leafReqLastIndex = 0 //Reset
 		return true
@@ -393,7 +384,7 @@ func updateLeafIndex(currentIndex int) bool {
 }
 
 func (c ConsulClient) getCertRequest(url string, lastIndex int) (*http.Response, error) {
-	log.Println(url)
+
 	request, errReq := http.NewRequest(get, url, nil)
 	if errReq != nil {
 		return nil, errReq
@@ -402,7 +393,6 @@ func (c ConsulClient) getCertRequest(url string, lastIndex int) (*http.Response,
 	//send the last index to activate long polling from serverside
 	query := request.URL.Query()
 	query.Add(indexQueryParam, strconv.Itoa(lastIndex))
-	log.Println("Requesting index: ", lastIndex)
 	query.Add(waitQueryParam, strconv.Itoa(longPollInterval/60)+"s")
 	request.URL.RawQuery = query.Encode()
 	response, errClient := c.longPollClient.Do(request)
@@ -417,21 +407,22 @@ func (c ConsulClient) getRootCert(signal chan bool) {
 	result := RootCertResp{}
 	response, errReq := c.getCertRequest(url, caReqLastIndex)
 	if errReq != nil {
-		log.Println(errReq)
+		logger.LoggerSvcDiscovery.Error("Error getting root cert: ", errReq)
 		return
 	}
 	body, errRead := ioutil.ReadAll(response.Body)
 	if errRead != nil {
-		log.Println(errRead)
+		logger.LoggerSvcDiscovery.Error("Error reading root cert request: ", errRead)
 		return
 	}
 	errUnmarshal := json.Unmarshal(body, &result)
 	if errUnmarshal != nil {
+		logger.LoggerSvcDiscovery.Error("Malformed response: ", errUnmarshal)
 		return
 	}
-	//log.Println("Root cert: ", result.Roots[0].RootCert, errUnmarshal)
 	index, errStrConv := strconv.Atoi(response.Header.Get(consulIndexHeader))
 	if errStrConv != nil {
+		logger.LoggerSvcDiscovery.Error("Index header not sent")
 		return
 	}
 	shouldUpdateRouter := updateCAIndex(index)
@@ -442,7 +433,6 @@ func (c ConsulClient) getRootCert(signal chan bool) {
 				MeshCACert = root.RootCert
 			}
 		}
-		//log.Println(MeshCACert)
 		signal <- true
 	}
 }
@@ -452,24 +442,23 @@ func (c ConsulClient) getServiceCertAndKey(signal chan bool) {
 	result := ServiceCertResp{}
 	response, errReq := c.getCertRequest(url, leafReqLastIndex)
 	if errReq != nil {
-		log.Println(errReq)
+		logger.LoggerSvcDiscovery.Error("Error getting leaf cert and key: ", errReq)
 		return
 	}
 	body, errRead := ioutil.ReadAll(response.Body)
 	if errRead != nil {
-		log.Println(errRead)
+		logger.LoggerSvcDiscovery.Error("Error reading leaf cert and key: ", errRead)
 		return
 	}
 	errUnmarshal := json.Unmarshal(body, &result)
 	if errUnmarshal != nil {
+		logger.LoggerSvcDiscovery.Error("Malformed response: ", errUnmarshal)
 		return
 	}
-	log.Println("Client certs")
-	//log.Println(result.CertPEM, errUnmarshal)
-	//log.Println(result.PrivateKeyPEM, errUnmarshal)
+
 	index, errStrConv := strconv.Atoi(response.Header.Get(consulIndexHeader))
-	log.Println("Got Leaf index: ", index)
 	if errStrConv != nil {
+		logger.LoggerSvcDiscovery.Error("Index header not sent")
 		return
 	}
 	shouldUpdateRouter := updateLeafIndex(index)

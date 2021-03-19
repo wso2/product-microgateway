@@ -23,7 +23,6 @@ import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"strings"
 	"sync"
@@ -128,7 +127,6 @@ func readCerts() error {
 //InitConsul loads certs and initialize a ConsulClient
 //lazy loading
 func InitConsul() {
-	log.Print("Init consul")
 	onceConfigLoad.Do(func() {
 		conf, errConfLoad = config.ReadConfigs()
 		if errConfLoad != nil {

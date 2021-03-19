@@ -22,7 +22,6 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/micro-gw/internal/svcdiscovery"
 	logger "github.com/wso2/micro-gw/loggers"
-	"log"
 	"reflect"
 	"sync"
 )
@@ -46,7 +45,6 @@ func startConsulServiceDiscovery() {
 					}
 				})
 				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
-				log.Println("consul syntax: ", consulSyntax)
 				if errConSyn != nil {
 					logger.LoggerXds.Error("consul syntax parse error ", errConSyn)
 					return
@@ -72,7 +70,6 @@ func updateCertsForServiceMesh() {
 	for _, clusters := range openAPIClustersMap {
 		for _, cluster := range clusters { //iterate through all clusters
 			if cluster.TransportSocket != nil { //has transport socket==> https/wss
-				logger.LoggerXds.Println(svcdiscovery.MeshCACert, "svcdiscovery.MeshCACert")
 				if svcdiscovery.MeshCACert == "" || svcdiscovery.MeshServiceKey == "" || svcdiscovery.MeshServiceCert == "" {
 					logger.LoggerXds.Warn("Mesh certs are empty")
 					return
@@ -103,7 +100,6 @@ func updateCertsForServiceMesh() {
 }
 
 func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKey string) {
-	logger.LoggerXds.Println("get service discovery data")
 	doneChan := make(chan bool)
 	svcdiscovery.ClusterConsulDoneChanMap[clusterName] = doneChan
 	resultChan := svcdiscovery.ConsulClientInstance.Poll(query, doneChan)
@@ -121,7 +117,6 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 				stopConsulDiscoveryFor(clusterName)
 				return
 			}
-			logger.LoggerXds.Println("Results: ", queryResultsList)
 			val := svcdiscovery.GetClusterConsulResultMap(clusterName)
 			if val != nil {
 				if !reflect.DeepEqual(val, queryResultsList) {
