@@ -131,10 +131,7 @@ public class RestAPI implements API {
             if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
-            // TODO: (VirajSalaka) Finalize.  (In preflight request and normal OPTIONS call)
-            // TODO: (VirajSalaka) Remove redundant check
-            // to avoid publishing OPTIONS call.
-            if (analyticsEnabled && responseObject.getStatusCode() != 204) {
+            if (analyticsEnabled) {
                 AnalyticsFilter.getInstance().handleFailureRequest(requestContext);
                 responseObject.setMetaDataMap(new HashMap<>(0));
             }

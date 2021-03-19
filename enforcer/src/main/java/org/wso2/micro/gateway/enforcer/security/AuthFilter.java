@@ -50,7 +50,6 @@ public class AuthFilter implements Filter {
             for (Authenticator authenticator : authenticators) {
                 if (authenticator.canAuthenticate(requestContext)) {
                     AuthenticationContext authenticate = authenticator.authenticate(requestContext);
-                    // TODO: (VirajSalaka) handle the scenario where subscription is disabled, and auth fault
                     requestContext.setAuthenticationContext(authenticate);
                     if (authenticate.isAuthenticated()) {
                         updateClusterHeaderAndCheckEnv(requestContext, authenticate);

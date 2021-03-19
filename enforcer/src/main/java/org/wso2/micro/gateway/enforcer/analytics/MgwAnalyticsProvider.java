@@ -167,7 +167,6 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         MetaInfo metaInfo = new MetaInfo();
         metaInfo.setCorrelationId(getValueAsString(fieldsMap, MetadataConstants.CORRELATION_ID_KEY));
         metaInfo.setGatewayType(AnalyticsConstants.GATEWAY_LABEL);
-        // TODO: (VirajSalaka) Env variable or config
         metaInfo.setRegionId(getValueAsString(fieldsMap, MetadataConstants.REGION_KEY));
         return metaInfo;
     }

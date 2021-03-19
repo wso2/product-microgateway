@@ -37,6 +37,7 @@ import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.AnalyticsConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
+import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 /**
  * Generate FaultDTO for the errors generated from enforcer.
@@ -94,8 +95,10 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
         api.setApiType(requestContext.getMathedAPI().getAPIConfig().getApiType());
         api.setApiName(requestContext.getMathedAPI().getAPIConfig().getName());
         api.setApiVersion(requestContext.getMathedAPI().getAPIConfig().getVersion());
-        // TODO: (VirajSalaka) pick tenant from subscription detail straightaway.
-        api.setApiCreatorTenantDomain("carbon.super");
+        api.setApiCreatorTenantDomain(FilterUtils.getTenantDomainFromRequestURL(
+                requestContext.getMathedAPI().getAPIConfig().getBasePath()) == null
+                ? APIConstants.SUPER_TENANT_DOMAIN_NAME
+                : requestContext.getMathedAPI().getAPIConfig().getBasePath());
         return api;
     }
 

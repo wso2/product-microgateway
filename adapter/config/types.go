@@ -123,7 +123,6 @@ type Config struct {
 		}
 	}
 
-	// TODO: (VirajSalaka) Analytics config is shared among adapter and enforcer
 	Enforcer struct {
 		JwtTokenConfig  []jwtTokenConfig
 		EventHub        eventHub

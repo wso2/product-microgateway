@@ -51,7 +51,6 @@ public class CorsFilter implements Filter {
                 return true;
             }
             StringBuilder allowedMethodsBuilder = new StringBuilder(HttpConstants.OPTIONS);
-            // TODO: (VirajSalaka) API Resources are iterated twice
             for (ResourceConfig resourceConfig : requestContext.getMathedAPI().getAPIConfig().getResources()) {
                 if (!resourceConfig.getPath().equals(requestContext.getRequestPathTemplate())) {
                     continue;
