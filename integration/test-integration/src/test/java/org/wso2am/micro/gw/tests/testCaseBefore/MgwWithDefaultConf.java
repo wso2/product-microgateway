@@ -18,11 +18,12 @@
 package org.wso2am.micro.gw.tests.testCaseBefore;
 
 import org.testng.Assert;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
-import org.wso2am.micro.gw.tests.util.ApiDeployment;
+import org.wso2am.micro.gw.tests.context.MicroGWTestException;
 import org.wso2am.micro.gw.tests.util.ApictlUtils;
 
 import java.io.IOException;
@@ -30,33 +31,26 @@ import java.util.concurrent.TimeUnit;
 
 public class MgwWithDefaultConf extends BaseTestCase {
 
-    @BeforeSuite
-    public void checkVersion() throws IOException {
-        String versionByApictl = ApictlUtils.getVersion();
-        String versionFromPomXml = System.getProperty("apictl_version");
-        Assert.assertEquals(versionByApictl, versionFromPomXml,"Expected apictl version is not downloaded");
-    }
-
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
         super.startMGW();
-        String apiZipfile = ApictlUtils.createProjectZip( "openAPI.yaml",
-                "petstore", null);
-        String prodSandApiZipfile = ApictlUtils.createProjectZip( "prod_and_sand_openAPI.yaml",
-                "prod_and_sand_petstore", null);
-        String prodOnlyApiZipfile = ApictlUtils.createProjectZip( "prod_openAPI.yaml",
-                "prod_petstore", null);
-        String sandOnlyApiZipfile = ApictlUtils.createProjectZip( "sand_openAPI.yaml",
-                "sand_petstore", null);
-        ApiDeployment.deployAPI(apiZipfile);
-        ApiDeployment.deployAPI(prodSandApiZipfile);
-        ApiDeployment.deployAPI(prodOnlyApiZipfile);
-        ApiDeployment.deployAPI(sandOnlyApiZipfile);
+        ApictlUtils.createProject( "prod_and_sand_openAPI.yaml", "prod_and_sand_petstore", null);
+        ApictlUtils.createProject( "prod_openAPI.yaml", "prod_petstore", null);
+        ApictlUtils.createProject( "sand_openAPI.yaml", "sand_petstore", null);
+
+        ApictlUtils.addEnv("test");
+        ApictlUtils.login("test");
+
+        ApictlUtils.deployAPI("petstore", "test");
+        ApictlUtils.deployAPI("prod_and_sand_petstore", "test");
+        ApictlUtils.deployAPI("prod_petstore", "test");
+        ApictlUtils.deployAPI("sand_petstore", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 
     @AfterTest(description = "stop the setup")
-    void stop() {
+    void stop() throws MicroGWTestException {
         super.stopMGW();
+        ApictlUtils.removeEnv("test");
     }
 }

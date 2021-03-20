@@ -12,25 +12,24 @@ public class APiDeployViaApictlTestCase {
 
     @BeforeClass
     public void createApiProject() throws IOException, MicroGWTestException {
-        ApictlUtils.createProject( "deploy_openAPI.yaml",
-                "apictl_petstore", null);
-        ApictlUtils.addEnv("test");
+        ApictlUtils.createProject( "deploy_openAPI.yaml", "apictl_petstore", null);
+        ApictlUtils.addEnv("apictl_test");
     }
 
     @Test
     public void deployAPI() throws MicroGWTestException {
-        ApictlUtils.login("test");
-        ApictlUtils.deployAPI("apictl_petstore", "test");
+        ApictlUtils.login("apictl_test");
+        ApictlUtils.deployAPI("apictl_petstore", "apictl_test");
     }
 
     @Test
     public void undeployAPI() throws MicroGWTestException {
-        ApictlUtils.undeployAPI("SwaggerPetstoreDeploy", "1.0.5", "test");
+        ApictlUtils.undeployAPI("SwaggerPetstoreDeploy", "1.0.5", "apictl_test");
     }
 
     @AfterClass
     public void logoutAndRemoveEnv() throws MicroGWTestException {
-        ApictlUtils.logout("test");
-        ApictlUtils.removeEnv("test");
+        ApictlUtils.logout("apictl_test");
+        ApictlUtils.removeEnv("apictl_test");
     }
 }

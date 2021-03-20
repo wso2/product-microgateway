@@ -28,8 +28,9 @@
         <listener class-name="org.wso2am.micro.gw.tests.listener.TestNGListener"/>
     </listeners>
 
-    <test name="micro-gw-with-no-apis" preserve-order="true" parallel="false">
+    <test name="micro-gw-with-default-config" preserve-order="true" parallel="false">
         <classes>
+            <class name="org.wso2am.micro.gw.tests.testCaseBefore.BeforeTestSuite"/>
             <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithDefaultConf"/>
             <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployViaRestTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployViaApictlTestCase"/>
@@ -38,16 +39,16 @@
             <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.ScopeTest"/>
         </classes>
     </test>
-    <test name="micro-gw-with-backend-tls-and-api" preserve-order="true" parallel="false">
+    <test name="micro-gw-with-backend-tls" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithBackendTlsAndAPI"/>
+            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithBackendTls"/>
             <class name="org.wso2am.micro.gw.tests.testCases.backendtls.BackendTLSTestcase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.security.CorsTestCase"/>
         </classes>
     </test>
-    <test name="micro-gw-with-jwt-config-and-api" preserve-order="true" parallel="false">
+    <test name="micro-gw-with-jwt-config" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithJwtConfigAndAPI"/>
+            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithJwtConfig"/>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.JwtGeneratorTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.JwtTransformerTestCase"/>
         </classes>

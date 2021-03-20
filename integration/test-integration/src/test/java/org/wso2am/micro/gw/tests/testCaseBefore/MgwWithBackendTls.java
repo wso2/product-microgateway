@@ -20,29 +20,31 @@ package org.wso2am.micro.gw.tests.testCaseBefore;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
-import org.wso2am.micro.gw.tests.util.ApiDeployment;
+import org.wso2am.micro.gw.tests.context.MicroGWTestException;
 import org.wso2am.micro.gw.tests.util.ApictlUtils;
-import org.wso2am.micro.gw.tests.util.TestConstant;
 
-import java.io.File;
 import java.util.concurrent.TimeUnit;
 
-public class MgwWithJwtConfigAndAPI extends BaseTestCase {
+public class MgwWithBackendTls extends BaseTestCase {
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        String confPath = TestConstant.BASE_RESOURCE_DIR
-                + File.separator + "jwtGenerator" + File.separator + "config.toml";
-        super.startMGW(confPath);
+        super.startMGW(null, true);
 
-        String apiZipfile = ApictlUtils.createProjectZip( "openAPI.yaml",
-                "petstore", null);
-        ApiDeployment.deployAPI(apiZipfile);
+        ApictlUtils.createProject("backend_tsl_openAPI.yaml", "backend_tsl_petstore", "backend_tls.crt");
+        ApictlUtils.createProject( "cors_openAPI.yaml", "cors_petstore", null);
+
+        ApictlUtils.addEnv("test");
+        ApictlUtils.login("test");
+
+        ApictlUtils.deployAPI("backend_tsl_petstore", "test");
+        ApictlUtils.deployAPI("cors_petstore", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 
     @AfterTest(description = "stop the setup")
-    void stop() {
+    void stop() throws MicroGWTestException {
         super.stopMGW();
+        ApictlUtils.removeEnv("test");
     }
 }

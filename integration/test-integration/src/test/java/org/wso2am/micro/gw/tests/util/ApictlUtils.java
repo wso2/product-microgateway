@@ -12,45 +12,114 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 public class ApictlUtils {
+    public static final String APICTL = "apictl";
+    public static final String VERSION = "version";
+    public static final String INIT = "init";
+    public static final String MG = "mg";
+    public static final String ADD = "add";
+    public static final String ENV = "env";
+    public static final String REMOVE = "remove";
+    public static final String LOGIN = "login";
+    public static final String LOGOUT = "logout";
+    public static final String DEPLOY = "deploy";
+    public static final String UNDEPLOY = "undeploy";
+    public static final String API = "api";
+
+    public static final String OAS_FLAG = "--oas";
+    public static final String ADAPTER_FLAG = "--adapter";
+    public static final String USER_FLAG = "-u";
+    public static final String PASSWORD_FLAG = "-p";
+    public static final String FILE_FLAG = "-f";
+    public static final String ENV_FLAG = "-e";
+    public static final String OVERRIDE_FLAG = "-o";
+    public static final String NAME_FLAG = "-n";
+    public static final String VERSION_FLAG = "-v";
+
+    public static final String PROJECT_INITIALIZED_RESPONSE = "Project initialized";
+    public static final String ALREADY_EXISTS_RESPONSE = " already exists";
+    public static final String SUCCESSFUL_ADD_ENV_RESPONSE = "Successfully added environment";
+    public static final String SUCCESSFUL_LOGIN_RESPONSE = "Successfully logged in";
+    public static final String SUCCESSFUL_LOGOUT_RESPONSE = "Logged out";
+    public static final String SUCCESSFULLY_DEPLOYED_RESPONSE = "Successfully deployed";
+    public static final String SUCCESSFULLY_UNDEPLOYED_RESPONSE = "API undeployed";
+
+    public static final String ENDPOINT_CERTIFICATES = "Endpoint-certificates";
+
+    public static final String APICTL_PATH = File.separator + "apictl" + File.separator;
+    public static final String API_PROJECTS_PATH = File.separator + "apiProjects" + File.separator;
+    public static final String OPENAPIS_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
+            "openAPIs" + File.separator;
+    public static final String BACKEND_CERTS_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
+            "certs" + File.separator;
+    public static final String MGW_ADAPTER_CERTS_PATH = File.separator + "server-tmp" + File.separator +
+            "resources" + File.separator + "adapter" + File.separator + "security" + File.separator +
+            "truststore" + File.separator;
+    public static final String APICTL_CERTS_PATH = File.separator +
+            ".wso2apictl" + File.separator + "certs" + File.separator;
+
     private static final Logger log = LoggerFactory.getLogger(ApictlUtils.class);
 
+    /**
+     * Get the version of apictl downloaded for integration tests
+     *
+     * @return downloaded version of apictl
+     * @throws IOException if the runtime fails to execute the apictl command
+     */
     public static String getVersion() throws IOException {
-        String[] cmdArray = new String[]{"version"};
+        String[] cmdArray = new String[]{VERSION};
         String[] argsArray = {""};
         String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
         return responseLines[0].split(" ")[1];
     }
 
+    /**
+     * Create and zip an API project - To be used when directly creating an API via
+     * the microgateway REST API rather than via the apictl deploy command
+     *
+     * @param openApiFile openAPI file to create the API project from
+     * @param apiProjectName expected name of the project that gets created
+     * @param backendCert name of the backend cert file that should be included in the
+     *                    Endpoint-certificates folder in the API project
+     * @return absolute path of the zipped API project
+     * @throws IOException if the runtime fails to execute the apictl command
+     * @throws MicroGWTestException if apictl was unable to create the project
+     */
     public static String createProjectZip(String openApiFile, String apiProjectName, String backendCert) throws IOException, MicroGWTestException {
-        String apiProjectPath = "";
         try {
-            apiProjectPath = createProject(openApiFile, apiProjectName, backendCert);
+            createProject(openApiFile, apiProjectName, backendCert);
         } catch (MicroGWTestException e) {
-            if (e.getMessage().equals("Project already exists")) {
-                return Utils.getTargetDirPath() + TestConstant.API_PROJECTS_PATH
-                        + File.separator + apiProjectName + ".zip";
+            if (!e.getMessage().equals("Project already exists")) {
+                throw e;
             }
-            throw e;
         }
+        String apiProjectPath = Utils.getTargetDirPath() + API_PROJECTS_PATH + apiProjectName;
         ZipDir.createZipFile(apiProjectPath);
-        log.info("Created API project zip" + apiProjectName);
+        log.info("Created API project zip " + apiProjectName);
         return apiProjectPath + ".zip";
     }
 
-    public static String createProject(String openApiFile, String apiProjectName, String backendCert) throws IOException, MicroGWTestException {
+    /**
+     * Create an API project - To be used before deploying an API via the apictl deploy command
+     *
+     * @param openApiFile openAPI file to create the API project from
+     * @param apiProjectName expected name of the project that gets created
+     * @param backendCert name of the backend cert file that should be included in the
+     *                    Endpoint-certificates folder in the API project
+     * @throws IOException if the runtime fails to execute the apictl command
+     * @throws MicroGWTestException if apictl was unable to create the project
+     */
+    public static void createProject(String openApiFile, String apiProjectName, String backendCert) throws IOException, MicroGWTestException {
         String targetDir = Utils.getTargetDirPath();
-        String openApiFilePath = targetDir + TestConstant.TEST_RESOURCES_PATH
-                + File.separator + "openAPIs" + File.separator + openApiFile;
-        String projectPathToCreate = targetDir + TestConstant.API_PROJECTS_PATH
-                + File.separator + apiProjectName;
+        String openApiFilePath = targetDir + OPENAPIS_PATH + openApiFile;
+        String projectPathToCreate = targetDir + API_PROJECTS_PATH + apiProjectName;
 
         //apictl init <projectPath> --oas <openApiFilePath>
-        String[] cmdArray = { "init" };
-        String[] argsArray = { projectPathToCreate, "--oas", openApiFilePath };
+        String[] cmdArray = { INIT };
+        String[] argsArray = { projectPathToCreate, OAS_FLAG, openApiFilePath };
         String[] responseLines = runApictlCommand(cmdArray, argsArray, 2);
 
-        if (!"Project initialized".equals(responseLines[1].trim())) {
-            if ((projectPathToCreate + " already exists").equals(responseLines[0].trim())) {
+        if (!PROJECT_INITIALIZED_RESPONSE.equals(responseLines[1].trim())) {
+            if ((projectPathToCreate + ALREADY_EXISTS_RESPONSE).equals(responseLines[0].trim())) {
                 throw new MicroGWTestException("Project already exists");
             } else {
                 throw new MicroGWTestException("Could not initialize API project: " + apiProjectName
@@ -59,49 +128,70 @@ public class ApictlUtils {
         }
         if (backendCert != null) {
             Utils.copyFile(
-                    targetDir + TestConstant.TEST_RESOURCES_PATH + File.separator +
-                            "certs" + File.separator + backendCert,
-                    projectPathToCreate + File.separator + TestConstant.ENDPOINT_CERTIFICATES
+                    targetDir + BACKEND_CERTS_PATH + backendCert,
+                    projectPathToCreate + File.separator + ENDPOINT_CERTIFICATES
                             + File.separator + "backend.crt");
         }
-        log.info("Created API project" + apiProjectName);
-        return projectPathToCreate;
+        log.info("Created API project " + apiProjectName);
     }
 
+    /**
+     * Add a microgateway adapter env to apictl
+     *
+     * @param mgwEnv name of the apictl mgw env
+     * @throws MicroGWTestException if apictl was unable to add the env
+     */
     public static void addEnv(String mgwEnv) throws MicroGWTestException {
-        String[] cmdArray = { "mg", "add", "env" };
-        String[] argsArray = { mgwEnv, "--adapter", "https://localhost:9843" };
+        String[] cmdArray = { MG, ADD, ENV };
+        String[] argsArray = { mgwEnv, ADAPTER_FLAG, "https://localhost:9843" };
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
-            if (!responseLines[0].startsWith("Successfully added environment")) {
+            if (!responseLines[0].startsWith(SUCCESSFUL_ADD_ENV_RESPONSE)) {
                 throw new MicroGWTestException("Unable to add microgateway adapter env to apictl");
             }
         } catch (IOException e) {
             throw new MicroGWTestException("Unable to add microgateway adapter env to apictl", e);
         }
+        // copy mgw public cert to apictl's cert folder
+        //${home_dir}/security/truststore/mg.pem -> ${home_dir}/.wso2apictl/certs/mg.pem
+        String targetDir = Utils.getTargetDirPath();
+        Utils.copyFile(
+                targetDir + MGW_ADAPTER_CERTS_PATH + "mg.pem",
+                System.getProperty("user.home") + APICTL_CERTS_PATH + "mg.pem");
         log.info("Added apictl microgateway environment: " + mgwEnv);
     }
 
+    /**
+     * Remove a microgateway adapter env from apictl
+     *
+     * @param mgwEnv name of the apictl mgw env
+     * @throws MicroGWTestException if apictl was unable to remove the env
+     */
     public static void removeEnv(String mgwEnv) throws MicroGWTestException {
-        String[] cmdArray = { "mg", "remove", "env" };
+        String[] cmdArray = { MG, REMOVE, ENV };
         String[] argsArray = { mgwEnv };
         try {
-            String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
-            if (!responseLines[0].startsWith("Successfully removed environment")) {
-                throw new MicroGWTestException("Unable to remove microgateway adapter env from apictl");
-            }
+            log.info("Removing apictl microgateway environment: " + mgwEnv);
+            runApictlCommand(cmdArray, argsArray, 1);
         } catch (IOException e) {
             throw new MicroGWTestException("Unable to remove microgateway adapter env from apictl", e);
         }
-        log.info("Removed apictl microgateway environment: " + mgwEnv);
     }
 
+    /**
+     * Login to a microgateway adapter env in apictl
+     *
+     * @param mgwEnv name of the apictl mgw env
+     * @throws MicroGWTestException if apictl was unable to login to the env
+     *                  i.e. if apictl was unable to get an access token from mgw and save
+     */
     public static void login(String mgwEnv) throws MicroGWTestException {
-        String[] cmdArray = { "mg", "login" };
-        String[] argsArray = { mgwEnv, "-u", "admin", "-p", "admin", "-k" };
+        String[] cmdArray = { MG, LOGIN };
+        String[] argsArray = { mgwEnv, USER_FLAG, "admin", PASSWORD_FLAG, "admin" };
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 2);
-            if (!responseLines[1].startsWith("Successfully logged in")) {
+
+            if (!responseLines[1].startsWith(SUCCESSFUL_LOGIN_RESPONSE)) {
                 throw new MicroGWTestException("Unable to login to apictl microgateway adapter env:"
                         + mgwEnv);
             }
@@ -112,12 +202,18 @@ public class ApictlUtils {
         log.info("Logged into apictl microgateway environment: " + mgwEnv);
     }
 
+    /**
+     * Logout from a microgateway adapter env in apictl
+     *
+     * @param mgwEnv name of the apictl mgw env
+     * @throws MicroGWTestException if apictl was unable to logout from the env
+     */
     public static void logout(String mgwEnv) throws MicroGWTestException {
-        String[] cmdArray = { "mg", "logout" };
+        String[] cmdArray = { MG, LOGOUT };
         String[] argsArray = { mgwEnv };
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
-            if (!responseLines[0].startsWith("Logged out")) {
+            if (!responseLines[0].startsWith(SUCCESSFUL_LOGOUT_RESPONSE)) {
                 throw new MicroGWTestException("Unable to logout from apictl microgateway adapter env: "
                     + mgwEnv);
             }
@@ -128,16 +224,22 @@ public class ApictlUtils {
         log.info("Logged out from apictl microgateway environment: " + mgwEnv);
     }
 
+    /**
+     * Deploy an API via apictl
+     *
+     * @param apiProjectName API project that represents the API
+     * @param mgwEnv name of the apictl mgw env
+     * @throws MicroGWTestException if apictl was unable to deploy the API to the apictl mgw env
+     */
     public static void deployAPI(String apiProjectName, String mgwEnv) throws MicroGWTestException {
         String targetDir = Utils.getTargetDirPath();
-        String projectPath = targetDir + TestConstant.API_PROJECTS_PATH
-                + File.separator + apiProjectName;
+        String projectPath = targetDir + API_PROJECTS_PATH + apiProjectName;
 
-        String[] cmdArray = { "mg", "deploy", "api" };
-        String[] argsArray = { "-f", projectPath, "-e", mgwEnv, "-o", "-k" };
+        String[] cmdArray = { MG, DEPLOY, API };
+        String[] argsArray = { FILE_FLAG, projectPath, ENV_FLAG, mgwEnv, OVERRIDE_FLAG };
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
-            if (!responseLines[0].startsWith("Successfully deployed")) {
+            if (!responseLines[0].startsWith(SUCCESSFULLY_DEPLOYED_RESPONSE)) {
                 throw new MicroGWTestException("Unable to deploy API project: "
                         + apiProjectName + " to microgateway adapter environment: " + mgwEnv);
             }
@@ -148,12 +250,20 @@ public class ApictlUtils {
         log.info("Deployed API project: " + apiProjectName + " to microgateway adapter environment: " + mgwEnv);
     }
 
+    /**
+     * Undeploy an API via apictl
+     *
+     * @param apiName name of the API (in api.yaml) to undeploy
+     * @param apiVersion version of the API
+     * @param mgwEnv name of the apictl mgw env the API was deployed
+     * @throws MicroGWTestException if apictl was unable to undeploy the API
+     */
     public static void undeployAPI(String apiName, String apiVersion, String mgwEnv) throws MicroGWTestException {
-        String[] cmdArray = { "mg", "undeploy", "api" };
-        String[] argsArray = { "-n", apiName, "-v", apiVersion, "-e", mgwEnv, "-k" };
+        String[] cmdArray = { MG, UNDEPLOY, API };
+        String[] argsArray = { NAME_FLAG, apiName, VERSION_FLAG, apiVersion, ENV_FLAG, mgwEnv };
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
-            if (!responseLines[0].startsWith("API undeployed")) {
+            if (!responseLines[0].startsWith(SUCCESSFULLY_UNDEPLOYED_RESPONSE)) {
                 throw new MicroGWTestException("Unable to undeploy API: "
                         + apiName + " from microgateway adapter environment: " + mgwEnv);
             }
@@ -164,11 +274,20 @@ public class ApictlUtils {
         log.info("Deployed API project: " + apiName + " to microgateway adapter environment: " + mgwEnv);
     }
 
+    /**
+     * Execute an apictl command
+     *
+     * @param cmdArray array of apictl microgateway commands
+     * @param argsArray array of arguments for the command
+     * @param numberOfLinesToRead number of lines to read from the command line response
+     * @return String array consisting the lines that usually gets printed after executing
+     *          the apictl command
+     * @throws IOException if the runtime fails to execute the apictl command
+     */
     private static String[] runApictlCommand(String[] cmdArray, String[] argsArray,
                                              int numberOfLinesToRead) throws IOException {
         String targetDir = Utils.getTargetDirPath();
-
-        String[] apictl = { targetDir + TestConstant.APICTL_PATH };
+        String[] apictl = { targetDir + APICTL_PATH + APICTL };
         String[] cmdWithArgs = concat(apictl, cmdArray, argsArray);
         String[] responseLines = new String[numberOfLinesToRead];
 
@@ -184,6 +303,12 @@ public class ApictlUtils {
         return responseLines;
     }
 
+    /**
+     * Merge any number of String arrays to one new String array
+     *
+     * @param stringArrays String arrays to merge
+     * @return a new array with the content of the given arrays
+     */
     public static String[] concat(String[]... stringArrays) {
         return Arrays.stream(stringArrays).flatMap(Stream::of).toArray(String[]::new);
     }
