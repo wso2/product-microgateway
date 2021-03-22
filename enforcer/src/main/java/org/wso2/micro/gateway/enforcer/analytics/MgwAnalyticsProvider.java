@@ -74,7 +74,7 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     public boolean isAnonymous() {
         Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
         // If appId is unknown, subscriptions are not validated.
-        return !AnalyticsConstants.DEFAULT_FOR_UNASSIGNED
+        return AnalyticsConstants.DEFAULT_FOR_UNASSIGNED
                 .equals(getValueAsString(fieldsMap, MetadataConstants.APP_ID_KEY));
     }
 
@@ -150,9 +150,12 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
         // This method is only invoked for success requests. Hence all these properties will be available.
         // The cors requests responded from the CORS filter are already filtered at this point.
         AccessLogCommon properties = logEntry.getCommonProperties();
-        long backendResponseRecvTimestamp = properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000;
-        long backendRequestSendTimestamp = properties.getTimeToFirstUpstreamTxByte().getNanos() / 1000000;
-        long downstreamResponseSendTimestamp = properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000;
+        long backendResponseRecvTimestamp = properties.getTimeToLastUpstreamRxByte().getSeconds() * 1000 +
+                properties.getTimeToLastUpstreamRxByte().getNanos() / 1000000;
+        long backendRequestSendTimestamp = properties.getTimeToFirstUpstreamTxByte().getSeconds() * 1000 +
+                properties.getTimeToFirstUpstreamTxByte().getNanos() / 1000000;
+        long downstreamResponseSendTimestamp = properties.getTimeToLastDownstreamTxByte().getSeconds() * 1000 +
+                properties.getTimeToLastDownstreamTxByte().getNanos() / 1000000;
         Latencies latencies = new Latencies();
         latencies.setBackendLatency(backendResponseRecvTimestamp - backendRequestSendTimestamp);
         latencies.setResponseLatency(downstreamResponseSendTimestamp);
@@ -184,7 +187,8 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public long getRequestTime() {
-        return logEntry.getCommonProperties().getStartTime().getSeconds() * 1000;
+        return logEntry.getCommonProperties().getStartTime().getSeconds() * 1000 +
+                logEntry.getCommonProperties().getStartTime().getNanos() / 1000000;
     }
 
     @Override
