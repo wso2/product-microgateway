@@ -315,4 +315,5 @@ type APIContent struct {
 	Environments       []string
 	ProductionEndpoint string
 	SandboxEndpoint    string
+	SecurityScheme     []string
 }

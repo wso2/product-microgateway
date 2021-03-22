@@ -29,7 +29,8 @@ private static final long serialVersionUID = 0L;
     sandboxUrls_ = java.util.Collections.emptyList();
     resources_ = java.util.Collections.emptyList();
     basePath_ = "";
-    apiLifeCycleStatus_ = "";
+    apiLifeCycleState_ = "";
+    securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
   }
 
   @java.lang.Override
@@ -142,7 +143,16 @@ private static final long serialVersionUID = 0L;
           case 90: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            apiLifeCycleStatus_ = s;
+            apiLifeCycleState_ = s;
+            break;
+          }
+          case 98: {
+            java.lang.String s = input.readStringRequireUtf8();
+            if (!((mutable_bitField0_ & 0x00000010) != 0)) {
+              securityScheme_ = new com.google.protobuf.LazyStringArrayList();
+              mutable_bitField0_ |= 0x00000010;
+            }
+            securityScheme_.add(s);
             break;
           }
           default: {
@@ -168,6 +178,9 @@ private static final long serialVersionUID = 0L;
       }
       if (((mutable_bitField0_ & 0x00000004) != 0)) {
         resources_ = java.util.Collections.unmodifiableList(resources_);
+      }
+      if (((mutable_bitField0_ & 0x00000010) != 0)) {
+        securityScheme_ = securityScheme_.getUnmodifiableView();
       }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
@@ -627,42 +640,77 @@ private static final long serialVersionUID = 0L;
     return map.get(key);
   }
 
-  public static final int APILIFECYCLESTATUS_FIELD_NUMBER = 11;
-  private volatile java.lang.Object apiLifeCycleStatus_;
+  public static final int APILIFECYCLESTATE_FIELD_NUMBER = 11;
+  private volatile java.lang.Object apiLifeCycleState_;
   /**
-   * <code>string apiLifeCycleStatus = 11;</code>
-   * @return The apiLifeCycleStatus.
+   * <code>string apiLifeCycleState = 11;</code>
+   * @return The apiLifeCycleState.
    */
   @java.lang.Override
-  public java.lang.String getApiLifeCycleStatus() {
-    java.lang.Object ref = apiLifeCycleStatus_;
+  public java.lang.String getApiLifeCycleState() {
+    java.lang.Object ref = apiLifeCycleState_;
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
-      apiLifeCycleStatus_ = s;
+      apiLifeCycleState_ = s;
       return s;
     }
   }
   /**
-   * <code>string apiLifeCycleStatus = 11;</code>
-   * @return The bytes for apiLifeCycleStatus.
+   * <code>string apiLifeCycleState = 11;</code>
+   * @return The bytes for apiLifeCycleState.
    */
   @java.lang.Override
   public com.google.protobuf.ByteString
-      getApiLifeCycleStatusBytes() {
-    java.lang.Object ref = apiLifeCycleStatus_;
+      getApiLifeCycleStateBytes() {
+    java.lang.Object ref = apiLifeCycleState_;
     if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
-      apiLifeCycleStatus_ = b;
+      apiLifeCycleState_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
     }
+  }
+
+  public static final int SECURITYSCHEME_FIELD_NUMBER = 12;
+  private com.google.protobuf.LazyStringList securityScheme_;
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @return A list containing the securityScheme.
+   */
+  public com.google.protobuf.ProtocolStringList
+      getSecuritySchemeList() {
+    return securityScheme_;
+  }
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @return The count of securityScheme.
+   */
+  public int getSecuritySchemeCount() {
+    return securityScheme_.size();
+  }
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @param index The index of the element to return.
+   * @return The securityScheme at the given index.
+   */
+  public java.lang.String getSecurityScheme(int index) {
+    return securityScheme_.get(index);
+  }
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the securityScheme at the given index.
+   */
+  public com.google.protobuf.ByteString
+      getSecuritySchemeBytes(int index) {
+    return securityScheme_.getByteString(index);
   }
 
   private byte memoizedIsInitialized = -1;
@@ -712,8 +760,11 @@ private static final long serialVersionUID = 0L;
         internalGetVendorExtensible(),
         VendorExtensibleDefaultEntryHolder.defaultEntry,
         10);
-    if (!getApiLifeCycleStatusBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 11, apiLifeCycleStatus_);
+    if (!getApiLifeCycleStateBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 11, apiLifeCycleState_);
+    }
+    for (int i = 0; i < securityScheme_.size(); i++) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 12, securityScheme_.getRaw(i));
     }
     unknownFields.writeTo(output);
   }
@@ -764,8 +815,16 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(10, vendorExtensible__);
     }
-    if (!getApiLifeCycleStatusBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, apiLifeCycleStatus_);
+    if (!getApiLifeCycleStateBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, apiLifeCycleState_);
+    }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < securityScheme_.size(); i++) {
+        dataSize += computeStringSizeNoTag(securityScheme_.getRaw(i));
+      }
+      size += dataSize;
+      size += 1 * getSecuritySchemeList().size();
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -802,8 +861,10 @@ private static final long serialVersionUID = 0L;
         .equals(other.getBasePath())) return false;
     if (!internalGetVendorExtensible().equals(
         other.internalGetVendorExtensible())) return false;
-    if (!getApiLifeCycleStatus()
-        .equals(other.getApiLifeCycleStatus())) return false;
+    if (!getApiLifeCycleState()
+        .equals(other.getApiLifeCycleState())) return false;
+    if (!getSecuritySchemeList()
+        .equals(other.getSecuritySchemeList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -843,8 +904,12 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + VENDOREXTENSIBLE_FIELD_NUMBER;
       hash = (53 * hash) + internalGetVendorExtensible().hashCode();
     }
-    hash = (37 * hash) + APILIFECYCLESTATUS_FIELD_NUMBER;
-    hash = (53 * hash) + getApiLifeCycleStatus().hashCode();
+    hash = (37 * hash) + APILIFECYCLESTATE_FIELD_NUMBER;
+    hash = (53 * hash) + getApiLifeCycleState().hashCode();
+    if (getSecuritySchemeCount() > 0) {
+      hash = (37 * hash) + SECURITYSCHEME_FIELD_NUMBER;
+      hash = (53 * hash) + getSecuritySchemeList().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1038,8 +1103,10 @@ private static final long serialVersionUID = 0L;
       basePath_ = "";
 
       internalGetMutableVendorExtensible().clear();
-      apiLifeCycleStatus_ = "";
+      apiLifeCycleState_ = "";
 
+      securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bitField0_ = (bitField0_ & ~0x00000010);
       return this;
     }
 
@@ -1102,7 +1169,12 @@ private static final long serialVersionUID = 0L;
       result.basePath_ = basePath_;
       result.vendorExtensible_ = internalGetVendorExtensible();
       result.vendorExtensible_.makeImmutable();
-      result.apiLifeCycleStatus_ = apiLifeCycleStatus_;
+      result.apiLifeCycleState_ = apiLifeCycleState_;
+      if (((bitField0_ & 0x00000010) != 0)) {
+        securityScheme_ = securityScheme_.getUnmodifiableView();
+        bitField0_ = (bitField0_ & ~0x00000010);
+      }
+      result.securityScheme_ = securityScheme_;
       onBuilt();
       return result;
     }
@@ -1255,8 +1327,18 @@ private static final long serialVersionUID = 0L;
       }
       internalGetMutableVendorExtensible().mergeFrom(
           other.internalGetVendorExtensible());
-      if (!other.getApiLifeCycleStatus().isEmpty()) {
-        apiLifeCycleStatus_ = other.apiLifeCycleStatus_;
+      if (!other.getApiLifeCycleState().isEmpty()) {
+        apiLifeCycleState_ = other.apiLifeCycleState_;
+        onChanged();
+      }
+      if (!other.securityScheme_.isEmpty()) {
+        if (securityScheme_.isEmpty()) {
+          securityScheme_ = other.securityScheme_;
+          bitField0_ = (bitField0_ & ~0x00000010);
+        } else {
+          ensureSecuritySchemeIsMutable();
+          securityScheme_.addAll(other.securityScheme_);
+        }
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -2593,78 +2675,188 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object apiLifeCycleStatus_ = "";
+    private java.lang.Object apiLifeCycleState_ = "";
     /**
-     * <code>string apiLifeCycleStatus = 11;</code>
-     * @return The apiLifeCycleStatus.
+     * <code>string apiLifeCycleState = 11;</code>
+     * @return The apiLifeCycleState.
      */
-    public java.lang.String getApiLifeCycleStatus() {
-      java.lang.Object ref = apiLifeCycleStatus_;
+    public java.lang.String getApiLifeCycleState() {
+      java.lang.Object ref = apiLifeCycleState_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        apiLifeCycleStatus_ = s;
+        apiLifeCycleState_ = s;
         return s;
       } else {
         return (java.lang.String) ref;
       }
     }
     /**
-     * <code>string apiLifeCycleStatus = 11;</code>
-     * @return The bytes for apiLifeCycleStatus.
+     * <code>string apiLifeCycleState = 11;</code>
+     * @return The bytes for apiLifeCycleState.
      */
     public com.google.protobuf.ByteString
-        getApiLifeCycleStatusBytes() {
-      java.lang.Object ref = apiLifeCycleStatus_;
+        getApiLifeCycleStateBytes() {
+      java.lang.Object ref = apiLifeCycleState_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        apiLifeCycleStatus_ = b;
+        apiLifeCycleState_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
     /**
-     * <code>string apiLifeCycleStatus = 11;</code>
-     * @param value The apiLifeCycleStatus to set.
+     * <code>string apiLifeCycleState = 11;</code>
+     * @param value The apiLifeCycleState to set.
      * @return This builder for chaining.
      */
-    public Builder setApiLifeCycleStatus(
+    public Builder setApiLifeCycleState(
         java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
   
-      apiLifeCycleStatus_ = value;
+      apiLifeCycleState_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>string apiLifeCycleStatus = 11;</code>
+     * <code>string apiLifeCycleState = 11;</code>
      * @return This builder for chaining.
      */
-    public Builder clearApiLifeCycleStatus() {
+    public Builder clearApiLifeCycleState() {
       
-      apiLifeCycleStatus_ = getDefaultInstance().getApiLifeCycleStatus();
+      apiLifeCycleState_ = getDefaultInstance().getApiLifeCycleState();
       onChanged();
       return this;
     }
     /**
-     * <code>string apiLifeCycleStatus = 11;</code>
-     * @param value The bytes for apiLifeCycleStatus to set.
+     * <code>string apiLifeCycleState = 11;</code>
+     * @param value The bytes for apiLifeCycleState to set.
      * @return This builder for chaining.
      */
-    public Builder setApiLifeCycleStatusBytes(
+    public Builder setApiLifeCycleStateBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
       
-      apiLifeCycleStatus_ = value;
+      apiLifeCycleState_ = value;
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.LazyStringList securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    private void ensureSecuritySchemeIsMutable() {
+      if (!((bitField0_ & 0x00000010) != 0)) {
+        securityScheme_ = new com.google.protobuf.LazyStringArrayList(securityScheme_);
+        bitField0_ |= 0x00000010;
+       }
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @return A list containing the securityScheme.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getSecuritySchemeList() {
+      return securityScheme_.getUnmodifiableView();
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @return The count of securityScheme.
+     */
+    public int getSecuritySchemeCount() {
+      return securityScheme_.size();
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @param index The index of the element to return.
+     * @return The securityScheme at the given index.
+     */
+    public java.lang.String getSecurityScheme(int index) {
+      return securityScheme_.get(index);
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the securityScheme at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getSecuritySchemeBytes(int index) {
+      return securityScheme_.getByteString(index);
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @param index The index to set the value at.
+     * @param value The securityScheme to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSecurityScheme(
+        int index, java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSecuritySchemeIsMutable();
+      securityScheme_.set(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @param value The securityScheme to add.
+     * @return This builder for chaining.
+     */
+    public Builder addSecurityScheme(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSecuritySchemeIsMutable();
+      securityScheme_.add(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @param values The securityScheme to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllSecurityScheme(
+        java.lang.Iterable<java.lang.String> values) {
+      ensureSecuritySchemeIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, securityScheme_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearSecurityScheme() {
+      securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bitField0_ = (bitField0_ & ~0x00000010);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @param value The bytes of the securityScheme to add.
+     * @return This builder for chaining.
+     */
+    public Builder addSecuritySchemeBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      ensureSecuritySchemeIsMutable();
+      securityScheme_.add(value);
       onChanged();
       return this;
     }

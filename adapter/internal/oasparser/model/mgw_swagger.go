@@ -38,6 +38,7 @@ type MgwSwagger struct {
 	resources        []Resource
 	xWso2Basepath    string
 	xWso2Cors        *CorsConfig
+	securityScheme   []string
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -131,9 +132,19 @@ func (swagger *MgwSwagger) SetName(name string) {
 	swagger.title = name
 }
 
+// SetSecurityScheme sets the securityscheme of the API
+func (swagger *MgwSwagger) SetSecurityScheme(securityScheme []string) {
+	swagger.securityScheme = securityScheme
+}
+
 // SetVersion sets the version of the API
 func (swagger *MgwSwagger) SetVersion(version string) {
 	swagger.version = version
+}
+
+// GetSetSecurityScheme returns the securityscheme of the API
+func (swagger *MgwSwagger) GetSetSecurityScheme() []string {
+	return swagger.securityScheme
 }
 
 // SetXWso2Extenstions set the MgwSwagger object with the properties

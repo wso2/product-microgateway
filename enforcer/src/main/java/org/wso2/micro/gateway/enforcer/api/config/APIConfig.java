@@ -31,7 +31,7 @@ public class APIConfig {
     private String basePath;
     private String apiLifeCycleState;
 
-    private List<String> securitySchemas = new ArrayList<>();
+    private List<String> securitySchemes = new ArrayList<>();
     private String tier = ThrottleConstants.UNLIMITED_TIER;
     private List<ResourceConfig> resources = new ArrayList<>();
 
@@ -45,7 +45,7 @@ public class APIConfig {
         private String basePath;
         private String apiLifeCycleState;
 
-        private List<String> securitySchemas = new ArrayList<>();
+        private List<String> securitySchemes = new ArrayList<>();
         private String tier = ThrottleConstants.UNLIMITED_TIER;
         private List<ResourceConfig> resources = new ArrayList<>();
 
@@ -73,6 +73,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder securitySchema(List<String> securityScheme) {
+            this.securitySchemes = securitySchemes;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -80,6 +85,7 @@ public class APIConfig {
             apiConfig.version = this.version;
             apiConfig.apiLifeCycleState = this.apiLifeCycleState;
             apiConfig.resources = this.resources;
+            apiConfig.securitySchemes = this.securitySchemes;
             return apiConfig;
         }
     }
@@ -104,7 +110,7 @@ public class APIConfig {
     }
 
     public List<String> getSecuritySchemas() {
-        return securitySchemas;
+        return securitySchemes;
     }
 
     public String getTier() {

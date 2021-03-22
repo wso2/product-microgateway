@@ -184,6 +184,11 @@ public class JWTAuthenticator implements Authenticator {
 
     }
 
+    @Override
+    public int getPriority() {
+        return 10;
+    }
+
     private String generateAndRetrieveJWTToken(String tokenSignature, JWTInfoDto jwtInfoDto)
             throws APISecurityException {
         log.debug("Inside generateAndRetrieveJWTToken");
