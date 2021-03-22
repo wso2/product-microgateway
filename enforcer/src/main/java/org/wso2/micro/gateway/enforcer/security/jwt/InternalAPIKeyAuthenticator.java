@@ -73,8 +73,9 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 // Extract internal from the request while removing it from the msg context.
                 String internalKey = extractInternalKey(requestContext);
                 if (StringUtils.isEmpty(internalKey)) {
-                    log.error("Internal Key does not perform at request");
-                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    log.error("Cannot find Internal key header");
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
 
@@ -90,7 +91,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                                 FilterUtils.getMaskedToken(splitToken[0]));
                     }
                     log.error("Invalid Internal Key token type." + FilterUtils.getMaskedToken(splitToken[0]));
-                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
 
@@ -102,7 +104,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                                 + FilterUtils.getMaskedToken(splitToken[0]));
                     }
                     log.error("Invalid Internal Key. " + FilterUtils.getMaskedToken(splitToken[0]));
-                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
 
@@ -121,7 +124,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                                 + FilterUtils.getMaskedToken(splitToken[0]));
                     }
                     log.error("Invalid Internal Key. " + FilterUtils.getMaskedToken(splitToken[0]));
-                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
 
@@ -141,7 +145,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                     } catch (MGWException e) {
                         log.error("Internal Key authentication failed. " +
                                 FilterUtils.getMaskedToken(splitToken[0]));
-                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                     }
 
@@ -161,7 +166,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                             CacheProvider.getGatewayInternalKeyDataCache().invalidate(tokenIdentifier);
                             CacheProvider.getInvalidGatewayInternalKeyCache().put(tokenIdentifier, "carbon.super");
                             log.error("Internal Key is expired");
-                            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                         }
                     } else {
@@ -189,8 +195,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 }
             }
         }
-        throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
     }
 
     public static JSONObject validateAPISubscription(String apiContext, String apiVersion, JWTClaimsSet payload,
@@ -224,8 +230,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                             ", version: " + apiVersion + ". Token: " + FilterUtils.getMaskedToken(splitToken[0]));
                 }
                 log.error("User is not subscribed to access the API.");
-                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
-                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                        APISecurityConstants.API_AUTH_FORBIDDEN, APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
         } else {
             if (log.isDebugEnabled()) {
@@ -234,8 +240,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
             // we perform mandatory authentication for Api Keys
             if (!isOauth) {
                 log.error("User is not subscribed to access the API.");
-                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
-                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                        APISecurityConstants.API_AUTH_FORBIDDEN, APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
         }
         return api;
