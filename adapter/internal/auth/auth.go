@@ -50,23 +50,21 @@ func GetBasicAuth(username, password string) string {
 
 // ValidateCredentials checks whether the provided username and password are valid
 func ValidateCredentials(username, password string, config *config.Config) bool {
-	valid := false
 	for _, regUser := range config.Adapter.Server.Users {
 		if username == regUser.Username && password == regUser.Password {
 			return true
 		}
 	}
-	return valid
+	return false
 }
 
 func validateUser(username string, config *config.Config) bool {
-	valid := false
 	for _, regUser := range config.Adapter.Server.Users {
 		if username == regUser.Username {
 			return true
 		}
 	}
-	return valid
+	return false
 }
 
 // Init prepares a private key to sign access tokens, and sets token duration
