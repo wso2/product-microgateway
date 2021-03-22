@@ -64,9 +64,6 @@ public class TestConstant {
     public static final int ADAPTER_PORT = 9843;
     public final static int MOCK_SERVER_PORT = 2383;
 
-
-    public static final String BASE_RESOURCE_DIR = "src" + File.separator + "test" + File.separator + "resources";
-
     public static final int INVALID_CREDENTIALS_CODE = 900901;
 
     public static final String LINE = "\r\n";

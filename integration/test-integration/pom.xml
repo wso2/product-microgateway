@@ -241,6 +241,7 @@
                 <os>
                     <family>unix</family>
                     <arch>amd64</arch>
+                    <name>!mac os x</name>
                 </os>
             </activation>
             <properties>
@@ -253,6 +254,7 @@
                 <os>
                     <family>unix</family>
                     <arch>x86_64</arch>
+                    <name>!mac os x</name>
                 </os>
             </activation>
             <properties>
@@ -265,6 +267,7 @@
                 <os>
                     <family>unix</family>
                     <arch>i586</arch>
+                    <name>!mac os x</name>
                 </os>
             </activation>
             <properties>
