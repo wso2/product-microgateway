@@ -52,6 +52,7 @@ const (
 	lifeCycleStatus            string = "lifeCycleStatus"
 	securityScheme             string = "securityScheme"
 	endpointImplementationType string = "endpointImplementationType"
+	inlineEndpointType         string = "INLINE"
 )
 
 // ProjectAPI contains the extracted from an API project zip
@@ -126,7 +127,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 
 			apiProject.APIJsn = apiJsn
 			extractAPIInformation(apiProject)
-			if apiProject.endpointImplementationType == "INLINE" {
+			if apiProject.endpointImplementationType == inlineEndpointType {
 				errMsg := "Inline endpointImplementationType is not currently supported with WSO2 micro-gateway"
 				loggers.LoggerAPI.Infof(errMsg)
 				err = errors.New(errMsg)
