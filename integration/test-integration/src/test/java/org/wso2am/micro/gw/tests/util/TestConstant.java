@@ -74,4 +74,6 @@ public class TestConstant {
 
     public static final String TEST_RESOURCES_PATH = File.separator  + "test-classes";
 
+    public static final String HEALTH_ENDPOINT_RESPONSE = "healthy";
+
 }

@@ -35,9 +35,9 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/wso2/micro-gw/config"
-	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/internal/oasparser/model"
 	"github.com/wso2/micro-gw/internal/svcdiscovery"
+	logger "github.com/wso2/micro-gw/loggers"
 
 	"strings"
 	"time"
@@ -527,22 +527,15 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 // CreateTokenRoute generates a route for the jwt /testkey endpoint
 func CreateTokenRoute() *routev3.Route {
 	var (
-		router routev3.Route
-		action       *routev3.Route_Route
-		match        *routev3.RouteMatch
-		decorator    *routev3.Decorator
+		router    routev3.Route
+		action    *routev3.Route_Route
+		match     *routev3.RouteMatch
+		decorator *routev3.Decorator
 	)
 
 	match = &routev3.RouteMatch{
-		PathSpecifier: &routev3.RouteMatch_SafeRegex{
-			SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-				EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-					GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-						MaxProgramSize: nil,
-					},
-				},
-				Regex: "/testkey",
-			},
+		PathSpecifier: &routev3.RouteMatch_Path{
+			Path: "/testkey",
 		},
 	}
 
@@ -573,7 +566,6 @@ func CreateTokenRoute() *routev3.Route {
 	action = &routev3.Route_Route{
 		Route: &routev3.RouteAction{
 			HostRewriteSpecifier: hostRewriteSpecifier,
-			// TODO: (VirajSalaka) Provide prefix rewrite since it is simple
 			RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
 				Pattern: &envoy_type_matcherv3.RegexMatcher{
 					EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
@@ -581,7 +573,7 @@ func CreateTokenRoute() *routev3.Route {
 							MaxProgramSize: nil,
 						},
 					},
-				Regex: "/testkey",
+					Regex: "/testkey",
 				},
 				Substitution: "/",
 			},
@@ -597,6 +589,61 @@ func CreateTokenRoute() *routev3.Route {
 		Name:      "/testkey", //Categorize routes with same base path
 		Match:     match,
 		Action:    action,
+		Metadata:  nil,
+		Decorator: decorator,
+		TypedPerFilterConfig: map[string]*any.Any{
+			wellknown.HTTPExternalAuthorization: filter,
+		},
+	}
+	return &router
+}
+
+// CreateHealthEndpoint generates a route for the jwt /health endpoint
+// Replies with direct response.
+func CreateHealthEndpoint() *routev3.Route {
+	var (
+		router    routev3.Route
+		match     *routev3.RouteMatch
+		decorator *routev3.Decorator
+	)
+
+	match = &routev3.RouteMatch{
+		PathSpecifier: &routev3.RouteMatch_Path{
+			Path: "/health",
+		},
+	}
+
+	decorator = &routev3.Decorator{
+		Operation: "/health",
+	}
+
+	perFilterConfig := extAuthService.ExtAuthzPerRoute{
+		Override: &extAuthService.ExtAuthzPerRoute_Disabled{
+			Disabled: true,
+		},
+	}
+
+	b := proto.NewBuffer(nil)
+	b.SetDeterministic(true)
+	_ = b.Marshal(&perFilterConfig)
+	filter := &any.Any{
+		TypeUrl: extAuthzPerRouteName,
+		Value:   b.Bytes(),
+	}
+
+	router = routev3.Route{
+		Name:  "/health", //Categorize routes with same base path
+		Match: match,
+		Action: &routev3.Route_DirectResponse{
+			DirectResponse: &routev3.DirectResponseAction{
+				Status: 200,
+				Body: &corev3.DataSource{
+					Specifier: &corev3.DataSource_InlineString{
+						InlineString: "healthy",
+					},
+				},
+			},
+		},
 		Metadata:  nil,
 		Decorator: decorator,
 		TypedPerFilterConfig: map[string]*any.Any{

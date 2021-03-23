@@ -352,12 +352,19 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 			// listenerArrays = append(listenerArrays, openAPIListenersMap[apiKey])
 		}
 	}
+
+	// If the token endpoint is enabled, the token endpoint also needs to be added.
 	conf, _ := config.ReadConfigs()
 	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
 	if enableJwtIssuer {
 		routeToken := envoyconf.CreateTokenRoute()
 		routeArray = append(routeArray, routeToken)
 	}
+
+	// Add health endpoint
+	routeHealth := envoyconf.CreateHealthEndpoint()
+	routeArray = append(routeArray, routeHealth)
+
 	listener, listenerFound := envoyListenerConfigMap[label]
 	routesConfig, routesConfigFound := envoyRouteConfigMap[label]
 	if !listenerFound && !routesConfigFound {
