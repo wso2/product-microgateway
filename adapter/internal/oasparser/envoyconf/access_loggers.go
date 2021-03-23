@@ -73,15 +73,15 @@ func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog
 		CommonConfig: &grpc_accesslogv3.CommonGrpcAccessLogConfig{
 			TransportApiVersion: corev3.ApiVersion_V3,
 			LogName:             grpcAccessLogLogName,
-			BufferFlushInterval: ptypes.DurationProto(conf.ControlPlane.Analytics.EnvoyLogPublisher.BufferFlushInterval),
-			BufferSizeBytes:     wrapperspb.UInt32(conf.ControlPlane.Analytics.EnvoyLogPublisher.BufferSizeBytes),
+			BufferFlushInterval: ptypes.DurationProto(conf.ControlPlane.Analytics.RouterLogPublisher.BufferFlushInterval),
+			BufferSizeBytes:     wrapperspb.UInt32(conf.ControlPlane.Analytics.RouterLogPublisher.BufferSizeBytes),
 			GrpcService: &corev3.GrpcService{
 				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
 					EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{
 						ClusterName: accessLoggerClusterName,
 					},
 				},
-				Timeout: ptypes.DurationProto(conf.ControlPlane.Analytics.EnvoyLogPublisher.GRPCRequestTimeout),
+				Timeout: ptypes.DurationProto(conf.ControlPlane.Analytics.RouterLogPublisher.GRPCRequestTimeout),
 			},
 		},
 	}

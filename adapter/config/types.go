@@ -263,14 +263,14 @@ type cache struct {
 }
 
 type analytics struct {
-	Enabled             bool              `toml:"enabled"`
-	AuthURL             string            `toml:"authURL"`
-	AuthToken           string            `toml:"authToken"`
-	EnforcerLogReceiver authService       `toml:"enforcerLogReceiver"`
-	EnvoyLogPublisher   envoyLogPublisher `toml:"envoyLogPublisher"`
+	Enabled             bool               `toml:"enabled"`
+	AuthURL             string             `toml:"authURL"`
+	AuthToken           string             `toml:"authToken"`
+	EnforcerLogReceiver authService        `toml:"enforcerLogReceiver"`
+	RouterLogPublisher  routerLogPublisher `toml:"routerLogPublisher"`
 }
 
-type envoyLogPublisher struct {
+type routerLogPublisher struct {
 	BufferFlushInterval time.Duration `toml:"bufferFlushInterval"`
 	BufferSizeBytes     uint32        `toml:"bufferSizeBytes"`
 	GRPCRequestTimeout  time.Duration `toml:"gRPCRequestTimeout"`
