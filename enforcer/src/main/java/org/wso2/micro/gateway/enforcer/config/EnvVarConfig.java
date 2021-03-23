@@ -46,13 +46,13 @@ public class EnvVarConfig {
     public static final String DEFAULT_XDS_MAX_MSG_SIZE = "4194304";
     public static final String DEFAULT_XDS_MAX_RETRIES = Integer.toString(Constants.MAX_XDS_RETRIES);
 
-    private String trustedAdapterCertsPath;
-    private String enforcerPrivateKeyPath;
-    private String enforcerPublicKeyPath;
-    private String adapterHost;
-    private String enforcerLabel;
-    private String adapterXdsPort;
-    private String adapterHostName;
+    private final String trustedAdapterCertsPath;
+    private final String enforcerPrivateKeyPath;
+    private final String enforcerPublicKeyPath;
+    private final String adapterHost;
+    private final String enforcerLabel;
+    private final String adapterXdsPort;
+    private final String adapterHostName;
     private final String xdsMaxMsgSize;
     private final String xdsMaxRetries;
 

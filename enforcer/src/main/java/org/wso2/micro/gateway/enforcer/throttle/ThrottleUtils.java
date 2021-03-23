@@ -19,19 +19,23 @@
 package org.wso2.micro.gateway.enforcer.throttle;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Utilities related to throttling.
  */
 public class ThrottleUtils {
-
     /**
      * Extract a {@code ThrottleCondition} from a provided compatible base64 encoded string.
      *
@@ -120,6 +124,27 @@ public class ThrottleUtils {
         });
 
         return conditionDtoList;
+    }
+
+    /**
+     * Parse a JWT and returns it's claims and a Map.
+     *
+     * @param token JWT token to parse.
+     * @return Map of claims.
+     */
+    public static Map<String, String> getJWTClaims(String token) {
+        if (token == null) {
+            return null;
+        }
+
+        // decoding JWT
+        String[] jwtTokenArray = token.split(Pattern.quote("."));
+        byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes(StandardCharsets.UTF_8));
+        String jwtAssertion = new String(jwtByteArray, StandardCharsets.UTF_8);
+        Type mapType = new TypeToken<Map<String, String>>() {
+        }.getType();
+
+        return new Gson().fromJson(jwtAssertion, mapType);
     }
 
 }

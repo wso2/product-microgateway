@@ -68,6 +68,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder tier(String tier) {
+            this.tier = tier;
+            return this;
+        }
+
         public Builder resources(List<ResourceConfig> resources) {
             this.resources = resources;
             return this;
@@ -86,6 +91,7 @@ public class APIConfig {
             apiConfig.apiLifeCycleState = this.apiLifeCycleState;
             apiConfig.resources = this.resources;
             apiConfig.securitySchemes = this.securitySchemes;
+            apiConfig.tier = this.tier;
             return apiConfig;
         }
     }

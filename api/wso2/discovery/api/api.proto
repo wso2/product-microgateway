@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package wso2.discovery.api;
 
-import "google/protobuf/any.proto";
 import "wso2/discovery/api/Endpoint.proto";
 import "wso2/discovery/api/Resource.proto";
 
@@ -24,7 +23,7 @@ message Api {
 	repeated Endpoint sandboxUrls = 7;
 	repeated Resource resources = 8;
 	string basePath = 9;
-	map<string, google.protobuf.Any> vendorExtensible = 10;
+	string tier = 10;
 	string apiLifeCycleState = 11;
 	repeated string securityScheme = 12;
 }

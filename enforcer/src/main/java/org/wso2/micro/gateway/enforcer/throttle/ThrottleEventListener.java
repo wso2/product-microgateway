@@ -129,11 +129,10 @@ public class ThrottleEventListener implements MessageListener {
     }
 
     private void handleThrottleUpdateMessage(Map<String, Object> map) {
-        String throttleKey = map.get(ThrottleConstants.AdvancedThrottleConstants.THROTTLE_KEY).toString();
-        String throttleState = map.get(ThrottleConstants.AdvancedThrottleConstants.IS_THROTTLED).toString();
-        long timeStamp = Long.parseLong(map.get(ThrottleConstants.
-                AdvancedThrottleConstants.EXPIRY_TIMESTAMP).toString());
-        Object evaluatedConditionObject = map.get(ThrottleConstants.AdvancedThrottleConstants.EVALUATED_CONDITIONS);
+        String throttleKey = map.get(ThrottleConstants.THROTTLE_KEY).toString();
+        String throttleState = map.get(ThrottleConstants.IS_THROTTLED).toString();
+        long timeStamp = Long.parseLong(map.get(ThrottleConstants.EXPIRY_TIMESTAMP).toString());
+        Object evaluatedConditionObject = map.get(ThrottleConstants.EVALUATED_CONDITIONS);
         ThrottleDataHolder dataHolder = ThrottleDataHolder.getInstance();
 
         if (log.isDebugEnabled()) {
@@ -141,7 +140,7 @@ public class ThrottleEventListener implements MessageListener {
                     throttleState + ", expiryTime: " + new Date(timeStamp).toString());
         }
 
-        if (ThrottleConstants.AdvancedThrottleConstants.TRUE.equalsIgnoreCase(throttleState)) {
+        if (ThrottleConstants.TRUE.equalsIgnoreCase(throttleState)) {
             dataHolder.addThrottleData(throttleKey, timeStamp);
             APICondition extractedKey = extractAPIorResourceKey(throttleKey);
             log.debug("Adding throttling key : {}",  extractedKey);
