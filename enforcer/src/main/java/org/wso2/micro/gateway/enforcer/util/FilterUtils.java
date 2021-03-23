@@ -276,8 +276,8 @@ public class FilterUtils {
 
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
-        String apiContext = requestContext.getMathedAPI().getAPIConfig().getBasePath();
-        String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
+        String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
+        String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
         jwtInfoDto.setApiContext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
         constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
