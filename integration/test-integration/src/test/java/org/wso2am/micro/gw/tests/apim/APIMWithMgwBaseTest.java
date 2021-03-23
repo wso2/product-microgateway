@@ -146,7 +146,7 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
      * @param confPath   - external conf.toml file location
      * @param tlsEnabled - true if the tls based backend server is required additionally
      * @throws MicroGWTestException if something goes wrong while copying server configs
-     * @throws IOException if an error while starting the mock-backend
+     * @throws IOException          if an error while starting the mock-backend
      */
     protected void startAPIMWithMGW(String confPath, boolean tlsEnabled) throws MicroGWTestException, IOException {
         apiManagerWithMgwServerInstance = new APIManagerWithMgwServerInstance(confPath, tlsEnabled);
@@ -220,19 +220,19 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
                         apimServiceURLHttps + "APIStatusMonitor/apiInformation/api/" + tenantIdentifier + apiName + "/"
                                 + apiVersion, headerMap);
             } catch (IOException ignored) {
-                LOGGER.warn("WebAPP:" + " APIStatusMonitor not yet deployed or" + " API :" + apiName + " not yet " +
-                                 "deployed " + " with provider: " + apiProvider);
+                LOGGER.warn("WebAPP:" + " APIStatusMonitor not yet deployed or" + " API :" + apiName + " not yet "
+                                    + "deployed " + " with provider: " + apiProvider);
             }
 
             LOGGER.info("WAIT for availability of API: " + apiName + " with version: " + apiVersion
-                             + " with provider: " + apiProvider + " with Tenant Identifier: " + tenantIdentifier
-                             + " with expected response : " + expectedResponse);
+                                + " with provider: " + apiProvider + " with Tenant Identifier: " + tenantIdentifier
+                                + " with expected response : " + expectedResponse);
 
             if (response != null) {
                 LOGGER.info("Data: " + response.getData());
                 if (response.getData().contains(expectedResponse)) {
-                    LOGGER.info("API :" + apiName + " with version: " + apiVersion +
-                                     " with expected response " + expectedResponse + " found");
+                    LOGGER.info("API :" + apiName + " with version: " + apiVersion + " with expected response "
+                                        + expectedResponse + " found");
                     break;
                 } else {
                     try {

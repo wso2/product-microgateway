@@ -455,7 +455,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * Undeploy and Delete API Product Revisions using REST API.
      *
      * @param apiId            - API UUID
-     * @param restAPIPublisher -  Instance of APIPublisherRestClient
+     * @param restAPIPublisher - Instance of APIPublisherRestClient
      */
     protected String undeployAndDeleteAPIProductRevisions(String apiId, RestAPIPublisherImpl restAPIPublisher)
             throws ApiException, JSONException {
