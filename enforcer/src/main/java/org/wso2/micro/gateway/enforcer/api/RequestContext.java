@@ -36,7 +36,7 @@ import java.util.TreeMap;
  */
 public class RequestContext {
 
-    private API mathedAPI;
+    private API matchedAPI;
     private String requestPath;
     private String requestMethod;
     private ResourceConfig matchedResourcePath;
@@ -61,7 +61,7 @@ public class RequestContext {
      * Implements builder pattern to build an {@link RequestContext} object.
      */
     public static class Builder {
-        private API mathedAPI;
+        private API matchedAPI;
         private String requestPath;
         private String requestMethod;
         private ResourceConfig matchedResourceConfig;
@@ -78,7 +78,7 @@ public class RequestContext {
         }
 
         public Builder matchedAPI(API api) {
-            this.mathedAPI = api;
+            this.matchedAPI = api;
             return this;
         }
 
@@ -129,7 +129,7 @@ public class RequestContext {
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
-            requestContext.mathedAPI = this.mathedAPI;
+            requestContext.matchedAPI = this.matchedAPI;
             requestContext.requestMethod = this.requestMethod;
             requestContext.requestPath = this.requestPath;
             requestContext.headers = this.headers;
@@ -170,8 +170,8 @@ public class RequestContext {
         return clientIp;
     }
 
-    public API getMathedAPI() {
-        return mathedAPI;
+    public API getMatchedAPI() {
+        return matchedAPI;
     }
 
     public String getRequestPath() {

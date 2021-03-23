@@ -86,7 +86,7 @@ public class ThrottleFilter implements Filter {
         // TODO: (Praminda) Handle unauthenticated + subscription validation false scenarios
         if (reqContext.getAuthenticationContext() != null) {
             log.debug("Found AuthenticationContext for the request");
-            APIConfig api = reqContext.getMathedAPI().getAPIConfig();
+            APIConfig api = reqContext.getMatchedAPI().getAPIConfig();
             String apiContext = api.getBasePath();
             String apiVersion = api.getVersion();
             String appId = authContext.getApplicationId();
@@ -195,7 +195,7 @@ public class ThrottleFilter implements Filter {
     private Map<String, String> getThrottleEventMap(RequestContext requestContext) {
         AuthenticationContext authenticationContext = requestContext.getAuthenticationContext();
         Map<String, String> throttleEvent = new HashMap<>();
-        APIConfig api = requestContext.getMathedAPI().getAPIConfig();
+        APIConfig api = requestContext.getMatchedAPI().getAPIConfig();
 
         String basePath = api.getBasePath();
         String apiVersion = api.getVersion();
