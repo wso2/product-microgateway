@@ -100,11 +100,10 @@ public type JWTAuthHandler object {
                 if (!generationStatus) {
                     printError(KEY_JWT_AUTH_PROVIDER, "JWT Generation failed");
                 }
-                return authenticationResult;
             } else {
                 printDebug(KEY_JWT_AUTH_PROVIDER, "JWT is set from the payload claim");
-                return true;
             }
+            return authenticationResult;
         } else {
             return prepareAuthenticationError("Failed to authenticate with jwt bearer auth handler.", authenticationResult);
         }
