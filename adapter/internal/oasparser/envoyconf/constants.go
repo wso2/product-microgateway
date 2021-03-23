@@ -62,3 +62,14 @@ const (
 	wssURLType       string = "wss"
 	httpMethodHeader string = ":method"
 )
+
+// Paths exposed from the router by default
+const (
+	healthPath  string = "/health"
+	testKeyPath string = "/testkey"
+)
+
+const (
+	// healthEndpointResponse - response from the health endpoint
+	healthEndpointResponse = "healthy"
+)

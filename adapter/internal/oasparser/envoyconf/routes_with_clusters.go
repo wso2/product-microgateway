@@ -535,7 +535,7 @@ func CreateTokenRoute() *routev3.Route {
 
 	match = &routev3.RouteMatch{
 		PathSpecifier: &routev3.RouteMatch_Path{
-			Path: "/testkey",
+			Path: testKeyPath,
 		},
 	}
 
@@ -546,7 +546,7 @@ func CreateTokenRoute() *routev3.Route {
 	}
 
 	decorator = &routev3.Decorator{
-		Operation: "/testkey",
+		Operation: testKeyPath,
 	}
 
 	perFilterConfig := extAuthService.ExtAuthzPerRoute{
@@ -573,7 +573,7 @@ func CreateTokenRoute() *routev3.Route {
 							MaxProgramSize: nil,
 						},
 					},
-					Regex: "/testkey",
+					Regex: testKeyPath,
 				},
 				Substitution: "/",
 			},
@@ -586,7 +586,7 @@ func CreateTokenRoute() *routev3.Route {
 	action.Route.ClusterSpecifier = directClusterSpecifier
 
 	router = routev3.Route{
-		Name:      "/testkey", //Categorize routes with same base path
+		Name:      testKeyPath, //Categorize routes with same base path
 		Match:     match,
 		Action:    action,
 		Metadata:  nil,
@@ -609,12 +609,12 @@ func CreateHealthEndpoint() *routev3.Route {
 
 	match = &routev3.RouteMatch{
 		PathSpecifier: &routev3.RouteMatch_Path{
-			Path: "/health",
+			Path: healthPath,
 		},
 	}
 
 	decorator = &routev3.Decorator{
-		Operation: "/health",
+		Operation: healthPath,
 	}
 
 	perFilterConfig := extAuthService.ExtAuthzPerRoute{
@@ -632,7 +632,7 @@ func CreateHealthEndpoint() *routev3.Route {
 	}
 
 	router = routev3.Route{
-		Name:  "/health", //Categorize routes with same base path
+		Name:  healthPath, //Categorize routes with same base path
 		Match: match,
 		Action: &routev3.Route_DirectResponse{
 			DirectResponse: &routev3.DirectResponseAction{
