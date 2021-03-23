@@ -18,7 +18,6 @@
 
 package org.wso2am.micro.gw.tests.context;
 
-import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,24 +25,15 @@ import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.wso2am.micro.gw.tests.mockbackend.MockBackendServer;
 import org.wso2am.micro.gw.tests.util.Utils;
-import org.wso2am.micro.gw.tests.util.HttpClientRequest;
-import org.wso2am.micro.gw.tests.util.HttpResponse;
-import org.wso2am.micro.gw.tests.util.Utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Mgw server instance class.
  */
-public class MgwServerInstance implements MgwServer {
+public class MgwServerInstance extends MgwServerImpl {
 
-    private static final Logger log = LoggerFactory.getLogger(MgwServerInstance.class);
-    private DockerComposeContainer environment;
     private static final String ENFORCER_DEBUG_ENV = "ENFORCER_DEBUG";
 
 
@@ -62,7 +52,6 @@ public class MgwServerInstance implements MgwServer {
      * initialize a docker environment using docker compose.
      *
      * @param confPath external conf.toml path
-     *
      * @throws IOException
      * @throws MicroGWTestException
      */
@@ -74,7 +63,6 @@ public class MgwServerInstance implements MgwServer {
      * initialize a docker environment using docker compose.
      *
      * @param confPath external conf.toml path
-     *
      * @throws IOException
      * @throws MicroGWTestException
      */
@@ -85,23 +73,20 @@ public class MgwServerInstance implements MgwServer {
     /**
      * initialize a docker environment using docker compose.
      *
-     * @param confPath external conf.toml path
+     * @param confPath   external conf.toml path
      * @param tlsEnabled if the backend needs to have the tls enabled server additionally
-     *
      * @throws IOException
      * @throws MicroGWTestException
      */
-    public MgwServerInstance(String confPath, boolean tlsEnabled, boolean customJwtTransformerEnabled) throws IOException, MicroGWTestException {
+    public MgwServerInstance(String confPath, boolean tlsEnabled, boolean customJwtTransformerEnabled)
+            throws IOException, MicroGWTestException {
         createTmpMgwSetup(customJwtTransformerEnabled);
-        File targetClassesDir = new File(MgwServerInstance.class.getProtectionDomain().getCodeSource().
-                getLocation().getPath());
-        String mgwServerPath = targetClassesDir.getParentFile().toString() + File.separator + "server-tmp";
         if (!StringUtils.isEmpty(confPath)) {
-            Utils.copyFile(confPath, mgwServerPath  +  File.separator + "resources"  +  File.separator +
-                    "conf" +  File.separator + "config.toml");
+            Utils.copyFile(confPath, mgwTmpServerPath + File.separator + "resources" + File.separator +
+                    "conf" + File.separator + "config.toml");
         }
 
-        String dockerComposePath = mgwServerPath+  File.separator + "docker-compose.yaml";
+        String dockerComposePath = mgwTmpServerPath + File.separator + "docker-compose.yaml";
         Logger enforcerLogger = LoggerFactory.getLogger("Enforcer");
         Logger adapterLogger = LoggerFactory.getLogger("Adapter");
         Logger routerLogger = LoggerFactory.getLogger("Router");
@@ -118,68 +103,19 @@ public class MgwServerInstance implements MgwServer {
 
     }
 
-    @Override
-    public void startMGW() throws IOException, InterruptedException {
-        try {
-            environment.start();
-        } catch (Exception e) {
-            log.error("Error occurs when docker-compose up");
-        }
-
-        waitTillBackendIsAvailable();
-    }
-
-    @Override
-    public void stopMGW() {
-        environment.stop();
-    }
-
     /**
      * This will create a separate mgw setup in the target directory to execute the tests.
      *
-     * @throws IOException
+     * @param customJwtTransformerEnabled - whether the custom JWT transformer is enabled or not
      * @throws MicroGWTestException
      */
-    public static void createTmpMgwSetup(boolean customJwtTransformerEnabled) throws IOException, MicroGWTestException {
-        File targetClassesDir = new File(MgwServerInstance.class.getProtectionDomain().getCodeSource().
-                getLocation().getPath());
-        String targetDir = targetClassesDir.getParentFile().toString();
-        final Properties properties = new Properties();
-        properties.load(MgwServerInstance.class.getClassLoader().getResourceAsStream("project.properties"));
-
-        Utils.copyDirectory(targetDir + File.separator + "micro-gwtmp" +  File.separator +
-                "wso2am-micro-gw-" + properties.getProperty("version"), targetDir +
-                File.separator + "server-tmp");
-
+    public void createTmpMgwSetup(boolean customJwtTransformerEnabled) throws MicroGWTestException {
+        Utils.copyDirectory(mgwServerPath, mgwTmpServerPath);
         String jarLocation = System.getProperty("jwt_transformer_jar");
         if (customJwtTransformerEnabled) {
             Utils.copyFile(jarLocation, targetDir +
                     File.separator + "server-tmp" + File.separator + "resources" + File.separator + "enforcer" +
                     File.separator + "dropins" + File.separator + "jwt-transformer.jar");
-        }
-    }
-
-    /**
-     * wait till mock backend is available.
-     *
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    public static void waitTillBackendIsAvailable() throws IOException, InterruptedException {
-        Map<String, String> headers = new HashMap<String, String>();
-        HttpResponse response;
-
-        int tries = 0;
-        while (true){
-            response= HttpClientRequest.doGet(Utils.getMockServiceURLHttp(
-                    "/v2/pet/3") , headers);
-            tries += 1;
-            if(response != null) {
-                if(response.getResponseCode() == HttpStatus.SC_OK || tries > 50) {
-                    break;
-                }
-            }
-            TimeUnit.SECONDS.sleep(5);
         }
     }
 }

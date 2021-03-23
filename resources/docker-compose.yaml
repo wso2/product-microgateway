@@ -48,7 +48,7 @@ services:
       options:
         max-size: "20m"
         max-file: "5"
-    volumes:  
+    volumes:
       - ./resources/enforcer/security:/home/wso2/security
       - ./resources/conf:/home/wso2/conf
       - ./resources/enforcer/dropins:/home/wso2/lib/dropins
