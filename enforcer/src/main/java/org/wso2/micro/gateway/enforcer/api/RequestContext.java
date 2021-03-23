@@ -137,6 +137,7 @@ public class RequestContext {
             requestContext.authenticationContext = this.authenticationContext;
             requestContext.requestID = this.requestID;
             requestContext.clientIp = this.clientIp;
+            requestContext.responseHeaders = new HashMap<>();
             String[] queryParts = this.requestPath.split("\\?");
             String queryPrams = queryParts.length > 1 ? queryParts[1] : "";
 
