@@ -211,6 +211,13 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                     (JSONArray) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
             for (Object subscribedAPI : subscribedAPIs) {
                 JSONObject subscribedAPIsJSONObject = (JSONObject) subscribedAPI;
+                log.info("apiContext " + apiContext);
+                log.info("apiVersion " + apiVersion);
+                log.info("subscribedAPI  apiContext: " +
+                        subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT));
+                log.info("subscribedAPI  apiVersion: " +
+                        subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION));
+
                 if (apiContext
                         .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion
@@ -280,7 +287,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 log.debug("Internal-Key is not expired. User: " + payload.getSubject());
             }
         } catch (BadJWTException e) {
-            if ("Expired Internal-Key".equals(e.getMessage())) {
+            if ("Expired JWT".equals(e.getMessage())) {
                 return true;
             }
         }

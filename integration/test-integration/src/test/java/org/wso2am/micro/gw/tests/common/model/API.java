@@ -52,6 +52,12 @@ public class API {
         return context;
     }
 
+    public String getApiLifeCycleStatus() { return apiLifeCycleStatus; }
+
+    public void setApiLifeCycleStatus(String apiLifeCycleStatus) {
+        this.apiLifeCycleStatus = apiLifeCycleStatus;
+    }
+
     public void setContext(String context) {
         this.context = context;
     }

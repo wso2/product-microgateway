@@ -37,6 +37,7 @@
             <class name="org.wso2am.micro.gw.tests.testCases.endpoints.ProductionSandboxTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.JwtTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.ScopeTest"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.InternalKeyTestCase"/>
         </classes>
     </test>
     <test name="micro-gw-with-backend-tls" preserve-order="true" parallel="false">

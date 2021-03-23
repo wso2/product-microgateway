@@ -42,8 +42,8 @@ public class ProductionSandboxTestCase {
         //ApiDeployment.waitTillRoutesAreAvailable("/v2/general/pet/findByStatus");
 
         //TODO: (VirajSalaka) change the token
-        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null);
-        jwtTokenSand = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_SANDBOX, null);
+        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
+        jwtTokenSand = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_SANDBOX, null, false);
     }
 
     @Test(description = "Invoke Production and Sandbox endpoint when both endpoints provided")
