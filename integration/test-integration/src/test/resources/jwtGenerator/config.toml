@@ -66,7 +66,7 @@
 [[enforcer.jwtTokenConfig]]
     name="Resident Key Manager"
     issuer = "https://localhost:9443/oauth2/token"
-    certificateAlias = "wso2carbon"
+    certificateAlias = "gateway_certificate_alias"
     # URL of the JWKs endpoint
     jwksURL = ""
     # Validate subscribed APIs
@@ -75,9 +75,20 @@
     consumerKeyClaim = "azp"
     # Certificate Filepath within enforcer
     certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
-    [[enforcer.jwtTokenConfig.claimMapping]]
-        remoteClaim = "sub"
-        localClaim = "CUSTOM-CLAIM"
+
+# Issuer 2
+[[enforcer.jwtTokenConfig]]
+    name="MGW"
+    issuer = "https://localhost:9095/token"
+    certificateAlias = "mgw"
+    # URL of the JWKs endpoint
+    jwksURL = ""
+    # Validate subscribed APIs
+    validateSubscription = false
+    # The claim in which the consumer key of the application is coming
+    consumerKeyClaim = ""
+    # Certificate Filepath within enforcer
+    certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 [enforcer.apimCredentials]
     username="admin"
