@@ -57,4 +57,6 @@ public class ThrottleConstants {
     public static final String EVALUATED_CONDITIONS = "evaluatedConditions";
     public static final String TRUE = "true";
     public static final String DEFAULT_THROTTLE_CONDITION = "default";
+    public static final String HEADER_RETRY_AFTER = "Retry-After";
+    public static final String GMT = "GMT";
 }
