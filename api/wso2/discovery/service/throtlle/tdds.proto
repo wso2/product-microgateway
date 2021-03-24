@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package discovery.service.throttle;
+
+import "envoy/service/discovery/v3/discovery.proto";
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/service/throttle";
+option java_package = "org.wso2.gateway.discovery.service.throttle";
+option java_outer_classname = "TDdsProto";
+option java_multiple_files = true;
+option java_generic_services = true;
+
+// [#protodoc-title: TDDS]
+service ThrottleDataDiscoveryService {
+  rpc StreamThrottleData(stream envoy.service.discovery.v3.DiscoveryRequest)
+      returns (stream envoy.service.discovery.v3.DiscoveryResponse) {
+  }
+
+  rpc FetchThrottleData(envoy.service.discovery.v3.DiscoveryRequest)
+      returns (envoy.service.discovery.v3.DiscoveryResponse) {
+  }
+}
