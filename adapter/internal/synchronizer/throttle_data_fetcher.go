@@ -17,7 +17,7 @@
 /*
  * Package "synchronizer" contains artifacts relate to fetching APIs and
  * API related updates from the control plane event-hub.
- * This file contains functions to retrieve revoked tokens.
+ * This file contains functions to retrieve APIs and API updates.
  */
 
 package synchronizer
@@ -31,44 +31,47 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/throttle"
+
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/wso2/micro-gw/config"
-	km "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/keymgt"
-
 	"github.com/wso2/micro-gw/internal/auth"
 	"github.com/wso2/micro-gw/internal/discovery/xds"
 	"github.com/wso2/micro-gw/internal/tlsutils"
+
 	logger "github.com/wso2/micro-gw/loggers"
 )
 
 const (
-	revokeEndpoint string = "internal/data/v1/revokedjwt"
+	keyTemplatesEndpoint string = "internal/data/v1/keyTemplates"
 )
 
-// RetrieveTokens func return tokens
-func RetrieveTokens(c chan SyncAPIResponse) {
+// FetchKeyTemplates pulls the startup Throttle Data required for custom and blocking condition
+// based throttling. This request goes to traffic manager node.
+func FetchKeyTemplates(c chan SyncAPIResponse) {
+	logger.LoggerSync.Info("Fetching Key Templates from Traffic Manager.")
 	respSyncAPI := SyncAPIResponse{}
 
-	// Read configurations and derive the eventHub details
+	// Read configurations and derive the traffic manager endpoint details
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
-		// This has to be error. For debugging purpose info
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
-	// Populate data from the config
+
 	ehConfigs := conf.ControlPlane.EventHub
 	ehURL := ehConfigs.ServiceURL
-	// If the eventHub URL is configured with trailing slash
-	if strings.HasSuffix(ehURL, "/") {
-		ehURL += revokeEndpoint
-	} else {
-		ehURL += "/" + revokeEndpoint
-	}
-	logger.LoggerSync.Debugf("Fetching revoked tokens from the URL %v: ", ehURL)
 
-	ehUname := ehConfigs.Username
+	// If the traffic manager URL is configured with trailing slash
+	if strings.HasSuffix(ehURL, "/") {
+		ehURL += keyTemplatesEndpoint
+	} else {
+		ehURL += "/" + keyTemplatesEndpoint
+	}
+	logger.LoggerSync.Debugf("KeyTemplate endpoint URL %v: ", ehURL)
+
+	ehUser := ehConfigs.Username
 	ehPass := ehConfigs.Password
-	basicAuth := "Basic " + auth.GetBasicAuth(ehUname, ehPass)
+	basicAuth := "Basic " + auth.GetBasicAuth(ehUser, ehPass)
 
 	// Check if TLS is enabled
 	skipSSL := ehConfigs.SkipSSLVerification
@@ -85,33 +88,25 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 		}
 	}
 
-	// Configuring the http client
 	client := &http.Client{
 		Transport: tr,
 	}
 
-	// Create a HTTP request
 	req, err := http.NewRequest("GET", ehURL, nil)
-
-	// Setting authorization header
 	req.Header.Set(authorization, basicAuth)
-	// Make the request
-	logger.LoggerSync.Debug("Sending the control plane request")
+
+	logger.LoggerSync.Debug("Sending the key template request to Traffic Manager")
 	resp, err := client.Do(req)
-	// In the event of a connection error, the error would not be nil, then return the error
-	// If the error is not null, proceed
 	if err != nil {
-		logger.LoggerSync.Errorf("Error occurred while retrieving revoked tokens from API manager: %v", err)
+		logger.LoggerSync.Errorf("Error occurred while retrieving Key Temaplate from Traffic manager: %v", err)
 		respSyncAPI.Err = err
 		respSyncAPI.Resp = nil
 		c <- respSyncAPI
 		return
 	}
 
-	// get the response in the form of a byte slice
+	// processing the response
 	respBytes, err := ioutil.ReadAll(resp.Body)
-
-	// If the reading response gives an error
 	if err != nil {
 		logger.LoggerSync.Errorf("Error occurred while reading the response: %v", err)
 		respSyncAPI.Err = err
@@ -120,7 +115,7 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 		c <- respSyncAPI
 		return
 	}
-	// For successful response, return the byte slice and nil as error
+
 	if resp.StatusCode == http.StatusOK {
 		respSyncAPI.Err = nil
 		respSyncAPI.Resp = respBytes
@@ -137,57 +132,51 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 	return
 }
 
-// pushTokens func will update the revoked tokens snapshots in
-// the enforcer(s).
-func pushTokens(tokens []RevokedToken) {
-	var stokens []types.Resource
-	for _, v := range tokens {
-		t := &km.RevokedToken{}
-		t.Jti = v.JWT
-		t.Expirytime = (v.ExpiryTime)
-		stokens = append(stokens, t)
+// pushKeyTemplates will update the ThrottleData xds snapshot
+func pushKeyTemplates(tokens []string) {
+	var templates []types.Resource
+	t := &throttle.ThrottleData{
+		KeyTemplates: tokens,
 	}
-	xds.UpdateEnforcerRevokedTokens(stokens)
-	logger.LoggerSync.Debug("Updated the snapshot for revoked tokens")
+	templates = append(templates, t)
+	xds.UpdateEnforcerThrottleData(templates)
+	logger.LoggerSync.Debug("Updated the snapshot for KeyTemplates")
 }
 
-// UpdateRevokedTokens pulls revoked tokens from control plane.
-// Once it's done, revoked tokens will be pushed to the enforcers.
-func UpdateRevokedTokens() {
+// UpdateKeyTemplates pulls keytemplates from the traffic manager
+// and updates the enforcer's xds cache
+func UpdateKeyTemplates() {
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
-		// This has to be error. For debugging purpose info
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
 	c := make(chan SyncAPIResponse)
-	go RetrieveTokens(c)
+	go FetchKeyTemplates(c)
 	for {
 		data := <-c
 		if data.Resp != nil {
-			tokens := []RevokedToken{}
-			err := json.Unmarshal(data.Resp, &tokens)
+			templates := []string{}
+			err := json.Unmarshal(data.Resp, &templates)
 			if err != nil {
-				logger.LoggerSync.Errorf("Error occurred while unmarshalling tokens %v", err)
+				logger.LoggerSync.Errorf("Error occurred while unmarshalling key templates %v", err)
 			}
-			pushTokens(tokens)
+			pushKeyTemplates(templates)
 			break
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-			logger.LoggerSync.Errorf("Error occurred when retrieving revoked token from control plane: %v", data.Err)
+			logger.LoggerSync.Errorf("Error occurred when fetching key templates: %v", data.Err)
 			break
 		} else {
-			// Keep the iteration still until all the environment response properly.
-			logger.LoggerSync.Errorf("Error occurred while fetching revoked tokens from control plane: %v", data.Err)
+			logger.LoggerSync.Errorf("Unexpected error occurred while fetching key templates: %v", data.Err)
 			go func() {
-				// Retry fetching from control plane after a configured time interval
-				if conf.ControlPlane.EventHub.RetryInterval == 0 {
-					// Assign default retry interval
-					conf.ControlPlane.EventHub.RetryInterval = 5
+				// Retry fetching key templates from traffic manager
+				retryInterval := conf.ControlPlane.EventHub.RetryInterval
+				if retryInterval == 0 {
+					retryInterval = 5
 				}
-				logger.LoggerSync.Debugf("Time Duration for retrying: %v",
-					conf.ControlPlane.EventHub.RetryInterval*time.Second)
-				time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
-				logger.LoggerSync.Info("Retrying to get revoked tokens from control plane.")
-				RetrieveTokens(c)
+				logger.LoggerSync.Debugf("Time Duration for retrying: %v", retryInterval*time.Second)
+				time.Sleep(retryInterval * time.Second)
+				logger.LoggerSync.Info("Retrying to get key templates from Traffic Manager.")
+				FetchKeyTemplates(c)
 			}()
 		}
 	}

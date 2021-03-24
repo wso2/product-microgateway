@@ -193,8 +193,8 @@ func Run(conf *config.Config) {
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
 
-	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
-	if enableJwtIssuer {
+	jwtIssuerEnabled := conf.Enforcer.JwtIssuer.Enabled
+	if jwtIssuerEnabled {
 		// Take the configured labels
 		envs := conf.ControlPlane.EventHub.EnvironmentLabels
 
@@ -211,8 +211,8 @@ func Run(conf *config.Config) {
 
 	go restserver.StartRestServer(conf)
 
-	enableEventHub := conf.ControlPlane.EventHub.Enabled
-	if enableEventHub {
+	eventHubEnabled := conf.ControlPlane.EventHub.Enabled
+	if eventHubEnabled {
 		// Load subscription data
 		eventhub.LoadSubscriptionData(conf)
 
@@ -224,6 +224,11 @@ func Run(conf *config.Config) {
 		go synchronizer.UpdateRevokedTokens()
 		// Fetch Key Managers from APIM
 		synchronizer.FetchKeyManagersOnStartUp(conf)
+	}
+
+	throttlingEnabled := conf.Enforcer.Throttling.EnableGlobalEventPublishing
+	if throttlingEnabled {
+		go synchronizer.UpdateKeyTemplates()
 	}
 OUTER:
 	for {

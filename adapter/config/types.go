@@ -305,7 +305,7 @@ type controlPlane struct {
 		SyncApisOnStartUp       bool          `toml:"syncApisOnStartUp"`
 		EnvironmentLabels       []string      `toml:"environmentLabels"`
 		RetryInterval           time.Duration `toml:"retryInterval"`
-		SkipSSLVerfication      bool          `toml:"skipSSLVerification"`
+		SkipSSLVerification     bool          `toml:"skipSSLVerification"`
 		JmsConnectionParameters struct {
 			EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
 		} `toml:"jmsConnectionParameters"`
