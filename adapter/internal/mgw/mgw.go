@@ -29,6 +29,7 @@ import (
 	configservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/config"
 	keymanagerservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/keymgt"
 	subscriptionservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/subscription"
+	throttleservice "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/throtlle"
 	wso2_server "github.com/wso2/micro-gw/internal/discovery/protocol/server/v3"
 	"github.com/wso2/micro-gw/internal/tlsutils"
 
@@ -85,7 +86,8 @@ const grpcMaxConcurrentStreams = 1000000
 func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server, enforcerSdsServer wso2_server.Server,
 	enforcerAppDsSrv wso2_server.Server, enforcerAPIDsSrv wso2_server.Server, enforcerAppPolicyDsSrv wso2_server.Server,
 	enforcerSubPolicyDsSrv wso2_server.Server, enforcerAppKeyMappingDsSrv wso2_server.Server,
-	enforcerKeyManagerDsSrv wso2_server.Server, enforcerRevokedTokenDsSrv wso2_server.Server, port uint) {
+	enforcerKeyManagerDsSrv wso2_server.Server, enforcerRevokedTokenDsSrv wso2_server.Server,
+	enforcerThrottleDataDsSrv wso2_server.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
 
@@ -124,6 +126,7 @@ func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server,
 	subscriptionservice.RegisterApplicationKeyMappingDiscoveryServiceServer(grpcServer, enforcerAppKeyMappingDsSrv)
 	keymanagerservice.RegisterKMDiscoveryServiceServer(grpcServer, enforcerKeyManagerDsSrv)
 	keymanagerservice.RegisterRevokedTokenDiscoveryServiceServer(grpcServer, enforcerRevokedTokenDsSrv)
+	throttleservice.RegisterThrottleDataDiscoveryServiceServer(grpcServer, enforcerThrottleDataDsSrv)
 
 	logger.LoggerMgw.Info("port: ", port, " management server listening")
 	go func() {
@@ -169,6 +172,7 @@ func Run(conf *config.Config) {
 	enforcerApplicationKeyMappingCache := xds.GetEnforcerApplicationKeyMappingCache()
 	enforcerKeyManagerCache := xds.GetEnforcerKeyManagerCache()
 	enforcerRevokedTokenCache := xds.GetEnforcerRevokedTokenCache()
+	enforcerThrottleDataCache := xds.GetEnforcerThrottleDataCache()
 
 	srv := xdsv3.NewServer(ctx, cache, nil)
 	enforcerXdsSrv := wso2_server.NewServer(ctx, enforcerCache, &cb.Callbacks{})
@@ -180,9 +184,11 @@ func Run(conf *config.Config) {
 	enforcerAppKeyMappingDsSrv := wso2_server.NewServer(ctx, enforcerApplicationKeyMappingCache, &cb.Callbacks{})
 	enforcerKeyManagerDsSrv := wso2_server.NewServer(ctx, enforcerKeyManagerCache, &cb.Callbacks{})
 	enforcerRevokedTokenDsSrv := wso2_server.NewServer(ctx, enforcerRevokedTokenCache, &cb.Callbacks{})
+	enforcerThrottleDataDsSrv := wso2_server.NewServer(ctx, enforcerThrottleDataCache, &cb.Callbacks{})
 
 	runManagementServer(srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
-		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, enforcerKeyManagerDsSrv, enforcerRevokedTokenDsSrv, port)
+		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, enforcerKeyManagerDsSrv,
+		enforcerRevokedTokenDsSrv, enforcerThrottleDataDsSrv, port)
 
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
