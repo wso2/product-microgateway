@@ -157,7 +157,6 @@ func TestGetOpenAPIVersionAndJSONContent(t *testing.T) {
 			testGetOpenAPIVersionAndJSONContent(t, apiYamlFilePath+"/"+f.Name())
 		}
 	}
-
 }
 
 //helper function to test GetOpenAPIVersionAndJSONContent
