@@ -32,6 +32,8 @@ import org.wso2.gateway.discovery.throttle.ThrottleData;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleDataHolder;
+import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
 
 import java.util.List;
@@ -94,6 +96,7 @@ public class ThrottleDataDiscoveryClient {
                 latestReceived = response;
                 try {
                     List<String> keyTemplates = handleResponse(response);
+                    ThrottleDataHolder.getInstance().addKeyTemplates(FilterUtils.generateMap(keyTemplates));
                     ack();
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime

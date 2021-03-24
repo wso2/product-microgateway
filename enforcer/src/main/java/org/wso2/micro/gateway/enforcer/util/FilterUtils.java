@@ -53,6 +53,8 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.SSLContext;
@@ -387,4 +389,41 @@ public class FilterUtils {
         context.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION, desc);
     }
 
+    /**
+     * Generates a map out of the {@code list} provided. Key will be the {@code toString}
+     * value of the list item. Value will be the list item.
+     *
+     * @param list list to be converted in to a map
+     * @param <T>  List Item type
+     * @return A map of type {@code <String, T>}
+     */
+    public static <T> Map<String, T> generateMap(Collection<T> list) {
+        if (list == null) {
+            return new HashMap<>();
+        }
+        Map<String, T> map = new HashMap<String, T>();
+
+        for (T el : list) {
+            map.put(el.toString(), el);
+        }
+        return map;
+    }
+
+    /**
+     * Append the username with tenant domain if not appended already.
+     * @param username username
+     * @param tenantDomain tenant domain
+     * @return tenant domain appended username
+     */
+    public static String buildUsernameWithTenant(String username, String tenantDomain) {
+        if (tenantDomain == null) {
+            tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
+        // Check if the tenant domain is appended with userName and append if it is not there
+        if (!StringUtils.contains(username, tenantDomain)) {
+            return username + '@' + tenantDomain;
+        }
+        return username;
+    }
 }
