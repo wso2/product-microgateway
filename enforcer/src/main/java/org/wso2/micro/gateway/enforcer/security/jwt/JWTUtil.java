@@ -36,15 +36,15 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJ
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
-import org.wso2.micro.gateway.enforcer.constants.JwtConstants;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.JWTConstants;
+import org.wso2.micro.gateway.enforcer.util.ClassLoadUtils;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
@@ -60,7 +60,6 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -199,92 +198,103 @@ public class JWTUtil {
         } else {
             // Load custom jwt generator class
             // Get the names of jar files available in the location.
-            List<String> jarFilesList = getJarFilesList();
-
-            for (int fileIndex = 0; fileIndex < jarFilesList.size(); fileIndex++) {
+//            List<String> jarFilesList = getJarFilesList();
+//
+//            for (int fileIndex = 0; fileIndex < jarFilesList.size(); fileIndex++) {
+//                try {
+//                    String pathToJar = JwtConstants.DROPINS_FOLDER + jarFilesList.get(fileIndex);
+//                    JarFile jarFile = new JarFile(pathToJar);
+//                    Enumeration<JarEntry> e = jarFile.entries();
+//
+//                    URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
+//                    URLClassLoader cl = URLClassLoader.newInstance(urls);
+//
+//                    while (e.hasMoreElements()) {
+//                        JarEntry je = e.nextElement();
+//                        if (je.isDirectory() || !je.getName().endsWith(JwtConstants.CLASS)) {
+//                            continue;
+//                        }
+//                        // -6 because of .class
+//                        String className = je.getName().substring(0, je.getName().length() - 6);
+//                        className = className.replace('/', '.');
+//                        if (classNameInConfig.equals(className)) {
+//                            Class classInJar = cl.loadClass(className);
+//                            try {
+//                                jwtGenerator = (AbstractAPIMgtGatewayJWTGenerator) classInJar.newInstance();
+//                                return jwtGenerator;
+//                            } catch (InstantiationException | IllegalAccessException exception) {
+//                                log.debug("Error in generating an object from the class", exception);
+//                            }
+//                        }
+//                    }
+//                } catch (IOException | ClassNotFoundException e) {
+//                    log.debug("Error in loading class", e);
+//                }
+//            }
+            Class<?> loadedClass = ClassLoadUtils.loadClass(classNameInConfig);
+            if (loadedClass != null) {
                 try {
-                    String pathToJar = JwtConstants.DROPINS_FOLDER + jarFilesList.get(fileIndex);
-                    JarFile jarFile = new JarFile(pathToJar);
-                    Enumeration<JarEntry> e = jarFile.entries();
-
-                    URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
-                    URLClassLoader cl = URLClassLoader.newInstance(urls);
-
-                    while (e.hasMoreElements()) {
-                        JarEntry je = e.nextElement();
-                        if (je.isDirectory() || !je.getName().endsWith(JwtConstants.CLASS)) {
-                            continue;
-                        }
-                        // -6 because of .class
-                        String className = je.getName().substring(0, je.getName().length() - 6);
-                        className = className.replace('/', '.');
-                        if (classNameInConfig.equals(className)) {
-                            Class classInJar = cl.loadClass(className);
-                            try {
-                                jwtGenerator = (AbstractAPIMgtGatewayJWTGenerator) classInJar.newInstance();
-                                return jwtGenerator;
-                            } catch (InstantiationException | IllegalAccessException exception) {
-                                log.debug("Error in generating an object from the class", exception);
-                            }
-                        }
-                    }
-                } catch (IOException | ClassNotFoundException e) {
-                    log.debug("Error in loading class", e);
+                    jwtGenerator = (AbstractAPIMgtGatewayJWTGenerator) loadedClass.getDeclaredConstructor()
+                            .newInstance();
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException
+                        | NoSuchMethodException e) {
+                   log.error("Error while generating AbstractAPIMgtGatewayJWTGenerator from the class", e);
                 }
+            } else {
+                log.error("Class Not Found : " + classNameInConfig);
             }
         }
         return jwtGenerator;
     }
 
-    public static List<String> getJarFilesList() {
-        List<String> jarFilesList = new ArrayList<String>();
-        File[] files = new File(JwtConstants.DROPINS_FOLDER).listFiles();
-        //If this pathname does not denote a directory, then listFiles() returns null.
-        for (File file : files) {
-            if (file.isFile()) {
-                String fileName = file.getName();
-                if (fileName.endsWith(JwtConstants.JAR)) {
-                    jarFilesList.add(file.getName());
-                }
-            }
-        }
-        return jarFilesList;
-    }
+//    public static List<String> getJarFilesList() {
+//        List<String> jarFilesList = new ArrayList<String>();
+//        File[] files = new File(JwtConstants.DROPINS_FOLDER).listFiles();
+//        //If this pathname does not denote a directory, then listFiles() returns null.
+//        for (File file : files) {
+//            if (file.isFile()) {
+//                String fileName = file.getName();
+//                if (fileName.endsWith(JwtConstants.JAR)) {
+//                    jarFilesList.add(file.getName());
+//                }
+//            }
+//        }
+//        return jarFilesList;
+//    }
 
     public static Map<String, JWTTransformer> loadJWTTransformers() {
-        JWTTransformer jwtTransformer = null;
-        List<String> jarFilesList = getJarFilesList();
+        JWTTransformer jwtTransformer;
+        List<String> jarFilesList = ClassLoadUtils.getJarFilesList();
         Map<String, JWTTransformer> jwtTransformersMap = new HashMap<>();
-        for (int fileIndex = 0; fileIndex < jarFilesList.size(); fileIndex++) {
+        for (String s : jarFilesList) {
             try {
-                String pathToJar = JwtConstants.DROPINS_FOLDER + jarFilesList.get(fileIndex);
+                String pathToJar = ClassLoadUtils.DROPINS_DIRECTORY + s;
                 JarFile jarFile = new JarFile(pathToJar);
                 Enumeration<JarEntry> e = jarFile.entries();
+                URLClassLoader cl = ClassLoadUtils.getURLClassLoaderForJar(pathToJar);
 
-                URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
-                URLClassLoader cl = URLClassLoader.newInstance(urls);
                 while (e.hasMoreElements()) {
                     JarEntry je = e.nextElement();
-                    if (je.isDirectory() || !je.getName().endsWith(JwtConstants.CLASS)) {
+                    if (je.isDirectory() || !je.getName().endsWith(ClassLoadUtils.CLASS_EXTENSION)) {
                         continue;
                     }
-                    // -6 because of .class
-                    String className = je.getName().substring(0, je.getName().length() - 6);
-                    className = className.replace('/', '.');
-                    Class classInJar = cl.loadClass(className);
+                    String className = ClassLoadUtils.formatClassNameFromJarEntry(je);
+                    Class<?> classInJar = cl.loadClass(className);
                     try {
                         Annotation[] annotations = classInJar.getAnnotations();
                         for (Annotation annotation : annotations) {
                             if (annotation instanceof JwtTransformerAnnotation) {
                                 JwtTransformerAnnotation jwtTransformerAnnotation =
                                         (JwtTransformerAnnotation) annotation;
-                                if (jwtTransformerAnnotation.enabled() == true) {
-                                    jwtTransformer = (JWTTransformer) classInJar.newInstance();
+                                if (jwtTransformerAnnotation.enabled()) {
+                                    jwtTransformer = (JWTTransformer) classInJar.getDeclaredConstructor()
+                                            .newInstance();
                                     jwtTransformersMap.put(jwtTransformerAnnotation.issuer(), jwtTransformer);
                                 }
                             }
                         }
-                    } catch (InstantiationException | IllegalAccessException exception) {
+                    } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+                            | InvocationTargetException exception) {
                         log.debug("Error in generating an object from the class", exception);
                     }
                 }
