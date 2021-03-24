@@ -53,7 +53,6 @@ public class CustomJwtTransformerTestCase {
 
         JSONObject responseJSON = new JSONObject(response.getData());
         String tokenFull = responseJSON.get("token").toString();
-        System.out.println(tokenFull);
         String strTokenBody = tokenFull.split("\\.")[1];
         String decodedTokenBody = new String(Base64.getUrlDecoder().decode(strTokenBody));
         JSONObject tokenBody = new JSONObject(decodedTokenBody);

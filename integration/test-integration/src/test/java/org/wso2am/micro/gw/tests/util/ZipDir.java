@@ -19,6 +19,10 @@
 package org.wso2am.micro.gw.tests.util;
 
 
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.FileOutputStream;
 import java.nio.file.FileVisitResult;
@@ -35,47 +39,42 @@ import java.util.zip.ZipOutputStream;
  *
  */
 public class ZipDir extends SimpleFileVisitor<Path> {
+    private static final Logger log = LoggerFactory.getLogger(ZipDir.class);
 
     private static ZipOutputStream zos;
-
-    private Path sourceDir;
+    private final Path sourceDir;
 
     public ZipDir(Path sourceDir) {
         this.sourceDir = sourceDir;
     }
 
     @Override
-    public FileVisitResult visitFile(Path file,
-                                     BasicFileAttributes attributes) {
-
+    public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
         try {
             Path targetFile = sourceDir.relativize(file);
-
             zos.putNextEntry(new ZipEntry(targetFile.toString()));
 
             byte[] bytes = Files.readAllBytes(file);
             zos.write(bytes, 0, bytes.length);
             zos.closeEntry();
-
-        } catch (IOException ex) {
-            System.err.println(ex);
+        } catch (IOException e) {
+            log.error("Error occurred while adding files to the zip", e);
         }
-
         return FileVisitResult.CONTINUE;
     }
 
     public static void createZipFile(String dirPath) {
         Path sourceDir = Paths.get(dirPath);
+        String zipFileName = dirPath.concat(".zip");
 
-        try {
-            String zipFileName = dirPath.concat(".zip");
-            zos = new ZipOutputStream(new FileOutputStream(zipFileName));
-
+        try (FileOutputStream fileOutputStream = new FileOutputStream(zipFileName)) {
+            zos = new ZipOutputStream(fileOutputStream);
             Files.walkFileTree(sourceDir, new ZipDir(sourceDir));
-
             zos.close();
-        } catch (IOException ex) {
-            System.err.println("I/O Error: " + ex);
+        } catch (IOException e) {
+            log.error("Error occurred while compressing directory into zip", e);
+        } finally {
+            IOUtils.closeQuietly(zos);
         }
     }
 }
