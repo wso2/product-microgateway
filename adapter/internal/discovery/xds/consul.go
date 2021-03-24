@@ -95,7 +95,7 @@ func updateCertsForServiceMesh() {
 
 	//send the update to Router
 	for apiKey := range openAPIClustersMap {
-		updateXDSRouteCacheForServiceDiscovery(apiKey)
+		updateXDSClusterCache(apiKey)
 	}
 }
 
@@ -122,18 +122,18 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 				if !reflect.DeepEqual(val, queryResultsList) {
 					svcdiscovery.SetClusterConsulResultMap(clusterName, queryResultsList)
 					//update the envoy cluster
-					updateRoute(apiKey, clusterName, queryResultsList)
+					updateCluster(apiKey, clusterName, queryResultsList)
 				}
 			} else {
 				logger.LoggerXds.Debugln("updating cluster from the consul service registry, removed the default host")
 				svcdiscovery.SetClusterConsulResultMap(clusterName, queryResultsList)
-				updateRoute(apiKey, clusterName, queryResultsList)
+				updateCluster(apiKey, clusterName, queryResultsList)
 			}
 		}
 	}
 }
 
-func updateRoute(apiKey string, clusterName string, queryResultsList []svcdiscovery.Upstream) {
+func updateCluster(apiKey string, clusterName string, queryResultsList []svcdiscovery.Upstream) {
 	if clusterList, available := openAPIClustersMap[apiKey]; available {
 		for i := range clusterList {
 			if clusterList[i].Name == clusterName {
@@ -166,13 +166,13 @@ func updateRoute(apiKey string, clusterName string, queryResultsList []svcdiscov
 						},
 					},
 				}
-				updateXDSRouteCacheForServiceDiscovery(apiKey)
+				updateXDSClusterCache(apiKey)
 			}
 		}
 	}
 }
 
-func updateXDSRouteCacheForServiceDiscovery(apiKey string) {
+func updateXDSClusterCache(apiKey string) {
 	for key, envoyLabelList := range openAPIEnvoyMap {
 		if key == apiKey {
 			for _, label := range envoyLabelList {
