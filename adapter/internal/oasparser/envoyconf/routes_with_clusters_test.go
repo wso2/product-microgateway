@@ -269,8 +269,7 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
 	mgwSwagger := operator.GetMgwSwaggerWebSocket(apiJsn)
-	//routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil)
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil)
-	t.Log(routes)
-	t.Log(clusters)
+	assert.NotNil(t, routes, "CreateRoutesWithClusters failed: returned routes nil")
+	assert.NotNil(t, clusters, "CreateRoutesWithClusters failed: returned clusters nil")
 }
