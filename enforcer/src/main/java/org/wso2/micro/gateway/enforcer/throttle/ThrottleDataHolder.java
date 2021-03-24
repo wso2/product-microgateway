@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
+import org.wso2.micro.gateway.enforcer.discovery.ThrottleDataDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.throttle.dto.Decision;
 import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
@@ -58,6 +59,24 @@ public class ThrottleDataHolder {
         }
 
         return instance;
+    }
+
+    /**
+     * Load initial data maps from throttle data endpoints.
+     */
+    public void init() {
+        ThrottleDataDiscoveryClient.getInstance().watchThrottleData();
+    }
+
+    /**
+     * Add all key templates in a given map to the key template map.
+     *
+     * @param templates Map of key template
+     */
+    public void addKeyTemplates(Map<String, String> templates) {
+        if (templates.size() > 0) {
+            keyTemplates.putAll(templates);
+        }
     }
 
     /**

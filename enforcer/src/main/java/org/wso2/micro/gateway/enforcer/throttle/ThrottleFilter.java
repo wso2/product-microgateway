@@ -97,8 +97,10 @@ public class ThrottleFilter implements Filter {
             String resourceThrottleKey = getResourceThrottleKey(reqContext, apiContext, apiVersion);
             String subTier = authContext.getTier();
             String appTier = authContext.getApplicationTier();
-            String authorizedUser = authContext.getUsername();
+            String appTenant = authContext.getSubscriberTenantDomain();
+            String clientIp = reqContext.getClientIp();
             String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
+            String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
             boolean isApiLevelTriggered = false;
 
             if (!StringUtils.isEmpty(apiTier) && !ThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(apiTier)) {
@@ -159,8 +161,6 @@ public class ThrottleFilter implements Filter {
             }
 
             // Checking Custom policy throttling
-            String appTenant = authContext.getSubscriberTenantDomain();
-            String clientIp = reqContext.getClientIp();
             Decision customDecision = dataHolder.isThrottledByCustomPolicy(authorizedUser, resourceThrottleKey,
                     apiContext, apiVersion, appTenant, apiTenantDomain, appId, clientIp);
             if (customDecision.isThrottled()) {
@@ -214,7 +214,7 @@ public class ThrottleFilter implements Filter {
      * @return Map of throttle event data
      */
     private Map<String, String> getThrottleEventMap(RequestContext requestContext) {
-        AuthenticationContext authenticationContext = requestContext.getAuthenticationContext();
+        AuthenticationContext authContext = requestContext.getAuthenticationContext();
         Map<String, String> throttleEvent = new HashMap<>();
         APIConfig api = requestContext.getMatchedAPI().getAPIConfig();
 
@@ -224,6 +224,8 @@ public class ThrottleFilter implements Filter {
         String apiName = api.getName();
         String apiTier = getApiTier(api);
         String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
+        String appTenant = authContext.getSubscriberTenantDomain();
+        String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
         if (tenantDomain == null) {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
         }
@@ -239,23 +241,23 @@ public class ThrottleFilter implements Filter {
         }
 
         throttleEvent.put(ThrottleEventConstants.MESSAGE_ID, requestContext.getRequestID());
-        throttleEvent.put(ThrottleEventConstants.APP_KEY, authenticationContext.getApplicationId() + ':' +
-                authenticationContext.getUsername());
-        throttleEvent.put(ThrottleEventConstants.APP_TIER, authenticationContext.getApplicationTier());
+        throttleEvent.put(ThrottleEventConstants.APP_KEY, authContext.getApplicationId() + ':' +
+                authContext.getUsername());
+        throttleEvent.put(ThrottleEventConstants.APP_TIER, authContext.getApplicationTier());
         throttleEvent.put(ThrottleEventConstants.API_KEY, apiContext);
         throttleEvent.put(ThrottleEventConstants.API_TIER, apiTier);
-        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authenticationContext.getApplicationId() + ':' +
+        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authContext.getApplicationId() + ':' +
                 apiContext);
-        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_TIER, authenticationContext.getTier());
+        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_TIER, authContext.getTier());
         throttleEvent.put(ThrottleEventConstants.RESOURCE_KEY, resourceKey);
         throttleEvent.put(ThrottleEventConstants.RESOURCE_TIER, resourceTier);
         // TODO: (Praminda) should publish with tenant domain?
-        throttleEvent.put(ThrottleEventConstants.USER_ID, authenticationContext.getUsername());
+        throttleEvent.put(ThrottleEventConstants.USER_ID, authorizedUser);
         throttleEvent.put(ThrottleEventConstants.API_CONTEXT, basePath);
         throttleEvent.put(ThrottleEventConstants.API_VERSION, apiVersion);
-        throttleEvent.put(ThrottleEventConstants.APP_TENANT, authenticationContext.getSubscriberTenantDomain());
+        throttleEvent.put(ThrottleEventConstants.APP_TENANT, authContext.getSubscriberTenantDomain());
         throttleEvent.put(ThrottleEventConstants.API_TENANT, tenantDomain);
-        throttleEvent.put(ThrottleEventConstants.APP_ID, authenticationContext.getApplicationId());
+        throttleEvent.put(ThrottleEventConstants.APP_ID, authContext.getApplicationId());
         throttleEvent.put(ThrottleEventConstants.API_NAME, apiName);
         throttleEvent.put(ThrottleEventConstants.PROPERTIES, getProperties(requestContext).toString());
         return throttleEvent;
