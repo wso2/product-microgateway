@@ -20,11 +20,13 @@ package org.wso2am.micro.gw.tests.util;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.io.FileUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.wso2am.micro.gw.tests.context.MgwServerInstance;
 import org.wso2am.micro.gw.tests.context.MicroGWTestException;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -36,7 +38,6 @@ import java.net.URL;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -126,7 +127,7 @@ public class Utils {
         //check whether http port is already occupied
         if (isPortOpen(port)) {
             throw new MicroGWTestException("Unable to start carbon server on port " +
-                    (port) + " : Port already in use");
+                                                   (port) + " : Port already in use");
         }
     }
 
@@ -232,8 +233,7 @@ public class Utils {
     }
 
     /**
-     * Return the system property value of os.name.
-     * System.getProperty("os.name").
+     * Return the system property value of os.name. System.getProperty("os.name").
      *
      * @return Operating System name
      */
@@ -318,8 +318,7 @@ public class Utils {
      *
      * @param sourceLocation file location.
      * @param destLocation   copy destination.
-     *
-     * @throws    MicroGWTestException
+     * @throws MicroGWTestException
      */
     public static void copyFile(String sourceLocation, String destLocation) throws MicroGWTestException {
         File source = new File(sourceLocation);
@@ -336,8 +335,7 @@ public class Utils {
      *
      * @param sourceLocation folder location.
      * @param destLocation   copy destination.
-     *
-     * @throws    MicroGWTestException
+     * @throws MicroGWTestException
      */
     public static void copyDirectory(String sourceLocation, String destLocation) throws MicroGWTestException {
         File source = new File(sourceLocation);
@@ -348,6 +346,24 @@ public class Utils {
             throw new MicroGWTestException("error while copying directory. ");
         }
     }
+
+    /**
+     * Retrieve  the value from JSON object bu using the key.
+     *
+     * @param httpResponse - Response that containing the JSON object in it response data.
+     * @param key          - key of the JSON value the need to retrieve.
+     * @return String - The value of provided key as a String
+     * @throws MicroGWTestException - Exception throws when resolving the JSON object in the HTTP response
+     */
+    protected String getValueFromJSON(HttpResponse httpResponse, String key) throws MicroGWTestException {
+        try {
+            JSONObject jsonObject = new JSONObject(httpResponse.getData());
+            return jsonObject.get(key).toString();
+        } catch (JSONException e) {
+            throw new MicroGWTestException("Exception thrown when resolving the JSON object in the HTTP response ", e);
+        }
+    }
+
 
     public static String getTargetDirPath() {
         File targetClassesDir = new File(Utils.class.getProtectionDomain().getCodeSource().
@@ -367,5 +383,18 @@ public class Utils {
 
     public static String getMockServiceURLHttp(String servicePath) throws MalformedURLException {
         return new URL(new URL("http://localhost:" + TestConstant.MOCK_SERVER_PORT), servicePath).toString();
+    }
+
+    public static String getDockerMockServiceURLHttp(String servicePath) throws MalformedURLException {
+        return new URL(new URL("http://mockBackend:" + TestConstant.MOCK_SERVER_PORT), servicePath).toString();
+    }
+
+    public static String getAPIMServiceURLHttps(String servicePath) throws MalformedURLException {
+        return new URL(new URL("https://localhost:" + TestConstant.APIM_SERVLET_TRP_HTTPS_PORT), servicePath)
+                .toString();
+    }
+
+    public static String getAPIMServiceURLHttp(String servicePath) throws MalformedURLException {
+        return new URL(new URL("http://localhost:" + TestConstant.APIM_SERVLET_TRP_HTTP_PORT), servicePath).toString();
     }
 }
