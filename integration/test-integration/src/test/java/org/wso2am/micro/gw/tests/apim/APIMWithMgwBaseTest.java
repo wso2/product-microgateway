@@ -58,6 +58,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.xml.xpath.XPathExpressionException;
 
 public class APIMWithMgwBaseTest extends BaseTestCase {
@@ -238,7 +239,7 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException ignored) {
-                        // do nothing
+                        Thread.currentThread().interrupt();
                     }
                 }
             }
@@ -301,6 +302,9 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
      */
     protected void cleanUp() throws Exception {
 
+        if (Objects.isNull(restAPIStore)) {
+            return;
+        }
         ApplicationListDTO applicationListDTO = restAPIStore.getAllApps();
         if (applicationListDTO.getList() != null) {
             for (ApplicationInfoDTO applicationInfoDTO : applicationListDTO.getList()) {
@@ -317,6 +321,9 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
             }
         }
 
+        if (Objects.isNull(restAPIPublisher)) {
+            return;
+        }
         APIProductListDTO allApiProducts = restAPIPublisher.getAllApiProducts();
         List<APIProductInfoDTO> apiProductListDTO = allApiProducts.getList();
 

@@ -64,7 +64,7 @@ public class APIManagerWithMgwServerInstance extends MgwServerImpl {
      */
     public APIManagerWithMgwServerInstance(String confPath, boolean tlsEnabled) throws MicroGWTestException,
                                                                                        IOException {
-        createTmpMgwSetup();
+        createTmpMgwSetup(false);
         if (!StringUtils.isEmpty(confPath)) {
             Utils.copyFile(confPath, mgwTmpServerPath + File.separator + "resources" + File.separator +
                     "conf" + File.separator + "config.toml");
@@ -77,14 +77,5 @@ public class APIManagerWithMgwServerInstance extends MgwServerImpl {
         environment = new DockerComposeContainer(new File(dockerComposePath)).withLocalCompose(true).waitingFor(
                 TestConstant.APIM_SERVICE_NAME_IN_DOCKER_COMPOSE,
                 Wait.forLogMessage("\\/localhost:9443\\/carbon\\/", 1));
-    }
-
-    /**
-     * This will create a separate mgw setup in the target/server-tmp directory to execute the tests.
-     *
-     * @throws MicroGWTestException if something goes wring while copying the config file
-     */
-    private void createTmpMgwSetup() throws MicroGWTestException {
-        Utils.copyDirectory(mgwServerPath, mgwTmpServerPath);
     }
 }
