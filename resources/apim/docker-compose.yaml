@@ -1,7 +1,7 @@
-version: "3.7"
+version: "2.4"
 services:
   router:
-    image: wso2/mg-router:4.0.0-m8-SNAPSHOT
+    image: wso2/mg-router:4.0.0-m10-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -28,7 +28,7 @@ services:
       - adapter
       - enforcer
   adapter:
-    image: wso2/mg-adapter:4.0.0-m8-SNAPSHOT
+    image: wso2/mg-adapter:4.0.0-m10-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -48,7 +48,7 @@ services:
     links:
       - apim
   enforcer:
-    image: wso2/mg-enforcer:4.0.0-m8-SNAPSHOT
+    image: wso2/mg-enforcer:4.0.0-m10-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -69,6 +69,7 @@ services:
       - ADAPTER_XDS_PORT=18000
       - ENFORCER_LABEL=Production and Sandbox
       - XDS_MAX_MSG_SIZE=4194304
+      - XDS_MAX_RETRIES=3
       - JAVA_OPTS=${JAVA_OPTS} -Dhttpclient.hostnameVerifier=AllowAll
       - apim_admin_pwd=admin
     ports:
@@ -78,7 +79,6 @@ services:
     healthcheck:
       test: ["CMD", "nc", "-z","localhost", "9443"]
       interval: 10s
-      start_period: 120s
       retries: 50
     ports:
       - "9763:9763"

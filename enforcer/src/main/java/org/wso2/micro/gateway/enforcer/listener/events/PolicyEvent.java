@@ -22,7 +22,7 @@ package org.wso2.micro.gateway.enforcer.listener.events;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 
 /**
- * Policy Event class
+ * Policy Event class.
  */
 public class PolicyEvent extends Event {
     protected APIConstants.PolicyType policyType;

@@ -19,7 +19,7 @@
 package org.wso2.micro.gateway.enforcer.common;
 
 /**
- * An interface to indicate that an entity provides a cacheKey
+ * An interface to indicate that an entity provides a cacheKey.
  *
  * @param <K> Type of the CacheKey
  */

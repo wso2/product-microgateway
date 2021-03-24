@@ -17,7 +17,7 @@
  */
 package org.wso2.micro.gateway.enforcer.api.config;
 
-import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +31,8 @@ public class APIConfig {
     private String basePath;
     private String apiLifeCycleState;
 
-    private List<String> securitySchemas = new ArrayList<>();
-    private String tier = APIConstants.UNLIMITED_TIER;
+    private List<String> securitySchemes = new ArrayList<>();
+    private String tier = ThrottleConstants.UNLIMITED_TIER;
     private List<ResourceConfig> resources = new ArrayList<>();
 
     /**
@@ -45,8 +45,8 @@ public class APIConfig {
         private String basePath;
         private String apiLifeCycleState;
 
-        private List<String> securitySchemas = new ArrayList<>();
-        private String tier = APIConstants.UNLIMITED_TIER;
+        private List<String> securitySchemes = new ArrayList<>();
+        private String tier = ThrottleConstants.UNLIMITED_TIER;
         private List<ResourceConfig> resources = new ArrayList<>();
 
         public Builder(String name) {
@@ -68,8 +68,18 @@ public class APIConfig {
             return this;
         }
 
+        public Builder tier(String tier) {
+            this.tier = tier;
+            return this;
+        }
+
         public Builder resources(List<ResourceConfig> resources) {
             this.resources = resources;
+            return this;
+        }
+
+        public Builder securitySchema(List<String> securityScheme) {
+            this.securitySchemes = securitySchemes;
             return this;
         }
 
@@ -80,6 +90,8 @@ public class APIConfig {
             apiConfig.version = this.version;
             apiConfig.apiLifeCycleState = this.apiLifeCycleState;
             apiConfig.resources = this.resources;
+            apiConfig.securitySchemes = this.securitySchemes;
+            apiConfig.tier = this.tier;
             return apiConfig;
         }
     }
@@ -104,7 +116,7 @@ public class APIConfig {
     }
 
     public List<String> getSecuritySchemas() {
-        return securitySchemas;
+        return securitySchemes;
     }
 
     public String getTier() {

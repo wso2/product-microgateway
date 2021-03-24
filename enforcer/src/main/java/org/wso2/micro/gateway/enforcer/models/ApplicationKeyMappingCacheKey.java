@@ -21,7 +21,7 @@ package org.wso2.micro.gateway.enforcer.models;
 import java.util.Objects;
 
 /**
- * Cache Key For Application KeyMapping Entries
+ * Cache Key For Application KeyMapping Entries.
  */
 public class ApplicationKeyMappingCacheKey {
 

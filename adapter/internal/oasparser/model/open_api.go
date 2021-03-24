@@ -103,15 +103,19 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) []Resource {
 }
 
 func getOperationLevelDetails(operation *openapi3.Operation, method string) Operation {
+	extensions := convertExtensibletoReadableFormat(operation.ExtensionProps)
+
 	if operation.Security != nil {
 		var securityData []openapi3.SecurityRequirement = *(operation.Security)
 		var securityArray = make([]map[string][]string, len(securityData))
 		for i, security := range securityData {
 			securityArray[i] = security
 		}
-		return Operation{method, securityArray}
+
+		return NewOperation(method, securityArray, extensions)
 	}
-	return Operation{method, nil}
+
+	return NewOperation(method, nil, extensions)
 }
 
 // getHostandBasepathandPort retrieves host, basepath and port from the endpoint defintion

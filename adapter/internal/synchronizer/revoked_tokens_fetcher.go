@@ -64,7 +64,7 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 	} else {
 		ehURL += "/" + revokeEndpoint
 	}
-	logger.LoggerSync.Debugf("Fetching APIs from the URL %v: ", ehURL)
+	logger.LoggerSync.Debugf("Fetching revoked tokens from the URL %v: ", ehURL)
 
 	ehUname := ehConfigs.Username
 	ehPass := ehConfigs.Password
@@ -96,12 +96,12 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 	// Setting authorization header
 	req.Header.Set(authorization, basicAuth)
 	// Make the request
-	logger.LoggerSync.Debug("Sending the controle plane request")
+	logger.LoggerSync.Debug("Sending the control plane request")
 	resp, err := client.Do(req)
 	// In the event of a connection error, the error would not be nil, then return the error
 	// If the error is not null, proceed
 	if err != nil {
-		logger.LoggerSync.Errorf("Error occurred while retrieving APIs from API manager: %v", err)
+		logger.LoggerSync.Errorf("Error occurred while retrieving revoked tokens from API manager: %v", err)
 		respSyncAPI.Err = err
 		respSyncAPI.Resp = nil
 		c <- respSyncAPI
@@ -170,10 +170,12 @@ func UpdateRevokedTokens() {
 				logger.LoggerSync.Errorf("Error occurred while unmarshalling tokens %v", err)
 			}
 			pushTokens(tokens)
+			break
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-			logger.LoggerSync.Errorf("Error occurred when retrieveing revoked token from control plane: %v", data.Err)
+			logger.LoggerSync.Errorf("Error occurred when retrieving revoked token from control plane: %v", data.Err)
+			break
 		} else {
-			// Keep the iteration still until all the envrionment response properly.
+			// Keep the iteration still until all the environment response properly.
 			logger.LoggerSync.Errorf("Error occurred while fetching revoked tokens from control plane: %v", data.Err)
 			go func() {
 				// Retry fetching from control plane after a configured time interval

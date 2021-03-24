@@ -18,9 +18,14 @@
 package org.wso2.micro.gateway.enforcer.api;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
+import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -35,7 +40,10 @@ public class RequestContext {
     private String requestMethod;
     private ResourceConfig matchedResourcePath;
     private Map<String, String> headers;
-    private Map<String, Object> properties = new HashMap();
+    private Map<String, Object> properties = new HashMap<>();
+    private AuthenticationContext authenticationContext;
+    private String requestID;
+    private String clientIp;
     // Denotes the cluster header name for each environment. Both properties can be null if
     // the openAPI has production endpoints alone.
     private String prodClusterHeader;
@@ -43,10 +51,9 @@ public class RequestContext {
     private boolean clusterHeaderEnabled = false;
     //Denotes the specific headers which needs to be passed to response object
     private Map<String, String> responseHeaders;
+    private Map<String, String> queryParameters;
 
-    private RequestContext() {
-
-    }
+    private RequestContext() {}
 
     /**
      * Implements builder pattern to build an {@link RequestContext} object.
@@ -59,7 +66,10 @@ public class RequestContext {
         private Map<String, String> headers;
         private String prodClusterHeader;
         private String sandClusterHeader;
-        private Map<String, Object> properties = new HashMap();
+        private Map<String, Object> properties = new HashMap<>();
+        private AuthenticationContext authenticationContext = new AuthenticationContext();
+        private String requestID;
+        private String clientIp;
 
         public Builder(String requestPath) {
             this.requestPath = requestPath;
@@ -99,6 +109,21 @@ public class RequestContext {
             return this;
         }
 
+        public Builder authenticationContext(AuthenticationContext authenticationContext) {
+            this.authenticationContext = authenticationContext;
+            return this;
+        }
+
+        public Builder requestID(String requestID) {
+            this.requestID = requestID;
+            return this;
+        }
+
+        public Builder address(String address) {
+            this.clientIp = address;
+            return this;
+        }
+
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
@@ -109,13 +134,38 @@ public class RequestContext {
             requestContext.prodClusterHeader = this.prodClusterHeader;
             requestContext.sandClusterHeader = this.sandClusterHeader;
             requestContext.properties = this.properties;
+            requestContext.authenticationContext = this.authenticationContext;
+            requestContext.requestID = this.requestID;
+            requestContext.clientIp = this.clientIp;
+            requestContext.responseHeaders = new HashMap<>();
+            String[] queryParts = this.requestPath.split("\\?");
+            String queryPrams = queryParts.length > 1 ? queryParts[1] : "";
+
+            requestContext.queryParameters = new HashMap<>();
+            List<NameValuePair> queryParams = URLEncodedUtils.parse(queryPrams, StandardCharsets.UTF_8);
+            for (NameValuePair param : queryParams) {
+                requestContext.queryParameters.put(param.getName(), param.getValue());
+            }
 
             // Adapter assigns header based routing only if both type of endpoints are present.
             if (!StringUtils.isEmpty(prodClusterHeader) && !StringUtils.isEmpty(sandClusterHeader)) {
                 requestContext.clusterHeaderEnabled = true;
             }
+
             return requestContext;
         }
+    }
+
+    public AuthenticationContext getAuthenticationContext() {
+        return authenticationContext;
+    }
+
+    public String getRequestID() {
+        return requestID;
+    }
+
+    public String getClientIp() {
+        return clientIp;
     }
 
     public API getMathedAPI() {
@@ -196,5 +246,14 @@ public class RequestContext {
      */
     public Map<String, String> getResponseHeaders() {
         return responseHeaders;
+    }
+
+    /**
+     * Retrieve a map of query parameters in the request.
+     *
+     * @return query parameters as a map of {@code <param_name, param_value>}
+     */
+    public Map<String, String> getQueryParameters() {
+        return queryParameters;
     }
 }

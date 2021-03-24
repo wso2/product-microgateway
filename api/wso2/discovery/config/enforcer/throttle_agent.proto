@@ -9,6 +9,7 @@ option java_multiple_files = true;
 
 // [#protodoc-title: ThrottleAgent]
 
+// Throttle Agent configuration model
 message ThrottleAgent {
    string sslEnabledProtocols = 1;
    string ciphers = 2;

@@ -110,6 +110,11 @@ public class OAuthAuthenticator implements Authenticator {
         return new AuthenticationContext();
     }
 
+    @Override
+    public int getPriority() {
+        return 0;
+    }
+
     /**
      * Extracts the customer API key from the OAuth Authentication header. If the required
      * security header is present in the provided map, it will be removed from the map

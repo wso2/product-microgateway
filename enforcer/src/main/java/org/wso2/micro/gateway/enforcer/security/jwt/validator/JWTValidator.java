@@ -52,25 +52,21 @@ import java.util.Map;
  */
 public class JWTValidator {
     private static final Logger logger = LogManager.getLogger(JWTValidator.class);
-    private Map<String, ExtendedTokenIssuerDto> tokenIssuers;
     private ExtendedTokenIssuerDto tokenIssuer;
     private JWTTransformer jwtTransformer;
     private JWKSet jwkSet;
 
     public JWTValidator() {
-        loadTokenIssuerConfiguration();
     }
 
-    public void loadTokenIssuerConfiguration() {
-        tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
-        //this.jwtTransformer = new DefaultJWTTransformer();
-    }
 
     public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws MGWException {
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
+        Map<String, ExtendedTokenIssuerDto> tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
+
         if (StringUtils.isNotEmpty(issuer) && tokenIssuers.containsKey(issuer)) {
-            this.tokenIssuer = this.tokenIssuers.get(issuer);
+            this.tokenIssuer = tokenIssuers.get(issuer);
             this.jwtTransformer = ConfigHolder.getInstance().getConfig().getJwtTransformerMap().get(issuer);
             if (this.jwtTransformer == null) {
                 this.jwtTransformer = new DefaultJWTTransformer();

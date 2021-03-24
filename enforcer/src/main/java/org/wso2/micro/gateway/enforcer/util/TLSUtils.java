@@ -21,7 +21,6 @@ package org.wso2.micro.gateway.enforcer.util;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -139,11 +138,10 @@ public class TLSUtils {
         }
     }
 
-    public static Certificate getCertificate() throws CertificateException, IOException {
+    public static Certificate getCertificate(String filePath) throws CertificateException, IOException {
         Certificate certificate = null;
         CertificateFactory fact = CertificateFactory.getInstance(X509);
-        FileInputStream is = new FileInputStream(ConfigHolder.getInstance().getConfig().
-                getPublicCertificatePath());
+        FileInputStream is = new FileInputStream(filePath);
         X509Certificate cert = (X509Certificate) fact.generateCertificate(is);
         certificate = (Certificate) cert;
         return certificate;
