@@ -102,20 +102,4 @@ public class MgwServerInstance extends MgwServerImpl {
         }
 
     }
-
-    /**
-     * This will create a separate mgw setup in the target directory to execute the tests.
-     *
-     * @param customJwtTransformerEnabled - whether the custom JWT transformer is enabled or not
-     * @throws MicroGWTestException
-     */
-    public void createTmpMgwSetup(boolean customJwtTransformerEnabled) throws MicroGWTestException {
-        Utils.copyDirectory(mgwServerPath, mgwTmpServerPath);
-        String jarLocation = System.getProperty("jwt_transformer_jar");
-        if (customJwtTransformerEnabled) {
-            Utils.copyFile(jarLocation, targetDir +
-                    File.separator + "server-tmp" + File.separator + "resources" + File.separator + "enforcer" +
-                    File.separator + "dropins" + File.separator + "jwt-transformer.jar");
-        }
-    }
 }

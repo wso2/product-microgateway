@@ -97,4 +97,19 @@ public abstract class MgwServerImpl implements MgwServer {
                 "/v2/pet/3"), headers);
         return response != null && response.getResponseCode() == HttpStatus.SC_OK;
     }
+
+    /**
+     * This will create a separate mgw setup in the target directory to execute the tests.
+     *
+     * @param customJwtTransformerEnabled - whether the custom JWT transformer is enabled or not
+     * @throws MicroGWTestException if an error occurs while file copy operation
+     */
+    void createTmpMgwSetup(boolean customJwtTransformerEnabled) throws MicroGWTestException {
+        Utils.copyDirectory(mgwServerPath, mgwTmpServerPath);
+        if (customJwtTransformerEnabled) {
+            Utils.copyFile(System.getProperty("jwt_transformer_jar"), targetDir + File.separator
+                    + "server-tmp" + File.separator + "resources" + File.separator + "enforcer" + File.separator
+                    + "dropins" + File.separator + "jwt-transformer.jar");
+        }
+    }
 }
