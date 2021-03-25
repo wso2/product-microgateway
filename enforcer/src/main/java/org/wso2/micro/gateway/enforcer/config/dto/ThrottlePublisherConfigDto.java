@@ -16,18 +16,19 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.enforcer.throttle.databridge.publisher;
+package org.wso2.micro.gateway.enforcer.config.dto;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.throttle.databridge.publisher.DataPublisherConstants;
 
 import java.util.Map;
 
 /**
  * This class holds the configurations related to binary data publisher.
  */
-public class PublisherConfiguration {
-    private static final Logger log = LogManager.getLogger(PublisherConfiguration.class);
+public class ThrottlePublisherConfigDto {
+    private static final Logger log = LogManager.getLogger(ThrottlePublisherConfigDto.class);
 
     private int maxIdleDataPublishingAgents;
     private int initIdleObjectDataPublishingAgents;
@@ -39,11 +40,6 @@ public class PublisherConfiguration {
     private String authUrlGroup;
     private String userName;
     private char[] password;
-
-    private static PublisherConfiguration instance = new PublisherConfiguration();
-
-    private PublisherConfiguration() {
-    }
 
     public void setMaxIdleDataPublishingAgents(int maxIdleDataPublishingAgents) {
         this.maxIdleDataPublishingAgents = maxIdleDataPublishingAgents;
@@ -115,14 +111,6 @@ public class PublisherConfiguration {
 
     public String getPassword() {
         return String.valueOf(password);
-    }
-
-    public static PublisherConfiguration getInstance() {
-        return instance;
-    }
-
-    public static synchronized void setInstance(PublisherConfiguration publisherConfiguration) {
-        instance = publisherConfiguration;
     }
 
     public void setConfiguration(Map<String, Object> publisherConfiguration) {
