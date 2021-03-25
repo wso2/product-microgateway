@@ -38,19 +38,37 @@ func TestCreateListenerWithRds(t *testing.T) {
 func TestCreateVirtualHost(t *testing.T) {
 	// TODO: (Vajira) Add more test scenarios
 
-	vHostName := "default"
-	vHost := CreateVirtualHost(vHostName, testCreateRoutesForUnitTests(t))
+	vhostToRouteArrayMap := map[string][]*routev3.Route{
+		"*":           testCreateRoutesForUnitTests(t),
+		"mg.wso2.com": testCreateRoutesForUnitTests(t),
+	}
+	vHosts := CreateVirtualHosts(vhostToRouteArrayMap)
 
-	assert.NotNil(t, vHost, "Virtual Host creation failed")
-	assert.Equal(t, vHost.Name, vHostName, "VirtualHost name not match")
+	if len(vHosts) != 2 {
+		t.Error("Virtual Host creation failed")
+	}
 
+	for _, vHost := range vHosts {
+		_, found := vhostToRouteArrayMap[vHost.Name]
+		if found {
+			if vHost.Domains[0] != vHost.Name {
+				t.Errorf("Virtual Host domain mismatched, expected %s but found %s",
+					vHost.Name, vHost.Domains[0])
+			}
+		} else {
+			t.Errorf("Invalid additional Virtual Host: %s", vHost.Name)
+		}
+	}
 }
 
 func TestCreateRoutesConfigForRds(t *testing.T) {
 	// TODO: (Vajira) Add more test scenarios
-	vHostName := "default"
-	vHost := CreateVirtualHost(vHostName, testCreateRoutesForUnitTests(t))
-	rConfig := CreateRoutesConfigForRds(vHost)
+	vhostToRouteArrayMap := map[string][]*routev3.Route{
+		"*":           testCreateRoutesForUnitTests(t),
+		"mg.wso2.com": testCreateRoutesForUnitTests(t),
+	}
+	vHosts := CreateVirtualHosts(vhostToRouteArrayMap)
+	rConfig := CreateRoutesConfigForRds(vHosts)
 
 	assert.NotNil(t, rConfig, "CreateRoutesConfigForRds is failed")
 	if rConfig.Validate() != nil {

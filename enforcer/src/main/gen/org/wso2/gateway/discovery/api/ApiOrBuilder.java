@@ -199,4 +199,16 @@ public interface ApiOrBuilder extends
    */
   com.google.protobuf.ByteString
       getSecuritySchemeBytes(int index);
+
+  /**
+   * <code>string vhost = 13;</code>
+   * @return The vhost.
+   */
+  java.lang.String getVhost();
+  /**
+   * <code>string vhost = 13;</code>
+   * @return The bytes for vhost.
+   */
+  com.google.protobuf.ByteString
+      getVhostBytes();
 }

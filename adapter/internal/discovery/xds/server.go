@@ -261,7 +261,8 @@ func UpdateAPI(apiContent config.APIContent) {
 	// openAPIListenersMap[apiMapKey] = listeners
 	openAPIClustersMap[apiIdentifier] = clusters
 	openAPIEndpointsMap[apiIdentifier] = endpoints
-	openAPIEnforcerApisMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiContent.LifeCycleStatus)
+	openAPIEnforcerApisMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiContent.LifeCycleStatus,
+		apiContent.VHost)
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
 	if svcdiscovery.IsServiceDiscoveryEnabled {
@@ -361,7 +362,7 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 
 	for apiKey, labels := range openAPIEnvoyMap {
 		if arrayContains(labels, label) {
-			vhost := fmt.Sprintf("%v:%v", ExtractVhostFromApiIdentifier(apiKey), port)
+			vhost := fmt.Sprintf("%v:%v", ExtractVHostFromAPIIdentifier(apiKey), port)
 			clusterArray = append(clusterArray, openAPIClustersMap[apiKey]...)
 			vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], openAPIRoutesMap[apiKey]...)
 			endpointArray = append(endpointArray, openAPIEndpointsMap[apiKey]...)
@@ -704,8 +705,8 @@ func GenerateIdentifierForAPI(vhost, name, version string) string {
 	return vhost + ":" + name + ":" + version
 }
 
-// ExtractVhostFromApiIdentifier extracts vhost from the API identifier
-func ExtractVhostFromApiIdentifier(id string) string {
+// ExtractVHostFromAPIIdentifier extracts vhost from the API identifier
+func ExtractVHostFromAPIIdentifier(id string) string {
 	elem := strings.Split(id, ":")
 	if len(elem) == 3 {
 		return elem[0]
@@ -714,6 +715,7 @@ func ExtractVhostFromApiIdentifier(id string) string {
 	return "*"
 }
 
+// GenerateAndUpdateKeyManagerList converts the data into KeyManager proto type
 func GenerateAndUpdateKeyManagerList() {
 	var keyManagerConfigList = make([]types.Resource, 0)
 	for _, keyManager := range KeyManagerList {

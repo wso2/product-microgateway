@@ -49,15 +49,15 @@ type DeploymentDescriptor struct {
 	Data    DeploymentData `json:"data"`
 }
 
-// DeploymentData contains list of ApiDeployment to be deployed to the gateway
+// DeploymentData contains list of APIDeployment to be deployed to the gateway
 type DeploymentData struct {
-	Deployments []ApiDeployment `json:"deployments"`
+	Deployments []APIDeployment `json:"deployments"`
 }
 
-// ApiDeployment represents an API project that contains zip file name and
+// APIDeployment represents an API project that contains zip file name and
 // gateway environments (labels) that the project to be deployed
-type ApiDeployment struct {
-	ApiFile      string         `json:"apiFile"`
+type APIDeployment struct {
+	APIFile      string         `json:"apiFile"`
 	Environments []GatewayLabel `json:"environments"`
 }
 

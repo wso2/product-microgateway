@@ -84,8 +84,9 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, vhostToRouteArr
 	routeConfig.VirtualHosts = envoy.CreateVirtualHosts(vhostToRouteArrayMap)
 }
 
-// GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition.
-func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string) *api.Api {
+// GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition
+// along with the vhost to deploy the API.
+func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState, vhost string) *api.Api {
 	prodUrls := []*api.Endpoint{}
 	sandUrls := []*api.Endpoint{}
 	resources := []*api.Resource{}
@@ -124,17 +125,18 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string) *api.Api
 	}
 
 	return &api.Api{
-		Id:                 mgwSwagger.GetID(),
-		Title:              mgwSwagger.GetTitle(),
-		Description:        mgwSwagger.GetDescription(),
-		BasePath:           mgwSwagger.GetXWso2Basepath(),
-		Version:            mgwSwagger.GetVersion(),
-		ProductionUrls:     prodUrls,
-		SandboxUrls:        sandUrls,
-		Resources:          resources,
-		ApiLifeCycleState:  lifeCycleState,
-		Tier:               mgwSwagger.GetXThrottlingTier(),
-		SecurityScheme:     mgwSwagger.GetSetSecurityScheme(),
+		Id:                mgwSwagger.GetID(),
+		Title:             mgwSwagger.GetTitle(),
+		Description:       mgwSwagger.GetDescription(),
+		BasePath:          mgwSwagger.GetXWso2Basepath(),
+		Version:           mgwSwagger.GetVersion(),
+		ProductionUrls:    prodUrls,
+		SandboxUrls:       sandUrls,
+		Resources:         resources,
+		ApiLifeCycleState: lifeCycleState,
+		Tier:              mgwSwagger.GetXThrottlingTier(),
+		SecurityScheme:    mgwSwagger.GetSetSecurityScheme(),
+		Vhost:             vhost,
 	}
 }
 

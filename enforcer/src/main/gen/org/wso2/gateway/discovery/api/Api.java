@@ -32,6 +32,7 @@ private static final long serialVersionUID = 0L;
     tier_ = "";
     apiLifeCycleState_ = "";
     securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    vhost_ = "";
   }
 
   @java.lang.Override
@@ -147,6 +148,12 @@ private static final long serialVersionUID = 0L;
               mutable_bitField0_ |= 0x00000008;
             }
             securityScheme_.add(s);
+            break;
+          }
+          case 106: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            vhost_ = s;
             break;
           }
           default: {
@@ -652,6 +659,44 @@ private static final long serialVersionUID = 0L;
     return securityScheme_.getByteString(index);
   }
 
+  public static final int VHOST_FIELD_NUMBER = 13;
+  private volatile java.lang.Object vhost_;
+  /**
+   * <code>string vhost = 13;</code>
+   * @return The vhost.
+   */
+  @java.lang.Override
+  public java.lang.String getVhost() {
+    java.lang.Object ref = vhost_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      vhost_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string vhost = 13;</code>
+   * @return The bytes for vhost.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getVhostBytes() {
+    java.lang.Object ref = vhost_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      vhost_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -701,6 +746,9 @@ private static final long serialVersionUID = 0L;
     }
     for (int i = 0; i < securityScheme_.size(); i++) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 12, securityScheme_.getRaw(i));
+    }
+    if (!getVhostBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 13, vhost_);
     }
     unknownFields.writeTo(output);
   }
@@ -755,6 +803,9 @@ private static final long serialVersionUID = 0L;
       size += dataSize;
       size += 1 * getSecuritySchemeList().size();
     }
+    if (!getVhostBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, vhost_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -794,6 +845,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getApiLifeCycleState())) return false;
     if (!getSecuritySchemeList()
         .equals(other.getSecuritySchemeList())) return false;
+    if (!getVhost()
+        .equals(other.getVhost())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -837,6 +890,8 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + SECURITYSCHEME_FIELD_NUMBER;
       hash = (53 * hash) + getSecuritySchemeList().hashCode();
     }
+    hash = (37 * hash) + VHOST_FIELD_NUMBER;
+    hash = (53 * hash) + getVhost().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1013,6 +1068,8 @@ private static final long serialVersionUID = 0L;
 
       securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       bitField0_ = (bitField0_ & ~0x00000008);
+      vhost_ = "";
+
       return this;
     }
 
@@ -1080,6 +1137,7 @@ private static final long serialVersionUID = 0L;
         bitField0_ = (bitField0_ & ~0x00000008);
       }
       result.securityScheme_ = securityScheme_;
+      result.vhost_ = vhost_;
       onBuilt();
       return result;
     }
@@ -1246,6 +1304,10 @@ private static final long serialVersionUID = 0L;
           ensureSecuritySchemeIsMutable();
           securityScheme_.addAll(other.securityScheme_);
         }
+        onChanged();
+      }
+      if (!other.getVhost().isEmpty()) {
+        vhost_ = other.vhost_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -2712,6 +2774,82 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       ensureSecuritySchemeIsMutable();
       securityScheme_.add(value);
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object vhost_ = "";
+    /**
+     * <code>string vhost = 13;</code>
+     * @return The vhost.
+     */
+    public java.lang.String getVhost() {
+      java.lang.Object ref = vhost_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        vhost_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string vhost = 13;</code>
+     * @return The bytes for vhost.
+     */
+    public com.google.protobuf.ByteString
+        getVhostBytes() {
+      java.lang.Object ref = vhost_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        vhost_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string vhost = 13;</code>
+     * @param value The vhost to set.
+     * @return This builder for chaining.
+     */
+    public Builder setVhost(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      vhost_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string vhost = 13;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearVhost() {
+      
+      vhost_ = getDefaultInstance().getVhost();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string vhost = 13;</code>
+     * @param value The bytes for vhost to set.
+     * @return This builder for chaining.
+     */
+    public Builder setVhostBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      vhost_ = value;
       onChanged();
       return this;
     }

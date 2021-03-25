@@ -199,7 +199,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 				logger.LoggerSync.Errorf("Error reading deployment descriptor: %v", err)
 				return err
 			}
-			logger.LoggerSync.Debugf("Parsing content of deployment descriptor, content: ", string(data))
+			logger.LoggerSync.Debugf("Parsing content of deployment descriptor, content: %s", string(data))
 			if err = json.Unmarshal(data, deploymentDescriptor); err != nil {
 				// TODO: (renuka) shall we print content of deployment descriptor
 				logger.LoggerSync.Errorf("Error parsing JSON content of deployment descriptor: %v", err)
@@ -214,10 +214,10 @@ func PushAPIProjects(payload []byte, environments []string) error {
 
 	// loop deployments in deployment descriptor file instead of files in the root zip
 	for _, deployment := range deploymentDescriptor.Data.Deployments {
-		file := apiFiles[deployment.ApiFile]
+		file := apiFiles[deployment.APIFile]
 		if file == nil {
 			err := fmt.Errorf("API file \"%v\" defined in deployment descriptor not found",
-				deployment.ApiFile)
+				deployment.APIFile)
 			logger.LoggerSync.Errorf("API file not found: %v", err)
 			return err
 		}
