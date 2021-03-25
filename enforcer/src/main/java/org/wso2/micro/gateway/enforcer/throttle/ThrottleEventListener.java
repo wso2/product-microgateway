@@ -22,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
+import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
 
 import java.util.Date;
 import java.util.Enumeration;
@@ -121,6 +122,13 @@ public class ThrottleEventListener implements MessageListener {
                      */
 
                     handleThrottleUpdateMessage(map);
+                } else if (map.get(ThrottleConstants.POLICY_TEMPLATE_KEY) != null) {
+                    /*
+                     * This message contains key template data
+                     * keyTemplateValue - Value of key template
+                     * keyTemplateState - whether key template active or not
+                     */
+                    handleKeyTemplateMessage(map);
                 }
             }
         } catch (JMSException e) {
@@ -163,6 +171,19 @@ public class ThrottleEventListener implements MessageListener {
 
                 dataHolder.removeThrottledConditions(extractedKey.getResourceKey(), extractedKey.getName());
             }
+        }
+    }
+
+    private synchronized void handleKeyTemplateMessage(Map<String, Object> map) {
+        String keyTemplateValue = map.get(ThrottleConstants.POLICY_TEMPLATE_KEY).toString();
+        String keyTemplateState = map.get(ThrottleConstants.TEMPLATE_KEY_STATE).toString();
+        ThrottleDataHolder dataHolder = ThrottleDataHolder.getInstance();
+        log.debug("Received Key - KeyTemplate: {}:{}", keyTemplateValue, keyTemplateState);
+
+        if (ThrottleConstants.ADD.equals(keyTemplateState)) {
+            dataHolder.addKeyTemplate(keyTemplateValue, keyTemplateValue);
+        } else {
+            dataHolder.removeKeyTemplate(keyTemplateValue);
         }
     }
 

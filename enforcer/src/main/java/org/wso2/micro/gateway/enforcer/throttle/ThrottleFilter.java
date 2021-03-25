@@ -31,6 +31,7 @@ import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.util.ThrottleEventConstants;
 import org.wso2.micro.gateway.enforcer.throttle.dto.Decision;
+import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.net.Inet4Address;
@@ -86,7 +87,7 @@ public class ThrottleFilter implements Filter {
         // TODO: (Praminda) Handle unauthenticated + subscription validation false scenarios
         if (reqContext.getAuthenticationContext() != null) {
             log.debug("Found AuthenticationContext for the request");
-            APIConfig api = reqContext.getMathedAPI().getAPIConfig();
+            APIConfig api = reqContext.getMatchedAPI().getAPIConfig();
             String apiContext = api.getBasePath();
             String apiVersion = api.getVersion();
             String appId = authContext.getApplicationId();
@@ -96,6 +97,10 @@ public class ThrottleFilter implements Filter {
             String resourceThrottleKey = getResourceThrottleKey(reqContext, apiContext, apiVersion);
             String subTier = authContext.getTier();
             String appTier = authContext.getApplicationTier();
+            String appTenant = authContext.getSubscriberTenantDomain();
+            String clientIp = reqContext.getClientIp();
+            String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
+            String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
             boolean isApiLevelTriggered = false;
 
             if (!StringUtils.isEmpty(apiTier) && !ThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(apiTier)) {
@@ -122,6 +127,7 @@ public class ThrottleFilter implements Filter {
                 return true;
             }
 
+            // Checking subscription level throttling
             String subThrottleKey = getSubscriptionThrottleKey(appId, apiContext, apiVersion);
             Decision subDecision = checkSubscriptionLevelThrottled(subThrottleKey, subTier);
             if (subDecision.isThrottled()) {
@@ -139,6 +145,7 @@ public class ThrottleFilter implements Filter {
                 log.debug("Proceeding since stopOnQuotaReach is false");
             }
 
+            // Checking Application level throttling
             String appThrottleKey = appId + ':' + authContext.getUsername();
             Decision appDecision = checkAppLevelThrottled(appThrottleKey, appTier);
             if (appDecision.isThrottled()) {
@@ -150,6 +157,20 @@ public class ThrottleFilter implements Filter {
                 reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                         ThrottleConstants.THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
                 ThrottleUtils.setRetryAfterHeader(reqContext, appDecision.getResetAt());
+                return true;
+            }
+
+            // Checking Custom policy throttling
+            Decision customDecision = dataHolder.isThrottledByCustomPolicy(authorizedUser, resourceThrottleKey,
+                    apiContext, apiVersion, appTenant, apiTenantDomain, appId, clientIp);
+            if (customDecision.isThrottled()) {
+                log.debug("Setting custom policy throttle out response");
+                FilterUtils.setThrottleErrorToContext(reqContext,
+                        ThrottleConstants.CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE,
+                        ThrottleConstants.THROTTLE_OUT_MESSAGE,
+                        ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
+                reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
+                        ThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED);
                 return true;
             }
         }
@@ -193,9 +214,9 @@ public class ThrottleFilter implements Filter {
      * @return Map of throttle event data
      */
     private Map<String, String> getThrottleEventMap(RequestContext requestContext) {
-        AuthenticationContext authenticationContext = requestContext.getAuthenticationContext();
+        AuthenticationContext authContext = requestContext.getAuthenticationContext();
         Map<String, String> throttleEvent = new HashMap<>();
-        APIConfig api = requestContext.getMathedAPI().getAPIConfig();
+        APIConfig api = requestContext.getMatchedAPI().getAPIConfig();
 
         String basePath = api.getBasePath();
         String apiVersion = api.getVersion();
@@ -203,6 +224,8 @@ public class ThrottleFilter implements Filter {
         String apiName = api.getName();
         String apiTier = getApiTier(api);
         String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
+        String appTenant = authContext.getSubscriberTenantDomain();
+        String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
         if (tenantDomain == null) {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
         }
@@ -218,22 +241,23 @@ public class ThrottleFilter implements Filter {
         }
 
         throttleEvent.put(ThrottleEventConstants.MESSAGE_ID, requestContext.getRequestID());
-        throttleEvent.put(ThrottleEventConstants.APP_KEY, authenticationContext.getApplicationId() + ':' +
-                authenticationContext.getUsername());
-        throttleEvent.put(ThrottleEventConstants.APP_TIER, authenticationContext.getApplicationTier());
+        throttleEvent.put(ThrottleEventConstants.APP_KEY, authContext.getApplicationId() + ':' +
+                authContext.getUsername());
+        throttleEvent.put(ThrottleEventConstants.APP_TIER, authContext.getApplicationTier());
         throttleEvent.put(ThrottleEventConstants.API_KEY, apiContext);
         throttleEvent.put(ThrottleEventConstants.API_TIER, apiTier);
-        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authenticationContext.getApplicationId() + ':' +
+        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authContext.getApplicationId() + ':' +
                 apiContext);
-        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_TIER, authenticationContext.getTier());
+        throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_TIER, authContext.getTier());
         throttleEvent.put(ThrottleEventConstants.RESOURCE_KEY, resourceKey);
         throttleEvent.put(ThrottleEventConstants.RESOURCE_TIER, resourceTier);
-        throttleEvent.put(ThrottleEventConstants.USER_ID, authenticationContext.getUsername());
+        // TODO: (Praminda) should publish with tenant domain?
+        throttleEvent.put(ThrottleEventConstants.USER_ID, authorizedUser);
         throttleEvent.put(ThrottleEventConstants.API_CONTEXT, basePath);
         throttleEvent.put(ThrottleEventConstants.API_VERSION, apiVersion);
-        throttleEvent.put(ThrottleEventConstants.APP_TENANT, authenticationContext.getSubscriberTenantDomain());
+        throttleEvent.put(ThrottleEventConstants.APP_TENANT, authContext.getSubscriberTenantDomain());
         throttleEvent.put(ThrottleEventConstants.API_TENANT, tenantDomain);
-        throttleEvent.put(ThrottleEventConstants.APP_ID, authenticationContext.getApplicationId());
+        throttleEvent.put(ThrottleEventConstants.APP_ID, authContext.getApplicationId());
         throttleEvent.put(ThrottleEventConstants.API_NAME, apiName);
         throttleEvent.put(ThrottleEventConstants.PROPERTIES, getProperties(requestContext).toString());
         return throttleEvent;

@@ -27,6 +27,7 @@ const (
 	ApplicationKeyMappingListType = apiTypePrefix + "wso2.discovery.subscription.ApplicationKeyMappingList"
 	KeyManagerType                = apiTypePrefix + "wso2.discovery.keymgt.KeyManagerConfig"
 	RevokedTokensType             = apiTypePrefix + "wso2.discovery.keymgt.RevokedToken"
+	ThrottleDataType              = apiTypePrefix + "wso2.discovery.throttle.ThrottleData"
 
 	// AnyType is used only by ADS
 	AnyType = ""

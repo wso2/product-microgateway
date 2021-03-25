@@ -24,7 +24,9 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
+import org.wso2.micro.gateway.enforcer.discovery.ThrottleDataDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.throttle.dto.Decision;
+import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.math.BigInteger;
@@ -42,11 +44,13 @@ public class ThrottleDataHolder {
     private static final Logger log = LogManager.getLogger(ThrottleDataHolder.class);
 
     private final Map<String, Long> throttleDataMap;
+    private final Map<String, String> keyTemplates;
     private static ThrottleDataHolder instance;
     private final Map<String, Map<String, List<ThrottleCondition>>> conditionDtoMap = new ConcurrentHashMap<>();
 
     private ThrottleDataHolder() {
         throttleDataMap = new ConcurrentHashMap<>();
+        this.keyTemplates = new ConcurrentHashMap<>();
     }
 
     public static ThrottleDataHolder getInstance() {
@@ -55,6 +59,43 @@ public class ThrottleDataHolder {
         }
 
         return instance;
+    }
+
+    /**
+     * Load initial data maps from throttle data endpoints.
+     */
+    public void init() {
+        ThrottleDataDiscoveryClient.getInstance().watchThrottleData();
+    }
+
+    /**
+     * Add all key templates in a given map to the key template map.
+     *
+     * @param templates Map of key template
+     */
+    public void addKeyTemplates(Map<String, String> templates) {
+        if (templates.size() > 0) {
+            keyTemplates.putAll(templates);
+        }
+    }
+
+    /**
+     * Add a key template to the key template map.
+     *
+     * @param key key template key
+     * @param value key template value
+     */
+    public void addKeyTemplate(String key, String value) {
+        keyTemplates.put(key, value);
+    }
+
+    /**
+     * Removes a key template from the key template map.
+     *
+     * @param key key template key to be removed from the key template map
+     */
+    public void removeKeyTemplate(String key) {
+        keyTemplates.remove(key);
     }
 
     /**
@@ -267,6 +308,41 @@ public class ThrottleDataHolder {
         }
 
         return isThrottled;
+    }
+
+    /**
+     * Verify if the request is throttled by a custom key template policy.
+     * This method call is an expensive operation and should not enabled by default.
+     * If we enabled this policy then all APIs available in system will have
+     * to go through this check.
+     *
+     * @return throttle {@link Decision}
+     */
+    public Decision isThrottledByCustomPolicy(String userID, String resourceKey, String apiContext, String apiVersion,
+                                             String appTenant, String apiTenant, String appId, String clientIp) {
+        Decision decision = new Decision();
+        if (keyTemplates.size() > 0) {
+            for (String key : keyTemplates.keySet()) {
+                key = key.replaceAll("\\$resourceKey", resourceKey);
+                key = key.replaceAll("\\$userId", userID);
+                key = key.replaceAll("\\$apiContext", apiContext);
+                key = key.replaceAll("\\$apiVersion", apiVersion);
+                key = key.replaceAll("\\$appTenant", appTenant);
+                key = key.replaceAll("\\$apiTenant", apiTenant);
+                key = key.replaceAll("\\$appId", appId);
+
+                if (clientIp != null) {
+                    key = key.replaceAll("\\$clientIp", FilterUtils.ipToBigInteger(clientIp).toString());
+                }
+
+                decision = isThrottled(key);
+                if (decision.isThrottled()) {
+                    return decision;
+                }
+            }
+        }
+
+        return decision;
     }
 
     private boolean isMatchingIp(String clientIp, ThrottleCondition.IPCondition ipCondition) {
