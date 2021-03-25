@@ -21,6 +21,8 @@ package org.wso2.micro.gateway.enforcer.throttle.databridge.publisher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottlePublisherConfigDto;
 import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.DataPublisher;
 import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.exception.DataEndpointAuthenticationException;
 import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.exception.DataEndpointConfigurationException;
@@ -57,19 +59,20 @@ public class ThrottleDataPublisher {
      */
     public ThrottleDataPublisher() {
         dataPublisherPool = ThrottleDataPublisherPool.getInstance();
-        PublisherConfiguration publisherConfiguration = PublisherConfiguration.getInstance();
+        ThrottlePublisherConfigDto throttlePublisherConfigDto = ConfigHolder.getInstance().getConfig().
+                getThrottleConfig().getThrottleAgent().getPublisher();
 
         try {
             executor = new DataPublisherThreadPoolExecutor(
-                    publisherConfiguration.getPublisherThreadPoolCoreSize(),
-                    publisherConfiguration.getPublisherThreadPoolMaximumSize(),
-                    publisherConfiguration.getPublisherThreadPoolKeepAliveTime(),
+                    throttlePublisherConfigDto.getPublisherThreadPoolCoreSize(),
+                    throttlePublisherConfigDto.getPublisherThreadPoolMaximumSize(),
+                    throttlePublisherConfigDto.getPublisherThreadPoolKeepAliveTime(),
                     TimeUnit.SECONDS,
                     new LinkedBlockingDeque<Runnable>() {
                     });
-            dataPublisher = new DataPublisher(publisherConfiguration.getReceiverUrlGroup(),
-                    publisherConfiguration.getAuthUrlGroup(), publisherConfiguration.getUserName(),
-                    publisherConfiguration.getPassword());
+            dataPublisher = new DataPublisher(throttlePublisherConfigDto.getReceiverUrlGroup(),
+                    throttlePublisherConfigDto.getAuthUrlGroup(), throttlePublisherConfigDto.getUserName(),
+                    throttlePublisherConfigDto.getPassword());
 
         } catch (DataEndpointException | DataEndpointConfigurationException | DataEndpointAuthenticationException
                 | TransportException e) {

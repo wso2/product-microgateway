@@ -19,7 +19,6 @@
 package org.wso2.micro.gateway.enforcer.config.dto;
 
 import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
-import org.wso2.micro.gateway.enforcer.throttle.databridge.publisher.PublisherConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,7 @@ public class ThrottleAgentConfigDto {
     String username;
     String password;
     List<ThrottleURLGroupDto> urlGroup = new ArrayList<>();
-    PublisherConfiguration publisher;
+    ThrottlePublisherConfigDto publisher;
     AgentConfiguration agent;
 
     public String getUsername() {
@@ -58,11 +57,11 @@ public class ThrottleAgentConfigDto {
         this.urlGroup = urlGroup;
     }
 
-    public PublisherConfiguration getPublisher() {
+    public ThrottlePublisherConfigDto getPublisher() {
         return publisher;
     }
 
-    public void setPublisher(PublisherConfiguration publisher) {
+    public void setPublisher(ThrottlePublisherConfigDto publisher) {
         this.publisher = publisher;
     }
 
