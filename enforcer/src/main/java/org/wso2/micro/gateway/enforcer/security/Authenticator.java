@@ -29,4 +29,6 @@ public interface Authenticator {
     boolean canAuthenticate(RequestContext requestContext);
 
     AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException;
+
+    int getPriority();
 }

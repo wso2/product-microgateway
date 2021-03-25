@@ -50,18 +50,22 @@ const (
 	apiTypeFilterKey           string = "type"
 	apiTypeYamlKey             string = "type"
 	lifeCycleStatus            string = "lifeCycleStatus"
+	securityScheme             string = "securityScheme"
 	endpointImplementationType string = "endpointImplementationType"
+	inlineEndpointType         string = "INLINE"
 )
 
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
-	APIJsn             []byte
-	SwaggerJsn         []byte // TODO: (SuKSW) change to OpenAPIJsn
-	UpstreamCerts      []byte
-	APIType            string
-	APILifeCycleStatus string
-	ProductionEndpoint string
-	SandboxEndpoint    string
+	APIJsn                     []byte
+	SwaggerJsn                 []byte // TODO: (SuKSW) change to OpenAPIJsn
+	UpstreamCerts              []byte
+	APIType                    string
+	APILifeCycleStatus         string
+	ProductionEndpoint         string
+	SandboxEndpoint            string
+	SecurityScheme             []string
+	endpointImplementationType string
 }
 
 // extractAPIProject accepts the API project as a zip file and returns the extracted content
@@ -121,20 +125,14 @@ func extractAPIProject(payload *[]byte) (apiProject ProjectAPI, err error) {
 				return apiProject, conversionErr
 			}
 
-			apiType, lifeCycleStatus, productionEndpoint, sandboxEndpoint, endpointImplementationType, err :=
-				extractAPIInformation(apiJsn)
-
-			if endpointImplementationType == "INLINE" {
+			apiProject.APIJsn = apiJsn
+			extractAPIInformation(apiProject)
+			if apiProject.endpointImplementationType == inlineEndpointType {
 				errMsg := "Inline endpointImplementationType is not currently supported with WSO2 micro-gateway"
 				loggers.LoggerAPI.Infof(errMsg)
 				err = errors.New(errMsg)
 				return apiProject, err
 			}
-			apiProject.APIJsn = apiJsn
-			apiProject.APIType = apiType
-			apiProject.APILifeCycleStatus = lifeCycleStatus
-			apiProject.ProductionEndpoint = productionEndpoint
-			apiProject.SandboxEndpoint = sandboxEndpoint
 		}
 	}
 	if apiProject.APIJsn == nil {
@@ -212,6 +210,7 @@ func updateAPI(vhost, name, version string, apiProject ProjectAPI, environments 
 	apiContent.Environments = environments
 	apiContent.ProductionEndpoint = apiProject.ProductionEndpoint
 	apiContent.SandboxEndpoint = apiProject.SandboxEndpoint
+	apiContent.SecurityScheme = apiProject.SecurityScheme
 
 	if apiProject.APIType == mgw.HTTP {
 		apiContent.APIDefinition = apiProject.SwaggerJsn
@@ -222,30 +221,37 @@ func updateAPI(vhost, name, version string, apiProject ProjectAPI, environments 
 	}
 }
 
-func extractAPIInformation(apiJsn []byte) (apiType, apiLifeCycleStatus, productionEndpoint, sandboxEndpoint,
-	apiEndpointImplementationType string, err error) {
-
+func extractAPIInformation(apiProject ProjectAPI) {
 	var apiDef map[string]interface{}
-	unmarshalErr := json.Unmarshal(apiJsn, &apiDef)
+	unmarshalErr := json.Unmarshal(apiProject.APIJsn, &apiDef)
 	if unmarshalErr != nil {
 		loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml %v", unmarshalErr.Error())
-		return "", "", "", "", "", unmarshalErr
 	}
 	data := apiDef["data"].(map[string]interface{})
-	apiType = strings.ToUpper(data[apiTypeYamlKey].(string))
-	apiLifeCycleStatus = strings.ToUpper(data[lifeCycleStatus].(string))
-	apiEndpointImplementationType = data[endpointImplementationType].(string)
-	endpointConfig := data["endpointConfig"].(map[string]interface{})
+	apiProject.APIType = strings.ToUpper(data[apiTypeYamlKey].(string))
+	apiProject.APILifeCycleStatus = strings.ToUpper(data[lifeCycleStatus].(string))
 
+	var securitySchemesTypes []string = nil
+	if data[securityScheme] != nil {
+		securitySchemes := data[securityScheme].([]interface{})
+		for _, scheme := range securitySchemes {
+			securitySchemesTypes = append(securitySchemesTypes, scheme.(string))
+		}
+	}
+	apiProject.SecurityScheme = securitySchemesTypes
+	loggers.LoggerAPI.Infof("apiProject.SecurityScheme %v", apiProject.SecurityScheme)
+
+	apiProject.endpointImplementationType = data[endpointImplementationType].(string)
+
+	endpointConfig := data["endpointConfig"].(map[string]interface{})
 	if endpointConfig["sandbox_endpoints"] != nil {
 		sandboxEndpoints := endpointConfig["sandbox_endpoints"].(map[string]interface{})
-		sandboxEndpoint = sandboxEndpoints["url"].(string)
+		apiProject.SandboxEndpoint = sandboxEndpoints["url"].(string)
 	}
 	if endpointConfig["production_endpoints"] != nil {
 		productionEndpoints := endpointConfig["production_endpoints"].(map[string]interface{})
-		productionEndpoint = productionEndpoints["url"].(string)
+		apiProject.ProductionEndpoint = productionEndpoints["url"].(string)
 	}
-	return apiType, apiLifeCycleStatus, productionEndpoint, sandboxEndpoint, apiEndpointImplementationType, nil
 }
 
 // DeleteAPI calls the DeleteAPI method in xds_server.go

@@ -18,10 +18,14 @@
 package org.wso2.micro.gateway.enforcer.api;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -31,15 +35,15 @@ import java.util.TreeMap;
  */
 public class RequestContext {
 
-    private API mathedAPI;
+    private API matchedAPI;
     private String requestPath;
     private String requestMethod;
     private ResourceConfig matchedResourcePath;
     private Map<String, String> headers;
-    private Map<String, Object> properties = new HashMap();
+    private Map<String, Object> properties = new HashMap<>();
     private AuthenticationContext authenticationContext;
     private String requestID;
-    private String address;
+    private String clientIp;
     // Denotes the cluster header name for each environment. Both properties can be null if
     // the openAPI has production endpoints alone.
     private String prodClusterHeader;
@@ -47,33 +51,32 @@ public class RequestContext {
     private boolean clusterHeaderEnabled = false;
     //Denotes the specific headers which needs to be passed to response object
     private Map<String, String> responseHeaders;
+    private Map<String, String> queryParameters;
 
-    private RequestContext() {
-
-    }
+    private RequestContext() {}
 
     /**
      * Implements builder pattern to build an {@link RequestContext} object.
      */
     public static class Builder {
-        private API mathedAPI;
+        private API matchedAPI;
         private String requestPath;
         private String requestMethod;
         private ResourceConfig matchedResourceConfig;
         private Map<String, String> headers;
         private String prodClusterHeader;
         private String sandClusterHeader;
-        private Map<String, Object> properties = new HashMap();
+        private Map<String, Object> properties = new HashMap<>();
         private AuthenticationContext authenticationContext = new AuthenticationContext();
         private String requestID;
-        private String address;
+        private String clientIp;
 
         public Builder(String requestPath) {
             this.requestPath = requestPath;
         }
 
         public Builder matchedAPI(API api) {
-            this.mathedAPI = api;
+            this.matchedAPI = api;
             return this;
         }
 
@@ -117,14 +120,14 @@ public class RequestContext {
         }
 
         public Builder address(String address) {
-            this.address = address;
+            this.clientIp = address;
             return this;
         }
 
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
-            requestContext.mathedAPI = this.mathedAPI;
+            requestContext.matchedAPI = this.matchedAPI;
             requestContext.requestMethod = this.requestMethod;
             requestContext.requestPath = this.requestPath;
             requestContext.headers = this.headers;
@@ -133,12 +136,22 @@ public class RequestContext {
             requestContext.properties = this.properties;
             requestContext.authenticationContext = this.authenticationContext;
             requestContext.requestID = this.requestID;
-            requestContext.address = this.address;
+            requestContext.clientIp = this.clientIp;
+            requestContext.responseHeaders = new HashMap<>();
+            String[] queryParts = this.requestPath.split("\\?");
+            String queryPrams = queryParts.length > 1 ? queryParts[1] : "";
+
+            requestContext.queryParameters = new HashMap<>();
+            List<NameValuePair> queryParams = URLEncodedUtils.parse(queryPrams, StandardCharsets.UTF_8);
+            for (NameValuePair param : queryParams) {
+                requestContext.queryParameters.put(param.getName(), param.getValue());
+            }
 
             // Adapter assigns header based routing only if both type of endpoints are present.
             if (!StringUtils.isEmpty(prodClusterHeader) && !StringUtils.isEmpty(sandClusterHeader)) {
                 requestContext.clusterHeaderEnabled = true;
             }
+
             return requestContext;
         }
     }
@@ -151,12 +164,12 @@ public class RequestContext {
         return requestID;
     }
 
-    public String getAddress() {
-        return address;
+    public String getClientIp() {
+        return clientIp;
     }
 
-    public API getMathedAPI() {
-        return mathedAPI;
+    public API getMatchedAPI() {
+        return matchedAPI;
     }
 
     public String getRequestPath() {
@@ -233,5 +246,14 @@ public class RequestContext {
      */
     public Map<String, String> getResponseHeaders() {
         return responseHeaders;
+    }
+
+    /**
+     * Retrieve a map of query parameters in the request.
+     *
+     * @return query parameters as a map of {@code <param_name, param_value>}
+     */
+    public Map<String, String> getQueryParameters() {
+        return queryParameters;
     }
 }

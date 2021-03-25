@@ -18,12 +18,14 @@
 package model
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/stretchr/testify/assert"
+	"github.com/wso2/micro-gw/config"
 )
 
 func TestSetInfoOpenAPI(t *testing.T) {
@@ -102,7 +104,7 @@ func TestSetResourcesOpenAPI(t *testing.T) {
 			[]Resource{
 				{
 					path:        "/pet/{petId}",
-					methods:     []Operation{{"GET", nil}},
+					methods:     []Operation{{"GET", nil, ""}},
 					description: "this retrieve data from id",
 					iD:          "petfindbyid",
 					summary:     "pet find by id",
@@ -167,4 +169,19 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 		resultResources := getHostandBasepathandPort(item.input)
 		assert.Equal(t, item.result, resultResources, item.message)
 	}
+}
+
+func TestGetXWso2Label(t *testing.T) {
+	// TODO: (Vajira) add more test scenarios
+	//newLabels := GetXWso2Label(openAPIV3Struct.ExtensionProps)
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_xwso2label.yaml"
+	swagger, err := openapi3.NewSwaggerLoader().LoadSwaggerFromFile(apiYamlFilePath)
+	assert.Nil(t, err, "Swagger loader failed")
+
+	assert.Nil(t, swagger.Validate(context.Background()), "Swagger Validation Failed")
+
+	wso2Label := GetXWso2Label(swagger.ExtensionProps)
+
+	assert.NotNil(t, wso2Label, "Lable should at leaset be default")
+
 }

@@ -152,48 +152,51 @@ public interface ApiOrBuilder extends
       getBasePathBytes();
 
   /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
+   * <code>string tier = 10;</code>
+   * @return The tier.
    */
-  int getVendorExtensibleCount();
+  java.lang.String getTier();
   /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-  boolean containsVendorExtensible(
-      java.lang.String key);
-  /**
-   * Use {@link #getVendorExtensibleMap()} instead.
-   */
-  @java.lang.Deprecated
-  java.util.Map<java.lang.String, com.google.protobuf.Any>
-  getVendorExtensible();
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-  java.util.Map<java.lang.String, com.google.protobuf.Any>
-  getVendorExtensibleMap();
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-
-  com.google.protobuf.Any getVendorExtensibleOrDefault(
-      java.lang.String key,
-      com.google.protobuf.Any defaultValue);
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-
-  com.google.protobuf.Any getVendorExtensibleOrThrow(
-      java.lang.String key);
-
-  /**
-   * <code>string apiLifeCycleStatus = 11;</code>
-   * @return The apiLifeCycleStatus.
-   */
-  java.lang.String getApiLifeCycleStatus();
-  /**
-   * <code>string apiLifeCycleStatus = 11;</code>
-   * @return The bytes for apiLifeCycleStatus.
+   * <code>string tier = 10;</code>
+   * @return The bytes for tier.
    */
   com.google.protobuf.ByteString
-      getApiLifeCycleStatusBytes();
+      getTierBytes();
+
+  /**
+   * <code>string apiLifeCycleState = 11;</code>
+   * @return The apiLifeCycleState.
+   */
+  java.lang.String getApiLifeCycleState();
+  /**
+   * <code>string apiLifeCycleState = 11;</code>
+   * @return The bytes for apiLifeCycleState.
+   */
+  com.google.protobuf.ByteString
+      getApiLifeCycleStateBytes();
+
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @return A list containing the securityScheme.
+   */
+  java.util.List<java.lang.String>
+      getSecuritySchemeList();
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @return The count of securityScheme.
+   */
+  int getSecuritySchemeCount();
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @param index The index of the element to return.
+   * @return The securityScheme at the given index.
+   */
+  java.lang.String getSecurityScheme(int index);
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the securityScheme at the given index.
+   */
+  com.google.protobuf.ByteString
+      getSecuritySchemeBytes(int index);
 }
