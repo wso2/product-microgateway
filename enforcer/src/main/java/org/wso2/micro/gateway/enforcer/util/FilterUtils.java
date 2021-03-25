@@ -44,6 +44,7 @@ import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -375,8 +376,13 @@ public class FilterUtils {
      */
     public static void setThrottleErrorToContext(RequestContext context, int errorCode, String msg, String desc) {
         context.getProperties().put(APIConstants.MessageFormat.ERROR_CODE, errorCode);
-        context.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
-                APIConstants.StatusCodes.THROTTLED.getCode());
+        if (ThrottleConstants.BLOCKED_ERROR_CODE == errorCode) {
+            context.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
+                    APIConstants.StatusCodes.UNAUTHORIZED.getCode());
+        } else {
+            context.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
+                    APIConstants.StatusCodes.THROTTLED.getCode());
+        }
         context.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE, msg);
         context.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION, desc);
     }

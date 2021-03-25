@@ -76,31 +76,38 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			var methodsArray []Operation
 			methodFound := false
 			if pathItem.Get != nil {
-				methodsArray = append(methodsArray, NewOperation("GET", pathItem.Get.Security))
+				methodsArray = append(methodsArray, NewOperation("GET", pathItem.Get.Security,
+					pathItem.Get.Extensions))
 				methodFound = true
 			}
 			if pathItem.Post != nil {
-				methodsArray = append(methodsArray, NewOperation("POST", pathItem.Post.Security))
+				methodsArray = append(methodsArray, NewOperation("POST", pathItem.Post.Security,
+					pathItem.Post.Extensions))
 				methodFound = true
 			}
 			if pathItem.Put != nil {
-				methodsArray = append(methodsArray, NewOperation("PUT", pathItem.Put.Security))
+				methodsArray = append(methodsArray, NewOperation("PUT", pathItem.Put.Security,
+					pathItem.Put.Extensions))
 				methodFound = true
 			}
 			if pathItem.Delete != nil {
-				methodsArray = append(methodsArray, NewOperation("DELETE", pathItem.Delete.Security))
+				methodsArray = append(methodsArray, NewOperation("DELETE", pathItem.Delete.Security,
+					pathItem.Delete.Extensions))
 				methodFound = true
 			}
 			if pathItem.Head != nil {
-				methodsArray = append(methodsArray, NewOperation("HEAD", pathItem.Head.Security))
+				methodsArray = append(methodsArray, NewOperation("HEAD", pathItem.Head.Security,
+					pathItem.Head.Extensions))
 				methodFound = true
 			}
 			if pathItem.Patch != nil {
-				methodsArray = append(methodsArray, NewOperation("PATCH", pathItem.Patch.Security))
+				methodsArray = append(methodsArray, NewOperation("PATCH", pathItem.Patch.Security,
+					pathItem.Patch.Extensions))
 				methodFound = true
 			}
 			if pathItem.Options != nil {
-				methodsArray = append(methodsArray, NewOperation("OPTION", pathItem.Options.Security))
+				methodsArray = append(methodsArray, NewOperation("OPTION", pathItem.Options.Security,
+					pathItem.Options.Extensions))
 				methodFound = true
 			}
 			if methodFound {
@@ -114,7 +121,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 
 func getSwaggerOperationLevelDetails(operation *spec.Operation, method string) Operation {
 	var securityData []map[string][]string = operation.Security
-	return Operation{method, securityData}
+	return NewOperation(method, securityData, operation.Extensions)
 }
 
 func setOperationSwagger(path string, methods []Operation, pathItem spec.PathItem) Resource {

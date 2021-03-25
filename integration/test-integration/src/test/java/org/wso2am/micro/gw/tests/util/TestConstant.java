@@ -63,11 +63,11 @@ public class TestConstant {
     public static final int GATEWAY_LISTENER_HTTPS_PORT = 9095;
     public static final int ADAPTER_PORT = 9843;
     public final static int MOCK_SERVER_PORT = 2383;
-
-
-    public static final String BASE_RESOURCE_DIR = "src" + File.separator + "test" + File.separator + "resources";
+    public final static int APIM_SERVLET_TRP_HTTPS_PORT = 9443;
+    public final static int APIM_SERVLET_TRP_HTTP_PORT = 9763;
 
     public static final int INVALID_CREDENTIALS_CODE = 900901;
+    public static final String RESOURCE_FORBIDDEN_CODE = "900908";
 
     public static final String LINE = "\r\n";
     public static final String MOCK_BACKEND_DOCKER_IMAGE = "wso2/mg-mock-backend";
@@ -76,4 +76,93 @@ public class TestConstant {
 
     public static final String HEALTH_ENDPOINT_RESPONSE = "healthy";
 
+    // apim related constants
+    public static final String APIM_SERVICE_NAME_IN_DOCKER_COMPOSE = "apim";
+    public static final String SUPER_TENANT_DOMAIN = "carbon.super";
+    public static final String DEFAULT_TOKEN_VALIDITY_TIME = "36000";
+    public static final String ADMIN_USERNAME = "admin";
+    public static final String ADMIN_PASSWORD = "admin";
+    public static final String LOCAL_HOST_NAME = "localhost";
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+
+    //apim instances names
+    public static final String AM_PRODUCT_GROUP_NAME = "APIM";
+    public static final String AM_ALL_IN_ONE_INSTANCE = "all-in-one";
+
+    public static final class APIM_INTERNAL_ROLE {
+        public static final String SUBSCRIBER = "Internal/subscriber";
+        public static final String PUBLISHER = "Internal/publisher";
+        public static final String CREATOR = "Internal/creator";
+        public static final String EVERYONE = "Internal/everyone";
+
+        public APIM_INTERNAL_ROLE() {
+        }
+    }
+
+    public static class GRANT_TYPE {
+        public static final String PASSWORD = "password";
+        public static final String CLIENT_CREDENTIAL = "client_credentials";
+        public static final String AUTHORIZATION_CODE = "authorization_code";
+        public static final String REFRESH_CODE = "refresh_token";
+        public static final String SAML2 = "urn:ietf:params:oauth:grant-type:saml2-bearer";
+        public static final String NTLM = "iwa:ntlm";
+        public static final String IMPLICIT = "implicit";
+        public static final String JWT = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+
+        public GRANT_TYPE() {
+        }
+    }
+
+    public static class RESOURCE_TIER {
+        public static final String UNLIMITED = "Unlimited";
+        public static final String TENK_PER_MIN = "10KPerMin";
+        public static final String TWENTYK_PER_MIN = "20KPerMin";
+        public static final String FIFTYK_PER_MIN = "50KPerMin";
+        public static final int ULTIMATE_LIMIT = 20;
+        public static final int PLUS_LIMIT = 5;
+        public static final int BASIC_LIMIT = 1;
+
+        public RESOURCE_TIER() {
+        }
+    }
+
+    public static class API_TIER {
+        public static final String UNLIMITED = "Unlimited";
+        public static final String GOLD = "Gold";
+        public static final String SILVER = "Silver";
+        public static final String BRONZE = "Bronze";
+        public static final String ASYNC_UNLIMITED = "AsyncWHUnlimited";
+        public static final int GOLD_LIMIT = 20;
+        public static final int SILVER_LIMIT = 5;
+        public static final int BRONZE_LIMIT = 1;
+
+        public API_TIER() {
+        }
+    }
+
+    public static final class APPLICATION_TIER {
+        public static final String UNLIMITED = "Unlimited";
+        public static final String LARGE = "Large";
+        public static final String MEDIUM = "Medium";
+        public static final String SMALL = "Small";
+        public static final String TEN_PER_MIN = "10PerMin";
+        public static final int LARGE_LIMIT = 20;
+        public static final int MEDIUM_LIMIT = 5;
+        public static final int SMALL_LIMIT = 1;
+        public static final String DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN = "50PerMin";
+
+        public APPLICATION_TIER() {
+        }
+    }
+
+    public static final class SUBSCRIPTION_TIER {
+        public static final String UNLIMITED = "Unlimited";
+        public static final String GOLD = "Gold";
+        public static final String SILVER = "Silver";
+        public static final String BRONZE = "Bronze";
+        public static final String UNAUTHENTICATED = "Unauthenticated";
+
+        public SUBSCRIPTION_TIER() {
+        }
+    }
 }

@@ -118,7 +118,7 @@ public class ApictlUtils {
         String[] argsArray = { projectPathToCreate, OAS_FLAG, openApiFilePath };
         String[] responseLines = runApictlCommand(cmdArray, argsArray, 2);
 
-        if (!PROJECT_INITIALIZED_RESPONSE.equals(responseLines[1].trim())) {
+        if (responseLines[1]!= null && !PROJECT_INITIALIZED_RESPONSE.equals(responseLines[1].trim())) {
             if ((projectPathToCreate + ALREADY_EXISTS_RESPONSE).equals(responseLines[0].trim())) {
                 throw new MicroGWTestException("Project already exists");
             } else {
@@ -146,7 +146,7 @@ public class ApictlUtils {
         String[] argsArray = { mgwEnv, ADAPTER_FLAG, "https://localhost:9843" };
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
-            if (!responseLines[0].startsWith(SUCCESSFUL_ADD_ENV_RESPONSE)) {
+            if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFUL_ADD_ENV_RESPONSE)) {
                 throw new MicroGWTestException("Unable to add microgateway adapter env to apictl");
             }
         } catch (IOException e) {
@@ -191,7 +191,7 @@ public class ApictlUtils {
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 2);
 
-            if (!responseLines[1].startsWith(SUCCESSFUL_LOGIN_RESPONSE)) {
+            if (responseLines[1]!= null && !responseLines[1].startsWith(SUCCESSFUL_LOGIN_RESPONSE)) {
                 throw new MicroGWTestException("Unable to login to apictl microgateway adapter env:"
                         + mgwEnv);
             }
@@ -213,7 +213,7 @@ public class ApictlUtils {
         String[] argsArray = { mgwEnv };
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
-            if (!responseLines[0].startsWith(SUCCESSFUL_LOGOUT_RESPONSE)) {
+            if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFUL_LOGOUT_RESPONSE)) {
                 throw new MicroGWTestException("Unable to logout from apictl microgateway adapter env: "
                     + mgwEnv);
             }
@@ -239,7 +239,7 @@ public class ApictlUtils {
         String[] argsArray = { FILE_FLAG, projectPath, ENV_FLAG, mgwEnv, OVERRIDE_FLAG };
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
-            if (!responseLines[0].startsWith(SUCCESSFULLY_DEPLOYED_RESPONSE)) {
+            if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFULLY_DEPLOYED_RESPONSE)) {
                 throw new MicroGWTestException("Unable to deploy API project: "
                         + apiProjectName + " to microgateway adapter environment: " + mgwEnv);
             }
@@ -263,7 +263,7 @@ public class ApictlUtils {
         String[] argsArray = { NAME_FLAG, apiName, VERSION_FLAG, apiVersion, ENV_FLAG, mgwEnv };
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
-            if (!responseLines[0].startsWith(SUCCESSFULLY_UNDEPLOYED_RESPONSE)) {
+            if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFULLY_UNDEPLOYED_RESPONSE)) {
                 throw new MicroGWTestException("Unable to undeploy API: "
                         + apiName + " from microgateway adapter environment: " + mgwEnv);
             }

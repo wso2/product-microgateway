@@ -29,6 +29,7 @@ private static final long serialVersionUID = 0L;
     sandboxUrls_ = java.util.Collections.emptyList();
     resources_ = java.util.Collections.emptyList();
     basePath_ = "";
+    tier_ = "";
     apiLifeCycleState_ = "";
     securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
   }
@@ -128,16 +129,9 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 82: {
-            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
-              vendorExtensible_ = com.google.protobuf.MapField.newMapField(
-                  VendorExtensibleDefaultEntryHolder.defaultEntry);
-              mutable_bitField0_ |= 0x00000008;
-            }
-            com.google.protobuf.MapEntry<java.lang.String, com.google.protobuf.Any>
-            vendorExtensible__ = input.readMessage(
-                VendorExtensibleDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-            vendorExtensible_.getMutableMap().put(
-                vendorExtensible__.getKey(), vendorExtensible__.getValue());
+            java.lang.String s = input.readStringRequireUtf8();
+
+            tier_ = s;
             break;
           }
           case 90: {
@@ -148,9 +142,9 @@ private static final long serialVersionUID = 0L;
           }
           case 98: {
             java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000010) != 0)) {
+            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
               securityScheme_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000010;
+              mutable_bitField0_ |= 0x00000008;
             }
             securityScheme_.add(s);
             break;
@@ -179,7 +173,7 @@ private static final long serialVersionUID = 0L;
       if (((mutable_bitField0_ & 0x00000004) != 0)) {
         resources_ = java.util.Collections.unmodifiableList(resources_);
       }
-      if (((mutable_bitField0_ & 0x00000010) != 0)) {
+      if (((mutable_bitField0_ & 0x00000008) != 0)) {
         securityScheme_ = securityScheme_.getUnmodifiableView();
       }
       this.unknownFields = unknownFields.build();
@@ -191,18 +185,6 @@ private static final long serialVersionUID = 0L;
     return org.wso2.gateway.discovery.api.ApiProto.internal_static_wso2_discovery_api_Api_descriptor;
   }
 
-  @SuppressWarnings({"rawtypes"})
-  @java.lang.Override
-  protected com.google.protobuf.MapField internalGetMapField(
-      int number) {
-    switch (number) {
-      case 10:
-        return internalGetVendorExtensible();
-      default:
-        throw new RuntimeException(
-            "Invalid map field number: " + number);
-    }
-  }
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
@@ -559,85 +541,42 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int VENDOREXTENSIBLE_FIELD_NUMBER = 10;
-  private static final class VendorExtensibleDefaultEntryHolder {
-    static final com.google.protobuf.MapEntry<
-        java.lang.String, com.google.protobuf.Any> defaultEntry =
-            com.google.protobuf.MapEntry
-            .<java.lang.String, com.google.protobuf.Any>newDefaultInstance(
-                org.wso2.gateway.discovery.api.ApiProto.internal_static_wso2_discovery_api_Api_VendorExtensibleEntry_descriptor, 
-                com.google.protobuf.WireFormat.FieldType.STRING,
-                "",
-                com.google.protobuf.WireFormat.FieldType.MESSAGE,
-                com.google.protobuf.Any.getDefaultInstance());
-  }
-  private com.google.protobuf.MapField<
-      java.lang.String, com.google.protobuf.Any> vendorExtensible_;
-  private com.google.protobuf.MapField<java.lang.String, com.google.protobuf.Any>
-  internalGetVendorExtensible() {
-    if (vendorExtensible_ == null) {
-      return com.google.protobuf.MapField.emptyMapField(
-          VendorExtensibleDefaultEntryHolder.defaultEntry);
+  public static final int TIER_FIELD_NUMBER = 10;
+  private volatile java.lang.Object tier_;
+  /**
+   * <code>string tier = 10;</code>
+   * @return The tier.
+   */
+  @java.lang.Override
+  public java.lang.String getTier() {
+    java.lang.Object ref = tier_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      tier_ = s;
+      return s;
     }
-    return vendorExtensible_;
-  }
-
-  public int getVendorExtensibleCount() {
-    return internalGetVendorExtensible().getMap().size();
   }
   /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-
-  @java.lang.Override
-  public boolean containsVendorExtensible(
-      java.lang.String key) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    return internalGetVendorExtensible().getMap().containsKey(key);
-  }
-  /**
-   * Use {@link #getVendorExtensibleMap()} instead.
+   * <code>string tier = 10;</code>
+   * @return The bytes for tier.
    */
   @java.lang.Override
-  @java.lang.Deprecated
-  public java.util.Map<java.lang.String, com.google.protobuf.Any> getVendorExtensible() {
-    return getVendorExtensibleMap();
-  }
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-  @java.lang.Override
-
-  public java.util.Map<java.lang.String, com.google.protobuf.Any> getVendorExtensibleMap() {
-    return internalGetVendorExtensible().getMap();
-  }
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-  @java.lang.Override
-
-  public com.google.protobuf.Any getVendorExtensibleOrDefault(
-      java.lang.String key,
-      com.google.protobuf.Any defaultValue) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-        internalGetVendorExtensible().getMap();
-    return map.containsKey(key) ? map.get(key) : defaultValue;
-  }
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-  @java.lang.Override
-
-  public com.google.protobuf.Any getVendorExtensibleOrThrow(
-      java.lang.String key) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-        internalGetVendorExtensible().getMap();
-    if (!map.containsKey(key)) {
-      throw new java.lang.IllegalArgumentException();
+  public com.google.protobuf.ByteString
+      getTierBytes() {
+    java.lang.Object ref = tier_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      tier_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
     }
-    return map.get(key);
   }
 
   public static final int APILIFECYCLESTATE_FIELD_NUMBER = 11;
@@ -754,12 +693,9 @@ private static final long serialVersionUID = 0L;
     if (!getBasePathBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 9, basePath_);
     }
-    com.google.protobuf.GeneratedMessageV3
-      .serializeStringMapTo(
-        output,
-        internalGetVendorExtensible(),
-        VendorExtensibleDefaultEntryHolder.defaultEntry,
-        10);
+    if (!getTierBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 10, tier_);
+    }
     if (!getApiLifeCycleStateBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 11, apiLifeCycleState_);
     }
@@ -805,15 +741,8 @@ private static final long serialVersionUID = 0L;
     if (!getBasePathBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, basePath_);
     }
-    for (java.util.Map.Entry<java.lang.String, com.google.protobuf.Any> entry
-         : internalGetVendorExtensible().getMap().entrySet()) {
-      com.google.protobuf.MapEntry<java.lang.String, com.google.protobuf.Any>
-      vendorExtensible__ = VendorExtensibleDefaultEntryHolder.defaultEntry.newBuilderForType()
-          .setKey(entry.getKey())
-          .setValue(entry.getValue())
-          .build();
-      size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(10, vendorExtensible__);
+    if (!getTierBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, tier_);
     }
     if (!getApiLifeCycleStateBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, apiLifeCycleState_);
@@ -859,8 +788,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getResourcesList())) return false;
     if (!getBasePath()
         .equals(other.getBasePath())) return false;
-    if (!internalGetVendorExtensible().equals(
-        other.internalGetVendorExtensible())) return false;
+    if (!getTier()
+        .equals(other.getTier())) return false;
     if (!getApiLifeCycleState()
         .equals(other.getApiLifeCycleState())) return false;
     if (!getSecuritySchemeList()
@@ -900,10 +829,8 @@ private static final long serialVersionUID = 0L;
     }
     hash = (37 * hash) + BASEPATH_FIELD_NUMBER;
     hash = (53 * hash) + getBasePath().hashCode();
-    if (!internalGetVendorExtensible().getMap().isEmpty()) {
-      hash = (37 * hash) + VENDOREXTENSIBLE_FIELD_NUMBER;
-      hash = (53 * hash) + internalGetVendorExtensible().hashCode();
-    }
+    hash = (37 * hash) + TIER_FIELD_NUMBER;
+    hash = (53 * hash) + getTier().hashCode();
     hash = (37 * hash) + APILIFECYCLESTATE_FIELD_NUMBER;
     hash = (53 * hash) + getApiLifeCycleState().hashCode();
     if (getSecuritySchemeCount() > 0) {
@@ -1021,28 +948,6 @@ private static final long serialVersionUID = 0L;
       return org.wso2.gateway.discovery.api.ApiProto.internal_static_wso2_discovery_api_Api_descriptor;
     }
 
-    @SuppressWarnings({"rawtypes"})
-    protected com.google.protobuf.MapField internalGetMapField(
-        int number) {
-      switch (number) {
-        case 10:
-          return internalGetVendorExtensible();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
-    @SuppressWarnings({"rawtypes"})
-    protected com.google.protobuf.MapField internalGetMutableMapField(
-        int number) {
-      switch (number) {
-        case 10:
-          return internalGetMutableVendorExtensible();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -1102,11 +1007,12 @@ private static final long serialVersionUID = 0L;
       }
       basePath_ = "";
 
-      internalGetMutableVendorExtensible().clear();
+      tier_ = "";
+
       apiLifeCycleState_ = "";
 
       securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000010);
+      bitField0_ = (bitField0_ & ~0x00000008);
       return this;
     }
 
@@ -1167,12 +1073,11 @@ private static final long serialVersionUID = 0L;
         result.resources_ = resourcesBuilder_.build();
       }
       result.basePath_ = basePath_;
-      result.vendorExtensible_ = internalGetVendorExtensible();
-      result.vendorExtensible_.makeImmutable();
+      result.tier_ = tier_;
       result.apiLifeCycleState_ = apiLifeCycleState_;
-      if (((bitField0_ & 0x00000010) != 0)) {
+      if (((bitField0_ & 0x00000008) != 0)) {
         securityScheme_ = securityScheme_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000008);
       }
       result.securityScheme_ = securityScheme_;
       onBuilt();
@@ -1325,8 +1230,10 @@ private static final long serialVersionUID = 0L;
         basePath_ = other.basePath_;
         onChanged();
       }
-      internalGetMutableVendorExtensible().mergeFrom(
-          other.internalGetVendorExtensible());
+      if (!other.getTier().isEmpty()) {
+        tier_ = other.tier_;
+        onChanged();
+      }
       if (!other.getApiLifeCycleState().isEmpty()) {
         apiLifeCycleState_ = other.apiLifeCycleState_;
         onChanged();
@@ -1334,7 +1241,7 @@ private static final long serialVersionUID = 0L;
       if (!other.securityScheme_.isEmpty()) {
         if (securityScheme_.isEmpty()) {
           securityScheme_ = other.securityScheme_;
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000008);
         } else {
           ensureSecuritySchemeIsMutable();
           securityScheme_.addAll(other.securityScheme_);
@@ -2547,131 +2454,79 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private com.google.protobuf.MapField<
-        java.lang.String, com.google.protobuf.Any> vendorExtensible_;
-    private com.google.protobuf.MapField<java.lang.String, com.google.protobuf.Any>
-    internalGetVendorExtensible() {
-      if (vendorExtensible_ == null) {
-        return com.google.protobuf.MapField.emptyMapField(
-            VendorExtensibleDefaultEntryHolder.defaultEntry);
+    private java.lang.Object tier_ = "";
+    /**
+     * <code>string tier = 10;</code>
+     * @return The tier.
+     */
+    public java.lang.String getTier() {
+      java.lang.Object ref = tier_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        tier_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
       }
-      return vendorExtensible_;
     }
-    private com.google.protobuf.MapField<java.lang.String, com.google.protobuf.Any>
-    internalGetMutableVendorExtensible() {
-      onChanged();;
-      if (vendorExtensible_ == null) {
-        vendorExtensible_ = com.google.protobuf.MapField.newMapField(
-            VendorExtensibleDefaultEntryHolder.defaultEntry);
+    /**
+     * <code>string tier = 10;</code>
+     * @return The bytes for tier.
+     */
+    public com.google.protobuf.ByteString
+        getTierBytes() {
+      java.lang.Object ref = tier_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        tier_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
       }
-      if (!vendorExtensible_.isMutable()) {
-        vendorExtensible_ = vendorExtensible_.copy();
-      }
-      return vendorExtensible_;
-    }
-
-    public int getVendorExtensibleCount() {
-      return internalGetVendorExtensible().getMap().size();
     }
     /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
+     * <code>string tier = 10;</code>
+     * @param value The tier to set.
+     * @return This builder for chaining.
      */
-
-    @java.lang.Override
-    public boolean containsVendorExtensible(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      return internalGetVendorExtensible().getMap().containsKey(key);
-    }
-    /**
-     * Use {@link #getVendorExtensibleMap()} instead.
-     */
-    @java.lang.Override
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, com.google.protobuf.Any> getVendorExtensible() {
-      return getVendorExtensibleMap();
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-     */
-    @java.lang.Override
-
-    public java.util.Map<java.lang.String, com.google.protobuf.Any> getVendorExtensibleMap() {
-      return internalGetVendorExtensible().getMap();
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-     */
-    @java.lang.Override
-
-    public com.google.protobuf.Any getVendorExtensibleOrDefault(
-        java.lang.String key,
-        com.google.protobuf.Any defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-          internalGetVendorExtensible().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-     */
-    @java.lang.Override
-
-    public com.google.protobuf.Any getVendorExtensibleOrThrow(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-          internalGetVendorExtensible().getMap();
-      if (!map.containsKey(key)) {
-        throw new java.lang.IllegalArgumentException();
-      }
-      return map.get(key);
-    }
-
-    public Builder clearVendorExtensible() {
-      internalGetMutableVendorExtensible().getMutableMap()
-          .clear();
+    public Builder setTier(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      tier_ = value;
+      onChanged();
       return this;
     }
     /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
+     * <code>string tier = 10;</code>
+     * @return This builder for chaining.
      */
-
-    public Builder removeVendorExtensible(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      internalGetMutableVendorExtensible().getMutableMap()
-          .remove(key);
+    public Builder clearTier() {
+      
+      tier_ = getDefaultInstance().getTier();
+      onChanged();
       return this;
     }
     /**
-     * Use alternate mutation accessors instead.
+     * <code>string tier = 10;</code>
+     * @param value The bytes for tier to set.
+     * @return This builder for chaining.
      */
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, com.google.protobuf.Any>
-    getMutableVendorExtensible() {
-      return internalGetMutableVendorExtensible().getMutableMap();
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-     */
-    public Builder putVendorExtensible(
-        java.lang.String key,
-        com.google.protobuf.Any value) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      if (value == null) { throw new java.lang.NullPointerException(); }
-      internalGetMutableVendorExtensible().getMutableMap()
-          .put(key, value);
-      return this;
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-     */
-
-    public Builder putAllVendorExtensible(
-        java.util.Map<java.lang.String, com.google.protobuf.Any> values) {
-      internalGetMutableVendorExtensible().getMutableMap()
-          .putAll(values);
+    public Builder setTierBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      tier_ = value;
+      onChanged();
       return this;
     }
 
@@ -2753,9 +2608,9 @@ private static final long serialVersionUID = 0L;
 
     private com.google.protobuf.LazyStringList securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     private void ensureSecuritySchemeIsMutable() {
-      if (!((bitField0_ & 0x00000010) != 0)) {
+      if (!((bitField0_ & 0x00000008) != 0)) {
         securityScheme_ = new com.google.protobuf.LazyStringArrayList(securityScheme_);
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000008;
        }
     }
     /**
@@ -2840,7 +2695,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder clearSecurityScheme() {
       securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000010);
+      bitField0_ = (bitField0_ & ~0x00000008);
       onChanged();
       return this;
     }

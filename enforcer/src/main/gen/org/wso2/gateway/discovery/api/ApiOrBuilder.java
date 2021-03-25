@@ -152,38 +152,16 @@ public interface ApiOrBuilder extends
       getBasePathBytes();
 
   /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
+   * <code>string tier = 10;</code>
+   * @return The tier.
    */
-  int getVendorExtensibleCount();
+  java.lang.String getTier();
   /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
+   * <code>string tier = 10;</code>
+   * @return The bytes for tier.
    */
-  boolean containsVendorExtensible(
-      java.lang.String key);
-  /**
-   * Use {@link #getVendorExtensibleMap()} instead.
-   */
-  @java.lang.Deprecated
-  java.util.Map<java.lang.String, com.google.protobuf.Any>
-  getVendorExtensible();
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-  java.util.Map<java.lang.String, com.google.protobuf.Any>
-  getVendorExtensibleMap();
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-
-  com.google.protobuf.Any getVendorExtensibleOrDefault(
-      java.lang.String key,
-      com.google.protobuf.Any defaultValue);
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-
-  com.google.protobuf.Any getVendorExtensibleOrThrow(
-      java.lang.String key);
+  com.google.protobuf.ByteString
+      getTierBytes();
 
   /**
    * <code>string apiLifeCycleState = 11;</code>

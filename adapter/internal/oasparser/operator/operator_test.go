@@ -17,6 +17,8 @@
 package operator_test
 
 import (
+	"context"
+	"encoding/json"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -138,6 +140,83 @@ func TestMgwSwaggerWebSocketProd(t *testing.T) {
 func TestMgwSwaggerWebSocketSand(t *testing.T) {
 	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api_sand.yaml"
 	testGetMgwSwaggerWebSocket(t, apiYamlFilePath)
+}
+
+//Test execution for GetOpenAPIVersionAndJSONContent
+func TestGetOpenAPIVersionAndJSONContent(t *testing.T) {
+
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen"
+	files, err := ioutil.ReadDir(apiYamlFilePath)
+
+	if err != nil {
+		t.Errorf("Unable to read test-resources")
+	}
+
+	for _, f := range files {
+		if strings.HasSuffix(f.Name(), ".yaml") {
+			testGetOpenAPIVersionAndJSONContent(t, apiYamlFilePath+"/"+f.Name())
+		}
+	}
+}
+
+//helper function to test GetOpenAPIVersionAndJSONContent
+func testGetOpenAPIVersionAndJSONContent(t *testing.T, apiYamlFilePath string) {
+
+	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the yaml file : %v"+apiYamlFilePath)
+	swaggerVerison, apiJsn, err := operator.GetOpenAPIVersionAndJSONContent(apiYamlByteArr)
+
+	assert.NotNil(t, swaggerVerison, "Swagger version should not be empty")
+	assert.NotNil(t, apiJsn, "Swagger version should not be empty")
+
+	// Check for swagger version
+	if strings.HasSuffix(apiYamlFilePath, "/openapi.yaml") {
+		assert.Equal(t, swaggerVerison, "3", "OpenAPI swagger version mismatch")
+	}
+
+	if strings.HasSuffix(apiYamlFilePath, "/api.yaml") {
+		assert.Equal(t, swaggerVerison, "2", "Default swaggerVersion should be 2")
+	}
+
+	if strings.HasSuffix(apiYamlFilePath, "/openapi_with_prod_sand_extensions.yaml") {
+		assert.Equal(t, swaggerVerison, "2", "swaggerVersion mismatch")
+	}
+
+	//validate apiJsn
+	var v interface{}
+	jsnerr := json.Unmarshal(apiJsn, &v)
+
+	assert.Nil(t, jsnerr, "JSONcontent validation failed")
+
+}
+
+//Test execution for TestGetOpenAPIV3Struct
+func TestGetOpenAPIV3Struct(t *testing.T) {
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen"
+	files, err := ioutil.ReadDir(apiYamlFilePath)
+
+	if err != nil {
+		t.Errorf("Unable to read test-resources")
+	}
+
+	for _, f := range files {
+		if strings.HasSuffix(f.Name(), ".yaml") {
+			testGetOpenAPIV3Struct(t, apiYamlFilePath+"/"+f.Name())
+		}
+	}
+}
+
+//helper function for TestGetOpenAPIV3Struct
+func testGetOpenAPIV3Struct(t *testing.T, apiYamlFilePath string) {
+	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
+	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
+	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
+
+	mgwSwagger, _ := operator.GetOpenAPIV3Struct(apiJsn)
+
+	assert.NotNil(t, mgwSwagger.Validate(context.Background()), "MgwSwagger validation failed for : %v", apiYamlFilePath)
+
 }
 
 func testGetMgwSwaggerWebSocket(t *testing.T, apiYamlFilePath string) {

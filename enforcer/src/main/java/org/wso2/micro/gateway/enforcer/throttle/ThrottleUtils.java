@@ -19,19 +19,27 @@
 package org.wso2.micro.gateway.enforcer.throttle;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.wso2.micro.gateway.enforcer.api.RequestContext;
 
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 /**
  * Utilities related to throttling.
  */
 public class ThrottleUtils {
-
     /**
      * Extract a {@code ThrottleCondition} from a provided compatible base64 encoded string.
      *
@@ -120,6 +128,47 @@ public class ThrottleUtils {
         });
 
         return conditionDtoList;
+    }
+
+    /**
+     * Parse a JWT and returns it's claims and a Map.
+     *
+     * @param token JWT token to parse.
+     * @return Map of claims.
+     */
+    public static Map<String, String> getJWTClaims(String token) {
+        if (token == null) {
+            return null;
+        }
+
+        // decoding JWT
+        String[] jwtTokenArray = token.split(Pattern.quote("."));
+        byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes(StandardCharsets.UTF_8));
+        String jwtAssertion = new String(jwtByteArray, StandardCharsets.UTF_8);
+        Type mapType = new TypeToken<Map<String, String>>() {
+        }.getType();
+
+        return new Gson().fromJson(jwtAssertion, mapType);
+    }
+
+    /**
+     * When sent with a 429 (Too Many Requests) response, this indicates how long to wait before making a new request.
+     * {@code Retry-After: <http-date>} format header will be set.
+     * <p>
+     *     Ex: Retry-After: Fri, 31 Dec 1999 23:59:59 GMT
+     * </p>
+     *
+     * @param context the request context to set the header
+     * @param retryTimestamp value of the Retry-After header
+     */
+    public static void setRetryAfterHeader(RequestContext context, Long retryTimestamp) {
+        if (retryTimestamp != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+            dateFormat.setTimeZone(TimeZone.getTimeZone(ThrottleConstants.GMT));
+            Date date = new Date(retryTimestamp);
+            String retryAfterValue = dateFormat.format(date);
+            context.getResponseHeaders().put(ThrottleConstants.HEADER_RETRY_AFTER, retryAfterValue);
+        }
     }
 
 }

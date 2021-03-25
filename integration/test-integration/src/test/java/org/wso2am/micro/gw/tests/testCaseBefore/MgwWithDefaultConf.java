@@ -66,7 +66,7 @@ public class MgwWithDefaultConf extends BaseTestCase {
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
-        Assert.assertEquals(response.getResponseMessage(), TestConstant.HEALTH_ENDPOINT_RESPONSE,
+        Assert.assertEquals(response.getData(), TestConstant.HEALTH_ENDPOINT_RESPONSE,
                 "Response message mismatched");
     }
 

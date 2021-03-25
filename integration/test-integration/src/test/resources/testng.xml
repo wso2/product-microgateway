@@ -28,9 +28,13 @@
         <listener class-name="org.wso2am.micro.gw.tests.listener.TestNGListener"/>
     </listeners>
 
-    <test name="micro-gw-with-default-config" preserve-order="true" parallel="false">
+    <test name="before-suite-preparations" parallel="false">
         <classes>
             <class name="org.wso2am.micro.gw.tests.testCaseBefore.BeforeTestSuite"/>
+        </classes>
+    </test>
+    <test name="micro-gw-with-default-config" preserve-order="true" parallel="false">
+        <classes>
             <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithDefaultConf"/>
             <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployViaRestTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployViaApictlTestCase"/>

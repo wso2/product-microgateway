@@ -6,17 +6,18 @@
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
+ * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.enforcer.filters;
+package org.wso2.micro.gateway.enforcer.throttle;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -25,12 +26,11 @@ import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
-import org.wso2.micro.gateway.enforcer.throttle.ThrottleAgent;
-import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
-import org.wso2.micro.gateway.enforcer.throttle.ThrottleDataHolder;
 import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.util.ThrottleEventConstants;
+import org.wso2.micro.gateway.enforcer.throttle.dto.Decision;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.net.Inet4Address;
@@ -56,7 +56,8 @@ public class ThrottleFilter implements Filter {
     }
 
     @Override
-    public void init(APIConfig apiConfig) {}
+    public void init(APIConfig apiConfig) {
+    }
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
@@ -89,33 +90,41 @@ public class ThrottleFilter implements Filter {
             String apiContext = api.getBasePath();
             String apiVersion = api.getVersion();
             String appId = authContext.getApplicationId();
-            String apiTier = authContext.getApiTier();
+            String apiTier = getApiTier(api);
             String apiThrottleKey = getApiThrottleKey(apiContext, apiVersion);
             String resourceTier = getResourceTier(reqContext.getMatchedResourcePath());
             String resourceThrottleKey = getResourceThrottleKey(reqContext, apiContext, apiVersion);
             String subTier = authContext.getTier();
             String appTier = authContext.getApplicationTier();
+            boolean isApiLevelTriggered = false;
 
-            if (isAPILevelThrottled(apiThrottleKey, apiTier)) {
-                FilterUtils.setThrottleErrorToContext(reqContext,
-                        ThrottleConstants.API_THROTTLE_OUT_ERROR_CODE,
-                        ThrottleConstants.THROTTLE_OUT_MESSAGE,
+            if (!StringUtils.isEmpty(apiTier) && !ThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(apiTier)) {
+                resourceThrottleKey = apiThrottleKey;
+                resourceTier = apiTier;
+                isApiLevelTriggered = true;
+            }
+
+            // Checking API and Resource level throttling. If API tier is defined,
+            // we ignore the resource level tier definition.
+            Decision apiDecision = checkResourceThrottled(resourceThrottleKey, resourceTier, reqContext);
+            if (apiDecision.isThrottled()) {
+                int errorCode;
+                if (isApiLevelTriggered) {
+                    errorCode = ThrottleConstants.API_THROTTLE_OUT_ERROR_CODE;
+                } else {
+                    errorCode = ThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE;
+                }
+                FilterUtils.setThrottleErrorToContext(reqContext, errorCode, ThrottleConstants.THROTTLE_OUT_MESSAGE,
                         ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                 reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                         ThrottleConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED);
-                return true;
-            } else if (isResourceLevelThrottled(resourceThrottleKey, resourceTier)) {
-                FilterUtils.setThrottleErrorToContext(reqContext,
-                        ThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE,
-                        ThrottleConstants.THROTTLE_OUT_MESSAGE,
-                        ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
-                reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
-                        ThrottleConstants.THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED);
+                ThrottleUtils.setRetryAfterHeader(reqContext, apiDecision.getResetAt());
                 return true;
             }
+
             String subThrottleKey = getSubscriptionThrottleKey(appId, apiContext, apiVersion);
-            boolean isSubscriptionThrottled = isSubscriptionLevelThrottled(subThrottleKey, subTier);
-            if (isSubscriptionThrottled) {
+            Decision subDecision = checkSubscriptionLevelThrottled(subThrottleKey, subTier);
+            if (subDecision.isThrottled()) {
                 if (authContext.isStopOnQuotaReach()) {
                     log.debug("Setting subscription throttle out response");
                     FilterUtils.setThrottleErrorToContext(reqContext,
@@ -124,14 +133,15 @@ public class ThrottleFilter implements Filter {
                             ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                     reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                             ThrottleConstants.THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
+                    ThrottleUtils.setRetryAfterHeader(reqContext, subDecision.getResetAt());
                     return true;
                 }
                 log.debug("Proceeding since stopOnQuotaReach is false");
             }
 
             String appThrottleKey = appId + ':' + authContext.getUsername();
-            boolean isAppThrottled = isAppLevelThrottled(appThrottleKey, appTier);
-            if (isAppThrottled) {
+            Decision appDecision = checkAppLevelThrottled(appThrottleKey, appTier);
+            if (appDecision.isThrottled()) {
                 log.debug("Setting application throttle out response");
                 FilterUtils.setThrottleErrorToContext(reqContext,
                         ThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE,
@@ -139,65 +149,42 @@ public class ThrottleFilter implements Filter {
                         ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                 reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                         ThrottleConstants.THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
+                ThrottleUtils.setRetryAfterHeader(reqContext, appDecision.getResetAt());
                 return true;
             }
         }
         return false;
     }
 
-    private boolean isSubscriptionLevelThrottled(String throttleKey, String tier) {
-        boolean isThrottled = dataHolder.isThrottled(throttleKey);
-        log.debug("Subscription Level throttle decision is {} for key:tier {}:{}", isThrottled, throttleKey, tier);
-        return isThrottled;
+    private Decision checkSubscriptionLevelThrottled(String throttleKey, String tier) {
+        Decision decision = dataHolder.isThrottled(throttleKey);
+        log.debug("Subscription Level throttle decision is {} for key:tier {}:{}", decision.isThrottled(),
+                throttleKey, tier);
+        return decision;
     }
 
-    private boolean isAppLevelThrottled(String throttleKey, String tier) {
-        boolean isThrottled = dataHolder.isThrottled(throttleKey);
-        log.debug("Application Level throttle decision is {} for key:tier {}:{}", isThrottled, throttleKey, tier);
-        return isThrottled;
+    private Decision checkAppLevelThrottled(String throttleKey, String tier) {
+        Decision decision = dataHolder.isThrottled(throttleKey);
+        log.debug("Application Level throttle decision is {} for key:tier {}:{}", decision.isThrottled(),
+                throttleKey, tier);
+        return decision;
     }
 
-    private boolean isAPILevelThrottled(String throttleKey, String tier) {
-        log.debug("Checking if request is throttled at API level for tier: {}", tier);
+    private Decision checkResourceThrottled(String throttleKey, String tier, RequestContext context) {
+        log.debug("Checking if request is throttled at API/Resource level for tier: {}, key: {}", tier, throttleKey);
+        Decision decision = new Decision();
 
         if (ThrottleConstants.UNLIMITED_TIER.equals(tier)) {
-            return false;
+            return decision;
         }
 
         if (isGlobalThrottlingEnabled) {
-            // TODO: (Praminda) Check conditional throttling decisions
-            boolean isThrottled;
-            throttleKey += "_default";
-
-            isThrottled = dataHolder.isThrottled(throttleKey);
-            log.debug("API Level throttle decision: {}", isThrottled);
-            return isThrottled;
+            decision = dataHolder.isAdvancedThrottled(throttleKey, context);
+            log.debug("API/Resource Level throttle decision: {}", decision.isThrottled());
+            return decision;
         }
-        return false;
+        return decision;
     }
-
-    private boolean isResourceLevelThrottled(String throttleKey, String tier) {
-        log.debug("Checking if request is throttled at resource level for tier: " + tier);
-
-        if (ThrottleConstants.UNLIMITED_TIER.equals(tier)) {
-            return false;
-        }
-
-        if (isGlobalThrottlingEnabled) {
-            boolean isThrottled;
-            throttleKey += "_default";
-
-            isThrottled = dataHolder.isThrottled(throttleKey);
-            log.debug("Resource Level throttle decision: {}", isThrottled);
-            return isThrottled;
-        }
-        return false;
-    }
-
-    //TODO (amaliMatharaarachchi) Add default values to keys.
-    // Handle fault invocations.
-    // Test all flows.
-    // Add unit tests.
 
     /**
      * This will generate the throttling event map to be publish to the traffic manager.
@@ -208,11 +195,13 @@ public class ThrottleFilter implements Filter {
     private Map<String, String> getThrottleEventMap(RequestContext requestContext) {
         AuthenticationContext authenticationContext = requestContext.getAuthenticationContext();
         Map<String, String> throttleEvent = new HashMap<>();
+        APIConfig api = requestContext.getMathedAPI().getAPIConfig();
 
-        String basePath = requestContext.getMathedAPI().getAPIConfig().getBasePath();
-        String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
+        String basePath = api.getBasePath();
+        String apiVersion = api.getVersion();
         String apiContext = basePath + ':' + apiVersion;
-        String apiName = requestContext.getMathedAPI().getAPIConfig().getName();
+        String apiName = api.getName();
+        String apiTier = getApiTier(api);
         String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
         if (tenantDomain == null) {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -220,14 +209,12 @@ public class ThrottleFilter implements Filter {
         String resourceTier;
         String resourceKey;
 
-        if (!ThrottleConstants.UNLIMITED_TIER.equals(authenticationContext.getApiTier()) &&
-                authenticationContext.getApiTier() != null &&
-                !authenticationContext.getApiTier().isBlank()) {
-            resourceTier = authenticationContext.getApiTier();
+        if (!ThrottleConstants.UNLIMITED_TIER.equals(apiTier) && apiTier != null && !apiTier.isBlank()) {
+            resourceTier = apiTier;
             resourceKey = apiContext;
         } else {
             resourceTier = getResourceTier(requestContext.getMatchedResourcePath());
-            resourceKey = getResourceThrottleKey(requestContext, apiContext, apiVersion);
+            resourceKey = getResourceThrottleKey(requestContext, basePath, apiVersion);
         }
 
         throttleEvent.put(ThrottleEventConstants.MESSAGE_ID, requestContext.getRequestID());
@@ -235,7 +222,7 @@ public class ThrottleFilter implements Filter {
                 authenticationContext.getUsername());
         throttleEvent.put(ThrottleEventConstants.APP_TIER, authenticationContext.getApplicationTier());
         throttleEvent.put(ThrottleEventConstants.API_KEY, apiContext);
-        throttleEvent.put(ThrottleEventConstants.API_TIER, authenticationContext.getApiTier());
+        throttleEvent.put(ThrottleEventConstants.API_TIER, apiTier);
         throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_KEY, authenticationContext.getApplicationId() + ':' +
                 apiContext);
         throttleEvent.put(ThrottleEventConstants.SUBSCRIPTION_TIER, authenticationContext.getTier());
@@ -285,10 +272,18 @@ public class ThrottleFilter implements Filter {
         return ThrottleConstants.UNLIMITED_TIER;
     }
 
+    private String getApiTier(APIConfig apiConfig) {
+        if (!apiConfig.getTier().isBlank()) {
+            return apiConfig.getTier();
+        }
+        return ThrottleConstants.UNLIMITED_TIER;
+    }
 
     private JSONObject getProperties(RequestContext requestContext) {
-        String remoteIP = requestContext.getAddress();
+        String remoteIP = requestContext.getClientIp();
         JSONObject jsonObMap = new JSONObject();
+        ThrottleConfigDto config = ConfigHolder.getInstance().getConfig().getThrottleConfig();
+
         if (remoteIP != null && remoteIP.length() > 0) {
             try {
                 InetAddress address = InetAddress.getByName(remoteIP);
@@ -306,7 +301,29 @@ public class ThrottleFilter implements Filter {
                 jsonObMap.put(ThrottleConstants.IP, 0);
             }
         }
-        // TODO(amaliMatharaarachchi) Add advance throttling data to additional properties.
+
+        if (config.isHeaderConditionsEnabled()) {
+            Map<String, String> headers = requestContext.getHeaders();
+            for (String name : headers.keySet()) {
+                jsonObMap.put(name, headers.get(name));
+            }
+        }
+
+        if (config.isQueryConditionsEnabled()) {
+            Map<String, String> params = requestContext.getQueryParameters();
+            for (String name : params.keySet()) {
+                jsonObMap.put(name, params.get(name));
+            }
+        }
+
+        String callerToken = requestContext.getAuthenticationContext().getCallerToken();
+        if (config.isJwtClaimConditionsEnabled() && callerToken != null) {
+            Map<String, String> claims = ThrottleUtils.getJWTClaims(callerToken);
+            for (String key : claims.keySet()) {
+                jsonObMap.put(key, claims.get(key));
+            }
+        }
+
         return jsonObMap;
     }
 }
