@@ -67,5 +67,6 @@ services:
       - JAVA_OPTS=${JAVA_OPTS}
       - apim_admin_pwd=admin
       - enforcer_admin_pwd=admin
+      - tm_admin_pwd=admin
     ports:
       - "8081:8081"
