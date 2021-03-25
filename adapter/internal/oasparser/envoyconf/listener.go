@@ -36,13 +36,13 @@ import (
 )
 
 // CreateRoutesConfigForRds generates the default RouteConfiguration.
-// Only the provided virtual host will be assigned inside the configuration.
+// Only the provided virtual hosts will be assigned inside the configuration.
 // This is used to provide the configuration for RDS.
-func CreateRoutesConfigForRds(vHost *routev3.VirtualHost) *routev3.RouteConfiguration {
+func CreateRoutesConfigForRds(vHosts []*routev3.VirtualHost) *routev3.RouteConfiguration {
 	rdsConfigName := defaultRdsConfigName
 	routeConfiguration := routev3.RouteConfiguration{
 		Name:         rdsConfigName,
-		VirtualHosts: []*routev3.VirtualHost{vHost},
+		VirtualHosts: vHosts,
 	}
 	return &routeConfiguration
 }
@@ -163,20 +163,20 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 	return &listener
 }
 
-// CreateVirtualHost creates VirtualHost configuration for envoy which serves
-// request from any domain(*). The provided name will the reference for
-// VirtualHost configuration. The routes array will be included as the routes
+// CreateVirtualHosts creates VirtualHost configurations for envoy which serves
+// request from the vhost domain. The routes array will be included as the routes
 // for the created virtual host.
-func CreateVirtualHost(vHostName string, routes []*routev3.Route) *routev3.VirtualHost {
-
-	vHostDomains := []string{"*"}
-
-	virtualHost := routev3.VirtualHost{
-		Name:    vHostName,
-		Domains: vHostDomains,
-		Routes:  routes,
+func CreateVirtualHosts(vhostToRouteArrayMap map[string][]*routev3.Route) []*routev3.VirtualHost {
+	virtualHosts := make([]*routev3.VirtualHost, 0, len(vhostToRouteArrayMap))
+	for vhost, routes := range vhostToRouteArrayMap {
+		virtualHost := &routev3.VirtualHost{
+			Name:    vhost,
+			Domains: []string{vhost},
+			Routes:  routes,
+		}
+		virtualHosts = append(virtualHosts, virtualHost)
 	}
-	return &virtualHost
+	return virtualHosts
 }
 
 // createAddress generates an address from the given host and port

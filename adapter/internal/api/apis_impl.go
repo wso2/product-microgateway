@@ -46,7 +46,7 @@ const (
 	crtExtension               string = ".crt"
 	pemExtension               string = ".pem"
 	defaultEnv                 string = "Production and Sandbox" //Todo: (SuKSW) update to `default` once APIM side changes.
-	defaultVHost               string = "default"
+	defaultVHostDomain         string = "*"
 	apiTypeFilterKey           string = "type"
 	apiTypeYamlKey             string = "type"
 	lifeCycleStatus            string = "lifeCycleStatus"
@@ -68,8 +68,8 @@ type ProjectAPI struct {
 // The apictl project must be in zipped format. And all the extensions should be defined with in the openAPI
 // definition as only swagger.yaml is taken into consideration here. For websocket APIs api.yaml is taken into
 // consideration. API type is decided by the type field in the api.yaml file.
-func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
-	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
+func extractAPIProject(payload *[]byte) (apiProject ProjectAPI, err error) {
+	zipReader, err := zip.NewReader(bytes.NewReader(*payload), int64(len(*payload)))
 	newLineByteArray := []byte("\n")
 	var upstreamCerts []byte
 
@@ -153,9 +153,9 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 	return apiProject, nil
 }
 
-// ApplyAPIProject accepts an apictl project (as a byte array) and updates the xds servers based upon the
-// content.
-func ApplyAPIProject(payload []byte, environments []string) error {
+// ApplyAPIProject accepts an apictl project (as a byte array), list of vhosts with respective environments
+// and updates the xds servers based upon the content.
+func ApplyAPIProject(payload *[]byte, vhostToEnvsMap map[string][]string) error {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
 		return err
@@ -164,13 +164,16 @@ func ApplyAPIProject(payload []byte, environments []string) error {
 	if err != nil {
 		return err
 	}
-	updateAPI(name, version, apiProject, environments)
+
+	for vhost, environments := range vhostToEnvsMap {
+		updateAPI(vhost, name, version, apiProject, environments)
+	}
 	return nil
 }
 
 // ApplyAPIProjectWithOverwrite is called by the rest implementation to differentiate
 // between create and update using the override param
-func ApplyAPIProjectWithOverwrite(payload []byte, environments []string, override *bool) error {
+func ApplyAPIProjectWithOverwrite(payload *[]byte, environments []string, override *bool) error {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
 		return err
@@ -186,21 +189,21 @@ func ApplyAPIProjectWithOverwrite(payload []byte, environments []string, overrid
 		overrideValue = *override
 	}
 	//TODO: force overwride
-	exists := xds.IsAPIExist(defaultVHost, name, version) // TODO: (SuKSW) update once vhost feature added
+	exists := xds.IsAPIExist(defaultVHostDomain, name, version) // TODO: (SuKSW) update once vhost feature added
 	if !overrideValue && exists {
 		loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.", name, version)
 		return errors.New(mgw.AlreadyExists)
 	}
-	updateAPI(name, version, apiProject, environments)
+	updateAPI(defaultVHostDomain, name, version, apiProject, environments)
 	return nil
 }
 
-func updateAPI(name, version string, apiProject ProjectAPI, environments []string) {
+func updateAPI(vhost, name, version string, apiProject ProjectAPI, environments []string) {
 	if len(environments) == 0 {
 		environments = append(environments, defaultEnv)
 	}
 	var apiContent config.APIContent
-	apiContent.VHost = defaultVHost
+	apiContent.VHost = vhost
 	apiContent.Name = name
 	apiContent.Version = version
 	apiContent.APIType = apiProject.APIType
@@ -248,7 +251,7 @@ func extractAPIInformation(apiJsn []byte) (apiType, apiLifeCycleStatus, producti
 // DeleteAPI calls the DeleteAPI method in xds_server.go
 func DeleteAPI(vhost *string, apiName string, version string) error {
 	if vhost == nil || *vhost == "" {
-		vhostValue := defaultVHost
+		vhostValue := defaultVHostDomain
 		vhost = &vhostValue
 	}
 	return xds.DeleteAPI(*vhost, apiName, version)

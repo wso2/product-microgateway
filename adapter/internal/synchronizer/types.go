@@ -40,3 +40,29 @@ type RevokedToken struct {
 	JWT        string `json:"jwt_signature"`
 	ExpiryTime int64  `json:"expiry_time"`
 }
+
+// DeploymentDescriptor represents deployment descriptor file contains in Artifact
+// received from control plane
+type DeploymentDescriptor struct {
+	Type    string         `json:"type"`
+	Version string         `json:"version"`
+	Data    DeploymentData `json:"data"`
+}
+
+// DeploymentData contains list of ApiDeployment to be deployed to the gateway
+type DeploymentData struct {
+	Deployments []ApiDeployment `json:"deployments"`
+}
+
+// ApiDeployment represents an API project that contains zip file name and
+// gateway environments (labels) that the project to be deployed
+type ApiDeployment struct {
+	ApiFile      string         `json:"apiFile"`
+	Environments []GatewayLabel `json:"environments"`
+}
+
+// GatewayLabel represents gateway environment name and VHost of an API project
+type GatewayLabel struct {
+	Name  string `json:"name"`
+	Vhost string `json:"vhost"`
+}

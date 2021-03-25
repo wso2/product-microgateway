@@ -48,11 +48,10 @@ func GetProductionRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCer
 // The provided set of envoy routes will be assigned under the virtual host
 //
 // The RouteConfiguration is named as "default"
-func GetProductionListenerAndRouteConfig(routes []*routev3.Route) (*listenerv3.Listener, *routev3.RouteConfiguration) {
+func GetProductionListenerAndRouteConfig(vhostToRouteArrayMap map[string][]*routev3.Route) (*listenerv3.Listener, *routev3.RouteConfiguration) {
 	listnerProd := envoy.CreateListenerWithRds("default")
-	vHostName := "default"
-	vHostP := envoy.CreateVirtualHost(vHostName, routes)
-	routeConfigProd := envoy.CreateRoutesConfigForRds(vHostP)
+	vHostsProd := envoy.CreateVirtualHosts(vhostToRouteArrayMap)
+	routeConfigProd := envoy.CreateRoutesConfigForRds(vHostsProd)
 
 	return listnerProd, routeConfigProd
 }
@@ -79,12 +78,10 @@ func GetCacheResources(endpoints []*corev3.Address, clusters []*clusterv3.Cluste
 	return listenerRes, clusterRes, routeConfigRes, endpointRes
 }
 
-// UpdateRoutesConfig updates the existing routes configuration with the provided array of routes.
+// UpdateRoutesConfig updates the existing routes configuration with the provided map of vhost to array of routes.
 // All the already existing routes (within the routeConfiguration) will be removed.
-func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, routes []*routev3.Route) {
-	vHostName := "default"
-	vHost := envoy.CreateVirtualHost(vHostName, routes)
-	routeConfig.VirtualHosts = []*routev3.VirtualHost{vHost}
+func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, vhostToRouteArrayMap map[string][]*routev3.Route) {
+	routeConfig.VirtualHosts = envoy.CreateVirtualHosts(vhostToRouteArrayMap)
 }
 
 // GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition.

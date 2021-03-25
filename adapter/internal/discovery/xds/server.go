@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math/rand"
 	"reflect"
+	"strings"
 	"sync"
 
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
@@ -337,34 +338,41 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Resource, []types.Resource,
 	[]types.Resource, []types.Resource) {
 	var clusterArray []*clusterv3.Cluster
-	var routeArray []*routev3.Route
+	var vhostToRouteArrayMap = make(map[string][]*routev3.Route)
 	var endpointArray []*corev3.Address
 	var apis []types.Resource
 
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
+	}
+	port := conf.Envoy.ListenerPort
+
 	for apiKey, labels := range openAPIEnvoyMap {
 		if arrayContains(labels, label) {
+			vhost := fmt.Sprintf("%v:%v", ExtractVhostFromApiIdentifier(apiKey), port)
 			clusterArray = append(clusterArray, openAPIClustersMap[apiKey]...)
-			routeArray = append(routeArray, openAPIRoutesMap[apiKey]...)
+			vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], openAPIRoutesMap[apiKey]...)
 			endpointArray = append(endpointArray, openAPIEndpointsMap[apiKey]...)
 			apis = append(apis, openAPIEnforcerApisMap[apiKey])
 			// listenerArrays = append(listenerArrays, openAPIListenersMap[apiKey])
 		}
 	}
-	conf, _ := config.ReadConfigs()
+
 	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
 	if enableJwtIssuer {
 		routeToken := envoyconf.CreateTokenRoute()
-		routeArray = append(routeArray, routeToken)
+		vhostToRouteArrayMap["*"] = append(vhostToRouteArrayMap["*"], routeToken)
 	}
 	listener, listenerFound := envoyListenerConfigMap[label]
 	routesConfig, routesConfigFound := envoyRouteConfigMap[label]
 	if !listenerFound && !routesConfigFound {
-		listener, routesConfig = oasParser.GetProductionListenerAndRouteConfig(routeArray)
+		listener, routesConfig = oasParser.GetProductionListenerAndRouteConfig(vhostToRouteArrayMap)
 		envoyListenerConfigMap[label] = listener
 		envoyRouteConfigMap[label] = routesConfig
 	} else {
 		// If the routesConfig exists, the listener exists too
-		oasParser.UpdateRoutesConfig(routesConfig, routeArray)
+		oasParser.UpdateRoutesConfig(routesConfig, vhostToRouteArrayMap)
 	}
 	endpoints, clusters, listeners, routeConfigs := oasParser.GetCacheResources(endpointArray, clusterArray, listener, routesConfig)
 	return endpoints, clusters, listeners, routeConfigs, apis
@@ -685,7 +693,16 @@ func GenerateIdentifierForAPI(vhost, name, version string) string {
 	return vhost + ":" + name + ":" + version
 }
 
-// GenerateAndUpdateKeyManagerList converts the data into KeyManager proto type
+// ExtractVhostFromApiIdentifier extracts vhost from the API identifier
+func ExtractVhostFromApiIdentifier(id string) string {
+	elem := strings.Split(id, ":")
+	if len(elem) == 3 {
+		return elem[0]
+	}
+	// TODO: (renuka) check this to have handle (return error?)
+	return "*"
+}
+
 func GenerateAndUpdateKeyManagerList() {
 	var keyManagerConfigList = make([]types.Resource, 0)
 	for _, keyManager := range KeyManagerList {
