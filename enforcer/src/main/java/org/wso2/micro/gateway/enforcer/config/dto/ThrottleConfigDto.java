@@ -18,6 +18,8 @@
 
 package org.wso2.micro.gateway.enforcer.config.dto;
 
+import java.util.Properties;
+
 /**
  * Throttling configuration model.
  */
@@ -26,8 +28,7 @@ public class ThrottleConfigDto {
     private boolean isHeaderConditionsEnabled;
     private boolean isQueryConditionsEnabled;
     private boolean isJwtClaimConditionsEnabled;
-    private String jmsConnectionInitialContextFactory;
-    private String jmsConnectionProviderUrl;
+    private Properties listenerProperties;
     private ThrottleAgentConfigDto throttleAgent;
 
     public boolean isGlobalPublishingEnabled() {
@@ -62,27 +63,19 @@ public class ThrottleConfigDto {
         isJwtClaimConditionsEnabled = jwtClaimConditionsEnabled;
     }
 
-    public String getJmsConnectionInitialContextFactory() {
-        return jmsConnectionInitialContextFactory;
-    }
-
-    public void setJmsConnectionInitialContextFactory(String jmsConnectionInitialContextFactory) {
-        this.jmsConnectionInitialContextFactory = jmsConnectionInitialContextFactory;
-    }
-
-    public String getJmsConnectionProviderUrl() {
-        return jmsConnectionProviderUrl;
-    }
-
-    public void setJmsConnectionProviderUrl(String jmsConnectionProviderUrl) {
-        this.jmsConnectionProviderUrl = jmsConnectionProviderUrl;
-    }
-
     public ThrottleAgentConfigDto getThrottleAgent() {
         return throttleAgent;
     }
 
     public void setThrottleAgent(ThrottleAgentConfigDto throttleAgent) {
         this.throttleAgent = throttleAgent;
+    }
+
+    public Properties getListenerProperties() {
+        return listenerProperties;
+    }
+
+    public void setListenerProperties(Properties listenerProperties) {
+        this.listenerProperties = listenerProperties;
     }
 }
