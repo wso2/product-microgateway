@@ -205,7 +205,7 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	}
 
 	// Check if TLS is enabled
-	skipSSL := conf.ControlPlane.EventHub.SkipSSLVerfication
+	skipSSL := conf.ControlPlane.EventHub.SkipSSLVerification
 	logger.LoggerSubscription.Debugf("Skip SSL Verification: %v", skipSSL)
 	tr := &http.Transport{}
 	if !skipSSL {

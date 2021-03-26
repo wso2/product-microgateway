@@ -34,7 +34,7 @@ public class APIConfig {
     private List<String> sandboxUrls;
     private String apiLifeCycleState;
 
-    private List<String> securitySchemas = new ArrayList<>();
+    private List<String> securitySchemes = new ArrayList<>();
     private String tier = ThrottleConstants.UNLIMITED_TIER;
     private List<ResourceConfig> resources = new ArrayList<>();
 
@@ -63,7 +63,7 @@ public class APIConfig {
         private List<String> sandboxUrls;
         private String apiLifeCycleState;
 
-        private List<String> securitySchemas = new ArrayList<>();
+        private List<String> securitySchemes = new ArrayList<>();
         private String tier = ThrottleConstants.UNLIMITED_TIER;
         private List<ResourceConfig> resources = new ArrayList<>();
 
@@ -91,6 +91,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder tier(String tier) {
+            this.tier = tier;
+            return this;
+        }
+
         public Builder resources(List<ResourceConfig> resources) {
             this.resources = resources;
             return this;
@@ -106,6 +111,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder securitySchema(List<String> securityScheme) {
+            this.securitySchemes = securitySchemes;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -116,6 +126,8 @@ public class APIConfig {
             apiConfig.apiType = this.apiType;
             apiConfig.productionUrls = this.productionUrls;
             apiConfig.sandboxUrls = this.sandboxUrls;
+            apiConfig.securitySchemes = this.securitySchemes;
+            apiConfig.tier = this.tier;
             return apiConfig;
         }
     }
@@ -140,7 +152,7 @@ public class APIConfig {
     }
 
     public List<String> getSecuritySchemas() {
-        return securitySchemas;
+        return securitySchemes;
     }
 
     public String getTier() {

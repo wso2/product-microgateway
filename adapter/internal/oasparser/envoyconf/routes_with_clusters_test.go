@@ -17,10 +17,11 @@
 package envoyconf_test
 
 import (
-	"github.com/wso2/micro-gw/internal/oasparser/utills"
 	"io/ioutil"
 	"strings"
 	"testing"
+
+	"github.com/wso2/micro-gw/internal/oasparser/utills"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/micro-gw/config"
@@ -259,3 +260,16 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 // 	assert.Contains(t, pathLevelSandCluster.GetName(), contextExtensionMapPath["sandClusterName"],
 // 		"Sandbox Cluster mismatch in route ext authz context. (Path Level Endpoints)")
 // }
+
+func TestCreateRoutesWithClusters(t *testing.T) {
+
+	apiYamlFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/api.yaml"
+	apiYamlByteArr, err := ioutil.ReadFile(apiYamlFilePath)
+	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
+	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
+	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
+	mgwSwagger := operator.GetMgwSwaggerWebSocket(apiJsn)
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil)
+	assert.NotNil(t, routes, "CreateRoutesWithClusters failed: returned routes nil")
+	assert.NotNil(t, clusters, "CreateRoutesWithClusters failed: returned clusters nil")
+}

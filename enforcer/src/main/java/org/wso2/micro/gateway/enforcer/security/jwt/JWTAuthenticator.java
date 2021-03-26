@@ -87,9 +87,9 @@ public class JWTAuthenticator implements Authenticator {
         if (splitToken.length > 1) {
             jwtToken = splitToken[1];
         }
-        String context = requestContext.getMathedAPI().getAPIConfig().getBasePath();
-        String name = requestContext.getMathedAPI().getAPIConfig().getName();
-        String version = requestContext.getMathedAPI().getAPIConfig().getVersion();
+        String context = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
+        String name = requestContext.getMatchedAPI().getAPIConfig().getName();
+        String version = requestContext.getMatchedAPI().getAPIConfig().getVersion();
         context = context + "/" + version;
         ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
         String httpMethod = requestContext.getMatchedResourcePath().getMethod().toString();
@@ -185,13 +185,18 @@ public class JWTAuthenticator implements Authenticator {
 
     }
 
+    @Override
+    public int getPriority() {
+        return 10;
+    }
+
     private String generateAndRetrieveJWTToken(String tokenSignature, JWTInfoDto jwtInfoDto)
             throws APISecurityException {
         log.debug("Inside generateAndRetrieveJWTToken");
 
         String endUserToken = null;
         boolean valid = false;
-        String jwtTokenCacheKey = jwtInfoDto.getApicontext().concat(":").concat(jwtInfoDto.getVersion()).concat(":")
+        String jwtTokenCacheKey = jwtInfoDto.getApiContext().concat(":").concat(jwtInfoDto.getVersion()).concat(":")
                 .concat(tokenSignature);
         JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().getJwtConfigurationDto();
         // Get the jwt generator class (Default jwt generator class)
@@ -295,8 +300,8 @@ public class JWTAuthenticator implements Authenticator {
     private APIKeyValidationInfoDTO validateSubscriptionUsingKeyManager(RequestContext requestContext,
             JWTValidationInfo jwtValidationInfo) throws APISecurityException {
 
-        String apiContext = requestContext.getMathedAPI().getAPIConfig().getBasePath();
-        String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
+        String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
+        String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
         return validateSubscriptionUsingKeyManager(apiContext, apiVersion, jwtValidationInfo);
     }
 

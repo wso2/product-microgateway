@@ -92,13 +92,13 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
         api.setApiCreator(AnalyticsUtils.setDefaultIfNull(
                 requestContext.getAuthenticationContext() == null
                         ? null : requestContext.getAuthenticationContext().getApiPublisher()));
-        api.setApiType(requestContext.getMathedAPI().getAPIConfig().getApiType());
-        api.setApiName(requestContext.getMathedAPI().getAPIConfig().getName());
-        api.setApiVersion(requestContext.getMathedAPI().getAPIConfig().getVersion());
+        api.setApiType(requestContext.getMatchedAPI().getAPIConfig().getApiType());
+        api.setApiName(requestContext.getMatchedAPI().getAPIConfig().getName());
+        api.setApiVersion(requestContext.getMatchedAPI().getAPIConfig().getVersion());
         api.setApiCreatorTenantDomain(FilterUtils.getTenantDomainFromRequestURL(
-                requestContext.getMathedAPI().getAPIConfig().getBasePath()) == null
+                requestContext.getMatchedAPI().getAPIConfig().getBasePath()) == null
                 ? APIConstants.SUPER_TENANT_DOMAIN_NAME
-                : requestContext.getMathedAPI().getAPIConfig().getBasePath());
+                : requestContext.getMatchedAPI().getAPIConfig().getBasePath());
         return api;
     }
 

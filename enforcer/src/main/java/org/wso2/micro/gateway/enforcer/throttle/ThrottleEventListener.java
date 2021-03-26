@@ -22,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
+import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
 
 import java.util.Date;
 import java.util.Enumeration;
@@ -121,6 +122,13 @@ public class ThrottleEventListener implements MessageListener {
                      */
 
                     handleThrottleUpdateMessage(map);
+                } else if (map.get(ThrottleConstants.POLICY_TEMPLATE_KEY) != null) {
+                    /*
+                     * This message contains key template data
+                     * keyTemplateValue - Value of key template
+                     * keyTemplateState - whether key template active or not
+                     */
+                    handleKeyTemplateMessage(map);
                 }
             }
         } catch (JMSException e) {
@@ -129,11 +137,10 @@ public class ThrottleEventListener implements MessageListener {
     }
 
     private void handleThrottleUpdateMessage(Map<String, Object> map) {
-        String throttleKey = map.get(ThrottleConstants.AdvancedThrottleConstants.THROTTLE_KEY).toString();
-        String throttleState = map.get(ThrottleConstants.AdvancedThrottleConstants.IS_THROTTLED).toString();
-        long timeStamp = Long.parseLong(map.get(ThrottleConstants.
-                AdvancedThrottleConstants.EXPIRY_TIMESTAMP).toString());
-        Object evaluatedConditionObject = map.get(ThrottleConstants.AdvancedThrottleConstants.EVALUATED_CONDITIONS);
+        String throttleKey = map.get(ThrottleConstants.THROTTLE_KEY).toString();
+        String throttleState = map.get(ThrottleConstants.IS_THROTTLED).toString();
+        long timeStamp = Long.parseLong(map.get(ThrottleConstants.EXPIRY_TIMESTAMP).toString());
+        Object evaluatedConditionObject = map.get(ThrottleConstants.EVALUATED_CONDITIONS);
         ThrottleDataHolder dataHolder = ThrottleDataHolder.getInstance();
 
         if (log.isDebugEnabled()) {
@@ -141,7 +148,7 @@ public class ThrottleEventListener implements MessageListener {
                     throttleState + ", expiryTime: " + new Date(timeStamp).toString());
         }
 
-        if (ThrottleConstants.AdvancedThrottleConstants.TRUE.equalsIgnoreCase(throttleState)) {
+        if (ThrottleConstants.TRUE.equalsIgnoreCase(throttleState)) {
             dataHolder.addThrottleData(throttleKey, timeStamp);
             APICondition extractedKey = extractAPIorResourceKey(throttleKey);
             log.debug("Adding throttling key : {}",  extractedKey);
@@ -164,6 +171,19 @@ public class ThrottleEventListener implements MessageListener {
 
                 dataHolder.removeThrottledConditions(extractedKey.getResourceKey(), extractedKey.getName());
             }
+        }
+    }
+
+    private synchronized void handleKeyTemplateMessage(Map<String, Object> map) {
+        String keyTemplateValue = map.get(ThrottleConstants.POLICY_TEMPLATE_KEY).toString();
+        String keyTemplateState = map.get(ThrottleConstants.TEMPLATE_KEY_STATE).toString();
+        ThrottleDataHolder dataHolder = ThrottleDataHolder.getInstance();
+        log.debug("Received Key - KeyTemplate: {}:{}", keyTemplateValue, keyTemplateState);
+
+        if (ThrottleConstants.ADD.equals(keyTemplateState)) {
+            dataHolder.addKeyTemplate(keyTemplateValue, keyTemplateValue);
+        } else {
+            dataHolder.removeKeyTemplate(keyTemplateValue);
         }
     }
 

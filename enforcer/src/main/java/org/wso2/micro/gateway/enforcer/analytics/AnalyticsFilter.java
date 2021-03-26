@@ -23,6 +23,7 @@ import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsCommonConfiguration;
 import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
@@ -57,7 +58,10 @@ public class AnalyticsFilter {
         Map<String, String> configuration = new HashMap<>(2);
         configuration.put(AUTH_TOKEN_KEY, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthToken());
         configuration.put(AUTH_URL, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthURL());
-        AnalyticsServiceReferenceHolder.getInstance().setConfigurations(configuration);
+        AnalyticsCommonConfiguration commonConfiguration = new AnalyticsCommonConfiguration(configuration);
+//        commonConfiguration.setResponseSchema("CHOREO_RESPONSE");
+//        commonConfiguration.setFaultSchema("CHOREO_ERROR");
+        AnalyticsServiceReferenceHolder.getInstance().setConfigurations(commonConfiguration);
         // TODO: (VirajSalaka) Load Class
     }
 
@@ -99,9 +103,9 @@ public class AnalyticsFilter {
     }
 
     public void handleSuccessRequest(RequestContext requestContext) {
-        String apiName = requestContext.getMathedAPI().getAPIConfig().getName();
-        String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
-        String apiType = requestContext.getMathedAPI().getAPIConfig().getApiType();
+        String apiName = requestContext.getMatchedAPI().getAPIConfig().getName();
+        String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
+        String apiType = requestContext.getMatchedAPI().getAPIConfig().getApiType();
         AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
 
         requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY, AnalyticsUtils.getAPIId(requestContext));
@@ -112,9 +116,9 @@ public class AnalyticsFilter {
         requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, apiType);
         requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY,
                 FilterUtils.getTenantDomainFromRequestURL(
-                        requestContext.getMathedAPI().getAPIConfig().getBasePath()) == null
+                        requestContext.getMatchedAPI().getAPIConfig().getBasePath()) == null
                         ? APIConstants.SUPER_TENANT_DOMAIN_NAME
-                        : requestContext.getMathedAPI().getAPIConfig().getBasePath());
+                        : requestContext.getMatchedAPI().getAPIConfig().getBasePath());
 
         // Default Value would be PRODUCTION
         requestContext.addMetadataToMap(MetadataConstants.APP_KEY_TYPE_KEY,
@@ -144,11 +148,11 @@ public class AnalyticsFilter {
                 && authContext.getKeyType().equals(APIConstants.API_KEY_TYPE_SANDBOX)) {
             // keyType is sandbox but the sandbox endpoints are null this will result in authentication failure.
             // Hence null scenario is impossible to occur.
-            return requestContext.getMathedAPI().getAPIConfig().getSandboxUrls() != null ?
-                    requestContext.getMathedAPI().getAPIConfig().getSandboxUrls().get(0) : "";
+            return requestContext.getMatchedAPI().getAPIConfig().getSandboxUrls() != null ?
+                    requestContext.getMatchedAPI().getAPIConfig().getSandboxUrls().get(0) : "";
         }
         // This does not cause problems at the moment Since the current microgateway supports only one URL
-        return requestContext.getMathedAPI().getAPIConfig().getProductionUrls().get(0);
+        return requestContext.getMatchedAPI().getAPIConfig().getProductionUrls().get(0);
     }
 
     public void handleFailureRequest(RequestContext requestContext) {

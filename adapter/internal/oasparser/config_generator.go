@@ -88,7 +88,7 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, routes []*route
 }
 
 // GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition.
-func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleStatus string) *api.Api {
+func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string) *api.Api {
 	prodUrls := []*api.Endpoint{}
 	sandUrls := []*api.Endpoint{}
 	resources := []*api.Resource{}
@@ -127,16 +127,18 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleStatus string) *api.Ap
 	}
 
 	return &api.Api{
-		Id:                 mgwSwagger.GetID(),
-		Title:              mgwSwagger.GetTitle(),
-		Description:        mgwSwagger.GetDescription(),
-		BasePath:           mgwSwagger.GetXWso2Basepath(),
-		Version:            mgwSwagger.GetVersion(),
-		ApiType:            mgwSwagger.GetAPIType(),
-		ProductionUrls:     prodUrls,
-		SandboxUrls:        sandUrls,
-		Resources:          resources,
-		ApiLifeCycleStatus: lifeCycleStatus,
+		Id:                mgwSwagger.GetID(),
+		Title:             mgwSwagger.GetTitle(),
+		Description:       mgwSwagger.GetDescription(),
+		BasePath:          mgwSwagger.GetXWso2Basepath(),
+		Version:           mgwSwagger.GetVersion(),
+		ApiType:           mgwSwagger.GetAPIType(),
+		ProductionUrls:    prodUrls,
+		SandboxUrls:       sandUrls,
+		Resources:         resources,
+		ApiLifeCycleState: lifeCycleState,
+		Tier:              mgwSwagger.GetXThrottlingTier(),
+		SecurityScheme:    mgwSwagger.GetSetSecurityScheme(),
 	}
 }
 
@@ -159,6 +161,7 @@ func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
 	apiOperation := api.Operation{
 		Method:   operation.GetMethod(),
 		Security: secSchemas,
+		Tier:     operation.GetTier(),
 	}
 	return &apiOperation
 }

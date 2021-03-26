@@ -32,8 +32,8 @@ public class AnalyticsUtils {
     public static String getAPIId(RequestContext requestContext) {
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
         if (authContext == null || StringUtils.isEmpty(authContext.getApiUUID())) {
-            return generateHash(requestContext.getMathedAPI().getAPIConfig().getName(),
-                    requestContext.getMathedAPI().getAPIConfig().getVersion());
+            return generateHash(requestContext.getMatchedAPI().getAPIConfig().getName(),
+                    requestContext.getMatchedAPI().getAPIConfig().getVersion());
         }
         return authContext.getApiUUID();
     }
