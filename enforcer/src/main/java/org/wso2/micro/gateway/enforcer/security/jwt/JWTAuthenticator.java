@@ -74,7 +74,7 @@ public class JWTAuthenticator implements Authenticator {
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
         // Retrieve the authType value, if it is "None", they you can proceed directly with the authentication.
-        String authTYpe = getAuthType(requestContext.getMathedAPI().getAPIConfig(),
+        String authTYpe = getAuthType(requestContext.getMatchedAPI().getAPIConfig(),
                 requestContext.getMatchedResourcePath());
         if (APIConstants.AUTH_NO_AUTHENTICATION.equals(authTYpe)) {
             return true;
@@ -95,7 +95,7 @@ public class JWTAuthenticator implements Authenticator {
         context = context + "/" + version;
         ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
         String httpMethod = requestContext.getMatchedResourcePath().getMethod().toString();
-        String authType = getAuthType(requestContext.getMathedAPI().getAPIConfig(), matchingResource);
+        String authType = getAuthType(requestContext.getMatchedAPI().getAPIConfig(), matchingResource);
         SignedJWTInfo signedJWTInfo;
         // Here handle secured and insecured scenario
         if (APIConstants.AUTH_NO_AUTHENTICATION.equals(authType)) {
