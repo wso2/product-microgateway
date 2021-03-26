@@ -127,17 +127,18 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string) *api.Api
 	}
 
 	return &api.Api{
-		Id:                 mgwSwagger.GetID(),
-		Title:              mgwSwagger.GetTitle(),
-		Description:        mgwSwagger.GetDescription(),
-		BasePath:           mgwSwagger.GetXWso2Basepath(),
-		Version:            mgwSwagger.GetVersion(),
-		ProductionUrls:     prodUrls,
-		SandboxUrls:        sandUrls,
-		Resources:          resources,
-		ApiLifeCycleState:  lifeCycleState,
-		Tier:               mgwSwagger.GetXThrottlingTier(),
-		SecurityScheme:     mgwSwagger.GetSetSecurityScheme(),
+		Id:                mgwSwagger.GetID(),
+		Title:             mgwSwagger.GetTitle(),
+		Description:       mgwSwagger.GetDescription(),
+		BasePath:          mgwSwagger.GetXWso2Basepath(),
+		Version:           mgwSwagger.GetVersion(),
+		ProductionUrls:    prodUrls,
+		SandboxUrls:       sandUrls,
+		Resources:         resources,
+		ApiLifeCycleState: lifeCycleState,
+		Tier:              mgwSwagger.GetXThrottlingTier(),
+		SecurityScheme:    mgwSwagger.GetSetSecurityScheme(),
+		AuthType:          mgwSwagger.GetXAuthType(),
 	}
 }
 
@@ -161,6 +162,7 @@ func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
 		Method:   operation.GetMethod(),
 		Security: secSchemas,
 		Tier:     operation.GetTier(),
+		AuthType: operation.GetAuthType(),
 	}
 	return &apiOperation
 }

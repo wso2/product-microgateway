@@ -23,6 +23,7 @@ private static final long serialVersionUID = 0L;
     method_ = "";
     security_ = java.util.Collections.emptyList();
     tier_ = "";
+    authType_ = "";
   }
 
   @java.lang.Override
@@ -75,6 +76,12 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             tier_ = s;
+            break;
+          }
+          case 34: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            authType_ = s;
             break;
           }
           default: {
@@ -228,6 +235,44 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int AUTHTYPE_FIELD_NUMBER = 4;
+  private volatile java.lang.Object authType_;
+  /**
+   * <code>string authType = 4;</code>
+   * @return The authType.
+   */
+  @java.lang.Override
+  public java.lang.String getAuthType() {
+    java.lang.Object ref = authType_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      authType_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string authType = 4;</code>
+   * @return The bytes for authType.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getAuthTypeBytes() {
+    java.lang.Object ref = authType_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      authType_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -251,6 +296,9 @@ private static final long serialVersionUID = 0L;
     if (!getTierBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, tier_);
     }
+    if (!getAuthTypeBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 4, authType_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -269,6 +317,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getTierBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, tier_);
+    }
+    if (!getAuthTypeBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, authType_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -291,6 +342,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getSecurityList())) return false;
     if (!getTier()
         .equals(other.getTier())) return false;
+    if (!getAuthType()
+        .equals(other.getAuthType())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -310,6 +363,8 @@ private static final long serialVersionUID = 0L;
     }
     hash = (37 * hash) + TIER_FIELD_NUMBER;
     hash = (53 * hash) + getTier().hashCode();
+    hash = (37 * hash) + AUTHTYPE_FIELD_NUMBER;
+    hash = (53 * hash) + getAuthType().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -458,6 +513,8 @@ private static final long serialVersionUID = 0L;
       }
       tier_ = "";
 
+      authType_ = "";
+
       return this;
     }
 
@@ -496,6 +553,7 @@ private static final long serialVersionUID = 0L;
         result.security_ = securityBuilder_.build();
       }
       result.tier_ = tier_;
+      result.authType_ = authType_;
       onBuilt();
       return result;
     }
@@ -576,6 +634,10 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getTier().isEmpty()) {
         tier_ = other.tier_;
+        onChanged();
+      }
+      if (!other.getAuthType().isEmpty()) {
+        authType_ = other.authType_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -996,6 +1058,82 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       tier_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object authType_ = "";
+    /**
+     * <code>string authType = 4;</code>
+     * @return The authType.
+     */
+    public java.lang.String getAuthType() {
+      java.lang.Object ref = authType_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        authType_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string authType = 4;</code>
+     * @return The bytes for authType.
+     */
+    public com.google.protobuf.ByteString
+        getAuthTypeBytes() {
+      java.lang.Object ref = authType_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        authType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string authType = 4;</code>
+     * @param value The authType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAuthType(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      authType_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string authType = 4;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearAuthType() {
+      
+      authType_ = getDefaultInstance().getAuthType();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string authType = 4;</code>
+     * @param value The bytes for authType to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAuthTypeBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      authType_ = value;
       onChanged();
       return this;
     }

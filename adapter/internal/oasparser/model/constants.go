@@ -25,12 +25,15 @@ const (
 
 // Constants for OpenAPI vendor extension keys
 const (
-	productionEndpoints string = "x-wso2-production-endpoints"
-	sandboxEndpoints    string = "x-wso2-sandbox-endpoints"
-	xWso2BasePath       string = "x-wso2-basePath"
-	xWso2Label          string = "x-wso2-label"
-	xWso2Cors           string = "x-wso2-cors"
-	xThrottlingTier     string = "x-throttling-tier"
+	productionEndpoints  string = "x-wso2-production-endpoints"
+	sandboxEndpoints     string = "x-wso2-sandbox-endpoints"
+	xWso2BasePath        string = "x-wso2-basePath"
+	xWso2Label           string = "x-wso2-label"
+	xWso2Cors            string = "x-wso2-cors"
+	xThrottlingTier      string = "x-throttling-tier"
+	xAuthType            string = "x-auth-type"
+	xWso2DisableSecurity string = "x-wso2-disable-wso2"
+	None                 string = "None"
 )
 
 const (

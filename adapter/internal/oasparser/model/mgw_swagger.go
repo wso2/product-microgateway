@@ -40,6 +40,7 @@ type MgwSwagger struct {
 	xWso2Cors        *CorsConfig
 	securityScheme   []string
 	xThrottlingTier  string
+	xAuthType        string
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -128,6 +129,11 @@ func (swagger *MgwSwagger) GetXThrottlingTier() string {
 	return swagger.xThrottlingTier
 }
 
+// GetXAuthType returns the authType via the vendor extension.
+func (swagger *MgwSwagger) GetXAuthType() string {
+	return swagger.xAuthType
+}
+
 // GetID returns the Id of the API
 func (swagger *MgwSwagger) GetID() string {
 	return swagger.id
@@ -166,6 +172,7 @@ func (swagger *MgwSwagger) SetXWso2Extenstions() {
 	swagger.setXWso2SandboxEndpoint()
 	swagger.setXWso2Cors()
 	swagger.setXThrottlingTier()
+	swagger.setXAuthType()
 }
 
 // SetXWso2SandboxEndpointForMgwSwagger set the MgwSwagger object with the SandboxEndpoint when
@@ -218,6 +225,13 @@ func (swagger *MgwSwagger) setXThrottlingTier() {
 	tier := ResolveXThrottlingTier(swagger.vendorExtensions)
 	if tier != "" {
 		swagger.xThrottlingTier = tier
+	}
+}
+
+func (swagger *MgwSwagger) setXAuthType() {
+	authType := ResolveXAuthType(swagger.vendorExtensions)
+	if authType != "" {
+		swagger.xAuthType = authType
 	}
 }
 
@@ -313,4 +327,26 @@ func ResolveXThrottlingTier(vendorExtensions map[string]interface{}) string {
 		}
 	}
 	return xTier
+}
+
+// ResolveXAuthType extracts the value of x-auth-type extension.
+// if the property is not available, an empty string is returned.
+// If the API definition is fed from API manager, then API definition contains
+// x-auth-type as "None" for non secured APIs.
+// If the API definition is fed through apictl, the users can use either
+// x-wso2-disable-security : true/false to enable and disable security.
+func ResolveXAuthType(vendorExtensions map[string]interface{}) string {
+	authType := ""
+	y, vExtAuthType := vendorExtensions[xAuthType]
+	z, vExtDisableSecurity := vendorExtensions[xWso2DisableSecurity]
+	if vExtDisableSecurity {
+		if z.(bool) {
+			authType = None
+		}
+	} else if vExtAuthType {
+		if val, ok := y.(string); ok {
+			authType = val
+		}
+	}
+	return authType
 }

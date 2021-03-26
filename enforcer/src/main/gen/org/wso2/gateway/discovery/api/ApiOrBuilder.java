@@ -199,4 +199,16 @@ public interface ApiOrBuilder extends
    */
   com.google.protobuf.ByteString
       getSecuritySchemeBytes(int index);
+
+  /**
+   * <code>string authType = 13;</code>
+   * @return The authType.
+   */
+  java.lang.String getAuthType();
+  /**
+   * <code>string authType = 13;</code>
+   * @return The bytes for authType.
+   */
+  com.google.protobuf.ByteString
+      getAuthTypeBytes();
 }

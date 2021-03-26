@@ -24,11 +24,17 @@ type Operation struct {
 	method   string
 	security []map[string][]string
 	tier     string
+	authType string
 }
 
 // GetMethod returns the http method name of the give API operation
 func (operation *Operation) GetMethod() string {
 	return operation.method
+}
+
+// GetAuthType returns the auth type of the give API operation
+func (operation *Operation) GetAuthType() string {
+	return operation.authType
 }
 
 // GetSecurity returns the security schemas defined for the http opeartion
@@ -44,5 +50,6 @@ func (operation *Operation) GetTier() string {
 // NewOperation Creates and returns operation type object
 func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}) Operation {
 	tier := ResolveXThrottlingTier(extensions)
-	return Operation{method, security, tier}
+	authType := ResolveXAuthType(extensions)
+	return Operation{method, security, tier, authType}
 }
