@@ -22,6 +22,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.micro.gateway.enforcer.constants.APISecurityConstants;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.common.model.API;
 import org.wso2am.micro.gw.tests.util.*;
@@ -57,6 +58,7 @@ public class InternalKeyTestCase extends BaseTestCase {
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
+        Assert.assertEquals(response.getResponseMessage(), "Unauthorized");
     }
 
     @Test(description = "Test to check the internal key auth validate expired token")
@@ -69,6 +71,7 @@ public class InternalKeyTestCase extends BaseTestCase {
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
+        Assert.assertEquals(response.getResponseMessage(), "Unauthorized");
     }
 
 }
