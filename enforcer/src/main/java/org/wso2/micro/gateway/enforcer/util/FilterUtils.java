@@ -191,7 +191,7 @@ public class FilterUtils {
         authContext.setApplicationName(null);
         authContext.setApplicationTier(APIConstants.UNAUTHENTICATED_TIER);
         authContext.setSubscriber(clientIP);
-        authContext.setApiName(requestContext.getMatchedAPI().getAPIConfig().getName());
+        authContext.setApiName(requestContext.getMathedAPI().getAPIConfig().getName());
         authContext.setStopOnQuotaReach(true);
         authContext.setConsumerKey(null);
         authContext.setCallerToken(null);
@@ -304,8 +304,8 @@ public class FilterUtils {
 
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
-        String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
-        String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
+        String apiContext = requestContext.getMathedAPI().getAPIConfig().getBasePath();
+        String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
         jwtInfoDto.setApiContext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
         constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);

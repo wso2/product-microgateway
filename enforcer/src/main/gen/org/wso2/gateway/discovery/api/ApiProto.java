@@ -31,7 +31,7 @@ public final class ApiProto {
       "\n\034wso2/discovery/api/api.proto\022\022wso2.dis" +
       "covery.api\032!wso2/discovery/api/Endpoint." +
       "proto\032!wso2/discovery/api/Resource.proto" +
-      "\"\335\002\n\003Api\022\n\n\002id\030\001 \001(\t\022\r\n\005title\030\002 \001(\t\022\017\n\007v" +
+      "\"\344\002\n\003Api\022\n\n\002id\030\001 \001(\t\022\r\n\005title\030\002 \001(\t\022\017\n\007v" +
       "ersion\030\003 \001(\t\022\026\n\016swaggerVersion\030\004 \001(\t\022\023\n\013" +
       "description\030\005 \001(\t\0224\n\016productionUrls\030\006 \003(" +
       "\0132\034.wso2.discovery.api.Endpoint\0221\n\013sandb" +
@@ -39,10 +39,10 @@ public final class ApiProto {
       "nt\022/\n\tresources\030\010 \003(\0132\034.wso2.discovery.a" +
       "pi.Resource\022\020\n\010basePath\030\t \001(\t\022\014\n\004tier\030\n " +
       "\001(\t\022\031\n\021apiLifeCycleState\030\013 \001(\t\022\026\n\016securi" +
-      "tyScheme\030\014 \003(\t\022\020\n\010authType\030\r \001(\tBk\n\036org." +
-      "wso2.gateway.discovery.apiB\010ApiProtoP\001Z=" +
-      "github.com/envoyproxy/go-control-plane/w" +
-      "so2/discovery/api;apib\006proto3"
+      "tyScheme\030\014 \003(\t\022\027\n\017disableSecurity\030\r \001(\010B" +
+      "k\n\036org.wso2.gateway.discovery.apiB\010ApiPr" +
+      "otoP\001Z=github.com/envoyproxy/go-control-" +
+      "plane/wso2/discovery/api;apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -55,7 +55,7 @@ public final class ApiProto {
     internal_static_wso2_discovery_api_Api_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Api_descriptor,
-        new java.lang.String[] { "Id", "Title", "Version", "SwaggerVersion", "Description", "ProductionUrls", "SandboxUrls", "Resources", "BasePath", "Tier", "ApiLifeCycleState", "SecurityScheme", "AuthType", });
+        new java.lang.String[] { "Id", "Title", "Version", "SwaggerVersion", "Description", "ProductionUrls", "SandboxUrls", "Resources", "BasePath", "Tier", "ApiLifeCycleState", "SecurityScheme", "DisableSecurity", });
     org.wso2.gateway.discovery.api.EndpointProto.getDescriptor();
     org.wso2.gateway.discovery.api.ResourceProto.getDescriptor();
   }

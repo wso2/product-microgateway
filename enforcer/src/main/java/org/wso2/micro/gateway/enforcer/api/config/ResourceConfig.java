@@ -33,7 +33,7 @@ public class ResourceConfig {
     private HttpMethods method;
     private Map<String, List<String>> securitySchemas = new HashMap();
     private String tier = ThrottleConstants.UNLIMITED_TIER;
-    private String authType;
+    private boolean disableSecurity = false;
 
     public String getPath() {
         return path;
@@ -67,12 +67,12 @@ public class ResourceConfig {
         this.tier = tier;
     }
 
-    public String getAuthType() {
-        return authType;
+    public boolean isDisableSecurity() {
+        return disableSecurity;
     }
 
-    public void setAuthType(String authType) {
-        this.authType = authType;
+    public void setDisableSecurity(boolean disableSecurity) {
+        this.disableSecurity = disableSecurity;
     }
 
     /**

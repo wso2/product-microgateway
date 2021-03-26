@@ -31,7 +31,7 @@ message Operation {
     string method = 1;
     repeated SecurityList security = 2;
     string tier = 3;
-    string authType = 4;
+    bool disableSecurity = 4;
 }
 
 // Holds the array of security schemas defined for particular API operation

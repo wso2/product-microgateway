@@ -119,7 +119,7 @@ func TestSetResourcesSwagger(t *testing.T) {
 			[]Resource{
 				{
 					path:        "/pet/{petId}",
-					methods:     []Operation{{"GET", nil, "", ""}},
+					methods:     []Operation{{"GET", nil, "", false}},
 					description: "this retrieve data from id",
 					iD:          "petfindbyid",
 					summary:     "pet find by id",

@@ -45,7 +45,7 @@ public class CorsFilter implements Filter {
         // Preflight success request does not reach here.
         if (requestContext.getRequestMethod().contains(HttpConstants.OPTIONS)) {
             StringBuilder allowedMethodsBuilder = new StringBuilder(HttpConstants.OPTIONS);
-            for (ResourceConfig resourceConfig : requestContext.getMatchedAPI().getAPIConfig().getResources()) {
+            for (ResourceConfig resourceConfig : requestContext.getMathedAPI().getAPIConfig().getResources()) {
                 if (resourceConfig.getMethod() == ResourceConfig.HttpMethods.OPTIONS) {
                     logger.debug("OPTIONS method is listed under the resource. Hence OPTIONS request will" +
                             "be responded from the upstream");
@@ -58,7 +58,7 @@ public class CorsFilter implements Filter {
                     .put(APIConstants.MessageFormat.STATUS_CODE, HttpConstants.NO_CONTENT_STATUS_CODE);
             requestContext.addResponseHeaders(HttpConstants.ALLOW_HEADER, allowedMethodsBuilder.toString());
             logger.debug("OPTIONS request received for " +
-                    requestContext.getMatchedAPI().getAPIConfig().getResources().get(0).getPath() +
+                    requestContext.getMathedAPI().getAPIConfig().getResources().get(0).getPath() +
                     ". Responded with allow header : " + allowedMethodsBuilder.toString());
             return false;
         }

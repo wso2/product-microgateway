@@ -65,17 +65,17 @@ public final class ResourceProto {
       "Resource.SecurityEntry\022\020\n\010consumes\030\t \003(\t" +
       "\022\017\n\007schemes\030\n \003(\t\022\014\n\004tags\030\013 \003(\t\032/\n\rSecur" +
       "ityEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001" +
-      "\"o\n\tOperation\022\016\n\006method\030\001 \001(\t\0222\n\010securit" +
+      "\"v\n\tOperation\022\016\n\006method\030\001 \001(\t\0222\n\010securit" +
       "y\030\002 \003(\0132 .wso2.discovery.api.SecurityLis" +
-      "t\022\014\n\004tier\030\003 \001(\t\022\020\n\010authType\030\004 \001(\t\"\240\001\n\014Se" +
-      "curityList\022B\n\tscopeList\030\001 \003(\0132/.wso2.dis" +
-      "covery.api.SecurityList.ScopeListEntry\032L" +
-      "\n\016ScopeListEntry\022\013\n\003key\030\001 \001(\t\022)\n\005value\030\002" +
-      " \001(\0132\032.wso2.discovery.api.Scopes:\0028\001\"\030\n\006" +
-      "Scopes\022\016\n\006scopes\030\001 \003(\tBp\n\036org.wso2.gatew" +
-      "ay.discovery.apiB\rResourceProtoP\001Z=githu" +
-      "b.com/envoyproxy/go-control-plane/wso2/d" +
-      "iscovery/api;apib\006proto3"
+      "t\022\014\n\004tier\030\003 \001(\t\022\027\n\017disableSecurity\030\004 \001(\010" +
+      "\"\240\001\n\014SecurityList\022B\n\tscopeList\030\001 \003(\0132/.w" +
+      "so2.discovery.api.SecurityList.ScopeList" +
+      "Entry\032L\n\016ScopeListEntry\022\013\n\003key\030\001 \001(\t\022)\n\005" +
+      "value\030\002 \001(\0132\032.wso2.discovery.api.Scopes:" +
+      "\0028\001\"\030\n\006Scopes\022\016\n\006scopes\030\001 \003(\tBp\n\036org.wso" +
+      "2.gateway.discovery.apiB\rResourceProtoP\001" +
+      "Z=github.com/envoyproxy/go-control-plane" +
+      "/wso2/discovery/api;apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -99,7 +99,7 @@ public final class ResourceProto {
     internal_static_wso2_discovery_api_Operation_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Operation_descriptor,
-        new java.lang.String[] { "Method", "Security", "Tier", "AuthType", });
+        new java.lang.String[] { "Method", "Security", "Tier", "DisableSecurity", });
     internal_static_wso2_discovery_api_SecurityList_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_wso2_discovery_api_SecurityList_fieldAccessorTable = new

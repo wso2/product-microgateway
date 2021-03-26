@@ -32,7 +32,6 @@ private static final long serialVersionUID = 0L;
     tier_ = "";
     apiLifeCycleState_ = "";
     securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-    authType_ = "";
   }
 
   @java.lang.Override
@@ -150,10 +149,9 @@ private static final long serialVersionUID = 0L;
             securityScheme_.add(s);
             break;
           }
-          case 106: {
-            java.lang.String s = input.readStringRequireUtf8();
+          case 104: {
 
-            authType_ = s;
+            disableSecurity_ = input.readBool();
             break;
           }
           default: {
@@ -659,42 +657,15 @@ private static final long serialVersionUID = 0L;
     return securityScheme_.getByteString(index);
   }
 
-  public static final int AUTHTYPE_FIELD_NUMBER = 13;
-  private volatile java.lang.Object authType_;
+  public static final int DISABLESECURITY_FIELD_NUMBER = 13;
+  private boolean disableSecurity_;
   /**
-   * <code>string authType = 13;</code>
-   * @return The authType.
+   * <code>bool disableSecurity = 13;</code>
+   * @return The disableSecurity.
    */
   @java.lang.Override
-  public java.lang.String getAuthType() {
-    java.lang.Object ref = authType_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      authType_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string authType = 13;</code>
-   * @return The bytes for authType.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getAuthTypeBytes() {
-    java.lang.Object ref = authType_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      authType_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
+  public boolean getDisableSecurity() {
+    return disableSecurity_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -747,8 +718,8 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < securityScheme_.size(); i++) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 12, securityScheme_.getRaw(i));
     }
-    if (!getAuthTypeBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 13, authType_);
+    if (disableSecurity_ != false) {
+      output.writeBool(13, disableSecurity_);
     }
     unknownFields.writeTo(output);
   }
@@ -803,8 +774,9 @@ private static final long serialVersionUID = 0L;
       size += dataSize;
       size += 1 * getSecuritySchemeList().size();
     }
-    if (!getAuthTypeBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, authType_);
+    if (disableSecurity_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(13, disableSecurity_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -845,8 +817,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getApiLifeCycleState())) return false;
     if (!getSecuritySchemeList()
         .equals(other.getSecuritySchemeList())) return false;
-    if (!getAuthType()
-        .equals(other.getAuthType())) return false;
+    if (getDisableSecurity()
+        != other.getDisableSecurity()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -890,8 +862,9 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + SECURITYSCHEME_FIELD_NUMBER;
       hash = (53 * hash) + getSecuritySchemeList().hashCode();
     }
-    hash = (37 * hash) + AUTHTYPE_FIELD_NUMBER;
-    hash = (53 * hash) + getAuthType().hashCode();
+    hash = (37 * hash) + DISABLESECURITY_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getDisableSecurity());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1068,7 +1041,7 @@ private static final long serialVersionUID = 0L;
 
       securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       bitField0_ = (bitField0_ & ~0x00000008);
-      authType_ = "";
+      disableSecurity_ = false;
 
       return this;
     }
@@ -1137,7 +1110,7 @@ private static final long serialVersionUID = 0L;
         bitField0_ = (bitField0_ & ~0x00000008);
       }
       result.securityScheme_ = securityScheme_;
-      result.authType_ = authType_;
+      result.disableSecurity_ = disableSecurity_;
       onBuilt();
       return result;
     }
@@ -1306,9 +1279,8 @@ private static final long serialVersionUID = 0L;
         }
         onChanged();
       }
-      if (!other.getAuthType().isEmpty()) {
-        authType_ = other.authType_;
-        onChanged();
+      if (other.getDisableSecurity() != false) {
+        setDisableSecurity(other.getDisableSecurity());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -2778,78 +2750,33 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object authType_ = "";
+    private boolean disableSecurity_ ;
     /**
-     * <code>string authType = 13;</code>
-     * @return The authType.
+     * <code>bool disableSecurity = 13;</code>
+     * @return The disableSecurity.
      */
-    public java.lang.String getAuthType() {
-      java.lang.Object ref = authType_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        authType_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
+    @java.lang.Override
+    public boolean getDisableSecurity() {
+      return disableSecurity_;
     }
     /**
-     * <code>string authType = 13;</code>
-     * @return The bytes for authType.
-     */
-    public com.google.protobuf.ByteString
-        getAuthTypeBytes() {
-      java.lang.Object ref = authType_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        authType_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string authType = 13;</code>
-     * @param value The authType to set.
+     * <code>bool disableSecurity = 13;</code>
+     * @param value The disableSecurity to set.
      * @return This builder for chaining.
      */
-    public Builder setAuthType(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      authType_ = value;
+    public Builder setDisableSecurity(boolean value) {
+      
+      disableSecurity_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>string authType = 13;</code>
+     * <code>bool disableSecurity = 13;</code>
      * @return This builder for chaining.
      */
-    public Builder clearAuthType() {
+    public Builder clearDisableSecurity() {
       
-      authType_ = getDefaultInstance().getAuthType();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string authType = 13;</code>
-     * @param value The bytes for authType to set.
-     * @return This builder for chaining.
-     */
-    public Builder setAuthTypeBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      authType_ = value;
+      disableSecurity_ = false;
       onChanged();
       return this;
     }

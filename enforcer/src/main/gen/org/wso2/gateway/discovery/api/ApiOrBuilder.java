@@ -201,14 +201,8 @@ public interface ApiOrBuilder extends
       getSecuritySchemeBytes(int index);
 
   /**
-   * <code>string authType = 13;</code>
-   * @return The authType.
+   * <code>bool disableSecurity = 13;</code>
+   * @return The disableSecurity.
    */
-  java.lang.String getAuthType();
-  /**
-   * <code>string authType = 13;</code>
-   * @return The bytes for authType.
-   */
-  com.google.protobuf.ByteString
-      getAuthTypeBytes();
+  boolean getDisableSecurity();
 }

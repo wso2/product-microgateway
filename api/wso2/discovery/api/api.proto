@@ -26,5 +26,5 @@ message Api {
 	string tier = 10;
 	string apiLifeCycleState = 11;
 	repeated string securityScheme = 12;
-	string authType = 13;
+	bool disableSecurity = 13;
 }

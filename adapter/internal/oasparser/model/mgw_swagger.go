@@ -40,7 +40,7 @@ type MgwSwagger struct {
 	xWso2Cors        *CorsConfig
 	securityScheme   []string
 	xThrottlingTier  string
-	xAuthType        string
+	disableSecurity  bool
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -129,9 +129,9 @@ func (swagger *MgwSwagger) GetXThrottlingTier() string {
 	return swagger.xThrottlingTier
 }
 
-// GetXAuthType returns the authType via the vendor extension.
-func (swagger *MgwSwagger) GetXAuthType() string {
-	return swagger.xAuthType
+// GetDisableSecurity returns the authType via the vendor extension.
+func (swagger *MgwSwagger) GetDisableSecurity() bool {
+	return swagger.disableSecurity
 }
 
 // GetID returns the Id of the API
@@ -172,7 +172,7 @@ func (swagger *MgwSwagger) SetXWso2Extenstions() {
 	swagger.setXWso2SandboxEndpoint()
 	swagger.setXWso2Cors()
 	swagger.setXThrottlingTier()
-	swagger.setXAuthType()
+	swagger.setDisableSecurity()
 }
 
 // SetXWso2SandboxEndpointForMgwSwagger set the MgwSwagger object with the SandboxEndpoint when
@@ -228,11 +228,8 @@ func (swagger *MgwSwagger) setXThrottlingTier() {
 	}
 }
 
-func (swagger *MgwSwagger) setXAuthType() {
-	authType := ResolveXAuthType(swagger.vendorExtensions)
-	if authType != "" {
-		swagger.xAuthType = authType
-	}
+func (swagger *MgwSwagger) setDisableSecurity() {
+	swagger.disableSecurity = ResolveDisableSecurity(swagger.vendorExtensions)
 }
 
 // getXWso2Endpoints extracts and generate the Endpoint Objects from the vendor extension map.
@@ -329,32 +326,31 @@ func ResolveXThrottlingTier(vendorExtensions map[string]interface{}) string {
 	return xTier
 }
 
-// ResolveXAuthType extracts the value of x-auth-type extension.
-// if the property is not available, an empty string is returned.
+// ResolveDisableSecurity extracts the value of x-auth-type extension.
+// if the property is not available, false is returned.
 // If the API definition is fed from API manager, then API definition contains
-// x-auth-type as "None" for non secured APIs.
+// x-auth-type as "None" for non secured APIs. Then the return value would be true.
 // If the API definition is fed through apictl, the users can use either
 // x-wso2-disable-security : true/false to enable and disable security.
-func ResolveXAuthType(vendorExtensions map[string]interface{}) string {
-	authType := ""
+func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
+	disableSecurity := false
 	y, vExtAuthType := vendorExtensions[xAuthType]
 	z, vExtDisableSecurity := vendorExtensions[xWso2DisableSecurity]
 	if vExtDisableSecurity {
-		// If x-wso2-disable-security is true, then authType is set to None
-		if z.(bool) {
-			authType = None
-		} else {
-			// If x-wso2-disable-secuirty is false, then AuthType set to default.
-			// The otherwise, if API level true and resource level false scenario does not
-			// work, since for false if we pass empty.
-			authType = DefaultSecurity
+		// If x-wso2-disable-security is present, then disableSecurity = val
+		if val, ok := z.(bool); ok {
+			disableSecurity = val
 		}
 	} else if vExtAuthType {
 		// If APIs are published through APIM, all resource levels contains x-auth-type
 		// vendor extension.
 		if val, ok := y.(string); ok {
-			authType = val
+			// If the x-auth-type vendor ext is None, then the API/resource is considerd
+			// to be non secure
+			if val == None {
+				disableSecurity = true
+			}
 		}
 	}
-	return authType
+	return disableSecurity
 }

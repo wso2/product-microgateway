@@ -56,14 +56,8 @@ public interface OperationOrBuilder extends
       getTierBytes();
 
   /**
-   * <code>string authType = 4;</code>
-   * @return The authType.
+   * <code>bool disableSecurity = 4;</code>
+   * @return The disableSecurity.
    */
-  java.lang.String getAuthType();
-  /**
-   * <code>string authType = 4;</code>
-   * @return The bytes for authType.
-   */
-  com.google.protobuf.ByteString
-      getAuthTypeBytes();
+  boolean getDisableSecurity();
 }

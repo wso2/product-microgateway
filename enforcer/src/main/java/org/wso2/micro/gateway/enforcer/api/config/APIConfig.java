@@ -33,7 +33,7 @@ public class APIConfig {
 
     private List<String> securitySchemes = new ArrayList<>();
     private String tier = ThrottleConstants.UNLIMITED_TIER;
-    private String authType;
+    private boolean disableSecurity = false;
     private List<ResourceConfig> resources = new ArrayList<>();
 
     /**
@@ -48,7 +48,7 @@ public class APIConfig {
 
         private List<String> securitySchemes = new ArrayList<>();
         private String tier = ThrottleConstants.UNLIMITED_TIER;
-        private String authType;
+        private boolean disableSecurity = false;
         private List<ResourceConfig> resources = new ArrayList<>();
 
         public Builder(String name) {
@@ -75,8 +75,8 @@ public class APIConfig {
             return this;
         }
 
-        public Builder authType(String authType) {
-            this.authType = authType;
+        public Builder disableSecurity(boolean enabled) {
+            this.disableSecurity = enabled;
             return this;
         }
 
@@ -99,7 +99,7 @@ public class APIConfig {
             apiConfig.resources = this.resources;
             apiConfig.securitySchemes = this.securitySchemes;
             apiConfig.tier = this.tier;
-            apiConfig.authType = this.authType;
+            apiConfig.disableSecurity = this.disableSecurity;
             return apiConfig;
         }
     }
@@ -131,8 +131,8 @@ public class APIConfig {
         return tier;
     }
 
-    public String getAuthType() {
-        return authType;
+    public boolean isDisableSecurity() {
+        return disableSecurity;
     }
 
     public List<ResourceConfig> getResources() {
