@@ -34,6 +34,7 @@ const (
 	xAuthType            string = "x-auth-type"
 	xWso2DisableSecurity string = "x-wso2-disable-security"
 	None                 string = "None"
+	DefaultSecurity      string = "default"
 )
 
 const (

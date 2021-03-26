@@ -340,10 +340,18 @@ func ResolveXAuthType(vendorExtensions map[string]interface{}) string {
 	y, vExtAuthType := vendorExtensions[xAuthType]
 	z, vExtDisableSecurity := vendorExtensions[xWso2DisableSecurity]
 	if vExtDisableSecurity {
+		// If x-wso2-disable-security is true, then authType is set to None
 		if z.(bool) {
 			authType = None
+		} else {
+			// If x-wso2-disable-secuirty is false, then AuthType set to default.
+			// The otherwise, if API level true and resource level false scenario does not
+			// work, since for false if we pass empty.
+			authType = DefaultSecurity
 		}
 	} else if vExtAuthType {
+		// If APIs are published through APIM, all resource levels contains x-auth-type
+		// vendor extension.
 		if val, ok := y.(string); ok {
 			authType = val
 		}
