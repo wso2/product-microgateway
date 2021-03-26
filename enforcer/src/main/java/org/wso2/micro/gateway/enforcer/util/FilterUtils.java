@@ -191,7 +191,7 @@ public class FilterUtils {
         authContext.setApplicationName(null);
         authContext.setApplicationTier(APIConstants.UNAUTHENTICATED_TIER);
         authContext.setSubscriber(clientIP);
-        authContext.setApiName(requestContext.getMathedAPI().getAPIConfig().getName());
+        authContext.setApiName(requestContext.getMatchedAPI().getAPIConfig().getName());
         authContext.setStopOnQuotaReach(true);
         authContext.setConsumerKey(null);
         authContext.setCallerToken(null);
