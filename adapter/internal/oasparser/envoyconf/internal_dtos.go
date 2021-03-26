@@ -27,6 +27,7 @@ type routeCreateParams struct {
 	version           string
 	apiType           string
 	xWSO2BasePath     string
+	vHost             string
 	endpointBasePath  string
 	resourcePathParam string
 	resourceMethods   []string

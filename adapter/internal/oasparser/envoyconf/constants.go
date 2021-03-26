@@ -44,6 +44,7 @@ const (
 // these values, modifications should be done in the both adapter and enforcer.
 const (
 	pathContextExtension            string = "path"
+	vHostContextExtension           string = "vHost"
 	basePathContextExtension        string = "basePath"
 	methodContextExtension          string = "method"
 	apiVersionContextExtension      string = "version"

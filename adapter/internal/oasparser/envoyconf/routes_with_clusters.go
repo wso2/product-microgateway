@@ -35,9 +35,9 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/wso2/micro-gw/config"
-	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/internal/oasparser/model"
 	"github.com/wso2/micro-gw/internal/svcdiscovery"
+	logger "github.com/wso2/micro-gw/loggers"
 
 	"strings"
 	"time"
@@ -55,7 +55,7 @@ import (
 //
 // First set of routes, clusters, addresses represents the production endpoints related
 // configurations. Next set represents the sandbox endpoints related configurations.
-func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte) (routesP []*routev3.Route,
+func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte, vHost string) (routesP []*routev3.Route,
 	clustersP []*clusterv3.Cluster, addressesP []*corev3.Address) {
 	var (
 		routesProd []*routev3.Route
@@ -203,11 +203,11 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte)
 				apiTitle, apiVersion, resource.GetPath())
 		}
 
-		routeP := createRoute(genRouteCreateParams(&mgwSwagger, &resource, endpointBasepath, clusterRefProd, clusterRefSand))
+		routeP := createRoute(genRouteCreateParams(&mgwSwagger, &resource, vHost, endpointBasepath, clusterRefProd, clusterRefSand))
 		routesProd = append(routesProd, routeP)
 	}
 	if mgwSwagger.GetAPIType() == mgw.WS {
-		routesP := createRoute(genRouteCreateParams(&mgwSwagger, nil, apiEndpointBasePath, apilevelClusterProd.GetName(),
+		routesP := createRoute(genRouteCreateParams(&mgwSwagger, nil, vHost, apiEndpointBasePath, apilevelClusterProd.GetName(),
 			apilevelClusterSand.GetName()))
 		routesProd = append(routesProd, routesP)
 	}
@@ -347,7 +347,7 @@ func createTLSProtocolVersion(tlsVersion string) tlsv3.TlsParameters_TlsProtocol
 	}
 }
 
-// createRoute creates route elements for the route configurations. API title, xWso2Basepath, API version,
+// createRoute creates route elements for the route configurations. API title, VHost, xWso2Basepath, API version,
 // endpoint's basePath, resource Object (Microgateway's internal representation), production clusterName and
 // sandbox clusterName needs to be provided.
 func createRoute(params *routeCreateParams) *routev3.Route {
@@ -356,6 +356,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	// 	corsPolicy *routev3.CorsPolicy) *routev3.Route {
 	title := params.title
 	version := params.version
+	vHost := params.vHost
 	xWso2Basepath := params.xWSO2BasePath
 	apiType := params.apiType
 	corsPolicy := getCorsPolicy(params.corsPolicy)
@@ -427,6 +428,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	var contextExtensions = make(map[string]string)
 	contextExtensions[pathContextExtension] = resourcePath
+	contextExtensions[vHostContextExtension] = vHost
 	if xWso2Basepath != "" {
 		contextExtensions[basePathContextExtension] = xWso2Basepath
 	} else {
@@ -527,10 +529,10 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 // CreateTokenRoute generates a route for the jwt /testkey endpoint
 func CreateTokenRoute() *routev3.Route {
 	var (
-		router routev3.Route
-		action       *routev3.Route_Route
-		match        *routev3.RouteMatch
-		decorator    *routev3.Decorator
+		router    routev3.Route
+		action    *routev3.Route_Route
+		match     *routev3.RouteMatch
+		decorator *routev3.Decorator
 	)
 
 	match = &routev3.RouteMatch{
@@ -581,7 +583,7 @@ func CreateTokenRoute() *routev3.Route {
 							MaxProgramSize: nil,
 						},
 					},
-				Regex: "/testkey",
+					Regex: "/testkey",
 				},
 				Substitution: "/",
 			},
@@ -716,12 +718,13 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 	return corsPolicy
 }
 
-func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, endpointBasePath string,
+func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, vHost, endpointBasePath string,
 	prodClusterName string, sandClusterName string) *routeCreateParams {
 	params := &routeCreateParams{
 		title:             swagger.GetTitle(),
 		apiType:           swagger.GetAPIType(),
 		version:           swagger.GetVersion(),
+		vHost:             vHost,
 		xWSO2BasePath:     swagger.GetXWso2Basepath(),
 		prodClusterName:   prodClusterName,
 		sandClusterName:   sandClusterName,

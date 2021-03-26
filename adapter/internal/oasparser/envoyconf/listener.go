@@ -162,7 +162,7 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 }
 
 // CreateVirtualHosts creates VirtualHost configurations for envoy which serves
-// request from the vhost domain. The routes array will be included as the routes
+// request from the vHost domain. The routes array will be included as the routes
 // for the created virtual host.
 func CreateVirtualHosts(vhostToRouteArrayMap map[string][]*routev3.Route) []*routev3.VirtualHost {
 	virtualHosts := make([]*routev3.VirtualHost, 0, len(vhostToRouteArrayMap))

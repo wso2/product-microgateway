@@ -255,7 +255,8 @@ func UpdateAPI(apiContent config.APIContent) {
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiIdentifier, oldLabels)
 	openAPIEnvoyMap[apiIdentifier] = newLabels
 
-	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, apiContent.UpstreamCerts)
+	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, apiContent.UpstreamCerts,
+		apiContent.VHost)
 	// TODO: (VirajSalaka) Decide if the routes and listeners need their own map since it is not going to be changed based on API at the moment.
 	openAPIRoutesMap[apiIdentifier] = routes
 	// openAPIListenersMap[apiMapKey] = listeners

@@ -85,11 +85,11 @@ func testCreateRoutesForUnitTests(t *testing.T) []*routev3.Route {
 		AccessControlAllowOrigins: []string{"http://test1.com", "http://test2.com"},
 	}
 
-	route1 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "/test", "1.0.0", "/test",
+	route1 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
 		"/testPath", []string{"GET"}, "test-cluster", "", corsConfigModel3))
-	route2 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "/test", "1.0.0", "/test",
+	route2 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
 		"/testPath", []string{"POST"}, "test-cluster", "", corsConfigModel3))
-	route3 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "/test", "1.0.0", "/test",
+	route3 := createRoute(generateRouteCreateParamsForUnitTests("test", "HTTP", "localhost", "/test", "1.0.0", "/test",
 		"/testPath", []string{"PUT"}, "test-cluster", "", corsConfigModel3))
 
 	routes := []*routev3.Route{route1, route2, route3}

@@ -1,7 +1,7 @@
 version: "2.4"
 services:
   apim:
-    image: wso2am/wso2am:4.0.0-alpha-alpine
+    image: wso2am-4.0.0-9.0.81-snapshot:alpine
     healthcheck:
       test: ["CMD", "nc", "-z","localhost", "9443"]
       interval: 10s
