@@ -47,7 +47,6 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
 	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.resources = setResourcesOpenAPI(swagger3)
 	swagger.apiType = HTTP
-
 	if isServerURLIsAvailable(swagger3.Servers) {
 		for _, serverEntry := range swagger3.Servers {
 			endpoint := getHostandBasepathandPort(serverEntry.URL)

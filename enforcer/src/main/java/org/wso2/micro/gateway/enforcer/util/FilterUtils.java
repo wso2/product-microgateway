@@ -173,6 +173,32 @@ public class FilterUtils {
         return domain;
     }
 
+    public static AuthenticationContext generateAuthenticationContext(RequestContext requestContext) {
+        AuthenticationContext authContext = requestContext.getAuthenticationContext();
+        String clientIP = requestContext.getClientIp();
+
+        //Create a dummy AuthenticationContext object with hard coded values for
+        // Tier and KeyType. This is because we cannot determine the Tier nor Key
+        // Type without subscription information.
+        authContext.setAuthenticated(true);
+        authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
+        authContext.setApiKey(clientIP);
+        authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        // Setting enduser as anonymous
+        authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
+        //authContext.setApiTier(APIConstants.UNAUTHENTICATED_TIER);
+        authContext.setApplicationId(clientIP);
+        authContext.setApplicationName(null);
+        authContext.setApplicationTier(APIConstants.UNAUTHENTICATED_TIER);
+        authContext.setSubscriber(clientIP);
+        authContext.setApiName(requestContext.getMathedAPI().getAPIConfig().getName());
+        authContext.setStopOnQuotaReach(true);
+        authContext.setConsumerKey(null);
+        authContext.setCallerToken(null);
+
+        return authContext;
+    }
+
     public static AuthenticationContext generateAuthenticationContext(RequestContext requestContext, String jti,
                                                                       JWTValidationInfo jwtValidationInfo,
                                                                       APIKeyValidationInfoDTO apiKeyValidationInfoDTO,

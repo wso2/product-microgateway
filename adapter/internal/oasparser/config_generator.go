@@ -141,6 +141,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string) *api.Api
 		ApiLifeCycleState: lifeCycleState,
 		Tier:              mgwSwagger.GetXThrottlingTier(),
 		SecurityScheme:    mgwSwagger.GetSetSecurityScheme(),
+		AuthType:          mgwSwagger.GetXAuthType(),
 	}
 }
 
@@ -164,6 +165,7 @@ func GetEnforcerAPIOperation(operation mgw.Operation) *api.Operation {
 		Method:   operation.GetMethod(),
 		Security: secSchemas,
 		Tier:     operation.GetTier(),
+		AuthType: operation.GetAuthType(),
 	}
 	return &apiOperation
 }

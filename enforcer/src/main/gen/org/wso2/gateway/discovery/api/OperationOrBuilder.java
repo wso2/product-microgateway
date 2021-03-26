@@ -54,4 +54,16 @@ public interface OperationOrBuilder extends
    */
   com.google.protobuf.ByteString
       getTierBytes();
+
+  /**
+   * <code>string authType = 4;</code>
+   * @return The authType.
+   */
+  java.lang.String getAuthType();
+  /**
+   * <code>string authType = 4;</code>
+   * @return The bytes for authType.
+   */
+  com.google.protobuf.ByteString
+      getAuthTypeBytes();
 }
