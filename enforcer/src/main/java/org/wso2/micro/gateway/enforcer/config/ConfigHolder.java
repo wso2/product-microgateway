@@ -224,18 +224,12 @@ public class ConfigHolder {
 
     private void populateThrottlingConfig(Throttling throttling) {
         ThrottleConfigDto throttleConfig = new ThrottleConfigDto();
-        Properties props = new Properties();
-        props.put(Constants.PROP_INIT_CONTEXT_FACTORY, throttling.getJmsConnectionInitialContextFactory());
-        props.put(Constants.PROP_CON_FACTORY, throttling.getJmsConnectionProviderUrl());
-        props.put(Constants.PROP_DESTINATION_TYPE, Constants.DEFAULT_DESTINATION_TYPE);
-        props.put(Constants.PROP_CON_FACTORY_JNDI_NAME, Constants.DEFAULT_CON_FACTORY_JNDI_NAME);
-        throttleConfig.setListenerProperties(props);
-
         throttleConfig.setGlobalPublishingEnabled(throttling.getEnableGlobalEventPublishing());
         throttleConfig.setHeaderConditionsEnabled(throttling.getEnableHeaderConditions());
         throttleConfig.setQueryConditionsEnabled(throttling.getEnableQueryParamConditions());
         throttleConfig.setJwtClaimConditionsEnabled(throttling.getEnableJwtClaimConditions());
-
+        throttleConfig.setJmsConnectionInitialContextFactory(throttling.getJmsConnectionInitialContextFactory());
+        throttleConfig.setJmsConnectionProviderUrl(throttling.getJmsConnectionProviderUrl());
         config.setThrottleConfig(throttleConfig);
         populateTMBinaryConfig(throttling.getPublisher());
     }

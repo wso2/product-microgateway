@@ -140,9 +140,9 @@
   # Enable global advanced throttling based on jwt claim conditions
   enableJwtClaimConditions = false
   # The message broker context factory
-  jmsConnectioninitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
+  jmsConnectionInitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
   # The message broker connection URL
-  jmsConnectionProviderUrl = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://localhost:5672'"
+  jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
   # Throttling configurations related to event publishing using a binary connection
   [enforcer.throttling.publisher]
     # Credentials required to establish connection between Traffic Manager

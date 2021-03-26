@@ -18,6 +18,8 @@
 
 package org.wso2.micro.gateway.enforcer.config.dto;
 
+import org.wso2.micro.gateway.enforcer.constants.Constants;
+
 import java.util.Properties;
 
 /**
@@ -28,7 +30,8 @@ public class ThrottleConfigDto {
     private boolean isHeaderConditionsEnabled;
     private boolean isQueryConditionsEnabled;
     private boolean isJwtClaimConditionsEnabled;
-    private Properties listenerProperties;
+    private String jmsConnectionInitialContextFactory;
+    private String jmsConnectionProviderUrl;
     private ThrottleAgentConfigDto throttleAgent;
 
     public boolean isGlobalPublishingEnabled() {
@@ -71,11 +74,35 @@ public class ThrottleConfigDto {
         this.throttleAgent = throttleAgent;
     }
 
-    public Properties getListenerProperties() {
-        return listenerProperties;
+    /**
+     * Build jms listener configuration property bag. This is done this way to
+     * get the properties after resolving env variables. if we create the property
+     * before resolving env vars, we lose the env value replacement.
+     *
+     * @return jms connection parameters as {@link Properties}
+     */
+    public Properties buildListenerProperties() {
+        Properties props = new Properties();
+        props.put(Constants.PROP_INIT_CONTEXT_FACTORY, this.jmsConnectionInitialContextFactory);
+        props.put(Constants.PROP_CON_FACTORY, this.jmsConnectionProviderUrl);
+        props.put(Constants.PROP_DESTINATION_TYPE, Constants.DEFAULT_DESTINATION_TYPE);
+        props.put(Constants.PROP_CON_FACTORY_JNDI_NAME, Constants.DEFAULT_CON_FACTORY_JNDI_NAME);
+        return props;
     }
 
-    public void setListenerProperties(Properties listenerProperties) {
-        this.listenerProperties = listenerProperties;
+    public String getJmsConnectionInitialContextFactory() {
+        return jmsConnectionInitialContextFactory;
+    }
+
+    public void setJmsConnectionInitialContextFactory(String jmsConnectionInitialContextFactory) {
+        this.jmsConnectionInitialContextFactory = jmsConnectionInitialContextFactory;
+    }
+
+    public String getJmsConnectionProviderUrl() {
+        return jmsConnectionProviderUrl;
+    }
+
+    public void setJmsConnectionProviderUrl(String jmsConnectionProviderUrl) {
+        this.jmsConnectionProviderUrl = jmsConnectionProviderUrl;
     }
 }

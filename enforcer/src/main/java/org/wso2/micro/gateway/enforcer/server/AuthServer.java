@@ -70,7 +70,7 @@ public class AuthServer {
             ThrottleConfigDto throttleConf = ConfigHolder.getInstance().getConfig().getThrottleConfig();
             if (throttleConf.isGlobalPublishingEnabled()) {
                 ThrottleAgent.startThrottlePublisherPool();
-                JMSTransportHandler jmsHandler = new JMSTransportHandler(throttleConf.getListenerProperties());
+                JMSTransportHandler jmsHandler = new JMSTransportHandler(throttleConf.buildListenerProperties());
                 jmsHandler.subscribeForJmsEvents(ThrottleConstants.TOPIC_THROTTLE_DATA, new ThrottleEventListener());
             }
 
