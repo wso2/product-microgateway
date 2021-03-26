@@ -32,7 +32,7 @@ const (
 	xWso2Cors            string = "x-wso2-cors"
 	xThrottlingTier      string = "x-throttling-tier"
 	xAuthType            string = "x-auth-type"
-	xWso2DisableSecurity string = "x-wso2-disable-wso2"
+	xWso2DisableSecurity string = "x-wso2-disable-security"
 	None                 string = "None"
 )
 
