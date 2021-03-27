@@ -221,8 +221,8 @@
         eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
     [controlPlane.analytics]
         enabled = false
-        authURL = "https://analytics-event-auth.st.choreo.dev/auth/v1"
-        authToken = ""
+        authURL = "$env{cp_analytics_authURL}"
+        authToken = "$env{cp_analytics_authToken}"
 
         [controlPlane.analytics.routerLogPublisher]
             bufferFlushInterval = "1s"

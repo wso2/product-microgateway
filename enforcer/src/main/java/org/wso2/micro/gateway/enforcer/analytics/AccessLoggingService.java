@@ -52,6 +52,8 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
     private static final Logger logger = LogManager.getLogger(AccessLoggingService.class);
 
     public void init() throws IOException {
+        // Initialize analytics Filter
+        AnalyticsFilter.getInstance();
         startAccessLoggingServer();
     }
 
