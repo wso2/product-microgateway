@@ -25,14 +25,16 @@ import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.gateway.discovery.throttle.BlockingConditions;
+import org.wso2.gateway.discovery.throttle.IPCondition;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.micro.gateway.enforcer.discovery.ThrottleDataDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.throttle.dto.Decision;
-import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
 import org.wso2.micro.gateway.enforcer.throttle.dto.IPRange;
 import org.wso2.micro.gateway.enforcer.throttle.dto.ThrottleCondition;
+import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.math.BigInteger;
@@ -175,6 +177,51 @@ public class ThrottleDataHolder {
      */
     public void addBlockingCondition(String conditionKey, String conditionValue) {
         blockedConditions.put(conditionKey, conditionValue);
+    }
+
+    /**
+     * Add all blocking conditions in a {@link BlockingConditions} definition.
+     *
+     * @param conditions a blocking condition dto with all types of conditions to add.
+     */
+    public void addBlockingConditions(BlockingConditions conditions) {
+        Map<String, String> apis = FilterUtils.generateMap(conditions.getApiList());
+        Map<String, String> apps = FilterUtils.generateMap(conditions.getApplicationList());
+        Map<String, String> subs = FilterUtils.generateMap(conditions.getSubscriptionList());
+        Map<String, String> users = FilterUtils.generateMap(conditions.getUserList());
+        Map<String, String> custom = FilterUtils.generateMap(conditions.getCustomList());
+
+        if (!apis.isEmpty()) {
+            blockedConditions.putAll(apis);
+        }
+        if (!apps.isEmpty()) {
+            blockedConditions.putAll(apps);
+        }
+        if (!subs.isEmpty()) {
+            blockedConditions.putAll(subs);
+        }
+        if (!users.isEmpty()) {
+            blockedConditions.putAll(users);
+        }
+        if (!custom.isEmpty()) {
+            blockedConditions.putAll(custom);
+        }
+
+        for (IPCondition condition : conditions.getIpList()) {
+            String fixed = condition.getFixedIp().isBlank() ? "null" : condition.getFixedIp();
+            String starting = condition.getStartingIp().isBlank() ? "null" : condition.getStartingIp();
+            String ending = condition.getEndingIp().isBlank() ? "null" : condition.getEndingIp();
+            StringBuilder sb = new StringBuilder("{\"fixedIp\":");
+            sb.append(fixed)
+                    .append(",\"startingIp\":")
+                    .append(starting)
+                    .append(",\"endingIp\":")
+                    .append(ending)
+                    .append(",\"invert\":")
+                    .append(condition.getInvert())
+                    .append("}");
+            addIpBlockingCondition(condition.getTenantDomain(), condition.getId(), sb.toString(), condition.getType());
+        }
     }
 
     /**

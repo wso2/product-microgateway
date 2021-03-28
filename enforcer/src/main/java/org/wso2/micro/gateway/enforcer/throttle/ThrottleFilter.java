@@ -194,6 +194,7 @@ public class ThrottleFilter implements Filter {
                         ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                 reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                         ThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED);
+                ThrottleUtils.setRetryAfterHeader(reqContext, customDecision.getResetAt());
                 return true;
             }
         }

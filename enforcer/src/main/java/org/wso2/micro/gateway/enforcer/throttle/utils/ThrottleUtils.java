@@ -26,8 +26,8 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.throttle.PolicyConstants;
-import org.wso2.micro.gateway.enforcer.throttle.dto.ThrottleCondition;
 import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
+import org.wso2.micro.gateway.enforcer.throttle.dto.ThrottleCondition;
 
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
