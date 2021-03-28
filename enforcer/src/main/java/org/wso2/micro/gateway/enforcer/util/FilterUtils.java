@@ -18,6 +18,7 @@
 
 package org.wso2.micro.gateway.enforcer.util;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.HttpClient;
@@ -43,6 +44,7 @@ import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -51,6 +53,8 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.SSLContext;
@@ -246,15 +250,39 @@ public class FilterUtils {
         return BigInteger.ZERO;
     }
 
+    public static AuthenticationContext generateAuthenticationContext(String tokenIdentifier, JWTClaimsSet payload,
+                                                                      JSONObject api, String apiLevelPolicy)
+            throws java.text.ParseException {
+
+        AuthenticationContext authContext = new AuthenticationContext();
+        authContext.setAuthenticated(true);
+        authContext.setApiKey(tokenIdentifier);
+        authContext.setUsername(payload.getSubject());
+        if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE) != null) {
+            authContext.setKeyType(payload.getStringClaim(APIConstants.JwtTokenConstants.KEY_TYPE));
+        } else {
+            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        }
+
+        authContext.setApiTier(apiLevelPolicy);
+        if (api != null) {
+            authContext.setTier(APIConstants.UNLIMITED_TIER);
+            authContext.setApiName(api.getAsString(APIConstants.JwtTokenConstants.API_NAME));
+            authContext.setApiPublisher(api.getAsString(APIConstants.JwtTokenConstants.API_PUBLISHER));
+
+        }
+        return authContext;
+    }
+
     public static JWTInfoDto generateJWTInfoDto(JSONObject subscribedAPI, JWTValidationInfo jwtValidationInfo,
                                                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
                                                 RequestContext requestContext) {
 
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
-        String apiContext = requestContext.getMathedAPI().getAPIConfig().getBasePath();
-        String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
-        jwtInfoDto.setApicontext(apiContext);
+        String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
+        String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
+        jwtInfoDto.setApiContext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
         constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
         return jwtInfoDto;
@@ -264,15 +292,15 @@ public class FilterUtils {
                                             APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
 
         if (apiKeyValidationInfoDTO != null) {
-            jwtInfoDto.setApplicationid(apiKeyValidationInfoDTO.getApplicationId());
-            jwtInfoDto.setApplicationname(apiKeyValidationInfoDTO.getApplicationName());
-            jwtInfoDto.setApplicationtier(apiKeyValidationInfoDTO.getApplicationTier());
-            jwtInfoDto.setKeytype(apiKeyValidationInfoDTO.getType());
+            jwtInfoDto.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
+            jwtInfoDto.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
+            jwtInfoDto.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
+            jwtInfoDto.setKeyType(apiKeyValidationInfoDTO.getType());
             jwtInfoDto.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
             jwtInfoDto.setSubscriptionTier(apiKeyValidationInfoDTO.getTier());
             jwtInfoDto.setApiName(apiKeyValidationInfoDTO.getApiName());
-            jwtInfoDto.setEndusertenantid(0);
-            jwtInfoDto.setApplicationuuid(apiKeyValidationInfoDTO.getApplicationUUID());
+            jwtInfoDto.setEndUserTenantId(0);
+            jwtInfoDto.setApplicationUUId(apiKeyValidationInfoDTO.getApplicationUUID());
             jwtInfoDto.setAppAttributes(apiKeyValidationInfoDTO.getAppAttributes());
         } else if (subscribedAPI != null) {
             // If the user is subscribed to the API
@@ -282,18 +310,18 @@ public class FilterUtils {
             String subscriptionTenantDomain =
                     subscribedAPI.getAsString(JwtConstants.SUBSCRIBER_TENANT_DOMAIN);
             jwtInfoDto.setSubscriptionTier(subscriptionTier);
-            jwtInfoDto.setEndusertenantid(0);
+            jwtInfoDto.setEndUserTenantId(0);
 
             Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
             if (claims.get(JwtConstants.APPLICATION) != null) {
                 JSONObject
                         applicationObj = (JSONObject) claims.get(JwtConstants.APPLICATION);
-                jwtInfoDto.setApplicationid(
+                jwtInfoDto.setApplicationId(
                         String.valueOf(applicationObj.getAsNumber(JwtConstants.APPLICATION_ID)));
                 jwtInfoDto
-                        .setApplicationname(applicationObj.getAsString(JwtConstants.APPLICATION_NAME));
+                        .setApplicationName(applicationObj.getAsString(JwtConstants.APPLICATION_NAME));
                 jwtInfoDto
-                        .setApplicationtier(applicationObj.getAsString(JwtConstants.APPLICATION_TIER));
+                        .setApplicationTier(applicationObj.getAsString(JwtConstants.APPLICATION_TIER));
                 jwtInfoDto.setSubscriber(applicationObj.getAsString(JwtConstants.APPLICATION_OWNER));
             }
         }
@@ -352,10 +380,52 @@ public class FilterUtils {
      */
     public static void setThrottleErrorToContext(RequestContext context, int errorCode, String msg, String desc) {
         context.getProperties().put(APIConstants.MessageFormat.ERROR_CODE, errorCode);
-        context.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
-                APIConstants.StatusCodes.THROTTLED.getCode());
+        if (ThrottleConstants.BLOCKED_ERROR_CODE == errorCode) {
+            context.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
+                    APIConstants.StatusCodes.UNAUTHORIZED.getCode());
+        } else {
+            context.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
+                    APIConstants.StatusCodes.THROTTLED.getCode());
+        }
         context.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE, msg);
         context.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION, desc);
     }
 
+    /**
+     * Generates a map out of the {@code list} provided. Key will be the {@code toString}
+     * value of the list item. Value will be the list item.
+     *
+     * @param list list to be converted in to a map
+     * @param <T>  List Item type
+     * @return A map of type {@code <String, T>}
+     */
+    public static <T> Map<String, T> generateMap(Collection<T> list) {
+        if (list == null) {
+            return new HashMap<>();
+        }
+        Map<String, T> map = new HashMap<String, T>();
+
+        for (T el : list) {
+            map.put(el.toString(), el);
+        }
+        return map;
+    }
+
+    /**
+     * Append the username with tenant domain if not appended already.
+     * @param username username
+     * @param tenantDomain tenant domain
+     * @return tenant domain appended username
+     */
+    public static String buildUsernameWithTenant(String username, String tenantDomain) {
+        if (tenantDomain == null) {
+            tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
+        // Check if the tenant domain is appended with userName and append if it is not there
+        if (!StringUtils.contains(username, tenantDomain)) {
+            return username + '@' + tenantDomain;
+        }
+        return username;
+    }
 }

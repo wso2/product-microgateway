@@ -48,7 +48,7 @@
         <module>enforcer</module>
         <module>router</module>
         <module>distribution</module>
-        <module>test</module>
+        <module>integration</module>
     </modules>
     <build>
         <pluginManagement>
@@ -282,6 +282,11 @@
                 <version>${testng.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>${download.maven.plugin.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.carbon.analytics-common</groupId>
                 <artifactId>org.wso2.carbon.databridge.commons</artifactId>
                 <version>${analytics.common.version}</version>
@@ -313,11 +318,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <andes.client.version>3.3.12</andes.client.version>
-        <apim.common.version>9.0.55</apim.common.version>
+        <apim.common.version>9.0.70</apim.common.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
         <commons.io.version>2.6</commons.io.version>
-        <envoy.controlplane.api.version>0.1.27</envoy.controlplane.api.version>
+        <envoy.controlplane.api.version>0.1.28</envoy.controlplane.api.version>
         <geronimo.jms11.spec.version>1.1.1.wso2v1</geronimo.jms11.spec.version>
         <grpc.netty.shaded.version>1.32.1</grpc.netty.shaded.version>
         <grpc.protobuf.version>1.32.1</grpc.protobuf.version>
@@ -349,5 +354,7 @@
         <analytics.common.version>6.1.45</analytics.common.version>
         <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
         <lmax.version>3.4.2.wso2v1</lmax.version>
+        <download.maven.plugin.version>1.6.1</download.maven.plugin.version>
+        <apictl.version>4.0.0-alpha2</apictl.version>
     </properties>
 </project>

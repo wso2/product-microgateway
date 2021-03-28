@@ -1,0 +1,85 @@
+# Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wso2apim
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment: wso2apim
+  minReadySeconds: 30
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        deployment: wso2apim
+    spec:
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+            - "wso2apim"
+      containers:
+        - name: wso2apim
+          image: wso2am/wso2am:4.0.0-alpha-alpine
+          resources:
+            limits:
+              memory: "2Gi"
+            requests:
+              memory: "2Gi"
+          livenessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - nc -z localhost 9443
+            initialDelaySeconds: 240
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - nc -z localhost 9443
+            initialDelaySeconds: 240
+            periodSeconds: 10
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8280
+              protocol: "TCP"
+            - containerPort: 8243
+              protocol: "TCP"
+            - containerPort: 9763
+              protocol: "TCP"
+            - containerPort: 9443
+              protocol: "TCP"
+            - containerPort: 5672
+              protocol: "TCP"
+            - containerPort: 9611
+              protocol: "TCP"
+            - containerPort: 9711
+              protocol: "TCP"
+          volumeMounts:
+            - name: apim-conf
+              mountPath: /home/wso2carbon/wso2-config-volume/repository/conf
+      volumes:
+        - name: apim-conf
+          configMap:
+            name: apim-conf

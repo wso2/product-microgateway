@@ -38,6 +38,7 @@ import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;
 import org.wso2.micro.gateway.enforcer.throttle.ThrottleAgent;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleDataHolder;
 import org.wso2.micro.gateway.enforcer.throttle.ThrottleEventListener;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
@@ -86,6 +87,7 @@ public class AuthServer {
             SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().initializeStore();
             KeyManagerHolder.getInstance().init();
             RevokedJWTDataHolder.getInstance().init();
+            ThrottleDataHolder.getInstance().init();
 
             // Create a new server to listen on port 8082
             TokenServer tokenServer = new TokenServer();

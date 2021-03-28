@@ -51,7 +51,7 @@ public class CorsFilter implements Filter {
                 return true;
             }
             StringBuilder allowedMethodsBuilder = new StringBuilder(HttpConstants.OPTIONS);
-            for (ResourceConfig resourceConfig : requestContext.getMathedAPI().getAPIConfig().getResources()) {
+            for (ResourceConfig resourceConfig : requestContext.getMatchedAPI().getAPIConfig().getResources()) {
                 if (!resourceConfig.getPath().equals(requestContext.getRequestPathTemplate())) {
                     continue;
                 }
@@ -61,7 +61,7 @@ public class CorsFilter implements Filter {
                     .put(APIConstants.MessageFormat.STATUS_CODE, HttpConstants.NO_CONTENT_STATUS_CODE);
             requestContext.addResponseHeaders(HttpConstants.ALLOW_HEADER, allowedMethodsBuilder.toString());
             logger.debug("OPTIONS request received for " +
-                    requestContext.getMathedAPI().getAPIConfig().getResources().get(0).getPath() +
+                    requestContext.getMatchedAPI().getAPIConfig().getResources().get(0).getPath() +
                     ". Responded with allow header : " + allowedMethodsBuilder.toString());
             return false;
         }

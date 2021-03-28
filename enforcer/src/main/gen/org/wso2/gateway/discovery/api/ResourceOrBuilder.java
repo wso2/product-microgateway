@@ -162,58 +162,24 @@ public interface ResourceOrBuilder extends
       java.lang.String key);
 
   /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-   */
-  int getVendorExtensibleCount();
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-   */
-  boolean containsVendorExtensible(
-      java.lang.String key);
-  /**
-   * Use {@link #getVendorExtensibleMap()} instead.
-   */
-  @java.lang.Deprecated
-  java.util.Map<java.lang.String, com.google.protobuf.Any>
-  getVendorExtensible();
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-   */
-  java.util.Map<java.lang.String, com.google.protobuf.Any>
-  getVendorExtensibleMap();
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-   */
-
-  com.google.protobuf.Any getVendorExtensibleOrDefault(
-      java.lang.String key,
-      com.google.protobuf.Any defaultValue);
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 9;</code>
-   */
-
-  com.google.protobuf.Any getVendorExtensibleOrThrow(
-      java.lang.String key);
-
-  /**
-   * <code>repeated string consumes = 10;</code>
+   * <code>repeated string consumes = 9;</code>
    * @return A list containing the consumes.
    */
   java.util.List<java.lang.String>
       getConsumesList();
   /**
-   * <code>repeated string consumes = 10;</code>
+   * <code>repeated string consumes = 9;</code>
    * @return The count of consumes.
    */
   int getConsumesCount();
   /**
-   * <code>repeated string consumes = 10;</code>
+   * <code>repeated string consumes = 9;</code>
    * @param index The index of the element to return.
    * @return The consumes at the given index.
    */
   java.lang.String getConsumes(int index);
   /**
-   * <code>repeated string consumes = 10;</code>
+   * <code>repeated string consumes = 9;</code>
    * @param index The index of the value to return.
    * @return The bytes of the consumes at the given index.
    */
@@ -221,24 +187,24 @@ public interface ResourceOrBuilder extends
       getConsumesBytes(int index);
 
   /**
-   * <code>repeated string schemes = 11;</code>
+   * <code>repeated string schemes = 10;</code>
    * @return A list containing the schemes.
    */
   java.util.List<java.lang.String>
       getSchemesList();
   /**
-   * <code>repeated string schemes = 11;</code>
+   * <code>repeated string schemes = 10;</code>
    * @return The count of schemes.
    */
   int getSchemesCount();
   /**
-   * <code>repeated string schemes = 11;</code>
+   * <code>repeated string schemes = 10;</code>
    * @param index The index of the element to return.
    * @return The schemes at the given index.
    */
   java.lang.String getSchemes(int index);
   /**
-   * <code>repeated string schemes = 11;</code>
+   * <code>repeated string schemes = 10;</code>
    * @param index The index of the value to return.
    * @return The bytes of the schemes at the given index.
    */
@@ -246,24 +212,24 @@ public interface ResourceOrBuilder extends
       getSchemesBytes(int index);
 
   /**
-   * <code>repeated string tags = 12;</code>
+   * <code>repeated string tags = 11;</code>
    * @return A list containing the tags.
    */
   java.util.List<java.lang.String>
       getTagsList();
   /**
-   * <code>repeated string tags = 12;</code>
+   * <code>repeated string tags = 11;</code>
    * @return The count of tags.
    */
   int getTagsCount();
   /**
-   * <code>repeated string tags = 12;</code>
+   * <code>repeated string tags = 11;</code>
    * @param index The index of the element to return.
    * @return The tags at the given index.
    */
   java.lang.String getTags(int index);
   /**
-   * <code>repeated string tags = 12;</code>
+   * <code>repeated string tags = 11;</code>
    * @param index The index of the value to return.
    * @return The bytes of the tags at the given index.
    */

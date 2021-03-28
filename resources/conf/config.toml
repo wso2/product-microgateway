@@ -70,7 +70,7 @@
 [[enforcer.jwtTokenConfig]]
   name="Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
-  certificateAlias = "wso2carbon"
+  certificateAlias = "gateway_certificate_alias"
   # URL of the JWKs endpoint
   jwksURL = ""
   # Validate subscribed APIs
@@ -79,9 +79,6 @@
   consumerKeyClaim = "azp"
   # Certificate Filepath within enforcer
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
-  [[enforcer.jwtTokenConfig.claimMapping]]
-    remoteClaim = "sub"
-    localClaim = "CUSTOM-CLAIM"
 
 # Issuer 2
 [[enforcer.jwtTokenConfig]]
@@ -224,8 +221,8 @@
         eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
     [controlPlane.analytics]
         enabled = false
-        authURL = "https://analytics-event-auth.st.choreo.dev/auth/v1"
-        authToken = ""
+        authURL = "$env{cp_analytics_authURL}"
+        authToken = "$env{cp_analytics_authToken}"
 
         [controlPlane.analytics.routerLogPublisher]
             bufferFlushInterval = "1s"

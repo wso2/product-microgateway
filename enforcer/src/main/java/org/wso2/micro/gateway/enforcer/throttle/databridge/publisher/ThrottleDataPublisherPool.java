@@ -23,6 +23,8 @@ import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.StackObjectPool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottlePublisherConfigDto;
 
 /**
  * This class implemented to hold throttle data publishing agent pool. Reason for implement this is to
@@ -43,7 +45,8 @@ public class ThrottleDataPublisherPool {
         // active" instance created by the pool, but is quite useful for re-using Objects without introducing
         // artificial limits.
         //Proper tuning is mandatory for good performance according to system load.
-        PublisherConfiguration configuration = PublisherConfiguration.getInstance();
+        ThrottlePublisherConfigDto configuration = ConfigHolder.getInstance().getConfig().getThrottleConfig()
+                .getThrottleAgent().getPublisher();
         clientPool = new StackObjectPool(new BasePoolableObjectFactory() {
             @Override
             public Object makeObject() throws Exception {

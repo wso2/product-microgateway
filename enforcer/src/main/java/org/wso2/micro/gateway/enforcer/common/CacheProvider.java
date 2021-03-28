@@ -38,6 +38,10 @@ public class CacheProvider {
     private static LoadingCache<String, JWTValidationInfo> gatewayKeyCache;
     private static LoadingCache<String, Boolean> invalidTokenCache;
     private static LoadingCache<String, JWTValidationInfo> gatewayJWTTokenCache;
+    private static LoadingCache<String, String> getGatewayInternalKeyCache;
+    private static LoadingCache<String, String> getInvalidGatewayInternalKeyCache;
+    private static LoadingCache<String, JWTValidationInfo> getGatewayInternalKeyDataCache;
+
     private static boolean cacheEnabled = true;
     public static void init() {
         CacheDto cacheDto = ConfigHolder.getInstance().getConfig().getCacheDto();
@@ -49,6 +53,9 @@ public class CacheProvider {
         gatewayKeyCache = initCache(maxSize, expiryTime);
         invalidTokenCache = initCache(maxSize, expiryTime);
         gatewayJWTTokenCache = initCache(maxSize, expiryTime);
+        getGatewayInternalKeyCache = initCache(maxSize, expiryTime);
+        getGatewayInternalKeyDataCache = initCache(maxSize, expiryTime);
+        getInvalidGatewayInternalKeyCache = initCache(maxSize, expiryTime);
     }
 
     private static LoadingCache initCache(int maxSize, int expiryTime) {
@@ -63,6 +70,27 @@ public class CacheProvider {
                 });
     }
 
+
+    /**
+     * @return Gateway Internal Key cache
+     */
+    public static LoadingCache getGatewayInternalKeyCache() {
+        return getGatewayInternalKeyCache;
+    }
+
+    /**
+     * @return Gateway Internal Key data cache
+     */
+    public static LoadingCache getGatewayInternalKeyDataCache() {
+        return getGatewayInternalKeyDataCache;
+    }
+
+    /**
+     * @return Gateway Internal Key invalid data cache
+     */
+    public static LoadingCache getInvalidGatewayInternalKeyCache() {
+        return getInvalidGatewayInternalKeyCache;
+    }
 
     /**
      *
