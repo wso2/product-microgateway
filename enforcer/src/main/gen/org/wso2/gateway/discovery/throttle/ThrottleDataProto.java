@@ -29,23 +29,28 @@ public final class ThrottleDataProto {
   static {
     java.lang.String[] descriptorData = {
       "\n+wso2/discovery/throttle/throttle_data." +
-      "proto\022\027wso2.discovery.throttle\"%\n\014Thrott" +
-      "leData\022\025\n\rkey_templates\030\001 \003(\tB\203\001\n#org.ws" +
-      "o2.gateway.discovery.throttleB\021ThrottleD" +
-      "ataProtoP\001ZGgithub.com/envoyproxy/go-con" +
-      "trol-plane/wso2/discovery/throttle;throt" +
-      "tleb\006proto3"
+      "proto\022\027wso2.discovery.throttle\0321wso2/dis" +
+      "covery/throttle/blocking_conditions.prot" +
+      "o\"o\n\014ThrottleData\022\025\n\rkey_templates\030\001 \003(\t" +
+      "\022H\n\023blocking_conditions\030\002 \001(\0132+.wso2.dis" +
+      "covery.throttle.BlockingConditionsB\203\001\n#o" +
+      "rg.wso2.gateway.discovery.throttleB\021Thro" +
+      "ttleDataProtoP\001ZGgithub.com/envoyproxy/g" +
+      "o-control-plane/wso2/discovery/throttle;" +
+      "throttleb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
+          org.wso2.gateway.discovery.throttle.BlockingConditionsProto.getDescriptor(),
         });
     internal_static_wso2_discovery_throttle_ThrottleData_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_wso2_discovery_throttle_ThrottleData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_throttle_ThrottleData_descriptor,
-        new java.lang.String[] { "KeyTemplates", });
+        new java.lang.String[] { "KeyTemplates", "BlockingConditions", });
+    org.wso2.gateway.discovery.throttle.BlockingConditionsProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

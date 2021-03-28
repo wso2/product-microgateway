@@ -31,4 +31,19 @@ public interface ThrottleDataOrBuilder extends
    */
   com.google.protobuf.ByteString
       getKeyTemplatesBytes(int index);
+
+  /**
+   * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+   * @return Whether the blockingConditions field is set.
+   */
+  boolean hasBlockingConditions();
+  /**
+   * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+   * @return The blockingConditions.
+   */
+  org.wso2.gateway.discovery.throttle.BlockingConditions getBlockingConditions();
+  /**
+   * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+   */
+  org.wso2.gateway.discovery.throttle.BlockingConditionsOrBuilder getBlockingConditionsOrBuilder();
 }

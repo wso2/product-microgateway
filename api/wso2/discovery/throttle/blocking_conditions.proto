@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package wso2.discovery.throttle;
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/throttle;throttle";
+option java_package = "org.wso2.gateway.discovery.throttle";
+option java_outer_classname = "BlockingConditionsProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: ThrottleDataModels]
+
+// Blocking condition model
+message BlockingConditions {
+	repeated string api = 1;
+	repeated string application = 2;
+	repeated string subscription = 3;
+	repeated IPCondition ip = 4;
+	repeated string custom = 5;
+	repeated string user = 6;
+}
+
+// IP blocking condition model
+message IPCondition {
+	string type = 1;
+	int32 id = 2;
+    string fixedIp = 3;
+    string startingIp = 4;
+    string endingIp = 5;
+    bool invert = 6;
+    string tenantDomain = 7;
+}

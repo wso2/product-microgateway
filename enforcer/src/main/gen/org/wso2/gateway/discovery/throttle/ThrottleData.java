@@ -63,6 +63,19 @@ private static final long serialVersionUID = 0L;
             keyTemplates_.add(s);
             break;
           }
+          case 18: {
+            org.wso2.gateway.discovery.throttle.BlockingConditions.Builder subBuilder = null;
+            if (blockingConditions_ != null) {
+              subBuilder = blockingConditions_.toBuilder();
+            }
+            blockingConditions_ = input.readMessage(org.wso2.gateway.discovery.throttle.BlockingConditions.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(blockingConditions_);
+              blockingConditions_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -133,6 +146,32 @@ private static final long serialVersionUID = 0L;
     return keyTemplates_.getByteString(index);
   }
 
+  public static final int BLOCKING_CONDITIONS_FIELD_NUMBER = 2;
+  private org.wso2.gateway.discovery.throttle.BlockingConditions blockingConditions_;
+  /**
+   * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+   * @return Whether the blockingConditions field is set.
+   */
+  @java.lang.Override
+  public boolean hasBlockingConditions() {
+    return blockingConditions_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+   * @return The blockingConditions.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.throttle.BlockingConditions getBlockingConditions() {
+    return blockingConditions_ == null ? org.wso2.gateway.discovery.throttle.BlockingConditions.getDefaultInstance() : blockingConditions_;
+  }
+  /**
+   * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.throttle.BlockingConditionsOrBuilder getBlockingConditionsOrBuilder() {
+    return getBlockingConditions();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -149,6 +188,9 @@ private static final long serialVersionUID = 0L;
                       throws java.io.IOException {
     for (int i = 0; i < keyTemplates_.size(); i++) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 1, keyTemplates_.getRaw(i));
+    }
+    if (blockingConditions_ != null) {
+      output.writeMessage(2, getBlockingConditions());
     }
     unknownFields.writeTo(output);
   }
@@ -167,6 +209,10 @@ private static final long serialVersionUID = 0L;
       size += dataSize;
       size += 1 * getKeyTemplatesList().size();
     }
+    if (blockingConditions_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(2, getBlockingConditions());
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -184,6 +230,11 @@ private static final long serialVersionUID = 0L;
 
     if (!getKeyTemplatesList()
         .equals(other.getKeyTemplatesList())) return false;
+    if (hasBlockingConditions() != other.hasBlockingConditions()) return false;
+    if (hasBlockingConditions()) {
+      if (!getBlockingConditions()
+          .equals(other.getBlockingConditions())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -198,6 +249,10 @@ private static final long serialVersionUID = 0L;
     if (getKeyTemplatesCount() > 0) {
       hash = (37 * hash) + KEY_TEMPLATES_FIELD_NUMBER;
       hash = (53 * hash) + getKeyTemplatesList().hashCode();
+    }
+    if (hasBlockingConditions()) {
+      hash = (37 * hash) + BLOCKING_CONDITIONS_FIELD_NUMBER;
+      hash = (53 * hash) + getBlockingConditions().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -338,6 +393,12 @@ private static final long serialVersionUID = 0L;
       super.clear();
       keyTemplates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       bitField0_ = (bitField0_ & ~0x00000001);
+      if (blockingConditionsBuilder_ == null) {
+        blockingConditions_ = null;
+      } else {
+        blockingConditions_ = null;
+        blockingConditionsBuilder_ = null;
+      }
       return this;
     }
 
@@ -370,6 +431,11 @@ private static final long serialVersionUID = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
       }
       result.keyTemplates_ = keyTemplates_;
+      if (blockingConditionsBuilder_ == null) {
+        result.blockingConditions_ = blockingConditions_;
+      } else {
+        result.blockingConditions_ = blockingConditionsBuilder_.build();
+      }
       onBuilt();
       return result;
     }
@@ -427,6 +493,9 @@ private static final long serialVersionUID = 0L;
           keyTemplates_.addAll(other.keyTemplates_);
         }
         onChanged();
+      }
+      if (other.hasBlockingConditions()) {
+        mergeBlockingConditions(other.getBlockingConditions());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -566,6 +635,125 @@ private static final long serialVersionUID = 0L;
       keyTemplates_.add(value);
       onChanged();
       return this;
+    }
+
+    private org.wso2.gateway.discovery.throttle.BlockingConditions blockingConditions_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.throttle.BlockingConditions, org.wso2.gateway.discovery.throttle.BlockingConditions.Builder, org.wso2.gateway.discovery.throttle.BlockingConditionsOrBuilder> blockingConditionsBuilder_;
+    /**
+     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     * @return Whether the blockingConditions field is set.
+     */
+    public boolean hasBlockingConditions() {
+      return blockingConditionsBuilder_ != null || blockingConditions_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     * @return The blockingConditions.
+     */
+    public org.wso2.gateway.discovery.throttle.BlockingConditions getBlockingConditions() {
+      if (blockingConditionsBuilder_ == null) {
+        return blockingConditions_ == null ? org.wso2.gateway.discovery.throttle.BlockingConditions.getDefaultInstance() : blockingConditions_;
+      } else {
+        return blockingConditionsBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     */
+    public Builder setBlockingConditions(org.wso2.gateway.discovery.throttle.BlockingConditions value) {
+      if (blockingConditionsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        blockingConditions_ = value;
+        onChanged();
+      } else {
+        blockingConditionsBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     */
+    public Builder setBlockingConditions(
+        org.wso2.gateway.discovery.throttle.BlockingConditions.Builder builderForValue) {
+      if (blockingConditionsBuilder_ == null) {
+        blockingConditions_ = builderForValue.build();
+        onChanged();
+      } else {
+        blockingConditionsBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     */
+    public Builder mergeBlockingConditions(org.wso2.gateway.discovery.throttle.BlockingConditions value) {
+      if (blockingConditionsBuilder_ == null) {
+        if (blockingConditions_ != null) {
+          blockingConditions_ =
+            org.wso2.gateway.discovery.throttle.BlockingConditions.newBuilder(blockingConditions_).mergeFrom(value).buildPartial();
+        } else {
+          blockingConditions_ = value;
+        }
+        onChanged();
+      } else {
+        blockingConditionsBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     */
+    public Builder clearBlockingConditions() {
+      if (blockingConditionsBuilder_ == null) {
+        blockingConditions_ = null;
+        onChanged();
+      } else {
+        blockingConditions_ = null;
+        blockingConditionsBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     */
+    public org.wso2.gateway.discovery.throttle.BlockingConditions.Builder getBlockingConditionsBuilder() {
+      
+      onChanged();
+      return getBlockingConditionsFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     */
+    public org.wso2.gateway.discovery.throttle.BlockingConditionsOrBuilder getBlockingConditionsOrBuilder() {
+      if (blockingConditionsBuilder_ != null) {
+        return blockingConditionsBuilder_.getMessageOrBuilder();
+      } else {
+        return blockingConditions_ == null ?
+            org.wso2.gateway.discovery.throttle.BlockingConditions.getDefaultInstance() : blockingConditions_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.throttle.BlockingConditions, org.wso2.gateway.discovery.throttle.BlockingConditions.Builder, org.wso2.gateway.discovery.throttle.BlockingConditionsOrBuilder> 
+        getBlockingConditionsFieldBuilder() {
+      if (blockingConditionsBuilder_ == null) {
+        blockingConditionsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.throttle.BlockingConditions, org.wso2.gateway.discovery.throttle.BlockingConditions.Builder, org.wso2.gateway.discovery.throttle.BlockingConditionsOrBuilder>(
+                getBlockingConditions(),
+                getParentForChildren(),
+                isClean());
+        blockingConditions_ = null;
+      }
+      return blockingConditionsBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(
