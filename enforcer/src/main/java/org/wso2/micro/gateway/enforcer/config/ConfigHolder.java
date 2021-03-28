@@ -46,13 +46,13 @@ import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.ThrottleAgentConfigDto;
 import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottlePublisherConfigDto;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTUtil;
 import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
-import org.wso2.micro.gateway.enforcer.throttle.databridge.publisher.PublisherConfiguration;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
 import java.io.IOException;
@@ -257,7 +257,7 @@ public class ConfigHolder {
         agentConf.setTrustStore(trustStore);
 
         PublisherPool pool = binary.getPool();
-        PublisherConfiguration pubConf = PublisherConfiguration.getInstance();
+        ThrottlePublisherConfigDto pubConf = new ThrottlePublisherConfigDto();
         pubConf.setUserName(binary.getUsername());
         pubConf.setPassword(binary.getPassword());
         pubConf.setInitIdleObjectDataPublishingAgents(pool.getInitIdleObjectDataPublishingAgents());
@@ -301,7 +301,7 @@ public class ConfigHolder {
      * such that to make them compatible with the binary agent.
      */
     private void processTMPublisherURLGroup(List<TMURLGroup> urlGroups,
-                                            PublisherConfiguration pubConfiguration) {
+                                            ThrottlePublisherConfigDto pubConfiguration) {
         StringBuilder restructuredReceiverURL = new StringBuilder();
         StringBuilder restructuredAuthURL = new StringBuilder();
 

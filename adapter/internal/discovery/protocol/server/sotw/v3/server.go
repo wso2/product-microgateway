@@ -58,6 +58,7 @@ type watches struct {
 	applicationKeyMappingList chan cache.Response
 	keyManagers               chan cache.Response
 	revokedTokens             chan cache.Response
+	throttleData              chan cache.Response
 
 	configCancel                    func()
 	apiCancel                       func()
@@ -69,6 +70,7 @@ type watches struct {
 	applicationKeyMappingListCancel func()
 	keyManagerCancel                func()
 	revokedTokenCancel              func()
+	throttleDataCancel              func()
 
 	configNonce                    string
 	apiNonce                       string
@@ -80,6 +82,7 @@ type watches struct {
 	applicationKeyMappingListNonce string
 	keyManagerNonce                string
 	revokedTokenNonce              string
+	throttleDataNonce              string
 
 	// Opaque resources share a muxed channel. Nonces and watch cancellations are indexed by type URL.
 	responses     chan cache.Response
@@ -91,7 +94,7 @@ type watches struct {
 // Initialize all watches
 func (values *watches) Init() {
 	// muxed channel needs a buffer to release go-routines populating it
-	values.responses = make(chan cache.Response, 10)
+	values.responses = make(chan cache.Response, 11)
 	values.cancellations = make(map[string]func())
 	values.nonces = make(map[string]string)
 	values.terminations = make(map[string]chan struct{})
@@ -131,6 +134,9 @@ func (values *watches) Cancel() {
 	}
 	if values.revokedTokenCancel != nil {
 		values.revokedTokenCancel()
+	}
+	if values.throttleDataCancel != nil {
+		values.throttleDataCancel()
 	}
 
 	for _, cancel := range values.cancellations {
@@ -296,6 +302,16 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			}
 			values.revokedTokenNonce = nonce
 
+		case resp, more := <-values.throttleData:
+			if !more {
+				return status.Errorf(codes.Unavailable, "throttle data watch failed")
+			}
+			nonce, err := send(resp, resource.ThrottleDataType)
+			if err != nil {
+				return err
+			}
+			values.throttleDataNonce = nonce
+
 		case resp, more := <-values.responses:
 			if more {
 				if resp == errorResponse {
@@ -415,6 +431,13 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 						values.revokedTokenCancel()
 					}
 					values.revokedTokens, values.revokedTokenCancel = s.cache.CreateWatch(req)
+				}
+			case req.TypeUrl == resource.ThrottleDataType:
+				if values.throttleDataNonce == "" || values.throttleDataNonce == nonce {
+					if values.throttleDataCancel != nil {
+						values.throttleDataCancel()
+					}
+					values.throttleData, values.throttleDataCancel = s.cache.CreateWatch(req)
 				}
 			default:
 				typeUrl := req.TypeUrl

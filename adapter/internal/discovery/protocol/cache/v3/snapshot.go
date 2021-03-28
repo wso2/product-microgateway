@@ -56,7 +56,8 @@ func NewSnapshot(version string,
 	subscriptionPolicyList []types.Resource,
 	applicationKeyMappingList []types.Resource,
 	keyManagerConfig []types.Resource,
-	revokedTokens []types.Resource) Snapshot {
+	revokedTokens []types.Resource,
+	throttleData []types.Resource) Snapshot {
 	out := Snapshot{}
 	out.Resources[wso2_types.Config] = NewResources(version, configs)
 	out.Resources[wso2_types.API] = NewResources(version, apis)
@@ -68,6 +69,7 @@ func NewSnapshot(version string,
 	out.Resources[wso2_types.ApplicationKeyMappingList] = NewResources(version, applicationKeyMappingList)
 	out.Resources[wso2_types.KeyManagerConfig] = NewResources(version, keyManagerConfig)
 	out.Resources[wso2_types.RevokedTokens] = NewResources(version, revokedTokens)
+	out.Resources[wso2_types.ThrottleData] = NewResources(version, throttleData)
 	return out
 }
 

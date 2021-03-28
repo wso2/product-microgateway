@@ -60,6 +60,7 @@ var (
 	enforcerApplicationKeyMappingCache wso2_cache.SnapshotCache
 	enforcerKeyManagerCache            wso2_cache.SnapshotCache
 	enforcerRevokedTokensCache         wso2_cache.SnapshotCache
+	enforcerThrottleDataCache          wso2_cache.SnapshotCache
 
 	// Vhost:APIName:Version as map key
 	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // MgwSwagger struct map
@@ -84,6 +85,7 @@ var (
 	enforcerSubscriptionPolicyMap    map[string][]types.Resource
 	enforcerApplicationKeyMappingMap map[string][]types.Resource
 	enforcerRevokedTokensMap         map[string][]types.Resource
+	enforcerThrottleDataMap          map[string][]types.Resource
 
 	// KeyManagerList to store data
 	KeyManagerList = make([]eventhubTypes.KeyManager, 0)
@@ -119,6 +121,7 @@ func init() {
 	enforcerApplicationKeyMappingCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerKeyManagerCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerRevokedTokensCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerThrottleDataCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 
 	apiMgwSwaggerMap = make(map[string]mgw.MgwSwagger)
 	openAPIEnvoyMap = make(map[string][]string)
@@ -140,6 +143,7 @@ func init() {
 	enforcerSubscriptionPolicyMap = make(map[string][]types.Resource)
 	enforcerApplicationKeyMappingMap = make(map[string][]types.Resource)
 	enforcerRevokedTokensMap = make(map[string][]types.Resource)
+	enforcerThrottleDataMap = make(map[string][]types.Resource)
 }
 
 // GetXdsCache returns xds server cache.
@@ -190,6 +194,11 @@ func GetEnforcerKeyManagerCache() wso2_cache.SnapshotCache {
 //GetEnforcerRevokedTokenCache return token cache
 func GetEnforcerRevokedTokenCache() wso2_cache.SnapshotCache {
 	return enforcerRevokedTokensCache
+}
+
+//GetEnforcerThrottleDataCache return throttle data cache
+func GetEnforcerThrottleDataCache() wso2_cache.SnapshotCache {
+	return enforcerThrottleDataCache
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
@@ -399,7 +408,7 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 	label := commonEnforcerLabel
 	configs := []types.Resource{MarshalConfig(configFile)}
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), configs, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), configs, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerCache.SetSnapshot(label, snap)
@@ -415,7 +424,7 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 func UpdateEnforcerApis(label string, apis []types.Resource) {
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, apis, nil, nil, nil, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, apis, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerCache.SetSnapshot(label, snap)
@@ -436,7 +445,7 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 
 	// TODO: (VirajSalaka) Decide if a map is required to keep version (just to avoid having the same version)
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, subscriptionList, nil, nil, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, subscriptionList, nil, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerSubscriptionCache.SetSnapshot(label, snap)
@@ -455,7 +464,7 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 	applicationList = append(applicationList, applications)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, applicationList, nil, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, applicationList, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationCache.SetSnapshot(label, snap)
@@ -473,7 +482,7 @@ func UpdateEnforcerAPIList(label string, apis *subscription.APIList) {
 	apiList = append(apiList, apis)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, apiList, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, apiList, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerAPICache.SetSnapshot(label, snap)
@@ -492,7 +501,7 @@ func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 	applicationPolicyList = append(applicationPolicyList, applicationPolicies)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, applicationPolicyList, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, applicationPolicyList, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationPolicyCache.SetSnapshot(label, snap)
@@ -511,7 +520,7 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 	subscriptionPolicyList = append(subscriptionPolicyList, subscriptionPolicies)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, subscriptionPolicyList, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, subscriptionPolicyList, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerSubscriptionPolicyCache.SetSnapshot(label, snap)
@@ -530,7 +539,7 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 	applicationKeyMappingList = append(applicationKeyMappingList, applicationKeyMappings)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, applicationKeyMappingList, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, applicationKeyMappingList, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationKeyMappingCache.SetSnapshot(label, snap)
@@ -712,7 +721,7 @@ func UpdateEnforcerKeyManagers(keyManagerConfigList []types.Resource) {
 	label := commonEnforcerLabel
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, keyManagerConfigList, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, keyManagerConfigList, nil, nil)
 	snap.Consistent()
 
 	err := enforcerKeyManagerCache.SetSnapshot(label, snap)
@@ -732,7 +741,7 @@ func UpdateEnforcerRevokedTokens(revokedTokens []types.Resource) {
 	tokens = append(tokens, revokedTokens...)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, tokens)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, tokens, nil)
 	snap.Consistent()
 
 	err := enforcerRevokedTokensCache.SetSnapshot(label, snap)
@@ -740,5 +749,25 @@ func UpdateEnforcerRevokedTokens(revokedTokens []types.Resource) {
 		logger.LoggerXds.Error(err)
 	}
 	enforcerRevokedTokensMap[label] = tokens
+	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+// UpdateEnforcerThrottleData update the key template and blocking conditions
+// data in the enforcer
+func UpdateEnforcerThrottleData(throttleData []types.Resource) {
+	logger.LoggerXds.Debug("Updating enforcer cache for throttle data")
+	label := commonEnforcerLabel
+	data := enforcerThrottleDataMap[label]
+	data = append(data, throttleData...)
+
+	version := rand.Intn(maxRandomInt)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, data)
+	snap.Consistent()
+
+	err := enforcerThrottleDataCache.SetSnapshot(label, snap)
+	if err != nil {
+		logger.LoggerXds.Error(err)
+	}
+	enforcerThrottleDataMap[label] = data
 	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }

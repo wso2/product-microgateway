@@ -83,7 +83,7 @@
 # Issuer 2
 [[enforcer.jwtTokenConfig]]
     name="MGW"
-    issuer = "https://localhost:9095/token"
+    issuer = "https://localhost:9095/testkey"
     certificateAlias = "mgw"
     # URL of the JWKs endpoint
     jwksURL = ""
@@ -118,7 +118,7 @@
 
 [enforcer.jwtIssuer]
   enabled = true
-  issuer = "https://localhost:9095/token"
+  issuer = "https://localhost:9095/testkey"
   encoding = "base64" # base64,base64url
   claimDialect = ""
   signingAlgorithm = "SHA256withRSA"
