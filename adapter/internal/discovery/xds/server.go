@@ -23,7 +23,8 @@ import (
 	"math/rand"
 	"sync"
 
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
+	subscription "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
+	throttle "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/throttle"
 
 	wso2_cache "github.com/wso2/micro-gw/internal/discovery/protocol/cache/v3"
 	"github.com/wso2/micro-gw/internal/svcdiscovery"
@@ -83,7 +84,7 @@ var (
 	enforcerSubscriptionPolicyMap    map[string][]types.Resource
 	enforcerApplicationKeyMappingMap map[string][]types.Resource
 	enforcerRevokedTokensMap         map[string][]types.Resource
-	enforcerThrottleDataMap          map[string][]types.Resource
+	enforcerThrottleData             *throttle.ThrottleData
 
 	// KeyManagerList to store data
 	KeyManagerList = make([]eventhubTypes.KeyManager, 0)
@@ -141,7 +142,7 @@ func init() {
 	enforcerSubscriptionPolicyMap = make(map[string][]types.Resource)
 	enforcerApplicationKeyMappingMap = make(map[string][]types.Resource)
 	enforcerRevokedTokensMap = make(map[string][]types.Resource)
-	enforcerThrottleDataMap = make(map[string][]types.Resource)
+	enforcerThrottleData = &throttle.ThrottleData{}
 }
 
 // GetXdsCache returns xds server cache.
@@ -644,11 +645,30 @@ func UpdateEnforcerRevokedTokens(revokedTokens []types.Resource) {
 
 // UpdateEnforcerThrottleData update the key template and blocking conditions
 // data in the enforcer
-func UpdateEnforcerThrottleData(throttleData []types.Resource) {
+func UpdateEnforcerThrottleData(throttleData *throttle.ThrottleData) {
 	logger.LoggerXds.Debug("Updating enforcer cache for throttle data")
 	label := commonEnforcerLabel
-	data := enforcerThrottleDataMap[label]
-	data = append(data, throttleData...)
+	var data []types.Resource
+
+	// Set new throttle data content based on the already available content in the cache DTO
+	// and the new data being requested to add.
+	// ex: keytemplates being pressent in the `throttleData` means this method was called
+	// after downloading key templates. That means we should populate keytemplates property
+	// in the cache DTO, keeping the other properties as it is. This is done this way to avoid
+	// the need of two xds services to push keytemplates and blocking conditions.
+	templates := throttleData.KeyTemplates
+	conditions := throttleData.BlockingConditions
+	if templates == nil {
+		templates = enforcerThrottleData.KeyTemplates
+	}
+	if conditions == nil {
+		conditions = enforcerThrottleData.BlockingConditions
+	}
+	t := &throttle.ThrottleData{
+		KeyTemplates:       templates,
+		BlockingConditions: conditions,
+	}
+	data = append(data, t)
 
 	version := rand.Intn(maxRandomInt)
 	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, data)
@@ -658,6 +678,6 @@ func UpdateEnforcerThrottleData(throttleData []types.Resource) {
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
-	enforcerThrottleDataMap[label] = data
+	enforcerThrottleData = t
 	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
