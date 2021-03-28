@@ -23,6 +23,7 @@ services:
       - ./resources/router/security:/home/wso2/security
     ports:
       - "9095:9095"
+      - "9090:9090"
       - "9000:9000"
     links:
       - adapter

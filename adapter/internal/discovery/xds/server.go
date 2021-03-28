@@ -72,7 +72,7 @@ var (
 
 	// Envoy Label as map key
 	envoyUpdateVersionMap  map[string]int64                       // XDS version map
-	envoyListenerConfigMap map[string]*listenerv3.Listener        // Listener Configuration map
+	envoyListenerConfigMap map[string][]*listenerv3.Listener      // Listener Configuration map
 	envoyRouteConfigMap    map[string]*routev3.RouteConfiguration // Routes Configuration map
 
 	// Common Enforcer Label as map key
@@ -131,7 +131,7 @@ func init() {
 	openAPIEndpointsMap = make(map[string][]*corev3.Address)
 	//TODO: (VirajSalaka) Swagger or project should contain the version as a meta information
 	envoyUpdateVersionMap = make(map[string]int64)
-	envoyListenerConfigMap = make(map[string]*listenerv3.Listener)
+	envoyListenerConfigMap = make(map[string][]*listenerv3.Listener)
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 
 	enforcerConfigMap = make(map[string][]types.Resource)
@@ -374,17 +374,17 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	routeHealth := envoyconf.CreateHealthEndpoint()
 	routeArray = append(routeArray, routeHealth)
 
-	listener, listenerFound := envoyListenerConfigMap[label]
+	listenerArray, listenerFound := envoyListenerConfigMap[label]
 	routesConfig, routesConfigFound := envoyRouteConfigMap[label]
 	if !listenerFound && !routesConfigFound {
-		listener, routesConfig = oasParser.GetProductionListenerAndRouteConfig(routeArray)
-		envoyListenerConfigMap[label] = listener
+		listenerArray, routesConfig = oasParser.GetProductionListenerAndRouteConfig(routeArray)
+		envoyListenerConfigMap[label] = listenerArray
 		envoyRouteConfigMap[label] = routesConfig
 	} else {
 		// If the routesConfig exists, the listener exists too
 		oasParser.UpdateRoutesConfig(routesConfig, routeArray)
 	}
-	endpoints, clusters, listeners, routeConfigs := oasParser.GetCacheResources(endpointArray, clusterArray, listener, routesConfig)
+	endpoints, clusters, listeners, routeConfigs := oasParser.GetCacheResources(endpointArray, clusterArray, listenerArray, routesConfig)
 	return endpoints, clusters, listeners, routeConfigs, apis
 }
 

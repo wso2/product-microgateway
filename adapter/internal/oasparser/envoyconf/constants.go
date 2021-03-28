@@ -30,6 +30,8 @@ const (
 
 const (
 	defaultRdsConfigName            string = "default"
+	defaultHTTPListenerName         string = "HTTPListener"
+	defaultHTTPSListenerName        string = "HTTPSListener"
 	defaultAccessLogPath            string = "/tmp/envoy.access.log"
 	defaultListenerSecretConfigName string = "DefaultListenerSecret"
 )
@@ -72,4 +74,8 @@ const (
 const (
 	// healthEndpointResponse - response from the health endpoint
 	healthEndpointResponse = "healthy"
+)
+
+const (
+	defaultListenerHostAddress = "0.0.0.0"
 )

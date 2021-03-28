@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.context.MicroGWTestException;
 import org.wso2am.micro.gw.tests.util.ApictlUtils;
+import org.wso2am.micro.gw.tests.util.HttpClientRequest;
 import org.wso2am.micro.gw.tests.util.HttpResponse;
 import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
 import org.wso2am.micro.gw.tests.util.TestConstant;
@@ -58,10 +59,23 @@ public class MgwWithDefaultConf extends BaseTestCase {
     }
 
     @Test(description = "Invoke Health endpoint")
-    public void invokeHttpEndpointSuccess() throws Exception {
+    public void invokeHttpsEndpointSuccess() throws Exception {
         // Set header
         Map<String, String> headers = new HashMap<String, String>(0);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/health") , headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertEquals(response.getData(), TestConstant.HEALTH_ENDPOINT_RESPONSE,
+                "Response message mismatched");
+    }
+
+    @Test(description = "Invoke Health endpoint (secured)")
+    public void invokeHttpEndpointSuccess() throws Exception {
+        // Set header
+        Map<String, String> headers = new HashMap<String, String>(0);
+        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttp(
                 "/health") , headers);
 
         Assert.assertNotNull(response);

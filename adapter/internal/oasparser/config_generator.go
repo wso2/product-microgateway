@@ -48,13 +48,13 @@ func GetProductionRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCer
 // The provided set of envoy routes will be assigned under the virtual host
 //
 // The RouteConfiguration is named as "default"
-func GetProductionListenerAndRouteConfig(routes []*routev3.Route) (*listenerv3.Listener, *routev3.RouteConfiguration) {
-	listnerProd := envoy.CreateListenerWithRds("default")
+func GetProductionListenerAndRouteConfig(routes []*routev3.Route) ([]*listenerv3.Listener, *routev3.RouteConfiguration) {
+	listeners := envoy.CreateListenersWithRds()
 	vHostName := "default"
 	vHostP := envoy.CreateVirtualHost(vHostName, routes)
-	routeConfigProd := envoy.CreateRoutesConfigForRds(vHostP)
+	routeConfig := envoy.CreateRoutesConfigForRds(vHostP)
 
-	return listnerProd, routeConfigProd
+	return listeners, routeConfig
 }
 
 // GetCacheResources converts the envoy endpoints, clusters, routes, and listener to
@@ -62,11 +62,11 @@ func GetProductionListenerAndRouteConfig(routes []*routev3.Route) (*listenerv3.L
 //
 // The returned resources are listeners, clusters, routeConfigurations, endpoints
 func GetCacheResources(endpoints []*corev3.Address, clusters []*clusterv3.Cluster,
-	listener *listenerv3.Listener, routeConfig *routev3.RouteConfiguration) (
+	listeners []*listenerv3.Listener, routeConfig *routev3.RouteConfiguration) (
 	listenerRes []types.Resource, clusterRes []types.Resource, routeConfigRes []types.Resource,
 	endpointRes []types.Resource) {
 
-	listenerRes = []types.Resource{listener}
+	listenerRes = []types.Resource{}
 	clusterRes = []types.Resource{}
 	routeConfigRes = []types.Resource{routeConfig}
 	endpointRes = []types.Resource{}
@@ -75,6 +75,9 @@ func GetCacheResources(endpoints []*corev3.Address, clusters []*clusterv3.Cluste
 	}
 	for _, endpoint := range endpoints {
 		endpointRes = append(endpointRes, endpoint)
+	}
+	for _, listener := range listeners {
+		listenerRes = append(listenerRes, listener)
 	}
 	return listenerRes, clusterRes, routeConfigRes, endpointRes
 }
@@ -127,17 +130,17 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string) *api.Api
 	}
 
 	return &api.Api{
-		Id:                 mgwSwagger.GetID(),
-		Title:              mgwSwagger.GetTitle(),
-		Description:        mgwSwagger.GetDescription(),
-		BasePath:           mgwSwagger.GetXWso2Basepath(),
-		Version:            mgwSwagger.GetVersion(),
-		ProductionUrls:     prodUrls,
-		SandboxUrls:        sandUrls,
-		Resources:          resources,
-		ApiLifeCycleState:  lifeCycleState,
-		Tier:               mgwSwagger.GetXThrottlingTier(),
-		SecurityScheme:     mgwSwagger.GetSetSecurityScheme(),
+		Id:                mgwSwagger.GetID(),
+		Title:             mgwSwagger.GetTitle(),
+		Description:       mgwSwagger.GetDescription(),
+		BasePath:          mgwSwagger.GetXWso2Basepath(),
+		Version:           mgwSwagger.GetVersion(),
+		ProductionUrls:    prodUrls,
+		SandboxUrls:       sandUrls,
+		Resources:         resources,
+		ApiLifeCycleState: lifeCycleState,
+		Tier:              mgwSwagger.GetXThrottlingTier(),
+		SecurityScheme:    mgwSwagger.GetSetSecurityScheme(),
 	}
 }
 

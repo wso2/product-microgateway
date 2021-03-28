@@ -61,6 +61,7 @@ public class TestConstant {
             "KcdFXFwDUzpLfyAsg8qHDGiMcM88sUc10cvMYQqRYw66SF3EqYWQ";
 
     public static final int GATEWAY_LISTENER_HTTPS_PORT = 9095;
+    public static final int GATEWAY_LISTENER_HTTP_PORT = 9090;
     public static final int ADAPTER_PORT = 9843;
     public final static int MOCK_SERVER_PORT = 2383;
     public final static int APIM_SERVLET_TRP_HTTPS_PORT = 9443;
