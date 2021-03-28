@@ -18,6 +18,10 @@
 
 package org.wso2.micro.gateway.enforcer.throttle;
 
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,11 +31,16 @@ import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.micro.gateway.enforcer.discovery.ThrottleDataDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.throttle.dto.Decision;
 import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
+import org.wso2.micro.gateway.enforcer.throttle.dto.IPRange;
+import org.wso2.micro.gateway.enforcer.throttle.dto.ThrottleCondition;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,14 +52,18 @@ import java.util.regex.Pattern;
 public class ThrottleDataHolder {
     private static final Logger log = LogManager.getLogger(ThrottleDataHolder.class);
 
-    private final Map<String, Long> throttleDataMap;
+    private final Map<String, Long> throttleDecisions;
     private final Map<String, String> keyTemplates;
+    private final Map<String, String> blockedConditions;
+    private Map<String, Set<IPRange>> blockedIpConditions;
     private static ThrottleDataHolder instance;
-    private final Map<String, Map<String, List<ThrottleCondition>>> conditionDtoMap = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, List<ThrottleCondition>>> conditionData = new ConcurrentHashMap<>();
 
     private ThrottleDataHolder() {
-        throttleDataMap = new ConcurrentHashMap<>();
+        this.throttleDecisions = new ConcurrentHashMap<>();
         this.keyTemplates = new ConcurrentHashMap<>();
+        this.blockedConditions = new ConcurrentHashMap<>();
+        this.blockedIpConditions = new ConcurrentHashMap<>();
     }
 
     public static ThrottleDataHolder getInstance() {
@@ -108,11 +121,11 @@ public class ThrottleDataHolder {
     public void addThrottledConditions(String key, String conditionKey, List<ThrottleCondition> conditionValue) {
         Map<String, List<ThrottleCondition>> conditionMap;
 
-        if (conditionDtoMap.containsKey(key)) {
-            conditionMap = conditionDtoMap.get(key);
+        if (conditionData.containsKey(key)) {
+            conditionMap = conditionData.get(key);
         } else {
             conditionMap = new ConcurrentHashMap<>();
-            conditionDtoMap.put(key, conditionMap);
+            conditionData.put(key, conditionMap);
         }
         if (!conditionMap.containsKey(conditionKey)) {
             conditionMap.put(conditionKey, conditionValue);
@@ -126,11 +139,11 @@ public class ThrottleDataHolder {
      * @param conditionKey condition key to be removed
      */
     public void removeThrottledConditions(String key, String conditionKey) {
-        if (conditionDtoMap.containsKey(key)) {
-            Map<String, List<ThrottleCondition>> conditionMap = conditionDtoMap.get(key);
+        if (conditionData.containsKey(key)) {
+            Map<String, List<ThrottleCondition>> conditionMap = conditionData.get(key);
             conditionMap.remove(conditionKey);
             if (conditionMap.isEmpty()) {
-                conditionDtoMap.remove(key);
+                conditionData.remove(key);
             }
         }
     }
@@ -142,7 +155,7 @@ public class ThrottleDataHolder {
      * @param timestamp throttle timestamp
      */
     public void addThrottleData(String key, Long timestamp) {
-        throttleDataMap.put(key, timestamp);
+        throttleDecisions.put(key, timestamp);
     }
 
     /**
@@ -151,9 +164,93 @@ public class ThrottleDataHolder {
      * @param key throttle key to be removed
      */
     public void removeThrottleData(String key) {
-        throttleDataMap.remove(key);
+        throttleDecisions.remove(key);
     }
 
+    /**
+     * Add a blocking condition to the blocked conditions map.
+     *
+     * @param conditionKey blocked condition key
+     * @param conditionValue blocked condition value
+     */
+    public void addBlockingCondition(String conditionKey, String conditionValue) {
+        blockedConditions.put(conditionKey, conditionValue);
+    }
+
+    /**
+     * Add IP blocking condition to the blocked IP condition map.
+     *
+     * @param tenantDomain tenant domain of the IP blocking condition
+     * @param conditionId  condition ID
+     * @param value        condition value as an string. This will be processed
+     *                     as an json string and must be in the valid format
+     * @param type         condition type. this can be {@link ThrottleConstants#BLOCK_CONDITION_IP_RANGE}
+     *                     or {@link ThrottleConstants#BLOCKING_CONDITIONS_IP}
+     */
+    public void addIpBlockingCondition(String tenantDomain, int conditionId, String value, String type) {
+
+        Set<IPRange> ipRanges = blockedIpConditions.get(tenantDomain);
+        if (ipRanges == null) {
+            ipRanges = new HashSet<>();
+        }
+
+        ipRanges.add(convertValueToIPRange(tenantDomain, conditionId, value, type));
+        blockedIpConditions.put(tenantDomain, ipRanges);
+    }
+
+    public void removeBlockingCondition(String conditionKey) {
+        blockedConditions.remove(conditionKey);
+    }
+
+    /**
+     * Remove IP blocking condition from the blocked IP condition map.
+     *
+     * @param tenantDomain tenant domain to lookup the blocked condition
+     * @param conditionId condition ID of the blocked condition
+     */
+    public void removeIpBlockingCondition(String tenantDomain, int conditionId) {
+        Set<IPRange> ipRanges = blockedIpConditions.get(tenantDomain);
+
+        if (ipRanges != null) {
+            Iterator<IPRange> iterator = ipRanges.iterator();
+            while (iterator.hasNext()) {
+                IPRange ipRange = iterator.next();
+                if (ipRange.getId() == conditionId) {
+                    iterator.remove();
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if there are any blocking conditions received from the traffic manager.
+     *
+     * @return returns {@code true} if blocking conditions are available {@code false} otherwise.
+     */
+    public boolean isBlockingConditionsPresent() {
+        return (blockedConditions.size() > 0 || blockedIpConditions.size() > 0);
+    }
+
+    /**
+     * Checks if a request is blocked by given blocking keys.
+     *
+     * @param apiBlockingKey blocking key for API blocking
+     * @param applicationBlockingKey blocking key for Application blocking
+     * @param userBlockingKey blocking key for User blocking
+     * @param ipBlockingKey blocking key for IP blocking
+     * @param subscriptionBlockingKey blocking key for Subscription blocking
+     * @param apiTenantDomain tenant domain of the current request
+     * @return {@code true} if request is blocked by any of the conditions, {@code false} otherwise
+     */
+    public boolean isRequestBlocked(String apiBlockingKey, String applicationBlockingKey, String userBlockingKey,
+                                    String ipBlockingKey, String subscriptionBlockingKey, String apiTenantDomain) {
+        return (blockedConditions.containsKey(apiBlockingKey)
+                || blockedConditions.containsKey(applicationBlockingKey)
+                || blockedConditions.containsKey(userBlockingKey)
+                || blockedConditions.containsKey(subscriptionBlockingKey)
+                || isIpLevelBlocked(apiTenantDomain, ipBlockingKey));
+    }
     /**
      * This method will check given key in throttle data Map. A key is considered throttled if,
      * <ol>
@@ -166,7 +263,7 @@ public class ThrottleDataHolder {
      */
     public Decision isThrottled(String key) {
         Decision decision = new Decision();
-        Long timestamp = this.throttleDataMap.get(key);
+        Long timestamp = this.throttleDecisions.get(key);
 
         if (timestamp != null) {
             long currentTime = System.currentTimeMillis();
@@ -174,7 +271,7 @@ public class ThrottleDataHolder {
             decision.setResetAt(timestamp);
 
             if (timestamp < currentTime) {
-                this.throttleDataMap.remove(key);
+                this.throttleDecisions.remove(key);
                 decision.setThrottled(false);
             }
         }
@@ -194,7 +291,7 @@ public class ThrottleDataHolder {
     public Decision isAdvancedThrottled(String key, RequestContext context) {
         String conditionKey = null;
         Decision decision = new Decision();
-        Map<String, List<ThrottleCondition>> conditionGrps = conditionDtoMap.get(key);
+        Map<String, List<ThrottleCondition>> conditionGrps = conditionData.get(key);
         List<ThrottleCondition> defaultGrp = null;
 
         if (conditionGrps == null) {
@@ -231,15 +328,15 @@ public class ThrottleDataHolder {
 
             // if throttle data is not available for the combined key, conditional throttle decision
             // is no longer valid
-            Long timestamp = throttleDataMap.get(combinedThrottleKey);
+            Long timestamp = throttleDecisions.get(combinedThrottleKey);
             if (timestamp == null) {
                 return decision;
             }
 
             long currentTime = System.currentTimeMillis();
             if (timestamp < currentTime) {
-                this.throttleDataMap.remove(key);
-                this.conditionDtoMap.remove(key);
+                this.throttleDecisions.remove(key);
+                this.conditionData.remove(key);
                 return decision;
             }
 
@@ -345,6 +442,45 @@ public class ThrottleDataHolder {
         return decision;
     }
 
+    private boolean isIpLevelBlocked(String apiTenantDomain, String ip) {
+        Set<IPRange> ipRanges = blockedIpConditions.get(apiTenantDomain);
+
+        if (ipRanges != null && ipRanges.size() > 0) {
+            log.debug("Tenant {} contains block conditions", apiTenantDomain);
+            for (IPRange ipRange : ipRanges) {
+                if (ThrottleConstants.BLOCKING_CONDITIONS_IP.equals(ipRange.getType())) {
+                    if (ip.equals(ipRange.getFixedIp())) {
+                        if (!ipRange.isInvert()) {
+                            log.debug("Blocked IP detected");
+                            return true;
+                        }
+                    } else {
+                        if (ipRange.isInvert()) {
+                            log.debug("Blocked IP detected");
+                            return true;
+                        }
+                    }
+                } else if (ThrottleConstants.BLOCK_CONDITION_IP_RANGE.equals(ipRange.getType())) {
+                    BigInteger ipBigIntegerValue = FilterUtils.ipToBigInteger(ip);
+
+                    if (((ipBigIntegerValue.compareTo(ipRange.getStartingIpBigIntValue()) > 0) &&
+                            (ipBigIntegerValue.compareTo(ipRange.getEndingIpBigIntValue()) < 0))) {
+                        if (!ipRange.isInvert()) {
+                            log.debug("Blocked IP detected in an IP Range");
+                            return true;
+                        }
+                    } else {
+                        if (ipRange.isInvert()) {
+                            log.debug("Blocked IP detected in an IP Range");
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private boolean isMatchingIp(String clientIp, ThrottleCondition.IPCondition ipCondition) {
         BigInteger longIp = FilterUtils.ipToBigInteger(clientIp);
         boolean isMatched = (longIp.equals(ipCondition.getSpecificIp()));
@@ -443,5 +579,36 @@ public class ThrottleDataHolder {
         }
 
         return status;
+    }
+
+    private IPRange convertValueToIPRange(String tenantDomain, int conditionId, String value, String type) {
+        IPRange ipRange = new IPRange();
+        ipRange.setId(conditionId);
+        ipRange.setTenantDomain(tenantDomain);
+        JsonObject ipLevelJson = JsonParser.parseString(value).getAsJsonObject();
+
+        if (ThrottleConstants.BLOCKING_CONDITIONS_IP.equals(type)) {
+            ipRange.setType(ThrottleConstants.BLOCKING_CONDITIONS_IP);
+            JsonElement fixedIpElement = ipLevelJson.get(ThrottleConstants.BLOCK_CONDITION_FIXED_IP);
+            if (fixedIpElement != null && StringUtils.isNotEmpty(fixedIpElement.getAsString())) {
+                ipRange.setFixedIp(fixedIpElement.getAsString());
+            }
+        } else if (ThrottleConstants.BLOCK_CONDITION_IP_RANGE.equals(type)) {
+            ipRange.setType(ThrottleConstants.BLOCK_CONDITION_IP_RANGE);
+            JsonElement startingIpElement = ipLevelJson.get(ThrottleConstants.BLOCK_CONDITION_START_IP);
+            if (startingIpElement != null && StringUtils.isNotEmpty(startingIpElement.getAsString())) {
+                ipRange.setStartingIP(startingIpElement.getAsString());
+                ipRange.setStartingIpBigIntValue(FilterUtils.ipToBigInteger(startingIpElement.getAsString()));
+            }
+            JsonElement endingIpElement = ipLevelJson.get(ThrottleConstants.BLOCK_CONDITION_ENDING_IP);
+            if (endingIpElement != null && StringUtils.isNotEmpty(endingIpElement.getAsString())) {
+                ipRange.setEndingIp(endingIpElement.getAsString());
+                ipRange.setEndingIpBigIntValue(FilterUtils.ipToBigInteger(endingIpElement.getAsString()));
+            }
+        }
+        if (ipLevelJson.has(ThrottleConstants.BLOCK_CONDITION_INVERT)) {
+            ipRange.setInvert(ipLevelJson.get(ThrottleConstants.BLOCK_CONDITION_INVERT).getAsBoolean());
+        }
+        return ipRange;
     }
 }

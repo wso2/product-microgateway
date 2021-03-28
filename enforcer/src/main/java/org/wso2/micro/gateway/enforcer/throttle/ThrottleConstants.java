@@ -27,11 +27,8 @@ public class ThrottleConstants {
     public static final int RESOURCE_THROTTLE_OUT_ERROR_CODE = 900802;
     public static final int APPLICATION_THROTTLE_OUT_ERROR_CODE = 900803;
     public static final int SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE = 900804;
-    public static final int SUBSCRIPTION_BURST_THROTTLE_OUT_ERROR_CODE = 900807;
     public static final int BLOCKED_ERROR_CODE = 900805;
     public static final int CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE = 900806;
-    public static final int CONNECTIONS_COUNT_THROTTLE_OUT_ERROR_CODE = 900808;
-    public static final int EVENTS_COUNT_THROTTLE_OUT_ERROR_CODE = 900808;
 
     public static final String THROTTLE_OUT_MESSAGE = "Message throttled out";
     public static final String THROTTLE_OUT_DESCRIPTION = "You have exceeded your quota";
@@ -62,4 +59,16 @@ public class ThrottleConstants {
     public static final String DEFAULT_THROTTLE_CONDITION = "default";
     public static final String HEADER_RETRY_AFTER = "Retry-After";
     public static final String GMT = "GMT";
+
+    // blocking constants
+    public static final String BLOCKING_CONDITION_VALUE = "conditionValue";
+    public static final String BLOCKING_CONDITION_DOMAIN = "tenantDomain";
+    public static final String BLOCKING_CONDITIONS_IP = "IP";
+    public static final String BLOCK_CONDITION_IP_RANGE = "IPRANGE";
+    public static final String BLOCK_CONDITION_FIXED_IP = "fixedIp";
+    public static final String BLOCK_CONDITION_START_IP = "startingIp";
+    public static final String BLOCK_CONDITION_ENDING_IP = "endingIp";
+    public static final String BLOCK_CONDITION_INVERT = "invert";
+    public static final String BLOCKING_CONDITION_ID = "id";
+    public static final String BLOCKING_CONDITION_STATE = "state";
 }
