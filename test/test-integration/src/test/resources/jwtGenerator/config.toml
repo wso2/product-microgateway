@@ -95,6 +95,9 @@ disableSslVerification = false
     publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
     privateKeyPath = "/home/wso2/security/keystore/mg.key"
 
+[enforcer.jwtIssuer]
+  enabled = false
+
 [controlPlane]
 # Control plane's eventHub details
 [controlPlane.eventHub]

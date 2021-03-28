@@ -38,15 +38,14 @@ import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.JWTConstants;
-import org.wso2.micro.gateway.enforcer.util.ClassLoadUtils;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -61,12 +60,10 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.ServiceLoader;
 
 /**
  * Utility functions used for jwt authentication.
@@ -231,75 +228,50 @@ public class JWTUtil {
 //                    log.debug("Error in loading class", e);
 //                }
 //            }
-            Class<?> loadedClass = ClassLoadUtils.loadClass(classNameInConfig);
-            if (loadedClass != null) {
-                try {
-                    jwtGenerator = (AbstractAPIMgtGatewayJWTGenerator) loadedClass.getDeclaredConstructor()
-                            .newInstance();
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException
-                        | NoSuchMethodException e) {
-                   log.error("Error while generating AbstractAPIMgtGatewayJWTGenerator from the class", e);
-                }
-            } else {
-                log.error("Class Not Found : " + classNameInConfig);
+            Class<AbstractAPIMgtGatewayJWTGenerator> clazz;
+            try {
+                clazz = (Class<AbstractAPIMgtGatewayJWTGenerator>) Class.forName(classNameInConfig);
+                Constructor<AbstractAPIMgtGatewayJWTGenerator> constructor = clazz.getConstructor();
+                jwtGenerator = constructor.newInstance();
+            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException
+                    | InstantiationException | InvocationTargetException | ClassCastException e) {
+                log.error("Error while generating AbstractAPIMgtGatewayJWTGenerator from the class", e);
             }
         }
         return jwtGenerator;
     }
 
-//    public static List<String> getJarFilesList() {
-//        List<String> jarFilesList = new ArrayList<String>();
-//        File[] files = new File(JwtConstants.DROPINS_FOLDER).listFiles();
-//        //If this pathname does not denote a directory, then listFiles() returns null.
-//        for (File file : files) {
-//            if (file.isFile()) {
-//                String fileName = file.getName();
-//                if (fileName.endsWith(JwtConstants.JAR)) {
-//                    jarFilesList.add(file.getName());
-//                }
-//            }
-//        }
-//        return jarFilesList;
-//    }
-
     public static Map<String, JWTTransformer> loadJWTTransformers() {
-        JWTTransformer jwtTransformer;
-        List<String> jarFilesList = ClassLoadUtils.getJarFilesList();
+        ServiceLoader<JWTTransformer> loader = ServiceLoader.load(JWTTransformer.class);
+        Iterator<JWTTransformer> classIterator = loader.iterator();
         Map<String, JWTTransformer> jwtTransformersMap = new HashMap<>();
-        for (String s : jarFilesList) {
-            try {
-                String pathToJar = ClassLoadUtils.DROPINS_DIRECTORY + s;
-                JarFile jarFile = new JarFile(pathToJar);
-                Enumeration<JarEntry> e = jarFile.entries();
-                URLClassLoader cl = ClassLoadUtils.getURLClassLoaderForJar(pathToJar);
 
-                while (e.hasMoreElements()) {
-                    JarEntry je = e.nextElement();
-                    if (je.isDirectory() || !je.getName().endsWith(ClassLoadUtils.CLASS_EXTENSION)) {
-                        continue;
-                    }
-                    String className = ClassLoadUtils.formatClassNameFromJarEntry(je);
-                    Class<?> classInJar = cl.loadClass(className);
-                    try {
-                        Annotation[] annotations = classInJar.getAnnotations();
-                        for (Annotation annotation : annotations) {
-                            if (annotation instanceof JwtTransformerAnnotation) {
-                                JwtTransformerAnnotation jwtTransformerAnnotation =
-                                        (JwtTransformerAnnotation) annotation;
-                                if (jwtTransformerAnnotation.enabled()) {
-                                    jwtTransformer = (JWTTransformer) classInJar.getDeclaredConstructor()
-                                            .newInstance();
-                                    jwtTransformersMap.put(jwtTransformerAnnotation.issuer(), jwtTransformer);
-                                }
-                            }
-                        }
-                    } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
-                            | InvocationTargetException exception) {
-                        log.debug("Error in generating an object from the class", exception);
+        if (!classIterator.hasNext()) {
+            log.debug("No JWTTransformers found.");
+            return jwtTransformersMap;
+        }
+
+        while (classIterator.hasNext()) {
+            JWTTransformer transformer = classIterator.next();
+            Annotation[] annotations = transformer.getClass().getAnnotations();
+            if (annotations.length == 0) {
+                log.debug("JWTTransformer is discarded as no annotations found. : " +
+                        transformer.getClass().getCanonicalName());
+                continue;
+            }
+            for (Annotation annotation : annotations) {
+                if (annotation instanceof JwtTransformerAnnotation) {
+                    JwtTransformerAnnotation jwtTransformerAnnotation =
+                            (JwtTransformerAnnotation) annotation;
+                    if (jwtTransformerAnnotation.enabled()) {
+                        log.debug("JWTTransformer for the issuer : " + jwtTransformerAnnotation.issuer() +
+                                "is enabled.");
+                        jwtTransformersMap.put(jwtTransformerAnnotation.issuer(), transformer);
+                    } else {
+                        log.debug("JWTTransformer for the issuer : " + jwtTransformerAnnotation.issuer() +
+                                "is disabled.");
                     }
                 }
-            } catch (IOException | ClassNotFoundException e) {
-                log.debug("Error in loading class", e);
             }
         }
         return jwtTransformersMap;
