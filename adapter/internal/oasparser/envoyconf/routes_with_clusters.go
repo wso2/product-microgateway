@@ -35,9 +35,9 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/wso2/micro-gw/config"
-	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/internal/oasparser/model"
 	"github.com/wso2/micro-gw/internal/svcdiscovery"
+	logger "github.com/wso2/micro-gw/loggers"
 
 	"strings"
 	"time"
@@ -364,14 +364,16 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	prodClusterName := params.prodClusterName
 	sandClusterName := params.sandClusterName
 	endpointBasepath := params.endpointBasePath
+	authHeader := params.AuthHeader
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
-		router       routev3.Route
-		action       *routev3.Route_Route
-		match        *routev3.RouteMatch
-		decorator    *routev3.Decorator
-		resourcePath string
+		router        routev3.Route
+		action        *routev3.Route_Route
+		match         *routev3.RouteMatch
+		decorator     *routev3.Decorator
+		removeHeaders []string
+		resourcePath  string
 	)
 
 	// OPTIONS is always added even if it is not listed under resources
@@ -423,6 +425,20 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		decorator = &routev3.Decorator{
 			Operation: resourcePath,
 		}
+	}
+
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
+	}
+
+	if !conf.Security.Adapter.EnableOutboundAuthHeader {
+		logger.LoggerOasparser.Infof("removeHeader: %v", authHeader)
+		if authHeader == "" {
+			authHeader = conf.Security.Adapter.AuthorizationHeader
+		}
+		removeHeaders = append(removeHeaders, authHeader)
+		removeHeaders = append(removeHeaders, "Internal-Key")
 	}
 
 	var contextExtensions = make(map[string]string)
@@ -510,7 +526,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
-
 	router = routev3.Route{
 		Name:      xWso2Basepath, //Categorize routes with same base path
 		Match:     match,
@@ -520,6 +535,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		TypedPerFilterConfig: map[string]*any.Any{
 			wellknown.HTTPExternalAuthorization: filter,
 		},
+		RequestHeadersToRemove: removeHeaders,
 	}
 	return &router
 }
@@ -527,10 +543,10 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 // CreateTokenRoute generates a route for the jwt /testkey endpoint
 func CreateTokenRoute() *routev3.Route {
 	var (
-		router routev3.Route
-		action       *routev3.Route_Route
-		match        *routev3.RouteMatch
-		decorator    *routev3.Decorator
+		router    routev3.Route
+		action    *routev3.Route_Route
+		match     *routev3.RouteMatch
+		decorator *routev3.Decorator
 	)
 
 	match = &routev3.RouteMatch{
@@ -581,7 +597,7 @@ func CreateTokenRoute() *routev3.Route {
 							MaxProgramSize: nil,
 						},
 					},
-				Regex: "/testkey",
+					Regex: "/testkey",
 				},
 				Substitution: "/",
 			},
@@ -723,6 +739,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, e
 		apiType:           swagger.GetAPIType(),
 		version:           swagger.GetVersion(),
 		xWSO2BasePath:     swagger.GetXWso2Basepath(),
+		AuthHeader:        swagger.GetXWSO2AuthHeader(),
 		prodClusterName:   prodClusterName,
 		sandClusterName:   sandClusterName,
 		endpointBasePath:  endpointBasePath,

@@ -57,6 +57,7 @@ public class EnforcerConfig {
         this.authService = authService;
     }
 
+
     public EventHubConfigurationDto getEventHub() {
         return eventHub;
     }
