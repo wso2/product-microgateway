@@ -150,7 +150,8 @@ public class JWTAuthenticator implements Authenticator {
                                 APIConstants.AUTHORIZATION_HEADER_BASIC.
                                         equalsIgnoreCase(securityInfo.getSecurityType())) {
                             // use constants
-                            requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT, "Basic " +
+                            requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                                    APIConstants.AUTHORIZATION_HEADER_BASIC + " " +
                                     Base64.getEncoder().encodeToString((securityInfo.getUsername() +
                                             ":" + securityInfo.getPassword()).getBytes()));
                         }

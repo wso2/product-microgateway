@@ -116,7 +116,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			if !tlsutils.IsPublicCertificate(unzippedFileBytes) {
 				loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", file.Name)
 				// TODO: (VirajSalaka) Create standard error handling mechanism
-				return apiProject, errors.New("Certificate Validation Error")
+				return apiProject, errors.New("certificate Validation Error")
 			}
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
@@ -143,15 +143,19 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 				return apiProject, err
 			}
 
-			loggers.LoggerAPI.Infof("apiObject %v", apiObject)
+			err = verifyMandatoryFields(apiObject)
+			if err != nil {
+				loggers.LoggerAPI.Errorf("Fields cannot be empty %v", err)
+				return apiProject, err
+			}
 
-			extractAPIInformation(&apiProject, apiObject)
-			if apiProject.endpointImplementationType == inlineEndpointType {
+			if apiObject.Data.EndpointImplementationType == inlineEndpointType {
 				errmsg := "inline endpointImplementationType is not currently supported with WSO2 micro-gateway"
 				loggers.LoggerAPI.Infof(errmsg)
 				err = errors.New(errmsg)
 				return apiProject, err
 			}
+			extractAPIInformation(&apiProject, apiObject)
 		}
 	}
 	if apiProject.APIJsn == nil {
@@ -168,6 +172,31 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 	}
 	apiProject.UpstreamCerts = upstreamCerts
 	return apiProject, nil
+}
+
+func verifyMandatoryFields(apiJSON config.APIJsonData) error {
+	var errMsg string = ""
+	if apiJSON.Data.APIName == "" {
+		errMsg = "API Name cannot be empty"
+	}
+
+	if apiJSON.Data.APIVersion == "" {
+		errMsg = "API Version cannot be empty"
+	}
+
+	if apiJSON.Data.APIContext == "" {
+		errMsg = "API Context cannot be empty"
+	}
+
+	if apiJSON.Data.EndpointConfig.ProductionEndpoints.Endpoint == "" &&
+		apiJSON.Data.EndpointConfig.SandBoxEndpoints.Endpoint == "" {
+		errMsg = "API production and sandbox enpoints both cannot be empty"
+	}
+
+	if errMsg != "" {
+		return errors.New(errMsg)
+	}
+	return nil
 }
 
 // ApplyAPIProject accepts an apictl project (as a byte array) and updates the xds servers based upon the
@@ -254,7 +283,6 @@ func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData)
 	}
 
 	apiProject.SecurityScheme = apiObject.Data.SecurityScheme
-	apiProject.endpointImplementationType = strings.ToUpper(apiObject.Data.EndpointImplementationType)
 
 	var apiHashValue string = generateHashValue(apiObject.Data.APIName, apiObject.Data.APIName)
 
@@ -337,12 +365,7 @@ func retrieveEndPointSecurityInfo(value string, endPointSecurity config.EpSecuri
 			"WSO2 micro-gateway"
 		err = errors.New(errMsg)
 		loggers.LoggerAPI.Error(errMsg)
-	} else {
-		errMsg := "endpoint security type is not defined in API"
-		err = errors.New(errMsg)
-		loggers.LoggerAPI.Error(errMsg)
 	}
-
 	return epSecurityInfo, err
 }
 

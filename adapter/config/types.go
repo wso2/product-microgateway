@@ -333,6 +333,7 @@ type APIContent struct {
 type APIJsonData struct {
 	Data struct {
 		APIName                    string   `json:"name,omitempty"`
+		APIContext                 string   `json:"context,omitempty"`
 		APIVersion                 string   `json:"version,omitempty"`
 		APIType                    string   `json:"type,omitempty"`
 		LifeCycleStatus            string   `json:"lifeCycleStatus,omitempty"`

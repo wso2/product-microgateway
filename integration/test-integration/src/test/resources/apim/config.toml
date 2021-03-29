@@ -60,21 +60,6 @@ disableSslVerification = false
     keepAliveTime = 600
     queueSize = 1000
 
-# JWT token authorization configurations. You can provide multiple JWT issuers
-# Issuer 1
-[[enforcer.jwtTokenConfig]]
-    name="Resident Key Manager"
-    issuer = "https://localhost:9443/oauth2/token"
-    certificateAlias = "wso2carbon"
-    # URL of the JWKs endpoint
-    jwksURL = ""
-    # Validate subscribed APIs
-    validateSubscription = false
-    # The claim in which the consumer key of the application is coming
-    consumerKeyClaim = "azp"
-    # Certificate Filepath within enforcer
-    certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
-
 [enforcer.apimCredentials]
     username="admin"
     password="admin"
@@ -96,6 +81,42 @@ disableSslVerification = false
     claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
     publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
     privateKeyPath = "/home/wso2/security/keystore/mg.key"
+
+[security]
+
+[security.adapter]
+  enableOutboundAuthHeader = false
+  authorizationHeader = "authorization"
+
+[security.enforcer]
+# JWT token authorization configurations. You can provide multiple JWT issuers
+# Issuer 1
+[[security.enforcer.tokenService]]
+  name="Resident Key Manager"
+  issuer = "https://localhost:9443/oauth2/token"
+  certificateAlias = ""
+  # URL of the JWKs endpoint
+  jwksURL = ""
+  # Validate subscribed APIs
+  validateSubscription = false
+  # The claim in which the consumer key of the application is coming
+  consumerKeyClaim = "azp"
+  # Certificate Filepath within enforcer
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+# Issuer 2
+[[security.enforcer.tokenService]]
+    name="MGW"
+    issuer = "https://localhost:9095/testkey"
+    certificateAlias = "mgw"
+    # URL of the JWKs endpoint
+    jwksURL = ""
+    # Validate subscribed APIs
+    validateSubscription = false
+    # The claim in which the consumer key of the application is coming
+    consumerKeyClaim = ""
+    # Certificate Filepath within enforcer
+    certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 [controlPlane]
 # Control plane's eventHub details
