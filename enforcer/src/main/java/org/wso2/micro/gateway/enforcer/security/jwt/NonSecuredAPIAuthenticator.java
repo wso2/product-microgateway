@@ -32,7 +32,8 @@ import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 public class NonSecuredAPIAuthenticator implements Authenticator {
 
     @Override public boolean canAuthenticate(RequestContext requestContext) {
-        // Retrieve the authType value, if it is "None", they you can proceed directly with the authentication.
+        // Retrieve the disable security value. If security is disabled, then you can proceed directly with the
+        // authentication.
         if (isDisableSecurity(requestContext.getMatchedResourcePath())) {
             return true;
         }
