@@ -140,10 +140,10 @@ public class JWTAuthenticator implements Authenticator {
                         // set endpoint security
                         SecurityInfo securityInfo;
                         if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                            securityInfo = requestContext.getMathedAPI().getAPIConfig().getEndpointSecurity().
+                            securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
                                     getProductionSecurityInfo();
                         } else {
-                            securityInfo = requestContext.getMathedAPI().getAPIConfig().getEndpointSecurity().
+                            securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
                                     getSandBoxSecurityInfo();
                         }
                         if (securityInfo.getEnabled() &&
@@ -209,7 +209,7 @@ public class JWTAuthenticator implements Authenticator {
 
     private String retrieveAuthHeaderValue(RequestContext requestContext) {
         Map<String, String> headers = requestContext.getHeaders();
-        String authHeader = requestContext.getMathedAPI().getAPIConfig().getAuthHeader().toLowerCase();
+        String authHeader = requestContext.getMatchedAPI().getAPIConfig().getAuthHeader().toLowerCase();
         String retrieveHeader = headers.get(authHeader);
         if (retrieveHeader != null) {
             return retrieveHeader;

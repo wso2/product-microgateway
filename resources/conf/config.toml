@@ -193,7 +193,7 @@
 
 [security]
 
-[security.adapater]
+[security.adapter]
   enableOutboundAuthHeader = false
   authorizationHeader = "authorization"
 
