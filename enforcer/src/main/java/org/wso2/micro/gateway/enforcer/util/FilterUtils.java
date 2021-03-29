@@ -186,11 +186,10 @@ public class FilterUtils {
         authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         // Setting end user as anonymous
         authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
-        // TODO: assign the API tier properly
         authContext.setApiTier(getAPILevelTier(requestContext));
         authContext.setApplicationId(clientIP);
         authContext.setApplicationName(null);
-        authContext.setApplicationTier(APIConstants.UNAUTHENTICATED_TIER);
+        authContext.setApplicationTier(APIConstants.UNLIMITED_TIER);
         authContext.setSubscriber(APIConstants.END_USER_ANONYMOUS);
         authContext.setApiName(requestContext.getMatchedAPI().getAPIConfig().getName());
         authContext.setStopOnQuotaReach(true);
