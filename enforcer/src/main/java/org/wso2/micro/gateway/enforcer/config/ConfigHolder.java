@@ -35,6 +35,7 @@ import org.wso2.gateway.discovery.config.enforcer.Issuer;
 import org.wso2.gateway.discovery.config.enforcer.JWTGenerator;
 import org.wso2.gateway.discovery.config.enforcer.JWTIssuer;
 import org.wso2.gateway.discovery.config.enforcer.PublisherPool;
+import org.wso2.gateway.discovery.config.enforcer.Security;
 import org.wso2.gateway.discovery.config.enforcer.TMURLGroup;
 import org.wso2.gateway.discovery.config.enforcer.ThrottleAgent;
 import org.wso2.gateway.discovery.config.enforcer.Throttling;
@@ -46,6 +47,7 @@ import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.micro.gateway.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.ThrottleAgentConfigDto;
 import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
@@ -126,7 +128,7 @@ public class ConfigHolder {
         populateAuthService(config.getAuthService());
 
         // Read jwt token configuration
-        populateJWTIssuerConfiguration(config.getJwtTokenConfigList());
+        populateJWTIssuerConfiguration(config.getSecurity());
 
         // Read credentials used to connect with APIM services
         populateAPIMCredentials(config.getApimCredentials());
@@ -177,8 +179,9 @@ public class ConfigHolder {
         config.setEventHub(eventHubDto);
     }
 
-    private void populateJWTIssuerConfiguration(List<Issuer> cdsIssuers) {
+    private void populateJWTIssuerConfiguration(Security security) {
         configIssuerList = new ArrayList<>();
+        List<Issuer> cdsIssuers = security.getTokenServiceList();
         try {
             setTrustStoreForJWT(KeyStore.getInstance(KeyStore.getDefaultType()));
             getTrustStoreForJWT().load(null);
@@ -200,6 +203,9 @@ public class ConfigHolder {
             // Load jwt transformers map.
             config.setJwtTransformerMap(JWTUtil.loadJWTTransformers());
             String certificateAlias = jwtIssuer.getCertificateAlias();
+            if (certificateAlias.isBlank() && APIConstants.DEFAULT_ISSUER.equals(jwtIssuer.getName())) {
+                certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
+            }
             if (!certificateAlias.isBlank()) {
                 try {
                     Certificate cert = TLSUtils.getCertificateFromFile(jwtIssuer.getCertificateFilePath());

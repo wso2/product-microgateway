@@ -40,6 +40,22 @@ type MgwSwagger struct {
 	xWso2Cors        *CorsConfig
 	securityScheme   []string
 	xThrottlingTier  string
+	xWSO2AuthHeader  string
+}
+
+// EndpointSecurity contains the SandBox/Production endpoint security
+type EndpointSecurity struct {
+	SandBox    SecurityInfo
+	Production SecurityInfo
+}
+
+// SecurityInfo contains the parameters of endpoint security
+type SecurityInfo struct {
+	Password         string
+	CustomParameters string
+	SecurityType     string
+	Enabled          bool
+	Username         string
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -146,6 +162,16 @@ func (swagger *MgwSwagger) SetSecurityScheme(securityScheme []string) {
 // SetVersion sets the version of the API
 func (swagger *MgwSwagger) SetVersion(version string) {
 	swagger.version = version
+}
+
+// SetXWSO2AuthHeader sets the AuthHeader of the API
+func (swagger *MgwSwagger) SetXWSO2AuthHeader(authHeader string) {
+	swagger.xWSO2AuthHeader = authHeader
+}
+
+// GetXWSO2AuthHeader returns the AuthHeader of the API
+func (swagger *MgwSwagger) GetXWSO2AuthHeader() string {
+	return swagger.xWSO2AuthHeader
 }
 
 // GetSetSecurityScheme returns the securityscheme of the API

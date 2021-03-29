@@ -63,10 +63,14 @@
 
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1
-[[enforcer.jwtTokenConfig]]
+[enforcer.security]
+  enableOutboundAuthHeader = true
+  authorizationHeader="authorization"
+
+[[enforcer.security.tokenService]]
     name="Resident Key Manager"
     issuer = "https://localhost:9443/oauth2/token"
-    certificateAlias = "gateway_certificate_alias"
+    certificateAlias = ""
     # URL of the JWKs endpoint
     jwksURL = ""
     # Validate subscribed APIs
@@ -77,7 +81,7 @@
     certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 # Issuer 2
-[[enforcer.jwtTokenConfig]]
+[[enforcer.security.tokenService]]
     name="MGW"
     issuer = "https://localhost:9095/token"
     certificateAlias = "mgw"

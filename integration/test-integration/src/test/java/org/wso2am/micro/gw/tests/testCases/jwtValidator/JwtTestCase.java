@@ -73,8 +73,8 @@ public class JwtTestCase {
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,
-                "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
+        Assert.assertEquals(response.getResponseMessage(), "Unauthorized");
     }
 
     @Test(description = "Test to check the JWT auth validate expired token")
