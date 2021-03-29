@@ -526,7 +526,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
-
 	router = routev3.Route{
 		Name:      xWso2Basepath, //Categorize routes with same base path
 		Match:     match,
