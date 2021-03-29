@@ -310,12 +310,10 @@ func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData)
 		sandboxEndpoint = endpointConfig.SandBoxEndpoints.Endpoint
 	}
 	apiProject.SandboxEndpoint = sandboxEndpoint
-	loggers.LoggerAPI.Infof("apiProject.SandboxEndpoint %v", apiProject.SandboxEndpoint)
 
 	// production Endpoint security
 	prodEpSecurity, _ := retrieveEndPointSecurityInfo("api_"+apiHashValue,
 		endpointConfig.EndpointSecurity.Production, "prod")
-	loggers.LoggerAPI.Infof("apiProject_security %v", endpointConfig.EndpointSecurity.Production)
 
 	// sandbox Endpoint security
 	sandBoxEpSecurity, _ := retrieveEndPointSecurityInfo("api_"+apiHashValue,
@@ -334,13 +332,13 @@ func generateHashValue(apiName string, apiVersion string) string {
 	return hex.EncodeToString(endpointConfigSHValue.Sum(nil)[:])
 }
 
-func resolveEnvValueForEndpointConfig(envKey string) string {
+func resolveEnvValueForEndpointConfig(envKey string, defaultVal string) string {
 	envValue, exists := os.LookupEnv(envKey)
 	if exists {
 		loggers.LoggerAPI.Debugf("resolve env value %v", envValue)
 		return envValue
 	}
-	return ""
+	return defaultVal
 }
 
 func retrieveEndPointSecurityInfo(value string, endPointSecurity config.EpSecurity,
@@ -351,15 +349,8 @@ func retrieveEndPointSecurityInfo(value string, endPointSecurity config.EpSecuri
 
 	if securityType != "" {
 		if securityType == BasicAuthSecurity {
-			username = resolveEnvValueForEndpointConfig(value + "_" + keyType + "_basic_username")
-			password = resolveEnvValueForEndpointConfig(value + "_" + keyType + "_basic_password")
-			if username == "" {
-				username = endPointSecurity.Username
-			}
-
-			if password == "" {
-				password = endPointSecurity.Password
-			}
+			username = resolveEnvValueForEndpointConfig(value+"_"+keyType+"_basic_username", endPointSecurity.Username)
+			password = resolveEnvValueForEndpointConfig(value+"_"+keyType+"_basic_password", endPointSecurity.Password)
 
 			epSecurityInfo.Username = username
 			epSecurityInfo.Password = password

@@ -433,12 +433,13 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 
 	if !conf.Security.Adapter.EnableOutboundAuthHeader {
+		var internalKey string = "Internal-Key"
 		logger.LoggerOasparser.Debugf("removeHeader: %v", authHeader)
 		if authHeader == "" {
 			authHeader = conf.Security.Adapter.AuthorizationHeader
 		}
 		removeHeaders = append(removeHeaders, authHeader)
-		removeHeaders = append(removeHeaders, "Internal-Key")
+		removeHeaders = append(removeHeaders, internalKey)
 	}
 
 	var contextExtensions = make(map[string]string)

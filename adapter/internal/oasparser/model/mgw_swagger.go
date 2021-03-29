@@ -255,7 +255,7 @@ func (swagger *MgwSwagger) setXThrottlingTier() {
 // resolve authHeader from swagger vendor extension map
 func resolveAuthHeader(vendorExtensions map[string]interface{}) string {
 	if xAuthHeader, ok := vendorExtensions[xAuthHeader]; ok {
-		// If x-wso2-auth-header is presen,
+		// If x-wso2-auth-header is present,
 		return xAuthHeader.(string)
 	}
 	return ""

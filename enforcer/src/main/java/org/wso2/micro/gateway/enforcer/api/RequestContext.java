@@ -52,7 +52,6 @@ public class RequestContext {
     private boolean clusterHeaderEnabled = false;
     //Denotes the specific headers which needs to be passed to response object
     private Map<String, String> responseHeaders;
-    private ArrayList<String> removeHeaders;
     private Map<String, String> queryParameters;
 
     private RequestContext() {}
