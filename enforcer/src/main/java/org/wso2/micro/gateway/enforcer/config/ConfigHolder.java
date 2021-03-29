@@ -49,6 +49,7 @@ import org.wso2.micro.gateway.enforcer.config.dto.ThrottleAgentConfigDto;
 import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.config.dto.ThrottlePublisherConfigDto;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
