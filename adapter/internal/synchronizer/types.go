@@ -40,3 +40,24 @@ type RevokedToken struct {
 	JWT        string `json:"jwt_signature"`
 	ExpiryTime int64  `json:"expiry_time"`
 }
+
+// BlockConditions defines a blocking condition retrieved from traffic manager
+type BlockConditions struct {
+	API          []string      `json:"api"`
+	Application  []string      `json:"application"`
+	User         []string      `json:"user"`
+	Subscription []string      `json:"subscription"`
+	Custom       []string      `json:"custom"`
+	IP           []IPCondition `json:"ip"`
+}
+
+// IPCondition defines a IP condition
+type IPCondition struct {
+	Type         string
+	ID           int32
+	FixedIP      string
+	StartingIP   string
+	EndingIP     string
+	Invert       bool
+	TenantDomain string
+}

@@ -31,11 +31,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/throttle"
-
-	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/internal/auth"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/throttle"
 	"github.com/wso2/micro-gw/internal/discovery/xds"
 	"github.com/wso2/micro-gw/internal/tlsutils"
 
@@ -43,13 +41,14 @@ import (
 )
 
 const (
-	keyTemplatesEndpoint string = "internal/data/v1/keyTemplates"
+	keyTemplatesEndpoint       string = "internal/data/v1/keyTemplates"
+	blockingConditionsEndpoint string = "internal/data/v1/block"
 )
 
-// FetchKeyTemplates pulls the startup Throttle Data required for custom and blocking condition
+// FetchThrottleData pulls the startup Throttle Data required for custom and blocking condition
 // based throttling. This request goes to traffic manager node.
-func FetchKeyTemplates(c chan SyncAPIResponse) {
-	logger.LoggerSync.Info("Fetching Key Templates from Traffic Manager.")
+func FetchThrottleData(endpoint string, c chan SyncAPIResponse) {
+	logger.LoggerSync.Infof("Fetching data from Traffic Manager. %v", endpoint)
 	respSyncAPI := SyncAPIResponse{}
 
 	// Read configurations and derive the traffic manager endpoint details
@@ -63,11 +62,11 @@ func FetchKeyTemplates(c chan SyncAPIResponse) {
 
 	// If the traffic manager URL is configured with trailing slash
 	if strings.HasSuffix(ehURL, "/") {
-		ehURL += keyTemplatesEndpoint
+		ehURL += endpoint
 	} else {
-		ehURL += "/" + keyTemplatesEndpoint
+		ehURL += "/" + endpoint
 	}
-	logger.LoggerSync.Debugf("KeyTemplate endpoint URL %v: ", ehURL)
+	logger.LoggerSync.Debugf("Endpoint URL %v: ", ehURL)
 
 	ehUser := ehConfigs.Username
 	ehPass := ehConfigs.Password
@@ -95,10 +94,10 @@ func FetchKeyTemplates(c chan SyncAPIResponse) {
 	req, err := http.NewRequest("GET", ehURL, nil)
 	req.Header.Set(authorization, basicAuth)
 
-	logger.LoggerSync.Debug("Sending the key template request to Traffic Manager")
+	logger.LoggerSync.Debug("Sending the throttle data request to Traffic Manager")
 	resp, err := client.Do(req)
 	if err != nil {
-		logger.LoggerSync.Errorf("Error occurred while retrieving Key Temaplate from Traffic manager: %v", err)
+		logger.LoggerSync.Errorf("Error occurred while fetching data from Traffic manager: %v. %v", endpoint, err)
 		respSyncAPI.Err = err
 		respSyncAPI.Resp = nil
 		c <- respSyncAPI
@@ -132,17 +131,6 @@ func FetchKeyTemplates(c chan SyncAPIResponse) {
 	return
 }
 
-// pushKeyTemplates will update the ThrottleData xds snapshot
-func pushKeyTemplates(tokens []string) {
-	var templates []types.Resource
-	t := &throttle.ThrottleData{
-		KeyTemplates: tokens,
-	}
-	templates = append(templates, t)
-	xds.UpdateEnforcerThrottleData(templates)
-	logger.LoggerSync.Debug("Updated the snapshot for KeyTemplates")
-}
-
 // UpdateKeyTemplates pulls keytemplates from the traffic manager
 // and updates the enforcer's xds cache
 func UpdateKeyTemplates() {
@@ -151,7 +139,7 @@ func UpdateKeyTemplates() {
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
 	c := make(chan SyncAPIResponse)
-	go FetchKeyTemplates(c)
+	go FetchThrottleData(keyTemplatesEndpoint, c)
 	for {
 		data := <-c
 		if data.Resp != nil {
@@ -176,8 +164,86 @@ func UpdateKeyTemplates() {
 				logger.LoggerSync.Debugf("Time Duration for retrying: %v", retryInterval*time.Second)
 				time.Sleep(retryInterval * time.Second)
 				logger.LoggerSync.Info("Retrying to get key templates from Traffic Manager.")
-				FetchKeyTemplates(c)
+				FetchThrottleData(keyTemplatesEndpoint, c)
 			}()
 		}
 	}
+}
+
+// UpdateBlockingConditions pulls blocking conditions from the traffic manager
+// and updates the enforcer's xds cache
+func UpdateBlockingConditions() {
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
+	}
+	c := make(chan SyncAPIResponse)
+	go FetchThrottleData(blockingConditionsEndpoint, c)
+	for {
+		data := <-c
+		if data.Resp != nil {
+			conditions := BlockConditions{}
+			err := json.Unmarshal(data.Resp, &conditions)
+			if err != nil {
+				logger.LoggerSync.Errorf("Error occurred while unmarshalling blocking conditions %v", err)
+			}
+			pushBlockingConditions(conditions)
+			break
+		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
+			logger.LoggerSync.Errorf("Error occurred when fetching blocking conditions: %v", data.Err)
+			break
+		} else {
+			logger.LoggerSync.Errorf("Unexpected error occurred while fetching blocking conditions: %v", data.Err)
+			go func() {
+				// Retry fetching blocking conditions from traffic manager
+				retryInterval := conf.ControlPlane.EventHub.RetryInterval
+				if retryInterval == 0 {
+					retryInterval = 5
+				}
+				logger.LoggerSync.Debugf("Time Duration for retrying: %v", retryInterval*time.Second)
+				time.Sleep(retryInterval * time.Second)
+				logger.LoggerSync.Info("Retrying to get blocking conditions from Traffic Manager.")
+				FetchThrottleData(blockingConditionsEndpoint, c)
+			}()
+		}
+	}
+}
+
+// pushKeyTemplates will update the ThrottleData xds snapshot with key templates
+func pushKeyTemplates(tokens []string) {
+	t := &throttle.ThrottleData{
+		KeyTemplates: tokens,
+	}
+	xds.UpdateEnforcerThrottleData(t)
+	logger.LoggerSync.Debug("Updated the snapshot for KeyTemplates")
+}
+
+// pushBlockingConditions will update the ThrottleData xds snapshot with blocking conditions
+func pushBlockingConditions(conditions BlockConditions) {
+	ips := []*throttle.IPCondition{}
+	for _, c := range conditions.IP {
+		ip := &throttle.IPCondition{
+			Type:         c.Type,
+			StartingIp:   c.StartingIP,
+			EndingIp:     c.EndingIP,
+			FixedIp:      c.FixedIP,
+			TenantDomain: c.TenantDomain,
+			Invert:       c.Invert,
+			Id:           c.ID,
+		}
+		ips = append(ips, ip)
+	}
+	t := &throttle.ThrottleData{
+		BlockingConditions: &throttle.BlockingConditions{
+			Api:          conditions.API,
+			Application:  conditions.Application,
+			Subscription: conditions.Subscription,
+			Custom:       conditions.Custom,
+			User:         conditions.User,
+			Ip:           ips,
+		},
+	}
+
+	xds.UpdateEnforcerThrottleData(t)
+	logger.LoggerSync.Debug("Updated the snapshot for BlockingConditions")
 }

@@ -229,6 +229,7 @@ func Run(conf *config.Config) {
 	throttlingEnabled := conf.Enforcer.Throttling.EnableGlobalEventPublishing
 	if throttlingEnabled {
 		go synchronizer.UpdateKeyTemplates()
+		go synchronizer.UpdateBlockingConditions()
 	}
 OUTER:
 	for {

@@ -20,6 +20,7 @@ package org.wso2.micro.gateway.enforcer.throttle;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.throttle.dto.ThrottleCondition;
 import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
 
 import java.util.Date;
@@ -88,6 +89,14 @@ public class ThrottleEventListener implements MessageListener {
                      * keyTemplateState - whether key template active or not
                      */
                     handleKeyTemplateMessage(map);
+                } else if (map.get(ThrottleConstants.BLOCKING_CONDITION_KEY) != null) {
+                    /*
+                     * This message contains blocking condition data
+                     * blockingCondition - Blocking condition type
+                     * conditionValue - blocking condition value
+                     * state - State whether blocking condition is enabled or not
+                     */
+                    handleBlockingMessage(map);
                 }
             }
         } catch (JMSException e) {
@@ -143,6 +152,40 @@ public class ThrottleEventListener implements MessageListener {
             dataHolder.addKeyTemplate(keyTemplateValue, keyTemplateValue);
         } else {
             dataHolder.removeKeyTemplate(keyTemplateValue);
+        }
+    }
+
+    /**
+     * Synchronized due to blocking data contains or not can updated by multiple threads.
+     * Will not be a performance issue as this will not happen more frequently.
+     */
+    private synchronized void handleBlockingMessage(Map<String, Object> map) {
+        log.debug("Received Key -  blockingCondition: {}, conditionValue: {}, tenantDomain: {}",
+                map.get(ThrottleConstants.BLOCKING_CONDITION_KEY).toString(),
+                map.get(ThrottleConstants.BLOCKING_CONDITION_VALUE).toString(),
+                map.get(ThrottleConstants.BLOCKING_CONDITION_DOMAIN));
+
+        ThrottleDataHolder dataHolder = ThrottleDataHolder.getInstance();
+        String condition = map.get(ThrottleConstants.BLOCKING_CONDITION_KEY).toString();
+        String conditionValue = map.get(ThrottleConstants.BLOCKING_CONDITION_VALUE).toString();
+        String conditionState = map.get(ThrottleConstants.BLOCKING_CONDITION_STATE).toString();
+        int conditionId = (int) map.get(ThrottleConstants.BLOCKING_CONDITION_ID);
+        String tenantDomain = map.get(ThrottleConstants.BLOCKING_CONDITION_DOMAIN).toString();
+
+        final boolean isIpBlockingCondition = ThrottleConstants.BLOCKING_CONDITIONS_IP.equals(condition) ||
+                ThrottleConstants.BLOCK_CONDITION_IP_RANGE.equals(condition);
+        if (ThrottleConstants.TRUE.equals(conditionState)) {
+            if (isIpBlockingCondition) {
+                dataHolder.addIpBlockingCondition(tenantDomain, conditionId, conditionValue, condition);
+            } else {
+                dataHolder.addBlockingCondition(conditionValue, conditionValue);
+            }
+        } else {
+            if (isIpBlockingCondition) {
+                dataHolder.removeIpBlockingCondition(tenantDomain, conditionId);
+            } else {
+                dataHolder.removeBlockingCondition(conditionValue);
+            }
         }
     }
 
