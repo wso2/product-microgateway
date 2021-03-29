@@ -32,18 +32,19 @@
   keyFile = "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem"
 
 
-[envoy] # --------------------------------------------------------
+[router] # --------------------------------------------------------
   listenerHost = "0.0.0.0"
-  listenerPort = 9095
+  listenerPort = 9090
+  securedListenerHost = "0.0.0.0"
+  securedListenerPort = 9095
   clusterTimeoutInSeconds = 20
-  listenerTLSEnabled = true
 
-[envoy.keystore]
+[router.keystore]
   certPath = "/home/wso2/security/keystore/mg.pem"
   keyPath = "/home/wso2/security/keystore/mg.key"
 
-[envoy.upstream]
-[envoy.upstream.tls]
+[router.upstream]
+[router.upstream.tls]
   minimumProtocolVersion = "TLS1_1"
   maximumProtocolVersion = "TLS1_2"
   ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"  

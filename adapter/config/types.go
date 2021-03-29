@@ -109,9 +109,10 @@ type Config struct {
 	Envoy struct {
 		ListenerHost            string
 		ListenerPort            uint32
+		SecuredListenerHost     string
+		SecuredListenerPort     uint32
 		ClusterTimeoutInSeconds time.Duration
 		KeyStore                keystore
-		ListenerTLSEnabled      bool
 
 		// Envoy Upstream Related Configurations
 		Upstream struct {
@@ -125,7 +126,7 @@ type Config struct {
 				DisableSSLVerification bool   `toml:"disableSslVerification"`
 			}
 		}
-	}
+	} `toml:"router"`
 
 	Enforcer struct {
 		JwtTokenConfig  []jwtTokenConfig

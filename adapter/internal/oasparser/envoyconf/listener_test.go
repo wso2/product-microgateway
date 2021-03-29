@@ -27,12 +27,33 @@ import (
 
 func TestCreateListenerWithRds(t *testing.T) {
 	// TODO: (Vajira) Add more test scenarios
-	listener := CreateListenerWithRds("default")
-	assert.NotNil(t, listener, "Listner creation has been failed")
+	listeners := CreateListenersWithRds()
+	assert.NotEmpty(t, listeners, "Listeners creation has been failed")
+	assert.Equal(t, 2, len(listeners), "Two listeners are not created.")
 
-	if listener.Validate() != nil {
+	securedListener := listeners[0]
+	if securedListener.Validate() != nil {
 		t.Error("Listener validation failed")
 	}
+	assert.Equal(t, "0.0.0.0", securedListener.GetAddress().GetSocketAddress().GetAddress(),
+		"Address mismatch for secured Listener.")
+	assert.Equal(t, uint32(9095), securedListener.GetAddress().GetSocketAddress().GetPortValue(),
+		"Address mismatch for secured Listener.")
+	assert.NotEmpty(t, securedListener.FilterChains, "Filter chain for listener should not be null.")
+	assert.NotNil(t, securedListener.FilterChains[0].GetTransportSocket(),
+		"Transport Socket should not be null for secured listener")
+
+	nonSecuredListener := listeners[1]
+	if nonSecuredListener.Validate() != nil {
+		t.Error("Listener validation failed")
+	}
+	assert.Equal(t, "0.0.0.0", nonSecuredListener.GetAddress().GetSocketAddress().GetAddress(),
+		"Address mismatch for non-secured Listener.")
+	assert.Equal(t, uint32(9090), nonSecuredListener.GetAddress().GetSocketAddress().GetPortValue(),
+		"Address mismatch for non-secured Listener.")
+	assert.NotEmpty(t, nonSecuredListener.FilterChains, "Filter chain for listener should not be null.")
+	assert.Nil(t, nonSecuredListener.FilterChains[0].GetTransportSocket(),
+		"Transport Socket should be null for non-secured listener")
 }
 
 func TestCreateVirtualHost(t *testing.T) {
