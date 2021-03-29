@@ -166,7 +166,12 @@ func (swagger *MgwSwagger) SetVersion(version string) {
 
 // SetXWSO2AuthHeader sets the AuthHeader of the API
 func (swagger *MgwSwagger) SetXWSO2AuthHeader(authHeader string) {
-	swagger.xWSO2AuthHeader = authHeader
+	authorizationHeader := resolveAuthHeader(swagger.vendorExtensions)
+	if authorizationHeader == "" {
+		swagger.xWSO2AuthHeader = authHeader
+	} else {
+		swagger.xWSO2AuthHeader = authorizationHeader
+	}
 }
 
 // GetXWSO2AuthHeader returns the AuthHeader of the API
@@ -245,6 +250,15 @@ func (swagger *MgwSwagger) setXThrottlingTier() {
 	if tier != "" {
 		swagger.xThrottlingTier = tier
 	}
+}
+
+// resolve authHeader from swagger vendor extension map
+func resolveAuthHeader(vendorExtensions map[string]interface{}) string {
+	if xAuthHeader, ok := vendorExtensions[xAuthHeader]; ok {
+		// If x-wso2-auth-header is presen,
+		return xAuthHeader.(string)
+	}
+	return ""
 }
 
 // getXWso2Endpoints extracts and generate the Endpoint Objects from the vendor extension map.

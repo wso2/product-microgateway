@@ -31,6 +31,7 @@ const (
 	xWso2Label          string = "x-wso2-label"
 	xWso2Cors           string = "x-wso2-cors"
 	xThrottlingTier     string = "x-throttling-tier"
+	xAuthHeader         string = "x-wso2-auth-header"
 )
 
 const (
