@@ -65,7 +65,8 @@ public class RestAPI implements API {
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).
                 apiLifeCycleState(apiLifeCycleState).securitySchema(securitySchemes).tier(api.getTier()).
-                endpointSecurity(api.getEndpointSecurity()).authHeader(api.getAuthorizationHeader()).build();
+                endpointSecurity(api.getEndpointSecurity()).authHeader(api.getAuthorizationHeader()).
+                disableSecurity(api.getDisableSecurity()).build();
         initFilters();
         return basePath;
     }
@@ -112,6 +113,7 @@ public class RestAPI implements API {
         resource.setPath(resPath);
         resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
         resource.setTier(operation.getTier());
+        resource.setDisableSecurity(operation.getDisableSecurity());
         Map<String, List<String>> securityMap = new HashMap<>();
         operation.getSecurityList().forEach(securityList -> securityList.getScopeListMap().forEach((key, security) -> {
             if (security != null && security.getScopesList().size() > 0) {

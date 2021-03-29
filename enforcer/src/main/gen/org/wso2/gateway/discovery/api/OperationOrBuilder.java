@@ -54,4 +54,10 @@ public interface OperationOrBuilder extends
    */
   com.google.protobuf.ByteString
       getTierBytes();
+
+  /**
+   * <code>bool disableSecurity = 4;</code>
+   * @return The disableSecurity.
+   */
+  boolean getDisableSecurity();
 }

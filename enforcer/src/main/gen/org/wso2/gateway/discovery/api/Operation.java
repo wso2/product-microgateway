@@ -77,6 +77,11 @@ private static final long serialVersionUID = 0L;
             tier_ = s;
             break;
           }
+          case 32: {
+
+            disableSecurity_ = input.readBool();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -228,6 +233,17 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int DISABLESECURITY_FIELD_NUMBER = 4;
+  private boolean disableSecurity_;
+  /**
+   * <code>bool disableSecurity = 4;</code>
+   * @return The disableSecurity.
+   */
+  @java.lang.Override
+  public boolean getDisableSecurity() {
+    return disableSecurity_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -251,6 +267,9 @@ private static final long serialVersionUID = 0L;
     if (!getTierBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, tier_);
     }
+    if (disableSecurity_ != false) {
+      output.writeBool(4, disableSecurity_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -269,6 +288,10 @@ private static final long serialVersionUID = 0L;
     }
     if (!getTierBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, tier_);
+    }
+    if (disableSecurity_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(4, disableSecurity_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -291,6 +314,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getSecurityList())) return false;
     if (!getTier()
         .equals(other.getTier())) return false;
+    if (getDisableSecurity()
+        != other.getDisableSecurity()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -310,6 +335,9 @@ private static final long serialVersionUID = 0L;
     }
     hash = (37 * hash) + TIER_FIELD_NUMBER;
     hash = (53 * hash) + getTier().hashCode();
+    hash = (37 * hash) + DISABLESECURITY_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getDisableSecurity());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -458,6 +486,8 @@ private static final long serialVersionUID = 0L;
       }
       tier_ = "";
 
+      disableSecurity_ = false;
+
       return this;
     }
 
@@ -496,6 +526,7 @@ private static final long serialVersionUID = 0L;
         result.security_ = securityBuilder_.build();
       }
       result.tier_ = tier_;
+      result.disableSecurity_ = disableSecurity_;
       onBuilt();
       return result;
     }
@@ -577,6 +608,9 @@ private static final long serialVersionUID = 0L;
       if (!other.getTier().isEmpty()) {
         tier_ = other.tier_;
         onChanged();
+      }
+      if (other.getDisableSecurity() != false) {
+        setDisableSecurity(other.getDisableSecurity());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -996,6 +1030,37 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       tier_ = value;
+      onChanged();
+      return this;
+    }
+
+    private boolean disableSecurity_ ;
+    /**
+     * <code>bool disableSecurity = 4;</code>
+     * @return The disableSecurity.
+     */
+    @java.lang.Override
+    public boolean getDisableSecurity() {
+      return disableSecurity_;
+    }
+    /**
+     * <code>bool disableSecurity = 4;</code>
+     * @param value The disableSecurity to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDisableSecurity(boolean value) {
+      
+      disableSecurity_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool disableSecurity = 4;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDisableSecurity() {
+      
+      disableSecurity_ = false;
       onChanged();
       return this;
     }

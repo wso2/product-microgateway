@@ -201,29 +201,8 @@ public interface ApiOrBuilder extends
       getSecuritySchemeBytes(int index);
 
   /**
-   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
-   * @return Whether the endpointSecurity field is set.
+   * <code>bool disableSecurity = 13;</code>
+   * @return The disableSecurity.
    */
-  boolean hasEndpointSecurity();
-  /**
-   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
-   * @return The endpointSecurity.
-   */
-  org.wso2.gateway.discovery.api.EndpointSecurity getEndpointSecurity();
-  /**
-   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
-   */
-  org.wso2.gateway.discovery.api.EndpointSecurityOrBuilder getEndpointSecurityOrBuilder();
-
-  /**
-   * <code>string authorizationHeader = 14;</code>
-   * @return The authorizationHeader.
-   */
-  java.lang.String getAuthorizationHeader();
-  /**
-   * <code>string authorizationHeader = 14;</code>
-   * @return The bytes for authorizationHeader.
-   */
-  com.google.protobuf.ByteString
-      getAuthorizationHeaderBytes();
+  boolean getDisableSecurity();
 }
