@@ -35,8 +35,6 @@ public class APIConstants {
     public static final String UNLIMITED_TIER = "Unlimited";
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     public static final String END_USER_ANONYMOUS = "anonymous";
-    public static final String AUTH_NO_AUTHENTICATION = "None";
-    public static final String DEFAULT_AUTH_TYPE = "default";
 
 
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
