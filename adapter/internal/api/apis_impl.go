@@ -176,24 +176,30 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 
 func verifyMandatoryFields(apiJSON config.APIJsonData) error {
 	var errMsg string = ""
-	if apiJSON.Data.APIName == "" {
-		errMsg = "API Name cannot be empty"
+	var apiName string = apiJSON.Data.APIName
+	var apiVersion string = apiJSON.Data.APIVersion
+
+	if apiName == "" {
+		apiName = "unknownAPIName"
+		errMsg = "API Name "
 	}
 
-	if apiJSON.Data.APIVersion == "" {
-		errMsg = "API Version cannot be empty"
+	if apiVersion == "" {
+		apiVersion = "unknownAPIVersion"
+		errMsg = errMsg + "API Version "
 	}
 
 	if apiJSON.Data.APIContext == "" {
-		errMsg = "API Context cannot be empty"
+		errMsg = errMsg + "API Context "
 	}
 
 	if apiJSON.Data.EndpointConfig.ProductionEndpoints.Endpoint == "" &&
 		apiJSON.Data.EndpointConfig.SandBoxEndpoints.Endpoint == "" {
-		errMsg = "API production and sandbox enpoints both cannot be empty"
+		errMsg = errMsg + "API production and sandbox enpoints "
 	}
 
 	if errMsg != "" {
+		errMsg = errMsg + "fields cannot be empty for " + apiName + " " + apiVersion
 		return errors.New(errMsg)
 	}
 	return nil
