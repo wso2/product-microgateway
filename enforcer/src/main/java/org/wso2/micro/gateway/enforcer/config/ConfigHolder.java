@@ -203,7 +203,7 @@ public class ConfigHolder {
             // Load jwt transformers map.
             config.setJwtTransformerMap(JWTUtil.loadJWTTransformers());
             String certificateAlias = jwtIssuer.getCertificateAlias();
-            if (certificateAlias.isBlank() && APIConstants.DEFAULT_ISSUER.equals(jwtIssuer.getName())) {
+            if (certificateAlias.isBlank() && APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(jwtIssuer.getName())) {
                 certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
             }
             if (!certificateAlias.isBlank()) {

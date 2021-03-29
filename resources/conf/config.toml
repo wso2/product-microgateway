@@ -219,7 +219,7 @@
 # Issuer 2
 [[security.enforcer.tokenService]]
     name="MGW"
-    issuer = "https://localhost:9095/token"
+    issuer = "https://localhost:9095/testkey"
     certificateAlias = "mgw"
     # URL of the JWKs endpoint
     jwksURL = ""
