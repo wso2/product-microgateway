@@ -32,6 +32,7 @@ private static final long serialVersionUID = 0L;
     tier_ = "";
     apiLifeCycleState_ = "";
     securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    authorizationHeader_ = "";
   }
 
   @java.lang.Override
@@ -149,7 +150,26 @@ private static final long serialVersionUID = 0L;
             securityScheme_.add(s);
             break;
           }
-          case 104: {
+          case 106: {
+            org.wso2.gateway.discovery.api.EndpointSecurity.Builder subBuilder = null;
+            if (endpointSecurity_ != null) {
+              subBuilder = endpointSecurity_.toBuilder();
+            }
+            endpointSecurity_ = input.readMessage(org.wso2.gateway.discovery.api.EndpointSecurity.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(endpointSecurity_);
+              endpointSecurity_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
+          case 114: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            authorizationHeader_ = s;
+            break;
+          }
+          case 120: {
 
             disableSecurity_ = input.readBool();
             break;
@@ -657,10 +677,74 @@ private static final long serialVersionUID = 0L;
     return securityScheme_.getByteString(index);
   }
 
-  public static final int DISABLESECURITY_FIELD_NUMBER = 13;
+  public static final int ENDPOINTSECURITY_FIELD_NUMBER = 13;
+  private org.wso2.gateway.discovery.api.EndpointSecurity endpointSecurity_;
+  /**
+   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+   * @return Whether the endpointSecurity field is set.
+   */
+  @java.lang.Override
+  public boolean hasEndpointSecurity() {
+    return endpointSecurity_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+   * @return The endpointSecurity.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.api.EndpointSecurity getEndpointSecurity() {
+    return endpointSecurity_ == null ? org.wso2.gateway.discovery.api.EndpointSecurity.getDefaultInstance() : endpointSecurity_;
+  }
+  /**
+   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.api.EndpointSecurityOrBuilder getEndpointSecurityOrBuilder() {
+    return getEndpointSecurity();
+  }
+
+  public static final int AUTHORIZATIONHEADER_FIELD_NUMBER = 14;
+  private volatile java.lang.Object authorizationHeader_;
+  /**
+   * <code>string authorizationHeader = 14;</code>
+   * @return The authorizationHeader.
+   */
+  @java.lang.Override
+  public java.lang.String getAuthorizationHeader() {
+    java.lang.Object ref = authorizationHeader_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      authorizationHeader_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string authorizationHeader = 14;</code>
+   * @return The bytes for authorizationHeader.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getAuthorizationHeaderBytes() {
+    java.lang.Object ref = authorizationHeader_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      authorizationHeader_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int DISABLESECURITY_FIELD_NUMBER = 15;
   private boolean disableSecurity_;
   /**
-   * <code>bool disableSecurity = 13;</code>
+   * <code>bool disableSecurity = 15;</code>
    * @return The disableSecurity.
    */
   @java.lang.Override
@@ -718,8 +802,14 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < securityScheme_.size(); i++) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 12, securityScheme_.getRaw(i));
     }
+    if (endpointSecurity_ != null) {
+      output.writeMessage(13, getEndpointSecurity());
+    }
+    if (!getAuthorizationHeaderBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 14, authorizationHeader_);
+    }
     if (disableSecurity_ != false) {
-      output.writeBool(13, disableSecurity_);
+      output.writeBool(15, disableSecurity_);
     }
     unknownFields.writeTo(output);
   }
@@ -774,9 +864,16 @@ private static final long serialVersionUID = 0L;
       size += dataSize;
       size += 1 * getSecuritySchemeList().size();
     }
+    if (endpointSecurity_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(13, getEndpointSecurity());
+    }
+    if (!getAuthorizationHeaderBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, authorizationHeader_);
+    }
     if (disableSecurity_ != false) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(13, disableSecurity_);
+        .computeBoolSize(15, disableSecurity_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -817,6 +914,13 @@ private static final long serialVersionUID = 0L;
         .equals(other.getApiLifeCycleState())) return false;
     if (!getSecuritySchemeList()
         .equals(other.getSecuritySchemeList())) return false;
+    if (hasEndpointSecurity() != other.hasEndpointSecurity()) return false;
+    if (hasEndpointSecurity()) {
+      if (!getEndpointSecurity()
+          .equals(other.getEndpointSecurity())) return false;
+    }
+    if (!getAuthorizationHeader()
+        .equals(other.getAuthorizationHeader())) return false;
     if (getDisableSecurity()
         != other.getDisableSecurity()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
@@ -862,6 +966,12 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + SECURITYSCHEME_FIELD_NUMBER;
       hash = (53 * hash) + getSecuritySchemeList().hashCode();
     }
+    if (hasEndpointSecurity()) {
+      hash = (37 * hash) + ENDPOINTSECURITY_FIELD_NUMBER;
+      hash = (53 * hash) + getEndpointSecurity().hashCode();
+    }
+    hash = (37 * hash) + AUTHORIZATIONHEADER_FIELD_NUMBER;
+    hash = (53 * hash) + getAuthorizationHeader().hashCode();
     hash = (37 * hash) + DISABLESECURITY_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getDisableSecurity());
@@ -1041,6 +1151,14 @@ private static final long serialVersionUID = 0L;
 
       securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       bitField0_ = (bitField0_ & ~0x00000008);
+      if (endpointSecurityBuilder_ == null) {
+        endpointSecurity_ = null;
+      } else {
+        endpointSecurity_ = null;
+        endpointSecurityBuilder_ = null;
+      }
+      authorizationHeader_ = "";
+
       disableSecurity_ = false;
 
       return this;
@@ -1110,6 +1228,12 @@ private static final long serialVersionUID = 0L;
         bitField0_ = (bitField0_ & ~0x00000008);
       }
       result.securityScheme_ = securityScheme_;
+      if (endpointSecurityBuilder_ == null) {
+        result.endpointSecurity_ = endpointSecurity_;
+      } else {
+        result.endpointSecurity_ = endpointSecurityBuilder_.build();
+      }
+      result.authorizationHeader_ = authorizationHeader_;
       result.disableSecurity_ = disableSecurity_;
       onBuilt();
       return result;
@@ -1277,6 +1401,13 @@ private static final long serialVersionUID = 0L;
           ensureSecuritySchemeIsMutable();
           securityScheme_.addAll(other.securityScheme_);
         }
+        onChanged();
+      }
+      if (other.hasEndpointSecurity()) {
+        mergeEndpointSecurity(other.getEndpointSecurity());
+      }
+      if (!other.getAuthorizationHeader().isEmpty()) {
+        authorizationHeader_ = other.authorizationHeader_;
         onChanged();
       }
       if (other.getDisableSecurity() != false) {
@@ -2750,9 +2881,204 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
+    private org.wso2.gateway.discovery.api.EndpointSecurity endpointSecurity_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.api.EndpointSecurity, org.wso2.gateway.discovery.api.EndpointSecurity.Builder, org.wso2.gateway.discovery.api.EndpointSecurityOrBuilder> endpointSecurityBuilder_;
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     * @return Whether the endpointSecurity field is set.
+     */
+    public boolean hasEndpointSecurity() {
+      return endpointSecurityBuilder_ != null || endpointSecurity_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     * @return The endpointSecurity.
+     */
+    public org.wso2.gateway.discovery.api.EndpointSecurity getEndpointSecurity() {
+      if (endpointSecurityBuilder_ == null) {
+        return endpointSecurity_ == null ? org.wso2.gateway.discovery.api.EndpointSecurity.getDefaultInstance() : endpointSecurity_;
+      } else {
+        return endpointSecurityBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    public Builder setEndpointSecurity(org.wso2.gateway.discovery.api.EndpointSecurity value) {
+      if (endpointSecurityBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        endpointSecurity_ = value;
+        onChanged();
+      } else {
+        endpointSecurityBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    public Builder setEndpointSecurity(
+        org.wso2.gateway.discovery.api.EndpointSecurity.Builder builderForValue) {
+      if (endpointSecurityBuilder_ == null) {
+        endpointSecurity_ = builderForValue.build();
+        onChanged();
+      } else {
+        endpointSecurityBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    public Builder mergeEndpointSecurity(org.wso2.gateway.discovery.api.EndpointSecurity value) {
+      if (endpointSecurityBuilder_ == null) {
+        if (endpointSecurity_ != null) {
+          endpointSecurity_ =
+            org.wso2.gateway.discovery.api.EndpointSecurity.newBuilder(endpointSecurity_).mergeFrom(value).buildPartial();
+        } else {
+          endpointSecurity_ = value;
+        }
+        onChanged();
+      } else {
+        endpointSecurityBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    public Builder clearEndpointSecurity() {
+      if (endpointSecurityBuilder_ == null) {
+        endpointSecurity_ = null;
+        onChanged();
+      } else {
+        endpointSecurity_ = null;
+        endpointSecurityBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    public org.wso2.gateway.discovery.api.EndpointSecurity.Builder getEndpointSecurityBuilder() {
+      
+      onChanged();
+      return getEndpointSecurityFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    public org.wso2.gateway.discovery.api.EndpointSecurityOrBuilder getEndpointSecurityOrBuilder() {
+      if (endpointSecurityBuilder_ != null) {
+        return endpointSecurityBuilder_.getMessageOrBuilder();
+      } else {
+        return endpointSecurity_ == null ?
+            org.wso2.gateway.discovery.api.EndpointSecurity.getDefaultInstance() : endpointSecurity_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.api.EndpointSecurity, org.wso2.gateway.discovery.api.EndpointSecurity.Builder, org.wso2.gateway.discovery.api.EndpointSecurityOrBuilder> 
+        getEndpointSecurityFieldBuilder() {
+      if (endpointSecurityBuilder_ == null) {
+        endpointSecurityBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.api.EndpointSecurity, org.wso2.gateway.discovery.api.EndpointSecurity.Builder, org.wso2.gateway.discovery.api.EndpointSecurityOrBuilder>(
+                getEndpointSecurity(),
+                getParentForChildren(),
+                isClean());
+        endpointSecurity_ = null;
+      }
+      return endpointSecurityBuilder_;
+    }
+
+    private java.lang.Object authorizationHeader_ = "";
+    /**
+     * <code>string authorizationHeader = 14;</code>
+     * @return The authorizationHeader.
+     */
+    public java.lang.String getAuthorizationHeader() {
+      java.lang.Object ref = authorizationHeader_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        authorizationHeader_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string authorizationHeader = 14;</code>
+     * @return The bytes for authorizationHeader.
+     */
+    public com.google.protobuf.ByteString
+        getAuthorizationHeaderBytes() {
+      java.lang.Object ref = authorizationHeader_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        authorizationHeader_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string authorizationHeader = 14;</code>
+     * @param value The authorizationHeader to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAuthorizationHeader(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      authorizationHeader_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string authorizationHeader = 14;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearAuthorizationHeader() {
+      
+      authorizationHeader_ = getDefaultInstance().getAuthorizationHeader();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string authorizationHeader = 14;</code>
+     * @param value The bytes for authorizationHeader to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAuthorizationHeaderBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      authorizationHeader_ = value;
+      onChanged();
+      return this;
+    }
+
     private boolean disableSecurity_ ;
     /**
-     * <code>bool disableSecurity = 13;</code>
+     * <code>bool disableSecurity = 15;</code>
      * @return The disableSecurity.
      */
     @java.lang.Override
@@ -2760,7 +3086,7 @@ private static final long serialVersionUID = 0L;
       return disableSecurity_;
     }
     /**
-     * <code>bool disableSecurity = 13;</code>
+     * <code>bool disableSecurity = 15;</code>
      * @param value The disableSecurity to set.
      * @return This builder for chaining.
      */
@@ -2771,7 +3097,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>bool disableSecurity = 13;</code>
+     * <code>bool disableSecurity = 15;</code>
      * @return This builder for chaining.
      */
     public Builder clearDisableSecurity() {
