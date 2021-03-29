@@ -328,9 +328,7 @@ func retrieveEndPointSecurityInfo(value string, endPointSecurity config.EpSecuri
 			}
 
 			epSecurityInfo.Username = username
-			loggers.LoggerAPI.Infof("Username %v", username)
 			epSecurityInfo.Password = password
-			loggers.LoggerAPI.Infof("Password %v", password)
 			epSecurityInfo.SecurityType = securityType
 			epSecurityInfo.Enabled = endPointSecurity.Enabled
 			return epSecurityInfo, nil
