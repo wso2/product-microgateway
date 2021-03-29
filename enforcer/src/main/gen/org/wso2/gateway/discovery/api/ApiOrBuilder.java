@@ -199,4 +199,10 @@ public interface ApiOrBuilder extends
    */
   com.google.protobuf.ByteString
       getSecuritySchemeBytes(int index);
+
+  /**
+   * <code>bool disableSecurity = 13;</code>
+   * @return The disableSecurity.
+   */
+  boolean getDisableSecurity();
 }

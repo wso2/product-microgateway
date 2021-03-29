@@ -33,6 +33,7 @@ public class APIConfig {
 
     private List<String> securitySchemes = new ArrayList<>();
     private String tier = ThrottleConstants.UNLIMITED_TIER;
+    private boolean disableSecurity = false;
     private List<ResourceConfig> resources = new ArrayList<>();
 
     /**
@@ -47,6 +48,7 @@ public class APIConfig {
 
         private List<String> securitySchemes = new ArrayList<>();
         private String tier = ThrottleConstants.UNLIMITED_TIER;
+        private boolean disableSecurity = false;
         private List<ResourceConfig> resources = new ArrayList<>();
 
         public Builder(String name) {
@@ -73,6 +75,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder disableSecurity(boolean enabled) {
+            this.disableSecurity = enabled;
+            return this;
+        }
+
         public Builder resources(List<ResourceConfig> resources) {
             this.resources = resources;
             return this;
@@ -92,6 +99,7 @@ public class APIConfig {
             apiConfig.resources = this.resources;
             apiConfig.securitySchemes = this.securitySchemes;
             apiConfig.tier = this.tier;
+            apiConfig.disableSecurity = this.disableSecurity;
             return apiConfig;
         }
     }
@@ -121,6 +129,10 @@ public class APIConfig {
 
     public String getTier() {
         return tier;
+    }
+
+    public boolean isDisableSecurity() {
+        return disableSecurity;
     }
 
     public List<ResourceConfig> getResources() {
