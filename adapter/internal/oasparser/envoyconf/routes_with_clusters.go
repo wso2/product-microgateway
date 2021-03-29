@@ -433,7 +433,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 
 	if !conf.Security.Adapter.EnableOutboundAuthHeader {
-		logger.LoggerOasparser.Infof("removeHeader: %v", authHeader)
+		logger.LoggerOasparser.Debugf("removeHeader: %v", authHeader)
 		if authHeader == "" {
 			authHeader = conf.Security.Adapter.AuthorizationHeader
 		}
