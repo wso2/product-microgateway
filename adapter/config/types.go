@@ -129,7 +129,6 @@ type Config struct {
 	} `toml:"router"`
 
 	Enforcer struct {
-		JwtTokenConfig  []jwtTokenConfig
 		EventHub        eventHub
 		ApimCredentials apimCredentials
 		AuthService     authService
@@ -137,6 +136,16 @@ type Config struct {
 		Cache           cache
 		Throttling      throttlingConfig
 		JwtIssuer       jwtIssuer
+	}
+
+	Security struct {
+		Adapter struct {
+			EnableOutboundAuthHeader bool   `toml:"enableOutboundAuthHeader"`
+			AuthorizationHeader      string `toml:"authorizationHeader"`
+		}
+		Enforcer struct {
+			TokenService []tokenService
+		}
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
@@ -171,7 +180,7 @@ type truststore struct {
 	Location string
 }
 
-type jwtTokenConfig struct {
+type tokenService struct {
 	Name                 string
 	Issuer               string
 	CertificateAlias     string
@@ -321,4 +330,65 @@ type APIContent struct {
 	ProductionEndpoint string
 	SandboxEndpoint    string
 	SecurityScheme     []string
+	EndpointSecurity   EndpointSecurity
+	AuthHeader         string
+}
+
+// APIJsonData contains everything necessary to extract api.json/api.yaml file
+type APIJsonData struct {
+	Data struct {
+		APIName                    string   `json:"name,omitempty"`
+		APIVersion                 string   `json:"version,omitempty"`
+		APIType                    string   `json:"type,omitempty"`
+		LifeCycleStatus            string   `json:"lifeCycleStatus,omitempty"`
+		EndpointImplementationType string   `json:"endpointImplementationType,omitempty"`
+		AuthorizationHeader        string   `json:"authorizationHeader,omitempty"`
+		SecurityScheme             []string `json:"securityScheme,omitempty"`
+		EndpointConfig             struct {
+			EndpointType     string `json:"endpoint_type,omitempty"`
+			EndpointSecurity struct {
+				Production struct {
+					Password string `json:"password,omitempty"`
+					Type     string `json:"type,omitempty"`
+					Enabled  bool   `json:"enabled,omitempty"`
+					Username string `json:"username,omitempty"`
+				} `json:"production,omitempty"`
+				Sandbox struct {
+					Password string `json:"password,omitempty"`
+					Type     string `json:"type,omitempty"`
+					Enabled  bool   `json:"enabled,omitempty"`
+					Username string `json:"username,omitempty"`
+				} `json:"sandbox,omitempty"`
+			} `json:"endpoint_security,omitempty"`
+			ProductionEndpoints struct {
+				Endpoint string `json:"url,omitempty"`
+			} `json:"production_endpoints,omitempty"`
+			SandBoxEndpoints struct {
+				Endpoint string `json:"url,omitempty"`
+			} `json:"sandbox_endpoints,omitempty"`
+		} `json:"endpointConfig,omitempty"`
+	} `json:"data"`
+}
+
+// EpSecurity contains parameters of endpoint security at api.json
+type EpSecurity struct {
+	Password string `json:"password,omitempty"`
+	Type     string `json:"type,omitempty"`
+	Enabled  bool   `json:"enabled,omitempty"`
+	Username string `json:"username,omitempty"`
+}
+
+// EndpointSecurity contains the SandBox/Production endpoint security
+type EndpointSecurity struct {
+	SandBox    SecurityInfo `json:"SandBox,omitempty"`
+	Production SecurityInfo `json:"Production,omitempty"`
+}
+
+// SecurityInfo contains the parameters of endpoint security
+type SecurityInfo struct {
+	Password         string `json:"password,omitempty"`
+	CustomParameters string `json:"customparameters,omitempty"`
+	SecurityType     string `json:"Type,omitempty"`
+	Enabled          bool   `json:"enabled,omitempty"`
+	Username         string `json:"username,omitempty"`
 }
