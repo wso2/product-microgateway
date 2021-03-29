@@ -23,7 +23,6 @@ package org.wso2.micro.gateway.enforcer.throttle;
  */
 public class ThrottleConstants {
     public static final int API_THROTTLE_OUT_ERROR_CODE = 900800;
-    public static final int HARD_LIMIT_EXCEEDED_ERROR_CODE = 900801;
     public static final int RESOURCE_THROTTLE_OUT_ERROR_CODE = 900802;
     public static final int APPLICATION_THROTTLE_OUT_ERROR_CODE = 900803;
     public static final int SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE = 900804;
@@ -39,8 +38,8 @@ public class ThrottleConstants {
     public static final String THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED = "RESOURCE_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED = "SUBSCRIPTION_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED = "APPLICATION_LIMIT_EXCEEDED";
-    public static final String CUSTOM_POLICY_LIMIT_EXCEED = "CUSTOM_POLICY_LIMIT_EXCEED";
-    public static final String POLICY_NOT_FOUND_DESCRIPTION = "POLICY ENFORCEMENT ERROR";
+    public static final String THROTTLE_OUT_REASON_CUSTOM_LIMIT_EXCEED = "CUSTOM_POLICY_LIMIT_EXCEED";
+    public static final String THROTTLE_OUT_REASON_REQUEST_BLOCKED = "REQUEST_BLOCKED";
 
     public static final String UNLIMITED_TIER = "Unlimited";
     public static final String IP = "ip";

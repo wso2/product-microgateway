@@ -124,7 +124,7 @@ public class ThrottleFilter implements Filter {
                             ThrottleConstants.BLOCKING_MESSAGE,
                             ThrottleConstants.BLOCKING_DESCRIPTION);
                     reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
-                            ThrottleConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED);
+                            ThrottleConstants.THROTTLE_OUT_REASON_REQUEST_BLOCKED);
                     log.debug("Request blocked as it violates blocking conditions, for API: {}," +
                                     " application: {}, user: {}", apiContext, appBlockingKey, authorizedUser);
                     return true;
@@ -136,15 +136,17 @@ public class ThrottleFilter implements Filter {
             Decision apiDecision = checkResourceThrottled(resourceThrottleKey, resourceTier, reqContext);
             if (apiDecision.isThrottled()) {
                 int errorCode;
+                String reason;
                 if (isApiLevelTriggered) {
                     errorCode = ThrottleConstants.API_THROTTLE_OUT_ERROR_CODE;
+                    reason = ThrottleConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED;
                 } else {
                     errorCode = ThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE;
+                    reason = ThrottleConstants.THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
                 }
                 FilterUtils.setThrottleErrorToContext(reqContext, errorCode, ThrottleConstants.THROTTLE_OUT_MESSAGE,
                         ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
-                reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
-                        ThrottleConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED);
+                reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON, reason);
                 ThrottleUtils.setRetryAfterHeader(reqContext, apiDecision.getResetAt());
                 return true;
             }
@@ -193,7 +195,7 @@ public class ThrottleFilter implements Filter {
                         ThrottleConstants.THROTTLE_OUT_MESSAGE,
                         ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                 reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
-                        ThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED);
+                        ThrottleConstants.THROTTLE_OUT_REASON_CUSTOM_LIMIT_EXCEED);
                 ThrottleUtils.setRetryAfterHeader(reqContext, customDecision.getResetAt());
                 return true;
             }

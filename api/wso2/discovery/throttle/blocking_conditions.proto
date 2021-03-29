@@ -23,9 +23,9 @@ message BlockingConditions {
 message IPCondition {
 	string type = 1;
 	int32 id = 2;
-    string fixedIp = 3;
-    string startingIp = 4;
-    string endingIp = 5;
-    bool invert = 6;
-    string tenantDomain = 7;
+	string fixedIp = 3;
+	string startingIp = 4;
+	string endingIp = 5;
+	bool invert = 6;
+	string tenantDomain = 7;
 }
