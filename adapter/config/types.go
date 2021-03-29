@@ -190,7 +190,7 @@ type throttlingConfig struct {
 	EnableHeaderConditions             bool   `toml:"enableHeaderConditions"`
 	EnableQueryParamConditions         bool   `toml:"enableQueryParamConditions"`
 	EnableJwtClaimConditions           bool   `toml:"enableJwtClaimConditions"`
-	JmsConnectionInitialContextFactory string `toml:"jmsConnectioninitialContextFactory"`
+	JmsConnectionInitialContextFactory string `toml:"jmsConnectionInitialContextFactory"`
 	JmsConnectionProviderURL           string `toml:"jmsConnectionProviderUrl"`
 	Publisher                          binaryPublisher
 }

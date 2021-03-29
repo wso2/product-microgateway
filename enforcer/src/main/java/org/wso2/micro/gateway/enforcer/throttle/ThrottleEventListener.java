@@ -20,8 +20,6 @@ package org.wso2.micro.gateway.enforcer.throttle;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
-import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
 
 import java.util.Date;
@@ -29,7 +27,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,13 +35,6 @@ import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicSession;
-import javax.jms.TopicSubscriber;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 /**
  * JMS event listener for throttle data.
@@ -60,37 +50,6 @@ public class ThrottleEventListener implements MessageListener {
     private final Pattern resourcePattern = Pattern.compile("/.*/(.*)/\\1(.*)?:[A-Z]{0,7}_(condition_(\\d*)|default)");
     public static final int RESOURCE_PATTERN_GROUPS = 4;
     public static final int RESOURCE_PATTERN_CONDITION_INDEX = 3;
-
-    private ThrottleEventListener() {}
-
-    public static void init() {
-        ThrottleConfigDto throttleConf = ConfigHolder.getInstance().getConfig().getThrottleConfig();
-        String initialContextFactory = throttleConf.getJmsConnectionInitialContextFactory();
-        String connectionFactoryNamePrefix = "connectionfactory.";
-        String connectionFactoryName = "qpidConnectionfactory";
-        String eventReceiverURL = throttleConf.getJmsConnectionProviderUrl();
-        Runnable runnable = () -> {
-            try {
-                TopicConnection topicConnection;
-                TopicSession topicSession;
-                Properties properties = new Properties();
-                properties.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
-                properties.put(connectionFactoryNamePrefix + connectionFactoryName, eventReceiverURL);
-                InitialContext context = new InitialContext(properties);
-                TopicConnectionFactory connFactory = (TopicConnectionFactory) context.lookup(connectionFactoryName);
-                topicConnection = connFactory.createTopicConnection();
-                topicConnection.start();
-                topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
-                Topic gatewayJmsTopic = topicSession.createTopic(ThrottleConstants.TOPIC_THROTTLE_DATA);
-                TopicSubscriber listener = topicSession.createSubscriber(gatewayJmsTopic);
-                listener.setMessageListener(new ThrottleEventListener());
-            } catch (NamingException | JMSException e) {
-                log.error("Error while initiating jms connection...", e);
-            }
-        };
-        Thread jmsThread = new Thread(runnable);
-        jmsThread.start();
-    }
 
     @Override
     public void onMessage(Message message) {

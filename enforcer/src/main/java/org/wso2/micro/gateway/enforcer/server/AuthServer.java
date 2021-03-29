@@ -28,16 +28,19 @@ import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.micro.gateway.enforcer.api.APIFactory;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.micro.gateway.enforcer.grpc.ExtAuthService;
 import org.wso2.micro.gateway.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataHolder;
 import org.wso2.micro.gateway.enforcer.throttle.ThrottleAgent;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 import org.wso2.micro.gateway.enforcer.throttle.ThrottleDataHolder;
 import org.wso2.micro.gateway.enforcer.throttle.ThrottleEventListener;
 
@@ -64,10 +67,11 @@ public class AuthServer {
             Server server = initServer();
             // Initialise cache objects
             CacheProvider.init();
-
-            if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
+            ThrottleConfigDto throttleConf = ConfigHolder.getInstance().getConfig().getThrottleConfig();
+            if (throttleConf.isGlobalPublishingEnabled()) {
                 ThrottleAgent.startThrottlePublisherPool();
-                ThrottleEventListener.init();
+                JMSTransportHandler jmsHandler = new JMSTransportHandler(throttleConf.buildListenerProperties());
+                jmsHandler.subscribeForJmsEvents(ThrottleConstants.TOPIC_THROTTLE_DATA, new ThrottleEventListener());
             }
 
             // Start the server
