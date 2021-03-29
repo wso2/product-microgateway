@@ -64,7 +64,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
-        if (requestContext.getMathedAPI() != null) {
+        if (requestContext.getMatchedAPI() != null) {
             if (log.isDebugEnabled()) {
                 log.info("Internal Key Authentication initialized");
             }
@@ -109,8 +109,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
 
-                String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
-                String apiContext = requestContext.getMathedAPI().getAPIConfig().getBasePath();
+                String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
+                String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
                 boolean isVerified = false;
 
                 JWTTokenPayloadInfo jwtTokenPayloadInfo = (JWTTokenPayloadInfo)
@@ -187,7 +187,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                         log.debug("Internal Key authentication successful.");
                     }
                     return FilterUtils.generateAuthenticationContext(tokenIdentifier, payload, api,
-                            requestContext.getMathedAPI().getAPIConfig().getTier());
+                            requestContext.getMatchedAPI().getAPIConfig().getTier());
                 }
             } catch (ParseException e) {
                 if (log.isDebugEnabled()) {

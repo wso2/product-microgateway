@@ -1,5 +1,18 @@
 version: "2.4"
 services:
+  apim:
+    image: wso2am/wso2am:4.0.0-alpha-alpine
+    healthcheck:
+      test: ["CMD", "nc", "-z","localhost", "9443"]
+      interval: 10s
+      retries: 50
+    ports:
+      - "9763:9763"
+      - "9443:9443"
+      - "5672:5672"
+      - "8243:8243"
+    volumes:
+      - ../resources/apim/deployment.toml:/home/wso2carbon/wso2am-4.0.0-alpha/repository/conf/deployment.toml
   router:
     image: wso2/mg-router:4.0.0-m10-SNAPSHOT
     logging:
@@ -72,18 +85,6 @@ services:
       - XDS_MAX_RETRIES=3
       - JAVA_OPTS=${JAVA_OPTS} -Dhttpclient.hostnameVerifier=AllowAll
       - apim_admin_pwd=admin
+      - tm_admin_pwd=admin
     ports:
       - "8081:8081"
-  apim:
-    image: wso2am/wso2am:4.0.0-alpha-alpine
-    healthcheck:
-      test: ["CMD", "nc", "-z","localhost", "9443"]
-      interval: 10s
-      retries: 50
-    ports:
-      - "9763:9763"
-      - "9443:9443"
-      - "5672:5672"
-      - "8243:8243"
-    volumes:
-      - ../resources/apim/deployment.toml:/home/wso2carbon/wso2am-4.0.0-alpha/repository/conf/deployment.toml

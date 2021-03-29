@@ -28,9 +28,13 @@
         <listener class-name="org.wso2am.micro.gw.tests.listener.TestNGListener"/>
     </listeners>
 
-    <test name="micro-gw-with-default-config" preserve-order="true" parallel="false">
+    <test name="before-suite-preparations" parallel="false">
         <classes>
             <class name="org.wso2am.micro.gw.tests.testCaseBefore.BeforeTestSuite"/>
+        </classes>
+    </test>
+    <test name="micro-gw-with-default-config" preserve-order="true" parallel="false">
+        <classes>
             <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithDefaultConf"/>
             <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployViaRestTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployViaApictlTestCase"/>
@@ -58,6 +62,12 @@
         <classes>
             <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithJwtConfigAndTransformer"/>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.CustomJwtTransformerTestCase"/>
+        </classes>
+    </test>
+    <test name="mgw-micro-with-apim" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2am.micro.gw.tests.testCaseBefore.APIManagerInitializeTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.subscription.SubscriptionValidationTestCase"/>
         </classes>
     </test>
 </suite>

@@ -71,7 +71,7 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 	basicAuth := "Basic " + auth.GetBasicAuth(ehUname, ehPass)
 
 	// Check if TLS is enabled
-	skipSSL := ehConfigs.SkipSSLVerfication
+	skipSSL := ehConfigs.SkipSSLVerification
 	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
 	tr := &http.Transport{}
 	if !skipSSL {

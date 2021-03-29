@@ -44,6 +44,7 @@ import org.wso2.micro.gateway.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -52,6 +53,8 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.SSLContext;
@@ -275,8 +278,8 @@ public class FilterUtils {
 
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
-        String apiContext = requestContext.getMathedAPI().getAPIConfig().getBasePath();
-        String apiVersion = requestContext.getMathedAPI().getAPIConfig().getVersion();
+        String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
+        String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
         jwtInfoDto.setApiContext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
         constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
@@ -375,10 +378,52 @@ public class FilterUtils {
      */
     public static void setThrottleErrorToContext(RequestContext context, int errorCode, String msg, String desc) {
         context.getProperties().put(APIConstants.MessageFormat.ERROR_CODE, errorCode);
-        context.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
-                APIConstants.StatusCodes.THROTTLED.getCode());
+        if (ThrottleConstants.BLOCKED_ERROR_CODE == errorCode) {
+            context.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
+                    APIConstants.StatusCodes.UNAUTHORIZED.getCode());
+        } else {
+            context.getProperties().put(APIConstants.MessageFormat.STATUS_CODE,
+                    APIConstants.StatusCodes.THROTTLED.getCode());
+        }
         context.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE, msg);
         context.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION, desc);
     }
 
+    /**
+     * Generates a map out of the {@code list} provided. Key will be the {@code toString}
+     * value of the list item. Value will be the list item.
+     *
+     * @param list list to be converted in to a map
+     * @param <T>  List Item type
+     * @return A map of type {@code <String, T>}
+     */
+    public static <T> Map<String, T> generateMap(Collection<T> list) {
+        if (list == null) {
+            return new HashMap<>();
+        }
+        Map<String, T> map = new HashMap<String, T>();
+
+        for (T el : list) {
+            map.put(el.toString(), el);
+        }
+        return map;
+    }
+
+    /**
+     * Append the username with tenant domain if not appended already.
+     * @param username username
+     * @param tenantDomain tenant domain
+     * @return tenant domain appended username
+     */
+    public static String buildUsernameWithTenant(String username, String tenantDomain) {
+        if (tenantDomain == null) {
+            tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
+        // Check if the tenant domain is appended with userName and append if it is not there
+        if (!StringUtils.contains(username, tenantDomain)) {
+            return username + '@' + tenantDomain;
+        }
+        return username;
+    }
 }

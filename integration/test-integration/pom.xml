@@ -44,6 +44,14 @@
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
+                    <systemProperties>
+                        <property>
+                            <name>framework.resource.location</name>
+                            <value>
+                                ${basedir}/src/test/resources/
+                            </value>
+                        </property>
+                    </systemProperties>
                 </configuration>
             </plugin>
             <plugin>
@@ -220,6 +228,19 @@
             <artifactId>org.wso2.micro.gateway.enforcer</artifactId>
             <version>4.0.0-m10-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.am</groupId>
+            <artifactId>org.wso2.am.integration.common.test.utils</artifactId>
+            <!-- TODO:Dinusha - bump the version to 4.0.0-alpha -->
+            <version>4.0.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>3.1.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -241,6 +262,7 @@
                 <os>
                     <family>unix</family>
                     <arch>amd64</arch>
+                    <name>!mac os x</name>
                 </os>
             </activation>
             <properties>
@@ -253,6 +275,7 @@
                 <os>
                     <family>unix</family>
                     <arch>x86_64</arch>
+                    <name>!mac os x</name>
                 </os>
             </activation>
             <properties>
@@ -265,6 +288,7 @@
                 <os>
                     <family>unix</family>
                     <arch>i586</arch>
+                    <name>!mac os x</name>
                 </os>
             </activation>
             <properties>

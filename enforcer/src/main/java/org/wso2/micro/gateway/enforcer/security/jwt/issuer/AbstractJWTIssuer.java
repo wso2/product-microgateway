@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -78,7 +79,7 @@ public abstract class AbstractJWTIssuer implements TokenIssuer {
     }
 
     public String encode(byte[] stringToBeEncoded) throws JWTGeneratorException {
-        return java.util.Base64.getUrlEncoder().encodeToString(stringToBeEncoded);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(stringToBeEncoded);
     }
 
     public String generateToken(TokenValidationContext validationContext) throws JWTGeneratorException {

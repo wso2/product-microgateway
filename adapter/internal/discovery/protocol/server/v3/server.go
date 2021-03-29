@@ -26,6 +26,7 @@ import (
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/config"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/keymgt"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/subscription"
+	throttle "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/service/throtlle"
 	"github.com/wso2/micro-gw/internal/discovery/protocol/resource/v3"
 	"github.com/wso2/micro-gw/internal/discovery/protocol/server/sotw/v3"
 	"google.golang.org/grpc/codes"
@@ -44,6 +45,7 @@ type Server interface {
 	subscription.ApplicationKeyMappingDiscoveryServiceServer
 	keymgt.KMDiscoveryServiceServer
 	keymgt.RevokedTokenDiscoveryServiceServer
+	throttle.ThrottleDataDiscoveryServiceServer
 
 	rest.Server
 	envoy_sotw.Server
@@ -70,6 +72,7 @@ type server struct {
 	subscription.UnimplementedApplicationKeyMappingDiscoveryServiceServer
 	keymgt.UnimplementedKMDiscoveryServiceServer
 	keymgt.UnimplementedRevokedTokenDiscoveryServiceServer
+	throttle.UnimplementedThrottleDataDiscoveryServiceServer
 	rest rest.Server
 	sotw envoy_sotw.Server
 }
@@ -118,6 +121,10 @@ func (s *server) StreamTokens(stream keymgt.RevokedTokenDiscoveryService_StreamT
 	return s.StreamHandler(stream, resource.RevokedTokensType)
 }
 
+func (s *server) StreamThrottleData(stream throttle.ThrottleDataDiscoveryService_StreamThrottleDataServer) error {
+	return s.StreamHandler(stream, resource.ThrottleDataType)
+}
+
 // Fetch is the universal fetch method.
 func (s *server) Fetch(ctx context.Context, req *discovery.DiscoveryRequest) (*discovery.DiscoveryResponse, error) {
 	return s.rest.Fetch(ctx, req)
@@ -144,5 +151,13 @@ func (s *server) FetchTokens(ctx context.Context, req *discovery.DiscoveryReques
 		return nil, status.Errorf(codes.Unavailable, "empty request")
 	}
 	req.TypeUrl = resource.RevokedTokensType
+	return s.Fetch(ctx, req)
+}
+
+func (s *server) FetchThrottleData(ctx context.Context, req *discovery.DiscoveryRequest) (*discovery.DiscoveryResponse, error) {
+	if req == nil {
+		return nil, status.Errorf(codes.Unavailable, "empty request")
+	}
+	req.TypeUrl = resource.ThrottleDataType
 	return s.Fetch(ctx, req)
 }

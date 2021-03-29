@@ -39,8 +39,6 @@ public class ProductionSandboxTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        //ApiDeployment.waitTillRoutesAreAvailable("/v2/general/pet/findByStatus");
-
         //TODO: (VirajSalaka) change the token
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
         jwtTokenSand = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_SANDBOX, null, false);
