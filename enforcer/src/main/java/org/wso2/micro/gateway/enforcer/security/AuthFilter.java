@@ -27,7 +27,7 @@ import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.exception.APISecurityException;
 import org.wso2.micro.gateway.enforcer.security.jwt.InternalAPIKeyAuthenticator;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTAuthenticator;
-import org.wso2.micro.gateway.enforcer.security.jwt.NonSecuredAPIAuthenticator;
+import org.wso2.micro.gateway.enforcer.security.jwt.UnsecuredAPIAuthenticator;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.util.ArrayList;
@@ -84,8 +84,8 @@ public class AuthFilter implements Filter {
         Authenticator authenticator = new InternalAPIKeyAuthenticator(APIConstants.JwtTokenConstants.INTERNAL_KEY);
         authenticators.add(authenticator);
     
-        Authenticator nonSecuredAPIAuthenticator = new NonSecuredAPIAuthenticator();
-        authenticators.add(nonSecuredAPIAuthenticator);
+        Authenticator unsecuredAPIAuthenticator = new UnsecuredAPIAuthenticator();
+        authenticators.add(unsecuredAPIAuthenticator);
 
         authenticators.sort(new Comparator<Authenticator>() {
             @Override

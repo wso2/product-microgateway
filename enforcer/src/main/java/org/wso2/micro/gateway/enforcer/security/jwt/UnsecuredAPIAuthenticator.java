@@ -29,7 +29,7 @@ import org.wso2.micro.gateway.enforcer.util.FilterUtils;
  * Implements the authenticator interface to authenticate non-secured APIs.
  */
 
-public class NonSecuredAPIAuthenticator implements Authenticator {
+public class UnsecuredAPIAuthenticator implements Authenticator {
 
     @Override public boolean canAuthenticate(RequestContext requestContext) {
         // Retrieve the disable security value. If security is disabled, then you can proceed directly with the
