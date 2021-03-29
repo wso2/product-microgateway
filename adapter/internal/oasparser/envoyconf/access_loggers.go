@@ -36,16 +36,22 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 	logConf, errReadConfig := config.ReadLogConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
-	} else {
-		logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
-			LogFormat: &corev3.SubstitutionFormatString{
-				Format: &corev3.SubstitutionFormatString_TextFormat{
-					TextFormat: logConf.AccessLogs.Format,
-				},
-			},
-		}
-		logpath = logConf.AccessLogs.LogFile
+		return nil
 	}
+
+	if !logConf.AccessLogs.Enable {
+		logger.LoggerOasparser.Info("Accesslog Configurations are disabled.")
+		return nil
+	}
+
+	logFormat = &file_accesslogv3.FileAccessLog_LogFormat{
+		LogFormat: &corev3.SubstitutionFormatString{
+			Format: &corev3.SubstitutionFormatString_TextFormat{
+				TextFormat: logConf.AccessLogs.Format,
+			},
+		},
+	}
+	logpath = logConf.AccessLogs.LogFile
 
 	accessLogConf := &file_accesslogv3.FileAccessLog{
 		Path:            logpath,
@@ -55,6 +61,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marsheling access log configs. ", err)
+		return nil
 	}
 
 	accessLog := config_access_logv3.AccessLog{
@@ -69,6 +76,11 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 
 // getAccessLogConfigs provides grpc access log configurations for envoy
 func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog {
+	analyticsEnable := conf.ControlPlane.Analytics.Enabled
+	if !analyticsEnable {
+		logger.LoggerOasparser.Debug("gRPC access logs are not enabled as analytics is disabled.")
+		return nil
+	}
 	accessLogConf := &grpc_accesslogv3.HttpGrpcAccessLogConfig{
 		CommonConfig: &grpc_accesslogv3.CommonGrpcAccessLogConfig{
 			TransportApiVersion: corev3.ApiVersion_V3,
@@ -88,6 +100,7 @@ func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog
 	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marsheling gRPC access log configs. ", err)
+		return nil
 	}
 
 	accessLog := config_access_logv3.AccessLog{
@@ -103,9 +116,14 @@ func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog
 // getAccessLogs provides access logs for envoy
 func getAccessLogs() []*config_access_logv3.AccessLog {
 	conf, _ := config.ReadConfigs()
-	analytics := conf.ControlPlane.Analytics.Enabled
-	if analytics {
-		return []*config_access_logv3.AccessLog{getFileAccessLogConfigs(), getGRPCAccessLogConfigs(conf)}
+	var accessLoggers []*config_access_logv3.AccessLog
+	fileAccessLog := getFileAccessLogConfigs()
+	grpcAccessLog := getGRPCAccessLogConfigs(conf)
+	if fileAccessLog != nil {
+		accessLoggers = append(accessLoggers, fileAccessLog)
 	}
-	return []*config_access_logv3.AccessLog{getFileAccessLogConfigs()}
+	if grpcAccessLog != nil {
+		accessLoggers = append(accessLoggers, getGRPCAccessLogConfigs(conf))
+	}
+	return accessLoggers
 }

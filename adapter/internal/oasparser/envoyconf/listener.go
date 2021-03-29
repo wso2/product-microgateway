@@ -93,7 +93,10 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 			},
 		},
 		HttpFilters: httpFilters,
-		AccessLog:   accessLogs,
+	}
+
+	if len(accessLogs) > 0 {
+		manager.AccessLog = accessLogs
 	}
 
 	pbst, err := ptypes.MarshalAny(manager)
