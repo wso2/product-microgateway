@@ -63,4 +63,10 @@
             <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.CustomJwtTransformerTestCase"/>
         </classes>
     </test>
+    <test name="mgw-micro-with-apim" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2am.micro.gw.tests.testCaseBefore.APIManagerInitializeTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.subscription.SubscriptionValidationTestCase"/>
+        </classes>
+    </test>
 </suite>

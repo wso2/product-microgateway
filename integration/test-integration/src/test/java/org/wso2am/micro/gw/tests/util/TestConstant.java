@@ -75,7 +75,7 @@ public class TestConstant {
 
     public static final String TEST_RESOURCES_PATH = File.separator  + "test-classes";
 
-    public static final String HEALTH_ENDPOINT_RESPONSE = "healthy";
+    public static final String HEALTH_ENDPOINT_RESPONSE = "{\"status\": \"healthy\"}";
 
     // apim related constants
     public static final String APIM_SERVICE_NAME_IN_DOCKER_COMPOSE = "apim";

@@ -639,7 +639,7 @@ func CreateHealthEndpoint() *routev3.Route {
 				Status: 200,
 				Body: &corev3.DataSource{
 					Specifier: &corev3.DataSource_InlineString{
-						InlineString: "healthy",
+						InlineString: healthEndpointResponse,
 					},
 				},
 			},

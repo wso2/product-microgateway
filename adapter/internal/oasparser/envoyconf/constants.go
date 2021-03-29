@@ -73,7 +73,7 @@ const (
 
 const (
 	// healthEndpointResponse - response from the health endpoint
-	healthEndpointResponse = "healthy"
+	healthEndpointResponse = "{\"status\": \"healthy\"}"
 )
 
 const (
