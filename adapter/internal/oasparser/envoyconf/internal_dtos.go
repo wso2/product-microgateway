@@ -32,5 +32,6 @@ type routeCreateParams struct {
 	resourceMethods   []string
 	prodClusterName   string
 	sandClusterName   string
+	AuthHeader        string
 	corsPolicy        *model.CorsConfig
 }

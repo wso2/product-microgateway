@@ -40,7 +40,23 @@ type MgwSwagger struct {
 	xWso2Cors        *CorsConfig
 	securityScheme   []string
 	xThrottlingTier  string
+	xWSO2AuthHeader  string
 	disableSecurity  bool
+}
+
+// EndpointSecurity contains the SandBox/Production endpoint security
+type EndpointSecurity struct {
+	SandBox    SecurityInfo
+	Production SecurityInfo
+}
+
+// SecurityInfo contains the parameters of endpoint security
+type SecurityInfo struct {
+	Password         string
+	CustomParameters string
+	SecurityType     string
+	Enabled          bool
+	Username         string
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -154,6 +170,21 @@ func (swagger *MgwSwagger) SetVersion(version string) {
 	swagger.version = version
 }
 
+// SetXWSO2AuthHeader sets the AuthHeader of the API
+func (swagger *MgwSwagger) SetXWSO2AuthHeader(authHeader string) {
+	authorizationHeader := resolveAuthHeader(swagger.vendorExtensions)
+	if authorizationHeader == "" {
+		swagger.xWSO2AuthHeader = authHeader
+	} else {
+		swagger.xWSO2AuthHeader = authorizationHeader
+	}
+}
+
+// GetXWSO2AuthHeader returns the AuthHeader of the API
+func (swagger *MgwSwagger) GetXWSO2AuthHeader() string {
+	return swagger.xWSO2AuthHeader
+}
+
 // GetSetSecurityScheme returns the securityscheme of the API
 func (swagger *MgwSwagger) GetSetSecurityScheme() []string {
 	return swagger.securityScheme
@@ -226,6 +257,15 @@ func (swagger *MgwSwagger) setXThrottlingTier() {
 	if tier != "" {
 		swagger.xThrottlingTier = tier
 	}
+}
+
+// resolve authHeader from swagger vendor extension map
+func resolveAuthHeader(vendorExtensions map[string]interface{}) string {
+	if xAuthHeader, ok := vendorExtensions[xAuthHeader]; ok {
+		// If x-wso2-auth-header is present,
+		return xAuthHeader.(string)
+	}
+	return ""
 }
 
 func (swagger *MgwSwagger) setDisableSecurity() {

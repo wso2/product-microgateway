@@ -17,6 +17,7 @@
  */
 package org.wso2.micro.gateway.enforcer.api.config;
 
+import org.wso2.gateway.discovery.api.EndpointSecurity;
 import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ public class APIConfig {
     private String version;
     private String basePath;
     private String apiLifeCycleState;
+    private String authorizationHeader;
+    private EndpointSecurity endpointSecurity;
 
     private List<String> securitySchemes = new ArrayList<>();
     private String tier = ThrottleConstants.UNLIMITED_TIER;
@@ -45,6 +48,8 @@ public class APIConfig {
         private String version;
         private String basePath;
         private String apiLifeCycleState;
+        private String authorizationHeader;
+        private EndpointSecurity endpointSecurity;
 
         private List<String> securitySchemes = new ArrayList<>();
         private String tier = ThrottleConstants.UNLIMITED_TIER;
@@ -90,6 +95,16 @@ public class APIConfig {
             return this;
         }
 
+        public Builder endpointSecurity(EndpointSecurity endpointSecurity) {
+            this.endpointSecurity = endpointSecurity;
+            return this;
+        }
+
+        public Builder authHeader(String authorizationHeader) {
+            this.authorizationHeader = authorizationHeader;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -99,6 +114,8 @@ public class APIConfig {
             apiConfig.resources = this.resources;
             apiConfig.securitySchemes = this.securitySchemes;
             apiConfig.tier = this.tier;
+            apiConfig.endpointSecurity = this.endpointSecurity;
+            apiConfig.authorizationHeader = this.authorizationHeader;
             apiConfig.disableSecurity = this.disableSecurity;
             return apiConfig;
         }
@@ -115,8 +132,16 @@ public class APIConfig {
         return version;
     }
 
+    public EndpointSecurity getEndpointSecurity() {
+        return endpointSecurity;
+    }
+
     public String getBasePath() {
         return basePath;
+    }
+
+    public String getAuthHeader() {
+        return authorizationHeader;
     }
 
     public String getApiLifeCycleState() {

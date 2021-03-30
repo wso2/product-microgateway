@@ -61,38 +61,6 @@
     keepAliveTime = 600
     queueSize = 1000
 
-# JWT token authorization configurations. You can provide multiple JWT issuers
-# Issuer 1
-[[enforcer.jwtTokenConfig]]
-    name="Resident Key Manager"
-    issuer = "https://localhost:9443/oauth2/token"
-    certificateAlias = "gateway_certificate_alias"
-    # URL of the JWKs endpoint
-    jwksURL = ""
-    # Validate subscribed APIs
-    validateSubscription = false
-    # The claim in which the consumer key of the application is coming
-    consumerKeyClaim = "azp"
-    # Certificate Filepath within enforcer
-    certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
-    [[enforcer.jwtTokenConfig.claimMapping]]
-    remoteClaim = "sub"
-    localClaim = "CUSTOM-CLAIM"
-
-# Issuer 2
-[[enforcer.jwtTokenConfig]]
-    name="MGW"
-    issuer = "https://localhost:9095/token"
-    certificateAlias = "mgw"
-    # URL of the JWKs endpoint
-    jwksURL = ""
-    # Validate subscribed APIs
-    validateSubscription = false
-    # The claim in which the consumer key of the application is coming
-    consumerKeyClaim = ""
-    # Certificate Filepath within enforcer
-    certificateFilePath = "/home/wso2/security/truststore/mg.pem"
-
 [enforcer.apimCredentials]
     username="admin"
     password="admin"
@@ -117,7 +85,7 @@
 
 [enforcer.jwtIssuer]
     enabled = true
-    issuer = "https://localhost:9095/token"
+    issuer = "https://localhost:9095/testkey"
     encoding = "base64" # base64,base64url
     claimDialect = ""
     signingAlgorithm = "SHA256withRSA"
@@ -189,6 +157,46 @@
         secureMaxIdleConnections = 250
         secureEvictionTimePeriod = 5500
         secureMinIdleTimeInPool = 5000
+
+[security]
+
+[security.adapter]
+  enableOutboundAuthHeader = false
+  authorizationHeader = "authorization"
+
+[security.enforcer]
+# JWT token authorization configurations. You can provide multiple JWT issuers
+# Issuer 1
+[[security.enforcer.tokenService]]
+  name="Resident Key Manager"
+  issuer = "https://localhost:9443/oauth2/token"
+  certificateAlias = ""
+  # URL of the JWKs endpoint
+  jwksURL = ""
+  # Validate subscribed APIs
+  validateSubscription = false
+  # The claim in which the consumer key of the application is coming
+  consumerKeyClaim = "azp"
+  # Certificate Filepath within enforcer
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+  [[security.enforcer.tokenService.claimMapping]]
+     remoteClaim = "sub"
+     localClaim = "CUSTOM-CLAIM"
+
+# Issuer 2
+[[security.enforcer.tokenService]]
+    name="MGW"
+    issuer = "https://localhost:9095/testkey"
+    certificateAlias = "mgw"
+    # URL of the JWKs endpoint
+    jwksURL = ""
+    # Validate subscribed APIs
+    validateSubscription = false
+    # The claim in which the consumer key of the application is coming
+    consumerKeyClaim = ""
+    # Certificate Filepath within enforcer
+    certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 [controlPlane]
 # Control plane's eventHub details
