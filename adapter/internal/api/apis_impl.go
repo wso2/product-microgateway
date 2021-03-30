@@ -41,6 +41,7 @@ const (
 	openAPIDir                 string = "Definitions"
 	openAPIFilename            string = "swagger."
 	apiYAMLFile                string = "api.yaml"
+	deploymentsYAMLFile        string = "deployment_environments.yaml"
 	apiJSONFile                string = "api.json"
 	endpointCertDir            string = "Endpoint-certificates"
 	crtExtension               string = ".crt"
@@ -58,6 +59,7 @@ const (
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
 	APIJsn                     []byte
+	Deployments                []Deployment
 	SwaggerJsn                 []byte // TODO: (SuKSW) change to OpenAPIJsn
 	UpstreamCerts              []byte
 	APIType                    string
@@ -84,6 +86,21 @@ func extractAPIProject(payload *[]byte) (apiProject ProjectAPI, err error) {
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
 	for _, file := range zipReader.File {
 		loggers.LoggerAPI.Debugf("File reading now: %v", file.Name)
+		if strings.Contains(file.Name, deploymentsYAMLFile) {
+			loggers.LoggerAPI.Debug("Setting deployments of API")
+			unzippedFileBytes, err := readZipFile(file)
+			if err != nil {
+				loggers.LoggerAPI.Errorf("Error occurred while reading the deployment environments: %v %v",
+					file.Name, err.Error())
+				return apiProject, err
+			}
+			deployments, err := parseDeployments(&unzippedFileBytes)
+			if err != nil {
+				loggers.LoggerAPI.Errorf("Error occurred while parsing the deployment environments: %v %v",
+					file.Name, err.Error())
+			}
+			apiProject.Deployments = deployments
+		}
 		if strings.Contains(file.Name, openAPIDir+string(os.PathSeparator)+openAPIFilename) {
 			loggers.LoggerAPI.Debugf("openAPI file : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
@@ -151,9 +168,9 @@ func extractAPIProject(payload *[]byte) (apiProject ProjectAPI, err error) {
 	return apiProject, nil
 }
 
-// ApplyAPIProject accepts an apictl project (as a byte array), list of vhosts with respective environments
+// ApplyAPIProjectFromAPIM accepts an apictl project (as a byte array), list of vhosts with respective environments
 // and updates the xds servers based upon the content.
-func ApplyAPIProject(payload *[]byte, vhostToEnvsMap map[string][]string) error {
+func ApplyAPIProjectFromAPIM(payload *[]byte, vhostToEnvsMap map[string][]string) error {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
 		return err
@@ -169,9 +186,9 @@ func ApplyAPIProject(payload *[]byte, vhostToEnvsMap map[string][]string) error 
 	return nil
 }
 
-// ApplyAPIProjectWithOverwrite is called by the rest implementation to differentiate
+// ApplyAPIProjectInStandaloneMode is called by the rest implementation to differentiate
 // between create and update using the override param
-func ApplyAPIProjectWithOverwrite(payload *[]byte, environments []string, override *bool) error {
+func ApplyAPIProjectInStandaloneMode(payload *[]byte, override *bool) error {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
 		return err
@@ -180,6 +197,7 @@ func ApplyAPIProjectWithOverwrite(payload *[]byte, environments []string, overri
 	if err != nil {
 		return err
 	}
+	// TODO (renuka) when len of apiProject.deployments is 0, return err "nothing deployed" <- check
 	var overrideValue bool
 	if override == nil {
 		overrideValue = false
@@ -187,12 +205,31 @@ func ApplyAPIProjectWithOverwrite(payload *[]byte, environments []string, overri
 		overrideValue = *override
 	}
 	//TODO: force overwride
-	exists := xds.IsAPIExist(defaultVHostDomain, name, version) // TODO: (SuKSW) update once vhost feature added
-	if !overrideValue && exists {
-		loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.", name, version)
-		return errors.New(mgw.AlreadyExists)
+	if !overrideValue {
+		// if the API already exists in the one of vhost, break deployment of the API
+		exists := false
+		for _, deployment := range apiProject.Deployments {
+			if xds.IsAPIExist(deployment.DeploymentVhost, name, version) {
+				exists = true
+				break
+			}
+		}
+
+		if exists {
+			loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.", name, version)
+			return errors.New(mgw.AlreadyExists)
+		}
 	}
-	updateAPI(defaultVHostDomain, name, version, apiProject, environments)
+
+	vhostToEnvsMap := make(map[string][]string)
+	for _, environment := range apiProject.Deployments {
+		vhostToEnvsMap[environment.DeploymentVhost] =
+			append(vhostToEnvsMap[environment.DeploymentVhost], environment.DeploymentEnvironment)
+	}
+
+	for vhost, environments := range vhostToEnvsMap {
+		updateAPI(vhost, name, version, apiProject, environments)
+	}
 	return nil
 }
 

@@ -12,6 +12,13 @@
     username = "admin"
     password = "$env{adapter_admin_pwd}"
 
+[[adapter.vhost]]
+  environment = "Production and Sandbox"
+  vhost = "localhost"
+[[adapter.vhost]]
+  environment = "us-region"
+  vhost = "us.wso2.com"
+
 [adapter.keystore]
   certPath = "/home/wso2/security/keystore/mg.pem"
   keyPath = "/home/wso2/security/keystore/mg.key"

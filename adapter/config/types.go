@@ -77,7 +77,13 @@ type Config struct {
 			// Private key to sign the token
 			TokenPrivateKeyPath string
 		}
-
+		// Vhost represents default vhost of gateway environments
+		Vhost []struct {
+			// Environment name of the gateway
+			Environment string
+			// Vhost to be default of the environment
+			Vhost string
+		}
 		//Consul represents the configuration required to connect to consul service discovery
 		Consul struct {
 			//Enable whether consul service discovery should be enabled

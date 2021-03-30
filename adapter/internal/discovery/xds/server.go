@@ -93,9 +93,10 @@ var (
 )
 
 const (
-	commonEnforcerLabel string = "commonEnforcerLabel"
-	maxRandomInt        int    = 999999999
-	prototypedAPI       string = "PROTOTYPED"
+	commonEnforcerLabel  string = "commonEnforcerLabel"
+	maxRandomInt         int    = 999999999
+	prototypedAPI        string = "PROTOTYPED"
+	apiKeyFieldSeparator string = ":"
 )
 
 // IDHash uses ID field as the node hash.
@@ -363,7 +364,7 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 
 	for apiKey, labels := range openAPIEnvoyMap {
 		if arrayContains(labels, label) {
-			vhost := fmt.Sprintf("%v:%v", ExtractVHostFromAPIIdentifier(apiKey), port)
+			vhost := fmt.Sprintf("%v:%v", ExtractVhostFromAPIIdentifier(apiKey), port)
 			clusterArray = append(clusterArray, openAPIClustersMap[apiKey]...)
 			vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], openAPIRoutesMap[apiKey]...)
 			endpointArray = append(endpointArray, openAPIEndpointsMap[apiKey]...)
@@ -703,12 +704,12 @@ func IsAPIExist(vhost, name, version string) (exists bool) {
 
 // GenerateIdentifierForAPI generates an identifier unique to the API
 func GenerateIdentifierForAPI(vhost, name, version string) string {
-	return vhost + ":" + name + ":" + version
+	return vhost + apiKeyFieldSeparator + name + apiKeyFieldSeparator + version
 }
 
-// ExtractVHostFromAPIIdentifier extracts vhost from the API identifier
-func ExtractVHostFromAPIIdentifier(id string) string {
-	elem := strings.Split(id, ":")
+// ExtractVhostFromAPIIdentifier extracts vhost from the API identifier
+func ExtractVhostFromAPIIdentifier(id string) string {
+	elem := strings.Split(id, apiKeyFieldSeparator)
 	if len(elem) == 3 {
 		return elem[0]
 	}

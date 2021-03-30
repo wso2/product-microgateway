@@ -34,13 +34,15 @@ import (
 )
 
 var (
-	onceConfigRead    sync.Once
-	onceLogConfigRead sync.Once
-	onceGetMgwHome    sync.Once
-	adapterConfig     *Config
-	adapterLogConfig  *LogConfig
-	mgwHome           string
-	e                 error
+	onceConfigRead      sync.Once
+	onceGetDefaultVhost sync.Once
+	onceLogConfigRead   sync.Once
+	onceGetMgwHome      sync.Once
+	adapterConfig       *Config
+	defaultVhost        map[string]string
+	adapterLogConfig    *LogConfig
+	mgwHome             string
+	e                   error
 )
 
 const (
@@ -83,6 +85,26 @@ func ReadConfigs() (*Config, error) {
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem())
 	})
 	return adapterConfig, e
+}
+
+// GetDefaultVhost returns the default vhost of given environment read from Adapter
+// configurations. Store the configuration in a map, so do not want to loop through
+// the config value Config.Adapter.Vhost
+func GetDefaultVhost(environment string) (string, bool, error) {
+	var err error
+	onceGetDefaultVhost.Do(func() {
+		defaultVhost = make(map[string]string)
+		configs, errConf := ReadConfigs()
+		if errConf != nil {
+			err = errConf
+			return
+		}
+		for _, gateway := range configs.Adapter.Vhost {
+			defaultVhost[gateway.Environment] = gateway.Vhost
+		}
+	})
+	vhost, ok := defaultVhost[environment]
+	return vhost, ok, err
 }
 
 // resolveConfigEnvValues looks for the string type config values which should be read from environment variables

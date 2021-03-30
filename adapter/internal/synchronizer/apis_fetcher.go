@@ -237,7 +237,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		apiFileData, err := ioutil.ReadAll(f)
 		_ = f.Close() // Close the file here (without defer)
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
-		err = apiServer.ApplyAPIProject(&apiFileData, vhostToEnvsMap)
+		err = apiServer.ApplyAPIProjectFromAPIM(&apiFileData, vhostToEnvsMap)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		}
