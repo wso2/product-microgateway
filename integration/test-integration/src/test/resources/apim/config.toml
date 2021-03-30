@@ -35,6 +35,14 @@ clusterTimeoutInSeconds = 20
 certPath = "/home/wso2/security/keystore/mg.pem"
 keyPath = "/home/wso2/security/keystore/mg.key"
 
+[router.cors]
+enabled = false
+allowOrigins = ["*"]
+allowMethods = ["GET","PUT","POST","DELETE","PATCH","OPTIONS"]
+allowHeaders = ["authorization","Access-Control-Allow-Origin","Content-Type","SOAPAction","apikey", "testKey"]
+exposeHeaders = []
+allowCredentials = false
+
 [router.upstream]
 [router.upstream.tls]
 minimumProtocolVersion = "TLS1_1"

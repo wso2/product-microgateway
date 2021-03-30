@@ -30,6 +30,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
 import org.wso2am.micro.gw.tests.util.TestConstant;
 import org.wso2am.micro.gw.tests.util.TokenUtil;
 import org.wso2am.micro.gw.tests.util.Utils;
@@ -53,6 +54,9 @@ public class CorsTestCase {
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
+        String certificatesTrustStorePath = HttpsClientRequest.class.getClassLoader()
+                .getResource("keystore/client-truststore.jks").getPath();
+        System.setProperty("javax.net.ssl.trustStore", certificatesTrustStorePath);
     }
 
     @Test(description = "Success Scenario, with allow credentials is set to true.")

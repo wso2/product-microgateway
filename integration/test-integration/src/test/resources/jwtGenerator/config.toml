@@ -31,7 +31,14 @@
   securedListenerHost = "0.0.0.0"
   securedListenerPort = 9095
   clusterTimeoutInSeconds = 20
-  listenerTLSEnabled = true
+
+[router.cors]
+enabled = true
+allowOrigins = ["http://test1.com", "http://test2.com"]
+allowMethods = ["GET","PUT","POST"]
+allowHeaders = ["Authorization","X-PINGOTHER"]
+exposeHeaders = ["Custom-Header"]
+allowCredentials = true
 
 [router.keystore]
   certPath = "/home/wso2/security/keystore/mg.pem"

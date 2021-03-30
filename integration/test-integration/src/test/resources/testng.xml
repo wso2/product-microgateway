@@ -54,6 +54,7 @@
     <test name="micro-gw-with-jwt-config" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithJwtConfig"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.security.CorsTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.JwtGeneratorTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.JwtTransformerTestCase"/>
         </classes>
