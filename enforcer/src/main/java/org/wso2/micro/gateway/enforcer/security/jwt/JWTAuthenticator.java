@@ -139,7 +139,8 @@ public class JWTAuthenticator implements Authenticator {
 
                         // set endpoint security
                         SecurityInfo securityInfo;
-                        if (apiKeyValidationInfoDTO != null) {
+                        if (apiKeyValidationInfoDTO != null && apiKeyValidationInfoDTO.getType() != null &&
+                                requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity() != null) {
                             if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
                                 securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
                                         getProductionSecurityInfo();
