@@ -69,7 +69,7 @@ public class InternalKeyTestCase extends BaseTestCase {
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertTrue(response.getData().contains("Access Token Expired"), "Error response message mismatch");
+        Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");
     }
 
 }

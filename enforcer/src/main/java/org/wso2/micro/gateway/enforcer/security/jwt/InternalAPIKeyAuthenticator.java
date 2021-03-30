@@ -279,8 +279,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 CacheProvider.getGatewayInternalKeyDataCache().invalidate(payload.getJWTID());
                 CacheProvider.getInvalidGatewayInternalKeyCache().put(payload.getJWTID(), "carbon.super");
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                        APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED,
-                        APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED_DESCRIPTION);
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             }
         }
         if (log.isDebugEnabled()) {
