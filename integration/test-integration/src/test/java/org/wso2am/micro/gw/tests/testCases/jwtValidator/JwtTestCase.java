@@ -50,7 +50,8 @@ public class JwtTestCase {
                 false);
         jwtWithMultipleScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION,
                 "write:pets read:pets", false);
-        jwtWithMultipleInvalidScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "foo bar", false);
+        jwtWithMultipleInvalidScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "foo bar",
+                false);
     }
 
     @Test(description = "Test to check the JWT auth working")

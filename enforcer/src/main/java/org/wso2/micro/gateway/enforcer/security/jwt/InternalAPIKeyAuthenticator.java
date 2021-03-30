@@ -113,11 +113,12 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
                 boolean isVerified = false;
 
+                // Verify token when it is found in cache
                 JWTTokenPayloadInfo jwtTokenPayloadInfo = (JWTTokenPayloadInfo)
                         CacheProvider.getGatewayInternalKeyDataCache().getIfPresent(tokenIdentifier);
                 if (jwtTokenPayloadInfo != null) {
                     String rawPayload = jwtTokenPayloadInfo.getRawPayload();
-                    isVerified = rawPayload.equals(splitToken[1]);
+                    isVerified = rawPayload.equals(splitToken[1]) && !isJwtTokenExpired(payload);
                 } else if (CacheProvider.getInvalidGatewayInternalKeyCache().getIfPresent(tokenIdentifier) != null) {
                     if (log.isDebugEnabled()) {
                         log.debug("Internal Key retrieved from the invalid internal Key cache. Internal Key: "
@@ -129,7 +130,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
 
-                // Not found in cache
+                // Verify token when it is not found in cache
                 if (!isVerified) {
                     if (log.isDebugEnabled()) {
                         log.debug("Internal Key not found in the cache.");
@@ -149,28 +150,13 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                     }
-
-                    if (!isVerified) {
-                        CacheProvider.getGatewayInternalKeyDataCache().invalidate(tokenIdentifier);
-                        CacheProvider.getInvalidGatewayInternalKeyCache().put(tokenIdentifier, "carbon.super");
-                    }
                 }
 
                 if (isVerified) {
                     if (log.isDebugEnabled()) {
                         log.debug("Internal Key signature is verified.");
                     }
-                    if (jwtTokenPayloadInfo != null && jwtTokenPayloadInfo.getRawPayload() != null) {
-                        // Internal Key is found in the key cache
-                        if (isJwtTokenExpired(payload)) {
-                            CacheProvider.getGatewayInternalKeyDataCache().invalidate(tokenIdentifier);
-                            CacheProvider.getInvalidGatewayInternalKeyCache().put(tokenIdentifier, "carbon.super");
-                            log.error("Internal Key is expired");
-                            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                        }
-                    } else {
+                    if (jwtTokenPayloadInfo == null) {
                         // Retrieve payload from InternalKey
                         if (log.isDebugEnabled()) {
                             log.debug("InternalKey payload not found in the cache.");
@@ -188,6 +174,12 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                     }
                     return FilterUtils.generateAuthenticationContext(tokenIdentifier, payload, api,
                             requestContext.getMatchedAPI().getAPIConfig().getTier());
+                } else {
+                    CacheProvider.getGatewayInternalKeyDataCache().invalidate(payload.getJWTID());
+                    CacheProvider.getInvalidGatewayInternalKeyCache().put(payload.getJWTID(), "carbon.super");
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
             } catch (ParseException e) {
                 if (log.isDebugEnabled()) {
@@ -269,7 +261,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
      * @param payload The payload of the JWT token
      * @return returns true if the JWT token is expired
      */
-    public boolean isJwtTokenExpired(JWTClaimsSet payload) {
+    public boolean isJwtTokenExpired(JWTClaimsSet payload) throws APISecurityException {
 
         int timestampSkew =  (int) getTimeStampSkewInSeconds();
         DefaultJWTClaimsVerifier jwtClaimsSetVerifier = new DefaultJWTClaimsVerifier();
@@ -281,7 +273,14 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
             }
         } catch (BadJWTException e) {
             if ("Expired JWT".equals(e.getMessage())) {
-                return true;
+                if (log.isDebugEnabled()) {
+                    log.debug("Internal Key is expired. Internal Key");
+                }
+                CacheProvider.getGatewayInternalKeyDataCache().invalidate(payload.getJWTID());
+                CacheProvider.getInvalidGatewayInternalKeyCache().put(payload.getJWTID(), "carbon.super");
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED,
+                        APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED_DESCRIPTION);
             }
         }
         if (log.isDebugEnabled()) {

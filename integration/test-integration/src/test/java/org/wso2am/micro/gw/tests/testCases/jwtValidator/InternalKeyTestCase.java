@@ -57,6 +57,7 @@ public class InternalKeyTestCase extends BaseTestCase {
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
+        Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");
     }
 
     @Test(description = "Test to check the internal key auth validate expired token")
@@ -68,7 +69,7 @@ public class InternalKeyTestCase extends BaseTestCase {
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
+        Assert.assertTrue(response.getData().contains("Access Token Expired"), "Error response message mismatch");
     }
 
 }
