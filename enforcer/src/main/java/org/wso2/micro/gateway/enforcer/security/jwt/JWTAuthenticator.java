@@ -139,21 +139,23 @@ public class JWTAuthenticator implements Authenticator {
 
                         // set endpoint security
                         SecurityInfo securityInfo;
-                        if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                            securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
-                                    getProductionSecurityInfo();
-                        } else {
-                            securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
-                                    getSandBoxSecurityInfo();
-                        }
-                        if (securityInfo.getEnabled() &&
-                                APIConstants.AUTHORIZATION_HEADER_BASIC.
-                                        equalsIgnoreCase(securityInfo.getSecurityType())) {
-                            // use constants
-                            requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                                    APIConstants.AUTHORIZATION_HEADER_BASIC + " " +
-                                    Base64.getEncoder().encodeToString((securityInfo.getUsername() +
-                                            ":" + securityInfo.getPassword()).getBytes()));
+                        if (apiKeyValidationInfoDTO != null) {
+                            if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
+                                securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                                        getProductionSecurityInfo();
+                            } else {
+                                securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                                        getSandBoxSecurityInfo();
+                            }
+                            if (securityInfo.getEnabled() &&
+                                    APIConstants.AUTHORIZATION_HEADER_BASIC.
+                                            equalsIgnoreCase(securityInfo.getSecurityType())) {
+                                // use constants
+                                requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                                        APIConstants.AUTHORIZATION_HEADER_BASIC + " " +
+                                                Base64.getEncoder().encodeToString((securityInfo.getUsername() +
+                                                        ":" + securityInfo.getPassword()).getBytes()));
+                            }
                         }
 
                         if (log.isDebugEnabled()) {
