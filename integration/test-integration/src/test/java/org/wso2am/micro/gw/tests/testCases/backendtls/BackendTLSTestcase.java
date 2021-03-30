@@ -38,7 +38,8 @@ public class BackendTLSTestcase {
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
         //TODO: (VirajSalaka) change the token
-        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets");
+        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION,
+                "write:pets", false);
     }
 
     @Test(description = "Invoke HTTP endpoint")
