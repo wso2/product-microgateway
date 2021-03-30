@@ -20,28 +20,31 @@
   location = "/home/wso2/security/truststore"
 
 [adapter.consul]
-  # todo rumesh check whether we need to have certPath and KeyPath
   enable = false
   url = "https://169.254.1.1:8501" # scheme + host ip + port
   pollInterval = 5 # seconds
-  aclTokenFilePath = ""
+  aclToken = "d3a2a719-4221-8c65-5212-58d4727427ac"
+  mgwServiceName = "wso2"
+  serviceMeshEnabled = false
   # certs for tls
-  caCertPath = "/home/wso2/security/truststore/consul/consul-agent-ca.pem"
-  certPath = "/home/wso2/security/truststore/consul/local-dc-client-consul-0.pem"
-  keyPath = "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem"
+  caCertFile = "/home/wso2/security/truststore/consul/consul-agent-ca.pem"
+  certFile = "/home/wso2/security/truststore/consul/local-dc-client-consul-0.pem"
+  keyFile = "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem"
 
-[envoy] # --------------------------------------------------------
+
+[router] # --------------------------------------------------------
   listenerHost = "0.0.0.0"
-  listenerPort = 9095
+  listenerPort = 9090
+  securedListenerHost = "0.0.0.0"
+  securedListenerPort = 9095
   clusterTimeoutInSeconds = 20
-  listenerTLSEnabled = true
 
-[envoy.keystore]
+[router.keystore]
   certPath = "/home/wso2/security/keystore/mg.pem"
   keyPath = "/home/wso2/security/keystore/mg.key"
 
-[envoy.upstream]
-[envoy.upstream.tls]
+[router.upstream]
+[router.upstream.tls]
   minimumProtocolVersion = "TLS1_1"
   maximumProtocolVersion = "TLS1_2"
   ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"  
@@ -83,7 +86,7 @@
 # Issuer 2
 [[enforcer.jwtTokenConfig]]
     name="MGW"
-    issuer = "https://localhost:9095/token"
+    issuer = "https://localhost:9095/testkey"
     certificateAlias = "mgw"
     # URL of the JWKs endpoint
     jwksURL = ""
@@ -118,7 +121,7 @@
 
 [enforcer.jwtIssuer]
   enabled = true
-  issuer = "https://localhost:9095/token"
+  issuer = "https://localhost:9095/testkey"
   encoding = "base64" # base64,base64url
   claimDialect = ""
   signingAlgorithm = "SHA256withRSA"
@@ -140,14 +143,14 @@
   # Enable global advanced throttling based on jwt claim conditions
   enableJwtClaimConditions = false
   # The message broker context factory
-  jmsConnectioninitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
+  jmsConnectionInitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
   # The message broker connection URL
   jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://apim:5672'"
   # Throttling configurations related to event publishing using a binary connection
   [enforcer.throttling.publisher]
     # Credentials required to establish connection between Traffic Manager
     username = "admin"
-    password = "admin"
+    password = "$env{tm_admin_pwd}"
     # Receiver URL and the authentication URL of the Traffic manager node/nodes
     [[enforcer.throttling.publisher.urlGroup]]
       receiverURLs = ["tcp://apim:9611"]

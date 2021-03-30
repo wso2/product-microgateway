@@ -173,6 +173,32 @@ public class FilterUtils {
         return domain;
     }
 
+    public static AuthenticationContext generateAuthenticationContext(RequestContext requestContext) {
+        AuthenticationContext authContext = requestContext.getAuthenticationContext();
+        String clientIP = requestContext.getClientIp();
+
+        // Create a dummy AuthenticationContext object with hard coded values for
+        // Tier and KeyType. This is because we cannot determine the Tier nor Key
+        // Type without subscription information.
+        authContext.setAuthenticated(true);
+        authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
+        authContext.setApiKey(clientIP);
+        authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        // Setting end user as anonymous
+        authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
+        authContext.setApiTier(getAPILevelTier(requestContext));
+        authContext.setApplicationId(clientIP);
+        authContext.setApplicationName(null);
+        authContext.setApplicationTier(APIConstants.UNLIMITED_TIER);
+        authContext.setSubscriber(APIConstants.END_USER_ANONYMOUS);
+        authContext.setApiName(requestContext.getMatchedAPI().getAPIConfig().getName());
+        authContext.setStopOnQuotaReach(true);
+        authContext.setConsumerKey(null);
+        authContext.setCallerToken(null);
+
+        return authContext;
+    }
+
     public static AuthenticationContext generateAuthenticationContext(RequestContext requestContext, String jti,
                                                                       JWTValidationInfo jwtValidationInfo,
                                                                       APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
@@ -427,5 +453,25 @@ public class FilterUtils {
             return username + '@' + tenantDomain;
         }
         return username;
+    }
+
+    /**
+     * Get the API related throttling tier for auth context.
+     * If API level present, it will be returned. If not resource level
+     * would be returned. If both not present, UNLIMITED tier would be returned.
+     * @param requestContext Request context
+     * @return string format API tier.
+     */
+    public static String getAPILevelTier(RequestContext requestContext) {
+        String apiTier = requestContext.getMatchedAPI().getAPIConfig().getTier();
+        String resourceTier = requestContext.getMatchedResourcePath().getTier();
+
+        if (!apiTier.isEmpty() && !ThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(apiTier)) {
+            return apiTier;
+        }
+        if (!resourceTier.isBlank()) {
+            return resourceTier;
+        }
+        return ThrottleConstants.UNLIMITED_TIER;
     }
 }

@@ -21,11 +21,10 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"reflect"
 	"sync"
 
-	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
+	subscription "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
+	throttle "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/throttle"
 
 	wso2_cache "github.com/wso2/micro-gw/internal/discovery/protocol/cache/v3"
 	"github.com/wso2/micro-gw/internal/svcdiscovery"
@@ -72,7 +71,7 @@ var (
 
 	// Envoy Label as map key
 	envoyUpdateVersionMap  map[string]int64                       // XDS version map
-	envoyListenerConfigMap map[string]*listenerv3.Listener        // Listener Configuration map
+	envoyListenerConfigMap map[string][]*listenerv3.Listener      // Listener Configuration map
 	envoyRouteConfigMap    map[string]*routev3.RouteConfiguration // Routes Configuration map
 
 	// Common Enforcer Label as map key
@@ -85,7 +84,7 @@ var (
 	enforcerSubscriptionPolicyMap    map[string][]types.Resource
 	enforcerApplicationKeyMappingMap map[string][]types.Resource
 	enforcerRevokedTokensMap         map[string][]types.Resource
-	enforcerThrottleDataMap          map[string][]types.Resource
+	enforcerThrottleData             *throttle.ThrottleData
 
 	// KeyManagerList to store data
 	KeyManagerList = make([]eventhubTypes.KeyManager, 0)
@@ -131,7 +130,7 @@ func init() {
 	openAPIEndpointsMap = make(map[string][]*corev3.Address)
 	//TODO: (VirajSalaka) Swagger or project should contain the version as a meta information
 	envoyUpdateVersionMap = make(map[string]int64)
-	envoyListenerConfigMap = make(map[string]*listenerv3.Listener)
+	envoyListenerConfigMap = make(map[string][]*listenerv3.Listener)
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 
 	enforcerConfigMap = make(map[string][]types.Resource)
@@ -143,7 +142,7 @@ func init() {
 	enforcerSubscriptionPolicyMap = make(map[string][]types.Resource)
 	enforcerApplicationKeyMappingMap = make(map[string][]types.Resource)
 	enforcerRevokedTokensMap = make(map[string][]types.Resource)
-	enforcerThrottleDataMap = make(map[string][]types.Resource)
+	enforcerThrottleData = &throttle.ThrottleData{}
 }
 
 // GetXdsCache returns xds server cache.
@@ -361,23 +360,30 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 			// listenerArrays = append(listenerArrays, openAPIListenersMap[apiKey])
 		}
 	}
+
+	// If the token endpoint is enabled, the token endpoint also needs to be added.
 	conf, _ := config.ReadConfigs()
 	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
 	if enableJwtIssuer {
 		routeToken := envoyconf.CreateTokenRoute()
 		routeArray = append(routeArray, routeToken)
 	}
-	listener, listenerFound := envoyListenerConfigMap[label]
+
+	// Add health endpoint
+	routeHealth := envoyconf.CreateHealthEndpoint()
+	routeArray = append(routeArray, routeHealth)
+
+	listenerArray, listenerFound := envoyListenerConfigMap[label]
 	routesConfig, routesConfigFound := envoyRouteConfigMap[label]
 	if !listenerFound && !routesConfigFound {
-		listener, routesConfig = oasParser.GetProductionListenerAndRouteConfig(routeArray)
-		envoyListenerConfigMap[label] = listener
+		listenerArray, routesConfig = oasParser.GetProductionListenerAndRouteConfig(routeArray)
+		envoyListenerConfigMap[label] = listenerArray
 		envoyRouteConfigMap[label] = routesConfig
 	} else {
 		// If the routesConfig exists, the listener exists too
 		oasParser.UpdateRoutesConfig(routesConfig, routeArray)
 	}
-	endpoints, clusters, listeners, routeConfigs := oasParser.GetCacheResources(endpointArray, clusterArray, listener, routesConfig)
+	endpoints, clusters, listeners, routeConfigs := oasParser.GetCacheResources(endpointArray, clusterArray, listenerArray, routesConfig)
 	return endpoints, clusters, listeners, routeConfigs, apis
 }
 
@@ -551,107 +557,6 @@ func UpdateXdsCacheWithLock(label string, endpoints []types.Resource, clusters [
 	updateXdsCache(label, endpoints, clusters, routes, listeners)
 }
 
-func startConsulServiceDiscovery() {
-	//label := "default"
-	for apiKey, clusterList := range openAPIClustersMap {
-		for _, cluster := range clusterList {
-			if consulSyntax, ok := svcdiscovery.ClusterConsulKeyMap[cluster.Name]; ok {
-				svcdiscovery.InitConsul() //initialize consul client and load certs
-				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
-				if errConSyn != nil {
-					logger.LoggerXds.Error("consul syntax parse error ", errConSyn)
-					return
-				}
-				logger.LoggerXds.Debugln(query)
-				go getServiceDiscoveryData(query, cluster.Name, apiKey)
-			}
-		}
-	}
-}
-
-func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKey string) {
-	doneChan := make(chan bool)
-	svcdiscovery.ClusterConsulDoneChanMap[clusterName] = doneChan
-	resultChan := svcdiscovery.ConsulClientInstance.Poll(query, doneChan)
-	for {
-		select {
-		case queryResultsList, ok := <-resultChan:
-			if !ok { //ok==false --> result chan is closed
-				logger.LoggerXds.Debugln("closed the result channel for cluster name: ", clusterName)
-				return
-			}
-			if val, ok := svcdiscovery.ClusterConsulResultMap[clusterName]; ok {
-				if !reflect.DeepEqual(val, queryResultsList) {
-					svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList
-					//update the envoy cluster
-					updateRoute(apiKey, clusterName, queryResultsList)
-				}
-			} else {
-				logger.LoggerXds.Debugln("updating cluster from the consul service registry, removed the default host")
-				svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList
-				updateRoute(apiKey, clusterName, queryResultsList)
-			}
-		}
-	}
-}
-
-func updateRoute(apiKey string, clusterName string, queryResultsList []svcdiscovery.Upstream) {
-	if clusterList, available := openAPIClustersMap[apiKey]; available {
-		for i := range clusterList {
-			if clusterList[i].Name == clusterName {
-				var lbEndpointList []*endpointv3.LbEndpoint
-				for _, result := range queryResultsList {
-					address := &corev3.Address{Address: &corev3.Address_SocketAddress{
-						SocketAddress: &corev3.SocketAddress{
-							Address:  result.Address,
-							Protocol: corev3.SocketAddress_TCP,
-							PortSpecifier: &corev3.SocketAddress_PortValue{
-								PortValue: uint32(result.ServicePort),
-							},
-						},
-					}}
-
-					lbEndPoint := &endpointv3.LbEndpoint{
-						HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
-							Endpoint: &endpointv3.Endpoint{
-								Address: address,
-							},
-						},
-					}
-					lbEndpointList = append(lbEndpointList, lbEndPoint)
-				}
-				clusterList[i].LoadAssignment = &endpointv3.ClusterLoadAssignment{
-					ClusterName: clusterName,
-					Endpoints: []*endpointv3.LocalityLbEndpoints{
-						{
-							LbEndpoints: lbEndpointList,
-						},
-					},
-				}
-				updateXDSRouteCacheForServiceDiscovery(apiKey)
-			}
-		}
-	}
-}
-
-func updateXDSRouteCacheForServiceDiscovery(apiKey string) {
-	for key, envoyLabelList := range openAPIEnvoyMap {
-		if key == apiKey {
-			for _, label := range envoyLabelList {
-				listeners, clusters, routes, endpoints, _ := GenerateEnvoyResoucesForLabel(label)
-				UpdateXdsCacheWithLock(label, endpoints, clusters, routes, listeners)
-				logger.LoggerXds.Info("Updated XDS cache by consul service discovery")
-			}
-		}
-	}
-}
-
-func stopConsulDiscoveryFor(clusterName string) {
-	if doneChan, available := svcdiscovery.ClusterConsulDoneChanMap[clusterName]; available {
-		close(doneChan)
-	}
-}
-
 // ListApis returns a list of objects that holds info about each API
 func ListApis(apiType string, limit *int64) *apiModel.APIMeta {
 	var limitValue int
@@ -747,11 +652,30 @@ func UpdateEnforcerRevokedTokens(revokedTokens []types.Resource) {
 
 // UpdateEnforcerThrottleData update the key template and blocking conditions
 // data in the enforcer
-func UpdateEnforcerThrottleData(throttleData []types.Resource) {
+func UpdateEnforcerThrottleData(throttleData *throttle.ThrottleData) {
 	logger.LoggerXds.Debug("Updating enforcer cache for throttle data")
 	label := commonEnforcerLabel
-	data := enforcerThrottleDataMap[label]
-	data = append(data, throttleData...)
+	var data []types.Resource
+
+	// Set new throttle data content based on the already available content in the cache DTO
+	// and the new data being requested to add.
+	// ex: keytemplates being pressent in the `throttleData` means this method was called
+	// after downloading key templates. That means we should populate keytemplates property
+	// in the cache DTO, keeping the other properties as it is. This is done this way to avoid
+	// the need of two xds services to push keytemplates and blocking conditions.
+	templates := throttleData.KeyTemplates
+	conditions := throttleData.BlockingConditions
+	if templates == nil {
+		templates = enforcerThrottleData.KeyTemplates
+	}
+	if conditions == nil {
+		conditions = enforcerThrottleData.BlockingConditions
+	}
+	t := &throttle.ThrottleData{
+		KeyTemplates:       templates,
+		BlockingConditions: conditions,
+	}
+	data = append(data, t)
 
 	version := rand.Intn(maxRandomInt)
 	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, data)
@@ -761,6 +685,6 @@ func UpdateEnforcerThrottleData(throttleData []types.Resource) {
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
-	enforcerThrottleDataMap[label] = data
+	enforcerThrottleData = t
 	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }

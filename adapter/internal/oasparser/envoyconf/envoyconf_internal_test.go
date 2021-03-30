@@ -229,39 +229,6 @@ func TestCreateRouteExtAuthzContext(t *testing.T) {
 		"Sandbox Cluster mismatch in route ext authz context.")
 }
 
-func TestCreateListener(t *testing.T) {
-	var listenerPort uint32
-	listenerPort = 10001
-	listenerAddress := "test.com"
-
-	config := new(mgwconfig.Config)
-	config.Envoy.ListenerPort = listenerPort
-	config.Envoy.ListenerHost = listenerAddress
-	config.Envoy.ListenerTLSEnabled = true
-	config.Envoy.KeyStore.PublicKeyLocation = mgwconfig.GetMgwHome() + "/adapter/security/localhost.pem"
-	config.Envoy.KeyStore.PrivateKeyLocation = mgwconfig.GetMgwHome() + "/adapter/security/localhost.key"
-
-	tlsEnabledListener := createListener(config, "test-id")
-
-	assert.NotNil(t, tlsEnabledListener, "The TLS Enabled Listener configuration should not be null")
-
-	assert.NotNil(t, tlsEnabledListener.Address.GetSocketAddress().Address, "The socket address of the listener should not be null")
-	assert.Equal(t, tlsEnabledListener.Address.GetSocketAddress().Address, listenerAddress,
-		"The assigned socket address of the listener is incorrect")
-
-	assert.NotNil(t, tlsEnabledListener.Address.GetSocketAddress().GetPortValue(), "The socket's port value of the listener should not be null")
-	assert.Equal(t, tlsEnabledListener.Address.GetSocketAddress().GetPortValue(), listenerPort,
-		"The assigned socket port of the listener is incorrect")
-
-	assert.NotNil(t, tlsEnabledListener.FilterChains[0].TransportSocket, "Transport Socket configuration should not be null")
-
-	config.Envoy.ListenerTLSEnabled = false
-	tlsDisabledListener := createListener(config, "test-id")
-
-	assert.NotNil(t, tlsDisabledListener, "The TLS Enabled Listener configuration should not be null")
-	assert.Nil(t, tlsDisabledListener.FilterChains[0].TransportSocket, "Transport Socket configuration should be null")
-}
-
 func TestGenerateTLSCert(t *testing.T) {
 	publicKeyPath := mgwconfig.GetMgwHome() + "/adapter/security/localhost.pem"
 	privateKeyPath := mgwconfig.GetMgwHome() + "/adapter/security/localhost.key"

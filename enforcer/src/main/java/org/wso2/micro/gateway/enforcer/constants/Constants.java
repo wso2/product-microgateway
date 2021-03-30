@@ -62,4 +62,12 @@ public class Constants {
     public static final String ENV_PREFIX = "$env{";
     public static final String START_BRACKET = "{";
     public static final String END_BRACKET = "}";
+
+    // jms listener properties
+    public static final String PROP_INIT_CONTEXT_FACTORY = "java.naming.factory.initial";
+    public static final String PROP_CON_FACTORY_JNDI_NAME = "transport.jms.ConnectionFactoryJNDIName";
+    public static final String PROP_DESTINATION_TYPE = "transport.jms.DestinationType";
+    public static final String PROP_CON_FACTORY = "connectionfactory.TopicConnectionFactory";
+    public static final String DEFAULT_DESTINATION_TYPE = "Topic";
+    public static final String DEFAULT_CON_FACTORY_JNDI_NAME = "TopicConnectionFactory";
 }

@@ -86,14 +86,18 @@ type Config struct {
 			URL string
 			//PollInterval how frequently consul API should be polled to get updates (in seconds)
 			PollInterval int
-			//ACLTokenFilePath ACL token required to invoke HTTP API
-			ACLTokenFilePath string
-			//CaCertPath path to the CA cert file(PEM encoded) required for tls connection between adapter and a consul client
-			CaCertPath string
-			//CertPath path to the cert file(PEM encoded) required for tls connection between adapter and a consul client
-			CertPath string
-			//CertPath path to the key file(PEM encoded) required for tls connection between adapter and a consul client
-			KeyPath string
+			//ACLToken Access Control Token required to invoke HTTP API
+			ACLToken string
+			//MgwServiceName service name that Microgateway registered in Consul Service Mesh
+			MgwServiceName string
+			//ServiceMeshEnabled whether Consul service mesh is enabled
+			ServiceMeshEnabled bool
+			//CaCertFile path to the CA cert file(PEM encoded) required for tls connection between adapter and a consul client
+			CaCertFile string
+			//CertFile path to the cert file(PEM encoded) required for tls connection between adapter and a consul client
+			CertFile string
+			//KeyFile path to the key file(PEM encoded) required for tls connection between adapter and a consul client
+			KeyFile string
 		}
 		// Keystore contains the keyFile and Cert File of the adapter
 		Keystore keystore
@@ -105,9 +109,10 @@ type Config struct {
 	Envoy struct {
 		ListenerHost            string
 		ListenerPort            uint32
+		SecuredListenerHost     string
+		SecuredListenerPort     uint32
 		ClusterTimeoutInSeconds time.Duration
 		KeyStore                keystore
-		ListenerTLSEnabled      bool
 
 		// Envoy Upstream Related Configurations
 		Upstream struct {
@@ -121,7 +126,7 @@ type Config struct {
 				DisableSSLVerification bool   `toml:"disableSslVerification"`
 			}
 		}
-	}
+	} `toml:"router"`
 
 	Enforcer struct {
 		JwtTokenConfig  []jwtTokenConfig
@@ -190,7 +195,7 @@ type throttlingConfig struct {
 	EnableHeaderConditions             bool   `toml:"enableHeaderConditions"`
 	EnableQueryParamConditions         bool   `toml:"enableQueryParamConditions"`
 	EnableJwtClaimConditions           bool   `toml:"enableJwtClaimConditions"`
-	JmsConnectionInitialContextFactory string `toml:"jmsConnectioninitialContextFactory"`
+	JmsConnectionInitialContextFactory string `toml:"jmsConnectionInitialContextFactory"`
 	JmsConnectionProviderURL           string `toml:"jmsConnectionProviderUrl"`
 	Publisher                          binaryPublisher
 }

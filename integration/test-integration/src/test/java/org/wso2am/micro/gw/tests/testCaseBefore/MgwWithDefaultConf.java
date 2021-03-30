@@ -17,16 +17,26 @@
  */
 package org.wso2am.micro.gw.tests.testCaseBefore;
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 import org.wso2am.micro.gw.tests.common.BaseTestCase;
 import org.wso2am.micro.gw.tests.context.MicroGWTestException;
 import org.wso2am.micro.gw.tests.util.ApictlUtils;
+import org.wso2am.micro.gw.tests.util.HttpClientRequest;
+import org.wso2am.micro.gw.tests.util.HttpResponse;
+import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
+import org.wso2am.micro.gw.tests.util.TestConstant;
+import org.wso2am.micro.gw.tests.util.Utils;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class MgwWithDefaultConf extends BaseTestCase {
@@ -46,6 +56,32 @@ public class MgwWithDefaultConf extends BaseTestCase {
         ApictlUtils.deployAPI("prod_petstore", "test");
         ApictlUtils.deployAPI("sand_petstore", "test");
         TimeUnit.SECONDS.sleep(5);
+    }
+
+    @Test(description = "Invoke Health endpoint")
+    public void invokeHttpsEndpointSuccess() throws Exception {
+        // Set header
+        Map<String, String> headers = new HashMap<String, String>(0);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/health") , headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertEquals(response.getData(), TestConstant.HEALTH_ENDPOINT_RESPONSE,
+                "Response message mismatched");
+    }
+
+    @Test(description = "Invoke Health endpoint (secured)")
+    public void invokeHttpEndpointSuccess() throws Exception {
+        // Set header
+        Map<String, String> headers = new HashMap<String, String>(0);
+        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttp(
+                "/health") , headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertEquals(response.getData(), TestConstant.HEALTH_ENDPOINT_RESPONSE,
+                "Response message mismatched");
     }
 
     @AfterTest(description = "stop the setup")

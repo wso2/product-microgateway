@@ -61,6 +61,7 @@ public class TestConstant {
             "KcdFXFwDUzpLfyAsg8qHDGiMcM88sUc10cvMYQqRYw66SF3EqYWQ";
 
     public static final int GATEWAY_LISTENER_HTTPS_PORT = 9095;
+    public static final int GATEWAY_LISTENER_HTTP_PORT = 9090;
     public static final int ADAPTER_PORT = 9843;
     public final static int MOCK_SERVER_PORT = 2383;
     public final static int APIM_SERVLET_TRP_HTTPS_PORT = 9443;
@@ -73,6 +74,8 @@ public class TestConstant {
     public static final String MOCK_BACKEND_DOCKER_IMAGE = "wso2/mg-mock-backend";
 
     public static final String TEST_RESOURCES_PATH = File.separator  + "test-classes";
+
+    public static final String HEALTH_ENDPOINT_RESPONSE = "{\"status\": \"healthy\"}";
 
     // apim related constants
     public static final String APIM_SERVICE_NAME_IN_DOCKER_COMPOSE = "apim";

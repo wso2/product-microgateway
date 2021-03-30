@@ -26,4 +26,5 @@ message Api {
 	string tier = 10;
 	string apiLifeCycleState = 11;
 	repeated string securityScheme = 12;
+	bool disableSecurity = 13;
 }

@@ -534,15 +534,8 @@ func CreateTokenRoute() *routev3.Route {
 	)
 
 	match = &routev3.RouteMatch{
-		PathSpecifier: &routev3.RouteMatch_SafeRegex{
-			SafeRegex: &envoy_type_matcherv3.RegexMatcher{
-				EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
-					GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
-						MaxProgramSize: nil,
-					},
-				},
-				Regex: "/testkey",
-			},
+		PathSpecifier: &routev3.RouteMatch_Path{
+			Path: testKeyPath,
 		},
 	}
 
@@ -553,7 +546,7 @@ func CreateTokenRoute() *routev3.Route {
 	}
 
 	decorator = &routev3.Decorator{
-		Operation: "/testkey",
+		Operation: testKeyPath,
 	}
 
 	perFilterConfig := extAuthService.ExtAuthzPerRoute{
@@ -573,7 +566,6 @@ func CreateTokenRoute() *routev3.Route {
 	action = &routev3.Route_Route{
 		Route: &routev3.RouteAction{
 			HostRewriteSpecifier: hostRewriteSpecifier,
-			// TODO: (VirajSalaka) Provide prefix rewrite since it is simple
 			RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
 				Pattern: &envoy_type_matcherv3.RegexMatcher{
 					EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
@@ -581,7 +573,7 @@ func CreateTokenRoute() *routev3.Route {
 							MaxProgramSize: nil,
 						},
 					},
-					Regex: "/testkey",
+					Regex: testKeyPath,
 				},
 				Substitution: "/",
 			},
@@ -594,9 +586,64 @@ func CreateTokenRoute() *routev3.Route {
 	action.Route.ClusterSpecifier = directClusterSpecifier
 
 	router = routev3.Route{
-		Name:      "/testkey", //Categorize routes with same base path
+		Name:      testKeyPath, //Categorize routes with same base path
 		Match:     match,
 		Action:    action,
+		Metadata:  nil,
+		Decorator: decorator,
+		TypedPerFilterConfig: map[string]*any.Any{
+			wellknown.HTTPExternalAuthorization: filter,
+		},
+	}
+	return &router
+}
+
+// CreateHealthEndpoint generates a route for the jwt /health endpoint
+// Replies with direct response.
+func CreateHealthEndpoint() *routev3.Route {
+	var (
+		router    routev3.Route
+		match     *routev3.RouteMatch
+		decorator *routev3.Decorator
+	)
+
+	match = &routev3.RouteMatch{
+		PathSpecifier: &routev3.RouteMatch_Path{
+			Path: healthPath,
+		},
+	}
+
+	decorator = &routev3.Decorator{
+		Operation: healthPath,
+	}
+
+	perFilterConfig := extAuthService.ExtAuthzPerRoute{
+		Override: &extAuthService.ExtAuthzPerRoute_Disabled{
+			Disabled: true,
+		},
+	}
+
+	b := proto.NewBuffer(nil)
+	b.SetDeterministic(true)
+	_ = b.Marshal(&perFilterConfig)
+	filter := &any.Any{
+		TypeUrl: extAuthzPerRouteName,
+		Value:   b.Bytes(),
+	}
+
+	router = routev3.Route{
+		Name:  healthPath, //Categorize routes with same base path
+		Match: match,
+		Action: &routev3.Route_DirectResponse{
+			DirectResponse: &routev3.DirectResponseAction{
+				Status: 200,
+				Body: &corev3.DataSource{
+					Specifier: &corev3.DataSource_InlineString{
+						InlineString: healthEndpointResponse,
+					},
+				},
+			},
+		},
 		Metadata:  nil,
 		Decorator: decorator,
 		TypedPerFilterConfig: map[string]*any.Any{
@@ -736,4 +783,18 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, e
 		params.resourcePathParam = resource.GetPath()
 	}
 	return params
+}
+
+// createAddress generates an address from the given host and port
+func createAddress(remoteHost string, port uint32) *corev3.Address {
+	address := corev3.Address{Address: &corev3.Address_SocketAddress{
+		SocketAddress: &corev3.SocketAddress{
+			Address:  remoteHost,
+			Protocol: corev3.SocketAddress_TCP,
+			PortSpecifier: &corev3.SocketAddress_PortValue{
+				PortValue: uint32(port),
+			},
+		},
+	}}
+	return &address
 }

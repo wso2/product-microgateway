@@ -36,18 +36,19 @@ import org.wso2.micro.gateway.enforcer.throttle.ThrottleDataHolder;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Client to communicate with ThrottleData discovery service at the adapter.
  */
 public class ThrottleDataDiscoveryClient {
+    private static final Logger logger = LogManager.getLogger(ThrottleDataDiscoveryClient.class);
     private static ThrottleDataDiscoveryClient instance;
     private final ManagedChannel channel;
     private final ThrottleDataDiscoveryServiceGrpc.ThrottleDataDiscoveryServiceStub stub;
-    private static final Logger logger = LogManager.getLogger(ThrottleDataDiscoveryClient.class);
     private StreamObserver<DiscoveryRequest> reqObserver;
+    private final ThrottleDataHolder throttleData;
+
     /**
      * This is a reference to the latest received response from the TDDS.
      * <p>
@@ -75,6 +76,7 @@ public class ThrottleDataDiscoveryClient {
         this.stub = ThrottleDataDiscoveryServiceGrpc.newStub(channel);
         this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
+        this.throttleData = ThrottleDataHolder.getInstance();
     }
 
     public static ThrottleDataDiscoveryClient getInstance() {
@@ -95,8 +97,7 @@ public class ThrottleDataDiscoveryClient {
                 logger.debug("Received ThrottleData discovery response " + response);
                 latestReceived = response;
                 try {
-                    List<String> keyTemplates = handleResponse(response);
-                    ThrottleDataHolder.getInstance().addKeyTemplates(FilterUtils.generateMap(keyTemplates));
+                    handleResponse(response);
                     ack();
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime
@@ -157,10 +158,16 @@ public class ThrottleDataDiscoveryClient {
         reqObserver.onNext(req);
     }
 
-    private List<String> handleResponse(DiscoveryResponse response) throws InvalidProtocolBufferException {
+    private void handleResponse(DiscoveryResponse response) throws InvalidProtocolBufferException {
         // Currently theres only one ThrottleData resource here. Therefore taking 0, no need to iterate
-        ThrottleData res = response.getResources(0).unpack(ThrottleData.class);
-        return res.getKeyTemplatesList();
+        ThrottleData data = response.getResources(0).unpack(ThrottleData.class);
+
+        if (data.getKeyTemplatesCount() > 0) {
+            throttleData.addKeyTemplates(FilterUtils.generateMap(data.getKeyTemplatesList()));
+        }
+        if (data.hasBlockingConditions()) {
+            throttleData.addBlockingConditions(data.getBlockingConditions());
+        }
     }
 
     public void shutdown() throws InterruptedException {
