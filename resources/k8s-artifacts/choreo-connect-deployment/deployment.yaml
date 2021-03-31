@@ -32,7 +32,7 @@ spec:
     spec:
       initContainers:
         - name: init-adapter-service
-          image: busybox:1.31
+          image: busybox:1.31.1
           command: [ 'sh', '-c', 'echo -e "Checking for the availability of Adapter"; while ! nc -z adapter 18000; do sleep 1; printf "-"; done; echo -e "  >> Adapter has started";' ]
       containers:
         - name: choreo-connect-enforcer
