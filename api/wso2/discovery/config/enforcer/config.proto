@@ -3,7 +3,7 @@ syntax = "proto3";
 package wso2.discovery.config.enforcer;
 
 import "wso2/discovery/config/enforcer/cert.proto";
-import "wso2/discovery/config/enforcer/issuer.proto";
+import "wso2/discovery/config/enforcer/security.proto";
 import "wso2/discovery/config/enforcer/event_hub.proto";
 import "wso2/discovery/config/enforcer/am_credentials.proto";
 import "wso2/discovery/config/enforcer/service.proto";
@@ -22,7 +22,7 @@ option java_multiple_files = true;
 
 // Enforcer config model
 message Config {
-    repeated Issuer jwtTokenConfig = 1;
+    Security security = 1;
 
     CertStore keystore = 2;
 

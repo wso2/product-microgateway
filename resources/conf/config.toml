@@ -68,35 +68,6 @@
     keepAliveTime = 600
     queueSize = 1000
 
-# JWT token authorization configurations. You can provide multiple JWT issuers
-# Issuer 1
-[[enforcer.jwtTokenConfig]]
-  name="Resident Key Manager"
-  issuer = "https://localhost:9443/oauth2/token"
-  certificateAlias = "gateway_certificate_alias"
-  # URL of the JWKs endpoint
-  jwksURL = ""
-  # Validate subscribed APIs
-  validateSubscription = false
-  # The claim in which the consumer key of the application is coming
-  consumerKeyClaim = "azp"
-  # Certificate Filepath within enforcer
-  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
-
-# Issuer 2
-[[enforcer.jwtTokenConfig]]
-    name="MGW"
-    issuer = "https://localhost:9095/testkey"
-    certificateAlias = "mgw"
-    # URL of the JWKs endpoint
-    jwksURL = ""
-    # Validate subscribed APIs
-    validateSubscription = false
-    # The claim in which the consumer key of the application is coming
-    consumerKeyClaim = ""
-    # Certificate Filepath within enforcer
-    certificateFilePath = "/home/wso2/security/truststore/mg.pem"
-
 [enforcer.apimCredentials]
   username="admin"
   password="$env{apim_admin_pwd}"
@@ -194,20 +165,41 @@
       secureEvictionTimePeriod = 5500
       secureMinIdleTimeInPool = 5000
 
-# remove this from config and assign default values
-[enforcer.analyticsReceiver]
-    port = 18090
-    maxMessageSize = 1000000000
-    maxHeaderLimit = 8192
-    #keep alive time of the external authz connection
-    keepAliveTime = 600
+[security]
 
-    [enforcer.analyticsReceiver.threadPool]
-        coreSize = 10
-        maxSize = 100
-        #keep alive time of threads in seconds
-        keepAliveTime = 600
-        queueSize = 1000
+[security.adapter]
+  enableOutboundAuthHeader = false
+  authorizationHeader = "authorization"
+
+[security.enforcer]
+# JWT token authorization configurations. You can provide multiple JWT issuers
+# Issuer 1
+[[security.enforcer.tokenService]]
+  name="Resident Key Manager"
+  issuer = "https://localhost:9443/oauth2/token"
+  certificateAlias = ""
+  # URL of the JWKs endpoint
+  jwksURL = ""
+  # Validate subscribed APIs
+  validateSubscription = false
+  # The claim in which the consumer key of the application is coming
+  consumerKeyClaim = "azp"
+  # Certificate Filepath within enforcer
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+# Issuer 2
+[[security.enforcer.tokenService]]
+    name="MGW"
+    issuer = "https://localhost:9095/testkey"
+    certificateAlias = "mgw"
+    # URL of the JWKs endpoint
+    jwksURL = ""
+    # Validate subscribed APIs
+    validateSubscription = false
+    # The claim in which the consumer key of the application is coming
+    consumerKeyClaim = ""
+    # Certificate Filepath within enforcer
+    certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 [controlPlane]
 # Control plane's eventHub details
@@ -245,3 +237,16 @@
                 #keep alive time of threads in seconds
                 keepAliveTime = 600
                 queueSize = 1000
+        [enforcer.analyticsReceiver.threadPool]
+            coreSize = 10
+            maxSize = 100
+            #keep alive time of threads in seconds
+            keepAliveTime = 600
+            queueSize = 1000
+
+        [enforcer.analyticsReceiver]
+            port = 18090
+            maxMessageSize = 1000000000
+            maxHeaderLimit = 8192
+            #keep alive time of the external authz connection
+            keepAliveTime = 600

@@ -90,6 +90,46 @@ public class TokenUtil {
         return base64UrlEncodedHeader + '.' + base64UrlEncodedBody + '.' + base64UrlEncodedAssertion;
     }
 
+    public static String getInternalKey(JSONObject jwtTokenInfo, String keyType, int validityPeriod) throws Exception {
+        jwtTokenInfo.put("sub", "admin");
+        jwtTokenInfo.put("iss", "https://localhost:9443/oauth2/token");
+        jwtTokenInfo.put("keytype", keyType);
+        jwtTokenInfo.put("iat", System.currentTimeMillis());
+        jwtTokenInfo.put("exp", (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) + validityPeriod);
+        jwtTokenInfo.put("jti", UUID.randomUUID());
+        jwtTokenInfo.put("token_type", "InternalKey");
+        String payload = jwtTokenInfo.toString();
+
+        JSONObject head = new JSONObject();
+        head.put("alg", "RS256");
+        head.put("kid", "gateway_certificate_alias");
+
+        String header = head.toString();
+        String base64UrlEncodedHeader = Base64.getUrlEncoder()
+                .encodeToString(header.getBytes(Charset.defaultCharset()));
+        String base64UrlEncodedBody = Base64.getUrlEncoder().encodeToString(payload.getBytes(Charset.defaultCharset()));
+
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        String jksPath = TokenUtil.class.getClassLoader().getResource("keystore/wso2carbon.jks").getPath();
+        FileInputStream is = new FileInputStream(jksPath);
+        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keystore.load(is, "wso2carbon".toCharArray());
+        String alias = "wso2carbon";
+        Key key = keystore.getKey(alias, "wso2carbon".toCharArray());
+        Key privateKey = null;
+        if (key instanceof PrivateKey) {
+            privateKey = key;
+        }
+        signature.initSign((PrivateKey) privateKey);
+        String assertion = base64UrlEncodedHeader + "." + base64UrlEncodedBody;
+        byte[] dataInBytes = assertion.getBytes(StandardCharsets.UTF_8);
+        signature.update(dataInBytes);
+        //sign the assertion and return the signature
+        byte[] signedAssertion = signature.sign();
+        String base64UrlEncodedAssertion = Base64.getUrlEncoder().encodeToString(signedAssertion);
+        return base64UrlEncodedHeader + '.' + base64UrlEncodedBody + '.' + base64UrlEncodedAssertion;
+    }
+
     public static String getJwtWithCustomClaims(ApplicationDTO applicationDTO, JSONObject jwtTokenInfo, String keyType, int validityPeriod, Map<String, String > claims)
             throws Exception {
         for(Map.Entry<String, String> entry : claims.entrySet()) {
@@ -120,9 +160,12 @@ public class TokenUtil {
      * @return JWT
      */
     public static String getJWT(API api, ApplicationDTO applicationDTO, String tier, String keyType,
-                                int validityPeriod, String scopes) throws Exception {
+                                int validityPeriod, String scopes, boolean isInternalKey) throws Exception {
         SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
-        subscribedApiDTO.setContext(api.getContext() + "/" + api.getVersion());
+        if (!api.getContext().startsWith("/")) {
+            api.setContext("/" + api.getContext());
+        }
+        subscribedApiDTO.setContext(api.getContext());
         subscribedApiDTO.setName(api.getName());
         subscribedApiDTO.setVersion(api.getVersion());
         subscribedApiDTO.setPublisher("admin");
@@ -132,15 +175,18 @@ public class TokenUtil {
 
         JSONObject jwtTokenInfo = new JSONObject();
         jwtTokenInfo.put("subscribedAPIs", new JSONArray(Arrays.asList(subscribedApiDTO)));
+        if (isInternalKey) {
+            return TokenUtil.getInternalKey(jwtTokenInfo, keyType, validityPeriod);
+        }
         return TokenUtil.getBasicJWT(applicationDTO, jwtTokenInfo, keyType, validityPeriod, scopes);
     }
 
-    public static String getJwtForPetstore(String keyType, String scopes) throws Exception {
+    public static String getJwtForPetstore(String keyType, String scopes, boolean isInternalKey) throws Exception {
         API api = new API();
         api.setName("PetStoreAPI");
-        api.setContext("petstore/v1");
+        api.setContext("v2");
         api.setProdEndpoint(Utils.getMockServiceURLHttp("/echo/prod"));
-        api.setVersion("1.0.0");
+        api.setVersion("1.0.5");
         api.setProvider("admin");
 
         //Define application info
@@ -148,6 +194,6 @@ public class TokenUtil {
         application.setName("jwtApp");
         application.setTier("Unlimited");
         application.setId((int) (Math.random() * 1000));
-        return getJWT(api, application, "Unlimited", keyType, 3600, scopes);
+        return getJWT(api, application, "Unlimited", keyType, 3600, scopes, isInternalKey);
     }
 }

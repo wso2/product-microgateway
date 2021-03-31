@@ -23,6 +23,7 @@ import (
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
+	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/api"
 	envoy "github.com/wso2/micro-gw/internal/oasparser/envoyconf"
 	"github.com/wso2/micro-gw/internal/oasparser/model"
@@ -91,7 +92,7 @@ func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, routes []*route
 }
 
 // GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition.
-func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string) *api.Api {
+func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpointSecurity config.EndpointSecurity) *api.Api {
 	prodUrls := []*api.Endpoint{}
 	sandUrls := []*api.Endpoint{}
 	resources := []*api.Resource{}
@@ -129,20 +130,39 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string) *api.Api
 		resources = append(resources, resource)
 	}
 
+	endpointSecurityDetails := &api.EndpointSecurity{
+		SandBoxSecurityInfo: &api.SecurityInfo{
+			Username:         endpointSecurity.SandBox.Username,
+			Password:         endpointSecurity.SandBox.Password,
+			SecurityType:     endpointSecurity.SandBox.SecurityType,
+			Enabled:          endpointSecurity.SandBox.Enabled,
+			CustomParameters: endpointSecurity.SandBox.CustomParameters,
+		},
+		ProductionSecurityInfo: &api.SecurityInfo{
+			Username:         endpointSecurity.Production.Username,
+			Password:         endpointSecurity.Production.Password,
+			SecurityType:     endpointSecurity.Production.SecurityType,
+			Enabled:          endpointSecurity.Production.Enabled,
+			CustomParameters: endpointSecurity.Production.CustomParameters,
+		},
+	}
+
 	return &api.Api{
-		Id:                mgwSwagger.GetID(),
-		Title:             mgwSwagger.GetTitle(),
-		Description:       mgwSwagger.GetDescription(),
-		BasePath:          mgwSwagger.GetXWso2Basepath(),
-		Version:           mgwSwagger.GetVersion(),
-		ApiType:           mgwSwagger.GetAPIType(),
-		ProductionUrls:    prodUrls,
-		SandboxUrls:       sandUrls,
-		Resources:         resources,
-		ApiLifeCycleState: lifeCycleState,
-		Tier:              mgwSwagger.GetXThrottlingTier(),
-		SecurityScheme:    mgwSwagger.GetSetSecurityScheme(),
-		DisableSecurity:   mgwSwagger.GetDisableSecurity(),
+		Id:                  mgwSwagger.GetID(),
+		Title:               mgwSwagger.GetTitle(),
+		Description:         mgwSwagger.GetDescription(),
+		BasePath:            mgwSwagger.GetXWso2Basepath(),
+		Version:             mgwSwagger.GetVersion(),
+		ApiType:             mgwSwagger.GetAPIType(),
+		ProductionUrls:      prodUrls,
+		SandboxUrls:         sandUrls,
+		Resources:           resources,
+		ApiLifeCycleState:   lifeCycleState,
+		Tier:                mgwSwagger.GetXThrottlingTier(),
+		SecurityScheme:      mgwSwagger.GetSetSecurityScheme(),
+		EndpointSecurity:    endpointSecurityDetails,
+		AuthorizationHeader: mgwSwagger.GetXWSO2AuthHeader(),
+		DisableSecurity:     mgwSwagger.GetDisableSecurity(),
 	}
 }
 

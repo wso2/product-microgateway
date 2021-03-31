@@ -60,7 +60,7 @@ public class RestAPI implements API {
         List<String> securitySchemes = api.getSecuritySchemeList();
         List<ResourceConfig> resources = new ArrayList<>();
 
-        for (Resource res: api.getResourcesList()) {
+        for (Resource res : api.getResourcesList()) {
             for (Operation operation : res.getMethodsList()) {
                 ResourceConfig resConfig = buildResource(operation, res.getPath());
                 resources.add(resConfig);
@@ -68,18 +68,10 @@ public class RestAPI implements API {
         }
 
         this.apiLifeCycleState = api.getApiLifeCycleState();
-        this.apiConfig = new APIConfig.Builder(name)
-                .basePath(basePath)
-                .version(version)
-                .resources(resources)
-                .apiType(apiType)
-                .productionUrls(productionUrls)
-                .sandboxUrls(sandboxUrls)
-                .apiLifeCycleState(apiLifeCycleState)
-                .securitySchema(securitySchemes)
-                .tier(api.getTier())
-                .disableSecurity(api.getDisableSecurity())
-                .build();
+        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources)
+                .apiType(apiType).apiLifeCycleState(apiLifeCycleState).securitySchema(securitySchemes)
+                .tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
+                .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity()).build();
         initFilters();
         return basePath;
     }
@@ -170,9 +162,7 @@ public class RestAPI implements API {
             AuthFilter authFilter = new AuthFilter();
             authFilter.init(apiConfig);
             this.filters.add(authFilter);
-
         }
-
         // enable throttle filter
         if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
             ThrottleFilter throttleFilter = new ThrottleFilter();

@@ -20,7 +20,6 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private Config() {
-    jwtTokenConfig_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -43,7 +42,6 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
-    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -55,12 +53,16 @@ private static final long serialVersionUID = 0L;
             done = true;
             break;
           case 10: {
-            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              jwtTokenConfig_ = new java.util.ArrayList<org.wso2.gateway.discovery.config.enforcer.Issuer>();
-              mutable_bitField0_ |= 0x00000001;
+            org.wso2.gateway.discovery.config.enforcer.Security.Builder subBuilder = null;
+            if (security_ != null) {
+              subBuilder = security_.toBuilder();
             }
-            jwtTokenConfig_.add(
-                input.readMessage(org.wso2.gateway.discovery.config.enforcer.Issuer.parser(), extensionRegistry));
+            security_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.Security.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(security_);
+              security_ = subBuilder.buildPartial();
+            }
+
             break;
           }
           case 18: {
@@ -208,9 +210,6 @@ private static final long serialVersionUID = 0L;
       throw new com.google.protobuf.InvalidProtocolBufferException(
           e).setUnfinishedMessage(this);
     } finally {
-      if (((mutable_bitField0_ & 0x00000001) != 0)) {
-        jwtTokenConfig_ = java.util.Collections.unmodifiableList(jwtTokenConfig_);
-      }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
     }
@@ -228,44 +227,30 @@ private static final long serialVersionUID = 0L;
             org.wso2.gateway.discovery.config.enforcer.Config.class, org.wso2.gateway.discovery.config.enforcer.Config.Builder.class);
   }
 
-  public static final int JWTTOKENCONFIG_FIELD_NUMBER = 1;
-  private java.util.List<org.wso2.gateway.discovery.config.enforcer.Issuer> jwtTokenConfig_;
+  public static final int SECURITY_FIELD_NUMBER = 1;
+  private org.wso2.gateway.discovery.config.enforcer.Security security_;
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+   * @return Whether the security field is set.
    */
   @java.lang.Override
-  public java.util.List<org.wso2.gateway.discovery.config.enforcer.Issuer> getJwtTokenConfigList() {
-    return jwtTokenConfig_;
+  public boolean hasSecurity() {
+    return security_ != null;
   }
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+   * @return The security.
    */
   @java.lang.Override
-  public java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder> 
-      getJwtTokenConfigOrBuilderList() {
-    return jwtTokenConfig_;
+  public org.wso2.gateway.discovery.config.enforcer.Security getSecurity() {
+    return security_ == null ? org.wso2.gateway.discovery.config.enforcer.Security.getDefaultInstance() : security_;
   }
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
    */
   @java.lang.Override
-  public int getJwtTokenConfigCount() {
-    return jwtTokenConfig_.size();
-  }
-  /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-   */
-  @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.Issuer getJwtTokenConfig(int index) {
-    return jwtTokenConfig_.get(index);
-  }
-  /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-   */
-  @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder getJwtTokenConfigOrBuilder(
-      int index) {
-    return jwtTokenConfig_.get(index);
+  public org.wso2.gateway.discovery.config.enforcer.SecurityOrBuilder getSecurityOrBuilder() {
+    return getSecurity();
   }
 
   public static final int KEYSTORE_FIELD_NUMBER = 2;
@@ -542,8 +527,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    for (int i = 0; i < jwtTokenConfig_.size(); i++) {
-      output.writeMessage(1, jwtTokenConfig_.get(i));
+    if (security_ != null) {
+      output.writeMessage(1, getSecurity());
     }
     if (keystore_ != null) {
       output.writeMessage(2, getKeystore());
@@ -584,9 +569,9 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    for (int i = 0; i < jwtTokenConfig_.size(); i++) {
+    if (security_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(1, jwtTokenConfig_.get(i));
+        .computeMessageSize(1, getSecurity());
     }
     if (keystore_ != null) {
       size += com.google.protobuf.CodedOutputStream
@@ -643,8 +628,11 @@ private static final long serialVersionUID = 0L;
     }
     org.wso2.gateway.discovery.config.enforcer.Config other = (org.wso2.gateway.discovery.config.enforcer.Config) obj;
 
-    if (!getJwtTokenConfigList()
-        .equals(other.getJwtTokenConfigList())) return false;
+    if (hasSecurity() != other.hasSecurity()) return false;
+    if (hasSecurity()) {
+      if (!getSecurity()
+          .equals(other.getSecurity())) return false;
+    }
     if (hasKeystore() != other.hasKeystore()) return false;
     if (hasKeystore()) {
       if (!getKeystore()
@@ -706,9 +694,9 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    if (getJwtTokenConfigCount() > 0) {
-      hash = (37 * hash) + JWTTOKENCONFIG_FIELD_NUMBER;
-      hash = (53 * hash) + getJwtTokenConfigList().hashCode();
+    if (hasSecurity()) {
+      hash = (37 * hash) + SECURITY_FIELD_NUMBER;
+      hash = (53 * hash) + getSecurity().hashCode();
     }
     if (hasKeystore()) {
       hash = (37 * hash) + KEYSTORE_FIELD_NUMBER;
@@ -882,17 +870,16 @@ private static final long serialVersionUID = 0L;
     private void maybeForceBuilderInitialization() {
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
-        getJwtTokenConfigFieldBuilder();
       }
     }
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      if (jwtTokenConfigBuilder_ == null) {
-        jwtTokenConfig_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000001);
+      if (securityBuilder_ == null) {
+        security_ = null;
       } else {
-        jwtTokenConfigBuilder_.clear();
+        security_ = null;
+        securityBuilder_ = null;
       }
       if (keystoreBuilder_ == null) {
         keystore_ = null;
@@ -980,15 +967,10 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.gateway.discovery.config.enforcer.Config buildPartial() {
       org.wso2.gateway.discovery.config.enforcer.Config result = new org.wso2.gateway.discovery.config.enforcer.Config(this);
-      int from_bitField0_ = bitField0_;
-      if (jwtTokenConfigBuilder_ == null) {
-        if (((bitField0_ & 0x00000001) != 0)) {
-          jwtTokenConfig_ = java.util.Collections.unmodifiableList(jwtTokenConfig_);
-          bitField0_ = (bitField0_ & ~0x00000001);
-        }
-        result.jwtTokenConfig_ = jwtTokenConfig_;
+      if (securityBuilder_ == null) {
+        result.security_ = security_;
       } else {
-        result.jwtTokenConfig_ = jwtTokenConfigBuilder_.build();
+        result.security_ = securityBuilder_.build();
       }
       if (keystoreBuilder_ == null) {
         result.keystore_ = keystore_;
@@ -1088,31 +1070,8 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.wso2.gateway.discovery.config.enforcer.Config other) {
       if (other == org.wso2.gateway.discovery.config.enforcer.Config.getDefaultInstance()) return this;
-      if (jwtTokenConfigBuilder_ == null) {
-        if (!other.jwtTokenConfig_.isEmpty()) {
-          if (jwtTokenConfig_.isEmpty()) {
-            jwtTokenConfig_ = other.jwtTokenConfig_;
-            bitField0_ = (bitField0_ & ~0x00000001);
-          } else {
-            ensureJwtTokenConfigIsMutable();
-            jwtTokenConfig_.addAll(other.jwtTokenConfig_);
-          }
-          onChanged();
-        }
-      } else {
-        if (!other.jwtTokenConfig_.isEmpty()) {
-          if (jwtTokenConfigBuilder_.isEmpty()) {
-            jwtTokenConfigBuilder_.dispose();
-            jwtTokenConfigBuilder_ = null;
-            jwtTokenConfig_ = other.jwtTokenConfig_;
-            bitField0_ = (bitField0_ & ~0x00000001);
-            jwtTokenConfigBuilder_ = 
-              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                 getJwtTokenConfigFieldBuilder() : null;
-          } else {
-            jwtTokenConfigBuilder_.addAllMessages(other.jwtTokenConfig_);
-          }
-        }
+      if (other.hasSecurity()) {
+        mergeSecurity(other.getSecurity());
       }
       if (other.hasKeystore()) {
         mergeKeystore(other.getKeystore());
@@ -1172,246 +1131,124 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
-    private int bitField0_;
 
-    private java.util.List<org.wso2.gateway.discovery.config.enforcer.Issuer> jwtTokenConfig_ =
-      java.util.Collections.emptyList();
-    private void ensureJwtTokenConfigIsMutable() {
-      if (!((bitField0_ & 0x00000001) != 0)) {
-        jwtTokenConfig_ = new java.util.ArrayList<org.wso2.gateway.discovery.config.enforcer.Issuer>(jwtTokenConfig_);
-        bitField0_ |= 0x00000001;
-       }
-    }
-
-    private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.Issuer, org.wso2.gateway.discovery.config.enforcer.Issuer.Builder, org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder> jwtTokenConfigBuilder_;
-
+    private org.wso2.gateway.discovery.config.enforcer.Security security_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.Security, org.wso2.gateway.discovery.config.enforcer.Security.Builder, org.wso2.gateway.discovery.config.enforcer.SecurityOrBuilder> securityBuilder_;
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+     * @return Whether the security field is set.
      */
-    public java.util.List<org.wso2.gateway.discovery.config.enforcer.Issuer> getJwtTokenConfigList() {
-      if (jwtTokenConfigBuilder_ == null) {
-        return java.util.Collections.unmodifiableList(jwtTokenConfig_);
+    public boolean hasSecurity() {
+      return securityBuilder_ != null || security_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+     * @return The security.
+     */
+    public org.wso2.gateway.discovery.config.enforcer.Security getSecurity() {
+      if (securityBuilder_ == null) {
+        return security_ == null ? org.wso2.gateway.discovery.config.enforcer.Security.getDefaultInstance() : security_;
       } else {
-        return jwtTokenConfigBuilder_.getMessageList();
+        return securityBuilder_.getMessage();
       }
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
      */
-    public int getJwtTokenConfigCount() {
-      if (jwtTokenConfigBuilder_ == null) {
-        return jwtTokenConfig_.size();
-      } else {
-        return jwtTokenConfigBuilder_.getCount();
-      }
-    }
-    /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-     */
-    public org.wso2.gateway.discovery.config.enforcer.Issuer getJwtTokenConfig(int index) {
-      if (jwtTokenConfigBuilder_ == null) {
-        return jwtTokenConfig_.get(index);
-      } else {
-        return jwtTokenConfigBuilder_.getMessage(index);
-      }
-    }
-    /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-     */
-    public Builder setJwtTokenConfig(
-        int index, org.wso2.gateway.discovery.config.enforcer.Issuer value) {
-      if (jwtTokenConfigBuilder_ == null) {
+    public Builder setSecurity(org.wso2.gateway.discovery.config.enforcer.Security value) {
+      if (securityBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        ensureJwtTokenConfigIsMutable();
-        jwtTokenConfig_.set(index, value);
+        security_ = value;
         onChanged();
       } else {
-        jwtTokenConfigBuilder_.setMessage(index, value);
+        securityBuilder_.setMessage(value);
       }
+
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
      */
-    public Builder setJwtTokenConfig(
-        int index, org.wso2.gateway.discovery.config.enforcer.Issuer.Builder builderForValue) {
-      if (jwtTokenConfigBuilder_ == null) {
-        ensureJwtTokenConfigIsMutable();
-        jwtTokenConfig_.set(index, builderForValue.build());
+    public Builder setSecurity(
+        org.wso2.gateway.discovery.config.enforcer.Security.Builder builderForValue) {
+      if (securityBuilder_ == null) {
+        security_ = builderForValue.build();
         onChanged();
       } else {
-        jwtTokenConfigBuilder_.setMessage(index, builderForValue.build());
+        securityBuilder_.setMessage(builderForValue.build());
       }
+
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
      */
-    public Builder addJwtTokenConfig(org.wso2.gateway.discovery.config.enforcer.Issuer value) {
-      if (jwtTokenConfigBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
+    public Builder mergeSecurity(org.wso2.gateway.discovery.config.enforcer.Security value) {
+      if (securityBuilder_ == null) {
+        if (security_ != null) {
+          security_ =
+            org.wso2.gateway.discovery.config.enforcer.Security.newBuilder(security_).mergeFrom(value).buildPartial();
+        } else {
+          security_ = value;
         }
-        ensureJwtTokenConfigIsMutable();
-        jwtTokenConfig_.add(value);
         onChanged();
       } else {
-        jwtTokenConfigBuilder_.addMessage(value);
+        securityBuilder_.mergeFrom(value);
       }
+
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
      */
-    public Builder addJwtTokenConfig(
-        int index, org.wso2.gateway.discovery.config.enforcer.Issuer value) {
-      if (jwtTokenConfigBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        ensureJwtTokenConfigIsMutable();
-        jwtTokenConfig_.add(index, value);
+    public Builder clearSecurity() {
+      if (securityBuilder_ == null) {
+        security_ = null;
         onChanged();
       } else {
-        jwtTokenConfigBuilder_.addMessage(index, value);
+        security_ = null;
+        securityBuilder_ = null;
       }
+
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
      */
-    public Builder addJwtTokenConfig(
-        org.wso2.gateway.discovery.config.enforcer.Issuer.Builder builderForValue) {
-      if (jwtTokenConfigBuilder_ == null) {
-        ensureJwtTokenConfigIsMutable();
-        jwtTokenConfig_.add(builderForValue.build());
-        onChanged();
+    public org.wso2.gateway.discovery.config.enforcer.Security.Builder getSecurityBuilder() {
+      
+      onChanged();
+      return getSecurityFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.SecurityOrBuilder getSecurityOrBuilder() {
+      if (securityBuilder_ != null) {
+        return securityBuilder_.getMessageOrBuilder();
       } else {
-        jwtTokenConfigBuilder_.addMessage(builderForValue.build());
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-     */
-    public Builder addJwtTokenConfig(
-        int index, org.wso2.gateway.discovery.config.enforcer.Issuer.Builder builderForValue) {
-      if (jwtTokenConfigBuilder_ == null) {
-        ensureJwtTokenConfigIsMutable();
-        jwtTokenConfig_.add(index, builderForValue.build());
-        onChanged();
-      } else {
-        jwtTokenConfigBuilder_.addMessage(index, builderForValue.build());
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-     */
-    public Builder addAllJwtTokenConfig(
-        java.lang.Iterable<? extends org.wso2.gateway.discovery.config.enforcer.Issuer> values) {
-      if (jwtTokenConfigBuilder_ == null) {
-        ensureJwtTokenConfigIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, jwtTokenConfig_);
-        onChanged();
-      } else {
-        jwtTokenConfigBuilder_.addAllMessages(values);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-     */
-    public Builder clearJwtTokenConfig() {
-      if (jwtTokenConfigBuilder_ == null) {
-        jwtTokenConfig_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000001);
-        onChanged();
-      } else {
-        jwtTokenConfigBuilder_.clear();
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-     */
-    public Builder removeJwtTokenConfig(int index) {
-      if (jwtTokenConfigBuilder_ == null) {
-        ensureJwtTokenConfigIsMutable();
-        jwtTokenConfig_.remove(index);
-        onChanged();
-      } else {
-        jwtTokenConfigBuilder_.remove(index);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-     */
-    public org.wso2.gateway.discovery.config.enforcer.Issuer.Builder getJwtTokenConfigBuilder(
-        int index) {
-      return getJwtTokenConfigFieldBuilder().getBuilder(index);
-    }
-    /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-     */
-    public org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder getJwtTokenConfigOrBuilder(
-        int index) {
-      if (jwtTokenConfigBuilder_ == null) {
-        return jwtTokenConfig_.get(index);  } else {
-        return jwtTokenConfigBuilder_.getMessageOrBuilder(index);
+        return security_ == null ?
+            org.wso2.gateway.discovery.config.enforcer.Security.getDefaultInstance() : security_;
       }
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
      */
-    public java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder> 
-         getJwtTokenConfigOrBuilderList() {
-      if (jwtTokenConfigBuilder_ != null) {
-        return jwtTokenConfigBuilder_.getMessageOrBuilderList();
-      } else {
-        return java.util.Collections.unmodifiableList(jwtTokenConfig_);
-      }
-    }
-    /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-     */
-    public org.wso2.gateway.discovery.config.enforcer.Issuer.Builder addJwtTokenConfigBuilder() {
-      return getJwtTokenConfigFieldBuilder().addBuilder(
-          org.wso2.gateway.discovery.config.enforcer.Issuer.getDefaultInstance());
-    }
-    /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-     */
-    public org.wso2.gateway.discovery.config.enforcer.Issuer.Builder addJwtTokenConfigBuilder(
-        int index) {
-      return getJwtTokenConfigFieldBuilder().addBuilder(
-          index, org.wso2.gateway.discovery.config.enforcer.Issuer.getDefaultInstance());
-    }
-    /**
-     * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-     */
-    public java.util.List<org.wso2.gateway.discovery.config.enforcer.Issuer.Builder> 
-         getJwtTokenConfigBuilderList() {
-      return getJwtTokenConfigFieldBuilder().getBuilderList();
-    }
-    private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.Issuer, org.wso2.gateway.discovery.config.enforcer.Issuer.Builder, org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder> 
-        getJwtTokenConfigFieldBuilder() {
-      if (jwtTokenConfigBuilder_ == null) {
-        jwtTokenConfigBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-            org.wso2.gateway.discovery.config.enforcer.Issuer, org.wso2.gateway.discovery.config.enforcer.Issuer.Builder, org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder>(
-                jwtTokenConfig_,
-                ((bitField0_ & 0x00000001) != 0),
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.Security, org.wso2.gateway.discovery.config.enforcer.Security.Builder, org.wso2.gateway.discovery.config.enforcer.SecurityOrBuilder> 
+        getSecurityFieldBuilder() {
+      if (securityBuilder_ == null) {
+        securityBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.Security, org.wso2.gateway.discovery.config.enforcer.Security.Builder, org.wso2.gateway.discovery.config.enforcer.SecurityOrBuilder>(
+                getSecurity(),
                 getParentForChildren(),
                 isClean());
-        jwtTokenConfig_ = null;
+        security_ = null;
       }
-      return jwtTokenConfigBuilder_;
+      return securityBuilder_;
     }
 
     private org.wso2.gateway.discovery.config.enforcer.CertStore keystore_;

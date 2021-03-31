@@ -52,7 +52,7 @@ public class CorsTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null);
+        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
     }
 
     @Test(description = "Success Scenario, with allow credentials is set to true.")

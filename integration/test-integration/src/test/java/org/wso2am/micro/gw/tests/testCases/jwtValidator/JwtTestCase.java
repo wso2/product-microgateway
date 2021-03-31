@@ -44,10 +44,14 @@ public class JwtTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        jwtWithoutScope = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null);
-        jwtWithScope = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets");
-        jwtWithMultipleScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets read:pets");
-        jwtWithMultipleInvalidScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "foo bar");
+        jwtWithoutScope = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null,
+                false);
+        jwtWithScope = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "write:pets",
+                false);
+        jwtWithMultipleScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION,
+                "write:pets read:pets", false);
+        jwtWithMultipleInvalidScopes = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, "foo bar",
+                false);
     }
 
     @Test(description = "Test to check the JWT auth working")
@@ -73,8 +77,7 @@ public class JwtTestCase {
                 "/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,
-                "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
     }
 
     @Test(description = "Test to check the JWT auth validate expired token")
