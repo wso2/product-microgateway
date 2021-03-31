@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM ubuntu:20.04
+FROM alpine:3.13.3
 LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
 
 ENV LANG=C.UTF-8
