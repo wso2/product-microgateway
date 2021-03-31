@@ -18,6 +18,7 @@
 
 package org.wso2am.micro.gw.tests.testCases.jwtGenerator;
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
 import org.testng.Assert;

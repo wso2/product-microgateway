@@ -135,6 +135,18 @@ paths:
         - petstore_auth:
             - 'write:pets'
             - 'read:pets'
+  '/removeauthheader':
+    get:
+      summary: Get the status of the remove oauth header
+      description: remove Auth Header
+      operationId: removeauthheader
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid status value
+      security:
+        - petstore_auth: [ ]
 securityDefinitions:
   api_key:
     type: apiKey
