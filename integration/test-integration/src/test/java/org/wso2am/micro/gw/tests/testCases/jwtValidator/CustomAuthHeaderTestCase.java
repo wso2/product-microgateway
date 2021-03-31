@@ -28,7 +28,7 @@ public class CustomAuthHeaderTestCase {
                 "/v2/security/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
     }
 
     @Test(description = "Invoke api with invalid AuthHeader")
