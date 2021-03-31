@@ -37,7 +37,7 @@ enabled = true
 allowOrigins = ["http://test1.com", "http://test2.com"]
 allowMethods = ["GET","PUT","POST"]
 allowHeaders = ["Authorization","X-PINGOTHER"]
-exposeHeaders = ["Custom-Header"]
+exposeHeaders = ["X-Custom-Header"]
 allowCredentials = true
 
 [router.keystore]

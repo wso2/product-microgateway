@@ -35,13 +35,13 @@ public class MgwWithJwtConfig extends BaseTestCase {
         String targetDir = Utils.getTargetDirPath();
         String confPath = targetDir + TestConstant.TEST_RESOURCES_PATH + File.separator +
                 "jwtGenerator" + File.separator + "config.toml";
-        ApictlUtils.createProject( "global_cors_openAPI.yaml", "cors_petstore", null);
+        ApictlUtils.createProject( "global_cors_openAPI.yaml", "global_cors_petstore", null);
         super.startMGW(confPath);
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
         ApictlUtils.deployAPI("petstore", "test");
-        ApictlUtils.deployAPI("cors_petstore", "test");
+        ApictlUtils.deployAPI("global_cors_petstore", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 
