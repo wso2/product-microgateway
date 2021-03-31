@@ -297,9 +297,7 @@ func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData)
 	// production Endpoints set
 	var productionEndpoint string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_prod_endpoint_0",
 		endpointConfig.ProductionEndpoints.Endpoint)
-
 	apiProject.ProductionEndpoint = productionEndpoint
-	loggers.LoggerAPI.Infof("apiProject.ProductionEndpoint %v", apiProject.ProductionEndpoint)
 
 	// sandbox Endpoints set
 	var sandboxEndpoint string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_sand_endpoint_0",
