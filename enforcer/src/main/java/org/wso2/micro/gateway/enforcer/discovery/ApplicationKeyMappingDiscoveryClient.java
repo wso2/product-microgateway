@@ -23,6 +23,7 @@ import com.google.rpc.Status;
 import io.envoyproxy.envoy.config.core.v3.Node;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryRequest;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
@@ -33,22 +34,26 @@ import org.wso2.gateway.discovery.subscription.ApplicationKeyMappingList;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
+import org.wso2.micro.gateway.enforcer.discovery.scheduler.XdsSchedulerManager;
 import org.wso2.micro.gateway.enforcer.subscription.SubscriptionDataStoreImpl;
 import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Client to communicate with Application Key Mapping discovery service at the adapter.
  */
-public class ApplicationKeyMappingDiscoveryClient {
+public class ApplicationKeyMappingDiscoveryClient implements Runnable {
     private static final Logger logger = LogManager.getLogger(ApplicationKeyMappingDiscoveryClient.class);
     private static ApplicationKeyMappingDiscoveryClient instance;
-    private final ManagedChannel channel;
-    private final ApplicationKeyMappingDiscoveryServiceGrpc.ApplicationKeyMappingDiscoveryServiceStub stub;
+    private ManagedChannel channel;
+    private ApplicationKeyMappingDiscoveryServiceGrpc.ApplicationKeyMappingDiscoveryServiceStub stub;
     private StreamObserver<DiscoveryRequest> reqObserver;
     private SubscriptionDataStoreImpl subscriptionDataStore;
+    private String host;
+    private int port;
 
     /**
      * This is a reference to the latest received response from the ADS.
@@ -74,11 +79,31 @@ public class ApplicationKeyMappingDiscoveryClient {
     private final String nodeId;
 
     private ApplicationKeyMappingDiscoveryClient(String host, int port) {
+        this.host = host;
+        this.port = port;
         this.subscriptionDataStore = SubscriptionDataStoreImpl.getInstance();
-        this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
-        this.stub = ApplicationKeyMappingDiscoveryServiceGrpc.newStub(channel);
+        initConnection();
         this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
+    }
+
+    private void initConnection() {
+        if (GRPCUtils.isReInitRequired(channel)) {
+            if (channel != null && !channel.isShutdown()) {
+                channel.shutdownNow();
+                do {
+                    try {
+                        channel.awaitTermination(100, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        logger.error("Application key mapping discovery channel shutdown wait was interrupted", e);
+                    }
+                } while (!channel.isShutdown());
+            }
+            this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
+            this.stub = ApplicationKeyMappingDiscoveryServiceGrpc.newStub(channel);
+        } else if (channel.getState(true) == ConnectivityState.READY) {
+            XdsSchedulerManager.getInstance().stopApplicationKeyMappingDiscoveryScheduling();
+        }
     }
 
     public static ApplicationKeyMappingDiscoveryClient getInstance() {
@@ -90,12 +115,18 @@ public class ApplicationKeyMappingDiscoveryClient {
         return instance;
     }
 
+    public void run() {
+        initConnection();
+        watchApplicationKeyMappings();
+    }
+
     public void watchApplicationKeyMappings() {
         // TODO: (Praminda) implement a deadline with retries
         reqObserver = stub.streamApplicationKeyMappings(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
                 logger.debug("Received Application Key Mapping discovery response " + response);
+                XdsSchedulerManager.getInstance().stopApplicationKeyMappingDiscoveryScheduling();
                 latestReceived = response;
                 try {
                     List<ApplicationKeyMapping> applicationKeyMappingLis = new ArrayList<>();
@@ -112,8 +143,8 @@ public class ApplicationKeyMappingDiscoveryClient {
 
             @Override
             public void onError(Throwable throwable) {
-                logger.error("Error occurred during SubApplication Key Mappingscription discovery", throwable);
-                // TODO: (Praminda) if adapter is unavailable keep retrying
+                logger.error("Error occurred during Application Key Mappings discovery", throwable);
+                XdsSchedulerManager.getInstance().startApplicationKeyMappingDiscoveryScheduling();
                 nack(throwable);
             }
 
