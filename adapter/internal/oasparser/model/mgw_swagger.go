@@ -347,23 +347,30 @@ func (swagger *MgwSwagger) setXWso2Cors() {
 				logger.LoggerOasparser.Errorf("Error while parsing %v: "+err.Error(), xWso2Cors)
 				return
 			}
-			logger.LoggerOasparser.Debugf("Cors Configuration is applied : %+v\n", corsConfig)
-			swagger.xWso2Cors = corsConfig
+			if corsConfig.Enabled {
+				logger.LoggerOasparser.Debugf("API Level Cors Configuration is applied : %+v\n", corsConfig)
+				swagger.xWso2Cors = corsConfig
+				return
+			}
+			swagger.xWso2Cors = generateGlobalCors()
 			return
 		}
 		logger.LoggerOasparser.Errorf("Error while parsing %v .", xWso2Cors)
 	} else {
-		conf, _ := config.ReadConfigs()
-		corsConfig := &CorsConfig{
-			Enabled:                       conf.Envoy.Cors.Enabled,
-			AccessControlAllowCredentials: conf.Envoy.Cors.AllowCredentials,
-			AccessControlAllowOrigins:     conf.Envoy.Cors.AllowOrigins,
-			AccessControlAllowHeaders:     conf.Envoy.Cors.AllowHeaders,
-			AccessControlAllowMethods:     conf.Envoy.Cors.AllowMethods,
-			AccessControlExposeHeaders:    conf.Envoy.Cors.ExposeHeaders,
-		}
-		logger.LoggerOasparser.Debug("CORS policy is applied from global configuration.")
-		swagger.xWso2Cors = corsConfig
+		swagger.xWso2Cors = generateGlobalCors()
+	}
+}
+
+func generateGlobalCors() *CorsConfig {
+	conf, _ := config.ReadConfigs()
+	logger.LoggerOasparser.Debug("CORS policy is applied from global configuration.")
+	return &CorsConfig{
+		Enabled:                       conf.Envoy.Cors.Enabled,
+		AccessControlAllowCredentials: conf.Envoy.Cors.AllowCredentials,
+		AccessControlAllowOrigins:     conf.Envoy.Cors.AllowOrigins,
+		AccessControlAllowHeaders:     conf.Envoy.Cors.AllowHeaders,
+		AccessControlAllowMethods:     conf.Envoy.Cors.AllowMethods,
+		AccessControlExposeHeaders:    conf.Envoy.Cors.ExposeHeaders,
 	}
 }
 
