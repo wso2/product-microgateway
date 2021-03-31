@@ -87,6 +87,7 @@ services:
       - XDS_MAX_RETRIES=3
       - JAVA_OPTS=${JAVA_OPTS} -Dhttpclient.hostnameVerifier=AllowAll
       - apim_admin_pwd=admin
+      - enforcer_admin_pwd=admin
       - tm_admin_pwd=admin
       - analytics_authURL=https://localhost:8080
       - analytics_authToken=

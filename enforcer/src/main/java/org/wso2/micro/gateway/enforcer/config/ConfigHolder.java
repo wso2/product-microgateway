@@ -69,9 +69,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.TrustManagerFactory;
 
@@ -90,6 +93,9 @@ public class ConfigHolder {
     private KeyStore trustStoreForJWT = null;
     private TrustManagerFactory trustManagerFactory = null;
     private ArrayList<ExtendedTokenIssuerDto> configIssuerList;
+
+    private static final String dtoPackageName = EnforcerConfig.class.getPackageName();
+    private static final String apimDTOPackageName = "org.wso2.carbon.apimgt";
 
     private ConfigHolder() {
         init();
@@ -419,27 +425,53 @@ public class ConfigHolder {
      * @param config - Enforcer config object.
      */
     private void resolveConfigsWithEnvs(Object config) {
-        String packageName = this.config.getClass().getPackageName();
-        for (Field field : config.getClass().getDeclaredFields()) {
+        List<Field> classFields = Arrays.asList(config.getClass().getDeclaredFields());
+        //extended config class env variables should also be resolved
+        if (config.getClass().getSuperclass() != null && (
+                config.getClass().getSuperclass().getPackageName().contains(dtoPackageName) || config.getClass()
+                        .getSuperclass().getPackageName().contains(apimDTOPackageName))) {
+            processRecursiveObject(config, config.getClass().getSuperclass().getDeclaredFields());
+        }
+        processRecursiveObject(config, config.getClass().getDeclaredFields());
+    }
+
+    private void processRecursiveObject(Object config, Field[] classFields) {
+        for (Field field : classFields) {
             try {
                 field.setAccessible(true);
+                // handles the string and char array objects
                 if (field.getType().isAssignableFrom(String.class) || field.getType().isAssignableFrom(char[].class)) {
                     field.set(config, getEnvValue(field.get(config)));
                 } else if (field.getName().contains(Constants.OBJECT_THIS_NOTATION)) {
+                    // skip the java internal objects created, inside the recursion to avoid stack overflow.
                     continue;
                 } else if (Map.class.isAssignableFrom(field.getType())) {
+                    // handles the config objects saved as Maps
                     Map<Object, Object> objectMap = (Map<Object, Object>) field.get(config);
                     for (Map.Entry<Object, Object> entry : objectMap.entrySet()) {
                         if (entry.getValue().getClass().isAssignableFrom(String.class) || entry.getValue().getClass()
                                 .isAssignableFrom(char[].class)) {
                             field.set(config, getEnvValue(field.get(config)));
                             continue;
-                        } else if (entry.getValue().getClass().getPackageName().contains(packageName)) {
+                        } else if (entry.getValue().getClass().getPackageName().contains(dtoPackageName) || entry
+                                .getValue().getClass().getPackageName().contains(apimDTOPackageName)) {
                             resolveConfigsWithEnvs(entry.getValue());
                         }
                     }
-                } else if (field.getType().getPackageName()
-                        .contains(packageName)) { //recursively call the dto objects in the same package
+                } else if (field.getType().isArray() && field.getType().getPackageName().contains(dtoPackageName)) {
+                    // handles the config objects saved as arrays
+                    Object[] objectArray = (Object[]) field.get(config);
+                    for (Object arrayObject : objectArray) {
+                        if (arrayObject.getClass().getPackageName().contains(dtoPackageName) || arrayObject.getClass()
+                                .getPackageName().contains(apimDTOPackageName)) {
+                            resolveConfigsWithEnvs(arrayObject);
+                        } else if (arrayObject.getClass().isAssignableFrom(String.class) || arrayObject.getClass()
+                                .isAssignableFrom(char[].class)) {
+                            field.set(config, getEnvValue(arrayObject));
+                        }
+                    }
+                } else if (field.getType().getPackageName().contains(dtoPackageName) || field.getType().getPackageName()
+                        .contains(apimDTOPackageName)) { //recursively call the dto objects in the same package
                     resolveConfigsWithEnvs(field.get(config));
                 }
             } catch (IllegalAccessException e) {
@@ -452,20 +484,25 @@ public class ConfigHolder {
     private Object getEnvValue(Object configValue) {
         if (configValue instanceof String) {
             String value = (String) configValue;
-            if (value.contains(Constants.ENV_PREFIX)) {
-                String envName = value
-                        .substring(value.indexOf(Constants.START_BRACKET) + 1, value.indexOf(Constants.END_BRACKET));
-                return System.getenv(envName);
-            }
+            return replaceEnvRegex(value);
         } else if (configValue instanceof char[]) {
             String value = String.valueOf((char[]) configValue);
-            if (value.contains(Constants.ENV_PREFIX)) {
-                String envName = value
-                        .substring(value.indexOf(Constants.START_BRACKET) + 1, value.indexOf(Constants.END_BRACKET));
-                return System.getenv(envName) != null ? System.getenv(envName).toCharArray() : configValue;
-            }
+            return replaceEnvRegex(value).toCharArray();
         }
         return configValue;
+    }
+
+    private String replaceEnvRegex(String value) {
+        Matcher m = Pattern.compile("\\$env\\{(.*?)\\}").matcher(value);
+        if (value.contains(Constants.ENV_PREFIX)) {
+            while (m.find()) {
+                String envName = value.substring(m.start() + 5, m.end() - 1);
+                if (System.getenv(envName) != null) {
+                    value = value.replace(value.substring(m.start(), m.end()), System.getenv(envName));
+                }
+            }
+        }
+        return value;
     }
 
     private void populateJWTIssuerConfigurations(JWTIssuer jwtIssuer) {

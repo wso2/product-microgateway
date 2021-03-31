@@ -101,7 +101,7 @@
   validityPeriod = 3600 # seconds
   [[enforcer.jwtIssuer.jwtUser]]
     username = "admin"
-    password = "admin"
+    password = "$env{enforcer_admin_pwd}"
 
 # Throttling configurations
 [enforcer.throttling]
@@ -116,7 +116,7 @@
   # The message broker context factory
   jmsConnectionInitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
   # The message broker connection URL
-  jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://apim:5672'"
+  jmsConnectionProviderUrl = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://localhost:5672'"
   # Throttling configurations related to event publishing using a binary connection
   [enforcer.throttling.publisher]
     # Credentials required to establish connection between Traffic Manager
