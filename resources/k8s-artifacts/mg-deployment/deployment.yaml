@@ -74,7 +74,7 @@ spec:
             - name: XDS_MAX_RETRIES
               value: "3"
             - name: JAVA_OPTS
-              value: "-Dhttpclient.hostnameVerifier=AllowAll -Djavax.net.debug=ssl:handshake"
+              value: "-Dhttpclient.hostnameVerifier=AllowAll"
             - name: apim_admin_pwd
               value: "admin"
           resources:
@@ -130,8 +130,6 @@ spec:
               value: "8081"
             - name: ENFORCER_CA_CERT_PATH
               value: "/home/wso2/security/truststore/mg.pem"
-            - name: TRAILING_ARGS
-              value: "--log-level trace"
           resources:
             requests:
               memory: "250Mi"
