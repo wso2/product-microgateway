@@ -76,7 +76,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 
 // getAccessLogConfigs provides grpc access log configurations for envoy
 func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog {
-	analyticsEnable := conf.ControlPlane.Analytics.Enabled
+	analyticsEnable := conf.Analytics.Enabled
 	if !analyticsEnable {
 		logger.LoggerOasparser.Debug("gRPC access logs are not enabled as analytics is disabled.")
 		return nil
@@ -85,15 +85,15 @@ func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog
 		CommonConfig: &grpc_accesslogv3.CommonGrpcAccessLogConfig{
 			TransportApiVersion: corev3.ApiVersion_V3,
 			LogName:             grpcAccessLogLogName,
-			BufferFlushInterval: ptypes.DurationProto(conf.ControlPlane.Analytics.RouterLogPublisher.BufferFlushInterval),
-			BufferSizeBytes:     wrapperspb.UInt32(conf.ControlPlane.Analytics.RouterLogPublisher.BufferSizeBytes),
+			BufferFlushInterval: ptypes.DurationProto(conf.Analytics.Adapter.BufferFlushInterval),
+			BufferSizeBytes:     wrapperspb.UInt32(conf.Analytics.Adapter.BufferSizeBytes),
 			GrpcService: &corev3.GrpcService{
 				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
 					EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{
 						ClusterName: accessLoggerClusterName,
 					},
 				},
-				Timeout: ptypes.DurationProto(conf.ControlPlane.Analytics.RouterLogPublisher.GRPCRequestTimeout),
+				Timeout: ptypes.DurationProto(conf.Analytics.Adapter.GRPCRequestTimeout),
 			},
 		},
 	}

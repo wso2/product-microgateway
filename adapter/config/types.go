@@ -149,6 +149,8 @@ type Config struct {
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
+
+	Analytics analytics `toml:"analytics"`
 }
 
 type apimCredentials struct {
@@ -277,11 +279,19 @@ type cache struct {
 }
 
 type analytics struct {
-	Enabled             bool               `toml:"enabled"`
-	AuthURL             string             `toml:"authURL"`
-	AuthToken           string             `toml:"authToken"`
-	EnforcerLogReceiver authService        `toml:"enforcerLogReceiver"`
-	RouterLogPublisher  routerLogPublisher `toml:"routerLogPublisher"`
+	Enabled bool `toml:"enabled"`
+
+	Adapter struct {
+		BufferFlushInterval time.Duration `toml:"bufferFlushInterval"`
+		BufferSizeBytes     uint32        `toml:"bufferSizeBytes"`
+		GRPCRequestTimeout  time.Duration `toml:"gRPCRequestTimeout"`
+	}
+
+	Enforcer struct {
+		AuthURL             string      `toml:"authURL"`
+		AuthToken           string      `toml:"authToken"`
+		EnforcerLogReceiver authService `toml:"LogReceiver"`
+	}
 }
 
 type routerLogPublisher struct {
@@ -329,7 +339,6 @@ type controlPlane struct {
 			EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
 		} `toml:"jmsConnectionParameters"`
 	} `toml:"eventHub"`
-	Analytics analytics `toml:"analytics"`
 }
 
 // APIContent contains everything necessary to create an API

@@ -88,5 +88,7 @@ services:
       - JAVA_OPTS=${JAVA_OPTS} -Dhttpclient.hostnameVerifier=AllowAll
       - apim_admin_pwd=admin
       - tm_admin_pwd=admin
+      - analytics_authURL=https://localhost:8080
+      - analytics_authToken=
     ports:
       - "8081:8081"
