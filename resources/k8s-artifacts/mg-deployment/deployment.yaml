@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-# Deployment for router
+# Deployment for router and enforcer
 
 apiVersion: apps/v1
 kind: Deployment
