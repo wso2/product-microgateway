@@ -145,7 +145,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 
 			err = verifyMandatoryFields(apiObject)
 			if err != nil {
-				loggers.LoggerAPI.Errorf("Fields cannot be empty %v", err)
+				loggers.LoggerAPI.Errorf("%v", err)
 				return apiProject, err
 			}
 
