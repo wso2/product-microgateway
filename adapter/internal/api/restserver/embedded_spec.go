@@ -214,10 +214,18 @@ func init() {
           },
           {
             "maxLength": 255,
-            "pattern": "\\b((xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,}\\b",
+            "pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$",
             "type": "string",
             "description": "Virtual Host of the API\n",
             "name": "vhost",
+            "in": "query"
+          },
+          {
+            "maxLength": 255,
+            "pattern": "^[\\w\\s.-]*(:[\\w\\s.-]+)*$",
+            "type": "string",
+            "description": "Name of gateway environments separated by \":\"\n",
+            "name": "environments",
             "in": "query"
           }
         ],
@@ -654,10 +662,18 @@ func init() {
           },
           {
             "maxLength": 255,
-            "pattern": "\\b((xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,}\\b",
+            "pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$",
             "type": "string",
             "description": "Virtual Host of the API\n",
             "name": "vhost",
+            "in": "query"
+          },
+          {
+            "maxLength": 255,
+            "pattern": "^[\\w\\s.-]*(:[\\w\\s.-]+)*$",
+            "type": "string",
+            "description": "Name of gateway environments separated by \":\"\n",
+            "name": "environments",
             "in": "query"
           }
         ],

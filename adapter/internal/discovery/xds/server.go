@@ -62,6 +62,8 @@ var (
 	enforcerRevokedTokensCache         wso2_cache.SnapshotCache
 	enforcerThrottleDataCache          wso2_cache.SnapshotCache
 
+	// APIName:Version to VHosts map
+	apiToVhostsMap map[string][]string
 	// Vhost:APIName:Version as map key
 	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // MgwSwagger struct map
 	openAPIEnvoyMap        map[string][]string             // Envoy Label Array map
@@ -124,6 +126,7 @@ func init() {
 	enforcerRevokedTokensCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerThrottleDataCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 
+	apiToVhostsMap = make(map[string][]string)
 	apiMgwSwaggerMap = make(map[string]mgw.MgwSwagger)
 	openAPIEnvoyMap = make(map[string][]string)
 	openAPIEnforcerApisMap = make(map[string]types.Resource)
@@ -234,6 +237,7 @@ func UpdateAPI(apiContent config.APIContent) {
 	}
 
 	apiIdentifier := GenerateIdentifierForAPI(apiContent.VHost, apiContent.Name, apiContent.Version)
+	apiIdentifierWithoutVhost := GenerateIdentifierForAPIWithoutVhost(apiContent.Name, apiContent.Version)
 	//TODO: (SuKSW) Uncomment the below section depending on MgwSwagger.Resource ids
 	//TODO: (SuKSW) Update the existing API if the basepath already exists
 	//existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
@@ -255,6 +259,7 @@ func UpdateAPI(apiContent config.APIContent) {
 	oldLabels, _ := openAPIEnvoyMap[apiIdentifier]
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiIdentifier, oldLabels)
 	openAPIEnvoyMap[apiIdentifier] = newLabels
+	apiToVhostsMap[apiIdentifierWithoutVhost] = append(apiToVhostsMap[apiIdentifierWithoutVhost], apiContent.VHost)
 
 	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, apiContent.UpstreamCerts,
 		apiContent.VHost)
@@ -272,21 +277,80 @@ func UpdateAPI(apiContent config.APIContent) {
 	}
 }
 
-// DeleteAPI deletes an API, its resources and updates the caches
-func DeleteAPI(vhost, apiName, version string) error {
+// DeleteAPIs deletes an API, its resources and updates the caches of given environments
+func DeleteAPIs(vhost, apiName, version string, environments []string) error {
+	apiNameVersionID := GenerateIdentifierForAPIWithoutVhost(apiName, version)
+	vhosts, found := apiToVhostsMap[apiNameVersionID]
+	if !found {
+		logger.LoggerXds.Infof("Unable to delete API %v. API does not exist.", apiNameVersionID)
+		return errors.New(mgw.NotFound)
+	}
+
+	if vhost == "" {
+		// vhost is not defined, delete all vhosts
+		logger.LoggerXds.Infof("No vhost is specified for the API %v deleting from all vhosts", apiNameVersionID)
+		deletedVhosts := make([]string, 0, len(vhosts))
+		for _, vh := range vhosts {
+			apiIdentifier := GenerateIdentifierForAPI(vh, apiName, version)
+			// TODO: (renuka) optimize to update cache only once after updating all maps
+			if err := deleteAPI(apiIdentifier, environments); err != nil {
+				// Update apiToVhostsMap with already deleted vhosts in the loop
+				logger.LoggerXds.Errorf("Error deleting API: %v", apiIdentifier)
+				logger.LoggerXds.Debugf("Update map apiToVhostsMap with deleting already deleted vhosts for API %v",
+					apiIdentifier)
+				remainingVhosts := make([]string, 0, len(vhosts)-len(deletedVhosts))
+				for _, v := range vhosts {
+					if !arrayContains(deletedVhosts, v) {
+						remainingVhosts = append(remainingVhosts, v)
+					}
+				}
+				apiToVhostsMap[apiNameVersionID] = remainingVhosts
+				return err
+			}
+			deletedVhosts = append(deletedVhosts, vh)
+		}
+		delete(apiToVhostsMap, apiNameVersionID)
+		return nil
+	}
+
 	apiIdentifier := GenerateIdentifierForAPI(vhost, apiName, version)
+	if err := deleteAPI(apiIdentifier, environments); err != nil {
+		return err
+	}
+	if len(vhosts) == 1 && vhosts[0] == vhost {
+		logger.LoggerXds.Debugf("There are no vhosts for the API %v and clean vhost entry with name:version from maps",
+			apiNameVersionID)
+		delete(apiToVhostsMap, apiNameVersionID)
+	}
+	return nil
+}
+
+// deleteAPI deletes an API, its resources and updates the caches of given environments
+func deleteAPI(apiIdentifier string, environments []string) error {
 	_, exists := apiMgwSwaggerMap[apiIdentifier]
 	if !exists {
 		logger.LoggerXds.Infof("Unable to delete API " + apiIdentifier + ". Does not exist.")
 		return errors.New(mgw.NotFound)
 	}
+
+	existingLabels := openAPIEnvoyMap[apiIdentifier]
+	toBeDelEnvs, toBeKeptEnvs := getEnvironmentsToBeDeleted(existingLabels, environments)
+
+	if len(existingLabels) != len(toBeDelEnvs) {
+		// do not delete from all environments, hence do not clear routes, clusters, endpoints, enforcerAPIs
+		openAPIEnvoyMap[apiIdentifier] = toBeKeptEnvs
+		// remove only toBeDelEnvs
+		updateXdsCacheOnAPIAdd(toBeDelEnvs, []string{})
+		logger.LoggerXds.Infof("Deleted API. %v", apiIdentifier)
+		return nil
+	}
+
 	//clean maps of routes, clusters, endpoints, enforcerAPIs
 	delete(openAPIRoutesMap, apiIdentifier)
 	delete(openAPIClustersMap, apiIdentifier)
 	delete(openAPIEndpointsMap, apiIdentifier)
 	delete(openAPIEnforcerApisMap, apiIdentifier)
 
-	existingLabels := openAPIEnvoyMap[apiIdentifier]
 	//updateXdsCacheOnAPIAdd is called after cleaning maps of routes, clusters, endpoints, enforcerAPIs.
 	//Therefore resources that belongs to the deleting API do not exist. Caches updated only with
 	//resources that belongs to the remaining APIs
@@ -297,6 +361,27 @@ func DeleteAPI(vhost, apiName, version string) error {
 	//TODO: (SuKSW) clean any remaining in label wise maps, if this is the last API of that label
 	logger.LoggerXds.Infof("Deleted API. %v", apiIdentifier)
 	return nil
+}
+
+// getEnvironmentsToBeDeleted returns an slice of environments APIs to be u-deployed from
+// by considering existing environments list and environments that APIs are wished to be un-deployed
+func getEnvironmentsToBeDeleted(existingEnvs, deleteEnvs []string) (toBeDel []string, toBeKept []string) {
+	toBeDel = make([]string, 0, len(deleteEnvs))
+	toBeKept = make([]string, 0, len(deleteEnvs))
+
+	// if deleteEnvs is empty (deleteEnvs wished to be deleted), delete all environments
+	if len(deleteEnvs) == 0 {
+		return existingEnvs, []string{}
+	}
+	// otherwise delete env if it wished to
+	for _, existingEnv := range existingEnvs {
+		if arrayContains(deleteEnvs, existingEnv) {
+			toBeDel = append(toBeDel, existingEnv)
+		} else {
+			toBeKept = append(toBeKept, existingEnv)
+		}
+	}
+	return
 }
 
 func arrayContains(a []string, x string) bool {
@@ -609,7 +694,12 @@ func IsAPIExist(vhost, name, version string) (exists bool) {
 
 // GenerateIdentifierForAPI generates an identifier unique to the API
 func GenerateIdentifierForAPI(vhost, name, version string) string {
-	return vhost + apiKeyFieldSeparator + name + apiKeyFieldSeparator + version
+	return fmt.Sprint(vhost, apiKeyFieldSeparator, name, apiKeyFieldSeparator, version)
+}
+
+// GenerateIdentifierForAPIWithoutVhost generates an identifier unique to the API name and version
+func GenerateIdentifierForAPIWithoutVhost(name, version string) string {
+	return fmt.Sprint(name, apiKeyFieldSeparator, version)
 }
 
 // ExtractVhostFromAPIIdentifier extracts vhost from the API identifier

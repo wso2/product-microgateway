@@ -56,6 +56,13 @@ type DeleteApisParams struct {
 	  In: query
 	*/
 	APIName string
+	/*Name of gateway environments separated by ":"
+
+	  Max Length: 255
+	  Pattern: ^[\w\s.-]*(:[\w\s.-]+)*$
+	  In: query
+	*/
+	Environments *string
 	/*version of the API
 
 	  Required: true
@@ -68,7 +75,7 @@ type DeleteApisParams struct {
 	/*Virtual Host of the API
 
 	  Max Length: 255
-	  Pattern: \b((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\b
+	  Pattern: ^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$
 	  In: query
 	*/
 	Vhost *string
@@ -87,6 +94,11 @@ func (o *DeleteApisParams) BindRequest(r *http.Request, route *middleware.Matche
 
 	qAPIName, qhkAPIName, _ := qs.GetOK("apiName")
 	if err := o.bindAPIName(qAPIName, qhkAPIName, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qEnvironments, qhkEnvironments, _ := qs.GetOK("environments")
+	if err := o.bindEnvironments(qEnvironments, qhkEnvironments, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -142,6 +154,42 @@ func (o *DeleteApisParams) validateAPIName(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("apiName", "query", o.APIName, `^[a-zA-Z0-9_~.-]*$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// bindEnvironments binds and validates parameter Environments from query.
+func (o *DeleteApisParams) bindEnvironments(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Environments = &raw
+
+	if err := o.validateEnvironments(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateEnvironments carries on validations for parameter Environments
+func (o *DeleteApisParams) validateEnvironments(formats strfmt.Registry) error {
+
+	if err := validate.MaxLength("environments", "query", *o.Environments, 255); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("environments", "query", *o.Environments, `^[\w\s.-]*(:[\w\s.-]+)*$`); err != nil {
 		return err
 	}
 
@@ -220,7 +268,7 @@ func (o *DeleteApisParams) validateVhost(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("vhost", "query", *o.Vhost, `\b((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\b`); err != nil {
+	if err := validate.Pattern("vhost", "query", *o.Vhost, `^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`); err != nil {
 		return err
 	}
 

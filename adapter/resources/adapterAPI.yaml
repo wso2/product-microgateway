@@ -165,7 +165,17 @@ paths:
           in: query
           type: string
           maxLength: 255
-          pattern: \b((xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\b
+          # hostname regex as per RFC 1123 (http://tools.ietf.org/html/rfc1123) TODO: (renuka) add support for * as well
+          # examples: *.wso2.com localhost *-wso2.com foo.* foo-*
+          pattern: ^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$
+        - name: environments
+          description: |
+            Name of gateway environments separated by ":"
+          in: query
+          type: string
+          maxLength: 255
+          # example: Production and Sandbox:Label1:Label2
+          pattern: ^[\w\s.-]*(:[\w\s.-]+)*$
       responses:
         200:
           description: |

@@ -401,15 +401,6 @@ func retrieveEndPointSecurityInfo(value string, endPointSecurity config.EpSecuri
 	return epSecurityInfo, err
 }
 
-// DeleteAPI calls the DeleteAPI method in xds_server.go
-func DeleteAPI(vhost *string, apiName string, version string) error {
-	if vhost == nil || *vhost == "" {
-		vhostValue := defaultVHostDomain
-		vhost = &vhostValue
-	}
-	return xds.DeleteAPI(*vhost, apiName, version)
-}
-
 // ListApis calls the ListApis method in xds_server.go
 func ListApis(query *string, limit *int64) *apiModel.APIMeta {
 	var apiType string

@@ -19,9 +19,11 @@ package restserver
 
 import (
 	"crypto/tls"
+	"github.com/wso2/micro-gw/internal/discovery/xds"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/loads"
@@ -113,7 +115,15 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.APIIndividualDeleteApisHandler = api_individual.DeleteApisHandlerFunc(func(
 		params api_individual.DeleteApisParams, principal *models.Principal) middleware.Responder {
 
-		err := apiServer.DeleteAPI(params.Vhost, params.APIName, params.Version)
+		vhost := ""
+		if params.Vhost != nil {
+			vhost = *params.Vhost
+		}
+		var environments []string
+		if params.Environments != nil {
+			environments = strings.Split(*params.Environments, ":")
+		}
+		err := xds.DeleteAPIs(vhost, params.APIName, params.Version, environments)
 		if err == nil {
 			return api_individual.NewDeleteApisOK()
 		}
