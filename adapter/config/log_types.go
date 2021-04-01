@@ -23,6 +23,7 @@ type pkg struct {
 }
 
 type accessLog struct {
+	Enable  bool
 	LogFile string
 	Format  string
 }
