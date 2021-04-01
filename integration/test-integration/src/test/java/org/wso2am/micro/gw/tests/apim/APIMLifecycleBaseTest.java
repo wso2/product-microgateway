@@ -323,6 +323,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         apiRevisionDeployRequest.setName("Production and Sandbox");
         apiRevisionDeployRequest.setDisplayOnDevportal(true);
         apiRevisionDeployRequestList.add(apiRevisionDeployRequest);
+        apiRevisionDeployRequest.setVhost("localhost");
         HttpResponse apiRevisionsDeployResponse = restAPIPublisher.deployAPIRevision(apiId, revisionUUID,
                                                                                      apiRevisionDeployRequestList);
         assertEquals(apiRevisionsDeployResponse.getResponseCode(), HTTP_RESPONSE_CODE_CREATED,
