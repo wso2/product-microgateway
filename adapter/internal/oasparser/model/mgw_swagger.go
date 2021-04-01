@@ -41,7 +41,7 @@ type MgwSwagger struct {
 	xWso2Cors        *CorsConfig
 	securityScheme   []string
 	xThrottlingTier  string
-	xWSO2AuthHeader  string
+	xWso2AuthHeader  string
 	disableSecurity  bool
 }
 
@@ -172,19 +172,16 @@ func (swagger *MgwSwagger) SetVersion(version string) {
 	swagger.version = version
 }
 
-// SetXWSO2AuthHeader sets the AuthHeader of the API
-func (swagger *MgwSwagger) SetXWSO2AuthHeader(authHeader string) {
-	authorizationHeader := resolveAuthHeader(swagger.vendorExtensions)
-	if authorizationHeader == "" {
-		swagger.xWSO2AuthHeader = authHeader
-	} else {
-		swagger.xWSO2AuthHeader = authorizationHeader
+// SetXWso2AuthHeader sets the authHeader of the API
+func (swagger *MgwSwagger) SetXWso2AuthHeader(authHeader string) {
+	if swagger.xWso2AuthHeader == "" {
+		swagger.xWso2AuthHeader = authHeader
 	}
 }
 
-// GetXWSO2AuthHeader returns the AuthHeader of the API
+// GetXWSO2AuthHeader returns the auth header set via the vendor extension.
 func (swagger *MgwSwagger) GetXWSO2AuthHeader() string {
-	return swagger.xWSO2AuthHeader
+	return swagger.xWso2AuthHeader
 }
 
 // GetSetSecurityScheme returns the securityscheme of the API
@@ -206,6 +203,7 @@ func (swagger *MgwSwagger) SetXWso2Extenstions() {
 	swagger.setXWso2Cors()
 	swagger.setXThrottlingTier()
 	swagger.setDisableSecurity()
+	swagger.setXWso2AuthHeader()
 }
 
 // SetXWso2SandboxEndpointForMgwSwagger set the MgwSwagger object with the SandboxEndpoint when
@@ -261,13 +259,24 @@ func (swagger *MgwSwagger) setXThrottlingTier() {
 	}
 }
 
-// resolve authHeader from swagger vendor extension map
-func resolveAuthHeader(vendorExtensions map[string]interface{}) string {
-	if xAuthHeader, ok := vendorExtensions[xAuthHeader]; ok {
-		// If x-wso2-auth-header is present,
-		return xAuthHeader.(string)
+// getXWso2AuthHeader extracts the value of xWso2AuthHeader extension.
+// if the property is not available, an empty string is returned.
+func getXWso2AuthHeader(vendorExtensions map[string]interface{}) string {
+	xWso2AuthHeader := ""
+	if y, found := vendorExtensions[xAuthHeader]; found {
+		if val, ok := y.(string); ok {
+			xWso2AuthHeader = val
+		}
 	}
-	return ""
+	return xWso2AuthHeader
+}
+
+// SetXWSO2AuthHeader sets the AuthHeader of the API
+func (swagger *MgwSwagger) setXWso2AuthHeader() {
+	authorizationHeader := getXWso2AuthHeader(swagger.vendorExtensions)
+	if authorizationHeader != "" {
+		swagger.xWso2AuthHeader = authorizationHeader
+	}
 }
 
 func (swagger *MgwSwagger) setDisableSecurity() {

@@ -432,7 +432,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}
 
-	if !conf.Security.Adapter.EnableOutboundAuthHeader {
+	if conf.Security.Adapter.EnableOutboundAuthHeader {
 		var internalKey string = "Internal-Key"
 		logger.LoggerOasparser.Debugf("removeHeader: %v", authHeader)
 		if authHeader == "" {
@@ -440,6 +440,10 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		}
 		removeHeaders = append(removeHeaders, authHeader)
 		removeHeaders = append(removeHeaders, internalKey)
+	}
+
+	if len(removeHeaders) == 0 {
+		removeHeaders = nil
 	}
 
 	var contextExtensions = make(map[string]string)
