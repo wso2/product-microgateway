@@ -124,7 +124,7 @@ allowCredentials = false
   # The message broker context factory
   jmsConnectionInitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
   # The message broker connection URL
-  jmsConnectionProviderUrl = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://localhost:5672'"
+  jmsConnectionProviderUrl = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://apim:5672'"
   # Throttling configurations related to event publishing using a binary connection
   [enforcer.throttling.publisher]
     # Credentials required to establish connection between Traffic Manager
@@ -132,8 +132,8 @@ allowCredentials = false
     password = "$env{tm_admin_pwd}"
     # Receiver URL and the authentication URL of the Traffic manager node/nodes
     [[enforcer.throttling.publisher.urlGroup]]
-      receiverURLs = ["tcp://localhost:9611"]
-      authURLs = ["ssl://localhost:9711"]
+      receiverURLs = ["tcp://apim:9611"]
+      authURLs = ["ssl://apim:9711"]
     # Data publisher object pool configurations
     [enforcer.throttling.publisher.pool]
       maxIdleDataPublishingAgents = 1000
