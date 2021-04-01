@@ -16,12 +16,15 @@
 
 package api
 
+// DeploymentEnvironments represents content of deployment_environments.yaml file
+// of an API_CTL Project
 type DeploymentEnvironments struct {
 	Type    string       `yaml:"type"`
 	Version string       `yaml:"version"`
 	Data    []Deployment `yaml:"data"`
 }
 
+// Deployment represents deployment information of an API_CTL project
 type Deployment struct {
 	DisplayOnDevportal    bool   `yaml:"displayOnDevportal"`
 	DeploymentVhost       string `yaml:"deploymentVhost"`

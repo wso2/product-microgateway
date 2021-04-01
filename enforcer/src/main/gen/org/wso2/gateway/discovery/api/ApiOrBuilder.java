@@ -232,4 +232,16 @@ public interface ApiOrBuilder extends
    * @return The disableSecurity.
    */
   boolean getDisableSecurity();
+
+  /**
+   * <code>string vhost = 16;</code>
+   * @return The vhost.
+   */
+  java.lang.String getVhost();
+  /**
+   * <code>string vhost = 16;</code>
+   * @return The bytes for vhost.
+   */
+  com.google.protobuf.ByteString
+      getVhostBytes();
 }
