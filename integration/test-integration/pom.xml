@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>integration</artifactId>
-        <version>4.0.0-m10-SNAPSHOT</version>
+        <version>4.0.0-m10</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -206,7 +206,7 @@
         <dependency>
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>mock-backend-server</artifactId>
-            <version>4.0.0-m10-SNAPSHOT</version>
+            <version>4.0.0-m10</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -226,7 +226,7 @@
         <dependency>
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>org.wso2.micro.gateway.enforcer</artifactId>
-            <version>4.0.0-m10-SNAPSHOT</version>
+            <version>4.0.0-m10</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.am</groupId>
