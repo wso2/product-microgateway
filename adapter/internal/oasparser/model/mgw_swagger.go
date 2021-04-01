@@ -172,7 +172,6 @@ func (swagger *MgwSwagger) SetVersion(version string) {
 
 // SetXWso2AuthHeader sets the authHeader of the API
 func (swagger *MgwSwagger) SetXWso2AuthHeader(authHeader string) {
-	logger.LoggerOasparser.Infof("APIObject swagger %v", authHeader)
 	if swagger.xWso2AuthHeader == "" {
 		swagger.xWso2AuthHeader = authHeader
 	}
