@@ -21,17 +21,18 @@ package org.wso2.micro.gateway.enforcer.analytics;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Error;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.MetaInfo;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.EventCategory;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.API;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Application;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Error;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.ExtendedAPI;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Latencies;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.MetaInfo;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Operation;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
@@ -87,7 +88,7 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public API getApi() {
-        API api = new API();
+        ExtendedAPI api = new ExtendedAPI();
         api.setApiId(AnalyticsUtils.getAPIId(requestContext));
         api.setApiCreator(AnalyticsUtils.setDefaultIfNull(
                 requestContext.getAuthenticationContext() == null
@@ -99,6 +100,7 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
                 requestContext.getMatchedAPI().getAPIConfig().getBasePath()) == null
                 ? APIConstants.SUPER_TENANT_DOMAIN_NAME
                 : requestContext.getMatchedAPI().getAPIConfig().getBasePath());
+        api.setOrganizationId("");
         return api;
     }
 
