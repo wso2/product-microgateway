@@ -29,6 +29,21 @@ type EventNotification struct {
 	} `json:"event"`
 }
 
+// EventThrottleData for struct throttle events
+type EventThrottleData struct {
+	Event struct {
+		PayloadData struct {
+			KeyTemplateValue  string `json:"keyTemplateValue"`
+			KeyTemplateState  string `json:"keyTemplateState"`
+			ID                int32  `json:"id"`
+			BlockingCondition string `json:"blockingCondition"`
+			ConditionValue    string `json:"conditionValue"`
+			State             string `json:"state"`
+			TenantDomain      string `json:"tenantDomain"`
+		} `json:"payloadData"`
+	} `json:"event"`
+}
+
 // EventTokenRevocationNotification for struct
 type EventTokenRevocationNotification struct {
 	Event struct {

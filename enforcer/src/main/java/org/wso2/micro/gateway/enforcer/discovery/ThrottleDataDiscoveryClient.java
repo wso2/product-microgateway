@@ -50,8 +50,8 @@ public class ThrottleDataDiscoveryClient implements Runnable {
     private ThrottleDataDiscoveryServiceGrpc.ThrottleDataDiscoveryServiceStub stub;
     private StreamObserver<DiscoveryRequest> reqObserver;
     private final ThrottleDataHolder throttleData;
-    private String host;
-    private int port;
+    private final String host;
+    private final int port;
 
     /**
      * This is a reference to the latest received response from the TDDS.
@@ -126,6 +126,7 @@ public class ThrottleDataDiscoveryClient implements Runnable {
                 logger.debug("Received ThrottleData discovery response " + response);
                 XdsSchedulerManager.getInstance().stopThrottleDataDiscoveryScheduling();
                 latestReceived = response;
+
                 try {
                     handleResponse(response);
                     ack();
@@ -192,12 +193,9 @@ public class ThrottleDataDiscoveryClient implements Runnable {
         // Currently theres only one ThrottleData resource here. Therefore taking 0, no need to iterate
         ThrottleData data = response.getResources(0).unpack(ThrottleData.class);
 
-        if (data.getKeyTemplatesCount() > 0) {
-            throttleData.addKeyTemplates(FilterUtils.generateMap(data.getKeyTemplatesList()));
-        }
-        if (data.hasBlockingConditions()) {
-            throttleData.addBlockingConditions(data.getBlockingConditions());
-        }
+        throttleData.addKeyTemplates(FilterUtils.generateMap(data.getKeyTemplatesList()));
+        throttleData.addBlockingConditions(data.getBlockingConditionsList());
+        throttleData.addIpBlockingConditions(data.getIpBlockingConditionsList());
     }
 
     public void shutdown() throws InterruptedException {
