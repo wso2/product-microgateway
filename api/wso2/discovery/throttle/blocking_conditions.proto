@@ -7,17 +7,7 @@ option java_package = "org.wso2.gateway.discovery.throttle";
 option java_outer_classname = "BlockingConditionsProto";
 option java_multiple_files = true;
 
-// [#protodoc-title: ThrottleDataModels]
-
-// Blocking condition model
-message BlockingConditions {
-	repeated string api = 1;
-	repeated string application = 2;
-	repeated string subscription = 3;
-	repeated IPCondition ip = 4;
-	repeated string custom = 5;
-	repeated string user = 6;
-}
+// [#protodoc-title: IPCondition]
 
 // IP blocking condition model
 message IPCondition {

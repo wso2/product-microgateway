@@ -14,21 +14,21 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-# Deployment for enforcer
+# Deployment for router and enforcer
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mg-enforcer
+  name: mg-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mg-enforcer
+      app: mg-deployment
   template:
     metadata:
       labels:
-        app: mg-enforcer
+        app: mg-deployment
     spec:
       initContainers:
         - name: init-adapter-service
@@ -52,7 +52,7 @@ spec:
               name: logconfig-toml-vol
             - mountPath: /home/wso2/lib/dropins
               name: dropins-vol
-          image: wso2/mg-enforcer:4.0.0-m10-SNAPSHOT
+          image: wso2/mg-enforcer:4.0.0-dev-SNAPSHOT
           imagePullPolicy: Always
           env:
             - name: ENFORCER_PRIVATE_KEY_PATH
@@ -86,6 +86,7 @@ spec:
               cpu: "500m"
           ports:
             - containerPort: 8081
+            - containerPort: 8082
           livenessProbe:
             tcpSocket:
               port: 8081
@@ -96,7 +97,66 @@ spec:
               port: 8081
             initialDelaySeconds: 8
             periodSeconds: 5
+        - name: mg-router
+          volumeMounts:
+            - mountPath: /home/wso2/security/keystore
+              name: router-keystore-vol
+            - mountPath: /home/wso2/security/truststore
+              name: router-truststore-vol
+          image: wso2/mg-router:4.0.0-dev-SNAPSHOT
+          imagePullPolicy: Always
+          env:
+            - name: ROUTER_ADMIN_HOST
+              value: "0.0.0.0"
+            - name: ROUTER_ADMIN_PORT
+              value: "9000"
+            - name: ROUTER_CLUSTER
+              value: "default_cluster"
+            - name: ROUTER_LABEL
+              value: "Production and Sandbox"
+            - name: ROUTER_PRIVATE_KEY_PATH
+              value: "/home/wso2/security/keystore/mg.key"
+            - name: ROUTER_PUBLIC_CERT_PATH
+              value: "/home/wso2/security/keystore/mg.pem"
+            - name: ADAPTER_HOST
+              value: "adapter"
+            - name: ADAPTER_PORT
+              value: "18000"
+            - name: ADAPTER_CA_CERT_PATH
+              value: "/home/wso2/security/truststore/mg.pem"
+            - name: ENFORCER_HOST
+              value: "127.0.0.1"
+            - name: ENFORCER_PORT
+              value: "8081"
+            - name: ENFORCER_CA_CERT_PATH
+              value: "/home/wso2/security/truststore/mg.pem"
+          resources:
+            requests:
+              memory: "250Mi"
+              cpu: "250m"
+            limits:
+              memory: "500Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 9000
+            - containerPort: 9095
+          livenessProbe:
+            tcpSocket:
+              port: 9095
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 9095
+            initialDelaySeconds: 25
+            periodSeconds: 5
       volumes:
+        - name: router-keystore-vol
+          secret:
+            secretName: router-keystore
+        - name: router-truststore-vol
+          secret:
+            secretName: router-truststore
         - name: enforcer-truststore-vol
           secret:
             secretName: enforcer-truststore

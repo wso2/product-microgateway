@@ -87,7 +87,7 @@ public class ConfigHolder {
     private static final Logger logger = LogManager.getLogger(ConfigHolder.class);
 
     private static ConfigHolder configHolder;
-    private EnvVarConfig envVarConfig = new EnvVarConfig();
+    private EnvVarConfig envVarConfig = EnvVarConfig.getInstance();
     EnforcerConfig config = new EnforcerConfig();
     private KeyStore trustStore = null;
     private KeyStore trustStoreForJWT = null;

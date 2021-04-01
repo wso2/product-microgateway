@@ -44,6 +44,7 @@ public class Constants {
 
     // xDS constants
     public static final int MAX_XDS_RETRIES = 3;
+    public static final int XDS_DEFAULT_RETRY = 15;
 
     // Config constants
     public static final String EVENT_HUB_EVENT_LISTENING_ENDPOINT = "eventListeningEndpoints";

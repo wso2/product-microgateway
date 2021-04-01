@@ -145,7 +145,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 
 			err = verifyMandatoryFields(apiObject)
 			if err != nil {
-				loggers.LoggerAPI.Errorf("Fields cannot be empty %v", err)
+				loggers.LoggerAPI.Errorf("%v", err)
 				return apiProject, err
 			}
 
@@ -297,9 +297,7 @@ func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData)
 	// production Endpoints set
 	var productionEndpoint string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_prod_endpoint_0",
 		endpointConfig.ProductionEndpoints.Endpoint)
-
 	apiProject.ProductionEndpoint = productionEndpoint
-	loggers.LoggerAPI.Infof("apiProject.ProductionEndpoint %v", apiProject.ProductionEndpoint)
 
 	// sandbox Endpoints set
 	var sandboxEndpoint string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_sand_endpoint_0",

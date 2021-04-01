@@ -47,6 +47,7 @@ public class MgwWithDefaultConf extends BaseTestCase {
         ApictlUtils.createProject( "prod_and_sand_openAPI.yaml", "prod_and_sand_petstore", null);
         ApictlUtils.createProject( "prod_openAPI.yaml", "prod_petstore", null);
         ApictlUtils.createProject( "sand_openAPI.yaml", "sand_petstore", null);
+        ApictlUtils.createProject( "security_openAPI.yaml", "custom_authheader_petstore", null);
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
@@ -55,6 +56,7 @@ public class MgwWithDefaultConf extends BaseTestCase {
         ApictlUtils.deployAPI("prod_and_sand_petstore", "test");
         ApictlUtils.deployAPI("prod_petstore", "test");
         ApictlUtils.deployAPI("sand_petstore", "test");
+        ApictlUtils.deployAPI("custom_authheader_petstore", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 

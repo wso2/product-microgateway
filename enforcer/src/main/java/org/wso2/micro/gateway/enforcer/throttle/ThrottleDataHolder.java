@@ -19,13 +19,9 @@
 package org.wso2.micro.gateway.enforcer.throttle;
 
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.gateway.discovery.throttle.BlockingConditions;
 import org.wso2.gateway.discovery.throttle.IPCondition;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
@@ -39,7 +35,6 @@ import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.math.BigInteger;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,8 +50,8 @@ public class ThrottleDataHolder {
     private static final Logger log = LogManager.getLogger(ThrottleDataHolder.class);
 
     private final Map<String, Long> throttleDecisions;
-    private final Map<String, String> keyTemplates;
-    private final Map<String, String> blockedConditions;
+    private Map<String, String> keyTemplates;
+    private Map<String, String> blockedConditions;
     private Map<String, Set<IPRange>> blockedIpConditions;
     private static ThrottleDataHolder instance;
     private final Map<String, Map<String, List<ThrottleCondition>>> conditionData = new ConcurrentHashMap<>();
@@ -89,28 +84,10 @@ public class ThrottleDataHolder {
      * @param templates Map of key template
      */
     public void addKeyTemplates(Map<String, String> templates) {
-        if (templates.size() > 0) {
-            keyTemplates.putAll(templates);
+        if (templates == null || templates.size() < 1) {
+            keyTemplates = new ConcurrentHashMap<>();
         }
-    }
-
-    /**
-     * Add a key template to the key template map.
-     *
-     * @param key key template key
-     * @param value key template value
-     */
-    public void addKeyTemplate(String key, String value) {
-        keyTemplates.put(key, value);
-    }
-
-    /**
-     * Removes a key template from the key template map.
-     *
-     * @param key key template key to be removed from the key template map
-     */
-    public void removeKeyTemplate(String key) {
-        keyTemplates.remove(key);
+        keyTemplates = new ConcurrentHashMap<>(templates);
     }
 
     /**
@@ -169,105 +146,52 @@ public class ThrottleDataHolder {
         throttleDecisions.remove(key);
     }
 
-    /**
-     * Add a blocking condition to the blocked conditions map.
-     *
-     * @param conditionKey blocked condition key
-     * @param conditionValue blocked condition value
-     */
-    public void addBlockingCondition(String conditionKey, String conditionValue) {
-        blockedConditions.put(conditionKey, conditionValue);
-    }
 
     /**
-     * Add all blocking conditions in a {@link BlockingConditions} definition.
+     * Add all blocking conditions in a {@link List<String>} definition.
      *
      * @param conditions a blocking condition dto with all types of conditions to add.
      */
-    public void addBlockingConditions(BlockingConditions conditions) {
-        Map<String, String> apis = FilterUtils.generateMap(conditions.getApiList());
-        Map<String, String> apps = FilterUtils.generateMap(conditions.getApplicationList());
-        Map<String, String> subs = FilterUtils.generateMap(conditions.getSubscriptionList());
-        Map<String, String> users = FilterUtils.generateMap(conditions.getUserList());
-        Map<String, String> custom = FilterUtils.generateMap(conditions.getCustomList());
-
-        if (!apis.isEmpty()) {
-            blockedConditions.putAll(apis);
+    public void addBlockingConditions(List<String> conditions) {
+        if (conditions == null || conditions.isEmpty()) {
+            blockedConditions = new ConcurrentHashMap<>();
+            return;
         }
-        if (!apps.isEmpty()) {
-            blockedConditions.putAll(apps);
-        }
-        if (!subs.isEmpty()) {
-            blockedConditions.putAll(subs);
-        }
-        if (!users.isEmpty()) {
-            blockedConditions.putAll(users);
-        }
-        if (!custom.isEmpty()) {
-            blockedConditions.putAll(custom);
-        }
-
-        for (IPCondition condition : conditions.getIpList()) {
-            String fixed = condition.getFixedIp().isBlank() ? "null" : condition.getFixedIp();
-            String starting = condition.getStartingIp().isBlank() ? "null" : condition.getStartingIp();
-            String ending = condition.getEndingIp().isBlank() ? "null" : condition.getEndingIp();
-            StringBuilder sb = new StringBuilder("{\"fixedIp\":");
-            sb.append(fixed)
-                    .append(",\"startingIp\":")
-                    .append(starting)
-                    .append(",\"endingIp\":")
-                    .append(ending)
-                    .append(",\"invert\":")
-                    .append(condition.getInvert())
-                    .append("}");
-            addIpBlockingCondition(condition.getTenantDomain(), condition.getId(), sb.toString(), condition.getType());
-        }
+        Map<String, String> conditionMap = FilterUtils.generateMap(conditions);
+        blockedConditions = new ConcurrentHashMap<>(conditionMap);
     }
 
-    /**
-     * Add IP blocking condition to the blocked IP condition map.
-     *
-     * @param tenantDomain tenant domain of the IP blocking condition
-     * @param conditionId  condition ID
-     * @param value        condition value as an string. This will be processed
-     *                     as an json string and must be in the valid format
-     * @param type         condition type. this can be {@link ThrottleConstants#BLOCK_CONDITION_IP_RANGE}
-     *                     or {@link ThrottleConstants#BLOCKING_CONDITIONS_IP}
-     */
-    public void addIpBlockingCondition(String tenantDomain, int conditionId, String value, String type) {
-
-        Set<IPRange> ipRanges = blockedIpConditions.get(tenantDomain);
-        if (ipRanges == null) {
-            ipRanges = new HashSet<>();
+    public void addIpBlockingConditions(List<IPCondition> conditions) {
+        if (conditions == null || conditions.isEmpty()) {
+            blockedIpConditions = new ConcurrentHashMap<>();
+            return;
         }
-
-        ipRanges.add(convertValueToIPRange(tenantDomain, conditionId, value, type));
-        blockedIpConditions.put(tenantDomain, ipRanges);
-    }
-
-    public void removeBlockingCondition(String conditionKey) {
-        blockedConditions.remove(conditionKey);
-    }
-
-    /**
-     * Remove IP blocking condition from the blocked IP condition map.
-     *
-     * @param tenantDomain tenant domain to lookup the blocked condition
-     * @param conditionId condition ID of the blocked condition
-     */
-    public void removeIpBlockingCondition(String tenantDomain, int conditionId) {
-        Set<IPRange> ipRanges = blockedIpConditions.get(tenantDomain);
-
-        if (ipRanges != null) {
-            Iterator<IPRange> iterator = ipRanges.iterator();
-            while (iterator.hasNext()) {
-                IPRange ipRange = iterator.next();
-                if (ipRange.getId() == conditionId) {
-                    iterator.remove();
-                    break;
-                }
+        Map<String, Set<IPRange>> newConditions = new ConcurrentHashMap<>();
+        for (IPCondition condition : conditions) {
+            Set<IPRange> ipRanges = newConditions.get(condition.getTenantDomain());
+            if (ipRanges == null) {
+                ipRanges = new HashSet<>();
             }
+
+            IPRange ipRange = new IPRange();
+            if (ThrottleConstants.BLOCK_CONDITION_IP_RANGE.equals(condition.getType())) {
+                ipRange.setStartingIP(condition.getStartingIp());
+                ipRange.setEndingIp(condition.getEndingIp());
+            } else if (ThrottleConstants.BLOCKING_CONDITIONS_IP.equals(condition.getType())) {
+                ipRange.setFixedIp(condition.getFixedIp());
+            }
+            ipRange.setId(condition.getId());
+            ipRange.setTenantDomain(condition.getTenantDomain());
+            ipRange.setType(condition.getType());
+            ipRange.setInvert(condition.getInvert());
+            ipRange.setStartingIpBigIntValue(FilterUtils.ipToBigInteger(condition.getStartingIp()));
+            ipRange.setEndingIpBigIntValue(FilterUtils.ipToBigInteger(condition.getEndingIp()));
+
+            ipRanges.add(ipRange);
+            newConditions.put(condition.getTenantDomain(), ipRanges);
         }
+
+        blockedIpConditions = newConditions;
     }
 
     /**
@@ -626,36 +550,5 @@ public class ThrottleDataHolder {
         }
 
         return status;
-    }
-
-    private IPRange convertValueToIPRange(String tenantDomain, int conditionId, String value, String type) {
-        IPRange ipRange = new IPRange();
-        ipRange.setId(conditionId);
-        ipRange.setTenantDomain(tenantDomain);
-        JsonObject ipLevelJson = JsonParser.parseString(value).getAsJsonObject();
-
-        if (ThrottleConstants.BLOCKING_CONDITIONS_IP.equals(type)) {
-            ipRange.setType(ThrottleConstants.BLOCKING_CONDITIONS_IP);
-            JsonElement fixedIpElement = ipLevelJson.get(ThrottleConstants.BLOCK_CONDITION_FIXED_IP);
-            if (fixedIpElement != null && StringUtils.isNotEmpty(fixedIpElement.getAsString())) {
-                ipRange.setFixedIp(fixedIpElement.getAsString());
-            }
-        } else if (ThrottleConstants.BLOCK_CONDITION_IP_RANGE.equals(type)) {
-            ipRange.setType(ThrottleConstants.BLOCK_CONDITION_IP_RANGE);
-            JsonElement startingIpElement = ipLevelJson.get(ThrottleConstants.BLOCK_CONDITION_START_IP);
-            if (startingIpElement != null && StringUtils.isNotEmpty(startingIpElement.getAsString())) {
-                ipRange.setStartingIP(startingIpElement.getAsString());
-                ipRange.setStartingIpBigIntValue(FilterUtils.ipToBigInteger(startingIpElement.getAsString()));
-            }
-            JsonElement endingIpElement = ipLevelJson.get(ThrottleConstants.BLOCK_CONDITION_ENDING_IP);
-            if (endingIpElement != null && StringUtils.isNotEmpty(endingIpElement.getAsString())) {
-                ipRange.setEndingIp(endingIpElement.getAsString());
-                ipRange.setEndingIpBigIntValue(FilterUtils.ipToBigInteger(endingIpElement.getAsString()));
-            }
-        }
-        if (ipLevelJson.has(ThrottleConstants.BLOCK_CONDITION_INVERT)) {
-            ipRange.setInvert(ipLevelJson.get(ThrottleConstants.BLOCK_CONDITION_INVERT).getAsBoolean());
-        }
-        return ipRange;
     }
 }

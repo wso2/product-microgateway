@@ -43,6 +43,14 @@
   certPath = "/home/wso2/security/keystore/mg.pem"
   keyPath = "/home/wso2/security/keystore/mg.key"
 
+[router.cors]
+enabled = false
+allowOrigins = ["*"]
+allowMethods = ["GET","PUT","POST","DELETE","PATCH","OPTIONS"]
+allowHeaders = ["authorization","Access-Control-Allow-Origin","Content-Type","SOAPAction","apikey", "testKey", "Internal-Key"]
+exposeHeaders = []
+allowCredentials = false
+
 [router.upstream]
 [router.upstream.tls]
   minimumProtocolVersion = "TLS1_1"
@@ -116,7 +124,7 @@
   # The message broker context factory
   jmsConnectionInitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
   # The message broker connection URL
-  jmsConnectionProviderUrl = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://localhost:5672'"
+  jmsConnectionProviderUrl = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://apim:5672'"
   # Throttling configurations related to event publishing using a binary connection
   [enforcer.throttling.publisher]
     # Credentials required to establish connection between Traffic Manager

@@ -114,6 +114,16 @@ type Config struct {
 		ClusterTimeoutInSeconds time.Duration
 		KeyStore                keystore
 
+		// Global CORS configurations.
+		Cors struct {
+			Enabled          bool
+			AllowOrigins     []string
+			AllowMethods     []string
+			AllowHeaders     []string
+			AllowCredentials bool
+			ExposeHeaders    []string
+		}
+
 		// Envoy Upstream Related Configurations
 		Upstream struct {
 			//UpstreamTLS related Configuration

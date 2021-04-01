@@ -21,6 +21,8 @@ private static final long serialVersionUID = 0L;
   }
   private ThrottleData() {
     keyTemplates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    blockingConditions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    ipBlockingConditions_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -64,16 +66,21 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 18: {
-            org.wso2.gateway.discovery.throttle.BlockingConditions.Builder subBuilder = null;
-            if (blockingConditions_ != null) {
-              subBuilder = blockingConditions_.toBuilder();
+            java.lang.String s = input.readStringRequireUtf8();
+            if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+              blockingConditions_ = new com.google.protobuf.LazyStringArrayList();
+              mutable_bitField0_ |= 0x00000002;
             }
-            blockingConditions_ = input.readMessage(org.wso2.gateway.discovery.throttle.BlockingConditions.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(blockingConditions_);
-              blockingConditions_ = subBuilder.buildPartial();
+            blockingConditions_.add(s);
+            break;
+          }
+          case 26: {
+            if (!((mutable_bitField0_ & 0x00000004) != 0)) {
+              ipBlockingConditions_ = new java.util.ArrayList<org.wso2.gateway.discovery.throttle.IPCondition>();
+              mutable_bitField0_ |= 0x00000004;
             }
-
+            ipBlockingConditions_.add(
+                input.readMessage(org.wso2.gateway.discovery.throttle.IPCondition.parser(), extensionRegistry));
             break;
           }
           default: {
@@ -93,6 +100,12 @@ private static final long serialVersionUID = 0L;
     } finally {
       if (((mutable_bitField0_ & 0x00000001) != 0)) {
         keyTemplates_ = keyTemplates_.getUnmodifiableView();
+      }
+      if (((mutable_bitField0_ & 0x00000002) != 0)) {
+        blockingConditions_ = blockingConditions_.getUnmodifiableView();
+      }
+      if (((mutable_bitField0_ & 0x00000004) != 0)) {
+        ipBlockingConditions_ = java.util.Collections.unmodifiableList(ipBlockingConditions_);
       }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
@@ -147,29 +160,78 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int BLOCKING_CONDITIONS_FIELD_NUMBER = 2;
-  private org.wso2.gateway.discovery.throttle.BlockingConditions blockingConditions_;
+  private com.google.protobuf.LazyStringList blockingConditions_;
   /**
-   * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
-   * @return Whether the blockingConditions field is set.
+   * <code>repeated string blocking_conditions = 2;</code>
+   * @return A list containing the blockingConditions.
    */
-  @java.lang.Override
-  public boolean hasBlockingConditions() {
-    return blockingConditions_ != null;
+  public com.google.protobuf.ProtocolStringList
+      getBlockingConditionsList() {
+    return blockingConditions_;
   }
   /**
-   * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
-   * @return The blockingConditions.
+   * <code>repeated string blocking_conditions = 2;</code>
+   * @return The count of blockingConditions.
    */
-  @java.lang.Override
-  public org.wso2.gateway.discovery.throttle.BlockingConditions getBlockingConditions() {
-    return blockingConditions_ == null ? org.wso2.gateway.discovery.throttle.BlockingConditions.getDefaultInstance() : blockingConditions_;
+  public int getBlockingConditionsCount() {
+    return blockingConditions_.size();
   }
   /**
-   * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+   * <code>repeated string blocking_conditions = 2;</code>
+   * @param index The index of the element to return.
+   * @return The blockingConditions at the given index.
+   */
+  public java.lang.String getBlockingConditions(int index) {
+    return blockingConditions_.get(index);
+  }
+  /**
+   * <code>repeated string blocking_conditions = 2;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the blockingConditions at the given index.
+   */
+  public com.google.protobuf.ByteString
+      getBlockingConditionsBytes(int index) {
+    return blockingConditions_.getByteString(index);
+  }
+
+  public static final int IP_BLOCKING_CONDITIONS_FIELD_NUMBER = 3;
+  private java.util.List<org.wso2.gateway.discovery.throttle.IPCondition> ipBlockingConditions_;
+  /**
+   * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.throttle.BlockingConditionsOrBuilder getBlockingConditionsOrBuilder() {
-    return getBlockingConditions();
+  public java.util.List<org.wso2.gateway.discovery.throttle.IPCondition> getIpBlockingConditionsList() {
+    return ipBlockingConditions_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends org.wso2.gateway.discovery.throttle.IPConditionOrBuilder> 
+      getIpBlockingConditionsOrBuilderList() {
+    return ipBlockingConditions_;
+  }
+  /**
+   * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+   */
+  @java.lang.Override
+  public int getIpBlockingConditionsCount() {
+    return ipBlockingConditions_.size();
+  }
+  /**
+   * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.throttle.IPCondition getIpBlockingConditions(int index) {
+    return ipBlockingConditions_.get(index);
+  }
+  /**
+   * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.throttle.IPConditionOrBuilder getIpBlockingConditionsOrBuilder(
+      int index) {
+    return ipBlockingConditions_.get(index);
   }
 
   private byte memoizedIsInitialized = -1;
@@ -189,8 +251,11 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < keyTemplates_.size(); i++) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 1, keyTemplates_.getRaw(i));
     }
-    if (blockingConditions_ != null) {
-      output.writeMessage(2, getBlockingConditions());
+    for (int i = 0; i < blockingConditions_.size(); i++) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, blockingConditions_.getRaw(i));
+    }
+    for (int i = 0; i < ipBlockingConditions_.size(); i++) {
+      output.writeMessage(3, ipBlockingConditions_.get(i));
     }
     unknownFields.writeTo(output);
   }
@@ -209,9 +274,17 @@ private static final long serialVersionUID = 0L;
       size += dataSize;
       size += 1 * getKeyTemplatesList().size();
     }
-    if (blockingConditions_ != null) {
+    {
+      int dataSize = 0;
+      for (int i = 0; i < blockingConditions_.size(); i++) {
+        dataSize += computeStringSizeNoTag(blockingConditions_.getRaw(i));
+      }
+      size += dataSize;
+      size += 1 * getBlockingConditionsList().size();
+    }
+    for (int i = 0; i < ipBlockingConditions_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(2, getBlockingConditions());
+        .computeMessageSize(3, ipBlockingConditions_.get(i));
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -230,11 +303,10 @@ private static final long serialVersionUID = 0L;
 
     if (!getKeyTemplatesList()
         .equals(other.getKeyTemplatesList())) return false;
-    if (hasBlockingConditions() != other.hasBlockingConditions()) return false;
-    if (hasBlockingConditions()) {
-      if (!getBlockingConditions()
-          .equals(other.getBlockingConditions())) return false;
-    }
+    if (!getBlockingConditionsList()
+        .equals(other.getBlockingConditionsList())) return false;
+    if (!getIpBlockingConditionsList()
+        .equals(other.getIpBlockingConditionsList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -250,9 +322,13 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + KEY_TEMPLATES_FIELD_NUMBER;
       hash = (53 * hash) + getKeyTemplatesList().hashCode();
     }
-    if (hasBlockingConditions()) {
+    if (getBlockingConditionsCount() > 0) {
       hash = (37 * hash) + BLOCKING_CONDITIONS_FIELD_NUMBER;
-      hash = (53 * hash) + getBlockingConditions().hashCode();
+      hash = (53 * hash) + getBlockingConditionsList().hashCode();
+    }
+    if (getIpBlockingConditionsCount() > 0) {
+      hash = (37 * hash) + IP_BLOCKING_CONDITIONS_FIELD_NUMBER;
+      hash = (53 * hash) + getIpBlockingConditionsList().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -386,6 +462,7 @@ private static final long serialVersionUID = 0L;
     private void maybeForceBuilderInitialization() {
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
+        getIpBlockingConditionsFieldBuilder();
       }
     }
     @java.lang.Override
@@ -393,11 +470,13 @@ private static final long serialVersionUID = 0L;
       super.clear();
       keyTemplates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       bitField0_ = (bitField0_ & ~0x00000001);
-      if (blockingConditionsBuilder_ == null) {
-        blockingConditions_ = null;
+      blockingConditions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bitField0_ = (bitField0_ & ~0x00000002);
+      if (ipBlockingConditionsBuilder_ == null) {
+        ipBlockingConditions_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000004);
       } else {
-        blockingConditions_ = null;
-        blockingConditionsBuilder_ = null;
+        ipBlockingConditionsBuilder_.clear();
       }
       return this;
     }
@@ -431,10 +510,19 @@ private static final long serialVersionUID = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
       }
       result.keyTemplates_ = keyTemplates_;
-      if (blockingConditionsBuilder_ == null) {
-        result.blockingConditions_ = blockingConditions_;
+      if (((bitField0_ & 0x00000002) != 0)) {
+        blockingConditions_ = blockingConditions_.getUnmodifiableView();
+        bitField0_ = (bitField0_ & ~0x00000002);
+      }
+      result.blockingConditions_ = blockingConditions_;
+      if (ipBlockingConditionsBuilder_ == null) {
+        if (((bitField0_ & 0x00000004) != 0)) {
+          ipBlockingConditions_ = java.util.Collections.unmodifiableList(ipBlockingConditions_);
+          bitField0_ = (bitField0_ & ~0x00000004);
+        }
+        result.ipBlockingConditions_ = ipBlockingConditions_;
       } else {
-        result.blockingConditions_ = blockingConditionsBuilder_.build();
+        result.ipBlockingConditions_ = ipBlockingConditionsBuilder_.build();
       }
       onBuilt();
       return result;
@@ -494,8 +582,41 @@ private static final long serialVersionUID = 0L;
         }
         onChanged();
       }
-      if (other.hasBlockingConditions()) {
-        mergeBlockingConditions(other.getBlockingConditions());
+      if (!other.blockingConditions_.isEmpty()) {
+        if (blockingConditions_.isEmpty()) {
+          blockingConditions_ = other.blockingConditions_;
+          bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          ensureBlockingConditionsIsMutable();
+          blockingConditions_.addAll(other.blockingConditions_);
+        }
+        onChanged();
+      }
+      if (ipBlockingConditionsBuilder_ == null) {
+        if (!other.ipBlockingConditions_.isEmpty()) {
+          if (ipBlockingConditions_.isEmpty()) {
+            ipBlockingConditions_ = other.ipBlockingConditions_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+          } else {
+            ensureIpBlockingConditionsIsMutable();
+            ipBlockingConditions_.addAll(other.ipBlockingConditions_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.ipBlockingConditions_.isEmpty()) {
+          if (ipBlockingConditionsBuilder_.isEmpty()) {
+            ipBlockingConditionsBuilder_.dispose();
+            ipBlockingConditionsBuilder_ = null;
+            ipBlockingConditions_ = other.ipBlockingConditions_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+            ipBlockingConditionsBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getIpBlockingConditionsFieldBuilder() : null;
+          } else {
+            ipBlockingConditionsBuilder_.addAllMessages(other.ipBlockingConditions_);
+          }
+        }
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -637,123 +758,354 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private org.wso2.gateway.discovery.throttle.BlockingConditions blockingConditions_;
-    private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.throttle.BlockingConditions, org.wso2.gateway.discovery.throttle.BlockingConditions.Builder, org.wso2.gateway.discovery.throttle.BlockingConditionsOrBuilder> blockingConditionsBuilder_;
-    /**
-     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
-     * @return Whether the blockingConditions field is set.
-     */
-    public boolean hasBlockingConditions() {
-      return blockingConditionsBuilder_ != null || blockingConditions_ != null;
+    private com.google.protobuf.LazyStringList blockingConditions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    private void ensureBlockingConditionsIsMutable() {
+      if (!((bitField0_ & 0x00000002) != 0)) {
+        blockingConditions_ = new com.google.protobuf.LazyStringArrayList(blockingConditions_);
+        bitField0_ |= 0x00000002;
+       }
     }
     /**
-     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
-     * @return The blockingConditions.
+     * <code>repeated string blocking_conditions = 2;</code>
+     * @return A list containing the blockingConditions.
      */
-    public org.wso2.gateway.discovery.throttle.BlockingConditions getBlockingConditions() {
-      if (blockingConditionsBuilder_ == null) {
-        return blockingConditions_ == null ? org.wso2.gateway.discovery.throttle.BlockingConditions.getDefaultInstance() : blockingConditions_;
+    public com.google.protobuf.ProtocolStringList
+        getBlockingConditionsList() {
+      return blockingConditions_.getUnmodifiableView();
+    }
+    /**
+     * <code>repeated string blocking_conditions = 2;</code>
+     * @return The count of blockingConditions.
+     */
+    public int getBlockingConditionsCount() {
+      return blockingConditions_.size();
+    }
+    /**
+     * <code>repeated string blocking_conditions = 2;</code>
+     * @param index The index of the element to return.
+     * @return The blockingConditions at the given index.
+     */
+    public java.lang.String getBlockingConditions(int index) {
+      return blockingConditions_.get(index);
+    }
+    /**
+     * <code>repeated string blocking_conditions = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the blockingConditions at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getBlockingConditionsBytes(int index) {
+      return blockingConditions_.getByteString(index);
+    }
+    /**
+     * <code>repeated string blocking_conditions = 2;</code>
+     * @param index The index to set the value at.
+     * @param value The blockingConditions to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBlockingConditions(
+        int index, java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureBlockingConditionsIsMutable();
+      blockingConditions_.set(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string blocking_conditions = 2;</code>
+     * @param value The blockingConditions to add.
+     * @return This builder for chaining.
+     */
+    public Builder addBlockingConditions(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureBlockingConditionsIsMutable();
+      blockingConditions_.add(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string blocking_conditions = 2;</code>
+     * @param values The blockingConditions to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllBlockingConditions(
+        java.lang.Iterable<java.lang.String> values) {
+      ensureBlockingConditionsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, blockingConditions_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string blocking_conditions = 2;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearBlockingConditions() {
+      blockingConditions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bitField0_ = (bitField0_ & ~0x00000002);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string blocking_conditions = 2;</code>
+     * @param value The bytes of the blockingConditions to add.
+     * @return This builder for chaining.
+     */
+    public Builder addBlockingConditionsBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      ensureBlockingConditionsIsMutable();
+      blockingConditions_.add(value);
+      onChanged();
+      return this;
+    }
+
+    private java.util.List<org.wso2.gateway.discovery.throttle.IPCondition> ipBlockingConditions_ =
+      java.util.Collections.emptyList();
+    private void ensureIpBlockingConditionsIsMutable() {
+      if (!((bitField0_ & 0x00000004) != 0)) {
+        ipBlockingConditions_ = new java.util.ArrayList<org.wso2.gateway.discovery.throttle.IPCondition>(ipBlockingConditions_);
+        bitField0_ |= 0x00000004;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.gateway.discovery.throttle.IPCondition, org.wso2.gateway.discovery.throttle.IPCondition.Builder, org.wso2.gateway.discovery.throttle.IPConditionOrBuilder> ipBlockingConditionsBuilder_;
+
+    /**
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+     */
+    public java.util.List<org.wso2.gateway.discovery.throttle.IPCondition> getIpBlockingConditionsList() {
+      if (ipBlockingConditionsBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(ipBlockingConditions_);
       } else {
-        return blockingConditionsBuilder_.getMessage();
+        return ipBlockingConditionsBuilder_.getMessageList();
       }
     }
     /**
-     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
      */
-    public Builder setBlockingConditions(org.wso2.gateway.discovery.throttle.BlockingConditions value) {
-      if (blockingConditionsBuilder_ == null) {
+    public int getIpBlockingConditionsCount() {
+      if (ipBlockingConditionsBuilder_ == null) {
+        return ipBlockingConditions_.size();
+      } else {
+        return ipBlockingConditionsBuilder_.getCount();
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+     */
+    public org.wso2.gateway.discovery.throttle.IPCondition getIpBlockingConditions(int index) {
+      if (ipBlockingConditionsBuilder_ == null) {
+        return ipBlockingConditions_.get(index);
+      } else {
+        return ipBlockingConditionsBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+     */
+    public Builder setIpBlockingConditions(
+        int index, org.wso2.gateway.discovery.throttle.IPCondition value) {
+      if (ipBlockingConditionsBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        blockingConditions_ = value;
+        ensureIpBlockingConditionsIsMutable();
+        ipBlockingConditions_.set(index, value);
         onChanged();
       } else {
-        blockingConditionsBuilder_.setMessage(value);
+        ipBlockingConditionsBuilder_.setMessage(index, value);
       }
-
       return this;
     }
     /**
-     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
      */
-    public Builder setBlockingConditions(
-        org.wso2.gateway.discovery.throttle.BlockingConditions.Builder builderForValue) {
-      if (blockingConditionsBuilder_ == null) {
-        blockingConditions_ = builderForValue.build();
+    public Builder setIpBlockingConditions(
+        int index, org.wso2.gateway.discovery.throttle.IPCondition.Builder builderForValue) {
+      if (ipBlockingConditionsBuilder_ == null) {
+        ensureIpBlockingConditionsIsMutable();
+        ipBlockingConditions_.set(index, builderForValue.build());
         onChanged();
       } else {
-        blockingConditionsBuilder_.setMessage(builderForValue.build());
+        ipBlockingConditionsBuilder_.setMessage(index, builderForValue.build());
       }
-
       return this;
     }
     /**
-     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
      */
-    public Builder mergeBlockingConditions(org.wso2.gateway.discovery.throttle.BlockingConditions value) {
-      if (blockingConditionsBuilder_ == null) {
-        if (blockingConditions_ != null) {
-          blockingConditions_ =
-            org.wso2.gateway.discovery.throttle.BlockingConditions.newBuilder(blockingConditions_).mergeFrom(value).buildPartial();
-        } else {
-          blockingConditions_ = value;
+    public Builder addIpBlockingConditions(org.wso2.gateway.discovery.throttle.IPCondition value) {
+      if (ipBlockingConditionsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
         }
+        ensureIpBlockingConditionsIsMutable();
+        ipBlockingConditions_.add(value);
         onChanged();
       } else {
-        blockingConditionsBuilder_.mergeFrom(value);
+        ipBlockingConditionsBuilder_.addMessage(value);
       }
-
       return this;
     }
     /**
-     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
      */
-    public Builder clearBlockingConditions() {
-      if (blockingConditionsBuilder_ == null) {
-        blockingConditions_ = null;
+    public Builder addIpBlockingConditions(
+        int index, org.wso2.gateway.discovery.throttle.IPCondition value) {
+      if (ipBlockingConditionsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureIpBlockingConditionsIsMutable();
+        ipBlockingConditions_.add(index, value);
         onChanged();
       } else {
-        blockingConditions_ = null;
-        blockingConditionsBuilder_ = null;
+        ipBlockingConditionsBuilder_.addMessage(index, value);
       }
-
       return this;
     }
     /**
-     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
      */
-    public org.wso2.gateway.discovery.throttle.BlockingConditions.Builder getBlockingConditionsBuilder() {
-      
-      onChanged();
-      return getBlockingConditionsFieldBuilder().getBuilder();
+    public Builder addIpBlockingConditions(
+        org.wso2.gateway.discovery.throttle.IPCondition.Builder builderForValue) {
+      if (ipBlockingConditionsBuilder_ == null) {
+        ensureIpBlockingConditionsIsMutable();
+        ipBlockingConditions_.add(builderForValue.build());
+        onChanged();
+      } else {
+        ipBlockingConditionsBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
     }
     /**
-     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
      */
-    public org.wso2.gateway.discovery.throttle.BlockingConditionsOrBuilder getBlockingConditionsOrBuilder() {
-      if (blockingConditionsBuilder_ != null) {
-        return blockingConditionsBuilder_.getMessageOrBuilder();
+    public Builder addIpBlockingConditions(
+        int index, org.wso2.gateway.discovery.throttle.IPCondition.Builder builderForValue) {
+      if (ipBlockingConditionsBuilder_ == null) {
+        ensureIpBlockingConditionsIsMutable();
+        ipBlockingConditions_.add(index, builderForValue.build());
+        onChanged();
       } else {
-        return blockingConditions_ == null ?
-            org.wso2.gateway.discovery.throttle.BlockingConditions.getDefaultInstance() : blockingConditions_;
+        ipBlockingConditionsBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+     */
+    public Builder addAllIpBlockingConditions(
+        java.lang.Iterable<? extends org.wso2.gateway.discovery.throttle.IPCondition> values) {
+      if (ipBlockingConditionsBuilder_ == null) {
+        ensureIpBlockingConditionsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, ipBlockingConditions_);
+        onChanged();
+      } else {
+        ipBlockingConditionsBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+     */
+    public Builder clearIpBlockingConditions() {
+      if (ipBlockingConditionsBuilder_ == null) {
+        ipBlockingConditions_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+      } else {
+        ipBlockingConditionsBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+     */
+    public Builder removeIpBlockingConditions(int index) {
+      if (ipBlockingConditionsBuilder_ == null) {
+        ensureIpBlockingConditionsIsMutable();
+        ipBlockingConditions_.remove(index);
+        onChanged();
+      } else {
+        ipBlockingConditionsBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+     */
+    public org.wso2.gateway.discovery.throttle.IPCondition.Builder getIpBlockingConditionsBuilder(
+        int index) {
+      return getIpBlockingConditionsFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+     */
+    public org.wso2.gateway.discovery.throttle.IPConditionOrBuilder getIpBlockingConditionsOrBuilder(
+        int index) {
+      if (ipBlockingConditionsBuilder_ == null) {
+        return ipBlockingConditions_.get(index);  } else {
+        return ipBlockingConditionsBuilder_.getMessageOrBuilder(index);
       }
     }
     /**
-     * <code>.wso2.discovery.throttle.BlockingConditions blocking_conditions = 2;</code>
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
      */
-    private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.throttle.BlockingConditions, org.wso2.gateway.discovery.throttle.BlockingConditions.Builder, org.wso2.gateway.discovery.throttle.BlockingConditionsOrBuilder> 
-        getBlockingConditionsFieldBuilder() {
-      if (blockingConditionsBuilder_ == null) {
-        blockingConditionsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.gateway.discovery.throttle.BlockingConditions, org.wso2.gateway.discovery.throttle.BlockingConditions.Builder, org.wso2.gateway.discovery.throttle.BlockingConditionsOrBuilder>(
-                getBlockingConditions(),
+    public java.util.List<? extends org.wso2.gateway.discovery.throttle.IPConditionOrBuilder> 
+         getIpBlockingConditionsOrBuilderList() {
+      if (ipBlockingConditionsBuilder_ != null) {
+        return ipBlockingConditionsBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(ipBlockingConditions_);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+     */
+    public org.wso2.gateway.discovery.throttle.IPCondition.Builder addIpBlockingConditionsBuilder() {
+      return getIpBlockingConditionsFieldBuilder().addBuilder(
+          org.wso2.gateway.discovery.throttle.IPCondition.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+     */
+    public org.wso2.gateway.discovery.throttle.IPCondition.Builder addIpBlockingConditionsBuilder(
+        int index) {
+      return getIpBlockingConditionsFieldBuilder().addBuilder(
+          index, org.wso2.gateway.discovery.throttle.IPCondition.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+     */
+    public java.util.List<org.wso2.gateway.discovery.throttle.IPCondition.Builder> 
+         getIpBlockingConditionsBuilderList() {
+      return getIpBlockingConditionsFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.gateway.discovery.throttle.IPCondition, org.wso2.gateway.discovery.throttle.IPCondition.Builder, org.wso2.gateway.discovery.throttle.IPConditionOrBuilder> 
+        getIpBlockingConditionsFieldBuilder() {
+      if (ipBlockingConditionsBuilder_ == null) {
+        ipBlockingConditionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.wso2.gateway.discovery.throttle.IPCondition, org.wso2.gateway.discovery.throttle.IPCondition.Builder, org.wso2.gateway.discovery.throttle.IPConditionOrBuilder>(
+                ipBlockingConditions_,
+                ((bitField0_ & 0x00000004) != 0),
                 getParentForChildren(),
                 isClean());
-        blockingConditions_ = null;
+        ipBlockingConditions_ = null;
       }
-      return blockingConditionsBuilder_;
+      return ipBlockingConditionsBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(
