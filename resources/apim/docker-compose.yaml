@@ -1,7 +1,7 @@
 version: "2.4"
 services:
   apim:
-    image: wso2am/wso2am:4.0.0-alpha-alpine
+    image: wso2am/wso2am:4.0.0-pre-beta-alpine
     healthcheck:
       test: ["CMD", "nc", "-z","localhost", "9443"]
       interval: 10s
@@ -12,7 +12,7 @@ services:
       - "5672:5672"
       - "8243:8243"
     volumes:
-      - ../resources/apim/deployment.toml:/home/wso2carbon/wso2am-4.0.0-alpha/repository/conf/deployment.toml
+      - ../resources/apim/deployment.toml:/home/wso2carbon/wso2am-4.0.0-pre-beta/repository/conf/deployment.toml
   router:
     image: wso2/mg-router:4.0.0-m10-SNAPSHOT
     logging:
