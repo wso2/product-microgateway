@@ -23,6 +23,7 @@ import com.google.rpc.Status;
 import io.envoyproxy.envoy.config.core.v3.Node;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryRequest;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
@@ -32,6 +33,7 @@ import org.wso2.gateway.discovery.throttle.ThrottleData;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
+import org.wso2.micro.gateway.enforcer.discovery.scheduler.XdsSchedulerManager;
 import org.wso2.micro.gateway.enforcer.throttle.ThrottleDataHolder;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
@@ -41,13 +43,15 @@ import java.util.concurrent.TimeUnit;
 /**
  * Client to communicate with ThrottleData discovery service at the adapter.
  */
-public class ThrottleDataDiscoveryClient {
+public class ThrottleDataDiscoveryClient implements Runnable {
     private static final Logger logger = LogManager.getLogger(ThrottleDataDiscoveryClient.class);
     private static ThrottleDataDiscoveryClient instance;
-    private final ManagedChannel channel;
-    private final ThrottleDataDiscoveryServiceGrpc.ThrottleDataDiscoveryServiceStub stub;
+    private ManagedChannel channel;
+    private ThrottleDataDiscoveryServiceGrpc.ThrottleDataDiscoveryServiceStub stub;
     private StreamObserver<DiscoveryRequest> reqObserver;
     private final ThrottleDataHolder throttleData;
+    private String host;
+    private int port;
 
     /**
      * This is a reference to the latest received response from the TDDS.
@@ -72,11 +76,31 @@ public class ThrottleDataDiscoveryClient {
     private final String nodeId;
 
     private ThrottleDataDiscoveryClient(String host, int port) {
-        this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
-        this.stub = ThrottleDataDiscoveryServiceGrpc.newStub(channel);
+        this.host = host;
+        this.port = port;
+        initConnection();
         this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
         this.throttleData = ThrottleDataHolder.getInstance();
+    }
+
+    private void initConnection() {
+        if (GRPCUtils.isReInitRequired(channel)) {
+            if (channel != null && !channel.isShutdown()) {
+                channel.shutdownNow();
+                do {
+                    try {
+                        channel.awaitTermination(100, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        logger.error("Throttle data discovery channel shutdown wait was interrupted", e);
+                    }
+                } while (!channel.isShutdown());
+            }
+            this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
+            this.stub = ThrottleDataDiscoveryServiceGrpc.newStub(channel);
+        } else if (channel.getState(true) == ConnectivityState.READY) {
+            XdsSchedulerManager.getInstance().stopThrottleDataDiscoveryScheduling();
+        }
     }
 
     public static ThrottleDataDiscoveryClient getInstance() {
@@ -88,6 +112,11 @@ public class ThrottleDataDiscoveryClient {
         return instance;
     }
 
+    public void run() {
+        initConnection();
+        watchThrottleData();
+    }
+
     public void watchThrottleData() {
         int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
         reqObserver = stub.withMaxInboundMessageSize(maxSize)
@@ -95,6 +124,7 @@ public class ThrottleDataDiscoveryClient {
             @Override
             public void onNext(DiscoveryResponse response) {
                 logger.debug("Received ThrottleData discovery response " + response);
+                XdsSchedulerManager.getInstance().stopThrottleDataDiscoveryScheduling();
                 latestReceived = response;
                 try {
                     handleResponse(response);
@@ -108,7 +138,7 @@ public class ThrottleDataDiscoveryClient {
             @Override
             public void onError(Throwable throwable) {
                 logger.error("Error occurred during ThrottleData discovery", throwable);
-                // TODO: (Praminda) if adapter is unavailable keep retrying
+                XdsSchedulerManager.getInstance().startThrottleDataDiscoveryScheduling();
                 nack(throwable);
             }
 

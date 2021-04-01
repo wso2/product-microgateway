@@ -86,6 +86,7 @@ services:
       - XDS_MAX_RETRIES=3
       - JAVA_OPTS=${JAVA_OPTS} -Dhttpclient.hostnameVerifier=AllowAll
       - apim_admin_pwd=admin
+      - enforcer_admin_pwd=admin
       - tm_admin_pwd=admin
     ports:
       - "8081:8081"
