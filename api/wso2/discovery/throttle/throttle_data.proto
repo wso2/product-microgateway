@@ -14,5 +14,6 @@ option java_multiple_files = true;
 // Throttle Data model
 message ThrottleData {
 	repeated string key_templates = 1;
-	BlockingConditions blocking_conditions = 2;
+	repeated string blocking_conditions = 2;
+	repeated IPCondition ip_blocking_conditions = 3;
 }
