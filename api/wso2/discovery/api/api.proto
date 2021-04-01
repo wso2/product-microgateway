@@ -4,6 +4,7 @@ package wso2.discovery.api;
 
 import "wso2/discovery/api/Endpoint.proto";
 import "wso2/discovery/api/Resource.proto";
+import "wso2/discovery/api/endpoint_security.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
 option java_package = "org.wso2.gateway.discovery.api";
@@ -26,5 +27,8 @@ message Api {
 	string tier = 10;
 	string apiLifeCycleState = 11;
 	repeated string securityScheme = 12;
-	string vhost = 13;
+	EndpointSecurity endpointSecurity = 13;
+	string authorizationHeader = 14;
+	bool disableSecurity = 15;
+	string vhost = 16;
 }

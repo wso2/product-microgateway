@@ -79,7 +79,7 @@ public class SubscriptionValidationTestCase extends APIMLifecycleBaseTest {
 
     @Test(description = "Send a request to a unsubscribed REST API and check if the API invocation is forbidden")
     public void testAPIsForInvalidSubscription() throws MicroGWTestException, MalformedURLException {
-        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(20, TimeUnit.SECONDS).until(
+        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
                 isResponseAvailable(endpointURL, requestHeaders));
 
         org.wso2am.micro.gw.tests.util.HttpResponse response;
@@ -104,7 +104,7 @@ public class SubscriptionValidationTestCase extends APIMLifecycleBaseTest {
                      "Subscribing to the API request not successful " + getAPIIdentifierStringFromAPIRequest(
                              apiRequest));
 
-        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(10, TimeUnit.SECONDS).until(
+        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
                 isResponseAvailable(endpointURL, requestHeaders));
 
         org.wso2am.micro.gw.tests.util.HttpResponse response = HttpsClientRequest.doGet(endpointURL, requestHeaders);

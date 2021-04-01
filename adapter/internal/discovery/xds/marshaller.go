@@ -19,7 +19,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	issuers := []*enforcer.Issuer{}
 	urlGroups := []*enforcer.TMURLGroup{}
 
-	for _, issuer := range config.Enforcer.JwtTokenConfig {
+	for _, issuer := range config.Security.Enforcer.TokenService {
 	    claimMaps := []*enforcer.ClaimMapping{}
 	    for _, claimMap := range issuer.ClaimMapping{
 	        claim := &enforcer.ClaimMapping{
@@ -105,11 +105,13 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 			PublicCertificatePath: config.Enforcer.JwtIssuer.PublicCertificatePath,
 			PrivateKeyPath:        config.Enforcer.JwtIssuer.PrivateKeyPath,
 			ValidityPeriod:        config.Enforcer.JwtIssuer.ValidityPeriod,
-			JwtUsers: jwtUsers,
+			JwtUsers:              jwtUsers,
 		},
-		AuthService:    authService,
-		JwtTokenConfig: issuers,
-		Cache:          cache,
+		AuthService: authService,
+		Security: &enforcer.Security{
+			TokenService: issuers,
+		},
+		Cache: cache,
 		Eventhub: &enforcer.EventHub{
 			Enabled:    config.ControlPlane.EventHub.Enabled,
 			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,

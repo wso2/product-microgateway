@@ -24,6 +24,7 @@ import com.google.rpc.Status;
 import io.envoyproxy.envoy.config.core.v3.Node;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryRequest;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
@@ -33,6 +34,7 @@ import org.wso2.gateway.discovery.service.keymgt.RevokedTokenDiscoveryServiceGrp
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
+import org.wso2.micro.gateway.enforcer.discovery.scheduler.XdsSchedulerManager;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
 
@@ -42,16 +44,17 @@ import java.util.concurrent.TimeUnit;
 /**
  * Client to communicate with API discovery service at the adapter.
  */
-public class RevokedTokenDiscoveryClient {
+public class RevokedTokenDiscoveryClient implements Runnable {
 
     private static RevokedTokenDiscoveryClient instance;
-    private final ManagedChannel channel;
-    private final RevokedTokenDiscoveryServiceGrpc.RevokedTokenDiscoveryServiceStub stub;
-    private final RevokedTokenDiscoveryServiceGrpc.RevokedTokenDiscoveryServiceBlockingStub blockingStub;
+    private ManagedChannel channel;
+    private RevokedTokenDiscoveryServiceGrpc.RevokedTokenDiscoveryServiceStub stub;
     private static final Logger logger = LogManager.getLogger(RevokedTokenDiscoveryClient.class);
     private final RevokedJWTDataHolder revokedJWTDataHolder;
     private StreamObserver<DiscoveryRequest> reqObserver;
     private static final Logger log = LogManager.getLogger(RevokedTokenDiscoveryClient.class);
+    private String host;
+    private int port;
     /**
      * This is a reference to the latest received response from the ADS.
      * <p>
@@ -75,15 +78,34 @@ public class RevokedTokenDiscoveryClient {
     private final String nodeId;
 
     private RevokedTokenDiscoveryClient(String host, int port) {
-        this.channel = GRPCUtils.createSecuredChannel(log, host, port);
+        this.host = host;
+        this.port = port;
         this.revokedJWTDataHolder = RevokedJWTDataHolder.getInstance();
-        this.stub = RevokedTokenDiscoveryServiceGrpc.newStub(channel);
-        this.blockingStub = RevokedTokenDiscoveryServiceGrpc.newBlockingStub(channel);
+        initConnection();
         // Since revoked tokens should be received by every enforcer, adapter creates a
         // common snapshot for revoked tokens. Hence each enforces requests data using the
         // common enforcer label to avoid redundent snapshots
         this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
+    }
+
+    private void initConnection() {
+        if (GRPCUtils.isReInitRequired(channel)) {
+            if (channel != null && !channel.isShutdown()) {
+                channel.shutdownNow();
+                do {
+                    try {
+                        channel.awaitTermination(100, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        log.error("Revoked  tokens discovery channel shutdown wait was interrupted", e);
+                    }
+                } while (!channel.isShutdown());
+            }
+            this.channel = GRPCUtils.createSecuredChannel(log, host, port);
+            this.stub = RevokedTokenDiscoveryServiceGrpc.newStub(channel);
+        } else if (channel.getState(true) == ConnectivityState.READY) {
+            XdsSchedulerManager.getInstance().stopRevokedTokenDiscoveryScheduling();
+        }
     }
 
     public static RevokedTokenDiscoveryClient getInstance() {
@@ -95,6 +117,11 @@ public class RevokedTokenDiscoveryClient {
         return instance;
     }
 
+    public void run() {
+        initConnection();
+        watchRevokedTokens();
+    }
+
     public void watchRevokedTokens() {
         // TODO: (Praminda) implement a deadline with retries
         int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
@@ -102,6 +129,7 @@ public class RevokedTokenDiscoveryClient {
                     @Override
                     public void onNext(DiscoveryResponse response) {
                         logger.debug("Received revoked tokens response " + response);
+                        XdsSchedulerManager.getInstance().stopRevokedTokenDiscoveryScheduling();
                         latestReceived = response;
                         try {
                             List<RevokedToken> tokens = handleResponse(response);
@@ -118,7 +146,7 @@ public class RevokedTokenDiscoveryClient {
                     @Override
                     public void onError(Throwable throwable) {
                         logger.error("Error occurred during revoked token discovery", throwable);
-                        // TODO: (Praminda) if adapter is unavailable keep retrying
+                        XdsSchedulerManager.getInstance().startRevokedTokenDiscoveryScheduling();
                         nack(throwable);
                     }
 

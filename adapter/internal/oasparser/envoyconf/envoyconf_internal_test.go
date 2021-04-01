@@ -232,39 +232,6 @@ func TestCreateRouteExtAuthzContext(t *testing.T) {
 		"Sandbox Cluster mismatch in route ext authz context.")
 }
 
-func TestCreateListener(t *testing.T) {
-	var listenerPort uint32
-	listenerPort = 10001
-	listenerAddress := "test.com"
-
-	config := new(mgwconfig.Config)
-	config.Envoy.ListenerPort = listenerPort
-	config.Envoy.ListenerHost = listenerAddress
-	config.Envoy.ListenerTLSEnabled = true
-	config.Envoy.KeyStore.PublicKeyLocation = mgwconfig.GetMgwHome() + "/adapter/security/localhost.pem"
-	config.Envoy.KeyStore.PrivateKeyLocation = mgwconfig.GetMgwHome() + "/adapter/security/localhost.key"
-
-	tlsEnabledListener := createListener(config, "test-id")
-
-	assert.NotNil(t, tlsEnabledListener, "The TLS Enabled Listener configuration should not be null")
-
-	assert.NotNil(t, tlsEnabledListener.Address.GetSocketAddress().Address, "The socket address of the listener should not be null")
-	assert.Equal(t, tlsEnabledListener.Address.GetSocketAddress().Address, listenerAddress,
-		"The assigned socket address of the listener is incorrect")
-
-	assert.NotNil(t, tlsEnabledListener.Address.GetSocketAddress().GetPortValue(), "The socket's port value of the listener should not be null")
-	assert.Equal(t, tlsEnabledListener.Address.GetSocketAddress().GetPortValue(), listenerPort,
-		"The assigned socket port of the listener is incorrect")
-
-	assert.NotNil(t, tlsEnabledListener.FilterChains[0].TransportSocket, "Transport Socket configuration should not be null")
-
-	config.Envoy.ListenerTLSEnabled = false
-	tlsDisabledListener := createListener(config, "test-id")
-
-	assert.NotNil(t, tlsDisabledListener, "The TLS Enabled Listener configuration should not be null")
-	assert.Nil(t, tlsDisabledListener.FilterChains[0].TransportSocket, "Transport Socket configuration should be null")
-}
-
 func TestGenerateTLSCert(t *testing.T) {
 	publicKeyPath := mgwconfig.GetMgwHome() + "/adapter/security/localhost.pem"
 	privateKeyPath := mgwconfig.GetMgwHome() + "/adapter/security/localhost.key"
@@ -407,6 +374,7 @@ func TestGetCorsPolicy(t *testing.T) {
 		Enabled:                       true,
 		AccessControlAllowMethods:     []string{"GET", "POST"},
 		AccessControlAllowHeaders:     []string{"X-TEST-HEADER1", "X-TEST-HEADER2"},
+		AccessControlExposeHeaders:    []string{"X-Custom-Header"},
 		AccessControlAllowOrigins:     []string{"http://test.com"},
 		AccessControlAllowCredentials: true,
 	}
@@ -432,12 +400,15 @@ func TestGetCorsPolicy(t *testing.T) {
 	assert.Equal(t, "GET, POST", corsPolicy2.GetAllowMethods(), "Cors allow methods mismatch.")
 	assert.NotNil(t, corsPolicy2.GetAllowHeaders(), "Cors Allowed headers should not be null.")
 	assert.Equal(t, "X-TEST-HEADER1, X-TEST-HEADER2", corsPolicy2.GetAllowHeaders(), "Cors Allow headers mismatch")
+	assert.NotNil(t, corsPolicy2.GetExposeHeaders(), "Cors Expose headers should not be null.")
+	assert.Equal(t, "X-Custom-Header", corsPolicy2.GetExposeHeaders(), "Cors Expose headers mismatch")
 	assert.True(t, corsPolicy2.GetAllowCredentials().GetValue(), "Cors Access Allow Credentials should be true")
 
 	// Test the configuration when headers configuration is not provided.
 	corsPolicy3 := getCorsPolicy(corsConfigModel3)
 	assert.NotNil(t, corsPolicy3, "Cors Policy should not be null.")
 	assert.Empty(t, corsPolicy3.GetAllowHeaders(), "Cors Allow headers should be null.")
+	assert.Empty(t, corsPolicy3.GetExposeHeaders(), "Cors Expose Headers should be null.")
 	assert.NotEmpty(t, corsPolicy3.GetAllowOriginStringMatch(), "Cors Allowded Origins should not be null.")
 	assert.Equal(t, regexp.QuoteMeta("http://test1.com"),
 		corsPolicy3.GetAllowOriginStringMatch()[0].GetSafeRegex().GetRegex(),

@@ -26,8 +26,8 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.throttle.PolicyConstants;
-import org.wso2.micro.gateway.enforcer.throttle.ThrottleCondition;
 import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
+import org.wso2.micro.gateway.enforcer.throttle.dto.ThrottleCondition;
 
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -148,8 +148,7 @@ public class ThrottleUtils {
         String[] jwtTokenArray = token.split(Pattern.quote("."));
         byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes(StandardCharsets.UTF_8));
         String jwtAssertion = new String(jwtByteArray, StandardCharsets.UTF_8);
-        Type mapType = new TypeToken<Map<String, String>>() {
-        }.getType();
+        Type mapType = new TypeToken<Map<String, String>>() { }.getType();
 
         return new Gson().fromJson(jwtAssertion, mapType);
     }

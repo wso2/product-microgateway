@@ -83,6 +83,7 @@ func ReadConfigs() (*Config, error) {
 		}
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem())
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem())
+		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Security)).Elem())
 	})
 	return adapterConfig, e
 }

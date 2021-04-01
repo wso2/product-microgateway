@@ -20,8 +20,7 @@ package org.wso2.micro.gateway.enforcer.throttle;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
-import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
+import org.wso2.micro.gateway.enforcer.throttle.dto.ThrottleCondition;
 import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
 
 import java.util.Date;
@@ -29,7 +28,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,13 +36,6 @@ import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicSession;
-import javax.jms.TopicSubscriber;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 /**
  * JMS event listener for throttle data.
@@ -60,37 +51,6 @@ public class ThrottleEventListener implements MessageListener {
     private final Pattern resourcePattern = Pattern.compile("/.*/(.*)/\\1(.*)?:[A-Z]{0,7}_(condition_(\\d*)|default)");
     public static final int RESOURCE_PATTERN_GROUPS = 4;
     public static final int RESOURCE_PATTERN_CONDITION_INDEX = 3;
-
-    private ThrottleEventListener() {}
-
-    public static void init() {
-        ThrottleConfigDto throttleConf = ConfigHolder.getInstance().getConfig().getThrottleConfig();
-        String initialContextFactory = throttleConf.getJmsConnectionInitialContextFactory();
-        String connectionFactoryNamePrefix = "connectionfactory.";
-        String connectionFactoryName = "qpidConnectionfactory";
-        String eventReceiverURL = throttleConf.getJmsConnectionProviderUrl();
-        Runnable runnable = () -> {
-            try {
-                TopicConnection topicConnection;
-                TopicSession topicSession;
-                Properties properties = new Properties();
-                properties.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
-                properties.put(connectionFactoryNamePrefix + connectionFactoryName, eventReceiverURL);
-                InitialContext context = new InitialContext(properties);
-                TopicConnectionFactory connFactory = (TopicConnectionFactory) context.lookup(connectionFactoryName);
-                topicConnection = connFactory.createTopicConnection();
-                topicConnection.start();
-                topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
-                Topic gatewayJmsTopic = topicSession.createTopic(ThrottleConstants.TOPIC_THROTTLE_DATA);
-                TopicSubscriber listener = topicSession.createSubscriber(gatewayJmsTopic);
-                listener.setMessageListener(new ThrottleEventListener());
-            } catch (NamingException | JMSException e) {
-                log.error("Error while initiating jms connection...", e);
-            }
-        };
-        Thread jmsThread = new Thread(runnable);
-        jmsThread.start();
-    }
 
     @Override
     public void onMessage(Message message) {
@@ -129,6 +89,14 @@ public class ThrottleEventListener implements MessageListener {
                      * keyTemplateState - whether key template active or not
                      */
                     handleKeyTemplateMessage(map);
+                } else if (map.get(ThrottleConstants.BLOCKING_CONDITION_KEY) != null) {
+                    /*
+                     * This message contains blocking condition data
+                     * blockingCondition - Blocking condition type
+                     * conditionValue - blocking condition value
+                     * state - State whether blocking condition is enabled or not
+                     */
+                    handleBlockingMessage(map);
                 }
             }
         } catch (JMSException e) {
@@ -184,6 +152,40 @@ public class ThrottleEventListener implements MessageListener {
             dataHolder.addKeyTemplate(keyTemplateValue, keyTemplateValue);
         } else {
             dataHolder.removeKeyTemplate(keyTemplateValue);
+        }
+    }
+
+    /**
+     * Synchronized due to blocking data contains or not can updated by multiple threads.
+     * Will not be a performance issue as this will not happen more frequently.
+     */
+    private synchronized void handleBlockingMessage(Map<String, Object> map) {
+        log.debug("Received Key -  blockingCondition: {}, conditionValue: {}, tenantDomain: {}",
+                map.get(ThrottleConstants.BLOCKING_CONDITION_KEY).toString(),
+                map.get(ThrottleConstants.BLOCKING_CONDITION_VALUE).toString(),
+                map.get(ThrottleConstants.BLOCKING_CONDITION_DOMAIN));
+
+        ThrottleDataHolder dataHolder = ThrottleDataHolder.getInstance();
+        String condition = map.get(ThrottleConstants.BLOCKING_CONDITION_KEY).toString();
+        String conditionValue = map.get(ThrottleConstants.BLOCKING_CONDITION_VALUE).toString();
+        String conditionState = map.get(ThrottleConstants.BLOCKING_CONDITION_STATE).toString();
+        int conditionId = (int) map.get(ThrottleConstants.BLOCKING_CONDITION_ID);
+        String tenantDomain = map.get(ThrottleConstants.BLOCKING_CONDITION_DOMAIN).toString();
+
+        final boolean isIpBlockingCondition = ThrottleConstants.BLOCKING_CONDITIONS_IP.equals(condition) ||
+                ThrottleConstants.BLOCK_CONDITION_IP_RANGE.equals(condition);
+        if (ThrottleConstants.TRUE.equals(conditionState)) {
+            if (isIpBlockingCondition) {
+                dataHolder.addIpBlockingCondition(tenantDomain, conditionId, conditionValue, condition);
+            } else {
+                dataHolder.addBlockingCondition(conditionValue, conditionValue);
+            }
+        } else {
+            if (isIpBlockingCondition) {
+                dataHolder.removeIpBlockingCondition(tenantDomain, conditionId);
+            } else {
+                dataHolder.removeBlockingCondition(conditionValue);
+            }
         }
     }
 

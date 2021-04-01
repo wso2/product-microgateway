@@ -38,7 +38,7 @@ public class CustomJwtTransformerTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null);
+        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
     }
 
     @Test(description = "Test custom jwt claim mapping")

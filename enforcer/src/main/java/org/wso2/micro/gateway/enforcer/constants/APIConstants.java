@@ -34,9 +34,12 @@ public class APIConstants {
     public static final String PROTOTYPED_LIFE_CYCLE_STATUS = "PROTOTYPED";
     public static final String PUBLISHED_LIFE_CYCLE_STATUS = "PUBLISHED";
     public static final String UNLIMITED_TIER = "Unlimited";
+    public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
+    public static final String END_USER_ANONYMOUS = "anonymous";
 
 
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
+    public static final String DEFAULT_ISSUER = "Resident Key Manager";
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
     public static final String HTTPS_PROTOCOL = "https";
     public static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";

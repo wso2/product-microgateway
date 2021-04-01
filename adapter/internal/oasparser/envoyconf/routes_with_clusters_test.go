@@ -183,6 +183,15 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 
 }
 
+func TestCreateHealthEndpoint(t *testing.T) {
+	route := envoy.CreateHealthEndpoint()
+	assert.NotNil(t, route, "Health Endpoint Route should not be null.")
+	assert.Equal(t, "/health", route.Name, "Health Route Name is incorrect.")
+	assert.Equal(t, "/health", route.GetMatch().GetPath(), "Health route path is incorrect.")
+	assert.Equal(t, "{\"status\": \"healthy\"}", route.GetDirectResponse().GetBody().GetInlineString(), "Health response message is incorrect.")
+	assert.Equal(t, uint32(200), route.GetDirectResponse().GetStatus(), "Health response status is incorrect.")
+}
+
 // TODO: (VirajSalaka) Fix the cause for the intermittent failure
 // func TestCreateRoutesWithClustersProdSandEp(t *testing.T) {
 // 	// Tested Features

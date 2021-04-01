@@ -47,7 +47,6 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
 	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
 	swagger.resources = setResourcesOpenAPI(swagger3)
 	swagger.apiType = HTTP
-
 	if isServerURLIsAvailable(swagger3.Servers) {
 		for _, serverEntry := range swagger3.Servers {
 			endpoint := getHostandBasepathandPort(serverEntry.URL)
@@ -77,12 +76,19 @@ func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.Pat
 
 func setResourcesOpenAPI(openAPI openapi3.Swagger) []Resource {
 	var resources []Resource
+	// Check the disable security vendor ext at API level.
+	// If it's present, then the same value should be added to the
+	// resource level if vendor ext is not present at each resource level.
+	val, found := resolveAPILevelDisableSecurity(openAPI.ExtensionProps)
 	if openAPI.Paths != nil {
 		for path, pathItem := range openAPI.Paths {
 			methodsArray := make([]Operation, len(pathItem.Operations()))
 			var arrayIndex int = 0
 			for httpMethod, operation := range pathItem.Operations() {
 				if operation != nil {
+					if found {
+						operation.ExtensionProps = addDisableSecurityIfNotPresent(operation.ExtensionProps, val)
+					}
 					methodsArray[arrayIndex] = getOperationLevelDetails(operation, httpMethod)
 					arrayIndex++
 				}
@@ -186,6 +192,31 @@ func convertExtensibletoReadableFormat(vendorExtensions openapi3.ExtensionProps)
 		logger.LoggerOasparser.Error("Error unmarsheling vendor extenstions:", err)
 	}
 	return extensible
+}
+
+// This method check if the x-wso2-disable-security vendor extension present in the given
+// openapi extension prop set.
+// If found, it will return two bool values which are the following in order.
+// 1st bool represnt the value of the vendor extension.
+// 2nd bool represent if the vendor extension present.
+func resolveAPILevelDisableSecurity(vendorExtensions openapi3.ExtensionProps) (bool, bool) {
+	extensions := convertExtensibletoReadableFormat(vendorExtensions)
+	if y, found := extensions[xWso2DisableSecurity]; found {
+		if val, ok := y.(bool); ok {
+			return val, found
+		}
+		logger.LoggerOasparser.Errorln("Error while parsing the x-wso2-label")
+	}
+	return false, false
+}
+
+// This method add the disable security to given vendor extensions, if it's not present.
+func addDisableSecurityIfNotPresent(vendorExtensions openapi3.ExtensionProps, val bool) openapi3.ExtensionProps {
+	_, found := resolveAPILevelDisableSecurity(vendorExtensions)
+	if !found {
+		vendorExtensions.Extensions[xWso2DisableSecurity] = val
+	}
+	return vendorExtensions
 }
 
 // GetXWso2Label extracts the vendor-extension (openapi v3) property.
