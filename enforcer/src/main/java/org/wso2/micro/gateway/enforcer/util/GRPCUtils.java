@@ -18,6 +18,7 @@
 
 package org.wso2.micro.gateway.enforcer.util;
 
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
@@ -53,5 +54,13 @@ public class GRPCUtils {
                 .sslContext(sslContext)
                 .overrideAuthority(ConfigHolder.getInstance().getEnvVarConfig().getAdapterHostName())
                 .build();
+    }
+
+    public static boolean isReInitRequired(ManagedChannel channel) {
+        if (channel != null && (channel.getState(true) == ConnectivityState.CONNECTING
+                || channel.getState(true) == ConnectivityState.READY)) {
+            return false;
+        }
+        return true;
     }
 }
