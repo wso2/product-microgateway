@@ -45,6 +45,15 @@ const (
 	blockingConditionsEndpoint string = "internal/data/v1/block"
 )
 
+var (
+	// BlockingConditions holds blocking conditions received from eventhub
+	blockingConditions []string
+	// BlockingIPConditions holds IP blocking conditions received from eventhub
+	blockingIPConditions []*throttle.IPCondition
+	// KeyTemplates holds key templates received from eventhub
+	keyTemplates []string
+)
+
 // FetchThrottleData pulls the startup Throttle Data required for custom and blocking condition
 // based throttling. This request goes to traffic manager node.
 func FetchThrottleData(endpoint string, c chan SyncAPIResponse) {
@@ -145,6 +154,7 @@ func UpdateKeyTemplates() {
 		if data.Resp != nil {
 			templates := []string{}
 			err := json.Unmarshal(data.Resp, &templates)
+			logger.LoggerMsg.Debugf("Key Templates: %s", string(data.Resp))
 			if err != nil {
 				logger.LoggerSync.Errorf("Error occurred while unmarshalling key templates %v", err)
 			}
@@ -183,6 +193,7 @@ func UpdateBlockingConditions() {
 		data := <-c
 		if data.Resp != nil {
 			conditions := BlockConditions{}
+			logger.LoggerMsg.Infof("Blocking Conditions: %s", string(data.Resp))
 			err := json.Unmarshal(data.Resp, &conditions)
 			if err != nil {
 				logger.LoggerSync.Errorf("Error occurred while unmarshalling blocking conditions %v", err)
@@ -210,9 +221,10 @@ func UpdateBlockingConditions() {
 }
 
 // pushKeyTemplates will update the ThrottleData xds snapshot with key templates
-func pushKeyTemplates(tokens []string) {
+func pushKeyTemplates(templates []string) {
+	keyTemplates = templates
 	t := &throttle.ThrottleData{
-		KeyTemplates: tokens,
+		KeyTemplates: keyTemplates,
 	}
 	xds.UpdateEnforcerThrottleData(t)
 	logger.LoggerSync.Debug("Updated the snapshot for KeyTemplates")
@@ -220,6 +232,7 @@ func pushKeyTemplates(tokens []string) {
 
 // pushBlockingConditions will update the ThrottleData xds snapshot with blocking conditions
 func pushBlockingConditions(conditions BlockConditions) {
+
 	ips := []*throttle.IPCondition{}
 	for _, c := range conditions.IP {
 		ip := &throttle.IPCondition{
@@ -233,17 +246,90 @@ func pushBlockingConditions(conditions BlockConditions) {
 		}
 		ips = append(ips, ip)
 	}
+
+	blockingConditions = conditions.API
+	blockingConditions = append(blockingConditions, conditions.Application...)
+	blockingConditions = append(blockingConditions, conditions.User...)
+	blockingConditions = append(blockingConditions, conditions.Subscription...)
+	blockingConditions = append(blockingConditions, conditions.Custom...)
+	blockingIPConditions = ips
+
 	t := &throttle.ThrottleData{
-		BlockingConditions: &throttle.BlockingConditions{
-			Api:          conditions.API,
-			Application:  conditions.Application,
-			Subscription: conditions.Subscription,
-			Custom:       conditions.Custom,
-			User:         conditions.User,
-			Ip:           ips,
-		},
+		BlockingConditions:   blockingConditions,
+		IpBlockingConditions: ips,
 	}
 
 	xds.UpdateEnforcerThrottleData(t)
 	logger.LoggerSync.Debug("Updated the snapshot for BlockingConditions")
+}
+
+// AddBlockingCondition adds a blocking condition to the blocking condition map
+func AddBlockingCondition(value string) {
+	blockingConditions = append(blockingConditions, value)
+}
+
+// RemoveBlockingCondition removes entry from blocking condition map
+func RemoveBlockingCondition(key string) {
+	blockingConditions = remove(blockingConditions, key)
+}
+
+// AddBlockingIPCondition adds a blocking IP condition to the blocking IP condition map
+func AddBlockingIPCondition(value *throttle.IPCondition) {
+	blockingIPConditions = append(blockingIPConditions, value)
+}
+
+// RemoveBlockingIPCondition removes entry from blocking IP condition map
+func RemoveBlockingIPCondition(ip *throttle.IPCondition) {
+	index := -1
+	for i := range blockingIPConditions {
+		if blockingIPConditions[i].Id == ip.Id {
+			index = i
+			break
+		}
+	}
+	if index < 0 {
+		return
+	}
+	blockingIPConditions[index] = blockingIPConditions[len(blockingIPConditions)-1]
+	blockingIPConditions = blockingIPConditions[:len(blockingIPConditions)-1]
+}
+
+// AddKeyTemplate adds a key template to the key template map
+func AddKeyTemplate(value string) {
+	keyTemplates = append(keyTemplates, value)
+}
+
+// RemoveKeyTemplate removes key template from the key template map
+func RemoveKeyTemplate(key string) {
+	keyTemplates = remove(keyTemplates, key)
+}
+
+// GetBlockingConditions returns blocking conditions
+func GetBlockingConditions() []string {
+	return blockingConditions
+}
+
+// GetKeyTemplates returns key templates
+func GetKeyTemplates() []string {
+	return keyTemplates
+}
+
+// GetBlockingIPConditions returns blocking IP conditions
+func GetBlockingIPConditions() []*throttle.IPCondition {
+	return blockingIPConditions
+}
+
+func remove(s []string, v string) []string {
+	i := -1
+	for index := range s {
+		if strings.EqualFold(v, s[index]) {
+			i = index
+			break
+		}
+	}
+	if i == -1 {
+		return s
+	}
+	s[i] = s[len(s)-1]
+	return s[:len(s)-1]
 }

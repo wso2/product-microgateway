@@ -15,11 +15,6 @@ public final class BlockingConditionsProto {
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_wso2_discovery_throttle_BlockingConditions_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_wso2_discovery_throttle_BlockingConditions_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_wso2_discovery_throttle_IPCondition_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -34,31 +29,21 @@ public final class BlockingConditionsProto {
   static {
     java.lang.String[] descriptorData = {
       "\n1wso2/discovery/throttle/blocking_condi" +
-      "tions.proto\022\027wso2.discovery.throttle\"\234\001\n" +
-      "\022BlockingConditions\022\013\n\003api\030\001 \003(\t\022\023\n\013appl" +
-      "ication\030\002 \003(\t\022\024\n\014subscription\030\003 \003(\t\0220\n\002i" +
-      "p\030\004 \003(\0132$.wso2.discovery.throttle.IPCond" +
-      "ition\022\016\n\006custom\030\005 \003(\t\022\014\n\004user\030\006 \003(\t\"\204\001\n\013" +
-      "IPCondition\022\014\n\004type\030\001 \001(\t\022\n\n\002id\030\002 \001(\005\022\017\n" +
-      "\007fixedIp\030\003 \001(\t\022\022\n\nstartingIp\030\004 \001(\t\022\020\n\010en" +
-      "dingIp\030\005 \001(\t\022\016\n\006invert\030\006 \001(\010\022\024\n\014tenantDo" +
-      "main\030\007 \001(\tB\211\001\n#org.wso2.gateway.discover" +
-      "y.throttleB\027BlockingConditionsProtoP\001ZGg" +
-      "ithub.com/envoyproxy/go-control-plane/ws" +
-      "o2/discovery/throttle;throttleb\006proto3"
+      "tions.proto\022\027wso2.discovery.throttle\"\204\001\n" +
+      "\013IPCondition\022\014\n\004type\030\001 \001(\t\022\n\n\002id\030\002 \001(\005\022\017" +
+      "\n\007fixedIp\030\003 \001(\t\022\022\n\nstartingIp\030\004 \001(\t\022\020\n\010e" +
+      "ndingIp\030\005 \001(\t\022\016\n\006invert\030\006 \001(\010\022\024\n\014tenantD" +
+      "omain\030\007 \001(\tB\211\001\n#org.wso2.gateway.discove" +
+      "ry.throttleB\027BlockingConditionsProtoP\001ZG" +
+      "github.com/envoyproxy/go-control-plane/w" +
+      "so2/discovery/throttle;throttleb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         });
-    internal_static_wso2_discovery_throttle_BlockingConditions_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_wso2_discovery_throttle_BlockingConditions_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_wso2_discovery_throttle_BlockingConditions_descriptor,
-        new java.lang.String[] { "Api", "Application", "Subscription", "Ip", "Custom", "User", });
     internal_static_wso2_discovery_throttle_IPCondition_descriptor =
-      getDescriptor().getMessageTypes().get(1);
+      getDescriptor().getMessageTypes().get(0);
     internal_static_wso2_discovery_throttle_IPCondition_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_throttle_IPCondition_descriptor,

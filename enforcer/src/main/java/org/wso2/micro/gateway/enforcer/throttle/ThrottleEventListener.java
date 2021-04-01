@@ -18,16 +18,17 @@
 
 package org.wso2.micro.gateway.enforcer.throttle;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.throttle.dto.ThrottleCondition;
 import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
 
 import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,6 +36,7 @@ import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 /**
@@ -64,16 +66,12 @@ public class ThrottleEventListener implements MessageListener {
 
         try {
             Topic jmsDestination = (Topic) message.getJMSDestination();
-            MapMessage mapMessage = (MapMessage) message;
-            Map<String, Object> map = new HashMap<>();
-            Enumeration enumeration = mapMessage.getMapNames();
-            while (enumeration.hasMoreElements()) {
-                String key = (String) enumeration.nextElement();
-                map.put(key, mapMessage.getObject(key));
-            }
+            String textMessage = ((TextMessage) message).getText();
+            JsonNode payloadData = new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
+                    path(APIConstants.EVENT_PAYLOAD_DATA);
 
             if (ThrottleConstants.TOPIC_THROTTLE_DATA.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                if (map.get(ThrottleConstants.THROTTLE_KEY) != null) {
+                if (payloadData.get(ThrottleConstants.THROTTLE_KEY) != null) {
                     /*
                      * This message contains throttle data in map which contains Keys
                      * throttleKey - Key of particular throttling level
@@ -81,34 +79,19 @@ public class ThrottleEventListener implements MessageListener {
                      * expiryTimeStamp - When the throttling time window will expires
                      */
 
-                    handleThrottleUpdateMessage(map);
-                } else if (map.get(ThrottleConstants.POLICY_TEMPLATE_KEY) != null) {
-                    /*
-                     * This message contains key template data
-                     * keyTemplateValue - Value of key template
-                     * keyTemplateState - whether key template active or not
-                     */
-                    handleKeyTemplateMessage(map);
-                } else if (map.get(ThrottleConstants.BLOCKING_CONDITION_KEY) != null) {
-                    /*
-                     * This message contains blocking condition data
-                     * blockingCondition - Blocking condition type
-                     * conditionValue - blocking condition value
-                     * state - State whether blocking condition is enabled or not
-                     */
-                    handleBlockingMessage(map);
+                    handleThrottleUpdateMessage(payloadData);
                 }
             }
-        } catch (JMSException e) {
+        } catch (JMSException | JsonProcessingException e) {
             log.error("Error occurred when processing the received message ", e);
         }
     }
 
-    private void handleThrottleUpdateMessage(Map<String, Object> map) {
-        String throttleKey = map.get(ThrottleConstants.THROTTLE_KEY).toString();
-        String throttleState = map.get(ThrottleConstants.IS_THROTTLED).toString();
-        long timeStamp = Long.parseLong(map.get(ThrottleConstants.EXPIRY_TIMESTAMP).toString());
-        Object evaluatedConditionObject = map.get(ThrottleConstants.EVALUATED_CONDITIONS);
+    private void handleThrottleUpdateMessage(JsonNode msg) {
+        String throttleKey = msg.get(ThrottleConstants.THROTTLE_KEY).toString();
+        String throttleState = msg.get(ThrottleConstants.IS_THROTTLED).toString();
+        long timeStamp = Long.parseLong(msg.get(ThrottleConstants.EXPIRY_TIMESTAMP).toString());
+        Object evaluatedConditionObject = msg.get(ThrottleConstants.EVALUATED_CONDITIONS);
         ThrottleDataHolder dataHolder = ThrottleDataHolder.getInstance();
 
         if (log.isDebugEnabled()) {
@@ -123,7 +106,7 @@ public class ThrottleEventListener implements MessageListener {
 
             if (extractedKey != null) {
                 if (evaluatedConditionObject != null) {
-                    String conditionStr = (String) evaluatedConditionObject;
+                    String conditionStr = evaluatedConditionObject.toString();
                     List<ThrottleCondition> conditions = ThrottleUtils.extractThrottleCondition(conditionStr);
                     dataHolder.addThrottledConditions(extractedKey.getResourceKey(), extractedKey.getName(),
                             conditions);
@@ -138,53 +121,6 @@ public class ThrottleEventListener implements MessageListener {
                 }
 
                 dataHolder.removeThrottledConditions(extractedKey.getResourceKey(), extractedKey.getName());
-            }
-        }
-    }
-
-    private synchronized void handleKeyTemplateMessage(Map<String, Object> map) {
-        String keyTemplateValue = map.get(ThrottleConstants.POLICY_TEMPLATE_KEY).toString();
-        String keyTemplateState = map.get(ThrottleConstants.TEMPLATE_KEY_STATE).toString();
-        ThrottleDataHolder dataHolder = ThrottleDataHolder.getInstance();
-        log.debug("Received Key - KeyTemplate: {}:{}", keyTemplateValue, keyTemplateState);
-
-        if (ThrottleConstants.ADD.equals(keyTemplateState)) {
-            dataHolder.addKeyTemplate(keyTemplateValue, keyTemplateValue);
-        } else {
-            dataHolder.removeKeyTemplate(keyTemplateValue);
-        }
-    }
-
-    /**
-     * Synchronized due to blocking data contains or not can updated by multiple threads.
-     * Will not be a performance issue as this will not happen more frequently.
-     */
-    private synchronized void handleBlockingMessage(Map<String, Object> map) {
-        log.debug("Received Key -  blockingCondition: {}, conditionValue: {}, tenantDomain: {}",
-                map.get(ThrottleConstants.BLOCKING_CONDITION_KEY).toString(),
-                map.get(ThrottleConstants.BLOCKING_CONDITION_VALUE).toString(),
-                map.get(ThrottleConstants.BLOCKING_CONDITION_DOMAIN));
-
-        ThrottleDataHolder dataHolder = ThrottleDataHolder.getInstance();
-        String condition = map.get(ThrottleConstants.BLOCKING_CONDITION_KEY).toString();
-        String conditionValue = map.get(ThrottleConstants.BLOCKING_CONDITION_VALUE).toString();
-        String conditionState = map.get(ThrottleConstants.BLOCKING_CONDITION_STATE).toString();
-        int conditionId = (int) map.get(ThrottleConstants.BLOCKING_CONDITION_ID);
-        String tenantDomain = map.get(ThrottleConstants.BLOCKING_CONDITION_DOMAIN).toString();
-
-        final boolean isIpBlockingCondition = ThrottleConstants.BLOCKING_CONDITIONS_IP.equals(condition) ||
-                ThrottleConstants.BLOCK_CONDITION_IP_RANGE.equals(condition);
-        if (ThrottleConstants.TRUE.equals(conditionState)) {
-            if (isIpBlockingCondition) {
-                dataHolder.addIpBlockingCondition(tenantDomain, conditionId, conditionValue, condition);
-            } else {
-                dataHolder.addBlockingCondition(conditionValue, conditionValue);
-            }
-        } else {
-            if (isIpBlockingCondition) {
-                dataHolder.removeIpBlockingCondition(tenantDomain, conditionId);
-            } else {
-                dataHolder.removeBlockingCondition(conditionValue);
             }
         }
     }

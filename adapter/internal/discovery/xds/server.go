@@ -666,15 +666,21 @@ func UpdateEnforcerThrottleData(throttleData *throttle.ThrottleData) {
 	// the need of two xds services to push keytemplates and blocking conditions.
 	templates := throttleData.KeyTemplates
 	conditions := throttleData.BlockingConditions
+	ipConditions := throttleData.IpBlockingConditions
 	if templates == nil {
 		templates = enforcerThrottleData.KeyTemplates
 	}
 	if conditions == nil {
 		conditions = enforcerThrottleData.BlockingConditions
 	}
+	if ipConditions == nil {
+		ipConditions = enforcerThrottleData.IpBlockingConditions
+	}
+
 	t := &throttle.ThrottleData{
-		KeyTemplates:       templates,
-		BlockingConditions: conditions,
+		KeyTemplates:         templates,
+		BlockingConditions:   conditions,
+		IpBlockingConditions: ipConditions,
 	}
 	data = append(data, t)
 
