@@ -442,6 +442,10 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		removeHeaders = append(removeHeaders, internalKey)
 	}
 
+	if len(removeHeaders) == 0 {
+		removeHeaders = nil
+	}
+
 	var contextExtensions = make(map[string]string)
 	contextExtensions[pathContextExtension] = resourcePath
 	if xWso2Basepath != "" {
