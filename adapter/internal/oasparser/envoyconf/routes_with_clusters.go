@@ -777,6 +777,9 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 	if len(corsConfig.AccessControlAllowHeaders) > 0 {
 		corsPolicy.AllowHeaders = strings.Join(corsConfig.AccessControlAllowHeaders, ", ")
 	}
+	if len(corsConfig.AccessControlExposeHeaders) > 0 {
+		corsPolicy.ExposeHeaders = strings.Join(corsConfig.AccessControlExposeHeaders, ", ")
+	}
 	return corsPolicy
 }
 

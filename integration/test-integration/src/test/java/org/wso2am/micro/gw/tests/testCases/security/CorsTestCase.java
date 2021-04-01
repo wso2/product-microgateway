@@ -30,6 +30,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2am.micro.gw.tests.util.HttpsClientRequest;
 import org.wso2am.micro.gw.tests.util.TestConstant;
 import org.wso2am.micro.gw.tests.util.TokenUtil;
 import org.wso2am.micro.gw.tests.util.Utils;
@@ -42,17 +43,22 @@ public class CorsTestCase {
     private String allowedOrigin2 = "http://test2.com";
     private String allowedMethods = "GET,PUT,POST";
     private String allowedHeaders = "Authorization,X-PINGOTHER";
+    private String exposeHeaders = "X-Custom-Header";
 
     private static final String ORIGIN_HEADER = "Origin";
     private static final String ACCESS_CONTROL_REQUEST_METHOD_HEADER = "access-control-request-method";
     private static final String ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = "access-control-allow-origin";
     private static final String ACCESS_CONTROL_ALLOW_METHODS_HEADER = "access-control-allow-methods";
     private static final String ACCESS_CONTROL_ALLOW_HEADERS_HEADER = "access-control-allow-headers";
+    private static final String ACCESS_CONTROL_EXPOSE_HEADERS_HEADER = "access-control-expose-headers";
     private static final String ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER = "access-control-allow-credentials";
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
+        String certificatesTrustStorePath = HttpsClientRequest.class.getClassLoader()
+                .getResource("keystore/client-truststore.jks").getPath();
+        System.setProperty("javax.net.ssl.trustStore", certificatesTrustStorePath);
     }
 
     @Test(description = "Success Scenario, with allow credentials is set to true.")
@@ -107,7 +113,10 @@ public class CorsTestCase {
         Assert.assertEquals(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_ORIGIN_HEADER).getValue(),
                 allowedOrigin2);
 
-        // TODO: (VirajSalaka) Check the validity
+        Assert.assertNotNull(pickHeader(responseHeaders, ACCESS_CONTROL_EXPOSE_HEADERS_HEADER),
+                ACCESS_CONTROL_EXPOSE_HEADERS_HEADER + " header is unavailable");
+        Assert.assertEquals(pickHeader(responseHeaders, ACCESS_CONTROL_EXPOSE_HEADERS_HEADER).getValue(),
+                exposeHeaders, ACCESS_CONTROL_EXPOSE_HEADERS_HEADER + " header mismatched.");
         Assert.assertNotNull(pickHeader(responseHeaders, ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER),
                 ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER + " header is unavailable");
         Assert.assertTrue(Boolean.parseBoolean(pickHeader(responseHeaders,

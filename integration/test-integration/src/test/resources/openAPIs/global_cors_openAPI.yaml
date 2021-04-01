@@ -9,23 +9,23 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-x-wso2-cors:
-  accessControlAllowOrigins:
-    - http://test1.com
-    - http://test2.com
-  accessControlAllowHeaders:
-    - Authorization
-    - X-PINGOTHER
-  accessControlAllowMethods:
-    - GET
-    - PUT
-    - POST
-  accessControlExposeHeaders:
-    - X-Custom-Header
-  accessControlAllowCredentials: true
 x-wso2-basePath: '/cors'
 host: 'mockBackend:2383'
 basePath: /v2
+x-wso2-cors:
+  corsConfigurationEnabled: false
+  accessControlAllowOrigins:
+    - http://test1Invalid.com
+    - http://test2Invalid.com
+  accessControlAllowHeaders:
+    - Authorization
+    - X-PINGOTHER-INVALID
+  accessControlAllowMethods:
+    - DELETE
+    - POST
+  accessControlExposeHeaders:
+    - X-Custom-Header-Invalid
+  accessControlAllowCredentials: false
 tags:
   - name: pet
     description: Everything about your Pets

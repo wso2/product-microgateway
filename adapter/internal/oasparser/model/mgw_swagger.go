@@ -18,6 +18,7 @@ package model
 
 import (
 	parser "github.com/mitchellh/mapstructure"
+	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/internal/svcdiscovery"
 	logger "github.com/wso2/micro-gw/loggers"
 )
@@ -87,6 +88,7 @@ type CorsConfig struct {
 	AccessControlAllowHeaders     []string `mapstructure:"accessControlAllowHeaders"`
 	AccessControlAllowMethods     []string `mapstructure:"accessControlAllowMethods"`
 	AccessControlAllowOrigins     []string `mapstructure:"accessControlAllowOrigins"`
+	AccessControlExposeHeaders    []string `mapstructure:"accessControlExposeHeaders"`
 }
 
 // GetCorsConfig returns the CorsConfiguration Object.
@@ -345,13 +347,31 @@ func (swagger *MgwSwagger) setXWso2Cors() {
 				logger.LoggerOasparser.Errorf("Error while parsing %v: "+err.Error(), xWso2Cors)
 				return
 			}
-			logger.LoggerOasparser.Debugf("Cors Configuration is applied : %+v\n", corsConfig)
-			swagger.xWso2Cors = corsConfig
+			if corsConfig.Enabled {
+				logger.LoggerOasparser.Debugf("API Level Cors Configuration is applied : %+v\n", corsConfig)
+				swagger.xWso2Cors = corsConfig
+				return
+			}
+			swagger.xWso2Cors = generateGlobalCors()
 			return
 		}
 		logger.LoggerOasparser.Errorf("Error while parsing %v .", xWso2Cors)
+	} else {
+		swagger.xWso2Cors = generateGlobalCors()
 	}
+}
 
+func generateGlobalCors() *CorsConfig {
+	conf, _ := config.ReadConfigs()
+	logger.LoggerOasparser.Debug("CORS policy is applied from global configuration.")
+	return &CorsConfig{
+		Enabled:                       conf.Envoy.Cors.Enabled,
+		AccessControlAllowCredentials: conf.Envoy.Cors.AllowCredentials,
+		AccessControlAllowOrigins:     conf.Envoy.Cors.AllowOrigins,
+		AccessControlAllowHeaders:     conf.Envoy.Cors.AllowHeaders,
+		AccessControlAllowMethods:     conf.Envoy.Cors.AllowMethods,
+		AccessControlExposeHeaders:    conf.Envoy.Cors.ExposeHeaders,
+	}
 }
 
 // ResolveXThrottlingTier extracts the value of x-throttling-tier extension.
