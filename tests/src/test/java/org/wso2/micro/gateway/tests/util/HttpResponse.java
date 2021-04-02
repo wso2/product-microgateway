@@ -71,5 +71,15 @@ public class HttpResponse {
     public void setResponseMessage(String responseMessage) {
         this.responseMessage = responseMessage;
     }
+
+    public String getHeader(String header) {
+        String value = null;
+        for (Map.Entry<String,String> entry : headers.entrySet()) {
+            if ((entry.getKey()).equals(header)) {
+                return entry.getValue();
+            }
+        }
+        return value;
+    }
 }
 

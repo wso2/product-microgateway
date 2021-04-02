@@ -1157,6 +1157,7 @@ public final class CmdUtils {
         corsConfigurationDTO.setAccessControlAllowMethods(CliConstants.ACCESS_CONTROL_ALLOW_METHODS);
         corsConfigurationDTO.setAccessControlAllowHeaders(CliConstants.ACCESS_CONTROL_ALLOW_HEADERS);
         corsConfigurationDTO.setAccessControlAllowCredentials(CliConstants.ACCESS_CONTROL_ALLOW_CREDENTIALS);
+        corsConfigurationDTO.setAccessControlExposeHeaders(CliConstants.ACCESS_CONTROL_EXPOSE_HEADERS);
         return corsConfigurationDTO;
     }
 

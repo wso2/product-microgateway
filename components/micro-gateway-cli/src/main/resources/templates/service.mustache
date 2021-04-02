@@ -65,7 +65,8 @@ string {{cut qualifiedServiceName " "}}Key = "{{api.name}}-{{api.version}}";
          allowOrigins: [{{#api.corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowOrigins}}],
          allowCredentials: {{api.corsConfiguration.accessControlAllowCredentials}},
          allowHeaders: [{{#api.corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowHeaders}}],
-         allowMethods: [{{#api.corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowMethods}}]
+         allowMethods: [{{#api.corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlAllowMethods}}],
+         exposeHeaders: [{{#api.corsConfiguration.accessControlExposeHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/api.corsConfiguration.accessControlExposeHeaders}}]
     }
     {{/api.corsConfiguration.corsConfigurationEnabled}}
 }
