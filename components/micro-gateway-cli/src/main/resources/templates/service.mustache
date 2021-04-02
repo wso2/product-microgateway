@@ -113,7 +113,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
         runtime:InvocationContext invocationContext = runtime:getInvocationContext();
 
         map<string> pathParams = { {{#pathParameters}}
-            "{{name}}": <@untainted>{{name}}{{#unless @last}},{{/unless}} {{/pathParameters}}
+            "{{name}}": <@untainted>'{{name}}{{#unless @last}},{{/unless}} {{/pathParameters}}
         };
         invocationContext.attributes["pathParams"] = pathParams;
 
