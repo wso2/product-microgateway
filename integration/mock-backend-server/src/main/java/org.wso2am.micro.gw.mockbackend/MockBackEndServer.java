@@ -54,20 +54,20 @@ public class MockBackEndServer extends Thread {
     public static void main(String[] args) throws Exception{
         MockBackEndServer mockBackEndServer = new MockBackEndServer(Constants.MOCK_BACKEND_SERVER_PORT);
         MockSandboxServer mockSandboxServer = new MockSandboxServer(Constants.MOCK_SANDBOX_SERVER_PORT);
-        MockWebSocketServer mockWebSocketServer = new MockWebSocketServer(Constants.MOCK_WEBSOCKET_SERVER_PORT, false, null);
+        //MockWebSocketServer mockWebSocketServer = new MockWebSocketServer(Constants.MOCK_WEBSOCKET_SERVER_PORT, false, null);
         mockBackEndServer.start();
         mockSandboxServer.start();
-        mockWebSocketServer.start();
+        //mockWebSocketServer.start();
 
         if (args.length > 0 && args[0].equals("-tls-enabled")) {
             MockBackEndServer securedMockBackEndServer = new MockBackEndServer(Constants.SECURED_MOCK_BACKEND_SERVER_PORT,
                     true, false);
             MockBackEndServer mtlsMockBackEndServer = new MockBackEndServer(Constants.MTLS_MOCK_BACKEND_SERVER_PORT,
                     true, true);
-            MockWebSocketServer securedWebSocketServer = new MockWebSocketServer(Constants.SECURED_MOCK_WEBSOCKET_SERVER_PORT, true, getSslContext());
+            //MockWebSocketServer securedWebSocketServer = new MockWebSocketServer(Constants.SECURED_MOCK_WEBSOCKET_SERVER_PORT, true, getSslContext());
             securedMockBackEndServer.start();
             mtlsMockBackEndServer.start();
-            securedWebSocketServer.start();
+            //securedWebSocketServer.start();
         }
     }
 

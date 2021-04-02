@@ -201,10 +201,6 @@ public class RequestContext {
         return properties;
     }
 
-    public AuthenticationContext getAuthenticationContext() {
-        return authenticationContext;
-    }
-
     /**
      * Returns the production cluster header value.
      * can be null if the openAPI has production endpoints alone.

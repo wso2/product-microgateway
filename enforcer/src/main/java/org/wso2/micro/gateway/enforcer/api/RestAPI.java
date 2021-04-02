@@ -66,7 +66,7 @@ public class RestAPI implements API {
         this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).
                 apiLifeCycleState(apiLifeCycleState).securitySchema(securitySchemes).tier(api.getTier()).
                 endpointSecurity(api.getEndpointSecurity()).authHeader(api.getAuthorizationHeader()).
-                disableSecurity(api.getDisableSecurity()).build();
+                disableSecurity(api.getDisableSecurity()).apiType(APIConstants.ApiType.REST).build();
         initFilters();
         return basePath;
     }
