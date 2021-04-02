@@ -78,7 +78,7 @@ public class JWTUtil {
     private static volatile long ttl = -1L;
 
     /**
-     * This method used to retrieve JWKS keys from endpoint
+     * This method used to retrieve JWKS keys from endpoint.
      *
      * @param jwksEndpoint
      * @return
@@ -155,16 +155,16 @@ public class JWTUtil {
                 throw new MGWException("Public key is not RSA");
             }
         } else {
-            log.debug("Couldn't find a public certificate to verify the signature");
+            log.error("Couldn't find a public certificate to verify the signature");
             throw new MGWException("Couldn't find a public certificate to verify the signature");
         }
     }
 
-    public static PrivateKey getPrivateKey() throws MGWException {
+    public static PrivateKey getPrivateKey(String filePath) throws MGWException {
         PrivateKey privateKey = null;
         try {
             String strKeyPEM = "";
-            Path keyPath = Paths.get(ConfigHolder.getInstance().getConfig().getPrivateKeyPath());
+            Path keyPath = Paths.get(filePath);
             String key = Files.readString(keyPath, Charset.defaultCharset());
             strKeyPEM = key
                     .replace(Constants.BEGINING_OF_PRIVATE_KEY, "")

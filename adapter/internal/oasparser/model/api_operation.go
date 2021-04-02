@@ -21,8 +21,10 @@ package model
 
 // Operation type object holds data about each http method in the REST API.
 type Operation struct {
-	method 		string
-	security	[]map[string][]string
+	method          string
+	security        []map[string][]string
+	tier            string
+	disableSecurity bool
 }
 
 // GetMethod returns the http method name of the give API operation
@@ -30,13 +32,24 @@ func (operation *Operation) GetMethod() string {
 	return operation.method
 }
 
+// GetDisableSecurity returns if the resouce is secured.
+func (operation *Operation) GetDisableSecurity() bool {
+	return operation.disableSecurity
+}
+
 // GetSecurity returns the security schemas defined for the http opeartion
 func (operation *Operation) GetSecurity() []map[string][]string {
 	return operation.security
 }
 
-// NewOperation Creates and returns operation type object
-func NewOperation(method string, security []map[string][]string) Operation {
-	return Operation{method, security}
+// GetTier returns the operation level throttling tier
+func (operation *Operation) GetTier() string {
+	return operation.tier
 }
 
+// NewOperation Creates and returns operation type object
+func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}) Operation {
+	tier := ResolveXThrottlingTier(extensions)
+	disableSecurity := ResolveDisableSecurity(extensions)
+	return Operation{method, security, tier, disableSecurity}
+}

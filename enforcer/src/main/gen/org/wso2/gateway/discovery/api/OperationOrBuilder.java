@@ -42,4 +42,22 @@ public interface OperationOrBuilder extends
    */
   org.wso2.gateway.discovery.api.SecurityListOrBuilder getSecurityOrBuilder(
       int index);
+
+  /**
+   * <code>string tier = 3;</code>
+   * @return The tier.
+   */
+  java.lang.String getTier();
+  /**
+   * <code>string tier = 3;</code>
+   * @return The bytes for tier.
+   */
+  com.google.protobuf.ByteString
+      getTierBytes();
+
+  /**
+   * <code>bool disableSecurity = 4;</code>
+   * @return The disableSecurity.
+   */
+  boolean getDisableSecurity();
 }

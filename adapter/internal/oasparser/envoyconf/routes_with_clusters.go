@@ -35,9 +35,9 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/wso2/micro-gw/config"
-	logger "github.com/wso2/micro-gw/loggers"
 	"github.com/wso2/micro-gw/internal/oasparser/model"
 	"github.com/wso2/micro-gw/internal/svcdiscovery"
+	logger "github.com/wso2/micro-gw/loggers"
 
 	"strings"
 	"time"
@@ -364,14 +364,16 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	prodClusterName := params.prodClusterName
 	sandClusterName := params.sandClusterName
 	endpointBasepath := params.endpointBasePath
+	authHeader := params.AuthHeader
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
-		router       routev3.Route
-		action       *routev3.Route_Route
-		match        *routev3.RouteMatch
-		decorator    *routev3.Decorator
-		resourcePath string
+		router        routev3.Route
+		action        *routev3.Route_Route
+		match         *routev3.RouteMatch
+		decorator     *routev3.Decorator
+		removeHeaders []string
+		resourcePath  string
 	)
 
 	// OPTIONS is always added even if it is not listed under resources
@@ -423,6 +425,25 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		decorator = &routev3.Decorator{
 			Operation: resourcePath,
 		}
+	}
+
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
+	}
+
+	if !conf.Security.Adapter.EnableOutboundAuthHeader {
+		var internalKey string = "Internal-Key"
+		logger.LoggerOasparser.Debugf("removeHeader: %v", authHeader)
+		if authHeader == "" {
+			authHeader = conf.Security.Adapter.AuthorizationHeader
+		}
+		removeHeaders = append(removeHeaders, authHeader)
+		removeHeaders = append(removeHeaders, internalKey)
+	}
+
+	if len(removeHeaders) == 0 {
+		removeHeaders = nil
 	}
 
 	var contextExtensions = make(map[string]string)
@@ -510,11 +531,140 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	}
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
-
 	router = routev3.Route{
 		Name:      xWso2Basepath, //Categorize routes with same base path
 		Match:     match,
 		Action:    action,
+		Metadata:  nil,
+		Decorator: decorator,
+		TypedPerFilterConfig: map[string]*any.Any{
+			wellknown.HTTPExternalAuthorization: filter,
+		},
+		RequestHeadersToRemove: removeHeaders,
+	}
+	return &router
+}
+
+// CreateTokenRoute generates a route for the jwt /testkey endpoint
+func CreateTokenRoute() *routev3.Route {
+	var (
+		router    routev3.Route
+		action    *routev3.Route_Route
+		match     *routev3.RouteMatch
+		decorator *routev3.Decorator
+	)
+
+	match = &routev3.RouteMatch{
+		PathSpecifier: &routev3.RouteMatch_Path{
+			Path: testKeyPath,
+		},
+	}
+
+	hostRewriteSpecifier := &routev3.RouteAction_AutoHostRewrite{
+		AutoHostRewrite: &wrapperspb.BoolValue{
+			Value: true,
+		},
+	}
+
+	decorator = &routev3.Decorator{
+		Operation: testKeyPath,
+	}
+
+	perFilterConfig := extAuthService.ExtAuthzPerRoute{
+		Override: &extAuthService.ExtAuthzPerRoute_Disabled{
+			Disabled: true,
+		},
+	}
+
+	b := proto.NewBuffer(nil)
+	b.SetDeterministic(true)
+	_ = b.Marshal(&perFilterConfig)
+	filter := &any.Any{
+		TypeUrl: extAuthzPerRouteName,
+		Value:   b.Bytes(),
+	}
+
+	action = &routev3.Route_Route{
+		Route: &routev3.RouteAction{
+			HostRewriteSpecifier: hostRewriteSpecifier,
+			RegexRewrite: &envoy_type_matcherv3.RegexMatchAndSubstitute{
+				Pattern: &envoy_type_matcherv3.RegexMatcher{
+					EngineType: &envoy_type_matcherv3.RegexMatcher_GoogleRe2{
+						GoogleRe2: &envoy_type_matcherv3.RegexMatcher_GoogleRE2{
+							MaxProgramSize: nil,
+						},
+					},
+					Regex: testKeyPath,
+				},
+				Substitution: "/",
+			},
+		},
+	}
+
+	directClusterSpecifier := &routev3.RouteAction_Cluster{
+		Cluster: "token_cluster",
+	}
+	action.Route.ClusterSpecifier = directClusterSpecifier
+
+	router = routev3.Route{
+		Name:      testKeyPath, //Categorize routes with same base path
+		Match:     match,
+		Action:    action,
+		Metadata:  nil,
+		Decorator: decorator,
+		TypedPerFilterConfig: map[string]*any.Any{
+			wellknown.HTTPExternalAuthorization: filter,
+		},
+	}
+	return &router
+}
+
+// CreateHealthEndpoint generates a route for the jwt /health endpoint
+// Replies with direct response.
+func CreateHealthEndpoint() *routev3.Route {
+	var (
+		router    routev3.Route
+		match     *routev3.RouteMatch
+		decorator *routev3.Decorator
+	)
+
+	match = &routev3.RouteMatch{
+		PathSpecifier: &routev3.RouteMatch_Path{
+			Path: healthPath,
+		},
+	}
+
+	decorator = &routev3.Decorator{
+		Operation: healthPath,
+	}
+
+	perFilterConfig := extAuthService.ExtAuthzPerRoute{
+		Override: &extAuthService.ExtAuthzPerRoute_Disabled{
+			Disabled: true,
+		},
+	}
+
+	b := proto.NewBuffer(nil)
+	b.SetDeterministic(true)
+	_ = b.Marshal(&perFilterConfig)
+	filter := &any.Any{
+		TypeUrl: extAuthzPerRouteName,
+		Value:   b.Bytes(),
+	}
+
+	router = routev3.Route{
+		Name:  healthPath, //Categorize routes with same base path
+		Match: match,
+		Action: &routev3.Route_DirectResponse{
+			DirectResponse: &routev3.DirectResponseAction{
+				Status: 200,
+				Body: &corev3.DataSource{
+					Specifier: &corev3.DataSource_InlineString{
+						InlineString: healthEndpointResponse,
+					},
+				},
+			},
+		},
 		Metadata:  nil,
 		Decorator: decorator,
 		TypedPerFilterConfig: map[string]*any.Any{
@@ -631,6 +781,9 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 	if len(corsConfig.AccessControlAllowHeaders) > 0 {
 		corsPolicy.AllowHeaders = strings.Join(corsConfig.AccessControlAllowHeaders, ", ")
 	}
+	if len(corsConfig.AccessControlExposeHeaders) > 0 {
+		corsPolicy.ExposeHeaders = strings.Join(corsConfig.AccessControlExposeHeaders, ", ")
+	}
 	return corsPolicy
 }
 
@@ -641,6 +794,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, e
 		apiType:           swagger.GetAPIType(),
 		version:           swagger.GetVersion(),
 		xWSO2BasePath:     swagger.GetXWso2Basepath(),
+		AuthHeader:        swagger.GetXWSO2AuthHeader(),
 		prodClusterName:   prodClusterName,
 		sandClusterName:   sandClusterName,
 		endpointBasePath:  endpointBasePath,

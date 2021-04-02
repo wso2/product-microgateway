@@ -1,7 +1,20 @@
-version: "3.7"
+version: "2.4"
 services:
+  apim:
+    image: wso2am/wso2am:4.0.0-pre-beta-alpine
+    healthcheck:
+      test: ["CMD", "nc", "-z","localhost", "9443"]
+      interval: 10s
+      retries: 50
+    ports:
+      - "9763:9763"
+      - "9443:9443"
+      - "5672:5672"
+      - "8243:8243"
+    volumes:
+      - ../resources/apim/deployment.toml:/home/wso2carbon/wso2am-4.0.0-pre-beta/repository/conf/deployment.toml
   router:
-    image: wso2/mg-router:4.0.0-m8-SNAPSHOT
+    image: wso2/mg-router:4.0.0-m10
     logging:
       options:
         max-size: "20m"
@@ -24,11 +37,12 @@ services:
     ports:
       - "9095:9095"
       - "9000:9000"
+      - "9090:9090"
     links:
       - adapter
       - enforcer
   adapter:
-    image: wso2/mg-adapter:4.0.0-m8-SNAPSHOT
+    image: wso2/mg-adapter:4.0.0-m10
     logging:
       options:
         max-size: "20m"
@@ -48,7 +62,7 @@ services:
     links:
       - apim
   enforcer:
-    image: wso2/mg-enforcer:4.0.0-m8-SNAPSHOT
+    image: wso2/mg-enforcer:4.0.0-m10
     logging:
       options:
         max-size: "20m"
@@ -69,21 +83,10 @@ services:
       - ADAPTER_XDS_PORT=18000
       - ENFORCER_LABEL=Production and Sandbox
       - XDS_MAX_MSG_SIZE=4194304
+      - XDS_MAX_RETRIES=3
       - JAVA_OPTS=${JAVA_OPTS} -Dhttpclient.hostnameVerifier=AllowAll
       - apim_admin_pwd=admin
+      - enforcer_admin_pwd=admin
+      - tm_admin_pwd=admin
     ports:
       - "8081:8081"
-  apim:
-    image: wso2am/wso2am:4.0.0-alpha-alpine
-    healthcheck:
-      test: ["CMD", "nc", "-z","localhost", "9443"]
-      interval: 10s
-      start_period: 120s
-      retries: 50
-    ports:
-      - "9763:9763"
-      - "9443:9443"
-      - "5672:5672"
-      - "8243:8243"
-    volumes:
-      - ../resources/apim/deployment.toml:/home/wso2carbon/wso2am-4.0.0-alpha/repository/conf/deployment.toml

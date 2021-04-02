@@ -21,11 +21,10 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"reflect"
 	"sync"
 
-	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
+	subscription "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
+	throttle "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/throttle"
 
 	wso2_cache "github.com/wso2/micro-gw/internal/discovery/protocol/cache/v3"
 	"github.com/wso2/micro-gw/internal/svcdiscovery"
@@ -40,6 +39,7 @@ import (
 	apiModel "github.com/wso2/micro-gw/internal/api/models"
 	eventhubTypes "github.com/wso2/micro-gw/internal/eventhub/types"
 	oasParser "github.com/wso2/micro-gw/internal/oasparser"
+	envoyconf "github.com/wso2/micro-gw/internal/oasparser/envoyconf"
 	mgw "github.com/wso2/micro-gw/internal/oasparser/model"
 	"github.com/wso2/micro-gw/internal/oasparser/operator"
 	logger "github.com/wso2/micro-gw/loggers"
@@ -59,6 +59,7 @@ var (
 	enforcerApplicationKeyMappingCache wso2_cache.SnapshotCache
 	enforcerKeyManagerCache            wso2_cache.SnapshotCache
 	enforcerRevokedTokensCache         wso2_cache.SnapshotCache
+	enforcerThrottleDataCache          wso2_cache.SnapshotCache
 
 	// Vhost:APIName:Version as map key
 	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // MgwSwagger struct map
@@ -70,7 +71,7 @@ var (
 
 	// Envoy Label as map key
 	envoyUpdateVersionMap  map[string]int64                       // XDS version map
-	envoyListenerConfigMap map[string]*listenerv3.Listener        // Listener Configuration map
+	envoyListenerConfigMap map[string][]*listenerv3.Listener      // Listener Configuration map
 	envoyRouteConfigMap    map[string]*routev3.RouteConfiguration // Routes Configuration map
 
 	// Common Enforcer Label as map key
@@ -83,6 +84,7 @@ var (
 	enforcerSubscriptionPolicyMap    map[string][]types.Resource
 	enforcerApplicationKeyMappingMap map[string][]types.Resource
 	enforcerRevokedTokensMap         map[string][]types.Resource
+	enforcerThrottleData             *throttle.ThrottleData
 
 	// KeyManagerList to store data
 	KeyManagerList = make([]eventhubTypes.KeyManager, 0)
@@ -118,6 +120,7 @@ func init() {
 	enforcerApplicationKeyMappingCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerKeyManagerCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerRevokedTokensCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
+	enforcerThrottleDataCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 
 	apiMgwSwaggerMap = make(map[string]mgw.MgwSwagger)
 	openAPIEnvoyMap = make(map[string][]string)
@@ -127,7 +130,7 @@ func init() {
 	openAPIEndpointsMap = make(map[string][]*corev3.Address)
 	//TODO: (VirajSalaka) Swagger or project should contain the version as a meta information
 	envoyUpdateVersionMap = make(map[string]int64)
-	envoyListenerConfigMap = make(map[string]*listenerv3.Listener)
+	envoyListenerConfigMap = make(map[string][]*listenerv3.Listener)
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 
 	enforcerConfigMap = make(map[string][]types.Resource)
@@ -139,6 +142,7 @@ func init() {
 	enforcerSubscriptionPolicyMap = make(map[string][]types.Resource)
 	enforcerApplicationKeyMappingMap = make(map[string][]types.Resource)
 	enforcerRevokedTokensMap = make(map[string][]types.Resource)
+	enforcerThrottleData = &throttle.ThrottleData{}
 }
 
 // GetXdsCache returns xds server cache.
@@ -191,6 +195,11 @@ func GetEnforcerRevokedTokenCache() wso2_cache.SnapshotCache {
 	return enforcerRevokedTokensCache
 }
 
+//GetEnforcerThrottleDataCache return throttle data cache
+func GetEnforcerThrottleDataCache() wso2_cache.SnapshotCache {
+	return enforcerThrottleDataCache
+}
+
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
 func UpdateAPI(apiContent config.APIContent) {
 	var newLabels []string
@@ -208,6 +217,8 @@ func UpdateAPI(apiContent config.APIContent) {
 		mgwSwagger = operator.GetMgwSwagger(apiContent.APIDefinition)
 		mgwSwagger.SetName(apiContent.Name)
 		mgwSwagger.SetVersion(apiContent.Version)
+		mgwSwagger.SetSecurityScheme(apiContent.SecurityScheme)
+		mgwSwagger.SetXWso2AuthHeader(apiContent.AuthHeader)
 	} else if apiContent.APIType == mgw.WS {
 		mgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
 	} else {
@@ -221,7 +232,8 @@ func UpdateAPI(apiContent config.APIContent) {
 	}
 
 	apiIdentifier := GenerateIdentifierForAPI(apiContent.VHost, apiContent.Name, apiContent.Version)
-	//TODO: Uncomment the below section depending on MgwSwagger.Resource ids
+	//TODO: (SuKSW) Uncomment the below section depending on MgwSwagger.Resource ids
+	//TODO: (SuKSW) Update the existing API if the basepath already exists
 	//existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
 	// if exists {
 	// 	if reflect.DeepEqual(mgwSwagger, existingMgwSwagger) {
@@ -248,7 +260,7 @@ func UpdateAPI(apiContent config.APIContent) {
 	// openAPIListenersMap[apiMapKey] = listeners
 	openAPIClustersMap[apiIdentifier] = clusters
 	openAPIEndpointsMap[apiIdentifier] = endpoints
-	openAPIEnforcerApisMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiContent.LifeCycleStatus)
+	openAPIEnforcerApisMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiContent.LifeCycleStatus, apiContent.EndpointSecurity)
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
 	if svcdiscovery.IsServiceDiscoveryEnabled {
@@ -317,22 +329,23 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 	// TODO: (VirajSalaka) check possible optimizations, Since the number of labels are low by design it should not be an issue
 	for _, oldLabel := range oldLabels {
 		if !arrayContains(newLabels, oldLabel) {
-			listeners, clusters, routes, endpoints, apis := generateEnvoyResoucesForLabel(oldLabel)
-			updateXdsCacheWithLock(oldLabel, endpoints, clusters, routes, listeners)
+			listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(oldLabel)
+			UpdateXdsCacheWithLock(oldLabel, endpoints, clusters, routes, listeners)
 			UpdateEnforcerApis(oldLabel, apis)
 			logger.LoggerXds.Debugf("Xds Cache is updated for the already existing label : %v", oldLabel)
 		}
 	}
 
 	for _, newLabel := range newLabels {
-		listeners, clusters, routes, endpoints, apis := generateEnvoyResoucesForLabel(newLabel)
-		updateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
+		listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(newLabel)
+		UpdateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
 		UpdateEnforcerApis(newLabel, apis)
 		logger.LoggerXds.Debugf("Xds Cache is updated for the newly added label : %v", newLabel)
 	}
 }
 
-func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Resource, []types.Resource,
+// GenerateEnvoyResoucesForLabel generates envoy resources for a given label
+func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Resource, []types.Resource,
 	[]types.Resource, []types.Resource) {
 	var clusterArray []*clusterv3.Cluster
 	var routeArray []*routev3.Route
@@ -348,21 +361,34 @@ func generateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 			// listenerArrays = append(listenerArrays, openAPIListenersMap[apiKey])
 		}
 	}
-	listener, listenerFound := envoyListenerConfigMap[label]
+
+	// If the token endpoint is enabled, the token endpoint also needs to be added.
+	conf, _ := config.ReadConfigs()
+	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
+	if enableJwtIssuer {
+		routeToken := envoyconf.CreateTokenRoute()
+		routeArray = append(routeArray, routeToken)
+	}
+
+	// Add health endpoint
+	routeHealth := envoyconf.CreateHealthEndpoint()
+	routeArray = append(routeArray, routeHealth)
+
+	listenerArray, listenerFound := envoyListenerConfigMap[label]
 	routesConfig, routesConfigFound := envoyRouteConfigMap[label]
 	if !listenerFound && !routesConfigFound {
-		listener, routesConfig = oasParser.GetProductionListenerAndRouteConfig(routeArray)
-		envoyListenerConfigMap[label] = listener
+		listenerArray, routesConfig = oasParser.GetProductionListenerAndRouteConfig(routeArray)
+		envoyListenerConfigMap[label] = listenerArray
 		envoyRouteConfigMap[label] = routesConfig
 	} else {
 		// If the routesConfig exists, the listener exists too
 		oasParser.UpdateRoutesConfig(routesConfig, routeArray)
 	}
-	endpoints, clusters, listeners, routeConfigs := oasParser.GetCacheResources(endpointArray, clusterArray, listener, routesConfig)
+	endpoints, clusters, listeners, routeConfigs := oasParser.GetCacheResources(endpointArray, clusterArray, listenerArray, routesConfig)
 	return endpoints, clusters, listeners, routeConfigs, apis
 }
 
-//use updateXdsCacheWithLock to avoid race conditions
+//use UpdateXdsCacheWithLock to avoid race conditions
 func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) {
 	version := rand.Intn(maxRandomInt)
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
@@ -382,7 +408,7 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 	label := commonEnforcerLabel
 	configs := []types.Resource{MarshalConfig(configFile)}
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), configs, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), configs, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerCache.SetSnapshot(label, snap)
@@ -398,7 +424,7 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 func UpdateEnforcerApis(label string, apis []types.Resource) {
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, apis, nil, nil, nil, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, apis, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerCache.SetSnapshot(label, snap)
@@ -419,7 +445,7 @@ func UpdateEnforcerSubscriptions(subscriptions *subscription.SubscriptionList) {
 
 	// TODO: (VirajSalaka) Decide if a map is required to keep version (just to avoid having the same version)
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, subscriptionList, nil, nil, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, subscriptionList, nil, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerSubscriptionCache.SetSnapshot(label, snap)
@@ -438,7 +464,7 @@ func UpdateEnforcerApplications(applications *subscription.ApplicationList) {
 	applicationList = append(applicationList, applications)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, applicationList, nil, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, applicationList, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationCache.SetSnapshot(label, snap)
@@ -456,7 +482,7 @@ func UpdateEnforcerAPIList(label string, apis *subscription.APIList) {
 	apiList = append(apiList, apis)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, apiList, nil, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, apiList, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerAPICache.SetSnapshot(label, snap)
@@ -475,7 +501,7 @@ func UpdateEnforcerApplicationPolicies(applicationPolicies *subscription.Applica
 	applicationPolicyList = append(applicationPolicyList, applicationPolicies)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, applicationPolicyList, nil, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, applicationPolicyList, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationPolicyCache.SetSnapshot(label, snap)
@@ -494,7 +520,7 @@ func UpdateEnforcerSubscriptionPolicies(subscriptionPolicies *subscription.Subsc
 	subscriptionPolicyList = append(subscriptionPolicyList, subscriptionPolicies)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, subscriptionPolicyList, nil, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, subscriptionPolicyList, nil, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerSubscriptionPolicyCache.SetSnapshot(label, snap)
@@ -513,7 +539,7 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 	applicationKeyMappingList = append(applicationKeyMappingList, applicationKeyMappings)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, applicationKeyMappingList, nil, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, applicationKeyMappingList, nil, nil, nil)
 	snap.Consistent()
 
 	err := enforcerApplicationKeyMappingCache.SetSnapshot(label, snap)
@@ -524,113 +550,12 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }
 
-//different go routines could update XDS at the same time. To avoid this we use a mutex and lock
-func updateXdsCacheWithLock(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource,
+// UpdateXdsCacheWithLock uses mutex and lock to avoid different go routines updating XDS at the same time
+func UpdateXdsCacheWithLock(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource,
 	listeners []types.Resource) {
 	mutexForXdsUpdate.Lock()
 	defer mutexForXdsUpdate.Unlock()
 	updateXdsCache(label, endpoints, clusters, routes, listeners)
-}
-
-func startConsulServiceDiscovery() {
-	//label := "default"
-	for apiKey, clusterList := range openAPIClustersMap {
-		for _, cluster := range clusterList {
-			if consulSyntax, ok := svcdiscovery.ClusterConsulKeyMap[cluster.Name]; ok {
-				svcdiscovery.InitConsul() //initialize consul client and load certs
-				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
-				if errConSyn != nil {
-					logger.LoggerXds.Error("consul syntax parse error ", errConSyn)
-					return
-				}
-				logger.LoggerXds.Debugln(query)
-				go getServiceDiscoveryData(query, cluster.Name, apiKey)
-			}
-		}
-	}
-}
-
-func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKey string) {
-	doneChan := make(chan bool)
-	svcdiscovery.ClusterConsulDoneChanMap[clusterName] = doneChan
-	resultChan := svcdiscovery.ConsulClientInstance.Poll(query, doneChan)
-	for {
-		select {
-		case queryResultsList, ok := <-resultChan:
-			if !ok { //ok==false --> result chan is closed
-				logger.LoggerXds.Debugln("closed the result channel for cluster name: ", clusterName)
-				return
-			}
-			if val, ok := svcdiscovery.ClusterConsulResultMap[clusterName]; ok {
-				if !reflect.DeepEqual(val, queryResultsList) {
-					svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList
-					//update the envoy cluster
-					updateRoute(apiKey, clusterName, queryResultsList)
-				}
-			} else {
-				logger.LoggerXds.Debugln("updating cluster from the consul service registry, removed the default host")
-				svcdiscovery.ClusterConsulResultMap[clusterName] = queryResultsList
-				updateRoute(apiKey, clusterName, queryResultsList)
-			}
-		}
-	}
-}
-
-func updateRoute(apiKey string, clusterName string, queryResultsList []svcdiscovery.Upstream) {
-	if clusterList, available := openAPIClustersMap[apiKey]; available {
-		for i := range clusterList {
-			if clusterList[i].Name == clusterName {
-				var lbEndpointList []*endpointv3.LbEndpoint
-				for _, result := range queryResultsList {
-					address := &corev3.Address{Address: &corev3.Address_SocketAddress{
-						SocketAddress: &corev3.SocketAddress{
-							Address:  result.Address,
-							Protocol: corev3.SocketAddress_TCP,
-							PortSpecifier: &corev3.SocketAddress_PortValue{
-								PortValue: uint32(result.ServicePort),
-							},
-						},
-					}}
-
-					lbEndPoint := &endpointv3.LbEndpoint{
-						HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
-							Endpoint: &endpointv3.Endpoint{
-								Address: address,
-							},
-						},
-					}
-					lbEndpointList = append(lbEndpointList, lbEndPoint)
-				}
-				clusterList[i].LoadAssignment = &endpointv3.ClusterLoadAssignment{
-					ClusterName: clusterName,
-					Endpoints: []*endpointv3.LocalityLbEndpoints{
-						{
-							LbEndpoints: lbEndpointList,
-						},
-					},
-				}
-				updateXDSRouteCacheForServiceDiscovery(apiKey)
-			}
-		}
-	}
-}
-
-func updateXDSRouteCacheForServiceDiscovery(apiKey string) {
-	for key, envoyLabelList := range openAPIEnvoyMap {
-		if key == apiKey {
-			for _, label := range envoyLabelList {
-				listeners, clusters, routes, endpoints, _ := generateEnvoyResoucesForLabel(label)
-				updateXdsCacheWithLock(label, endpoints, clusters, routes, listeners)
-				logger.LoggerXds.Info("Updated XDS cache by consul service discovery")
-			}
-		}
-	}
-}
-
-func stopConsulDiscoveryFor(clusterName string) {
-	if doneChan, available := svcdiscovery.ClusterConsulDoneChanMap[clusterName]; available {
-		close(doneChan)
-	}
 }
 
 // ListApis returns a list of objects that holds info about each API
@@ -695,7 +620,7 @@ func UpdateEnforcerKeyManagers(keyManagerConfigList []types.Resource) {
 	label := commonEnforcerLabel
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, keyManagerConfigList, nil)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, keyManagerConfigList, nil, nil)
 	snap.Consistent()
 
 	err := enforcerKeyManagerCache.SetSnapshot(label, snap)
@@ -715,7 +640,7 @@ func UpdateEnforcerRevokedTokens(revokedTokens []types.Resource) {
 	tokens = append(tokens, revokedTokens...)
 
 	version := rand.Intn(maxRandomInt)
-	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, tokens)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, tokens, nil)
 	snap.Consistent()
 
 	err := enforcerRevokedTokensCache.SetSnapshot(label, snap)
@@ -723,5 +648,50 @@ func UpdateEnforcerRevokedTokens(revokedTokens []types.Resource) {
 		logger.LoggerXds.Error(err)
 	}
 	enforcerRevokedTokensMap[label] = tokens
+	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
+}
+
+// UpdateEnforcerThrottleData update the key template and blocking conditions
+// data in the enforcer
+func UpdateEnforcerThrottleData(throttleData *throttle.ThrottleData) {
+	logger.LoggerXds.Debug("Updating enforcer cache for throttle data")
+	label := commonEnforcerLabel
+	var data []types.Resource
+
+	// Set new throttle data content based on the already available content in the cache DTO
+	// and the new data being requested to add.
+	// ex: keytemplates being pressent in the `throttleData` means this method was called
+	// after downloading key templates. That means we should populate keytemplates property
+	// in the cache DTO, keeping the other properties as it is. This is done this way to avoid
+	// the need of two xds services to push keytemplates and blocking conditions.
+	templates := throttleData.KeyTemplates
+	conditions := throttleData.BlockingConditions
+	ipConditions := throttleData.IpBlockingConditions
+	if templates == nil {
+		templates = enforcerThrottleData.KeyTemplates
+	}
+	if conditions == nil {
+		conditions = enforcerThrottleData.BlockingConditions
+	}
+	if ipConditions == nil {
+		ipConditions = enforcerThrottleData.IpBlockingConditions
+	}
+
+	t := &throttle.ThrottleData{
+		KeyTemplates:         templates,
+		BlockingConditions:   conditions,
+		IpBlockingConditions: ipConditions,
+	}
+	data = append(data, t)
+
+	version := rand.Intn(maxRandomInt)
+	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, data)
+	snap.Consistent()
+
+	err := enforcerThrottleDataCache.SetSnapshot(label, snap)
+	if err != nil {
+		logger.LoggerXds.Error(err)
+	}
+	enforcerThrottleData = t
 	logger.LoggerXds.Infof("New cache update for the label: " + label + " version: " + fmt.Sprint(version))
 }

@@ -44,6 +44,7 @@ const (
 	notification    string = "notification"
 	keymanager      string = "keymanager"
 	tokenRevocation string = "tokenRevocation"
+	throttleData    string = "throttleData"
 )
 
 // ProcessEvents to pass event consumption
@@ -51,7 +52,7 @@ func ProcessEvents(config *config.Config) {
 	var err error
 	mgwConfig = config
 	amqpURIArray = retrieveAMQPURLList()
-	bindingKeys := []string{notification, keymanager, tokenRevocation}
+	bindingKeys := []string{notification, keymanager, tokenRevocation, throttleData}
 
 	logger.LoggerMsg.Infof("dialing %q", amqpURIArray[0].url+"/")
 	rabbitConn, err = connectToRabbitMQ(amqpURIArray[0].url + "/")
@@ -160,6 +161,8 @@ func StartConsumer(key string) (*Consumer, error) {
 		go handleKMConfiguration(deliveries, c.done)
 	} else if strings.EqualFold(key, tokenRevocation) {
 		go handleTokenRevocation(deliveries, c.done)
+	} else if strings.EqualFold(key, throttleData) {
+		go handleThrottleData(deliveries, c.done)
 	}
 
 	return c, nil

@@ -4,6 +4,10 @@
 package org.wso2.gateway.discovery.config.enforcer;
 
 /**
+ * <pre>
+ * Throttle Agent configuration model
+ * </pre>
+ *
  * Protobuf type {@code wso2.discovery.config.enforcer.ThrottleAgent}
  */
 public final class ThrottleAgent extends
@@ -740,6 +744,10 @@ private static final long serialVersionUID = 0L;
     return builder;
   }
   /**
+   * <pre>
+   * Throttle Agent configuration model
+   * </pre>
+   *
    * Protobuf type {@code wso2.discovery.config.enforcer.ThrottleAgent}
    */
   public static final class Builder extends

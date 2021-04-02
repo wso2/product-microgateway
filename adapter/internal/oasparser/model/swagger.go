@@ -71,36 +71,68 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 // setResourcesSwagger sets swagger (openapi v2) paths as mgwSwagger resources.
 func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 	var resources []Resource
+	// Check if the "x-wso2-disable-security" vendor ext is present at the API level.
+	// If API level vendor ext is present, then the same key:value should be added to
+	// resourve level, if it's not present at resource level using "addResourceLevelDisableSecurity"
+	disableSecurity, found := swagger2.VendorExtensible.Extensions.GetBool(xWso2DisableSecurity)
 	if swagger2.Paths != nil {
 		for path, pathItem := range swagger2.Paths.Paths {
 			var methodsArray []Operation
 			methodFound := false
 			if pathItem.Get != nil {
-				methodsArray = append(methodsArray, NewOperation("GET", pathItem.Get.Security))
+				if found {
+					addResourceLevelDisableSecurity(&pathItem.Get.VendorExtensible, disableSecurity)
+				}
+				methodsArray = append(methodsArray, NewOperation("GET", pathItem.Get.Security,
+					pathItem.Get.Extensions))
 				methodFound = true
 			}
 			if pathItem.Post != nil {
-				methodsArray = append(methodsArray, NewOperation("POST", pathItem.Post.Security))
+				if found {
+					addResourceLevelDisableSecurity(&pathItem.Post.VendorExtensible, disableSecurity)
+				}
+				methodsArray = append(methodsArray, NewOperation("POST", pathItem.Post.Security,
+					pathItem.Post.Extensions))
 				methodFound = true
 			}
 			if pathItem.Put != nil {
-				methodsArray = append(methodsArray, NewOperation("PUT", pathItem.Put.Security))
+				if found {
+					addResourceLevelDisableSecurity(&pathItem.Put.VendorExtensible, disableSecurity)
+				}
+				methodsArray = append(methodsArray, NewOperation("PUT", pathItem.Put.Security,
+					pathItem.Put.Extensions))
 				methodFound = true
 			}
 			if pathItem.Delete != nil {
-				methodsArray = append(methodsArray, NewOperation("DELETE", pathItem.Delete.Security))
+				if found {
+					addResourceLevelDisableSecurity(&pathItem.Delete.VendorExtensible, disableSecurity)
+				}
+				methodsArray = append(methodsArray, NewOperation("DELETE", pathItem.Delete.Security,
+					pathItem.Delete.Extensions))
 				methodFound = true
 			}
 			if pathItem.Head != nil {
-				methodsArray = append(methodsArray, NewOperation("HEAD", pathItem.Head.Security))
+				if found {
+					addResourceLevelDisableSecurity(&pathItem.Head.VendorExtensible, disableSecurity)
+				}
+				methodsArray = append(methodsArray, NewOperation("HEAD", pathItem.Head.Security,
+					pathItem.Head.Extensions))
 				methodFound = true
 			}
 			if pathItem.Patch != nil {
-				methodsArray = append(methodsArray, NewOperation("PATCH", pathItem.Patch.Security))
+				if found {
+					addResourceLevelDisableSecurity(&pathItem.Patch.VendorExtensible, disableSecurity)
+				}
+				methodsArray = append(methodsArray, NewOperation("PATCH", pathItem.Patch.Security,
+					pathItem.Patch.Extensions))
 				methodFound = true
 			}
 			if pathItem.Options != nil {
-				methodsArray = append(methodsArray, NewOperation("OPTION", pathItem.Options.Security))
+				if found {
+					addResourceLevelDisableSecurity(&pathItem.Options.VendorExtensible, disableSecurity)
+				}
+				methodsArray = append(methodsArray, NewOperation("OPTION", pathItem.Options.Security,
+					pathItem.Options.Extensions))
 				methodFound = true
 			}
 			if methodFound {
@@ -112,9 +144,17 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 	return resources
 }
 
+// This methods adds x-wso2-disable-security vendor extension
+// if it's not present in the given vendor extensions.
+func addResourceLevelDisableSecurity(v *spec.VendorExtensible, enable bool) {
+	if _, found := v.Extensions.GetBool(xWso2DisableSecurity); !found {
+		v.AddExtension(xWso2DisableSecurity, enable)
+	}
+}
+
 func getSwaggerOperationLevelDetails(operation *spec.Operation, method string) Operation {
 	var securityData []map[string][]string = operation.Security
-	return Operation{method, securityData}
+	return NewOperation(method, securityData, operation.Extensions)
 }
 
 func setOperationSwagger(path string, methods []Operation, pathItem spec.PathItem) Resource {

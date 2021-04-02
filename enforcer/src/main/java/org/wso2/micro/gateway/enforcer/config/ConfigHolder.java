@@ -26,21 +26,35 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.gateway.discovery.config.enforcer.AmCredentials;
 import org.wso2.gateway.discovery.config.enforcer.AuthService;
+import org.wso2.gateway.discovery.config.enforcer.BinaryPublisher;
 import org.wso2.gateway.discovery.config.enforcer.Cache;
 import org.wso2.gateway.discovery.config.enforcer.ClaimMapping;
 import org.wso2.gateway.discovery.config.enforcer.Config;
 import org.wso2.gateway.discovery.config.enforcer.EventHub;
 import org.wso2.gateway.discovery.config.enforcer.Issuer;
 import org.wso2.gateway.discovery.config.enforcer.JWTGenerator;
+import org.wso2.gateway.discovery.config.enforcer.JWTIssuer;
+import org.wso2.gateway.discovery.config.enforcer.PublisherPool;
+import org.wso2.gateway.discovery.config.enforcer.Security;
+import org.wso2.gateway.discovery.config.enforcer.TMURLGroup;
+import org.wso2.gateway.discovery.config.enforcer.ThrottleAgent;
+import org.wso2.gateway.discovery.config.enforcer.Throttling;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.JWTIssuerConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottleAgentConfigDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottlePublisherConfigDto;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
+import org.wso2.micro.gateway.enforcer.exception.MGWException;
 import org.wso2.micro.gateway.enforcer.security.jwt.JWTUtil;
+import org.wso2.micro.gateway.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.micro.gateway.enforcer.util.TLSUtils;
 
 import java.io.IOException;
@@ -51,9 +65,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.TrustManagerFactory;
 
@@ -66,12 +83,15 @@ public class ConfigHolder {
     private static final Logger logger = LogManager.getLogger(ConfigHolder.class);
 
     private static ConfigHolder configHolder;
-    private EnvVarConfig envVarConfig = new EnvVarConfig();
+    private EnvVarConfig envVarConfig = EnvVarConfig.getInstance();
     EnforcerConfig config = new EnforcerConfig();
     private KeyStore trustStore = null;
     private KeyStore trustStoreForJWT = null;
     private TrustManagerFactory trustManagerFactory = null;
     private ArrayList<ExtendedTokenIssuerDto> configIssuerList;
+
+    private static final String dtoPackageName = EnforcerConfig.class.getPackageName();
+    private static final String apimDTOPackageName = "org.wso2.carbon.apimgt";
 
     private ConfigHolder() {
         init();
@@ -114,10 +134,13 @@ public class ConfigHolder {
         populateAuthService(config.getAuthService());
 
         // Read jwt token configuration
-        populateJWTIssuerConfiguration(config.getJwtTokenConfigList());
+        populateJWTIssuerConfiguration(config.getSecurity());
 
-        //Read credentials used to connect with APIM services
+        // Read credentials used to connect with APIM services
         populateAPIMCredentials(config.getApimCredentials());
+
+        // Read throttle publisher configurations
+        populateThrottlingConfig(config.getThrottling());
 
         // Read backend jwt generation configurations
         populateJWTGeneratorConfigurations(config.getJwtGenerator());
@@ -125,9 +148,11 @@ public class ConfigHolder {
         // Read token caching configs
         populateCacheConfigs(config.getCache());
 
+        // Read jwt issuer configurations
+        populateJWTIssuerConfigurations(config.getJwtIssuer());
+
         // resolve string variables provided as environment variables.
         resolveConfigsWithEnvs(this.config);
-
     }
 
     private void populateAuthService(AuthService cdsAuth) {
@@ -160,8 +185,9 @@ public class ConfigHolder {
         config.setEventHub(eventHubDto);
     }
 
-    private void populateJWTIssuerConfiguration(List<Issuer> cdsIssuers) {
+    private void populateJWTIssuerConfiguration(Security security) {
         configIssuerList = new ArrayList<>();
+        List<Issuer> cdsIssuers = security.getTokenServiceList();
         try {
             setTrustStoreForJWT(KeyStore.getInstance(KeyStore.getDefaultType()));
             getTrustStoreForJWT().load(null);
@@ -183,7 +209,10 @@ public class ConfigHolder {
             // Load jwt transformers map.
             config.setJwtTransformerMap(JWTUtil.loadJWTTransformers());
             String certificateAlias = jwtIssuer.getCertificateAlias();
-            if (certificateAlias != null) {
+            if (certificateAlias.isBlank() && APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(jwtIssuer.getName())) {
+                certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
+            }
+            if (!certificateAlias.isBlank()) {
                 try {
                     Certificate cert = TLSUtils.getCertificateFromFile(jwtIssuer.getCertificateFilePath());
                     getTrustStoreForJWT().setCertificateEntry(certificateAlias, cert);
@@ -203,6 +232,60 @@ public class ConfigHolder {
             config.getIssuersMap().put(jwtIssuer.getIssuer(), issuerDto);
             configIssuerList.add(issuerDto);
         }
+    }
+
+    private void populateThrottlingConfig(Throttling throttling) {
+        ThrottleConfigDto throttleConfig = new ThrottleConfigDto();
+        throttleConfig.setGlobalPublishingEnabled(throttling.getEnableGlobalEventPublishing());
+        throttleConfig.setHeaderConditionsEnabled(throttling.getEnableHeaderConditions());
+        throttleConfig.setQueryConditionsEnabled(throttling.getEnableQueryParamConditions());
+        throttleConfig.setJwtClaimConditionsEnabled(throttling.getEnableJwtClaimConditions());
+        throttleConfig.setJmsConnectionInitialContextFactory(throttling.getJmsConnectionInitialContextFactory());
+        throttleConfig.setJmsConnectionProviderUrl(throttling.getJmsConnectionProviderUrl());
+        config.setThrottleConfig(throttleConfig);
+        populateTMBinaryConfig(throttling.getPublisher());
+    }
+
+    private void populateTMBinaryConfig(BinaryPublisher binary) {
+        ThrottleAgent binaryAgent = binary.getAgent();
+        AgentConfiguration agentConf = AgentConfiguration.getInstance();
+        agentConf.setBatchSize(binaryAgent.getBatchSize());
+        agentConf.setCiphers(binaryAgent.getCiphers());
+        agentConf.setCorePoolSize(binaryAgent.getCorePoolSize());
+        agentConf.setEvictionTimePeriod(binaryAgent.getEvictionTimePeriod());
+        agentConf.setKeepAliveTimeInPool(binaryAgent.getKeepAliveTimeInPool());
+        agentConf.setMaxIdleConnections(binaryAgent.getMaxIdleConnections());
+        agentConf.setMaxPoolSize(binaryAgent.getMaxPoolSize());
+        agentConf.setMaxTransportPoolSize(binaryAgent.getMaxTransportPoolSize());
+        agentConf.setMinIdleTimeInPool(binaryAgent.getMinIdleTimeInPool());
+        agentConf.setQueueSize(binaryAgent.getQueueSize());
+        agentConf.setReconnectionInterval(binaryAgent.getReconnectionInterval());
+        agentConf.setSecureEvictionTimePeriod(binaryAgent.getSecureEvictionTimePeriod());
+        agentConf.setSecureMaxIdleConnections(binaryAgent.getSecureMaxIdleConnections());
+        agentConf.setSecureMaxTransportPoolSize(binaryAgent.getSecureMaxTransportPoolSize());
+        agentConf.setSecureMinIdleTimeInPool(binaryAgent.getSecureMinIdleTimeInPool());
+        agentConf.setSslEnabledProtocols(binaryAgent.getSslEnabledProtocols());
+        agentConf.setSocketTimeoutMS(binaryAgent.getSocketTimeoutMS());
+        agentConf.setTrustStore(trustStore);
+
+        PublisherPool pool = binary.getPool();
+        ThrottlePublisherConfigDto pubConf = new ThrottlePublisherConfigDto();
+        pubConf.setUserName(binary.getUsername());
+        pubConf.setPassword(binary.getPassword());
+        pubConf.setInitIdleObjectDataPublishingAgents(pool.getInitIdleObjectDataPublishingAgents());
+        pubConf.setMaxIdleDataPublishingAgents(pool.getMaxIdleDataPublishingAgents());
+        pubConf.setPublisherThreadPoolCoreSize(pool.getPublisherThreadPoolCoreSize());
+        pubConf.setPublisherThreadPoolKeepAliveTime(pool.getPublisherThreadPoolKeepAliveTime());
+        pubConf.setPublisherThreadPoolMaximumSize(pool.getPublisherThreadPoolMaximumSize());
+
+        processTMPublisherURLGroup(binary.getUrlGroupList(), pubConf);
+
+        ThrottleAgentConfigDto throttleAgent = new ThrottleAgentConfigDto();
+        throttleAgent.setAgent(agentConf);
+        throttleAgent.setUsername(binary.getUsername());
+        throttleAgent.setPassword(binary.getPassword());
+        throttleAgent.setPublisher(pubConf);
+        config.getThrottleConfig().setThrottleAgent(throttleAgent);
     }
 
     private void loadTrustStore() {
@@ -225,6 +308,60 @@ public class ConfigHolder {
         config.setApimCredentials(credentialDto);
     }
 
+    /**
+     * The receiverURLGroup and the authURLGroup is preprocessed
+     * such that to make them compatible with the binary agent.
+     */
+    private void processTMPublisherURLGroup(List<TMURLGroup> urlGroups,
+                                            ThrottlePublisherConfigDto pubConfiguration) {
+        StringBuilder restructuredReceiverURL = new StringBuilder();
+        StringBuilder restructuredAuthURL = new StringBuilder();
+
+        for (TMURLGroup urlGroup : urlGroups) {
+            List<String> receiverUrls = urlGroup.getReceiverURLsList();
+            List<String> authUrls = urlGroup.getAuthURLsList();
+            if (receiverUrls.size() == 1 && authUrls.size() == 1) {
+                restructuredReceiverURL.append("{").append(receiverUrls.get(0)).append("},");
+                restructuredAuthURL.append("{").append(authUrls.get(0)).append("},");
+                continue;
+            }
+            String urlType = urlGroup.getType();
+            if (urlType.isBlank() || !(Constants.LOADBALANCE.equalsIgnoreCase(urlType)
+                    || Constants.FAILOVER.equalsIgnoreCase(urlType))) {
+                logger.warn("Type is not "
+                        + Constants.LOADBALANCE + " or " + Constants.FAILOVER + ". Hence proceeding as a "
+                        + Constants.FAILOVER + " configuration.");
+                urlType = Constants.FAILOVER;
+            }
+            restructuredReceiverURL.append(processSingleURLGroup(receiverUrls, urlType)).append(",");
+            restructuredAuthURL.append(processSingleURLGroup(authUrls, urlType)).append(",");
+        }
+
+        //to remove the final ',' in the URLs and set to publisher config
+        if (!restructuredReceiverURL.toString().isBlank() && !restructuredAuthURL.toString().isBlank()) {
+            pubConfiguration.setReceiverUrlGroup(restructuredReceiverURL.substring(0,
+                    restructuredReceiverURL.length() - 1));
+            pubConfiguration.setAuthUrlGroup(restructuredAuthURL.substring(0, restructuredAuthURL.length() - 1));
+        }
+    }
+
+    private String processSingleURLGroup(List<String> urlArray, String urlType) {
+        StringBuilder concatenatedURLString = new StringBuilder("{");
+        for (String url : urlArray) {
+            if (Constants.LOADBALANCE.equalsIgnoreCase(urlType)) {
+                concatenatedURLString.append(url).append(Constants.TM_BINARY_LOADBALANCE_SEPARATOR);
+            } else if (Constants.FAILOVER.equalsIgnoreCase(urlType)) {
+                concatenatedURLString.append(url).append(Constants.TM_BINARY_FAILOVER_SEPARATOR);
+            } else {
+                concatenatedURLString.append(url).append(Constants.TM_BINARY_FAILOVER_SEPARATOR);
+            }
+        }
+        //to remove the trailing '|' or ','
+        concatenatedURLString = new StringBuilder(
+                concatenatedURLString.substring(0, concatenatedURLString.length() - 1) + "}");
+        return concatenatedURLString.toString();
+    }
+
     private void populateJWTGeneratorConfigurations(JWTGenerator jwtGenerator) {
         JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
         jwtConfigurationDto.setEnabled(jwtGenerator.getEnable());
@@ -233,8 +370,12 @@ public class ConfigHolder {
         jwtConfigurationDto.setSignatureAlgorithm(jwtGenerator.getSigningAlgorithm());
         jwtConfigurationDto.setEnableUserClaims(jwtGenerator.getEnableUserClaims());
         jwtConfigurationDto.setGatewayJWTGeneratorImpl(jwtGenerator.getGatewayGeneratorImpl());
-        config.setPublicCertificatePath(jwtGenerator.getPublicCertificatePath());
-        config.setPrivateKeyPath(jwtGenerator.getPrivateKeyPath());
+        try {
+            jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtGenerator.getPublicCertificatePath()));
+            jwtConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey(jwtGenerator.getPrivateKeyPath()));
+        } catch (MGWException | CertificateException | IOException e) {
+            logger.error("Error in loading public cert or private key", e);
+        }
         config.setJwtConfigurationDto(jwtConfigurationDto);
     }
 
@@ -254,27 +395,53 @@ public class ConfigHolder {
      * @param config - Enforcer config object.
      */
     private void resolveConfigsWithEnvs(Object config) {
-        String packageName = this.config.getClass().getPackageName();
-        for (Field field : config.getClass().getDeclaredFields()) {
+        List<Field> classFields = Arrays.asList(config.getClass().getDeclaredFields());
+        //extended config class env variables should also be resolved
+        if (config.getClass().getSuperclass() != null && (
+                config.getClass().getSuperclass().getPackageName().contains(dtoPackageName) || config.getClass()
+                        .getSuperclass().getPackageName().contains(apimDTOPackageName))) {
+            processRecursiveObject(config, config.getClass().getSuperclass().getDeclaredFields());
+        }
+        processRecursiveObject(config, config.getClass().getDeclaredFields());
+    }
+
+    private void processRecursiveObject(Object config, Field[] classFields) {
+        for (Field field : classFields) {
             try {
                 field.setAccessible(true);
+                // handles the string and char array objects
                 if (field.getType().isAssignableFrom(String.class) || field.getType().isAssignableFrom(char[].class)) {
                     field.set(config, getEnvValue(field.get(config)));
                 } else if (field.getName().contains(Constants.OBJECT_THIS_NOTATION)) {
+                    // skip the java internal objects created, inside the recursion to avoid stack overflow.
                     continue;
                 } else if (Map.class.isAssignableFrom(field.getType())) {
+                    // handles the config objects saved as Maps
                     Map<Object, Object> objectMap = (Map<Object, Object>) field.get(config);
                     for (Map.Entry<Object, Object> entry : objectMap.entrySet()) {
                         if (entry.getValue().getClass().isAssignableFrom(String.class) || entry.getValue().getClass()
                                 .isAssignableFrom(char[].class)) {
                             field.set(config, getEnvValue(field.get(config)));
                             continue;
-                        } else if (entry.getValue().getClass().getPackageName().contains(packageName)) {
+                        } else if (entry.getValue().getClass().getPackageName().contains(dtoPackageName) || entry
+                                .getValue().getClass().getPackageName().contains(apimDTOPackageName)) {
                             resolveConfigsWithEnvs(entry.getValue());
                         }
                     }
-                } else if (field.getType().getPackageName()
-                        .contains(packageName)) { //recursively call the dto objects in the same package
+                } else if (field.getType().isArray() && field.getType().getPackageName().contains(dtoPackageName)) {
+                    // handles the config objects saved as arrays
+                    Object[] objectArray = (Object[]) field.get(config);
+                    for (Object arrayObject : objectArray) {
+                        if (arrayObject.getClass().getPackageName().contains(dtoPackageName) || arrayObject.getClass()
+                                .getPackageName().contains(apimDTOPackageName)) {
+                            resolveConfigsWithEnvs(arrayObject);
+                        } else if (arrayObject.getClass().isAssignableFrom(String.class) || arrayObject.getClass()
+                                .isAssignableFrom(char[].class)) {
+                            field.set(config, getEnvValue(arrayObject));
+                        }
+                    }
+                } else if (field.getType().getPackageName().contains(dtoPackageName) || field.getType().getPackageName()
+                        .contains(apimDTOPackageName)) { //recursively call the dto objects in the same package
                     resolveConfigsWithEnvs(field.get(config));
                 }
             } catch (IllegalAccessException e) {
@@ -287,20 +454,48 @@ public class ConfigHolder {
     private Object getEnvValue(Object configValue) {
         if (configValue instanceof String) {
             String value = (String) configValue;
-            if (value.contains(Constants.ENV_PREFIX)) {
-                String envName = value
-                        .substring(value.indexOf(Constants.START_BRACKET) + 1, value.indexOf(Constants.END_BRACKET));
-                return System.getenv(envName);
-            }
+            return replaceEnvRegex(value);
         } else if (configValue instanceof char[]) {
             String value = String.valueOf((char[]) configValue);
-            if (value.contains(Constants.ENV_PREFIX)) {
-                String envName = value
-                        .substring(value.indexOf(Constants.START_BRACKET) + 1, value.indexOf(Constants.END_BRACKET));
-                return System.getenv(envName) != null ? System.getenv(envName).toCharArray() : configValue;
-            }
+            return replaceEnvRegex(value).toCharArray();
         }
         return configValue;
+    }
+
+    private String replaceEnvRegex(String value) {
+        Matcher m = Pattern.compile("\\$env\\{(.*?)\\}").matcher(value);
+        if (value.contains(Constants.ENV_PREFIX)) {
+            while (m.find()) {
+                String envName = value.substring(m.start() + 5, m.end() - 1);
+                if (System.getenv(envName) != null) {
+                    value = value.replace(value.substring(m.start(), m.end()), System.getenv(envName));
+                }
+            }
+        }
+        return value;
+    }
+
+    private void populateJWTIssuerConfigurations(JWTIssuer jwtIssuer) {
+        JWTIssuerConfigurationDto jwtIssuerConfigurationDto = new JWTIssuerConfigurationDto();
+        jwtIssuerConfigurationDto.setEnabled(jwtIssuer.getEnabled());
+        jwtIssuerConfigurationDto.setIssuer(jwtIssuer.getIssuer());
+        jwtIssuerConfigurationDto.setConsumerDialectUri(jwtIssuer.getClaimDialect());
+        jwtIssuerConfigurationDto.setSignatureAlgorithm(jwtIssuer.getSigningAlgorithm());
+        try {
+            jwtIssuerConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey(jwtIssuer.getPrivateKeyPath()));
+            jwtIssuerConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtIssuer.getPublicCertificatePath()));
+        } catch (MGWException | CertificateException | IOException e) {
+            logger.error("Error in loading public cert or private key", e);
+        }
+        jwtIssuerConfigurationDto.setTtl(jwtIssuer.getValidityPeriod());
+        CredentialDto[] credentialDtos = new CredentialDto[jwtIssuer.getJwtUsersList().size()];
+        for (int index = 0; index < jwtIssuer.getJwtUsersList().size(); index++) {
+            CredentialDto credentialDto = new CredentialDto(jwtIssuer.getJwtUsers(index).getUsername(),
+                    jwtIssuer.getJwtUsers(index).getPassword().toCharArray());
+            credentialDtos[index] = credentialDto;
+        }
+        config.setJwtUsersCredentials(credentialDtos);
+        config.setJwtIssuerConfigurationDto(jwtIssuerConfigurationDto);
     }
 
     public EnforcerConfig getConfig() {

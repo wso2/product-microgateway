@@ -17,14 +17,12 @@ package cache
 import (
 	"fmt"
 
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/keymgt"
-
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
-
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/config/enforcer"
-
 	envoy_types "github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/api"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/config/enforcer"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/keymgt"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
+	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/throttle"
 	"github.com/wso2/micro-gw/internal/discovery/protocol/cache/types"
 	"github.com/wso2/micro-gw/internal/discovery/protocol/resource/v3"
 )
@@ -52,6 +50,8 @@ func GetResponseType(typeURL string) types.ResponseType {
 		return types.KeyManagerConfig
 	case resource.RevokedTokensType:
 		return types.RevokedTokens
+	case resource.ThrottleDataType:
+		return types.ThrottleData
 	}
 	return types.UnknownType
 }
@@ -67,8 +67,8 @@ func GetResourceName(res envoy_types.Resource) string {
 		return "Subscription"
 	case *keymgt.KeyManagerConfig:
 		return fmt.Sprint(v.Name)
-	case *keymgt.RevokedToken:
-		return v.Jti
+	case *throttle.ThrottleData:
+		return "ThrottleData"
 	default:
 		return ""
 	}

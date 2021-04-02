@@ -3,11 +3,12 @@ syntax = "proto3";
 package wso2.discovery.config.enforcer;
 
 import "wso2/discovery/config/enforcer/cert.proto";
-import "wso2/discovery/config/enforcer/issuer.proto";
+import "wso2/discovery/config/enforcer/security.proto";
 import "wso2/discovery/config/enforcer/event_hub.proto";
 import "wso2/discovery/config/enforcer/am_credentials.proto";
 import "wso2/discovery/config/enforcer/auth_service.proto";
 import "wso2/discovery/config/enforcer/jwt_generator.proto";
+import "wso2/discovery/config/enforcer/jwt_issuer.proto";
 import "wso2/discovery/config/enforcer/throttling.proto";
 import "wso2/discovery/config/enforcer/cache.proto";
 
@@ -20,7 +21,7 @@ option java_multiple_files = true;
 
 // Enforcer config model
 message Config {
-    repeated Issuer jwtTokenConfig = 1;
+    Security security = 1;
 
     CertStore keystore = 2;
 
@@ -34,7 +35,9 @@ message Config {
 
     JWTGenerator jwtGenerator = 7;
 
-    Throttling throttlingConfig = 8;
+    Throttling throttling = 8;
 
     Cache cache = 9;
+
+    JWTIssuer jwtIssuer = 10;
 }

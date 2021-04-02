@@ -29,7 +29,10 @@ private static final long serialVersionUID = 0L;
     sandboxUrls_ = java.util.Collections.emptyList();
     resources_ = java.util.Collections.emptyList();
     basePath_ = "";
-    apiLifeCycleStatus_ = "";
+    tier_ = "";
+    apiLifeCycleState_ = "";
+    securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    authorizationHeader_ = "";
   }
 
   @java.lang.Override
@@ -127,22 +130,48 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 82: {
-            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
-              vendorExtensible_ = com.google.protobuf.MapField.newMapField(
-                  VendorExtensibleDefaultEntryHolder.defaultEntry);
-              mutable_bitField0_ |= 0x00000008;
-            }
-            com.google.protobuf.MapEntry<java.lang.String, com.google.protobuf.Any>
-            vendorExtensible__ = input.readMessage(
-                VendorExtensibleDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-            vendorExtensible_.getMutableMap().put(
-                vendorExtensible__.getKey(), vendorExtensible__.getValue());
+            java.lang.String s = input.readStringRequireUtf8();
+
+            tier_ = s;
             break;
           }
           case 90: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            apiLifeCycleStatus_ = s;
+            apiLifeCycleState_ = s;
+            break;
+          }
+          case 98: {
+            java.lang.String s = input.readStringRequireUtf8();
+            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
+              securityScheme_ = new com.google.protobuf.LazyStringArrayList();
+              mutable_bitField0_ |= 0x00000008;
+            }
+            securityScheme_.add(s);
+            break;
+          }
+          case 106: {
+            org.wso2.gateway.discovery.api.EndpointSecurity.Builder subBuilder = null;
+            if (endpointSecurity_ != null) {
+              subBuilder = endpointSecurity_.toBuilder();
+            }
+            endpointSecurity_ = input.readMessage(org.wso2.gateway.discovery.api.EndpointSecurity.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(endpointSecurity_);
+              endpointSecurity_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
+          case 114: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            authorizationHeader_ = s;
+            break;
+          }
+          case 120: {
+
+            disableSecurity_ = input.readBool();
             break;
           }
           default: {
@@ -169,6 +198,9 @@ private static final long serialVersionUID = 0L;
       if (((mutable_bitField0_ & 0x00000004) != 0)) {
         resources_ = java.util.Collections.unmodifiableList(resources_);
       }
+      if (((mutable_bitField0_ & 0x00000008) != 0)) {
+        securityScheme_ = securityScheme_.getUnmodifiableView();
+      }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
     }
@@ -178,18 +210,6 @@ private static final long serialVersionUID = 0L;
     return org.wso2.gateway.discovery.api.ApiProto.internal_static_wso2_discovery_api_Api_descriptor;
   }
 
-  @SuppressWarnings({"rawtypes"})
-  @java.lang.Override
-  protected com.google.protobuf.MapField internalGetMapField(
-      int number) {
-    switch (number) {
-      case 10:
-        return internalGetVendorExtensible();
-      default:
-        throw new RuntimeException(
-            "Invalid map field number: " + number);
-    }
-  }
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
@@ -546,123 +566,190 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int VENDOREXTENSIBLE_FIELD_NUMBER = 10;
-  private static final class VendorExtensibleDefaultEntryHolder {
-    static final com.google.protobuf.MapEntry<
-        java.lang.String, com.google.protobuf.Any> defaultEntry =
-            com.google.protobuf.MapEntry
-            .<java.lang.String, com.google.protobuf.Any>newDefaultInstance(
-                org.wso2.gateway.discovery.api.ApiProto.internal_static_wso2_discovery_api_Api_VendorExtensibleEntry_descriptor, 
-                com.google.protobuf.WireFormat.FieldType.STRING,
-                "",
-                com.google.protobuf.WireFormat.FieldType.MESSAGE,
-                com.google.protobuf.Any.getDefaultInstance());
-  }
-  private com.google.protobuf.MapField<
-      java.lang.String, com.google.protobuf.Any> vendorExtensible_;
-  private com.google.protobuf.MapField<java.lang.String, com.google.protobuf.Any>
-  internalGetVendorExtensible() {
-    if (vendorExtensible_ == null) {
-      return com.google.protobuf.MapField.emptyMapField(
-          VendorExtensibleDefaultEntryHolder.defaultEntry);
-    }
-    return vendorExtensible_;
-  }
-
-  public int getVendorExtensibleCount() {
-    return internalGetVendorExtensible().getMap().size();
-  }
+  public static final int TIER_FIELD_NUMBER = 10;
+  private volatile java.lang.Object tier_;
   /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-
-  @java.lang.Override
-  public boolean containsVendorExtensible(
-      java.lang.String key) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    return internalGetVendorExtensible().getMap().containsKey(key);
-  }
-  /**
-   * Use {@link #getVendorExtensibleMap()} instead.
+   * <code>string tier = 10;</code>
+   * @return The tier.
    */
   @java.lang.Override
-  @java.lang.Deprecated
-  public java.util.Map<java.lang.String, com.google.protobuf.Any> getVendorExtensible() {
-    return getVendorExtensibleMap();
-  }
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-  @java.lang.Override
-
-  public java.util.Map<java.lang.String, com.google.protobuf.Any> getVendorExtensibleMap() {
-    return internalGetVendorExtensible().getMap();
-  }
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-  @java.lang.Override
-
-  public com.google.protobuf.Any getVendorExtensibleOrDefault(
-      java.lang.String key,
-      com.google.protobuf.Any defaultValue) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-        internalGetVendorExtensible().getMap();
-    return map.containsKey(key) ? map.get(key) : defaultValue;
-  }
-  /**
-   * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-   */
-  @java.lang.Override
-
-  public com.google.protobuf.Any getVendorExtensibleOrThrow(
-      java.lang.String key) {
-    if (key == null) { throw new java.lang.NullPointerException(); }
-    java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-        internalGetVendorExtensible().getMap();
-    if (!map.containsKey(key)) {
-      throw new java.lang.IllegalArgumentException();
-    }
-    return map.get(key);
-  }
-
-  public static final int APILIFECYCLESTATUS_FIELD_NUMBER = 11;
-  private volatile java.lang.Object apiLifeCycleStatus_;
-  /**
-   * <code>string apiLifeCycleStatus = 11;</code>
-   * @return The apiLifeCycleStatus.
-   */
-  @java.lang.Override
-  public java.lang.String getApiLifeCycleStatus() {
-    java.lang.Object ref = apiLifeCycleStatus_;
+  public java.lang.String getTier() {
+    java.lang.Object ref = tier_;
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
-      apiLifeCycleStatus_ = s;
+      tier_ = s;
       return s;
     }
   }
   /**
-   * <code>string apiLifeCycleStatus = 11;</code>
-   * @return The bytes for apiLifeCycleStatus.
+   * <code>string tier = 10;</code>
+   * @return The bytes for tier.
    */
   @java.lang.Override
   public com.google.protobuf.ByteString
-      getApiLifeCycleStatusBytes() {
-    java.lang.Object ref = apiLifeCycleStatus_;
+      getTierBytes() {
+    java.lang.Object ref = tier_;
     if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
-      apiLifeCycleStatus_ = b;
+      tier_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
     }
+  }
+
+  public static final int APILIFECYCLESTATE_FIELD_NUMBER = 11;
+  private volatile java.lang.Object apiLifeCycleState_;
+  /**
+   * <code>string apiLifeCycleState = 11;</code>
+   * @return The apiLifeCycleState.
+   */
+  @java.lang.Override
+  public java.lang.String getApiLifeCycleState() {
+    java.lang.Object ref = apiLifeCycleState_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      apiLifeCycleState_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string apiLifeCycleState = 11;</code>
+   * @return The bytes for apiLifeCycleState.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getApiLifeCycleStateBytes() {
+    java.lang.Object ref = apiLifeCycleState_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      apiLifeCycleState_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int SECURITYSCHEME_FIELD_NUMBER = 12;
+  private com.google.protobuf.LazyStringList securityScheme_;
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @return A list containing the securityScheme.
+   */
+  public com.google.protobuf.ProtocolStringList
+      getSecuritySchemeList() {
+    return securityScheme_;
+  }
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @return The count of securityScheme.
+   */
+  public int getSecuritySchemeCount() {
+    return securityScheme_.size();
+  }
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @param index The index of the element to return.
+   * @return The securityScheme at the given index.
+   */
+  public java.lang.String getSecurityScheme(int index) {
+    return securityScheme_.get(index);
+  }
+  /**
+   * <code>repeated string securityScheme = 12;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the securityScheme at the given index.
+   */
+  public com.google.protobuf.ByteString
+      getSecuritySchemeBytes(int index) {
+    return securityScheme_.getByteString(index);
+  }
+
+  public static final int ENDPOINTSECURITY_FIELD_NUMBER = 13;
+  private org.wso2.gateway.discovery.api.EndpointSecurity endpointSecurity_;
+  /**
+   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+   * @return Whether the endpointSecurity field is set.
+   */
+  @java.lang.Override
+  public boolean hasEndpointSecurity() {
+    return endpointSecurity_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+   * @return The endpointSecurity.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.api.EndpointSecurity getEndpointSecurity() {
+    return endpointSecurity_ == null ? org.wso2.gateway.discovery.api.EndpointSecurity.getDefaultInstance() : endpointSecurity_;
+  }
+  /**
+   * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.api.EndpointSecurityOrBuilder getEndpointSecurityOrBuilder() {
+    return getEndpointSecurity();
+  }
+
+  public static final int AUTHORIZATIONHEADER_FIELD_NUMBER = 14;
+  private volatile java.lang.Object authorizationHeader_;
+  /**
+   * <code>string authorizationHeader = 14;</code>
+   * @return The authorizationHeader.
+   */
+  @java.lang.Override
+  public java.lang.String getAuthorizationHeader() {
+    java.lang.Object ref = authorizationHeader_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      authorizationHeader_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string authorizationHeader = 14;</code>
+   * @return The bytes for authorizationHeader.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getAuthorizationHeaderBytes() {
+    java.lang.Object ref = authorizationHeader_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      authorizationHeader_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int DISABLESECURITY_FIELD_NUMBER = 15;
+  private boolean disableSecurity_;
+  /**
+   * <code>bool disableSecurity = 15;</code>
+   * @return The disableSecurity.
+   */
+  @java.lang.Override
+  public boolean getDisableSecurity() {
+    return disableSecurity_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -706,14 +793,23 @@ private static final long serialVersionUID = 0L;
     if (!getBasePathBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 9, basePath_);
     }
-    com.google.protobuf.GeneratedMessageV3
-      .serializeStringMapTo(
-        output,
-        internalGetVendorExtensible(),
-        VendorExtensibleDefaultEntryHolder.defaultEntry,
-        10);
-    if (!getApiLifeCycleStatusBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 11, apiLifeCycleStatus_);
+    if (!getTierBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 10, tier_);
+    }
+    if (!getApiLifeCycleStateBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 11, apiLifeCycleState_);
+    }
+    for (int i = 0; i < securityScheme_.size(); i++) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 12, securityScheme_.getRaw(i));
+    }
+    if (endpointSecurity_ != null) {
+      output.writeMessage(13, getEndpointSecurity());
+    }
+    if (!getAuthorizationHeaderBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 14, authorizationHeader_);
+    }
+    if (disableSecurity_ != false) {
+      output.writeBool(15, disableSecurity_);
     }
     unknownFields.writeTo(output);
   }
@@ -754,18 +850,30 @@ private static final long serialVersionUID = 0L;
     if (!getBasePathBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, basePath_);
     }
-    for (java.util.Map.Entry<java.lang.String, com.google.protobuf.Any> entry
-         : internalGetVendorExtensible().getMap().entrySet()) {
-      com.google.protobuf.MapEntry<java.lang.String, com.google.protobuf.Any>
-      vendorExtensible__ = VendorExtensibleDefaultEntryHolder.defaultEntry.newBuilderForType()
-          .setKey(entry.getKey())
-          .setValue(entry.getValue())
-          .build();
-      size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(10, vendorExtensible__);
+    if (!getTierBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, tier_);
     }
-    if (!getApiLifeCycleStatusBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, apiLifeCycleStatus_);
+    if (!getApiLifeCycleStateBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, apiLifeCycleState_);
+    }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < securityScheme_.size(); i++) {
+        dataSize += computeStringSizeNoTag(securityScheme_.getRaw(i));
+      }
+      size += dataSize;
+      size += 1 * getSecuritySchemeList().size();
+    }
+    if (endpointSecurity_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(13, getEndpointSecurity());
+    }
+    if (!getAuthorizationHeaderBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, authorizationHeader_);
+    }
+    if (disableSecurity_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(15, disableSecurity_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -800,10 +908,21 @@ private static final long serialVersionUID = 0L;
         .equals(other.getResourcesList())) return false;
     if (!getBasePath()
         .equals(other.getBasePath())) return false;
-    if (!internalGetVendorExtensible().equals(
-        other.internalGetVendorExtensible())) return false;
-    if (!getApiLifeCycleStatus()
-        .equals(other.getApiLifeCycleStatus())) return false;
+    if (!getTier()
+        .equals(other.getTier())) return false;
+    if (!getApiLifeCycleState()
+        .equals(other.getApiLifeCycleState())) return false;
+    if (!getSecuritySchemeList()
+        .equals(other.getSecuritySchemeList())) return false;
+    if (hasEndpointSecurity() != other.hasEndpointSecurity()) return false;
+    if (hasEndpointSecurity()) {
+      if (!getEndpointSecurity()
+          .equals(other.getEndpointSecurity())) return false;
+    }
+    if (!getAuthorizationHeader()
+        .equals(other.getAuthorizationHeader())) return false;
+    if (getDisableSecurity()
+        != other.getDisableSecurity()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -839,12 +958,23 @@ private static final long serialVersionUID = 0L;
     }
     hash = (37 * hash) + BASEPATH_FIELD_NUMBER;
     hash = (53 * hash) + getBasePath().hashCode();
-    if (!internalGetVendorExtensible().getMap().isEmpty()) {
-      hash = (37 * hash) + VENDOREXTENSIBLE_FIELD_NUMBER;
-      hash = (53 * hash) + internalGetVendorExtensible().hashCode();
+    hash = (37 * hash) + TIER_FIELD_NUMBER;
+    hash = (53 * hash) + getTier().hashCode();
+    hash = (37 * hash) + APILIFECYCLESTATE_FIELD_NUMBER;
+    hash = (53 * hash) + getApiLifeCycleState().hashCode();
+    if (getSecuritySchemeCount() > 0) {
+      hash = (37 * hash) + SECURITYSCHEME_FIELD_NUMBER;
+      hash = (53 * hash) + getSecuritySchemeList().hashCode();
     }
-    hash = (37 * hash) + APILIFECYCLESTATUS_FIELD_NUMBER;
-    hash = (53 * hash) + getApiLifeCycleStatus().hashCode();
+    if (hasEndpointSecurity()) {
+      hash = (37 * hash) + ENDPOINTSECURITY_FIELD_NUMBER;
+      hash = (53 * hash) + getEndpointSecurity().hashCode();
+    }
+    hash = (37 * hash) + AUTHORIZATIONHEADER_FIELD_NUMBER;
+    hash = (53 * hash) + getAuthorizationHeader().hashCode();
+    hash = (37 * hash) + DISABLESECURITY_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getDisableSecurity());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -956,28 +1086,6 @@ private static final long serialVersionUID = 0L;
       return org.wso2.gateway.discovery.api.ApiProto.internal_static_wso2_discovery_api_Api_descriptor;
     }
 
-    @SuppressWarnings({"rawtypes"})
-    protected com.google.protobuf.MapField internalGetMapField(
-        int number) {
-      switch (number) {
-        case 10:
-          return internalGetVendorExtensible();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
-    @SuppressWarnings({"rawtypes"})
-    protected com.google.protobuf.MapField internalGetMutableMapField(
-        int number) {
-      switch (number) {
-        case 10:
-          return internalGetMutableVendorExtensible();
-        default:
-          throw new RuntimeException(
-              "Invalid map field number: " + number);
-      }
-    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -1037,8 +1145,21 @@ private static final long serialVersionUID = 0L;
       }
       basePath_ = "";
 
-      internalGetMutableVendorExtensible().clear();
-      apiLifeCycleStatus_ = "";
+      tier_ = "";
+
+      apiLifeCycleState_ = "";
+
+      securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bitField0_ = (bitField0_ & ~0x00000008);
+      if (endpointSecurityBuilder_ == null) {
+        endpointSecurity_ = null;
+      } else {
+        endpointSecurity_ = null;
+        endpointSecurityBuilder_ = null;
+      }
+      authorizationHeader_ = "";
+
+      disableSecurity_ = false;
 
       return this;
     }
@@ -1100,9 +1221,20 @@ private static final long serialVersionUID = 0L;
         result.resources_ = resourcesBuilder_.build();
       }
       result.basePath_ = basePath_;
-      result.vendorExtensible_ = internalGetVendorExtensible();
-      result.vendorExtensible_.makeImmutable();
-      result.apiLifeCycleStatus_ = apiLifeCycleStatus_;
+      result.tier_ = tier_;
+      result.apiLifeCycleState_ = apiLifeCycleState_;
+      if (((bitField0_ & 0x00000008) != 0)) {
+        securityScheme_ = securityScheme_.getUnmodifiableView();
+        bitField0_ = (bitField0_ & ~0x00000008);
+      }
+      result.securityScheme_ = securityScheme_;
+      if (endpointSecurityBuilder_ == null) {
+        result.endpointSecurity_ = endpointSecurity_;
+      } else {
+        result.endpointSecurity_ = endpointSecurityBuilder_.build();
+      }
+      result.authorizationHeader_ = authorizationHeader_;
+      result.disableSecurity_ = disableSecurity_;
       onBuilt();
       return result;
     }
@@ -1253,11 +1385,33 @@ private static final long serialVersionUID = 0L;
         basePath_ = other.basePath_;
         onChanged();
       }
-      internalGetMutableVendorExtensible().mergeFrom(
-          other.internalGetVendorExtensible());
-      if (!other.getApiLifeCycleStatus().isEmpty()) {
-        apiLifeCycleStatus_ = other.apiLifeCycleStatus_;
+      if (!other.getTier().isEmpty()) {
+        tier_ = other.tier_;
         onChanged();
+      }
+      if (!other.getApiLifeCycleState().isEmpty()) {
+        apiLifeCycleState_ = other.apiLifeCycleState_;
+        onChanged();
+      }
+      if (!other.securityScheme_.isEmpty()) {
+        if (securityScheme_.isEmpty()) {
+          securityScheme_ = other.securityScheme_;
+          bitField0_ = (bitField0_ & ~0x00000008);
+        } else {
+          ensureSecuritySchemeIsMutable();
+          securityScheme_.addAll(other.securityScheme_);
+        }
+        onChanged();
+      }
+      if (other.hasEndpointSecurity()) {
+        mergeEndpointSecurity(other.getEndpointSecurity());
+      }
+      if (!other.getAuthorizationHeader().isEmpty()) {
+        authorizationHeader_ = other.authorizationHeader_;
+        onChanged();
+      }
+      if (other.getDisableSecurity() != false) {
+        setDisableSecurity(other.getDisableSecurity());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -2465,206 +2619,490 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private com.google.protobuf.MapField<
-        java.lang.String, com.google.protobuf.Any> vendorExtensible_;
-    private com.google.protobuf.MapField<java.lang.String, com.google.protobuf.Any>
-    internalGetVendorExtensible() {
-      if (vendorExtensible_ == null) {
-        return com.google.protobuf.MapField.emptyMapField(
-            VendorExtensibleDefaultEntryHolder.defaultEntry);
-      }
-      return vendorExtensible_;
-    }
-    private com.google.protobuf.MapField<java.lang.String, com.google.protobuf.Any>
-    internalGetMutableVendorExtensible() {
-      onChanged();;
-      if (vendorExtensible_ == null) {
-        vendorExtensible_ = com.google.protobuf.MapField.newMapField(
-            VendorExtensibleDefaultEntryHolder.defaultEntry);
-      }
-      if (!vendorExtensible_.isMutable()) {
-        vendorExtensible_ = vendorExtensible_.copy();
-      }
-      return vendorExtensible_;
-    }
-
-    public int getVendorExtensibleCount() {
-      return internalGetVendorExtensible().getMap().size();
-    }
+    private java.lang.Object tier_ = "";
     /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
+     * <code>string tier = 10;</code>
+     * @return The tier.
      */
-
-    @java.lang.Override
-    public boolean containsVendorExtensible(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      return internalGetVendorExtensible().getMap().containsKey(key);
-    }
-    /**
-     * Use {@link #getVendorExtensibleMap()} instead.
-     */
-    @java.lang.Override
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, com.google.protobuf.Any> getVendorExtensible() {
-      return getVendorExtensibleMap();
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-     */
-    @java.lang.Override
-
-    public java.util.Map<java.lang.String, com.google.protobuf.Any> getVendorExtensibleMap() {
-      return internalGetVendorExtensible().getMap();
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-     */
-    @java.lang.Override
-
-    public com.google.protobuf.Any getVendorExtensibleOrDefault(
-        java.lang.String key,
-        com.google.protobuf.Any defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-          internalGetVendorExtensible().getMap();
-      return map.containsKey(key) ? map.get(key) : defaultValue;
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-     */
-    @java.lang.Override
-
-    public com.google.protobuf.Any getVendorExtensibleOrThrow(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      java.util.Map<java.lang.String, com.google.protobuf.Any> map =
-          internalGetVendorExtensible().getMap();
-      if (!map.containsKey(key)) {
-        throw new java.lang.IllegalArgumentException();
-      }
-      return map.get(key);
-    }
-
-    public Builder clearVendorExtensible() {
-      internalGetMutableVendorExtensible().getMutableMap()
-          .clear();
-      return this;
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-     */
-
-    public Builder removeVendorExtensible(
-        java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      internalGetMutableVendorExtensible().getMutableMap()
-          .remove(key);
-      return this;
-    }
-    /**
-     * Use alternate mutation accessors instead.
-     */
-    @java.lang.Deprecated
-    public java.util.Map<java.lang.String, com.google.protobuf.Any>
-    getMutableVendorExtensible() {
-      return internalGetMutableVendorExtensible().getMutableMap();
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-     */
-    public Builder putVendorExtensible(
-        java.lang.String key,
-        com.google.protobuf.Any value) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
-      if (value == null) { throw new java.lang.NullPointerException(); }
-      internalGetMutableVendorExtensible().getMutableMap()
-          .put(key, value);
-      return this;
-    }
-    /**
-     * <code>map&lt;string, .google.protobuf.Any&gt; vendorExtensible = 10;</code>
-     */
-
-    public Builder putAllVendorExtensible(
-        java.util.Map<java.lang.String, com.google.protobuf.Any> values) {
-      internalGetMutableVendorExtensible().getMutableMap()
-          .putAll(values);
-      return this;
-    }
-
-    private java.lang.Object apiLifeCycleStatus_ = "";
-    /**
-     * <code>string apiLifeCycleStatus = 11;</code>
-     * @return The apiLifeCycleStatus.
-     */
-    public java.lang.String getApiLifeCycleStatus() {
-      java.lang.Object ref = apiLifeCycleStatus_;
+    public java.lang.String getTier() {
+      java.lang.Object ref = tier_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        apiLifeCycleStatus_ = s;
+        tier_ = s;
         return s;
       } else {
         return (java.lang.String) ref;
       }
     }
     /**
-     * <code>string apiLifeCycleStatus = 11;</code>
-     * @return The bytes for apiLifeCycleStatus.
+     * <code>string tier = 10;</code>
+     * @return The bytes for tier.
      */
     public com.google.protobuf.ByteString
-        getApiLifeCycleStatusBytes() {
-      java.lang.Object ref = apiLifeCycleStatus_;
+        getTierBytes() {
+      java.lang.Object ref = tier_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        apiLifeCycleStatus_ = b;
+        tier_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
     /**
-     * <code>string apiLifeCycleStatus = 11;</code>
-     * @param value The apiLifeCycleStatus to set.
+     * <code>string tier = 10;</code>
+     * @param value The tier to set.
      * @return This builder for chaining.
      */
-    public Builder setApiLifeCycleStatus(
+    public Builder setTier(
         java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
   
-      apiLifeCycleStatus_ = value;
+      tier_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>string apiLifeCycleStatus = 11;</code>
+     * <code>string tier = 10;</code>
      * @return This builder for chaining.
      */
-    public Builder clearApiLifeCycleStatus() {
+    public Builder clearTier() {
       
-      apiLifeCycleStatus_ = getDefaultInstance().getApiLifeCycleStatus();
+      tier_ = getDefaultInstance().getTier();
       onChanged();
       return this;
     }
     /**
-     * <code>string apiLifeCycleStatus = 11;</code>
-     * @param value The bytes for apiLifeCycleStatus to set.
+     * <code>string tier = 10;</code>
+     * @param value The bytes for tier to set.
      * @return This builder for chaining.
      */
-    public Builder setApiLifeCycleStatusBytes(
+    public Builder setTierBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
       
-      apiLifeCycleStatus_ = value;
+      tier_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object apiLifeCycleState_ = "";
+    /**
+     * <code>string apiLifeCycleState = 11;</code>
+     * @return The apiLifeCycleState.
+     */
+    public java.lang.String getApiLifeCycleState() {
+      java.lang.Object ref = apiLifeCycleState_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        apiLifeCycleState_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string apiLifeCycleState = 11;</code>
+     * @return The bytes for apiLifeCycleState.
+     */
+    public com.google.protobuf.ByteString
+        getApiLifeCycleStateBytes() {
+      java.lang.Object ref = apiLifeCycleState_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        apiLifeCycleState_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string apiLifeCycleState = 11;</code>
+     * @param value The apiLifeCycleState to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApiLifeCycleState(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      apiLifeCycleState_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string apiLifeCycleState = 11;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearApiLifeCycleState() {
+      
+      apiLifeCycleState_ = getDefaultInstance().getApiLifeCycleState();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string apiLifeCycleState = 11;</code>
+     * @param value The bytes for apiLifeCycleState to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApiLifeCycleStateBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      apiLifeCycleState_ = value;
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.LazyStringList securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    private void ensureSecuritySchemeIsMutable() {
+      if (!((bitField0_ & 0x00000008) != 0)) {
+        securityScheme_ = new com.google.protobuf.LazyStringArrayList(securityScheme_);
+        bitField0_ |= 0x00000008;
+       }
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @return A list containing the securityScheme.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getSecuritySchemeList() {
+      return securityScheme_.getUnmodifiableView();
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @return The count of securityScheme.
+     */
+    public int getSecuritySchemeCount() {
+      return securityScheme_.size();
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @param index The index of the element to return.
+     * @return The securityScheme at the given index.
+     */
+    public java.lang.String getSecurityScheme(int index) {
+      return securityScheme_.get(index);
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the securityScheme at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getSecuritySchemeBytes(int index) {
+      return securityScheme_.getByteString(index);
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @param index The index to set the value at.
+     * @param value The securityScheme to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSecurityScheme(
+        int index, java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSecuritySchemeIsMutable();
+      securityScheme_.set(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @param value The securityScheme to add.
+     * @return This builder for chaining.
+     */
+    public Builder addSecurityScheme(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureSecuritySchemeIsMutable();
+      securityScheme_.add(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @param values The securityScheme to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllSecurityScheme(
+        java.lang.Iterable<java.lang.String> values) {
+      ensureSecuritySchemeIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, securityScheme_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearSecurityScheme() {
+      securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bitField0_ = (bitField0_ & ~0x00000008);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated string securityScheme = 12;</code>
+     * @param value The bytes of the securityScheme to add.
+     * @return This builder for chaining.
+     */
+    public Builder addSecuritySchemeBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      ensureSecuritySchemeIsMutable();
+      securityScheme_.add(value);
+      onChanged();
+      return this;
+    }
+
+    private org.wso2.gateway.discovery.api.EndpointSecurity endpointSecurity_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.api.EndpointSecurity, org.wso2.gateway.discovery.api.EndpointSecurity.Builder, org.wso2.gateway.discovery.api.EndpointSecurityOrBuilder> endpointSecurityBuilder_;
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     * @return Whether the endpointSecurity field is set.
+     */
+    public boolean hasEndpointSecurity() {
+      return endpointSecurityBuilder_ != null || endpointSecurity_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     * @return The endpointSecurity.
+     */
+    public org.wso2.gateway.discovery.api.EndpointSecurity getEndpointSecurity() {
+      if (endpointSecurityBuilder_ == null) {
+        return endpointSecurity_ == null ? org.wso2.gateway.discovery.api.EndpointSecurity.getDefaultInstance() : endpointSecurity_;
+      } else {
+        return endpointSecurityBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    public Builder setEndpointSecurity(org.wso2.gateway.discovery.api.EndpointSecurity value) {
+      if (endpointSecurityBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        endpointSecurity_ = value;
+        onChanged();
+      } else {
+        endpointSecurityBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    public Builder setEndpointSecurity(
+        org.wso2.gateway.discovery.api.EndpointSecurity.Builder builderForValue) {
+      if (endpointSecurityBuilder_ == null) {
+        endpointSecurity_ = builderForValue.build();
+        onChanged();
+      } else {
+        endpointSecurityBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    public Builder mergeEndpointSecurity(org.wso2.gateway.discovery.api.EndpointSecurity value) {
+      if (endpointSecurityBuilder_ == null) {
+        if (endpointSecurity_ != null) {
+          endpointSecurity_ =
+            org.wso2.gateway.discovery.api.EndpointSecurity.newBuilder(endpointSecurity_).mergeFrom(value).buildPartial();
+        } else {
+          endpointSecurity_ = value;
+        }
+        onChanged();
+      } else {
+        endpointSecurityBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    public Builder clearEndpointSecurity() {
+      if (endpointSecurityBuilder_ == null) {
+        endpointSecurity_ = null;
+        onChanged();
+      } else {
+        endpointSecurity_ = null;
+        endpointSecurityBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    public org.wso2.gateway.discovery.api.EndpointSecurity.Builder getEndpointSecurityBuilder() {
+      
+      onChanged();
+      return getEndpointSecurityFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    public org.wso2.gateway.discovery.api.EndpointSecurityOrBuilder getEndpointSecurityOrBuilder() {
+      if (endpointSecurityBuilder_ != null) {
+        return endpointSecurityBuilder_.getMessageOrBuilder();
+      } else {
+        return endpointSecurity_ == null ?
+            org.wso2.gateway.discovery.api.EndpointSecurity.getDefaultInstance() : endpointSecurity_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.api.EndpointSecurity, org.wso2.gateway.discovery.api.EndpointSecurity.Builder, org.wso2.gateway.discovery.api.EndpointSecurityOrBuilder> 
+        getEndpointSecurityFieldBuilder() {
+      if (endpointSecurityBuilder_ == null) {
+        endpointSecurityBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.api.EndpointSecurity, org.wso2.gateway.discovery.api.EndpointSecurity.Builder, org.wso2.gateway.discovery.api.EndpointSecurityOrBuilder>(
+                getEndpointSecurity(),
+                getParentForChildren(),
+                isClean());
+        endpointSecurity_ = null;
+      }
+      return endpointSecurityBuilder_;
+    }
+
+    private java.lang.Object authorizationHeader_ = "";
+    /**
+     * <code>string authorizationHeader = 14;</code>
+     * @return The authorizationHeader.
+     */
+    public java.lang.String getAuthorizationHeader() {
+      java.lang.Object ref = authorizationHeader_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        authorizationHeader_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string authorizationHeader = 14;</code>
+     * @return The bytes for authorizationHeader.
+     */
+    public com.google.protobuf.ByteString
+        getAuthorizationHeaderBytes() {
+      java.lang.Object ref = authorizationHeader_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        authorizationHeader_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string authorizationHeader = 14;</code>
+     * @param value The authorizationHeader to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAuthorizationHeader(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      authorizationHeader_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string authorizationHeader = 14;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearAuthorizationHeader() {
+      
+      authorizationHeader_ = getDefaultInstance().getAuthorizationHeader();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string authorizationHeader = 14;</code>
+     * @param value The bytes for authorizationHeader to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAuthorizationHeaderBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      authorizationHeader_ = value;
+      onChanged();
+      return this;
+    }
+
+    private boolean disableSecurity_ ;
+    /**
+     * <code>bool disableSecurity = 15;</code>
+     * @return The disableSecurity.
+     */
+    @java.lang.Override
+    public boolean getDisableSecurity() {
+      return disableSecurity_;
+    }
+    /**
+     * <code>bool disableSecurity = 15;</code>
+     * @param value The disableSecurity to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDisableSecurity(boolean value) {
+      
+      disableSecurity_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool disableSecurity = 15;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDisableSecurity() {
+      
+      disableSecurity_ = false;
       onChanged();
       return this;
     }

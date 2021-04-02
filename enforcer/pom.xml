@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wso2.am.microgw</groupId>
         <artifactId>micro-gateway-parent</artifactId>
-        <version>4.0.0-m8-SNAPSHOT</version>
+        <version>4.0.0-m10-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -135,8 +135,9 @@
                     </filters>
                     <artifactSet>
                         <excludes>
-                            <exclude>org.apache.logging.log4j:log4j-core</exclude>
-                            <exclude>org.apache.logging.log4j:log4j-api</exclude>
+                            <exclude>org.apache.logging:*</exclude>
+                            <exclude>log4j:*</exclude>
+                            <exclude>org.ops4j.pax.logging:*</exclude>
                         </excludes>
                     </artifactSet>
                 </configuration>
@@ -165,7 +166,7 @@
                                 org.apache.logging.log4j
                             </includeGroupIds>
                             <includeArtifactIds>
-                                log4j-api, log4j-core
+                                log4j-api, log4j-core, log4j-jcl
                             </includeArtifactIds>
                         </configuration>
                     </execution>
@@ -318,9 +319,32 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.commons.binary</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-pool.wso2</groupId>
+            <artifactId>commons-pool</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
-            <version>9.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.common.jms</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jcl</artifactId>
         </dependency>
     </dependencies>
 </project>

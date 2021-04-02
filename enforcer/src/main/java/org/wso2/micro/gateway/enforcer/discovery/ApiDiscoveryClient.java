@@ -24,6 +24,7 @@ import com.google.rpc.Status;
 import io.envoyproxy.envoy.config.core.v3.Node;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryRequest;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
@@ -33,6 +34,7 @@ import org.wso2.gateway.discovery.service.api.ApiDiscoveryServiceGrpc;
 import org.wso2.micro.gateway.enforcer.api.APIFactory;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
+import org.wso2.micro.gateway.enforcer.discovery.scheduler.XdsSchedulerManager;
 import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
 import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
 
@@ -43,15 +45,17 @@ import java.util.concurrent.TimeUnit;
 /**
  * Client to communicate with API discovery service at the adapter.
  */
-public class ApiDiscoveryClient {
+public class ApiDiscoveryClient implements Runnable {
     private static ApiDiscoveryClient instance;
-    private final ManagedChannel channel;
-    private final ApiDiscoveryServiceGrpc.ApiDiscoveryServiceStub stub;
-    private final ApiDiscoveryServiceGrpc.ApiDiscoveryServiceBlockingStub blockingStub;
+    private ManagedChannel channel;
+    private ApiDiscoveryServiceGrpc.ApiDiscoveryServiceStub stub;
+    private ApiDiscoveryServiceGrpc.ApiDiscoveryServiceBlockingStub blockingStub;
     private static final Logger logger = LogManager.getLogger(ApiDiscoveryClient.class);
     private final APIFactory apiFactory;
     private StreamObserver<DiscoveryRequest> reqObserver;
     private static final Logger log = LogManager.getLogger(ApiDiscoveryClient.class);
+    private String host;
+    private int port;
     /**
      * This is a reference to the latest received response from the ADS.
      * <p>
@@ -75,12 +79,32 @@ public class ApiDiscoveryClient {
     private final String nodeId;
 
     private ApiDiscoveryClient(String host, int port) {
-        this.channel = GRPCUtils.createSecuredChannel(log, host, port);
+        this.host = host;
+        this.port = port;
         this.apiFactory = APIFactory.getInstance();
-        this.stub = ApiDiscoveryServiceGrpc.newStub(channel);
-        this.blockingStub = ApiDiscoveryServiceGrpc.newBlockingStub(channel);
         this.nodeId = ConfigHolder.getInstance().getEnvVarConfig().getEnforcerLabel();
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
+        initConnection();
+    }
+
+    private void initConnection() {
+        if (GRPCUtils.isReInitRequired(channel)) {
+            if (channel != null && !channel.isShutdown()) {
+                channel.shutdownNow();
+                do {
+                    try {
+                        channel.awaitTermination(100, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        log.error("API discovery channel shutdown wait was interrupted", e);
+                    }
+                } while (!channel.isShutdown());
+            }
+            this.channel = GRPCUtils.createSecuredChannel(log, host, port);
+            this.stub = ApiDiscoveryServiceGrpc.newStub(channel);
+            this.blockingStub = ApiDiscoveryServiceGrpc.newBlockingStub(channel);
+        } else if (channel.getState(true) == ConnectivityState.READY) {
+            XdsSchedulerManager.getInstance().stopAPIDiscoveryScheduling();
+        }
     }
 
     public static ApiDiscoveryClient getInstance() {
@@ -109,6 +133,11 @@ public class ApiDiscoveryClient {
         return apis;
     }
 
+    public void run() {
+        initConnection();
+        watchApis();
+    }
+
     public void watchApis() {
         // TODO: (Praminda) implement a deadline with retries
         int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
@@ -116,6 +145,7 @@ public class ApiDiscoveryClient {
                     @Override
                     public void onNext(DiscoveryResponse response) {
                         logger.debug("Received API discovery response " + response);
+                        XdsSchedulerManager.getInstance().stopAPIDiscoveryScheduling();
                         latestReceived = response;
                         try {
                             List<Api> apis = handleResponse(response);
@@ -131,7 +161,7 @@ public class ApiDiscoveryClient {
                     @Override
                     public void onError(Throwable throwable) {
                         logger.error("Error occurred during API discovery", throwable);
-                        // TODO: (Praminda) if adapter is unavailable keep retrying
+                        XdsSchedulerManager.getInstance().startAPIDiscoveryScheduling();
                         nack(throwable);
                     }
 

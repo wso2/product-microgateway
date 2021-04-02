@@ -29,5 +29,6 @@ const (
 	ApplicationKeyMappingList
 	KeyManagerConfig
 	RevokedTokens
+	ThrottleData
 	UnknownType // token to count the total number of supported types
 )

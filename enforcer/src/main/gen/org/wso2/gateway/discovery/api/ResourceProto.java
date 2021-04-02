@@ -25,11 +25,6 @@ public final class ResourceProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_wso2_discovery_api_Resource_SecurityEntry_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_wso2_discovery_api_Resource_VendorExtensibleEntry_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_wso2_discovery_api_Resource_VendorExtensibleEntry_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_wso2_discovery_api_Operation_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -59,37 +54,32 @@ public final class ResourceProto {
   static {
     java.lang.String[] descriptorData = {
       "\n!wso2/discovery/api/Resource.proto\022\022wso" +
-      "2.discovery.api\032\031google/protobuf/any.pro" +
-      "to\032!wso2/discovery/api/Endpoint.proto\"\240\004" +
-      "\n\010Resource\022\n\n\002id\030\001 \001(\t\022\014\n\004path\030\002 \001(\t\022.\n\007" +
-      "methods\030\003 \003(\0132\035.wso2.discovery.api.Opera" +
-      "tion\022\017\n\007summary\030\004 \001(\t\022\023\n\013description\030\005 \001" +
-      "(\t\0224\n\016productionUrls\030\006 \003(\0132\034.wso2.discov" +
-      "ery.api.Endpoint\0221\n\013sandboxUrls\030\007 \003(\0132\034." +
-      "wso2.discovery.api.Endpoint\022<\n\010security\030" +
-      "\010 \003(\0132*.wso2.discovery.api.Resource.Secu" +
-      "rityEntry\022L\n\020vendorExtensible\030\t \003(\01322.ws" +
-      "o2.discovery.api.Resource.VendorExtensib" +
-      "leEntry\022\020\n\010consumes\030\n \003(\t\022\017\n\007schemes\030\013 \003" +
-      "(\t\022\014\n\004tags\030\014 \003(\t\032/\n\rSecurityEntry\022\013\n\003key" +
-      "\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\032M\n\025VendorExten" +
-      "sibleEntry\022\013\n\003key\030\001 \001(\t\022#\n\005value\030\002 \001(\0132\024" +
-      ".google.protobuf.Any:\0028\001\"O\n\tOperation\022\016\n" +
-      "\006method\030\001 \001(\t\0222\n\010security\030\002 \003(\0132 .wso2.d" +
-      "iscovery.api.SecurityList\"\240\001\n\014SecurityLi" +
-      "st\022B\n\tscopeList\030\001 \003(\0132/.wso2.discovery.a" +
-      "pi.SecurityList.ScopeListEntry\032L\n\016ScopeL" +
-      "istEntry\022\013\n\003key\030\001 \001(\t\022)\n\005value\030\002 \001(\0132\032.w" +
-      "so2.discovery.api.Scopes:\0028\001\"\030\n\006Scopes\022\016" +
-      "\n\006scopes\030\001 \003(\tBp\n\036org.wso2.gateway.disco" +
-      "very.apiB\rResourceProtoP\001Z=github.com/en" +
-      "voyproxy/go-control-plane/wso2/discovery" +
-      "/api;apib\006proto3"
+      "2.discovery.api\032!wso2/discovery/api/Endp" +
+      "oint.proto\"\203\003\n\010Resource\022\n\n\002id\030\001 \001(\t\022\014\n\004p" +
+      "ath\030\002 \001(\t\022.\n\007methods\030\003 \003(\0132\035.wso2.discov" +
+      "ery.api.Operation\022\017\n\007summary\030\004 \001(\t\022\023\n\013de" +
+      "scription\030\005 \001(\t\0224\n\016productionUrls\030\006 \003(\0132" +
+      "\034.wso2.discovery.api.Endpoint\0221\n\013sandbox" +
+      "Urls\030\007 \003(\0132\034.wso2.discovery.api.Endpoint" +
+      "\022<\n\010security\030\010 \003(\0132*.wso2.discovery.api." +
+      "Resource.SecurityEntry\022\020\n\010consumes\030\t \003(\t" +
+      "\022\017\n\007schemes\030\n \003(\t\022\014\n\004tags\030\013 \003(\t\032/\n\rSecur" +
+      "ityEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001" +
+      "\"v\n\tOperation\022\016\n\006method\030\001 \001(\t\0222\n\010securit" +
+      "y\030\002 \003(\0132 .wso2.discovery.api.SecurityLis" +
+      "t\022\014\n\004tier\030\003 \001(\t\022\027\n\017disableSecurity\030\004 \001(\010" +
+      "\"\240\001\n\014SecurityList\022B\n\tscopeList\030\001 \003(\0132/.w" +
+      "so2.discovery.api.SecurityList.ScopeList" +
+      "Entry\032L\n\016ScopeListEntry\022\013\n\003key\030\001 \001(\t\022)\n\005" +
+      "value\030\002 \001(\0132\032.wso2.discovery.api.Scopes:" +
+      "\0028\001\"\030\n\006Scopes\022\016\n\006scopes\030\001 \003(\tBp\n\036org.wso" +
+      "2.gateway.discovery.apiB\rResourceProtoP\001" +
+      "Z=github.com/envoyproxy/go-control-plane" +
+      "/wso2/discovery/api;apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          com.google.protobuf.AnyProto.getDescriptor(),
           org.wso2.gateway.discovery.api.EndpointProto.getDescriptor(),
         });
     internal_static_wso2_discovery_api_Resource_descriptor =
@@ -97,25 +87,19 @@ public final class ResourceProto {
     internal_static_wso2_discovery_api_Resource_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Resource_descriptor,
-        new java.lang.String[] { "Id", "Path", "Methods", "Summary", "Description", "ProductionUrls", "SandboxUrls", "Security", "VendorExtensible", "Consumes", "Schemes", "Tags", });
+        new java.lang.String[] { "Id", "Path", "Methods", "Summary", "Description", "ProductionUrls", "SandboxUrls", "Security", "Consumes", "Schemes", "Tags", });
     internal_static_wso2_discovery_api_Resource_SecurityEntry_descriptor =
       internal_static_wso2_discovery_api_Resource_descriptor.getNestedTypes().get(0);
     internal_static_wso2_discovery_api_Resource_SecurityEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Resource_SecurityEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
-    internal_static_wso2_discovery_api_Resource_VendorExtensibleEntry_descriptor =
-      internal_static_wso2_discovery_api_Resource_descriptor.getNestedTypes().get(1);
-    internal_static_wso2_discovery_api_Resource_VendorExtensibleEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_wso2_discovery_api_Resource_VendorExtensibleEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", });
     internal_static_wso2_discovery_api_Operation_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_wso2_discovery_api_Operation_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Operation_descriptor,
-        new java.lang.String[] { "Method", "Security", });
+        new java.lang.String[] { "Method", "Security", "Tier", "DisableSecurity", });
     internal_static_wso2_discovery_api_SecurityList_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_wso2_discovery_api_SecurityList_fieldAccessorTable = new
@@ -134,7 +118,6 @@ public final class ResourceProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Scopes_descriptor,
         new java.lang.String[] { "Scopes", });
-    com.google.protobuf.AnyProto.getDescriptor();
     org.wso2.gateway.discovery.api.EndpointProto.getDescriptor();
   }
 

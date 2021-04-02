@@ -51,7 +51,7 @@ const (
 	// RelativeLogConfigPath is the relative file path where the log configuration file is.
 	relativeLogConfigPath = "/conf/log_config.toml"
 	// The prefix used when configs should be read from environment variables.
-	envConfigPrefix = "$env{"
+	envConfigPrefix = "$env"
 )
 
 // ReadConfigs implements adapter configuration read operation. The read operation will happen only once, hence
@@ -81,6 +81,7 @@ func ReadConfigs() (*Config, error) {
 		}
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem())
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem())
+		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Security)).Elem())
 	})
 	return adapterConfig, e
 }
@@ -98,6 +99,8 @@ func resolveConfigEnvValues(v reflect.Value) {
 			for index := 0; index < field.Len(); index++ {
 				if field.Index(index).Kind() == reflect.Struct {
 					resolveConfigEnvValues(field.Index(index).Addr().Elem())
+				} else if field.Index(index).Kind() == reflect.String && strings.Contains(field.Index(index).String(), envConfigPrefix) {
+					field.Index(index).SetString(resolveEnvValue(field.Index(index).String()))
 				}
 			}
 		}
@@ -113,7 +116,7 @@ func resolveEnvValue(value string) string {
 	if len(m) > 1 {
 		envValue, exists := os.LookupEnv(m[1])
 		if exists {
-			return envValue
+			return strings.ReplaceAll(re.ReplaceAllString(value, envValue), envConfigPrefix, "")
 		}
 	}
 	return value

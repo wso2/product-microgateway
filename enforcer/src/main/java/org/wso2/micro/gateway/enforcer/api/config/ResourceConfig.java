@@ -17,7 +17,7 @@
  */
 package org.wso2.micro.gateway.enforcer.api.config;
 
-import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +32,8 @@ public class ResourceConfig {
     private String path;
     private HttpMethods method;
     private Map<String, List<String>> securitySchemas = new HashMap();
-    private String tier = APIConstants.UNLIMITED_TIER;
+    private String tier = ThrottleConstants.UNLIMITED_TIER;
+    private boolean disableSecurity = false;
 
     public String getPath() {
         return path;
@@ -66,8 +67,16 @@ public class ResourceConfig {
         this.tier = tier;
     }
 
+    public boolean isDisableSecurity() {
+        return disableSecurity;
+    }
+
+    public void setDisableSecurity(boolean disableSecurity) {
+        this.disableSecurity = disableSecurity;
+    }
+
     /**
-     * ENUM to hold http operations
+     * ENUM to hold http operations.
      */
     public enum HttpMethods {
         GET("get"), POST("post"), PUT("put"), DELETE("delete"), HEAD("head"),

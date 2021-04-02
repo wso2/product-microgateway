@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package wso2.discovery.api;
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
+option java_package = "org.wso2.gateway.discovery.api";
+option java_outer_classname = "SecurityInfoProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: Endpoint]
+
+// Endpoint config model
+message SecurityInfo {
+  string password = 1;
+  string customParameters = 2;
+  string securityType = 3;
+  bool enabled = 4;
+  string username = 5;
+}

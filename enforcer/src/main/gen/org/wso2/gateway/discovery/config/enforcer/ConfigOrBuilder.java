@@ -8,28 +8,19 @@ public interface ConfigOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+   * @return Whether the security field is set.
    */
-  java.util.List<org.wso2.gateway.discovery.config.enforcer.Issuer> 
-      getJwtTokenConfigList();
+  boolean hasSecurity();
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+   * @return The security.
    */
-  org.wso2.gateway.discovery.config.enforcer.Issuer getJwtTokenConfig(int index);
+  org.wso2.gateway.discovery.config.enforcer.Security getSecurity();
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
    */
-  int getJwtTokenConfigCount();
-  /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-   */
-  java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder> 
-      getJwtTokenConfigOrBuilderList();
-  /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-   */
-  org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder getJwtTokenConfigOrBuilder(
-      int index);
+  org.wso2.gateway.discovery.config.enforcer.SecurityOrBuilder getSecurityOrBuilder();
 
   /**
    * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
@@ -122,19 +113,19 @@ public interface ConfigOrBuilder extends
   org.wso2.gateway.discovery.config.enforcer.JWTGeneratorOrBuilder getJwtGeneratorOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
-   * @return Whether the throttlingConfig field is set.
+   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+   * @return Whether the throttling field is set.
    */
-  boolean hasThrottlingConfig();
+  boolean hasThrottling();
   /**
-   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
-   * @return The throttlingConfig.
+   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+   * @return The throttling.
    */
-  org.wso2.gateway.discovery.config.enforcer.Throttling getThrottlingConfig();
+  org.wso2.gateway.discovery.config.enforcer.Throttling getThrottling();
   /**
-   * <code>.wso2.discovery.config.enforcer.Throttling throttlingConfig = 8;</code>
+   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
    */
-  org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder getThrottlingConfigOrBuilder();
+  org.wso2.gateway.discovery.config.enforcer.ThrottlingOrBuilder getThrottlingOrBuilder();
 
   /**
    * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
@@ -150,4 +141,19 @@ public interface ConfigOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.CacheOrBuilder getCacheOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * @return Whether the jwtIssuer field is set.
+   */
+  boolean hasJwtIssuer();
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * @return The jwtIssuer.
+   */
+  org.wso2.gateway.discovery.config.enforcer.JWTIssuer getJwtIssuer();
+  /**
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.JWTIssuerOrBuilder getJwtIssuerOrBuilder();
 }

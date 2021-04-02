@@ -19,11 +19,6 @@ public final class ApiProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_wso2_discovery_api_Api_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_wso2_discovery_api_Api_VendorExtensibleEntry_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_wso2_discovery_api_Api_VendorExtensibleEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -34,46 +29,41 @@ public final class ApiProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\034wso2/discovery/api/api.proto\022\022wso2.dis" +
-      "covery.api\032\031google/protobuf/any.proto\032!w" +
-      "so2/discovery/api/Endpoint.proto\032!wso2/d" +
-      "iscovery/api/Resource.proto\"\276\003\n\003Api\022\n\n\002i" +
-      "d\030\001 \001(\t\022\r\n\005title\030\002 \001(\t\022\017\n\007version\030\003 \001(\t\022" +
-      "\026\n\016swaggerVersion\030\004 \001(\t\022\023\n\013description\030\005" +
-      " \001(\t\0224\n\016productionUrls\030\006 \003(\0132\034.wso2.disc" +
-      "overy.api.Endpoint\0221\n\013sandboxUrls\030\007 \003(\0132" +
-      "\034.wso2.discovery.api.Endpoint\022/\n\tresourc" +
-      "es\030\010 \003(\0132\034.wso2.discovery.api.Resource\022\020" +
-      "\n\010basePath\030\t \001(\t\022G\n\020vendorExtensible\030\n \003" +
-      "(\0132-.wso2.discovery.api.Api.VendorExtens" +
-      "ibleEntry\022\032\n\022apiLifeCycleStatus\030\013 \001(\t\032M\n" +
-      "\025VendorExtensibleEntry\022\013\n\003key\030\001 \001(\t\022#\n\005v" +
-      "alue\030\002 \001(\0132\024.google.protobuf.Any:\0028\001Bk\n\036" +
-      "org.wso2.gateway.discovery.apiB\010ApiProto" +
-      "P\001Z=github.com/envoyproxy/go-control-pla" +
-      "ne/wso2/discovery/api;apib\006proto3"
+      "covery.api\032!wso2/discovery/api/Endpoint." +
+      "proto\032!wso2/discovery/api/Resource.proto" +
+      "\032*wso2/discovery/api/endpoint_security.p" +
+      "roto\"\301\003\n\003Api\022\n\n\002id\030\001 \001(\t\022\r\n\005title\030\002 \001(\t\022" +
+      "\017\n\007version\030\003 \001(\t\022\026\n\016swaggerVersion\030\004 \001(\t" +
+      "\022\023\n\013description\030\005 \001(\t\0224\n\016productionUrls\030" +
+      "\006 \003(\0132\034.wso2.discovery.api.Endpoint\0221\n\013s" +
+      "andboxUrls\030\007 \003(\0132\034.wso2.discovery.api.En" +
+      "dpoint\022/\n\tresources\030\010 \003(\0132\034.wso2.discove" +
+      "ry.api.Resource\022\020\n\010basePath\030\t \001(\t\022\014\n\004tie" +
+      "r\030\n \001(\t\022\031\n\021apiLifeCycleState\030\013 \001(\t\022\026\n\016se" +
+      "curityScheme\030\014 \003(\t\022>\n\020endpointSecurity\030\r" +
+      " \001(\0132$.wso2.discovery.api.EndpointSecuri" +
+      "ty\022\033\n\023authorizationHeader\030\016 \001(\t\022\027\n\017disab" +
+      "leSecurity\030\017 \001(\010Bk\n\036org.wso2.gateway.dis" +
+      "covery.apiB\010ApiProtoP\001Z=github.com/envoy" +
+      "proxy/go-control-plane/wso2/discovery/ap" +
+      "i;apib\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          com.google.protobuf.AnyProto.getDescriptor(),
           org.wso2.gateway.discovery.api.EndpointProto.getDescriptor(),
           org.wso2.gateway.discovery.api.ResourceProto.getDescriptor(),
+          org.wso2.gateway.discovery.api.EndpointSecurityProto.getDescriptor(),
         });
     internal_static_wso2_discovery_api_Api_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_wso2_discovery_api_Api_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_api_Api_descriptor,
-        new java.lang.String[] { "Id", "Title", "Version", "SwaggerVersion", "Description", "ProductionUrls", "SandboxUrls", "Resources", "BasePath", "VendorExtensible", "ApiLifeCycleStatus", });
-    internal_static_wso2_discovery_api_Api_VendorExtensibleEntry_descriptor =
-      internal_static_wso2_discovery_api_Api_descriptor.getNestedTypes().get(0);
-    internal_static_wso2_discovery_api_Api_VendorExtensibleEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_wso2_discovery_api_Api_VendorExtensibleEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", });
-    com.google.protobuf.AnyProto.getDescriptor();
+        new java.lang.String[] { "Id", "Title", "Version", "SwaggerVersion", "Description", "ProductionUrls", "SandboxUrls", "Resources", "BasePath", "Tier", "ApiLifeCycleState", "SecurityScheme", "EndpointSecurity", "AuthorizationHeader", "DisableSecurity", });
     org.wso2.gateway.discovery.api.EndpointProto.getDescriptor();
     org.wso2.gateway.discovery.api.ResourceProto.getDescriptor();
+    org.wso2.gateway.discovery.api.EndpointSecurityProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

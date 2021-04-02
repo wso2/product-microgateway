@@ -48,7 +48,8 @@ public class ConfigDiscoveryClient {
     private static final Logger log = LogManager.getLogger(ConfigDiscoveryClient.class);
     private final ManagedChannel channel;
     private final ConfigDiscoveryServiceGrpc.ConfigDiscoveryServiceBlockingStub blockingStub;
-    private String nodeId;
+    private final String nodeId;
+    private final int maxRetries;
 
     public ConfigDiscoveryClient(EnvVarConfig envVarConfig, TrustManagerFactory trustManagerFactory) {
         File certFile = Paths.get(envVarConfig.getEnforcerPublicKeyPath()).toFile();
@@ -71,6 +72,7 @@ public class ConfigDiscoveryClient {
                 .build();
         this.blockingStub = ConfigDiscoveryServiceGrpc.newBlockingStub(channel);
         nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
+        maxRetries = Integer.parseInt(envVarConfig.getXdsMaxRetries());
     }
 
     public Config requestInitConfig() throws DiscoveryException {
@@ -98,12 +100,10 @@ public class ConfigDiscoveryClient {
      */
     private DiscoveryResponse requestConfig(DiscoveryRequest req) throws DiscoveryException {
         DiscoveryResponse res;
-        int retries = 0;
         Exception e = new Exception();
+        Backoff backoff = new Backoff(maxRetries);
 
-        // We are looking for a runtime exception to retry. Therefore with the `break` statement,
-        // the IDE always mark this condition as always true condition.
-        while (retries < Constants.MAX_XDS_RETRIES) {
+        while (backoff.shouldRetry()) {
             try {
                 res = blockingStub.withDeadlineAfter(10, TimeUnit.SECONDS).fetchConfigs(req);
                 shutdown();
@@ -112,9 +112,10 @@ public class ConfigDiscoveryClient {
                 // catching generic error here to wrap any grpc communication errors in the runtime
                 e = ex;
             }
-            retries++;
+            log.warn("Connection failed. Attempting a retry...");
+            backoff.errorOccurred();
         }
-        throw new DiscoveryException("Failed " + Constants.MAX_XDS_RETRIES + " retries", e);
+        throw new DiscoveryException("Failed connect to adapter after max retry times", e);
     }
 
     public void shutdown() throws InterruptedException {

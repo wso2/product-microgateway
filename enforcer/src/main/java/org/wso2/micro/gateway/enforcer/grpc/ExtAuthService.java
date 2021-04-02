@@ -60,8 +60,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         HttpStatus status = HttpStatus.newBuilder().setCodeValue(responseObject.getStatusCode()).build();
         String traceKey = request.getAttributes().getRequest().getHttp().getId();
         if (responseObject.isDirectResponse()) {
-            // To handle pre flight options request
-            if (responseObject.getStatusCode() == HttpConstants.NO_CONTENT_STATUS_CODE) {
+            if (responseObject.getHeaderMap() != null) {
                 responseObject.getHeaderMap().forEach((key, value) -> {
                             HeaderValueOption headerValueOption = HeaderValueOption.newBuilder()
                                     .setHeader(HeaderValue.newBuilder().setKey(key).setValue(value).build())
@@ -69,6 +68,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                             responseBuilder.addHeaders(headerValueOption);
                         }
                 );
+            }
+            // To handle pre flight options request
+            if (responseObject.getStatusCode() == HttpConstants.NO_CONTENT_STATUS_CODE) {
                 return CheckResponse.newBuilder()
                         .setStatus(Status.newBuilder().setCode(getCode(responseObject.getStatusCode())))
                         .setDeniedResponse(responseBuilder.setStatus(status).build())

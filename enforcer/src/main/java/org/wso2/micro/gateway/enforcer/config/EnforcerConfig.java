@@ -25,6 +25,8 @@ import org.wso2.micro.gateway.enforcer.config.dto.CacheDto;
 import org.wso2.micro.gateway.enforcer.config.dto.CredentialDto;
 import org.wso2.micro.gateway.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.ExtendedTokenIssuerDto;
+import org.wso2.micro.gateway.enforcer.config.dto.JWTIssuerConfigurationDto;
+import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,8 +40,11 @@ public class EnforcerConfig {
     private EventHubConfigurationDto eventHub;
     private Map<String, ExtendedTokenIssuerDto> issuersMap = new HashMap<>();
     private CredentialDto apimCredentials;
+    private ThrottleConfigDto throttleConfig;
     private JWTConfigurationDto jwtConfigurationDto;
     private CacheDto cacheDto;
+    private JWTIssuerConfigurationDto jwtIssuerConfigurationDto;
+    private CredentialDto[] jwtUsersCredentials;
     private String publicCertificatePath = "";
     private String privateKeyPath = "";
     private Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
@@ -51,6 +56,7 @@ public class EnforcerConfig {
     public void setAuthService(AuthServiceConfigurationDto authService) {
         this.authService = authService;
     }
+
 
     public EventHubConfigurationDto getEventHub() {
         return eventHub;
@@ -76,8 +82,32 @@ public class EnforcerConfig {
         this.apimCredentials = apimCredentials;
     }
 
+    public ThrottleConfigDto getThrottleConfig() {
+        return throttleConfig;
+    }
+
+    public void setThrottleConfig(ThrottleConfigDto throttleConfig) {
+        this.throttleConfig = throttleConfig;
+    }
+
     public void setJwtConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {
         this.jwtConfigurationDto = jwtConfigurationDto;
+    }
+
+    public void setJwtIssuerConfigurationDto(JWTIssuerConfigurationDto jwtIssuerConfigurationDto) {
+        this.jwtIssuerConfigurationDto = jwtIssuerConfigurationDto;
+    }
+
+    public JWTIssuerConfigurationDto getJwtIssuerConfigurationDto() {
+        return jwtIssuerConfigurationDto;
+    }
+
+    public void setJwtUsersCredentials(CredentialDto[] credentialDtos) {
+        this.jwtUsersCredentials = credentialDtos;
+    }
+
+    public CredentialDto[] getJwtUsersCredentials() {
+        return jwtUsersCredentials;
     }
 
     public JWTConfigurationDto getJwtConfigurationDto() {
@@ -116,4 +146,3 @@ public class EnforcerConfig {
         this.jwtTransformerMap = jwtTransformerMap;
     }
 }
-

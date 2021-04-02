@@ -12,4 +12,5 @@ option java_multiple_files = true;
 message TMURLGroup {
    repeated string receiverURLs = 1;
    repeated string authURLs = 2;
+   string type = 3;
 }

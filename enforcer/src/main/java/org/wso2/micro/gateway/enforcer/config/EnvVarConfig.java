@@ -19,6 +19,7 @@
 package org.wso2.micro.gateway.enforcer.config;
 
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.micro.gateway.enforcer.constants.Constants;
 
 /**
  * Holds and returns the configuration values retrieved from the environment variables.
@@ -32,6 +33,8 @@ public class EnvVarConfig {
     private static final String ADAPTER_XDS_PORT = "ADAPTER_XDS_PORT";
     private static final String ENFORCER_LABEL = "ENFORCER_LABEL";
     public static final String XDS_MAX_MSG_SIZE = "XDS_MAX_MSG_SIZE";
+    public static final String XDS_MAX_RETRIES = "XDS_MAX_RETRIES";
+    public static final String XDS_RETRY_PERIOD = "XDS_RETRY_PERIOD";
 
     // Since the container is running in linux container, path separator is not needed.
     private static final String DEFAULT_TRUSTED_CA_CERTS_PATH = "/home/wso2/security/truststore";
@@ -42,17 +45,22 @@ public class EnvVarConfig {
     private static final String DEFAULT_ADAPTER_XDS_PORT = "18000";
     private static final String DEFAULT_ENFORCER_LABEL = "enforcer";
     public static final String DEFAULT_XDS_MAX_MSG_SIZE = "4194304";
+    public static final String DEFAULT_XDS_MAX_RETRIES = Integer.toString(Constants.MAX_XDS_RETRIES);
+    public static final String DEFAULT_XDS_RETRY_PERIOD = Integer.toString(Constants.XDS_DEFAULT_RETRY);
 
-    private String trustedAdapterCertsPath;
-    private String enforcerPrivateKeyPath;
-    private String enforcerPublicKeyPath;
-    private String adapterHost;
-    private String enforcerLabel;
-    private String adapterXdsPort;
-    private String adapterHostName;
+    private static EnvVarConfig instance;
+    private final String trustedAdapterCertsPath;
+    private final String enforcerPrivateKeyPath;
+    private final String enforcerPublicKeyPath;
+    private final String adapterHost;
+    private final String enforcerLabel;
+    private final String adapterXdsPort;
+    private final String adapterHostName;
     private final String xdsMaxMsgSize;
+    private final String xdsMaxRetries;
+    private final String xdsRetryPeriod;
 
-    public EnvVarConfig() {
+    private EnvVarConfig() {
         trustedAdapterCertsPath = retrieveEnvVarOrDefault(TRUSTED_CA_CERTS_PATH,
                 DEFAULT_TRUSTED_CA_CERTS_PATH);
         enforcerPrivateKeyPath = retrieveEnvVarOrDefault(ENFORCER_PRIVATE_KEY_PATH,
@@ -64,7 +72,21 @@ public class EnvVarConfig {
         adapterHostName = retrieveEnvVarOrDefault(ADAPTER_HOST_NAME, DEFAULT_ADAPTER_HOST_NAME);
         adapterXdsPort = retrieveEnvVarOrDefault(ADAPTER_XDS_PORT, DEFAULT_ADAPTER_XDS_PORT);
         xdsMaxMsgSize = retrieveEnvVarOrDefault(XDS_MAX_MSG_SIZE, DEFAULT_XDS_MAX_MSG_SIZE);
+        xdsMaxRetries = retrieveEnvVarOrDefault(XDS_MAX_RETRIES, DEFAULT_XDS_MAX_RETRIES);
+        xdsRetryPeriod = retrieveEnvVarOrDefault(XDS_RETRY_PERIOD, DEFAULT_XDS_MAX_RETRIES);
     }
+
+    public static EnvVarConfig getInstance() {
+        if (instance == null) {
+            synchronized (EnvVarConfig.class) {
+                if (instance == null) {
+                    instance = new EnvVarConfig();
+                }
+            }
+        }
+        return instance;
+    }
+
 
     private String retrieveEnvVarOrDefault(String variable, String defaultValue) {
         if (StringUtils.isEmpty(System.getenv(variable))) {
@@ -103,5 +125,13 @@ public class EnvVarConfig {
 
     public String getXdsMaxMsgSize() {
         return xdsMaxMsgSize;
+    }
+
+    public String getXdsMaxRetries() {
+        return xdsMaxRetries;
+    }
+
+    public String getXdsRetryPeriod() {
+        return xdsRetryPeriod;
     }
 }

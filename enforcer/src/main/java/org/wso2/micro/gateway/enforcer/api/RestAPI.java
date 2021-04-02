@@ -17,17 +17,17 @@
  */
 package org.wso2.micro.gateway.enforcer.api;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.wso2.gateway.discovery.api.Api;
 import org.wso2.gateway.discovery.api.Operation;
 import org.wso2.gateway.discovery.api.Resource;
 import org.wso2.micro.gateway.enforcer.Filter;
 import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
+import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
 import org.wso2.micro.gateway.enforcer.cors.CorsFilter;
 import org.wso2.micro.gateway.enforcer.security.AuthFilter;
+import org.wso2.micro.gateway.enforcer.throttle.ThrottleFilter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,11 +38,9 @@ import java.util.Map;
  * Specific implementation for a Rest API type APIs.
  */
 public class RestAPI implements API {
-    private static final Logger logger = LogManager.getLogger(RestAPI.class);
-
+    private final List<Filter> filters = new ArrayList<>();
     private APIConfig apiConfig;
     private String apiLifeCycleState;
-    private List<Filter> filters = new ArrayList<>();
 
     @Override
     public List<Filter> getFilters() {
@@ -54,17 +52,21 @@ public class RestAPI implements API {
         String basePath = api.getBasePath();
         String name = api.getTitle();
         String version = api.getVersion();
+        List<String> securitySchemes = api.getSecuritySchemeList();
         List<ResourceConfig> resources = new ArrayList<>();
-        for (Resource res: api.getResourcesList()) {
-            // TODO: (Praminda) handle all fields of resource
+
+        for (Resource res : api.getResourcesList()) {
             for (Operation operation : res.getMethodsList()) {
                 ResourceConfig resConfig = buildResource(operation, res.getPath());
                 resources.add(resConfig);
             }
         }
-        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources)
-                .apiLifeCycleState(apiLifeCycleState).apiType(APIConstants.ApiType.REST).build();
-        this.apiLifeCycleState = api.getApiLifeCycleStatus();
+
+        this.apiLifeCycleState = api.getApiLifeCycleState();
+        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).
+                apiLifeCycleState(apiLifeCycleState).securitySchema(securitySchemes).tier(api.getTier()).
+                endpointSecurity(api.getEndpointSecurity()).authHeader(api.getAuthorizationHeader()).
+                disableSecurity(api.getDisableSecurity()).build();
         initFilters();
         return basePath;
     }
@@ -74,7 +76,7 @@ public class RestAPI implements API {
         ResponseObject responseObject = new ResponseObject();
         if (executeFilterChain(requestContext)) {
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
-            if (requestContext.getResponseHeaders() != null) {
+            if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
         } else {
@@ -110,11 +112,12 @@ public class RestAPI implements API {
         ResourceConfig resource = new ResourceConfig();
         resource.setPath(resPath);
         resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
+        resource.setTier(operation.getTier());
+        resource.setDisableSecurity(operation.getDisableSecurity());
         Map<String, List<String>> securityMap = new HashMap<>();
         operation.getSecurityList().forEach(securityList -> securityList.getScopeListMap().forEach((key, security) -> {
-            List<String> scopeList = new ArrayList<>();
-            if (security != null && security.getScopesList() != null) {
-                scopeList.addAll(security.getScopesList());
+            if (security != null && security.getScopesList().size() > 0) {
+                List<String> scopeList = new ArrayList<>(security.getScopesList());
                 securityMap.put(key, scopeList);
             }
         }));
@@ -125,10 +128,17 @@ public class RestAPI implements API {
     private void initFilters() {
         CorsFilter corsFilter = new CorsFilter();
         this.filters.add(corsFilter);
+        // TODO : re-vist the logic with apim prototype implemetation
         if (!APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(apiLifeCycleState)) {
             AuthFilter authFilter = new AuthFilter();
             authFilter.init(apiConfig);
             this.filters.add(authFilter);
+        }
+        // enable throttle filter
+        if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
+            ThrottleFilter throttleFilter = new ThrottleFilter();
+            throttleFilter.init(apiConfig);
+            this.filters.add(throttleFilter);
         }
     }
 }

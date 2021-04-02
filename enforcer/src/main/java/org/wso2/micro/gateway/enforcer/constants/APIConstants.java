@@ -22,8 +22,6 @@ package org.wso2.micro.gateway.enforcer.constants;
  */
 public class APIConstants {
 
-    public static final String UNLIMITED_TIER = "Unlimited";
-
     //open API extensions
     public static final String X_WSO2_BASE_PATH = "x-wso2-basepath";
 
@@ -33,10 +31,15 @@ public class APIConstants {
     public static final String GW_VERSION_PARAM = "version";
     public static final String GW_API_NAME_PARAM = "name";
     public static final String PROTOTYPED_LIFE_CYCLE_STATUS = "PROTOTYPED";
+    public static final String PUBLISHED_LIFE_CYCLE_STATUS = "PUBLISHED";
+    public static final String UNLIMITED_TIER = "Unlimited";
+    public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
+    public static final String END_USER_ANONYMOUS = "anonymous";
 
 
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
-    public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "wso2carbon";
+    public static final String DEFAULT_ISSUER = "Resident Key Manager";
+    public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
     public static final String HTTPS_PROTOCOL = "https";
     public static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
     public static final String BANDWIDTH_TYPE = "bandwidthVolume";
@@ -51,6 +54,14 @@ public class APIConstants {
     public static final String API_KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String API_KEY_TYPE_SANDBOX = "SANDBOX";
 
+    public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
+    public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";
+    public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
+    public static final String API_SECURITY_BASIC_AUTH = "basic_auth";
+    public static final String API_SECURITY_API_KEY = "api_key";
+    public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
+    public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
+
     public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
     public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
     public static final String BEGIN_PUBLIC_KEY_STRING = "-----BEGIN PUBLIC KEY-----\n";
@@ -59,6 +70,7 @@ public class APIConstants {
     public static final String EVENT_TYPE = "eventType";
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_PAYLOAD = "event";
+    public static final String EVENT_PAYLOAD_DATA = "payloadData";
 
     public static final String NOT_FOUND_MESSAGE = "Not Found";
     public static final String NOT_FOUND_DESCRIPTION = "The requested resource is not available.";
@@ -96,7 +108,7 @@ public class APIConstants {
     }
 
     /**
-     * Holds the common set of constants for output of the subscription validation
+     * Holds the common set of constants for output of the subscription validation.
      */
     public static class SubscriptionStatus {
 
@@ -113,7 +125,7 @@ public class APIConstants {
     }
 
     /**
-     * Holds the common set of constants for validating the JWT tokens
+     * Holds the common set of constants for validating the JWT tokens.
      */
     public static class JwtTokenConstants {
 
@@ -140,7 +152,7 @@ public class APIConstants {
         public static final String EXPIRY_TIME = "exp";
         public static final String JWT_KID = "kid";
         public static final String SIGNATURE_ALGORITHM = "alg";
-        public static final String TOKEN_TYPE = "typ";
+        public static final String TOKEN_TYPE = "token_type";
         public static final String BACKEND_TOKEN = "backendJwt";
         public static final String SUBSCRIBED_APIS = "subscribedAPIs";
         public static final String API_CONTEXT = "context";
@@ -153,6 +165,8 @@ public class APIConstants {
         public static final String PERMITTED_REFERER = "permittedReferer";
         public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
         public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
+        public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
+        public static final String INTERNAL_KEY = "internal-key";
 
     }
 
@@ -303,19 +317,6 @@ public class APIConstants {
     }
 
     /**
-     * Topic Names.
-     */
-    public static class TopicNames {
-
-        //APIM default topic names
-        public static final String TOPIC_THROTTLE_DATA = "throttleData";
-        public static final String TOPIC_TOKEN_REVOCATION = "tokenRevocation";
-        public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
-        public static final String TOPIC_KEY_MANAGER = "keyManager";
-        public static final String TOPIC_NOTIFICATION = "notification";
-    }
-
-    /**
      * Holds the constants related to attributes to be sent in the response in case of an error
      * scenario raised within the enforcer.
      */
@@ -333,7 +334,8 @@ public class APIConstants {
         OK("200", 200),
         UNAUTHENTICATED("401", 401),
         UNAUTHORIZED("403", 403),
-        NOTFOUND("404", 404);
+        NOTFOUND("404", 404),
+        THROTTLED("429", 429);
 
         private String value;
         private int code;

@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package wso2.discovery.api;
 
-import "google/protobuf/any.proto";
 import "wso2/discovery/api/Endpoint.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
@@ -14,7 +13,7 @@ option java_multiple_files = true;
 
 // Resource config model
 message Resource {
-    string id = 1;
+	string id = 1;
 	string path = 2;
 	repeated Operation methods = 3;
 	string summary = 4;
@@ -22,16 +21,17 @@ message Resource {
 	repeated Endpoint productionUrls = 6;
 	repeated Endpoint sandboxUrls = 7;
 	map<string, string> security = 8;
-	map<string, google.protobuf.Any> vendorExtensible = 9;
-	repeated string consumes = 10;
-	repeated string schemes = 11;
-	repeated string tags = 12;
+	repeated string consumes = 9;
+	repeated string schemes = 10;
+	repeated string tags = 11;
 }
 
 // Operation model which maps to a particular http methods
 message Operation {
     string method = 1;
     repeated SecurityList security = 2;
+    string tier = 3;
+    bool disableSecurity = 4;
 }
 
 // Holds the array of security schemas defined for particular API operation

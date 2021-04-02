@@ -39,7 +39,12 @@ public class Constants {
             "type.googleapis.com/wso2.discovery.keymgt.KeyManagerConfig";
     public static final String REVOKED_TOKEN_TYPE_URL =
             "type.googleapis.com/wso2.discovery.keymgt.RevokedToken";
+    public static final String THROTTLE_DATA_TYPE_URL =
+            "type.googleapis.com/wso2.discovery.throttle.ThrottleData";
+
+    // xDS constants
     public static final int MAX_XDS_RETRIES = 3;
+    public static final int XDS_DEFAULT_RETRY = 15;
 
     // Config constants
     public static final String EVENT_HUB_EVENT_LISTENING_ENDPOINT = "eventListeningEndpoints";
@@ -48,8 +53,22 @@ public class Constants {
     public static final String END_OF_PRIVATE_KEY = "-----END PRIVATE KEY-----";
     public static final String RSA = "RSA";
 
+    public static final String LOADBALANCE = "loadbalance";
+    public static final String FAILOVER = "failover";
+    public static final String TM_BINARY_LOADBALANCE_SEPARATOR = ",";
+    public static final String TM_BINARY_FAILOVER_SEPARATOR = "|";
+    public static final String UNKNOWN_VALUE = "__unknown__";
+
     public static final String OBJECT_THIS_NOTATION = "this$";
     public static final String ENV_PREFIX = "$env{";
     public static final String START_BRACKET = "{";
     public static final String END_BRACKET = "}";
+
+    // jms listener properties
+    public static final String PROP_INIT_CONTEXT_FACTORY = "java.naming.factory.initial";
+    public static final String PROP_CON_FACTORY_JNDI_NAME = "transport.jms.ConnectionFactoryJNDIName";
+    public static final String PROP_DESTINATION_TYPE = "transport.jms.DestinationType";
+    public static final String PROP_CON_FACTORY = "connectionfactory.TopicConnectionFactory";
+    public static final String DEFAULT_DESTINATION_TYPE = "Topic";
+    public static final String DEFAULT_CON_FACTORY_JNDI_NAME = "TopicConnectionFactory";
 }
