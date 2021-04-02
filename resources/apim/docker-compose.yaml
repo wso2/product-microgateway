@@ -2,6 +2,7 @@ version: "2.4"
 services:
   apim:
     image: wso2am/wso2am:4.0.0-pre-beta-alpine
+    mem_limit: 1024m
     healthcheck:
       test: ["CMD", "nc", "-z","localhost", "9443"]
       interval: 10s
@@ -15,6 +16,7 @@ services:
       - ../resources/apim/deployment.toml:/home/wso2carbon/wso2am-4.0.0-pre-beta/repository/conf/deployment.toml
   router:
     image: wso2/mg-router:4.0.0-m10
+    mem_limit: 256m
     logging:
       options:
         max-size: "20m"
@@ -43,6 +45,7 @@ services:
       - enforcer
   adapter:
     image: wso2/mg-adapter:4.0.0-m10
+    mem_limit: 256m
     logging:
       options:
         max-size: "20m"
@@ -63,6 +66,7 @@ services:
       - apim
   enforcer:
     image: wso2/mg-enforcer:4.0.0-m10
+    mem_limit: 256m
     logging:
       options:
         max-size: "20m"
