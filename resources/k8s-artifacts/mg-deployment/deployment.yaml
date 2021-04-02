@@ -77,6 +77,10 @@ spec:
               value: "-Dhttpclient.hostnameVerifier=AllowAll"
             - name: apim_admin_pwd
               value: "admin"
+            - name: enforcer_admin_pwd
+              value: "admin"
+            - name: tm_admin_pwd
+              value: "admin"
           resources:
             requests:
               memory: "250Mi"
@@ -87,6 +91,11 @@ spec:
           ports:
             - containerPort: 8081
             - containerPort: 8082
+          startupProbe:
+            tcpSocket:
+              port: 8081
+            periodSeconds: 5
+            failureThreshold: 30
           livenessProbe:
             tcpSocket:
               port: 8081
@@ -140,15 +149,26 @@ spec:
           ports:
             - containerPort: 9000
             - containerPort: 9095
-          livenessProbe:
-            tcpSocket:
+          startupProbe:
+            httpGet:
               port: 9095
+              path: /health
+              scheme: HTTPS
+            failureThreshold: 30
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              port: 9095
+              path: /health
+              scheme: HTTPS
             initialDelaySeconds: 20
             periodSeconds: 10
           readinessProbe:
-            tcpSocket:
+            httpGet:
               port: 9095
-            initialDelaySeconds: 25
+              path: /health
+              scheme: HTTPS
+            initialDelaySeconds: 20
             periodSeconds: 5
       volumes:
         - name: router-keystore-vol
