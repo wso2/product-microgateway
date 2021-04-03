@@ -365,6 +365,6 @@
         <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
         <lmax.version>3.4.2.wso2v1</lmax.version>
         <download.maven.plugin.version>1.6.1</download.maven.plugin.version>
-        <apictl.version>4.0.0-alpha2</apictl.version>
+        <apictl.version>4.0.0-beta</apictl.version>
     </properties>
 </project>

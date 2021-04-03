@@ -321,6 +321,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         List<APIRevisionDeployUndeployRequest> apiRevisionDeployRequestList = new ArrayList<>();
         APIRevisionDeployUndeployRequest apiRevisionDeployRequest = new APIRevisionDeployUndeployRequest();
         apiRevisionDeployRequest.setName("Production and Sandbox");
+        apiRevisionDeployRequest.setVhost("localhost");
         apiRevisionDeployRequest.setDisplayOnDevportal(true);
         apiRevisionDeployRequestList.add(apiRevisionDeployRequest);
         apiRevisionDeployRequest.setVhost("localhost");
@@ -366,6 +367,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         List<APIRevisionDeployUndeployRequest> apiRevisionUndeployRequestList = new ArrayList<>();
         APIRevisionDeployUndeployRequest apiRevisionUnDeployRequest = new APIRevisionDeployUndeployRequest();
         apiRevisionUnDeployRequest.setName("Production and Sandbox");
+        apiRevisionUnDeployRequest.setVhost("localhost");
         apiRevisionUnDeployRequest.setDisplayOnDevportal(true);
         apiRevisionUndeployRequestList.add(apiRevisionUnDeployRequest);
         HttpResponse apiRevisionsUnDeployResponse = restAPIPublisher.undeployAPIRevision(apiId, revisionUUID,
@@ -441,6 +443,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         List<APIRevisionDeployUndeployRequest> apiRevisionDeployRequestList = new ArrayList<>();
         APIRevisionDeployUndeployRequest apiRevisionDeployRequest = new APIRevisionDeployUndeployRequest();
         apiRevisionDeployRequest.setName("Production and Sandbox");
+        apiRevisionDeployRequest.setName("localhost");
         apiRevisionDeployRequest.setDisplayOnDevportal(true);
         apiRevisionDeployRequestList.add(apiRevisionDeployRequest);
         HttpResponse apiRevisionsDeployResponse = restAPIPublisher.deployAPIProductRevision(apiId, revisionUUID,
@@ -487,6 +490,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         List<APIRevisionDeployUndeployRequest> apiRevisionUndeployRequestList = new ArrayList<>();
         APIRevisionDeployUndeployRequest apiRevisionUnDeployRequest = new APIRevisionDeployUndeployRequest();
         apiRevisionUnDeployRequest.setName("Production and Sandbox");
+        apiRevisionUnDeployRequest.setName("localhost");
         apiRevisionUnDeployRequest.setDisplayOnDevportal(true);
         apiRevisionUndeployRequestList.add(apiRevisionUnDeployRequest);
         HttpResponse apiRevisionsUnDeployResponse = restAPIPublisher.undeployAPIProductRevision(apiId, revisionUUID,

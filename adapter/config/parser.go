@@ -45,6 +45,9 @@ var (
 	e                   error
 )
 
+// DefaultGatewayName represents the name of the default gateway
+const DefaultGatewayName = "Production and Sandbox" // TODO: should be changed to "Default"
+
 const (
 	// The environtmental variable which represents the path of the distribution in host machine.
 	mgwHomeEnvVariable = "MGW_HOME"

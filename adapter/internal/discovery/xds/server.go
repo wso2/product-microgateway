@@ -441,15 +441,9 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	var endpointArray []*corev3.Address
 	var apis []types.Resource
 
-	conf, errReadConfig := config.ReadConfigs()
-	if errReadConfig != nil {
-		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
-	}
-	port := conf.Envoy.ListenerPort
-
 	for apiKey, labels := range openAPIEnvoyMap {
 		if arrayContains(labels, label) {
-			vhost := fmt.Sprintf("%v:%v", ExtractVhostFromAPIIdentifier(apiKey), port)
+			vhost := fmt.Sprintf("%v:%v", ExtractVhostFromAPIIdentifier(apiKey), "*")
 			clusterArray = append(clusterArray, openAPIClustersMap[apiKey]...)
 			vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], openAPIRoutesMap[apiKey]...)
 			endpointArray = append(endpointArray, openAPIEndpointsMap[apiKey]...)
@@ -459,15 +453,22 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	}
 
 	// If the token endpoint is enabled, the token endpoint also needs to be added.
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
+	}
 	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
+	// error can be omited since we have already read configs
+	defaultEnvVhost, _, _ := config.GetDefaultVhost(config.DefaultGatewayName)
+	defaultEnvVhost = fmt.Sprintf("%v:%v", defaultEnvVhost, "*")
 	if enableJwtIssuer {
 		routeToken := envoyconf.CreateTokenRoute()
-		vhostToRouteArrayMap["*"] = append(vhostToRouteArrayMap["*"], routeToken)
+		vhostToRouteArrayMap[defaultEnvVhost] = append(vhostToRouteArrayMap[defaultEnvVhost], routeToken)
 	}
 
 	// Add health endpoint
 	routeHealth := envoyconf.CreateHealthEndpoint()
-	vhostToRouteArrayMap["*"] = append(vhostToRouteArrayMap["*"], routeHealth)
+	vhostToRouteArrayMap[defaultEnvVhost] = append(vhostToRouteArrayMap[defaultEnvVhost], routeHealth)
 
 	listenerArray, listenerFound := envoyListenerConfigMap[label]
 	routesConfig, routesConfigFound := envoyRouteConfigMap[label]
