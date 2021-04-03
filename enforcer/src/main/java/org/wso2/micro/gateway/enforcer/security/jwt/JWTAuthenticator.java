@@ -214,11 +214,10 @@ public class JWTAuthenticator implements Authenticator {
     private String retrieveAuthHeaderValue(RequestContext requestContext) {
         Map<String, String> headers = requestContext.getHeaders();
         String authHeader = requestContext.getMatchedAPI().getAPIConfig().getAuthHeader().toLowerCase();
-        String retrieveHeader = headers.get(authHeader);
-        if (retrieveHeader != null) {
-            return retrieveHeader;
+        if (StringUtils.isEmpty(authHeader)) {
+            authHeader = APIConstants.AUTHORIZATION_HEADER_DEFAULT.toLowerCase();
         }
-        return headers.get(APIConstants.AUTHORIZATION_HEADER_DEFAULT.toLowerCase());
+        return headers.get(authHeader);
     }
 
     @Override

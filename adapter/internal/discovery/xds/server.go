@@ -223,7 +223,7 @@ func UpdateAPI(apiContent config.APIContent) {
 		mgwSwagger.SetName(apiContent.Name)
 		mgwSwagger.SetVersion(apiContent.Version)
 		mgwSwagger.SetSecurityScheme(apiContent.SecurityScheme)
-		mgwSwagger.SetXWSO2AuthHeader(apiContent.AuthHeader)
+		mgwSwagger.SetXWso2AuthHeader(apiContent.AuthHeader)
 	} else if apiContent.APIType == mgw.WS {
 		mgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
 	} else {
@@ -776,15 +776,21 @@ func UpdateEnforcerThrottleData(throttleData *throttle.ThrottleData) {
 	// the need of two xds services to push keytemplates and blocking conditions.
 	templates := throttleData.KeyTemplates
 	conditions := throttleData.BlockingConditions
+	ipConditions := throttleData.IpBlockingConditions
 	if templates == nil {
 		templates = enforcerThrottleData.KeyTemplates
 	}
 	if conditions == nil {
 		conditions = enforcerThrottleData.BlockingConditions
 	}
+	if ipConditions == nil {
+		ipConditions = enforcerThrottleData.IpBlockingConditions
+	}
+
 	t := &throttle.ThrottleData{
-		KeyTemplates:       templates,
-		BlockingConditions: conditions,
+		KeyTemplates:         templates,
+		BlockingConditions:   conditions,
+		IpBlockingConditions: ipConditions,
 	}
 	data = append(data, t)
 

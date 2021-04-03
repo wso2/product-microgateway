@@ -74,7 +74,6 @@ func CreateListenersWithRds() []*listenerv3.Listener {
 func createListeners(conf *config.Config) []*listenerv3.Listener {
 	httpFilters := getHTTPFilters()
 	upgradeFilters := getUpgradeFilters()
-	accessLogs := getAccessLogConfigs()
 	var filters []*listenerv3.Filter
 	var listeners []*listenerv3.Listener
 
@@ -99,7 +98,22 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 			},
 		},
 		HttpFilters: httpFilters,
-		AccessLog:   []*access_logv3.AccessLog{accessLogs},
+	}
+	logConf, errReadLogConfig := config.ReadLogConfigs()
+	if errReadLogConfig != nil {
+		logger.LoggerOasparser.Error("Error while reading the adapter log configuration.", errReadLogConfig)
+		return nil
+	}
+
+	if !logConf.AccessLogs.Enable {
+		logger.LoggerOasparser.Debug("Router accesslog configurations are disabled.")
+	} else {
+		logger.LoggerOasparser.Debug("Router accesslog Configurations are enabled.")
+		accessLogs := getAccessLogConfigs(logConf)
+		if accessLogs != nil {
+			manager.AccessLog = []*access_logv3.AccessLog{accessLogs}
+			logger.LoggerOasparser.Debug("Router accesslog Configurations are added.")
+		}
 	}
 
 	pbst, err := ptypes.MarshalAny(manager)
@@ -241,19 +255,14 @@ func createAddress(remoteHost string, port uint32) *corev3.Address {
 }
 
 // getAccessLogConfigs provides access log configurations for envoy
-func getAccessLogConfigs() *access_logv3.AccessLog {
+func getAccessLogConfigs(logConf *config.LogConfig) *access_logv3.AccessLog {
 	var logFormat *envoy_config_filter_accesslog_v3.FileAccessLog_Format
 	logpath := defaultAccessLogPath //default access log path
 
-	logConf, errReadConfig := config.ReadLogConfigs()
-	if errReadConfig != nil {
-		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
-	} else {
-		logFormat = &envoy_config_filter_accesslog_v3.FileAccessLog_Format{
-			Format: logConf.AccessLogs.Format,
-		}
-		logpath = logConf.AccessLogs.LogFile
+	logFormat = &envoy_config_filter_accesslog_v3.FileAccessLog_Format{
+		Format: logConf.AccessLogs.Format,
 	}
+	logpath = logConf.AccessLogs.LogFile
 
 	accessLogConf := &envoy_config_filter_accesslog_v3.FileAccessLog{
 		Path:            logpath,
@@ -263,6 +272,7 @@ func getAccessLogConfigs() *access_logv3.AccessLog {
 	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error marsheling access log configs. ", err)
+		return nil
 	}
 
 	accessLogs := access_logv3.AccessLog{

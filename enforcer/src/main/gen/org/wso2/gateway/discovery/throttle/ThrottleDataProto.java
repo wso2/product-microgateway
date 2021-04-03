@@ -31,13 +31,14 @@ public final class ThrottleDataProto {
       "\n+wso2/discovery/throttle/throttle_data." +
       "proto\022\027wso2.discovery.throttle\0321wso2/dis" +
       "covery/throttle/blocking_conditions.prot" +
-      "o\"o\n\014ThrottleData\022\025\n\rkey_templates\030\001 \003(\t" +
-      "\022H\n\023blocking_conditions\030\002 \001(\0132+.wso2.dis" +
-      "covery.throttle.BlockingConditionsB\203\001\n#o" +
-      "rg.wso2.gateway.discovery.throttleB\021Thro" +
-      "ttleDataProtoP\001ZGgithub.com/envoyproxy/g" +
-      "o-control-plane/wso2/discovery/throttle;" +
-      "throttleb\006proto3"
+      "o\"\210\001\n\014ThrottleData\022\025\n\rkey_templates\030\001 \003(" +
+      "\t\022\033\n\023blocking_conditions\030\002 \003(\t\022D\n\026ip_blo" +
+      "cking_conditions\030\003 \003(\0132$.wso2.discovery." +
+      "throttle.IPConditionB\203\001\n#org.wso2.gatewa" +
+      "y.discovery.throttleB\021ThrottleDataProtoP" +
+      "\001ZGgithub.com/envoyproxy/go-control-plan" +
+      "e/wso2/discovery/throttle;throttleb\006prot" +
+      "o3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -49,7 +50,7 @@ public final class ThrottleDataProto {
     internal_static_wso2_discovery_throttle_ThrottleData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_throttle_ThrottleData_descriptor,
-        new java.lang.String[] { "KeyTemplates", "BlockingConditions", });
+        new java.lang.String[] { "KeyTemplates", "BlockingConditions", "IpBlockingConditions", });
     org.wso2.gateway.discovery.throttle.BlockingConditionsProto.getDescriptor();
   }
 

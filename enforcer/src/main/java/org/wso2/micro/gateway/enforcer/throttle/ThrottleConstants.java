@@ -44,9 +44,6 @@ public class ThrottleConstants {
     public static final String UNLIMITED_TIER = "Unlimited";
     public static final String IP = "ip";
     public static final String IPV6 = "ipv6";
-    public static final String BLOCKING_CONDITION_KEY = "blockingCondition";
-    public static final String POLICY_TEMPLATE_KEY = "keyTemplateValue";
-    public static final String TEMPLATE_KEY_STATE = "keyTemplateState";
     public static final String THROTTLE_KEY = "throttleKey";
     public static final String THROTTLE_OUT_REASON = "THROTTLED_OUT_REASON";
     public static final String TOPIC_THROTTLE_DATA = "throttleData";
@@ -60,14 +57,6 @@ public class ThrottleConstants {
     public static final String GMT = "GMT";
 
     // blocking constants
-    public static final String BLOCKING_CONDITION_VALUE = "conditionValue";
-    public static final String BLOCKING_CONDITION_DOMAIN = "tenantDomain";
     public static final String BLOCKING_CONDITIONS_IP = "IP";
     public static final String BLOCK_CONDITION_IP_RANGE = "IPRANGE";
-    public static final String BLOCK_CONDITION_FIXED_IP = "fixedIp";
-    public static final String BLOCK_CONDITION_START_IP = "startingIp";
-    public static final String BLOCK_CONDITION_ENDING_IP = "endingIp";
-    public static final String BLOCK_CONDITION_INVERT = "invert";
-    public static final String BLOCKING_CONDITION_ID = "id";
-    public static final String BLOCKING_CONDITION_STATE = "state";
 }

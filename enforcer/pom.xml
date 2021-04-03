@@ -136,6 +136,8 @@
                     <artifactSet>
                         <excludes>
                             <exclude>org.apache.logging:*</exclude>
+                            <exclude>log4j:*</exclude>
+                            <exclude>org.ops4j.pax.logging:*</exclude>
                         </excludes>
                     </artifactSet>
                 </configuration>
@@ -164,7 +166,7 @@
                                 org.apache.logging.log4j
                             </includeGroupIds>
                             <includeArtifactIds>
-                                log4j-api, log4j-core
+                                log4j-api, log4j-core, log4j-jcl
                             </includeArtifactIds>
                         </configuration>
                     </execution>
@@ -338,6 +340,10 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.common.jms</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jcl</artifactId>
         </dependency>
     </dependencies>
 </project>

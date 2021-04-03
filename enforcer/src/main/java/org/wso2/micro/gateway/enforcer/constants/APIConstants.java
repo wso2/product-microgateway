@@ -71,6 +71,7 @@ public class APIConstants {
     public static final String EVENT_TYPE = "eventType";
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_PAYLOAD = "event";
+    public static final String EVENT_PAYLOAD_DATA = "payloadData";
 
     public static final String NOT_FOUND_MESSAGE = "Not Found";
     public static final String NOT_FOUND_DESCRIPTION = "The requested resource is not available.";

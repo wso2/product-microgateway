@@ -42,6 +42,7 @@
             <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.JwtTestCase"/>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.ScopeTest"/>
             <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.InternalKeyTestCase"/>
+            <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.CustomAuthHeaderTestCase"/>
         </classes>
     </test>
     <test name="micro-gw-with-backend-tls" preserve-order="true" parallel="false">

@@ -60,6 +60,7 @@ type IPCondition struct {
 	EndingIP     string
 	Invert       bool
 	TenantDomain string
+	State        string
 }
 
 // DeploymentDescriptor represents deployment descriptor file contains in Artifact
