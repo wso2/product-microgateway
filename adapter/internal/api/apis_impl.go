@@ -49,7 +49,6 @@ const (
 	crtExtension               string = ".crt"
 	pemExtension               string = ".pem"
 	defaultEnv                 string = "Production and Sandbox" //Todo: (SuKSW) update to `default` once APIM side changes.
-	defaultVHostDomain         string = "*"
 	apiTypeFilterKey           string = "type"
 	apiTypeYamlKey             string = "type"
 	lifeCycleStatus            string = "lifeCycleStatus"
