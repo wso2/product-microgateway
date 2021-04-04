@@ -33,7 +33,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.jms.JMSException;
-import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
@@ -59,7 +58,7 @@ public class ThrottleEventListener implements MessageListener {
         if (message == null) {
             log.warn("Dropping the empty/null event received through jms receiver");
             return;
-        } else if (!(message instanceof MapMessage)) {
+        } else if (!(message instanceof TextMessage)) {
             log.warn("Event dropped due to unsupported message type " + message.getClass());
             return;
         }
@@ -88,9 +87,9 @@ public class ThrottleEventListener implements MessageListener {
     }
 
     private void handleThrottleUpdateMessage(JsonNode msg) {
-        String throttleKey = msg.get(ThrottleConstants.THROTTLE_KEY).toString();
-        String throttleState = msg.get(ThrottleConstants.IS_THROTTLED).toString();
-        long timeStamp = Long.parseLong(msg.get(ThrottleConstants.EXPIRY_TIMESTAMP).toString());
+        String throttleKey = msg.get(ThrottleConstants.THROTTLE_KEY).asText();
+        String throttleState = msg.get(ThrottleConstants.IS_THROTTLED).asText();
+        long timeStamp = Long.parseLong(msg.get(ThrottleConstants.EXPIRY_TIMESTAMP).asText());
         Object evaluatedConditionObject = msg.get(ThrottleConstants.EVALUATED_CONDITIONS);
         ThrottleDataHolder dataHolder = ThrottleDataHolder.getInstance();
 

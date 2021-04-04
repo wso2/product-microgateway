@@ -230,7 +230,7 @@ public class MockBackEndServer extends Thread {
             });
             httpServer.createContext(context + "/removeauthheader", exchange -> {
                 byte[] response;
-                if (!exchange.getRequestHeaders().containsKey("Authorization")) {
+                if (!exchange.getRequestHeaders().containsKey("authHeader")) {
                     response = ResponseConstants.VALID_REMOVE_HEADER_RESPONSE.getBytes();
                 } else {
                     response = ResponseConstants.INVALID_REMOVE_HEADER_RESPONSE.getBytes();
