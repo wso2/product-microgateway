@@ -48,7 +48,6 @@ const (
 	endpointCertDir            string = "Endpoint-certificates"
 	crtExtension               string = ".crt"
 	pemExtension               string = ".pem"
-	defaultEnv                 string = "Production and Sandbox" //Todo: (SuKSW) update to `default` once APIM side changes.
 	apiTypeFilterKey           string = "type"
 	apiTypeYamlKey             string = "type"
 	lifeCycleStatus            string = "lifeCycleStatus"
@@ -288,7 +287,7 @@ func ApplyAPIProjectInStandaloneMode(payload *[]byte, override *bool) error {
 
 func updateAPI(vhost, name, version string, apiProject ProjectAPI, environments []string) {
 	if len(environments) == 0 {
-		environments = append(environments, defaultEnv)
+		environments = append(environments, config.DefaultGatewayName)
 	}
 	var apiContent config.APIContent
 	apiContent.VHost = vhost

@@ -237,6 +237,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		apiFileData, err := ioutil.ReadAll(f)
 		_ = f.Close() // Close the file here (without defer)
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
+		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
 		err = apiServer.ApplyAPIProjectFromAPIM(&apiFileData, vhostToEnvsMap)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
@@ -274,7 +275,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 		}
 	} else {
 		// If the labels are not configured, publish the APIS to the default environment
-		finalEnvs = append(finalEnvs, "default")
+		finalEnvs = []string{config.DefaultGatewayName}
 	}
 
 	if len(finalEnvs) == 0 {
@@ -287,6 +288,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 	logger.LoggerSync.Infof("API %s is added/updated to APIList for label %v", updatedAPIID, updatedEnvs)
 	// updatedEnvs contains at least a single env. Hence pulling API with a single environment is enough
 	// since API data is same for each of the updatedEnvs.
+	// TODO: (renuka) fetch APIs from all environments (finalEnvs variable) joined with "|"
 	go FetchAPIs(&updatedAPIID, &updatedEnvs[0], c)
 	for {
 		data := <-c

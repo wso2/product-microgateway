@@ -210,7 +210,7 @@ func UpdateAPI(apiContent config.APIContent) {
 	var newLabels []string
 	var mgwSwagger mgw.MgwSwagger
 	if len(apiContent.Environments) == 0 {
-		apiContent.Environments = append(apiContent.Environments, "default")
+		apiContent.Environments = []string{config.DefaultGatewayName}
 	}
 
 	//TODO: (VirajSalaka) Optimize locking

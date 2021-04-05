@@ -262,6 +262,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 		// If the envrionment labels are present, call the controle plane
 		// with label concurrently (ControlPlane API is not supported for mutiple labels yet)
 		logger.LoggerMgw.Debugf("Environments label present: %v", envs)
+		// TODO: (renuka) fetch APIs once without foreach (use "|" to join envs and send request once)
 		for _, env := range envs {
 			go synchronizer.FetchAPIs(nil, &env, c)
 		}
