@@ -52,7 +52,7 @@ spec:
               name: logconfig-toml-vol
             - mountPath: /home/wso2/lib/dropins
               name: dropins-vol
-          image: wso2/mg-enforcer:4.0.0-m10
+          image: wso2/mg-enforcer:4.0.0-m10-SNAPSHOT
           imagePullPolicy: Always
           env:
             - name: ENFORCER_PRIVATE_KEY_PATH
@@ -112,7 +112,7 @@ spec:
               name: router-keystore-vol
             - mountPath: /home/wso2/security/truststore
               name: router-truststore-vol
-          image: wso2/mg-router:4.0.0-m10
+          image: wso2/mg-router:4.0.0-m10-SNAPSHOT
           imagePullPolicy: Always
           env:
             - name: ROUTER_ADMIN_HOST
