@@ -23,12 +23,13 @@ import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsServiceReferenceHolder;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
-import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.EventCategory;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
+import org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration;
+import org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
@@ -57,10 +58,10 @@ public class AnalyticsFilter {
         Map<String, String> configuration = new HashMap<>(2);
         configuration.put(AUTH_TOKEN_KEY, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthToken());
         configuration.put(AUTH_URL, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthURL());
-//        AnalyticsCommonConfiguration commonConfiguration = new AnalyticsCommonConfiguration(configuration);
+        AnalyticsCommonConfiguration commonConfiguration = new AnalyticsCommonConfiguration(configuration);
 //        commonConfiguration.setResponseSchema("CHOREO_RESPONSE");
 //        commonConfiguration.setFaultSchema("CHOREO_ERROR");
-        AnalyticsServiceReferenceHolder.getInstance().setConfigurations(configuration);
+        AnalyticsServiceReferenceHolder.getInstance().setConfigurations(commonConfiguration);
         // TODO: (VirajSalaka) Load Class
     }
 
