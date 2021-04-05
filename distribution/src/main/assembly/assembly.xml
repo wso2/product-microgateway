@@ -24,26 +24,26 @@
     <fileSets>
         <fileSet>
             <directory>../resources/adapter</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/adapter</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../resources/conf</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/conf</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../resources/enforcer</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/enforcer</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../resources/router</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/router</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../resources/k8s-artifacts</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/k8s-artifacts</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/k8s-artifacts</outputDirectory>
         </fileSet>
         <fileSet>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/dropins</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/enforcer/dropins</outputDirectory>
             <excludes>
                 <exclude>**/*</exclude>
             </excludes>
@@ -52,51 +52,51 @@
     <files>
         <file>
             <source>../resources/docker-compose.yaml</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}</outputDirectory>
         </file>
         <file>
             <source>../resources/apim/docker-compose.yaml</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/docker-with-apim</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-with-apim</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.key</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/adapter/security/keystore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/adapter/security/keystore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security/truststore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/adapter/security/truststore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.key</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/enforcer/security/keystore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/enforcer/security/keystore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/security/truststore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/enforcer/security/truststore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.key</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/router/security/keystore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/router/security/keystore</outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security/truststore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/router/security/truststore</outputDirectory>
         </file>
         <file>
             <source>../resources/apim/conf/deployment.toml</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/apim/</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/resources/apim/</outputDirectory>
         </file>
     </files>
 </assembly>

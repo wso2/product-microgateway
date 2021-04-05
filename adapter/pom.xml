@@ -17,8 +17,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     
     <parent>
-        <groupId>org.wso2.am.microgw</groupId>
-        <artifactId>micro-gateway-parent</artifactId>
+        <groupId>org.wso2.am.choreo.connect</groupId>
+        <artifactId>choreo-connect-parent</artifactId>
         <version>4.0.0-m10-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -26,7 +26,7 @@
     <artifactId>adapter</artifactId>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
-    <name>Micro Gateway - Adapter</name>
+    <name>Choreo Connect - Adapter</name>
 
     <profiles>
         <profile>
@@ -77,8 +77,8 @@
                 <configuration>
                   <images>
                     <image>
-                        <alias>mg-adapter</alias>
-                        <name>wso2/mg-adapter:${project.version}</name>
+                        <alias>choreo-connect-adapter</alias>
+                        <name>wso2/choreo-connect-adapter:${project.version}</name>
                       <build>
                         <contextDir>${project.basedir}/src/main/resources</contextDir>
                         <assembly>

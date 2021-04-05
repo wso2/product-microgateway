@@ -5,7 +5,7 @@ package wso2.discovery.subscription;
 import "wso2/discovery/subscription/url_mapping.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/subscription;subscription";
-option java_package = "org.wso2.gateway.discovery.subscription";
+option java_package = "org.wso2.choreo.connect.discovery.subscription";
 option java_outer_classname = "APIsProto";
 option java_multiple_files = true;
 

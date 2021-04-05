@@ -5,7 +5,7 @@ package wso2.discovery.api;
 import "wso2/discovery/api/security_info.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
-option java_package = "org.wso2.gateway.discovery.api";
+option java_package = "org.wso2.choreo.connect.discovery.api";
 option java_outer_classname = "EndpointSecurityProto";
 option java_multiple_files = true;
 

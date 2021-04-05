@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.wso2.am.microgw</groupId>
-        <artifactId>micro-gateway-parent</artifactId>
+        <groupId>org.wso2.am.choreo.connect</groupId>
+        <artifactId>choreo-connect-parent</artifactId>
         <version>4.0.0-m10-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.wso2.micro.gateway.enforcer</artifactId>
-    <name>Micro Gateway - Enforcer</name>
+    <artifactId>org.wso2.choreo.connect.enforcer</artifactId>
+    <name>Choreo Connect - Enforcer</name>
 
     <url>https://wso2.org</url>
     <organization>
@@ -120,7 +120,7 @@
                     <minimizeJar>false</minimizeJar>
                     <transformers>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                          <mainClass>org.wso2.micro.gateway.enforcer.server.AuthServer</mainClass>
+                          <mainClass>org.wso2.choreo.connect.enforcer.server.AuthServer</mainClass>
                         </transformer>
                     </transformers>
                     <filters>
@@ -178,8 +178,8 @@
                 <configuration>
                     <images>
                         <image>
-                            <alias>mg-enforcer</alias>
-                            <name>wso2/mg-enforcer:${project.version}</name>
+                            <alias>choreo-connect-enforcer</alias>
+                            <name>wso2/choreo-connect-enforcer:${project.version}</name>
                             <build>
                                 <contextDir>${project.basedir}/src/main/resources</contextDir>
                                 <args>

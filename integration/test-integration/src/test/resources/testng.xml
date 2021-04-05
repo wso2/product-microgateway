@@ -25,51 +25,51 @@
     <listeners>
         <!--Disabled since there are no any pre configured apis -->
         <!--<listener class-name="org.wso2.micro.gateway.tests.listener.TestExecutionListener"/>-->
-        <listener class-name="org.wso2am.micro.gw.tests.listener.TestNGListener"/>
+        <listener class-name="org.wso2.choreo.connect.tests.listener.TestNGListener"/>
     </listeners>
 
     <test name="before-suite-preparations" parallel="false">
         <classes>
-            <class name="org.wso2am.micro.gw.tests.testCaseBefore.BeforeTestSuite"/>
+            <class name="org.wso2.choreo.connect.tests.testCaseBefore.BeforeTestSuite"/>
         </classes>
     </test>
     <test name="micro-gw-with-default-config" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithDefaultConf"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployViaRestTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.apiDeploy.APiDeployViaApictlTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.endpoints.ProductionSandboxTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.JwtTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.ScopeTest"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.InternalKeyTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.jwtValidator.CustomAuthHeaderTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithDefaultConf"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.apiDeploy.APiDeployViaRestTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.apiDeploy.APiDeployViaApictlTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.endpoints.ProductionSandboxTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.jwtValidator.JwtTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.jwtValidator.ScopeTest"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.jwtValidator.InternalKeyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.jwtValidator.CustomAuthHeaderTestCase"/>
         </classes>
     </test>
     <test name="micro-gw-with-backend-tls" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithBackendTls"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.backendtls.BackendTLSTestcase"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.security.CorsTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithBackendTls"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.backendtls.BackendTLSTestcase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.security.CorsTestCase"/>
         </classes>
     </test>
     <test name="micro-gw-with-jwt-config" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithJwtConfig"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.security.CorsTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.JwtGeneratorTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.JwtTransformerTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithJwtConfig"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.security.CorsTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.jwtGenerator.JwtGeneratorTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.jwtGenerator.JwtTransformerTestCase"/>
         </classes>
     </test>
     <test name="micro-gw-with-jwt-config-and-transformer" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2am.micro.gw.tests.testCaseBefore.MgwWithJwtConfigAndTransformer"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.jwtGenerator.CustomJwtTransformerTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithJwtConfigAndTransformer"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.jwtGenerator.CustomJwtTransformerTestCase"/>
         </classes>
     </test>
     <test name="mgw-micro-with-apim" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2am.micro.gw.tests.testCaseBefore.APIManagerInitializeTestCase"/>
-            <class name="org.wso2am.micro.gw.tests.testCases.subscription.SubscriptionValidationTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCaseBefore.APIManagerInitializeTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.subscription.SubscriptionValidationTestCase"/>
         </classes>
     </test>
 </suite>
