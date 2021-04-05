@@ -265,6 +265,7 @@ data:
     notification_endpoint = "https://localhost:${mgt.transport.https.port}/internal/data/v1/notify"
     username = "${admin.username}"
     password = "${admin.password}"
+    'header.X-WSO2-KEY-MANAGER' = "default"
 
     [transport.https.properties]
     proxyPort = 32001
