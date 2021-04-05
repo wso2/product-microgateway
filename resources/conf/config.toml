@@ -231,8 +231,9 @@ allowCredentials = false
     gRPCRequestTimeout = "20s"
 
   [analytics.enforcer]
-    authURL = "$env{analytics_authURL}"
-    authToken = "$env{analytics_authToken}"
+    [analytics.enforcer.configProperties]
+      authURL = "$env{analytics_authURL}"
+      authToken = "$env{analytics_authToken}"
 
     [analytics.enforcer.LogReceiver]
       port = 18090

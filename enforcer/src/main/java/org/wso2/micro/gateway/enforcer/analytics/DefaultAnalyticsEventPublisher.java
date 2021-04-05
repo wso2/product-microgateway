@@ -20,9 +20,11 @@ package org.wso2.micro.gateway.enforcer.analytics;
 
 import io.envoyproxy.envoy.data.accesslog.v3.HTTPAccessLogEntry;
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration;
+import org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
@@ -30,10 +32,15 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategor
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.micro.gateway.enforcer.constants.AnalyticsConstants;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Default Analytics Event publisher to the analytics cloud.
  */
 public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
+    private static final String AUTH_TOKEN_KEY = "auth.api.token";
+    private static final String AUTH_URL = "auth.api.url";
 
     private static final Logger logger = LogManager.getLogger(DefaultAnalyticsEventPublisher.class);
 
@@ -62,6 +69,30 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                 logger.error("Error while publishing the event to the analytics portal.", e);
             }
         }
+    }
+
+    @Override
+    public void init(Map<String, String> configuration) {
+        if (StringUtils.isEmpty(configuration.get(AnalyticsConstants.AUTH_URL_CONFIG_KEY))
+                || StringUtils.isEmpty(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY)) {
+            logger.error(AnalyticsConstants.AUTH_URL_CONFIG_KEY + " and / or " +
+                    AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY +
+                    "properties are not provided under analytics configurations.");
+            return;
+        }
+        Map<String, String> publisherConfig = new HashMap<>(2);
+        for (Map.Entry<String, String> entry : configuration.entrySet()) {
+            if (AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY.equals(entry.getKey())) {
+                publisherConfig.put(AUTH_TOKEN_KEY, configuration.get(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY));
+                continue;
+            } else if (AnalyticsConstants.AUTH_URL_CONFIG_KEY.equals(entry.getKey())) {
+                publisherConfig.put(AUTH_URL, configuration.get(AnalyticsConstants.AUTH_URL_CONFIG_KEY));
+                continue;
+            }
+            publisherConfig.put(entry.getKey(), entry.getValue());
+        }
+        AnalyticsCommonConfiguration commonConfiguration = new AnalyticsCommonConfiguration(publisherConfig);
+        AnalyticsServiceReferenceHolder.getInstance().setConfigurations(commonConfiguration);
     }
 
     private boolean doNotPublishEvent(HTTPAccessLogEntry logEntry) {

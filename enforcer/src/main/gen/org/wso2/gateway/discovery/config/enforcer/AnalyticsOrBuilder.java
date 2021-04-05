@@ -15,50 +15,64 @@ public interface AnalyticsOrBuilder extends
 
   /**
    * <pre>
-   * Authentication endpoint URL
+   * Analytics Publisher Configurations
    * </pre>
    *
-   * <code>string authUrl = 2;</code>
-   * @return The authUrl.
+   * <code>map&lt;string, string&gt; configProperties = 2;</code>
    */
-  java.lang.String getAuthUrl();
+  int getConfigPropertiesCount();
   /**
    * <pre>
-   * Authentication endpoint URL
+   * Analytics Publisher Configurations
    * </pre>
    *
-   * <code>string authUrl = 2;</code>
-   * @return The bytes for authUrl.
+   * <code>map&lt;string, string&gt; configProperties = 2;</code>
    */
-  com.google.protobuf.ByteString
-      getAuthUrlBytes();
+  boolean containsConfigProperties(
+      java.lang.String key);
+  /**
+   * Use {@link #getConfigPropertiesMap()} instead.
+   */
+  @java.lang.Deprecated
+  java.util.Map<java.lang.String, java.lang.String>
+  getConfigProperties();
+  /**
+   * <pre>
+   * Analytics Publisher Configurations
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 2;</code>
+   */
+  java.util.Map<java.lang.String, java.lang.String>
+  getConfigPropertiesMap();
+  /**
+   * <pre>
+   * Analytics Publisher Configurations
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 2;</code>
+   */
 
+  java.lang.String getConfigPropertiesOrDefault(
+      java.lang.String key,
+      java.lang.String defaultValue);
   /**
    * <pre>
-   * Token required for Authentication Endpoint
+   * Analytics Publisher Configurations
    * </pre>
    *
-   * <code>string authToken = 3;</code>
-   * @return The authToken.
+   * <code>map&lt;string, string&gt; configProperties = 2;</code>
    */
-  java.lang.String getAuthToken();
-  /**
-   * <pre>
-   * Token required for Authentication Endpoint
-   * </pre>
-   *
-   * <code>string authToken = 3;</code>
-   * @return The bytes for authToken.
-   */
-  com.google.protobuf.ByteString
-      getAuthTokenBytes();
+
+  java.lang.String getConfigPropertiesOrThrow(
+      java.lang.String key);
 
   /**
    * <pre>
    * Receiver grpc Service Configuration
    * </pre>
    *
-   * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+   * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
    * @return Whether the service field is set.
    */
   boolean hasService();
@@ -67,7 +81,7 @@ public interface AnalyticsOrBuilder extends
    * Receiver grpc Service Configuration
    * </pre>
    *
-   * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+   * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
    * @return The service.
    */
   org.wso2.gateway.discovery.config.enforcer.Service getService();
@@ -76,7 +90,7 @@ public interface AnalyticsOrBuilder extends
    * Receiver grpc Service Configuration
    * </pre>
    *
-   * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+   * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
    */
   org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder getServiceOrBuilder();
 }

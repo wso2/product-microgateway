@@ -16,8 +16,6 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private Analytics() {
-    authUrl_ = "";
-    authToken_ = "";
   }
 
   @java.lang.Override
@@ -40,6 +38,7 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
+    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -56,18 +55,19 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 18: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            authUrl_ = s;
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              configProperties_ = com.google.protobuf.MapField.newMapField(
+                  ConfigPropertiesDefaultEntryHolder.defaultEntry);
+              mutable_bitField0_ |= 0x00000001;
+            }
+            com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+            configProperties__ = input.readMessage(
+                ConfigPropertiesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+            configProperties_.getMutableMap().put(
+                configProperties__.getKey(), configProperties__.getValue());
             break;
           }
           case 26: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            authToken_ = s;
-            break;
-          }
-          case 34: {
             org.wso2.gateway.discovery.config.enforcer.Service.Builder subBuilder = null;
             if (service_ != null) {
               subBuilder = service_.toBuilder();
@@ -104,6 +104,18 @@ private static final long serialVersionUID = 0L;
     return org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.internal_static_wso2_discovery_config_enforcer_Analytics_descriptor;
   }
 
+  @SuppressWarnings({"rawtypes"})
+  @java.lang.Override
+  protected com.google.protobuf.MapField internalGetMapField(
+      int number) {
+    switch (number) {
+      case 2:
+        return internalGetConfigProperties();
+      default:
+        throw new RuntimeException(
+            "Invalid map field number: " + number);
+    }
+  }
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
@@ -123,106 +135,111 @@ private static final long serialVersionUID = 0L;
     return enabled_;
   }
 
-  public static final int AUTHURL_FIELD_NUMBER = 2;
-  private volatile java.lang.Object authUrl_;
-  /**
-   * <pre>
-   * Authentication endpoint URL
-   * </pre>
-   *
-   * <code>string authUrl = 2;</code>
-   * @return The authUrl.
-   */
-  @java.lang.Override
-  public java.lang.String getAuthUrl() {
-    java.lang.Object ref = authUrl_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      authUrl_ = s;
-      return s;
-    }
+  public static final int CONFIGPROPERTIES_FIELD_NUMBER = 2;
+  private static final class ConfigPropertiesDefaultEntryHolder {
+    static final com.google.protobuf.MapEntry<
+        java.lang.String, java.lang.String> defaultEntry =
+            com.google.protobuf.MapEntry
+            .<java.lang.String, java.lang.String>newDefaultInstance(
+                org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.internal_static_wso2_discovery_config_enforcer_Analytics_ConfigPropertiesEntry_descriptor, 
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "",
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "");
   }
-  /**
-   * <pre>
-   * Authentication endpoint URL
-   * </pre>
-   *
-   * <code>string authUrl = 2;</code>
-   * @return The bytes for authUrl.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getAuthUrlBytes() {
-    java.lang.Object ref = authUrl_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      authUrl_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
+  private com.google.protobuf.MapField<
+      java.lang.String, java.lang.String> configProperties_;
+  private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+  internalGetConfigProperties() {
+    if (configProperties_ == null) {
+      return com.google.protobuf.MapField.emptyMapField(
+          ConfigPropertiesDefaultEntryHolder.defaultEntry);
     }
+    return configProperties_;
   }
 
-  public static final int AUTHTOKEN_FIELD_NUMBER = 3;
-  private volatile java.lang.Object authToken_;
-  /**
-   * <pre>
-   * Token required for Authentication Endpoint
-   * </pre>
-   *
-   * <code>string authToken = 3;</code>
-   * @return The authToken.
-   */
-  @java.lang.Override
-  public java.lang.String getAuthToken() {
-    java.lang.Object ref = authToken_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      authToken_ = s;
-      return s;
-    }
+  public int getConfigPropertiesCount() {
+    return internalGetConfigProperties().getMap().size();
   }
   /**
    * <pre>
-   * Token required for Authentication Endpoint
+   * Analytics Publisher Configurations
    * </pre>
    *
-   * <code>string authToken = 3;</code>
-   * @return The bytes for authToken.
+   * <code>map&lt;string, string&gt; configProperties = 2;</code>
+   */
+
+  @java.lang.Override
+  public boolean containsConfigProperties(
+      java.lang.String key) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    return internalGetConfigProperties().getMap().containsKey(key);
+  }
+  /**
+   * Use {@link #getConfigPropertiesMap()} instead.
    */
   @java.lang.Override
-  public com.google.protobuf.ByteString
-      getAuthTokenBytes() {
-    java.lang.Object ref = authToken_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      authToken_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
+  @java.lang.Deprecated
+  public java.util.Map<java.lang.String, java.lang.String> getConfigProperties() {
+    return getConfigPropertiesMap();
+  }
+  /**
+   * <pre>
+   * Analytics Publisher Configurations
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 2;</code>
+   */
+  @java.lang.Override
+
+  public java.util.Map<java.lang.String, java.lang.String> getConfigPropertiesMap() {
+    return internalGetConfigProperties().getMap();
+  }
+  /**
+   * <pre>
+   * Analytics Publisher Configurations
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 2;</code>
+   */
+  @java.lang.Override
+
+  public java.lang.String getConfigPropertiesOrDefault(
+      java.lang.String key,
+      java.lang.String defaultValue) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetConfigProperties().getMap();
+    return map.containsKey(key) ? map.get(key) : defaultValue;
+  }
+  /**
+   * <pre>
+   * Analytics Publisher Configurations
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 2;</code>
+   */
+  @java.lang.Override
+
+  public java.lang.String getConfigPropertiesOrThrow(
+      java.lang.String key) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetConfigProperties().getMap();
+    if (!map.containsKey(key)) {
+      throw new java.lang.IllegalArgumentException();
     }
+    return map.get(key);
   }
 
-  public static final int SERVICE_FIELD_NUMBER = 4;
+  public static final int SERVICE_FIELD_NUMBER = 3;
   private org.wso2.gateway.discovery.config.enforcer.Service service_;
   /**
    * <pre>
    * Receiver grpc Service Configuration
    * </pre>
    *
-   * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+   * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
    * @return Whether the service field is set.
    */
   @java.lang.Override
@@ -234,7 +251,7 @@ private static final long serialVersionUID = 0L;
    * Receiver grpc Service Configuration
    * </pre>
    *
-   * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+   * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
    * @return The service.
    */
   @java.lang.Override
@@ -246,7 +263,7 @@ private static final long serialVersionUID = 0L;
    * Receiver grpc Service Configuration
    * </pre>
    *
-   * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+   * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
    */
   @java.lang.Override
   public org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder getServiceOrBuilder() {
@@ -270,14 +287,14 @@ private static final long serialVersionUID = 0L;
     if (enabled_ != false) {
       output.writeBool(1, enabled_);
     }
-    if (!getAuthUrlBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, authUrl_);
-    }
-    if (!getAuthTokenBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, authToken_);
-    }
+    com.google.protobuf.GeneratedMessageV3
+      .serializeStringMapTo(
+        output,
+        internalGetConfigProperties(),
+        ConfigPropertiesDefaultEntryHolder.defaultEntry,
+        2);
     if (service_ != null) {
-      output.writeMessage(4, getService());
+      output.writeMessage(3, getService());
     }
     unknownFields.writeTo(output);
   }
@@ -292,15 +309,19 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(1, enabled_);
     }
-    if (!getAuthUrlBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, authUrl_);
-    }
-    if (!getAuthTokenBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, authToken_);
+    for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+         : internalGetConfigProperties().getMap().entrySet()) {
+      com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+      configProperties__ = ConfigPropertiesDefaultEntryHolder.defaultEntry.newBuilderForType()
+          .setKey(entry.getKey())
+          .setValue(entry.getValue())
+          .build();
+      size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, configProperties__);
     }
     if (service_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(4, getService());
+        .computeMessageSize(3, getService());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -319,10 +340,8 @@ private static final long serialVersionUID = 0L;
 
     if (getEnabled()
         != other.getEnabled()) return false;
-    if (!getAuthUrl()
-        .equals(other.getAuthUrl())) return false;
-    if (!getAuthToken()
-        .equals(other.getAuthToken())) return false;
+    if (!internalGetConfigProperties().equals(
+        other.internalGetConfigProperties())) return false;
     if (hasService() != other.hasService()) return false;
     if (hasService()) {
       if (!getService()
@@ -342,10 +361,10 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + ENABLED_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getEnabled());
-    hash = (37 * hash) + AUTHURL_FIELD_NUMBER;
-    hash = (53 * hash) + getAuthUrl().hashCode();
-    hash = (37 * hash) + AUTHTOKEN_FIELD_NUMBER;
-    hash = (53 * hash) + getAuthToken().hashCode();
+    if (!internalGetConfigProperties().getMap().isEmpty()) {
+      hash = (37 * hash) + CONFIGPROPERTIES_FIELD_NUMBER;
+      hash = (53 * hash) + internalGetConfigProperties().hashCode();
+    }
     if (hasService()) {
       hash = (37 * hash) + SERVICE_FIELD_NUMBER;
       hash = (53 * hash) + getService().hashCode();
@@ -457,6 +476,28 @@ private static final long serialVersionUID = 0L;
       return org.wso2.gateway.discovery.config.enforcer.AnalyticsProto.internal_static_wso2_discovery_config_enforcer_Analytics_descriptor;
     }
 
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 2:
+          return internalGetConfigProperties();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMutableMapField(
+        int number) {
+      switch (number) {
+        case 2:
+          return internalGetMutableConfigProperties();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -485,10 +526,7 @@ private static final long serialVersionUID = 0L;
       super.clear();
       enabled_ = false;
 
-      authUrl_ = "";
-
-      authToken_ = "";
-
+      internalGetMutableConfigProperties().clear();
       if (serviceBuilder_ == null) {
         service_ = null;
       } else {
@@ -521,9 +559,10 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.gateway.discovery.config.enforcer.Analytics buildPartial() {
       org.wso2.gateway.discovery.config.enforcer.Analytics result = new org.wso2.gateway.discovery.config.enforcer.Analytics(this);
+      int from_bitField0_ = bitField0_;
       result.enabled_ = enabled_;
-      result.authUrl_ = authUrl_;
-      result.authToken_ = authToken_;
+      result.configProperties_ = internalGetConfigProperties();
+      result.configProperties_.makeImmutable();
       if (serviceBuilder_ == null) {
         result.service_ = service_;
       } else {
@@ -580,14 +619,8 @@ private static final long serialVersionUID = 0L;
       if (other.getEnabled() != false) {
         setEnabled(other.getEnabled());
       }
-      if (!other.getAuthUrl().isEmpty()) {
-        authUrl_ = other.authUrl_;
-        onChanged();
-      }
-      if (!other.getAuthToken().isEmpty()) {
-        authToken_ = other.authToken_;
-        onChanged();
-      }
+      internalGetMutableConfigProperties().mergeFrom(
+          other.internalGetConfigProperties());
       if (other.hasService()) {
         mergeService(other.getService());
       }
@@ -619,6 +652,7 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
+    private int bitField0_;
 
     private boolean enabled_ ;
     /**
@@ -651,195 +685,159 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object authUrl_ = "";
-    /**
-     * <pre>
-     * Authentication endpoint URL
-     * </pre>
-     *
-     * <code>string authUrl = 2;</code>
-     * @return The authUrl.
-     */
-    public java.lang.String getAuthUrl() {
-      java.lang.Object ref = authUrl_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        authUrl_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> configProperties_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetConfigProperties() {
+      if (configProperties_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ConfigPropertiesDefaultEntryHolder.defaultEntry);
       }
+      return configProperties_;
     }
-    /**
-     * <pre>
-     * Authentication endpoint URL
-     * </pre>
-     *
-     * <code>string authUrl = 2;</code>
-     * @return The bytes for authUrl.
-     */
-    public com.google.protobuf.ByteString
-        getAuthUrlBytes() {
-      java.lang.Object ref = authUrl_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        authUrl_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetMutableConfigProperties() {
+      onChanged();;
+      if (configProperties_ == null) {
+        configProperties_ = com.google.protobuf.MapField.newMapField(
+            ConfigPropertiesDefaultEntryHolder.defaultEntry);
       }
-    }
-    /**
-     * <pre>
-     * Authentication endpoint URL
-     * </pre>
-     *
-     * <code>string authUrl = 2;</code>
-     * @param value The authUrl to set.
-     * @return This builder for chaining.
-     */
-    public Builder setAuthUrl(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      authUrl_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * Authentication endpoint URL
-     * </pre>
-     *
-     * <code>string authUrl = 2;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearAuthUrl() {
-      
-      authUrl_ = getDefaultInstance().getAuthUrl();
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * Authentication endpoint URL
-     * </pre>
-     *
-     * <code>string authUrl = 2;</code>
-     * @param value The bytes for authUrl to set.
-     * @return This builder for chaining.
-     */
-    public Builder setAuthUrlBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      authUrl_ = value;
-      onChanged();
-      return this;
+      if (!configProperties_.isMutable()) {
+        configProperties_ = configProperties_.copy();
+      }
+      return configProperties_;
     }
 
-    private java.lang.Object authToken_ = "";
-    /**
-     * <pre>
-     * Token required for Authentication Endpoint
-     * </pre>
-     *
-     * <code>string authToken = 3;</code>
-     * @return The authToken.
-     */
-    public java.lang.String getAuthToken() {
-      java.lang.Object ref = authToken_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        authToken_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
+    public int getConfigPropertiesCount() {
+      return internalGetConfigProperties().getMap().size();
     }
     /**
      * <pre>
-     * Token required for Authentication Endpoint
+     * Analytics Publisher Configurations
      * </pre>
      *
-     * <code>string authToken = 3;</code>
-     * @return The bytes for authToken.
+     * <code>map&lt;string, string&gt; configProperties = 2;</code>
      */
-    public com.google.protobuf.ByteString
-        getAuthTokenBytes() {
-      java.lang.Object ref = authToken_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        authToken_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+
+    @java.lang.Override
+    public boolean containsConfigProperties(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      return internalGetConfigProperties().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getConfigPropertiesMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getConfigProperties() {
+      return getConfigPropertiesMap();
     }
     /**
      * <pre>
-     * Token required for Authentication Endpoint
+     * Analytics Publisher Configurations
      * </pre>
      *
-     * <code>string authToken = 3;</code>
-     * @param value The authToken to set.
-     * @return This builder for chaining.
+     * <code>map&lt;string, string&gt; configProperties = 2;</code>
      */
-    public Builder setAuthToken(
+    @java.lang.Override
+
+    public java.util.Map<java.lang.String, java.lang.String> getConfigPropertiesMap() {
+      return internalGetConfigProperties().getMap();
+    }
+    /**
+     * <pre>
+     * Analytics Publisher Configurations
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 2;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getConfigPropertiesOrDefault(
+        java.lang.String key,
+        java.lang.String defaultValue) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetConfigProperties().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Analytics Publisher Configurations
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 2;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getConfigPropertiesOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetConfigProperties().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    public Builder clearConfigProperties() {
+      internalGetMutableConfigProperties().getMutableMap()
+          .clear();
+      return this;
+    }
+    /**
+     * <pre>
+     * Analytics Publisher Configurations
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 2;</code>
+     */
+
+    public Builder removeConfigProperties(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      internalGetMutableConfigProperties().getMutableMap()
+          .remove(key);
+      return this;
+    }
+    /**
+     * Use alternate mutation accessors instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String>
+    getMutableConfigProperties() {
+      return internalGetMutableConfigProperties().getMutableMap();
+    }
+    /**
+     * <pre>
+     * Analytics Publisher Configurations
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 2;</code>
+     */
+    public Builder putConfigProperties(
+        java.lang.String key,
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      authToken_ = value;
-      onChanged();
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (value == null) { throw new java.lang.NullPointerException(); }
+      internalGetMutableConfigProperties().getMutableMap()
+          .put(key, value);
       return this;
     }
     /**
      * <pre>
-     * Token required for Authentication Endpoint
+     * Analytics Publisher Configurations
      * </pre>
      *
-     * <code>string authToken = 3;</code>
-     * @return This builder for chaining.
+     * <code>map&lt;string, string&gt; configProperties = 2;</code>
      */
-    public Builder clearAuthToken() {
-      
-      authToken_ = getDefaultInstance().getAuthToken();
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * Token required for Authentication Endpoint
-     * </pre>
-     *
-     * <code>string authToken = 3;</code>
-     * @param value The bytes for authToken to set.
-     * @return This builder for chaining.
-     */
-    public Builder setAuthTokenBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      authToken_ = value;
-      onChanged();
+
+    public Builder putAllConfigProperties(
+        java.util.Map<java.lang.String, java.lang.String> values) {
+      internalGetMutableConfigProperties().getMutableMap()
+          .putAll(values);
       return this;
     }
 
@@ -851,7 +849,7 @@ private static final long serialVersionUID = 0L;
      * Receiver grpc Service Configuration
      * </pre>
      *
-     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
      * @return Whether the service field is set.
      */
     public boolean hasService() {
@@ -862,7 +860,7 @@ private static final long serialVersionUID = 0L;
      * Receiver grpc Service Configuration
      * </pre>
      *
-     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
      * @return The service.
      */
     public org.wso2.gateway.discovery.config.enforcer.Service getService() {
@@ -877,7 +875,7 @@ private static final long serialVersionUID = 0L;
      * Receiver grpc Service Configuration
      * </pre>
      *
-     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
      */
     public Builder setService(org.wso2.gateway.discovery.config.enforcer.Service value) {
       if (serviceBuilder_ == null) {
@@ -897,7 +895,7 @@ private static final long serialVersionUID = 0L;
      * Receiver grpc Service Configuration
      * </pre>
      *
-     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
      */
     public Builder setService(
         org.wso2.gateway.discovery.config.enforcer.Service.Builder builderForValue) {
@@ -915,7 +913,7 @@ private static final long serialVersionUID = 0L;
      * Receiver grpc Service Configuration
      * </pre>
      *
-     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
      */
     public Builder mergeService(org.wso2.gateway.discovery.config.enforcer.Service value) {
       if (serviceBuilder_ == null) {
@@ -937,7 +935,7 @@ private static final long serialVersionUID = 0L;
      * Receiver grpc Service Configuration
      * </pre>
      *
-     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
      */
     public Builder clearService() {
       if (serviceBuilder_ == null) {
@@ -955,7 +953,7 @@ private static final long serialVersionUID = 0L;
      * Receiver grpc Service Configuration
      * </pre>
      *
-     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.Service.Builder getServiceBuilder() {
       
@@ -967,7 +965,7 @@ private static final long serialVersionUID = 0L;
      * Receiver grpc Service Configuration
      * </pre>
      *
-     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
      */
     public org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder getServiceOrBuilder() {
       if (serviceBuilder_ != null) {
@@ -982,7 +980,7 @@ private static final long serialVersionUID = 0L;
      * Receiver grpc Service Configuration
      * </pre>
      *
-     * <code>.wso2.discovery.config.enforcer.Service service = 4;</code>
+     * <code>.wso2.discovery.config.enforcer.Service service = 3;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.gateway.discovery.config.enforcer.Service, org.wso2.gateway.discovery.config.enforcer.Service.Builder, org.wso2.gateway.discovery.config.enforcer.ServiceOrBuilder> 

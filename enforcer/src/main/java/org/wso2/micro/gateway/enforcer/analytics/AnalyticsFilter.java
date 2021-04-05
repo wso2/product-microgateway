@@ -22,8 +22,6 @@ import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration;
-import org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
@@ -35,8 +33,6 @@ import org.wso2.micro.gateway.enforcer.util.ClassLoadUtils;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This is the filter is for Analytics.
@@ -48,20 +44,14 @@ import java.util.Map;
 public class AnalyticsFilter {
     private static final Logger logger = LogManager.getLogger(AnalyticsFilter.class);
     private static AnalyticsFilter analyticsFilter;
-    private static final String AUTH_TOKEN_KEY = "auth.api.token";
-    private static final String AUTH_URL = "auth.api.url";
     private static AnalyticsEventPublisher publisher;
 
     private AnalyticsFilter() {
-        Map<String, String> configuration = new HashMap<>(2);
-        configuration.put(AUTH_TOKEN_KEY, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthToken());
-        configuration.put(AUTH_URL, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthURL());
-        AnalyticsCommonConfiguration commonConfiguration = new AnalyticsCommonConfiguration(configuration);
-//        commonConfiguration.setResponseSchema("CHOREO_RESPONSE");
-//        commonConfiguration.setFaultSchema("CHOREO_ERROR");
-        AnalyticsServiceReferenceHolder.getInstance().setConfigurations(commonConfiguration);
         // TODO: (VirajSalaka) Load Metric Reporter Class
         publisher = loadAnalyticsPublisher();
+        if (publisher != null) {
+            publisher.init(ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties());
+        }
     }
 
     public static AnalyticsFilter getInstance() {

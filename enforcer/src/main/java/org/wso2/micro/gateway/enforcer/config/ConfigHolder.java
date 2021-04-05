@@ -411,8 +411,7 @@ public class ConfigHolder {
 
         AnalyticsDTO analyticsDTO = new AnalyticsDTO();
         analyticsDTO.setEnabled(analyticsConfig.getEnabled());
-        analyticsDTO.setAuthURL(analyticsConfig.getAuthUrl());
-        analyticsDTO.setAuthToken(analyticsConfig.getAuthToken());
+        analyticsDTO.setConfigProperties(analyticsConfig.getConfigPropertiesMap());
         analyticsDTO.setServerConfig(serverConfig);
         config.setAnalyticsConfig(analyticsDTO);
 

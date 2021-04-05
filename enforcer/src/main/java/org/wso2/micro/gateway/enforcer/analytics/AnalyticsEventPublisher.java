@@ -20,6 +20,8 @@ package org.wso2.micro.gateway.enforcer.analytics;
 
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
 
+import java.util.Map;
+
 /**
  * AnalyticsEventPublisher interface should be used to write a custom analytics publisher.
  */
@@ -51,4 +53,11 @@ public interface AnalyticsEventPublisher {
      * @param message gRPC Stream access log message from router.
      */
     void handleGRPCLogMsg(StreamAccessLogsMessage message);
+
+    /**
+     * Initialize the analytics publisher with configurations map.
+     *
+     * @param configurationMap Analytics Configurations
+     */
+    void init(Map<String, String> configurationMap);
 }

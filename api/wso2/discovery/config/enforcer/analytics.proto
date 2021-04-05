@@ -27,10 +27,8 @@ option java_multiple_files = true;
 
 message Analytics {
   bool enabled = 1;
-  // Authentication endpoint URL
-  string authUrl = 2;
-  // Token required for Authentication Endpoint
-  string authToken = 3;
+  // Analytics Publisher Configurations
+  map<string, string> configProperties = 2;
   // Receiver grpc Service Configuration
-  Service service = 4;
+  Service service = 3;
 }

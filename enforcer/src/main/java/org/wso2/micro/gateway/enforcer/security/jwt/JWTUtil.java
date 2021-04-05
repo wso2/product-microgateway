@@ -193,41 +193,6 @@ public class JWTUtil {
             jwtGenerator = new APIMgtGatewayJWTGeneratorImpl();
             return jwtGenerator;
         } else {
-            // Load custom jwt generator class
-            // Get the names of jar files available in the location.
-//            List<String> jarFilesList = getJarFilesList();
-//
-//            for (int fileIndex = 0; fileIndex < jarFilesList.size(); fileIndex++) {
-//                try {
-//                    String pathToJar = JwtConstants.DROPINS_FOLDER + jarFilesList.get(fileIndex);
-//                    JarFile jarFile = new JarFile(pathToJar);
-//                    Enumeration<JarEntry> e = jarFile.entries();
-//
-//                    URL[] urls = {new URL("jar:file:" + pathToJar + "!/")};
-//                    URLClassLoader cl = URLClassLoader.newInstance(urls);
-//
-//                    while (e.hasMoreElements()) {
-//                        JarEntry je = e.nextElement();
-//                        if (je.isDirectory() || !je.getName().endsWith(JwtConstants.CLASS)) {
-//                            continue;
-//                        }
-//                        // -6 because of .class
-//                        String className = je.getName().substring(0, je.getName().length() - 6);
-//                        className = className.replace('/', '.');
-//                        if (classNameInConfig.equals(className)) {
-//                            Class classInJar = cl.loadClass(className);
-//                            try {
-//                                jwtGenerator = (AbstractAPIMgtGatewayJWTGenerator) classInJar.newInstance();
-//                                return jwtGenerator;
-//                            } catch (InstantiationException | IllegalAccessException exception) {
-//                                log.debug("Error in generating an object from the class", exception);
-//                            }
-//                        }
-//                    }
-//                } catch (IOException | ClassNotFoundException e) {
-//                    log.debug("Error in loading class", e);
-//                }
-//            }
             Class<AbstractAPIMgtGatewayJWTGenerator> clazz;
             try {
                 clazz = (Class<AbstractAPIMgtGatewayJWTGenerator>) Class.forName(classNameInConfig);
