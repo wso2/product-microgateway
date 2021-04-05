@@ -33,6 +33,8 @@ const (
 
 const (
 	defaultRdsConfigName            string = "default"
+	defaultHTTPListenerName         string = "HTTPListener"
+	defaultHTTPSListenerName        string = "HTTPSListener"
 	defaultAccessLogPath            string = "/tmp/envoy.access.log"
 	defaultListenerSecretConfigName string = "DefaultListenerSecret"
 )
@@ -64,4 +66,19 @@ const (
 	httpsURLType     string = "https"
 	wssURLType       string = "wss"
 	httpMethodHeader string = ":method"
+)
+
+// Paths exposed from the router by default
+const (
+	healthPath  string = "/health"
+	testKeyPath string = "/testkey"
+)
+
+const (
+	// healthEndpointResponse - response from the health endpoint
+	healthEndpointResponse = "{\"status\": \"healthy\"}"
+)
+
+const (
+	defaultListenerHostAddress = "0.0.0.0"
 )

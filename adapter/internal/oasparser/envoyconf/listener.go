@@ -18,6 +18,8 @@
 package envoyconf
 
 import (
+	"errors"
+
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
@@ -43,33 +45,36 @@ func CreateRoutesConfigForRds(vHost *routev3.VirtualHost) *routev3.RouteConfigur
 	return &routeConfiguration
 }
 
-// CreateListenerWithRds create a listener with the Route Configuration stated as
-// RDS. (routes are not assigned directly to the listener.) RouteConfiguration name
-// is assigned using its default value. Route Configuration would be resolved via
-// ADS.
+// CreateListenersWithRds create two listeners or one listener with the Route Configuration
+// stated as RDS. (routes are not assigned directly to the listener.) RouteConfiguration name
+// is assigned using its default value. Route Configuration would be resolved via ADS.
+//
+// If SecuredListenerPort and ListenerPort both are mentioned, two listeners would be added.
+// If neither of the two properies are assigned with non-zero values, adapter would panic.
 //
 // HTTPConnectionManager with HTTP Filters, Accesslog configuration, TransportSocket
 // Configuration is included within the implementation.
 //
-// Listener Address, Port Valuei is fetched from the configuration accordingly.
+// Listener Address, ListenerPort Value, SecuredListener Address, and  SecuredListenerPort Values are
+// fetched from the configuration accordingly.
 //
-// If the TLSEnabled Configuration is provided, TransportSocket Configuration will
-// be applied. The relevant private keys and certificates are fetched from the filepath
+// The relevant private keys and certificates (for securedListener) are fetched from the filepath
 // mentioned in the adapter configuration. These certificate, key values are added
 // as inline records (base64 encoded).
-func CreateListenerWithRds(listenerName string) *listenerv3.Listener {
+func CreateListenersWithRds() []*listenerv3.Listener {
 	conf, errReadConfig := config.ReadConfigs()
 	if errReadConfig != nil {
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}
-	return createListener(conf, listenerName)
+	return createListeners(conf)
 }
 
-func createListener(conf *config.Config, listenerName string) *listenerv3.Listener {
+func createListeners(conf *config.Config) []*listenerv3.Listener {
 	httpFilters := getHTTPFilters()
 	upgradeFilters := getUpgradeFilters()
 	accessLogs := getAccessLogs()
 	var filters []*listenerv3.Filter
+	var listeners []*listenerv3.Listener
 
 	manager := &hcmv3.HttpConnectionManager{
 		CodecType:  hcmv3.HttpConnectionManager_AUTO,
@@ -82,7 +87,6 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 		}},
 		RouteSpecifier: &hcmv3.HttpConnectionManager_Rds{
 			Rds: &hcmv3.Rds{
-				//TODO: (VirajSalaka) Decide if we need this to be configurable in the first stage
 				RouteConfigName: defaultRdsConfigName,
 				ConfigSource: &corev3.ConfigSource{
 					ConfigSourceSpecifier: &corev3.ConfigSource_Ads{
@@ -93,7 +97,10 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 			},
 		},
 		HttpFilters: httpFilters,
-		AccessLog:   accessLogs,
+	}
+
+	if len(accessLogs) > 0 {
+		manager.AccessLog = accessLogs
 	}
 
 	pbst, err := ptypes.MarshalAny(manager)
@@ -110,28 +117,32 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 	// add filters
 	filters = append(filters, &connectionManagerFilterP)
 
-	listenerAddress := &corev3.Address_SocketAddress{
-		SocketAddress: &corev3.SocketAddress{
-			Protocol: corev3.SocketAddress_TCP,
-			Address:  conf.Envoy.ListenerHost,
-			PortSpecifier: &corev3.SocketAddress_PortValue{
-				PortValue: conf.Envoy.ListenerPort,
+	if conf.Envoy.SecuredListenerPort > 0 {
+		listenerHostAddress := defaultListenerHostAddress
+		if len(conf.Envoy.SecuredListenerHost) > 0 {
+			listenerHostAddress = conf.Envoy.SecuredListenerHost
+		}
+		securedListenerAddress := &corev3.Address_SocketAddress{
+			SocketAddress: &corev3.SocketAddress{
+				Protocol: corev3.SocketAddress_TCP,
+				Address:  listenerHostAddress,
+				PortSpecifier: &corev3.SocketAddress_PortValue{
+					PortValue: conf.Envoy.SecuredListenerPort,
+				},
 			},
-		},
-	}
+		}
 
-	listener := listenerv3.Listener{
-		Name: listenerName,
-		Address: &corev3.Address{
-			Address: listenerAddress,
-		},
-		FilterChains: []*listenerv3.FilterChain{{
-			Filters: filters,
-		},
-		},
-	}
+		securedListener := listenerv3.Listener{
+			Name: defaultHTTPSListenerName,
+			Address: &corev3.Address{
+				Address: securedListenerAddress,
+			},
+			FilterChains: []*listenerv3.FilterChain{{
+				Filters: filters,
+			},
+			},
+		}
 
-	if conf.Envoy.ListenerTLSEnabled {
 		tlsCert := generateTLSCert(conf.Envoy.KeyStore.PrivateKeyLocation, conf.Envoy.KeyStore.PublicKeyLocation)
 		//TODO: (VirajSalaka) Make it configurable via SDS
 		tlsFilter := &tlsv3.DownstreamTlsContext{
@@ -143,6 +154,7 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 
 		marshalledTLSFilter, err := ptypes.MarshalAny(tlsFilter)
 		if err != nil {
+			logger.LoggerOasparser.Fatal("Error while Marshalling the downstream TLS Context for the configuration.")
 			panic(err)
 		}
 
@@ -154,9 +166,49 @@ func createListener(conf *config.Config, listenerName string) *listenerv3.Listen
 		}
 
 		// At the moment, the listener as only one filter chain
-		listener.FilterChains[0].TransportSocket = transportSocket
+		securedListener.FilterChains[0].TransportSocket = transportSocket
+		listeners = append(listeners, &securedListener)
+		logger.LoggerOasparser.Infof("Secured Listener is added. %s : %d", listenerHostAddress, conf.Envoy.SecuredListenerPort)
+	} else {
+		logger.LoggerOasparser.Info("No SecuredListenerPort is included.")
 	}
-	return &listener
+
+	if conf.Envoy.ListenerPort > 0 {
+		listenerHostAddress := defaultListenerHostAddress
+		if len(conf.Envoy.ListenerHost) > 0 {
+			listenerHostAddress = conf.Envoy.ListenerHost
+		}
+		listenerAddress := &corev3.Address_SocketAddress{
+			SocketAddress: &corev3.SocketAddress{
+				Protocol: corev3.SocketAddress_TCP,
+				Address:  listenerHostAddress,
+				PortSpecifier: &corev3.SocketAddress_PortValue{
+					PortValue: conf.Envoy.ListenerPort,
+				},
+			},
+		}
+
+		listener := listenerv3.Listener{
+			Name: defaultHTTPListenerName,
+			Address: &corev3.Address{
+				Address: listenerAddress,
+			},
+			FilterChains: []*listenerv3.FilterChain{{
+				Filters: filters,
+			},
+			},
+		}
+		listeners = append(listeners, &listener)
+		logger.LoggerOasparser.Infof("Non-secured Listener is added. %s : %d", listenerHostAddress, conf.Envoy.ListenerPort)
+	} else {
+		logger.LoggerOasparser.Info("No Non-securedListenerPort is included.")
+	}
+
+	if len(listeners) == 0 {
+		err := errors.New("No Listeners are configured as no port value is mentioned under securedListenerPort or ListenerPort")
+		panic(err)
+	}
+	return listeners
 }
 
 // CreateVirtualHost creates VirtualHost configuration for envoy which serves
@@ -173,20 +225,6 @@ func CreateVirtualHost(vHostName string, routes []*routev3.Route) *routev3.Virtu
 		Routes:  routes,
 	}
 	return &virtualHost
-}
-
-// createAddress generates an address from the given host and port
-func createAddress(remoteHost string, port uint32) *corev3.Address {
-	address := corev3.Address{Address: &corev3.Address_SocketAddress{
-		SocketAddress: &corev3.SocketAddress{
-			Address:  remoteHost,
-			Protocol: corev3.SocketAddress_TCP,
-			PortSpecifier: &corev3.SocketAddress_PortValue{
-				PortValue: uint32(port),
-			},
-		},
-	}}
-	return &address
 }
 
 //TODO: (VirajSalaka) Still the following method is not utilized as Sds is not implement. Keeping the Implementation for future reference

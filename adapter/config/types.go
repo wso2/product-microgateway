@@ -86,14 +86,18 @@ type Config struct {
 			URL string
 			//PollInterval how frequently consul API should be polled to get updates (in seconds)
 			PollInterval int
-			//ACLTokenFilePath ACL token required to invoke HTTP API
-			ACLTokenFilePath string
-			//CaCertPath path to the CA cert file(PEM encoded) required for tls connection between adapter and a consul client
-			CaCertPath string
-			//CertPath path to the cert file(PEM encoded) required for tls connection between adapter and a consul client
-			CertPath string
-			//CertPath path to the key file(PEM encoded) required for tls connection between adapter and a consul client
-			KeyPath string
+			//ACLToken Access Control Token required to invoke HTTP API
+			ACLToken string
+			//MgwServiceName service name that Microgateway registered in Consul Service Mesh
+			MgwServiceName string
+			//ServiceMeshEnabled whether Consul service mesh is enabled
+			ServiceMeshEnabled bool
+			//CaCertFile path to the CA cert file(PEM encoded) required for tls connection between adapter and a consul client
+			CaCertFile string
+			//CertFile path to the cert file(PEM encoded) required for tls connection between adapter and a consul client
+			CertFile string
+			//KeyFile path to the key file(PEM encoded) required for tls connection between adapter and a consul client
+			KeyFile string
 		}
 		// Keystore contains the keyFile and Cert File of the adapter
 		Keystore keystore
@@ -105,9 +109,20 @@ type Config struct {
 	Envoy struct {
 		ListenerHost            string
 		ListenerPort            uint32
+		SecuredListenerHost     string
+		SecuredListenerPort     uint32
 		ClusterTimeoutInSeconds time.Duration
 		KeyStore                keystore
-		ListenerTLSEnabled      bool
+
+		// Global CORS configurations.
+		Cors struct {
+			Enabled          bool
+			AllowOrigins     []string
+			AllowMethods     []string
+			AllowHeaders     []string
+			AllowCredentials bool
+			ExposeHeaders    []string
+		}
 
 		// Envoy Upstream Related Configurations
 		Upstream struct {
@@ -121,10 +136,9 @@ type Config struct {
 				DisableSSLVerification bool   `toml:"disableSslVerification"`
 			}
 		}
-	}
+	} `toml:"router"`
 
 	Enforcer struct {
-		JwtTokenConfig  []jwtTokenConfig
 		EventHub        eventHub
 		ApimCredentials apimCredentials
 		AuthService     authService
@@ -134,7 +148,19 @@ type Config struct {
 		JwtIssuer       jwtIssuer
 	}
 
+	Security struct {
+		Adapter struct {
+			EnableOutboundAuthHeader bool   `toml:"enableOutboundAuthHeader"`
+			AuthorizationHeader      string `toml:"authorizationHeader"`
+		}
+		Enforcer struct {
+			TokenService []tokenService
+		}
+	}
+
 	ControlPlane controlPlane `toml:"controlPlane"`
+
+	Analytics analytics `toml:"analytics"`
 }
 
 type apimCredentials struct {
@@ -166,7 +192,7 @@ type truststore struct {
 	Location string
 }
 
-type jwtTokenConfig struct {
+type tokenService struct {
 	Name                 string
 	Issuer               string
 	CertificateAlias     string
@@ -190,7 +216,7 @@ type throttlingConfig struct {
 	EnableHeaderConditions             bool   `toml:"enableHeaderConditions"`
 	EnableQueryParamConditions         bool   `toml:"enableQueryParamConditions"`
 	EnableJwtClaimConditions           bool   `toml:"enableJwtClaimConditions"`
-	JmsConnectionInitialContextFactory string `toml:"jmsConnectioninitialContextFactory"`
+	JmsConnectionInitialContextFactory string `toml:"jmsConnectionInitialContextFactory"`
 	JmsConnectionProviderURL           string `toml:"jmsConnectionProviderUrl"`
 	Publisher                          binaryPublisher
 }
@@ -263,11 +289,19 @@ type cache struct {
 }
 
 type analytics struct {
-	Enabled             bool               `toml:"enabled"`
-	AuthURL             string             `toml:"authURL"`
-	AuthToken           string             `toml:"authToken"`
-	EnforcerLogReceiver authService        `toml:"enforcerLogReceiver"`
-	RouterLogPublisher  routerLogPublisher `toml:"routerLogPublisher"`
+	Enabled bool `toml:"enabled"`
+
+	Adapter struct {
+		BufferFlushInterval time.Duration `toml:"bufferFlushInterval"`
+		BufferSizeBytes     uint32        `toml:"bufferSizeBytes"`
+		GRPCRequestTimeout  time.Duration `toml:"gRPCRequestTimeout"`
+	}
+
+	Enforcer struct {
+		AuthURL             string      `toml:"authURL"`
+		AuthToken           string      `toml:"authToken"`
+		EnforcerLogReceiver authService `toml:"LogReceiver"`
+	}
 }
 
 type routerLogPublisher struct {
@@ -315,7 +349,6 @@ type controlPlane struct {
 			EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
 		} `toml:"jmsConnectionParameters"`
 	} `toml:"eventHub"`
-	Analytics analytics `toml:"analytics"`
 }
 
 // APIContent contains everything necessary to create an API
@@ -331,4 +364,66 @@ type APIContent struct {
 	ProductionEndpoint string
 	SandboxEndpoint    string
 	SecurityScheme     []string
+	EndpointSecurity   EndpointSecurity
+	AuthHeader         string
+}
+
+// APIJsonData contains everything necessary to extract api.json/api.yaml file
+type APIJsonData struct {
+	Data struct {
+		APIName                    string   `json:"name,omitempty"`
+		APIContext                 string   `json:"context,omitempty"`
+		APIVersion                 string   `json:"version,omitempty"`
+		APIType                    string   `json:"type,omitempty"`
+		LifeCycleStatus            string   `json:"lifeCycleStatus,omitempty"`
+		EndpointImplementationType string   `json:"endpointImplementationType,omitempty"`
+		AuthorizationHeader        string   `json:"authorizationHeader,omitempty"`
+		SecurityScheme             []string `json:"securityScheme,omitempty"`
+		EndpointConfig             struct {
+			EndpointType     string `json:"endpoint_type,omitempty"`
+			EndpointSecurity struct {
+				Production struct {
+					Password string `json:"password,omitempty"`
+					Type     string `json:"type,omitempty"`
+					Enabled  bool   `json:"enabled,omitempty"`
+					Username string `json:"username,omitempty"`
+				} `json:"production,omitempty"`
+				Sandbox struct {
+					Password string `json:"password,omitempty"`
+					Type     string `json:"type,omitempty"`
+					Enabled  bool   `json:"enabled,omitempty"`
+					Username string `json:"username,omitempty"`
+				} `json:"sandbox,omitempty"`
+			} `json:"endpoint_security,omitempty"`
+			ProductionEndpoints struct {
+				Endpoint string `json:"url,omitempty"`
+			} `json:"production_endpoints,omitempty"`
+			SandBoxEndpoints struct {
+				Endpoint string `json:"url,omitempty"`
+			} `json:"sandbox_endpoints,omitempty"`
+		} `json:"endpointConfig,omitempty"`
+	} `json:"data"`
+}
+
+// EpSecurity contains parameters of endpoint security at api.json
+type EpSecurity struct {
+	Password string `json:"password,omitempty"`
+	Type     string `json:"type,omitempty"`
+	Enabled  bool   `json:"enabled,omitempty"`
+	Username string `json:"username,omitempty"`
+}
+
+// EndpointSecurity contains the SandBox/Production endpoint security
+type EndpointSecurity struct {
+	SandBox    SecurityInfo `json:"SandBox,omitempty"`
+	Production SecurityInfo `json:"Production,omitempty"`
+}
+
+// SecurityInfo contains the parameters of endpoint security
+type SecurityInfo struct {
+	Password         string `json:"password,omitempty"`
+	CustomParameters string `json:"customparameters,omitempty"`
+	SecurityType     string `json:"Type,omitempty"`
+	Enabled          bool   `json:"enabled,omitempty"`
+	Username         string `json:"username,omitempty"`
 }

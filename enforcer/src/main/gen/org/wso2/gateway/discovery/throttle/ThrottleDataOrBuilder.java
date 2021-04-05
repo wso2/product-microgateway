@@ -31,4 +31,53 @@ public interface ThrottleDataOrBuilder extends
    */
   com.google.protobuf.ByteString
       getKeyTemplatesBytes(int index);
+
+  /**
+   * <code>repeated string blocking_conditions = 2;</code>
+   * @return A list containing the blockingConditions.
+   */
+  java.util.List<java.lang.String>
+      getBlockingConditionsList();
+  /**
+   * <code>repeated string blocking_conditions = 2;</code>
+   * @return The count of blockingConditions.
+   */
+  int getBlockingConditionsCount();
+  /**
+   * <code>repeated string blocking_conditions = 2;</code>
+   * @param index The index of the element to return.
+   * @return The blockingConditions at the given index.
+   */
+  java.lang.String getBlockingConditions(int index);
+  /**
+   * <code>repeated string blocking_conditions = 2;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the blockingConditions at the given index.
+   */
+  com.google.protobuf.ByteString
+      getBlockingConditionsBytes(int index);
+
+  /**
+   * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+   */
+  java.util.List<org.wso2.gateway.discovery.throttle.IPCondition> 
+      getIpBlockingConditionsList();
+  /**
+   * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+   */
+  org.wso2.gateway.discovery.throttle.IPCondition getIpBlockingConditions(int index);
+  /**
+   * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+   */
+  int getIpBlockingConditionsCount();
+  /**
+   * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+   */
+  java.util.List<? extends org.wso2.gateway.discovery.throttle.IPConditionOrBuilder> 
+      getIpBlockingConditionsOrBuilderList();
+  /**
+   * <code>repeated .wso2.discovery.throttle.IPCondition ip_blocking_conditions = 3;</code>
+   */
+  org.wso2.gateway.discovery.throttle.IPConditionOrBuilder getIpBlockingConditionsOrBuilder(
+      int index);
 }

@@ -23,11 +23,11 @@ import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
-import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.EventCategory;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.micro.gateway.enforcer.constants.AnalyticsConstants;
 
 /**

@@ -18,6 +18,7 @@
 
 package org.wso2am.micro.gw.tests.testCases.jwtGenerator;
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.json.JSONObject;
 import org.testng.Assert;
@@ -44,7 +45,7 @@ public class JwtGeneratorTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null);
+        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
     }
 
     @Test(description = "Test the availability of JWT Generator header")

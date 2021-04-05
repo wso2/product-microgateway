@@ -18,6 +18,7 @@ package model
 
 import (
 	parser "github.com/mitchellh/mapstructure"
+	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/internal/svcdiscovery"
 	logger "github.com/wso2/micro-gw/loggers"
 )
@@ -40,6 +41,23 @@ type MgwSwagger struct {
 	xWso2Cors        *CorsConfig
 	securityScheme   []string
 	xThrottlingTier  string
+	xWso2AuthHeader  string
+	disableSecurity  bool
+}
+
+// EndpointSecurity contains the SandBox/Production endpoint security
+type EndpointSecurity struct {
+	SandBox    SecurityInfo
+	Production SecurityInfo
+}
+
+// SecurityInfo contains the parameters of endpoint security
+type SecurityInfo struct {
+	Password         string
+	CustomParameters string
+	SecurityType     string
+	Enabled          bool
+	Username         string
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -70,6 +88,7 @@ type CorsConfig struct {
 	AccessControlAllowHeaders     []string `mapstructure:"accessControlAllowHeaders"`
 	AccessControlAllowMethods     []string `mapstructure:"accessControlAllowMethods"`
 	AccessControlAllowOrigins     []string `mapstructure:"accessControlAllowOrigins"`
+	AccessControlExposeHeaders    []string `mapstructure:"accessControlExposeHeaders"`
 }
 
 // GetCorsConfig returns the CorsConfiguration Object.
@@ -128,6 +147,11 @@ func (swagger *MgwSwagger) GetXThrottlingTier() string {
 	return swagger.xThrottlingTier
 }
 
+// GetDisableSecurity returns the authType via the vendor extension.
+func (swagger *MgwSwagger) GetDisableSecurity() bool {
+	return swagger.disableSecurity
+}
+
 // GetID returns the Id of the API
 func (swagger *MgwSwagger) GetID() string {
 	return swagger.id
@@ -148,6 +172,18 @@ func (swagger *MgwSwagger) SetVersion(version string) {
 	swagger.version = version
 }
 
+// SetXWso2AuthHeader sets the authHeader of the API
+func (swagger *MgwSwagger) SetXWso2AuthHeader(authHeader string) {
+	if swagger.xWso2AuthHeader == "" {
+		swagger.xWso2AuthHeader = authHeader
+	}
+}
+
+// GetXWSO2AuthHeader returns the auth header set via the vendor extension.
+func (swagger *MgwSwagger) GetXWSO2AuthHeader() string {
+	return swagger.xWso2AuthHeader
+}
+
 // GetSetSecurityScheme returns the securityscheme of the API
 func (swagger *MgwSwagger) GetSetSecurityScheme() []string {
 	return swagger.securityScheme
@@ -166,6 +202,8 @@ func (swagger *MgwSwagger) SetXWso2Extenstions() {
 	swagger.setXWso2SandboxEndpoint()
 	swagger.setXWso2Cors()
 	swagger.setXThrottlingTier()
+	swagger.setDisableSecurity()
+	swagger.setXWso2AuthHeader()
 }
 
 // SetXWso2SandboxEndpointForMgwSwagger set the MgwSwagger object with the SandboxEndpoint when
@@ -219,6 +257,30 @@ func (swagger *MgwSwagger) setXThrottlingTier() {
 	if tier != "" {
 		swagger.xThrottlingTier = tier
 	}
+}
+
+// getXWso2AuthHeader extracts the value of xWso2AuthHeader extension.
+// if the property is not available, an empty string is returned.
+func getXWso2AuthHeader(vendorExtensions map[string]interface{}) string {
+	xWso2AuthHeader := ""
+	if y, found := vendorExtensions[xAuthHeader]; found {
+		if val, ok := y.(string); ok {
+			xWso2AuthHeader = val
+		}
+	}
+	return xWso2AuthHeader
+}
+
+// SetXWSO2AuthHeader sets the AuthHeader of the API
+func (swagger *MgwSwagger) setXWso2AuthHeader() {
+	authorizationHeader := getXWso2AuthHeader(swagger.vendorExtensions)
+	if authorizationHeader != "" {
+		swagger.xWso2AuthHeader = authorizationHeader
+	}
+}
+
+func (swagger *MgwSwagger) setDisableSecurity() {
+	swagger.disableSecurity = ResolveDisableSecurity(swagger.vendorExtensions)
 }
 
 // getXWso2Endpoints extracts and generate the Endpoint Objects from the vendor extension map.
@@ -294,13 +356,31 @@ func (swagger *MgwSwagger) setXWso2Cors() {
 				logger.LoggerOasparser.Errorf("Error while parsing %v: "+err.Error(), xWso2Cors)
 				return
 			}
-			logger.LoggerOasparser.Debugf("Cors Configuration is applied : %+v\n", corsConfig)
-			swagger.xWso2Cors = corsConfig
+			if corsConfig.Enabled {
+				logger.LoggerOasparser.Debugf("API Level Cors Configuration is applied : %+v\n", corsConfig)
+				swagger.xWso2Cors = corsConfig
+				return
+			}
+			swagger.xWso2Cors = generateGlobalCors()
 			return
 		}
 		logger.LoggerOasparser.Errorf("Error while parsing %v .", xWso2Cors)
+	} else {
+		swagger.xWso2Cors = generateGlobalCors()
 	}
+}
 
+func generateGlobalCors() *CorsConfig {
+	conf, _ := config.ReadConfigs()
+	logger.LoggerOasparser.Debug("CORS policy is applied from global configuration.")
+	return &CorsConfig{
+		Enabled:                       conf.Envoy.Cors.Enabled,
+		AccessControlAllowCredentials: conf.Envoy.Cors.AllowCredentials,
+		AccessControlAllowOrigins:     conf.Envoy.Cors.AllowOrigins,
+		AccessControlAllowHeaders:     conf.Envoy.Cors.AllowHeaders,
+		AccessControlAllowMethods:     conf.Envoy.Cors.AllowMethods,
+		AccessControlExposeHeaders:    conf.Envoy.Cors.ExposeHeaders,
+	}
 }
 
 // ResolveXThrottlingTier extracts the value of x-throttling-tier extension.
@@ -313,4 +393,33 @@ func ResolveXThrottlingTier(vendorExtensions map[string]interface{}) string {
 		}
 	}
 	return xTier
+}
+
+// ResolveDisableSecurity extracts the value of x-auth-type extension.
+// if the property is not available, false is returned.
+// If the API definition is fed from API manager, then API definition contains
+// x-auth-type as "None" for non secured APIs. Then the return value would be true.
+// If the API definition is fed through apictl, the users can use either
+// x-wso2-disable-security : true/false to enable and disable security.
+func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
+	disableSecurity := false
+	y, vExtAuthType := vendorExtensions[xAuthType]
+	z, vExtDisableSecurity := vendorExtensions[xWso2DisableSecurity]
+	if vExtDisableSecurity {
+		// If x-wso2-disable-security is present, then disableSecurity = val
+		if val, ok := z.(bool); ok {
+			disableSecurity = val
+		}
+	} else if vExtAuthType {
+		// If APIs are published through APIM, all resource levels contains x-auth-type
+		// vendor extension.
+		if val, ok := y.(string); ok {
+			// If the x-auth-type vendor ext is None, then the API/resource is considerd
+			// to be non secure
+			if val == None {
+				disableSecurity = true
+			}
+		}
+	}
+	return disableSecurity
 }

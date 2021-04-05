@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.micro.gateway.enforcer.throttle;
+package org.wso2.micro.gateway.enforcer.throttle.dto;
 
 import java.math.BigInteger;
 import java.util.HashMap;

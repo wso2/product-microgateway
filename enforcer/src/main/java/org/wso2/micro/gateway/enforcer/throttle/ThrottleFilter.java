@@ -85,7 +85,7 @@ public class ThrottleFilter implements Filter {
         AuthenticationContext authContext = reqContext.getAuthenticationContext();
 
         // TODO: (Praminda) Handle unauthenticated + subscription validation false scenarios
-        if (reqContext.getAuthenticationContext() != null) {
+        if (authContext != null) {
             log.debug("Found AuthenticationContext for the request");
             APIConfig api = reqContext.getMatchedAPI().getAPIConfig();
             String apiContext = api.getBasePath();
@@ -108,21 +108,45 @@ public class ThrottleFilter implements Filter {
                 resourceTier = apiTier;
                 isApiLevelTriggered = true;
             }
+            if (apiTenantDomain == null) {
+                apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
+            }
+
+            if (dataHolder.isBlockingConditionsPresent()) {
+                String appBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
+                String subBlockingKey = apiContext + ":" + apiVersion + ":" + authContext.getSubscriber()
+                        + "-" + authContext.getApplicationName() + ":" + authContext.getKeyType();
+
+                if (dataHolder.isRequestBlocked(apiContext, appBlockingKey, authorizedUser, reqContext.getClientIp(),
+                        subBlockingKey, apiTenantDomain)) {
+                    FilterUtils.setThrottleErrorToContext(reqContext,
+                            ThrottleConstants.BLOCKED_ERROR_CODE,
+                            ThrottleConstants.BLOCKING_MESSAGE,
+                            ThrottleConstants.BLOCKING_DESCRIPTION);
+                    reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
+                            ThrottleConstants.THROTTLE_OUT_REASON_REQUEST_BLOCKED);
+                    log.debug("Request blocked as it violates blocking conditions, for API: {}," +
+                                    " application: {}, user: {}", apiContext, appBlockingKey, authorizedUser);
+                    return true;
+                }
+            }
 
             // Checking API and Resource level throttling. If API tier is defined,
             // we ignore the resource level tier definition.
             Decision apiDecision = checkResourceThrottled(resourceThrottleKey, resourceTier, reqContext);
             if (apiDecision.isThrottled()) {
                 int errorCode;
+                String reason;
                 if (isApiLevelTriggered) {
                     errorCode = ThrottleConstants.API_THROTTLE_OUT_ERROR_CODE;
+                    reason = ThrottleConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED;
                 } else {
                     errorCode = ThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE;
+                    reason = ThrottleConstants.THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
                 }
                 FilterUtils.setThrottleErrorToContext(reqContext, errorCode, ThrottleConstants.THROTTLE_OUT_MESSAGE,
                         ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
-                reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
-                        ThrottleConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED);
+                reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON, reason);
                 ThrottleUtils.setRetryAfterHeader(reqContext, apiDecision.getResetAt());
                 return true;
             }
@@ -163,6 +187,7 @@ public class ThrottleFilter implements Filter {
             // Checking Custom policy throttling
             Decision customDecision = dataHolder.isThrottledByCustomPolicy(authorizedUser, resourceThrottleKey,
                     apiContext, apiVersion, appTenant, apiTenantDomain, appId, clientIp);
+            log.debug("Custom policy throttle decision is {}", customDecision.isThrottled());
             if (customDecision.isThrottled()) {
                 log.debug("Setting custom policy throttle out response");
                 FilterUtils.setThrottleErrorToContext(reqContext,
@@ -170,7 +195,8 @@ public class ThrottleFilter implements Filter {
                         ThrottleConstants.THROTTLE_OUT_MESSAGE,
                         ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                 reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
-                        ThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED);
+                        ThrottleConstants.THROTTLE_OUT_REASON_CUSTOM_LIMIT_EXCEED);
+                ThrottleUtils.setRetryAfterHeader(reqContext, customDecision.getResetAt());
                 return true;
             }
         }
@@ -226,11 +252,12 @@ public class ThrottleFilter implements Filter {
         String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
         String appTenant = authContext.getSubscriberTenantDomain();
         String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
+        String resourceTier;
+        String resourceKey;
+
         if (tenantDomain == null) {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        String resourceTier;
-        String resourceKey;
 
         if (!ThrottleConstants.UNLIMITED_TIER.equals(apiTier) && apiTier != null && !apiTier.isBlank()) {
             resourceTier = apiTier;

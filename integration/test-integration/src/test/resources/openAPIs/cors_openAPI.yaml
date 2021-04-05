@@ -20,6 +20,8 @@ x-wso2-cors:
     - GET
     - PUT
     - POST
+  accessControlExposeHeaders:
+    - X-Custom-Header
   accessControlAllowCredentials: true
 x-wso2-basePath: '/cors'
 host: 'mockBackend:2383'

@@ -8,28 +8,19 @@ public interface ConfigOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+   * @return Whether the security field is set.
    */
-  java.util.List<org.wso2.gateway.discovery.config.enforcer.Issuer> 
-      getJwtTokenConfigList();
+  boolean hasSecurity();
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+   * @return The security.
    */
-  org.wso2.gateway.discovery.config.enforcer.Issuer getJwtTokenConfig(int index);
+  org.wso2.gateway.discovery.config.enforcer.Security getSecurity();
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
    */
-  int getJwtTokenConfigCount();
-  /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-   */
-  java.util.List<? extends org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder> 
-      getJwtTokenConfigOrBuilderList();
-  /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer jwtTokenConfig = 1;</code>
-   */
-  org.wso2.gateway.discovery.config.enforcer.IssuerOrBuilder getJwtTokenConfigOrBuilder(
-      int index);
+  org.wso2.gateway.discovery.config.enforcer.SecurityOrBuilder getSecurityOrBuilder();
 
   /**
    * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>

@@ -228,7 +228,19 @@ public class MockBackEndServer extends Thread {
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });
-
+            httpServer.createContext(context + "/removeauthheader", exchange -> {
+                byte[] response;
+                if (!exchange.getRequestHeaders().containsKey("authHeader")) {
+                    response = ResponseConstants.VALID_REMOVE_HEADER_RESPONSE.getBytes();
+                } else {
+                    response = ResponseConstants.INVALID_REMOVE_HEADER_RESPONSE.getBytes();
+                }
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        Constants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
             httpServer.start();
             backEndServerUrl = "http://localhost:" + backEndServerPort;
         } catch (Exception ex) {

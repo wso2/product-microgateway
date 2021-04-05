@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.gateway.discovery.api.SecurityInfo;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
 import org.wso2.micro.gateway.enforcer.common.CacheProvider;
@@ -55,7 +56,9 @@ import java.text.ParseException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+
 
 /**
  * Implements the authenticator interface to authenticate request using a JWT token.
@@ -72,7 +75,7 @@ public class JWTAuthenticator implements Authenticator {
     }
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
-        String jwt = requestContext.getHeaders().get("authorization");
+        String jwt = retrieveAuthHeaderValue(requestContext);
         if (jwt != null && jwt.split("\\.").length == 3) {
             return true;
         }
@@ -81,7 +84,7 @@ public class JWTAuthenticator implements Authenticator {
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
-        String jwtToken = requestContext.getHeaders().get("authorization");
+        String jwtToken = retrieveAuthHeaderValue(requestContext);
         String splitToken[] = jwtToken.split("\\s");
         // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
         if (splitToken.length > 1) {
@@ -133,6 +136,29 @@ public class JWTAuthenticator implements Authenticator {
                                     + validationInfo.getKeyManager());
                         }
                         apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, validationInfo);
+
+                        // set endpoint security
+                        SecurityInfo securityInfo;
+                        if (apiKeyValidationInfoDTO != null && apiKeyValidationInfoDTO.getType() != null &&
+                                requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity() != null) {
+                            if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
+                                securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                                        getProductionSecurityInfo();
+                            } else {
+                                securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                                        getSandBoxSecurityInfo();
+                            }
+                            if (securityInfo.getEnabled() &&
+                                    APIConstants.AUTHORIZATION_HEADER_BASIC.
+                                            equalsIgnoreCase(securityInfo.getSecurityType())) {
+                                // use constants
+                                requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                                        APIConstants.AUTHORIZATION_HEADER_BASIC + " " +
+                                                Base64.getEncoder().encodeToString((securityInfo.getUsername() +
+                                                        ":" + securityInfo.getPassword()).getBytes()));
+                            }
+                        }
+
                         if (log.isDebugEnabled()) {
                             log.debug("Subscription validation via Key Manager. Status: " + apiKeyValidationInfoDTO
                                     .isAuthorized());
@@ -183,6 +209,15 @@ public class JWTAuthenticator implements Authenticator {
                     APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
 
+    }
+
+    private String retrieveAuthHeaderValue(RequestContext requestContext) {
+        Map<String, String> headers = requestContext.getHeaders();
+        String authHeader = requestContext.getMatchedAPI().getAPIConfig().getAuthHeader().toLowerCase();
+        if (StringUtils.isEmpty(authHeader)) {
+            authHeader = APIConstants.AUTHORIZATION_HEADER_DEFAULT.toLowerCase();
+        }
+        return headers.get(authHeader);
     }
 
     @Override
@@ -320,8 +355,7 @@ public class JWTAuthenticator implements Authenticator {
                 + "Payload of the token does not contain the Authorized party - the party to which the ID Token was "
                 + "issued");
         throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
-                APISecurityConstants.API_AUTH_FORBIDDEN,
-                APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+                APISecurityConstants.API_AUTH_FORBIDDEN, APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
     }
 
 

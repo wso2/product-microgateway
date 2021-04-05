@@ -18,6 +18,10 @@
 
 package org.wso2.micro.gateway.enforcer.config.dto;
 
+import org.wso2.micro.gateway.enforcer.constants.Constants;
+
+import java.util.Properties;
+
 /**
  * Throttling configuration model.
  */
@@ -62,6 +66,30 @@ public class ThrottleConfigDto {
         isJwtClaimConditionsEnabled = jwtClaimConditionsEnabled;
     }
 
+    public ThrottleAgentConfigDto getThrottleAgent() {
+        return throttleAgent;
+    }
+
+    public void setThrottleAgent(ThrottleAgentConfigDto throttleAgent) {
+        this.throttleAgent = throttleAgent;
+    }
+
+    /**
+     * Build jms listener configuration property bag. This is done this way to
+     * get the properties after resolving env variables. if we create the property
+     * before resolving env vars, we lose the env value replacement.
+     *
+     * @return jms connection parameters as {@link Properties}
+     */
+    public Properties buildListenerProperties() {
+        Properties props = new Properties();
+        props.put(Constants.PROP_INIT_CONTEXT_FACTORY, this.jmsConnectionInitialContextFactory);
+        props.put(Constants.PROP_CON_FACTORY, this.jmsConnectionProviderUrl);
+        props.put(Constants.PROP_DESTINATION_TYPE, Constants.DEFAULT_DESTINATION_TYPE);
+        props.put(Constants.PROP_CON_FACTORY_JNDI_NAME, Constants.DEFAULT_CON_FACTORY_JNDI_NAME);
+        return props;
+    }
+
     public String getJmsConnectionInitialContextFactory() {
         return jmsConnectionInitialContextFactory;
     }
@@ -76,13 +104,5 @@ public class ThrottleConfigDto {
 
     public void setJmsConnectionProviderUrl(String jmsConnectionProviderUrl) {
         this.jmsConnectionProviderUrl = jmsConnectionProviderUrl;
-    }
-
-    public ThrottleAgentConfigDto getThrottleAgent() {
-        return throttleAgent;
-    }
-
-    public void setThrottleAgent(ThrottleAgentConfigDto throttleAgent) {
-        this.throttleAgent = throttleAgent;
     }
 }

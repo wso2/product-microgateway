@@ -193,20 +193,17 @@ func Run(conf *config.Config) {
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
 
-	jwtIssuerEnabled := conf.Enforcer.JwtIssuer.Enabled
-	if jwtIssuerEnabled {
-		// Take the configured labels
-		envs := conf.ControlPlane.EventHub.EnvironmentLabels
+	envs := conf.ControlPlane.EventHub.EnvironmentLabels
 
-		// If no environments are configured, default gateway label value is assigned.
-		if len(envs) == 0 {
-			envs = append(envs, DefaultGatewayLabelValue)
-		}
-		for _, env := range envs {
-			listeners, clusters, routes, endpoints, apis := xds.GenerateEnvoyResoucesForLabel(env)
-			xds.UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners)
-			xds.UpdateEnforcerApis(env, apis)
-		}
+	// If no environments are configured, default gateway label value is assigned.
+	if len(envs) == 0 {
+		envs = append(envs, DefaultGatewayLabelValue)
+	}
+
+	for _, env := range envs {
+		listeners, clusters, routes, endpoints, apis := xds.GenerateEnvoyResoucesForLabel(env)
+		xds.UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners)
+		xds.UpdateEnforcerApis(env, apis)
 	}
 
 	go restserver.StartRestServer(conf)
@@ -229,6 +226,7 @@ func Run(conf *config.Config) {
 	throttlingEnabled := conf.Enforcer.Throttling.EnableGlobalEventPublishing
 	if throttlingEnabled {
 		go synchronizer.UpdateKeyTemplates()
+		go synchronizer.UpdateBlockingConditions()
 	}
 OUTER:
 	for {

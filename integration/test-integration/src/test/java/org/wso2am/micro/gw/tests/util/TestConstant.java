@@ -60,7 +60,19 @@ public class TestConstant {
             "-CGdjRlPII2dMR3SYkuoGMQyoCOP2j2pAiP01Q8VseGV9CXZBciDHjCPv-pnP_oTAWCLjqCzFw-fG3Z3C_euEfN2KhMu520UfGuBKz2" +
             "KcdFXFwDUzpLfyAsg8qHDGiMcM88sUc10cvMYQqRYw66SF3EqYWQ";
 
+    public static final String EXPIRED_INTERNAL_KEY_TOKEN = "eyJraWQiOiJnYXRld2F5X2NlcnRpZmljYXRlX2FsaWFzIiwi" +
+            "YWxnIjoiUlMyNTYifQ.eyJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJpc3MiOiJodHRwczpcL1wvbG9jYWxob3N0Ojk0NDNc" +
+            "L29hdXRoMlwvdG9rZW4iLCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsInN1YnNjcmliZWRBUElzIjpbeyJzdWJzY3JpYmVyVGVuYW5" +
+            "0RG9tYWluIjpudWxsLCJuYW1lIjoiUGl6emFTaGFja0FQSSIsImNvbnRleHQiOiJcL3Bpenphc2hhY2tcLzEuMC4wIiwicHVib" +
+            "GlzaGVyIjoiYWRtaW4iLCJ2ZXJzaW9uIjoiMS4wLjAiLCJzdWJzY3JpcHRpb25UaWVyIjpudWxsfV0sImV4cCI6MTYxNTk1NTI1" +
+            "OSwidG9rZW5fdHlwZSI6IkludGVybmFsS2V5IiwiaWF0IjoxNjE1ODk1MjU5LCJqdGkiOiI3YTQ2MmZhNy1hNGE2LTQ2Y2ItOTQ3" +
+            "My0yZGQ5MTM1YzM1NmQifQ.iYNnaFrkZqw6JexLYDz8O68iueUoeDnCVpsCpKXabgOj1eLUaSrwDeW_Blg2fDkSO-NA_V9ESmtBXYg" +
+            "UpE_gDNy8jRRyc-PMt30zphkiqBcyxU2vhEqRz9ne37yVGlq4hLWrlaRDZNIzj1PniLGA7Y_fLiuq_SvLoh6Zz4tm-p4eIeDunaDkK" +
+            "lFn0V_NFOTKiTwue6WAJutP2gEy3Fd5__cxaxjZ6GUbntVmddMhCQk0-0HN5843CzpSVhW8OpAi9QOCKC6HIq8XnJHzyw06juQOKD" +
+            "PCi2qmQ-LlCQlBQrA4ECIFBzA_IqihOwymTPJHuqxPhGkJx1WfQ1oSb03Lxw";
+
     public static final int GATEWAY_LISTENER_HTTPS_PORT = 9095;
+    public static final int GATEWAY_LISTENER_HTTP_PORT = 9090;
     public static final int ADAPTER_PORT = 9843;
     public final static int MOCK_SERVER_PORT = 2383;
     public final static int APIM_SERVLET_TRP_HTTPS_PORT = 9443;
@@ -73,6 +85,8 @@ public class TestConstant {
     public static final String MOCK_BACKEND_DOCKER_IMAGE = "wso2/mg-mock-backend";
 
     public static final String TEST_RESOURCES_PATH = File.separator  + "test-classes";
+
+    public static final String HEALTH_ENDPOINT_RESPONSE = "{\"status\": \"healthy\"}";
 
     // apim related constants
     public static final String APIM_SERVICE_NAME_IN_DOCKER_COMPOSE = "apim";

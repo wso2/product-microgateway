@@ -21,6 +21,8 @@ package api
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -53,6 +55,10 @@ const (
 	securityScheme             string = "securityScheme"
 	endpointImplementationType string = "endpointImplementationType"
 	inlineEndpointType         string = "INLINE"
+	endpointSecurity           string = "endpoint_security"
+	production                 string = "production"
+	sandbox                    string = "sandbox"
+	BasicAuthSecurity          string = "BASIC"
 )
 
 // ProjectAPI contains the extracted from an API project zip
@@ -66,6 +72,8 @@ type ProjectAPI struct {
 	SandboxEndpoint            string
 	SecurityScheme             []string
 	endpointImplementationType string
+	AuthHeader                 string
+	EndpointSecurity           config.EndpointSecurity
 }
 
 // extractAPIProject accepts the API project as a zip file and returns the extracted content
@@ -108,7 +116,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			if !tlsutils.IsPublicCertificate(unzippedFileBytes) {
 				loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", file.Name)
 				// TODO: (VirajSalaka) Create standard error handling mechanism
-				return apiProject, errors.New("Certificate Validation Error")
+				return apiProject, errors.New("certificate Validation Error")
 			}
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
@@ -126,19 +134,34 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			}
 
 			apiProject.APIJsn = apiJsn
-			extractAPIInformation(apiProject)
-			if apiProject.endpointImplementationType == inlineEndpointType {
-				errMsg := "Inline endpointImplementationType is not currently supported with WSO2 micro-gateway"
-				loggers.LoggerAPI.Infof(errMsg)
-				err = errors.New(errMsg)
+
+			var apiObject config.APIJsonData
+
+			unmarshalErr := json.Unmarshal(apiProject.APIJsn, &apiObject)
+			if unmarshalErr != nil {
+				loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml or api.json %v", unmarshalErr.Error())
 				return apiProject, err
 			}
+
+			err = verifyMandatoryFields(apiObject)
+			if err != nil {
+				loggers.LoggerAPI.Errorf("%v", err)
+				return apiProject, err
+			}
+
+			if apiObject.Data.EndpointImplementationType == inlineEndpointType {
+				errmsg := "inline endpointImplementationType is not currently supported with WSO2 micro-gateway"
+				loggers.LoggerAPI.Infof(errmsg)
+				err = errors.New(errmsg)
+				return apiProject, err
+			}
+			extractAPIInformation(&apiProject, apiObject)
 		}
 	}
 	if apiProject.APIJsn == nil {
 		// TODO : (LahiruUdayanga) Handle the default behaviour after when the APIDeployTestCase test is fixed.
 		// If no api.yaml file is included in the zip folder, return with error.
-		err := errors.New("Could not find api.yaml or api.json")
+		err := errors.New("could not find api.yaml or api.json")
 		loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
 		return apiProject, err
 	} else if apiProject.APIType != mgw.HTTP && apiProject.APIType != mgw.WS {
@@ -149,6 +172,37 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 	}
 	apiProject.UpstreamCerts = upstreamCerts
 	return apiProject, nil
+}
+
+func verifyMandatoryFields(apiJSON config.APIJsonData) error {
+	var errMsg string = ""
+	var apiName string = apiJSON.Data.APIName
+	var apiVersion string = apiJSON.Data.APIVersion
+
+	if apiName == "" {
+		apiName = "unknownAPIName"
+		errMsg = "API Name "
+	}
+
+	if apiVersion == "" {
+		apiVersion = "unknownAPIVersion"
+		errMsg = errMsg + "API Version "
+	}
+
+	if apiJSON.Data.APIContext == "" {
+		errMsg = errMsg + "API Context "
+	}
+
+	if apiJSON.Data.EndpointConfig.ProductionEndpoints.Endpoint == "" &&
+		apiJSON.Data.EndpointConfig.SandBoxEndpoints.Endpoint == "" {
+		errMsg = errMsg + "API production and sandbox enpoints "
+	}
+
+	if errMsg != "" {
+		errMsg = errMsg + "fields cannot be empty for " + apiName + " " + apiVersion
+		return errors.New(errMsg)
+	}
+	return nil
 }
 
 // ApplyAPIProject accepts an apictl project (as a byte array) and updates the xds servers based upon the
@@ -208,6 +262,11 @@ func updateAPI(name, version string, apiProject ProjectAPI, environments []strin
 	apiContent.ProductionEndpoint = apiProject.ProductionEndpoint
 	apiContent.SandboxEndpoint = apiProject.SandboxEndpoint
 	apiContent.SecurityScheme = apiProject.SecurityScheme
+	apiContent.AuthHeader = apiProject.AuthHeader
+	apiContent.EndpointSecurity.Production.Enabled = apiProject.EndpointSecurity.Production.Enabled
+	apiContent.EndpointSecurity.Production.Password = apiProject.EndpointSecurity.Production.Password
+	apiContent.EndpointSecurity.Production.Username = apiProject.EndpointSecurity.Production.Username
+	apiContent.EndpointSecurity.Production.SecurityType = apiProject.EndpointSecurity.Production.SecurityType
 
 	if apiProject.APIType == mgw.HTTP {
 		apiContent.APIDefinition = apiProject.SwaggerJsn
@@ -218,37 +277,86 @@ func updateAPI(name, version string, apiProject ProjectAPI, environments []strin
 	}
 }
 
-func extractAPIInformation(apiProject ProjectAPI) {
-	var apiDef map[string]interface{}
-	unmarshalErr := json.Unmarshal(apiProject.APIJsn, &apiDef)
-	if unmarshalErr != nil {
-		loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml %v", unmarshalErr.Error())
-	}
-	data := apiDef["data"].(map[string]interface{})
-	apiProject.APIType = strings.ToUpper(data[apiTypeYamlKey].(string))
-	apiProject.APILifeCycleStatus = strings.ToUpper(data[lifeCycleStatus].(string))
+func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData) {
+	apiProject.APIType = strings.ToUpper(apiObject.Data.APIType)
+	apiProject.APILifeCycleStatus = strings.ToUpper(apiObject.Data.LifeCycleStatus)
 
-	var securitySchemesTypes []string = nil
-	if data[securityScheme] != nil {
-		securitySchemes := data[securityScheme].([]interface{})
-		for _, scheme := range securitySchemes {
-			securitySchemesTypes = append(securitySchemesTypes, scheme.(string))
+	if apiObject.Data.AuthorizationHeader != "" {
+		apiProject.AuthHeader = apiObject.Data.AuthorizationHeader
+	} else {
+		conf, _ := config.ReadConfigs()
+		apiProject.AuthHeader = conf.Security.Adapter.AuthorizationHeader
+	}
+
+	apiProject.SecurityScheme = apiObject.Data.SecurityScheme
+
+	var apiHashValue string = generateHashValue(apiObject.Data.APIName, apiObject.Data.APIName)
+
+	endpointConfig := apiObject.Data.EndpointConfig
+
+	// production Endpoints set
+	var productionEndpoint string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_prod_endpoint_0",
+		endpointConfig.ProductionEndpoints.Endpoint)
+	apiProject.ProductionEndpoint = productionEndpoint
+
+	// sandbox Endpoints set
+	var sandboxEndpoint string = resolveEnvValueForEndpointConfig("api_"+apiHashValue+"_sand_endpoint_0",
+		endpointConfig.SandBoxEndpoints.Endpoint)
+	apiProject.SandboxEndpoint = sandboxEndpoint
+
+	// production Endpoint security
+	prodEpSecurity, _ := retrieveEndPointSecurityInfo("api_"+apiHashValue,
+		endpointConfig.EndpointSecurity.Production, "prod")
+
+	// sandbox Endpoint security
+	sandBoxEpSecurity, _ := retrieveEndPointSecurityInfo("api_"+apiHashValue,
+		endpointConfig.EndpointSecurity.Sandbox, "sand")
+
+	epSecurity := config.EndpointSecurity{
+		SandBox:    sandBoxEpSecurity,
+		Production: prodEpSecurity,
+	}
+	apiProject.EndpointSecurity = epSecurity
+}
+
+func generateHashValue(apiName string, apiVersion string) string {
+	endpointConfigSHValue := sha1.New()
+	endpointConfigSHValue.Write([]byte(apiName + ":" + apiVersion))
+	return hex.EncodeToString(endpointConfigSHValue.Sum(nil)[:])
+}
+
+func resolveEnvValueForEndpointConfig(envKey string, defaultVal string) string {
+	envValue, exists := os.LookupEnv(envKey)
+	if exists {
+		loggers.LoggerAPI.Debugf("resolve env value %v", envValue)
+		return envValue
+	}
+	return defaultVal
+}
+
+func retrieveEndPointSecurityInfo(value string, endPointSecurity config.EpSecurity,
+	keyType string) (epSecurityInfo config.SecurityInfo, err error) {
+	var username string
+	var password string
+	var securityType = endPointSecurity.Type
+
+	if securityType != "" {
+		if securityType == BasicAuthSecurity {
+			username = resolveEnvValueForEndpointConfig(value+"_"+keyType+"_basic_username", endPointSecurity.Username)
+			password = resolveEnvValueForEndpointConfig(value+"_"+keyType+"_basic_password", endPointSecurity.Password)
+
+			epSecurityInfo.Username = username
+			epSecurityInfo.Password = password
+			epSecurityInfo.SecurityType = securityType
+			epSecurityInfo.Enabled = endPointSecurity.Enabled
+			return epSecurityInfo, nil
 		}
+		errMsg := securityType + " endpoint security type is not currently supported with" +
+			"WSO2 micro-gateway"
+		err = errors.New(errMsg)
+		loggers.LoggerAPI.Error(errMsg)
 	}
-	apiProject.SecurityScheme = securitySchemesTypes
-	loggers.LoggerAPI.Infof("apiProject.SecurityScheme %v", apiProject.SecurityScheme)
-
-	apiProject.endpointImplementationType = data[endpointImplementationType].(string)
-
-	endpointConfig := data["endpointConfig"].(map[string]interface{})
-	if endpointConfig["sandbox_endpoints"] != nil {
-		sandboxEndpoints := endpointConfig["sandbox_endpoints"].(map[string]interface{})
-		apiProject.SandboxEndpoint = sandboxEndpoints["url"].(string)
-	}
-	if endpointConfig["production_endpoints"] != nil {
-		productionEndpoints := endpointConfig["production_endpoints"].(map[string]interface{})
-		apiProject.ProductionEndpoint = productionEndpoints["url"].(string)
-	}
+	return epSecurityInfo, err
 }
 
 // DeleteAPI calls the DeleteAPI method in xds_server.go

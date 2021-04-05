@@ -18,33 +18,25 @@
 
 package org.wso2.micro.gateway.enforcer.throttle;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
-import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
+import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.throttle.dto.ThrottleCondition;
 import org.wso2.micro.gateway.enforcer.throttle.utils.ThrottleUtils;
 
 import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.jms.JMSException;
-import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicSession;
-import javax.jms.TopicSubscriber;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 /**
  * JMS event listener for throttle data.
@@ -61,59 +53,24 @@ public class ThrottleEventListener implements MessageListener {
     public static final int RESOURCE_PATTERN_GROUPS = 4;
     public static final int RESOURCE_PATTERN_CONDITION_INDEX = 3;
 
-    private ThrottleEventListener() {}
-
-    public static void init() {
-        ThrottleConfigDto throttleConf = ConfigHolder.getInstance().getConfig().getThrottleConfig();
-        String initialContextFactory = throttleConf.getJmsConnectionInitialContextFactory();
-        String connectionFactoryNamePrefix = "connectionfactory.";
-        String connectionFactoryName = "qpidConnectionfactory";
-        String eventReceiverURL = throttleConf.getJmsConnectionProviderUrl();
-        Runnable runnable = () -> {
-            try {
-                TopicConnection topicConnection;
-                TopicSession topicSession;
-                Properties properties = new Properties();
-                properties.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
-                properties.put(connectionFactoryNamePrefix + connectionFactoryName, eventReceiverURL);
-                InitialContext context = new InitialContext(properties);
-                TopicConnectionFactory connFactory = (TopicConnectionFactory) context.lookup(connectionFactoryName);
-                topicConnection = connFactory.createTopicConnection();
-                topicConnection.start();
-                topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
-                Topic gatewayJmsTopic = topicSession.createTopic(ThrottleConstants.TOPIC_THROTTLE_DATA);
-                TopicSubscriber listener = topicSession.createSubscriber(gatewayJmsTopic);
-                listener.setMessageListener(new ThrottleEventListener());
-            } catch (NamingException | JMSException e) {
-                log.error("Error while initiating jms connection...", e);
-            }
-        };
-        Thread jmsThread = new Thread(runnable);
-        jmsThread.start();
-    }
-
     @Override
     public void onMessage(Message message) {
         if (message == null) {
             log.warn("Dropping the empty/null event received through jms receiver");
             return;
-        } else if (!(message instanceof MapMessage)) {
+        } else if (!(message instanceof TextMessage)) {
             log.warn("Event dropped due to unsupported message type " + message.getClass());
             return;
         }
 
         try {
             Topic jmsDestination = (Topic) message.getJMSDestination();
-            MapMessage mapMessage = (MapMessage) message;
-            Map<String, Object> map = new HashMap<>();
-            Enumeration enumeration = mapMessage.getMapNames();
-            while (enumeration.hasMoreElements()) {
-                String key = (String) enumeration.nextElement();
-                map.put(key, mapMessage.getObject(key));
-            }
+            String textMessage = ((TextMessage) message).getText();
+            JsonNode payloadData = new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
+                    path(APIConstants.EVENT_PAYLOAD_DATA);
 
             if (ThrottleConstants.TOPIC_THROTTLE_DATA.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                if (map.get(ThrottleConstants.THROTTLE_KEY) != null) {
+                if (payloadData.get(ThrottleConstants.THROTTLE_KEY) != null) {
                     /*
                      * This message contains throttle data in map which contains Keys
                      * throttleKey - Key of particular throttling level
@@ -121,26 +78,19 @@ public class ThrottleEventListener implements MessageListener {
                      * expiryTimeStamp - When the throttling time window will expires
                      */
 
-                    handleThrottleUpdateMessage(map);
-                } else if (map.get(ThrottleConstants.POLICY_TEMPLATE_KEY) != null) {
-                    /*
-                     * This message contains key template data
-                     * keyTemplateValue - Value of key template
-                     * keyTemplateState - whether key template active or not
-                     */
-                    handleKeyTemplateMessage(map);
+                    handleThrottleUpdateMessage(payloadData);
                 }
             }
-        } catch (JMSException e) {
+        } catch (JMSException | JsonProcessingException e) {
             log.error("Error occurred when processing the received message ", e);
         }
     }
 
-    private void handleThrottleUpdateMessage(Map<String, Object> map) {
-        String throttleKey = map.get(ThrottleConstants.THROTTLE_KEY).toString();
-        String throttleState = map.get(ThrottleConstants.IS_THROTTLED).toString();
-        long timeStamp = Long.parseLong(map.get(ThrottleConstants.EXPIRY_TIMESTAMP).toString());
-        Object evaluatedConditionObject = map.get(ThrottleConstants.EVALUATED_CONDITIONS);
+    private void handleThrottleUpdateMessage(JsonNode msg) {
+        String throttleKey = msg.get(ThrottleConstants.THROTTLE_KEY).asText();
+        String throttleState = msg.get(ThrottleConstants.IS_THROTTLED).asText();
+        long timeStamp = Long.parseLong(msg.get(ThrottleConstants.EXPIRY_TIMESTAMP).asText());
+        Object evaluatedConditionObject = msg.get(ThrottleConstants.EVALUATED_CONDITIONS);
         ThrottleDataHolder dataHolder = ThrottleDataHolder.getInstance();
 
         if (log.isDebugEnabled()) {
@@ -155,7 +105,7 @@ public class ThrottleEventListener implements MessageListener {
 
             if (extractedKey != null) {
                 if (evaluatedConditionObject != null) {
-                    String conditionStr = (String) evaluatedConditionObject;
+                    String conditionStr = evaluatedConditionObject.toString();
                     List<ThrottleCondition> conditions = ThrottleUtils.extractThrottleCondition(conditionStr);
                     dataHolder.addThrottledConditions(extractedKey.getResourceKey(), extractedKey.getName(),
                             conditions);
@@ -171,19 +121,6 @@ public class ThrottleEventListener implements MessageListener {
 
                 dataHolder.removeThrottledConditions(extractedKey.getResourceKey(), extractedKey.getName());
             }
-        }
-    }
-
-    private synchronized void handleKeyTemplateMessage(Map<String, Object> map) {
-        String keyTemplateValue = map.get(ThrottleConstants.POLICY_TEMPLATE_KEY).toString();
-        String keyTemplateState = map.get(ThrottleConstants.TEMPLATE_KEY_STATE).toString();
-        ThrottleDataHolder dataHolder = ThrottleDataHolder.getInstance();
-        log.debug("Received Key - KeyTemplate: {}:{}", keyTemplateValue, keyTemplateState);
-
-        if (ThrottleConstants.ADD.equals(keyTemplateState)) {
-            dataHolder.addKeyTemplate(keyTemplateValue, keyTemplateValue);
-        } else {
-            dataHolder.removeKeyTemplate(keyTemplateValue);
         }
     }
 

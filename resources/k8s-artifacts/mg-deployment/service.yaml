@@ -20,12 +20,12 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: mg-router
+    app: mg-deployment
   name: router
 spec:
   type: NodePort
   selector:
-    app: mg-router
+    app: mg-deployment
   ports:
     - name: "http-routeradmin"
       port: 9000
@@ -37,3 +37,4 @@ spec:
       targetPort: 9095
       protocol: TCP
       nodePort: 30201
+

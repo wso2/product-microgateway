@@ -35,6 +35,7 @@ public class EnvVarConfig {
     private static final String ENFORCER_REGION_ID = "ENFORCER_REGION";
     public static final String XDS_MAX_MSG_SIZE = "XDS_MAX_MSG_SIZE";
     public static final String XDS_MAX_RETRIES = "XDS_MAX_RETRIES";
+    public static final String XDS_RETRY_PERIOD = "XDS_RETRY_PERIOD";
 
     // Since the container is running in linux container, path separator is not needed.
     private static final String DEFAULT_TRUSTED_CA_CERTS_PATH = "/home/wso2/security/truststore";
@@ -47,7 +48,9 @@ public class EnvVarConfig {
     private static final String DEFAULT_ENFORCER_LABEL = "enforcer";
     public static final String DEFAULT_XDS_MAX_MSG_SIZE = "4194304";
     public static final String DEFAULT_XDS_MAX_RETRIES = Integer.toString(Constants.MAX_XDS_RETRIES);
+    public static final String DEFAULT_XDS_RETRY_PERIOD = Integer.toString(Constants.XDS_DEFAULT_RETRY);
 
+    private static EnvVarConfig instance;
     private final String trustedAdapterCertsPath;
     private final String enforcerPrivateKeyPath;
     private final String enforcerPublicKeyPath;
@@ -60,8 +63,9 @@ public class EnvVarConfig {
     private final String enforcerRegionId;
     private final String xdsMaxMsgSize;
     private final String xdsMaxRetries;
+    private final String xdsRetryPeriod;
 
-    public EnvVarConfig() {
+    private EnvVarConfig() {
         trustedAdapterCertsPath = retrieveEnvVarOrDefault(TRUSTED_CA_CERTS_PATH,
                 DEFAULT_TRUSTED_CA_CERTS_PATH);
         enforcerPrivateKeyPath = retrieveEnvVarOrDefault(ENFORCER_PRIVATE_KEY_PATH,
@@ -75,7 +79,20 @@ public class EnvVarConfig {
         xdsMaxMsgSize = retrieveEnvVarOrDefault(XDS_MAX_MSG_SIZE, DEFAULT_XDS_MAX_MSG_SIZE);
         enforcerRegionId = retrieveEnvVarOrDefault(ENFORCER_REGION_ID, DEFAULT_ENFORCER_REGION_ID);
         xdsMaxRetries = retrieveEnvVarOrDefault(XDS_MAX_RETRIES, DEFAULT_XDS_MAX_RETRIES);
+        xdsRetryPeriod = retrieveEnvVarOrDefault(XDS_RETRY_PERIOD, DEFAULT_XDS_MAX_RETRIES);
     }
+
+    public static EnvVarConfig getInstance() {
+        if (instance == null) {
+            synchronized (EnvVarConfig.class) {
+                if (instance == null) {
+                    instance = new EnvVarConfig();
+                }
+            }
+        }
+        return instance;
+    }
+
 
     private String retrieveEnvVarOrDefault(String variable, String defaultValue) {
         if (StringUtils.isEmpty(System.getenv(variable))) {
@@ -123,5 +140,9 @@ public class EnvVarConfig {
 
     public String getXdsMaxRetries() {
         return xdsMaxRetries;
+    }
+
+    public String getXdsRetryPeriod() {
+        return xdsRetryPeriod;
     }
 }

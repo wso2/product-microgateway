@@ -17,6 +17,7 @@
  */
 package org.wso2.micro.gateway.enforcer.api.config;
 
+import org.wso2.gateway.discovery.api.EndpointSecurity;
 import org.wso2.micro.gateway.enforcer.throttle.ThrottleConstants;
 
 import java.util.ArrayList;
@@ -33,9 +34,12 @@ public class APIConfig {
     private List<String> productionUrls;
     private List<String> sandboxUrls;
     private String apiLifeCycleState;
+    private String authorizationHeader;
+    private EndpointSecurity endpointSecurity;
 
     private List<String> securitySchemes = new ArrayList<>();
     private String tier = ThrottleConstants.UNLIMITED_TIER;
+    private boolean disableSecurity = false;
     private List<ResourceConfig> resources = new ArrayList<>();
 
     public String getApiType() {
@@ -62,9 +66,12 @@ public class APIConfig {
         private List<String> productionUrls;
         private List<String> sandboxUrls;
         private String apiLifeCycleState;
+        private String authorizationHeader;
+        private EndpointSecurity endpointSecurity;
 
         private List<String> securitySchemes = new ArrayList<>();
         private String tier = ThrottleConstants.UNLIMITED_TIER;
+        private boolean disableSecurity = false;
         private List<ResourceConfig> resources = new ArrayList<>();
 
         public Builder(String name) {
@@ -96,6 +103,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder disableSecurity(boolean enabled) {
+            this.disableSecurity = enabled;
+            return this;
+        }
+
         public Builder resources(List<ResourceConfig> resources) {
             this.resources = resources;
             return this;
@@ -116,6 +128,16 @@ public class APIConfig {
             return this;
         }
 
+        public Builder endpointSecurity(EndpointSecurity endpointSecurity) {
+            this.endpointSecurity = endpointSecurity;
+            return this;
+        }
+
+        public Builder authHeader(String authorizationHeader) {
+            this.authorizationHeader = authorizationHeader;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -128,6 +150,9 @@ public class APIConfig {
             apiConfig.sandboxUrls = this.sandboxUrls;
             apiConfig.securitySchemes = this.securitySchemes;
             apiConfig.tier = this.tier;
+            apiConfig.endpointSecurity = this.endpointSecurity;
+            apiConfig.authorizationHeader = this.authorizationHeader;
+            apiConfig.disableSecurity = this.disableSecurity;
             return apiConfig;
         }
     }
@@ -143,8 +168,16 @@ public class APIConfig {
         return version;
     }
 
+    public EndpointSecurity getEndpointSecurity() {
+        return endpointSecurity;
+    }
+
     public String getBasePath() {
         return basePath;
+    }
+
+    public String getAuthHeader() {
+        return authorizationHeader;
     }
 
     public String getApiLifeCycleState() {
@@ -157,6 +190,10 @@ public class APIConfig {
 
     public String getTier() {
         return tier;
+    }
+
+    public boolean isDisableSecurity() {
+        return disableSecurity;
     }
 
     public List<ResourceConfig> getResources() {

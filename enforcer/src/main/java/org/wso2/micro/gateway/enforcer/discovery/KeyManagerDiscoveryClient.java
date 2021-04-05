@@ -24,6 +24,7 @@ import com.google.rpc.Status;
 import io.envoyproxy.envoy.config.core.v3.Node;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryRequest;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
@@ -33,7 +34,7 @@ import org.wso2.gateway.discovery.service.keymgt.KMDiscoveryServiceGrpc;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.AdapterConstants;
 import org.wso2.micro.gateway.enforcer.constants.Constants;
-import org.wso2.micro.gateway.enforcer.exception.DiscoveryException;
+import org.wso2.micro.gateway.enforcer.discovery.scheduler.XdsSchedulerManager;
 import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.micro.gateway.enforcer.util.GRPCUtils;
 
@@ -44,15 +45,16 @@ import java.util.concurrent.TimeUnit;
 /**
  * Client to communicate with API discovery service at the adapter.
  */
-public class KeyManagerDiscoveryClient {
+public class KeyManagerDiscoveryClient implements Runnable {
     private static KeyManagerDiscoveryClient instance;
-    private final ManagedChannel channel;
-    private final KMDiscoveryServiceGrpc.KMDiscoveryServiceStub stub;
-    private final KMDiscoveryServiceGrpc.KMDiscoveryServiceBlockingStub blockingStub;
+    private ManagedChannel channel;
+    private KMDiscoveryServiceGrpc.KMDiscoveryServiceStub stub;
     private static final Logger logger = LogManager.getLogger(KeyManagerDiscoveryClient.class);
     private StreamObserver<DiscoveryRequest> reqObserver;
     private static final Logger log = LogManager.getLogger(KeyManagerDiscoveryClient.class);
     private final KeyManagerHolder kmHolder;
+    private String host;
+    private int port;
     /**
      * This is a reference to the latest received response from the ADS.
      * <p>
@@ -76,12 +78,31 @@ public class KeyManagerDiscoveryClient {
     private final String nodeId;
 
     private KeyManagerDiscoveryClient(String host, int port) {
-        this.channel = GRPCUtils.createSecuredChannel(log, host, port);
-        this.stub = KMDiscoveryServiceGrpc.newStub(channel);
-        this.blockingStub = KMDiscoveryServiceGrpc.newBlockingStub(channel);
+        this.host = host;
+        this.port = port;
+        initConnection();
         this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
         this.kmHolder = KeyManagerHolder.getInstance();
+    }
+
+    private void initConnection() {
+        if (GRPCUtils.isReInitRequired(channel)) {
+            if (channel != null && !channel.isShutdown()) {
+                channel.shutdownNow();
+                do {
+                    try {
+                        channel.awaitTermination(100, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        log.error("Key manager discovery channel shutdown wait was interrupted", e);
+                    }
+                } while (!channel.isShutdown());
+            }
+            this.channel = GRPCUtils.createSecuredChannel(log, host, port);
+            this.stub = KMDiscoveryServiceGrpc.newStub(channel);
+        } else if (channel.getState(true) == ConnectivityState.READY) {
+            XdsSchedulerManager.getInstance().stopKeyManagerDiscoveryScheduling();
+        }
     }
 
     public static KeyManagerDiscoveryClient getInstance() {
@@ -93,22 +114,9 @@ public class KeyManagerDiscoveryClient {
         return instance;
     }
 
-    public List<KeyManagerConfig> requestInitKeyManagers() throws DiscoveryException {
-        List<KeyManagerConfig> keyManagers;
-        DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
-                .setTypeUrl(Constants.KEY_MANAGER_TYPE_URL).build();
-        try {
-            DiscoveryResponse response =
-                    blockingStub.withDeadlineAfter(60, TimeUnit.SECONDS).fetchKeyManagers(req);
-            shutdown();
-
-            keyManagers = handleResponse(response);
-        } catch (Exception e) {
-            // catching generic error here to wrap any grpc communication errors in the runtime
-            throw new DiscoveryException("Couldn't fetch init KeyManagers", e);
-        }
-        return keyManagers;
+    public void run() {
+        initConnection();
+        watchKeyManagers();
     }
 
     public void watchKeyManagers() {
@@ -117,6 +125,7 @@ public class KeyManagerDiscoveryClient {
             @Override
             public void onNext(DiscoveryResponse response) {
                 logger.debug("Received KeyManagers discovery response " + response);
+                XdsSchedulerManager.getInstance().stopKeyManagerDiscoveryScheduling();
                 latestReceived = response;
                 try {
                     List<KeyManagerConfig> keyManagerConfig = handleResponse(response);
@@ -132,7 +141,7 @@ public class KeyManagerDiscoveryClient {
             @Override
             public void onError(Throwable throwable) {
                 logger.error("Error occurred during Key Manager discovery", throwable);
-                // TODO: if adapter is unavailable keep retrying
+                XdsSchedulerManager.getInstance().startKeyManagerDiscoveryScheduling();
                 nack(throwable);
             }
 
