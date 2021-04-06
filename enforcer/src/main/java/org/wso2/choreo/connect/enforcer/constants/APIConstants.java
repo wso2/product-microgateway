@@ -159,6 +159,8 @@ public class APIConstants {
         public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
         public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
         public static final String INTERNAL_KEY = "internal-key";
+        public static final String PARAM_SEPARATOR = "&";
+        public static final String PARAM_VALUE_SEPARATOR = "=";
 
     }
 

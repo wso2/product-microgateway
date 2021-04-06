@@ -110,7 +110,12 @@ public class ApictlUtils {
      */
     public static void createProject(String openApiFile, String apiProjectName, String backendCert) throws IOException, MicroGWTestException {
         String targetDir = Utils.getTargetDirPath();
-        String openApiFilePath = targetDir + OPENAPIS_PATH + openApiFile;
+        String openApiFilePath;
+        if(openApiFile.startsWith("https://") || openApiFile.startsWith("http://")) {
+            openApiFilePath = openApiFile;
+        } else {
+            openApiFilePath = targetDir + OPENAPIS_PATH + openApiFile;
+        }
         String projectPathToCreate = targetDir + API_PROJECTS_PATH + apiProjectName;
 
         //apictl init <projectPath> --oas <openApiFilePath>
