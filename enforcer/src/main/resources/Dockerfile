@@ -15,7 +15,7 @@
 # -----------------------------------------------------------------------
 
 # TODO: (VirajSalaka) finalize jdk 11 image
-FROM adoptopenjdk/openjdk11:jre-11.0.9_11.1-alpine
+FROM adoptopenjdk/openjdk11:jre-11.0.10_9-alpine
 LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
 
 ENV LANG=C.UTF-8
