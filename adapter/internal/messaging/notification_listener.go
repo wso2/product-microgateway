@@ -88,8 +88,6 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 			handleApplicationEvents(decodedByte, eventType)
 		} else if strings.Contains(eventType, subscriptionEventType) {
 			handleSubscriptionEvents(decodedByte, eventType)
-		} else if strings.Contains(eventType, scopeEvenType) {
-			// handleScopeEvents(decodedByte, eventType)
 		} else {
 			handlePolicyEvents(decodedByte, eventType)
 		}
@@ -238,15 +236,6 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 	}
 	xds.UpdateEnforcerSubscriptions(xds.MarshalSubscriptionList(eh.SubList))
 	// EventTypes: SUBSCRIPTIONS_CREATE, SUBSCRIPTIONS_UPDATE, SUBSCRIPTIONS_DELETE
-}
-
-// handleScopeRelatedEvents to process scope related events
-func handleScopeEvents(data []byte, eventType string) {
-	var scopeEvent ScopeEvent
-	json.Unmarshal([]byte(string(data)), &scopeEvent)
-	scope := types.Scope{Name: scopeEvent.Name, DisplayName: scopeEvent.DisplayName, ApplicationName: scopeEvent.ApplicationName}
-	ScopeList = append(ScopeList, scope)
-	// EventTypes: SCOPE_CREATE, SCOPE_UPDATE,SCOPE_DELETE
 }
 
 // handlePolicyRelatedEvents to process policy related events
