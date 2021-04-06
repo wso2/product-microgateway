@@ -79,6 +79,7 @@ public class APIConstants {
     public static final String CONTENT_TYPE_HEADER = "Content-type";
     public static final String APPLICATION_JSON = "application/json";
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
+    public static final String X_FORWARDED_FOR = "x-forwarded-for";
 
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
