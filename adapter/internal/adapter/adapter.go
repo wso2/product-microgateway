@@ -15,8 +15,8 @@
  *
  */
 
-// Package mgw contains the implementation to start the adapter
-package mgw
+// Package adapter contains the implementation to start the adapter
+package adapter
 
 import (
 	"crypto/tls"
