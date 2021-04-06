@@ -15,7 +15,7 @@
 # -----------------------------------------------------------------------
 
 # TODO: (VirajSalaka) finalize jdk 11 image
-FROM adoptopenjdk/openjdk11:jre-11.0.9_11.1-alpine
+FROM adoptopenjdk/openjdk11:jre-11.0.10_9-alpine
 LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
 
 ENV LANG=C.UTF-8
@@ -60,4 +60,4 @@ USER ${MG_USER}
 COPY maven/ lib/
 COPY maven/conf conf
 COPY maven/security security
-CMD java $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -cp "lib/*" org.wso2.micro.gateway.enforcer.server.AuthServer
+CMD java $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -cp "lib/*" org.wso2.choreo.connect.enforcer.server.AuthServer

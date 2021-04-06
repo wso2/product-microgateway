@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   router:
-    image: wso2/mg-router:4.0.0-m10
+    image: wso2/choreo-connect-router:0.9.0-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -18,6 +18,7 @@ services:
       - ADAPTER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
       - ENFORCER_HOST=enforcer
       - ENFORCER_PORT=8081
+      - ENFORCER_ANALYTICS_RECEIVER_PORT=18090
       - ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
     volumes:
       - ./resources/router/security:/home/wso2/security
@@ -29,7 +30,7 @@ services:
       - adapter
       - enforcer
   adapter:
-    image: wso2/mg-adapter:4.0.0-m10
+    image: wso2/choreo-connect-adapter:0.9.0-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -44,7 +45,7 @@ services:
       - "18000:18000"
       - "9843:9843"
   enforcer:
-    image: wso2/mg-enforcer:4.0.0-m10
+    image: wso2/choreo-connect-enforcer:0.9.0-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -63,11 +64,14 @@ services:
       - ADAPTER_HOST=adapter
       - ADAPTER_XDS_PORT=18000
       - ENFORCER_LABEL=Production and Sandbox
+      - ENFORCER_REGION=UNKNOWN
       - XDS_MAX_MSG_SIZE=4194304
       - XDS_MAX_RETRIES=3
       - JAVA_OPTS=${JAVA_OPTS}
       - apim_admin_pwd=admin
       - enforcer_admin_pwd=admin
       - tm_admin_pwd=admin
+      - analytics_authURL=https://localhost:8080
+      - analytics_authToken=
     ports:
       - "8081:8081"

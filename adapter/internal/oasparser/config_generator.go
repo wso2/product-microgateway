@@ -151,6 +151,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 		Description:         mgwSwagger.GetDescription(),
 		BasePath:            mgwSwagger.GetXWso2Basepath(),
 		Version:             mgwSwagger.GetVersion(),
+		ApiType:             mgwSwagger.GetAPIType(),
 		ProductionUrls:      prodUrls,
 		SandboxUrls:         sandUrls,
 		Resources:           resources,
@@ -159,7 +160,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 		SecurityScheme:      mgwSwagger.GetSetSecurityScheme(),
 		EndpointSecurity:    endpointSecurityDetails,
 		AuthorizationHeader: mgwSwagger.GetXWSO2AuthHeader(),
-        DisableSecurity:     mgwSwagger.GetDisableSecurity(),
+		DisableSecurity:     mgwSwagger.GetDisableSecurity(),
 		Vhost:               vhost,
 	}
 }

@@ -5,7 +5,7 @@ package wso2.discovery.api;
 import "wso2/discovery/api/Endpoint.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
-option java_package = "org.wso2.gateway.discovery.api";
+option java_package = "org.wso2.choreo.connect.discovery.api";
 option java_outer_classname = "ResourceProto";
 option java_multiple_files = true;
 

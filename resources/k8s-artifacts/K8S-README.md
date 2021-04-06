@@ -5,9 +5,9 @@ There are two modes when deploying Microgateway in Kubernetes.
    - Deployment with WSO2 API operator for kubernetes
 
 When deploying the Microgateway in kubernetes there are 3 pods for the components as follows.
-   - mg-router
-   - mg-adapter
-   - mg-enforcer
+   - choreo-connect-router
+   - choreo-connect-adapter
+   - choreo-connect-enforcer
    
 Router and Adapter services are exposed as NodePort type in kubernetes. Enforcer service is exposed as ClusterIP type.
 
@@ -44,7 +44,7 @@ export PATH=$PATH:<CLI_HOME>
   - In each folder config maps, deployment and service are included.
   - You can use the following command to deploy each microgateway component in kubernetes.
   ```
-  kubectl apply -f mg-adapter/ -f mg-enforcer/ -f mg-router/
+  kubectl apply -f choreo-connect-adapter/ -f choreo-connect-enforcer/ -f choreo-connect-router/
   ```
   - You can verify the deployments using the following commands.
   ```
@@ -107,7 +107,7 @@ referred as `MG_HOME`.
   - In each folder config maps, deployment and service are included.
   - You can use the following commands to deploy each microgateway component in kubernetes.
   ```
-  kubectl apply -f mg-adapter/ -f mg-enforcer/ -f mg-router/
+  kubectl apply -f choreo-connect-adapter/ -f choreo-connect-enforcer/ -f choreo-connect-router/
   ```
   - You can verify the deployments using the following commands.
   ```

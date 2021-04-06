@@ -20,12 +20,12 @@
 
     <parent>
         <artifactId>integration</artifactId>
-        <groupId>org.wso2.am.microgw</groupId>
-        <version>4.0.0-m10-SNAPSHOT</version>
+        <groupId>org.wso2.am.choreo.connect</groupId>
+        <version>0.9.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <version>4.0.0-m10-SNAPSHOT</version>
+    <version>0.9.0-SNAPSHOT</version>
     <dependencies>
         <dependency>
             <groupId>io.grpc</groupId>
@@ -37,9 +37,9 @@
         </dependency>
     </dependencies>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.am.microgw</groupId>
+    <groupId>org.wso2.am.choreo.connect</groupId>
     <artifactId>mock-backend-server</artifactId>
-    <name>Micro Gateway - Mock-Backend-Server</name>
+    <name>Choreo Connect - Mock-Backend-Server</name>
 
     <build>
         <plugins>
@@ -74,7 +74,7 @@
                 <configuration>
                     <images>
                         <image>
-                            <name>wso2/mg-mock-backend:latest</name>
+                            <name>wso2/choreo-connect-mock-backend:latest</name>
                             <build>
                                 <contextDir>${project.basedir}/src/main/resources</contextDir>
                                 <assembly>
