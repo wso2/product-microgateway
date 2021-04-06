@@ -95,9 +95,10 @@ public class OAuthAuthenticator implements Authenticator {
         String token = requestContext.getHeaders().get("authorization");
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
 
-        if (token.toLowerCase().contains("bearer")) {
-            token = token.split("\\s")[1];
+        if (token == null || !token.toLowerCase().contains("bearer")) {
+            throw new SecurityException("Authorization header is not in correct format. Authorization: Bearer <token>");
         }
+        token = token.split("\\s")[1];
 
         try {
             IntrospectInfo introspectInfo = validateToken(token);

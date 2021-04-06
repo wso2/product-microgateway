@@ -24,6 +24,7 @@ package org.wso2.choreo.connect.enforcer.security.jwt.validator;
 public class JWTConstants {
     public static final String AUTHORIZATION = "authorization";
     public static final String RSA = "RSA";
+    public static final String BEARER = "bearer";
     public static final String UNAVAILABLE = "Token is not available in cache";
     public static final String VALID = "valid";
     public static final String INVALID = "invalid";

@@ -86,7 +86,10 @@ public class JWTAuthenticator implements Authenticator {
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
         String jwtToken = retrieveAuthHeaderValue(requestContext);
-        String splitToken[] = jwtToken.split("\\s");
+        if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
+            throw new SecurityException("Authorization header is not in correct format. Authorization: Bearer <token>");
+        }
+        String[] splitToken = jwtToken.split("\\s");
         // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
         if (splitToken.length > 1) {
             jwtToken = splitToken[1];
