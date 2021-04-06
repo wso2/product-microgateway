@@ -88,12 +88,11 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 			handleApplicationEvents(decodedByte, eventType)
 		} else if strings.Contains(eventType, subscriptionEventType) {
 			handleSubscriptionEvents(decodedByte, eventType)
+		} else if strings.Contains(eventType, scopeEvenType) {
+			// handleScopeEvents(decodedByte, eventType)
+		} else {
+			handlePolicyEvents(decodedByte, eventType)
 		}
-		// else if strings.Contains(eventType, scopeEvenType) {
-		// 	handleScopeEvents(decodedByte, eventType)
-		// } else {
-		// 	handlePolicyEvents(decodedByte, eventType)
-		// }
 		d.Ack(false)
 	}
 	logger.LoggerMsg.Infof("handle: deliveries channel closed")
@@ -270,8 +269,8 @@ func handlePolicyEvents(data []byte, eventType string) {
 	// 	json.Unmarshal([]byte(string(data)), &apiPolicyEvent)
 	// } else
 	if strings.EqualFold(applicationEventType, policyEvent.PolicyType) {
-		applicationPolicy := types.ApplicationPolicy{ID: policyEvent.PolicyID, TenantID: -1, Name: policyEvent.PolicyName,
-			QuotaType: policyEvent.QuotaType}
+		applicationPolicy := types.ApplicationPolicy{ID: policyEvent.PolicyID, TenantID: policyEvent.Event.TenantID,
+			Name: policyEvent.PolicyName, QuotaType: policyEvent.QuotaType}
 
 		if policyEvent.Event.Type == policyCreate {
 			eh.AppPolicyList.List = append(eh.AppPolicyList.List, applicationPolicy)
