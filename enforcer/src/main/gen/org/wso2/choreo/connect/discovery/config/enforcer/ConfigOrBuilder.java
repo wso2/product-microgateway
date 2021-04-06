@@ -68,19 +68,19 @@ public interface ConfigOrBuilder extends
   org.wso2.choreo.connect.discovery.config.enforcer.EventHubOrBuilder getEventhubOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
    * @return Whether the authService field is set.
    */
   boolean hasAuthService();
   /**
-   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
    * @return The authService.
    */
-  org.wso2.choreo.connect.discovery.config.enforcer.AuthService getAuthService();
+  org.wso2.choreo.connect.discovery.config.enforcer.Service getAuthService();
   /**
-   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
    */
-  org.wso2.choreo.connect.discovery.config.enforcer.AuthServiceOrBuilder getAuthServiceOrBuilder();
+  org.wso2.choreo.connect.discovery.config.enforcer.ServiceOrBuilder getAuthServiceOrBuilder();
 
   /**
    * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
@@ -156,4 +156,19 @@ public interface ConfigOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuerOrBuilder getJwtIssuerOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+   * @return Whether the analytics field is set.
+   */
+  boolean hasAnalytics();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+   * @return The analytics.
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.Analytics getAnalytics();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder getAnalyticsOrBuilder();
 }

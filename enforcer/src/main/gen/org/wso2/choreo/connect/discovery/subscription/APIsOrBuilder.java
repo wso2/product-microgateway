@@ -111,4 +111,16 @@ public interface APIsOrBuilder extends
    * <code>.wso2.discovery.subscription.URLMapping urlMappings = 9;</code>
    */
   org.wso2.choreo.connect.discovery.subscription.URLMappingOrBuilder getUrlMappingsOrBuilder();
+
+  /**
+   * <code>string uuid = 10;</code>
+   * @return The uuid.
+   */
+  java.lang.String getUuid();
+  /**
+   * <code>string uuid = 10;</code>
+   * @return The bytes for uuid.
+   */
+  com.google.protobuf.ByteString
+      getUuidBytes();
 }

@@ -231,7 +231,7 @@ public class KeyValidator {
         }
         infoDTO.setTier(sub.getPolicyId());
         infoDTO.setSubscriber(app.getSubName());
-        infoDTO.setApplicationId(app.getId().toString());
+        infoDTO.setApplicationId(app.getUUID());
         infoDTO.setApiName(api.getApiName());
         infoDTO.setApiVersion(api.getApiVersion());
         infoDTO.setApiPublisher(api.getApiProvider());
@@ -239,6 +239,7 @@ public class KeyValidator {
         infoDTO.setApplicationTier(app.getPolicy());
         infoDTO.setApplicationUUID(app.getUUID());
         infoDTO.setAppAttributes(app.getAttributes());
+        infoDTO.setApiUUID(api.getApiUUID());
         infoDTO.setType(type);
 
         // Advanced Level Throttling Related Properties

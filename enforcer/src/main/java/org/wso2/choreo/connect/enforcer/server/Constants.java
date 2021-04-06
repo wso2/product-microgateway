@@ -19,10 +19,13 @@
 package org.wso2.choreo.connect.enforcer.server;
 
 /**
- * Constants related to gRPC server component.
+ * Constants related to gRPC analytics/auth server components.
  */
 public class Constants {
 
     public static final String EXTERNAL_AUTHZ_THREAD_GROUP = "External Authentication Service Thread Group";
     public static final String EXTERNAL_AUTHZ_THREAD_ID = "ExtAuthService";
+
+    public static final String ANALYTICS_THREAD_GROUP = "Analytics Receiver Service Thread Group";
+    public static final String ANALYTICS_THREAD_ID = "AnalyticsReceiver";
 }

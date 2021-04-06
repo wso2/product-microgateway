@@ -66,6 +66,7 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private int graphQLMaxDepth;
     private int graphQLMaxComplexity;
     private String apiVersion;
+    private String apiUUID;
     private String applicationUUID;
     private Map<String, String> appAttributes;
 
@@ -396,6 +397,14 @@ public class APIKeyValidationInfoDTO implements Serializable {
     public void setAppAttributes(Map<String, String> appAttributes) {
 
         this.appAttributes = appAttributes;
+    }
+
+    public String getApiUUID() {
+        return apiUUID;
+    }
+
+    public void setApiUUID(String apiUUID) {
+        this.apiUUID = apiUUID;
     }
 }
 

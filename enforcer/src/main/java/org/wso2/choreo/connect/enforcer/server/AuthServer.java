@@ -20,19 +20,19 @@ package org.wso2.choreo.connect.enforcer.server;
 
 import io.grpc.Server;
 import io.grpc.ServerInterceptors;
-import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.channel.EventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
+import org.wso2.choreo.connect.enforcer.analytics.AccessLoggingService;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
+import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.choreo.connect.enforcer.grpc.ExtAuthService;
 import org.wso2.choreo.connect.enforcer.grpc.interceptors.AccessLogInterceptor;
@@ -43,10 +43,9 @@ import org.wso2.choreo.connect.enforcer.throttle.ThrottleAgent;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleDataHolder;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleEventListener;
+import org.wso2.choreo.connect.enforcer.util.TLSUtils;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
@@ -65,7 +64,17 @@ public class AuthServer {
 
             // Create a new server to listen on port 8081
             Server server = initServer();
-            // Initialise cache objects
+
+            // Enable global filters
+            if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {
+                logger.info("analytics filter is enabled.");
+                AccessLoggingService accessLoggingService = new AccessLoggingService();
+                accessLoggingService.init();
+            } else {
+                logger.debug("analytics filter is disabled.");
+            }
+
+            //Initialise cache objects
             CacheProvider.init();
             ThrottleConfigDto throttleConf = ConfigHolder.getInstance().getConfig().getThrottleConfig();
             if (throttleConf.isGlobalPublishingEnabled()) {
@@ -105,12 +114,10 @@ public class AuthServer {
     }
 
     private static Server initServer() throws SSLException {
-        File certFile = Paths.get(ConfigHolder.getInstance().getEnvVarConfig().getEnforcerPublicKeyPath()).toFile();
-        File keyFile = Paths.get(ConfigHolder.getInstance().getEnvVarConfig().getEnforcerPrivateKeyPath()).toFile();
         final EventLoopGroup bossGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
         final EventLoopGroup workerGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors() * 2);
         AuthServiceConfigurationDto authServerConfig = ConfigHolder.getInstance().getConfig().getAuthService();
-        AuthServiceConfigurationDto.ThreadPoolConfig threadPoolConfig = authServerConfig.getThreadPool();
+        ThreadPoolConfig threadPoolConfig = authServerConfig.getThreadPool();
         EnforcerWorkerPool enforcerWorkerPool = new EnforcerWorkerPool(threadPoolConfig.getCoreSize(),
                 threadPoolConfig.getMaxSize(), threadPoolConfig.getKeepAliveTime(), threadPoolConfig.getQueueSize(),
                 Constants.EXTERNAL_AUTHZ_THREAD_GROUP, Constants.EXTERNAL_AUTHZ_THREAD_ID);
@@ -120,9 +127,8 @@ public class AuthServer {
                 .addService(ServerInterceptors.intercept(new ExtAuthService(), new AccessLogInterceptor()))
                 .maxInboundMessageSize(authServerConfig.getMaxMessageSize())
                 .maxInboundMetadataSize(authServerConfig.getMaxHeaderLimit()).channelType(NioServerSocketChannel.class)
-                .executor(enforcerWorkerPool.getExecutor()).sslContext(GrpcSslContexts.forServer(certFile, keyFile)
-                        .trustManager(ConfigHolder.getInstance().getTrustManagerFactory())
-                        .clientAuth(ClientAuth.REQUIRE).build()).build();
-
+                .executor(enforcerWorkerPool.getExecutor())
+                .sslContext(TLSUtils.buildGRPCServerSSLContext())
+                .build();
     }
 }

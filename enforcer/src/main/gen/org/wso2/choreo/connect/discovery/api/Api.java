@@ -23,7 +23,7 @@ private static final long serialVersionUID = 0L;
     id_ = "";
     title_ = "";
     version_ = "";
-    swaggerVersion_ = "";
+    apiType_ = "";
     description_ = "";
     productionUrls_ = java.util.Collections.emptyList();
     sandboxUrls_ = java.util.Collections.emptyList();
@@ -87,7 +87,7 @@ private static final long serialVersionUID = 0L;
           case 34: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            swaggerVersion_ = s;
+            apiType_ = s;
             break;
           }
           case 42: {
@@ -332,38 +332,38 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int SWAGGERVERSION_FIELD_NUMBER = 4;
-  private volatile java.lang.Object swaggerVersion_;
+  public static final int APITYPE_FIELD_NUMBER = 4;
+  private volatile java.lang.Object apiType_;
   /**
-   * <code>string swaggerVersion = 4;</code>
-   * @return The swaggerVersion.
+   * <code>string apiType = 4;</code>
+   * @return The apiType.
    */
   @java.lang.Override
-  public java.lang.String getSwaggerVersion() {
-    java.lang.Object ref = swaggerVersion_;
+  public java.lang.String getApiType() {
+    java.lang.Object ref = apiType_;
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
-      swaggerVersion_ = s;
+      apiType_ = s;
       return s;
     }
   }
   /**
-   * <code>string swaggerVersion = 4;</code>
-   * @return The bytes for swaggerVersion.
+   * <code>string apiType = 4;</code>
+   * @return The bytes for apiType.
    */
   @java.lang.Override
   public com.google.protobuf.ByteString
-      getSwaggerVersionBytes() {
-    java.lang.Object ref = swaggerVersion_;
+      getApiTypeBytes() {
+    java.lang.Object ref = apiType_;
     if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
-      swaggerVersion_ = b;
+      apiType_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
@@ -775,8 +775,8 @@ private static final long serialVersionUID = 0L;
     if (!getVersionBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, version_);
     }
-    if (!getSwaggerVersionBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 4, swaggerVersion_);
+    if (!getApiTypeBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 4, apiType_);
     }
     if (!getDescriptionBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 5, description_);
@@ -829,8 +829,8 @@ private static final long serialVersionUID = 0L;
     if (!getVersionBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, version_);
     }
-    if (!getSwaggerVersionBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, swaggerVersion_);
+    if (!getApiTypeBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, apiType_);
     }
     if (!getDescriptionBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, description_);
@@ -896,8 +896,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getTitle())) return false;
     if (!getVersion()
         .equals(other.getVersion())) return false;
-    if (!getSwaggerVersion()
-        .equals(other.getSwaggerVersion())) return false;
+    if (!getApiType()
+        .equals(other.getApiType())) return false;
     if (!getDescription()
         .equals(other.getDescription())) return false;
     if (!getProductionUrlsList()
@@ -940,8 +940,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getTitle().hashCode();
     hash = (37 * hash) + VERSION_FIELD_NUMBER;
     hash = (53 * hash) + getVersion().hashCode();
-    hash = (37 * hash) + SWAGGERVERSION_FIELD_NUMBER;
-    hash = (53 * hash) + getSwaggerVersion().hashCode();
+    hash = (37 * hash) + APITYPE_FIELD_NUMBER;
+    hash = (53 * hash) + getApiType().hashCode();
     hash = (37 * hash) + DESCRIPTION_FIELD_NUMBER;
     hash = (53 * hash) + getDescription().hashCode();
     if (getProductionUrlsCount() > 0) {
@@ -1121,7 +1121,7 @@ private static final long serialVersionUID = 0L;
 
       version_ = "";
 
-      swaggerVersion_ = "";
+      apiType_ = "";
 
       description_ = "";
 
@@ -1191,7 +1191,7 @@ private static final long serialVersionUID = 0L;
       result.id_ = id_;
       result.title_ = title_;
       result.version_ = version_;
-      result.swaggerVersion_ = swaggerVersion_;
+      result.apiType_ = apiType_;
       result.description_ = description_;
       if (productionUrlsBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0)) {
@@ -1295,8 +1295,8 @@ private static final long serialVersionUID = 0L;
         version_ = other.version_;
         onChanged();
       }
-      if (!other.getSwaggerVersion().isEmpty()) {
-        swaggerVersion_ = other.swaggerVersion_;
+      if (!other.getApiType().isEmpty()) {
+        apiType_ = other.apiType_;
         onChanged();
       }
       if (!other.getDescription().isEmpty()) {
@@ -1671,78 +1671,78 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object swaggerVersion_ = "";
+    private java.lang.Object apiType_ = "";
     /**
-     * <code>string swaggerVersion = 4;</code>
-     * @return The swaggerVersion.
+     * <code>string apiType = 4;</code>
+     * @return The apiType.
      */
-    public java.lang.String getSwaggerVersion() {
-      java.lang.Object ref = swaggerVersion_;
+    public java.lang.String getApiType() {
+      java.lang.Object ref = apiType_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        swaggerVersion_ = s;
+        apiType_ = s;
         return s;
       } else {
         return (java.lang.String) ref;
       }
     }
     /**
-     * <code>string swaggerVersion = 4;</code>
-     * @return The bytes for swaggerVersion.
+     * <code>string apiType = 4;</code>
+     * @return The bytes for apiType.
      */
     public com.google.protobuf.ByteString
-        getSwaggerVersionBytes() {
-      java.lang.Object ref = swaggerVersion_;
+        getApiTypeBytes() {
+      java.lang.Object ref = apiType_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        swaggerVersion_ = b;
+        apiType_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
     /**
-     * <code>string swaggerVersion = 4;</code>
-     * @param value The swaggerVersion to set.
+     * <code>string apiType = 4;</code>
+     * @param value The apiType to set.
      * @return This builder for chaining.
      */
-    public Builder setSwaggerVersion(
+    public Builder setApiType(
         java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
   
-      swaggerVersion_ = value;
+      apiType_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>string swaggerVersion = 4;</code>
+     * <code>string apiType = 4;</code>
      * @return This builder for chaining.
      */
-    public Builder clearSwaggerVersion() {
+    public Builder clearApiType() {
       
-      swaggerVersion_ = getDefaultInstance().getSwaggerVersion();
+      apiType_ = getDefaultInstance().getApiType();
       onChanged();
       return this;
     }
     /**
-     * <code>string swaggerVersion = 4;</code>
-     * @param value The bytes for swaggerVersion to set.
+     * <code>string apiType = 4;</code>
+     * @param value The bytes for apiType to set.
      * @return This builder for chaining.
      */
-    public Builder setSwaggerVersionBytes(
+    public Builder setApiTypeBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
       
-      swaggerVersion_ = value;
+      apiType_ = value;
       onChanged();
       return this;
     }

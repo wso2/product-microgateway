@@ -809,3 +809,17 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, e
 	}
 	return params
 }
+
+// createAddress generates an address from the given host and port
+func createAddress(remoteHost string, port uint32) *corev3.Address {
+	address := corev3.Address{Address: &corev3.Address_SocketAddress{
+		SocketAddress: &corev3.SocketAddress{
+			Address:  remoteHost,
+			Protocol: corev3.SocketAddress_TCP,
+			PortSpecifier: &corev3.SocketAddress_PortValue{
+				PortValue: uint32(port),
+			},
+		},
+	}}
+	return &address
+}

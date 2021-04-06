@@ -68,48 +68,5 @@ public class AuthServiceConfigurationDto {
     public void setThreadPool(ThreadPoolConfig threadPool) {
         this.threadPool = threadPool;
     }
-
-    /**
-     * Holds the configurations related to threading of gRPC netty server.
-     */
-    public class ThreadPoolConfig {
-        private int coreSize;
-        private int maxSize;
-        private int keepAliveTime;
-        private int queueSize;
-
-        public int getCoreSize() {
-            return coreSize;
-        }
-
-        public void setCoreSize(int coreSize) {
-            this.coreSize = coreSize;
-        }
-
-        public int getMaxSize() {
-            return maxSize;
-        }
-
-        public void setMaxSize(int maxSize) {
-            this.maxSize = maxSize;
-        }
-
-        public int getKeepAliveTime() {
-            return keepAliveTime;
-        }
-
-        public void setKeepAliveTime(int keepAliveTime) {
-            this.keepAliveTime = keepAliveTime;
-        }
-
-        public int getQueueSize() {
-            return queueSize;
-        }
-
-        public void setQueueSize(int queueSize) {
-            this.queueSize = queueSize;
-        }
-    }
-
 }
 

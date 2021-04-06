@@ -105,11 +105,11 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 42: {
-            org.wso2.choreo.connect.discovery.config.enforcer.AuthService.Builder subBuilder = null;
+            org.wso2.choreo.connect.discovery.config.enforcer.Service.Builder subBuilder = null;
             if (authService_ != null) {
               subBuilder = authService_.toBuilder();
             }
-            authService_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.AuthService.parser(), extensionRegistry);
+            authService_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Service.parser(), extensionRegistry);
             if (subBuilder != null) {
               subBuilder.mergeFrom(authService_);
               authService_ = subBuilder.buildPartial();
@@ -178,6 +178,19 @@ private static final long serialVersionUID = 0L;
             if (subBuilder != null) {
               subBuilder.mergeFrom(jwtIssuer_);
               jwtIssuer_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
+          case 90: {
+            org.wso2.choreo.connect.discovery.config.enforcer.Analytics.Builder subBuilder = null;
+            if (analytics_ != null) {
+              subBuilder = analytics_.toBuilder();
+            }
+            analytics_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Analytics.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(analytics_);
+              analytics_ = subBuilder.buildPartial();
             }
 
             break;
@@ -319,9 +332,9 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int AUTHSERVICE_FIELD_NUMBER = 5;
-  private org.wso2.choreo.connect.discovery.config.enforcer.AuthService authService_;
+  private org.wso2.choreo.connect.discovery.config.enforcer.Service authService_;
   /**
-   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
    * @return Whether the authService field is set.
    */
   @java.lang.Override
@@ -329,18 +342,18 @@ private static final long serialVersionUID = 0L;
     return authService_ != null;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
    * @return The authService.
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.config.enforcer.AuthService getAuthService() {
-    return authService_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.AuthService.getDefaultInstance() : authService_;
+  public org.wso2.choreo.connect.discovery.config.enforcer.Service getAuthService() {
+    return authService_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Service.getDefaultInstance() : authService_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.config.enforcer.AuthServiceOrBuilder getAuthServiceOrBuilder() {
+  public org.wso2.choreo.connect.discovery.config.enforcer.ServiceOrBuilder getAuthServiceOrBuilder() {
     return getAuthService();
   }
 
@@ -474,6 +487,32 @@ private static final long serialVersionUID = 0L;
     return getJwtIssuer();
   }
 
+  public static final int ANALYTICS_FIELD_NUMBER = 11;
+  private org.wso2.choreo.connect.discovery.config.enforcer.Analytics analytics_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+   * @return Whether the analytics field is set.
+   */
+  @java.lang.Override
+  public boolean hasAnalytics() {
+    return analytics_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+   * @return The analytics.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.Analytics getAnalytics() {
+    return analytics_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Analytics.getDefaultInstance() : analytics_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder getAnalyticsOrBuilder() {
+    return getAnalytics();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -517,6 +556,9 @@ private static final long serialVersionUID = 0L;
     }
     if (jwtIssuer_ != null) {
       output.writeMessage(10, getJwtIssuer());
+    }
+    if (analytics_ != null) {
+      output.writeMessage(11, getAnalytics());
     }
     unknownFields.writeTo(output);
   }
@@ -566,6 +608,10 @@ private static final long serialVersionUID = 0L;
     if (jwtIssuer_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(10, getJwtIssuer());
+    }
+    if (analytics_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(11, getAnalytics());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -632,6 +678,11 @@ private static final long serialVersionUID = 0L;
       if (!getJwtIssuer()
           .equals(other.getJwtIssuer())) return false;
     }
+    if (hasAnalytics() != other.hasAnalytics()) return false;
+    if (hasAnalytics()) {
+      if (!getAnalytics()
+          .equals(other.getAnalytics())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -682,6 +733,10 @@ private static final long serialVersionUID = 0L;
     if (hasJwtIssuer()) {
       hash = (37 * hash) + JWTISSUER_FIELD_NUMBER;
       hash = (53 * hash) + getJwtIssuer().hashCode();
+    }
+    if (hasAnalytics()) {
+      hash = (37 * hash) + ANALYTICS_FIELD_NUMBER;
+      hash = (53 * hash) + getAnalytics().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -880,6 +935,12 @@ private static final long serialVersionUID = 0L;
         jwtIssuer_ = null;
         jwtIssuerBuilder_ = null;
       }
+      if (analyticsBuilder_ == null) {
+        analytics_ = null;
+      } else {
+        analytics_ = null;
+        analyticsBuilder_ = null;
+      }
       return this;
     }
 
@@ -955,6 +1016,11 @@ private static final long serialVersionUID = 0L;
         result.jwtIssuer_ = jwtIssuer_;
       } else {
         result.jwtIssuer_ = jwtIssuerBuilder_.build();
+      }
+      if (analyticsBuilder_ == null) {
+        result.analytics_ = analytics_;
+      } else {
+        result.analytics_ = analyticsBuilder_.build();
       }
       onBuilt();
       return result;
@@ -1033,6 +1099,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasJwtIssuer()) {
         mergeJwtIssuer(other.getJwtIssuer());
+      }
+      if (other.hasAnalytics()) {
+        mergeAnalytics(other.getAnalytics());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1539,31 +1608,31 @@ private static final long serialVersionUID = 0L;
       return eventhubBuilder_;
     }
 
-    private org.wso2.choreo.connect.discovery.config.enforcer.AuthService authService_;
+    private org.wso2.choreo.connect.discovery.config.enforcer.Service authService_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.config.enforcer.AuthService, org.wso2.choreo.connect.discovery.config.enforcer.AuthService.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AuthServiceOrBuilder> authServiceBuilder_;
+        org.wso2.choreo.connect.discovery.config.enforcer.Service, org.wso2.choreo.connect.discovery.config.enforcer.Service.Builder, org.wso2.choreo.connect.discovery.config.enforcer.ServiceOrBuilder> authServiceBuilder_;
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      * @return Whether the authService field is set.
      */
     public boolean hasAuthService() {
       return authServiceBuilder_ != null || authService_ != null;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      * @return The authService.
      */
-    public org.wso2.choreo.connect.discovery.config.enforcer.AuthService getAuthService() {
+    public org.wso2.choreo.connect.discovery.config.enforcer.Service getAuthService() {
       if (authServiceBuilder_ == null) {
-        return authService_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.AuthService.getDefaultInstance() : authService_;
+        return authService_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Service.getDefaultInstance() : authService_;
       } else {
         return authServiceBuilder_.getMessage();
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
-    public Builder setAuthService(org.wso2.choreo.connect.discovery.config.enforcer.AuthService value) {
+    public Builder setAuthService(org.wso2.choreo.connect.discovery.config.enforcer.Service value) {
       if (authServiceBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -1577,10 +1646,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
     public Builder setAuthService(
-        org.wso2.choreo.connect.discovery.config.enforcer.AuthService.Builder builderForValue) {
+        org.wso2.choreo.connect.discovery.config.enforcer.Service.Builder builderForValue) {
       if (authServiceBuilder_ == null) {
         authService_ = builderForValue.build();
         onChanged();
@@ -1591,13 +1660,13 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
-    public Builder mergeAuthService(org.wso2.choreo.connect.discovery.config.enforcer.AuthService value) {
+    public Builder mergeAuthService(org.wso2.choreo.connect.discovery.config.enforcer.Service value) {
       if (authServiceBuilder_ == null) {
         if (authService_ != null) {
           authService_ =
-            org.wso2.choreo.connect.discovery.config.enforcer.AuthService.newBuilder(authService_).mergeFrom(value).buildPartial();
+            org.wso2.choreo.connect.discovery.config.enforcer.Service.newBuilder(authService_).mergeFrom(value).buildPartial();
         } else {
           authService_ = value;
         }
@@ -1609,7 +1678,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
     public Builder clearAuthService() {
       if (authServiceBuilder_ == null) {
@@ -1623,33 +1692,33 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
-    public org.wso2.choreo.connect.discovery.config.enforcer.AuthService.Builder getAuthServiceBuilder() {
+    public org.wso2.choreo.connect.discovery.config.enforcer.Service.Builder getAuthServiceBuilder() {
       
       onChanged();
       return getAuthServiceFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
-    public org.wso2.choreo.connect.discovery.config.enforcer.AuthServiceOrBuilder getAuthServiceOrBuilder() {
+    public org.wso2.choreo.connect.discovery.config.enforcer.ServiceOrBuilder getAuthServiceOrBuilder() {
       if (authServiceBuilder_ != null) {
         return authServiceBuilder_.getMessageOrBuilder();
       } else {
         return authService_ == null ?
-            org.wso2.choreo.connect.discovery.config.enforcer.AuthService.getDefaultInstance() : authService_;
+            org.wso2.choreo.connect.discovery.config.enforcer.Service.getDefaultInstance() : authService_;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.AuthService authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.config.enforcer.AuthService, org.wso2.choreo.connect.discovery.config.enforcer.AuthService.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AuthServiceOrBuilder> 
+        org.wso2.choreo.connect.discovery.config.enforcer.Service, org.wso2.choreo.connect.discovery.config.enforcer.Service.Builder, org.wso2.choreo.connect.discovery.config.enforcer.ServiceOrBuilder> 
         getAuthServiceFieldBuilder() {
       if (authServiceBuilder_ == null) {
         authServiceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.choreo.connect.discovery.config.enforcer.AuthService, org.wso2.choreo.connect.discovery.config.enforcer.AuthService.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AuthServiceOrBuilder>(
+            org.wso2.choreo.connect.discovery.config.enforcer.Service, org.wso2.choreo.connect.discovery.config.enforcer.Service.Builder, org.wso2.choreo.connect.discovery.config.enforcer.ServiceOrBuilder>(
                 getAuthService(),
                 getParentForChildren(),
                 isClean());
@@ -2251,6 +2320,125 @@ private static final long serialVersionUID = 0L;
         jwtIssuer_ = null;
       }
       return jwtIssuerBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.config.enforcer.Analytics analytics_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Analytics, org.wso2.choreo.connect.discovery.config.enforcer.Analytics.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder> analyticsBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     * @return Whether the analytics field is set.
+     */
+    public boolean hasAnalytics() {
+      return analyticsBuilder_ != null || analytics_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     * @return The analytics.
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Analytics getAnalytics() {
+      if (analyticsBuilder_ == null) {
+        return analytics_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Analytics.getDefaultInstance() : analytics_;
+      } else {
+        return analyticsBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     */
+    public Builder setAnalytics(org.wso2.choreo.connect.discovery.config.enforcer.Analytics value) {
+      if (analyticsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        analytics_ = value;
+        onChanged();
+      } else {
+        analyticsBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     */
+    public Builder setAnalytics(
+        org.wso2.choreo.connect.discovery.config.enforcer.Analytics.Builder builderForValue) {
+      if (analyticsBuilder_ == null) {
+        analytics_ = builderForValue.build();
+        onChanged();
+      } else {
+        analyticsBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     */
+    public Builder mergeAnalytics(org.wso2.choreo.connect.discovery.config.enforcer.Analytics value) {
+      if (analyticsBuilder_ == null) {
+        if (analytics_ != null) {
+          analytics_ =
+            org.wso2.choreo.connect.discovery.config.enforcer.Analytics.newBuilder(analytics_).mergeFrom(value).buildPartial();
+        } else {
+          analytics_ = value;
+        }
+        onChanged();
+      } else {
+        analyticsBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     */
+    public Builder clearAnalytics() {
+      if (analyticsBuilder_ == null) {
+        analytics_ = null;
+        onChanged();
+      } else {
+        analytics_ = null;
+        analyticsBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Analytics.Builder getAnalyticsBuilder() {
+      
+      onChanged();
+      return getAnalyticsFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder getAnalyticsOrBuilder() {
+      if (analyticsBuilder_ != null) {
+        return analyticsBuilder_.getMessageOrBuilder();
+      } else {
+        return analytics_ == null ?
+            org.wso2.choreo.connect.discovery.config.enforcer.Analytics.getDefaultInstance() : analytics_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Analytics, org.wso2.choreo.connect.discovery.config.enforcer.Analytics.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder> 
+        getAnalyticsFieldBuilder() {
+      if (analyticsBuilder_ == null) {
+        analyticsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.config.enforcer.Analytics, org.wso2.choreo.connect.discovery.config.enforcer.Analytics.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder>(
+                getAnalytics(),
+                getParentForChildren(),
+                isClean());
+        analytics_ = null;
+      }
+      return analyticsBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

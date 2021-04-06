@@ -51,6 +51,35 @@ public class RequestContext {
     private boolean clusterHeaderEnabled = false;
     //Denotes the specific headers which needs to be passed to response object
     private Map<String, String> responseHeaders;
+    private Map<String, String> metadataMap = new HashMap<>();
+    private String requestPathTemplate;
+
+    // Request Timestamp is required for analytics
+    private long requestTimeStamp;
+
+    public Map<String, String> getMetadataMap() {
+        return metadataMap;
+    }
+
+    public void addMetadataToMap(String key, String value) {
+        metadataMap.put(key, value);
+    }
+
+    public AuthenticationContext getAuthenticationContext() {
+        return authenticationContext;
+    }
+
+    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+        this.authenticationContext = authenticationContext;
+    }
+
+    public String getRequestPathTemplate() {
+        return requestPathTemplate;
+    }
+
+    public long getRequestTimeStamp() {
+        return requestTimeStamp;
+    }
     private Map<String, String> queryParameters;
 
     private RequestContext() {}
@@ -62,14 +91,17 @@ public class RequestContext {
         private API matchedAPI;
         private String requestPath;
         private String requestMethod;
+        private String requestPathTemplate;
         private ResourceConfig matchedResourceConfig;
         private Map<String, String> headers;
         private String prodClusterHeader;
         private String sandClusterHeader;
+        private long requestTimeStamp;
         private Map<String, Object> properties = new HashMap<>();
         private AuthenticationContext authenticationContext = new AuthenticationContext();
         private String requestID;
         private String clientIp;
+
 
         public Builder(String requestPath) {
             this.requestPath = requestPath;
@@ -109,6 +141,11 @@ public class RequestContext {
             return this;
         }
 
+        public Builder requestTimeStamp(long requestTimeStampInMillies) {
+            this.requestTimeStamp = requestTimeStampInMillies;
+            return this;
+        }
+
         public Builder authenticationContext(AuthenticationContext authenticationContext) {
             this.authenticationContext = authenticationContext;
             return this;
@@ -134,6 +171,8 @@ public class RequestContext {
             requestContext.prodClusterHeader = this.prodClusterHeader;
             requestContext.sandClusterHeader = this.sandClusterHeader;
             requestContext.properties = this.properties;
+            requestContext.requestPathTemplate = this.requestPathTemplate;
+            requestContext.requestTimeStamp = this.requestTimeStamp;
             requestContext.authenticationContext = this.authenticationContext;
             requestContext.requestID = this.requestID;
             requestContext.clientIp = this.clientIp;
@@ -154,10 +193,15 @@ public class RequestContext {
 
             return requestContext;
         }
-    }
 
-    public AuthenticationContext getAuthenticationContext() {
-        return authenticationContext;
+        public String getRequestPathTemplate() {
+            return requestPathTemplate;
+        }
+
+        public Builder pathTemplate(String requestPathTemplate) {
+            this.requestPathTemplate = requestPathTemplate;
+            return this;
+        }
     }
 
     public String getRequestID() {

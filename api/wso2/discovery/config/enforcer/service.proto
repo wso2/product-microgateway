@@ -6,13 +6,13 @@ import "wso2/discovery/config/enforcer/thread_pool.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
 option java_package = "org.wso2.choreo.connect.discovery.config.enforcer";
-option java_outer_classname = "AuthServiceProto";
+option java_outer_classname = "ServiceProto";
 option java_multiple_files = true;
 
-// [#protodoc-title: Authservicec]
+// [#protodoc-title: Service]
 
 // Auth service model
-message AuthService {
+message Service {
     int32 port = 1;
 
     int32 maxMessageSize = 2;

@@ -82,11 +82,14 @@ services:
       - ADAPTER_HOST=adapter
       - ADAPTER_XDS_PORT=18000
       - ENFORCER_LABEL=Production and Sandbox
+      - ENFORCER_REGION=UNKNOWN
       - XDS_MAX_MSG_SIZE=4194304
       - XDS_MAX_RETRIES=3
       - JAVA_OPTS=${JAVA_OPTS} -Dhttpclient.hostnameVerifier=AllowAll
       - apim_admin_pwd=admin
       - enforcer_admin_pwd=admin
       - tm_admin_pwd=admin
+      - analytics_authURL=https://localhost:8080
+      - analytics_authToken=
     ports:
       - "8081:8081"

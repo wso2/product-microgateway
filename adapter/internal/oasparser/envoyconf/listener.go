@@ -20,11 +20,9 @@ package envoyconf
 import (
 	"errors"
 
-	access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
-	envoy_config_filter_accesslog_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/file/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
@@ -74,6 +72,7 @@ func CreateListenersWithRds() []*listenerv3.Listener {
 func createListeners(conf *config.Config) []*listenerv3.Listener {
 	httpFilters := getHTTPFilters()
 	upgradeFilters := getUpgradeFilters()
+	accessLogs := getAccessLogs()
 	var filters []*listenerv3.Filter
 	var listeners []*listenerv3.Listener
 
@@ -99,21 +98,9 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		},
 		HttpFilters: httpFilters,
 	}
-	logConf, errReadLogConfig := config.ReadLogConfigs()
-	if errReadLogConfig != nil {
-		logger.LoggerOasparser.Error("Error while reading the adapter log configuration.", errReadLogConfig)
-		return nil
-	}
 
-	if !logConf.AccessLogs.Enable {
-		logger.LoggerOasparser.Debug("Router accesslog configurations are disabled.")
-	} else {
-		logger.LoggerOasparser.Debug("Router accesslog Configurations are enabled.")
-		accessLogs := getAccessLogConfigs(logConf)
-		if accessLogs != nil {
-			manager.AccessLog = []*access_logv3.AccessLog{accessLogs}
-			logger.LoggerOasparser.Debug("Router accesslog Configurations are added.")
-		}
+	if len(accessLogs) > 0 {
+		manager.AccessLog = accessLogs
 	}
 
 	pbst, err := ptypes.MarshalAny(manager)
@@ -238,52 +225,6 @@ func CreateVirtualHost(vHostName string, routes []*routev3.Route) *routev3.Virtu
 		Routes:  routes,
 	}
 	return &virtualHost
-}
-
-// createAddress generates an address from the given host and port
-func createAddress(remoteHost string, port uint32) *corev3.Address {
-	address := corev3.Address{Address: &corev3.Address_SocketAddress{
-		SocketAddress: &corev3.SocketAddress{
-			Address:  remoteHost,
-			Protocol: corev3.SocketAddress_TCP,
-			PortSpecifier: &corev3.SocketAddress_PortValue{
-				PortValue: uint32(port),
-			},
-		},
-	}}
-	return &address
-}
-
-// getAccessLogConfigs provides access log configurations for envoy
-func getAccessLogConfigs(logConf *config.LogConfig) *access_logv3.AccessLog {
-	var logFormat *envoy_config_filter_accesslog_v3.FileAccessLog_Format
-	logpath := defaultAccessLogPath //default access log path
-
-	logFormat = &envoy_config_filter_accesslog_v3.FileAccessLog_Format{
-		Format: logConf.AccessLogs.Format,
-	}
-	logpath = logConf.AccessLogs.LogFile
-
-	accessLogConf := &envoy_config_filter_accesslog_v3.FileAccessLog{
-		Path:            logpath,
-		AccessLogFormat: logFormat,
-	}
-
-	accessLogTypedConf, err := ptypes.MarshalAny(accessLogConf)
-	if err != nil {
-		logger.LoggerOasparser.Error("Error marsheling access log configs. ", err)
-		return nil
-	}
-
-	accessLogs := access_logv3.AccessLog{
-		Name:   accessLogName,
-		Filter: nil,
-		ConfigType: &access_logv3.AccessLog_TypedConfig{
-			TypedConfig: accessLogTypedConf,
-		},
-	}
-
-	return &accessLogs
 }
 
 //TODO: (VirajSalaka) Still the following method is not utilized as Sds is not implement. Keeping the Implementation for future reference

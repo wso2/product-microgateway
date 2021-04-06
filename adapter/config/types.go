@@ -159,6 +159,8 @@ type Config struct {
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
+
+	Analytics analytics `toml:"analytics"`
 }
 
 type apimCredentials struct {
@@ -284,6 +286,28 @@ type cache struct {
 	Enabled     bool  `toml:"enabled"`
 	MaximumSize int32 `toml:"maximumSize"`
 	ExpiryTime  int32 `toml:"expiryTime"`
+}
+
+type analytics struct {
+	Enabled bool `toml:"enabled"`
+
+	Adapter struct {
+		BufferFlushInterval time.Duration `toml:"bufferFlushInterval"`
+		BufferSizeBytes     uint32        `toml:"bufferSizeBytes"`
+		GRPCRequestTimeout  time.Duration `toml:"gRPCRequestTimeout"`
+	}
+
+	Enforcer struct {
+		AuthURL             string      `toml:"authURL"`
+		AuthToken           string      `toml:"authToken"`
+		EnforcerLogReceiver authService `toml:"LogReceiver"`
+	}
+}
+
+type routerLogPublisher struct {
+	BufferFlushInterval time.Duration `toml:"bufferFlushInterval"`
+	BufferSizeBytes     uint32        `toml:"bufferSizeBytes"`
+	GRPCRequestTimeout  time.Duration `toml:"gRPCRequestTimeout"`
 }
 
 type jwtIssuer struct {

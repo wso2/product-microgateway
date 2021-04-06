@@ -22,4 +22,5 @@ message APIs {
 	string apiType = 7;
 	bool isDefaultVersion = 8;
 	URLMapping urlMappings = 9;
+	string uuid = 10;
 }
