@@ -34,6 +34,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
+import org.wso2.choreo.connect.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.grpc.ExtAuthService;
 import org.wso2.choreo.connect.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
@@ -46,6 +47,7 @@ import org.wso2.choreo.connect.enforcer.throttle.ThrottleEventListener;
 import org.wso2.choreo.connect.enforcer.util.TLSUtils;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
@@ -59,6 +61,20 @@ public class AuthServer {
 
     public static void main(String[] args) {
         try {
+            // initialize the config holder
+            ConfigHolder.getInstance();
+
+            // wait until configurations are fetched from cds
+            CountDownLatch latch = new CountDownLatch(1);
+            ConfigDiscoveryClient cds = ConfigDiscoveryClient.init(latch);
+            cds.requestInitConfig();
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                logger.error("Error while waiting for configurations from adapter", e);
+                System.exit(1);
+            }
+
             // Load configurations
             APIFactory.getInstance().init();
 

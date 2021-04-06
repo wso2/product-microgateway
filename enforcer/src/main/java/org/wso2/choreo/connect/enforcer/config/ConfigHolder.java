@@ -54,8 +54,6 @@ import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottlePublisherConfigDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
-import org.wso2.choreo.connect.enforcer.discovery.ConfigDiscoveryClient;
-import org.wso2.choreo.connect.enforcer.exception.DiscoveryException;
 import org.wso2.choreo.connect.enforcer.exception.MGWException;
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTUtil;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
@@ -98,32 +96,26 @@ public class ConfigHolder {
     private static final String apimDTOPackageName = "org.wso2.carbon.apimgt";
 
     private ConfigHolder() {
-        init();
+        loadTrustStore();
     }
 
     public static ConfigHolder getInstance() {
         if (configHolder != null) {
             return configHolder;
         }
+
         configHolder = new ConfigHolder();
         return configHolder;
     }
 
     /**
-     * Initialize the configuration provider class by reading the Mgw Configuration file.
+     * Initialize the configuration provider class by parsing the cds configuration.
+     *
+     * @param cdsConfig configuration fetch from CDS
      */
-    private void init() {
-        //Load Client Trust Store
-        loadTrustStore();
-        ConfigDiscoveryClient cds = new ConfigDiscoveryClient(envVarConfig, trustManagerFactory);
-
-        try {
-            Config cdsConfig = cds.requestInitConfig();
-            parseConfigs(cdsConfig);
-        } catch (DiscoveryException e) {
-            logger.error("Error in loading configurations from Adapter", e);
-            System.exit(1);
-        }
+    public static ConfigHolder load(Config cdsConfig) {
+        configHolder.parseConfigs(cdsConfig);
+        return configHolder;
     }
 
     /**
