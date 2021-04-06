@@ -82,11 +82,14 @@ public class MgwServerInstance extends MgwServerImpl {
             throws IOException, MicroGWTestException {
         createTmpMgwSetup(customJwtTransformerEnabled);
         if (!StringUtils.isEmpty(confPath)) {
-            Utils.copyFile(confPath, mgwTmpServerPath + File.separator + "resources" + File.separator +
-                    "conf" + File.separator + "config.toml");
+            Utils.copyFile(confPath,
+                    mgwTmpServerPath + File.separator + "docker-compose" + File.separator + "conf" + File.separator
+                            + "config.toml");
         }
 
-        String dockerComposePath = mgwTmpServerPath + File.separator + "docker-compose.yaml";
+        String dockerComposePath =
+                mgwTmpServerPath + File.separator + "docker-compose" + File.separator + "choreo-connect"
+                        + File.separator + "docker-compose.yaml";
         Logger enforcerLogger = LoggerFactory.getLogger("Enforcer");
         Logger adapterLogger = LoggerFactory.getLogger("Adapter");
         Logger routerLogger = LoggerFactory.getLogger("Router");

@@ -1,5 +1,18 @@
-version: "3.7"
+version: "2.4"
 services:
+  apim:
+    image: wso2am/wso2am:4.0.0-beta-alpine
+    healthcheck:
+      test: ["CMD", "nc", "-z","localhost", "9443"]
+      interval: 10s
+      retries: 50
+    ports:
+      - "9763:9763"
+      - "9443:9443"
+      - "5672:5672"
+      - "8243:8243"
+    volumes:
+      - ./deployment.toml:/home/wso2carbon/wso2am-4.0.0-beta/repository/conf/deployment.toml
   router:
     image: wso2/choreo-connect-router:0.9.0-SNAPSHOT
     logging:
@@ -18,14 +31,13 @@ services:
       - ADAPTER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
       - ENFORCER_HOST=enforcer
       - ENFORCER_PORT=8081
-      - ENFORCER_ANALYTICS_RECEIVER_PORT=18090
       - ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
     volumes:
-      - ./resources/router/security:/home/wso2/security
+      - ../router/security:/home/wso2/security
     ports:
       - "9095:9095"
-      - "9090:9090"
       - "9000:9000"
+      - "9090:9090"
     links:
       - adapter
       - enforcer
@@ -35,15 +47,20 @@ services:
       options:
         max-size: "20m"
         max-file: "5"
+    depends_on:
+      apim:
+        condition: service_healthy
     volumes:
-      - ./resources/adapter/security:/home/wso2/security
-      - ./resources/conf:/home/wso2/conf
+      - ../adapter/security:/home/wso2/security
+      - ../conf:/home/wso2/conf
     environment:
       - cp_admin_pwd=admin
       - adapter_admin_pwd=admin
     ports:
       - "18000:18000"
       - "9843:9843"
+    links:
+      - apim
   enforcer:
     image: wso2/choreo-connect-enforcer:0.9.0-SNAPSHOT
     logging:
@@ -51,11 +68,12 @@ services:
         max-size: "20m"
         max-file: "5"
     volumes:
-      - ./resources/enforcer/security:/home/wso2/security
-      - ./resources/conf:/home/wso2/conf
-      - ./resources/enforcer/dropins:/home/wso2/lib/dropins
+      - ../enforcer/security:/home/wso2/security
+      - ../conf:/home/wso2/conf
+      - ../enforcer/dropins:/home/wso2/lib/dropins
     links:
       - adapter
+      - apim
     environment:
       - ENFORCER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
       - ENFORCER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
@@ -67,7 +85,7 @@ services:
       - ENFORCER_REGION=UNKNOWN
       - XDS_MAX_MSG_SIZE=4194304
       - XDS_MAX_RETRIES=3
-      - JAVA_OPTS=${JAVA_OPTS}
+      - JAVA_OPTS=${JAVA_OPTS} -Dhttpclient.hostnameVerifier=AllowAll
       - apim_admin_pwd=admin
       - enforcer_admin_pwd=admin
       - tm_admin_pwd=admin
