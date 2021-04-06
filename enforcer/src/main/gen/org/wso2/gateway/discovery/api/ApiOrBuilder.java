@@ -44,16 +44,16 @@ public interface ApiOrBuilder extends
       getVersionBytes();
 
   /**
-   * <code>string swaggerVersion = 4;</code>
-   * @return The swaggerVersion.
+   * <code>string apiType = 4;</code>
+   * @return The apiType.
    */
-  java.lang.String getSwaggerVersion();
+  java.lang.String getApiType();
   /**
-   * <code>string swaggerVersion = 4;</code>
-   * @return The bytes for swaggerVersion.
+   * <code>string apiType = 4;</code>
+   * @return The bytes for apiType.
    */
   com.google.protobuf.ByteString
-      getSwaggerVersionBytes();
+      getApiTypeBytes();
 
   /**
    * <code>string description = 5;</code>

@@ -20,32 +20,32 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	urlGroups := []*enforcer.TMURLGroup{}
 
 	for _, issuer := range config.Security.Enforcer.TokenService {
-	    claimMaps := []*enforcer.ClaimMapping{}
-	    for _, claimMap := range issuer.ClaimMapping{
-	        claim := &enforcer.ClaimMapping{
-	            RemoteClaim:    claimMap.RemoteClaim,
-	            LocalClaim:     claimMap.LocalClaim,
-        	}
-        	claimMaps = append(claimMaps,claim)
-        }
-    	jwtConfig := &enforcer.Issuer{
-            CertificateAlias:     issuer.CertificateAlias,
-    		ConsumerKeyClaim:     issuer.ConsumerKeyClaim,
-    		Issuer:               issuer.Issuer,
-    		Name:                 issuer.Name,
-    		ValidateSubscription: issuer.ValidateSubscription,
-    		JwksURL:              issuer.JwksURL,
-    		CertificateFilePath:  issuer.CertificateFilePath,
-    		ClaimMapping:         claimMaps,
-    	}
-    	issuers = append(issuers, jwtConfig)
-    }
+		claimMaps := []*enforcer.ClaimMapping{}
+		for _, claimMap := range issuer.ClaimMapping {
+			claim := &enforcer.ClaimMapping{
+				RemoteClaim: claimMap.RemoteClaim,
+				LocalClaim:  claimMap.LocalClaim,
+			}
+			claimMaps = append(claimMaps, claim)
+		}
+		jwtConfig := &enforcer.Issuer{
+			CertificateAlias:     issuer.CertificateAlias,
+			ConsumerKeyClaim:     issuer.ConsumerKeyClaim,
+			Issuer:               issuer.Issuer,
+			Name:                 issuer.Name,
+			ValidateSubscription: issuer.ValidateSubscription,
+			JwksURL:              issuer.JwksURL,
+			CertificateFilePath:  issuer.CertificateFilePath,
+			ClaimMapping:         claimMaps,
+		}
+		issuers = append(issuers, jwtConfig)
+	}
 
 	jwtUsers := []*enforcer.JWTUser{}
 	for _, user := range config.Enforcer.JwtIssuer.JwtUsers {
 		jwtUser := &enforcer.JWTUser{
-			Username:  user.Username,
-			Password:  user.Password,
+			Username: user.Username,
+			Password: user.Password,
 		}
 		jwtUsers = append(jwtUsers, jwtUser)
 	}
@@ -59,7 +59,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		urlGroups = append(urlGroups, group)
 	}
 
-	authService := &enforcer.AuthService{
+	authService := &enforcer.Service{
 		KeepAliveTime:  config.Enforcer.AuthService.KeepAliveTime,
 		MaxHeaderLimit: config.Enforcer.AuthService.MaxHeaderLimit,
 		MaxMessageSize: config.Enforcer.AuthService.MaxMessageSize,
@@ -76,6 +76,24 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		Enable:      config.Enforcer.Cache.Enabled,
 		MaximumSize: config.Enforcer.Cache.MaximumSize,
 		ExpiryTime:  config.Enforcer.Cache.ExpiryTime,
+	}
+
+	analytics := &enforcer.Analytics{
+		Enabled:   config.Analytics.Enabled,
+		AuthUrl:   config.Analytics.Enforcer.AuthURL,
+		AuthToken: config.Analytics.Enforcer.AuthToken,
+		Service: &enforcer.Service{
+			Port:           config.Analytics.Enforcer.EnforcerLogReceiver.Port,
+			MaxHeaderLimit: config.Analytics.Enforcer.EnforcerLogReceiver.MaxHeaderLimit,
+			KeepAliveTime:  config.Analytics.Enforcer.EnforcerLogReceiver.KeepAliveTime,
+			MaxMessageSize: config.Analytics.Enforcer.EnforcerLogReceiver.MaxMessageSize,
+			ThreadPool: &enforcer.ThreadPool{
+				CoreSize:      config.Analytics.Enforcer.EnforcerLogReceiver.ThreadPool.CoreSize,
+				MaxSize:       config.Analytics.Enforcer.EnforcerLogReceiver.ThreadPool.MaxSize,
+				QueueSize:     config.Analytics.Enforcer.EnforcerLogReceiver.ThreadPool.QueueSize,
+				KeepAliveTime: config.Analytics.Enforcer.EnforcerLogReceiver.ThreadPool.KeepAliveTime,
+			},
+		},
 	}
 
 	return &enforcer.Config{
@@ -111,7 +129,8 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		Security: &enforcer.Security{
 			TokenService: issuers,
 		},
-		Cache: cache,
+		Cache:     cache,
+		Analytics: analytics,
 		Eventhub: &enforcer.EventHub{
 			Enabled:    config.ControlPlane.EventHub.Enabled,
 			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,
@@ -224,6 +243,7 @@ func MarshalAPIList(apiList *types.APIList) *subscription.APIList {
 			Context:          api.Context,
 			Policy:           api.Policy,
 			ApiType:          api.APIType,
+			Uuid:             api.UUID,
 			IsDefaultVersion: api.IsDefaultVersion,
 		}
 		apis = append(apis, newAPI)

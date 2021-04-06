@@ -18,7 +18,7 @@ message Api {
 	string id = 1;
 	string title = 2;
 	string version = 3;
-	string swaggerVersion = 4;
+	string apiType = 4;
 	string description = 5;
 	repeated Endpoint productionUrls = 6;
 	repeated Endpoint sandboxUrls = 7;

@@ -17,13 +17,16 @@
 package envoyconf
 
 const (
-	extAuthzClusterName string = "ext-authz"
+	extAuthzClusterName     string = "ext-authz"
+	accessLoggerClusterName string = "access-logger"
+	grpcAccessLogLogName    string = "mgw_access_logs"
 )
 
 const (
 	extAuthzFilterName        string = "envoy.filters.http.ext_authz"
 	transportSocketName       string = "envoy.transport_sockets.tls"
-	accessLogName             string = "envoy.access_loggers.file"
+	fileAccessLogName         string = "envoy.access_loggers.file"
+	grpcAccessLogName         string = "envoy.http_grpc_access_log"
 	httpConManagerStartPrefix string = "ingress_http"
 	extAuthzPerRouteName      string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 )

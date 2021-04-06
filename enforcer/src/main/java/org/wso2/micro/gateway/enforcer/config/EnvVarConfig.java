@@ -32,6 +32,7 @@ public class EnvVarConfig {
     private static final String ADAPTER_HOST = "ADAPTER_HOST";
     private static final String ADAPTER_XDS_PORT = "ADAPTER_XDS_PORT";
     private static final String ENFORCER_LABEL = "ENFORCER_LABEL";
+    private static final String ENFORCER_REGION_ID = "ENFORCER_REGION";
     public static final String XDS_MAX_MSG_SIZE = "XDS_MAX_MSG_SIZE";
     public static final String XDS_MAX_RETRIES = "XDS_MAX_RETRIES";
     public static final String XDS_RETRY_PERIOD = "XDS_RETRY_PERIOD";
@@ -41,6 +42,7 @@ public class EnvVarConfig {
     private static final String DEFAULT_ADAPTER_HOST_NAME = "adapter";
     private static final String DEFAULT_ENFORCER_PRIVATE_KEY_PATH = "/home/wso2/security/keystore/mg.key";
     private static final String DEFAULT_ENFORCER_PUBLIC_CERT_PATH = "/home/wso2/security/keystore/mg.pem";
+    private static final String DEFAULT_ENFORCER_REGION_ID = "UNKNOWN";
     private static final String DEFAULT_ADAPTER_HOST = "adapter";
     private static final String DEFAULT_ADAPTER_XDS_PORT = "18000";
     private static final String DEFAULT_ENFORCER_LABEL = "enforcer";
@@ -56,6 +58,9 @@ public class EnvVarConfig {
     private final String enforcerLabel;
     private final String adapterXdsPort;
     private final String adapterHostName;
+    // TODO: (VirajSalaka) Enforcer ID should be picked from router once envoy 1.18.0 is released and microgateway
+    // is updated.
+    private final String enforcerRegionId;
     private final String xdsMaxMsgSize;
     private final String xdsMaxRetries;
     private final String xdsRetryPeriod;
@@ -72,6 +77,7 @@ public class EnvVarConfig {
         adapterHostName = retrieveEnvVarOrDefault(ADAPTER_HOST_NAME, DEFAULT_ADAPTER_HOST_NAME);
         adapterXdsPort = retrieveEnvVarOrDefault(ADAPTER_XDS_PORT, DEFAULT_ADAPTER_XDS_PORT);
         xdsMaxMsgSize = retrieveEnvVarOrDefault(XDS_MAX_MSG_SIZE, DEFAULT_XDS_MAX_MSG_SIZE);
+        enforcerRegionId = retrieveEnvVarOrDefault(ENFORCER_REGION_ID, DEFAULT_ENFORCER_REGION_ID);
         xdsMaxRetries = retrieveEnvVarOrDefault(XDS_MAX_RETRIES, DEFAULT_XDS_MAX_RETRIES);
         xdsRetryPeriod = retrieveEnvVarOrDefault(XDS_RETRY_PERIOD, DEFAULT_XDS_MAX_RETRIES);
     }
@@ -125,6 +131,11 @@ public class EnvVarConfig {
 
     public String getXdsMaxMsgSize() {
         return xdsMaxMsgSize;
+    }
+
+
+    public String getEnforcerRegionId() {
+        return enforcerRegionId;
     }
 
     public String getXdsMaxRetries() {

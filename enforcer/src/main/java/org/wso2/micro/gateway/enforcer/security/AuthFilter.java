@@ -97,6 +97,7 @@ public class AuthFilter implements Filter {
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
+
         boolean canAuthenticated = false;
         for (Authenticator authenticator : authenticators) {
             if (authenticator.canAuthenticate(requestContext)) {

@@ -68,6 +68,8 @@ public class RequestHandler {
                 .get(AdapterConstants.PROD_CLUSTER_HEADER_KEY);
         String sandCluster = request.getAttributes().getContextExtensionsMap()
                 .get(AdapterConstants.SAND_CLUSTER_HEADER_KEY);
+        long requestTimeInMillis = request.getAttributes().getRequest().getTime().getSeconds() * 1000 +
+                request.getAttributes().getRequest().getTime().getNanos() / 1000000;
         String requestID = request.getAttributes().getRequest().getHttp().getId();
         String address = "";
         if (request.getAttributes().getSource().hasAddress() &&
@@ -78,6 +80,6 @@ public class RequestHandler {
         ResourceConfig resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api).headers(headers).requestID(requestID).address(address).prodClusterHeader(prodCluster)
-                .sandClusterHeader(sandCluster).build();
+                .sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis).build();
     }
 }
