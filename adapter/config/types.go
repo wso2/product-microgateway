@@ -298,8 +298,6 @@ type analytics struct {
 	}
 
 	Enforcer struct {
-		// AuthURL             string      `toml:"authURL"`
-		// AuthToken           string      `toml:"authToken"`
 		ConfigProperties    map[string]string
 		EnforcerLogReceiver authService `toml:"LogReceiver"`
 	}

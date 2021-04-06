@@ -27,12 +27,17 @@ import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.micro.gateway.enforcer.api.RequestContext;
 import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.constants.APIConstants;
+import org.wso2.micro.gateway.enforcer.constants.Constants;
 import org.wso2.micro.gateway.enforcer.constants.MetadataConstants;
 import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
-import org.wso2.micro.gateway.enforcer.util.ClassLoadUtils;
 import org.wso2.micro.gateway.enforcer.util.FilterUtils;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is the filter is for Analytics.
@@ -47,10 +52,19 @@ public class AnalyticsFilter {
     private static AnalyticsEventPublisher publisher;
 
     private AnalyticsFilter() {
-        // TODO: (VirajSalaka) Load Metric Reporter Class
-        publisher = loadAnalyticsPublisher();
+        Map<String, String> configuration =
+                ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties();
+        String customAnalyticsPublisher =
+                ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties()
+                .get("customAnalyticsPublisher");
+        Map<String, String> publisherConfig = new HashMap<>(2);
+        for (Map.Entry<String, String> entry : configuration.entrySet()) {
+            // We are always expecting <String, String> Map as configuration.
+            publisherConfig.put(entry.getKey(), getEnvValue(entry.getValue()).toString());
+        }
+        publisher = loadAnalyticsPublisher(customAnalyticsPublisher);
         if (publisher != null) {
-            publisher.init(ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties());
+            publisher.init(publisherConfig);
         }
     }
 
@@ -69,29 +83,6 @@ public class AnalyticsFilter {
         if (publisher != null) {
             publisher.handleGRPCLogMsg(message);
         }
-//        for (int i = 0; i < message.getHttpLogs().getLogEntryCount(); i++) {
-//            HTTPAccessLogEntry logEntry = message.getHttpLogs().getLogEntry(i);
-//            logger.trace("Received logEntry from Router " + message.getIdentifier().getNode() +
-//                    " : " + message.toString());
-//            if (doNotPublishEvent(logEntry)) {
-//                logger.debug("LogEntry is ignored as it is already published by the enforcer.");
-//                continue;
-//            }
-//            AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
-//            // If the APIName is not available, the event should not be published.
-//            // 404 errors are not logged due to this.
-//            if (provider.getEventCategory() == EventCategory.FAULT
-//                    && provider.getFaultType() == FaultCategory.OTHER) {
-//                continue;
-//            }
-//            GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-//            try {
-//                dataCollector.collectData();
-//                logger.debug("Event is published.");
-//            } catch (AnalyticsException e) {
-//                logger.error("Error while publishing the event to the analytics portal.", e);
-//            }
-//        }
     }
 
     public void handleSuccessRequest(RequestContext requestContext) {
@@ -162,35 +153,48 @@ public class AnalyticsFilter {
         }
     }
 
-//    private boolean doNotPublishEvent(HTTPAccessLogEntry logEntry) {
-//        // If ext_auth_denied request comes, the event is already published from the enforcer.
-//        // There is a chance that the analytics event is published from enforcer and then result in ext_authz_error
-//        // responseCodeDetail due to some error/exception within enforcer implementation. This scenario is not
-//        // handled as it should be fixed from enforcer.
-//        return (!StringUtils.isEmpty(logEntry.getResponse().getResponseCodeDetails()))
-//                && logEntry.getResponse().getResponseCodeDetails()
-//                .equals(AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL)
-//                // Token endpoint calls needs to be removed as well
-//                && (!AnalyticsConstants.TOKEN_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()));
-//    }
-
-    private static AnalyticsEventPublisher loadAnalyticsPublisher() {
-        String className = "";
+    private static AnalyticsEventPublisher loadAnalyticsPublisher(String className) {
 
         if (StringUtils.isEmpty(className)) {
             return new DefaultAnalyticsEventPublisher();
         }
-        Class<?> loadedClass = ClassLoadUtils.loadClass(className);
-        if (loadedClass != null) {
-            try {
-                return (AnalyticsEventPublisher) loadedClass.getDeclaredConstructor()
-                        .newInstance();
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException
+
+        try {
+            Class<AnalyticsEventPublisher> clazz = (Class<AnalyticsEventPublisher>) Class.forName(className);
+            Constructor<AnalyticsEventPublisher> constructor = clazz.getConstructor();
+            return constructor.newInstance();
+        } catch (ClassNotFoundException e) {
+            logger.error("Error while loading the custom analytics publisher class.", e);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException
                     | NoSuchMethodException e) {
-                logger.error("Error while generating AnalyticsEventPublisherInstance from the class", e);
-            }
-            logger.error("Class Not Found : " + className);
+            logger.error("Error while generating AnalyticsEventPublisherInstance from the class", e);
         }
         return null;
+    }
+
+    // TODO: (VirajSalaka) Avoid Code duplication and process the map entries while initial env variable based
+    // resolution.
+    private Object getEnvValue(Object configValue) {
+        if (configValue instanceof String) {
+            String value = (String) configValue;
+            return replaceEnvRegex(value);
+        } else if (configValue instanceof char[]) {
+            String value = String.valueOf((char[]) configValue);
+            return replaceEnvRegex(value).toCharArray();
+        }
+        return configValue;
+    }
+
+    private String replaceEnvRegex(String value) {
+        Matcher m = Pattern.compile("\\$env\\{(.*?)\\}").matcher(value);
+        if (value.contains(Constants.ENV_PREFIX)) {
+            while (m.find()) {
+                String envName = value.substring(m.start() + 5, m.end() - 1);
+                if (System.getenv(envName) != null) {
+                    value = value.replace(value.substring(m.start(), m.end()), System.getenv(envName));
+                }
+            }
+        }
+        return value;
     }
 }
