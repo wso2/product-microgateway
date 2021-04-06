@@ -18,13 +18,12 @@
 
 package org.wso2.choreo.connect.enforcer.discovery.scheduler;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.EnvVarConfig;
 import org.wso2.choreo.connect.enforcer.discovery.ApiDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApiListDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationKeyMappingDiscoveryClient;
+import org.wso2.choreo.connect.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.KeyManagerDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.RevokedTokenDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.SubscriptionDiscoveryClient;
@@ -39,8 +38,6 @@ import java.util.concurrent.TimeUnit;
  * Manages all the scheduling tasks that runs for retrying discovery requests.
  */
 public class XdsSchedulerManager {
-
-    private static final Logger log = LogManager.getLogger(XdsSchedulerManager.class);
     private static int retryPeriod;
     private static volatile XdsSchedulerManager instance;
 
@@ -53,6 +50,7 @@ public class XdsSchedulerManager {
     private ScheduledFuture<?> revokedTokenDiscoveryScheduledFuture;
     private ScheduledFuture<?> subscriptionDiscoveryScheduledFuture;
     private ScheduledFuture<?> throttleDataDiscoveryScheduledFuture;
+    private ScheduledFuture<?> configDiscoveryScheduledFuture;
 
     public static XdsSchedulerManager getInstance() {
         if (instance == null) {
@@ -174,6 +172,20 @@ public class XdsSchedulerManager {
     public synchronized void stopThrottleDataDiscoveryScheduling() {
         if (throttleDataDiscoveryScheduledFuture != null && !throttleDataDiscoveryScheduledFuture.isDone()) {
             throttleDataDiscoveryScheduledFuture.cancel(false);
+        }
+    }
+
+    public synchronized void startConfigDiscoveryScheduling() {
+        if (configDiscoveryScheduledFuture == null || configDiscoveryScheduledFuture.isDone()) {
+            configDiscoveryScheduledFuture = discoveryClientScheduler
+                    .scheduleWithFixedDelay(ConfigDiscoveryClient.getInstance(), 1, retryPeriod,
+                            TimeUnit.SECONDS);
+        }
+    }
+
+    public synchronized void stopConfigDiscoveryScheduling() {
+        if (configDiscoveryScheduledFuture != null && !configDiscoveryScheduledFuture.isDone()) {
+            configDiscoveryScheduledFuture.cancel(false);
         }
     }
 }
