@@ -97,7 +97,7 @@ public class ConfigDiscoveryClient implements Runnable {
                     try {
                         channel.awaitTermination(100, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException e) {
-                        log.error("API discovery channel shutdown wait was interrupted", e);
+                        log.error("Config discovery channel shutdown wait was interrupted", e);
                     }
                 } while (!channel.isShutdown());
             }
