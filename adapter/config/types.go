@@ -77,8 +77,8 @@ type Config struct {
 			// Private key to sign the token
 			TokenPrivateKeyPath string
 		}
-		// Vhost represents default vhost of gateway environments
-		Vhost []struct {
+		// VhostMapping represents default vhost of gateway environments
+		VhostMapping []struct {
 			// Environment name of the gateway
 			Environment string
 			// Vhost to be default of the environment
@@ -119,6 +119,7 @@ type Config struct {
 		SecuredListenerPort     uint32
 		ClusterTimeoutInSeconds time.Duration
 		KeyStore                keystore
+		SystemHost              string
 
 		// Global CORS configurations.
 		Cors struct {

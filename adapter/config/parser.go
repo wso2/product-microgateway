@@ -96,7 +96,7 @@ func ReadConfigs() (*Config, error) {
 
 // GetDefaultVhost returns the default vhost of given environment read from Adapter
 // configurations. Store the configuration in a map, so do not want to loop through
-// the config value Config.Adapter.Vhost
+// the config value Config.Adapter.VhostMapping
 func GetDefaultVhost(environment string) (string, bool, error) {
 	var err error
 	onceGetDefaultVhost.Do(func() {
@@ -106,7 +106,7 @@ func GetDefaultVhost(environment string) (string, bool, error) {
 			err = errConf
 			return
 		}
-		for _, gateway := range configs.Adapter.Vhost {
+		for _, gateway := range configs.Adapter.VhostMapping {
 			defaultVhost[gateway.Environment] = gateway.Vhost
 		}
 	})

@@ -167,9 +167,8 @@ paths:
           maxLength: 255
           # hostname regex as per RFC 1123 (http://tools.ietf.org/html/rfc1123)
           # regex: ^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$
-          # TODO: (renuka) to support * edit this pattern (do we want to support * - ask pubuduG)
-          # examples: *.wso2.com localhost *-wso2.com foo.* foo-*
-          pattern: ^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$
+          # examples: *.wso2.com localhost *-wso2.com foo.* foo-* also supports *.wso2.*
+          pattern: ^(\*|(\*-|\*\.)?(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])(-\*|\.\*)?)$
         - name: environments
           description: |
             Name of gateway environments separated by ":"

@@ -443,7 +443,13 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 
 	for apiKey, labels := range openAPIEnvoyMap {
 		if arrayContains(labels, label) {
-			vhost := fmt.Sprintf("%v:%v", ExtractVhostFromAPIIdentifier(apiKey), "*")
+			vhostName, err := ExtractVhostFromAPIIdentifier(apiKey)
+			if err != nil {
+				logger.LoggerXds.Errorf("Error extracting vhost from API identifier: %v. Ignore deploying the API",
+					err.Error())
+				continue
+			}
+			vhost := fmt.Sprintf("%v:%v", vhostName, "*")
 			clusterArray = append(clusterArray, openAPIClustersMap[apiKey]...)
 			vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], openAPIRoutesMap[apiKey]...)
 			endpointArray = append(endpointArray, openAPIEndpointsMap[apiKey]...)
@@ -458,17 +464,15 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}
 	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
-	// error can be omited since we have already read configs
-	defaultEnvVhost, _, _ := config.GetDefaultVhost(config.DefaultGatewayName)
-	defaultEnvVhost = fmt.Sprintf("%v:%v", defaultEnvVhost, "*")
+	systemHost := fmt.Sprintf("%v:%v", conf.Envoy.SystemHost, "*")
 	if enableJwtIssuer {
 		routeToken := envoyconf.CreateTokenRoute()
-		vhostToRouteArrayMap[defaultEnvVhost] = append(vhostToRouteArrayMap[defaultEnvVhost], routeToken)
+		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeToken)
 	}
 
 	// Add health endpoint
 	routeHealth := envoyconf.CreateHealthEndpoint()
-	vhostToRouteArrayMap[defaultEnvVhost] = append(vhostToRouteArrayMap[defaultEnvVhost], routeHealth)
+	vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeHealth)
 
 	listenerArray, listenerFound := envoyListenerConfigMap[label]
 	routesConfig, routesConfigFound := envoyRouteConfigMap[label]
@@ -704,13 +708,13 @@ func GenerateIdentifierForAPIWithoutVhost(name, version string) string {
 }
 
 // ExtractVhostFromAPIIdentifier extracts vhost from the API identifier
-func ExtractVhostFromAPIIdentifier(id string) string {
+func ExtractVhostFromAPIIdentifier(id string) (string, error) {
 	elem := strings.Split(id, apiKeyFieldSeparator)
 	if len(elem) == 3 {
-		return elem[0]
+		return elem[0], nil
 	}
-	// TODO: (renuka) check this to have handle (return error?)
-	return "*"
+	err := fmt.Errorf("invalid API identifier: %v", id)
+	return "", err
 }
 
 // GenerateAndUpdateKeyManagerList converts the data into KeyManager proto type
