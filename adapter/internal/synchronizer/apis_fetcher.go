@@ -58,7 +58,7 @@ const (
 // FetchAPIs pulls the API artifact calling to the API manager
 // API Manager returns a .zip file as a response and this function
 // returns a byte slice of that ZIP file.
-func FetchAPIs(id *string, gwLabel *string, c chan SyncAPIResponse) {
+func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse) {
 	logger.LoggerSync.Info("Fetching APIs from Control Plane.")
 	respSyncAPI := SyncAPIResponse{}
 
@@ -115,10 +115,11 @@ func FetchAPIs(id *string, gwLabel *string, c chan SyncAPIResponse) {
 		q.Add(apiID, *id)
 	}
 	// If the gateway label is present, make a query parameter
-	if gwLabel != nil {
-		logger.LoggerSync.Debugf("Gateway Label: %v", *gwLabel)
-		respSyncAPI.GatewayLabel = *gwLabel
-		q.Add(gatewayLabel, base64.StdEncoding.EncodeToString([]byte(*gwLabel)))
+	if len(gwLabel) > 0 {
+		logger.LoggerSync.Debugf("Gateway Label: %v", gwLabel)
+		respSyncAPI.GatewayLabels = gwLabel
+		gatewaysQStr := strings.Join(gwLabel, "|")
+		q.Add(gatewayLabel, base64.StdEncoding.EncodeToString([]byte(gatewaysQStr)))
 	}
 	// Default "type" query parameter for adapter is "Envoy"
 	q.Add(gwType, envoy)
@@ -261,7 +262,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 	// Take the configured labels from the adapter
 	configuredEnvs := conf.ControlPlane.EventHub.EnvironmentLabels
 	//finalEnvs contains the actual envrionments that the adapter should update
-	finalEnvs := []string{}
+	var finalEnvs []string
 	if len(configuredEnvs) > 0 {
 		// If the configuration file contains environment list, then check if then check if the
 		// affected environments are present in the provided configs. If so, add that environment
@@ -286,10 +287,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 
 	c := make(chan SyncAPIResponse)
 	logger.LoggerSync.Infof("API %s is added/updated to APIList for label %v", updatedAPIID, updatedEnvs)
-	// updatedEnvs contains at least a single env. Hence pulling API with a single environment is enough
-	// since API data is same for each of the updatedEnvs.
-	// TODO: (renuka) fetch APIs from all environments (finalEnvs variable) joined with "|"
-	go FetchAPIs(&updatedAPIID, &updatedEnvs[0], c)
+	go FetchAPIs(&updatedAPIID, finalEnvs, c)
 	for {
 		data := <-c
 		logger.LoggerSync.Debugf("Receing data for an envrionment: %v", string(data.Resp))
@@ -316,7 +314,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 				logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.EventHub.RetryInterval*time.Second)
 				time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
 				logger.LoggerSync.Info("Retrying to fetch API data from control plane.")
-				FetchAPIs(&updatedAPIID, &updatedEnvs[0], c)
+				FetchAPIs(&updatedAPIID, finalEnvs, c)
 			}(data)
 		}
 	}

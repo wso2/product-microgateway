@@ -214,7 +214,7 @@ func init() {
           },
           {
             "maxLength": 255,
-            "pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$",
+            "pattern": "^(\\*|(\\*-|\\*\\.)?(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])(-\\*|\\.\\*)?)$",
             "type": "string",
             "description": "Virtual Host of the API\n",
             "name": "vhost",
@@ -662,7 +662,7 @@ func init() {
           },
           {
             "maxLength": 255,
-            "pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$",
+            "pattern": "^(\\*|(\\*-|\\*\\.)?(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])(-\\*|\\.\\*)?)$",
             "type": "string",
             "description": "Virtual Host of the API\n",
             "name": "vhost",

@@ -75,7 +75,7 @@ type DeleteApisParams struct {
 	/*Virtual Host of the API
 
 	  Max Length: 255
-	  Pattern: ^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$
+	  Pattern: ^(\*|(\*-|\*\.)?(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])(-\*|\.\*)?)$
 	  In: query
 	*/
 	Vhost *string
@@ -268,7 +268,7 @@ func (o *DeleteApisParams) validateVhost(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("vhost", "query", *o.Vhost, `^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`); err != nil {
+	if err := validate.Pattern("vhost", "query", *o.Vhost, `^(\*|(\*-|\*\.)?(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])(-\*|\.\*)?)$`); err != nil {
 		return err
 	}
 

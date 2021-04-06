@@ -27,11 +27,11 @@ package synchronizer
 // along with the apiId and the gateway label that the call
 // was made with.
 type SyncAPIResponse struct {
-	Resp         []byte
-	Err          error
-	ErrorCode    int
-	APIID        string
-	GatewayLabel string
+	Resp          []byte
+	Err           error
+	ErrorCode     int
+	APIID         string
+	GatewayLabels []string
 }
 
 // RevokedToken contains the JWT and the expirty time of the

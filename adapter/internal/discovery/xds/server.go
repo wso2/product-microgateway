@@ -62,7 +62,10 @@ var (
 	enforcerRevokedTokensCache         wso2_cache.SnapshotCache
 	enforcerThrottleDataCache          wso2_cache.SnapshotCache
 
-	// APIName:Version to VHosts map
+	// API_UUID to gateway-env to vhost map (for the purpose of un-deploying APIs from APIM or Choreo)
+	apiUUIDToGatewayToVhosts map[string]map[string]string
+
+	// APIName:Version to VHosts map (for the purpose of un-deploying APIs from APICTL)
 	apiToVhostsMap map[string][]string
 	// Vhost:APIName:Version as map key
 	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // MgwSwagger struct map
@@ -126,6 +129,7 @@ func init() {
 	enforcerRevokedTokensCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerThrottleDataCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 
+	apiUUIDToGatewayToVhosts = make(map[string]map[string]string)
 	apiToVhostsMap = make(map[string][]string)
 	apiMgwSwaggerMap = make(map[string]mgw.MgwSwagger)
 	openAPIEnvoyMap = make(map[string][]string)
