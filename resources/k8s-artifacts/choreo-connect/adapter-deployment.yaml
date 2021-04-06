@@ -19,19 +19,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mg-adapter
+  name: choreo-connect-adapter
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mg-adapter
+      app: choreo-connect-adapter
   template:
     metadata:
       labels:
-        app: mg-adapter
+        app: choreo-connect-adapter
     spec:
       containers:
-        - name: mg-adapter
+        - name: choreo-connect-adapter
           volumeMounts:
             - mountPath: /home/wso2/security/keystore
               name: adapter-keystore-vol
@@ -48,7 +48,7 @@ spec:
             - mountPath: /home/wso2/conf/log_config.toml
               subPath: log_config.toml
               name: logconfig-toml-vol
-          image: wso2/mg-adapter:4.0.0-m10-SNAPSHOT
+          image: wso2/choreo-connect-adapter:0.9.0-SNAPSHOT
           imagePullPolicy: Always
           env:
             - name: cp_admin_pwd
