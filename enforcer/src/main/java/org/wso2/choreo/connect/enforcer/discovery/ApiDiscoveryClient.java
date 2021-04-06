@@ -35,7 +35,6 @@ import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
-import org.wso2.choreo.connect.enforcer.exception.DiscoveryException;
 import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
 
 import java.util.ArrayList;
@@ -46,16 +45,14 @@ import java.util.concurrent.TimeUnit;
  * Client to communicate with API discovery service at the adapter.
  */
 public class ApiDiscoveryClient implements Runnable {
+    private static final Logger logger = LogManager.getLogger(ApiDiscoveryClient.class);
     private static ApiDiscoveryClient instance;
+    private final APIFactory apiFactory;
+    private final String host;
+    private final int port;
     private ManagedChannel channel;
     private ApiDiscoveryServiceGrpc.ApiDiscoveryServiceStub stub;
-    private ApiDiscoveryServiceGrpc.ApiDiscoveryServiceBlockingStub blockingStub;
-    private static final Logger logger = LogManager.getLogger(ApiDiscoveryClient.class);
-    private final APIFactory apiFactory;
     private StreamObserver<DiscoveryRequest> reqObserver;
-    private static final Logger log = LogManager.getLogger(ApiDiscoveryClient.class);
-    private String host;
-    private int port;
     /**
      * This is a reference to the latest received response from the ADS.
      * <p>
@@ -95,13 +92,12 @@ public class ApiDiscoveryClient implements Runnable {
                     try {
                         channel.awaitTermination(100, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException e) {
-                        log.error("API discovery channel shutdown wait was interrupted", e);
+                        logger.error("API discovery channel shutdown wait was interrupted", e);
                     }
                 } while (!channel.isShutdown());
             }
-            this.channel = GRPCUtils.createSecuredChannel(log, host, port);
+            this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
             this.stub = ApiDiscoveryServiceGrpc.newStub(channel);
-            this.blockingStub = ApiDiscoveryServiceGrpc.newBlockingStub(channel);
         } else if (channel.getState(true) == ConnectivityState.READY) {
             XdsSchedulerManager.getInstance().stopAPIDiscoveryScheduling();
         }
@@ -116,60 +112,42 @@ public class ApiDiscoveryClient implements Runnable {
         return instance;
     }
 
-    public List<Api> requestInitApis() throws DiscoveryException {
-        List<Api> apis;
-        DiscoveryRequest req = DiscoveryRequest.newBuilder()
-                .setNode(Node.newBuilder().setId(nodeId).build())
-                .setTypeUrl(Constants.API_TYPE_URL).build();
-        try {
-            DiscoveryResponse response = blockingStub.withDeadlineAfter(60, TimeUnit.SECONDS).fetchApis(req);
-            shutdown();
-
-            apis = handleResponse(response);
-        } catch (Exception e) {
-            // catching generic error here to wrap any grpc communication errors in the runtime
-            throw new DiscoveryException("Couldn't fetch init APIs", e);
-        }
-        return apis;
-    }
-
     public void run() {
         initConnection();
         watchApis();
     }
 
     public void watchApis() {
-        // TODO: (Praminda) implement a deadline with retries
         int maxSize = Integer.parseInt(ConfigHolder.getInstance().getEnvVarConfig().getXdsMaxMsgSize());
         reqObserver = stub.withMaxInboundMessageSize(maxSize).streamApis(new StreamObserver<DiscoveryResponse>() {
-                    @Override
-                    public void onNext(DiscoveryResponse response) {
-                        logger.debug("Received API discovery response " + response);
-                        XdsSchedulerManager.getInstance().stopAPIDiscoveryScheduling();
-                        latestReceived = response;
-                        try {
-                            List<Api> apis = handleResponse(response);
-                            apiFactory.addApis(apis);
-                            // TODO: (Praminda) fix recursive ack on ack failure
-                            ack();
-                        } catch (Exception e) {
-                            // catching generic error here to wrap any grpc communication errors in the runtime
-                            onError(e);
-                        }
-                    }
+            @Override
+            public void onNext(DiscoveryResponse response) {
+                logger.debug("Received API discovery response " + response);
+                XdsSchedulerManager.getInstance().stopAPIDiscoveryScheduling();
+                latestReceived = response;
+                try {
+                    List<Api> apis = handleResponse(response);
+                    apiFactory.addApis(apis);
+                    // TODO: (Praminda) fix recursive ack on ack failure
+                    ack();
+                } catch (Exception e) {
+                    // catching generic error here to wrap any grpc communication errors in the runtime
+                    onError(e);
+                }
+            }
 
-                    @Override
-                    public void onError(Throwable throwable) {
-                        logger.error("Error occurred during API discovery", throwable);
-                        XdsSchedulerManager.getInstance().startAPIDiscoveryScheduling();
-                        nack(throwable);
-                    }
+            @Override
+            public void onError(Throwable throwable) {
+                logger.error("Error occurred during API discovery", throwable);
+                XdsSchedulerManager.getInstance().startAPIDiscoveryScheduling();
+                nack(throwable);
+            }
 
-                    @Override
-                    public void onCompleted() {
-                        logger.info("Completed receiving APIs");
-                    }
-                });
+            @Override
+            public void onCompleted() {
+                logger.info("Completed receiving APIs");
+            }
+        });
 
         try {
             DiscoveryRequest req = DiscoveryRequest.newBuilder()
