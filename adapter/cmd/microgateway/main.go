@@ -24,7 +24,7 @@ import (
 	logger "github.com/sirupsen/logrus"
 	"github.com/wso2/micro-gw/config"
 	_ "github.com/wso2/micro-gw/internal/logging"
-	"github.com/wso2/micro-gw/internal/mgw"
+	"github.com/wso2/micro-gw/internal/adapter"
 )
 
 func main() {
@@ -54,5 +54,5 @@ func startMicroGateway(args []string) {
 	if errReadConfig != nil {
 		logger.Fatal("Error loading configuration. ", errReadConfig)
 	}
-	mgw.Run(conf)
+	adapter.Run(conf)
 }

@@ -22,4 +22,4 @@ EXPOSE 23823
 
 COPY maven/ lib/
 
-CMD java -cp "lib/*" org.wso2am.micro.gw.mockbackend.MockBackEndServer
+CMD java -cp "lib/*" org.wso2.choreo.connect.mockbackend.MockBackEndServer

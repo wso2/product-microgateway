@@ -5,7 +5,7 @@ package wso2.discovery.throttle;
 import "wso2/discovery/throttle/blocking_conditions.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/throttle;throttle";
-option java_package = "org.wso2.gateway.discovery.throttle";
+option java_package = "org.wso2.choreo.connect.discovery.throttle";
 option java_outer_classname = "ThrottleDataProto";
 option java_multiple_files = true;
 

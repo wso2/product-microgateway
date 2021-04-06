@@ -63,7 +63,7 @@ where you executed the command.
     Once containers are up and running, we can monitor the status of the containers using the following command
 
     ```
-    docker ps | grep mg-
+    docker ps | grep choreo-connect-
     ```
     The user credentials can be configured in the configurations of the `MG_HOME` distribution. `admin:admin` is the default accepted credentials by the microgateway adapter.
 

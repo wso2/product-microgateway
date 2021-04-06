@@ -3,7 +3,7 @@ syntax = "proto3";
 package wso2.discovery.keymgt;
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/keymgt;keymgt";
-option java_package = "org.wso2.gateway.discovery.keymgt";
+option java_package = "org.wso2.choreo.connect.discovery.keymgt";
 option java_outer_classname = "KeyManagerConfigProto";
 option java_multiple_files = true;
 
