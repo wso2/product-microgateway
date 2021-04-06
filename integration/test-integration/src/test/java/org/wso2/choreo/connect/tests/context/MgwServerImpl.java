@@ -107,9 +107,9 @@ public abstract class MgwServerImpl implements MgwServer {
     void createTmpMgwSetup(boolean customJwtTransformerEnabled) throws MicroGWTestException {
         Utils.copyDirectory(mgwServerPath, mgwTmpServerPath);
         if (customJwtTransformerEnabled) {
-            Utils.copyFile(System.getProperty("jwt_transformer_jar"), targetDir + File.separator
-                    + "server-tmp" + File.separator + "resources" + File.separator + "enforcer" + File.separator
-                    + "dropins" + File.separator + "jwt-transformer.jar");
+            Utils.copyFile(System.getProperty("jwt_transformer_jar"),
+                    targetDir + File.separator + "server-tmp" + File.separator + "docker-compose" + File.separator
+                            + "enforcer" + File.separator + "dropins" + File.separator + "jwt-transformer.jar");
         }
     }
 }
