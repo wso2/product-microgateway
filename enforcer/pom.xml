@@ -141,6 +141,7 @@
                             <exclude>org.apache.logging:*</exclude>
                             <exclude>log4j:*</exclude>
                             <exclude>org.ops4j.pax.logging:*</exclude>
+                            <exclude>org.json:json</exclude>
                         </excludes>
                     </artifactSet>
                 </configuration>
@@ -166,10 +167,10 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/</outputDirectory>
                             <includeGroupIds>
-                                org.apache.logging.log4j
+                                org.apache.logging.log4j, org.json.wso2
                             </includeGroupIds>
                             <includeArtifactIds>
-                                log4j-api, log4j-core, log4j-jcl
+                                log4j-api, log4j-core, log4j-jcl, json
                             </includeArtifactIds>
                         </configuration>
                     </execution>
