@@ -86,7 +86,11 @@ public class JWTAuthenticator implements Authenticator {
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
         String jwtToken = retrieveAuthHeaderValue(requestContext);
-        String splitToken[] = jwtToken.split("\\s");
+        if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
+        }
+        String[] splitToken = jwtToken.split("\\s");
         // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
         if (splitToken.length > 1) {
             jwtToken = splitToken[1];
