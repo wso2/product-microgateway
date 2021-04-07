@@ -55,7 +55,8 @@ public class ThrottleUtils {
         String base64Decoded = new String(Base64.decodeBase64(base64EncodedString));
         JSONTokener tokener = new JSONTokener(base64Decoded);
         JSONArray conditionJsonArray = new JSONArray(tokener);
-        for (Object conditionJson : conditionJsonArray) {
+        for (int index = 0; index < conditionJsonArray.length(); index++) {
+            Object conditionJson = conditionJsonArray.get(index);
             ThrottleCondition conditionDto = new ThrottleCondition();
             JSONObject conditionJsonObject = (JSONObject) conditionJson;
             if (conditionJsonObject.has(PolicyConstants.IP_SPECIFIC_TYPE.toLowerCase())) {

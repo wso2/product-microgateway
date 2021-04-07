@@ -161,7 +161,7 @@
                 <version>${swagger.v3.parser.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.json</groupId>
+                <groupId>org.json.wso2</groupId>
                 <artifactId>json</artifactId>
                 <version>${org.json.version}</version>
             </dependency>
@@ -367,7 +367,7 @@
         <maven.spotbugs.version>4.0.4</maven.spotbugs.version>
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
         <nimbus.jose.jwt.version>7.3.0.wso2v1</nimbus.jose.jwt.version>
-        <org.json.version>20180130</org.json.version>
+        <org.json.version>3.0.0.wso2v1</org.json.version>
         <os.mvn.plugin.version>1.6.2</os.mvn.plugin.version>
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
         <protobuf.java.version>3.14.0</protobuf.java.version>
