@@ -21,7 +21,7 @@ package org.wso2.choreo.connect.enforcer.exception;
 /**
  * Exception thrown when loading Subscriptions.
  */
-public class DataLoadingException extends MGWException {
+public class DataLoadingException extends EnforcerException {
 
     public DataLoadingException(String message) {
 

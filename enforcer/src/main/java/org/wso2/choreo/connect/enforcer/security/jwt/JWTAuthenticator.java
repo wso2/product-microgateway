@@ -44,7 +44,7 @@ import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
-import org.wso2.choreo.connect.enforcer.exception.MGWException;
+import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
@@ -330,7 +330,7 @@ public class JWTAuthenticator implements Authenticator {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                         APISecurityConstants.INVALID_SCOPE, message);
             }
-        } catch (MGWException e) {
+        } catch (EnforcerException e) {
             String message = "Error while accessing backend services for token scope validation";
             log.error(message, e);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, message, e);
@@ -471,7 +471,8 @@ public class JWTAuthenticator implements Authenticator {
 
                 }
                 return jwtValidationInfo;
-            } catch (MGWException e) {
+            } catch (EnforcerException e) {
+                log.error("JWT Validation failed", e);
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_GENERAL_ERROR,
                         APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
