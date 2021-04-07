@@ -38,7 +38,7 @@ const (
 	pkgOasparser    = "github.com/wso2/adapter/internal/oasparser"
 	pkgXds          = "github.com/wso2/adapter/internal/discovery/xds"
 	pkgSync         = "github.com/wso2/adapter/internal/synchronizer"
-	pkgMsg          = "github.com/wso2/adapter/messaging"
+	pkgMsg          = "github.com/wso2/adapter/internal/messaging"
 	pkgSvcDiscovery = "github.com/wso2/adapter/internal/svcDiscovery"
 	pkgTLSUtils     = "github.com/wso2/adapter/internal/tlsutils"
 	pkgSubscription = "github.com/wso2/adapter/internal/subscription"
