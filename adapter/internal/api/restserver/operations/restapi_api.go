@@ -34,10 +34,10 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/wso2/micro-gw/internal/api/models"
-	"github.com/wso2/micro-gw/internal/api/restserver/operations/api_collection"
-	"github.com/wso2/micro-gw/internal/api/restserver/operations/api_individual"
-	"github.com/wso2/micro-gw/internal/api/restserver/operations/authorization"
+	"github.com/wso2/adapter/internal/api/models"
+	"github.com/wso2/adapter/internal/api/restserver/operations/api_collection"
+	"github.com/wso2/adapter/internal/api/restserver/operations/api_individual"
+	"github.com/wso2/adapter/internal/api/restserver/operations/authorization"
 )
 
 // NewRestapiAPI creates a new Restapi instance

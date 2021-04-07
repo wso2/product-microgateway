@@ -32,7 +32,7 @@
             <artifactId>grpc-netty-shaded</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.json</groupId>
+            <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
         </dependency>
     </dependencies>

@@ -33,7 +33,7 @@
     </fileSets>
     <files>
         <file>
-            <source>target/micro-gw-ubuntu</source>
+            <source>target/adapter-ubuntu</source>
             <outputDirectory></outputDirectory>
         </file>
         <file>

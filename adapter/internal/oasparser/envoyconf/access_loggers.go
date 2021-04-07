@@ -23,8 +23,8 @@ import (
 	file_accesslogv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/file/v3"
 	grpc_accesslogv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/grpc/v3"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/wso2/micro-gw/config"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/adapter/config"
+	logger "github.com/wso2/adapter/loggers"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 

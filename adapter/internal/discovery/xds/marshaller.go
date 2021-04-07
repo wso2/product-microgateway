@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/wso2/micro-gw/config"
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/config/enforcer"
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/keymgt"
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
-	"github.com/wso2/micro-gw/internal/eventhub/types"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/adapter/config"
+	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/config/enforcer"
+	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/keymgt"
+	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/subscription"
+	"github.com/wso2/adapter/internal/eventhub/types"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 // MarshalConfig will marshal a Config struct - read from the config toml - to

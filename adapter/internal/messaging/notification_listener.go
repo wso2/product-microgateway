@@ -25,12 +25,12 @@ import (
 	"strings"
 
 	"github.com/streadway/amqp"
-	"github.com/wso2/micro-gw/config"
-	"github.com/wso2/micro-gw/internal/discovery/xds"
-	eh "github.com/wso2/micro-gw/internal/eventhub"
-	"github.com/wso2/micro-gw/internal/eventhub/types"
-	"github.com/wso2/micro-gw/internal/synchronizer"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/adapter/config"
+	"github.com/wso2/adapter/internal/discovery/xds"
+	eh "github.com/wso2/adapter/internal/eventhub"
+	"github.com/wso2/adapter/internal/eventhub/types"
+	"github.com/wso2/adapter/internal/synchronizer"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 // constant variables

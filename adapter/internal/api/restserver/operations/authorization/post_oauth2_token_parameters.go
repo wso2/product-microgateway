@@ -30,7 +30,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/validate"
 
-	"github.com/wso2/micro-gw/internal/api/models"
+	"github.com/wso2/adapter/internal/api/models"
 )
 
 // NewPostOauth2TokenParams creates a new PostOauth2TokenParams object

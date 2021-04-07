@@ -22,9 +22,9 @@ import (
 	"os"
 
 	logger "github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/config"
-	_ "github.com/wso2/micro-gw/internal/logging"
-	"github.com/wso2/micro-gw/internal/adapter"
+	"github.com/wso2/adapter/config"
+	_ "github.com/wso2/adapter/internal/logging"
+	"github.com/wso2/adapter/internal/adapter"
 )
 
 func main() {
@@ -45,7 +45,7 @@ func initServer() error {
 // Commandline arguments needs to be provided as args
 func startMicroGateway(args []string) {
 
-	logger.Info("Starting Microgateway")
+	logger.Info("Starting Choreo Connect Adapter")
 	err := initServer()
 	if err != nil {
 		logger.Fatal("Error starting the adapter", err)
