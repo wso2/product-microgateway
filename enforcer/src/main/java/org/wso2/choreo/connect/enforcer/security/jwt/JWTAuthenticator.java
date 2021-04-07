@@ -144,28 +144,6 @@ public class JWTAuthenticator implements Authenticator {
                         }
                         apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, validationInfo);
 
-                        // set endpoint security
-                        SecurityInfo securityInfo;
-                        if (apiKeyValidationInfoDTO != null && apiKeyValidationInfoDTO.getType() != null &&
-                                requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity() != null) {
-                            if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                                securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
-                                        getProductionSecurityInfo();
-                            } else {
-                                securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
-                                        getSandBoxSecurityInfo();
-                            }
-                            if (securityInfo.getEnabled() &&
-                                    APIConstants.AUTHORIZATION_HEADER_BASIC.
-                                            equalsIgnoreCase(securityInfo.getSecurityType())) {
-                                // use constants
-                                requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                                        APIConstants.AUTHORIZATION_HEADER_BASIC + " " +
-                                                Base64.getEncoder().encodeToString((securityInfo.getUsername() +
-                                                        ":" + securityInfo.getPassword()).getBytes()));
-                            }
-                        }
-
                         if (log.isDebugEnabled()) {
                             log.debug("Subscription validation via Key Manager. Status: " + apiKeyValidationInfoDTO
                                     .isAuthorized());
@@ -178,6 +156,29 @@ public class JWTAuthenticator implements Authenticator {
                         }
                     }
                 }
+
+                // set endpoint security
+                SecurityInfo securityInfo;
+                if (apiKeyValidationInfoDTO.getType() != null &&
+                        requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity() != null) {
+                    if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
+                        securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                                getProductionSecurityInfo();
+                    } else {
+                        securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                                getSandBoxSecurityInfo();
+                    }
+                    if (securityInfo.getEnabled() &&
+                            APIConstants.AUTHORIZATION_HEADER_BASIC.
+                                    equalsIgnoreCase(securityInfo.getSecurityType())) {
+                        // use constants
+                        requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                                APIConstants.AUTHORIZATION_HEADER_BASIC + ' ' +
+                                        Base64.getEncoder().encodeToString((securityInfo.getUsername() +
+                                                ':' + securityInfo.getPassword()).getBytes()));
+                    }
+                }
+
                 // Validate scopes
                 validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
 
