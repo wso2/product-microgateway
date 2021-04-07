@@ -429,9 +429,11 @@ public class JWTAuthenticator implements Authenticator {
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
         String tenantDomain = "carbon.super"; //TODO : Get the tenant domain.
         JWTValidationInfo jwtValidationInfo = null;
-        if (isGatewayTokenCacheEnabled) {
+        if (isGatewayTokenCacheEnabled &&
+                !SignedJWTInfo.ValidationStatus.NOT_VALIDATED.equals(signedJWTInfo.getValidationStatus())) {
             Object cacheToken = CacheProvider.getGatewayTokenCache().getIfPresent(jti);
-            if (cacheToken != null && (Boolean) cacheToken) {
+            if (cacheToken != null && (Boolean) cacheToken &&
+                    SignedJWTInfo.ValidationStatus.VALID.equals(signedJWTInfo.getValidationStatus())) {
                 if (CacheProvider.getGatewayKeyCache().getIfPresent(jti) != null) {
                     JWTValidationInfo tempJWTValidationInfo =
                             (JWTValidationInfo) CacheProvider.getGatewayKeyCache()
@@ -439,7 +441,8 @@ public class JWTAuthenticator implements Authenticator {
                     checkTokenExpiration(jti, tempJWTValidationInfo);
                     jwtValidationInfo = tempJWTValidationInfo;
                 }
-            } else if (CacheProvider.getInvalidTokenCache().getIfPresent(jti) != null) {
+            } else if (SignedJWTInfo.ValidationStatus.INVALID.equals(signedJWTInfo.getValidationStatus()) &&
+                    CacheProvider.getInvalidTokenCache().getIfPresent(jti) != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the invalid token cache. Token: "
                             + FilterUtils.getMaskedToken(jwtHeader));
@@ -460,6 +463,8 @@ public class JWTAuthenticator implements Authenticator {
 
             try {
                 jwtValidationInfo = jwtValidator.validateJWTToken(signedJWTInfo);
+                signedJWTInfo.setValidationStatus(jwtValidationInfo.isValid() ?
+                        SignedJWTInfo.ValidationStatus.VALID : SignedJWTInfo.ValidationStatus.INVALID);
                 if (isGatewayTokenCacheEnabled) {
                     // Add token to tenant token cache
                     if (jwtValidationInfo.isValid()) {
@@ -512,15 +517,15 @@ public class JWTAuthenticator implements Authenticator {
     }
 
     private SignedJWTInfo getSignedJwt(String accessToken) throws ParseException {
-
         String signature = accessToken.split("\\.")[2];
-        SignedJWTInfo signedJWTInfo;
+        SignedJWTInfo signedJWTInfo = null;
         LoadingCache gatewaySignedJWTParseCache = CacheProvider.getGatewaySignedJWTParseCache();
         if (gatewaySignedJWTParseCache != null) {
-            Object cachedEntry = gatewaySignedJWTParseCache.getIfPresent(accessToken);
+            Object cachedEntry = gatewaySignedJWTParseCache.getIfPresent(signature);
             if (cachedEntry != null) {
                 signedJWTInfo = (SignedJWTInfo) cachedEntry;
-            } else {
+            }
+            if (signedJWTInfo == null  || !signedJWTInfo.getToken().equals(accessToken)) {
                 SignedJWT signedJWT = SignedJWT.parse(accessToken);
                 JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
                 signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
