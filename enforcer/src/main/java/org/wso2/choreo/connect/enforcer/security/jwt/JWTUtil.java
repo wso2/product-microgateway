@@ -37,7 +37,7 @@ import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
-import org.wso2.choreo.connect.enforcer.exception.MGWException;
+import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTConstants;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
@@ -133,16 +133,16 @@ public class JWTUtil {
      * @param jwt   SignedJwt Token
      * @param alias public certificate alias
      * @return whether the signature is verified or or not
-     * @throws MGWException in case of signature verification failure
+     * @throws EnforcerException in case of signature verification failure
      */
-    public static boolean verifyTokenSignature(SignedJWT jwt, String alias) throws MGWException {
+    public static boolean verifyTokenSignature(SignedJWT jwt, String alias) throws EnforcerException {
 
         Certificate publicCert = null;
         //Read the client-truststore.jks into a KeyStore
         try {
             publicCert = ConfigHolder.getInstance().getTrustStoreForJWT().getCertificate(alias);
         } catch (KeyStoreException e) {
-            throw new MGWException("Error while retrieving the certificate for JWT verification.", e);
+            throw new EnforcerException("Error while retrieving the certificate for JWT verification.", e);
         }
 
         if (publicCert != null) {
@@ -152,15 +152,15 @@ public class JWTUtil {
                 return verifyTokenSignature(jwt, (RSAPublicKey) publicCert.getPublicKey());
             } else {
                 log.error("Public key is not RSA");
-                throw new MGWException("Public key is not RSA");
+                throw new EnforcerException("Public key is not RSA");
             }
         } else {
             log.error("Couldn't find a public certificate to verify the signature");
-            throw new MGWException("Couldn't find a public certificate to verify the signature");
+            throw new EnforcerException("Couldn't find a public certificate to verify the signature");
         }
     }
 
-    public static PrivateKey getPrivateKey(String filePath) throws MGWException {
+    public static PrivateKey getPrivateKey(String filePath) throws EnforcerException {
         PrivateKey privateKey = null;
         try {
             String strKeyPEM = "";
@@ -178,7 +178,7 @@ public class JWTUtil {
             privateKey = (PrivateKey) rsaPrivateKey;
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             log.debug("Error obtaining private key", e);
-            throw new MGWException("Error obtaining private key");
+            throw new EnforcerException("Error obtaining private key");
         }
         return privateKey;
     }

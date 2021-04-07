@@ -33,7 +33,7 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
-import org.wso2.choreo.connect.enforcer.exception.MGWException;
+import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
@@ -143,7 +143,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
 
                     try {
                         isVerified = JWTUtil.verifyTokenSignature(signedJWT, alias) && !isJwtTokenExpired(payload);
-                    } catch (MGWException e) {
+                    } catch (EnforcerException e) {
                         log.error("Internal Key authentication failed. " +
                                 FilterUtils.getMaskedToken(splitToken[0]));
                         throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),

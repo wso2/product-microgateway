@@ -42,7 +42,7 @@ import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
-import org.wso2.choreo.connect.enforcer.exception.MGWException;
+import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 
@@ -95,7 +95,7 @@ public class FilterUtils {
         PoolingHttpClientConnectionManager pool = null;
         try {
             pool = getPoolingHttpClientConnectionManager(protocol);
-        } catch (MGWException e) {
+        } catch (EnforcerException e) {
             log.error("Error while getting http client connection manager", e);
         }
         pool.setMaxTotal(Integer.parseInt(maxTotal));
@@ -112,7 +112,7 @@ public class FilterUtils {
      * @return PoolManager
      */
     private static PoolingHttpClientConnectionManager getPoolingHttpClientConnectionManager(String protocol)
-            throws MGWException {
+            throws EnforcerException {
 
         PoolingHttpClientConnectionManager poolManager;
         if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
@@ -127,7 +127,7 @@ public class FilterUtils {
         return poolManager;
     }
 
-    private static SSLConnectionSocketFactory createSocketFactory() throws MGWException {
+    private static SSLConnectionSocketFactory createSocketFactory() throws EnforcerException {
         SSLContext sslContext;
         try {
             KeyStore trustStore = ConfigHolder.getInstance().getTrustStore();
@@ -156,10 +156,10 @@ public class FilterUtils {
         return null;
     }
 
-    public static void handleException(String msg, Throwable t) throws MGWException {
+    public static void handleException(String msg, Throwable t) throws EnforcerException {
 
         log.error(msg, t);
-        throw new MGWException(msg, t);
+        throw new EnforcerException(msg, t);
     }
 
     public static String getTenantDomainFromRequestURL(String requestURI) {
