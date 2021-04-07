@@ -342,10 +342,9 @@ func deleteAPI(apiIdentifier string, environments []string) error {
 
 	if len(existingLabels) != len(toBeDelEnvs) {
 		// do not delete from all environments, hence do not clear routes, clusters, endpoints, enforcerAPIs
-		openAPIEnvoyMap[apiIdentifier] = toBeKeptEnvs
-		// remove only toBeDelEnvs
 		updateXdsCacheOnAPIAdd(toBeDelEnvs, []string{})
 		logger.LoggerXds.Infof("Deleted API. %v", apiIdentifier)
+		openAPIEnvoyMap[apiIdentifier] = toBeKeptEnvs
 		return nil
 	}
 
@@ -358,7 +357,7 @@ func deleteAPI(apiIdentifier string, environments []string) error {
 	//updateXdsCacheOnAPIAdd is called after cleaning maps of routes, clusters, endpoints, enforcerAPIs.
 	//Therefore resources that belongs to the deleting API do not exist. Caches updated only with
 	//resources that belongs to the remaining APIs
-	updateXdsCacheOnAPIAdd(existingLabels, []string{})
+	updateXdsCacheOnAPIAdd(toBeDelEnvs, []string{})
 
 	delete(openAPIEnvoyMap, apiIdentifier)  //delete labels
 	delete(apiMgwSwaggerMap, apiIdentifier) //delete mgwSwagger
