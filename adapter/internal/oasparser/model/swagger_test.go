@@ -21,10 +21,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/micro-gw/config"
-	model "github.com/wso2/micro-gw/internal/oasparser/model"
-	"github.com/wso2/micro-gw/internal/oasparser/operator"
-	"github.com/wso2/micro-gw/internal/oasparser/utills"
+	"github.com/wso2/adapter/config"
+	model "github.com/wso2/adapter/internal/oasparser/model"
+	"github.com/wso2/adapter/internal/oasparser/operator"
+	"github.com/wso2/adapter/internal/oasparser/utills"
 )
 
 func TestSetInfoSwaggerWebSocket(t *testing.T) {

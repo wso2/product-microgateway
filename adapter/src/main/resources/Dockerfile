@@ -42,6 +42,6 @@ WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 COPY maven/security security
 COPY maven/conf conf
-COPY maven/micro-gw-ubuntu micro-gw
+COPY maven/adapter-ubuntu adapter
 
-CMD ./micro-gw
+CMD ./adapter

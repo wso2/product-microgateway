@@ -121,6 +121,9 @@
                     <transformers>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                           <mainClass>org.wso2.choreo.connect.enforcer.server.AuthServer</mainClass>
+                            <manifestEntries>
+                                <Multi-Release>true</Multi-Release>
+                            </manifestEntries>
                         </transformer>
                     </transformers>
                     <filters>

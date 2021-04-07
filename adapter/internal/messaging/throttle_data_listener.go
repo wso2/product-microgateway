@@ -21,12 +21,12 @@ package messaging
 import (
 	"encoding/json"
 
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/throttle"
-	"github.com/wso2/micro-gw/internal/discovery/xds"
-	"github.com/wso2/micro-gw/internal/synchronizer"
+	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/throttle"
+	"github.com/wso2/adapter/internal/discovery/xds"
+	"github.com/wso2/adapter/internal/synchronizer"
 
 	"github.com/streadway/amqp"
-	logger "github.com/wso2/micro-gw/loggers"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 const (

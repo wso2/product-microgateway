@@ -25,7 +25,7 @@ import (
 
 	"github.com/go-openapi/runtime/middleware"
 
-	"github.com/wso2/micro-gw/internal/api/models"
+	"github.com/wso2/adapter/internal/api/models"
 )
 
 // DeleteApisHandlerFunc turns a function with the right signature into a delete apis handler

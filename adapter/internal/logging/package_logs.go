@@ -23,7 +23,7 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/adapter/config"
 )
 
 func logLevelMapper(pkgLevel string) logrus.Level {

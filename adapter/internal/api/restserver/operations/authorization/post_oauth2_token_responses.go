@@ -25,7 +25,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/wso2/micro-gw/internal/api/models"
+	"github.com/wso2/adapter/internal/api/models"
 )
 
 // PostOauth2TokenOKCode is the HTTP code returned for type PostOauth2TokenOK

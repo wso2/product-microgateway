@@ -1,4 +1,4 @@
-module github.com/wso2/micro-gw
+module github.com/wso2/adapter
 
 go 1.15
 

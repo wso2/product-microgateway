@@ -24,78 +24,79 @@ data:
   log4j2.properties: |
     monitorInterval=20
 
-    appenders = MGW_CONSOLE, MGW_LOGFILE, MGW_ACCESS_LOG
+    appenders = ENFORCER_CONSOLE, ENFORCER_LOGFILE, ENFORCER_ACCESS_LOG
 
-    appender.MGW_CONSOLE.type = Console
-    appender.MGW_CONSOLE.name = MGW_CONSOLE
-    appender.MGW_CONSOLE.layout.type = PatternLayout
-    appender.MGW_CONSOLE.layout.pattern = [%d{DEFAULT}] %5p - %c{1} %m%n
-    appender.MGW_CONSOLE.filter.threshold.type = ThresholdFilter
-    appender.MGW_CONSOLE.filter.threshold.level = DEBUG
+    appender.ENFORCER_CONSOLE.type = Console
+    appender.ENFORCER_CONSOLE.name = ENFORCER_CONSOLE
+    appender.ENFORCER_CONSOLE.layout.type = PatternLayout
+    appender.ENFORCER_CONSOLE.layout.pattern = [%d{DEFAULT}] %5p - %c{1} %m%n
+    appender.ENFORCER_CONSOLE.filter.threshold.type = ThresholdFilter
+    appender.ENFORCER_CONSOLE.filter.threshold.level = DEBUG
 
-    appender.MGW_LOGFILE.type = RollingFile
-    appender.MGW_LOGFILE.name = MGW_LOGFILE
-    appender.MGW_LOGFILE.fileName = logs/enforcer.log
-    appender.MGW_LOGFILE.filePattern = /logs/enforcer-%d{MM-dd-yyyy}.log
-    appender.MGW_LOGFILE.layout.type = PatternLayout
-    appender.MGW_LOGFILE.layout.pattern = [%d] %5p {%c} - [%m%ex%n]
-    appender.MGW_LOGFILE.policies.type = Policies
-    appender.MGW_LOGFILE.policies.time.type = TimeBasedTriggeringPolicy
-    appender.MGW_LOGFILE.policies.time.interval = 1
-    appender.MGW_LOGFILE.policies.time.modulate = true
-    appender.MGW_LOGFILE.policies.size.type = SizeBasedTriggeringPolicy
-    appender.MGW_LOGFILE.policies.size.size=10MB
-    appender.MGW_LOGFILE.strategy.type = DefaultRolloverStrategy
-    appender.MGW_LOGFILE.strategy.max = 20
-    appender.MGW_LOGFILE.filter.threshold.type = ThresholdFilter
-    appender.MGW_LOGFILE.filter.threshold.level = DEBUG
+    appender.ENFORCER_LOGFILE.type = RollingFile
+    appender.ENFORCER_LOGFILE.name = ENFORCER_LOGFILE
+    appender.ENFORCER_LOGFILE.fileName = logs/enforcer.log
+    appender.ENFORCER_LOGFILE.filePattern = /logs/enforcer-%d{MM-dd-yyyy}.log
+    appender.ENFORCER_LOGFILE.layout.type = PatternLayout
+    appender.ENFORCER_LOGFILE.layout.pattern = [%d] %5p {%c} - %m%ex%n
+    appender.ENFORCER_LOGFILE.policies.type = Policies
+    appender.ENFORCER_LOGFILE.policies.time.type = TimeBasedTriggeringPolicy
+    appender.ENFORCER_LOGFILE.policies.time.interval = 1
+    appender.ENFORCER_LOGFILE.policies.time.modulate = true
+    appender.ENFORCER_LOGFILE.policies.size.type = SizeBasedTriggeringPolicy
+    appender.ENFORCER_LOGFILE.policies.size.size=10MB
+    appender.ENFORCER_LOGFILE.strategy.type = DefaultRolloverStrategy
+    appender.ENFORCER_LOGFILE.strategy.max = 20
+    appender.ENFORCER_LOGFILE.filter.threshold.type = ThresholdFilter
+    appender.ENFORCER_LOGFILE.filter.threshold.level = DEBUG
 
-    appender.MGW_ACCESS_LOG.type = RollingFile
-    appender.MGW_ACCESS_LOG.name = MGW_ACCESS_LOG
-    appender.MGW_ACCESS_LOG.fileName = logs/enforcer_access.log
-    appender.MGW_ACCESS_LOG.filePattern = /logs/enforcer_access-%d{MM-dd-yyyy}.log
-    appender.MGW_ACCESS_LOG.layout.type = PatternLayout
-    appender.MGW_ACCESS_LOG.layout.pattern = [%d] - %m%ex%n
-    appender.MGW_ACCESS_LOG.policies.type = Policies
-    appender.MGW_ACCESS_LOG.policies.time.type = TimeBasedTriggeringPolicy
-    appender.MGW_ACCESS_LOG.policies.time.interval = 1
-    appender.MGW_ACCESS_LOG.policies.time.modulate = true
-    appender.MGW_ACCESS_LOG.policies.size.type = SizeBasedTriggeringPolicy
-    appender.MGW_ACCESS_LOG.policies.size.size=10MB
-    appender.MGW_ACCESS_LOG.strategy.type = DefaultRolloverStrategy
-    appender.MGW_ACCESS_LOG.strategy.max = 20
-    appender.MGW_ACCESS_LOG.filter.threshold.type = ThresholdFilter
-    appender.MGW_ACCESS_LOG.filter.threshold.level = DEBUG
+    appender.ENFORCER_ACCESS_LOG.type = RollingFile
+    appender.ENFORCER_ACCESS_LOG.name = ENFORCER_ACCESS_LOG
+    appender.ENFORCER_ACCESS_LOG.fileName = logs/enforcer_access.log
+    appender.ENFORCER_ACCESS_LOG.filePattern = /logs/enforcer_access-%d{MM-dd-yyyy}.log
+    appender.ENFORCER_ACCESS_LOG.layout.type = PatternLayout
+    appender.ENFORCER_ACCESS_LOG.layout.pattern = [%d] - %m%ex%n
+    appender.ENFORCER_ACCESS_LOG.policies.type = Policies
+    appender.ENFORCER_ACCESS_LOG.policies.time.type = TimeBasedTriggeringPolicy
+    appender.ENFORCER_ACCESS_LOG.policies.time.interval = 1
+    appender.ENFORCER_ACCESS_LOG.policies.time.modulate = true
+    appender.ENFORCER_ACCESS_LOG.policies.size.type = SizeBasedTriggeringPolicy
+    appender.ENFORCER_ACCESS_LOG.policies.size.size=10MB
+    appender.ENFORCER_ACCESS_LOG.strategy.type = DefaultRolloverStrategy
+    appender.ENFORCER_ACCESS_LOG.strategy.max = 20
+    appender.ENFORCER_ACCESS_LOG.filter.threshold.type = ThresholdFilter
+    appender.ENFORCER_ACCESS_LOG.filter.threshold.level = DEBUG
 
-    loggers = mgw-enforcer, io-swagger-v3, mgw-enforcer-interceptors, carbon-apimgt
+    loggers = enforcer, io-swagger-v3, enforcer-interceptors, carbon-apimgt
 
     # Log to access log file
-    logger.mgw-enforcer-interceptors.name = org.wso2.micro.gateway.enforcer.grpc.interceptors
+    logger.enforcer-interceptors.name = org.wso2.choreo.connect.enforcer.grpc.interceptors
     # Change the log level into DEBUG to view the access logs.
-    logger.mgw-enforcer-interceptors.level = INFO
-    logger.mgw-enforcer-interceptors.additivity = false
-    logger.mgw-enforcer-interceptors.appenderRef.rolling.ref = MGW_ACCESS_LOG
+    logger.enforcer-interceptors.level = INFO
+    logger.enforcer-interceptors.additivity = false
+    logger.enforcer-interceptors.appenderRef.rolling.ref = ENFORCER_ACCESS_LOG
 
     # Log to console and rolling file
-    logger.mgw-enforcer.name = org.wso2.micro.gateway.enforcer
-    logger.mgw-enforcer.level = INFO
-    logger.mgw-enforcer.additivity = false
-    logger.mgw-enforcer.appenderRef.rolling.ref = MGW_LOGFILE
-    logger.mgw-enforcer.appenderRef.console.ref = MGW_CONSOLE
+    logger.enforcer.name = org.wso2.choreo.connect.enforcer
+    logger.enforcer.level = INFO
+    logger.enforcer.additivity = false
+    logger.enforcer.appenderRef.rolling.ref = ENFORCER_LOGFILE
+    logger.enforcer.appenderRef.console.ref = ENFORCER_CONSOLE
 
     logger.carbon-apimgt.name = org.wso2.carbon.apimgt
     logger.carbon-apimgt.level = INFO
     logger.carbon-apimgt.additivity = false
-    logger.carbon-apimgt.appenderRef.MGW_LOGFILE.ref = MGW_LOGFILE
-    logger.carbon-apimgt.appenderRef.console.ref = MGW_CONSOLE
+    logger.carbon-apimgt.appenderRef.ENFORCER_LOGFILE.ref = ENFORCER_LOGFILE
+    logger.carbon-apimgt.appenderRef.console.ref = ENFORCER_CONSOLE
 
     logger.io-swagger-v3.name = io.swagger.v3.parser
     logger.io-swagger-v3.level = ERROR
     logger.io-swagger-v3.additivity = false
-    logger.io-swagger-v3.appenderRef.rolling.ref = MGW_LOGFILE
-    logger.io-swagger-v3.appenderRef.console.ref = MGW_CONSOLE
+    logger.io-swagger-v3.appenderRef.rolling.ref = ENFORCER_LOGFILE
+    logger.io-swagger-v3.appenderRef.console.ref = ENFORCER_CONSOLE
 
     rootLogger.level = ERROR
-    rootLogger.appenderRef.MGW_CONSOLE.ref = MGW_CONSOLE
-    rootLogger.appenderRef.MGW_LOGFILE.ref = MGW_LOGFILE
-    rootLogger.appenderRef.MGW_ACCESS_LOG.ref = MGW_ACCESS_LOG
+    rootLogger.appenderRef.ENFORCER_CONSOLE.ref = ENFORCER_CONSOLE
+    rootLogger.appenderRef.ENFORCER_LOGFILE.ref = ENFORCER_LOGFILE
+    rootLogger.appenderRef.ENFORCER_ACCESS_LOG.ref = ENFORCER_ACCESS_LOG
+
