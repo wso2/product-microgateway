@@ -51,6 +51,11 @@ func handleThrottleData(deliveries <-chan amqp.Delivery, done chan error) {
 
 		payload := data.Event.PayloadData
 		if payload.BlockingCondition != "" {
+			// control plane sends a blocking throttle data event for subscription blocking.
+			// this is not required and causes issues in evaluating subscription blocking.
+			if payload.BlockingCondition == "SUBSCRIPTION" {
+				return
+			}
 			isIPCondition := payload.BlockingCondition == blockIP || payload.BlockingCondition == blockIPRange
 
 			if isIPCondition {
