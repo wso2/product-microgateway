@@ -33,11 +33,11 @@ When you add a new logger instance add the related package name as a constant
 // package name constants
 const (
 	pkgAPI          = "github.com/wso2/adapter/internal/api"
-	pkgAuth         = "github.com/wso2/adapter/pkg/auth"
+	pkgAuth         = "github.com/wso2/adapter/internal/auth"
 	pkgMgw          = "github.com/wso2/adapter/internal/adapter"
 	pkgOasparser    = "github.com/wso2/adapter/internal/oasparser"
 	pkgXds          = "github.com/wso2/adapter/internal/discovery/xds"
-	pkgSync         = "github.com/wso2/adapter/pkg/synchronizer"
+	pkgSync         = "github.com/wso2/adapter/internal/synchronizer"
 	pkgMsg          = "github.com/wso2/adapter/messaging"
 	pkgSvcDiscovery = "github.com/wso2/adapter/internal/svcDiscovery"
 	pkgTLSUtils     = "github.com/wso2/adapter/internal/tlsutils"
