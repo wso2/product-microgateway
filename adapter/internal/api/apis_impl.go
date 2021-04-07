@@ -80,8 +80,8 @@ type ProjectAPI struct {
 // The apictl project must be in zipped format. And all the extensions should be defined with in the openAPI
 // definition as only swagger.yaml is taken into consideration here. For websocket APIs api.yaml is taken into
 // consideration. API type is decided by the type field in the api.yaml file.
-func extractAPIProject(payload *[]byte) (apiProject ProjectAPI, err error) {
-	zipReader, err := zip.NewReader(bytes.NewReader(*payload), int64(len(*payload)))
+func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
+	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	newLineByteArray := []byte("\n")
 	var upstreamCerts []byte
 
@@ -100,7 +100,7 @@ func extractAPIProject(payload *[]byte) (apiProject ProjectAPI, err error) {
 					file.Name, err.Error())
 				return apiProject, err
 			}
-			deployments, err := parseDeployments(&unzippedFileBytes)
+			deployments, err := parseDeployments(unzippedFileBytes)
 			if err != nil {
 				loggers.LoggerAPI.Errorf("Error occurred while parsing the deployment environments: %v %v",
 					file.Name, err.Error())
@@ -222,30 +222,30 @@ func verifyMandatoryFields(apiJSON config.APIJsonData) error {
 
 // ApplyAPIProjectFromAPIM accepts an apictl project (as a byte array), list of vhosts with respective environments
 // and updates the xds servers based upon the content.
-func ApplyAPIProjectFromAPIM(payload *[]byte, vhostToEnvsMap map[string][]string) error {
+func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string) error {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
 		return err
 	}
-	name, version, err := getAPINameAndVersion(apiProject.APIJsn)
+	apiInfo, err := parseAPIInfo(apiProject.APIJsn)
 	if err != nil {
 		return err
 	}
 
 	for vhost, environments := range vhostToEnvsMap {
-		updateAPI(vhost, name, version, apiProject, environments)
+		updateAPI(vhost, apiInfo, apiProject, environments)
 	}
 	return nil
 }
 
 // ApplyAPIProjectInStandaloneMode is called by the rest implementation to differentiate
 // between create and update using the override param
-func ApplyAPIProjectInStandaloneMode(payload *[]byte, override *bool) error {
+func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
 		return err
 	}
-	name, version, err := getAPINameAndVersion(apiProject.APIJsn)
+	apiInfo, err := parseAPIInfo(apiProject.APIJsn)
 	if err != nil {
 		return err
 	}
@@ -261,14 +261,15 @@ func ApplyAPIProjectInStandaloneMode(payload *[]byte, override *bool) error {
 		// if the API already exists in the one of vhost, break deployment of the API
 		exists := false
 		for _, deployment := range apiProject.Deployments {
-			if xds.IsAPIExist(deployment.DeploymentVhost, name, version) {
+			if xds.IsAPIExist(deployment.DeploymentVhost, apiInfo.Name, apiInfo.Version) {
 				exists = true
 				break
 			}
 		}
 
 		if exists {
-			loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.", name, version)
+			loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.",
+				apiInfo.Name, apiInfo.Version)
 			return errors.New(mgw.AlreadyExists)
 		}
 	}
@@ -280,19 +281,19 @@ func ApplyAPIProjectInStandaloneMode(payload *[]byte, override *bool) error {
 	}
 
 	for vhost, environments := range vhostToEnvsMap {
-		updateAPI(vhost, name, version, apiProject, environments)
+		updateAPI(vhost, apiInfo, apiProject, environments)
 	}
 	return nil
 }
 
-func updateAPI(vhost, name, version string, apiProject ProjectAPI, environments []string) {
+func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) {
 	if len(environments) == 0 {
 		environments = append(environments, config.DefaultGatewayName)
 	}
 	var apiContent config.APIContent
 	apiContent.VHost = vhost
-	apiContent.Name = name
-	apiContent.Version = version
+	apiContent.Name = apiInfo.Name
+	apiContent.Version = apiInfo.Version
 	apiContent.APIType = apiProject.APIType
 	apiContent.LifeCycleStatus = apiProject.APILifeCycleStatus
 	apiContent.UpstreamCerts = apiProject.UpstreamCerts
@@ -417,17 +418,4 @@ func readZipFile(zf *zip.File) ([]byte, error) {
 	}
 	defer f.Close()
 	return ioutil.ReadAll(f)
-}
-
-func getAPINameAndVersion(apiJsn []byte) (name string, version string, err error) {
-	var apiDef map[string]interface{}
-	err = json.Unmarshal(apiJsn, &apiDef)
-	if err != nil {
-		loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml %v", err.Error())
-		return "", "", err
-	}
-	data := apiDef["data"].(map[string]interface{})
-	name = data["name"].(string)
-	version = data["version"].(string)
-	return name, version, nil
 }

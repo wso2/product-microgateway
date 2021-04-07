@@ -17,15 +17,16 @@
 package api
 
 import (
+	"encoding/json"
 	"github.com/ghodss/yaml"
 	"github.com/wso2/micro-gw/config"
 	"github.com/wso2/micro-gw/loggers"
 )
 
-func parseDeployments(data *[]byte) ([]Deployment, error) {
+func parseDeployments(data []byte) ([]Deployment, error) {
 	// deployEnvsFromAPI represents deployments read from API Project
 	deployEnvsFromAPI := &DeploymentEnvironments{}
-	if err := yaml.Unmarshal(*data, deployEnvsFromAPI); err != nil {
+	if err := yaml.Unmarshal(data, deployEnvsFromAPI); err != nil {
 		loggers.LoggerAPI.Errorf("Error parsing content of deployment environments: %v", err.Error())
 		return nil, err
 	}
@@ -51,4 +52,13 @@ func parseDeployments(data *[]byte) ([]Deployment, error) {
 		deployments = append(deployments, deployment)
 	}
 	return deployments, nil
+}
+
+func parseAPIInfo(data []byte) (ApictlProjectInfo, error) {
+	apiInfo := ApictlProjectInfoJSON{}
+	err := json.Unmarshal(data, &apiInfo)
+	if err != nil {
+		loggers.LoggerAPI.Errorf("Error occurred while parsing api.json %v", err.Error())
+	}
+	return apiInfo.Data, err
 }

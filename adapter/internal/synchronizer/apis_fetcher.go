@@ -111,7 +111,7 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse) {
 	// If an API ID is present, make a query parameter
 	if id != nil {
 		logger.LoggerSync.Debugf("API ID: %v", *id)
-		respSyncAPI.APIID = *id
+		respSyncAPI.APIUUID = *id
 		q.Add(apiID, *id)
 	}
 	// If the gateway label is present, make a query parameter
@@ -239,7 +239,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		_ = f.Close() // Close the file here (without defer)
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
 		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
-		err = apiServer.ApplyAPIProjectFromAPIM(&apiFileData, vhostToEnvsMap)
+		err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		}

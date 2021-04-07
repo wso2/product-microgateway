@@ -16,12 +16,17 @@
 
 package api
 
+// ApimMeta represents APIM meta information of files received from APIM
+type ApimMeta struct {
+	Type    string `yaml:"type"`
+	Version string `yaml:"version"`
+}
+
 // DeploymentEnvironments represents content of deployment_environments.yaml file
 // of an API_CTL Project
 type DeploymentEnvironments struct {
-	Type    string       `yaml:"type"`
-	Version string       `yaml:"version"`
-	Data    []Deployment `yaml:"data"`
+	ApimMeta
+	Data []Deployment `yaml:"data"`
 }
 
 // Deployment represents deployment information of an API_CTL project
@@ -29,4 +34,17 @@ type Deployment struct {
 	DisplayOnDevportal    bool   `yaml:"displayOnDevportal"`
 	DeploymentVhost       string `yaml:"deploymentVhost"`
 	DeploymentEnvironment string `yaml:"deploymentEnvironment"`
+}
+
+// ApictlProjectInfoJSON represents APICTL project's API JSON file
+type ApictlProjectInfoJSON struct {
+	ApimMeta
+	Data ApictlProjectInfo
+}
+
+// ApictlProjectInfo represents Information of API extracted from APICTL project's API JSON file
+type ApictlProjectInfo struct {
+	ID      string `json:"Id"`
+	Name    string `json:"Name"`
+	Version string `json:"Version"`
 }
