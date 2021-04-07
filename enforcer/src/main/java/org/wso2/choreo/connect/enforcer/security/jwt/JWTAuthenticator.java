@@ -534,24 +534,6 @@ public class JWTAuthenticator implements Authenticator {
         return signedJWTInfo;
     }
 
-//    Cache gatewaySignedJWTParseCache = CacheProvider.getGatewaySignedJWTParseCache();
-//        if (gatewaySignedJWTParseCache != null) {
-//        Object cachedEntry = gatewaySignedJWTParseCache.get(signature);
-//        if (cachedEntry != null) {
-//            signedJWTInfo = (SignedJWTInfo) cachedEntry;
-//        }
-//        if (signedJWTInfo == null || !signedJWTInfo.getToken().equals(accessToken)) {
-//            SignedJWT signedJWT = SignedJWT.parse(accessToken);
-//            JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
-//            signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
-//            gatewaySignedJWTParseCache.put(signature, signedJWTInfo);
-//        }
-//    } else {
-//        SignedJWT signedJWT = SignedJWT.parse(accessToken);
-//        JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
-//        signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);
-//    }
-
     private String getJWTTokenIdentifier(SignedJWTInfo signedJWTInfo) {
 
         JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
