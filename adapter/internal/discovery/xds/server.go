@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sync"
+	"time"
 
 	subscription "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
 	throttle "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/throttle"
@@ -143,6 +144,7 @@ func init() {
 	enforcerApplicationKeyMappingMap = make(map[string][]types.Resource)
 	enforcerRevokedTokensMap = make(map[string][]types.Resource)
 	enforcerThrottleData = &throttle.ThrottleData{}
+	rand.Seed(time.Now().UnixNano())
 }
 
 // GetXdsCache returns xds server cache.
@@ -293,6 +295,31 @@ func DeleteAPI(vhost, apiName, version string) error {
 	//TODO: (SuKSW) clean any remaining in label wise maps, if this is the last API of that label
 	logger.LoggerXds.Infof("Deleted API. %v", apiIdentifier)
 	return nil
+}
+
+// UndeployAPI undeploys the APIs from the provided set of enviroments. If the complete set of provided environments
+// and already deployed environments are the same the apim
+func UndeployAPI(vhost, apiName, version string, undeployEnvs []string) {
+	apiIdentifier := GenerateIdentifierForAPI(vhost, apiName, version)
+	existingLabels, ok := openAPIEnvoyMap[apiIdentifier]
+	if !ok {
+		logger.LoggerXds.Debugf("No API to undeploy under %s:%s", apiName, version)
+		return
+	}
+	newLabels := []string{}
+	for _, existingEnv := range existingLabels {
+		if !arrayContains(undeployEnvs, existingEnv) {
+			newLabels = append(newLabels, existingEnv)
+		}
+	}
+
+	if len(newLabels) == 0 {
+		DeleteAPI(vhost, apiName, version)
+		return
+	}
+	openAPIEnvoyMap[apiIdentifier] = newLabels
+	updateXdsCacheOnAPIAdd(existingLabels, newLabels)
+	logger.LoggerXds.Infof("Undeployed APIs. %s:%s - %v", apiName, version, undeployEnvs)
 }
 
 func arrayContains(a []string, x string) bool {

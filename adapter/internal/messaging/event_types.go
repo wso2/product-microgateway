@@ -98,6 +98,7 @@ type APIEvent struct {
 	// TODO: (VirajSalaka) Remove this when the event is fixed from APIM side
 	Version string `json:"version"`
 	Context string `json:"context"`
+	Name    string `json:"name"`
 }
 
 // ApplicationRegistrationEvent for struct application registration events
