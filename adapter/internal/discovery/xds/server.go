@@ -241,7 +241,6 @@ func UpdateAPI(apiContent config.APIContent) {
 	}
 
 	apiIdentifier := GenerateIdentifierForAPI(apiContent.VHost, apiContent.Name, apiContent.Version)
-	apiIdentifierWithoutVhost := GenerateIdentifierForAPIWithoutVhost(apiContent.Name, apiContent.Version)
 	//TODO: (SuKSW) Uncomment the below section depending on MgwSwagger.Resource ids
 	//TODO: (SuKSW) Update the existing API if the basepath already exists
 	//existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
@@ -263,7 +262,7 @@ func UpdateAPI(apiContent config.APIContent) {
 	oldLabels, _ := openAPIEnvoyMap[apiIdentifier]
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiIdentifier, oldLabels)
 	openAPIEnvoyMap[apiIdentifier] = newLabels
-	apiToVhostsMap[apiIdentifierWithoutVhost] = append(apiToVhostsMap[apiIdentifierWithoutVhost], apiContent.VHost)
+	updateVhostInternalMaps(apiContent, newLabels)
 
 	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, apiContent.UpstreamCerts,
 		apiContent.VHost)
@@ -279,6 +278,15 @@ func UpdateAPI(apiContent config.APIContent) {
 	if svcdiscovery.IsServiceDiscoveryEnabled {
 		startConsulServiceDiscovery() //consul service discovery starting point
 	}
+}
+
+// GetVhostOfAPI returns the vhost of API deployed in the given gateway environment
+func GetVhostOfAPI(apiUUID, environment string) (vhost string, exists bool) {
+	if envToVhost, ok := apiUUIDToGatewayToVhosts[apiUUID]; ok {
+		vhost, exists = envToVhost[environment]
+		return
+	}
+	return "", false
 }
 
 // DeleteAPIs deletes an API, its resources and updates the caches of given environments
@@ -364,27 +372,6 @@ func deleteAPI(apiIdentifier string, environments []string) error {
 	//TODO: (SuKSW) clean any remaining in label wise maps, if this is the last API of that label
 	logger.LoggerXds.Infof("Deleted API. %v", apiIdentifier)
 	return nil
-}
-
-// getEnvironmentsToBeDeleted returns an slice of environments APIs to be u-deployed from
-// by considering existing environments list and environments that APIs are wished to be un-deployed
-func getEnvironmentsToBeDeleted(existingEnvs, deleteEnvs []string) (toBeDel []string, toBeKept []string) {
-	toBeDel = make([]string, 0, len(deleteEnvs))
-	toBeKept = make([]string, 0, len(deleteEnvs))
-
-	// if deleteEnvs is empty (deleteEnvs wished to be deleted), delete all environments
-	if len(deleteEnvs) == 0 {
-		return existingEnvs, []string{}
-	}
-	// otherwise delete env if it wished to
-	for _, existingEnv := range existingEnvs {
-		if arrayContains(deleteEnvs, existingEnv) {
-			toBeDel = append(toBeDel, existingEnv)
-		} else {
-			toBeKept = append(toBeKept, existingEnv)
-		}
-	}
-	return
 }
 
 func arrayContains(a []string, x string) bool {

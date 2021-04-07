@@ -360,6 +360,7 @@ type controlPlane struct {
 
 // APIContent contains everything necessary to create an API
 type APIContent struct {
+	UUID               string
 	VHost              string
 	Name               string
 	Version            string

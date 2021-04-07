@@ -232,8 +232,36 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 		return err
 	}
 
+	// vhostsToRemove contains vhosts and environments to undeploy
+	vhostsToRemove := make(map[string][]string)
+
+	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
+		// search for vhosts in the given environments
+		for _, env := range environments {
+			if existingVhost, exists := xds.GetVhostOfAPI(apiInfo.ID, env); exists {
+				loggers.LoggerAPI.Debugf("API %v:%v with UUID \"%v\" already deployed to vhost: %v",
+					apiInfo.Name, apiInfo.Version, apiInfo.ID, existingVhost)
+				if vhost != existingVhost {
+					loggers.LoggerAPI.Infof("Un-deploying API %v:%v with UUID \"%v\" which is already deployed to vhost: %v",
+						apiInfo.Name, apiInfo.Version, apiInfo.ID, existingVhost)
+					vhostsToRemove[existingVhost] = append(vhostsToRemove[existingVhost], env)
+				}
+			}
+		}
+		// first update the API for vhost
 		updateAPI(vhost, apiInfo, apiProject, environments)
+	}
+
+	// undeploy APIs with other vhosts in the same gateway environment
+	for vhost, environments := range vhostsToRemove {
+		if vhost == "" {
+			// ignore if vhost is empty, since it deletes all vhosts of API
+			continue
+		}
+		if err := xds.DeleteAPIs(vhost, apiInfo.Name, apiInfo.Version, environments); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -280,6 +308,7 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 			append(vhostToEnvsMap[environment.DeploymentVhost], environment.DeploymentEnvironment)
 	}
 
+	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
 		updateAPI(vhost, apiInfo, apiProject, environments)
 	}
@@ -291,6 +320,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 		environments = append(environments, config.DefaultGatewayName)
 	}
 	var apiContent config.APIContent
+	apiContent.UUID = apiInfo.ID
 	apiContent.VHost = vhost
 	apiContent.Name = apiInfo.Name
 	apiContent.Version = apiInfo.Version
