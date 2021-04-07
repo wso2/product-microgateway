@@ -18,21 +18,25 @@
 
 package org.wso2.choreo.connect.enforcer.security.jwt.issuer;
 
+import io.grpc.netty.shaded.io.netty.buffer.ByteBuf;
 import io.grpc.netty.shaded.io.netty.buffer.Unpooled;
 import io.grpc.netty.shaded.io.netty.channel.ChannelFuture;
 import io.grpc.netty.shaded.io.netty.channel.ChannelFutureListener;
 import io.grpc.netty.shaded.io.netty.channel.ChannelHandlerContext;
 import io.grpc.netty.shaded.io.netty.channel.SimpleChannelInboundHandler;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpRequest;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.FullHttpResponse;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpObject;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpRequest;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpUtil;
+import io.grpc.netty.shaded.io.netty.util.CharsetUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
 
@@ -68,7 +72,7 @@ public class HttpTokenServerHandler extends SimpleChannelInboundHandler<HttpObje
         FullHttpResponse response = null;
 
         if (msg instanceof HttpRequest) {
-            HttpRequest req = (HttpRequest) msg;
+            FullHttpRequest req = (FullHttpRequest) msg;
             boolean keepAlive = HttpUtil.isKeepAlive(req);
 
             String authHeader = req.headers().get(AUTHORIZATION);
@@ -122,8 +126,21 @@ public class HttpTokenServerHandler extends SimpleChannelInboundHandler<HttpObje
             }
 
             if (isAuthorized) {
-                tokenIssuer = new JWTIssuerImpl();
                 TokenValidationContext validationContext = new TokenValidationContext();
+                ByteBuf byteBuf = req.content();
+                if (byteBuf != null && byteBuf.isReadable()) {
+                    String payload = byteBuf.toString(CharsetUtil.UTF_8);
+                    if (!payload.isEmpty()) {
+                        String[] bodyParams = payload.split(APIConstants.JwtTokenConstants.PARAM_SEPARATOR);
+                        for (String param : bodyParams) {
+                            String[] pair = param.split(APIConstants.JwtTokenConstants.PARAM_VALUE_SEPARATOR);
+                            if (pair.length == 2 && APIConstants.JwtTokenConstants.SCOPE.equals(pair[0])) {
+                                validationContext.setAttribute(APIConstants.JwtTokenConstants.SCOPE, pair[1]);
+                            }
+                        }
+                    }
+                }
+                tokenIssuer = new JWTIssuerImpl();
                 validationContext.setValidationInfoDTO(new APIKeyValidationInfoDTO());
                 validationContext.getValidationInfoDTO().setEndUserName(username);
                 String jwt = tokenIssuer.generateToken(validationContext);

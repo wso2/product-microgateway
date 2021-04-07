@@ -66,11 +66,13 @@ public class APIManagerWithMgwServerInstance extends MgwServerImpl {
                                                                                        IOException {
         createTmpMgwSetup(false);
         if (!StringUtils.isEmpty(confPath)) {
-            Utils.copyFile(confPath, mgwTmpServerPath + File.separator + "resources" + File.separator +
-                    "conf" + File.separator + "config.toml");
+            Utils.copyFile(confPath,
+                    mgwTmpServerPath + File.separator + "docker-compose" + File.separator + "conf" + File.separator
+                            + "config.toml");
         }
         String dockerComposePath =
-                mgwTmpServerPath + File.separator + "docker-with-apim" + File.separator + "docker-compose.yaml";
+                mgwTmpServerPath + File.separator + "docker-compose" + File.separator + "choreo-connect-with-apim"
+                        + File.separator + "docker-compose.yaml";
         // add mock backend service to the docker-compose.yaml file
         MockBackendServer.addMockBackendServiceToDockerCompose(dockerComposePath, tlsEnabled);
 

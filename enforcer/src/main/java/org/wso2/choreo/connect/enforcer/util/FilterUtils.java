@@ -474,4 +474,18 @@ public class FilterUtils {
         }
         return ThrottleConstants.UNLIMITED_TIER;
     }
+
+    public static String getClientIp(Map<String, String> headers, String knownIp) {
+        String clientIp = knownIp;
+        String xForwardFor = headers.get(APIConstants.X_FORWARDED_FOR);
+        if (!StringUtils.isEmpty(xForwardFor)) {
+            clientIp = xForwardFor;
+            int idx = xForwardFor.indexOf(',');
+            if (idx > -1) {
+                clientIp = clientIp.substring(0, idx);
+            }
+        }
+
+        return clientIp;
+    }
 }

@@ -21,6 +21,7 @@ package org.wso2.choreo.connect.enforcer.security.jwt.issuer;
 import io.grpc.netty.shaded.io.netty.channel.ChannelInitializer;
 import io.grpc.netty.shaded.io.netty.channel.ChannelPipeline;
 import io.grpc.netty.shaded.io.netty.channel.socket.SocketChannel;
+import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpObjectAggregator;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpServerCodec;
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
@@ -43,6 +44,7 @@ public class HttpTokenServerInitializer extends ChannelInitializer<SocketChannel
         }
         p.addLast(new HttpServerCodec());
         p.addLast(new HttpServerExpectContinueHandler());
+        p.addLast(new HttpObjectAggregator(1048576));
         p.addLast(new HttpTokenServerHandler());
     }
 }

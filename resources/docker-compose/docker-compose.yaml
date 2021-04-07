@@ -21,7 +21,7 @@ services:
       - ENFORCER_ANALYTICS_RECEIVER_PORT=18090
       - ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
     volumes:
-      - ./resources/router/security:/home/wso2/security
+      - ../router/security:/home/wso2/security
     ports:
       - "9095:9095"
       - "9090:9090"
@@ -36,8 +36,8 @@ services:
         max-size: "20m"
         max-file: "5"
     volumes:
-      - ./resources/adapter/security:/home/wso2/security
-      - ./resources/conf:/home/wso2/conf
+      - ../adapter/security:/home/wso2/security
+      - ../conf:/home/wso2/conf
     environment:
       - cp_admin_pwd=admin
       - adapter_admin_pwd=admin
@@ -51,9 +51,9 @@ services:
         max-size: "20m"
         max-file: "5"
     volumes:
-      - ./resources/enforcer/security:/home/wso2/security
-      - ./resources/conf:/home/wso2/conf
-      - ./resources/enforcer/dropins:/home/wso2/lib/dropins
+      - ../enforcer/security:/home/wso2/security
+      - ../conf:/home/wso2/conf
+      - ../enforcer/dropins:/home/wso2/lib/dropins
     links:
       - adapter
     environment:

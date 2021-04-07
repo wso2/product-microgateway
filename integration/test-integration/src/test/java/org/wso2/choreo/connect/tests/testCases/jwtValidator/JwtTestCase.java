@@ -80,6 +80,19 @@ public class JwtTestCase {
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
     }
 
+    @Test(description = "Test to check the invalid authorization header format")
+    public void invokeJWTHeaderInvalidAuthorizationHeader() throws Exception {
+
+        // Set header
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Something " + TestConstant.INVALID_JWT_TOKEN);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/pet/2") , headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
+    }
+
     @Test(description = "Test to check the JWT auth validate expired token")
     public void invokeJWTHeaderExpiredTokenTest() throws Exception {
 

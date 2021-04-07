@@ -48,6 +48,7 @@ import org.wso2.choreo.connect.enforcer.exception.MGWException;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
+import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTConstants;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
@@ -85,7 +86,11 @@ public class JWTAuthenticator implements Authenticator {
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
         String jwtToken = retrieveAuthHeaderValue(requestContext);
-        String splitToken[] = jwtToken.split("\\s");
+        if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
+        }
+        String[] splitToken = jwtToken.split("\\s");
         // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
         if (splitToken.length > 1) {
             jwtToken = splitToken[1];
@@ -242,7 +247,7 @@ public class JWTAuthenticator implements Authenticator {
             if (isGatewayTokenCacheEnabled) {
                 try {
                     Object token = CacheProvider.getGatewayJWTTokenCache().get(jwtTokenCacheKey);
-                    if (token != null) {
+                    if (token != null && !JWTConstants.UNAVAILABLE.equals(token)) {
                         endUserToken = (String) token;
                         String[] splitToken = ((String) token).split("\\.");
                         org.json.JSONObject payload = new org.json.JSONObject(new String(Base64.getUrlDecoder().

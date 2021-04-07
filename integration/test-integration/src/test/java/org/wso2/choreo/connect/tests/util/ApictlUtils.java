@@ -51,9 +51,9 @@ public class ApictlUtils {
             "openAPIs" + File.separator;
     public static final String BACKEND_CERTS_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
             "certs" + File.separator;
-    public static final String MGW_ADAPTER_CERTS_PATH = File.separator + "server-tmp" + File.separator +
-            "resources" + File.separator + "adapter" + File.separator + "security" + File.separator +
-            "truststore" + File.separator;
+    public static final String MGW_ADAPTER_CERTS_PATH =
+            File.separator + "server-tmp" + File.separator + "docker-compose" + File.separator + "adapter"
+                    + File.separator + "security" + File.separator + "truststore" + File.separator;
     public static final String APICTL_CERTS_PATH = File.separator +
             ".wso2apictl" + File.separator + "certs" + File.separator;
 
@@ -110,7 +110,12 @@ public class ApictlUtils {
      */
     public static void createProject(String openApiFile, String apiProjectName, String backendCert) throws IOException, MicroGWTestException {
         String targetDir = Utils.getTargetDirPath();
-        String openApiFilePath = targetDir + OPENAPIS_PATH + openApiFile;
+        String openApiFilePath;
+        if(openApiFile.startsWith("https://") || openApiFile.startsWith("http://")) {
+            openApiFilePath = openApiFile;
+        } else {
+            openApiFilePath = targetDir + OPENAPIS_PATH + openApiFile;
+        }
         String projectPathToCreate = targetDir + API_PROJECTS_PATH + apiProjectName;
 
         //apictl init <projectPath> --oas <openApiFilePath>

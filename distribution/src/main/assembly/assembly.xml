@@ -24,26 +24,37 @@
     <fileSets>
         <fileSet>
             <directory>../resources/adapter</directory>
-            <outputDirectory>choreo-connect-${project.version}/resources/adapter</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/adapter</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../resources/conf</directory>
-            <outputDirectory>choreo-connect-${project.version}/resources/conf</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../resources/enforcer</directory>
-            <outputDirectory>choreo-connect-${project.version}/resources/enforcer</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/enforcer</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../resources/router</directory>
-            <outputDirectory>choreo-connect-${project.version}/resources/router</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/router</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../resources/k8s-artifacts</directory>
-            <outputDirectory>choreo-connect-${project.version}/resources/k8s-artifacts</outputDirectory>
+            <excludes>
+                <exclude>./choreo-connect/config-toml-configmap.yaml</exclude>
+            </excludes>
+            <outputDirectory>choreo-connect-${project.version}/k8s-artifacts/choreo-connect-with-apim</outputDirectory>
         </fileSet>
         <fileSet>
-            <outputDirectory>choreo-connect-${project.version}/resources/enforcer/dropins</outputDirectory>
+            <directory>../resources/k8s-artifacts</directory>
+            <excludes>
+                <exclude>./apim/**</exclude>
+                <exclude>./choreo-connect/config-toml-configmap-for-eventhub.yaml</exclude>
+            </excludes>
+            <outputDirectory>choreo-connect-${project.version}/k8s-artifacts/choreo-connect</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/enforcer/dropins</outputDirectory>
             <excludes>
                 <exclude>**/*</exclude>
             </excludes>
@@ -51,52 +62,68 @@
     </fileSets>
     <files>
         <file>
-            <source>../resources/docker-compose.yaml</source>
-            <outputDirectory>choreo-connect-${project.version}</outputDirectory>
+            <source>../resources/docker-compose/docker-compose.yaml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect</outputDirectory>
         </file>
         <file>
-            <source>../resources/apim/docker-compose.yaml</source>
-            <outputDirectory>choreo-connect-${project.version}/docker-with-apim</outputDirectory>
-        </file>
-        <file>
-            <source>../resources/security/mg.key</source>
-            <outputDirectory>choreo-connect-${project.version}/resources/adapter/security/keystore</outputDirectory>
-        </file>
-        <file>
-            <source>../resources/security/mg.pem</source>
-            <outputDirectory>choreo-connect-${project.version}/resources/adapter/security/keystore</outputDirectory>
-        </file>
-        <file>
-            <source>../resources/security/mg.pem</source>
-            <outputDirectory>choreo-connect-${project.version}/resources/adapter/security/truststore</outputDirectory>
+            <source>../resources/docker-compose/apim/docker-compose.yaml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim
+            </outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.key</source>
-            <outputDirectory>choreo-connect-${project.version}/resources/enforcer/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/adapter/security/keystore
+            </outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>choreo-connect-${project.version}/resources/enforcer/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/adapter/security/keystore
+            </outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>choreo-connect-${project.version}/resources/enforcer/security/truststore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/adapter/security/truststore
+            </outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.key</source>
-            <outputDirectory>choreo-connect-${project.version}/resources/router/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/enforcer/security/keystore
+            </outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>choreo-connect-${project.version}/resources/router/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/enforcer/security/keystore
+            </outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>choreo-connect-${project.version}/resources/router/security/truststore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/enforcer/security/truststore
+            </outputDirectory>
         </file>
         <file>
-            <source>../resources/apim/conf/deployment.toml</source>
-            <outputDirectory>choreo-connect-${project.version}/resources/apim/</outputDirectory>
+            <source>../resources/security/mg.key</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/router/security/keystore
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/router/security/keystore
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/router/security/truststore
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/docker-compose/apim/conf/deployment.toml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/docker-compose/apim/conf/config.toml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
+            </outputDirectory>
         </file>
     </files>
 </assembly>

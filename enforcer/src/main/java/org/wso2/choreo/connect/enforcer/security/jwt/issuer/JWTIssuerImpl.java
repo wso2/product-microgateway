@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
 
 import java.util.LinkedHashMap;
@@ -56,6 +57,11 @@ public class JWTIssuerImpl extends AbstractJWTIssuer {
         claims.put("iat", String.valueOf(currentTime));
         claims.put("aud", AUD_VALUE);
         claims.put(dialect + "keytype", KEY_TYPE);
+        // in test key we provide the requested scope without any authorization checks.
+        if (validationContext.getAttribute(APIConstants.JwtTokenConstants.SCOPE) != null) {
+            claims.put(APIConstants.JwtTokenConstants.SCOPE,
+                    validationContext.getAttribute(APIConstants.JwtTokenConstants.SCOPE).toString());
+        }
 
         String endUserName = validationContext.getValidationInfoDTO().getEndUserName();
 

@@ -457,7 +457,10 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 			clusterArray = append(clusterArray, openAPIClustersMap[apiKey]...)
 			vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], openAPIRoutesMap[apiKey]...)
 			endpointArray = append(endpointArray, openAPIEndpointsMap[apiKey]...)
-			apis = append(apis, openAPIEnforcerApisMap[apiKey])
+			enfocerAPI, ok := openAPIEnforcerApisMap[apiKey]
+			if ok {
+				apis = append(apis, enfocerAPI)
+			}
 			// listenerArrays = append(listenerArrays, openAPIListenersMap[apiKey])
 		}
 	}

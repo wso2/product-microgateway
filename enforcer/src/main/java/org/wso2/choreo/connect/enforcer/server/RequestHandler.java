@@ -30,6 +30,7 @@ import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
+import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.Map;
 
@@ -76,6 +77,7 @@ public class RequestHandler {
                 request.getAttributes().getSource().getAddress().hasSocketAddress()) {
             address = request.getAttributes().getSource().getAddress().getSocketAddress().getAddress();
         }
+        address = FilterUtils.getClientIp(headers, address);
 
         ResourceConfig resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
