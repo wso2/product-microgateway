@@ -14,7 +14,6 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 FROM envoyproxy/envoy-alpine:v1.17.1
-FROM frolvlad/alpine-glibc:alpine-3.12_glibc-2.32
 
 ENV LANG=C.UTF-8
 
@@ -56,11 +55,6 @@ ENV ENFORCER_ANALYTICS_RECEIVER_PORT=18090
 ENV ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
 
 ENV TRAILING_ARGS=
-
-RUN mkdir -p /etc/envoy
-COPY --from=0 /usr/local/bin /usr/local/bin
-COPY maven/envoy.yaml /etc/envoy/envoy.yaml
-COPY maven/security /home/wso2/security
 
 USER ${MG_USER}
 ENV ENVOY_UID=0
