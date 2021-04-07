@@ -299,7 +299,7 @@ func DeleteAPI(vhost, apiName, version string) error {
 
 // UndeployAPI undeploys the APIs from the provided set of enviroments. If the complete set of provided environments
 // and already deployed environments are the same the apim
-func UndeployAPI(vhost, apiName, version string, undeployedEnvs []string) {
+func UndeployAPI(vhost, apiName, version string, undeployEnvs []string) {
 	apiIdentifier := GenerateIdentifierForAPI(vhost, apiName, version)
 	existingLabels, ok := openAPIEnvoyMap[apiIdentifier]
 	if !ok {
@@ -308,14 +308,7 @@ func UndeployAPI(vhost, apiName, version string, undeployedEnvs []string) {
 	}
 	newLabels := []string{}
 	for _, existingEnv := range existingLabels {
-		labelMatched := false
-		for _, undeployedEnv := range undeployedEnvs {
-			if undeployedEnv == existingEnv {
-				labelMatched = true
-				break
-			}
-		}
-		if !labelMatched {
+		if !arrayContains(undeployEnvs, existingEnv) {
 			newLabels = append(newLabels, existingEnv)
 		}
 	}
@@ -326,7 +319,7 @@ func UndeployAPI(vhost, apiName, version string, undeployedEnvs []string) {
 	}
 	openAPIEnvoyMap[apiIdentifier] = newLabels
 	updateXdsCacheOnAPIAdd(existingLabels, newLabels)
-	logger.LoggerXds.Infof("Undeployed APIs. %s:%s - %v", apiName, version, undeployedEnvs)
+	logger.LoggerXds.Infof("Undeployed APIs. %s:%s - %v", apiName, version, undeployEnvs)
 }
 
 func arrayContains(a []string, x string) bool {
