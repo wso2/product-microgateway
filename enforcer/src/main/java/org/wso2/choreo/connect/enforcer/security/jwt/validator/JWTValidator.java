@@ -34,7 +34,7 @@ import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.exception.MGWException;
+import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTUtil;
 import org.wso2.choreo.connect.enforcer.security.jwt.SignedJWTInfo;
 
@@ -60,7 +60,7 @@ public class JWTValidator {
     }
 
 
-    public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws MGWException {
+    public JWTValidationInfo validateJWTToken(SignedJWTInfo signedJWTInfo) throws EnforcerException {
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         String issuer = signedJWTInfo.getJwtClaimsSet().getIssuer();
         Map<String, ExtendedTokenIssuerDto> tokenIssuers = ConfigHolder.getInstance().getConfig().getIssuersMap();
@@ -79,7 +79,7 @@ public class JWTValidator {
         return jwtValidationInfo;
     }
 
-    private JWTValidationInfo validateToken(SignedJWTInfo signedJWTInfo) throws MGWException {
+    private JWTValidationInfo validateToken(SignedJWTInfo signedJWTInfo) throws EnforcerException {
 
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         boolean state;
@@ -107,11 +107,11 @@ public class JWTValidator {
                 return jwtValidationInfo;
             }
         } catch (ParseException | JWTGeneratorException e) {
-            throw new MGWException("Error while parsing JWT", e);
+            throw new EnforcerException("Error while parsing JWT", e);
         }
     }
 
-    protected boolean validateSignature(SignedJWT signedJWT) throws MGWException {
+    protected boolean validateSignature(SignedJWT signedJWT) throws EnforcerException {
 
         String certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
         try {
@@ -133,7 +133,7 @@ public class JWTValidator {
                             return JWTUtil.verifyTokenSignature(signedJWT, rsaPublicKey);
                         }
                     } else {
-                        throw new MGWException("Key Algorithm not supported");
+                        throw new EnforcerException("Key Algorithm not supported");
                     }
                 } else if (tokenIssuer.getCertificate() != null) {
                     logger.debug("Retrieve certificate from Token issuer and validating");
@@ -146,7 +146,7 @@ public class JWTValidator {
             }
             return JWTUtil.verifyTokenSignature(signedJWT, certificateAlias);
         } catch (ParseException | JOSEException | IOException e) {
-            throw new MGWException("Error while parsing JWT", e);
+            throw new EnforcerException("JWT Signature verification failed", e);
         }
     }
 

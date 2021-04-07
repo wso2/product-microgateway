@@ -21,17 +21,17 @@ package org.wso2.choreo.connect.enforcer.exception;
 /**
  * This is the custom exception class for API management.
  */
-public class MGWException extends Exception {
+public class EnforcerException extends Exception {
 
-    public MGWException(String msg) {
+    public EnforcerException(String msg) {
         super(msg);
     }
 
-    public MGWException(String msg, Throwable e) {
+    public EnforcerException(String msg, Throwable e) {
         super(msg, e);
     }
 
-    public MGWException(Throwable throwable) {
+    public EnforcerException(Throwable throwable) {
         super(throwable);
     }
 
