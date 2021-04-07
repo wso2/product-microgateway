@@ -31,6 +31,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.AccessTokenInfo;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
@@ -91,13 +94,15 @@ public class OAuthAuthenticator implements Authenticator {
     }
 
     @Override
-    public AuthenticationContext authenticate(RequestContext requestContext) {
+    public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
         String token = requestContext.getHeaders().get("authorization");
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
 
-        if (token.toLowerCase().contains("bearer")) {
-            token = token.split("\\s")[1];
+        if (token == null || !token.toLowerCase().contains("bearer")) {
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
         }
+        token = token.split("\\s")[1];
 
         try {
             IntrospectInfo introspectInfo = validateToken(token);

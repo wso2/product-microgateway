@@ -34,7 +34,7 @@ public class APISecurityConstants {
     public static final int API_AUTH_MISSING_CREDENTIALS = 900902;
     public static final String API_AUTH_MISSING_CREDENTIALS_MESSAGE = "Missing Credentials";
     public static final String API_AUTH_MISSING_CREDENTIALS_DESCRIPTION = "Make sure your API invocation call "
-            + "has a header: ";
+            + "has a header: Authorization: Bearer ACCESS_TOKEN";
 
     public static final int API_AUTH_ACCESS_TOKEN_EXPIRED = 900903;
     public static final String API_AUTH_ACCESS_TOKEN_EXPIRED_MESSAGE = "Access Token Expired";

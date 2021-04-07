@@ -33,7 +33,6 @@ const (
 	blockIPRange        = "IPRANGE"
 	blockIP             = "IP"
 	blockStateTrue      = "true"
-	blockStateFalse     = "false"
 	templateStateAdd    = "add"
 	templateStateRemove = "remove"
 )
@@ -72,17 +71,13 @@ func handleThrottleData(deliveries <-chan amqp.Delivery, done chan error) {
 				}
 				if payload.State == blockStateTrue {
 					synchronizer.AddBlockingIPCondition(ip)
-				} else if payload.State == blockStateFalse {
-					if isIPCondition {
-						synchronizer.RemoveBlockingIPCondition(ip)
-					} else {
-						synchronizer.RemoveBlockingCondition(payload.ConditionValue)
-					}
+				} else {
+					synchronizer.RemoveBlockingIPCondition(ip)
 				}
 			} else {
 				if payload.State == blockStateTrue {
 					synchronizer.AddBlockingCondition(payload.ConditionValue)
-				} else if payload.State == blockStateFalse {
+				} else {
 					synchronizer.RemoveBlockingCondition(payload.ConditionValue)
 				}
 			}

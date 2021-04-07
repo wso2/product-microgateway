@@ -121,7 +121,6 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 	if resp.StatusCode == http.StatusOK {
 		var keyManagers []eventhubTypes.KeyManager
 		json.Unmarshal(responseBytes, &keyManagers)
-		logger.LoggerSync.Infof("unmarshal %v", keyManagers)
 
 		for _, kmConfig := range keyManagers {
 			xds.KeyManagerList = append(xds.KeyManagerList, kmConfig)
