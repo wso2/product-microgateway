@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 FROM envoyproxy/envoy-alpine:v1.17.1
-FROM frolvlad/alpine-glibc:alpine-3.12_glibc-2.31
+FROM frolvlad/alpine-glibc:alpine-3.12_glibc-2.32
 
 ENV LANG=C.UTF-8
 
@@ -59,12 +59,9 @@ ENV TRAILING_ARGS=
 
 RUN mkdir -p /etc/envoy
 COPY --from=0 /usr/local/bin /usr/local/bin
-COPY --from=0 /etc/envoy/envoy.yaml /etc/envoy/envoy.yaml
-
 COPY maven/envoy.yaml /etc/envoy/envoy.yaml
 COPY maven/security /home/wso2/security
 
-EXPOSE 10000
 USER ${MG_USER}
 ENV ENVOY_UID=0
 ENV ENVOY_GID=0
