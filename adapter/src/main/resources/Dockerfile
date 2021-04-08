@@ -43,5 +43,6 @@ USER ${MG_USER}
 COPY maven/security security
 COPY maven/conf conf
 COPY maven/adapter-ubuntu adapter
+COPY maven/LICENSE.txt .
 
 CMD ./adapter
