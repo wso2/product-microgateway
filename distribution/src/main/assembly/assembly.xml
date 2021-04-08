@@ -149,5 +149,19 @@
             <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
             <destName>config.toml</destName>
         </file>
+        <file>
+            <source>../release-note.html</source>
+            <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
+        </file>
+        <file>
+            <source>../adapter/LICENSE.txt</source>
+            <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
+            <destName>LICENSE-ADAPTER.txt</destName>
+        </file>
+        <file>
+            <source>../enforcer/LICENSE.txt</source>
+            <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
+            <destName>LICENSE-ENFORCER.txt</destName>
+        </file>
     </files>
 </assembly>
