@@ -45,7 +45,11 @@ func getEnvironmentsToBeDeleted(existingEnvs, deleteEnvs []string) (toBeDel []st
 func updateVhostInternalMaps(apiContent config.APIContent, gwEnvs []string) {
 	// update internal map: apiToVhostsMap
 	apiIdentifierWithoutVhost := GenerateIdentifierForAPIWithoutVhost(apiContent.Name, apiContent.Version)
-	apiToVhostsMap[apiIdentifierWithoutVhost] = append(apiToVhostsMap[apiIdentifierWithoutVhost], apiContent.VHost)
+	if _, ok := apiToVhostsMap[apiIdentifierWithoutVhost]; ok {
+		apiToVhostsMap[apiIdentifierWithoutVhost][apiContent.VHost] = void
+	} else {
+		apiToVhostsMap[apiIdentifierWithoutVhost] = map[string]struct{}{apiContent.VHost: void}
+	}
 
 	// update internal map: apiUUIDToGatewayToVhosts
 	logger.LoggerXds.Debugf("Updating Vhost of API with UUID \"%v\" as %v.", apiContent.UUID, apiContent.VHost)

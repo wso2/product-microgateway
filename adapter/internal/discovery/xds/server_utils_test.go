@@ -17,6 +17,7 @@
 package xds
 
 import (
+	"github.com/wso2/micro-gw/config"
 	"reflect"
 	"testing"
 )
@@ -79,5 +80,41 @@ func TestGetEnvironmentsToBeDeleted(t *testing.T) {
 				t.Errorf("expected deleted environments %v but found %v", test.toBeKept, toBeKept)
 			}
 		})
+	}
+}
+
+func TestUpdateVhostInternalMaps(t *testing.T) {
+	setupInternalMemoryMapsWithTestSamples()
+
+	// force update existing API with same name and same UUID to same vhost in same environment
+	apiContent := config.APIContent{
+		UUID:    "111-PetStore-org1",
+		Name:    "PetStore",
+		Version: "v1",
+		VHost:   "org1.wso2.com",
+	}
+	updateVhostInternalMaps(apiContent, []string{"us-region"})
+	if _, ok := apiToVhostsMap["PetStore:v1"]["org1.wso2.com"]; len(apiToVhostsMap["PetStore:v1"]) != 2 || !ok {
+		t.Errorf("expected the vhost %v in the map only once", "org1.wso2.com")
+	}
+	vhost := apiUUIDToGatewayToVhosts[apiContent.UUID]["us-region"]
+	if vhost != apiContent.VHost {
+		t.Errorf("expected the vhost %v of the API is but found %v", apiContent.VHost, vhost)
+	}
+
+	// add new API
+	apiContent = config.APIContent{
+		UUID:    "xxx",
+		Name:    "NewAPI",
+		Version: "v1",
+		VHost:   "org1.wso2.com",
+	}
+	updateVhostInternalMaps(apiContent, []string{"us-region"})
+	if _, ok := apiToVhostsMap["NewAPI:v1"]["org1.wso2.com"]; len(apiToVhostsMap["NewAPI:v1"]) != 1 || !ok {
+		t.Errorf("expected the vhost %v in the map only once", "org1.wso2.com")
+	}
+	vhost = apiUUIDToGatewayToVhosts[apiContent.UUID]["us-region"]
+	if vhost != apiContent.VHost {
+		t.Errorf("expected the vhost %v of the API is but found %v", apiContent.VHost, vhost)
 	}
 }

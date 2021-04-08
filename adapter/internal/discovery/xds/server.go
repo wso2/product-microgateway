@@ -62,11 +62,10 @@ var (
 	enforcerRevokedTokensCache         wso2_cache.SnapshotCache
 	enforcerThrottleDataCache          wso2_cache.SnapshotCache
 
-	// API_UUID to gateway-env to vhost map (for the purpose of un-deploying APIs from APIM or Choreo)
-	apiUUIDToGatewayToVhosts map[string]map[string]string
+	// Vhosts entry maps, these maps updated with delta changes (when an API added, only added its entry only)
+	apiUUIDToGatewayToVhosts map[string]map[string]string   // API_UUID to gateway-env to vhost (for un-deploying APIs from APIM or Choreo)
+	apiToVhostsMap           map[string]map[string]struct{} // APIName:Version to VHosts set (for un-deploying APIs from APICTL)
 
-	// APIName:Version to VHosts map (for the purpose of un-deploying APIs from APICTL)
-	apiToVhostsMap map[string][]string
 	// Vhost:APIName:Version as map key
 	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // MgwSwagger struct map
 	openAPIEnvoyMap        map[string][]string             // Envoy Label Array map
@@ -95,6 +94,8 @@ var (
 	// KeyManagerList to store data
 	KeyManagerList = make([]eventhubTypes.KeyManager, 0)
 )
+
+var void struct{}
 
 const (
 	commonEnforcerLabel  string = "commonEnforcerLabel"
@@ -130,7 +131,7 @@ func init() {
 	enforcerThrottleDataCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 
 	apiUUIDToGatewayToVhosts = make(map[string]map[string]string)
-	apiToVhostsMap = make(map[string][]string)
+	apiToVhostsMap = make(map[string]map[string]struct{})
 	apiMgwSwaggerMap = make(map[string]mgw.MgwSwagger)
 	openAPIEnvoyMap = make(map[string][]string)
 	openAPIEnforcerApisMap = make(map[string]types.Resource)
@@ -301,8 +302,8 @@ func DeleteAPIs(vhost, apiName, version string, environments []string) error {
 	if vhost == "" {
 		// vhost is not defined, delete all vhosts
 		logger.LoggerXds.Infof("No vhost is specified for the API %v deleting from all vhosts", apiNameVersionID)
-		deletedVhosts := make([]string, 0, len(vhosts))
-		for _, vh := range vhosts {
+		deletedVhosts := make(map[string]struct{})
+		for vh := range vhosts {
 			apiIdentifier := GenerateIdentifierForAPI(vh, apiName, version)
 			// TODO: (renuka) optimize to update cache only once after updating all maps
 			if err := deleteAPI(apiIdentifier, environments); err != nil {
@@ -310,16 +311,16 @@ func DeleteAPIs(vhost, apiName, version string, environments []string) error {
 				logger.LoggerXds.Errorf("Error deleting API: %v", apiIdentifier)
 				logger.LoggerXds.Debugf("Update map apiToVhostsMap with deleting already deleted vhosts for API %v",
 					apiIdentifier)
-				remainingVhosts := make([]string, 0, len(vhosts)-len(deletedVhosts))
-				for _, v := range vhosts {
-					if !arrayContains(deletedVhosts, v) {
-						remainingVhosts = append(remainingVhosts, v)
+				remainingVhosts := make(map[string]struct{})
+				for v := range vhosts {
+					if _, ok := deletedVhosts[v]; ok {
+						remainingVhosts[v] = void
 					}
 				}
 				apiToVhostsMap[apiNameVersionID] = remainingVhosts
 				return err
 			}
-			deletedVhosts = append(deletedVhosts, vh)
+			deletedVhosts[vh] = void
 		}
 		delete(apiToVhostsMap, apiNameVersionID)
 		return nil
@@ -329,7 +330,9 @@ func DeleteAPIs(vhost, apiName, version string, environments []string) error {
 	if err := deleteAPI(apiIdentifier, environments); err != nil {
 		return err
 	}
-	if len(vhosts) == 1 && vhosts[0] == vhost {
+
+	// if this is the final vhost delete map entry
+	if _, ok := vhosts[vhost]; len(vhosts) == 1 && ok {
 		logger.LoggerXds.Debugf("There are no vhosts for the API %v and clean vhost entry with name:version from maps",
 			apiNameVersionID)
 		delete(apiToVhostsMap, apiNameVersionID)
