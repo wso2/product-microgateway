@@ -116,7 +116,7 @@
             <source>../resources/docker-compose/apim/conf/deployment.toml</source>
             <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
             </outputDirectory>
-        </file>testPreflightReqResourceWithoutCors
+        </file>
         <file>
             <source>../resources/conf/log4j2.properties</source>
             <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
