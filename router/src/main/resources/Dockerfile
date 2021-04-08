@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # -----------------------------------------------------------------------
+FROM alpine:3.13.4 as alpine
 FROM envoyproxy/envoy-alpine:v1.17.1
+COPY --from=alpine . .
 
 ENV LANG=C.UTF-8
 
@@ -29,9 +31,6 @@ ARG MOTD="\n\
  This Docker container comprises of a WSO2 product, running with its latest GA release \n\
  which is under the Apache License, Version 2.0. \n\
  Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"
-
-# Updrade the base os
-RUN apk upgrade
 
 RUN \
     addgroup -S -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
