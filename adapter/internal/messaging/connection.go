@@ -88,7 +88,7 @@ func connectionRetry(key string) (*Consumer, *amqp.Connection, error) {
 			time.Sleep(retryInterval)
 		}
 		if i == maxAttempt {
-			logger.LoggerMsg.Infof("Exceeds maximum attempts %d for %s", maxAttempt, amqpURIArray[j].url)
+			logger.LoggerMsg.Infof("Exceeds maximum connection retry attempts %d for %s", maxAttempt, amqpURIArray[j].url)
 		}
 	}
 	return nil, rabbitConn, err
