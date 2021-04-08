@@ -28,12 +28,12 @@ import (
 	"strconv"
 
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/config"
-	"github.com/wso2/micro-gw/internal/auth"
-	"github.com/wso2/micro-gw/internal/discovery/xds"
-	"github.com/wso2/micro-gw/internal/eventhub/types"
-	"github.com/wso2/micro-gw/internal/tlsutils"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/adapter/config"
+	"github.com/wso2/adapter/internal/auth"
+	"github.com/wso2/adapter/internal/discovery/xds"
+	"github.com/wso2/adapter/internal/eventhub/types"
+	"github.com/wso2/adapter/internal/tlsutils"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 const (

@@ -32,9 +32,9 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/micro-gw/config"
-	mgwconfig "github.com/wso2/micro-gw/config"
-	"github.com/wso2/micro-gw/internal/oasparser/model"
+	"github.com/wso2/adapter/config"
+	mgwconfig "github.com/wso2/adapter/config"
+	"github.com/wso2/adapter/internal/oasparser/model"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 

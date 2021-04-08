@@ -83,8 +83,8 @@ public class MgwServerInstance extends MgwServerImpl {
         createTmpMgwSetup(customJwtTransformerEnabled);
         if (!StringUtils.isEmpty(confPath)) {
             Utils.copyFile(confPath,
-                    mgwTmpServerPath + File.separator + "docker-compose" + File.separator + "conf" + File.separator
-                            + "config.toml");
+                    mgwTmpServerPath + File.separator + "docker-compose" + File.separator + "choreo-connect"
+                            + File.separator + "conf" + File.separator + "config.toml");
         }
 
         String dockerComposePath =

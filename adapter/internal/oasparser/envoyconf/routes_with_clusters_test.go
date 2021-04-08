@@ -21,12 +21,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wso2/micro-gw/internal/oasparser/utills"
+	"github.com/wso2/adapter/internal/oasparser/utills"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/micro-gw/config"
-	envoy "github.com/wso2/micro-gw/internal/oasparser/envoyconf"
-	"github.com/wso2/micro-gw/internal/oasparser/operator"
+	"github.com/wso2/adapter/config"
+	envoy "github.com/wso2/adapter/internal/oasparser/envoyconf"
+	"github.com/wso2/adapter/internal/oasparser/operator"
 )
 
 func TestCreateRoutesWithClustersForOpenAPIWithoutExtensions(t *testing.T) {

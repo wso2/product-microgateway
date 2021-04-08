@@ -30,17 +30,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	apiServer "github.com/wso2/micro-gw/internal/api"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/wso2/micro-gw/config"
-	"github.com/wso2/micro-gw/internal/auth"
-	"github.com/wso2/micro-gw/internal/tlsutils"
+	"github.com/wso2/adapter/config"
+	"github.com/wso2/adapter/internal/auth"
+	"github.com/wso2/adapter/internal/tlsutils"
 
-	logger "github.com/wso2/micro-gw/loggers"
+	apiServer "github.com/wso2/adapter/internal/api"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 const (

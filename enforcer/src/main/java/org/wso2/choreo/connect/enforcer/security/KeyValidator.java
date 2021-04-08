@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
-import org.wso2.choreo.connect.enforcer.exception.MGWException;
+import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.models.API;
 import org.wso2.choreo.connect.enforcer.models.ApiPolicy;
 import org.wso2.choreo.connect.enforcer.models.Application;
@@ -62,13 +62,13 @@ public class KeyValidator {
             if (log.isDebugEnabled()) {
                 log.debug("After validating subscriptions");
             }
-        } catch (MGWException e) {
+        } catch (EnforcerException e) {
             log.error("Error Occurred while validating subscription.", e);
         }
         return apiKeyValidationInfoDTO;
     }
 
-    public boolean validateScopes(TokenValidationContext validationContext) throws MGWException {
+    public boolean validateScopes(TokenValidationContext validationContext) throws EnforcerException {
 
         if (validationContext.isCacheHit()) {
             return true;
@@ -76,7 +76,7 @@ public class KeyValidator {
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validationContext.getValidationInfoDTO();
 
         if (apiKeyValidationInfoDTO == null) {
-            throw new MGWException("Key Validation information not set");
+            throw new EnforcerException("Key Validation information not set");
         }
         String[] scopes;
         Set<String> scopesSet = apiKeyValidationInfoDTO.getScopes();
@@ -127,7 +127,7 @@ public class KeyValidator {
     }
 
     private boolean validateSubscriptionDetails(String context, String version, String consumerKey, String keyManager,
-            APIKeyValidationInfoDTO infoDTO) throws MGWException {
+            APIKeyValidationInfoDTO infoDTO) throws EnforcerException {
         boolean defaultVersionInvoked = false;
         String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(context);
         if (apiTenantDomain == null) {

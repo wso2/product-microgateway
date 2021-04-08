@@ -29,13 +29,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/wso2/micro-gw/config"
-	apiModel "github.com/wso2/micro-gw/internal/api/models"
-	xds "github.com/wso2/micro-gw/internal/discovery/xds"
-	mgw "github.com/wso2/micro-gw/internal/oasparser/model"
-	"github.com/wso2/micro-gw/internal/oasparser/utills"
-	"github.com/wso2/micro-gw/internal/tlsutils"
-	"github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/adapter/config"
+	apiModel "github.com/wso2/adapter/internal/api/models"
+	xds "github.com/wso2/adapter/internal/discovery/xds"
+	mgw "github.com/wso2/adapter/internal/oasparser/model"
+	"github.com/wso2/adapter/internal/oasparser/utills"
+	"github.com/wso2/adapter/internal/tlsutils"
+	"github.com/wso2/adapter/loggers"
 )
 
 // API Controller related constants

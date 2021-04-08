@@ -60,4 +60,6 @@ USER ${MG_USER}
 COPY maven/ lib/
 COPY maven/conf conf
 COPY maven/security security
+COPY maven/LICENSE.txt .
+
 CMD java $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -cp "lib/*" org.wso2.choreo.connect.enforcer.server.AuthServer

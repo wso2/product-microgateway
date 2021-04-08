@@ -31,13 +31,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wso2/micro-gw/config"
-	"github.com/wso2/micro-gw/internal/auth"
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/throttle"
-	"github.com/wso2/micro-gw/internal/discovery/xds"
-	"github.com/wso2/micro-gw/internal/tlsutils"
+	"github.com/wso2/adapter/config"
+	"github.com/wso2/adapter/internal/auth"
+	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/throttle"
+	"github.com/wso2/adapter/internal/discovery/xds"
+	"github.com/wso2/adapter/internal/tlsutils"
 
-	logger "github.com/wso2/micro-gw/loggers"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 const (

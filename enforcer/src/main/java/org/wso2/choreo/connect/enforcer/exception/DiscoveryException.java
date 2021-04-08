@@ -21,7 +21,7 @@ package org.wso2.choreo.connect.enforcer.exception;
 /**
  * An exception definition for discovery service related errors.
  */
-public class DiscoveryException extends MGWException {
+public class DiscoveryException extends EnforcerException {
     public DiscoveryException(String msg) {
         super(msg);
     }

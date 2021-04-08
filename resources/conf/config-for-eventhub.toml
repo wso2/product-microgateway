@@ -114,7 +114,7 @@ allowCredentials = false
 # Throttling configurations
 [enforcer.throttling]
   # Connect with the central traffic manager
-  enableGlobalEventPublishing = true
+  enableGlobalEventPublishing = false
   # Enable global advanced throttling based on request header conditions
   enableHeaderConditions = false
   # Enable global advanced throttling based on request query parameter conditions

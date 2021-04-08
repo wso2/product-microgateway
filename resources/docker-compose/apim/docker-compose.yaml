@@ -14,7 +14,7 @@ services:
     volumes:
       - ./conf/deployment.toml:/home/wso2carbon/wso2am-4.0.0-beta/repository/conf/deployment.toml
   router:
-    image: wso2/choreo-connect-router:0.9.0-SNAPSHOT
+    image: wso2/choreo-connect-router:0.9.0-alpha
     logging:
       options:
         max-size: "20m"
@@ -33,7 +33,7 @@ services:
       - ENFORCER_PORT=8081
       - ENFORCER_CA_CERT_PATH=/home/wso2/security/truststore/mg.pem
     volumes:
-      - ../router/security:/home/wso2/security
+      - ../resources/router/security:/home/wso2/security
     ports:
       - "9095:9095"
       - "9000:9000"
@@ -42,7 +42,7 @@ services:
       - adapter
       - enforcer
   adapter:
-    image: wso2/choreo-connect-adapter:0.9.0-SNAPSHOT
+    image: wso2/choreo-connect-adapter:0.9.0-alpha
     logging:
       options:
         max-size: "20m"
@@ -51,9 +51,9 @@ services:
       apim:
         condition: service_healthy
     volumes:
-      - ../adapter/security:/home/wso2/security
-      - ../conf/log4j2.properties:/home/wso2/conf/log4j2.properties
-      - ../conf/log_config.toml:/home/wso2/cong/log_config.toml
+      - ../resources/adapter/security:/home/wso2/security
+      - ./conf/log4j2.properties:/home/wso2/conf/log4j2.properties
+      - ./conf/log_config.toml:/home/wso2/conf/log_config.toml
       - ./conf/config.toml:/home/wso2/conf/config.toml
     environment:
       - cp_admin_pwd=admin
@@ -64,15 +64,15 @@ services:
     links:
       - apim
   enforcer:
-    image: wso2/choreo-connect-enforcer:0.9.0-SNAPSHOT
+    image: wso2/choreo-connect-enforcer:0.9.0-alpha
     logging:
       options:
         max-size: "20m"
         max-file: "5"
     volumes:
-      - ../enforcer/security:/home/wso2/security
-      - ../conf:/home/wso2/conf
-      - ../enforcer/dropins:/home/wso2/lib/dropins
+      - ../resources/enforcer/security:/home/wso2/security
+      - ./conf:/home/wso2/conf
+      - ../resources/enforcer/dropins:/home/wso2/lib/dropins
     links:
       - adapter
       - apim

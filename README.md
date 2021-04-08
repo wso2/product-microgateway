@@ -1,39 +1,38 @@
-# Choreo-Connect
+# Choreo Connect
 
 [![Build Status](https://wso2.org/jenkins/job/products/job/product-microgateway/badge/icon)](https://wso2.org/jenkins/job/products/job/product-microgateway/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![License](https://img.shields.io/badge/slack-microgateway-blueviolet)](https://join.slack.com/t/wso2-apim/shared_invite/enQtNzEzMzk5Njc5MzM0LTgwODI3NmQ1MjI0ZDQyMGNmZGI4ZjdkZmI1ZWZmMjNkY2E0NmY3ZmExYjkxYThjNzNkOTU2NWJmYzM4YzZiOWU)
 
-The Choreo-Connect is a Cloud Native API Gateway which can be used to expose one or many microservices as APIs.
+The Choreo Connect is a Cloud Native API Gateway which can be used to expose one or many microservices as APIs.
 
 
-## Why Choreo-Connect
+## Why Choreo Connect
 Microservices have become the norm for modern application architecture. Workloads of modern applications are spread 
 across many groups of microservices, cloud services and legacy services. The characteristics and behaviors of such 
 heterogeneous services have a massive diversity. Such as authentication mechanisms, message formats, high availability 
 factors and so on.
-The Choreo-Connect is designed to expose heterogeneous microservices as APIs to end consumers using a common API 
+The Choreo Connect is designed to expose heterogeneous microservices as APIs to end consumers using a common API 
 interface based on the Open API Specification. This helps expose microservices using a unified interface to external 
 consumers, internal consumers and partners. It applies the common quality of service attributes on API requests such as 
 security, rate limiting and analytics and also offers a wide range of features which helps organizations to deploy APIs 
 microservice architectures efficiently.
 
-## Choreo-Connect quick start
+## Choreo Connect quick start
 
 *Prerequisites*
     - Make sure you have installed *docker* on your machine.
     - Make sure you have installed the *docker-compose* on your machine
 
-Let's host our first API on Choreo-Connect. We will be exposing the publicly available [petstore services](https://petstore.swagger.io/) via  microgateway.
+Let's host our first API on Choreo Connect. We will be exposing the publicly available [petstore services](https://petstore.swagger.io/) via  microgateway.
 
-1. First download the CLI tool(APICTL) and the Choreo-Connect distributions
+1. First download the latest CLI tool(APICTL) and the Choreo Connect distributions
 and extract them to a folder of your choice.
-  * [CLI (APICTL) Alpha 2](https://github.com/wso2/product-apim-tooling/releases/tag/v4.0.0-alpha2)
-  * [Choreo-Connect Distribution](https://github.com/wso2/product-microgateway/releases/tag/v4.0.0-m10)
+  * [CLI (APICTL)](https://github.com/wso2/product-apim-tooling/releases/)
+  * [Choreo Connect Distribution](https://github.com/wso2/product-microgateway/releases/)
   
-Note: Choreo-Connect-0.9.0-SNAPSHOT is compatible with APICTL 4.0.0-alpha2.
 
-CLI tool extracted location will be referred as `CLI_HOME` and Microgateway distribution extracted location would be 
+CLI tool extracted location will be referred as `CLI_HOME` and Choreo Connect distribution extracted location would be 
 referred as `CC_HOME`.
 
 2. Using your command line client tool add the 'CLI_HOME' folder to your PATH variable.
@@ -55,7 +54,7 @@ referred as `CC_HOME`.
 where you executed the command. 
 
  
-5. Now lets start the choreo-connect on docker by executing the docker compose script inside the `CC_HOME/docker-compose/choreo-connect/`. Navigate to `CC_HOME/docker-compose/choreo-connect/` and execute the following command
+5. Now lets start the Choreo Connect on docker by executing the docker compose script inside the `CC_HOME/docker-compose/choreo-connect/`. Navigate to `CC_HOME/docker-compose/choreo-connect/` and execute the following command
     ```
     docker-compose up -d
     ```
@@ -65,21 +64,21 @@ where you executed the command.
     ```
     docker ps | grep choreo-connect-
     ```
-    The user credentials can be configured in the configurations file `CC_HOME/docker-compose/conf/config.toml`inside Choreo-Connect distribution. `admin:admin` is the default accepted credentials by the microgateway adapter.
+    The user credentials can be configured in the configurations file `CC_HOME/docker-compose/choreo-connect/conf/config.toml`inside Choreo Connect distribution. `admin:admin` is the default accepted credentials by the Choreo Connect adapter.
 
     !!! NOTE:
 
-    Following apictl commands are being executed with -k flag to avoid SSL verification with the Choreo-Connect.
+    Following apictl commands are being executed with -k flag to avoid SSL verification with the Choreo Connect.
 
-    To communicate via https without skipping SSL verification (without -k flag), add the cert of Choreo-Connect into `/home/<your-pc-username>/.wso2apictl/certs`.
+    To communicate via https without skipping SSL verification (without -k flag), add the cert of Choreo Connect into `/home/<your-pc-username>/.wso2apictl/certs`.
 
-6. To use apictl with Choreo-Connect, let's first add a environment specifically for our Choreo-Connect deployment. The environment will hold the adapter URL for further commands.
+6. To use apictl with Choreo Connect, let's first add a environment specifically for our Choreo Connect deployment. The environment will hold the adapter URL for further commands.
 
     ```
     apictl mg add env dev --adapter https://localhost:9843
     ```
 
-7. Next you can use the following command to login to the above Choreo-Connect cluster (in other words login to the Choreo-Connect adapter).
+7. Next you can use the following command to login to the above Choreo Connect cluster (in other words login to the Choreo Connect adapter).
 
     ```
     apictl mg login dev -k
@@ -90,21 +89,22 @@ where you executed the command.
     ```
 
 
-8. Now let's deploy our first API to Choreo-Connect using the project created in the step 3. Navigate to the location where the petstore project was initialized. Execute the following command to deploy the API in the Choreo-Connect deployment.
+8. Now let's deploy our first API to Choreo Connect using the project created in the step 3. Navigate to the location where the petstore project was initialized. Execute the following command to deploy the API in the Choreo Connect deployment.
 
     ```
     apictl mg deploy api -f petstore -e dev -k
     ```
 
-9. The next step would be to invoke the API using a REST tool. Since APIs on the Choreo-Connect are by default secured. We need a valid token in order to invoke the API. 
-Use the following sample token accepted by the Choreo-Connect to access the API. Lets set the token to command line as a variable
-
-
+9. The next step would be to invoke the API using a REST tool. Since APIs on the Choreo Connect are by default secured. We need a valid token in order to invoke the API. 
+Let's get a test token from the Choreo Connect using its `/testkey` endpoint.
+   
     ```
-    TOKEN=eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNNV0kyTkRBelpHUXpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XSTBaV05tTkRjeE5HWXdZbU00WlRBM01XSTJOREF6WkdRek5HTTBaR1JsTmpKa09ERmtaRFJpT1RGa01XRmhNelUyWkdWbE5nX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJhZG1pbiIsImF1dCI6IkFQUExJQ0FUSU9OIiwiYXVkIjoiQUFjY1FwM1VrYkhmc1lnS2p5NmRCNWpKbmY0YSIsIm5iZiI6MTYxNTE5OTM0MCwiYXpwIjoiQUFjY1FwM1VrYkhmc1lnS2p5NmRCNWpKbmY0YSIsInNjb3BlIjoicmVhZDpwZXRzIHdyaXRlOnBldHMiLCJpc3MiOiJodHRwczpcL1wvbG9jYWxob3N0Ojk0NDNcL29hdXRoMlwvdG9rZW4iLCJleHAiOjI2MTUxOTkzNDAsImlhdCI6MTYxNTE5OTM0MCwianRpIjoiNWMyZDFmNjctZjc3NC00YjU3LTk2YTUtMWNiYWJmZmM4YjUxIn0.A0GzwmBTJl5AkcDJ3mQO9q9_G0ZtISAkF6SQ44aTV4Mmf2MhwWRTI6M9458q34OSjGSQPo2Mf8cIZbAyG7vOABh9oaChfLnJHerOK9mFo-wOUmz4ZC8P2orYe2GqL-f5-k_wiA8ji57Vzn7SMBFCOlHlgU-uJyRKWCLXvliCoa2zTrWjOHuhMeSFd2ra718SAzYqsk8brdvZ4ZjC7zye45j1uOx0JnjvRDtiKt01GtwG0idGKwA9xVOuMKYzKochFy9TwA1HVNC7edNJ-gcw5ceoj4Is6r-KM0qGQLMAc8OrkyaAgU1ForFJAXVzl1IguXgLuux6uJzkmCJlC4bhrA
+    TOKEN=$(curl -X POST "https://localhost:9095/testkey" -d "scope=read:pets" -H "Authorization: Basic YWRtaW46YWRtaW4=" -k -v)
     ``` 
+!!! NOTE:
+    Recommendation is to disable this `/testkey` endpoint in production environments as it is configurable.
 
-10. We can now invoke the API running on the Choreo-Connect using cURL as below.
+10. We can now invoke the API running on the Choreo Connect using cURL as below.
     ```
     curl -X GET "https://localhost:9095/v2/pet/findByStatus?status=available" -H "accept: application/json" -H "Authorization:Bearer $TOKEN" -k
     ```
@@ -116,10 +116,10 @@ Use the following sample token accepted by the Choreo-Connect to access the API.
     logout        - `apictl mg logout dev`    
     remove environment - `apictl mg remove env dev`
 
-## Choreo-Connect Components
-- **APICTL** : The APICTL is used to initiate Choreo-Connect projects as well as to deploy APIs in to Choreo-Connect environment by developers. 
+## Choreo Connect Components
+- **APICTL** : The APICTL is used to initiate Choreo Connect projects as well as to deploy APIs in to Choreo Connect environment by developers. 
 
-- **Router** : The client facing component of the Choreo-Connect. The downstream request will reach the proxy component and it will route the request
+- **Router** : The client facing component of the Choreo Connect. The downstream request will reach the proxy component and it will route the request
 to the desired destination.
 
 - **Enforcer** : This component will intercept the request going through the Router and applies security, rate limiting, publish analytics data and etc.
@@ -129,15 +129,15 @@ Router will forward the request to this component in order to validate and to ad
 creation or update.
 ## Architecture
 
-The following diagram illustrates how the Choreo-Connect expose microservices using Open API definition as well 
+The following diagram illustrates how the Choreo Connect expose microservices using Open API definition as well 
 as exposing APIs from [WSO2 API Manager](https://wso2.com/api-management/).
 
 ![Alt text](Architecture.png?raw=true "Title")
 
 
-## Choreo-Connect APICTL commands
+## Choreo Connect APICTL commands
 
-Following are the basic commands in APICTL which is used to handle APIs in Choreo-Connect
+Following are the basic commands in APICTL which is used to handle APIs in Choreo Connect
 
 Note: Before you execute any of the commands below you need to add the path to the `<CLI_HOME` directory to the PATH environment variable. Ex: /home/dev/wso2am-micro-gw/bin
 
@@ -145,7 +145,7 @@ Note: Before you execute any of the commands below you need to add the path to t
 
 `$ apictl init <project_name> --oas <filePathToOpenAPI_or_openAPIUrl>`
 
-The "apictl init" command is used to initialize a project structure with artifacts required to deploy API in Choreo-Connect. This will create a **api_definitions**  directory.
+The "apictl init" command is used to initialize a project structure with artifacts required to deploy API in Choreo Connect. This will create a **api_definitions**  directory.
 
 Execute `apictl init -h` to get more detailed information regarding the setup command.
 
@@ -153,7 +153,7 @@ Example
 
     $ apictl init petstore --oas https://petstore.swagger.io/v2/swagger.json
 
-Let's see how we can expose the [petstore swagger](samples/petstore_swagger3.yaml) using the `apictl `through Choreo-Connect.
+Let's see how we can expose the [petstore swagger](samples/petstore_swagger3.yaml) using the `apictl `through Choreo Connect.
 
 ### Add Environment and Login
 ```
@@ -190,13 +190,13 @@ apictl mg logout <mgw_environement>
 apictl mg remove env <mgw_environement>
 ```
 
-## Invoke API exposed via Choreo-Connect
+## Invoke API exposed via Choreo Connect
 Once APIs are exposed we can invoke API with a valid jwt token or an opaque access token.
-In order to use jwt tokens, Choreo-Connect should be presented with  a jwt signed by a trusted OAuth2 service. There are few ways we can get a jwt token
+In order to use jwt tokens, Choreo Connect should be presented with  a jwt signed by a trusted OAuth2 service. There are few ways we can get a jwt token
 
 1. Any third party secure token service
-The public certificate of the token service which used to sign the token should be added to the trust store of the Choreo-Connect.
-The jwt should have the claims **sub, aud, exp** in order to validate with Choreo-Connect.
+The public certificate of the token service which used to sign the token should be added to the trust store of the Choreo Connect.
+The jwt should have the claims **sub, aud, exp** in order to validate with Choreo Connect.
 
 1. Get jwt from WSO2 API Manager
 Please refer the [documentation](https://apim.docs.wso2.com/en/4.0.0-dev/consume/manage-application/generate-keys/generate-api-keys/) on how to get a valid jwt

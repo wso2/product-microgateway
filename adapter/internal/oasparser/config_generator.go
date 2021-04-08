@@ -23,11 +23,11 @@ import (
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	"github.com/wso2/micro-gw/config"
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/api"
-	envoy "github.com/wso2/micro-gw/internal/oasparser/envoyconf"
-	"github.com/wso2/micro-gw/internal/oasparser/model"
-	mgw "github.com/wso2/micro-gw/internal/oasparser/model"
+	"github.com/wso2/adapter/config"
+	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/api"
+	envoy "github.com/wso2/adapter/internal/oasparser/envoyconf"
+	"github.com/wso2/adapter/internal/oasparser/model"
+	mgw "github.com/wso2/adapter/internal/oasparser/model"
 )
 
 // GetProductionRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)

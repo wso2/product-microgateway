@@ -109,7 +109,8 @@ public abstract class MgwServerImpl implements MgwServer {
         if (customJwtTransformerEnabled) {
             Utils.copyFile(System.getProperty("jwt_transformer_jar"),
                     targetDir + File.separator + "server-tmp" + File.separator + "docker-compose" + File.separator
-                            + "enforcer" + File.separator + "dropins" + File.separator + "jwt-transformer.jar");
+                            + "resources" + File.separator + "enforcer" + File.separator + "dropins" + File.separator
+                            + "jwt-transformer.jar");
         }
     }
 }

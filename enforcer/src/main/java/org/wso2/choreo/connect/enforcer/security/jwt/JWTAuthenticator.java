@@ -44,7 +44,7 @@ import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
-import org.wso2.choreo.connect.enforcer.exception.MGWException;
+import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
@@ -128,41 +128,21 @@ public class JWTAuthenticator implements Authenticator {
         if (validationInfo != null) {
             if (validationInfo.isValid()) {
                 // Validate subscriptions
-                APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
+                APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
                 EnforcerConfig configuration = ConfigHolder.getInstance().getConfig();
                 ExtendedTokenIssuerDto issuerDto = configuration.getIssuersMap().get(validationInfo.getIssuer());
-                  //TODO: enable subscription validation
-                if (issuerDto.isValidateSubscriptions()) {
 
-                    JSONObject api = validateSubscriptionFromClaim(name, version, claims, splitToken, true);
+                if (issuerDto.isValidateSubscriptions()) {
+                    // if the token is self contained, validation subscription from `subscribedApis` claim
+                    JSONObject api = validateSubscriptionFromClaim(name, version, claims, splitToken,
+                            apiKeyValidationInfoDTO, true);
+
                     if (api == null) {
                         if (log.isDebugEnabled()) {
                             log.debug("Begin subscription validation via Key Manager: "
                                     + validationInfo.getKeyManager());
                         }
                         apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, validationInfo);
-
-                        // set endpoint security
-                        SecurityInfo securityInfo;
-                        if (apiKeyValidationInfoDTO != null && apiKeyValidationInfoDTO.getType() != null &&
-                                requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity() != null) {
-                            if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                                securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
-                                        getProductionSecurityInfo();
-                            } else {
-                                securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
-                                        getSandBoxSecurityInfo();
-                            }
-                            if (securityInfo.getEnabled() &&
-                                    APIConstants.AUTHORIZATION_HEADER_BASIC.
-                                            equalsIgnoreCase(securityInfo.getSecurityType())) {
-                                // use constants
-                                requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                                        APIConstants.AUTHORIZATION_HEADER_BASIC + " " +
-                                                Base64.getEncoder().encodeToString((securityInfo.getUsername() +
-                                                        ":" + securityInfo.getPassword()).getBytes()));
-                            }
-                        }
 
                         if (log.isDebugEnabled()) {
                             log.debug("Subscription validation via Key Manager. Status: " + apiKeyValidationInfoDTO
@@ -176,6 +156,29 @@ public class JWTAuthenticator implements Authenticator {
                         }
                     }
                 }
+
+                // set endpoint security
+                SecurityInfo securityInfo;
+                if (apiKeyValidationInfoDTO.getType() != null &&
+                        requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity() != null) {
+                    if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
+                        securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                                getProductionSecurityInfo();
+                    } else {
+                        securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                                getSandBoxSecurityInfo();
+                    }
+                    if (securityInfo.getEnabled() &&
+                            APIConstants.AUTHORIZATION_HEADER_BASIC.
+                                    equalsIgnoreCase(securityInfo.getSecurityType())) {
+                        // use constants
+                        requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                                APIConstants.AUTHORIZATION_HEADER_BASIC + ' ' +
+                                        Base64.getEncoder().encodeToString((securityInfo.getUsername() +
+                                                ':' + securityInfo.getPassword()).getBytes()));
+                    }
+                }
+
                 // Validate scopes
                 validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
 
@@ -330,7 +333,7 @@ public class JWTAuthenticator implements Authenticator {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                         APISecurityConstants.INVALID_SCOPE, message);
             }
-        } catch (MGWException e) {
+        } catch (EnforcerException e) {
             String message = "Error while accessing backend services for token scope validation";
             log.error(message, e);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, message, e);
@@ -368,29 +371,77 @@ public class JWTAuthenticator implements Authenticator {
      * Validate whether the user is subscribed to the invoked API. If subscribed, return a JSON object containing
      * the API information. This validation is done based on the jwt token claims.
      *
-     * @param name API name
-     * @param version API version
-     * @param payload The payload of the JWT token
+     * @param name           API name
+     * @param version        API version
+     * @param validationInfo token validation related details. this will be populated based on the available data
+     *                       during the subscription validation.
+     * @param payload        The payload of the JWT token
      * @return an JSON object containing subscribed API information retrieved from token payload.
      * If the subscription information is not found, return a null object.
      * @throws APISecurityException if the user is not subscribed to the API
      */
     private JSONObject validateSubscriptionFromClaim(String name, String version, JWTClaimsSet payload,
-                                                     String[] splitToken, boolean isOauth)
-            throws APISecurityException {
+                                                     String[] splitToken, APIKeyValidationInfoDTO validationInfo,
+                                                     boolean isOauth) throws APISecurityException {
         JSONObject api = null;
+        try {
+            validationInfo.setEndUserName(payload.getSubject());
+            if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE) != null) {
+                validationInfo.setType(payload.getStringClaim(APIConstants.JwtTokenConstants.KEY_TYPE));
+            } else {
+                validationInfo.setType(APIConstants.API_KEY_TYPE_PRODUCTION);
+            }
+
+            if (payload.getClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY) != null) {
+                validationInfo.setConsumerKey(payload.getStringClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY));
+            }
+
+            JSONObject app = payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
+            if (app != null) {
+                validationInfo.setApplicationUUID(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_UUID));
+                validationInfo.setApplicationId(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+                validationInfo.setApplicationName(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
+                validationInfo.setApplicationTier(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
+                validationInfo.setSubscriber(app.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
+                if (app.containsKey(APIConstants.JwtTokenConstants.QUOTA_TYPE)
+                        && APIConstants.JwtTokenConstants.QUOTA_TYPE_BANDWIDTH
+                        .equals(app.getAsString(APIConstants.JwtTokenConstants.QUOTA_TYPE))) {
+                    validationInfo.setContentAware(true);
+                }
+            }
+        } catch (ParseException e) {
+            log.error("Error while parsing jwt claims");
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                    APISecurityConstants.API_AUTH_FORBIDDEN,
+                    APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+        }
 
         if (payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS) != null) {
             // Subscription validation
             JSONArray subscribedAPIs =
                     (JSONArray) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
-            for (int i = 0; i < subscribedAPIs.size(); i++) {
-                JSONObject subscribedAPI =
-                        (JSONObject) subscribedAPIs.get(i);
-                if (name.equals(subscribedAPI.getAsString(APIConstants.JwtTokenConstants.API_NAME)) &&
-                        version.equals(subscribedAPI.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
+            for (Object apiObj : subscribedAPIs) {
+                JSONObject subApi =
+                        (JSONObject) apiObj;
+                if (name.equals(subApi.getAsString(APIConstants.JwtTokenConstants.API_NAME)) &&
+                        version.equals(subApi.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
                         )) {
-                    api = subscribedAPI;
+                    api = subApi;
+                    validationInfo.setAuthorized(true);
+
+                    //set throttling attribs if present
+                    String subTier = subApi.getAsString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER);
+                    String subPublisher = subApi.getAsString(APIConstants.JwtTokenConstants.API_PUBLISHER);
+                    String subTenant = subApi.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN);
+                    if (subTier != null) {
+                        validationInfo.setTier(subTier);
+                    }
+                    if (subPublisher != null) {
+                        validationInfo.setApiPublisher(subPublisher);
+                    }
+                    if (subTenant != null) {
+                        validationInfo.setSubscriberTenantDomain(subTenant);
+                    }
                     if (log.isDebugEnabled()) {
                         log.debug("User is subscribed to the API: " + name + ", " +
                                 "version: " + version + ". Token: " + FilterUtils.getMaskedToken(splitToken[0]));
@@ -429,9 +480,11 @@ public class JWTAuthenticator implements Authenticator {
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
         String tenantDomain = "carbon.super"; //TODO : Get the tenant domain.
         JWTValidationInfo jwtValidationInfo = null;
-        if (isGatewayTokenCacheEnabled) {
+        if (isGatewayTokenCacheEnabled &&
+                !SignedJWTInfo.ValidationStatus.NOT_VALIDATED.equals(signedJWTInfo.getValidationStatus())) {
             Object cacheToken = CacheProvider.getGatewayTokenCache().getIfPresent(jti);
-            if (cacheToken != null && (Boolean) cacheToken) {
+            if (cacheToken != null && (Boolean) cacheToken &&
+                    SignedJWTInfo.ValidationStatus.VALID.equals(signedJWTInfo.getValidationStatus())) {
                 if (CacheProvider.getGatewayKeyCache().getIfPresent(jti) != null) {
                     JWTValidationInfo tempJWTValidationInfo =
                             (JWTValidationInfo) CacheProvider.getGatewayKeyCache()
@@ -439,7 +492,8 @@ public class JWTAuthenticator implements Authenticator {
                     checkTokenExpiration(jti, tempJWTValidationInfo);
                     jwtValidationInfo = tempJWTValidationInfo;
                 }
-            } else if (CacheProvider.getInvalidTokenCache().getIfPresent(jti) != null) {
+            } else if (SignedJWTInfo.ValidationStatus.INVALID.equals(signedJWTInfo.getValidationStatus()) &&
+                    CacheProvider.getInvalidTokenCache().getIfPresent(jti) != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Token retrieved from the invalid token cache. Token: "
                             + FilterUtils.getMaskedToken(jwtHeader));
@@ -460,6 +514,8 @@ public class JWTAuthenticator implements Authenticator {
 
             try {
                 jwtValidationInfo = jwtValidator.validateJWTToken(signedJWTInfo);
+                signedJWTInfo.setValidationStatus(jwtValidationInfo.isValid() ?
+                        SignedJWTInfo.ValidationStatus.VALID : SignedJWTInfo.ValidationStatus.INVALID);
                 if (isGatewayTokenCacheEnabled) {
                     // Add token to tenant token cache
                     if (jwtValidationInfo.isValid()) {
@@ -471,7 +527,8 @@ public class JWTAuthenticator implements Authenticator {
 
                 }
                 return jwtValidationInfo;
-            } catch (MGWException e) {
+            } catch (EnforcerException e) {
+                log.error("JWT Validation failed", e);
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_GENERAL_ERROR,
                         APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
@@ -512,15 +569,15 @@ public class JWTAuthenticator implements Authenticator {
     }
 
     private SignedJWTInfo getSignedJwt(String accessToken) throws ParseException {
-
         String signature = accessToken.split("\\.")[2];
-        SignedJWTInfo signedJWTInfo;
+        SignedJWTInfo signedJWTInfo = null;
         LoadingCache gatewaySignedJWTParseCache = CacheProvider.getGatewaySignedJWTParseCache();
         if (gatewaySignedJWTParseCache != null) {
-            Object cachedEntry = gatewaySignedJWTParseCache.getIfPresent(accessToken);
+            Object cachedEntry = gatewaySignedJWTParseCache.getIfPresent(signature);
             if (cachedEntry != null) {
                 signedJWTInfo = (SignedJWTInfo) cachedEntry;
-            } else {
+            }
+            if (signedJWTInfo == null  || !signedJWTInfo.getToken().equals(accessToken)) {
                 SignedJWT signedJWT = SignedJWT.parse(accessToken);
                 JWTClaimsSet jwtClaimsSet = signedJWT.getJWTClaimsSet();
                 signedJWTInfo = new SignedJWTInfo(accessToken, signedJWT, jwtClaimsSet);

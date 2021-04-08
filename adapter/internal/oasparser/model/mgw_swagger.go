@@ -18,9 +18,9 @@ package model
 
 import (
 	parser "github.com/mitchellh/mapstructure"
-	"github.com/wso2/micro-gw/config"
-	"github.com/wso2/micro-gw/internal/svcdiscovery"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/adapter/config"
+	"github.com/wso2/adapter/internal/svcdiscovery"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 // MgwSwagger represents the object structure holding the information related to the

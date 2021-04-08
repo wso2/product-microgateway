@@ -17,8 +17,8 @@
 package xds
 
 import (
-	"github.com/wso2/micro-gw/config"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/adapter/config"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 // getEnvironmentsToBeDeleted returns an slice of environments APIs to be u-deployed from

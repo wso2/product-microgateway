@@ -25,7 +25,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/adapter/config"
 )
 
 func TestSetInfoOpenAPI(t *testing.T) {

@@ -29,7 +29,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
 	"github.com/golang/protobuf/ptypes"
-	logger "github.com/wso2/micro-gw/loggers"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 // getHTTPFilters generates httpFilter configuration

@@ -21,18 +21,18 @@
     <parent>
         <artifactId>integration</artifactId>
         <groupId>org.wso2.am.choreo.connect</groupId>
-        <version>0.9.0-SNAPSHOT</version>
+        <version>0.9.0-beta-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.9.0-beta-SNAPSHOT</version>
     <dependencies>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.json</groupId>
+            <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
         </dependency>
     </dependencies>

@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/micro-gw/config"
+	"github.com/wso2/adapter/config"
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
 

@@ -24,9 +24,9 @@ import (
 	"strings"
 
 	"github.com/streadway/amqp"
-	"github.com/wso2/micro-gw/internal/discovery/xds"
-	eventhubTypes "github.com/wso2/micro-gw/internal/eventhub/types"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/adapter/internal/discovery/xds"
+	eventhubTypes "github.com/wso2/adapter/internal/eventhub/types"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 // constants related to key manager events

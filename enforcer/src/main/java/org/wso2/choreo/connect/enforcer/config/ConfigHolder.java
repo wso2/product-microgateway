@@ -54,7 +54,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottlePublisherConfigDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
-import org.wso2.choreo.connect.enforcer.exception.MGWException;
+import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTUtil;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.choreo.connect.enforcer.util.TLSUtils;
@@ -372,7 +372,7 @@ public class ConfigHolder {
         try {
             jwtConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtGenerator.getPublicCertificatePath()));
             jwtConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey(jwtGenerator.getPrivateKeyPath()));
-        } catch (MGWException | CertificateException | IOException e) {
+        } catch (EnforcerException | CertificateException | IOException e) {
             logger.error("Error in loading public cert or private key", e);
         }
         config.setJwtConfigurationDto(jwtConfigurationDto);
@@ -506,7 +506,7 @@ public class ConfigHolder {
         try {
             jwtIssuerConfigurationDto.setPrivateKey(JWTUtil.getPrivateKey(jwtIssuer.getPrivateKeyPath()));
             jwtIssuerConfigurationDto.setPublicCert(TLSUtils.getCertificate(jwtIssuer.getPublicCertificatePath()));
-        } catch (MGWException | CertificateException | IOException e) {
+        } catch (EnforcerException | CertificateException | IOException e) {
             logger.error("Error in loading public cert or private key", e);
         }
         jwtIssuerConfigurationDto.setTtl(jwtIssuer.getValidityPeriod());

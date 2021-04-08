@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/streadway/amqp"
-	logger "github.com/wso2/micro-gw/loggers"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 // Try to connect to the RabbitMQ server as long as it takes to establish a connection
@@ -59,7 +59,6 @@ func (c *Consumer) reconnect(key string) {
 func connectionRetry(key string) (*Consumer, *amqp.Connection, error) {
 	var err error = nil
 	var i int
-	logger.LoggerMsg.Infof("length.... %d", len(amqpURIArray))
 
 	for j := 0; j < len(amqpURIArray); j++ {
 		var maxAttempt int = amqpURIArray[j].retryCount
@@ -72,16 +71,14 @@ func connectionRetry(key string) (*Consumer, *amqp.Connection, error) {
 		if retryInterval == 0 {
 			retryInterval = 10 * time.Second
 		}
-
-		logger.LoggerMsg.Debugf("maxAttempt %d", maxAttempt)
-		logger.LoggerMsg.Debugf("retryInterval %d", retryInterval)
+		logger.LoggerMsg.Infof("Retrying to connect with %s in every %d seconds until exceed %d attempts",
+			amqpURIArray[j].url, retryInterval, maxAttempt)
 
 		for i := 1; i <= maxAttempt; i++ {
-			logger.LoggerMsg.Debugf("connecting...%s", amqpURIArray[j].url)
 			rabbitConn, err = amqp.Dial(amqpURIArray[j].url + "/")
 			if err == nil {
 				if key != "" && len(key) > 0 {
-					logger.LoggerMsg.Debugf("Reconnected to topic %s", key)
+					logger.LoggerMsg.Infof("Reconnected to topic %s", key)
 					// startup pull
 					c, err := StartConsumer(key)
 					return c, rabbitConn, err
@@ -91,7 +88,7 @@ func connectionRetry(key string) (*Consumer, *amqp.Connection, error) {
 			time.Sleep(retryInterval)
 		}
 		if i == maxAttempt {
-			logger.LoggerMsg.Infof("Exceeds maxAttempts %d. move to next url", maxAttempt)
+			logger.LoggerMsg.Infof("Exceeds maximum connection retry attempts %d for %s", maxAttempt, amqpURIArray[j].url)
 		}
 	}
 	return nil, rabbitConn, err
