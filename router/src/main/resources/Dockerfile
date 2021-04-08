@@ -30,6 +30,9 @@ ARG MOTD="\n\
  which is under the Apache License, Version 2.0. \n\
  Read more about Apache License, Version 2.0 here @ http://www.apache.org/licenses/LICENSE-2.0.\n"
 
+# Updrade the base os
+RUN apk upgrade
+
 RUN \
     addgroup -S -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
     && adduser -S -u ${MG_USER_ID} -h ${MG_USER_HOME} -G ${MG_USER_GROUP} ${MG_USER} \
