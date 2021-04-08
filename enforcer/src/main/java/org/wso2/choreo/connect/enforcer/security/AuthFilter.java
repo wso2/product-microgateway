@@ -111,6 +111,10 @@ public class AuthFilter implements Filter {
         if (!canAuthenticated) {
             FilterUtils.setUnauthenticatedErrorToContext(requestContext);
         }
+        //set WWW_AUTHENTICATE header to error response
+        requestContext.addResponseHeaders(APIConstants.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
+                ", error=\"invalid_token\"" +
+                ", error_description=\"The access token expired\"");
         return false;
     }
 
@@ -186,5 +190,15 @@ public class AuthFilter implements Filter {
                         "Sandbox key offered to the API with no sandbox endpoint");
             }   
         }
+    }
+
+    private String getAuthenticatorsChallengeString() {
+        StringBuilder challengeString = new StringBuilder();
+        if (authenticators != null) {
+            for (Authenticator authenticator : authenticators) {
+                challengeString.append(authenticator.getChallengeString()).append(" ");
+            }
+        }
+        return challengeString.toString().trim();
     }
 }

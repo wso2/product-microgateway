@@ -211,6 +211,11 @@ public class JWTAuthenticator implements Authenticator {
 
     }
 
+    @Override
+    public String getChallengeString() {
+        return "Bearer realm=\"Choreo Connect\"";
+    }
+
     private String retrieveAuthHeaderValue(RequestContext requestContext) {
         Map<String, String> headers = requestContext.getHeaders();
         String authHeader = requestContext.getMatchedAPI().getAPIConfig().getAuthHeader().toLowerCase();

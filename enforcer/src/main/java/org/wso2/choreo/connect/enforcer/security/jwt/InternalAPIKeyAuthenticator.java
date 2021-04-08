@@ -191,6 +191,11 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
     }
 
+    @Override
+    public String getChallengeString() {
+        return null;
+    }
+
     public static JSONObject validateAPISubscription(String apiContext, String apiVersion, JWTClaimsSet payload,
                                                      String[] splitToken, boolean isOauth)
             throws APISecurityException {
