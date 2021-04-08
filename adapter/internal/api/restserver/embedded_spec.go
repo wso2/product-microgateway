@@ -343,6 +343,9 @@ func init() {
         },
         "version": {
           "type": "string"
+        },
+        "vhost": {
+          "type": "string"
         }
       }
     },
@@ -802,6 +805,9 @@ func init() {
           }
         },
         "version": {
+          "type": "string"
+        },
+        "vhost": {
           "type": "string"
         }
       }

@@ -677,6 +677,11 @@ func ListApis(apiType string, limit *int64) *apiModel.APIMeta {
 			apiMetaListItem.APIType = mgwSwagger.GetAPIType()
 			apiMetaListItem.Context = mgwSwagger.GetXWso2Basepath()
 			apiMetaListItem.GatewayEnvs = openAPIEnvoyMap[apiIdentifier]
+			vhost := "ERROR"
+			if vh, err := ExtractVhostFromAPIIdentifier(apiIdentifier); err == nil {
+				vhost = vh
+			}
+			apiMetaListItem.Vhost = vhost
 			apisArray = append(apisArray, &apiMetaListItem)
 			i++
 		}

@@ -363,6 +363,8 @@ definitions:
         type: array
         items:
           type: string
+      vhost:
+        type: string
   DeployResponse:
     type: object
     properties:
