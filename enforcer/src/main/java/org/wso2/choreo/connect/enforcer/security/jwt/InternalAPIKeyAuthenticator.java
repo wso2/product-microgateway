@@ -193,7 +193,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
 
     @Override
     public String getChallengeString() {
-        return null;
+        return "";
     }
 
     public static JSONObject validateAPISubscription(String apiContext, String apiVersion, JWTClaimsSet payload,

@@ -46,7 +46,7 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
 
     @Override
     public String getChallengeString() {
-        return null;
+        return "";
     }
 
     @Override public int getPriority() {
