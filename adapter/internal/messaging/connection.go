@@ -71,11 +71,10 @@ func connectionRetry(key string) (*Consumer, *amqp.Connection, error) {
 		if retryInterval == 0 {
 			retryInterval = 10 * time.Second
 		}
-		logger.LoggerMsg.Infof("Trying to connect with control plane in every %d seconds until exceed %d attempts",
-			retryInterval, maxAttempt)
+		logger.LoggerMsg.Infof("Retrying to connect with %s in every %d seconds until exceed %d attempts",
+			amqpURIArray[j].url, retryInterval, maxAttempt)
 
 		for i := 1; i <= maxAttempt; i++ {
-			logger.LoggerMsg.Infof("Connecting... %s", amqpURIArray[j].url)
 			rabbitConn, err = amqp.Dial(amqpURIArray[j].url + "/")
 			if err == nil {
 				if key != "" && len(key) > 0 {
