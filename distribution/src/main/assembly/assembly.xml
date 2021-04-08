@@ -163,5 +163,9 @@
             <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
             <destName>LICENSE-ENFORCER.txt</destName>
         </file>
+        <file>
+            <source>../README.md</source>
+            <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
+        </file>
     </files>
 </assembly>
