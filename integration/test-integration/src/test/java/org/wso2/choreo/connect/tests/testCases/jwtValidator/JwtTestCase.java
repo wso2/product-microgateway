@@ -65,7 +65,7 @@ public class JwtTestCase {
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
-        Assert.assertTrue(response.getHeaders().containsKey("www-authenticate"),
+        Assert.assertFalse(response.getHeaders().containsKey("www-authenticate"),
                 "\"www-authenticate\" is available");
     }
 
