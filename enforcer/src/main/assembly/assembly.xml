@@ -52,5 +52,9 @@
             <source>../resources/security/mg.pem</source>
             <outputDirectory>security</outputDirectory>
         </file>
+        <file>
+            <source>LICENSE.txt</source>
+            <outputDirectory>/</outputDirectory>
+        </file>
     </files>
 </assembly>

@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.tests.testCaseBefore;
 
+import java.io.File;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.wso2.choreo.connect.tests.common.BaseTestCase;
@@ -24,13 +25,17 @@ import org.wso2.choreo.connect.tests.context.MicroGWTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
 
 import java.util.concurrent.TimeUnit;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 public class MgwWithBackendTls extends BaseTestCase {
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        super.startMGW(null, true);
-
+        String targetDir = Utils.getTargetDirPath();
+        String confPath = targetDir + TestConstant.TEST_RESOURCES_PATH + File.separator + "cors" + File.separator
+                + "cors-disabled-config.toml";
+        super.startMGW(confPath, true);
         ApictlUtils.createProject("backend_tsl_openAPI.yaml", "backend_tsl_petstore", "backend_tls.crt");
         ApictlUtils.createProject( "cors_openAPI.yaml", "cors_petstore", null);
 
