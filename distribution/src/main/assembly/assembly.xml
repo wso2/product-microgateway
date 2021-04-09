@@ -118,11 +118,6 @@
             </outputDirectory>
         </file>
         <file>
-            <source>../resources/docker-compose/apim/conf/config.toml</source>
-            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
-            </outputDirectory>
-        </file>
-        <file>
             <source>../resources/conf/log4j2.properties</source>
             <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
         </file>
@@ -146,7 +141,8 @@
         </file>
         <file>
             <source>../resources/conf/config-for-eventhub.toml</source>
-            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
+            </outputDirectory>
             <destName>config.toml</destName>
         </file>
         <file>

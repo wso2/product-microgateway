@@ -79,8 +79,8 @@ data:
     password= "${admin.password}"
     ws_endpoint = "ws://localhost:9099"
     wss_endpoint = "wss://localhost:8099"
-    http_endpoint = "http://localhost:${http.nio.port}"
-    https_endpoint = "https://localhost:${https.nio.port}"
+    http_endpoint = "http://gw.wso2.com:30201"
+    https_endpoint = "https://gw.wso2.com:30201"
 
     #[apim.cache.gateway_token]
     #enable = true
@@ -149,8 +149,8 @@ data:
     #enable_token_encryption = false
     #enable_token_hashing = false
 
-    #[apim.devportal]
-    #url = "https://localhost:${mgt.transport.https.port}/devportal"
+    [apim.devportal]
+    url = "https://wso2apim:32001/devportal"
     #enable_application_sharing = false
     #if application_sharing_type, application_sharing_impl both defined priority goes to application_sharing_impl
     #application_sharing_type = "default" #changed type, saml, default #todo: check the new config for rest api
