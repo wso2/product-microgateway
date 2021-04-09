@@ -114,7 +114,7 @@ public class AuthFilter implements Filter {
         //set WWW_AUTHENTICATE header to error response
         requestContext.addResponseHeaders(APIConstants.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
                 ", error=\"invalid_token\"" +
-                ", error_description=\"The access token expired\"");
+                ", error_description=\"The provided token is invalid\"");
         return false;
     }
 
