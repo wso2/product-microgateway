@@ -16,6 +16,8 @@
 
 # TODO: (VirajSalaka) finalize jdk 11 image
 FROM adoptopenjdk/openjdk11:jre-11.0.10_9-alpine
+RUN apk update && apk upgrade --no-cache
+
 LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
 
 ENV LANG=C.UTF-8
@@ -55,7 +57,6 @@ RUN \
 
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
-
 
 COPY maven/ lib/
 COPY maven/conf conf

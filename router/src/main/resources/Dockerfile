@@ -14,6 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 FROM envoyproxy/envoy-alpine:v1.17.1
+RUN apk update && apk upgrade --no-cache
 
 ENV LANG=C.UTF-8
 
