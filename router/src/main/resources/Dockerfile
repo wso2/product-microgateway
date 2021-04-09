@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # -----------------------------------------------------------------------
-FROM alpine:3.13.4 as alpine
 FROM envoyproxy/envoy-alpine:v1.17.1
-COPY --from=alpine . .
+RUN apk update && apk upgrade --no-cache
 
 ENV LANG=C.UTF-8
 

@@ -15,9 +15,8 @@
 # -----------------------------------------------------------------------
 
 # TODO: (VirajSalaka) finalize jdk 11 image
-FROM alpine:3.13.4 as alpine
 FROM adoptopenjdk/openjdk11:jre-11.0.10_9-alpine
-COPY --from=alpine . .
+RUN apk update && apk upgrade --no-cache
 
 LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
 
