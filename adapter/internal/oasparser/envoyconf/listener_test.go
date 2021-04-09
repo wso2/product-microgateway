@@ -22,7 +22,7 @@ import (
 
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/micro-gw/internal/oasparser/model"
+	"github.com/wso2/adapter/internal/oasparser/model"
 )
 
 func TestCreateListenerWithRds(t *testing.T) {

@@ -17,7 +17,7 @@ package cache
 import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	envoy_cache "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
-	wso2_types "github.com/wso2/micro-gw/internal/discovery/protocol/cache/types"
+	wso2_types "github.com/wso2/adapter/internal/discovery/protocol/cache/types"
 )
 
 // IndexResourcesByName creates a map from the resource name to the resource.

@@ -17,16 +17,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     
     <parent>
-        <groupId>org.wso2.am.microgw</groupId>
-        <artifactId>micro-gateway-parent</artifactId>
-        <version>4.0.0-m10-SNAPSHOT</version>
+        <groupId>org.wso2.am.choreo.connect</groupId>
+        <artifactId>choreo-connect-parent</artifactId>
+        <version>0.9.0-beta-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>wso2am-micro-gw</artifactId>
+    <artifactId>choreo-connect</artifactId>
     <packaging>pom</packaging>
-    <name>Micro Gateway - Distribution</name>
+    <name>Choreo Connect - Distribution</name>
 
     <build>
         <plugins>
@@ -45,7 +45,7 @@
                                 <descriptor>src/main/assembly/assembly.xml</descriptor>
                             </descriptors>
                             <appendAssemblyId>false</appendAssemblyId>
-                            <finalName>wso2am-micro-gw-${project.version}</finalName>
+                            <finalName>choreo-connect-${project.version}</finalName>
                         </configuration>
                     </execution>
                 </executions>

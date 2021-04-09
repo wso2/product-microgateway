@@ -18,11 +18,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.am.microgw</groupId>
-    <artifactId>micro-gateway-parent</artifactId>
+    <groupId>org.wso2.am.choreo.connect</groupId>
+    <artifactId>choreo-connect-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.0-m10-SNAPSHOT</version>
-    <name>Micro Gateway - Parent</name>
+    <version>0.9.0-beta-SNAPSHOT</version>
+    <name>Choreo Connect - Parent</name>
 
     <url>https://wso2.org</url>
     <organization>
@@ -117,9 +117,9 @@
                         </goals>
                         <configuration>
                             <target>
-                                <replaceregexp file="resources/docker-compose.yaml" match="wso2\/mg\-router\:.*" replace="wso2/mg-router:${project.version}" byline="true" />
-                                <replaceregexp file="resources/docker-compose.yaml" match="wso2\/mg\-adapter\:.*" replace="wso2/mg-adapter:${project.version}" byline="true" />
-                                <replaceregexp file="resources/docker-compose.yaml" match="wso2\/mg\-enforcer\:.*" replace="wso2/mg-enforcer:${project.version}" byline="true" />
+                                <replaceregexp file="resources/docker-compose/docker-compose.yaml" match="wso2\/choreo-connect\-router\:.*" replace="wso2/choreo-connect-router:${project.version}" byline="true" />
+                                <replaceregexp file="resources/docker-compose/docker-compose.yaml" match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true" />
+                                <replaceregexp file="resources/docker-compose/docker-compose.yaml" match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true" />
                                 <replaceregexp file="remove-containers.sh" match="micro_gw_version=.*" replace="micro_gw_version=${project.version}" byline="true" />
                             </target>
                         </configuration>
@@ -154,7 +154,7 @@
                 <version>${swagger.v3.parser.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.json</groupId>
+                <groupId>org.json.wso2</groupId>
                 <artifactId>json</artifactId>
                 <version>${org.json.version}</version>
             </dependency>
@@ -326,6 +326,13 @@
                 <artifactId>log4j-jcl</artifactId>
                 <version>${log4j.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.am</groupId>
+                <artifactId>org.wso2.am.integration.common.test.utils</artifactId>
+                <!-- TODO:Dinusha - bump the version to 4.0.0-latest -->
+                <version>4.0.0-beta</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -333,7 +340,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <andes.client.version>3.3.12</andes.client.version>
-        <carbon.apimgt.version>9.0.99</carbon.apimgt.version>
+        <carbon.apimgt.version>9.0.114</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
         <commons.io.version>2.6</commons.io.version>
@@ -353,7 +360,7 @@
         <maven.spotbugs.version>4.0.4</maven.spotbugs.version>
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
         <nimbus.jose.jwt.version>7.3.0.wso2v1</nimbus.jose.jwt.version>
-        <org.json.version>20180130</org.json.version>
+        <org.json.version>3.0.0.wso2v1</org.json.version>
         <os.mvn.plugin.version>1.6.2</os.mvn.plugin.version>
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
         <protobuf.java.version>3.14.0</protobuf.java.version>
@@ -370,6 +377,6 @@
         <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
         <lmax.version>3.4.2.wso2v1</lmax.version>
         <download.maven.plugin.version>1.6.1</download.maven.plugin.version>
-        <apictl.version>4.0.0-alpha2</apictl.version>
+        <apictl.version>4.0.0-beta</apictl.version>
     </properties>
 </project>

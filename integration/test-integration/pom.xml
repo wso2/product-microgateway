@@ -18,15 +18,15 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.wso2.am.microgw</groupId>
+        <groupId>org.wso2.am.choreo.connect</groupId>
         <artifactId>integration</artifactId>
-        <version>4.0.0-m10-SNAPSHOT</version>
+        <version>0.9.0-beta-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>test-integration</artifactId>
-    <name>Micro Gateway - Test-Integration</name>
+    <name>Choreo Connect - Test-Integration</name>
 
     <build>
         <plugins>
@@ -63,7 +63,7 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <target>
-                                <unzip src="${basedir}/../../distribution/target/wso2am-micro-gw-${project.version}.zip" dest="${basedir}/../test-integration/target/micro-gwtmp" />
+                                <unzip src="${basedir}/../../distribution/target/choreo-connect-${project.version}.zip" dest="${basedir}/../test-integration/target/micro-gwtmp" />
                             </target>
                         </configuration>
                         <goals>
@@ -95,7 +95,7 @@
                 <configuration>
                     <images>
                         <image>
-                            <alias>mg-backend</alias>
+                            <alias>choreo-connect-backend</alias>
                             <name>testcontainers/ryuk:${ryuk.image.version}</name>
                         </image>
                     </images>
@@ -190,7 +190,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.json</groupId>
+            <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
         </dependency>
         <dependency>
@@ -211,9 +211,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.am.microgw</groupId>
+            <groupId>org.wso2.am.choreo.connect</groupId>
             <artifactId>mock-backend-server</artifactId>
-            <version>4.0.0-m10-SNAPSHOT</version>
+            <version>0.9.0-beta-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -231,15 +231,13 @@
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.am.microgw</groupId>
-            <artifactId>org.wso2.micro.gateway.enforcer</artifactId>
-            <version>4.0.0-m10-SNAPSHOT</version>
+            <groupId>org.wso2.am.choreo.connect</groupId>
+            <artifactId>org.wso2.choreo.connect.enforcer</artifactId>
+            <version>0.9.0-beta-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.am</groupId>
             <artifactId>org.wso2.am.integration.common.test.utils</artifactId>
-            <!-- TODO:Dinusha - bump the version to 4.0.0-alpha -->
-            <version>4.0.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>

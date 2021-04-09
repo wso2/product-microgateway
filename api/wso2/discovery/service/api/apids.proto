@@ -5,7 +5,7 @@ package discovery.service.api;
 import "envoy/service/discovery/v3/discovery.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/service/api";
-option java_package = "org.wso2.gateway.discovery.service.api";
+option java_package = "org.wso2.choreo.connect.discovery.service.api";
 option java_outer_classname = "APIDsProto";
 option java_multiple_files = true;
 option java_generic_services = true;

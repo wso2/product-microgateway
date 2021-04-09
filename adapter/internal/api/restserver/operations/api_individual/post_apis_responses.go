@@ -25,7 +25,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/wso2/micro-gw/internal/api/models"
+	"github.com/wso2/adapter/internal/api/models"
 )
 
 // PostApisOKCode is the HTTP code returned for type PostApisOK

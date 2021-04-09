@@ -23,9 +23,9 @@ import (
 
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/streadway/amqp"
-	"github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/keymgt"
-	"github.com/wso2/micro-gw/internal/discovery/xds"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/keymgt"
+	"github.com/wso2/adapter/internal/discovery/xds"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 func handleTokenRevocation(deliveries <-chan amqp.Delivery, done chan error) {

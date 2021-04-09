@@ -24,26 +24,34 @@
     <fileSets>
         <fileSet>
             <directory>../resources/adapter</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>../resources/conf</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/conf</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/adapter</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../resources/enforcer</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/enforcer</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../resources/router</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/router</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../resources/k8s-artifacts</directory>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/k8s-artifacts</outputDirectory>
+            <excludes>
+                <exclude>./choreo-connect/config-toml-configmap.yaml</exclude>
+            </excludes>
+            <outputDirectory>choreo-connect-${project.version}/k8s-artifacts/choreo-connect-with-apim</outputDirectory>
         </fileSet>
         <fileSet>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/dropins</outputDirectory>
+            <directory>../resources/k8s-artifacts</directory>
+            <excludes>
+                <exclude>./apim/**</exclude>
+                <exclude>./choreo-connect/config-toml-configmap-for-eventhub.yaml</exclude>
+            </excludes>
+            <outputDirectory>choreo-connect-${project.version}/k8s-artifacts/choreo-connect</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/enforcer/dropins
+            </outputDirectory>
             <excludes>
                 <exclude>**/*</exclude>
             </excludes>
@@ -51,52 +59,113 @@
     </fileSets>
     <files>
         <file>
-            <source>../resources/docker-compose.yaml</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}</outputDirectory>
+            <source>../resources/docker-compose/docker-compose.yaml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect</outputDirectory>
         </file>
         <file>
-            <source>../resources/apim/docker-compose.yaml</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/docker-with-apim</outputDirectory>
-        </file>
-        <file>
-            <source>../resources/security/mg.key</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security/keystore</outputDirectory>
-        </file>
-        <file>
-            <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security/keystore</outputDirectory>
-        </file>
-        <file>
-            <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/adapter/security/truststore</outputDirectory>
+            <source>../resources/docker-compose/apim/docker-compose.yaml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim
+            </outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.key</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/adapter/security/keystore
+            </outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/adapter/security/keystore
+            </outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/enforcer/security/truststore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/adapter/security/truststore
+            </outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.key</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/enforcer/security/keystore
+            </outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security/keystore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/enforcer/security/keystore
+            </outputDirectory>
         </file>
         <file>
             <source>../resources/security/mg.pem</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/router/security/truststore</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/enforcer/security/truststore
+            </outputDirectory>
         </file>
         <file>
-            <source>../resources/apim/conf/deployment.toml</source>
-            <outputDirectory>wso2am-micro-gw-${project.version}/resources/apim/</outputDirectory>
+            <source>../resources/security/mg.key</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/router/security/keystore
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/router/security/keystore
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/security/mg.pem</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/router/security/truststore
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/docker-compose/apim/conf/deployment.toml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/docker-compose/apim/conf/config.toml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/conf/log4j2.properties</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/conf/log_config.toml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/conf/config.toml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
+        </file>
+        <file>
+            <source>../resources/conf/log4j2.properties</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/conf/log_config.toml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
+            </outputDirectory>
+        </file>
+        <file>
+            <source>../resources/conf/config-for-eventhub.toml</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
+            <destName>config.toml</destName>
+        </file>
+        <file>
+            <source>../release-note.html</source>
+            <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
+        </file>
+        <file>
+            <source>../adapter/LICENSE.txt</source>
+            <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
+            <destName>LICENSE-ADAPTER.txt</destName>
+        </file>
+        <file>
+            <source>../enforcer/LICENSE.txt</source>
+            <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
+            <destName>LICENSE-ENFORCER.txt</destName>
+        </file>
+        <file>
+            <source>../README.md</source>
+            <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
         </file>
     </files>
 </assembly>

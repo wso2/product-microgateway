@@ -18,7 +18,7 @@
 package envoyconf
 
 import (
-	"github.com/wso2/micro-gw/internal/oasparser/model"
+	"github.com/wso2/adapter/internal/oasparser/model"
 )
 
 // routeCreateParams is the DTO used to provide information to the envoy route create function

@@ -25,12 +25,12 @@ import (
 	"strings"
 
 	"github.com/streadway/amqp"
-	"github.com/wso2/micro-gw/config"
-	"github.com/wso2/micro-gw/internal/discovery/xds"
-	eh "github.com/wso2/micro-gw/internal/eventhub"
-	"github.com/wso2/micro-gw/internal/eventhub/types"
-	"github.com/wso2/micro-gw/internal/synchronizer"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/adapter/config"
+	"github.com/wso2/adapter/internal/discovery/xds"
+	eh "github.com/wso2/adapter/internal/eventhub"
+	"github.com/wso2/adapter/internal/eventhub/types"
+	"github.com/wso2/adapter/internal/synchronizer"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 // constant variables
@@ -88,12 +88,9 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 			handleApplicationEvents(decodedByte, eventType)
 		} else if strings.Contains(eventType, subscriptionEventType) {
 			handleSubscriptionEvents(decodedByte, eventType)
+		} else {
+			handlePolicyEvents(decodedByte, eventType)
 		}
-		// else if strings.Contains(eventType, scopeEvenType) {
-		// 	handleScopeEvents(decodedByte, eventType)
-		// } else {
-		// 	handlePolicyEvents(decodedByte, eventType)
-		// }
 		d.Ack(false)
 	}
 	logger.LoggerMsg.Infof("handle: deliveries channel closed")
@@ -150,6 +147,8 @@ func handleAPIEvents(data []byte, eventType string) {
 				}
 			}
 		} else if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
+			// TODO: (renuka) fix here once the vhost feature is implemented.
+			xds.UndeployAPI("default", apiEvent.Name, apiEvent.Version, apiEvent.GatewayLabels)
 			if _, ok := eh.APIListMap[env]; ok {
 				apiListOfEnv := eh.APIListMap[env].List
 				for i := range apiListOfEnv {
@@ -241,15 +240,6 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 	// EventTypes: SUBSCRIPTIONS_CREATE, SUBSCRIPTIONS_UPDATE, SUBSCRIPTIONS_DELETE
 }
 
-// handleScopeRelatedEvents to process scope related events
-func handleScopeEvents(data []byte, eventType string) {
-	var scopeEvent ScopeEvent
-	json.Unmarshal([]byte(string(data)), &scopeEvent)
-	scope := types.Scope{Name: scopeEvent.Name, DisplayName: scopeEvent.DisplayName, ApplicationName: scopeEvent.ApplicationName}
-	ScopeList = append(ScopeList, scope)
-	// EventTypes: SCOPE_CREATE, SCOPE_UPDATE,SCOPE_DELETE
-}
-
 // handlePolicyRelatedEvents to process policy related events
 func handlePolicyEvents(data []byte, eventType string) {
 	var policyEvent PolicyInfo
@@ -270,8 +260,8 @@ func handlePolicyEvents(data []byte, eventType string) {
 	// 	json.Unmarshal([]byte(string(data)), &apiPolicyEvent)
 	// } else
 	if strings.EqualFold(applicationEventType, policyEvent.PolicyType) {
-		applicationPolicy := types.ApplicationPolicy{ID: policyEvent.PolicyID, TenantID: -1, Name: policyEvent.PolicyName,
-			QuotaType: policyEvent.QuotaType}
+		applicationPolicy := types.ApplicationPolicy{ID: policyEvent.PolicyID, TenantID: policyEvent.Event.TenantID,
+			Name: policyEvent.PolicyName, QuotaType: policyEvent.QuotaType}
 
 		if policyEvent.Event.Type == policyCreate {
 			eh.AppPolicyList.List = append(eh.AppPolicyList.List, applicationPolicy)

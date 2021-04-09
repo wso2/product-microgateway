@@ -32,30 +32,8 @@ Then follow [Contributing with code](contributing-with-code) section.
 ### Contributing with code
 If you are familiar with the project and its technologies, you no longer need to check `good first issue`. Browse through all open issues and pick one to work on. Check issues in [`help wanted`](https://github.com/wso2/product-microgateway/labels/help%20wanted) label, where we prioritize issues we need help from you.
 
-#### Understanding project structure
-We've two diffent components,
-- Toolkit - Handles creating projects, importing APIs, building the project, etc...
-- Runtime - Run the gateway by taking toolkit build artifact as input
-
-Toolkit is implemented with java and Runtime is implemented with [ballerina-lang](https://ballerina.io).
-Code for toolkit can be found in [micro-gateway-cli](https://github.com/wso2/product-microgateway/tree/master/components/micro-gateway-cli) component.
-Code for runtime is in [micro-gateway-core](https://github.com/wso2/product-microgateway/tree/master/components/micro-gateway-core) component.
-Also we've a small utility component based on Go-lang located at [micro-gateway-tools](https://github.com/wso2/product-microgateway/tree/master/components/micro-gateway-tools)
-
-#### Development environment
-1. JDK 8
-1. Maven 3(Tested on 3.6.0)
-1. Go
-1. IntelliJ IDEA or VSCode (Ballerina plugins currently support these two IDEs)
-
-#### Implementing solution
-Pick the correct component from above. Go through the component code and find where you should add your solution. Implement it and use maven command `mvn clean install` to build the product.
-
-#### Debugging the toolkit
-1. Add remote debug configuration to your IDE.
-1. Run required micro-gw command with `--java.debug <debug_port>` parameter. All tooklit commands accept this dev parameter allowing developers to debug java code.
-
-Ex: `micro-gw init --java.debug 5005`
+### Developer guide
+If you are a developer, please refer to the [developer guide](https://github.com/wso2/product-microgateway/blob/main/developer-guide.md) to understand how you can proceed with the code structure.
 
 ## Ground Rules
 - Follow the contribution guidelines.

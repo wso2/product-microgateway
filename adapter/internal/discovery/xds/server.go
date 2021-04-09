@@ -22,12 +22,13 @@ import (
 	"fmt"
 	"math/rand"
 	"sync"
+	"time"
 
-	subscription "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/subscription"
-	throttle "github.com/wso2/micro-gw/internal/discovery/api/wso2/discovery/throttle"
+	subscription "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/subscription"
+	throttle "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/throttle"
 
-	wso2_cache "github.com/wso2/micro-gw/internal/discovery/protocol/cache/v3"
-	"github.com/wso2/micro-gw/internal/svcdiscovery"
+	wso2_cache "github.com/wso2/adapter/internal/discovery/protocol/cache/v3"
+	"github.com/wso2/adapter/internal/svcdiscovery"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -35,14 +36,14 @@ import (
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	envoy_cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
-	"github.com/wso2/micro-gw/config"
-	apiModel "github.com/wso2/micro-gw/internal/api/models"
-	eventhubTypes "github.com/wso2/micro-gw/internal/eventhub/types"
-	oasParser "github.com/wso2/micro-gw/internal/oasparser"
-	envoyconf "github.com/wso2/micro-gw/internal/oasparser/envoyconf"
-	mgw "github.com/wso2/micro-gw/internal/oasparser/model"
-	"github.com/wso2/micro-gw/internal/oasparser/operator"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/adapter/config"
+	apiModel "github.com/wso2/adapter/internal/api/models"
+	eventhubTypes "github.com/wso2/adapter/internal/eventhub/types"
+	oasParser "github.com/wso2/adapter/internal/oasparser"
+	envoyconf "github.com/wso2/adapter/internal/oasparser/envoyconf"
+	mgw "github.com/wso2/adapter/internal/oasparser/model"
+	"github.com/wso2/adapter/internal/oasparser/operator"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 var (
@@ -143,6 +144,7 @@ func init() {
 	enforcerApplicationKeyMappingMap = make(map[string][]types.Resource)
 	enforcerRevokedTokensMap = make(map[string][]types.Resource)
 	enforcerThrottleData = &throttle.ThrottleData{}
+	rand.Seed(time.Now().UnixNano())
 }
 
 // GetXdsCache returns xds server cache.
@@ -295,6 +297,31 @@ func DeleteAPI(vhost, apiName, version string) error {
 	return nil
 }
 
+// UndeployAPI undeploys the APIs from the provided set of enviroments. If the complete set of provided environments
+// and already deployed environments are the same the apim
+func UndeployAPI(vhost, apiName, version string, undeployEnvs []string) {
+	apiIdentifier := GenerateIdentifierForAPI(vhost, apiName, version)
+	existingLabels, ok := openAPIEnvoyMap[apiIdentifier]
+	if !ok {
+		logger.LoggerXds.Debugf("No API to undeploy under %s:%s", apiName, version)
+		return
+	}
+	newLabels := []string{}
+	for _, existingEnv := range existingLabels {
+		if !arrayContains(undeployEnvs, existingEnv) {
+			newLabels = append(newLabels, existingEnv)
+		}
+	}
+
+	if len(newLabels) == 0 {
+		DeleteAPI(vhost, apiName, version)
+		return
+	}
+	openAPIEnvoyMap[apiIdentifier] = newLabels
+	updateXdsCacheOnAPIAdd(existingLabels, newLabels)
+	logger.LoggerXds.Infof("Undeployed APIs. %s:%s - %v", apiName, version, undeployEnvs)
+}
+
 func arrayContains(a []string, x string) bool {
 	for _, n := range a {
 		if x == n {
@@ -357,7 +384,10 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 			clusterArray = append(clusterArray, openAPIClustersMap[apiKey]...)
 			routeArray = append(routeArray, openAPIRoutesMap[apiKey]...)
 			endpointArray = append(endpointArray, openAPIEndpointsMap[apiKey]...)
-			apis = append(apis, openAPIEnforcerApisMap[apiKey])
+			enfocerAPI, ok := openAPIEnforcerApisMap[apiKey]
+			if ok {
+				apis = append(apis, enfocerAPI)
+			}
 			// listenerArrays = append(listenerArrays, openAPIListenersMap[apiKey])
 		}
 	}
