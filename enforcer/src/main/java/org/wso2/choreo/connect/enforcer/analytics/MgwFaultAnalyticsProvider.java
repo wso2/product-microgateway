@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.API;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Application;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Error;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.ExtendedAPI;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.MetaInfo;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Operation;
@@ -45,9 +46,11 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
     private final RequestContext requestContext;
     private static final Logger logger = LogManager.getLogger(MgwFaultAnalyticsProvider.class);
+    private final boolean isChoreoDeployment;
 
-    public MgwFaultAnalyticsProvider(RequestContext requestContext) {
+    public MgwFaultAnalyticsProvider(RequestContext requestContext, boolean isChoreoDeployment) {
         this.requestContext = requestContext;
+        this.isChoreoDeployment = isChoreoDeployment;
     }
 
     @Override
@@ -87,7 +90,12 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public API getApi() {
-        API api = new API();
+        API api;
+        if (isChoreoDeployment) {
+            api = new ExtendedAPI();
+        } else {
+            api = new API();
+        }
         api.setApiId(AnalyticsUtils.getAPIId(requestContext));
         api.setApiCreator(AnalyticsUtils.setDefaultIfNull(
                 requestContext.getAuthenticationContext() == null
@@ -99,6 +107,9 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
                 requestContext.getMatchedAPI().getAPIConfig().getBasePath()) == null
                 ? APIConstants.SUPER_TENANT_DOMAIN_NAME
                 : requestContext.getMatchedAPI().getAPIConfig().getBasePath());
+        if (isChoreoDeployment) {
+            ((ExtendedAPI) api).setOrganizationId(requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
+        }
         return api;
     }
 

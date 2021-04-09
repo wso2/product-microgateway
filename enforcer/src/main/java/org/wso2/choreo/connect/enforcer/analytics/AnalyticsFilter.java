@@ -50,13 +50,21 @@ public class AnalyticsFilter {
     private static final Logger logger = LogManager.getLogger(AnalyticsFilter.class);
     private static AnalyticsFilter analyticsFilter;
     private static AnalyticsEventPublisher publisher;
+    // TODO: (VirajSalaka) Move this to the analytics publisher component once the envoy is upgraded to 1.18.0
+    private final boolean isChoreoDeployment;
 
     private AnalyticsFilter() {
         Map<String, String> configuration =
                 ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties();
+        if (configuration.containsKey("isChoreoDeployment")
+                && configuration.get("isChoreoDeployment").toLowerCase().equals("true")) {
+            isChoreoDeployment = true;
+        } else {
+            isChoreoDeployment = false;
+        }
         String customAnalyticsPublisher =
                 ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties()
-                .get("customAnalyticsPublisher");
+                        .get("customAnalyticsPublisher");
         Map<String, String> publisherConfig = new HashMap<>(2);
         for (Map.Entry<String, String> entry : configuration.entrySet()) {
             // We are always expecting <String, String> Map as configuration.
@@ -122,6 +130,10 @@ public class AnalyticsFilter {
                 requestContext.getMatchedResourcePath().getPath());
 
         requestContext.addMetadataToMap(MetadataConstants.DESTINATION, resolveEndpoint(requestContext));
+
+        // TODO: (VirajSalaka) Check later
+        requestContext.addMetadataToMap(MetadataConstants.API_ORGANIZATION_ID,
+                requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
     }
 
     private String resolveEndpoint(RequestContext requestContext) {
@@ -139,7 +151,7 @@ public class AnalyticsFilter {
     }
 
     public void handleFailureRequest(RequestContext requestContext) {
-        MgwFaultAnalyticsProvider provider = new MgwFaultAnalyticsProvider(requestContext);
+        MgwFaultAnalyticsProvider provider = new MgwFaultAnalyticsProvider(requestContext, isChoreoDeployment);
         // To avoid incrementing counter for options call
         if (provider.getProxyResponseCode() == 200 || provider.getProxyResponseCode() == 204) {
             return;
@@ -166,7 +178,7 @@ public class AnalyticsFilter {
         } catch (ClassNotFoundException e) {
             logger.error("Error while loading the custom analytics publisher class.", e);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
-                    | NoSuchMethodException e) {
+                | NoSuchMethodException e) {
             logger.error("Error while generating AnalyticsEventPublisherInstance from the class", e);
         }
         return null;

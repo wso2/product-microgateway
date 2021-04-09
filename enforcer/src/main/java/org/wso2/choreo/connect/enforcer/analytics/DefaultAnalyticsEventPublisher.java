@@ -41,6 +41,7 @@ import java.util.Map;
 public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
     private static final String AUTH_TOKEN_KEY = "auth.api.token";
     private static final String AUTH_URL = "auth.api.url";
+    private static boolean isChoreoDeployment = false;
 
     private static final Logger logger = LogManager.getLogger(DefaultAnalyticsEventPublisher.class);
 
@@ -54,7 +55,7 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                 logger.debug("LogEntry is ignored as it is already published by the enforcer.");
                 continue;
             }
-            AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
+            AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry, isChoreoDeployment);
             // If the APIName is not available, the event should not be published.
             // 404 errors are not logged due to this.
             if (provider.getEventCategory() == EventCategory.FAULT
@@ -91,7 +92,14 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
             }
             publisherConfig.put(entry.getKey(), entry.getValue());
         }
+
         AnalyticsCommonConfiguration commonConfiguration = new AnalyticsCommonConfiguration(publisherConfig);
+        if (configuration.containsKey("isChoreoDeployment")
+                && configuration.get("isChoreoDeployment").toLowerCase().equals("true")) {
+            isChoreoDeployment = true;
+            commonConfiguration.setResponseSchema("CHOREO_RESPONSE");
+            commonConfiguration.setFaultSchema("CHOREO_ERROR");
+        }
         AnalyticsServiceReferenceHolder.getInstance().setConfigurations(commonConfiguration);
     }
 

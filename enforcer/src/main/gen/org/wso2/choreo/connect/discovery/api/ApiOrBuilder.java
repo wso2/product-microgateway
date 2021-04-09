@@ -232,4 +232,16 @@ public interface ApiOrBuilder extends
    * @return The disableSecurity.
    */
   boolean getDisableSecurity();
+
+  /**
+   * <code>string organizationId = 16;</code>
+   * @return The organizationId.
+   */
+  java.lang.String getOrganizationId();
+  /**
+   * <code>string organizationId = 16;</code>
+   * @return The bytes for organizationId.
+   */
+  com.google.protobuf.ByteString
+      getOrganizationIdBytes();
 }

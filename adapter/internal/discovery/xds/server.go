@@ -221,8 +221,10 @@ func UpdateAPI(apiContent config.APIContent) {
 		mgwSwagger.SetVersion(apiContent.Version)
 		mgwSwagger.SetSecurityScheme(apiContent.SecurityScheme)
 		mgwSwagger.SetXWso2AuthHeader(apiContent.AuthHeader)
+		mgwSwagger.OrganizationID = apiContent.OrganizationID
 	} else if apiContent.APIType == mgw.WS {
 		mgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
+		mgwSwagger.OrganizationID = apiContent.OrganizationID
 	} else {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported with WSO2 Microgateway")

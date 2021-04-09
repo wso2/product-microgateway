@@ -30,4 +30,5 @@ message Api {
 	EndpointSecurity endpointSecurity = 13;
 	string authorizationHeader = 14;
 	bool disableSecurity = 15;
+	string organizationId = 16;
 }
