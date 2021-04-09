@@ -120,7 +120,7 @@ jopt-simple-5.0.3.jar                                                           
 woden-impl-dom-1.0M9.jar                                                                            bundle         apache2             
 netty-tcnative-boringssl-static-2.0.31.Final.jar                                                    bundle         apache2             
 swagger-models-2.0.8.jar                                                                            bundle         apache2             
-org.wso2.choreo.connect.enforcer-0.9.0-alpha2.jar                                                    bundle         apache2             
+org.wso2.choreo.connect.enforcer-0.9.0-alpha2.jar                                                   bundle         apache2
 jline-0.9.94.jar                                                                                    jar            bsd                 
 swagger-annotations-2.0.8.jar                                                                       bundle         apache2             
 slf4j-api-1.6.3.jar                                                                                 bundle         mit                 
