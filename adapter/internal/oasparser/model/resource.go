@@ -19,6 +19,10 @@
 // and create a common model which can represent both types.
 package model
 
+import (
+	"sort"
+)
+
 // Resource represents the object structure holding the information related to the
 // pathItem object in OpenAPI definition. This is the most granular level in which the
 // information can be stored as envoy architecture does not support having an operation level
@@ -73,8 +77,8 @@ func (resource *Resource) GetMethod() []Operation {
 // a given resource.
 func (resource *Resource) GetMethodList() []string {
 	var methodList = make([]string, len(resource.methods))
-	for i,method := range resource.methods {
-		methodList[i] =  method.method
+	for i, method := range resource.methods {
+		methodList[i] = method.method
 	}
 	return methodList
 }
@@ -110,4 +114,22 @@ func CreateMinimalDummyResourceForTests(path string, methods []Operation, id str
 		productionUrls: productionUrls,
 		sandboxUrls:    sandboxUrls,
 	}
+}
+
+// Custom sort implementation to sort the Resources based on the resource path
+type byPath []Resource
+
+//Len Returns the length of the arry
+func (a byPath) Len() int { return len(a) }
+
+//Less  returns true if the first item is less than the second parameter
+func (a byPath) Less(i, j int) bool { return a[i].path < a[j].path }
+
+//Swap Swaps the input parameter values
+func (a byPath) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+
+// SortResources Sort the list of resources provided based on the resource path.
+func SortResources(resources []Resource) []Resource {
+	sort.Sort(byPath(resources))
+	return resources
 }
