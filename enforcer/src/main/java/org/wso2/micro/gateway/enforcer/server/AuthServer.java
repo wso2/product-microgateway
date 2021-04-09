@@ -35,7 +35,7 @@ import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
 import org.wso2.micro.gateway.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.micro.gateway.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.micro.gateway.enforcer.grpc.ExtAuthService;
-import org.wso2.micro.gateway.enforcer.grpc.WebSocketMetadataService;
+import org.wso2.micro.gateway.enforcer.grpc.WebSocketFrameService;
 import org.wso2.micro.gateway.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.micro.gateway.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.micro.gateway.enforcer.security.jwt.validator.RevokedJWTDataHolder;
@@ -119,7 +119,7 @@ public class AuthServer {
                 .keepAliveTime(authServerConfig.getKeepAliveTime(), TimeUnit.SECONDS).bossEventLoopGroup(bossGroup)
                 .workerEventLoopGroup(workerGroup)
                 .addService(ServerInterceptors.intercept(new ExtAuthService(), new AccessLogInterceptor()))
-                .addService(ServerInterceptors.intercept(new WebSocketMetadataService(), new AccessLogInterceptor()))
+                .addService(ServerInterceptors.intercept(new WebSocketFrameService(), new AccessLogInterceptor()))
                 .maxInboundMessageSize(authServerConfig.getMaxMessageSize())
                 .maxInboundMetadataSize(authServerConfig.getMaxHeaderLimit()).channelType(NioServerSocketChannel.class)
                 .executor(enforcerWorkerPool.getExecutor()).sslContext(GrpcSslContexts.forServer(certFile, keyFile)

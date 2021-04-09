@@ -20,9 +20,9 @@ package org.wso2.micro.gateway.enforcer.grpc;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.websocket.RateLimitRequest;
-import org.wso2.micro.gateway.enforcer.websocket.RateLimitResponse;
-import org.wso2.micro.gateway.enforcer.websocket.WebSocketMetadataServiceGrpc;
+import org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameRequest;
+import org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse;
+import org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameServiceGrpc;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,11 +31,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * contains a ConcurrentHashMap of the StreamObservers that corresponds to open grpc bidirectional streams with
  * envoy mgw_websocket filter.
  */
-public class WebSocketMetadataService extends WebSocketMetadataServiceGrpc.WebSocketMetadataServiceImplBase {
-    private static final Logger logger = LogManager.getLogger(WebSocketMetadataService.class);
+public class WebSocketFrameService extends WebSocketFrameServiceGrpc.WebSocketFrameServiceImplBase {
+    private static final Logger logger = LogManager.getLogger(WebSocketFrameService.class);
     private static ConcurrentHashMap<String, WebSocketResponseObserver> responseObservers = new ConcurrentHashMap<>();
     @Override
-    public StreamObserver<RateLimitRequest> publishMetadata(StreamObserver<RateLimitResponse> responseObserver) {
+    public StreamObserver<WebSocketFrameRequest> publishFrameData(StreamObserver<WebSocketFrameResponse> responseObserver) {
         logger.debug("publishMetadata invoked from websocket meatadata service");
         return new WebSocketResponseObserver(responseObserver);
     }

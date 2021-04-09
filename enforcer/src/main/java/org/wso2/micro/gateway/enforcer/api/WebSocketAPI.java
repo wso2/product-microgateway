@@ -40,6 +40,7 @@ public class WebSocketAPI implements API {
     private APIConfig apiConfig;
     private final List<Filter> filters = new ArrayList<>();
     private final List<Filter> upgradeFilters = new ArrayList<>();
+    private String apiLifeCycleState;
 
     @Override
     public List<Filter> getFilters() {
@@ -51,8 +52,14 @@ public class WebSocketAPI implements API {
         String basePath = api.getBasePath();
         String name = api.getTitle();
         String version = api.getVersion();
+        List<String> securitySchemes = api.getSecuritySchemeList();
+//        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).
+//                apiType(APIConstants.ApiType.WEB_SOCKET).build();
+        this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).
-                apiType(APIConstants.ApiType.WEB_SOCKET).build();
+                apiLifeCycleState(apiLifeCycleState).securitySchema(securitySchemes).tier(api.getTier()).
+                endpointSecurity(api.getEndpointSecurity()).authHeader(api.getAuthorizationHeader()).
+                disableSecurity(api.getDisableSecurity()).apiType(APIConstants.ApiType.WEB_SOCKET).build();
         initFilters();
         return basePath;
     }

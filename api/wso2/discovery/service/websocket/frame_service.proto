@@ -17,48 +17,11 @@
  */
 syntax = "proto3";
 
-package envoy.extensions.filters.http.mgw_websocket.v3;
-
-import "google/protobuf/duration.proto";
-import "google/protobuf/struct.proto";
+package envoy.extensions.filters.http.mgw_wasm_websocket.v3;
 
 option java_package = "org.wso2.micro.gateway.enforcer.websocket";
 option java_outer_classname = "MgwWebSocketProto";
 option java_multiple_files = true;
-
-//message Metadata {
-//  // Key is the reverse DNS filter name, e.g. com.acme.widget. The envoy.*
-//  // namespace is reserved for Envoy's built-in filters.
-//  map<string, google.protobuf.Struct> filter_metadata = 1;
-//}
-//
-//message RateLimitRequest{
-//  // Can be interpreted as the label name assigned to envoy instances.
-//  string domain = 1;
-//
-//  Metadata metadata_context = 2;
-//}
-//
-//message RateLimitResponse{
-//
-//  enum Code {
-//    // The response code is not known.
-//    UNKNOWN = 0;
-//    // The response code to notify that the number of requests are under limit.
-//    OK = 1;
-//    // The response code to notify that the number of requests are over limit.
-//    OVER_LIMIT = 2;
-//  }
-//
-//  Code overall_code = 1;
-//
-//}
-//
-//service WebSocketMetadataService{
-//  rpc publishMetadata(stream RateLimitRequest) returns (stream RateLimitResponse){
-//
-//  }
-//}
 
 service WebSocketFrameService {
   rpc PublishFrameData(stream WebSocketFrameRequest) returns (stream WebSocketFrameResponse) {}
@@ -66,8 +29,10 @@ service WebSocketFrameService {
 
 message WebSocketFrameRequest {
   string node_id = 1;
-  //google.protobuf.Struct ext_metadata = 2;
-  Metadata metadata = 2;
+  Metadata filter_metadata = 2;
+  int32 frame_length = 3;
+
+  string remote_ip = 4;
 }
 
 message WebSocketFrameResponse {
@@ -82,3 +47,4 @@ message MetadataValue {
 message Metadata {
   repeated MetadataValue metadata = 1;
 }
+
