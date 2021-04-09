@@ -52,7 +52,12 @@ func updateVhostInternalMaps(apiContent config.APIContent, gwEnvs []string) {
 	}
 
 	// update internal map: apiUUIDToGatewayToVhosts
-	logger.LoggerXds.Debugf("Updating Vhost of API with UUID \"%v\" as %v.", apiContent.UUID, apiContent.VHost)
+	if apiContent.UUID == "" {
+		// may be deployed with API-CTL
+		logger.LoggerXds.Debug("No UUID defined, do not update vhosts internal maps with UUIDs")
+		return
+	}
+	logger.LoggerXds.Debugf("Updating Vhost internal map of API with UUID \"%v\" as %v.", apiContent.UUID, apiContent.VHost)
 	var envToVhostMap map[string]string
 	if existingMap, ok := apiUUIDToGatewayToVhosts[apiContent.UUID]; ok {
 		logger.LoggerXds.Debugf("API with UUID \"%v\" already exist in vhosts internal map.", apiContent.UUID)

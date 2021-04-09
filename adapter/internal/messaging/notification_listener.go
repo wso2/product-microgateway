@@ -147,11 +147,8 @@ func handleAPIEvents(data []byte, eventType string) {
 				}
 			}
 		} else if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
-			// TODO: (renuka) fix here once the vhost feature is implemented.
-			if err := xds.DeleteAPIs("default", apiEvent.Name, apiEvent.Version, apiEvent.GatewayLabels); err != nil {
-				// TODO (renuka) change this to handle from UUID
-				logger.LoggerMsg.Errorf("Error un-deploying API %v:%v", apiEvent.Name, apiEvent.Version)
-			}
+			xds.DeleteAPIWithAPIMEvent(apiEvent.UUID, apiEvent.Name, apiEvent.Version, apiEvent.GatewayLabels)
+			logger.LoggerMsg.Debugf("Undeployed API from router")
 			if _, ok := eh.APIListMap[env]; ok {
 				apiListOfEnv := eh.APIListMap[env].List
 				for i := range apiListOfEnv {

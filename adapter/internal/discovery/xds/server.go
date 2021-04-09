@@ -64,8 +64,9 @@ var (
 	enforcerThrottleDataCache          wso2_cache.SnapshotCache
 
 	// Vhosts entry maps, these maps updated with delta changes (when an API added, only added its entry only)
+	// These maps are managed separately for API-CTL and APIM, since when deploying an project from API-CTL there is no API uuid
 	apiUUIDToGatewayToVhosts map[string]map[string]string   // API_UUID to gateway-env to vhost (for un-deploying APIs from APIM or Choreo)
-	apiToVhostsMap           map[string]map[string]struct{} // APIName:Version to VHosts set (for un-deploying APIs from APICTL)
+	apiToVhostsMap           map[string]map[string]struct{} // APIName:Version to VHosts set (for un-deploying APIs from API-CTL)
 
 	// Vhost:APIName:Version as map key
 	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // MgwSwagger struct map
@@ -340,6 +341,31 @@ func DeleteAPIs(vhost, apiName, version string, environments []string) error {
 		delete(apiToVhostsMap, apiNameVersionID)
 	}
 	return nil
+}
+
+// DeleteAPIWithAPIMEvent deletes API with the given UUID from the given gw environments
+func DeleteAPIWithAPIMEvent(uuid, name, version string, environments []string) {
+	apiIdentifiers := make(map[string]struct{})
+	for gw, vhost := range apiUUIDToGatewayToVhosts[uuid] {
+		// delete from only specified environments
+		if arrayContains(environments, gw) {
+			id := GenerateIdentifierForAPI(vhost, name, version)
+			apiIdentifiers[id] = void
+		}
+	}
+	for apiIdentifier := range apiIdentifiers {
+		if err := deleteAPI(apiIdentifier, environments); err != nil {
+			logger.LoggerXds.Errorf("Error undeploying API %v from environments %v", apiIdentifier, environments)
+		} else {
+			// if no error, update internal vhost maps
+			// error only happens when API not found in deleteAPI func
+			logger.LoggerXds.Debugf("Successfully undeployed API %v from environments %v", apiIdentifier, environments)
+			for _, environment := range environments {
+				// delete environment if exists
+				delete(apiUUIDToGatewayToVhosts[uuid], environment)
+			}
+		}
+	}
 }
 
 // deleteAPI deletes an API, its resources and updates the caches of given environments
