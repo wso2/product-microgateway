@@ -37,6 +37,7 @@ public class Application implements CacheableEntity<Integer> {
     private String subName = null;
     private String policy = null;
     private String tokenType = null;
+    private String tenantDomain = null;
     private List<String> groupIds = new ArrayList<>();
     private Map<String, String> attributes = new ConcurrentHashMap<>();
 
@@ -140,10 +141,19 @@ public class Application implements CacheableEntity<Integer> {
         this.uuid = uuid;
     }
 
+    public String getTenantDomain() {
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+        this.tenantDomain = tenantDomain;
+    }
+
     @Override
     public String toString() {
         return "Application [id=" + id + ", name=" + name + ", subId=" + subId + ", policy=" + policy + ", tokenType="
-                + tokenType + ", groupIds=" + groupIds + ", attributes=" + attributes + "]";
+                + tokenType + ", groupIds=" + groupIds + ", tenantDomain=" + tenantDomain + ", attributes=" + attributes
+                + "]";
     }
 
     public String getUUID() {

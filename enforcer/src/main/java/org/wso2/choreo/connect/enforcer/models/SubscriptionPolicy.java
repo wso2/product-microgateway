@@ -79,7 +79,7 @@ public class SubscriptionPolicy extends Policy {
     @Override
     public String getCacheKey() {
 
-        return PolicyType.SUBSCRIPTION + SubscriptionDataStoreUtil.getPolicyCacheKey(getName(), getTenantId());
+        return PolicyType.SUBSCRIPTION + SubscriptionDataStoreUtil.getPolicyCacheKey(getName());
 
     }
 

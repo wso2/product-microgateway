@@ -444,7 +444,7 @@ public class FilterUtils {
      * @return tenant domain appended username
      */
     public static String buildUsernameWithTenant(String username, String tenantDomain) {
-        if (tenantDomain == null) {
+        if (tenantDomain == null || tenantDomain.isEmpty()) {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
         }
 
@@ -487,5 +487,18 @@ public class FilterUtils {
         }
 
         return clientIp;
+    }
+
+    /**
+     * Get the subscriber tenant domain from the subscriber user name.
+     *
+     * @param subscriber The name of the subscriber.
+     * @return tenant domain of the subscriber.
+     */
+    public static String getSubscriberTenantDomain(String subscriber, String apiTenantDomain) {
+        if (subscriber.contains(APIConstants.TENANT_DOMAIN_SEPARATOR)) {
+            return subscriber.substring(subscriber.lastIndexOf(APIConstants.TENANT_DOMAIN_SEPARATOR) + 1);
+        }
+        return APIConstants.SUPER_TENANT_DOMAIN_NAME;
     }
 }
