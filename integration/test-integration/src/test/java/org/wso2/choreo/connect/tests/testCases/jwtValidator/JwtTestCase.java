@@ -65,6 +65,8 @@ public class JwtTestCase {
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertFalse(response.getHeaders().containsKey("www-authenticate"),
+                "\"www-authenticate\" is available");
     }
 
     @Test(description = "Test to check the JWT auth validate invalida signature token")
@@ -78,6 +80,8 @@ public class JwtTestCase {
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED, "Response code mismatched");
+        Assert.assertTrue(response.getHeaders().containsKey("www-authenticate"),
+                "\"www-authenticate\" is not available");
     }
 
     @Test(description = "Test to check the invalid authorization header format")
@@ -105,5 +109,7 @@ public class JwtTestCase {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,
                 "Response code mismatched");
+        Assert.assertTrue(response.getHeaders().containsKey("www-authenticate"),
+                "\"www-authenticate\" is not available");
     }
 }
