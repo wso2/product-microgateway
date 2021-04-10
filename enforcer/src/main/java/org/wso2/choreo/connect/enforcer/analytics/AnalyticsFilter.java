@@ -56,15 +56,12 @@ public class AnalyticsFilter {
     private AnalyticsFilter() {
         Map<String, String> configuration =
                 ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties();
-        if (configuration.containsKey("isChoreoDeployment")
-                && configuration.get("isChoreoDeployment").toLowerCase().equals("true")) {
-            isChoreoDeployment = true;
-        } else {
-            isChoreoDeployment = false;
-        }
+        isChoreoDeployment = configuration.containsKey(ConfigurationConstants.IS_CHOREO_DEPLOYMENT_CONFIG_KEY)
+                && configuration.get(ConfigurationConstants.IS_CHOREO_DEPLOYMENT_CONFIG_KEY)
+                .toLowerCase().equals("true");
         String customAnalyticsPublisher =
                 ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties()
-                        .get("customAnalyticsPublisher");
+                        .get(ConfigurationConstants.PUBLISHER_IMPL_CONFIG_KEY);
         Map<String, String> publisherConfig = new HashMap<>(2);
         for (Map.Entry<String, String> entry : configuration.entrySet()) {
             // We are always expecting <String, String> Map as configuration.
@@ -168,13 +165,16 @@ public class AnalyticsFilter {
     private static AnalyticsEventPublisher loadAnalyticsPublisher(String className) {
 
         if (StringUtils.isEmpty(className)) {
+            logger.debug("Proceeding with default analytics publisher.");
             return new DefaultAnalyticsEventPublisher();
         }
 
         try {
             Class<AnalyticsEventPublisher> clazz = (Class<AnalyticsEventPublisher>) Class.forName(className);
             Constructor<AnalyticsEventPublisher> constructor = clazz.getConstructor();
-            return constructor.newInstance();
+            AnalyticsEventPublisher publisher = constructor.newInstance();
+            logger.info("Proceeding with the custom analytics publisher implementation: " + className);
+            return publisher;
         } catch (ClassNotFoundException e) {
             logger.error("Error while loading the custom analytics publisher class.", e);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
