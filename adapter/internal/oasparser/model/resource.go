@@ -20,6 +20,7 @@
 package model
 
 import (
+	"regexp"
 	"sort"
 )
 
@@ -123,7 +124,53 @@ type byPath []Resource
 func (a byPath) Len() int { return len(a) }
 
 //Less  returns true if the first item is less than the second parameter
-func (a byPath) Less(i, j int) bool { return a[i].path < a[j].path }
+func (a byPath) Less(i, j int) bool {
+	// Get the less weighted path.
+	// Paths can be in several types.
+	// - /pet
+	// - /pet/{id}
+	// - /pet/index.html
+	// - /pet/{id}/price
+	// - /pet/*
+	// When representing these resources in envoy configuration, they must be ordered correctly.
+	// Sorted order
+	// - /pet/index.html
+	// - /pet
+	// - /pet/{id}
+	// - /pet/{id}/price
+	// - /pet/{id}/{price}
+	// - pet/*
+	// Considerations...
+	// The concrete paths are matched first
+	// Any path with . character gets higher precidence
+	// Precedence decreases when the number of path parameters increses.
+	// The wild card path is matched last.
+
+	charMatcher := regexp.MustCompile(`[\w\s]`)
+
+	// Replace all the non symbol characters with empty string ("") Because the alphabatical order is not mandetory.
+	pathI := charMatcher.ReplaceAllString(a[i].path, "")
+	pathJ := charMatcher.ReplaceAllString(a[j].path, "")
+
+	dotMatcher := regexp.MustCompile(`\.`)
+	wildCardMatcher := regexp.MustCompile(`(\/[*]$)`)
+
+	// if wildcard is matched for either i or j, it will be returnd as greater.
+	if wildCardMatcher.Match([]byte(pathI)) || wildCardMatcher.Match([]byte(pathJ)) {
+		return !wildCardMatcher.Match([]byte(pathI)) || wildCardMatcher.Match([]byte(pathJ))
+	}
+
+	// if the dot is matched (either i or j), the path is considered less than the other one. If both i and j match this at the same time, compare the full path.
+	if dotMatcher.Match([]byte(pathI)) && dotMatcher.Match([]byte(pathJ)) {
+		return pathI < pathJ
+	} else if dotMatcher.Match([]byte(pathI)) {
+		return true
+	} else if dotMatcher.Match([]byte(pathJ)) {
+		return false
+	}
+	// If non of the above matched, compare the strings.
+	return pathI < pathJ
+}
 
 //Swap Swaps the input parameter values
 func (a byPath) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
