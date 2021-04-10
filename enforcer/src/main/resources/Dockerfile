@@ -36,6 +36,7 @@ ENV ENFORCER_HOME=${MG_USER_HOME}
 ENV ENFORCER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
 ENV ENFORCER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
 ENV TRUSTED_CA_CERTS_PATH=/home/wso2/security/truststore
+ENV GRPC_HEALTH_PROBE_PATH=/bin/grpc_health_probe
 ENV ADAPTER_HOST_NAME=adapter
 ENV ADAPTER_HOST=adapter
 ENV ADAPTER_XDS_PORT=18000
@@ -54,6 +55,11 @@ RUN \
     && adduser -S -u ${MG_USER_ID} -h ${MG_USER_HOME} -G ${MG_USER_GROUP} ${MG_USER} \
     && mkdir ${MG_USER_HOME}/lib && mkdir -p ${MG_USER_HOME}/mg/security && mkdir -p ${MG_USER_HOME}/mg/logs  \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
+
+COPY maven/grpc_health_probe-linux-amd64 ${GRPC_HEALTH_PROBE_PATH}
+RUN \
+    chown -R ${MG_USER}:${MG_USER_GROUP} ${GRPC_HEALTH_PROBE_PATH} \
+    && chmod +x ${GRPC_HEALTH_PROBE_PATH}
 
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
