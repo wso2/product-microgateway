@@ -146,21 +146,20 @@ func (a byPath) Less(i, j int) bool {
 	// Precedence decreases when the number of path parameters increses.
 	// The wild card path is matched last.
 
+	// Replace all the non symbol characters with empty string ("") Because the alphabetical order is not mandatory.
 	charMatcher := regexp.MustCompile(`[\w\s]`)
-
-	// Replace all the non symbol characters with empty string ("") Because the alphabatical order is not mandetory.
 	pathI := charMatcher.ReplaceAllString(a[i].path, "")
 	pathJ := charMatcher.ReplaceAllString(a[j].path, "")
 
-	dotMatcher := regexp.MustCompile(`\.`)
+	// if wildcard is matched for either i or j, it will be returned as greater.
 	wildCardMatcher := regexp.MustCompile(`(\/[*]$)`)
-
-	// if wildcard is matched for either i or j, it will be returnd as greater.
 	if wildCardMatcher.Match([]byte(pathI)) || wildCardMatcher.Match([]byte(pathJ)) {
 		return !wildCardMatcher.Match([]byte(pathI)) || wildCardMatcher.Match([]byte(pathJ))
 	}
 
-	// if the dot is matched (either i or j), the path is considered less than the other one. If both i and j match this at the same time, compare the full path.
+	// if the dot is matched (either i or j), the path is considered less than the other one.
+	// If both i and j match this at the same time, compare the full path.
+	dotMatcher := regexp.MustCompile(`\.`)
 	if dotMatcher.Match([]byte(pathI)) && dotMatcher.Match([]byte(pathJ)) {
 		return pathI < pathJ
 	} else if dotMatcher.Match([]byte(pathI)) {
