@@ -301,6 +301,12 @@ func TestGenerateRegex(t *testing.T) {
 			message:       "when query parameter is provided without ?",
 			isMatched:     false,
 		},
+		{
+			inputpath:     "/v2/pet/*",
+			userInputPath: "/v2/pet/findByIdstatus=availabe",
+			message:       "when the resource ends with *",
+			isMatched:     true,
+		},
 	}
 
 	for _, item := range dataItems {

@@ -718,12 +718,16 @@ func generateRegex(fullpath string) string {
 				res1[i] = pathParaRegex
 			}
 		}
-		newPath = "^" + strings.Join(res1[:], "/") + endRegex + "$"
+		newPath = strings.Join(res1[:], "/")
 
 	} else {
-		newPath = "^" + fullpath + endRegex + "$"
+		newPath = fullpath
 	}
-	return newPath
+
+	if strings.HasSuffix(newPath, "/*") {
+		newPath = strings.TrimSuffix(newPath, "*") + pathParaRegex
+	}
+	return "^" + newPath + endRegex + "$"
 }
 
 func getUpgradeConfig(apiType string) []*routev3.RouteAction_UpgradeConfig {
