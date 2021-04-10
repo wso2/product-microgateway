@@ -710,12 +710,14 @@ func generateRegex(fullpath string) string {
 	endRegex := "(\\?([^/]+))?"
 	newPath := ""
 
-	if strings.Contains(fullpath, "{") || strings.Contains(fullpath, "}") {
+	if strings.Contains(fullpath, "{") && strings.Contains(fullpath, "}") {
 		res1 := strings.Split(fullpath, "/")
 
 		for i, p := range res1 {
-			if strings.Contains(p, "{") || strings.Contains(p, "}") {
-				res1[i] = pathParaRegex
+			if strings.Contains(p, "{") && strings.Contains(p, "}") {
+				startP := strings.Index(p, "{")
+				endP := strings.Index(p, "}")
+				res1[i] = p[:startP] + pathParaRegex + p[endP+1:]
 			}
 		}
 		newPath = strings.Join(res1[:], "/")
