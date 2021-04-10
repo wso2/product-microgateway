@@ -47,7 +47,7 @@
                 <exclude>./apim/**</exclude>
                 <exclude>./choreo-connect/config-toml-configmap-for-eventhub.yaml</exclude>
             </excludes>
-            <outputDirectory>choreo-connect-${project.version}/k8s-artifacts/choreo-connect</outputDirectory>
+            <outputDirectory>choreo-connect-${project.version}/k8s-artifacts/</outputDirectory>
         </fileSet>
         <fileSet>
             <outputDirectory>choreo-connect-${project.version}/docker-compose/resources/enforcer/dropins
