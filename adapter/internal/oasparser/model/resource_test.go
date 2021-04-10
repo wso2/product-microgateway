@@ -26,11 +26,14 @@ func TestSortResources(t *testing.T) {
 	resources := getResources()
 	sortedPaths := []string{
 		"/pet/index.html",
-		"/pet",
-		"/pet/{id}",
-		"/pet/{id}/price",
-		"/pet/{id}/{price}",
-		"pet/*",
+        "/pet/pet.{anc}",
+        "/pet/{petId}.com",
+        "/pet/{pet}.{anc}",
+        "/pet",
+        "/pet/{id}",
+        "/pet/{id}/price",
+        "/pet/{id}/{price}",
+        "/pet/*",
 	}
 	sortedResources := SortResources(resources)
 
@@ -42,11 +45,14 @@ func TestSortResources(t *testing.T) {
 func getResources() []Resource {
 	paths := []string{
 		"/pet",
-		"pet/*",
 		"/pet/{id}",
 		"/pet/index.html",
 		"/pet/{id}/price",
 		"/pet/{id}/{price}",
+		"/pet/*",
+		"/pet/{petId}.com",
+		"/pet/pet.{anc}",
+		"/pet/{pet}.{anc}",
 	}
 	resources := make([]Resource, len(paths))
 	for index := range paths {
