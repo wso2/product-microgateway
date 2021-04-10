@@ -53,8 +53,11 @@ public class MockBackEndServer extends Thread {
     public static void main(String[] args) {
         MockBackEndServer mockBackEndServer = new MockBackEndServer(Constants.MOCK_BACKEND_SERVER_PORT);
         MockSandboxServer mockSandboxServer = new MockSandboxServer(Constants.MOCK_SANDBOX_SERVER_PORT);
+        // TODO: (VirajSalaka) start analytics server only when it requires
+        MockAnalyticsServer mockAnalyticsServer = new MockAnalyticsServer(Constants.MOCK_ANALYTICS_SERVER_PORT);
         mockBackEndServer.start();
         mockSandboxServer.start();
+        mockAnalyticsServer.start();
         if (args.length > 0 && args[0].equals("-tls-enabled")) {
             MockBackEndServer securedMockBackEndServer = new MockBackEndServer(Constants.SECURED_MOCK_BACKEND_SERVER_PORT,
                     true, false);
