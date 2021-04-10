@@ -44,6 +44,11 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
         return FilterUtils.generateAuthenticationContext(requestContext);
     }
 
+    @Override
+    public String getChallengeString() {
+        return "";
+    }
+
     @Override public int getPriority() {
         return -20;
     }
