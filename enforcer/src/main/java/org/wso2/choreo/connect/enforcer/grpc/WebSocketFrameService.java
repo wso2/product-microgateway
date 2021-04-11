@@ -15,14 +15,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.enforcer.grpc;
+package org.wso2.choreo.connect.enforcer.grpc;
 
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameRequest;
-import org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse;
-import org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameServiceGrpc;
+import org.wso2.choreo.connect.enforcer.websocket.WebSocketResponseObserver;
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse;
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameServiceGrpc;
 
 import java.util.concurrent.ConcurrentHashMap;
 

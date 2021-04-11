@@ -94,6 +94,19 @@ public class APIFactory {
         return apis.get(apiKey);
     }
 
+//    public WebSocketAPI getMatchedAPI(WebSocketFrameRequest webSocketFrameRequest) {
+//        String basePath = webSocketFrameRequest.getMetadata().getFilterMetadataMap()
+//                .get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.GW_BASE_PATH_PARAM)
+//                .getStringValue();
+//        String version = webSocketFrameRequest.getMetadata().getFilterMetadataMap().
+//                get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.GW_VERSION_PARAM).getStringValue();
+//        String apiKey = basePath + '/' + version;
+//        if (logger.isDebugEnabled()) {
+//            logger.debug("Looking for matching API with basepath: {} and version: {}", basePath, version);
+//        }
+//        return (WebSocketAPI) apis.get(apiKey);
+//    }
+
     public ResourceConfig getMatchedResource(API api, String matchedResourcePath, String method) {
         List<ResourceConfig> resourceConfigList = api.getAPIConfig().getResources();
         return resourceConfigList.stream()

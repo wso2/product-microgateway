@@ -15,36 +15,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.enforcer.api;
+package org.wso2.choreo.connect.enforcer.api;
 
-import org.wso2.gateway.discovery.api.Api;
-import org.wso2.gateway.discovery.api.Operation;
-import org.wso2.gateway.discovery.api.Resource;
-import org.wso2.micro.gateway.enforcer.Filter;
-import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
-import org.wso2.micro.gateway.enforcer.api.config.ResourceConfig;
-import org.wso2.micro.gateway.enforcer.config.ConfigHolder;
-import org.wso2.micro.gateway.enforcer.constants.APIConstants;
-import org.wso2.micro.gateway.enforcer.cors.CorsFilter;
-import org.wso2.micro.gateway.enforcer.security.AuthFilter;
-import org.wso2.micro.gateway.enforcer.throttle.ThrottleFilter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.enforcer.Filter;
+//import org.wso2.micro.gateway.enforcer.api.API;
+//import org.wso2.micro.gateway.enforcer.api.RequestContext;
+//import org.wso2.micro.gateway.enforcer.api.ResponseObject;
+import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
+import org.wso2.choreo.connect.enforcer.security.AuthFilter;
+import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetadataContext;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Specific implementation for a Rest API type APIs.
+ * Specific implementation for a WebSocket API type APIs. Contains 2 filter chains to process initial HTTP request and
+ * websocket frame metadata.
  */
-public class RestAPI implements API {
-    private final List<Filter> filters = new ArrayList<>();
+public class WebSocketAPI implements API {
+
+    private static final Logger logger = LogManager.getLogger(WebSocketAPI.class);
     private APIConfig apiConfig;
+    private final List<Filter> filters = new ArrayList<>();
+    private final List<Filter> upgradeFilters = new ArrayList<>();
     private String apiLifeCycleState;
 
     @Override
     public List<Filter> getFilters() {
-        return filters;
+        return null;
     }
 
     @Override
@@ -53,30 +56,25 @@ public class RestAPI implements API {
         String name = api.getTitle();
         String version = api.getVersion();
         List<String> securitySchemes = api.getSecuritySchemeList();
-        List<ResourceConfig> resources = new ArrayList<>();
-
-        for (Resource res : api.getResourcesList()) {
-            for (Operation operation : res.getMethodsList()) {
-                ResourceConfig resConfig = buildResource(operation, res.getPath());
-                resources.add(resConfig);
-            }
-        }
-
+//        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).
+//                apiType(APIConstants.ApiType.WEB_SOCKET).build();
         this.apiLifeCycleState = api.getApiLifeCycleState();
-        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources).
+        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).
                 apiLifeCycleState(apiLifeCycleState).securitySchema(securitySchemes).tier(api.getTier()).
                 endpointSecurity(api.getEndpointSecurity()).authHeader(api.getAuthorizationHeader()).
-                disableSecurity(api.getDisableSecurity()).apiType(APIConstants.ApiType.REST).build();
+                disableSecurity(api.getDisableSecurity()).apiType(APIConstants.ApiType.WEB_SOCKET).build();
         initFilters();
         return basePath;
     }
 
     @Override
-    public ResponseObject process(RequestContext requestContext) {
+    public ResponseObject process(
+            RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject();
         if (executeFilterChain(requestContext)) {
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
-            if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
+            //responseObject.setWebSocketMetadataContext(requestContext.getAuthenticationContext());
+            if (requestContext.getResponseHeaders() != null) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
         } else {
@@ -108,37 +106,46 @@ public class RestAPI implements API {
         return this.apiConfig;
     }
 
-    private ResourceConfig buildResource(Operation operation, String resPath) {
-        ResourceConfig resource = new ResourceConfig();
-        resource.setPath(resPath);
-        resource.setMethod(ResourceConfig.HttpMethods.valueOf(operation.getMethod().toUpperCase()));
-        resource.setTier(operation.getTier());
-        resource.setDisableSecurity(operation.getDisableSecurity());
-        Map<String, List<String>> securityMap = new HashMap<>();
-        operation.getSecurityList().forEach(securityList -> securityList.getScopeListMap().forEach((key, security) -> {
-            if (security != null && security.getScopesList().size() > 0) {
-                List<String> scopeList = new ArrayList<>(security.getScopesList());
-                securityMap.put(key, scopeList);
+    @Override
+    public boolean executeFilterChain(RequestContext requestContext) {
+        logger.info("normal filter chain");
+        boolean proceed;
+        for (Filter filter : getHttpFilters()) {
+            proceed = filter.handleRequest(requestContext);
+            logger.info("proceed:" + proceed);
+            if (!proceed) {
+                return false;
             }
-        }));
-        resource.setSecuritySchemas(securityMap);
-        return resource;
+        }
+        return true;
     }
 
-    private void initFilters() {
+
+    public List<Filter> getUpgradeFilters() {
+        return upgradeFilters;
+    }
+
+    public List<Filter> getHttpFilters() {
+        return filters;
+    }
+
+    public void initFilters() {
+        AuthFilter authFilter = new AuthFilter();
+        authFilter.init(apiConfig);
         CorsFilter corsFilter = new CorsFilter();
         this.filters.add(corsFilter);
-        // TODO : re-vist the logic with apim prototype implemetation
-        if (!APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(apiLifeCycleState)) {
-            AuthFilter authFilter = new AuthFilter();
-            authFilter.init(apiConfig);
-            this.filters.add(authFilter);
-        }
-        // enable throttle filter
-        if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
-            ThrottleFilter throttleFilter = new ThrottleFilter();
-            throttleFilter.init(apiConfig);
-            this.filters.add(throttleFilter);
-        }
+        this.filters.add(authFilter);
     }
+
+    public void initUpgradeFilters() {
+        // TODO (LahiruUdayanga) - Initiate upgrade filter chain.
+        // WebSocket throttle filter
+        // WebSocket analytics filter
+    }
+
+    public WebSocketMetadataContext processMetadata(RequestContext requestContext) {
+        return null;
+    }
+
+
 }

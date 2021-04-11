@@ -35,6 +35,7 @@ import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
 import org.wso2.choreo.connect.enforcer.server.RequestHandler;
 
 /**
@@ -43,11 +44,11 @@ import org.wso2.choreo.connect.enforcer.server.RequestHandler;
  */
 public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
-    private RequestHandler requestHandler = new RequestHandler();
+    private HttpRequestHandler requestHandler = new HttpRequestHandler();
 
     @Override
     public void check(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
-        ResponseObject responseObject = requestHandler.process(request, responseObserver);
+        ResponseObject responseObject = requestHandler.process(request);
         CheckResponse response = buildResponse(request, responseObject);
         responseObserver.onNext(response);
         // When you are done, you must call onCompleted.

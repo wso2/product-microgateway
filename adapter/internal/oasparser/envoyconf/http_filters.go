@@ -31,11 +31,11 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/wrappers"
 
-	rls "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
+	//rls "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	logger "github.com/wso2/adapter/loggers"
-	mgw_websocket "github.com/wso2/micro-gw/internal/oasparser/envoyconf/api"
+	//mgw_websocket "github.com/wso2/micro-gw/internal/oasparser/envoyconf/api"
 	"github.com/golang/protobuf/ptypes/any"
 )
 
@@ -89,13 +89,13 @@ func getUpgradeFilters() []*hcmv3.HttpFilter {
 	extAauth := getExtAuthzHTTPFilter()
 	// enable mgwWebSocket when envoy binary with mgw_websocket filter is used
 	//mgwWebSocket := getMgwWebSocketFilter()
-	mgwWebSocketWASM := getMgwWebSocketWASMFilter()
+	//mgwWebSocketWASM := getMgwWebSocketWASMFilter()
 	router := getRouterHTTPFilter()
 	upgradeFilters := []*hcmv3.HttpFilter{
 		cors,
 		extAauth,
 		//mgwWebSocket,
-		mgwWebSocketWASM,
+		//mgwWebSocketWASM,
 		router,
 	}
 	return upgradeFilters
@@ -138,39 +138,39 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 	return &extAuthzFilter
 }
 
-func getMgwWebSocketFilter() *hcmv3.HttpFilter {
-	mgwWebsocketConfig := &mgw_websocket.RateLimit{
-		Domain:          "rl",
-		RatelimitType:   "default",
-		Timeout:         ptypes.DurationProto(20 * time.Second),
-		FailureModeDeny: false,
-		RateLimitService: &rls.RateLimitServiceConfig{
-			GrpcService: &corev3.GrpcService{
-				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
-					EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{
-						ClusterName: extAuthzClusterName,
-					},
-				},
-				Timeout: ptypes.DurationProto(20 * time.Second),
-			},
-		},
-	}
-	ext, err2 := proto.Marshal(mgwWebsocketConfig)
-	if err2 != nil {
-		logger.LoggerOasparser.Error(err2)
-	}
-	mgwWebSocketFilter := hcmv3.HttpFilter{
-		Name: mgwWebSocketFilterName,
-		ConfigType: &hcmv3.HttpFilter_TypedConfig{
-			TypedConfig: &any.Any{
-				TypeUrl: "type.googleapis.com/envoy.extensions.filters.http.mgw_websocket.v3.RateLimit",
-				Value:   ext,
-			},
-		},
-	}
-	return &mgwWebSocketFilter
-
-}
+// func getMgwWebSocketFilter() *hcmv3.HttpFilter {
+// 	mgwWebsocketConfig := &mgw_websocket.RateLimit{
+// 		Domain:          "rl",
+// 		RatelimitType:   "default",
+// 		Timeout:         ptypes.DurationProto(20 * time.Second),
+// 		FailureModeDeny: false,
+// 		RateLimitService: &rls.RateLimitServiceConfig{
+// 			GrpcService: &corev3.GrpcService{
+// 				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
+// 					EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{
+// 						ClusterName: extAuthzClusterName,
+// 					},
+// 				},
+// 				Timeout: ptypes.DurationProto(20 * time.Second),
+// 			},
+// 		},
+// 	}
+// 	ext, err2 := proto.Marshal(mgwWebsocketConfig)
+// 	if err2 != nil {
+// 		logger.LoggerOasparser.Error(err2)
+// 	}
+// 	mgwWebSocketFilter := hcmv3.HttpFilter{
+// 		Name: mgwWebSocketFilterName,
+// 		ConfigType: &hcmv3.HttpFilter_TypedConfig{
+// 			TypedConfig: &any.Any{
+// 				TypeUrl: "type.googleapis.com/envoy.extensions.filters.http.mgw_websocket.v3.RateLimit",
+// 				Value:   ext,
+// 			},
+// 		},
+// 	}
+// 	return &mgwWebSocketFilter
+//
+// }
 
 func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {
 

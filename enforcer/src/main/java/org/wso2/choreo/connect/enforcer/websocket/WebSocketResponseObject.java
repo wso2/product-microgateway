@@ -15,15 +15,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.enforcer.server;
-
+package org.wso2.choreo.connect.enforcer.websocket;
 
 /**
- * RequestHandler generic interface
- * @param <T> Request type
- * @param <S> Response type
- * e.g - HttpRequestHandler implements RequestHandler<CheckRequest,ResponseObject>
+ * OK - WebSocket connection is at non-throttled state
+ * OVER_LIMIT - WebSocket connection is at throttled state
+ * UNKNOWN - Throttle state of the WebSocket connection is not known
  */
-public interface RequestHandler<T, S> {
-    S process(T request);
+public enum WebSocketResponseObject {
+    UNKNOWN,
+    OK,
+    OVER_LIMIT
 }

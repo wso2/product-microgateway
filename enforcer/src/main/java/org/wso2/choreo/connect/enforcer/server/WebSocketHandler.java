@@ -15,28 +15,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.enforcer.server;
+package org.wso2.choreo.connect.enforcer.server;
 
-import com.google.protobuf.Struct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.api.APIFactory;
-import org.wso2.micro.gateway.enforcer.api.RequestContext;
-import org.wso2.micro.gateway.enforcer.api.WebSocketAPI;
-import org.wso2.micro.gateway.enforcer.api.WebSocketMetadataContext;
-import org.wso2.micro.gateway.enforcer.api.config.APIConfig;
-import org.wso2.micro.gateway.enforcer.constants.APIConstants;
-import org.wso2.micro.gateway.enforcer.constants.AuthenticationConstants;
-import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
-import org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameRequest;
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
+import org.wso2.choreo.connect.enforcer.api.RequestContext;
+import org.wso2.choreo.connect.enforcer.api.WebSocketAPI;
+import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetadataContext;
+import org.wso2.choreo.connect.enforcer.server.RequestHandler;
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse;
 
 /**
  * WebSocketHandler handles requests coming through websocket metadata service.
  */
-public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, AuthenticationContext> {
+public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, WebSocketMetadataContext> {
     private static final Logger logger = LogManager.getLogger(WebSocketHandler.class);
     @Override
-    public AuthenticationContext process(WebSocketFrameRequest webSocketFrameRequest) {
+    public WebSocketMetadataContext process(WebSocketFrameRequest webSocketFrameRequest) {
 //        WebSocketAPI matchedAPI = APIFactory.getInstance().getMatchedAPI(webSocketFrameRequest);
 //        if (matchedAPI == null) {
 //            return null;

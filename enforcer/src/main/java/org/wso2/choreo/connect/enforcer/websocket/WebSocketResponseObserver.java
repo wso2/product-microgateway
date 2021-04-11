@@ -15,17 +15,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.enforcer.grpc;
+package org.wso2.choreo.connect.enforcer.websocket;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.micro.gateway.enforcer.constants.APIConstants;
-import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
-import org.wso2.micro.gateway.enforcer.server.WebSocketHandler;
-import org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameRequest;
-import org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse;
+import org.wso2.choreo.connect.enforcer.grpc.WebSocketFrameService;
+import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetadataContext;
+import org.wso2.choreo.connect.enforcer.server.WebSocketHandler;
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse;
 
 /**
  * Wrapper class for StreamObserver<RateLimitRequest> with extra fields added to identify relevant information about
@@ -34,7 +33,7 @@ import org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse;
 public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameRequest> {
 
     private static final Logger logger = LogManager.getLogger(WebSocketResponseObserver.class);
-    private AuthenticationContext authenticationContext;
+    private WebSocketMetadataContext webSocketMetadataContext;
     private final StreamObserver<WebSocketFrameResponse> responseStreamObserver;
     private final WebSocketHandler webSocketHandler = new WebSocketHandler();
     private String streamId;

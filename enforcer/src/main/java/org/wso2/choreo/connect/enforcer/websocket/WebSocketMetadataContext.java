@@ -15,10 +15,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.micro.gateway.enforcer.api;
+package org.wso2.choreo.connect.enforcer.websocket;
 
 
-import org.wso2.micro.gateway.enforcer.security.AuthenticationContext;
+import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 
 /**
  * WebSocketMetadataContext object is the corresponding class implementation for dynamic metadata received from

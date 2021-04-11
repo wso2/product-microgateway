@@ -19,7 +19,7 @@ syntax = "proto3";
 
 package envoy.extensions.filters.http.mgw_wasm_websocket.v3;
 
-option java_package = "org.wso2.micro.gateway.enforcer.websocket";
+option java_package = "org.wso2.choreo.connect.discovery.service.websocket";
 option java_outer_classname = "MgwWebSocketProto";
 option java_multiple_files = true;
 

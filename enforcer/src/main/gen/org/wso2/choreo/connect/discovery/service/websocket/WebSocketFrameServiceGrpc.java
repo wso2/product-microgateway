@@ -1,4 +1,4 @@
-package org.wso2.micro.gateway.enforcer.websocket;
+package org.wso2.choreo.connect.discovery.service.websocket;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
@@ -27,29 +27,29 @@ public final class WebSocketFrameServiceGrpc {
   public static final String SERVICE_NAME = "envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameService";
 
   // Static method descriptors that strictly reflect the proto.
-  private static volatile io.grpc.MethodDescriptor<org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameRequest,
-      org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse> getPublishFrameDataMethod;
+  private static volatile io.grpc.MethodDescriptor<org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest,
+      org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse> getPublishFrameDataMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "PublishFrameData",
-      requestType = org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameRequest.class,
-      responseType = org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse.class,
+      requestType = org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.class,
+      responseType = org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
-  public static io.grpc.MethodDescriptor<org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameRequest,
-      org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse> getPublishFrameDataMethod() {
-    io.grpc.MethodDescriptor<org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameRequest, org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse> getPublishFrameDataMethod;
+  public static io.grpc.MethodDescriptor<org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest,
+      org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse> getPublishFrameDataMethod() {
+    io.grpc.MethodDescriptor<org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest, org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse> getPublishFrameDataMethod;
     if ((getPublishFrameDataMethod = WebSocketFrameServiceGrpc.getPublishFrameDataMethod) == null) {
       synchronized (WebSocketFrameServiceGrpc.class) {
         if ((getPublishFrameDataMethod = WebSocketFrameServiceGrpc.getPublishFrameDataMethod) == null) {
           WebSocketFrameServiceGrpc.getPublishFrameDataMethod = getPublishFrameDataMethod =
-              io.grpc.MethodDescriptor.<org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameRequest, org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse>newBuilder()
+              io.grpc.MethodDescriptor.<org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest, org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "PublishFrameData"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameRequest.getDefaultInstance()))
+                  org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse.getDefaultInstance()))
+                  org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.getDefaultInstance()))
               .setSchemaDescriptor(new WebSocketFrameServiceMethodDescriptorSupplier("PublishFrameData"))
               .build();
         }
@@ -108,8 +108,8 @@ public final class WebSocketFrameServiceGrpc {
 
     /**
      */
-    public io.grpc.stub.StreamObserver<org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameRequest> publishFrameData(
-        io.grpc.stub.StreamObserver<org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse> responseObserver) {
+    public io.grpc.stub.StreamObserver<org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest> publishFrameData(
+        io.grpc.stub.StreamObserver<org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse> responseObserver) {
       return asyncUnimplementedStreamingCall(getPublishFrameDataMethod(), responseObserver);
     }
 
@@ -119,8 +119,8 @@ public final class WebSocketFrameServiceGrpc {
             getPublishFrameDataMethod(),
             asyncBidiStreamingCall(
               new MethodHandlers<
-                org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameRequest,
-                org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse>(
+                org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest,
+                org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse>(
                   this, METHODID_PUBLISH_FRAME_DATA)))
           .build();
     }
@@ -142,8 +142,8 @@ public final class WebSocketFrameServiceGrpc {
 
     /**
      */
-    public io.grpc.stub.StreamObserver<org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameRequest> publishFrameData(
-        io.grpc.stub.StreamObserver<org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse> responseObserver) {
+    public io.grpc.stub.StreamObserver<org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest> publishFrameData(
+        io.grpc.stub.StreamObserver<org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse> responseObserver) {
       return asyncBidiStreamingCall(
           getChannel().newCall(getPublishFrameDataMethod(), getCallOptions()), responseObserver);
     }
@@ -210,7 +210,7 @@ public final class WebSocketFrameServiceGrpc {
       switch (methodId) {
         case METHODID_PUBLISH_FRAME_DATA:
           return (io.grpc.stub.StreamObserver<Req>) serviceImpl.publishFrameData(
-              (io.grpc.stub.StreamObserver<org.wso2.micro.gateway.enforcer.websocket.WebSocketFrameResponse>) responseObserver);
+              (io.grpc.stub.StreamObserver<org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse>) responseObserver);
         default:
           throw new AssertionError();
       }
@@ -223,7 +223,7 @@ public final class WebSocketFrameServiceGrpc {
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.FileDescriptor getFileDescriptor() {
-      return org.wso2.micro.gateway.enforcer.websocket.MgwWebSocketProto.getDescriptor();
+      return org.wso2.choreo.connect.discovery.service.websocket.MgwWebSocketProto.getDescriptor();
     }
 
     @java.lang.Override
