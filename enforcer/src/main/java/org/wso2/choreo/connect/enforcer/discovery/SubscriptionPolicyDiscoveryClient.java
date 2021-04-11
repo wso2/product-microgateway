@@ -23,6 +23,7 @@ import com.google.rpc.Status;
 import io.envoyproxy.envoy.config.core.v3.Node;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryRequest;
 import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
@@ -33,22 +34,26 @@ import org.wso2.choreo.connect.discovery.subscription.SubscriptionPolicyList;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
+import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStoreImpl;
 import org.wso2.choreo.connect.enforcer.util.GRPCUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Client to communicate with Subscription Policy discovery service at the adapter.
  */
-public class SubscriptionPolicyDiscoveryClient {
+public class SubscriptionPolicyDiscoveryClient implements Runnable {
     private static final Logger logger = LogManager.getLogger(SubscriptionPolicyDiscoveryClient.class);
     private static SubscriptionPolicyDiscoveryClient instance;
-    private final ManagedChannel channel;
-    private final SubscriptionPolicyDiscoveryServiceGrpc.SubscriptionPolicyDiscoveryServiceStub stub;
+    private ManagedChannel channel;
+    private SubscriptionPolicyDiscoveryServiceGrpc.SubscriptionPolicyDiscoveryServiceStub stub;
     private StreamObserver<DiscoveryRequest> reqObserver;
     private SubscriptionDataStoreImpl subscriptionDataStore;
+    private String host;
+    private int port;
 
     /**
      * This is a reference to the latest received response from the ADS.
@@ -74,11 +79,31 @@ public class SubscriptionPolicyDiscoveryClient {
     private final String nodeId;
 
     private SubscriptionPolicyDiscoveryClient(String host, int port) {
+        this.host = host;
+        this.port = port;
         this.subscriptionDataStore = SubscriptionDataStoreImpl.getInstance();
-        this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
-        this.stub = SubscriptionPolicyDiscoveryServiceGrpc.newStub(channel);
+        initConnection();
         this.nodeId = AdapterConstants.COMMON_ENFORCER_LABEL;
         this.latestACKed = DiscoveryResponse.getDefaultInstance();
+    }
+
+    private void initConnection() {
+        if (GRPCUtils.isReInitRequired(channel)) {
+            if (channel != null && !channel.isShutdown()) {
+                channel.shutdownNow();
+                do {
+                    try {
+                        channel.awaitTermination(100, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        logger.error("Subscription policy discovery channel shutdown wait was interrupted", e);
+                    }
+                } while (!channel.isShutdown());
+            }
+            this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
+            this.stub = SubscriptionPolicyDiscoveryServiceGrpc.newStub(channel);
+        } else if (channel.getState(true) == ConnectivityState.READY) {
+            XdsSchedulerManager.getInstance().stopAPIListDiscoveryScheduling();
+        }
     }
 
     public static SubscriptionPolicyDiscoveryClient getInstance() {
@@ -90,12 +115,18 @@ public class SubscriptionPolicyDiscoveryClient {
         return instance;
     }
 
+    public void run() {
+        initConnection();
+        watchSubscriptionPolicies();
+    }
+
     public void watchSubscriptionPolicies() {
         // TODO: (Praminda) implement a deadline with retries
         reqObserver = stub.streamSubscriptionPolicies(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
                 logger.debug("Received Application discovery response " + response);
+                XdsSchedulerManager.getInstance().stopSubscriptionPolicyDiscoveryScheduling();
                 latestReceived = response;
                 try {
                     List<SubscriptionPolicy> subscriptionPolicyList = new ArrayList<>();
@@ -113,7 +144,7 @@ public class SubscriptionPolicyDiscoveryClient {
             @Override
             public void onError(Throwable throwable) {
                 logger.error("Error occurred during Subscription discovery", throwable);
-                // TODO: (Praminda) if adapter is unavailable keep retrying
+                XdsSchedulerManager.getInstance().startSubscriptionPolicyDiscoveryScheduling();
                 nack(throwable);
             }
 

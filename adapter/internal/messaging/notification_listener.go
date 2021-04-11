@@ -37,7 +37,7 @@ import (
 const (
 	apiEventType                = "API"
 	applicationEventType        = "APPLICATION"
-	subscriptionEventType       = "SUBSCRIPTIONS"
+	subscriptionEventType       = "SUBSCRIPTION"
 	scopeEvenType               = "SCOPE"
 	removeAPIFromGateway        = "REMOVE_API_FROM_GATEWAY"
 	deployAPIToGateway          = "DEPLOY_API_IN_GATEWAY"

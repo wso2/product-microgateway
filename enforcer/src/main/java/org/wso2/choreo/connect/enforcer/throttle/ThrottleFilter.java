@@ -170,7 +170,7 @@ public class ThrottleFilter implements Filter {
             }
 
             // Checking Application level throttling
-            String appThrottleKey = appId + ':' + authContext.getUsername();
+            String appThrottleKey = appId + ':' + authorizedUser;
             Decision appDecision = checkAppLevelThrottled(appThrottleKey, appTier);
             if (appDecision.isThrottled()) {
                 log.debug("Setting application throttle out response");
@@ -268,8 +268,7 @@ public class ThrottleFilter implements Filter {
         }
 
         throttleEvent.put(ThrottleEventConstants.MESSAGE_ID, requestContext.getRequestID());
-        throttleEvent.put(ThrottleEventConstants.APP_KEY, authContext.getApplicationId() + ':' +
-                authContext.getUsername());
+        throttleEvent.put(ThrottleEventConstants.APP_KEY, authContext.getApplicationId() + ':' + authorizedUser);
         throttleEvent.put(ThrottleEventConstants.APP_TIER, authContext.getApplicationTier());
         throttleEvent.put(ThrottleEventConstants.API_KEY, apiContext);
         throttleEvent.put(ThrottleEventConstants.API_TIER, apiTier);
