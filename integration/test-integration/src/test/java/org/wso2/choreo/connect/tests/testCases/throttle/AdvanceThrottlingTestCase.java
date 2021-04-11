@@ -1,5 +1,6 @@
 package org.wso2.choreo.connect.tests.testCases.throttle;
 
+import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -11,7 +12,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.admin.ApiResponse;
 import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyDTO;
+import org.wso2.am.integration.clients.admin.api.dto.ConditionalGroupDTO;
+import org.wso2.am.integration.clients.admin.api.dto.IPConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
+import org.wso2.am.integration.clients.admin.api.dto.ThrottleConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
@@ -37,14 +41,19 @@ import static org.testng.Assert.assertEquals;
 
 public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
     private static final Logger log = LogManager.getLogger(AdvanceThrottlingTestCase.class);
+    private final String THROTTLED_IP = "10.100.1.22";
     private final Map<String, String> requestHeaders = new HashMap<>();
     private final String apiPolicyName = "APIPolicyWithDefaultLimit";
+    private final String conditionalPolicyName = "APIPolicyWithIPLimit";
     private final long limit5Req = 5L;
+    private final long limit10Req = 10L;
+    private final long limit1000Req = 1000L;
     private APIRequest apiRequest;
     private String apiId;
     private String applicationId;
     private String endpointURL;
     private String apiPolicyId;
+    private String conditionalPolicyId;
 
     @BeforeClass(alwaysRun = true, description = "initialize setup")
     void setup() throws Exception {
@@ -53,6 +62,14 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
                 DtoFactory.createRequestCountLimitDTO("min", 1, limit5Req);
         ThrottleLimitDTO defaultLimit =
                 DtoFactory.createThrottleLimitDTO(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT, threePerMin, null);
+        RequestCountLimitDTO thousandPerMin =
+                DtoFactory.createRequestCountLimitDTO("min", 1, limit1000Req);
+        ThrottleLimitDTO defaultLimitForConditions =
+                DtoFactory.createThrottleLimitDTO(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT, thousandPerMin, null);
+        RequestCountLimitDTO tenPerMin =
+                DtoFactory.createRequestCountLimitDTO("min", 1, limit10Req);
+        ThrottleLimitDTO limitForConditions =
+                DtoFactory.createThrottleLimitDTO(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT, tenPerMin, null);
 
         // creating the application
         ApplicationDTO app = new ApplicationDTO();
@@ -64,17 +81,30 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
         applicationId = appCreationResponse.getApplicationId();
 
         // create the advanced throttling policy with no conditions
-        AdvancedThrottlePolicyDTO requestCountAdvancedPolicyDTO = DtoFactory
+        AdvancedThrottlePolicyDTO apiPolicyDto = DtoFactory
                 .createAdvancedThrottlePolicyDTO(apiPolicyName, "", "", false, defaultLimit,
                         new ArrayList<>());
         ApiResponse<AdvancedThrottlePolicyDTO> addedApiPolicy =
-                restAPIAdmin.addAdvancedThrottlingPolicy(requestCountAdvancedPolicyDTO);
+                restAPIAdmin.addAdvancedThrottlingPolicy(apiPolicyDto);
 
         // assert the status code and policy ID
         Assert.assertEquals(addedApiPolicy.getStatusCode(), HttpStatus.SC_CREATED);
-        AdvancedThrottlePolicyDTO addedAdvancedPolicyDTO = addedApiPolicy.getData();
-        apiPolicyId = addedAdvancedPolicyDTO.getPolicyId();
+        AdvancedThrottlePolicyDTO addedApiPolicyDto = addedApiPolicy.getData();
+        apiPolicyId = addedApiPolicyDto.getPolicyId();
         Assert.assertNotNull(apiPolicyId, "The policy ID cannot be null or empty");
+
+        // create the advanced throttling policy with conditions
+        AdvancedThrottlePolicyDTO conditionPolicyDto = DtoFactory
+                .createAdvancedThrottlePolicyDTO(conditionalPolicyName, "", "", false, defaultLimitForConditions,
+                        createConditionalGroups(limitForConditions));
+        ApiResponse<AdvancedThrottlePolicyDTO> addedConditionalPolicy =
+                restAPIAdmin.addAdvancedThrottlingPolicy(conditionPolicyDto);
+
+        // assert the status code and policy ID
+        Assert.assertEquals(addedConditionalPolicy.getStatusCode(), HttpStatus.SC_CREATED);
+        AdvancedThrottlePolicyDTO addedConditionPolicyDto = addedConditionalPolicy.getData();
+        conditionalPolicyId = addedConditionPolicyDto.getPolicyId();
+        Assert.assertNotNull(conditionalPolicyId, "The policy ID cannot be null or empty");
 
         // create the request headers after generating the access token
         String accessToken = generateUserAccessToken(appCreationResponse.getConsumerKey(),
@@ -126,6 +156,39 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
                 "Request not throttled by request count condition in api tier");
     }
 
+
+    @Test(description = "Test API level throttling with IP Condition", dependsOnMethods = {"testAPILevelThrottling"})
+    public void testAPILevelThrottlingWithIpCondition() throws Exception {
+        HttpResponse api = restAPIPublisher.getAPI(apiId);
+        Gson gson = new Gson();
+        APIDTO apidto = gson.fromJson(api.getData(), APIDTO.class);
+        apidto.setApiThrottlingPolicy(APIMIntegrationConstants.API_TIER.UNLIMITED);
+        APIDTO updatedAPI = restAPIPublisher.updateAPI(apidto, apiId);
+        Assert.assertEquals(updatedAPI.getApiThrottlingPolicy(), APIMIntegrationConstants.API_TIER.UNLIMITED,
+                "API tier not updated.");
+        // create Revision and Deploy to Gateway
+        createAPIRevisionAndDeploy(apiId, restAPIPublisher);
+        Assert.assertFalse(isThrottled(requestHeaders, null, -1),
+                "Request was throttled unexpectedly in Unlimited API tier");
+
+        apidto.setApiThrottlingPolicy(conditionalPolicyName);
+        updatedAPI = restAPIPublisher.updateAPI(apidto, apiId);
+        Assert.assertEquals(updatedAPI.getApiThrottlingPolicy(), conditionalPolicyName,
+                "API tier not updated.");
+        Assert.assertFalse(isThrottled(requestHeaders, null, -1),
+                "Request not need to throttle since policy was Unlimited");
+        // create Revision and Deploy to Gateway
+        createAPIRevisionAndDeploy(apiId, restAPIPublisher);
+
+        requestHeaders.put(HttpHeaders.X_FORWARDED_FOR, "192.100.1.24");
+        Assert.assertFalse(isThrottled(requestHeaders, null, limit10Req),
+                "Request shouldn't throttle for an IP not in a condition");
+
+        requestHeaders.put(HttpHeaders.X_FORWARDED_FOR, THROTTLED_IP);
+        Assert.assertTrue(isThrottled(requestHeaders, null, limit10Req),
+                "Request need to throttle since policy was updated");
+        requestHeaders.remove(HttpHeaders.X_FORWARDED_FOR);
+    }
     private boolean isThrottled(Map<String, String> requestHeaders, Map<String, String> queryParams,
                                 long expectedCount) throws InterruptedException, IOException {
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
@@ -161,9 +224,34 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
         return isThrottled;
     }
 
+    /**
+     * Creates a set of conditional groups with a list of conditions
+     *
+     * @param limit Throttle limit of the conditional group.
+     * @return Created list of conditional group DTO
+     */
+    private List<ConditionalGroupDTO> createConditionalGroups(ThrottleLimitDTO limit) {
+        List<ConditionalGroupDTO> conditionalGroups = new ArrayList<>();
+
+        // create an IP condition and add it to the throttle conditions list
+        List<ThrottleConditionDTO> ipGrp = new ArrayList<>();
+        IPConditionDTO ipConditionDTO =
+                DtoFactory.createIPConditionDTO(IPConditionDTO.IpConditionTypeEnum.IPSPECIFIC, THROTTLED_IP, null, null);
+        ThrottleConditionDTO ipCondition = DtoFactory
+                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.IPCONDITION, false, null, ipConditionDTO,
+                        null, null);
+        ipGrp.add(ipCondition);
+        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
+                "IP conditional group", ipGrp, limit));
+
+        return conditionalGroups;
+    }
+
+
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
         super.cleanUp();
         restAPIAdmin.deleteAdvancedThrottlingPolicy(apiPolicyId);
+        restAPIAdmin.deleteAdvancedThrottlingPolicy(conditionalPolicyId);
     }
 }
