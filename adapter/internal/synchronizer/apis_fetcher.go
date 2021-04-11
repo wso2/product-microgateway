@@ -27,35 +27,38 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/wso2/micro-gw/config"
-	"github.com/wso2/micro-gw/internal/auth"
-	"github.com/wso2/micro-gw/internal/tlsutils"
+	"github.com/wso2/adapter/config"
+	"github.com/wso2/adapter/internal/auth"
+	"github.com/wso2/adapter/internal/tlsutils"
 
-	apiServer "github.com/wso2/micro-gw/internal/api"
-	logger "github.com/wso2/micro-gw/loggers"
+	apiServer "github.com/wso2/adapter/internal/api"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 const (
-	apiID                   string = "apiId"
-	gwType                  string = "type"
-	gatewayLabel            string = "gatewayLabel"
-	envoy                   string = "Envoy"
-	runtimeArtifactEndpoint string = "internal/data/v1/runtime-artifacts"
-	authorization           string = "Authorization"
-	zipExt                  string = ".zip"
-	defaultCertPath         string = "/home/wso2/security/controlplane.pem"
+	apiID                    string = "apiId"
+	gwType                   string = "type"
+	gatewayLabel             string = "gatewayLabel"
+	envoy                    string = "Envoy"
+	runtimeArtifactEndpoint  string = "internal/data/v1/runtime-artifacts"
+	authorization            string = "Authorization"
+	zipExt                   string = ".zip"
+	defaultCertPath          string = "/home/wso2/security/controlplane.pem"
+	deploymentDescriptorFile string = "deployments.json"
 )
 
 // FetchAPIs pulls the API artifact calling to the API manager
 // API Manager returns a .zip file as a response and this function
 // returns a byte slice of that ZIP file.
-func FetchAPIs(id *string, gwLabel *string, c chan SyncAPIResponse) {
+func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse) {
 	logger.LoggerSync.Info("Fetching APIs from Control Plane.")
 	respSyncAPI := SyncAPIResponse{}
 
@@ -108,14 +111,15 @@ func FetchAPIs(id *string, gwLabel *string, c chan SyncAPIResponse) {
 	// If an API ID is present, make a query parameter
 	if id != nil {
 		logger.LoggerSync.Debugf("API ID: %v", *id)
-		respSyncAPI.APIID = *id
+		respSyncAPI.APIUUID = *id
 		q.Add(apiID, *id)
 	}
 	// If the gateway label is present, make a query parameter
-	if gwLabel != nil {
-		logger.LoggerSync.Debugf("Gateway Label: %v", *gwLabel)
-		respSyncAPI.GatewayLabel = *gwLabel
-		q.Add(gatewayLabel, base64.StdEncoding.EncodeToString([]byte(*gwLabel)))
+	if len(gwLabel) > 0 {
+		logger.LoggerSync.Debugf("Gateway Label: %v", gwLabel)
+		respSyncAPI.GatewayLabels = gwLabel
+		gatewaysQStr := strings.Join(gwLabel, "|")
+		q.Add(gatewayLabel, base64.StdEncoding.EncodeToString([]byte(gatewaysQStr)))
 	}
 	// Default "type" query parameter for adapter is "Envoy"
 	q.Add(gwType, envoy)
@@ -175,30 +179,69 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		logger.LoggerSync.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
 		return err
 	}
-	// TODO: Currently the apis.zip file contains another zip files containing API projects.
-	// But there would be a meta data file in future. Once that comes, this code segement should
-	// handle that meta data file as well.
+
+	// apiFiles represents zipped API files fetched from API Manager
+	apiFiles := make(map[string]*zip.File, len(zipReader.File)-1)
+	deploymentDescriptor := &DeploymentDescriptor{}
 
 	// Read the .zip files within the root apis.zip
 	for _, file := range zipReader.File {
-		// open the zip files
-		if strings.HasSuffix(file.Name, zipExt) {
-			logger.LoggerSync.Debugf("Starting zip reading: %v", file.Name)
-			// Open thezip
+		// Open deployment descriptor file
+		if strings.EqualFold(file.Name, deploymentDescriptorFile) {
+			logger.LoggerSync.Debugf("Start reading %v file", deploymentDescriptorFile)
 			f, err := file.Open()
 			if err != nil {
-				logger.LoggerSync.Errorf("Error zip reading: %v", err)
+				logger.LoggerSync.Errorf("Error reading deployment descriptor: %v", err)
 				return err
 			}
-			// Close the stream once the processing of f is done
-			defer f.Close()
-			//Read the files inside each xxxx-api.zip
-			r, err := ioutil.ReadAll(f)
-			// Pass the byte slice for the XDS APIs to push it to the enforcer and router
-			err = apiServer.ApplyAPIProject(r, environments)
+			data, err := ioutil.ReadAll(f)
+			_ = f.Close() // Close the file here (without defer)
 			if err != nil {
-				logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
+				logger.LoggerSync.Errorf("Error reading deployment descriptor: %v", err)
+				return err
 			}
+			logger.LoggerSync.Debugf("Parsing content of deployment descriptor, content: %s", string(data))
+			if err = json.Unmarshal(data, deploymentDescriptor); err != nil {
+				// TODO: (renuka) shall we print content of deployment descriptor
+				logger.LoggerSync.Errorf("Error parsing JSON content of deployment descriptor: %v", err)
+				return err
+			}
+		}
+
+		if strings.HasSuffix(file.Name, zipExt) {
+			apiFiles[file.Name] = file
+		}
+	}
+
+	// loop deployments in deployment descriptor file instead of files in the root zip
+	for _, deployment := range deploymentDescriptor.Data.Deployments {
+		file := apiFiles[deployment.APIFile]
+		if file == nil {
+			err := fmt.Errorf("API file \"%v\" defined in deployment descriptor not found",
+				deployment.APIFile)
+			logger.LoggerSync.Errorf("API file not found: %v", err)
+			return err
+		}
+
+		vhostToEnvsMap := make(map[string][]string)
+		for _, environment := range deployment.Environments {
+			vhostToEnvsMap[environment.Vhost] = append(vhostToEnvsMap[environment.Vhost], environment.Name)
+		}
+
+		logger.LoggerSync.Debugf("Starting zip reading: %v", file.Name)
+		f, err := file.Open()
+		if err != nil {
+			logger.LoggerSync.Errorf("Error reading zip file: %v", err)
+			return err
+		}
+		//Read the files inside each xxxx-api.zip
+		apiFileData, err := ioutil.ReadAll(f)
+		_ = f.Close() // Close the file here (without defer)
+		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
+		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
+		err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap)
+		if err != nil {
+			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		}
 	}
 	// Error nil for successful execution
@@ -219,7 +262,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 	// Take the configured labels from the adapter
 	configuredEnvs := conf.ControlPlane.EventHub.EnvironmentLabels
 	//finalEnvs contains the actual envrionments that the adapter should update
-	finalEnvs := []string{}
+	var finalEnvs []string
 	if len(configuredEnvs) > 0 {
 		// If the configuration file contains environment list, then check if then check if the
 		// affected environments are present in the provided configs. If so, add that environment
@@ -233,7 +276,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 		}
 	} else {
 		// If the labels are not configured, publish the APIS to the default environment
-		finalEnvs = append(finalEnvs, "default")
+		finalEnvs = []string{config.DefaultGatewayName}
 	}
 
 	if len(finalEnvs) == 0 {
@@ -244,9 +287,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 
 	c := make(chan SyncAPIResponse)
 	logger.LoggerSync.Infof("API %s is added/updated to APIList for label %v", updatedAPIID, updatedEnvs)
-	// updatedEnvs contains at least a single env. Hence pulling API with a single environment is enough
-	// since API data is same for each of the updatedEnvs.
-	go FetchAPIs(&updatedAPIID, &updatedEnvs[0], c)
+	go FetchAPIs(&updatedAPIID, finalEnvs, c)
 	for {
 		data := <-c
 		logger.LoggerSync.Debugf("Receing data for an envrionment: %v", string(data.Resp))
@@ -273,7 +314,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 				logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.EventHub.RetryInterval*time.Second)
 				time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
 				logger.LoggerSync.Info("Retrying to fetch API data from control plane.")
-				FetchAPIs(&updatedAPIID, &updatedEnvs[0], c)
+				FetchAPIs(&updatedAPIID, finalEnvs, c)
 			}(data)
 		}
 	}

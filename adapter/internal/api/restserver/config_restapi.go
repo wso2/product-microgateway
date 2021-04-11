@@ -19,26 +19,28 @@ package restserver
 
 import (
 	"crypto/tls"
+	"github.com/wso2/adapter/internal/discovery/xds"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"github.com/wso2/micro-gw/config"
-	apiServer "github.com/wso2/micro-gw/internal/api"
-	"github.com/wso2/micro-gw/internal/api/models"
-	"github.com/wso2/micro-gw/internal/api/restserver/operations"
-	"github.com/wso2/micro-gw/internal/api/restserver/operations/api_collection"
-	"github.com/wso2/micro-gw/internal/api/restserver/operations/api_individual"
-	"github.com/wso2/micro-gw/internal/api/restserver/operations/authorization"
-	"github.com/wso2/micro-gw/internal/auth"
-	constants "github.com/wso2/micro-gw/internal/oasparser/model"
-	"github.com/wso2/micro-gw/internal/tlsutils"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/adapter/config"
+	apiServer "github.com/wso2/adapter/internal/api"
+	"github.com/wso2/adapter/internal/api/models"
+	"github.com/wso2/adapter/internal/api/restserver/operations"
+	"github.com/wso2/adapter/internal/api/restserver/operations/api_collection"
+	"github.com/wso2/adapter/internal/api/restserver/operations/api_individual"
+	"github.com/wso2/adapter/internal/api/restserver/operations/authorization"
+	"github.com/wso2/adapter/internal/auth"
+	constants "github.com/wso2/adapter/internal/oasparser/model"
+	"github.com/wso2/adapter/internal/tlsutils"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 var (
@@ -113,7 +115,15 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.APIIndividualDeleteApisHandler = api_individual.DeleteApisHandlerFunc(func(
 		params api_individual.DeleteApisParams, principal *models.Principal) middleware.Responder {
 
-		err := apiServer.DeleteAPI(params.Vhost, params.APIName, params.Version)
+		vhost := ""
+		if params.Vhost != nil {
+			vhost = *params.Vhost
+		}
+		var environments []string
+		if params.Environments != nil {
+			environments = strings.Split(*params.Environments, ":")
+		}
+		err := xds.DeleteAPIs(vhost, params.APIName, params.Version, environments)
 		if err == nil {
 			return api_individual.NewDeleteApisOK()
 		}
@@ -132,7 +142,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(
 		params api_individual.PostApisParams, principal *models.Principal) middleware.Responder {
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
-		err := apiServer.ApplyAPIProjectWithOverwrite(jsonByteArray, []string{}, params.Override)
+		err := apiServer.ApplyAPIProjectInStandaloneMode(jsonByteArray, params.Override)
 		if err != nil {
 			switch err.Error() {
 			case constants.AlreadyExists:

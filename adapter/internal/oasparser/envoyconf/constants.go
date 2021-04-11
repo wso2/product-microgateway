@@ -17,21 +17,24 @@
 package envoyconf
 
 const (
-	extAuthzClusterName string = "ext-authz"
+	extAuthzClusterName     string = "ext-authz"
+	accessLoggerClusterName string = "access-logger"
+	grpcAccessLogLogName    string = "mgw_access_logs"
 )
 
 const (
-	extAuthzFilterName         string = "envoy.filters.http.ext_authz"
+	extAuthzFilterName        string = "envoy.filters.http.ext_authz"
+	transportSocketName       string = "envoy.transport_sockets.tls"
+	fileAccessLogName         string = "envoy.access_loggers.file"
+	grpcAccessLogName         string = "envoy.http_grpc_access_log"
+	httpConManagerStartPrefix string = "ingress_http"
+	extAuthzPerRouteName      string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 	mgwWebSocketFilterName     string = "envoy.filters.http.mgw_websocket"
 	mgwWebSocketWASMFilterName string = "envoy.filters.http.mgw_WASM_websocket"
 	mgwWASMVmID                string = "mgw_WASM_vm"
 	mgwWASMVmRuntime           string = "envoy.wasm.runtime.v8"
 	mgwWebSocketWASMFilterRoot string = "mgw_WASM_websocket_root"
 	mgwWebSocketWASM           string = "/usr/local/bin/mgw-websocket.wasm"
-	transportSocketName        string = "envoy.transport_sockets.tls"
-	accessLogName              string = "envoy.access_loggers.file"
-	httpConManagerStartPrefix  string = "ingress_http"
-	extAuthzPerRouteName       string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 )
 
 const (
@@ -52,6 +55,7 @@ const (
 // these values, modifications should be done in the both adapter and enforcer.
 const (
 	pathContextExtension            string = "path"
+	vHostContextExtension           string = "vHost"
 	basePathContextExtension        string = "basePath"
 	methodContextExtension          string = "method"
 	apiVersionContextExtension      string = "version"

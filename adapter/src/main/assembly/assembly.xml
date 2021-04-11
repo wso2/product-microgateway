@@ -33,7 +33,7 @@
     </fileSets>
     <files>
         <file>
-            <source>target/micro-gw-ubuntu</source>
+            <source>target/adapter-ubuntu</source>
             <outputDirectory></outputDirectory>
         </file>
         <file>
@@ -47,6 +47,10 @@
         <file>
             <source>../resources/security/mg.pem</source>
             <outputDirectory>security/truststore</outputDirectory>
+        </file>
+        <file>
+            <source>LICENSE.txt</source>
+            <outputDirectory></outputDirectory>
         </file>
     </files>
 </assembly>

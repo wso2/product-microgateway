@@ -20,7 +20,7 @@ package model
 import (
 	"github.com/go-openapi/spec"
 	"github.com/google/uuid"
-	logger "github.com/wso2/micro-gw/loggers"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 // SetInfoSwagger populates the MgwSwagger object with the properties within the openAPI v2
@@ -141,7 +141,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			}
 		}
 	}
-	return resources
+	return SortResources(resources)
 }
 
 // This methods adds x-wso2-disable-security vendor extension

@@ -1,0 +1,51 @@
+# --------------------------------------------------------------------
+# Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# -----------------------------------------------------------------------
+
+# Config map containing the log_config.toml file for adapter
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logconfig-toml
+data:
+  log_config.toml: |
+    # The logging configuration file for control plane
+    ######### root Level ########
+    logfile = "logs/adapter.log"
+    logLevel = "INFO"
+
+    [rotation]
+    MaxSize = 10    #meabytes
+    MaxBackups = 3
+    MaxAge =  2   #days
+    Compress = true
+
+    ######### package Level ############
+    # LogLevels = "DEBG", "FATL", "ERRO", "WARN", "INFO", "PANC"
+
+    [[pkg]]
+    name = "github.com/wso2/adapter/internal/adapter"
+    logLevel = "INFO"
+
+    [[pkg]]
+    name = "github.com/wso2/adapter/internal/oasparser"
+    logLevel = "INFO"
+
+
+    [accessLogs]
+    enable = false
+    logfile = "/tmp/envoy.access.log"
+    format = "[%START_TIME%] '%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%' %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% '%REQ(X-FORWARDED-FOR)%' '%REQ(USER-AGENT)%' '%REQ(X-REQUEST-ID)%' '%REQ(:AUTHORITY)%' '%UPSTREAM_HOST%'\n"

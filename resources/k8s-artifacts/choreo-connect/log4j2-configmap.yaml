@@ -1,0 +1,102 @@
+# --------------------------------------------------------------------
+# Copyright (c) 2020, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# -----------------------------------------------------------------------
+
+# Config map containing the log4j2.properties file for adapter
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: log4j2
+data:
+  log4j2.properties: |
+    monitorInterval=20
+
+    appenders = ENFORCER_CONSOLE, ENFORCER_LOGFILE, ENFORCER_ACCESS_LOG
+
+    appender.ENFORCER_CONSOLE.type = Console
+    appender.ENFORCER_CONSOLE.name = ENFORCER_CONSOLE
+    appender.ENFORCER_CONSOLE.layout.type = PatternLayout
+    appender.ENFORCER_CONSOLE.layout.pattern = [%d{DEFAULT}] %5p - %c{1} %m%n
+    appender.ENFORCER_CONSOLE.filter.threshold.type = ThresholdFilter
+    appender.ENFORCER_CONSOLE.filter.threshold.level = DEBUG
+
+    appender.ENFORCER_LOGFILE.type = RollingFile
+    appender.ENFORCER_LOGFILE.name = ENFORCER_LOGFILE
+    appender.ENFORCER_LOGFILE.fileName = logs/enforcer.log
+    appender.ENFORCER_LOGFILE.filePattern = /logs/enforcer-%d{MM-dd-yyyy}.log
+    appender.ENFORCER_LOGFILE.layout.type = PatternLayout
+    appender.ENFORCER_LOGFILE.layout.pattern = [%d] %5p {%c} - %m%ex%n
+    appender.ENFORCER_LOGFILE.policies.type = Policies
+    appender.ENFORCER_LOGFILE.policies.time.type = TimeBasedTriggeringPolicy
+    appender.ENFORCER_LOGFILE.policies.time.interval = 1
+    appender.ENFORCER_LOGFILE.policies.time.modulate = true
+    appender.ENFORCER_LOGFILE.policies.size.type = SizeBasedTriggeringPolicy
+    appender.ENFORCER_LOGFILE.policies.size.size=10MB
+    appender.ENFORCER_LOGFILE.strategy.type = DefaultRolloverStrategy
+    appender.ENFORCER_LOGFILE.strategy.max = 20
+    appender.ENFORCER_LOGFILE.filter.threshold.type = ThresholdFilter
+    appender.ENFORCER_LOGFILE.filter.threshold.level = DEBUG
+
+    appender.ENFORCER_ACCESS_LOG.type = RollingFile
+    appender.ENFORCER_ACCESS_LOG.name = ENFORCER_ACCESS_LOG
+    appender.ENFORCER_ACCESS_LOG.fileName = logs/enforcer_access.log
+    appender.ENFORCER_ACCESS_LOG.filePattern = /logs/enforcer_access-%d{MM-dd-yyyy}.log
+    appender.ENFORCER_ACCESS_LOG.layout.type = PatternLayout
+    appender.ENFORCER_ACCESS_LOG.layout.pattern = [%d] - %m%ex%n
+    appender.ENFORCER_ACCESS_LOG.policies.type = Policies
+    appender.ENFORCER_ACCESS_LOG.policies.time.type = TimeBasedTriggeringPolicy
+    appender.ENFORCER_ACCESS_LOG.policies.time.interval = 1
+    appender.ENFORCER_ACCESS_LOG.policies.time.modulate = true
+    appender.ENFORCER_ACCESS_LOG.policies.size.type = SizeBasedTriggeringPolicy
+    appender.ENFORCER_ACCESS_LOG.policies.size.size=10MB
+    appender.ENFORCER_ACCESS_LOG.strategy.type = DefaultRolloverStrategy
+    appender.ENFORCER_ACCESS_LOG.strategy.max = 20
+    appender.ENFORCER_ACCESS_LOG.filter.threshold.type = ThresholdFilter
+    appender.ENFORCER_ACCESS_LOG.filter.threshold.level = DEBUG
+
+    loggers = enforcer, io-swagger-v3, enforcer-interceptors, carbon-apimgt
+
+    # Log to access log file
+    logger.enforcer-interceptors.name = org.wso2.choreo.connect.enforcer.grpc.interceptors
+    # Change the log level into DEBUG to view the access logs.
+    logger.enforcer-interceptors.level = INFO
+    logger.enforcer-interceptors.additivity = false
+    logger.enforcer-interceptors.appenderRef.rolling.ref = ENFORCER_ACCESS_LOG
+
+    # Log to console and rolling file
+    logger.enforcer.name = org.wso2.choreo.connect.enforcer
+    logger.enforcer.level = INFO
+    logger.enforcer.additivity = false
+    logger.enforcer.appenderRef.rolling.ref = ENFORCER_LOGFILE
+    logger.enforcer.appenderRef.console.ref = ENFORCER_CONSOLE
+
+    logger.carbon-apimgt.name = org.wso2.carbon.apimgt
+    logger.carbon-apimgt.level = INFO
+    logger.carbon-apimgt.additivity = false
+    logger.carbon-apimgt.appenderRef.ENFORCER_LOGFILE.ref = ENFORCER_LOGFILE
+    logger.carbon-apimgt.appenderRef.console.ref = ENFORCER_CONSOLE
+
+    logger.io-swagger-v3.name = io.swagger.v3.parser
+    logger.io-swagger-v3.level = ERROR
+    logger.io-swagger-v3.additivity = false
+    logger.io-swagger-v3.appenderRef.rolling.ref = ENFORCER_LOGFILE
+    logger.io-swagger-v3.appenderRef.console.ref = ENFORCER_CONSOLE
+
+    rootLogger.level = ERROR
+    rootLogger.appenderRef.ENFORCER_CONSOLE.ref = ENFORCER_CONSOLE
+    rootLogger.appenderRef.ENFORCER_LOGFILE.ref = ENFORCER_LOGFILE
+    rootLogger.appenderRef.ENFORCER_ACCESS_LOG.ref = ENFORCER_ACCESS_LOG
+

@@ -21,6 +21,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -88,7 +89,6 @@ func (m *Error) validateCode(formats strfmt.Registry) error {
 }
 
 func (m *Error) validateError(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Error) { // not required
 		return nil
 	}
@@ -116,6 +116,38 @@ func (m *Error) validateMessage(formats strfmt.Registry) error {
 
 	if err := validate.Required("message", "body", m.Message); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validate this error based on the context it is used
+func (m *Error) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateError(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *Error) contextValidateError(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Error); i++ {
+
+		if m.Error[i] != nil {
+			if err := m.Error[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("error" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

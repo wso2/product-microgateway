@@ -7,7 +7,7 @@ import "wso2/discovery/api/Resource.proto";
 import "wso2/discovery/api/endpoint_security.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/api;api";
-option java_package = "org.wso2.gateway.discovery.api";
+option java_package = "org.wso2.choreo.connect.discovery.api";
 option java_outer_classname = "ApiProto";
 option java_multiple_files = true;
 
@@ -18,7 +18,7 @@ message Api {
 	string id = 1;
 	string title = 2;
 	string version = 3;
-	string swaggerVersion = 4;
+	string apiType = 4;
 	string description = 5;
 	repeated Endpoint productionUrls = 6;
 	repeated Endpoint sandboxUrls = 7;
@@ -30,4 +30,5 @@ message Api {
 	EndpointSecurity endpointSecurity = 13;
 	string authorizationHeader = 14;
 	bool disableSecurity = 15;
+	string vhost = 16;
 }

@@ -25,9 +25,9 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-openapi/spec"
-	"github.com/wso2/micro-gw/internal/oasparser/model"
-	"github.com/wso2/micro-gw/internal/oasparser/utills"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/wso2/adapter/internal/oasparser/model"
+	"github.com/wso2/adapter/internal/oasparser/utills"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 // GetMgwSwagger converts the openAPI v3 and v2 content

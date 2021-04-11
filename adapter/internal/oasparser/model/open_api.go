@@ -25,7 +25,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/uuid"
-	logger "github.com/wso2/micro-gw/loggers"
+	logger "github.com/wso2/adapter/loggers"
 )
 
 // SetInfoOpenAPI populates the MgwSwagger object with the properties within the openAPI v3 definition.
@@ -105,7 +105,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) []Resource {
 
 		}
 	}
-	return resources
+	return SortResources(resources)
 }
 
 func getOperationLevelDetails(operation *openapi3.Operation, method string) Operation {

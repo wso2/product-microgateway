@@ -1,6 +1,6 @@
       - "5006:5006"
   mockBackend:
-    image: wso2/mg-mock-backend:latest
+    image: wso2/choreo-connect-mock-backend:latest
     ports:
       - "2383:2383"
     links:

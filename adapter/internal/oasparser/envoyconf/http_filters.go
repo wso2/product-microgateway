@@ -34,9 +34,9 @@ import (
 	rls "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/any"
+	logger "github.com/wso2/adapter/loggers"
 	mgw_websocket "github.com/wso2/micro-gw/internal/oasparser/envoyconf/api"
-	logger "github.com/wso2/micro-gw/loggers"
+	"github.com/golang/protobuf/ptypes/any"
 )
 
 // getHTTPFilters generates httpFilter configuration
