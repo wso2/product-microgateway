@@ -95,7 +95,7 @@ public class ApplicationPolicyDiscoveryClient implements Runnable {
                     try {
                         channel.awaitTermination(100, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException e) {
-                        logger.error("API list discovery channel shutdown wait was interrupted", e);
+                        logger.error("Application policy discovery channel shutdown wait was interrupted", e);
                     }
                 } while (!channel.isShutdown());
             }

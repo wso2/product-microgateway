@@ -95,7 +95,7 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable {
                     try {
                         channel.awaitTermination(100, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException e) {
-                        logger.error("API list discovery channel shutdown wait was interrupted", e);
+                        logger.error("Subscription policy discovery channel shutdown wait was interrupted", e);
                     }
                 } while (!channel.isShutdown());
             }

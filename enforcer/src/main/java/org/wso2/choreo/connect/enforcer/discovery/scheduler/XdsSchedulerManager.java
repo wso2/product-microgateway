@@ -23,10 +23,12 @@ import org.wso2.choreo.connect.enforcer.discovery.ApiDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApiListDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationKeyMappingDiscoveryClient;
+import org.wso2.choreo.connect.enforcer.discovery.ApplicationPolicyDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.KeyManagerDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.RevokedTokenDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.SubscriptionDiscoveryClient;
+import org.wso2.choreo.connect.enforcer.discovery.SubscriptionPolicyDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ThrottleDataDiscoveryClient;
 
 import java.util.concurrent.Executors;
@@ -194,7 +196,7 @@ public class XdsSchedulerManager {
     public synchronized void startApplicationPolicyDiscoveryScheduling() {
         if (applicationPolicyDiscoveryScheduledFuture == null || applicationPolicyDiscoveryScheduledFuture.isDone()) {
             applicationPolicyDiscoveryScheduledFuture = discoveryClientScheduler
-                    .scheduleWithFixedDelay(ConfigDiscoveryClient.getInstance(), 1, retryPeriod,
+                    .scheduleWithFixedDelay(ApplicationPolicyDiscoveryClient.getInstance(), 1, retryPeriod,
                             TimeUnit.SECONDS);
         }
     }
@@ -208,7 +210,8 @@ public class XdsSchedulerManager {
     public synchronized void startSubscriptionPolicyDiscoveryScheduling() {
         if (subscriptionPolicyDiscoveryScheduledFuture == null || subscriptionPolicyDiscoveryScheduledFuture.isDone()) {
             subscriptionPolicyDiscoveryScheduledFuture = discoveryClientScheduler
-                    .scheduleWithFixedDelay(ConfigDiscoveryClient.getInstance(), 1, retryPeriod, TimeUnit.SECONDS);
+                    .scheduleWithFixedDelay(SubscriptionPolicyDiscoveryClient.getInstance(), 1, retryPeriod,
+                            TimeUnit.SECONDS);
         }
     }
 
