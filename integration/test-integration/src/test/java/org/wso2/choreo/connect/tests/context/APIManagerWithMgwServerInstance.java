@@ -92,5 +92,10 @@ public class APIManagerWithMgwServerInstance extends MgwServerImpl {
                 .waitingFor(
                 TestConstant.APIM_SERVICE_NAME_IN_DOCKER_COMPOSE,
                 Wait.forLogMessage("\\/apim:9443/carbon\\/", 1));
+
+        if (Boolean.parseBoolean(System.getenv(MgwServerInstance.ENFORCER_DEBUG_ENV))) {
+            environment.withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5006");
+        }
+
     }
 }

@@ -34,7 +34,7 @@ import java.io.IOException;
  */
 public class MgwServerInstance extends MgwServerImpl {
 
-    private static final String ENFORCER_DEBUG_ENV = "ENFORCER_DEBUG";
+    static final String ENFORCER_DEBUG_ENV = "ENFORCER_DEBUG";
 
 
     /**
