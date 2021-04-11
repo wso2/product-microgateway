@@ -44,7 +44,7 @@
   keyPath = "/home/wso2/security/keystore/mg.key"
 
 [router.cors]
-enabled = false
+enabled = true
 allowOrigins = ["*"]
 allowMethods = ["GET","PUT","POST","DELETE","PATCH","OPTIONS"]
 allowHeaders = ["authorization","Access-Control-Allow-Origin","Content-Type","SOAPAction","apikey", "testKey", "Internal-Key"]
@@ -114,7 +114,7 @@ allowCredentials = false
 # Throttling configurations
 [enforcer.throttling]
   # Connect with the central traffic manager
-  enableGlobalEventPublishing = false
+  enableGlobalEventPublishing = true
   # Enable global advanced throttling based on request header conditions
   enableHeaderConditions = false
   # Enable global advanced throttling based on request query parameter conditions

@@ -23,10 +23,12 @@ import org.wso2.choreo.connect.enforcer.discovery.ApiDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApiListDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationKeyMappingDiscoveryClient;
+import org.wso2.choreo.connect.enforcer.discovery.ApplicationPolicyDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.KeyManagerDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.RevokedTokenDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.SubscriptionDiscoveryClient;
+import org.wso2.choreo.connect.enforcer.discovery.SubscriptionPolicyDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ThrottleDataDiscoveryClient;
 
 import java.util.concurrent.Executors;
@@ -51,6 +53,8 @@ public class XdsSchedulerManager {
     private ScheduledFuture<?> subscriptionDiscoveryScheduledFuture;
     private ScheduledFuture<?> throttleDataDiscoveryScheduledFuture;
     private ScheduledFuture<?> configDiscoveryScheduledFuture;
+    private ScheduledFuture<?> applicationPolicyDiscoveryScheduledFuture;
+    private ScheduledFuture<?> subscriptionPolicyDiscoveryScheduledFuture;
 
     public static XdsSchedulerManager getInstance() {
         if (instance == null) {
@@ -186,6 +190,35 @@ public class XdsSchedulerManager {
     public synchronized void stopConfigDiscoveryScheduling() {
         if (configDiscoveryScheduledFuture != null && !configDiscoveryScheduledFuture.isDone()) {
             configDiscoveryScheduledFuture.cancel(false);
+        }
+    }
+
+    public synchronized void startApplicationPolicyDiscoveryScheduling() {
+        if (applicationPolicyDiscoveryScheduledFuture == null || applicationPolicyDiscoveryScheduledFuture.isDone()) {
+            applicationPolicyDiscoveryScheduledFuture = discoveryClientScheduler
+                    .scheduleWithFixedDelay(ApplicationPolicyDiscoveryClient.getInstance(), 1, retryPeriod,
+                            TimeUnit.SECONDS);
+        }
+    }
+
+    public synchronized void stopApplicationPolicyDiscoveryScheduling() {
+        if (applicationPolicyDiscoveryScheduledFuture != null && !applicationPolicyDiscoveryScheduledFuture.isDone()) {
+            applicationPolicyDiscoveryScheduledFuture.cancel(false);
+        }
+    }
+
+    public synchronized void startSubscriptionPolicyDiscoveryScheduling() {
+        if (subscriptionPolicyDiscoveryScheduledFuture == null || subscriptionPolicyDiscoveryScheduledFuture.isDone()) {
+            subscriptionPolicyDiscoveryScheduledFuture = discoveryClientScheduler
+                    .scheduleWithFixedDelay(SubscriptionPolicyDiscoveryClient.getInstance(), 1, retryPeriod,
+                            TimeUnit.SECONDS);
+        }
+    }
+
+    public synchronized void stopSubscriptionPolicyDiscoveryScheduling() {
+        if (subscriptionPolicyDiscoveryScheduledFuture != null && !subscriptionPolicyDiscoveryScheduledFuture
+                .isDone()) {
+            subscriptionPolicyDiscoveryScheduledFuture.cancel(false);
         }
     }
 }

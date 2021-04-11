@@ -32,12 +32,12 @@ import (
 
 // GetProductionRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
 // when the openAPI Json is provided. For websockets apiJsn created from api.yaml file is considerd.
-func GetProductionRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCerts []byte) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
+func GetProductionRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCerts []byte, vHost string) ([]*routev3.Route, []*clusterv3.Cluster, []*corev3.Address) {
 	var routes []*routev3.Route
 	var clusters []*clusterv3.Cluster
 	var endpoints []*corev3.Address
 
-	routes, clusters, endpoints = envoy.CreateRoutesWithClusters(mgwSwagger, upstreamCerts)
+	routes, clusters, endpoints = envoy.CreateRoutesWithClusters(mgwSwagger, upstreamCerts, vHost)
 	//TODO: (VirajSalaka) Decide if this needs to be added to the MgwSwagger
 
 	return routes, clusters, endpoints
@@ -49,11 +49,10 @@ func GetProductionRoutesClustersEndpoints(mgwSwagger mgw.MgwSwagger, upstreamCer
 // The provided set of envoy routes will be assigned under the virtual host
 //
 // The RouteConfiguration is named as "default"
-func GetProductionListenerAndRouteConfig(routes []*routev3.Route) ([]*listenerv3.Listener, *routev3.RouteConfiguration) {
+func GetProductionListenerAndRouteConfig(vhostToRouteArrayMap map[string][]*routev3.Route) ([]*listenerv3.Listener, *routev3.RouteConfiguration) {
 	listeners := envoy.CreateListenersWithRds()
-	vHostName := "default"
-	vHostP := envoy.CreateVirtualHost(vHostName, routes)
-	routeConfig := envoy.CreateRoutesConfigForRds(vHostP)
+	vHosts := envoy.CreateVirtualHosts(vhostToRouteArrayMap)
+	routeConfig := envoy.CreateRoutesConfigForRds(vHosts)
 
 	return listeners, routeConfig
 }
@@ -83,16 +82,15 @@ func GetCacheResources(endpoints []*corev3.Address, clusters []*clusterv3.Cluste
 	return listenerRes, clusterRes, routeConfigRes, endpointRes
 }
 
-// UpdateRoutesConfig updates the existing routes configuration with the provided array of routes.
+// UpdateRoutesConfig updates the existing routes configuration with the provided map of vhost to array of routes.
 // All the already existing routes (within the routeConfiguration) will be removed.
-func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, routes []*routev3.Route) {
-	vHostName := "default"
-	vHost := envoy.CreateVirtualHost(vHostName, routes)
-	routeConfig.VirtualHosts = []*routev3.VirtualHost{vHost}
+func UpdateRoutesConfig(routeConfig *routev3.RouteConfiguration, vhostToRouteArrayMap map[string][]*routev3.Route) {
+	routeConfig.VirtualHosts = envoy.CreateVirtualHosts(vhostToRouteArrayMap)
 }
 
-// GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition.
-func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpointSecurity config.EndpointSecurity) *api.Api {
+// GetEnforcerAPI retrieves the ApiDS object model for a given swagger definition
+// along with the vhost to deploy the API.
+func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpointSecurity config.EndpointSecurity, vhost string) *api.Api {
 	prodUrls := []*api.Endpoint{}
 	sandUrls := []*api.Endpoint{}
 	resources := []*api.Resource{}
@@ -164,6 +162,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 		AuthorizationHeader: mgwSwagger.GetXWSO2AuthHeader(),
 		DisableSecurity:     mgwSwagger.GetDisableSecurity(),
 		OrganizationId:      mgwSwagger.OrganizationID,
+		Vhost:               vhost,
 	}
 }
 

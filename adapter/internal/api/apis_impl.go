@@ -43,12 +43,11 @@ const (
 	openAPIDir                 string = "Definitions"
 	openAPIFilename            string = "swagger."
 	apiYAMLFile                string = "api.yaml"
+	deploymentsYAMLFile        string = "deployment_environments.yaml"
 	apiJSONFile                string = "api.json"
 	endpointCertDir            string = "Endpoint-certificates"
 	crtExtension               string = ".crt"
 	pemExtension               string = ".pem"
-	defaultEnv                 string = "Production and Sandbox" //Todo: (SuKSW) update to `default` once APIM side changes.
-	defaultVHost               string = "default"
 	apiTypeFilterKey           string = "type"
 	apiTypeYamlKey             string = "type"
 	lifeCycleStatus            string = "lifeCycleStatus"
@@ -64,6 +63,7 @@ const (
 // ProjectAPI contains the extracted from an API project zip
 type ProjectAPI struct {
 	APIJsn                     []byte
+	Deployments                []Deployment
 	SwaggerJsn                 []byte // TODO: (SuKSW) change to OpenAPIJsn
 	UpstreamCerts              []byte
 	APIType                    string
@@ -93,6 +93,21 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 	// TODO: (VirajSalaka) this won't support for distributed openAPI definition
 	for _, file := range zipReader.File {
 		loggers.LoggerAPI.Debugf("File reading now: %v", file.Name)
+		if strings.Contains(file.Name, deploymentsYAMLFile) {
+			loggers.LoggerAPI.Debug("Setting deployments of API")
+			unzippedFileBytes, err := readZipFile(file)
+			if err != nil {
+				loggers.LoggerAPI.Errorf("Error occurred while reading the deployment environments: %v %v",
+					file.Name, err.Error())
+				return apiProject, err
+			}
+			deployments, err := parseDeployments(unzippedFileBytes)
+			if err != nil {
+				loggers.LoggerAPI.Errorf("Error occurred while parsing the deployment environments: %v %v",
+					file.Name, err.Error())
+			}
+			apiProject.Deployments = deployments
+		}
 		if strings.Contains(file.Name, openAPIDir+string(os.PathSeparator)+openAPIFilename) {
 			loggers.LoggerAPI.Debugf("openAPI file : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
@@ -206,32 +221,64 @@ func verifyMandatoryFields(apiJSON config.APIJsonData) error {
 	return nil
 }
 
-// ApplyAPIProject accepts an apictl project (as a byte array) and updates the xds servers based upon the
-// content.
-func ApplyAPIProject(payload []byte, environments []string) error {
+// ApplyAPIProjectFromAPIM accepts an apictl project (as a byte array), list of vhosts with respective environments
+// and updates the xds servers based upon the content.
+func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string) error {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
 		return err
 	}
-	name, version, err := getAPINameAndVersion(apiProject.APIJsn)
+	apiInfo, err := parseAPIInfo(apiProject.APIJsn)
 	if err != nil {
 		return err
 	}
-	updateAPI(name, version, apiProject, environments)
+
+	// vhostsToRemove contains vhosts and environments to undeploy
+	vhostsToRemove := make(map[string][]string)
+
+	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
+	for vhost, environments := range vhostToEnvsMap {
+		// search for vhosts in the given environments
+		for _, env := range environments {
+			if existingVhost, exists := xds.GetVhostOfAPI(apiInfo.ID, env); exists {
+				loggers.LoggerAPI.Debugf("API %v:%v with UUID \"%v\" already deployed to vhost: %v",
+					apiInfo.Name, apiInfo.Version, apiInfo.ID, existingVhost)
+				if vhost != existingVhost {
+					loggers.LoggerAPI.Infof("Un-deploying API %v:%v with UUID \"%v\" which is already deployed to vhost: %v",
+						apiInfo.Name, apiInfo.Version, apiInfo.ID, existingVhost)
+					vhostsToRemove[existingVhost] = append(vhostsToRemove[existingVhost], env)
+				}
+			}
+		}
+		// first update the API for vhost
+		updateAPI(vhost, apiInfo, apiProject, environments)
+	}
+
+	// undeploy APIs with other vhosts in the same gateway environment
+	for vhost, environments := range vhostsToRemove {
+		if vhost == "" {
+			// ignore if vhost is empty, since it deletes all vhosts of API
+			continue
+		}
+		if err := xds.DeleteAPIs(vhost, apiInfo.Name, apiInfo.Version, environments); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-// ApplyAPIProjectWithOverwrite is called by the rest implementation to differentiate
+// ApplyAPIProjectInStandaloneMode is called by the rest implementation to differentiate
 // between create and update using the override param
-func ApplyAPIProjectWithOverwrite(payload []byte, environments []string, override *bool) error {
+func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
 		return err
 	}
-	name, version, err := getAPINameAndVersion(apiProject.APIJsn)
+	apiInfo, err := parseAPIInfo(apiProject.APIJsn)
 	if err != nil {
 		return err
 	}
+	// TODO (renuka) when len of apiProject.deployments is 0, return err "nothing deployed" <- check
 	var overrideValue bool
 	if override == nil {
 		overrideValue = false
@@ -239,23 +286,45 @@ func ApplyAPIProjectWithOverwrite(payload []byte, environments []string, overrid
 		overrideValue = *override
 	}
 	//TODO: force overwride
-	exists := xds.IsAPIExist(defaultVHost, name, version) // TODO: (SuKSW) update once vhost feature added
-	if !overrideValue && exists {
-		loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.", name, version)
-		return errors.New(mgw.AlreadyExists)
+	if !overrideValue {
+		// if the API already exists in the one of vhost, break deployment of the API
+		exists := false
+		for _, deployment := range apiProject.Deployments {
+			if xds.IsAPIExist(deployment.DeploymentVhost, apiInfo.Name, apiInfo.Version) {
+				exists = true
+				break
+			}
+		}
+
+		if exists {
+			loggers.LoggerAPI.Infof("Error creating new API. API %v:%v already exists.",
+				apiInfo.Name, apiInfo.Version)
+			return errors.New(mgw.AlreadyExists)
+		}
 	}
-	updateAPI(name, version, apiProject, environments)
+
+	vhostToEnvsMap := make(map[string][]string)
+	for _, environment := range apiProject.Deployments {
+		vhostToEnvsMap[environment.DeploymentVhost] =
+			append(vhostToEnvsMap[environment.DeploymentVhost], environment.DeploymentEnvironment)
+	}
+
+	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
+	for vhost, environments := range vhostToEnvsMap {
+		updateAPI(vhost, apiInfo, apiProject, environments)
+	}
 	return nil
 }
 
-func updateAPI(name, version string, apiProject ProjectAPI, environments []string) {
+func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) {
 	if len(environments) == 0 {
-		environments = append(environments, defaultEnv)
+		environments = append(environments, config.DefaultGatewayName)
 	}
 	var apiContent config.APIContent
-	apiContent.VHost = defaultVHost
-	apiContent.Name = name
-	apiContent.Version = version
+	apiContent.UUID = apiInfo.ID
+	apiContent.VHost = vhost
+	apiContent.Name = apiInfo.Name
+	apiContent.Version = apiInfo.Version
 	apiContent.APIType = apiProject.APIType
 	apiContent.LifeCycleStatus = apiProject.APILifeCycleStatus
 	apiContent.UpstreamCerts = apiProject.UpstreamCerts
@@ -364,15 +433,6 @@ func retrieveEndPointSecurityInfo(value string, endPointSecurity config.EpSecuri
 	return epSecurityInfo, err
 }
 
-// DeleteAPI calls the DeleteAPI method in xds_server.go
-func DeleteAPI(vhost *string, apiName string, version string) error {
-	if vhost == nil || *vhost == "" {
-		vhostValue := defaultVHost
-		vhost = &vhostValue
-	}
-	return xds.DeleteAPI(*vhost, apiName, version)
-}
-
 // ListApis calls the ListApis method in xds_server.go
 func ListApis(query *string, limit *int64) *apiModel.APIMeta {
 	var apiType string
@@ -393,17 +453,4 @@ func readZipFile(zf *zip.File) ([]byte, error) {
 	}
 	defer f.Close()
 	return ioutil.ReadAll(f)
-}
-
-func getAPINameAndVersion(apiJsn []byte) (name string, version string, err error) {
-	var apiDef map[string]interface{}
-	err = json.Unmarshal(apiJsn, &apiDef)
-	if err != nil {
-		loggers.LoggerAPI.Errorf("Error occured while parsing api.yaml %v", err.Error())
-		return "", "", err
-	}
-	data := apiDef["data"].(map[string]interface{})
-	name = data["name"].(string)
-	version = data["version"].(string)
-	return name, version, nil
 }

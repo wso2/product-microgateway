@@ -33,6 +33,7 @@ private static final long serialVersionUID = 0L;
     apiLifeCycleState_ = "";
     securityScheme_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     authorizationHeader_ = "";
+    vhost_ = "";
     organizationId_ = "";
   }
 
@@ -176,6 +177,12 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 130: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            vhost_ = s;
+            break;
+          }
+          case 138: {
             java.lang.String s = input.readStringRequireUtf8();
 
             organizationId_ = s;
@@ -759,10 +766,48 @@ private static final long serialVersionUID = 0L;
     return disableSecurity_;
   }
 
-  public static final int ORGANIZATIONID_FIELD_NUMBER = 16;
+  public static final int VHOST_FIELD_NUMBER = 16;
+  private volatile java.lang.Object vhost_;
+  /**
+   * <code>string vhost = 16;</code>
+   * @return The vhost.
+   */
+  @java.lang.Override
+  public java.lang.String getVhost() {
+    java.lang.Object ref = vhost_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      vhost_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string vhost = 16;</code>
+   * @return The bytes for vhost.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getVhostBytes() {
+    java.lang.Object ref = vhost_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      vhost_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int ORGANIZATIONID_FIELD_NUMBER = 17;
   private volatile java.lang.Object organizationId_;
   /**
-   * <code>string organizationId = 16;</code>
+   * <code>string organizationId = 17;</code>
    * @return The organizationId.
    */
   @java.lang.Override
@@ -779,7 +824,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string organizationId = 16;</code>
+   * <code>string organizationId = 17;</code>
    * @return The bytes for organizationId.
    */
   @java.lang.Override
@@ -856,8 +901,11 @@ private static final long serialVersionUID = 0L;
     if (disableSecurity_ != false) {
       output.writeBool(15, disableSecurity_);
     }
+    if (!getVhostBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 16, vhost_);
+    }
     if (!getOrganizationIdBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 16, organizationId_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 17, organizationId_);
     }
     unknownFields.writeTo(output);
   }
@@ -923,8 +971,11 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(15, disableSecurity_);
     }
+    if (!getVhostBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(16, vhost_);
+    }
     if (!getOrganizationIdBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(16, organizationId_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(17, organizationId_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -974,6 +1025,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getAuthorizationHeader())) return false;
     if (getDisableSecurity()
         != other.getDisableSecurity()) return false;
+    if (!getVhost()
+        .equals(other.getVhost())) return false;
     if (!getOrganizationId()
         .equals(other.getOrganizationId())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
@@ -1028,6 +1081,8 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + DISABLESECURITY_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getDisableSecurity());
+    hash = (37 * hash) + VHOST_FIELD_NUMBER;
+    hash = (53 * hash) + getVhost().hashCode();
     hash = (37 * hash) + ORGANIZATIONID_FIELD_NUMBER;
     hash = (53 * hash) + getOrganizationId().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
@@ -1216,6 +1271,8 @@ private static final long serialVersionUID = 0L;
 
       disableSecurity_ = false;
 
+      vhost_ = "";
+
       organizationId_ = "";
 
       return this;
@@ -1292,6 +1349,7 @@ private static final long serialVersionUID = 0L;
       }
       result.authorizationHeader_ = authorizationHeader_;
       result.disableSecurity_ = disableSecurity_;
+      result.vhost_ = vhost_;
       result.organizationId_ = organizationId_;
       onBuilt();
       return result;
@@ -1470,6 +1528,10 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getDisableSecurity() != false) {
         setDisableSecurity(other.getDisableSecurity());
+      }
+      if (!other.getVhost().isEmpty()) {
+        vhost_ = other.vhost_;
+        onChanged();
       }
       if (!other.getOrganizationId().isEmpty()) {
         organizationId_ = other.organizationId_;
@@ -3169,9 +3231,85 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
+    private java.lang.Object vhost_ = "";
+    /**
+     * <code>string vhost = 16;</code>
+     * @return The vhost.
+     */
+    public java.lang.String getVhost() {
+      java.lang.Object ref = vhost_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        vhost_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string vhost = 16;</code>
+     * @return The bytes for vhost.
+     */
+    public com.google.protobuf.ByteString
+        getVhostBytes() {
+      java.lang.Object ref = vhost_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        vhost_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string vhost = 16;</code>
+     * @param value The vhost to set.
+     * @return This builder for chaining.
+     */
+    public Builder setVhost(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      vhost_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string vhost = 16;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearVhost() {
+      
+      vhost_ = getDefaultInstance().getVhost();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string vhost = 16;</code>
+     * @param value The bytes for vhost to set.
+     * @return This builder for chaining.
+     */
+    public Builder setVhostBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      vhost_ = value;
+      onChanged();
+      return this;
+    }
+
     private java.lang.Object organizationId_ = "";
     /**
-     * <code>string organizationId = 16;</code>
+     * <code>string organizationId = 17;</code>
      * @return The organizationId.
      */
     public java.lang.String getOrganizationId() {
@@ -3187,7 +3325,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string organizationId = 16;</code>
+     * <code>string organizationId = 17;</code>
      * @return The bytes for organizationId.
      */
     public com.google.protobuf.ByteString
@@ -3204,7 +3342,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string organizationId = 16;</code>
+     * <code>string organizationId = 17;</code>
      * @param value The organizationId to set.
      * @return This builder for chaining.
      */
@@ -3219,7 +3357,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string organizationId = 16;</code>
+     * <code>string organizationId = 17;</code>
      * @return This builder for chaining.
      */
     public Builder clearOrganizationId() {
@@ -3229,7 +3367,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string organizationId = 16;</code>
+     * <code>string organizationId = 17;</code>
      * @param value The bytes for organizationId to set.
      * @return This builder for chaining.
      */

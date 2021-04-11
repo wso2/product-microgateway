@@ -27,11 +27,11 @@ package synchronizer
 // along with the apiId and the gateway label that the call
 // was made with.
 type SyncAPIResponse struct {
-	Resp         []byte
-	Err          error
-	ErrorCode    int
-	APIID        string
-	GatewayLabel string
+	Resp          []byte
+	Err           error
+	ErrorCode     int
+	APIUUID       string
+	GatewayLabels []string
 }
 
 // RevokedToken contains the JWT and the expirty time of the
@@ -61,4 +61,30 @@ type IPCondition struct {
 	Invert       bool
 	TenantDomain string
 	State        string
+}
+
+// DeploymentDescriptor represents deployment descriptor file contains in Artifact
+// received from control plane
+type DeploymentDescriptor struct {
+	Type    string         `json:"type"`
+	Version string         `json:"version"`
+	Data    DeploymentData `json:"data"`
+}
+
+// DeploymentData contains list of APIDeployment to be deployed to the gateway
+type DeploymentData struct {
+	Deployments []APIDeployment `json:"deployments"`
+}
+
+// APIDeployment represents an API project that contains zip file name and
+// gateway environments (labels) that the project to be deployed
+type APIDeployment struct {
+	APIFile      string         `json:"apiFile"`
+	Environments []GatewayLabel `json:"environments"`
+}
+
+// GatewayLabel represents gateway environment name and VHost of an API project
+type GatewayLabel struct {
+	Name  string `json:"name"`
+	Vhost string `json:"vhost"`
 }

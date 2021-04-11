@@ -35,9 +35,9 @@ public class SubscriptionDataStoreUtil {
         return appId + DELEM_PERIOD + apiId;
     }
 
-    public static String getPolicyCacheKey(String tierName, int tenantId) {
+    public static String getPolicyCacheKey(String tierName) {
 
-        return tierName + DELEM_PERIOD + tenantId;
+        return tierName;
     }
 
 }

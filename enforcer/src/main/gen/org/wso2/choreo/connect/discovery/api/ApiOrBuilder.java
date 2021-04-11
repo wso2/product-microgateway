@@ -234,12 +234,24 @@ public interface ApiOrBuilder extends
   boolean getDisableSecurity();
 
   /**
-   * <code>string organizationId = 16;</code>
+   * <code>string vhost = 16;</code>
+   * @return The vhost.
+   */
+  java.lang.String getVhost();
+  /**
+   * <code>string vhost = 16;</code>
+   * @return The bytes for vhost.
+   */
+  com.google.protobuf.ByteString
+      getVhostBytes();
+
+  /**
+   * <code>string organizationId = 17;</code>
    * @return The organizationId.
    */
   java.lang.String getOrganizationId();
   /**
-   * <code>string organizationId = 16;</code>
+   * <code>string organizationId = 17;</code>
    * @return The bytes for organizationId.
    */
   com.google.protobuf.ByteString

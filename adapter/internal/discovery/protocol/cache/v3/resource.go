@@ -60,7 +60,7 @@ func GetResponseType(typeURL string) types.ResponseType {
 func GetResourceName(res envoy_types.Resource) string {
 	switch v := res.(type) {
 	case *api.Api:
-		return fmt.Sprint(v.BasePath, v.Version)
+		return fmt.Sprint(v.Vhost, v.BasePath, v.Version)
 	case *enforcer.Config:
 		return "Config"
 	case *subscription.SubscriptionList:

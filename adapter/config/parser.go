@@ -34,14 +34,22 @@ import (
 )
 
 var (
-	onceConfigRead    sync.Once
-	onceLogConfigRead sync.Once
-	onceGetMgwHome    sync.Once
-	adapterConfig     *Config
-	adapterLogConfig  *LogConfig
-	mgwHome           string
-	e                 error
+	onceConfigRead      sync.Once
+	onceGetDefaultVhost sync.Once
+	onceLogConfigRead   sync.Once
+	onceGetMgwHome      sync.Once
+	adapterConfig       *Config
+	defaultVhost        map[string]string
+	adapterLogConfig    *LogConfig
+	mgwHome             string
+	e                   error
 )
+
+// DefaultGatewayName represents the name of the default gateway
+const DefaultGatewayName = "Production and Sandbox" // TODO: should be changed to "Default"
+// DefaultGatewayVHost represents the default vhost of default gateway environment if it is not configured
+const DefaultGatewayVHost = "localhost" // TODO (renuka): check this with pubuduG and raji: do we want this?
+// for /testtoken and /health check, if user not configured default env, we have no vhost
 
 const (
 	// The environtmental variable which represents the path of the distribution in host machine.
@@ -85,6 +93,29 @@ func ReadConfigs() (*Config, error) {
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem())
 	})
 	return adapterConfig, e
+}
+
+// GetDefaultVhost returns the default vhost of given environment read from Adapter
+// configurations. Store the configuration in a map, so do not want to loop through
+// the config value Config.Adapter.VhostMapping
+func GetDefaultVhost(environment string) (string, bool, error) {
+	var err error
+	onceGetDefaultVhost.Do(func() {
+		defaultVhost = make(map[string]string)
+		configs, errConf := ReadConfigs()
+		if errConf != nil {
+			err = errConf
+			return
+		}
+		for _, gateway := range configs.Adapter.VhostMapping {
+			defaultVhost[gateway.Environment] = gateway.Vhost
+		}
+	})
+	vhost, ok := defaultVhost[environment]
+	if !ok && environment == DefaultGatewayName {
+		return DefaultGatewayVHost, true, nil
+	}
+	return vhost, ok, err
 }
 
 // resolveConfigEnvValues looks for the string type config values which should be read from environment variables

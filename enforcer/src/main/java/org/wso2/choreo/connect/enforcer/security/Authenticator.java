@@ -30,5 +30,14 @@ public interface Authenticator {
 
     AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException;
 
+    /**
+     * Returns a string representation of the authentication challenge imposed by this
+     * authenticator. In case of an authentication failure this value will be sent back
+     * to the API consumer in the form of a WWW-Authenticate header.
+     *
+     * @return A string representation of the authentication challenge
+     */
+    String getChallengeString();
+
     int getPriority();
 }

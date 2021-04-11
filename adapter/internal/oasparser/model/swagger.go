@@ -141,7 +141,7 @@ func setResourcesSwagger(swagger2 spec.Swagger) []Resource {
 			}
 		}
 	}
-	return resources
+	return SortResources(resources)
 }
 
 // This methods adds x-wso2-disable-security vendor extension

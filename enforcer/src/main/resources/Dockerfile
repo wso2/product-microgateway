@@ -15,6 +15,8 @@
 # -----------------------------------------------------------------------
 
 FROM adoptopenjdk/openjdk11:jre-11.0.10_9-alpine
+RUN apk update && apk upgrade --no-cache
+
 LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
 
 ENV LANG=C.UTF-8
@@ -55,9 +57,9 @@ RUN \
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 
-
 COPY maven/ lib/
 COPY maven/conf conf
 COPY maven/security security
 COPY maven/LICENSE.txt .
+
 CMD java $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -cp "lib/*:lib/dropins/*" org.wso2.choreo.connect.enforcer.server.AuthServer

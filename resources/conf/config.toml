@@ -12,6 +12,11 @@
     username = "admin"
     password = "$env{adapter_admin_pwd}"
 
+# default vhosts mapping for standalone mode
+[[adapter.vhostMapping]]
+  environment = "Production and Sandbox"
+  vhost = "localhost"
+
 [adapter.keystore]
   certPath = "/home/wso2/security/keystore/mg.pem"
   keyPath = "/home/wso2/security/keystore/mg.key"
@@ -38,13 +43,15 @@
   securedListenerHost = "0.0.0.0"
   securedListenerPort = 9095
   clusterTimeoutInSeconds = 20
+  # system hostname for system API resources (eg: /testkey and /health)
+  systemHost = "localhost"
 
 [router.keystore]
   certPath = "/home/wso2/security/keystore/mg.pem"
   keyPath = "/home/wso2/security/keystore/mg.key"
 
 [router.cors]
-enabled = false
+enabled = true
 allowOrigins = ["*"]
 allowMethods = ["GET","PUT","POST","DELETE","PATCH","OPTIONS"]
 allowHeaders = ["authorization","Access-Control-Allow-Origin","Content-Type","SOAPAction","apikey", "testKey", "Internal-Key"]
@@ -114,7 +121,7 @@ allowCredentials = false
 # Throttling configurations
 [enforcer.throttling]
   # Connect with the central traffic manager
-  enableGlobalEventPublishing = false
+  enableGlobalEventPublishing = true
   # Enable global advanced throttling based on request header conditions
   enableHeaderConditions = false
   # Enable global advanced throttling based on request query parameter conditions

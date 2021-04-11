@@ -76,9 +76,9 @@ public class JWTUtil {
     /**
      * This method used to retrieve JWKS keys from endpoint.
      *
-     * @param jwksEndpoint
-     * @return
-     * @throws IOException
+     * @param jwksEndpoint jwksEndpoint
+     * @return JwksKeys
+     * @throws IOException Exception while invoking the JWKS endpoint
      */
     public static String retrieveJWKSConfiguration(String jwksEndpoint) throws IOException {
 
@@ -89,7 +89,7 @@ public class JWTUtil {
                 if (response.getStatusLine().getStatusCode() == 200) {
                     HttpEntity entity = response.getEntity();
                     try (InputStream content = entity.getContent()) {
-                        return IOUtils.toString(content);
+                        return IOUtils.toString(content, Charset.defaultCharset());
                     }
                 } else {
                     return null;
@@ -133,7 +133,7 @@ public class JWTUtil {
      */
     public static boolean verifyTokenSignature(SignedJWT jwt, String alias) throws EnforcerException {
 
-        Certificate publicCert = null;
+        Certificate publicCert;
         //Read the client-truststore.jks into a KeyStore
         try {
             publicCert = ConfigHolder.getInstance().getTrustStoreForJWT().getCertificate(alias);
@@ -157,9 +157,9 @@ public class JWTUtil {
     }
 
     public static PrivateKey getPrivateKey(String filePath) throws EnforcerException {
-        PrivateKey privateKey = null;
+        PrivateKey privateKey;
         try {
-            String strKeyPEM = "";
+            String strKeyPEM;
             Path keyPath = Paths.get(filePath);
             String key = Files.readString(keyPath, Charset.defaultCharset());
             strKeyPEM = key
@@ -171,7 +171,7 @@ public class JWTUtil {
             KeyFactory kf = KeyFactory.getInstance(Constants.RSA);
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
             RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) kf.generatePrivate(keySpec);
-            privateKey = (PrivateKey) rsaPrivateKey;
+            privateKey = rsaPrivateKey;
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             log.debug("Error obtaining private key", e);
             throw new EnforcerException("Error obtaining private key");

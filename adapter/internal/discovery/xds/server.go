@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
@@ -62,6 +63,11 @@ var (
 	enforcerRevokedTokensCache         wso2_cache.SnapshotCache
 	enforcerThrottleDataCache          wso2_cache.SnapshotCache
 
+	// Vhosts entry maps, these maps updated with delta changes (when an API added, only added its entry only)
+	// These maps are managed separately for API-CTL and APIM, since when deploying an project from API-CTL there is no API uuid
+	apiUUIDToGatewayToVhosts map[string]map[string]string   // API_UUID to gateway-env to vhost (for un-deploying APIs from APIM or Choreo)
+	apiToVhostsMap           map[string]map[string]struct{} // APIName:Version to VHosts set (for un-deploying APIs from API-CTL)
+
 	// Vhost:APIName:Version as map key
 	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // MgwSwagger struct map
 	openAPIEnvoyMap        map[string][]string             // Envoy Label Array map
@@ -91,10 +97,13 @@ var (
 	KeyManagerList = make([]eventhubTypes.KeyManager, 0)
 )
 
+var void struct{}
+
 const (
-	commonEnforcerLabel string = "commonEnforcerLabel"
-	maxRandomInt        int    = 999999999
-	prototypedAPI       string = "PROTOTYPED"
+	commonEnforcerLabel  string = "commonEnforcerLabel"
+	maxRandomInt         int    = 999999999
+	prototypedAPI        string = "PROTOTYPED"
+	apiKeyFieldSeparator string = ":"
 )
 
 // IDHash uses ID field as the node hash.
@@ -123,6 +132,8 @@ func init() {
 	enforcerRevokedTokensCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 	enforcerThrottleDataCache = wso2_cache.NewSnapshotCache(false, IDHash{}, nil)
 
+	apiUUIDToGatewayToVhosts = make(map[string]map[string]string)
+	apiToVhostsMap = make(map[string]map[string]struct{})
 	apiMgwSwaggerMap = make(map[string]mgw.MgwSwagger)
 	openAPIEnvoyMap = make(map[string][]string)
 	openAPIEnforcerApisMap = make(map[string]types.Resource)
@@ -207,7 +218,7 @@ func UpdateAPI(apiContent config.APIContent) {
 	var newLabels []string
 	var mgwSwagger mgw.MgwSwagger
 	if len(apiContent.Environments) == 0 {
-		apiContent.Environments = append(apiContent.Environments, "default")
+		apiContent.Environments = []string{config.DefaultGatewayName}
 	}
 
 	//TODO: (VirajSalaka) Optimize locking
@@ -257,14 +268,17 @@ func UpdateAPI(apiContent config.APIContent) {
 	oldLabels, _ := openAPIEnvoyMap[apiIdentifier]
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiIdentifier, oldLabels)
 	openAPIEnvoyMap[apiIdentifier] = newLabels
+	updateVhostInternalMaps(apiContent, newLabels)
 
-	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, apiContent.UpstreamCerts)
+	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, apiContent.UpstreamCerts,
+		apiContent.VHost)
 	// TODO: (VirajSalaka) Decide if the routes and listeners need their own map since it is not going to be changed based on API at the moment.
 	openAPIRoutesMap[apiIdentifier] = routes
 	// openAPIListenersMap[apiMapKey] = listeners
 	openAPIClustersMap[apiIdentifier] = clusters
 	openAPIEndpointsMap[apiIdentifier] = endpoints
-	openAPIEnforcerApisMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiContent.LifeCycleStatus, apiContent.EndpointSecurity)
+	openAPIEnforcerApisMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiContent.LifeCycleStatus,
+		apiContent.EndpointSecurity, apiContent.VHost)
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
 	if svcdiscovery.IsServiceDiscoveryEnabled {
@@ -272,56 +286,125 @@ func UpdateAPI(apiContent config.APIContent) {
 	}
 }
 
-// DeleteAPI deletes an API, its resources and updates the caches
-func DeleteAPI(vhost, apiName, version string) error {
+// GetVhostOfAPI returns the vhost of API deployed in the given gateway environment
+func GetVhostOfAPI(apiUUID, environment string) (vhost string, exists bool) {
+	if envToVhost, ok := apiUUIDToGatewayToVhosts[apiUUID]; ok {
+		vhost, exists = envToVhost[environment]
+		return
+	}
+	return "", false
+}
+
+// DeleteAPIs deletes an API, its resources and updates the caches of given environments
+func DeleteAPIs(vhost, apiName, version string, environments []string) error {
+	apiNameVersionID := GenerateIdentifierForAPIWithoutVhost(apiName, version)
+	vhosts, found := apiToVhostsMap[apiNameVersionID]
+	if !found {
+		logger.LoggerXds.Infof("Unable to delete API %v. API does not exist.", apiNameVersionID)
+		return errors.New(mgw.NotFound)
+	}
+
+	if vhost == "" {
+		// vhost is not defined, delete all vhosts
+		logger.LoggerXds.Infof("No vhost is specified for the API %v deleting from all vhosts", apiNameVersionID)
+		deletedVhosts := make(map[string]struct{})
+		for vh := range vhosts {
+			apiIdentifier := GenerateIdentifierForAPI(vh, apiName, version)
+			// TODO: (renuka) optimize to update cache only once after updating all maps
+			if err := deleteAPI(apiIdentifier, environments); err != nil {
+				// Update apiToVhostsMap with already deleted vhosts in the loop
+				logger.LoggerXds.Errorf("Error deleting API: %v", apiIdentifier)
+				logger.LoggerXds.Debugf("Update map apiToVhostsMap with deleting already deleted vhosts for API %v",
+					apiIdentifier)
+				remainingVhosts := make(map[string]struct{})
+				for v := range vhosts {
+					if _, ok := deletedVhosts[v]; ok {
+						remainingVhosts[v] = void
+					}
+				}
+				apiToVhostsMap[apiNameVersionID] = remainingVhosts
+				return err
+			}
+			deletedVhosts[vh] = void
+		}
+		delete(apiToVhostsMap, apiNameVersionID)
+		return nil
+	}
+
 	apiIdentifier := GenerateIdentifierForAPI(vhost, apiName, version)
+	if err := deleteAPI(apiIdentifier, environments); err != nil {
+		return err
+	}
+
+	// if this is the final vhost delete map entry
+	if _, ok := vhosts[vhost]; len(vhosts) == 1 && ok {
+		logger.LoggerXds.Debugf("There are no vhosts for the API %v and clean vhost entry with name:version from maps",
+			apiNameVersionID)
+		delete(apiToVhostsMap, apiNameVersionID)
+	}
+	return nil
+}
+
+// DeleteAPIWithAPIMEvent deletes API with the given UUID from the given gw environments
+func DeleteAPIWithAPIMEvent(uuid, name, version string, environments []string) {
+	apiIdentifiers := make(map[string]struct{})
+	for gw, vhost := range apiUUIDToGatewayToVhosts[uuid] {
+		// delete from only specified environments
+		if arrayContains(environments, gw) {
+			id := GenerateIdentifierForAPI(vhost, name, version)
+			apiIdentifiers[id] = void
+		}
+	}
+	for apiIdentifier := range apiIdentifiers {
+		if err := deleteAPI(apiIdentifier, environments); err != nil {
+			logger.LoggerXds.Errorf("Error undeploying API %v from environments %v", apiIdentifier, environments)
+		} else {
+			// if no error, update internal vhost maps
+			// error only happens when API not found in deleteAPI func
+			logger.LoggerXds.Debugf("Successfully undeployed API %v from environments %v", apiIdentifier, environments)
+			for _, environment := range environments {
+				// delete environment if exists
+				delete(apiUUIDToGatewayToVhosts[uuid], environment)
+			}
+		}
+	}
+}
+
+// deleteAPI deletes an API, its resources and updates the caches of given environments
+func deleteAPI(apiIdentifier string, environments []string) error {
 	_, exists := apiMgwSwaggerMap[apiIdentifier]
 	if !exists {
 		logger.LoggerXds.Infof("Unable to delete API " + apiIdentifier + ". Does not exist.")
 		return errors.New(mgw.NotFound)
 	}
+
+	existingLabels := openAPIEnvoyMap[apiIdentifier]
+	toBeDelEnvs, toBeKeptEnvs := getEnvironmentsToBeDeleted(existingLabels, environments)
+
+	if len(existingLabels) != len(toBeDelEnvs) {
+		// do not delete from all environments, hence do not clear routes, clusters, endpoints, enforcerAPIs
+		updateXdsCacheOnAPIAdd(toBeDelEnvs, []string{})
+		logger.LoggerXds.Infof("Deleted API. %v", apiIdentifier)
+		openAPIEnvoyMap[apiIdentifier] = toBeKeptEnvs
+		return nil
+	}
+
 	//clean maps of routes, clusters, endpoints, enforcerAPIs
 	delete(openAPIRoutesMap, apiIdentifier)
 	delete(openAPIClustersMap, apiIdentifier)
 	delete(openAPIEndpointsMap, apiIdentifier)
 	delete(openAPIEnforcerApisMap, apiIdentifier)
 
-	existingLabels := openAPIEnvoyMap[apiIdentifier]
 	//updateXdsCacheOnAPIAdd is called after cleaning maps of routes, clusters, endpoints, enforcerAPIs.
 	//Therefore resources that belongs to the deleting API do not exist. Caches updated only with
 	//resources that belongs to the remaining APIs
-	updateXdsCacheOnAPIAdd(existingLabels, []string{})
+	updateXdsCacheOnAPIAdd(toBeDelEnvs, []string{})
 
 	delete(openAPIEnvoyMap, apiIdentifier)  //delete labels
 	delete(apiMgwSwaggerMap, apiIdentifier) //delete mgwSwagger
 	//TODO: (SuKSW) clean any remaining in label wise maps, if this is the last API of that label
 	logger.LoggerXds.Infof("Deleted API. %v", apiIdentifier)
 	return nil
-}
-
-// UndeployAPI undeploys the APIs from the provided set of enviroments. If the complete set of provided environments
-// and already deployed environments are the same the apim
-func UndeployAPI(vhost, apiName, version string, undeployEnvs []string) {
-	apiIdentifier := GenerateIdentifierForAPI(vhost, apiName, version)
-	existingLabels, ok := openAPIEnvoyMap[apiIdentifier]
-	if !ok {
-		logger.LoggerXds.Debugf("No API to undeploy under %s:%s", apiName, version)
-		return
-	}
-	newLabels := []string{}
-	for _, existingEnv := range existingLabels {
-		if !arrayContains(undeployEnvs, existingEnv) {
-			newLabels = append(newLabels, existingEnv)
-		}
-	}
-
-	if len(newLabels) == 0 {
-		DeleteAPI(vhost, apiName, version)
-		return
-	}
-	openAPIEnvoyMap[apiIdentifier] = newLabels
-	updateXdsCacheOnAPIAdd(existingLabels, newLabels)
-	logger.LoggerXds.Infof("Undeployed APIs. %s:%s - %v", apiName, version, undeployEnvs)
 }
 
 func arrayContains(a []string, x string) bool {
@@ -377,14 +460,21 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Resource, []types.Resource,
 	[]types.Resource, []types.Resource) {
 	var clusterArray []*clusterv3.Cluster
-	var routeArray []*routev3.Route
+	var vhostToRouteArrayMap = make(map[string][]*routev3.Route)
 	var endpointArray []*corev3.Address
 	var apis []types.Resource
 
 	for apiKey, labels := range openAPIEnvoyMap {
 		if arrayContains(labels, label) {
+			vhostName, err := ExtractVhostFromAPIIdentifier(apiKey)
+			if err != nil {
+				logger.LoggerXds.Errorf("Error extracting vhost from API identifier: %v. Ignore deploying the API",
+					err.Error())
+				continue
+			}
+			vhost := fmt.Sprintf("%v:%v", vhostName, "*")
 			clusterArray = append(clusterArray, openAPIClustersMap[apiKey]...)
-			routeArray = append(routeArray, openAPIRoutesMap[apiKey]...)
+			vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], openAPIRoutesMap[apiKey]...)
 			endpointArray = append(endpointArray, openAPIEndpointsMap[apiKey]...)
 			enfocerAPI, ok := openAPIEnforcerApisMap[apiKey]
 			if ok {
@@ -395,26 +485,30 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	}
 
 	// If the token endpoint is enabled, the token endpoint also needs to be added.
-	conf, _ := config.ReadConfigs()
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
+	}
 	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
+	systemHost := fmt.Sprintf("%v:%v", conf.Envoy.SystemHost, "*")
 	if enableJwtIssuer {
 		routeToken := envoyconf.CreateTokenRoute()
-		routeArray = append(routeArray, routeToken)
+		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeToken)
 	}
 
 	// Add health endpoint
 	routeHealth := envoyconf.CreateHealthEndpoint()
-	routeArray = append(routeArray, routeHealth)
+	vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeHealth)
 
 	listenerArray, listenerFound := envoyListenerConfigMap[label]
 	routesConfig, routesConfigFound := envoyRouteConfigMap[label]
 	if !listenerFound && !routesConfigFound {
-		listenerArray, routesConfig = oasParser.GetProductionListenerAndRouteConfig(routeArray)
+		listenerArray, routesConfig = oasParser.GetProductionListenerAndRouteConfig(vhostToRouteArrayMap)
 		envoyListenerConfigMap[label] = listenerArray
 		envoyRouteConfigMap[label] = routesConfig
 	} else {
 		// If the routesConfig exists, the listener exists too
-		oasParser.UpdateRoutesConfig(routesConfig, routeArray)
+		oasParser.UpdateRoutesConfig(routesConfig, vhostToRouteArrayMap)
 	}
 	endpoints, clusters, listeners, routeConfigs := oasParser.GetCacheResources(endpointArray, clusterArray, listenerArray, routesConfig)
 	return endpoints, clusters, listeners, routeConfigs, apis
@@ -611,6 +705,11 @@ func ListApis(apiType string, limit *int64) *apiModel.APIMeta {
 			apiMetaListItem.APIType = mgwSwagger.GetAPIType()
 			apiMetaListItem.Context = mgwSwagger.GetXWso2Basepath()
 			apiMetaListItem.GatewayEnvs = openAPIEnvoyMap[apiIdentifier]
+			vhost := "ERROR"
+			if vh, err := ExtractVhostFromAPIIdentifier(apiIdentifier); err == nil {
+				vhost = vh
+			}
+			apiMetaListItem.Vhost = vhost
 			apisArray = append(apisArray, &apiMetaListItem)
 			i++
 		}
@@ -631,7 +730,22 @@ func IsAPIExist(vhost, name, version string) (exists bool) {
 
 // GenerateIdentifierForAPI generates an identifier unique to the API
 func GenerateIdentifierForAPI(vhost, name, version string) string {
-	return vhost + ":" + name + ":" + version
+	return fmt.Sprint(vhost, apiKeyFieldSeparator, name, apiKeyFieldSeparator, version)
+}
+
+// GenerateIdentifierForAPIWithoutVhost generates an identifier unique to the API name and version
+func GenerateIdentifierForAPIWithoutVhost(name, version string) string {
+	return fmt.Sprint(name, apiKeyFieldSeparator, version)
+}
+
+// ExtractVhostFromAPIIdentifier extracts vhost from the API identifier
+func ExtractVhostFromAPIIdentifier(id string) (string, error) {
+	elem := strings.Split(id, apiKeyFieldSeparator)
+	if len(elem) == 3 {
+		return elem[0], nil
+	}
+	err := fmt.Errorf("invalid API identifier: %v", id)
+	return "", err
 }
 
 // GenerateAndUpdateKeyManagerList converts the data into KeyManager proto type
