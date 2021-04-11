@@ -15,6 +15,7 @@ import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ConditionalGroupDTO;
 import org.wso2.am.integration.clients.admin.api.dto.HeaderConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.IPConditionDTO;
+import org.wso2.am.integration.clients.admin.api.dto.QueryParameterConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
@@ -44,6 +45,8 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
     private static final Logger log = LogManager.getLogger(AdvanceThrottlingTestCase.class);
     private final String THROTTLED_IP = "10.100.1.22";
     private final String THROTTLED_HEADER = "10.100.7.77";
+    private final String THROTTLED_QUERY_PARAM = "name";
+    private final String THROTTLED_QUERY_PARAM_VALUE = "admin";
     private final Map<String, String> requestHeaders = new HashMap<>();
     private final String apiPolicyName = "APIPolicyWithDefaultLimit";
     private final String conditionalPolicyName = "APIPolicyWithIPLimit";
@@ -211,6 +214,23 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
         requestHeaders.remove(HttpHeaders.HOST);
     }
 
+    @Test(description = "Test Advance throttling with query param Condition",
+            dependsOnMethods = {"testAPILevelThrottlingWithHeaderCondition"})
+    public void testAPILevelThrottlingWithQueryCondition() throws Exception {
+        HttpResponse api = restAPIPublisher.getAPI(apiId);
+        Gson gson = new Gson();
+        APIDTO apidto = gson.fromJson(api.getData(), APIDTO.class);
+        Assert.assertEquals(apidto.getApiThrottlingPolicy(), conditionalPolicyName,
+                "API tier not updated.");
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put(THROTTLED_QUERY_PARAM, "foo");
+        Assert.assertFalse(isThrottled(requestHeaders, queryParams, limit10Req),
+                "Request shouldn't throttle for a query param not in a condition");
+        queryParams.put(THROTTLED_QUERY_PARAM, THROTTLED_QUERY_PARAM_VALUE);
+        Assert.assertTrue(isThrottled(requestHeaders, queryParams, limit10Req),
+                "Request not throttled by request count query parameter condition in API tier");
+    }
+
     private boolean isThrottled(Map<String, String> requestHeaders, Map<String, String> queryParams,
                                 long expectedCount) throws InterruptedException, IOException {
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
@@ -275,6 +295,18 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
         headerGrp.add(headerCondition);
         conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
                 "Header conditional group", headerGrp, limit));
+
+        // create a query parameter condition and add it to the throttle conditions list
+        List<ThrottleConditionDTO> queryGrp = new ArrayList<>();
+        QueryParameterConditionDTO queryParameterConditionDTO =
+                DtoFactory.createQueryParameterConditionDTO(THROTTLED_QUERY_PARAM, THROTTLED_QUERY_PARAM_VALUE);
+        ThrottleConditionDTO queryParameterCondition = DtoFactory
+                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION, false, null, null,
+                        null, queryParameterConditionDTO);
+        queryGrp.add(queryParameterCondition);
+        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
+                "Query param conditional group", queryGrp, limit));
+
         return conditionalGroups;
     }
 
