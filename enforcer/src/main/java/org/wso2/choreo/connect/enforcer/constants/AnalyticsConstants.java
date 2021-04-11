@@ -30,7 +30,8 @@ public class AnalyticsConstants {
     public static final String ROUTE_NOT_FOUND_RESPONSE_DETAIL = "route_not_found";
     public static final String GATEWAY_LABEL = "ENVOY";
 
-    public static final String TOKEN_ENDPOINT_PATH = "/token";
+    public static final String TOKEN_ENDPOINT_PATH = "/testkey";
+    public static final String HEALTH_ENDPOINT_PATH = "/health";
 
     public static final String DEFAULT_FOR_UNASSIGNED = "UNKNOWN";
 

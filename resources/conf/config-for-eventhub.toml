@@ -225,10 +225,10 @@ allowCredentials = false
 
 [analytics]
   enabled = false
-  [analytics.adapter]
-    bufferFlushInterval = "1s"
-    bufferSizeBytes = 16384
-    gRPCRequestTimeout = "20s"
+  [analytics.enforcer]
+    [analytics.enforcer.configProperties]
+      authURL = "$env{analytics_authURL}"
+      authToken = "$env{analytics_authToken}"
 
   [analytics.enforcer]
     authURL = "$env{analytics_authURL}"

@@ -92,7 +92,7 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                 || StringUtils.isEmpty(AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY)) {
             logger.error(AnalyticsConstants.AUTH_URL_CONFIG_KEY + " and / or " +
                     AnalyticsConstants.AUTH_TOKEN_CONFIG_KEY +
-                    "properties are not provided under analytics configurations.");
+                    "  are not provided under analytics configurations.");
             return;
         }
         Map<String, String> publisherConfig = new HashMap<>(2);
@@ -112,7 +112,7 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
             commonConfiguration.setResponseSchema(responseSchema);
         }
         if (!StringUtils.isEmpty(faultSchema)) {
-            commonConfiguration.setResponseSchema(faultSchema);
+            commonConfiguration.setFaultSchema(faultSchema);
         }
         AnalyticsServiceReferenceHolder.getInstance().setConfigurations(commonConfiguration);
     }
@@ -126,7 +126,8 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                 && logEntry.getResponse().getResponseCodeDetails()
                 .equals(AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL)
                 // Token endpoint calls needs to be removed as well
-                // TODO: (VirajSalaka) healthcheck calls also needs to filtered out.
-                && (!AnalyticsConstants.TOKEN_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()));
+                && (!AnalyticsConstants.TOKEN_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()))
+                // Health endpoint calls are not published
+                && (!AnalyticsConstants.HEALTH_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()));
     }
 }

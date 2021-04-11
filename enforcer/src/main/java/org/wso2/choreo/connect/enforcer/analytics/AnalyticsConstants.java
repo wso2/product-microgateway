@@ -28,5 +28,5 @@ public class AnalyticsConstants {
     public static final String RESPONSE_SCHEMA = "RESPONSE";
     public static final String ERROR_SCHEMA = "ERROR";
     protected static final String CHOREO_RESPONSE_SCHEMA = "CHOREO_RESPONSE";
-    protected static final String CHOREO_FAULT_SCHEMA = "CHOREO_FAULT_SCHEMA";
+    protected static final String CHOREO_FAULT_SCHEMA = "CHOREO_ERROR";
 }
