@@ -77,7 +77,13 @@ type Config struct {
 			// Private key to sign the token
 			TokenPrivateKeyPath string
 		}
-
+		// VhostMapping represents default vhost of gateway environments
+		VhostMapping []struct {
+			// Environment name of the gateway
+			Environment string
+			// Vhost to be default of the environment
+			Vhost string
+		}
 		//Consul represents the configuration required to connect to consul service discovery
 		Consul struct {
 			//Enable whether consul service discovery should be enabled
@@ -113,6 +119,7 @@ type Config struct {
 		SecuredListenerPort     uint32
 		ClusterTimeoutInSeconds time.Duration
 		KeyStore                keystore
+		SystemHost              string
 
 		// Global CORS configurations.
 		Cors struct {
@@ -353,6 +360,7 @@ type controlPlane struct {
 
 // APIContent contains everything necessary to create an API
 type APIContent struct {
+	UUID               string
 	VHost              string
 	Name               string
 	Version            string

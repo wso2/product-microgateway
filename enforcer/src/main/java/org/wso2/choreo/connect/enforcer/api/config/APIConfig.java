@@ -29,6 +29,7 @@ import java.util.List;
 public class APIConfig {
     private String name;
     private String version;
+    private String vhost;
     private String basePath;
     private String apiType;
     private List<String> productionUrls;
@@ -61,6 +62,7 @@ public class APIConfig {
 
         private String name;
         private String version;
+        private String vhost;
         private String basePath;
         private String apiType;
         private List<String> productionUrls;
@@ -80,6 +82,11 @@ public class APIConfig {
 
         public Builder version(String version) {
             this.version = version;
+            return this;
+        }
+
+        public Builder vhost(String vhost) {
+            this.vhost = vhost;
             return this;
         }
 
@@ -141,6 +148,7 @@ public class APIConfig {
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
+            apiConfig.vhost = this.vhost;
             apiConfig.basePath = this.basePath;
             apiConfig.version = this.version;
             apiConfig.apiLifeCycleState = this.apiLifeCycleState;
@@ -170,6 +178,10 @@ public class APIConfig {
 
     public EndpointSecurity getEndpointSecurity() {
         return endpointSecurity;
+    }
+
+    public String getVhost() {
+        return vhost;
     }
 
     public String getBasePath() {

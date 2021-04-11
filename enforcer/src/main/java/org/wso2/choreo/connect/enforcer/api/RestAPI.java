@@ -51,6 +51,7 @@ public class RestAPI implements API {
 
     @Override
     public String init(Api api) {
+        String vhost = api.getVhost();
         String basePath = api.getBasePath();
         String name = api.getTitle();
         String version = api.getVersion();
@@ -68,9 +69,9 @@ public class RestAPI implements API {
         }
 
         this.apiLifeCycleState = api.getApiLifeCycleState();
-        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).resources(resources)
-                .apiType(apiType).apiLifeCycleState(apiLifeCycleState).securitySchema(securitySchemes)
-                .tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
+        this.apiConfig = new APIConfig.Builder(name).vhost(vhost).basePath(basePath).version(version)
+                .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState)
+                .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
                 .productionUrls(productionUrls).sandboxUrls(sandboxUrls)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity()).build();
         initFilters();

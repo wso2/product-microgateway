@@ -25,6 +25,7 @@ public class APIConstants {
     //open API extensions
     public static final String X_WSO2_BASE_PATH = "x-wso2-basepath";
 
+    public static final String GW_VHOST_PARAM = "vHost";
     public static final String GW_BASE_PATH_PARAM = "basePath";
     public static final String GW_RES_PATH_PARAM = "path";
     public static final String GW_RES_METHOD_PARAM = "method";

@@ -46,6 +46,9 @@ type APIMetaListItem struct {
 
 	// version
 	Version string `json:"version,omitempty"`
+
+	// vhost
+	Vhost string `json:"vhost,omitempty"`
 }
 
 // Validate validates this API meta list item
