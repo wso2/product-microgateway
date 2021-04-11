@@ -51,6 +51,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.choreo.connect.tests.common.BaseTestCase;
 import org.wso2.choreo.connect.tests.context.APIManagerWithMgwServerInstance;
 import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 
 import java.io.IOException;
@@ -59,6 +60,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+
 import javax.xml.xpath.XPathExpressionException;
 
 public class APIMWithMgwBaseTest extends BaseTestCase {
@@ -198,7 +201,7 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
      * @param expectedResponse - Expected response
      * @throws MicroGWTestException if something goes wrong when getting the tenant identifier
      */
-    void waitForAPIDeploymentSync(String apiProvider, String apiName, String apiVersion,
+    protected void waitForAPIDeploymentSync(String apiProvider, String apiName, String apiVersion,
                                   String expectedResponse)
             throws XPathExpressionException, MicroGWTestException {
 
@@ -339,5 +342,23 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
                 restAPIPublisher.deleteAPI(apiInfoDTO.getId());
             }
         }
+    }
+
+    protected Callable<Boolean> isResponseAvailable(String URL, Map<String, String> requestHeaders) {
+        return new Callable<Boolean>() {
+            public Boolean call() {
+                return checkForResponse(URL, requestHeaders);
+            }
+        };
+    }
+
+    private Boolean checkForResponse(String URL, Map<String, String> requestHeaders) {
+        org.wso2.choreo.connect.tests.util.HttpResponse response;
+        try {
+            response = HttpsClientRequest.doGet(URL, requestHeaders);
+        } catch (IOException e) {
+            return false;
+        }
+        return Objects.nonNull(response);
     }
 }

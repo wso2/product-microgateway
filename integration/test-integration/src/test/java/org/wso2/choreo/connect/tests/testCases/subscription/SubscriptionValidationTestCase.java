@@ -24,6 +24,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
@@ -56,8 +57,12 @@ public class SubscriptionValidationTestCase extends APIMLifecycleBaseTest {
         super.init();
 
         // Creating the application
-        ApplicationCreationResponse appCreationResponse = createApplicationAndClientKeyClientSecret(
-                "SubscriptionValidationTestApp", restAPIStore);
+        ApplicationDTO app = new ApplicationDTO();
+        app.setName("SubscriptionValidationTestApp");
+        app.setDescription("Test Application for SubscriptionValidationTestCase");
+        app.setThrottlingPolicy(TestConstant.APPLICATION_TIER.UNLIMITED);
+        app.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
+        ApplicationCreationResponse appCreationResponse = createApplicationWithKeys(app, restAPIStore);
         applicationId = appCreationResponse.getApplicationId();
 
         // create the request headers after generating the access token
@@ -68,13 +73,13 @@ public class SubscriptionValidationTestCase extends APIMLifecycleBaseTest {
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
         // get a predefined api request
-        apiRequest = getAPIRequest("SubscriptionValidationTestAPI");
+        apiRequest = getAPIRequest(SAMPLE_API_NAME);
         apiRequest.setProvider(user.getUserName());
 
         // create and publish the api
         apiId = createAndPublishAPIWithoutRequireReSubscription(apiRequest, restAPIPublisher);
 
-        endpointURL = Utils.getServiceURLHttps("/subscriptionValidationTestAPI/1.0.0/pet/findByStatus");
+        endpointURL = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
     }
 
     @Test(description = "Send a request to a unsubscribed REST API and check if the API invocation is forbidden")
@@ -118,23 +123,5 @@ public class SubscriptionValidationTestCase extends APIMLifecycleBaseTest {
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
         super.cleanUp();
-    }
-
-    private Callable<Boolean> isResponseAvailable(String URL, Map<String, String> requestHeaders) {
-        return new Callable<Boolean>() {
-            public Boolean call() {
-                return checkForResponse(URL, requestHeaders);
-            }
-        };
-    }
-
-    private Boolean checkForResponse(String URL, Map<String, String> requestHeaders) {
-        org.wso2.choreo.connect.tests.util.HttpResponse response;
-        try {
-            response = HttpsClientRequest.doGet(URL, requestHeaders);
-        } catch (IOException e) {
-            return false;
-        }
-        return Objects.nonNull(response);
     }
 }
