@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.admin.ApiResponse;
 import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ConditionalGroupDTO;
+import org.wso2.am.integration.clients.admin.api.dto.HeaderConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.IPConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleConditionDTO;
@@ -42,6 +43,7 @@ import static org.testng.Assert.assertEquals;
 public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
     private static final Logger log = LogManager.getLogger(AdvanceThrottlingTestCase.class);
     private final String THROTTLED_IP = "10.100.1.22";
+    private final String THROTTLED_HEADER = "10.100.7.77";
     private final Map<String, String> requestHeaders = new HashMap<>();
     private final String apiPolicyName = "APIPolicyWithDefaultLimit";
     private final String conditionalPolicyName = "APIPolicyWithIPLimit";
@@ -157,7 +159,7 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
     }
 
 
-    @Test(description = "Test API level throttling with IP Condition", dependsOnMethods = {"testAPILevelThrottling"})
+    @Test(description = "Test Advance throttling with IP Condition", dependsOnMethods = {"testAPILevelThrottling"})
     public void testAPILevelThrottlingWithIpCondition() throws Exception {
         HttpResponse api = restAPIPublisher.getAPI(apiId);
         Gson gson = new Gson();
@@ -189,6 +191,26 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
                 "Request need to throttle since policy was updated");
         requestHeaders.remove(HttpHeaders.X_FORWARDED_FOR);
     }
+
+    @Test(description = "Test Advance throttling with Header Condition",
+            dependsOnMethods = {"testAPILevelThrottlingWithIpCondition"})
+    public void testAPILevelThrottlingWithHeaderCondition() throws Exception {
+        HttpResponse api = restAPIPublisher.getAPI(apiId);
+        Gson gson = new Gson();
+        APIDTO apidto = gson.fromJson(api.getData(), APIDTO.class);
+        Assert.assertEquals(apidto.getApiThrottlingPolicy(), conditionalPolicyName,
+                "API tier not updated.");
+
+        requestHeaders.put(HttpHeaders.HOST, "19.2.1.2");
+        Assert.assertFalse(isThrottled(requestHeaders, null, limit10Req),
+                "Request shouldn't throttle for a host not in a condition");
+
+        requestHeaders.put(HttpHeaders.HOST, THROTTLED_HEADER);
+        Assert.assertTrue(isThrottled(requestHeaders, null, limit10Req),
+                "Request not throttled by request count header condition in API tier");
+        requestHeaders.remove(HttpHeaders.HOST);
+    }
+
     private boolean isThrottled(Map<String, String> requestHeaders, Map<String, String> queryParams,
                                 long expectedCount) throws InterruptedException, IOException {
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
@@ -244,6 +266,15 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
         conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
                 "IP conditional group", ipGrp, limit));
 
+        // create a header condition and add it to the throttle conditions list
+        List<ThrottleConditionDTO> headerGrp = new ArrayList<>();
+        HeaderConditionDTO headerConditionDTO = DtoFactory.createHeaderConditionDTO(HttpHeaders.HOST, THROTTLED_HEADER);
+        ThrottleConditionDTO headerCondition = DtoFactory
+                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.HEADERCONDITION, false, headerConditionDTO,
+                        null, null, null);
+        headerGrp.add(headerCondition);
+        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
+                "Header conditional group", headerGrp, limit));
         return conditionalGroups;
     }
 
