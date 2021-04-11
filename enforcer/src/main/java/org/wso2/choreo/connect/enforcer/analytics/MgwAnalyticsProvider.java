@@ -48,11 +48,9 @@ import java.util.Map;
 public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     private static final Logger logger = LogManager.getLogger(APIFactory.class);
     private final HTTPAccessLogEntry logEntry;
-    private final boolean isChoreoDeployment;
 
-    public MgwAnalyticsProvider(HTTPAccessLogEntry logEntry, boolean isChoreoDeploymennt) {
+    public MgwAnalyticsProvider(HTTPAccessLogEntry logEntry) {
         this.logEntry = logEntry;
-        this.isChoreoDeployment = isChoreoDeploymennt;
     }
 
     @Override
@@ -107,22 +105,15 @@ public class MgwAnalyticsProvider implements AnalyticsDataProvider {
     @Override
     public API getApi() {
         Map<String, Value> fieldsMap = getFieldsMapFromLogEntry();
-        API api;
-        if (isChoreoDeployment) {
-            api = new ExtendedAPI();
-        } else {
-            api = new API();
-        }
+        ExtendedAPI api = new ExtendedAPI();
         api.setApiId(getValueAsString(fieldsMap, MetadataConstants.API_ID_KEY));
         api.setApiCreator(getValueAsString(fieldsMap, MetadataConstants.API_CREATOR_KEY));
         api.setApiType(getValueAsString(fieldsMap, MetadataConstants.API_TYPE_KEY));
         api.setApiName(getValueAsString(fieldsMap, MetadataConstants.API_NAME_KEY));
         api.setApiVersion(getValueAsString(fieldsMap, MetadataConstants.API_VERSION_KEY));
         api.setApiCreatorTenantDomain(getValueAsString(fieldsMap, MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY));
+        api.setOrganizationId(getValueAsString(fieldsMap, MetadataConstants.API_ORGANIZATION_ID));
 
-        if (isChoreoDeployment) {
-            ((ExtendedAPI) api).setOrganizationId(getValueAsString(fieldsMap, MetadataConstants.API_ORGANIZATION_ID));
-        }
         return api;
     }
 

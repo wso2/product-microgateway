@@ -21,8 +21,12 @@ package org.wso2.choreo.connect.enforcer.analytics;
 /**
  * ConfigurationConstants holds the pre determined configuration keys provided.
  */
-public class ConfigurationConstants {
+public class AnalyticsConstants {
 
     public static final String PUBLISHER_IMPL_CONFIG_KEY = "publisherImpl";
     protected static final String IS_CHOREO_DEPLOYMENT_CONFIG_KEY = "isChoreoDeployment";
+    public static final String RESPONSE_SCHEMA = "RESPONSE";
+    public static final String ERROR_SCHEMA = "ERROR";
+    protected static final String CHOREO_RESPONSE_SCHEMA = "CHOREO_RESPONSE";
+    protected static final String CHOREO_FAULT_SCHEMA = "CHOREO_FAULT_SCHEMA";
 }

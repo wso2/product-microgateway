@@ -46,11 +46,9 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
     private final RequestContext requestContext;
     private static final Logger logger = LogManager.getLogger(MgwFaultAnalyticsProvider.class);
-    private final boolean isChoreoDeployment;
 
-    public MgwFaultAnalyticsProvider(RequestContext requestContext, boolean isChoreoDeployment) {
+    public MgwFaultAnalyticsProvider(RequestContext requestContext) {
         this.requestContext = requestContext;
-        this.isChoreoDeployment = isChoreoDeployment;
     }
 
     @Override
@@ -90,12 +88,7 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public API getApi() {
-        API api;
-        if (isChoreoDeployment) {
-            api = new ExtendedAPI();
-        } else {
-            api = new API();
-        }
+        ExtendedAPI api = new ExtendedAPI();
         api.setApiId(AnalyticsUtils.getAPIId(requestContext));
         api.setApiCreator(AnalyticsUtils.setDefaultIfNull(
                 requestContext.getAuthenticationContext() == null
@@ -107,9 +100,7 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
                 requestContext.getMatchedAPI().getAPIConfig().getBasePath()) == null
                 ? APIConstants.SUPER_TENANT_DOMAIN_NAME
                 : requestContext.getMatchedAPI().getAPIConfig().getBasePath());
-        if (isChoreoDeployment) {
-            ((ExtendedAPI) api).setOrganizationId(requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
-        }
+        api.setOrganizationId(requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
         return api;
     }
 

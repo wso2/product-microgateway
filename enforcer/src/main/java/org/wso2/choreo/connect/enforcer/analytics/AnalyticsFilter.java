@@ -50,24 +50,22 @@ public class AnalyticsFilter {
     private static final Logger logger = LogManager.getLogger(AnalyticsFilter.class);
     private static AnalyticsFilter analyticsFilter;
     private static AnalyticsEventPublisher publisher;
-    // TODO: (VirajSalaka) Move this to the analytics publisher component once the envoy is upgraded to 1.18.0
-    private final boolean isChoreoDeployment;
 
     private AnalyticsFilter() {
         Map<String, String> configuration =
                 ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties();
-        isChoreoDeployment = configuration.containsKey(ConfigurationConstants.IS_CHOREO_DEPLOYMENT_CONFIG_KEY)
-                && configuration.get(ConfigurationConstants.IS_CHOREO_DEPLOYMENT_CONFIG_KEY)
+        boolean isChoreoDeployment = configuration.containsKey(AnalyticsConstants.IS_CHOREO_DEPLOYMENT_CONFIG_KEY)
+                && configuration.get(AnalyticsConstants.IS_CHOREO_DEPLOYMENT_CONFIG_KEY)
                 .toLowerCase().equals("true");
         String customAnalyticsPublisher =
                 ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties()
-                        .get(ConfigurationConstants.PUBLISHER_IMPL_CONFIG_KEY);
+                        .get(AnalyticsConstants.PUBLISHER_IMPL_CONFIG_KEY);
         Map<String, String> publisherConfig = new HashMap<>(2);
         for (Map.Entry<String, String> entry : configuration.entrySet()) {
             // We are always expecting <String, String> Map as configuration.
             publisherConfig.put(entry.getKey(), getEnvValue(entry.getValue()).toString());
         }
-        publisher = loadAnalyticsPublisher(customAnalyticsPublisher);
+        publisher = loadAnalyticsPublisher(customAnalyticsPublisher, isChoreoDeployment);
         if (publisher != null) {
             publisher.init(publisherConfig);
         }
@@ -87,6 +85,8 @@ public class AnalyticsFilter {
     public void handleGRPCLogMsg(StreamAccessLogsMessage message) {
         if (publisher != null) {
             publisher.handleGRPCLogMsg(message);
+        } else {
+            logger.error("Cannot publish the analytics event as analytics publisher is null.");
         }
     }
 
@@ -128,7 +128,6 @@ public class AnalyticsFilter {
 
         requestContext.addMetadataToMap(MetadataConstants.DESTINATION, resolveEndpoint(requestContext));
 
-        // TODO: (VirajSalaka) Check later
         requestContext.addMetadataToMap(MetadataConstants.API_ORGANIZATION_ID,
                 requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
     }
@@ -148,7 +147,11 @@ public class AnalyticsFilter {
     }
 
     public void handleFailureRequest(RequestContext requestContext) {
-        MgwFaultAnalyticsProvider provider = new MgwFaultAnalyticsProvider(requestContext, isChoreoDeployment);
+        if (publisher == null) {
+            logger.error("Cannot publish the failure event as analytics publisher is null.");
+            return;
+        }
+        MgwFaultAnalyticsProvider provider = new MgwFaultAnalyticsProvider(requestContext);
         // To avoid incrementing counter for options call
         if (provider.getProxyResponseCode() == 200 || provider.getProxyResponseCode() == 204) {
             return;
@@ -162,10 +165,15 @@ public class AnalyticsFilter {
         }
     }
 
-    private static AnalyticsEventPublisher loadAnalyticsPublisher(String className) {
+    private static AnalyticsEventPublisher loadAnalyticsPublisher(String className, boolean isChoreoDeployment) {
 
+        // For the choreo deployment, class name need not to be provided.
         if (StringUtils.isEmpty(className)) {
             logger.debug("Proceeding with default analytics publisher.");
+            if (isChoreoDeployment) {
+                return new DefaultAnalyticsEventPublisher(AnalyticsConstants.CHOREO_RESPONSE_SCHEMA,
+                        AnalyticsConstants.CHOREO_FAULT_SCHEMA);
+            }
             return new DefaultAnalyticsEventPublisher();
         }
 
@@ -184,7 +192,7 @@ public class AnalyticsFilter {
         return null;
     }
 
-    // TODO: (VirajSalaka) Avoid Code duplication and process the map entries while initial env variable based
+    // TODO: (RajithRoshan) Avoid Code duplication and process the map entries while initial env variable based
     // resolution.
     private Object getEnvValue(Object configValue) {
         if (configValue instanceof String) {

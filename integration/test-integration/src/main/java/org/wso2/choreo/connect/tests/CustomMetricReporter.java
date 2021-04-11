@@ -33,7 +33,7 @@ public class CustomMetricReporter extends LogMetricReporter {
 
     @Override
     public CounterMetric createCounterMetric(String s, MetricSchema metricSchema) throws MetricCreationException {
-        return new CustomAnalyticsMetric("testMetric", metricSchema);
+        return new CustomAnalyticsMetric(s, metricSchema);
     }
 
     @Override

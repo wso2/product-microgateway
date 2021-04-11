@@ -298,6 +298,7 @@ type analytics struct {
 	}
 
 	Enforcer struct {
+	// TODO: (VirajSalaka) convert it to map[string]{}interface
 		ConfigProperties    map[string]string
 		EnforcerLogReceiver authService `toml:"LogReceiver"`
 	}
