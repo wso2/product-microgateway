@@ -139,7 +139,6 @@ type Config struct {
 	} `toml:"router"`
 
 	Enforcer struct {
-		EventHub        eventHub
 		ApimCredentials apimCredentials
 		AuthService     authService
 		JwtGenerator    jwtGenerator
@@ -336,19 +335,17 @@ type APICtlUser struct {
 
 // ControlPlane struct contains configurations related to the API Manager
 type controlPlane struct {
-	EventHub struct {
-		Enabled                 bool          `toml:"enabled"`
-		ServiceURL              string        `toml:"serviceUrl"`
-		Username                string        `toml:"username"`
-		Password                string        `toml:"password"`
-		SyncApisOnStartUp       bool          `toml:"syncApisOnStartUp"`
-		EnvironmentLabels       []string      `toml:"environmentLabels"`
-		RetryInterval           time.Duration `toml:"retryInterval"`
-		SkipSSLVerification     bool          `toml:"skipSSLVerification"`
-		JmsConnectionParameters struct {
-			EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
-		} `toml:"jmsConnectionParameters"`
-	} `toml:"eventHub"`
+	Enabled                 bool          `toml:"enabled"`
+	ServiceURL              string        `toml:"serviceUrl"`
+	Username                string        `toml:"username"`
+	Password                string        `toml:"password"`
+	SyncApisOnStartUp       bool          `toml:"syncApisOnStartUp"`
+	EnvironmentLabels       []string      `toml:"environmentLabels"`
+	RetryInterval           time.Duration `toml:"retryInterval"`
+	SkipSSLVerification     bool          `toml:"skipSSLVerification"`
+	JmsConnectionParameters struct {
+		EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
+	} `toml:"jmsConnectionParameters"`
 }
 
 // APIContent contains everything necessary to create an API

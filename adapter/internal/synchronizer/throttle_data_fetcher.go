@@ -66,7 +66,7 @@ func FetchThrottleData(endpoint string, c chan SyncAPIResponse) {
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
 
-	ehConfigs := conf.ControlPlane.EventHub
+	ehConfigs := conf.ControlPlane
 	ehURL := ehConfigs.ServiceURL
 
 	// If the traffic manager URL is configured with trailing slash
@@ -167,7 +167,7 @@ func UpdateKeyTemplates() {
 			logger.LoggerSync.Errorf("Unexpected error occurred while fetching key templates: %v", data.Err)
 			go func() {
 				// Retry fetching key templates from traffic manager
-				retryInterval := conf.ControlPlane.EventHub.RetryInterval
+				retryInterval := conf.ControlPlane.RetryInterval
 				if retryInterval == 0 {
 					retryInterval = 5
 				}
@@ -207,7 +207,7 @@ func UpdateBlockingConditions() {
 			logger.LoggerSync.Errorf("Unexpected error occurred while fetching blocking conditions: %v", data.Err)
 			go func() {
 				// Retry fetching blocking conditions from traffic manager
-				retryInterval := conf.ControlPlane.EventHub.RetryInterval
+				retryInterval := conf.ControlPlane.RetryInterval
 				if retryInterval == 0 {
 					retryInterval = 5
 				}

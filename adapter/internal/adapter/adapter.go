@@ -193,7 +193,7 @@ func Run(conf *config.Config) {
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
 
-	envs := conf.ControlPlane.EventHub.EnvironmentLabels
+	envs := conf.ControlPlane.EnvironmentLabels
 
 	// If no environments are configured, default gateway label value is assigned.
 	if len(envs) == 0 {
@@ -208,7 +208,7 @@ func Run(conf *config.Config) {
 
 	go restserver.StartRestServer(conf)
 
-	eventHubEnabled := conf.ControlPlane.EventHub.Enabled
+	eventHubEnabled := conf.ControlPlane.Enabled
 	if eventHubEnabled {
 		// Load subscription data
 		eventhub.LoadSubscriptionData(conf)
@@ -255,7 +255,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 	// NOTE: Currently controle plane API does not support multiple labels in the same
 	// request. Hence until that is fixed, we have to make seperate requests.
 	// Checking the envrionments to fetch the APIs from
-	envs := conf.ControlPlane.EventHub.EnvironmentLabels
+	envs := conf.ControlPlane.EnvironmentLabels
 	// Create a channel for the byte slice (response from the APIs from control plane)
 	c := make(chan synchronizer.SyncAPIResponse)
 	if len(envs) > 0 {
@@ -291,12 +291,12 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
 			go func(d synchronizer.SyncAPIResponse) {
 				// Retry fetching from control plane after a configured time interval
-				if conf.ControlPlane.EventHub.RetryInterval == 0 {
+				if conf.ControlPlane.RetryInterval == 0 {
 					// Assign default retry interval
-					conf.ControlPlane.EventHub.RetryInterval = 5
+					conf.ControlPlane.RetryInterval = 5
 				}
-				logger.LoggerMgw.Debugf("Time Duration for retrying: %v", conf.ControlPlane.EventHub.RetryInterval*time.Second)
-				time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
+				logger.LoggerMgw.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
+				time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
 				logger.LoggerMgw.Infof("Retrying to fetch API data from control plane.")
 				synchronizer.FetchAPIs(&d.APIID, &d.GatewayLabel, c)
 			}(data)
