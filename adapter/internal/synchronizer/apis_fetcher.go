@@ -28,6 +28,7 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"errors"
+	"github.com/wso2/adapter/internal/health"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -127,6 +128,10 @@ func FetchAPIs(id *string, gwLabel *string, c chan SyncAPIResponse) {
 	resp, err := client.Do(req)
 	// In the event of a connection error, the error would not be nil, then return the error
 	// If the error is not null, proceed
+	isHealthy := err == nil
+	logger.LoggerSync.Infof("Updating health status of EventHubRestAPIConsumerService. IsHealthy: %v", isHealthy)
+	health.EventHubRestAPIConsumerService.SetStatus(isHealthy)
+
 	if err != nil {
 		logger.LoggerSync.Errorf("Error occurred while retrieving APIs from API manager: %v", err)
 		respSyncAPI.Err = err

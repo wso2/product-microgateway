@@ -1,7 +1,7 @@
 # The logging configuration file for control plane
 ######### root Level ########
 logfile = "logs/adapter.log"
-logLevel = "INFO"
+logLevel = "DEBG"
 
 [rotation]
 MaxSize = 10    #meabytes

@@ -20,7 +20,6 @@ package adapter
 
 import (
 	"crypto/tls"
-
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/wso2/adapter/internal/api/restserver"
@@ -31,6 +30,8 @@ import (
 	subscriptionservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/subscription"
 	throttleservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/throtlle"
 	wso2_server "github.com/wso2/adapter/internal/discovery/protocol/server/v3"
+	"github.com/wso2/adapter/internal/health"
+	healthservice "github.com/wso2/adapter/internal/health/api/wso2/health/service"
 	"github.com/wso2/adapter/internal/tlsutils"
 
 	"context"
@@ -128,6 +129,9 @@ func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server,
 	keymanagerservice.RegisterRevokedTokenDiscoveryServiceServer(grpcServer, enforcerRevokedTokenDsSrv)
 	throttleservice.RegisterThrottleDataDiscoveryServiceServer(grpcServer, enforcerThrottleDataDsSrv)
 
+	// register health service
+	healthservice.RegisterHealthServer(grpcServer, &health.Server{})
+
 	logger.LoggerMgw.Info("port: ", port, " management server listening")
 	go func() {
 		if err = grpcServer.Serve(lis); err != nil {
@@ -139,6 +143,7 @@ func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server,
 		if err = auth.Init(); err != nil {
 			logger.LoggerMgw.Error("Error while initializing autherization component.", err)
 		}
+		health.AuthService.SetStatus(err == nil)
 	}()
 }
 
@@ -210,6 +215,11 @@ func Run(conf *config.Config) {
 
 	eventHubEnabled := conf.ControlPlane.EventHub.Enabled
 	if eventHubEnabled {
+		// set initial value of eventhub service as
+		logger.LoggerMgw.Info("Updating startup health status of EventHubRestAPIConsumerService and" +
+			" EventHubAMQPConsumerService as unhealthy")
+		health.EventHubRestAPIConsumerService.SetStatus(false)
+		health.EventHubAMQPConsumerService.SetStatus(false)
 		// Load subscription data
 		eventhub.LoadSubscriptionData(conf)
 

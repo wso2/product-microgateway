@@ -19,6 +19,7 @@
 package messaging
 
 import (
+	"github.com/wso2/adapter/internal/health"
 	"net/url"
 	"strconv"
 	"strings"
@@ -52,6 +53,12 @@ func (c *Consumer) reconnect(key string) {
 		if err != nil {
 			logger.LoggerMsg.Errorf("Cannot establish connection for topic %s", key)
 		}
+		isHealthy := err == nil
+		logger.LoggerMsg.Infof("Updating health status of EventHubAMQPConsumerService after retrying AMQP connection. IsHealthy: %v", isHealthy)
+		health.EventHubAMQPConsumerService.SetStatus(isHealthy)
+	} else {
+		logger.LoggerMsg.Info("Updating health status of EventHubAMQPConsumerService as healthy")
+		health.EventHubAMQPConsumerService.SetStatus(true)
 	}
 }
 

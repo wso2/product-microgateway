@@ -140,6 +140,7 @@ public class ApiDiscoveryClient implements Runnable {
             public void onError(Throwable throwable) {
                 logger.error("Error occurred during API discovery", throwable);
                 XdsSchedulerManager.getInstance().startAPIDiscoveryScheduling();
+                // set un healthy after retry
                 nack(throwable);
             }
 

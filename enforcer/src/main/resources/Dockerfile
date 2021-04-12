@@ -57,9 +57,7 @@ RUN \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
 
 COPY maven/grpc_health_probe-linux-amd64 ${GRPC_HEALTH_PROBE_PATH}
-RUN \
-    chown -R ${MG_USER}:${MG_USER_GROUP} ${GRPC_HEALTH_PROBE_PATH} \
-    && chmod +x ${GRPC_HEALTH_PROBE_PATH}
+RUN chmod +x ${GRPC_HEALTH_PROBE_PATH}
 
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
