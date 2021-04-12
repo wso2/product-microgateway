@@ -216,11 +216,6 @@ func Run(conf *config.Config) {
 
 	eventHubEnabled := conf.ControlPlane.EventHub.Enabled
 	if eventHubEnabled {
-		// set initial value of eventhub service as
-		logger.LoggerMgw.Debug("Updating startup health status of EventHubRestAPIConsumerService and" +
-			" EventHubAMQPConsumerService as unhealthy")
-		health.EventHubRestAPIConsumerService.SetStatus(false)
-		health.EventHubAMQPConsumerService.SetStatus(false)
 		// Load subscription data
 		eventhub.LoadSubscriptionData(conf)
 

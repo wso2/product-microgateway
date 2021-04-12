@@ -214,9 +214,10 @@ func StartRestServer(config *config.Config) {
 	go func() {
 		select {
 		case _ = <-server.interrupt:
-			logger.LoggerAPI.Fatal("Rest server interrupted.")
+			logger.LoggerAPI.Debug("Rest server is interrupted. Update health status of RestService")
 			health.RestService.SetStatus(false)
 		case _ = <-server.shutdown:
+			logger.LoggerAPI.Debug("Rest server is shutdown. Update health status of RestService")
 			health.RestService.SetStatus(false)
 		}
 	}()

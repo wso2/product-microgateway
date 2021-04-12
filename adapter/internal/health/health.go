@@ -18,10 +18,8 @@ var (
 
 // Service components to be set health status
 const (
-	AuthService                    service = "adapter.internal.Authorization"
-	RestService                    service = "adapter.internal.RestService"
-	EventHubRestAPIConsumerService service = "adapter.internal.eventHub.RestAPIConsumer"
-	EventHubAMQPConsumerService    service = "adapter.internal.eventHub.AMQPConsumer"
+	AuthService service = "adapter.internal.Authorization"
+	RestService service = "adapter.internal.RestService"
 )
 
 type service string

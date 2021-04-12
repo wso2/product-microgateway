@@ -22,7 +22,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"github.com/wso2/adapter/internal/health"
 	"io/ioutil"
 	"net/http"
 	"reflect"
@@ -259,16 +258,7 @@ func retrieveAPIListFromChannel(c chan response) {
 		responseType := reflect.TypeOf(response.Type).Elem()
 		newResponse := reflect.New(responseType).Interface()
 
-		if response.Error != nil {
-			// TODO (renuka) do we want to check what is the error
-			// if nErr, ok := response.Error.(*url.Error); ok
-			logger.LoggerSubscription.Error("Error while retrieving APIList response from EventHub", response.Error)
-			logger.LoggerSubscription.Debug("Updating startup health status of EventHubRestAPIConsumerService as unhealthy")
-			health.EventHubRestAPIConsumerService.SetStatus(false)
-			return
-		}
-
-		if response.Payload != nil {
+		if response.Error == nil && response.Payload != nil {
 			err := json.Unmarshal(response.Payload, &newResponse)
 
 			if err != nil {
@@ -294,12 +284,8 @@ func retrieveAPIListFromChannel(c chan response) {
 						}
 					}
 					xds.UpdateEnforcerAPIList(response.GatewayLabel, xds.MarshalAPIList(APIListMap[response.GatewayLabel]))
-					logger.LoggerSubscription.Debug("Updating health status of EventHubRestAPIConsumerService as healthy")
-					health.EventHubRestAPIConsumerService.SetStatus(true)
 				default:
 					logger.LoggerSubscription.Warnf("APIList Type DTO is not recieved. Unknown type %T", t)
-					logger.LoggerSubscription.Debug("Updating health status of EventHubRestAPIConsumerService as unhealthy")
-					health.EventHubRestAPIConsumerService.SetStatus(false)
 				}
 			}
 		}

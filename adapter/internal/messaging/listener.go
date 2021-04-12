@@ -20,7 +20,6 @@ package messaging
 
 import (
 	"fmt"
-	"github.com/wso2/adapter/internal/health"
 	"strings"
 	"time"
 
@@ -57,9 +56,6 @@ func ProcessEvents(config *config.Config) {
 
 	logger.LoggerMsg.Infof("dialing %q", amqpURIArray[0].url+"/")
 	rabbitConn, err = connectToRabbitMQ(amqpURIArray[0].url + "/")
-	isHealthy := err == nil
-	logger.LoggerMsg.Debugf("Updating startup health status of EventHubAMQPConsumerService. Is healthy: %v", isHealthy)
-	health.EventHubAMQPConsumerService.SetStatus(isHealthy)
 
 	if err == nil {
 		for i, key := range bindingKeys {
