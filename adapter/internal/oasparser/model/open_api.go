@@ -105,7 +105,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) []Resource {
 
 		}
 	}
-	return resources
+	return SortResources(resources)
 }
 
 func getOperationLevelDetails(operation *openapi3.Operation, method string) Operation {

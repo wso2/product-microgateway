@@ -19,9 +19,11 @@ package restserver
 
 import (
 	"crypto/tls"
+	"github.com/wso2/adapter/internal/discovery/xds"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/loads"
@@ -113,7 +115,15 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.APIIndividualDeleteApisHandler = api_individual.DeleteApisHandlerFunc(func(
 		params api_individual.DeleteApisParams, principal *models.Principal) middleware.Responder {
 
-		err := apiServer.DeleteAPI(params.Vhost, params.APIName, params.Version)
+		vhost := ""
+		if params.Vhost != nil {
+			vhost = *params.Vhost
+		}
+		var environments []string
+		if params.Environments != nil {
+			environments = strings.Split(*params.Environments, ":")
+		}
+		err := xds.DeleteAPIs(vhost, params.APIName, params.Version, environments)
 		if err == nil {
 			return api_individual.NewDeleteApisOK()
 		}
@@ -132,7 +142,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(
 		params api_individual.PostApisParams, principal *models.Principal) middleware.Responder {
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
-		err := apiServer.ApplyAPIProjectWithOverwrite(jsonByteArray, []string{}, params.Override)
+		err := apiServer.ApplyAPIProjectInStandaloneMode(jsonByteArray, params.Override)
 		if err != nil {
 			switch err.Error() {
 			case constants.AlreadyExists:

@@ -444,7 +444,7 @@ public class FilterUtils {
      * @return tenant domain appended username
      */
     public static String buildUsernameWithTenant(String username, String tenantDomain) {
-        if (tenantDomain == null) {
+        if (StringUtils.isEmpty(tenantDomain)) {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
         }
 
@@ -488,4 +488,5 @@ public class FilterUtils {
 
         return clientIp;
     }
+
 }

@@ -25,6 +25,7 @@ public class APIConstants {
     //open API extensions
     public static final String X_WSO2_BASE_PATH = "x-wso2-basepath";
 
+    public static final String GW_VHOST_PARAM = "vHost";
     public static final String GW_BASE_PATH_PARAM = "basePath";
     public static final String GW_RES_PATH_PARAM = "path";
     public static final String GW_RES_METHOD_PARAM = "method";
@@ -53,6 +54,7 @@ public class APIConstants {
     public static final String DELEM_COLON = ":";
     public static final String API_KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String API_KEY_TYPE_SANDBOX = "SANDBOX";
+    public static final String TENANT_DOMAIN_SEPARATOR = "@";
 
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
     public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";

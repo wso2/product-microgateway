@@ -272,9 +272,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 		// If the envrionment labels are present, call the controle plane
 		// with label concurrently (ControlPlane API is not supported for mutiple labels yet)
 		logger.LoggerMgw.Debugf("Environments label present: %v", envs)
-		for _, env := range envs {
-			go synchronizer.FetchAPIs(nil, &env, c)
-		}
+		go synchronizer.FetchAPIs(nil, envs, c)
 	} else {
 		// If the environments are not give, fetch the APIs from default envrionment
 		logger.LoggerMgw.Debug("Environments label  NOT present. Hence adding \"default\"")
@@ -308,7 +306,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 				logger.LoggerMgw.Debugf("Time Duration for retrying: %v", conf.ControlPlane.EventHub.RetryInterval*time.Second)
 				time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
 				logger.LoggerMgw.Infof("Retrying to fetch API data from control plane.")
-				synchronizer.FetchAPIs(&d.APIID, &d.GatewayLabel, c)
+				synchronizer.FetchAPIs(&d.APIUUID, d.GatewayLabels, c)
 			}(data)
 		}
 	}

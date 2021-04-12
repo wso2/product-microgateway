@@ -28,9 +28,10 @@ import (
 
 // DeleteApisURL generates an URL for the delete apis operation
 type DeleteApisURL struct {
-	APIName string
-	Version string
-	Vhost   *string
+	APIName      string
+	Environments *string
+	Version      string
+	Vhost        *string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -69,6 +70,14 @@ func (o *DeleteApisURL) Build() (*url.URL, error) {
 	aPINameQ := o.APIName
 	if aPINameQ != "" {
 		qs.Set("apiName", aPINameQ)
+	}
+
+	var environmentsQ string
+	if o.Environments != nil {
+		environmentsQ = *o.Environments
+	}
+	if environmentsQ != "" {
+		qs.Set("environments", environmentsQ)
 	}
 
 	versionQ := o.Version

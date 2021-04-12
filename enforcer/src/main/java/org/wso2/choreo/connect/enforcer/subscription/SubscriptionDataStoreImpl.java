@@ -114,18 +114,18 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public SubscriptionPolicy getSubscriptionPolicyByName(String policyName, int tenantId) {
+    public SubscriptionPolicy getSubscriptionPolicyByName(String policyName) {
 
         String key = PolicyType.SUBSCRIPTION +
-                SubscriptionDataStoreUtil.getPolicyCacheKey(policyName, tenantId);
+                SubscriptionDataStoreUtil.getPolicyCacheKey(policyName);
         return subscriptionPolicyMap.get(key);
     }
 
     @Override
-    public ApplicationPolicy getApplicationPolicyByName(String policyName, int tenantId) {
+    public ApplicationPolicy getApplicationPolicyByName(String policyName) {
 
         String key = PolicyType.APPLICATION + DELEM_PERIOD +
-                SubscriptionDataStoreUtil.getPolicyCacheKey(policyName, tenantId);
+                SubscriptionDataStoreUtil.getPolicyCacheKey(policyName);
         return appPolicyMap.get(key);
     }
 
@@ -136,10 +136,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public ApiPolicy getApiPolicyByName(String policyName, int tenantId) {
+    public ApiPolicy getApiPolicyByName(String policyName) {
 
         String key = PolicyType.API + DELEM_PERIOD +
-                SubscriptionDataStoreUtil.getPolicyCacheKey(policyName, tenantId);
+                SubscriptionDataStoreUtil.getPolicyCacheKey(policyName);
         return apiPolicyMap.get(key);
     }
 
@@ -186,6 +186,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             newApplication.setSubName(application.getSubName());
             newApplication.setTokenType(application.getTokenType());
             newApplication.setUUID(application.getUuid());
+            newApplication.setTenantDomain(application.getTenantDomain());
             application.getAttributesMap().forEach(newApplication::addAttribute);
 
             newApplicationMap.put(newApplication.getCacheKey(), newApplication);

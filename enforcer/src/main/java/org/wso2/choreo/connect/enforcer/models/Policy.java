@@ -88,6 +88,6 @@ public class Policy implements CacheableEntity<String> {
     @Override
     public String getCacheKey() {
 
-        return SubscriptionDataStoreUtil.getPolicyCacheKey(getName(), getTenantId());
+        return SubscriptionDataStoreUtil.getPolicyCacheKey(getName());
     }
 }

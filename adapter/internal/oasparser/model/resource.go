@@ -19,6 +19,11 @@
 // and create a common model which can represent both types.
 package model
 
+import (
+	"regexp"
+	"sort"
+)
+
 // Resource represents the object structure holding the information related to the
 // pathItem object in OpenAPI definition. This is the most granular level in which the
 // information can be stored as envoy architecture does not support having an operation level
@@ -73,8 +78,8 @@ func (resource *Resource) GetMethod() []Operation {
 // a given resource.
 func (resource *Resource) GetMethodList() []string {
 	var methodList = make([]string, len(resource.methods))
-	for i,method := range resource.methods {
-		methodList[i] =  method.method
+	for i, method := range resource.methods {
+		methodList[i] = method.method
 	}
 	return methodList
 }
@@ -110,4 +115,67 @@ func CreateMinimalDummyResourceForTests(path string, methods []Operation, id str
 		productionUrls: productionUrls,
 		sandboxUrls:    sandboxUrls,
 	}
+}
+
+// Custom sort implementation to sort the Resources based on the resource path
+type byPath []Resource
+
+//Len Returns the length of the arry
+func (a byPath) Len() int { return len(a) }
+
+//Less  returns true if the first item is less than the second parameter
+func (a byPath) Less(i, j int) bool {
+	// Get the less weighted path.
+	// Paths can be in several types.
+	// - /pet
+	// - /pet/{id}
+	// - /pet/index.html
+	// - /pet/{id}/price
+	// - /pet/*
+	// When representing these resources in envoy configuration, they must be ordered correctly.
+	// Sorted order
+	// - /pet/index.html
+	// - /pet
+	// - /pet/{id}
+	// - /pet/{id}/price
+	// - /pet/{id}/{price}
+	// - pet/*
+	// Considerations...
+	// The concrete paths are matched first
+	// Any path with . character gets higher precidence
+	// Precedence decreases when the number of path parameters increses.
+	// The wild card path is matched last.
+
+	// Replace all the non symbol characters with empty string ("") Because the alphabetical order is not mandatory.
+	charMatcher := regexp.MustCompile(`[\w\s]`)
+	pathI := charMatcher.ReplaceAllString(a[i].path, "")
+	pathJ := charMatcher.ReplaceAllString(a[j].path, "")
+
+	// if wildcard is matched for either i or j, it will be returned as greater.
+	wildCardMatcher := regexp.MustCompile(`(\/[*]$)`)
+	if wildCardMatcher.Match([]byte(pathI)) || wildCardMatcher.Match([]byte(pathJ)) {
+		return !wildCardMatcher.Match([]byte(pathI)) || wildCardMatcher.Match([]byte(pathJ))
+	}
+
+	// if the dot is matched (either i or j), the path is considered less than the other one.
+	// If both i and j match this at the same time, compare the full path.
+	dotMatcher := regexp.MustCompile(`\.`)
+	if dotMatcher.Match([]byte(pathI)) && dotMatcher.Match([]byte(pathJ)) {
+		return pathI < pathJ
+	} else if dotMatcher.Match([]byte(pathI)) {
+		return true
+	} else if dotMatcher.Match([]byte(pathJ)) {
+		return false
+	}
+	// If non of the above matched, compare the strings.
+	return pathI < pathJ
+}
+
+//Swap Swaps the input parameter values
+func (a byPath) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+
+// SortResources Sort the list of resources provided based on the resource path.
+func SortResources(resources []Resource) []Resource {
+	sort.Sort(byPath(resources))
+	return resources
 }

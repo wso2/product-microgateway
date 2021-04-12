@@ -73,28 +73,25 @@ public interface SubscriptionDataStore {
      * Gets API Throttling Policy by the name and Tenant Id.
      *
      * @param policyName Name of the Throttling Policy
-     * @param tenantId   Tenant ID in the Policy
      * @return API Throttling Policy
      */
-    ApiPolicy getApiPolicyByName(String policyName, int tenantId);
+    ApiPolicy getApiPolicyByName(String policyName);
 
     /**
      * Gets Subscription Throttling Policy by the name and Tenant Id.
      *
      * @param policyName Name of the Throttling Policy
-     * @param tenantId   Tenant ID in the Policy
      * @return Subscription Throttling Policy
      */
-    SubscriptionPolicy getSubscriptionPolicyByName(String policyName, int tenantId);
+    SubscriptionPolicy getSubscriptionPolicyByName(String policyName);
 
     /**
      * Gets Application Throttling Policy by the name and Tenant Id.
      *
      * @param policyName Name of the Throttling Policy
-     * @param tenantId   Tenant ID in the Policy
      * @return Application Throttling Policy
      */
-    ApplicationPolicy getApplicationPolicyByName(String policyName, int tenantId);
+    ApplicationPolicy getApplicationPolicyByName(String policyName);
 
     void addSubscriptions(List<org.wso2.choreo.connect.discovery.subscription.Subscription> subscriptionList);
 

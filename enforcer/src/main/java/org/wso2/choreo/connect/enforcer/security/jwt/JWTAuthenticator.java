@@ -483,7 +483,6 @@ public class JWTAuthenticator implements Authenticator {
             throws APISecurityException {
 
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
-        String tenantDomain = "carbon.super"; //TODO : Get the tenant domain.
         JWTValidationInfo jwtValidationInfo = null;
         if (isGatewayTokenCacheEnabled &&
                 !SignedJWTInfo.ValidationStatus.NOT_VALIDATED.equals(signedJWTInfo.getValidationStatus())) {

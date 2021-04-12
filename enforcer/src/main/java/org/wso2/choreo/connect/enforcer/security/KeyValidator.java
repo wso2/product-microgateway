@@ -241,14 +241,13 @@ public class KeyValidator {
         infoDTO.setAppAttributes(app.getAttributes());
         infoDTO.setApiUUID(api.getApiUUID());
         infoDTO.setType(type);
-
+        infoDTO.setSubscriberTenantDomain(app.getTenantDomain());
         // Advanced Level Throttling Related Properties
         String apiTier = api.getApiTier();
-        String subscriberTenant = "carbon.super"; //TODO : get correct tenant domain
 
-        ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(), tenantId);
-        SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(sub.getPolicyId(), tenantId);
-        ApiPolicy apiPolicy = datastore.getApiPolicyByName(api.getApiTier(), tenantId);
+        ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy());
+        SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(sub.getPolicyId());
+        ApiPolicy apiPolicy = datastore.getApiPolicyByName(api.getApiTier());
 
         boolean isContentAware = false;
         if (appPolicy.isContentAware() || subPolicy.isContentAware() || (apiPolicy != null && apiPolicy
@@ -284,7 +283,6 @@ public class KeyValidator {
         infoDTO.setSpikeArrestLimit(spikeArrest);
         infoDTO.setSpikeArrestUnit(spikeArrestUnit);
         infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
-        infoDTO.setSubscriberTenantDomain(subscriberTenant);
         infoDTO.setGraphQLMaxDepth(graphQLMaxDepth);
         infoDTO.setGraphQLMaxComplexity(graphQLMaxComplexity);
         if (apiTier != null && apiTier.trim().length() > 0) {

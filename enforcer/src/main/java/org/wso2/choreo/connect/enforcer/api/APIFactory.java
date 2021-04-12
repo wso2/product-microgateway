@@ -21,6 +21,7 @@ import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.discovery.ApiDiscoveryClient;
@@ -49,7 +50,7 @@ public class APIFactory {
     }
 
     public void init() {
-        ApiDiscoveryClient ads =  ApiDiscoveryClient.getInstance();
+        ApiDiscoveryClient ads = ApiDiscoveryClient.getInstance();
         ads.watchApis();
     }
 
@@ -82,9 +83,10 @@ public class APIFactory {
 
     public API getMatchedAPI(CheckRequest request) {
         // TODO: (Praminda) Change the init type depending on the api type param from gw
+        String vHost = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_VHOST_PARAM);
         String basePath = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_BASE_PATH_PARAM);
         String version = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_VERSION_PARAM);
-        String apiKey = basePath + '/' + version;
+        String apiKey = getApiKey(vHost, basePath, version);
         if (logger.isDebugEnabled()) {
             logger.debug("Looking for matching API with basepath: {} and version: {}", basePath, version);
         }
@@ -101,6 +103,11 @@ public class APIFactory {
     }
 
     private String getApiKey(API api) {
-        return api.getAPIConfig().getBasePath() + '/' + api.getAPIConfig().getVersion();
+        APIConfig apiConfig = api.getAPIConfig();
+        return getApiKey(apiConfig.getVhost(), apiConfig.getBasePath(), apiConfig.getVersion());
+    }
+
+    private String getApiKey(String vhost, String basePath, String version) {
+        return String.format("%s:%s:%s", vhost, basePath, version);
     }
 }
