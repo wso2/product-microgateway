@@ -24,6 +24,7 @@ ARG MG_USER_ID=802
 ARG MG_USER_GROUP=wso2
 ARG MG_USER_GROUP_ID=802
 ARG MG_USER_HOME=/home/${MG_USER}
+ENV GRPC_HEALTH_PROBE_PATH=/bin/grpc_health_probe
 
 ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\
@@ -37,6 +38,9 @@ RUN \
     && adduser -S -u ${MG_USER_ID} -h ${MG_USER_HOME} -G ${MG_USER_GROUP} ${MG_USER} \
     && mkdir ${MG_USER_HOME}/logs && chown -R ${MG_USER}:${MG_USER_GROUP} ${MG_USER_HOME}/logs  \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
+
+COPY maven/grpc_health_probe-linux-amd64 ${GRPC_HEALTH_PROBE_PATH}
+RUN chmod +x ${GRPC_HEALTH_PROBE_PATH}
 
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}

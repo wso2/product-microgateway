@@ -492,11 +492,13 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	if enableJwtIssuer {
 		routeToken := envoyconf.CreateTokenRoute()
 		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeToken)
+		vhostToRouteArrayMap["*"] = append(vhostToRouteArrayMap["*"], routeToken)
 	}
 
 	// Add health endpoint
 	routeHealth := envoyconf.CreateHealthEndpoint()
 	vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeHealth)
+	vhostToRouteArrayMap["*"] = append(vhostToRouteArrayMap["*"], routeHealth)
 
 	listenerArray, listenerFound := envoyListenerConfigMap[label]
 	routesConfig, routesConfigFound := envoyRouteConfigMap[label]

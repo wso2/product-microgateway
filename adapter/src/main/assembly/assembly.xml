@@ -49,6 +49,10 @@
             <outputDirectory>security/truststore</outputDirectory>
         </file>
         <file>
+            <source>target/grpc_health_probe-linux-amd64</source>
+            <outputDirectory>/</outputDirectory>
+        </file>
+        <file>
             <source>LICENSE.txt</source>
             <outputDirectory></outputDirectory>
         </file>
