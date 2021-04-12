@@ -12,6 +12,7 @@ var (
 	mutexForHealthUpdate sync.Mutex
 )
 
+// Service components to be set health status
 const (
 	AuthService                    service = "adapter.internal.Authorization"
 	EventHubRestAPIConsumerService service = "adapter.internal.eventHub.RestAPIConsumer"
@@ -20,16 +21,19 @@ const (
 
 type service string
 
+// SetStatus sets the health state of the service
 func (s service) SetStatus(isHealthy bool) {
 	mutexForHealthUpdate.Lock()
 	defer mutexForHealthUpdate.Unlock()
 	healthStatus[string(s)] = isHealthy
 }
 
+// Server represents the Health GRPC server
 type Server struct {
 	healthservice.UnimplementedHealthServer
 }
 
+// Check responds the health check client with health status of the Adapter
 func (s Server) Check(ctx context.Context, request *healthservice.HealthCheckRequest) (*healthservice.HealthCheckResponse, error) {
 	logger.LoggerHealth.Debugf("Querying health state for Adapter service \"%s\"", request.Service)
 	logger.LoggerHealth.Debugf("Internal health state map: %v", healthStatus)
@@ -62,9 +66,4 @@ func (s Server) Check(ctx context.Context, request *healthservice.HealthCheckReq
 	// no component found
 	logger.LoggerHealth.Infof("Responding health state of Adapter service \"%s\" as UNKNOWN", request.Service)
 	return &healthservice.HealthCheckResponse{Status: healthservice.HealthCheckResponse_UNKNOWN}, nil
-}
-
-func (s Server) Watch(request *healthservice.HealthCheckRequest, server healthservice.Health_WatchServer) error {
-	response := &healthservice.HealthCheckResponse{Status: healthservice.HealthCheckResponse_SERVING}
-	return server.Send(response)
 }
