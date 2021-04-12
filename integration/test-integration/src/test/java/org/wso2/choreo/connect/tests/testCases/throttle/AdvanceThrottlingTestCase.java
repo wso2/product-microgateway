@@ -15,6 +15,7 @@ import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ConditionalGroupDTO;
 import org.wso2.am.integration.clients.admin.api.dto.HeaderConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.IPConditionDTO;
+import org.wso2.am.integration.clients.admin.api.dto.JWTClaimsConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.QueryParameterConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleConditionDTO;
@@ -47,15 +48,15 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
     private final String THROTTLED_HEADER = "10.100.7.77";
     private final String THROTTLED_QUERY_PARAM = "name";
     private final String THROTTLED_QUERY_PARAM_VALUE = "admin";
+    private final String THROTTLED_CLAIM = "ClaimApp";
     private final Map<String, String> requestHeaders = new HashMap<>();
     private final String apiPolicyName = "APIPolicyWithDefaultLimit";
-    private final String conditionalPolicyName = "APIPolicyWithIPLimit";
+    private final String conditionalPolicyName = "APIPolicyWithConditionLimit";
     private final long limit5Req = 5L;
     private final long limit10Req = 10L;
     private final long limit1000Req = 1000L;
     private APIRequest apiRequest;
     private String apiId;
-    private String applicationId;
     private String endpointURL;
     private String apiPolicyId;
     private String conditionalPolicyId;
@@ -83,7 +84,7 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
         app.setThrottlingPolicy(TestConstant.APPLICATION_TIER.UNLIMITED);
         app.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
         ApplicationCreationResponse appCreationResponse = createApplicationWithKeys(app, restAPIStore);
-        applicationId = appCreationResponse.getApplicationId();
+        String applicationId = appCreationResponse.getApplicationId();
 
         // create the advanced throttling policy with no conditions
         AdvancedThrottlePolicyDTO apiPolicyDto = DtoFactory
@@ -231,6 +232,37 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
                 "Request not throttled by request count query parameter condition in API tier");
     }
 
+    @Test(description = "Test Advance throttling with jwt claim Condition",
+            dependsOnMethods = {"testAPILevelThrottlingWithQueryCondition"})
+    public void testAPILevelThrottlingWithJWTClaimCondition() throws Exception {
+        HttpResponse api = restAPIPublisher.getAPI(apiId);
+        Gson gson = new Gson();
+        APIDTO apidto = gson.fromJson(api.getData(), APIDTO.class);
+        Assert.assertEquals(apidto.getApiThrottlingPolicy(), conditionalPolicyName,
+                "API tier not updated.");
+
+
+        ApplicationDTO app = new ApplicationDTO();
+        app.setName(THROTTLED_CLAIM);
+        app.setDescription("Test Application for JWT condition");
+        app.setThrottlingPolicy(TestConstant.APPLICATION_TIER.UNLIMITED);
+        app.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
+        ApplicationCreationResponse appCreationResponse = createApplicationWithKeys(app, restAPIStore);
+        HttpResponse subscriptionResponse = subscribeToAPI(apiId, appCreationResponse.getApplicationId(),
+                TestConstant.SUBSCRIPTION_TIER.UNLIMITED, restAPIStore);
+        assertEquals(subscriptionResponse.getResponseCode(), HttpStatus.SC_OK,
+                "Failed to subscribe to the API " + getAPIIdentifierStringFromAPIRequest(apiRequest));
+        String accessToken = generateUserAccessToken(appCreationResponse.getConsumerKey(),
+                appCreationResponse.getConsumerSecret(), new String[]{}, user, restAPIStore);
+
+        String origToken = requestHeaders.get(HttpHeaders.AUTHORIZATION);
+        requestHeaders.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        Assert.assertTrue(isThrottled(requestHeaders, null,limit10Req),
+                "Request not throttled by request count jwt claim condition in API tier");
+        // replace with original token so that rest of the test cases will use initial token
+        requestHeaders.put(HttpHeaders.AUTHORIZATION, "Bearer " + origToken);
+    }
+
     private boolean isThrottled(Map<String, String> requestHeaders, Map<String, String> queryParams,
                                 long expectedCount) throws InterruptedException, IOException {
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
@@ -307,6 +339,17 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
         conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
                 "Query param conditional group", queryGrp, limit));
 
+        // create a JWT claims condition and add it to the throttle conditions list
+        List<ThrottleConditionDTO> claimGrp = new ArrayList<>();
+        String claimUrl = "http://wso2.org/claims/applicationname";
+        JWTClaimsConditionDTO jwtClaimsConditionDTO =
+                DtoFactory.createJWTClaimsConditionDTO(claimUrl, THROTTLED_CLAIM);
+        ThrottleConditionDTO jwtClaimsCondition = DtoFactory
+                .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION, false, null, null,
+                        jwtClaimsConditionDTO, null);
+        claimGrp.add(jwtClaimsCondition);
+        conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
+                "JWT Claim conditional group", claimGrp, limit));
         return conditionalGroups;
     }
 
