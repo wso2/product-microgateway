@@ -38,6 +38,7 @@ import (
 	"github.com/wso2/adapter/internal/api/restserver/operations/api_individual"
 	"github.com/wso2/adapter/internal/api/restserver/operations/authorization"
 	"github.com/wso2/adapter/internal/auth"
+	"github.com/wso2/adapter/internal/health"
 	constants "github.com/wso2/adapter/internal/oasparser/model"
 	"github.com/wso2/adapter/internal/tlsutils"
 	logger "github.com/wso2/adapter/loggers"
@@ -208,8 +209,21 @@ func StartRestServer(config *config.Config) {
 		return
 	}
 	server.TLSPort = port
+
+	// handle server interruption
+	go func() {
+		select {
+		case _ = <-server.interrupt:
+			logger.LoggerAPI.Fatal("Rest server interrupted.")
+			health.RestService.SetStatus(false)
+		case _ = <-server.shutdown:
+			health.RestService.SetStatus(false)
+		}
+	}()
+
+	health.RestService.SetStatus(true)
 	if err := server.Serve(); err != nil {
 		logger.LoggerAPI.Fatal(err)
+		health.RestService.SetStatus(false)
 	}
-
 }

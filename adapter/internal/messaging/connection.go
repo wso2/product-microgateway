@@ -54,10 +54,10 @@ func (c *Consumer) reconnect(key string) {
 			logger.LoggerMsg.Errorf("Cannot establish connection for topic %s", key)
 		}
 		isHealthy := err == nil
-		logger.LoggerMsg.Infof("Updating health status of EventHubAMQPConsumerService after retrying AMQP connection. IsHealthy: %v", isHealthy)
+		logger.LoggerMsg.Debugf("Updating health status of EventHubAMQPConsumerService after retrying AMQP connection. IsHealthy: %v", isHealthy)
 		health.EventHubAMQPConsumerService.SetStatus(isHealthy)
 	} else {
-		logger.LoggerMsg.Info("Updating health status of EventHubAMQPConsumerService as healthy")
+		logger.LoggerMsg.Debug("Updating health status of EventHubAMQPConsumerService as healthy")
 		health.EventHubAMQPConsumerService.SetStatus(true)
 	}
 }

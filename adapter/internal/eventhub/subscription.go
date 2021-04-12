@@ -263,7 +263,7 @@ func retrieveAPIListFromChannel(c chan response) {
 			// TODO (renuka) do we want to check what is the error
 			// if nErr, ok := response.Error.(*url.Error); ok
 			logger.LoggerSubscription.Error("Error while retrieving APIList response from EventHub", response.Error)
-			logger.LoggerSubscription.Info("Updating startup health status of EventHubRestAPIConsumerService as unhealthy")
+			logger.LoggerSubscription.Debug("Updating startup health status of EventHubRestAPIConsumerService as unhealthy")
 			health.EventHubRestAPIConsumerService.SetStatus(false)
 			return
 		}
@@ -294,11 +294,11 @@ func retrieveAPIListFromChannel(c chan response) {
 						}
 					}
 					xds.UpdateEnforcerAPIList(response.GatewayLabel, xds.MarshalAPIList(APIListMap[response.GatewayLabel]))
-					logger.LoggerSubscription.Info("Updating health status of EventHubRestAPIConsumerService as healthy")
+					logger.LoggerSubscription.Debug("Updating health status of EventHubRestAPIConsumerService as healthy")
 					health.EventHubRestAPIConsumerService.SetStatus(true)
 				default:
 					logger.LoggerSubscription.Warnf("APIList Type DTO is not recieved. Unknown type %T", t)
-					logger.LoggerSubscription.Info("Updating health status of EventHubRestAPIConsumerService as unhealthy")
+					logger.LoggerSubscription.Debug("Updating health status of EventHubRestAPIConsumerService as unhealthy")
 					health.EventHubRestAPIConsumerService.SetStatus(false)
 				}
 			}

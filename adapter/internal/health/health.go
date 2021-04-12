@@ -8,13 +8,18 @@ import (
 )
 
 var (
-	healthStatus         = make(map[string]bool)
+	serviceHealthStatus = make(map[string]bool)
+	healthStatuses      = map[bool]string{
+		true:  "HEALTHY",
+		false: "UNHEALTHY",
+	}
 	mutexForHealthUpdate sync.Mutex
 )
 
 // Service components to be set health status
 const (
 	AuthService                    service = "adapter.internal.Authorization"
+	RestService                    service = "adapter.internal.RestService"
 	EventHubRestAPIConsumerService service = "adapter.internal.eventHub.RestAPIConsumer"
 	EventHubAMQPConsumerService    service = "adapter.internal.eventHub.AMQPConsumer"
 )
@@ -25,7 +30,8 @@ type service string
 func (s service) SetStatus(isHealthy bool) {
 	mutexForHealthUpdate.Lock()
 	defer mutexForHealthUpdate.Unlock()
-	healthStatus[string(s)] = isHealthy
+	logger.LoggerHealth.Infof("Update health status of service \"%s\" as %s", s, healthStatuses[isHealthy])
+	serviceHealthStatus[string(s)] = isHealthy
 }
 
 // Server represents the Health GRPC server
@@ -36,12 +42,12 @@ type Server struct {
 // Check responds the health check client with health status of the Adapter
 func (s Server) Check(ctx context.Context, request *healthservice.HealthCheckRequest) (*healthservice.HealthCheckResponse, error) {
 	logger.LoggerHealth.Debugf("Querying health state for Adapter service \"%s\"", request.Service)
-	logger.LoggerHealth.Debugf("Internal health state map: %v", healthStatus)
+	logger.LoggerHealth.Debugf("Internal health state map: %v", serviceHealthStatus)
 
 	if request.Service == "" {
 		// overall health of the server
 		isHealthy := true
-		for _, ok := range healthStatus {
+		for _, ok := range serviceHealthStatus {
 			isHealthy = isHealthy && ok
 		}
 
@@ -54,7 +60,7 @@ func (s Server) Check(ctx context.Context, request *healthservice.HealthCheckReq
 	}
 
 	// health of the component of a server
-	if isHealthy, ok := healthStatus[request.Service]; ok {
+	if isHealthy, ok := serviceHealthStatus[request.Service]; ok {
 		if isHealthy {
 			logger.LoggerHealth.Infof("Responding health state of Adapter service \"%s\" as HEALTHY", request.Service)
 			return &healthservice.HealthCheckResponse{Status: healthservice.HealthCheckResponse_SERVING}, nil

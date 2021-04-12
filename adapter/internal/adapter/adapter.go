@@ -143,6 +143,7 @@ func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server,
 		if err = auth.Init(); err != nil {
 			logger.LoggerMgw.Error("Error while initializing autherization component.", err)
 		}
+		logger.LoggerMgw.Debug("Updating health status of AuthService")
 		health.AuthService.SetStatus(err == nil)
 	}()
 }
@@ -216,7 +217,7 @@ func Run(conf *config.Config) {
 	eventHubEnabled := conf.ControlPlane.EventHub.Enabled
 	if eventHubEnabled {
 		// set initial value of eventhub service as
-		logger.LoggerMgw.Info("Updating startup health status of EventHubRestAPIConsumerService and" +
+		logger.LoggerMgw.Debug("Updating startup health status of EventHubRestAPIConsumerService and" +
 			" EventHubAMQPConsumerService as unhealthy")
 		health.EventHubRestAPIConsumerService.SetStatus(false)
 		health.EventHubAMQPConsumerService.SetStatus(false)
