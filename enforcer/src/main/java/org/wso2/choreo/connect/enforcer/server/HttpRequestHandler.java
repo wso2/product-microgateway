@@ -42,7 +42,6 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
 
     public ResponseObject process(CheckRequest request) {
         API matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
-
         if (matchedAPI == null) {
             ResponseObject responseObject = new ResponseObject();
             responseObject.setStatusCode(APIConstants.StatusCodes.NOTFOUND.getCode());
@@ -78,8 +77,12 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
             address = request.getAttributes().getSource().getAddress().getSocketAddress().getAddress();
         }
         address = FilterUtils.getClientIp(headers, address);
-
-        ResourceConfig resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
+        ResourceConfig resourceConfig = null;
+        if(api.getAPIConfig().getApiType() == APIConstants.ApiType.REST){
+            resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
+        }else{
+            resourceConfig = APIFactory.getInstance().getMatchedBasePath(api, requestPath);
+        }
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api).headers(headers).requestID(requestID).address(address).prodClusterHeader(prodCluster)
                 .sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis).build();

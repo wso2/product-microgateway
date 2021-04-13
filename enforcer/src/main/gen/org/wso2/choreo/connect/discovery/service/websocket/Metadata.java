@@ -16,7 +16,6 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private Metadata() {
-    metadata_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -52,11 +51,15 @@ private static final long serialVersionUID = 0L;
             break;
           case 10: {
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              metadata_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.service.websocket.MetadataValue>();
+              extAuthzMetadata_ = com.google.protobuf.MapField.newMapField(
+                  ExtAuthzMetadataDefaultEntryHolder.defaultEntry);
               mutable_bitField0_ |= 0x00000001;
             }
-            metadata_.add(
-                input.readMessage(org.wso2.choreo.connect.discovery.service.websocket.MetadataValue.parser(), extensionRegistry));
+            com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+            extAuthzMetadata__ = input.readMessage(
+                ExtAuthzMetadataDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+            extAuthzMetadata_.getMutableMap().put(
+                extAuthzMetadata__.getKey(), extAuthzMetadata__.getValue());
             break;
           }
           default: {
@@ -74,9 +77,6 @@ private static final long serialVersionUID = 0L;
       throw new com.google.protobuf.InvalidProtocolBufferException(
           e).setUnfinishedMessage(this);
     } finally {
-      if (((mutable_bitField0_ & 0x00000001) != 0)) {
-        metadata_ = java.util.Collections.unmodifiableList(metadata_);
-      }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
     }
@@ -86,6 +86,18 @@ private static final long serialVersionUID = 0L;
     return org.wso2.choreo.connect.discovery.service.websocket.MgwWebSocketProto.internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_descriptor;
   }
 
+  @SuppressWarnings({"rawtypes"})
+  @java.lang.Override
+  protected com.google.protobuf.MapField internalGetMapField(
+      int number) {
+    switch (number) {
+      case 1:
+        return internalGetExtAuthzMetadata();
+      default:
+        throw new RuntimeException(
+            "Invalid map field number: " + number);
+    }
+  }
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
@@ -94,44 +106,85 @@ private static final long serialVersionUID = 0L;
             org.wso2.choreo.connect.discovery.service.websocket.Metadata.class, org.wso2.choreo.connect.discovery.service.websocket.Metadata.Builder.class);
   }
 
-  public static final int METADATA_FIELD_NUMBER = 1;
-  private java.util.List<org.wso2.choreo.connect.discovery.service.websocket.MetadataValue> metadata_;
-  /**
-   * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
-   */
-  @java.lang.Override
-  public java.util.List<org.wso2.choreo.connect.discovery.service.websocket.MetadataValue> getMetadataList() {
-    return metadata_;
+  public static final int EXT_AUTHZ_METADATA_FIELD_NUMBER = 1;
+  private static final class ExtAuthzMetadataDefaultEntryHolder {
+    static final com.google.protobuf.MapEntry<
+        java.lang.String, java.lang.String> defaultEntry =
+            com.google.protobuf.MapEntry
+            .<java.lang.String, java.lang.String>newDefaultInstance(
+                org.wso2.choreo.connect.discovery.service.websocket.MgwWebSocketProto.internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_ExtAuthzMetadataEntry_descriptor, 
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "",
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "");
+  }
+  private com.google.protobuf.MapField<
+      java.lang.String, java.lang.String> extAuthzMetadata_;
+  private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+  internalGetExtAuthzMetadata() {
+    if (extAuthzMetadata_ == null) {
+      return com.google.protobuf.MapField.emptyMapField(
+          ExtAuthzMetadataDefaultEntryHolder.defaultEntry);
+    }
+    return extAuthzMetadata_;
+  }
+
+  public int getExtAuthzMetadataCount() {
+    return internalGetExtAuthzMetadata().getMap().size();
   }
   /**
-   * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+   * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
    */
+
   @java.lang.Override
-  public java.util.List<? extends org.wso2.choreo.connect.discovery.service.websocket.MetadataValueOrBuilder> 
-      getMetadataOrBuilderList() {
-    return metadata_;
+  public boolean containsExtAuthzMetadata(
+      java.lang.String key) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    return internalGetExtAuthzMetadata().getMap().containsKey(key);
   }
   /**
-   * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+   * Use {@link #getExtAuthzMetadataMap()} instead.
    */
   @java.lang.Override
-  public int getMetadataCount() {
-    return metadata_.size();
+  @java.lang.Deprecated
+  public java.util.Map<java.lang.String, java.lang.String> getExtAuthzMetadata() {
+    return getExtAuthzMetadataMap();
   }
   /**
-   * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+   * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.service.websocket.MetadataValue getMetadata(int index) {
-    return metadata_.get(index);
+
+  public java.util.Map<java.lang.String, java.lang.String> getExtAuthzMetadataMap() {
+    return internalGetExtAuthzMetadata().getMap();
   }
   /**
-   * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+   * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.service.websocket.MetadataValueOrBuilder getMetadataOrBuilder(
-      int index) {
-    return metadata_.get(index);
+
+  public java.lang.String getExtAuthzMetadataOrDefault(
+      java.lang.String key,
+      java.lang.String defaultValue) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetExtAuthzMetadata().getMap();
+    return map.containsKey(key) ? map.get(key) : defaultValue;
+  }
+  /**
+   * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
+   */
+  @java.lang.Override
+
+  public java.lang.String getExtAuthzMetadataOrThrow(
+      java.lang.String key) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetExtAuthzMetadata().getMap();
+    if (!map.containsKey(key)) {
+      throw new java.lang.IllegalArgumentException();
+    }
+    return map.get(key);
   }
 
   private byte memoizedIsInitialized = -1;
@@ -148,9 +201,12 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    for (int i = 0; i < metadata_.size(); i++) {
-      output.writeMessage(1, metadata_.get(i));
-    }
+    com.google.protobuf.GeneratedMessageV3
+      .serializeStringMapTo(
+        output,
+        internalGetExtAuthzMetadata(),
+        ExtAuthzMetadataDefaultEntryHolder.defaultEntry,
+        1);
     unknownFields.writeTo(output);
   }
 
@@ -160,9 +216,15 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    for (int i = 0; i < metadata_.size(); i++) {
+    for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+         : internalGetExtAuthzMetadata().getMap().entrySet()) {
+      com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+      extAuthzMetadata__ = ExtAuthzMetadataDefaultEntryHolder.defaultEntry.newBuilderForType()
+          .setKey(entry.getKey())
+          .setValue(entry.getValue())
+          .build();
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(1, metadata_.get(i));
+          .computeMessageSize(1, extAuthzMetadata__);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -179,8 +241,8 @@ private static final long serialVersionUID = 0L;
     }
     org.wso2.choreo.connect.discovery.service.websocket.Metadata other = (org.wso2.choreo.connect.discovery.service.websocket.Metadata) obj;
 
-    if (!getMetadataList()
-        .equals(other.getMetadataList())) return false;
+    if (!internalGetExtAuthzMetadata().equals(
+        other.internalGetExtAuthzMetadata())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -192,9 +254,9 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    if (getMetadataCount() > 0) {
-      hash = (37 * hash) + METADATA_FIELD_NUMBER;
-      hash = (53 * hash) + getMetadataList().hashCode();
+    if (!internalGetExtAuthzMetadata().getMap().isEmpty()) {
+      hash = (37 * hash) + EXT_AUTHZ_METADATA_FIELD_NUMBER;
+      hash = (53 * hash) + internalGetExtAuthzMetadata().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -303,6 +365,28 @@ private static final long serialVersionUID = 0L;
       return org.wso2.choreo.connect.discovery.service.websocket.MgwWebSocketProto.internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_descriptor;
     }
 
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 1:
+          return internalGetExtAuthzMetadata();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMutableMapField(
+        int number) {
+      switch (number) {
+        case 1:
+          return internalGetMutableExtAuthzMetadata();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -324,18 +408,12 @@ private static final long serialVersionUID = 0L;
     private void maybeForceBuilderInitialization() {
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
-        getMetadataFieldBuilder();
       }
     }
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      if (metadataBuilder_ == null) {
-        metadata_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000001);
-      } else {
-        metadataBuilder_.clear();
-      }
+      internalGetMutableExtAuthzMetadata().clear();
       return this;
     }
 
@@ -363,15 +441,8 @@ private static final long serialVersionUID = 0L;
     public org.wso2.choreo.connect.discovery.service.websocket.Metadata buildPartial() {
       org.wso2.choreo.connect.discovery.service.websocket.Metadata result = new org.wso2.choreo.connect.discovery.service.websocket.Metadata(this);
       int from_bitField0_ = bitField0_;
-      if (metadataBuilder_ == null) {
-        if (((bitField0_ & 0x00000001) != 0)) {
-          metadata_ = java.util.Collections.unmodifiableList(metadata_);
-          bitField0_ = (bitField0_ & ~0x00000001);
-        }
-        result.metadata_ = metadata_;
-      } else {
-        result.metadata_ = metadataBuilder_.build();
-      }
+      result.extAuthzMetadata_ = internalGetExtAuthzMetadata();
+      result.extAuthzMetadata_.makeImmutable();
       onBuilt();
       return result;
     }
@@ -420,32 +491,8 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.wso2.choreo.connect.discovery.service.websocket.Metadata other) {
       if (other == org.wso2.choreo.connect.discovery.service.websocket.Metadata.getDefaultInstance()) return this;
-      if (metadataBuilder_ == null) {
-        if (!other.metadata_.isEmpty()) {
-          if (metadata_.isEmpty()) {
-            metadata_ = other.metadata_;
-            bitField0_ = (bitField0_ & ~0x00000001);
-          } else {
-            ensureMetadataIsMutable();
-            metadata_.addAll(other.metadata_);
-          }
-          onChanged();
-        }
-      } else {
-        if (!other.metadata_.isEmpty()) {
-          if (metadataBuilder_.isEmpty()) {
-            metadataBuilder_.dispose();
-            metadataBuilder_ = null;
-            metadata_ = other.metadata_;
-            bitField0_ = (bitField0_ & ~0x00000001);
-            metadataBuilder_ = 
-              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                 getMetadataFieldBuilder() : null;
-          } else {
-            metadataBuilder_.addAllMessages(other.metadata_);
-          }
-        }
-      }
+      internalGetMutableExtAuthzMetadata().mergeFrom(
+          other.internalGetExtAuthzMetadata());
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -476,244 +523,132 @@ private static final long serialVersionUID = 0L;
     }
     private int bitField0_;
 
-    private java.util.List<org.wso2.choreo.connect.discovery.service.websocket.MetadataValue> metadata_ =
-      java.util.Collections.emptyList();
-    private void ensureMetadataIsMutable() {
-      if (!((bitField0_ & 0x00000001) != 0)) {
-        metadata_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.service.websocket.MetadataValue>(metadata_);
-        bitField0_ |= 0x00000001;
-       }
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> extAuthzMetadata_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetExtAuthzMetadata() {
+      if (extAuthzMetadata_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ExtAuthzMetadataDefaultEntryHolder.defaultEntry);
+      }
+      return extAuthzMetadata_;
+    }
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetMutableExtAuthzMetadata() {
+      onChanged();;
+      if (extAuthzMetadata_ == null) {
+        extAuthzMetadata_ = com.google.protobuf.MapField.newMapField(
+            ExtAuthzMetadataDefaultEntryHolder.defaultEntry);
+      }
+      if (!extAuthzMetadata_.isMutable()) {
+        extAuthzMetadata_ = extAuthzMetadata_.copy();
+      }
+      return extAuthzMetadata_;
     }
 
-    private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.service.websocket.MetadataValue, org.wso2.choreo.connect.discovery.service.websocket.MetadataValue.Builder, org.wso2.choreo.connect.discovery.service.websocket.MetadataValueOrBuilder> metadataBuilder_;
+    public int getExtAuthzMetadataCount() {
+      return internalGetExtAuthzMetadata().getMap().size();
+    }
+    /**
+     * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
+     */
 
-    /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
-     */
-    public java.util.List<org.wso2.choreo.connect.discovery.service.websocket.MetadataValue> getMetadataList() {
-      if (metadataBuilder_ == null) {
-        return java.util.Collections.unmodifiableList(metadata_);
-      } else {
-        return metadataBuilder_.getMessageList();
-      }
+    @java.lang.Override
+    public boolean containsExtAuthzMetadata(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      return internalGetExtAuthzMetadata().getMap().containsKey(key);
     }
     /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+     * Use {@link #getExtAuthzMetadataMap()} instead.
      */
-    public int getMetadataCount() {
-      if (metadataBuilder_ == null) {
-        return metadata_.size();
-      } else {
-        return metadataBuilder_.getCount();
-      }
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getExtAuthzMetadata() {
+      return getExtAuthzMetadataMap();
     }
     /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+     * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
      */
-    public org.wso2.choreo.connect.discovery.service.websocket.MetadataValue getMetadata(int index) {
-      if (metadataBuilder_ == null) {
-        return metadata_.get(index);
-      } else {
-        return metadataBuilder_.getMessage(index);
-      }
+    @java.lang.Override
+
+    public java.util.Map<java.lang.String, java.lang.String> getExtAuthzMetadataMap() {
+      return internalGetExtAuthzMetadata().getMap();
     }
     /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+     * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
      */
-    public Builder setMetadata(
-        int index, org.wso2.choreo.connect.discovery.service.websocket.MetadataValue value) {
-      if (metadataBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        ensureMetadataIsMutable();
-        metadata_.set(index, value);
-        onChanged();
-      } else {
-        metadataBuilder_.setMessage(index, value);
+    @java.lang.Override
+
+    public java.lang.String getExtAuthzMetadataOrDefault(
+        java.lang.String key,
+        java.lang.String defaultValue) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetExtAuthzMetadata().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getExtAuthzMetadataOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetExtAuthzMetadata().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
       }
+      return map.get(key);
+    }
+
+    public Builder clearExtAuthzMetadata() {
+      internalGetMutableExtAuthzMetadata().getMutableMap()
+          .clear();
       return this;
     }
     /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+     * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
      */
-    public Builder setMetadata(
-        int index, org.wso2.choreo.connect.discovery.service.websocket.MetadataValue.Builder builderForValue) {
-      if (metadataBuilder_ == null) {
-        ensureMetadataIsMutable();
-        metadata_.set(index, builderForValue.build());
-        onChanged();
-      } else {
-        metadataBuilder_.setMessage(index, builderForValue.build());
-      }
+
+    public Builder removeExtAuthzMetadata(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      internalGetMutableExtAuthzMetadata().getMutableMap()
+          .remove(key);
       return this;
     }
     /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+     * Use alternate mutation accessors instead.
      */
-    public Builder addMetadata(org.wso2.choreo.connect.discovery.service.websocket.MetadataValue value) {
-      if (metadataBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        ensureMetadataIsMutable();
-        metadata_.add(value);
-        onChanged();
-      } else {
-        metadataBuilder_.addMessage(value);
-      }
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String>
+    getMutableExtAuthzMetadata() {
+      return internalGetMutableExtAuthzMetadata().getMutableMap();
+    }
+    /**
+     * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
+     */
+    public Builder putExtAuthzMetadata(
+        java.lang.String key,
+        java.lang.String value) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (value == null) { throw new java.lang.NullPointerException(); }
+      internalGetMutableExtAuthzMetadata().getMutableMap()
+          .put(key, value);
       return this;
     }
     /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+     * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
      */
-    public Builder addMetadata(
-        int index, org.wso2.choreo.connect.discovery.service.websocket.MetadataValue value) {
-      if (metadataBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        ensureMetadataIsMutable();
-        metadata_.add(index, value);
-        onChanged();
-      } else {
-        metadataBuilder_.addMessage(index, value);
-      }
+
+    public Builder putAllExtAuthzMetadata(
+        java.util.Map<java.lang.String, java.lang.String> values) {
+      internalGetMutableExtAuthzMetadata().getMutableMap()
+          .putAll(values);
       return this;
-    }
-    /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
-     */
-    public Builder addMetadata(
-        org.wso2.choreo.connect.discovery.service.websocket.MetadataValue.Builder builderForValue) {
-      if (metadataBuilder_ == null) {
-        ensureMetadataIsMutable();
-        metadata_.add(builderForValue.build());
-        onChanged();
-      } else {
-        metadataBuilder_.addMessage(builderForValue.build());
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
-     */
-    public Builder addMetadata(
-        int index, org.wso2.choreo.connect.discovery.service.websocket.MetadataValue.Builder builderForValue) {
-      if (metadataBuilder_ == null) {
-        ensureMetadataIsMutable();
-        metadata_.add(index, builderForValue.build());
-        onChanged();
-      } else {
-        metadataBuilder_.addMessage(index, builderForValue.build());
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
-     */
-    public Builder addAllMetadata(
-        java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.service.websocket.MetadataValue> values) {
-      if (metadataBuilder_ == null) {
-        ensureMetadataIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, metadata_);
-        onChanged();
-      } else {
-        metadataBuilder_.addAllMessages(values);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
-     */
-    public Builder clearMetadata() {
-      if (metadataBuilder_ == null) {
-        metadata_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000001);
-        onChanged();
-      } else {
-        metadataBuilder_.clear();
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
-     */
-    public Builder removeMetadata(int index) {
-      if (metadataBuilder_ == null) {
-        ensureMetadataIsMutable();
-        metadata_.remove(index);
-        onChanged();
-      } else {
-        metadataBuilder_.remove(index);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
-     */
-    public org.wso2.choreo.connect.discovery.service.websocket.MetadataValue.Builder getMetadataBuilder(
-        int index) {
-      return getMetadataFieldBuilder().getBuilder(index);
-    }
-    /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
-     */
-    public org.wso2.choreo.connect.discovery.service.websocket.MetadataValueOrBuilder getMetadataOrBuilder(
-        int index) {
-      if (metadataBuilder_ == null) {
-        return metadata_.get(index);  } else {
-        return metadataBuilder_.getMessageOrBuilder(index);
-      }
-    }
-    /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
-     */
-    public java.util.List<? extends org.wso2.choreo.connect.discovery.service.websocket.MetadataValueOrBuilder> 
-         getMetadataOrBuilderList() {
-      if (metadataBuilder_ != null) {
-        return metadataBuilder_.getMessageOrBuilderList();
-      } else {
-        return java.util.Collections.unmodifiableList(metadata_);
-      }
-    }
-    /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
-     */
-    public org.wso2.choreo.connect.discovery.service.websocket.MetadataValue.Builder addMetadataBuilder() {
-      return getMetadataFieldBuilder().addBuilder(
-          org.wso2.choreo.connect.discovery.service.websocket.MetadataValue.getDefaultInstance());
-    }
-    /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
-     */
-    public org.wso2.choreo.connect.discovery.service.websocket.MetadataValue.Builder addMetadataBuilder(
-        int index) {
-      return getMetadataFieldBuilder().addBuilder(
-          index, org.wso2.choreo.connect.discovery.service.websocket.MetadataValue.getDefaultInstance());
-    }
-    /**
-     * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
-     */
-    public java.util.List<org.wso2.choreo.connect.discovery.service.websocket.MetadataValue.Builder> 
-         getMetadataBuilderList() {
-      return getMetadataFieldBuilder().getBuilderList();
-    }
-    private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.service.websocket.MetadataValue, org.wso2.choreo.connect.discovery.service.websocket.MetadataValue.Builder, org.wso2.choreo.connect.discovery.service.websocket.MetadataValueOrBuilder> 
-        getMetadataFieldBuilder() {
-      if (metadataBuilder_ == null) {
-        metadataBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-            org.wso2.choreo.connect.discovery.service.websocket.MetadataValue, org.wso2.choreo.connect.discovery.service.websocket.MetadataValue.Builder, org.wso2.choreo.connect.discovery.service.websocket.MetadataValueOrBuilder>(
-                metadata_,
-                ((bitField0_ & 0x00000001) != 0),
-                getParentForChildren(),
-                isClean());
-        metadata_ = null;
-      }
-      return metadataBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

@@ -37,15 +37,22 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
     private final StreamObserver<WebSocketFrameResponse> responseStreamObserver;
     private final WebSocketHandler webSocketHandler = new WebSocketHandler();
     private String streamId;
+    private int count;
 
     public WebSocketResponseObserver(StreamObserver<WebSocketFrameResponse> responseStreamObserver) {
         this.responseStreamObserver = responseStreamObserver;
+        this.count = 0;
     }
 
     @Override
     public void onNext(WebSocketFrameRequest webSocketFrameRequest) {
+        count++;
+        logger.info("Count: "+ count);
         logger.info(webSocketFrameRequest.toString());
-        //authenticationContext = webSocketHandler.process(webSocketFrameRequest);
+        logger.info(webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap());
+//        logger.info(webSocketFrameRequest.getFilterMetadata().getMetadataList().get(1));
+//        logger.info(webSocketFrameRequest.getFilterMetadata().getField());
+         WebSocketResponseObject webSocketResponseObject = webSocketHandler.process(webSocketFrameRequest);
         //streamId = getStreamId(webSocketFrameRequest);
         //WebSocketFrameService.addObserver(streamId, this);
         WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setMessage("Hello from server").build();

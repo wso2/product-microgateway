@@ -20,39 +20,96 @@ package org.wso2.choreo.connect.enforcer.server;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
+import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.api.WebSocketAPI;
-import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetadataContext;
-import org.wso2.choreo.connect.enforcer.server.RequestHandler;
-import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse;
+import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
+import org.wso2.choreo.connect.enforcer.websocket.MetadataConstants;
+import org.wso2.choreo.connect.enforcer.websocket.WebSocketFrameContext;
+import org.wso2.choreo.connect.enforcer.websocket.WebSocketResponseObject;
+
+import java.util.Map;
 
 /**
  * WebSocketHandler handles requests coming through websocket metadata service.
  */
-public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, WebSocketMetadataContext> {
+public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, WebSocketResponseObject> {
     private static final Logger logger = LogManager.getLogger(WebSocketHandler.class);
     @Override
-    public WebSocketMetadataContext process(WebSocketFrameRequest webSocketFrameRequest) {
-//        WebSocketAPI matchedAPI = APIFactory.getInstance().getMatchedAPI(webSocketFrameRequest);
-//        if (matchedAPI == null) {
-//            return null;
-//        } else if (logger.isDebugEnabled()) {
-//            APIConfig api = matchedAPI.getAPIConfig();
-//            logger.debug("API {}/{} found in the cache", api.getBasePath(), api.getVersion());
-//        }
-//        RequestContext webSocketMetadata = buildRequestContext(matchedAPI, webSocketFrameRequest);
-//
-//        return matchedAPI.processMetadata(webSocketMetadata);
-        return null;
+    public WebSocketResponseObject process(WebSocketFrameRequest webSocketFrameRequest) {
+        WebSocketAPI matchedAPI = APIFactory.getInstance().getMatchedAPI(webSocketFrameRequest);
+        if (matchedAPI == null) {
+            return null;
+        } else if (logger.isDebugEnabled()) {
+            APIConfig api = matchedAPI.getAPIConfig();
+            logger.info("API {}/{} found in the cache", api.getBasePath(), api.getVersion());
+        }
+        RequestContext requestContext = buildRequestContext(matchedAPI, webSocketFrameRequest);
+        logger.info(requestContext.toString());
+        return matchedAPI.processMetadata(requestContext);
     }
 
     private RequestContext buildRequestContext(WebSocketAPI api, WebSocketFrameRequest webSocketFrameRequest) {
-        try {
-            logger.info("contextString:" + webSocketFrameRequest.getFilterMetadata().toString());
-        } catch (Exception e) {
-            logger.error(e);
-        }
-        return null;
+        Map<String, String> extAuthMetadata = webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap();
+        String apiName = extAuthMetadata.get(APIConstants.GW_API_NAME_PARAM);
+        String apiVersion = extAuthMetadata.get(APIConstants.GW_VERSION_PARAM);
+        String apiBasePath = extAuthMetadata.get(APIConstants.GW_BASE_PATH_PARAM);
+        String username = extAuthMetadata.get(MetadataConstants.USERNAME);
+        String appTier = extAuthMetadata.get(MetadataConstants.APP_TIER);
+        String tier = extAuthMetadata.get(MetadataConstants.TIER);
+        String apiTier = extAuthMetadata.get(MetadataConstants.API_TIER);
+        boolean isContentAwareTierPresent = Boolean.parseBoolean(extAuthMetadata.get(MetadataConstants.CONTENT_AWARE_TIER_PRESENT));
+        String apiKey = extAuthMetadata.get(MetadataConstants.API_KEY);
+        String keyType = extAuthMetadata.get(MetadataConstants.KEY_TYPE);
+        String callerToken = extAuthMetadata.get(MetadataConstants.CALLER_TOKEN);
+        String applicationId = extAuthMetadata.get(MetadataConstants.APP_ID);
+        String applicationName = extAuthMetadata.get(MetadataConstants.APP_NAME);
+        String consumerKey = extAuthMetadata.get(MetadataConstants.CONSUMER_KEY);
+        String subscriber = extAuthMetadata.get(MetadataConstants.SUBSCRIBER);
+        int spikeArrestLimit = Integer.parseInt(extAuthMetadata.get(MetadataConstants.SPIKE_ARREST_LIMIT));
+        String subscriberTenantDomain = extAuthMetadata.get(MetadataConstants.SUBSCRIBER_TENANT_DOMAIN);
+        String spikeArrestUnit = extAuthMetadata.get(MetadataConstants.SPIKE_ARREST_UNIT);
+        boolean stopOnQuota = Boolean.parseBoolean(extAuthMetadata.get(MetadataConstants.STOP_ON_QUOTA));
+        String productName = extAuthMetadata.get(MetadataConstants.PRODUCT_NAME);
+        String productProvider = extAuthMetadata.get(MetadataConstants.PRODUCT_PROVIDER);
+        String apiPublisher = extAuthMetadata.get(MetadataConstants.API_PUBLISHER);
+
+        int frameLength = webSocketFrameRequest.getFrameLength();
+        String remoteIp = webSocketFrameRequest.getRemoteIp();
+        String streamId = null;
+
+        WebSocketFrameContext webSocketFrameContext = new WebSocketFrameContext(streamId, frameLength, remoteIp);
+
+        AuthenticationContext authenticationContext = new AuthenticationContext();
+        authenticationContext.setApiName(apiName);
+        authenticationContext.setApiVersion(apiVersion);
+        authenticationContext.setUsername(username);
+        authenticationContext.setApplicationTier(appTier);
+        authenticationContext.setTier(tier);
+        authenticationContext.setApiTier(apiTier);
+        authenticationContext.setIsContentAware(isContentAwareTierPresent);
+        authenticationContext.setApiKey(apiKey);
+        authenticationContext.setKeyType(keyType);
+        authenticationContext.setCallerToken(callerToken);
+        authenticationContext.setApplicationId(applicationId);
+        authenticationContext.setApplicationName(applicationName);
+        authenticationContext.setConsumerKey(consumerKey);
+        authenticationContext.setSubscriber(subscriber);
+        authenticationContext.setSpikeArrestLimit(spikeArrestLimit);
+        authenticationContext.setSubscriberTenantDomain(subscriberTenantDomain);
+        authenticationContext.setSpikeArrestUnit(spikeArrestUnit);
+        authenticationContext.setStopOnQuotaReach(stopOnQuota);
+        authenticationContext.setProductName(productName);
+        authenticationContext.setProductProvider(productProvider);
+        authenticationContext.setApiPublisher(apiPublisher);
+
+
+        return new RequestContext.Builder(apiBasePath).authenticationContext(authenticationContext).
+                webSocketFrameContext(webSocketFrameContext).build();
+
+
 //        // google.protobuf.struct that holds the dynamic metadata from ext_auth filter
 //        Struct externalAuthMetadata = rateLimitRequest.getMetadataContext().getFilterMetadataMap()
 //                .get(APIConstants.EXT_AUTHZ_METADATA);

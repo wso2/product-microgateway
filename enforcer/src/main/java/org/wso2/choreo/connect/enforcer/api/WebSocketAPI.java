@@ -21,14 +21,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.enforcer.Filter;
-//import org.wso2.micro.gateway.enforcer.api.API;
-//import org.wso2.micro.gateway.enforcer.api.RequestContext;
-//import org.wso2.micro.gateway.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
-import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetadataContext;
+import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetaDataFilter;
+import org.wso2.choreo.connect.enforcer.websocket.WebSocketResponseObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,17 +50,18 @@ public class WebSocketAPI implements API {
 
     @Override
     public String init(Api api) {
+        String vhost = api.getVhost();
         String basePath = api.getBasePath();
         String name = api.getTitle();
         String version = api.getVersion();
+        String apiType = api.getApiType();
         List<String> securitySchemes = api.getSecuritySchemeList();
-//        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).
-//                apiType(APIConstants.ApiType.WEB_SOCKET).build();
+
         this.apiLifeCycleState = api.getApiLifeCycleState();
-        this.apiConfig = new APIConfig.Builder(name).basePath(basePath).version(version).
-                apiLifeCycleState(apiLifeCycleState).securitySchema(securitySchemes).tier(api.getTier()).
-                endpointSecurity(api.getEndpointSecurity()).authHeader(api.getAuthorizationHeader()).
-                disableSecurity(api.getDisableSecurity()).apiType(APIConstants.ApiType.WEB_SOCKET).build();
+        this.apiConfig = new APIConfig.Builder(name).vhost(vhost).basePath(basePath).version(version)
+                .apiType(apiType).apiLifeCycleState(apiLifeCycleState)
+                .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
+                .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity()).build();
         initFilters();
         return basePath;
     }
@@ -73,10 +72,11 @@ public class WebSocketAPI implements API {
         ResponseObject responseObject = new ResponseObject();
         if (executeFilterChain(requestContext)) {
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
-            //responseObject.setWebSocketMetadataContext(requestContext.getAuthenticationContext());
-            if (requestContext.getResponseHeaders() != null) {
+            if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
+            logger.info(requestContext.getMetadataMap());
+            responseObject.setMetaDataMap(requestContext.getMetadataMap());
         } else {
             // If a enforcer stops with a false, it will be passed directly to the client.
             responseObject.setDirectResponse(true);
@@ -133,8 +133,11 @@ public class WebSocketAPI implements API {
         AuthFilter authFilter = new AuthFilter();
         authFilter.init(apiConfig);
         CorsFilter corsFilter = new CorsFilter();
+        WebSocketMetaDataFilter metaDataFilter = new WebSocketMetaDataFilter();
+        metaDataFilter.init(apiConfig);
         this.filters.add(corsFilter);
         this.filters.add(authFilter);
+        this.filters.add(metaDataFilter);
     }
 
     public void initUpgradeFilters() {
@@ -143,7 +146,8 @@ public class WebSocketAPI implements API {
         // WebSocket analytics filter
     }
 
-    public WebSocketMetadataContext processMetadata(RequestContext requestContext) {
+    public WebSocketResponseObject processMetadata(RequestContext requestContext) {
+        logger.info("XXXXXXXXX processMetadata"+requestContext.toString());
         return null;
     }
 

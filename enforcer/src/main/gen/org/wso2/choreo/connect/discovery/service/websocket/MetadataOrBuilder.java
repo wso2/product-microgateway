@@ -8,26 +8,36 @@ public interface MetadataOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+   * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
    */
-  java.util.List<org.wso2.choreo.connect.discovery.service.websocket.MetadataValue> 
-      getMetadataList();
+  int getExtAuthzMetadataCount();
   /**
-   * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+   * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
    */
-  org.wso2.choreo.connect.discovery.service.websocket.MetadataValue getMetadata(int index);
+  boolean containsExtAuthzMetadata(
+      java.lang.String key);
   /**
-   * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+   * Use {@link #getExtAuthzMetadataMap()} instead.
    */
-  int getMetadataCount();
+  @java.lang.Deprecated
+  java.util.Map<java.lang.String, java.lang.String>
+  getExtAuthzMetadata();
   /**
-   * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+   * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
    */
-  java.util.List<? extends org.wso2.choreo.connect.discovery.service.websocket.MetadataValueOrBuilder> 
-      getMetadataOrBuilderList();
+  java.util.Map<java.lang.String, java.lang.String>
+  getExtAuthzMetadataMap();
   /**
-   * <code>repeated .envoy.extensions.filters.http.mgw_wasm_websocket.v3.MetadataValue metadata = 1;</code>
+   * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
    */
-  org.wso2.choreo.connect.discovery.service.websocket.MetadataValueOrBuilder getMetadataOrBuilder(
-      int index);
+
+  java.lang.String getExtAuthzMetadataOrDefault(
+      java.lang.String key,
+      java.lang.String defaultValue);
+  /**
+   * <code>map&lt;string, string&gt; ext_authz_metadata = 1;</code>
+   */
+
+  java.lang.String getExtAuthzMetadataOrThrow(
+      java.lang.String key);
 }

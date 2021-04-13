@@ -20,19 +20,19 @@ public interface WebSocketFrameRequestOrBuilder extends
       getNodeIdBytes();
 
   /**
-   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
-   * @return Whether the filterMetadata field is set.
+   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
+   * @return Whether the metadata field is set.
    */
-  boolean hasFilterMetadata();
+  boolean hasMetadata();
   /**
-   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
-   * @return The filterMetadata.
+   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
+   * @return The metadata.
    */
-  org.wso2.choreo.connect.discovery.service.websocket.Metadata getFilterMetadata();
+  org.wso2.choreo.connect.discovery.service.websocket.Metadata getMetadata();
   /**
-   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
+   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
    */
-  org.wso2.choreo.connect.discovery.service.websocket.MetadataOrBuilder getFilterMetadataOrBuilder();
+  org.wso2.choreo.connect.discovery.service.websocket.MetadataOrBuilder getMetadataOrBuilder();
 
   /**
    * <code>int32 frame_length = 3;</code>

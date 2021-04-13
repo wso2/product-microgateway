@@ -58,13 +58,13 @@ private static final long serialVersionUID = 0L;
           }
           case 18: {
             org.wso2.choreo.connect.discovery.service.websocket.Metadata.Builder subBuilder = null;
-            if (filterMetadata_ != null) {
-              subBuilder = filterMetadata_.toBuilder();
+            if (metadata_ != null) {
+              subBuilder = metadata_.toBuilder();
             }
-            filterMetadata_ = input.readMessage(org.wso2.choreo.connect.discovery.service.websocket.Metadata.parser(), extensionRegistry);
+            metadata_ = input.readMessage(org.wso2.choreo.connect.discovery.service.websocket.Metadata.parser(), extensionRegistry);
             if (subBuilder != null) {
-              subBuilder.mergeFrom(filterMetadata_);
-              filterMetadata_ = subBuilder.buildPartial();
+              subBuilder.mergeFrom(metadata_);
+              metadata_ = subBuilder.buildPartial();
             }
 
             break;
@@ -150,30 +150,30 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int FILTER_METADATA_FIELD_NUMBER = 2;
-  private org.wso2.choreo.connect.discovery.service.websocket.Metadata filterMetadata_;
+  public static final int METADATA_FIELD_NUMBER = 2;
+  private org.wso2.choreo.connect.discovery.service.websocket.Metadata metadata_;
   /**
-   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
-   * @return Whether the filterMetadata field is set.
+   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
+   * @return Whether the metadata field is set.
    */
   @java.lang.Override
-  public boolean hasFilterMetadata() {
-    return filterMetadata_ != null;
+  public boolean hasMetadata() {
+    return metadata_ != null;
   }
   /**
-   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
-   * @return The filterMetadata.
+   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
+   * @return The metadata.
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.service.websocket.Metadata getFilterMetadata() {
-    return filterMetadata_ == null ? org.wso2.choreo.connect.discovery.service.websocket.Metadata.getDefaultInstance() : filterMetadata_;
+  public org.wso2.choreo.connect.discovery.service.websocket.Metadata getMetadata() {
+    return metadata_ == null ? org.wso2.choreo.connect.discovery.service.websocket.Metadata.getDefaultInstance() : metadata_;
   }
   /**
-   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
+   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.service.websocket.MetadataOrBuilder getFilterMetadataOrBuilder() {
-    return getFilterMetadata();
+  public org.wso2.choreo.connect.discovery.service.websocket.MetadataOrBuilder getMetadataOrBuilder() {
+    return getMetadata();
   }
 
   public static final int FRAME_LENGTH_FIELD_NUMBER = 3;
@@ -242,8 +242,8 @@ private static final long serialVersionUID = 0L;
     if (!getNodeIdBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 1, nodeId_);
     }
-    if (filterMetadata_ != null) {
-      output.writeMessage(2, getFilterMetadata());
+    if (metadata_ != null) {
+      output.writeMessage(2, getMetadata());
     }
     if (frameLength_ != 0) {
       output.writeInt32(3, frameLength_);
@@ -263,9 +263,9 @@ private static final long serialVersionUID = 0L;
     if (!getNodeIdBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, nodeId_);
     }
-    if (filterMetadata_ != null) {
+    if (metadata_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(2, getFilterMetadata());
+        .computeMessageSize(2, getMetadata());
     }
     if (frameLength_ != 0) {
       size += com.google.protobuf.CodedOutputStream
@@ -291,10 +291,10 @@ private static final long serialVersionUID = 0L;
 
     if (!getNodeId()
         .equals(other.getNodeId())) return false;
-    if (hasFilterMetadata() != other.hasFilterMetadata()) return false;
-    if (hasFilterMetadata()) {
-      if (!getFilterMetadata()
-          .equals(other.getFilterMetadata())) return false;
+    if (hasMetadata() != other.hasMetadata()) return false;
+    if (hasMetadata()) {
+      if (!getMetadata()
+          .equals(other.getMetadata())) return false;
     }
     if (getFrameLength()
         != other.getFrameLength()) return false;
@@ -313,9 +313,9 @@ private static final long serialVersionUID = 0L;
     hash = (19 * hash) + getDescriptor().hashCode();
     hash = (37 * hash) + NODE_ID_FIELD_NUMBER;
     hash = (53 * hash) + getNodeId().hashCode();
-    if (hasFilterMetadata()) {
-      hash = (37 * hash) + FILTER_METADATA_FIELD_NUMBER;
-      hash = (53 * hash) + getFilterMetadata().hashCode();
+    if (hasMetadata()) {
+      hash = (37 * hash) + METADATA_FIELD_NUMBER;
+      hash = (53 * hash) + getMetadata().hashCode();
     }
     hash = (37 * hash) + FRAME_LENGTH_FIELD_NUMBER;
     hash = (53 * hash) + getFrameLength();
@@ -456,11 +456,11 @@ private static final long serialVersionUID = 0L;
       super.clear();
       nodeId_ = "";
 
-      if (filterMetadataBuilder_ == null) {
-        filterMetadata_ = null;
+      if (metadataBuilder_ == null) {
+        metadata_ = null;
       } else {
-        filterMetadata_ = null;
-        filterMetadataBuilder_ = null;
+        metadata_ = null;
+        metadataBuilder_ = null;
       }
       frameLength_ = 0;
 
@@ -493,10 +493,10 @@ private static final long serialVersionUID = 0L;
     public org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest buildPartial() {
       org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest result = new org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest(this);
       result.nodeId_ = nodeId_;
-      if (filterMetadataBuilder_ == null) {
-        result.filterMetadata_ = filterMetadata_;
+      if (metadataBuilder_ == null) {
+        result.metadata_ = metadata_;
       } else {
-        result.filterMetadata_ = filterMetadataBuilder_.build();
+        result.metadata_ = metadataBuilder_.build();
       }
       result.frameLength_ = frameLength_;
       result.remoteIp_ = remoteIp_;
@@ -552,8 +552,8 @@ private static final long serialVersionUID = 0L;
         nodeId_ = other.nodeId_;
         onChanged();
       }
-      if (other.hasFilterMetadata()) {
-        mergeFilterMetadata(other.getFilterMetadata());
+      if (other.hasMetadata()) {
+        mergeMetadata(other.getMetadata());
       }
       if (other.getFrameLength() != 0) {
         setFrameLength(other.getFrameLength());
@@ -667,123 +667,123 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private org.wso2.choreo.connect.discovery.service.websocket.Metadata filterMetadata_;
+    private org.wso2.choreo.connect.discovery.service.websocket.Metadata metadata_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.service.websocket.Metadata, org.wso2.choreo.connect.discovery.service.websocket.Metadata.Builder, org.wso2.choreo.connect.discovery.service.websocket.MetadataOrBuilder> filterMetadataBuilder_;
+        org.wso2.choreo.connect.discovery.service.websocket.Metadata, org.wso2.choreo.connect.discovery.service.websocket.Metadata.Builder, org.wso2.choreo.connect.discovery.service.websocket.MetadataOrBuilder> metadataBuilder_;
     /**
-     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
-     * @return Whether the filterMetadata field is set.
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
+     * @return Whether the metadata field is set.
      */
-    public boolean hasFilterMetadata() {
-      return filterMetadataBuilder_ != null || filterMetadata_ != null;
+    public boolean hasMetadata() {
+      return metadataBuilder_ != null || metadata_ != null;
     }
     /**
-     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
-     * @return The filterMetadata.
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
+     * @return The metadata.
      */
-    public org.wso2.choreo.connect.discovery.service.websocket.Metadata getFilterMetadata() {
-      if (filterMetadataBuilder_ == null) {
-        return filterMetadata_ == null ? org.wso2.choreo.connect.discovery.service.websocket.Metadata.getDefaultInstance() : filterMetadata_;
+    public org.wso2.choreo.connect.discovery.service.websocket.Metadata getMetadata() {
+      if (metadataBuilder_ == null) {
+        return metadata_ == null ? org.wso2.choreo.connect.discovery.service.websocket.Metadata.getDefaultInstance() : metadata_;
       } else {
-        return filterMetadataBuilder_.getMessage();
+        return metadataBuilder_.getMessage();
       }
     }
     /**
-     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
-    public Builder setFilterMetadata(org.wso2.choreo.connect.discovery.service.websocket.Metadata value) {
-      if (filterMetadataBuilder_ == null) {
+    public Builder setMetadata(org.wso2.choreo.connect.discovery.service.websocket.Metadata value) {
+      if (metadataBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        filterMetadata_ = value;
+        metadata_ = value;
         onChanged();
       } else {
-        filterMetadataBuilder_.setMessage(value);
+        metadataBuilder_.setMessage(value);
       }
 
       return this;
     }
     /**
-     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
-    public Builder setFilterMetadata(
+    public Builder setMetadata(
         org.wso2.choreo.connect.discovery.service.websocket.Metadata.Builder builderForValue) {
-      if (filterMetadataBuilder_ == null) {
-        filterMetadata_ = builderForValue.build();
+      if (metadataBuilder_ == null) {
+        metadata_ = builderForValue.build();
         onChanged();
       } else {
-        filterMetadataBuilder_.setMessage(builderForValue.build());
+        metadataBuilder_.setMessage(builderForValue.build());
       }
 
       return this;
     }
     /**
-     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
-    public Builder mergeFilterMetadata(org.wso2.choreo.connect.discovery.service.websocket.Metadata value) {
-      if (filterMetadataBuilder_ == null) {
-        if (filterMetadata_ != null) {
-          filterMetadata_ =
-            org.wso2.choreo.connect.discovery.service.websocket.Metadata.newBuilder(filterMetadata_).mergeFrom(value).buildPartial();
+    public Builder mergeMetadata(org.wso2.choreo.connect.discovery.service.websocket.Metadata value) {
+      if (metadataBuilder_ == null) {
+        if (metadata_ != null) {
+          metadata_ =
+            org.wso2.choreo.connect.discovery.service.websocket.Metadata.newBuilder(metadata_).mergeFrom(value).buildPartial();
         } else {
-          filterMetadata_ = value;
+          metadata_ = value;
         }
         onChanged();
       } else {
-        filterMetadataBuilder_.mergeFrom(value);
+        metadataBuilder_.mergeFrom(value);
       }
 
       return this;
     }
     /**
-     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
-    public Builder clearFilterMetadata() {
-      if (filterMetadataBuilder_ == null) {
-        filterMetadata_ = null;
+    public Builder clearMetadata() {
+      if (metadataBuilder_ == null) {
+        metadata_ = null;
         onChanged();
       } else {
-        filterMetadata_ = null;
-        filterMetadataBuilder_ = null;
+        metadata_ = null;
+        metadataBuilder_ = null;
       }
 
       return this;
     }
     /**
-     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
-    public org.wso2.choreo.connect.discovery.service.websocket.Metadata.Builder getFilterMetadataBuilder() {
+    public org.wso2.choreo.connect.discovery.service.websocket.Metadata.Builder getMetadataBuilder() {
       
       onChanged();
-      return getFilterMetadataFieldBuilder().getBuilder();
+      return getMetadataFieldBuilder().getBuilder();
     }
     /**
-     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
-    public org.wso2.choreo.connect.discovery.service.websocket.MetadataOrBuilder getFilterMetadataOrBuilder() {
-      if (filterMetadataBuilder_ != null) {
-        return filterMetadataBuilder_.getMessageOrBuilder();
+    public org.wso2.choreo.connect.discovery.service.websocket.MetadataOrBuilder getMetadataOrBuilder() {
+      if (metadataBuilder_ != null) {
+        return metadataBuilder_.getMessageOrBuilder();
       } else {
-        return filterMetadata_ == null ?
-            org.wso2.choreo.connect.discovery.service.websocket.Metadata.getDefaultInstance() : filterMetadata_;
+        return metadata_ == null ?
+            org.wso2.choreo.connect.discovery.service.websocket.Metadata.getDefaultInstance() : metadata_;
       }
     }
     /**
-     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata filter_metadata = 2;</code>
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.service.websocket.Metadata, org.wso2.choreo.connect.discovery.service.websocket.Metadata.Builder, org.wso2.choreo.connect.discovery.service.websocket.MetadataOrBuilder> 
-        getFilterMetadataFieldBuilder() {
-      if (filterMetadataBuilder_ == null) {
-        filterMetadataBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+        getMetadataFieldBuilder() {
+      if (metadataBuilder_ == null) {
+        metadataBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
             org.wso2.choreo.connect.discovery.service.websocket.Metadata, org.wso2.choreo.connect.discovery.service.websocket.Metadata.Builder, org.wso2.choreo.connect.discovery.service.websocket.MetadataOrBuilder>(
-                getFilterMetadata(),
+                getMetadata(),
                 getParentForChildren(),
                 isClean());
-        filterMetadata_ = null;
+        metadata_ = null;
       }
-      return filterMetadataBuilder_;
+      return metadataBuilder_;
     }
 
     private int frameLength_ ;

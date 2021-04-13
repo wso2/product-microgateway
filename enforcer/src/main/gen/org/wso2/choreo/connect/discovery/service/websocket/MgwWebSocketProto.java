@@ -34,6 +34,11 @@ public final class MgwWebSocketProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_ExtAuthzMetadataEntry_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_ExtAuthzMetadataEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -45,23 +50,25 @@ public final class MgwWebSocketProto {
     java.lang.String[] descriptorData = {
       "\n4wso2/discovery/service/websocket/frame" +
       "_service.proto\0223envoy.extensions.filters" +
-      ".http.mgw_wasm_websocket.v3\"\251\001\n\025WebSocke" +
-      "tFrameRequest\022\017\n\007node_id\030\001 \001(\t\022V\n\017filter" +
-      "_metadata\030\002 \001(\0132=.envoy.extensions.filte" +
-      "rs.http.mgw_wasm_websocket.v3.Metadata\022\024" +
-      "\n\014frame_length\030\003 \001(\005\022\021\n\tremote_ip\030\004 \001(\t\"" +
-      ")\n\026WebSocketFrameResponse\022\017\n\007message\030\001 \001" +
-      "(\t\"+\n\rMetadataValue\022\013\n\003key\030\001 \001(\t\022\r\n\005valu" +
-      "e\030\002 \001(\t\"`\n\010Metadata\022T\n\010metadata\030\001 \003(\0132B." +
-      "envoy.extensions.filters.http.mgw_wasm_w" +
-      "ebsocket.v3.MetadataValue2\313\001\n\025WebSocketF" +
-      "rameService\022\261\001\n\020PublishFrameData\022J.envoy" +
-      ".extensions.filters.http.mgw_wasm_websoc" +
-      "ket.v3.WebSocketFrameRequest\032K.envoy.ext" +
-      "ensions.filters.http.mgw_wasm_websocket." +
-      "v3.WebSocketFrameResponse\"\000(\0010\001BJ\n3org.w" +
-      "so2.choreo.connect.discovery.service.web" +
-      "socketB\021MgwWebSocketProtoP\001b\006proto3"
+      ".http.mgw_wasm_websocket.v3\"\242\001\n\025WebSocke" +
+      "tFrameRequest\022\017\n\007node_id\030\001 \001(\t\022O\n\010metada" +
+      "ta\030\002 \001(\0132=.envoy.extensions.filters.http" +
+      ".mgw_wasm_websocket.v3.Metadata\022\024\n\014frame" +
+      "_length\030\003 \001(\005\022\021\n\tremote_ip\030\004 \001(\t\")\n\026WebS" +
+      "ocketFrameResponse\022\017\n\007message\030\001 \001(\t\"+\n\rM" +
+      "etadataValue\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t" +
+      "\"\264\001\n\010Metadata\022o\n\022ext_authz_metadata\030\001 \003(" +
+      "\0132S.envoy.extensions.filters.http.mgw_wa" +
+      "sm_websocket.v3.Metadata.ExtAuthzMetadat" +
+      "aEntry\0327\n\025ExtAuthzMetadataEntry\022\013\n\003key\030\001" +
+      " \001(\t\022\r\n\005value\030\002 \001(\t:\0028\0012\313\001\n\025WebSocketFra" +
+      "meService\022\261\001\n\020PublishFrameData\022J.envoy.e" +
+      "xtensions.filters.http.mgw_wasm_websocke" +
+      "t.v3.WebSocketFrameRequest\032K.envoy.exten" +
+      "sions.filters.http.mgw_wasm_websocket.v3" +
+      ".WebSocketFrameResponse\"\000(\0010\001BJ\n3org.wso" +
+      "2.choreo.connect.discovery.service.webso" +
+      "cketB\021MgwWebSocketProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -72,7 +79,7 @@ public final class MgwWebSocketProto {
     internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_WebSocketFrameRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_WebSocketFrameRequest_descriptor,
-        new java.lang.String[] { "NodeId", "FilterMetadata", "FrameLength", "RemoteIp", });
+        new java.lang.String[] { "NodeId", "Metadata", "FrameLength", "RemoteIp", });
     internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_WebSocketFrameResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_WebSocketFrameResponse_fieldAccessorTable = new
@@ -90,7 +97,13 @@ public final class MgwWebSocketProto {
     internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_descriptor,
-        new java.lang.String[] { "Metadata", });
+        new java.lang.String[] { "ExtAuthzMetadata", });
+    internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_ExtAuthzMetadataEntry_descriptor =
+      internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_descriptor.getNestedTypes().get(0);
+    internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_ExtAuthzMetadataEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_ExtAuthzMetadataEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

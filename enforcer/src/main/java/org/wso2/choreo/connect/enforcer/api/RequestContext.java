@@ -20,8 +20,10 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
+import org.wso2.choreo.connect.enforcer.websocket.WebSocketFrameContext;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -53,6 +55,7 @@ public class RequestContext {
     private Map<String, String> responseHeaders;
     private Map<String, String> metadataMap = new HashMap<>();
     private String requestPathTemplate;
+    private WebSocketFrameContext webSocketFrameContext;
 
     // Request Timestamp is required for analytics
     private long requestTimeStamp;
@@ -101,6 +104,7 @@ public class RequestContext {
         private AuthenticationContext authenticationContext = new AuthenticationContext();
         private String requestID;
         private String clientIp;
+        private WebSocketFrameContext webSocketFrameContext;
 
 
         public Builder(String requestPath) {
@@ -161,6 +165,11 @@ public class RequestContext {
             return this;
         }
 
+        public Builder webSocketFrameContext(WebSocketFrameContext webSocketFrameContext){
+            this.webSocketFrameContext = webSocketFrameContext;
+            return this;
+        }
+
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
@@ -189,6 +198,10 @@ public class RequestContext {
             // Adapter assigns header based routing only if both type of endpoints are present.
             if (!StringUtils.isEmpty(prodClusterHeader) && !StringUtils.isEmpty(sandClusterHeader)) {
                 requestContext.clusterHeaderEnabled = true;
+            }
+
+            if(this.webSocketFrameContext != null){
+                requestContext.webSocketFrameContext = this.webSocketFrameContext;
             }
 
             return requestContext;
@@ -299,5 +312,9 @@ public class RequestContext {
      */
     public Map<String, String> getQueryParameters() {
         return queryParameters;
+    }
+
+    public WebSocketFrameContext getWebSocketFrameContext() {
+        return webSocketFrameContext;
     }
 }

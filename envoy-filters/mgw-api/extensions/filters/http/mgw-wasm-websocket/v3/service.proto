@@ -9,7 +9,7 @@ service WebSocketFrameService {
 message WebSocketFrameRequest {
   string node_id = 1;
   //google.protobuf.Struct ext_metadata = 2;
-  Metadata filter_metadata = 2;
+  Metadata metadata = 2;
   
   int32 frame_length = 3;
 
@@ -20,11 +20,11 @@ message WebSocketFrameResponse {
   string message = 1;
 }
 
-message MetadataValue {
-  string key = 1;
-  string value = 2;
-}
+// message MetadataValue {
+//   string key = 1;
+//   string value = 2;
+// }
 
 message Metadata {
-  repeated MetadataValue metadata = 1;
+  map<string,string> ext_authz_metadata = 1;
 }

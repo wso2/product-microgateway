@@ -29,7 +29,7 @@ service WebSocketFrameService {
 
 message WebSocketFrameRequest {
   string node_id = 1;
-  Metadata filter_metadata = 2;
+  Metadata metadata = 2;
   int32 frame_length = 3;
 
   string remote_ip = 4;
@@ -45,6 +45,6 @@ message MetadataValue {
 }
 
 message Metadata {
-  repeated MetadataValue metadata = 1;
+  map<string,string> ext_authz_metadata = 1;
 }
 

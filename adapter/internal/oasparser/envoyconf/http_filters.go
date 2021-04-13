@@ -89,13 +89,13 @@ func getUpgradeFilters() []*hcmv3.HttpFilter {
 	extAauth := getExtAuthzHTTPFilter()
 	// enable mgwWebSocket when envoy binary with mgw_websocket filter is used
 	//mgwWebSocket := getMgwWebSocketFilter()
-	//mgwWebSocketWASM := getMgwWebSocketWASMFilter()
+	mgwWebSocketWASM := getMgwWebSocketWASMFilter()
 	router := getRouterHTTPFilter()
 	upgradeFilters := []*hcmv3.HttpFilter{
 		cors,
 		extAauth,
 		//mgwWebSocket,
-		//mgwWebSocketWASM,
+		mgwWebSocketWASM,
 		router,
 	}
 	return upgradeFilters
