@@ -65,7 +65,7 @@ import java.util.concurrent.Callable;
 import javax.xml.xpath.XPathExpressionException;
 
 public class APIMWithMgwBaseTest extends BaseTestCase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(APIMWithMgwBaseTest.class);
+    private static final Logger log = LoggerFactory.getLogger(APIMWithMgwBaseTest.class);
 
     private static APIManagerWithMgwServerInstance apiManagerWithMgwServerInstance;
     protected AutomationContext apimServerContext, superTenantKeyManagerContext;
@@ -174,7 +174,7 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
         if (certificatesTrustStore != null) {
             System.setProperty("javax.net.ssl.trustStore", certificatesTrustStore.getPath());
         } else {
-            LOGGER.error("Truststore is not set.");
+            log.error("Truststore is not set.");
         }
         System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
         System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
@@ -186,8 +186,19 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
     void waitForAPIDeployment() {
         try {
             Thread.sleep(15000);
-        } catch (InterruptedException ignored) {
+        } catch (InterruptedException e) {
+            log.error("Couldn't wait until deployment completed");
+        }
+    }
 
+    /**
+     * This method can be used to wait for API deployment sync.
+     */
+    protected void waitForXdsDeployment() {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            log.error("Couldn't wait until xds deployment completed");
         }
     }
 
@@ -224,18 +235,18 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
                         apimServiceURLHttps + "APIStatusMonitor/apiInformation/api/" + tenantIdentifier + apiName + "/"
                                 + apiVersion, headerMap);
             } catch (IOException ignored) {
-                LOGGER.warn("WebAPP:" + " APIStatusMonitor not yet deployed or" + " API :" + apiName + " not yet "
+                log.warn("WebAPP:" + " APIStatusMonitor not yet deployed or" + " API :" + apiName + " not yet "
                                     + "deployed " + " with provider: " + apiProvider);
             }
 
-            LOGGER.info("WAIT for availability of API: " + apiName + " with version: " + apiVersion
+            log.info("WAIT for availability of API: " + apiName + " with version: " + apiVersion
                                 + " with provider: " + apiProvider + " with Tenant Identifier: " + tenantIdentifier
                                 + " with expected response : " + expectedResponse);
 
             if (response != null) {
-                LOGGER.info("Data: " + response.getData());
+                log.info("Data: " + response.getData());
                 if (response.getData().contains(expectedResponse)) {
-                    LOGGER.info("API :" + apiName + " with version: " + apiVersion + " with expected response "
+                    log.info("API :" + apiName + " with version: " + apiVersion + " with expected response "
                                         + expectedResponse + " found");
                     break;
                 } else {
@@ -266,7 +277,7 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
                         keyManagerSuperTenantSessionCookie);
                 TenantInfoBean tenant = tenantManagementServiceClient.getTenant(providerTenantDomain);
                 if (tenant == null) {
-                    LOGGER.info("tenant is null: " + providerTenantDomain);
+                    log.info("tenant is null: " + providerTenantDomain);
                 } else {
                     tenantId = tenant.getTenantId();
                 }
@@ -293,7 +304,7 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
             loginLogoutClient = new LoginLogoutClient(automationContext);
             return loginLogoutClient.login();
         } catch (Exception e) {
-            LOGGER.error("session creation error", e);
+            log.error("session creation error", e);
             throw new MicroGWTestException("Session creation error", e);
         }
     }

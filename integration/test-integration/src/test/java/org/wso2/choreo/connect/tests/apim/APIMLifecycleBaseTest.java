@@ -150,6 +150,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
     protected HttpResponse subscribeToAPI(String apiId, String applicationId, String tier,
                                           RestAPIStoreImpl storeRestClient) throws MicroGWTestException {
         HttpResponse response = storeRestClient.createSubscription(apiId, applicationId, tier);
+        waitForXdsDeployment();
         if (Objects.isNull(response)) {
             throw new MicroGWTestException(
                     "Error while subscribing to the API. API Id : " + apiId + ", Application Id: " + applicationId);
@@ -191,6 +192,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
                                 .getData());
             }
             LOGGER.info("API Published :" + getAPIIdentifierStringFromAPIRequest(apiRequest));
+            waitForXdsDeployment();
             return createAPIResponse.getData();
         } else {
             throw new MicroGWTestException(
