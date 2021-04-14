@@ -18,8 +18,6 @@
 package org.wso2.choreo.connect.enforcer.server;
 
 import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
-import io.envoyproxy.envoy.service.auth.v3.CheckResponse;
-import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.api.API;
@@ -37,7 +35,7 @@ import java.util.Map;
 /**
  * This class handles the request coming via the external auth gRPC service.
  */
-public class HttpRequestHandler implements RequestHandler<CheckRequest, ResponseObject>{
+public class HttpRequestHandler implements RequestHandler<CheckRequest, ResponseObject> {
     private static final Logger logger = LogManager.getLogger(RequestHandler.class);
 
     public ResponseObject process(CheckRequest request) {
@@ -77,12 +75,14 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
             address = request.getAttributes().getSource().getAddress().getSocketAddress().getAddress();
         }
         address = FilterUtils.getClientIp(headers, address);
-        ResourceConfig resourceConfig = null;
-        if(api.getAPIConfig().getApiType() == APIConstants.ApiType.REST){
-            resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
-        }else{
-            resourceConfig = APIFactory.getInstance().getMatchedBasePath(api, requestPath);
-        }
+        ResourceConfig resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
+//        if (api.getAPIConfig().getApiType().equals(APIConstants.ApiType.REST)) {
+//            logger.info("RESSSST");
+//            resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
+//        } else {
+//            logger.info("WEBSOCKET");
+//            resourceConfig = APIFactory.getInstance().getMatchedBasePath(api, requestPath);
+//        }
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api).headers(headers).requestID(requestID).address(address).prodClusterHeader(prodCluster)
                 .sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis).build();

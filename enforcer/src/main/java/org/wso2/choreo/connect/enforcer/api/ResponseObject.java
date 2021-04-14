@@ -18,8 +18,6 @@
 
 package org.wso2.choreo.connect.enforcer.api;
 
-import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetadataContext;
-
 import java.util.Map;
 
 /**
@@ -34,7 +32,6 @@ public class ResponseObject {
     private Map<String, String> headerMap;
     private Map<String, String> metaDataMap;
     private boolean isDirectResponse = false;
-    private WebSocketMetadataContext webSocketMetadataContext;
 
     public ResponseObject(String correlationID) {
         this.correlationID = correlationID;
@@ -102,13 +99,5 @@ public class ResponseObject {
 
     public void setMetaDataMap(Map<String, String> metaDataMap) {
         this.metaDataMap = metaDataMap;
-    }
-
-    public WebSocketMetadataContext getWebSocketMetadataContext() {
-        return webSocketMetadataContext;
-    }
-
-    public void setWebSocketMetadataContext(WebSocketMetadataContext webSocketMetadataContext) {
-        this.webSocketMetadataContext = webSocketMetadataContext;
     }
 }

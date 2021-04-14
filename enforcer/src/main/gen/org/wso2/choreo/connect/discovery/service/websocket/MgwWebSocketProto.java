@@ -25,11 +25,6 @@ public final class MgwWebSocketProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_WebSocketFrameResponse_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_MetadataValue_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_MetadataValue_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -55,20 +50,19 @@ public final class MgwWebSocketProto {
       "ta\030\002 \001(\0132=.envoy.extensions.filters.http" +
       ".mgw_wasm_websocket.v3.Metadata\022\024\n\014frame" +
       "_length\030\003 \001(\005\022\021\n\tremote_ip\030\004 \001(\t\")\n\026WebS" +
-      "ocketFrameResponse\022\017\n\007message\030\001 \001(\t\"+\n\rM" +
-      "etadataValue\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t" +
-      "\"\264\001\n\010Metadata\022o\n\022ext_authz_metadata\030\001 \003(" +
-      "\0132S.envoy.extensions.filters.http.mgw_wa" +
-      "sm_websocket.v3.Metadata.ExtAuthzMetadat" +
-      "aEntry\0327\n\025ExtAuthzMetadataEntry\022\013\n\003key\030\001" +
-      " \001(\t\022\r\n\005value\030\002 \001(\t:\0028\0012\313\001\n\025WebSocketFra" +
-      "meService\022\261\001\n\020PublishFrameData\022J.envoy.e" +
-      "xtensions.filters.http.mgw_wasm_websocke" +
-      "t.v3.WebSocketFrameRequest\032K.envoy.exten" +
-      "sions.filters.http.mgw_wasm_websocket.v3" +
-      ".WebSocketFrameResponse\"\000(\0010\001BJ\n3org.wso" +
-      "2.choreo.connect.discovery.service.webso" +
-      "cketB\021MgwWebSocketProtoP\001b\006proto3"
+      "ocketFrameResponse\022\017\n\007message\030\001 \001(\t\"\264\001\n\010" +
+      "Metadata\022o\n\022ext_authz_metadata\030\001 \003(\0132S.e" +
+      "nvoy.extensions.filters.http.mgw_wasm_we" +
+      "bsocket.v3.Metadata.ExtAuthzMetadataEntr" +
+      "y\0327\n\025ExtAuthzMetadataEntry\022\013\n\003key\030\001 \001(\t\022" +
+      "\r\n\005value\030\002 \001(\t:\0028\0012\313\001\n\025WebSocketFrameSer" +
+      "vice\022\261\001\n\020PublishFrameData\022J.envoy.extens" +
+      "ions.filters.http.mgw_wasm_websocket.v3." +
+      "WebSocketFrameRequest\032K.envoy.extensions" +
+      ".filters.http.mgw_wasm_websocket.v3.WebS" +
+      "ocketFrameResponse\"\000(\0010\001BJ\n3org.wso2.cho" +
+      "reo.connect.discovery.service.websocketB" +
+      "\021MgwWebSocketProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -86,14 +80,8 @@ public final class MgwWebSocketProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_WebSocketFrameResponse_descriptor,
         new java.lang.String[] { "Message", });
-    internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_MetadataValue_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_MetadataValue_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_MetadataValue_descriptor,
-        new java.lang.String[] { "Key", "Value", });
     internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_descriptor =
-      getDescriptor().getMessageTypes().get(3);
+      getDescriptor().getMessageTypes().get(2);
     internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_descriptor,

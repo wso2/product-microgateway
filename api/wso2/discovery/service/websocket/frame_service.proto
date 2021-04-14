@@ -23,25 +23,27 @@ option java_package = "org.wso2.choreo.connect.discovery.service.websocket";
 option java_outer_classname = "MgwWebSocketProto";
 option java_multiple_files = true;
 
+// [#protodoc-title: WebSocketFrameService]
 service WebSocketFrameService {
   rpc PublishFrameData(stream WebSocketFrameRequest) returns (stream WebSocketFrameResponse) {}
 }
 
 message WebSocketFrameRequest {
+  // Unique Id / label of the router
   string node_id = 1;
+
+  // Ext_authz metadata
   Metadata metadata = 2;
+
+  // Web socket frame length
   int32 frame_length = 3;
 
+  // IP address of upstream service
   string remote_ip = 4;
 }
 
 message WebSocketFrameResponse {
   string message = 1;
-}
-
-message MetadataValue {
-  string key = 1;
-  string value = 2;
 }
 
 message Metadata {

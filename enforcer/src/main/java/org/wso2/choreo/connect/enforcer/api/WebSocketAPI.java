@@ -22,18 +22,20 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.enforcer.Filter;
 import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetaDataFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketResponseObject;
+import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleFilter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Specific implementation for a WebSocket API type APIs. Contains 2 filter chains to process initial HTTP request and
- * websocket frame metadata.
+ * websocket frame data.
  */
 public class WebSocketAPI implements API {
 
@@ -63,12 +65,12 @@ public class WebSocketAPI implements API {
                 .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity()).build();
         initFilters();
+        initUpgradeFilters();
         return basePath;
     }
 
     @Override
-    public ResponseObject process(
-            RequestContext requestContext) {
+    public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject();
         if (executeFilterChain(requestContext)) {
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
@@ -120,6 +122,19 @@ public class WebSocketAPI implements API {
         return true;
     }
 
+    public boolean executeUpgradeFilterChain(RequestContext requestContext) {
+        logger.info("upgrade filter chain");
+        boolean proceed;
+        for (Filter filter : getUpgradeFilters()) {
+            proceed = filter.handleRequest(requestContext);
+            logger.info("procced" + proceed);
+            if (!proceed) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     public List<Filter> getUpgradeFilters() {
         return upgradeFilters;
@@ -144,11 +159,20 @@ public class WebSocketAPI implements API {
         // TODO (LahiruUdayanga) - Initiate upgrade filter chain.
         // WebSocket throttle filter
         // WebSocket analytics filter
+        if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
+            WebSocketThrottleFilter webSocketThrottleFilter = new WebSocketThrottleFilter();
+            webSocketThrottleFilter.init(apiConfig);
+            this.upgradeFilters.add(webSocketThrottleFilter);
+        }
     }
 
-    public WebSocketResponseObject processMetadata(RequestContext requestContext) {
-        logger.info("XXXXXXXXX processMetadata"+requestContext.toString());
-        return null;
+    public WebSocketResponseObject processFramedata(RequestContext requestContext) {
+        logger.info("XXXXXXXXX processMetadata" + requestContext.toString());
+        if (executeUpgradeFilterChain(requestContext)) {
+            logger.info("XXXXXXXXXXXXXXXXXXXX Successful");
+            return WebSocketResponseObject.OK;
+        }
+        return WebSocketResponseObject.OVER_LIMIT;
     }
 
 

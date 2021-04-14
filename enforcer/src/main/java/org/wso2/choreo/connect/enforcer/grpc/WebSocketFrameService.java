@@ -20,24 +20,26 @@ package org.wso2.choreo.connect.enforcer.grpc;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.choreo.connect.enforcer.websocket.WebSocketResponseObserver;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameServiceGrpc;
+import org.wso2.choreo.connect.enforcer.websocket.WebSocketResponseObserver;
+
 
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * gRPC service for processing web socket frame related metadata for websocket throttling and analytics. This class
  * contains a ConcurrentHashMap of the StreamObservers that corresponds to open grpc bidirectional streams with
- * envoy mgw_websocket filter.
+ * envoy mgw_wasm_websocket filter.
  */
 public class WebSocketFrameService extends WebSocketFrameServiceGrpc.WebSocketFrameServiceImplBase {
     private static final Logger logger = LogManager.getLogger(WebSocketFrameService.class);
     private static ConcurrentHashMap<String, WebSocketResponseObserver> responseObservers = new ConcurrentHashMap<>();
     @Override
-    public StreamObserver<WebSocketFrameRequest> publishFrameData(StreamObserver<WebSocketFrameResponse> responseObserver) {
-        logger.debug("publishMetadata invoked from websocket meatadata service");
+    public StreamObserver<WebSocketFrameRequest> publishFrameData(StreamObserver<WebSocketFrameResponse>
+            responseObserver) {
+        logger.debug("publishMetadata invoked from websocket metadata service");
         return new WebSocketResponseObserver(responseObserver);
     }
 

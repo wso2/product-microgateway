@@ -115,6 +115,10 @@ private static final long serialVersionUID = 0L;
   public static final int NODE_ID_FIELD_NUMBER = 1;
   private volatile java.lang.Object nodeId_;
   /**
+   * <pre>
+   * Unique Id / label of the router
+   * </pre>
+   *
    * <code>string node_id = 1;</code>
    * @return The nodeId.
    */
@@ -132,6 +136,10 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
+   * <pre>
+   * Unique Id / label of the router
+   * </pre>
+   *
    * <code>string node_id = 1;</code>
    * @return The bytes for nodeId.
    */
@@ -153,6 +161,10 @@ private static final long serialVersionUID = 0L;
   public static final int METADATA_FIELD_NUMBER = 2;
   private org.wso2.choreo.connect.discovery.service.websocket.Metadata metadata_;
   /**
+   * <pre>
+   * Ext_authz metadata
+   * </pre>
+   *
    * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
    * @return Whether the metadata field is set.
    */
@@ -161,6 +173,10 @@ private static final long serialVersionUID = 0L;
     return metadata_ != null;
   }
   /**
+   * <pre>
+   * Ext_authz metadata
+   * </pre>
+   *
    * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
    * @return The metadata.
    */
@@ -169,6 +185,10 @@ private static final long serialVersionUID = 0L;
     return metadata_ == null ? org.wso2.choreo.connect.discovery.service.websocket.Metadata.getDefaultInstance() : metadata_;
   }
   /**
+   * <pre>
+   * Ext_authz metadata
+   * </pre>
+   *
    * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
    */
   @java.lang.Override
@@ -179,6 +199,10 @@ private static final long serialVersionUID = 0L;
   public static final int FRAME_LENGTH_FIELD_NUMBER = 3;
   private int frameLength_;
   /**
+   * <pre>
+   * Web socket frame length
+   * </pre>
+   *
    * <code>int32 frame_length = 3;</code>
    * @return The frameLength.
    */
@@ -190,6 +214,10 @@ private static final long serialVersionUID = 0L;
   public static final int REMOTE_IP_FIELD_NUMBER = 4;
   private volatile java.lang.Object remoteIp_;
   /**
+   * <pre>
+   * IP address of upstream service
+   * </pre>
+   *
    * <code>string remote_ip = 4;</code>
    * @return The remoteIp.
    */
@@ -207,6 +235,10 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
+   * <pre>
+   * IP address of upstream service
+   * </pre>
+   *
    * <code>string remote_ip = 4;</code>
    * @return The bytes for remoteIp.
    */
@@ -593,6 +625,10 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object nodeId_ = "";
     /**
+     * <pre>
+     * Unique Id / label of the router
+     * </pre>
+     *
      * <code>string node_id = 1;</code>
      * @return The nodeId.
      */
@@ -609,6 +645,10 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
+     * <pre>
+     * Unique Id / label of the router
+     * </pre>
+     *
      * <code>string node_id = 1;</code>
      * @return The bytes for nodeId.
      */
@@ -626,6 +666,10 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
+     * <pre>
+     * Unique Id / label of the router
+     * </pre>
+     *
      * <code>string node_id = 1;</code>
      * @param value The nodeId to set.
      * @return This builder for chaining.
@@ -641,6 +685,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
+     * <pre>
+     * Unique Id / label of the router
+     * </pre>
+     *
      * <code>string node_id = 1;</code>
      * @return This builder for chaining.
      */
@@ -651,6 +699,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
+     * <pre>
+     * Unique Id / label of the router
+     * </pre>
+     *
      * <code>string node_id = 1;</code>
      * @param value The bytes for nodeId to set.
      * @return This builder for chaining.
@@ -671,6 +723,10 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.service.websocket.Metadata, org.wso2.choreo.connect.discovery.service.websocket.Metadata.Builder, org.wso2.choreo.connect.discovery.service.websocket.MetadataOrBuilder> metadataBuilder_;
     /**
+     * <pre>
+     * Ext_authz metadata
+     * </pre>
+     *
      * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      * @return Whether the metadata field is set.
      */
@@ -678,6 +734,10 @@ private static final long serialVersionUID = 0L;
       return metadataBuilder_ != null || metadata_ != null;
     }
     /**
+     * <pre>
+     * Ext_authz metadata
+     * </pre>
+     *
      * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      * @return The metadata.
      */
@@ -689,6 +749,10 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
+     * <pre>
+     * Ext_authz metadata
+     * </pre>
+     *
      * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
     public Builder setMetadata(org.wso2.choreo.connect.discovery.service.websocket.Metadata value) {
@@ -705,6 +769,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
+     * <pre>
+     * Ext_authz metadata
+     * </pre>
+     *
      * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
     public Builder setMetadata(
@@ -719,6 +787,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
+     * <pre>
+     * Ext_authz metadata
+     * </pre>
+     *
      * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
     public Builder mergeMetadata(org.wso2.choreo.connect.discovery.service.websocket.Metadata value) {
@@ -737,6 +809,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
+     * <pre>
+     * Ext_authz metadata
+     * </pre>
+     *
      * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
     public Builder clearMetadata() {
@@ -751,6 +827,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
+     * <pre>
+     * Ext_authz metadata
+     * </pre>
+     *
      * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
     public org.wso2.choreo.connect.discovery.service.websocket.Metadata.Builder getMetadataBuilder() {
@@ -759,6 +839,10 @@ private static final long serialVersionUID = 0L;
       return getMetadataFieldBuilder().getBuilder();
     }
     /**
+     * <pre>
+     * Ext_authz metadata
+     * </pre>
+     *
      * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
     public org.wso2.choreo.connect.discovery.service.websocket.MetadataOrBuilder getMetadataOrBuilder() {
@@ -770,6 +854,10 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
+     * <pre>
+     * Ext_authz metadata
+     * </pre>
+     *
      * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.Metadata metadata = 2;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
@@ -788,6 +876,10 @@ private static final long serialVersionUID = 0L;
 
     private int frameLength_ ;
     /**
+     * <pre>
+     * Web socket frame length
+     * </pre>
+     *
      * <code>int32 frame_length = 3;</code>
      * @return The frameLength.
      */
@@ -796,6 +888,10 @@ private static final long serialVersionUID = 0L;
       return frameLength_;
     }
     /**
+     * <pre>
+     * Web socket frame length
+     * </pre>
+     *
      * <code>int32 frame_length = 3;</code>
      * @param value The frameLength to set.
      * @return This builder for chaining.
@@ -807,6 +903,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
+     * <pre>
+     * Web socket frame length
+     * </pre>
+     *
      * <code>int32 frame_length = 3;</code>
      * @return This builder for chaining.
      */
@@ -819,6 +919,10 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object remoteIp_ = "";
     /**
+     * <pre>
+     * IP address of upstream service
+     * </pre>
+     *
      * <code>string remote_ip = 4;</code>
      * @return The remoteIp.
      */
@@ -835,6 +939,10 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
+     * <pre>
+     * IP address of upstream service
+     * </pre>
+     *
      * <code>string remote_ip = 4;</code>
      * @return The bytes for remoteIp.
      */
@@ -852,6 +960,10 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
+     * <pre>
+     * IP address of upstream service
+     * </pre>
+     *
      * <code>string remote_ip = 4;</code>
      * @param value The remoteIp to set.
      * @return This builder for chaining.
@@ -867,6 +979,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
+     * <pre>
+     * IP address of upstream service
+     * </pre>
+     *
      * <code>string remote_ip = 4;</code>
      * @return This builder for chaining.
      */
@@ -877,6 +993,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
+     * <pre>
+     * IP address of upstream service
+     * </pre>
+     *
      * <code>string remote_ip = 4;</code>
      * @param value The bytes for remoteIp to set.
      * @return This builder for chaining.

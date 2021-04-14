@@ -1,5 +1,8 @@
 package org.wso2.choreo.connect.enforcer.websocket;
 
+/**
+ * WebSocketFrameContext contains web socket frame related information like frame length, remote ip
+ */
 public class WebSocketFrameContext {
     private String streamId;
     private int frameLength;

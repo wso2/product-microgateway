@@ -20,7 +20,6 @@ package org.wso2.choreo.connect.enforcer.api;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketFrameContext;
@@ -55,6 +54,7 @@ public class RequestContext {
     private Map<String, String> responseHeaders;
     private Map<String, String> metadataMap = new HashMap<>();
     private String requestPathTemplate;
+    // Consist of web socket frame related data like frame length, remote IP
     private WebSocketFrameContext webSocketFrameContext;
 
     // Request Timestamp is required for analytics
@@ -165,7 +165,7 @@ public class RequestContext {
             return this;
         }
 
-        public Builder webSocketFrameContext(WebSocketFrameContext webSocketFrameContext){
+        public Builder webSocketFrameContext(WebSocketFrameContext webSocketFrameContext) {
             this.webSocketFrameContext = webSocketFrameContext;
             return this;
         }
@@ -200,7 +200,7 @@ public class RequestContext {
                 requestContext.clusterHeaderEnabled = true;
             }
 
-            if(this.webSocketFrameContext != null){
+            if (this.webSocketFrameContext != null) {
                 requestContext.webSocketFrameContext = this.webSocketFrameContext;
             }
 

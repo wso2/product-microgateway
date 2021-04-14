@@ -20,11 +20,14 @@ package org.wso2.choreo.connect.enforcer.websocket;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.choreo.connect.enforcer.grpc.WebSocketFrameService;
-import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetadataContext;
-import org.wso2.choreo.connect.enforcer.server.WebSocketHandler;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.grpc.WebSocketFrameService;
+import org.wso2.choreo.connect.enforcer.server.WebSocketHandler;
+
+
+import java.util.Map;
 
 /**
  * Wrapper class for StreamObserver<RateLimitRequest> with extra fields added to identify relevant information about
@@ -33,21 +36,23 @@ import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRespons
 public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameRequest> {
 
     private static final Logger logger = LogManager.getLogger(WebSocketResponseObserver.class);
-    private WebSocketMetadataContext webSocketMetadataContext;
+    private String apiThrottleKey;
+    private String subscriptionThrottleKey;
+    private String applicationThrottleKey;
     private final StreamObserver<WebSocketFrameResponse> responseStreamObserver;
     private final WebSocketHandler webSocketHandler = new WebSocketHandler();
     private String streamId;
-    private int count;
+    private boolean throttleKeysInitiated;
 
     public WebSocketResponseObserver(StreamObserver<WebSocketFrameResponse> responseStreamObserver) {
         this.responseStreamObserver = responseStreamObserver;
-        this.count = 0;
     }
 
     @Override
     public void onNext(WebSocketFrameRequest webSocketFrameRequest) {
-        count++;
-        logger.info("Count: "+ count);
+        if (!this.throttleKeysInitiated) {
+            initializeThrottleKeys(webSocketFrameRequest);
+        }
         logger.info(webSocketFrameRequest.toString());
         logger.info(webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap());
 //        logger.info(webSocketFrameRequest.getFilterMetadata().getMetadataList().get(1));
@@ -61,7 +66,7 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
 
     @Override
     public void onError(Throwable throwable) {
-        logger.debug("websocket metadata service onError: " + throwable.toString());
+        logger.info("websocket metadata service onError: " + throwable.toString());
         WebSocketFrameService.removeObserver(streamId);
     }
 
@@ -70,9 +75,30 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
         WebSocketFrameService.removeObserver(streamId);
     }
 
-//    private String getStreamId(WebSocketFrameRequest webSocketFrameRequest) {
-//        return webSocketFrameRequest.getMetadata().get(APIConstants.EXT_AUTHZ_METADATA).getFieldsMap().get(APIConstants.WEBSOCKET_STREAM_ID)
-//                .getStringValue();
-//    }
+    private void initializeThrottleKeys(WebSocketFrameRequest webSocketFrameRequest) {
+        Map<String, String> extAuthMetadata = webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap();
+        String basePath = extAuthMetadata.get(APIConstants.GW_BASE_PATH_PARAM);
+        String version = extAuthMetadata.get(APIConstants.GW_VERSION_PARAM);
+        String applicationId = extAuthMetadata.get(MetadataConstants.APP_ID);
+        String streamId = extAuthMetadata.get(MetadataConstants.GRPC_STREAM_ID);
+        String apiContext = basePath + ':' + version;
+        this.apiThrottleKey = apiContext;
+        this.subscriptionThrottleKey = applicationId + ":" + apiContext;
+        this.applicationThrottleKey = applicationId;
+        this.streamId = streamId;
+        WebSocketFrameService.addObserver(streamId, this);
+        this.throttleKeysInitiated = true;
+    }
 
+    public String getApiThrottleKey() {
+        return apiThrottleKey;
+    }
+
+    public String getSubscriptionThrottleKey() {
+        return subscriptionThrottleKey;
+    }
+
+    public String getApplicationThrottleKey() {
+        return applicationThrottleKey;
+    }
 }

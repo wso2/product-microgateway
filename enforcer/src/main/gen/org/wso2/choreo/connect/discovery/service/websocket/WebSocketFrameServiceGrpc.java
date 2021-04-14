@@ -16,6 +16,9 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
 import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
+ * <pre>
+ * [#protodoc-title: WebSocketFrameService]
+ * </pre>
  */
 @javax.annotation.Generated(
     value = "by gRPC proto compiler (version 1.33.1)",
@@ -103,6 +106,9 @@ public final class WebSocketFrameServiceGrpc {
   }
 
   /**
+   * <pre>
+   * [#protodoc-title: WebSocketFrameService]
+   * </pre>
    */
   public static abstract class WebSocketFrameServiceImplBase implements io.grpc.BindableService {
 
@@ -127,6 +133,9 @@ public final class WebSocketFrameServiceGrpc {
   }
 
   /**
+   * <pre>
+   * [#protodoc-title: WebSocketFrameService]
+   * </pre>
    */
   public static final class WebSocketFrameServiceStub extends io.grpc.stub.AbstractAsyncStub<WebSocketFrameServiceStub> {
     private WebSocketFrameServiceStub(
@@ -150,6 +159,9 @@ public final class WebSocketFrameServiceGrpc {
   }
 
   /**
+   * <pre>
+   * [#protodoc-title: WebSocketFrameService]
+   * </pre>
    */
   public static final class WebSocketFrameServiceBlockingStub extends io.grpc.stub.AbstractBlockingStub<WebSocketFrameServiceBlockingStub> {
     private WebSocketFrameServiceBlockingStub(
@@ -165,6 +177,9 @@ public final class WebSocketFrameServiceGrpc {
   }
 
   /**
+   * <pre>
+   * [#protodoc-title: WebSocketFrameService]
+   * </pre>
    */
   public static final class WebSocketFrameServiceFutureStub extends io.grpc.stub.AbstractFutureStub<WebSocketFrameServiceFutureStub> {
     private WebSocketFrameServiceFutureStub(

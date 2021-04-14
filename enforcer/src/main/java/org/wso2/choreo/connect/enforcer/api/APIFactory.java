@@ -66,12 +66,12 @@ public class APIFactory {
         ConcurrentHashMap<String, API> newApis = new ConcurrentHashMap<>();
 
         for (Api api : apis) {
-            if(api.getApiType().equals(APIConstants.ApiType.REST)){
+            if (api.getApiType().equals(APIConstants.ApiType.REST)) {
                 RestAPI enforcerApi = new RestAPI();
                 enforcerApi.init(api);
                 String apiKey = getApiKey(enforcerApi);
                 newApis.put(apiKey, enforcerApi);
-            }else{
+            } else {
                 WebSocketAPI webSocketAPI = new WebSocketAPI();
                 webSocketAPI.init(api);
                 String apiKey = getApiKey(webSocketAPI);
@@ -96,7 +96,7 @@ public class APIFactory {
         String vHost = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_VHOST_PARAM);
         String basePath = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_BASE_PATH_PARAM);
         String version = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_VERSION_PARAM);
-        String apiKey = getApiKey(vHost,basePath, version);
+        String apiKey = getApiKey(vHost, basePath, version);
         if (logger.isDebugEnabled()) {
             logger.debug("Looking for matching API with basepath: {} and version: {}", basePath, version);
         }
