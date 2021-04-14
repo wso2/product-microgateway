@@ -1,11 +1,26 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.choreo.connect.tests.testCases.throttle;
 
 import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
 import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.awaitility.Awaitility;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -21,29 +36,20 @@ import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
 import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
-import org.wso2.am.integration.test.utils.bean.APIRequest;
-import org.wso2.am.integration.test.utils.http.HTTPSClientUtils;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
-import org.wso2.choreo.connect.tests.apim.APIMLifecycleBaseTest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
-import org.wso2.choreo.connect.tests.util.Utils;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.testng.Assert.assertEquals;
 
-public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
-    private static final Logger log = LogManager.getLogger(AdvanceThrottlingTestCase.class);
+public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
     private final String THROTTLED_IP = "10.100.1.22";
     private final String THROTTLED_HEADER = "10.100.7.77";
     private final String THROTTLED_QUERY_PARAM = "name";
@@ -54,8 +60,8 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
     private final String conditionalPolicyName = "APIPolicyWithConditionLimit";
     private final long limit5Req = 5L;
     private final long limit10Req = 10L;
+    private final long limitNoThrottle = 20L;
     private final long limit1000Req = 1000L;
-    private APIRequest apiRequest;
     private String apiId;
     private String endpointURL;
     private String apiPolicyId;
@@ -117,33 +123,15 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
                 appCreationResponse.getConsumerSecret(), new String[]{}, user, restAPIStore);
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
-        apiRequest = new APIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT,
-                new URL(Utils.getDockerMockServiceURLHttp("/v2")));
-        String API_VERSION_1_0_0 = "1.0.0";
-        apiRequest.setProvider(user.getUserName());
-        apiRequest.setVersion(API_VERSION_1_0_0);
-        apiRequest.setTiersCollection(TestConstant.API_TIER.UNLIMITED);
-        apiRequest.setTier(TestConstant.API_TIER.UNLIMITED);
-        apiRequest.setApiTier(apiPolicyName);
-
-        APIOperationsDTO apiOperationsDTO1 = new APIOperationsDTO();
-        apiOperationsDTO1.setVerb("GET");
-        apiOperationsDTO1.setTarget("/pet/findByStatus");
-        apiOperationsDTO1.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
-
-        List<APIOperationsDTO> operationsDTOS = new ArrayList<>();
-        operationsDTOS.add(apiOperationsDTO1);
-        apiRequest.setOperationsDTOS(operationsDTOS);
-
+        createThrottleApi(apiPolicyName, TestConstant.API_TIER.UNLIMITED, TestConstant.API_TIER.UNLIMITED);
         // get a predefined api request
-        apiId = createAndPublishAPIWithoutRequireReSubscription(apiRequest, restAPIPublisher);
-        endpointURL = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
+        endpointURL = getThrottleAPIEndpoint();
 
         HttpResponse subscriptionResponse = subscribeToAPI(apiId, applicationId,
                 TestConstant.SUBSCRIPTION_TIER.UNLIMITED, restAPIStore);
 
         assertEquals(subscriptionResponse.getResponseCode(), HttpStatus.SC_OK,
-                "Failed to subscribe to the API " + getAPIIdentifierStringFromAPIRequest(apiRequest));
+                "Failed to subscribe to the API");
     }
 
 
@@ -158,7 +146,7 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
 
         // create Revision and Deploy to Gateway
         createAPIRevisionAndDeploy(apiId, restAPIPublisher);
-        Assert.assertTrue(isThrottled(requestHeaders, null, limit5Req),
+        Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, limit5Req),
                 "Request not throttled by request count condition in api tier");
     }
 
@@ -174,24 +162,23 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
                 "API tier not updated.");
         // create Revision and Deploy to Gateway
         createAPIRevisionAndDeploy(apiId, restAPIPublisher);
-        Assert.assertFalse(isThrottled(requestHeaders, null, -1),
+        boolean tUnlimited = isThrottled(endpointURL, requestHeaders, null, limitNoThrottle);
+        Assert.assertFalse(tUnlimited,
                 "Request was throttled unexpectedly in Unlimited API tier");
 
         apidto.setApiThrottlingPolicy(conditionalPolicyName);
         updatedAPI = restAPIPublisher.updateAPI(apidto, apiId);
         Assert.assertEquals(updatedAPI.getApiThrottlingPolicy(), conditionalPolicyName,
                 "API tier not updated.");
-        Assert.assertFalse(isThrottled(requestHeaders, null, -1),
-                "Request not need to throttle since policy was Unlimited");
         // create Revision and Deploy to Gateway
         createAPIRevisionAndDeploy(apiId, restAPIPublisher);
-
         requestHeaders.put(HttpHeaders.X_FORWARDED_FOR, "192.100.1.24");
-        Assert.assertFalse(isThrottled(requestHeaders, null, limit10Req),
+        boolean tNotinCondition = isThrottled(endpointURL, requestHeaders, null, limit10Req);
+        Assert.assertFalse(tNotinCondition,
                 "Request shouldn't throttle for an IP not in a condition");
 
         requestHeaders.put(HttpHeaders.X_FORWARDED_FOR, THROTTLED_IP);
-        Assert.assertTrue(isThrottled(requestHeaders, null, limit10Req),
+        Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, limit10Req),
                 "Request need to throttle since policy was updated");
         requestHeaders.remove(HttpHeaders.X_FORWARDED_FOR);
     }
@@ -206,11 +193,11 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
                 "API tier not updated.");
 
         requestHeaders.put(HttpHeaders.HOST, "19.2.1.2");
-        Assert.assertFalse(isThrottled(requestHeaders, null, limit10Req),
+        Assert.assertFalse(isThrottled(endpointURL, requestHeaders, null, limit10Req),
                 "Request shouldn't throttle for a host not in a condition");
 
         requestHeaders.put(HttpHeaders.HOST, THROTTLED_HEADER);
-        Assert.assertTrue(isThrottled(requestHeaders, null, limit10Req),
+        Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, limit10Req),
                 "Request not throttled by request count header condition in API tier");
         requestHeaders.remove(HttpHeaders.HOST);
     }
@@ -225,10 +212,10 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
                 "API tier not updated.");
         Map<String, String> queryParams = new HashMap<>();
         queryParams.put(THROTTLED_QUERY_PARAM, "foo");
-        Assert.assertFalse(isThrottled(requestHeaders, queryParams, limit10Req),
+        Assert.assertFalse(isThrottled(endpointURL, requestHeaders, queryParams, limit10Req),
                 "Request shouldn't throttle for a query param not in a condition");
         queryParams.put(THROTTLED_QUERY_PARAM, THROTTLED_QUERY_PARAM_VALUE);
-        Assert.assertTrue(isThrottled(requestHeaders, queryParams, limit10Req),
+        Assert.assertTrue(isThrottled(endpointURL, requestHeaders, queryParams, limit10Req),
                 "Request not throttled by request count query parameter condition in API tier");
     }
 
@@ -241,7 +228,6 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
         Assert.assertEquals(apidto.getApiThrottlingPolicy(), conditionalPolicyName,
                 "API tier not updated.");
 
-
         ApplicationDTO app = new ApplicationDTO();
         app.setName(THROTTLED_CLAIM);
         app.setDescription("Test Application for JWT condition");
@@ -250,52 +236,16 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
         ApplicationCreationResponse appCreationResponse = createApplicationWithKeys(app, restAPIStore);
         HttpResponse subscriptionResponse = subscribeToAPI(apiId, appCreationResponse.getApplicationId(),
                 TestConstant.SUBSCRIPTION_TIER.UNLIMITED, restAPIStore);
-        assertEquals(subscriptionResponse.getResponseCode(), HttpStatus.SC_OK,
-                "Failed to subscribe to the API " + getAPIIdentifierStringFromAPIRequest(apiRequest));
+        assertEquals(subscriptionResponse.getResponseCode(), HttpStatus.SC_OK, "Failed to subscribe to the API");
         String accessToken = generateUserAccessToken(appCreationResponse.getConsumerKey(),
                 appCreationResponse.getConsumerSecret(), new String[]{}, user, restAPIStore);
 
         String origToken = requestHeaders.get(HttpHeaders.AUTHORIZATION);
         requestHeaders.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-        Assert.assertTrue(isThrottled(requestHeaders, null,limit10Req),
+        Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null,limit10Req),
                 "Request not throttled by request count jwt claim condition in API tier");
         // replace with original token so that rest of the test cases will use initial token
         requestHeaders.put(HttpHeaders.AUTHORIZATION, "Bearer " + origToken);
-    }
-
-    private boolean isThrottled(Map<String, String> requestHeaders, Map<String, String> queryParams,
-                                long expectedCount) throws InterruptedException, IOException {
-        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
-                isResponseAvailable(endpointURL, requestHeaders));
-
-        StringBuilder url = new StringBuilder(endpointURL);
-        if (queryParams != null) {
-            int i = 0;
-            if (expectedCount == -1) {
-                expectedCount = 21;
-            }
-            for (Map.Entry<String, String> entry : queryParams.entrySet()) {
-                System.out.println(entry.getKey() + "/" + entry.getValue());
-                if (i == 0) {
-                    url.append(url).append("?").append(entry.getKey()).append("=").append(entry.getValue());
-                } else {
-                    url.append(url).append("&").append(entry.getKey()).append("=").append(entry.getValue());
-                }
-                i++;
-            }
-        }
-        HttpResponse response;
-        boolean isThrottled = false;
-        for (int j = 0; j < expectedCount; j++) {
-            response = HTTPSClientUtils.doGet(url.toString(), requestHeaders);
-            log.info("============== Response " + response.getResponseCode());
-            if (response.getResponseCode() == 429) {
-                isThrottled = true;
-                break;
-            }
-            Thread.sleep(500);
-        }
-        return isThrottled;
     }
 
     /**
@@ -350,6 +300,7 @@ public class AdvanceThrottlingTestCase extends APIMLifecycleBaseTest {
         claimGrp.add(jwtClaimsCondition);
         conditionalGroups.add(DtoFactory.createConditionalGroupDTO(
                 "JWT Claim conditional group", claimGrp, limit));
+
         return conditionalGroups;
     }
 
