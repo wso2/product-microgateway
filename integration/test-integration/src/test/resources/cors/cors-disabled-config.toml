@@ -211,7 +211,7 @@ allowCredentials = false
     certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 [controlPlane]
-  enabled = true
+  enabled = false
   serviceUrl = "https://apim:9443/"
   username="admin"
   password="$env{cp_admin_pwd}"
