@@ -138,14 +138,6 @@ func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server,
 			logger.LoggerMgw.Error(err)
 		}
 	}()
-
-	go func() {
-		if err = auth.Init(); err != nil {
-			logger.LoggerMgw.Error("Error while initializing autherization component.", err)
-		}
-		logger.LoggerMgw.Debug("Updating health status of AuthService")
-		health.AuthService.SetStatus(err == nil)
-	}()
 }
 
 // Run starts the XDS server and Rest API server.
@@ -212,7 +204,13 @@ func Run(conf *config.Config) {
 		xds.UpdateEnforcerApis(env, apis)
 	}
 
-	go restserver.StartRestServer(conf)
+	// Adapter REST API
+	if conf.Adapter.Server.Enabled {
+		if err := auth.Init(); err != nil {
+			logger.LoggerMgw.Error("Error while initializing authorization component.", err)
+		}
+		go restserver.StartRestServer(conf)
+	}
 
 	eventHubEnabled := conf.ControlPlane.EventHub.Enabled
 	if eventHubEnabled {

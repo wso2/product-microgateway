@@ -18,7 +18,6 @@ var (
 
 // Service components to be set health status
 const (
-	AuthService service = "adapter.internal.Authorization"
 	RestService service = "adapter.internal.RestService"
 )
 

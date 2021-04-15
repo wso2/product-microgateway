@@ -130,7 +130,7 @@ data:
 
     [enforcer.jwtIssuer]
       enabled = true
-      issuer = "https://localhost:9095/testkey"
+      issuer = "https://adapter:9095/testkey"
       encoding = "base64" # base64,base64url
       claimDialect = ""
       signingAlgorithm = "SHA256withRSA"

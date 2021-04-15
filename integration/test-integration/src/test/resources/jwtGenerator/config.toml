@@ -1,6 +1,7 @@
 [adapter]
 # The configuration file for mgw
 [adapter.server]
+  enabled = true
   host = "0.0.0.0"
   port = "9843"
   tokenTTL = "1h"
