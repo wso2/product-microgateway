@@ -151,7 +151,7 @@ public class AnalyticsFilter {
             logger.error("Cannot publish the failure event as analytics publisher is null.");
             return;
         }
-        MgwFaultAnalyticsProvider provider = new MgwFaultAnalyticsProvider(requestContext);
+        ChoreoFaultAnalyticsProvider provider = new ChoreoFaultAnalyticsProvider(requestContext);
         // To avoid incrementing counter for options call
         if (provider.getProxyResponseCode() == 200 || provider.getProxyResponseCode() == 204) {
             return;

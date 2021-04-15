@@ -45,11 +45,11 @@ import java.util.Map;
 /**
  * Analytics Data Provider of Microgateway
  */
-public class MgwAnalyticsProvider implements AnalyticsDataProvider {
+public class ChoreoAnalyticsProvider implements AnalyticsDataProvider {
     private static final Logger logger = LogManager.getLogger(APIFactory.class);
     private final HTTPAccessLogEntry logEntry;
 
-    public MgwAnalyticsProvider(HTTPAccessLogEntry logEntry) {
+    public ChoreoAnalyticsProvider(HTTPAccessLogEntry logEntry) {
         this.logEntry = logEntry;
     }
 

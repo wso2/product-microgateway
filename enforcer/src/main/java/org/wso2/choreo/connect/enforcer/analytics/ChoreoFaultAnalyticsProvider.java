@@ -43,11 +43,11 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 /**
  * Generate FaultDTO for the errors generated from enforcer.
  */
-public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
+public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
     private final RequestContext requestContext;
-    private static final Logger logger = LogManager.getLogger(MgwFaultAnalyticsProvider.class);
+    private static final Logger logger = LogManager.getLogger(ChoreoFaultAnalyticsProvider.class);
 
-    public MgwFaultAnalyticsProvider(RequestContext requestContext) {
+    public ChoreoFaultAnalyticsProvider(RequestContext requestContext) {
         this.requestContext = requestContext;
     }
 
