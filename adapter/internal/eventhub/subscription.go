@@ -114,7 +114,7 @@ func init() {
 // LoadSubscriptionData loads subscription data from control-plane
 func LoadSubscriptionData(configFile *config.Config) {
 	conf = configFile
-	accessToken = auth.GetBasicAuth(configFile.ControlPlane.EventHub.Username, configFile.ControlPlane.EventHub.Password)
+	accessToken = auth.GetBasicAuth(configFile.ControlPlane.Username, configFile.ControlPlane.Password)
 
 	var responseChannel = make(chan response)
 	for _, url := range resources {
@@ -122,7 +122,7 @@ func LoadSubscriptionData(configFile *config.Config) {
 	}
 
 	// Take the configured labels from the adapter
-	configuredEnvs := conf.ControlPlane.EventHub.EnvironmentLabels
+	configuredEnvs := conf.ControlPlane.EnvironmentLabels
 
 	// If no environments are configured, default gateway label value is assigned.
 	if len(configuredEnvs) == 0 {
@@ -182,7 +182,7 @@ func LoadSubscriptionData(configFile *config.Config) {
 func InvokeService(endpoint string, responseType interface{}, queryParamMap map[string]string, c chan response,
 	retryAttempt int) {
 
-	serviceURL := conf.ControlPlane.EventHub.ServiceURL + internalWebAppEP + endpoint
+	serviceURL := conf.ControlPlane.ServiceURL + internalWebAppEP + endpoint
 	// Create the request
 	req, err := http.NewRequest("GET", serviceURL, nil)
 	// gatewayLabel will only be required for apis endpoint
@@ -205,7 +205,7 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	}
 
 	// Check if TLS is enabled
-	skipSSL := conf.ControlPlane.EventHub.SkipSSLVerification
+	skipSSL := conf.ControlPlane.SkipSSLVerification
 	logger.LoggerSubscription.Debugf("Skip SSL Verification: %v", skipSSL)
 	tr := &http.Transport{}
 	if !skipSSL {

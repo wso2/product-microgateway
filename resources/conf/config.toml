@@ -122,7 +122,7 @@ allowCredentials = false
 # Throttling configurations
 [enforcer.throttling]
   # Connect with the central traffic manager
-  enableGlobalEventPublishing = true
+  enableGlobalEventPublishing = false
   # Enable global advanced throttling based on request header conditions
   enableHeaderConditions = false
   # Enable global advanced throttling based on request query parameter conditions
@@ -217,9 +217,8 @@ allowCredentials = false
     # Certificate Filepath within enforcer
     certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
+# Control plane's connection details
 [controlPlane]
-# Control plane's eventHub details
-[controlPlane.eventHub]
   enabled = false
   serviceUrl = "https://apim:9443/"
   username="admin"
@@ -228,7 +227,7 @@ allowCredentials = false
   retryInterval = 5
   skipSSLVerification=true
   # Message broker connection URL of the control plane
-    [controlPlane.eventHub.jmsConnectionParameters]
+    [controlPlane.jmsConnectionParameters]
         eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
 
 [analytics]

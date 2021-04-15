@@ -131,13 +131,6 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		},
 		Cache:     cache,
 		Analytics: analytics,
-		Eventhub: &enforcer.EventHub{
-			Enabled:    config.ControlPlane.EventHub.Enabled,
-			ServiceUrl: config.ControlPlane.EventHub.ServiceURL,
-			JmsConnectionParameters: &enforcer.JmsConnectionParameters{
-				EventListeningEndpoints: config.ControlPlane.EventHub.JmsConnectionParameters.EventListeningEndpoints,
-			},
-		},
 		Throttling: &enforcer.Throttling{
 			EnableGlobalEventPublishing:        config.Enforcer.Throttling.EnableGlobalEventPublishing,
 			EnableHeaderConditions:             config.Enforcer.Throttling.EnableHeaderConditions,

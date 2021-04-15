@@ -207,8 +207,6 @@ allowCredentials = true
     certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 [controlPlane]
-# Control plane's eventHub details
-[controlPlane.eventHub]
 enabled = false
 serviceUrl = "https://localhost:9443/"
 username="admin"
@@ -217,5 +215,5 @@ environmentLabels = ["Production and Sandbox"]
 retryInterval = 5
 skipSSLVerification=true
 # Message broker connection URL of the control plane
-[controlPlane.eventHub.jmsConnectionParameters]
+[controlPlane.jmsConnectionParameters]
 eventListeningEndpoints = ["amqp://admin:admin@localhost:5672?retries='5'&connectdelay='30000'"]
