@@ -86,7 +86,7 @@ maximumSize = 10000
 expiryTime = 15
 
 [enforcer.jwtGenerator]
-enable = false
+enable = true
 encoding = "base64" # base64,base64url
 claimDialect = "http://wso2.org/claims"
 convertDialect = false

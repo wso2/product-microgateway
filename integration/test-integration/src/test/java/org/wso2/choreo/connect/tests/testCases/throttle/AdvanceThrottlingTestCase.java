@@ -45,13 +45,14 @@ import org.wso2.choreo.connect.tests.util.TestConstant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 
 public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
     private final String THROTTLED_IP = "10.100.1.22";
-    private final String THROTTLED_HEADER = "10.100.7.77";
+    private final String THROTTLED_HEADER = "cc_integration";
     private final String THROTTLED_QUERY_PARAM = "name";
     private final String THROTTLED_QUERY_PARAM_VALUE = "admin";
     private final String THROTTLED_CLAIM = "ClaimApp";
@@ -83,15 +84,6 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         ThrottleLimitDTO limitForConditions =
                 DtoFactory.createThrottleLimitDTO(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT, tenPerMin, null);
 
-        // creating the application
-        ApplicationDTO app = new ApplicationDTO();
-        app.setName("AdvanceThrottlingApp");
-        app.setDescription("Test Application for AdvanceThrottling");
-        app.setThrottlingPolicy(TestConstant.APPLICATION_TIER.UNLIMITED);
-        app.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
-        ApplicationCreationResponse appCreationResponse = createApplicationWithKeys(app, restAPIStore);
-        String applicationId = appCreationResponse.getApplicationId();
-
         // create the advanced throttling policy with no conditions
         AdvancedThrottlePolicyDTO apiPolicyDto = DtoFactory
                 .createAdvancedThrottlePolicyDTO(apiPolicyName, "", "", false, defaultLimit,
@@ -118,22 +110,31 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         conditionalPolicyId = addedConditionPolicyDto.getPolicyId();
         Assert.assertNotNull(conditionalPolicyId, "The policy ID cannot be null or empty");
 
+        // creating the application
+        ApplicationDTO app = new ApplicationDTO();
+        app.setName("AdvanceThrottlingApp");
+        app.setDescription("Test Application for AdvanceThrottling");
+        app.setThrottlingPolicy(TestConstant.APPLICATION_TIER.UNLIMITED);
+        app.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
+        ApplicationCreationResponse appCreationResponse = createApplicationWithKeys(app, restAPIStore);
+        String applicationId = appCreationResponse.getApplicationId();
         // create the request headers after generating the access token
         String accessToken = generateUserAccessToken(appCreationResponse.getConsumerKey(),
                 appCreationResponse.getConsumerSecret(), new String[]{}, user, restAPIStore);
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
-        createThrottleApi(apiPolicyName, TestConstant.API_TIER.UNLIMITED, TestConstant.API_TIER.UNLIMITED);
+        apiId = createThrottleApi(TestConstant.API_TIER.UNLIMITED, TestConstant.API_TIER.UNLIMITED,
+                TestConstant.API_TIER.UNLIMITED);
         // get a predefined api request
         endpointURL = getThrottleAPIEndpoint();
 
         HttpResponse subscriptionResponse = subscribeToAPI(apiId, applicationId,
                 TestConstant.SUBSCRIPTION_TIER.UNLIMITED, restAPIStore);
 
-        assertEquals(subscriptionResponse.getResponseCode(), HttpStatus.SC_OK,
-                "Failed to subscribe to the API");
+        assertEquals(subscriptionResponse.getResponseCode(), HttpStatus.SC_OK, "Failed to subscribe to the API");
+        // this is to wait until policy deployment is complete in case it didn't complete already
+        Thread.sleep(TestConstant.DEPLOYMENT_WAIT_TIME);
     }
-
 
     @Test(description = "Test API level throttling with default limits")
     public void testAPILevelThrottling() throws Exception {
@@ -146,10 +147,11 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
 
         // create Revision and Deploy to Gateway
         createAPIRevisionAndDeploy(apiId, restAPIPublisher);
+        waitForXdsDeployment();
         Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, limit5Req),
                 "Request not throttled by request count condition in api tier");
+        Thread.sleep(40000); // wait until throttle decision expires
     }
-
 
     @Test(description = "Test Advance throttling with IP Condition", dependsOnMethods = {"testAPILevelThrottling"})
     public void testAPILevelThrottlingWithIpCondition() throws Exception {
@@ -157,13 +159,14 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         Gson gson = new Gson();
         APIDTO apidto = gson.fromJson(api.getData(), APIDTO.class);
         apidto.setApiThrottlingPolicy(APIMIntegrationConstants.API_TIER.UNLIMITED);
+        apidto.getOperations().forEach(op -> op.setThrottlingPolicy(APIMIntegrationConstants.RESOURCE_TIER.UNLIMITED));
         APIDTO updatedAPI = restAPIPublisher.updateAPI(apidto, apiId);
         Assert.assertEquals(updatedAPI.getApiThrottlingPolicy(), APIMIntegrationConstants.API_TIER.UNLIMITED,
                 "API tier not updated.");
         // create Revision and Deploy to Gateway
         createAPIRevisionAndDeploy(apiId, restAPIPublisher);
-        boolean tUnlimited = isThrottled(endpointURL, requestHeaders, null, limitNoThrottle);
-        Assert.assertFalse(tUnlimited,
+        waitForXdsDeployment();
+        Assert.assertFalse(isThrottled(endpointURL, requestHeaders, null, limitNoThrottle),
                 "Request was throttled unexpectedly in Unlimited API tier");
 
         apidto.setApiThrottlingPolicy(conditionalPolicyName);
@@ -172,14 +175,14 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
                 "API tier not updated.");
         // create Revision and Deploy to Gateway
         createAPIRevisionAndDeploy(apiId, restAPIPublisher);
+        waitForXdsDeployment();
         requestHeaders.put(HttpHeaders.X_FORWARDED_FOR, "192.100.1.24");
-        boolean tNotinCondition = isThrottled(endpointURL, requestHeaders, null, limit10Req);
-        Assert.assertFalse(tNotinCondition,
+        Assert.assertFalse(isThrottled(endpointURL, requestHeaders, null, limit10Req),
                 "Request shouldn't throttle for an IP not in a condition");
 
         requestHeaders.put(HttpHeaders.X_FORWARDED_FOR, THROTTLED_IP);
         Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, limit10Req),
-                "Request need to throttle since policy was updated");
+                "Request not throttled by request count IP condition in API tier");
         requestHeaders.remove(HttpHeaders.X_FORWARDED_FOR);
     }
 
@@ -192,14 +195,14 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         Assert.assertEquals(apidto.getApiThrottlingPolicy(), conditionalPolicyName,
                 "API tier not updated.");
 
-        requestHeaders.put(HttpHeaders.HOST, "19.2.1.2");
+        requestHeaders.put(HttpHeaders.USER_AGENT, "http_client");
         Assert.assertFalse(isThrottled(endpointURL, requestHeaders, null, limit10Req),
                 "Request shouldn't throttle for a host not in a condition");
 
-        requestHeaders.put(HttpHeaders.HOST, THROTTLED_HEADER);
+        requestHeaders.put(HttpHeaders.USER_AGENT, THROTTLED_HEADER);
         Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, limit10Req),
                 "Request not throttled by request count header condition in API tier");
-        requestHeaders.remove(HttpHeaders.HOST);
+        requestHeaders.remove(HttpHeaders.USER_AGENT);
     }
 
     @Test(description = "Test Advance throttling with query param Condition",
@@ -208,8 +211,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         HttpResponse api = restAPIPublisher.getAPI(apiId);
         Gson gson = new Gson();
         APIDTO apidto = gson.fromJson(api.getData(), APIDTO.class);
-        Assert.assertEquals(apidto.getApiThrottlingPolicy(), conditionalPolicyName,
-                "API tier not updated.");
+        Assert.assertEquals(apidto.getApiThrottlingPolicy(), conditionalPolicyName, "API tier not updated.");
         Map<String, String> queryParams = new HashMap<>();
         queryParams.put(THROTTLED_QUERY_PARAM, "foo");
         Assert.assertFalse(isThrottled(endpointURL, requestHeaders, queryParams, limit10Req),
@@ -242,7 +244,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
 
         String origToken = requestHeaders.get(HttpHeaders.AUTHORIZATION);
         requestHeaders.put(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-        Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null,limit10Req),
+        Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, limit10Req),
                 "Request not throttled by request count jwt claim condition in API tier");
         // replace with original token so that rest of the test cases will use initial token
         requestHeaders.put(HttpHeaders.AUTHORIZATION, "Bearer " + origToken);
@@ -259,8 +261,8 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
 
         // create an IP condition and add it to the throttle conditions list
         List<ThrottleConditionDTO> ipGrp = new ArrayList<>();
-        IPConditionDTO ipConditionDTO =
-                DtoFactory.createIPConditionDTO(IPConditionDTO.IpConditionTypeEnum.IPSPECIFIC, THROTTLED_IP, null, null);
+        IPConditionDTO ipConditionDTO = DtoFactory.createIPConditionDTO(IPConditionDTO.IpConditionTypeEnum.IPSPECIFIC,
+                THROTTLED_IP, null, null);
         ThrottleConditionDTO ipCondition = DtoFactory
                 .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.IPCONDITION, false, null, ipConditionDTO,
                         null, null);
@@ -270,7 +272,8 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
 
         // create a header condition and add it to the throttle conditions list
         List<ThrottleConditionDTO> headerGrp = new ArrayList<>();
-        HeaderConditionDTO headerConditionDTO = DtoFactory.createHeaderConditionDTO(HttpHeaders.HOST, THROTTLED_HEADER);
+        HeaderConditionDTO headerConditionDTO =
+                DtoFactory.createHeaderConditionDTO(HttpHeaders.USER_AGENT.toLowerCase(Locale.ROOT), THROTTLED_HEADER);
         ThrottleConditionDTO headerCondition = DtoFactory
                 .createThrottleConditionDTO(ThrottleConditionDTO.TypeEnum.HEADERCONDITION, false, headerConditionDTO,
                         null, null, null);

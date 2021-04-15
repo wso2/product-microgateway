@@ -36,6 +36,7 @@ public class TestConstant {
 
     public static final String KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String KEY_TYPE_SANDBOX = "SANDBOX";
+    public static final long DEPLOYMENT_WAIT_TIME = 15000;
 
     public static final String INVALID_JWT_TOKEN = "eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNN" +
             "V0kyTkRBelpHUXpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XST" +

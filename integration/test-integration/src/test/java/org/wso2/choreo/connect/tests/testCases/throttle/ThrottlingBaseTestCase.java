@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.tests.testCases.throttle;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,7 @@ import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,31 +73,24 @@ public class ThrottlingBaseTestCase extends APIMLifecycleBaseTest {
     }
 
     protected boolean isThrottled(String endpointURL, Map<String, String> headers, Map<String, String> queryParams,
-                                  long expectedCount) throws InterruptedException, IOException {
+                                  long expectedCount) throws InterruptedException, IOException, URISyntaxException {
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
                 isResponseAvailable(endpointURL, headers));
+        // This buffer is to avoid failures due to delays in evaluating throttle conditions at TM
+        int throttleBuffer = 3;
 
-        StringBuilder url = new StringBuilder(endpointURL);
+        URIBuilder url = new URIBuilder(endpointURL);
         if (queryParams != null) {
-            int i = 0;
-            if (expectedCount == -1) {
-                expectedCount = 21;
-            }
             for (Map.Entry<String, String> entry : queryParams.entrySet()) {
                 System.out.println(entry.getKey() + "/" + entry.getValue());
-                if (i == 0) {
-                    url.append(url).append("?").append(entry.getKey()).append("=").append(entry.getValue());
-                } else {
-                    url.append(url).append("&").append(entry.getKey()).append("=").append(entry.getValue());
-                }
-                i++;
+                url.addParameter(entry.getKey(), entry.getValue());
             }
         }
         HttpResponse response;
         boolean isThrottled = false;
-        for (int j = 0; j <= expectedCount; j++) {
+        for (int j = 0; j <= expectedCount + throttleBuffer; j++) {
             response = HTTPSClientUtils.doGet(url.toString(), headers);
-            log.info("============== Response " + response.getResponseCode());
+            log.info("============== Response {}, {}", response.getResponseCode(), response.getData());
             if (response.getResponseCode() == 429) {
                 isThrottled = true;
                 break;
