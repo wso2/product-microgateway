@@ -17,7 +17,8 @@
 #include "handler_impl.h"
 
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameRequest;
-using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameRequest;
+using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameResponse;
+using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameResponse_Code_OK;
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::Config;
 
 
@@ -31,8 +32,16 @@ MgwGrpcStreamHandler::~MgwGrpcStreamHandler(){
 
 void MgwGrpcStreamHandler::onReceive(size_t body_size){
     LOG_INFO("gRPC streaming onReceive");
+    WasmDataPtr message = getBufferBytes(WasmBufferType::GrpcReceiveBuffer, 0, body_size);
+    const WebSocketFrameResponse& frame_response = message->proto<WebSocketFrameResponse>();
+    LOG_INFO(WebSocketFrameResponse_Code_Name(frame_response.throttle_state()));
+    if(frame_response.throttle_state() == WebSocketFrameResponse_Code_OK){
+      this->callbacks_->updateFilterState(ResponseStatus::OK);
+    }else {
+      this->callbacks_->updateFilterState(ResponseStatus::OverLimit);
+    }
     //this->callbacks_->setEffectiveContext();
-    this->callbacks_->updateFilterState(ResponseStatus::OK);
+    //this->callbacks_->updateFilterState(frame_response.throttle_state());
 };
 
 void MgwGrpcStreamHandler::onRemoteClose(GrpcStatus status){

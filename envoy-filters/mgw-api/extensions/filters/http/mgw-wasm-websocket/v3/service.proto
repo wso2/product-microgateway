@@ -8,7 +8,7 @@ service WebSocketFrameService {
 
 message WebSocketFrameRequest {
   string node_id = 1;
-  //google.protobuf.Struct ext_metadata = 2;
+
   Metadata metadata = 2;
   
   int32 frame_length = 3;
@@ -17,7 +17,16 @@ message WebSocketFrameRequest {
 }
 
 message WebSocketFrameResponse {
-  string message = 1;
+  enum Code {
+        // The response code is not known.
+        UNKNOWN = 0;
+        // The response code to notify that the number of requests are under limit.
+        OK = 1;
+        // The response code to notify that the number of requests are over limit.
+        OVER_LIMIT = 2;
+    }
+
+    Code throttle_state = 1;
 }
 
 // message MetadataValue {

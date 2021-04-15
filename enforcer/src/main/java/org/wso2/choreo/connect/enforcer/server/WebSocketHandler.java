@@ -30,6 +30,8 @@ import org.wso2.choreo.connect.enforcer.websocket.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketFrameContext;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketResponseObject;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 /**
@@ -122,6 +124,16 @@ public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, W
 
         return new RequestContext.Builder(apiBasePath).authenticationContext(authenticationContext).
                 webSocketFrameContext(webSocketFrameContext).matchedAPI(api).requestID(requestId)
-                .address(remoteIp).build();
+                .address(extractIpAddress(remoteIp)).build();
+    }
+
+    private String extractIpAddress(String remoteIpStringWithPort) {
+        try {
+            URI uri = new URI("ws://" + remoteIpStringWithPort);
+            return uri.getHost();
+        } catch (URISyntaxException e) {
+            logger.error(e);
+            return null;
+        }
     }
 }

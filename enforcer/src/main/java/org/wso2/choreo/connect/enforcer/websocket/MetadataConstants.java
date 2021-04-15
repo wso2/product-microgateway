@@ -26,4 +26,5 @@ public class MetadataConstants {
     public static final String REQUEST_ID = "requestId";
     public static final String MESSAGE_SIZE = "messageSize";
     public static final String GRPC_STREAM_ID = "streamId";
+    public static final String DEFAULT_SUBSCRIBER_TENANT = "carbon.super";
 }

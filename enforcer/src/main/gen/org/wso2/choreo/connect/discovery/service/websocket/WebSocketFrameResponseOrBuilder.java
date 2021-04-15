@@ -8,14 +8,13 @@ public interface WebSocketFrameResponseOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>string message = 1;</code>
-   * @return The message.
+   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameResponse.Code throttle_state = 1;</code>
+   * @return The enum numeric value on the wire for throttleState.
    */
-  java.lang.String getMessage();
+  int getThrottleStateValue();
   /**
-   * <code>string message = 1;</code>
-   * @return The bytes for message.
+   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameResponse.Code throttle_state = 1;</code>
+   * @return The throttleState.
    */
-  com.google.protobuf.ByteString
-      getMessageBytes();
+  org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code getThrottleState();
 }

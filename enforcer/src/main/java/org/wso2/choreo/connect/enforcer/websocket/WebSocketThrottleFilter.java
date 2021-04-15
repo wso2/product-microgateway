@@ -100,6 +100,22 @@ public class WebSocketThrottleFilter implements Filter {
             }
             log.info(">>>>>>>>>>>>>>>>>>>>>>>>>> 2");
 
+            // Checking API and Resource level throttling. If API tier is defined,
+            // we ignore the resource level tier definition.
+            Decision apiDecision = checkApiThrottled(apiThrottleKey, apiTier, requestContext);
+            if (apiDecision.isThrottled()) {
+                log.debug("Setting api throttle out response");
+                int errorCode;
+                String reason;
+                errorCode = ThrottleConstants.API_THROTTLE_OUT_ERROR_CODE;
+                reason = ThrottleConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED;
+                FilterUtils.setThrottleErrorToContext(requestContext, errorCode, ThrottleConstants.THROTTLE_OUT_MESSAGE,
+                        ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
+                requestContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON, reason);
+                ThrottleUtils.setRetryAfterHeader(requestContext, apiDecision.getResetAt());
+                return true;
+            }
+
             String subThrottleKey = getSubscriptionThrottleKey(appId, apiContext, apiVersion);
             Decision subDecision = checkSubscriptionLevelThrottled(subThrottleKey, subTier);
             if (subDecision.isThrottled()) {
@@ -121,6 +137,7 @@ public class WebSocketThrottleFilter implements Filter {
 
             // Checking Application level throttling
             String appThrottleKey = appId + ':' + authorizedUser;
+            log.info("appKey >>>>>>>>>>>>>>" + appThrottleKey);
             Decision appDecision = checkAppLevelThrottled(appThrottleKey, appTier);
             if (appDecision.isThrottled()) {
                 log.debug("Setting application throttle out response");
@@ -248,5 +265,21 @@ public class WebSocketThrottleFilter implements Filter {
         jsonObMap.put(MetadataConstants.MESSAGE_SIZE, frameLength);
 
         return jsonObMap;
+    }
+
+    private Decision checkApiThrottled(String throttleKey, String tier, RequestContext context) {
+        log.debug("Checking if request is throttled at API/Resource level for tier: {}, key: {}", tier, throttleKey);
+        Decision decision = new Decision();
+
+        if (ThrottleConstants.UNLIMITED_TIER.equals(tier)) {
+            return decision;
+        }
+
+        if (isGlobalThrottlingEnabled) {
+            decision = dataHolder.isAdvancedThrottled(throttleKey, context);
+            log.debug("API/Resource Level throttle decision: {}", decision.isThrottled());
+            return decision;
+        }
+        return decision;
     }
 }

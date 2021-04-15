@@ -16,7 +16,7 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private WebSocketFrameResponse() {
-    message_ = "";
+    throttleState_ = 0;
   }
 
   @java.lang.Override
@@ -49,10 +49,10 @@ private static final long serialVersionUID = 0L;
           case 0:
             done = true;
             break;
-          case 10: {
-            java.lang.String s = input.readStringRequireUtf8();
+          case 8: {
+            int rawValue = input.readEnum();
 
-            message_ = s;
+            throttleState_ = rawValue;
             break;
           }
           default: {
@@ -87,42 +87,164 @@ private static final long serialVersionUID = 0L;
             org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.class, org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Builder.class);
   }
 
-  public static final int MESSAGE_FIELD_NUMBER = 1;
-  private volatile java.lang.Object message_;
   /**
-   * <code>string message = 1;</code>
-   * @return The message.
+   * Protobuf enum {@code envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameResponse.Code}
    */
-  @java.lang.Override
-  public java.lang.String getMessage() {
-    java.lang.Object ref = message_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      message_ = s;
-      return s;
+  public enum Code
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <pre>
+     * The response code is not known.
+     * </pre>
+     *
+     * <code>UNKNOWN = 0;</code>
+     */
+    UNKNOWN(0),
+    /**
+     * <pre>
+     * The response code to notify that the number of requests are under limit.
+     * </pre>
+     *
+     * <code>OK = 1;</code>
+     */
+    OK(1),
+    /**
+     * <pre>
+     * The response code to notify that the number of requests are over limit.
+     * </pre>
+     *
+     * <code>OVER_LIMIT = 2;</code>
+     */
+    OVER_LIMIT(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     * The response code is not known.
+     * </pre>
+     *
+     * <code>UNKNOWN = 0;</code>
+     */
+    public static final int UNKNOWN_VALUE = 0;
+    /**
+     * <pre>
+     * The response code to notify that the number of requests are under limit.
+     * </pre>
+     *
+     * <code>OK = 1;</code>
+     */
+    public static final int OK_VALUE = 1;
+    /**
+     * <pre>
+     * The response code to notify that the number of requests are over limit.
+     * </pre>
+     *
+     * <code>OVER_LIMIT = 2;</code>
+     */
+    public static final int OVER_LIMIT_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
     }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Code valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static Code forNumber(int value) {
+      switch (value) {
+        case 0: return UNKNOWN;
+        case 1: return OK;
+        case 2: return OVER_LIMIT;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Code>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Code> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Code>() {
+            public Code findValueByNumber(int number) {
+              return Code.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final Code[] VALUES = values();
+
+    public static Code valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private Code(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameResponse.Code)
+  }
+
+  public static final int THROTTLE_STATE_FIELD_NUMBER = 1;
+  private int throttleState_;
+  /**
+   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameResponse.Code throttle_state = 1;</code>
+   * @return The enum numeric value on the wire for throttleState.
+   */
+  @java.lang.Override public int getThrottleStateValue() {
+    return throttleState_;
   }
   /**
-   * <code>string message = 1;</code>
-   * @return The bytes for message.
+   * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameResponse.Code throttle_state = 1;</code>
+   * @return The throttleState.
    */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getMessageBytes() {
-    java.lang.Object ref = message_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      message_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
+  @java.lang.Override public org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code getThrottleState() {
+    @SuppressWarnings("deprecation")
+    org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code result = org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code.valueOf(throttleState_);
+    return result == null ? org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code.UNRECOGNIZED : result;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -139,8 +261,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (!getMessageBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, message_);
+    if (throttleState_ != org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code.UNKNOWN.getNumber()) {
+      output.writeEnum(1, throttleState_);
     }
     unknownFields.writeTo(output);
   }
@@ -151,8 +273,9 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (!getMessageBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, message_);
+    if (throttleState_ != org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code.UNKNOWN.getNumber()) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeEnumSize(1, throttleState_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -169,8 +292,7 @@ private static final long serialVersionUID = 0L;
     }
     org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse other = (org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse) obj;
 
-    if (!getMessage()
-        .equals(other.getMessage())) return false;
+    if (throttleState_ != other.throttleState_) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -182,8 +304,8 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + MESSAGE_FIELD_NUMBER;
-    hash = (53 * hash) + getMessage().hashCode();
+    hash = (37 * hash) + THROTTLE_STATE_FIELD_NUMBER;
+    hash = (53 * hash) + throttleState_;
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -317,7 +439,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      message_ = "";
+      throttleState_ = 0;
 
       return this;
     }
@@ -345,7 +467,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse buildPartial() {
       org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse result = new org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse(this);
-      result.message_ = message_;
+      result.throttleState_ = throttleState_;
       onBuilt();
       return result;
     }
@@ -394,9 +516,8 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse other) {
       if (other == org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.getDefaultInstance()) return this;
-      if (!other.getMessage().isEmpty()) {
-        message_ = other.message_;
-        onChanged();
+      if (other.throttleState_ != 0) {
+        setThrottleStateValue(other.getThrottleStateValue());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -427,78 +548,56 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object message_ = "";
+    private int throttleState_ = 0;
     /**
-     * <code>string message = 1;</code>
-     * @return The message.
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameResponse.Code throttle_state = 1;</code>
+     * @return The enum numeric value on the wire for throttleState.
      */
-    public java.lang.String getMessage() {
-      java.lang.Object ref = message_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        message_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
+    @java.lang.Override public int getThrottleStateValue() {
+      return throttleState_;
     }
     /**
-     * <code>string message = 1;</code>
-     * @return The bytes for message.
-     */
-    public com.google.protobuf.ByteString
-        getMessageBytes() {
-      java.lang.Object ref = message_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        message_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string message = 1;</code>
-     * @param value The message to set.
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameResponse.Code throttle_state = 1;</code>
+     * @param value The enum numeric value on the wire for throttleState to set.
      * @return This builder for chaining.
      */
-    public Builder setMessage(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      message_ = value;
+    public Builder setThrottleStateValue(int value) {
+      
+      throttleState_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>string message = 1;</code>
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameResponse.Code throttle_state = 1;</code>
+     * @return The throttleState.
+     */
+    @java.lang.Override
+    public org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code getThrottleState() {
+      @SuppressWarnings("deprecation")
+      org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code result = org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code.valueOf(throttleState_);
+      return result == null ? org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code.UNRECOGNIZED : result;
+    }
+    /**
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameResponse.Code throttle_state = 1;</code>
+     * @param value The throttleState to set.
      * @return This builder for chaining.
      */
-    public Builder clearMessage() {
+    public Builder setThrottleState(org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
       
-      message_ = getDefaultInstance().getMessage();
+      throttleState_ = value.getNumber();
       onChanged();
       return this;
     }
     /**
-     * <code>string message = 1;</code>
-     * @param value The bytes for message to set.
+     * <code>.envoy.extensions.filters.http.mgw_wasm_websocket.v3.WebSocketFrameResponse.Code throttle_state = 1;</code>
      * @return This builder for chaining.
      */
-    public Builder setMessageBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
+    public Builder clearThrottleState() {
       
-      message_ = value;
+      throttleState_ = 0;
       onChanged();
       return this;
     }

@@ -1,7 +1,10 @@
 package org.wso2.choreo.connect.enforcer.websocket;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.Filter;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
+import org.wso2.choreo.connect.enforcer.api.WebSocketAPI;
 import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
@@ -14,6 +17,8 @@ import java.util.UUID;
  * sent back to enforcer through the WebSocketFrame service as Metadata.
  */
 public class WebSocketMetaDataFilter implements Filter {
+
+    private static final Logger logger = LogManager.getLogger(WebSocketAPI.class);
 
     private APIConfig apiConfig;
     private AuthenticationContext authenticationContext;
@@ -53,8 +58,9 @@ public class WebSocketMetaDataFilter implements Filter {
                 getNullableStringValue(authenticationContext.getSubscriber()));
         requestContext.addMetadataToMap(MetadataConstants.SPIKE_ARREST_LIMIT,
                 getNullableStringValue(String.valueOf(authenticationContext.getSpikeArrestLimit())));
+        logger.info(">>>>>>>>>>" + authenticationContext.getSubscriberTenantDomain());
         requestContext.addMetadataToMap(MetadataConstants.SUBSCRIBER_TENANT_DOMAIN,
-                getNullableStringValue(authenticationContext.getSubscriberTenantDomain()));
+                MetadataConstants.DEFAULT_SUBSCRIBER_TENANT);
         requestContext.addMetadataToMap(MetadataConstants.SPIKE_ARREST_UNIT,
                 getNullableStringValue(authenticationContext.getSpikeArrestUnit()));
         requestContext.addMetadataToMap(MetadataConstants.STOP_ON_QUOTA,

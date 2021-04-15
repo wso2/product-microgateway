@@ -49,20 +49,24 @@ public final class MgwWebSocketProto {
       "tFrameRequest\022\017\n\007node_id\030\001 \001(\t\022O\n\010metada" +
       "ta\030\002 \001(\0132=.envoy.extensions.filters.http" +
       ".mgw_wasm_websocket.v3.Metadata\022\024\n\014frame" +
-      "_length\030\003 \001(\005\022\021\n\tremote_ip\030\004 \001(\t\")\n\026WebS" +
-      "ocketFrameResponse\022\017\n\007message\030\001 \001(\t\"\264\001\n\010" +
-      "Metadata\022o\n\022ext_authz_metadata\030\001 \003(\0132S.e" +
+      "_length\030\003 \001(\005\022\021\n\tremote_ip\030\004 \001(\t\"\257\001\n\026Web" +
+      "SocketFrameResponse\022h\n\016throttle_state\030\001 " +
+      "\001(\0162P.envoy.extensions.filters.http.mgw_" +
+      "wasm_websocket.v3.WebSocketFrameResponse" +
+      ".Code\"+\n\004Code\022\013\n\007UNKNOWN\020\000\022\006\n\002OK\020\001\022\016\n\nOV" +
+      "ER_LIMIT\020\002\"\264\001\n\010Metadata\022o\n\022ext_authz_met" +
+      "adata\030\001 \003(\0132S.envoy.extensions.filters.h" +
+      "ttp.mgw_wasm_websocket.v3.Metadata.ExtAu" +
+      "thzMetadataEntry\0327\n\025ExtAuthzMetadataEntr" +
+      "y\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\0012\313\001\n\025We" +
+      "bSocketFrameService\022\261\001\n\020PublishFrameData" +
+      "\022J.envoy.extensions.filters.http.mgw_was" +
+      "m_websocket.v3.WebSocketFrameRequest\032K.e" +
       "nvoy.extensions.filters.http.mgw_wasm_we" +
-      "bsocket.v3.Metadata.ExtAuthzMetadataEntr" +
-      "y\0327\n\025ExtAuthzMetadataEntry\022\013\n\003key\030\001 \001(\t\022" +
-      "\r\n\005value\030\002 \001(\t:\0028\0012\313\001\n\025WebSocketFrameSer" +
-      "vice\022\261\001\n\020PublishFrameData\022J.envoy.extens" +
-      "ions.filters.http.mgw_wasm_websocket.v3." +
-      "WebSocketFrameRequest\032K.envoy.extensions" +
-      ".filters.http.mgw_wasm_websocket.v3.WebS" +
-      "ocketFrameResponse\"\000(\0010\001BJ\n3org.wso2.cho" +
-      "reo.connect.discovery.service.websocketB" +
-      "\021MgwWebSocketProtoP\001b\006proto3"
+      "bsocket.v3.WebSocketFrameResponse\"\000(\0010\001B" +
+      "J\n3org.wso2.choreo.connect.discovery.ser" +
+      "vice.websocketB\021MgwWebSocketProtoP\001b\006pro" +
+      "to3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -79,7 +83,7 @@ public final class MgwWebSocketProto {
     internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_WebSocketFrameResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_WebSocketFrameResponse_descriptor,
-        new java.lang.String[] { "Message", });
+        new java.lang.String[] { "ThrottleState", });
     internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_envoy_extensions_filters_http_mgw_wasm_websocket_v3_Metadata_fieldAccessorTable = new

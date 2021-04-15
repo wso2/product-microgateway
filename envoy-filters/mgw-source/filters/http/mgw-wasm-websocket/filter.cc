@@ -28,7 +28,7 @@ using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameRe
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameResponse;
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::Config;
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::Metadata;
-using envoy::extensions::filters::http::mgw_wasm_websocket::v3::MetadataValue;
+// using envoy::extensions::filters::http::mgw_wasm_websocket::v3::MetadataValue;
 
 
 static RegisterContextFactory register_MgwWebSocketContext(CONTEXT_FACTORY(MgwWebSocketContext),
@@ -91,10 +91,11 @@ FilterHeadersStatus MgwWebSocketContext::onRequestHeaders(uint32_t, bool) {
   if (buffer.has_value() && buffer.value()->size() != 0) {
     auto pairs = buffer.value()->pairs();
     for (auto &p : pairs) {
-      MetadataValue* metadataValue = this->ext_authz_metadata_->add_metadata();
+      //(*this->ext_authz_metadata_)[std::string(p.first)] = std::string(p.second);
+      (*this->metadata_->mutable_ext_authz_metadata())[std::string(p.first)] = std::string(p.second);
       LOG_TRACE(std::string(p.first) + std::string(" -> ") + std::string(p.second));
-      metadataValue->set_key(std::string(p.first));
-      metadataValue->set_value(std::string(p.second));
+      //metadataValue->set_key(std::string(p.first));
+      //metadataValue->set_value(std::string(p.second));
     }
   }
                      
@@ -132,7 +133,7 @@ FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
     request.set_frame_length(body_buffer_length);
     request.set_remote_ip(upstream_address);
     // Read ext_authz_metadata_ metdata saved as a member variable
-    *request.mutable_filter_metadata() = *this->ext_authz_metadata_;
+    *request.mutable_metadata() = *this->metadata_;
     if(this->handler_state_ == HandlerState::OK){
       LOG_INFO(std::string("gRPC bidi stream available. publishing frame data..."));
       auto ack = this->stream_handler_->send(request, false);
@@ -193,7 +194,7 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
     request.set_frame_length(body_buffer_length);
     request.set_remote_ip(upstream_address);
     // Read ext_authz_metadata_ metdata saved as a member variable
-    *request.mutable_filter_metadata() = *this->ext_authz_metadata_;
+    *request.mutable_metadata() = *this->metadata_;
     if(this->handler_state_ == HandlerState::OK){
       LOG_INFO(std::string("gRPC bidi stream available. publishing frame data..."));
       auto ack = this->stream_handler_->send(request, false);

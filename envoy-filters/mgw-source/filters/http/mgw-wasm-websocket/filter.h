@@ -45,10 +45,11 @@ private:
   MgwGrpcStreamHandler* stream_handler_{};
   HandlerState handler_state_;
   std::string node_id_;
-  Metadata* ext_authz_metadata_{};
+  //Metadata* ext_authz_metadata_{};
   bool isDataFrame(const std::string_view data);
   ThrottleState throttle_state_{ThrottleState::UnderLimit};
   bool failure_mode_deny_;
+  std::unique_ptr<Metadata> metadata_{new Metadata};
 
 };
 

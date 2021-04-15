@@ -60,8 +60,15 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
          WebSocketResponseObject webSocketResponseObject = webSocketHandler.process(webSocketFrameRequest);
         //streamId = getStreamId(webSocketFrameRequest);
         //WebSocketFrameService.addObserver(streamId, this);
-        WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setMessage("Hello from server").build();
-        responseStreamObserver.onNext(response);
+        if (webSocketResponseObject == WebSocketResponseObject.OK) {
+            WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
+                    WebSocketFrameResponse.Code.OK).build();
+            responseStreamObserver.onNext(response);
+        } else {
+            WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
+                    WebSocketFrameResponse.Code.OVER_LIMIT).build();
+            responseStreamObserver.onNext(response);
+        }
     }
 
     @Override
