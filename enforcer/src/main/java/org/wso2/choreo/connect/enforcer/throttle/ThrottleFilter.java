@@ -259,7 +259,7 @@ public class ThrottleFilter implements Filter {
             tenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
         }
 
-        if (!ThrottleConstants.UNLIMITED_TIER.equals(apiTier) && apiTier != null && !apiTier.isBlank()) {
+        if (!StringUtils.isEmpty(apiTier) && !ThrottleConstants.UNLIMITED_TIER.equals(apiTier)) {
             resourceTier = apiTier;
             resourceKey = apiContext;
         } else {
