@@ -259,9 +259,6 @@ data:
             queueSize = 1000
 
     [controlPlane]
-
-    # Control plane's eventHub details
-    [controlPlane.eventHub]
       enabled = false
       serviceUrl = "https://wso2apim:9443/"
       username="admin"
@@ -270,7 +267,7 @@ data:
       retryInterval = 5
       skipSSLVerification=true
       # Message broker connection URL of the control plane
-      [controlPlane.eventHub.jmsConnectionParameters]
+      [controlPlane.jmsConnectionParameters]
         eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@wso2apim:5672?retries='10'&connectdelay='30'"]
 
 

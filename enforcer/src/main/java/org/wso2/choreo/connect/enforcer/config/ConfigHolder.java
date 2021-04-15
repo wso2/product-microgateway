@@ -30,7 +30,6 @@ import org.wso2.choreo.connect.discovery.config.enforcer.BinaryPublisher;
 import org.wso2.choreo.connect.discovery.config.enforcer.Cache;
 import org.wso2.choreo.connect.discovery.config.enforcer.ClaimMapping;
 import org.wso2.choreo.connect.discovery.config.enforcer.Config;
-import org.wso2.choreo.connect.discovery.config.enforcer.EventHub;
 import org.wso2.choreo.connect.discovery.config.enforcer.Issuer;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer;
@@ -45,7 +44,6 @@ import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsReceiverConfigDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CacheDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
-import org.wso2.choreo.connect.enforcer.config.dto.EventHubConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
@@ -70,7 +68,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -124,8 +121,6 @@ public class ConfigHolder {
      * of the mgw. Later we can switch to CDS data models directly.
      */
     private void parseConfigs(Config config) {
-        // load EventHub
-        populateEventHub(config.getEventhub());
         // load auth service
         populateAuthService(config.getAuthService());
 
@@ -171,18 +166,6 @@ public class ConfigHolder {
         config.setAuthService(authDto);
     }
 
-    private void populateEventHub(EventHub eventhub) {
-        EventHubConfigurationDto eventHubDto = new EventHubConfigurationDto();
-        eventHubDto.setEnable(eventhub.getEnabled());
-        eventHubDto.setServiceUrl(eventhub.getServiceUrl());
-
-        Properties jmsProps = new Properties();
-        jmsProps.put(Constants.EVENT_HUB_EVENT_LISTENING_ENDPOINT,
-                eventhub.getJmsConnectionParameters().getEventListeningEndpointsList());
-        eventHubDto.setJmsConnectionParameters(jmsProps);
-
-        config.setEventHub(eventHubDto);
-    }
 
     private void populateJWTIssuerConfiguration(Security security) {
         configIssuerList = new ArrayList<>();
