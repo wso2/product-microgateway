@@ -118,7 +118,7 @@ func handleAPIEvents(data []byte, eventType string) {
 		}
 		if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
 			conf, _ := config.ReadConfigs()
-			configuredEnvs := conf.ControlPlane.EventHub.EnvironmentLabels
+			configuredEnvs := conf.ControlPlane.EnvironmentLabels
 			if len(configuredEnvs) == 0 {
 				configuredEnvs = append(configuredEnvs, eh.DefaultGatewayLabelValue)
 			}
