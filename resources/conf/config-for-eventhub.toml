@@ -229,10 +229,6 @@ allowCredentials = false
       authURL = "$env{analytics_authURL}"
       authToken = "$env{analytics_authToken}"
 
-  [analytics.enforcer]
-    authURL = "$env{analytics_authURL}"
-    authToken = "$env{analytics_authToken}"
-
     [analytics.enforcer.LogReceiver]
       port = 18090
       maxMessageSize = 1000000000
