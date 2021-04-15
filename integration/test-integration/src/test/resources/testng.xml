@@ -72,6 +72,7 @@
             <class name="org.wso2.choreo.connect.tests.testCaseBefore.APIManagerInitializeTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.subscription.SubscriptionValidationTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.throttle.AdvanceThrottlingTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.throttle.ApplicationThrottlingTestCase"/>
         </classes>
     </test>
 </suite>
