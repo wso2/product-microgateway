@@ -50,24 +50,24 @@ func (s Server) Check(ctx context.Context, request *healthservice.HealthCheckReq
 		}
 
 		if isHealthy {
-			logger.LoggerHealth.Info("Responding health state of Adapter as HEALTHY")
+			logger.LoggerHealth.Debug("Responding health state of Adapter as HEALTHY")
 			return &healthservice.HealthCheckResponse{Status: healthservice.HealthCheckResponse_SERVING}, nil
 		}
-		logger.LoggerHealth.Info("Responding health state of Adapter as NOT_HEALTHY")
+		logger.LoggerHealth.Debug("Responding health state of Adapter as NOT_HEALTHY")
 		return &healthservice.HealthCheckResponse{Status: healthservice.HealthCheckResponse_NOT_SERVING}, nil
 	}
 
 	// health of the component of a server
 	if isHealthy, ok := serviceHealthStatus[request.Service]; ok {
 		if isHealthy {
-			logger.LoggerHealth.Infof("Responding health state of Adapter service \"%s\" as HEALTHY", request.Service)
+			logger.LoggerHealth.Debugf("Responding health state of Adapter service \"%s\" as HEALTHY", request.Service)
 			return &healthservice.HealthCheckResponse{Status: healthservice.HealthCheckResponse_SERVING}, nil
 		}
-		logger.LoggerHealth.Infof("Responding health state of Adapter service \"%s\" as NOT_HEALTHY", request.Service)
+		logger.LoggerHealth.Debugf("Responding health state of Adapter service \"%s\" as NOT_HEALTHY", request.Service)
 		return &healthservice.HealthCheckResponse{Status: healthservice.HealthCheckResponse_NOT_SERVING}, nil
 	}
 
 	// no component found
-	logger.LoggerHealth.Infof("Responding health state of Adapter service \"%s\" as UNKNOWN", request.Service)
+	logger.LoggerHealth.Debugf("Responding health state of Adapter service \"%s\" as UNKNOWN", request.Service)
 	return &healthservice.HealthCheckResponse{Status: healthservice.HealthCheckResponse_UNKNOWN}, nil
 }

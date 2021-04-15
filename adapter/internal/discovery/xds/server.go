@@ -464,13 +464,12 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 
 	for apiKey, labels := range openAPIEnvoyMap {
 		if arrayContains(labels, label) {
-			vhostName, err := ExtractVhostFromAPIIdentifier(apiKey)
+			vhost, err := ExtractVhostFromAPIIdentifier(apiKey)
 			if err != nil {
 				logger.LoggerXds.Errorf("Error extracting vhost from API identifier: %v. Ignore deploying the API",
 					err.Error())
 				continue
 			}
-			vhost := fmt.Sprintf("%v:%v", vhostName, "*")
 			clusterArray = append(clusterArray, openAPIClustersMap[apiKey]...)
 			vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], openAPIRoutesMap[apiKey]...)
 			endpointArray = append(endpointArray, openAPIEndpointsMap[apiKey]...)
@@ -488,17 +487,15 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
 	}
 	enableJwtIssuer := conf.Enforcer.JwtIssuer.Enabled
-	systemHost := fmt.Sprintf("%v:%v", conf.Envoy.SystemHost, "*")
+	systemHost := conf.Envoy.SystemHost
 	if enableJwtIssuer {
 		routeToken := envoyconf.CreateTokenRoute()
 		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeToken)
-		vhostToRouteArrayMap["*"] = append(vhostToRouteArrayMap["*"], routeToken)
 	}
 
 	// Add health endpoint
 	routeHealth := envoyconf.CreateHealthEndpoint()
 	vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeHealth)
-	vhostToRouteArrayMap["*"] = append(vhostToRouteArrayMap["*"], routeHealth)
 
 	listenerArray, listenerFound := envoyListenerConfigMap[label]
 	routesConfig, routesConfigFound := envoyRouteConfigMap[label]

@@ -35,6 +35,11 @@ data:
         username = "admin"
         password = "$env{adapter_admin_pwd}"
 
+    # default vhosts mapping for standalone mode
+    [[adapter.vhostMapping]]
+      environment = "Production and Sandbox"
+      vhost = "localhost"
+
     [adapter.keystore]
       certPath = "/home/wso2/security/keystore/mg.pem"
       keyPath = "/home/wso2/security/keystore/mg.key"
@@ -61,6 +66,8 @@ data:
       securedListenerHost = "0.0.0.0"
       securedListenerPort = 9095
       clusterTimeoutInSeconds = 20
+      # system hostname for system API resources (eg: /testkey and /health)
+      systemHost = "localhost"
 
     [router.keystore]
       certPath = "/home/wso2/security/keystore/mg.pem"
@@ -78,7 +85,7 @@ data:
     [router.upstream.tls]
       minimumProtocolVersion = "TLS1_1"
       maximumProtocolVersion = "TLS1_2"
-      ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"  
+      ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"
       # the default endpoint certificates
       trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
       verifyHostName = true
@@ -233,7 +240,6 @@ data:
         certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
     [controlPlane]
-
     # Control plane's eventHub details
     [controlPlane.eventHub]
       enabled = false

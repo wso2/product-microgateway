@@ -154,6 +154,9 @@ spec:
               port: 9095
               path: /health
               scheme: HTTPS
+              httpHeaders:
+                - name: Host
+                  value: localhost
             failureThreshold: 30
             periodSeconds: 5
           livenessProbe:
@@ -161,6 +164,9 @@ spec:
               port: 9095
               path: /health
               scheme: HTTPS
+              httpHeaders:
+                - name: Host
+                  value: localhost
             initialDelaySeconds: 20
             periodSeconds: 10
           readinessProbe:
@@ -168,6 +174,9 @@ spec:
               port: 9095
               path: /health
               scheme: HTTPS
+              httpHeaders:
+                - name: Host
+                  value: localhost
             initialDelaySeconds: 20
             periodSeconds: 5
       volumes:

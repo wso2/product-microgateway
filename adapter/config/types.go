@@ -119,7 +119,7 @@ type Config struct {
 		SecuredListenerPort     uint32
 		ClusterTimeoutInSeconds time.Duration
 		KeyStore                keystore
-		SystemHost              string
+		SystemHost              string `default:"localhost"`
 
 		// Global CORS configurations.
 		Cors struct {
