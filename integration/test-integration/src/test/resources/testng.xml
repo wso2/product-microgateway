@@ -73,6 +73,9 @@
             <class name="org.wso2.choreo.connect.tests.testCases.subscription.SubscriptionValidationTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.throttle.AdvanceThrottlingTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.throttle.ApplicationThrottlingTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.throttle.SubscriptionThrottlingTestCase"/>
+<!--            TODO: (Praminda) this requires upgrade in apim throttle dependency. enable after upgrade-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.throttle.DenyConditionTestCase"/>-->
         </classes>
     </test>
 </suite>
