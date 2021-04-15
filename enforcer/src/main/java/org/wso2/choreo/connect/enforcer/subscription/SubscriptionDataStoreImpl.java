@@ -21,7 +21,6 @@ package org.wso2.choreo.connect.enforcer.subscription;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.subscription.APIs;
-import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.discovery.ApiListDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationDiscoveryClient;
@@ -89,10 +88,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.appPolicyMap = new ConcurrentHashMap<>();
         this.apiPolicyMap = new ConcurrentHashMap<>();
         this.subscriptionMap = new ConcurrentHashMap<>();
-        //TODO: Enable data loading tasks if event hub is enabled
-        if (ConfigHolder.getInstance().getConfig().getEventHub().isEnabled()) {
-            initializeLoadingTasks();
-        }
+        initializeLoadingTasks();
     }
 
     @Override

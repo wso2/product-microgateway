@@ -20,7 +20,6 @@ package org.wso2.choreo.connect.enforcer.security.jwt.validator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.discovery.RevokedTokenDiscoveryClient;
 
 import java.util.Map;
@@ -36,10 +35,8 @@ public class RevokedJWTDataHolder {
     private static RevokedJWTDataHolder instance = new RevokedJWTDataHolder();
 
     public void init() {
-        if (ConfigHolder.getInstance().getConfig().getEventHub().isEnabled()) {
-            RevokedTokenDiscoveryClient revokedTokenDs =  RevokedTokenDiscoveryClient.getInstance();
-            revokedTokenDs.watchRevokedTokens();
-        }
+        RevokedTokenDiscoveryClient revokedTokenDs = RevokedTokenDiscoveryClient.getInstance();
+        revokedTokenDs.watchRevokedTokens();
     }
 
     /**

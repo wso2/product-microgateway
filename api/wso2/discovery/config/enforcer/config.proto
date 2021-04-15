@@ -4,7 +4,6 @@ package wso2.discovery.config.enforcer;
 
 import "wso2/discovery/config/enforcer/cert.proto";
 import "wso2/discovery/config/enforcer/security.proto";
-import "wso2/discovery/config/enforcer/event_hub.proto";
 import "wso2/discovery/config/enforcer/am_credentials.proto";
 import "wso2/discovery/config/enforcer/service.proto";
 import "wso2/discovery/config/enforcer/jwt_generator.proto";
@@ -27,8 +26,6 @@ message Config {
     CertStore keystore = 2;
 
     CertStore truststore = 3;
-
-    EventHub eventhub = 4;
 
     Service authService = 5;
 
