@@ -18,6 +18,8 @@
 package org.wso2.choreo.connect.enforcer.security;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.Filter;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
@@ -39,6 +41,7 @@ import java.util.List;
  */
 public class AuthFilter implements Filter {
     private List<Authenticator> authenticators = new ArrayList<>();
+    private static final Logger log = LogManager.getLogger(AuthFilter.class);
 
     @Override
     public void init(APIConfig apiConfig) {
@@ -111,6 +114,8 @@ public class AuthFilter implements Filter {
         if (!canAuthenticated) {
             FilterUtils.setUnauthenticatedErrorToContext(requestContext);
         }
+        log.error(
+                "None of the authenticators were able to authenticate the request: " + requestContext.getRequestPath());
         //set WWW_AUTHENTICATE header to error response
         requestContext.addResponseHeaders(APIConstants.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
                 ", error=\"invalid_token\"" +

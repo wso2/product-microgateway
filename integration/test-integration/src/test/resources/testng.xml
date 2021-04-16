@@ -70,7 +70,8 @@
     <test name="mgw-micro-with-apim" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.testCaseBefore.APIManagerInitializeTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.subscription.SubscriptionValidationTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.apim.SubscriptionValidationTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.apim.BlockedAPITestCase"/>
         </classes>
     </test>
 </suite>

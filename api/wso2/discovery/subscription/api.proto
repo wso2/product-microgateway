@@ -23,4 +23,5 @@ message APIs {
 	bool isDefaultVersion = 8;
 	URLMapping urlMappings = 9;
 	string uuid = 10;
+	string lcState = 11;
 }

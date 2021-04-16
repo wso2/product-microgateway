@@ -237,6 +237,7 @@ func MarshalAPIList(apiList *types.APIList) *subscription.APIList {
 			ApiType:          api.APIType,
 			Uuid:             api.UUID,
 			IsDefaultVersion: api.IsDefaultVersion,
+			LcState: 		  api.APIStatus,
 		}
 		apis = append(apis, newAPI)
 	}
