@@ -181,8 +181,8 @@ func handleLifeCycleEvents(data []byte) {
 		if _, ok := eh.APIListMap[configuredEnv]; ok {
 			apiListOfEnv := eh.APIListMap[configuredEnv].List
 			for i := range apiListOfEnv {
-				if apiEvent.UUID == apiListOfEnv[i].UUID && apiListOfEnv[i].APIStatus == blockedStatus ||
-					apiEvent.APIStatus == blockedStatus {
+				if apiEvent.UUID == apiListOfEnv[i].UUID && (apiListOfEnv[i].APIStatus == blockedStatus ||
+					apiEvent.APIStatus == blockedStatus) {
 					//If previous or current state is 'Blocked' only we update the xds. All other states are neglected at the gateway
 					logger.LoggerMsg.Infof("Lifecycle state changed from %s to %s", apiListOfEnv[i].APIStatus, apiEvent.APIStatus)
 					apiListOfEnv[i].APIStatus = apiEvent.APIStatus
