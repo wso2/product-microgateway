@@ -988,14 +988,12 @@ func watchEnforcerResponse() {
 		requestEvent := <-GetRequestEventChannel()
 		logger.LoggerXds.Debugf("xds Request from client version : %s", requestEvent.Version)
 		if requestEvent.IsError {
-			logger.LoggerXds.Infof("Applying config failed. Last success versio of enforcer : %s", requestEvent.Version)
+			logger.LoggerXds.Debugf("Applying config failed. Last success versio of enforcer : %s", requestEvent.Version)
 			restorePreviousState(requestEvent.Node)
 			_, _, _, _, apis := GenerateEnvoyResoucesForLabel(requestEvent.Node)
-			logger.LoggerXds.Infof("Restore APIS=======>>>>>>")
-			logger.LoggerXds.Infof("%v", apis)
 			UpdateEnforcerApis(requestEvent.Node, apis)
 		} else {
-			logger.LoggerXds.Infof("Success Response from client for version: %s", requestEvent.Version)
+			logger.LoggerXds.Debugf("Success Response from client for version: %s", requestEvent.Version)
 
 			// Successful message, set the current state of the enforcer apis to the state cache.
 			buildAndStoreSuccessState(requestEvent.Node)
