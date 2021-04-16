@@ -40,7 +40,7 @@ ENV ROUTER_ADMIN_HOST=0.0.0.0
 ENV ROUTER_ADMIN_PORT=9000
 
 ENV ROUTER_CLUSTER=default_cluster
-ENV ROUTER_LABEL="Production and Sandbox"
+ENV ROUTER_LABEL="Default"
 ENV ROUTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
 ENV ROUTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
 

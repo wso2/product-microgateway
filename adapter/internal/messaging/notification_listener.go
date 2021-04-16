@@ -124,7 +124,7 @@ func handleAPIEvents(data []byte, eventType string) {
 			conf, _ := config.ReadConfigs()
 			configuredEnvs := conf.ControlPlane.EnvironmentLabels
 			if len(configuredEnvs) == 0 {
-				configuredEnvs = append(configuredEnvs, eh.DefaultGatewayLabelValue)
+				configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
 			}
 			for _, configuredEnv := range configuredEnvs {
 				if configuredEnv == env {

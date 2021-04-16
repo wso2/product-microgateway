@@ -48,8 +48,6 @@ const (
 	GatewayLabelParam string = "gatewayLabel"
 	// ApisEndpoint is the resource path of /apis endpoint
 	ApisEndpoint string = "apis"
-	// DefaultGatewayLabelValue is the default environment which is used to retrieve API details
-	DefaultGatewayLabelValue string = "Production and Sandbox"
 )
 
 var (
@@ -126,7 +124,7 @@ func LoadSubscriptionData(configFile *config.Config) {
 
 	// If no environments are configured, default gateway label value is assigned.
 	if len(configuredEnvs) == 0 {
-		configuredEnvs = append(configuredEnvs, DefaultGatewayLabelValue)
+		configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
 	}
 	for _, configuredEnv := range configuredEnvs {
 		queryParamMap := make(map[string]string, 1)

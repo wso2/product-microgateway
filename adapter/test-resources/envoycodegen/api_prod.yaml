@@ -25,7 +25,7 @@ data:
   visibleRoles: []
   visibleTenants: []
   gatewayEnvironments:
-   - Production and Sandbox
+   - Default
   deploymentEnvironments: []
   labels: []
   mediationPolicies: []
