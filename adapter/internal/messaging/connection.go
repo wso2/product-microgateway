@@ -19,7 +19,6 @@
 package messaging
 
 import (
-	"github.com/wso2/adapter/internal/health"
 	"net/url"
 	"strconv"
 	"strings"
@@ -53,11 +52,6 @@ func (c *Consumer) reconnect(key string) {
 		if err != nil {
 			logger.LoggerMsg.Errorf("Cannot establish connection for topic %s", key)
 		}
-		// set state of the control plane
-		health.SetControlPlaneJmsStatus(err == nil)
-	} else {
-		// set state of the control plane as APIM started
-		health.SetControlPlaneJmsStatus(true)
 	}
 }
 

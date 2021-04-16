@@ -27,6 +27,8 @@ var (
 
 // SetControlPlaneJmsStatus sets the given status to the internal channel controlPlaneJmsStatusChan
 func SetControlPlaneJmsStatus(status bool) {
+	// check for controlPlaneStarted, to non block call
+	// if called again (somehow) after startup, for extra safe check this value
 	if !controlPlaneStarted {
 		controlPlaneJmsStatusChan <- status
 	}
@@ -34,6 +36,7 @@ func SetControlPlaneJmsStatus(status bool) {
 
 // SetControlPlaneRestAPIStatus sets the given status to the internal channel controlPlaneRestAPIStatusChan
 func SetControlPlaneRestAPIStatus(status bool) {
+	// check for controlPlaneStarted, to non block call
 	if !controlPlaneStarted {
 		controlPlaneRestAPIStatusChan <- status
 	}

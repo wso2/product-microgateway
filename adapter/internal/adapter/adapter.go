@@ -287,16 +287,19 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 		if data.Resp != nil {
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
 			logger.LoggerMgw.Debug("Pushing data to router and enforcer")
+			health.SetControlPlaneRestAPIStatus(true)
 			err := synchronizer.PushAPIProjects(data.Resp, envs)
 			if err != nil {
 				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
 			}
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 			logger.LoggerMgw.Errorf("Error occurred when retrieveing APIs from control plane: %v", data.Err)
+			health.SetControlPlaneRestAPIStatus(true)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			i--
 			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
+			health.SetControlPlaneRestAPIStatus(false)
 			go func(d synchronizer.SyncAPIResponse) {
 				// Retry fetching from control plane after a configured time interval
 				if conf.ControlPlane.RetryInterval == 0 {

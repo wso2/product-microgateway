@@ -30,7 +30,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/wso2/adapter/internal/health"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -132,7 +131,6 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse) {
 	resp, err := client.Do(req)
 	// In the event of a connection error, the error would not be nil, then return the error
 	// If the error is not null, proceed
-	health.SetControlPlaneRestAPIStatus(err == nil)
 	if err != nil {
 		logger.LoggerSync.Errorf("Error occurred while retrieving APIs from API manager: %v", err)
 		respSyncAPI.Err = err
