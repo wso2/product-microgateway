@@ -25,7 +25,6 @@ spec:
   - hosts:
       - gw.wso2.com
       - adapter.wso2.com
-      - internal.wso2.com
     secretName: tls-secret
   rules:
     - host: gw.wso2.com
@@ -61,7 +60,6 @@ spec:
   tls:
   - hosts:
       - internal.wso2.com
-
   rules:
     - host: internal.wso2.com
       http:
