@@ -45,6 +45,18 @@ func (cb *Callbacks) OnStreamClosed(id int64) {
 // OnStreamRequest prints debug logs
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
 	logger.LoggerXdsCallbacks.Debugf("stream request on stream id: %d Request: %v", id, request)
+	requestEventChannel := GetRequestEventChannel()
+	if "type.googleapis.com/wso2.discovery.api.Api" == request.GetTypeUrl() {
+		logger.LoggerXdsCallbacks.Debugf("stream request on stream id: %d Request: %v", id, request)
+		requestEvent := NewRequestEvent()
+		if request.ErrorDetail != nil {
+			requestEvent.IsError = true
+		}
+		requestEvent.Node = request.GetNode().GetId()
+		requestEvent.Version = request.VersionInfo
+		requestEvent.IsResponse = false
+		requestEventChannel <- requestEvent
+	}
 	return nil
 }
 
