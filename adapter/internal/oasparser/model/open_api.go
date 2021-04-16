@@ -49,6 +49,9 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
 	swagger.apiType = HTTP
 	if isServerURLIsAvailable(swagger3.Servers) {
 		for _, serverEntry := range swagger3.Servers {
+			if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
+				continue
+			}
 			endpoint := getHostandBasepathandPort(serverEntry.URL)
 			swagger.productionUrls = append(swagger.productionUrls, endpoint)
 		}
@@ -97,6 +100,9 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) []Resource {
 			resource := setPathInfoOpenAPI(path, methodsArray, pathItem)
 			if isServerURLIsAvailable(pathItem.Servers) {
 				for _, serverEntry := range pathItem.Servers {
+					if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
+						continue
+					}
 					endpoint := getHostandBasepathandPort(serverEntry.URL)
 					resource.productionUrls = append(resource.productionUrls, endpoint)
 				}

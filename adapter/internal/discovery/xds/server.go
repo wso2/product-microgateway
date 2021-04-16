@@ -239,9 +239,16 @@ func UpdateAPI(apiContent config.APIContent) {
 		logger.LoggerXds.Error("API type not currently supported with WSO2 Microgateway")
 	}
 
-	if apiContent.LifeCycleStatus == prototypedAPI {
+	if (len(mgwSwagger.GetProdEndpoints()) == 0 || mgwSwagger.GetProdEndpoints()[0].Host == "/") &&
+		(len(mgwSwagger.GetSandEndpoints()) == 0 || mgwSwagger.GetSandEndpoints()[0].Host == "/") {
 		mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
 		mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
+	}
+
+	validationErr := mgwSwagger.Validate()
+	if validationErr != nil {
+		logger.LoggerOasparser.Errorf("Validation failed for the API. %s:%s", mgwSwagger.GetTitle(), mgwSwagger.GetVersion())
+		return
 	}
 
 	apiIdentifier := GenerateIdentifierForAPI(apiContent.VHost, apiContent.Name, apiContent.Version)

@@ -210,11 +210,17 @@ func verifyMandatoryFields(apiJSON config.APIJsonData) error {
 
 	if apiJSON.Data.EndpointConfig.ProductionEndpoints.Endpoint == "" &&
 		apiJSON.Data.EndpointConfig.SandBoxEndpoints.Endpoint == "" {
-		errMsg = errMsg + "API production and sandbox enpoints "
+		errMsg = errMsg + "API production and sandbox endpoints "
 	}
 
 	if errMsg != "" {
 		errMsg = errMsg + "fields cannot be empty for " + apiName + " " + apiVersion
+		return errors.New(errMsg)
+	}
+
+	if strings.HasPrefix(apiJSON.Data.EndpointConfig.ProductionEndpoints.Endpoint, "/") ||
+		strings.HasPrefix(apiJSON.Data.EndpointConfig.SandBoxEndpoints.Endpoint, "/") {
+		errMsg = "relative urls are not supported for API production and sandbox endpoints"
 		return errors.New(errMsg)
 	}
 	return nil
