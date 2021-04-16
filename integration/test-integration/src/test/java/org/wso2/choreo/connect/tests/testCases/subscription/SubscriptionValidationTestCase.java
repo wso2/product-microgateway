@@ -73,13 +73,13 @@ public class SubscriptionValidationTestCase extends APIMLifecycleBaseTest {
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
         // get a predefined api request
-        apiRequest = getAPIRequest(SAMPLE_API_NAME);
+        apiRequest = getAPIRequest(TestConstant.SAMPLE_API_NAME);
         apiRequest.setProvider(user.getUserName());
 
         // create and publish the api
         apiId = createAndPublishAPIWithoutRequireReSubscription(apiRequest, restAPIPublisher);
 
-        endpointURL = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
+        endpointURL = Utils.getServiceURLHttps(TestConstant.SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
     }
 
     @Test(description = "Send a request to a unsubscribed REST API and check if the API invocation is forbidden")

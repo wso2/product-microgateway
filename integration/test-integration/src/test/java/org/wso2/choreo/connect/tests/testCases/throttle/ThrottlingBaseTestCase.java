@@ -30,6 +30,7 @@ import org.wso2.am.integration.test.utils.http.HTTPSClientUtils;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.apim.APIMLifecycleBaseTest;
 import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.IOException;
@@ -46,7 +47,7 @@ public class ThrottlingBaseTestCase extends APIMLifecycleBaseTest {
 
     protected String createThrottleApi(String tiers, String apiTier, String resTier) throws MalformedURLException,
             APIManagerIntegrationTestException, MicroGWTestException, ApiException {
-        APIRequest apiRequest = new APIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT,
+        APIRequest apiRequest = new APIRequest(TestConstant.SAMPLE_API_NAME, TestConstant.SAMPLE_API_CONTEXT,
                 new URL(Utils.getDockerMockServiceURLHttp("/v2")));
         String API_VERSION_1_0_0 = "1.0.0";
         apiRequest.setProvider(user.getUserName());
@@ -69,7 +70,7 @@ public class ThrottlingBaseTestCase extends APIMLifecycleBaseTest {
     }
 
     protected String getThrottleAPIEndpoint() throws MalformedURLException {
-        return Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
+        return Utils.getServiceURLHttps(TestConstant.SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
     }
 
     protected boolean isThrottled(String endpointURL, Map<String, String> headers, Map<String, String> queryParams,

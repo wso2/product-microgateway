@@ -78,6 +78,8 @@ public class TestConstant {
     public final static int MOCK_SERVER_PORT = 2383;
     public final static int APIM_SERVLET_TRP_HTTPS_PORT = 9443;
     public final static int APIM_SERVLET_TRP_HTTP_PORT = 9763;
+    public static final String SAMPLE_API_NAME = "PetStore";
+    public static final String SAMPLE_API_CONTEXT = "petstore";
 
     public static final int INVALID_CREDENTIALS_CODE = 900901;
     public static final String RESOURCE_FORBIDDEN_CODE = "900908";

@@ -95,7 +95,7 @@ public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
                 TestConstant.API_TIER.UNLIMITED);
         // get a predefined api request
         endpointURL = getThrottleAPIEndpoint();
-        endpointURL = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
+        endpointURL = Utils.getServiceURLHttps(TestConstant.SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
 
         HttpResponse subscriptionResponse = subscribeToAPI(apiId, applicationId,
                 TestConstant.SUBSCRIPTION_TIER.UNLIMITED, restAPIStore);

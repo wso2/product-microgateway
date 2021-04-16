@@ -63,8 +63,6 @@ import static org.testng.Assert.assertEquals;
 
 public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(APIMLifecycleBaseTest.class);
-    protected static final String SAMPLE_API_NAME = "PetStore";
-    protected static final String SAMPLE_API_CONTEXT = "petstore";
 
     /**
      * Map of the predefined API requests. Key represents the api name and the value represents the APIRequest.
@@ -81,7 +79,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         String apiEndPointPostfixUrl = "/v2";
 
         try {
-            APIRequest apiRequest = new APIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT,
+            APIRequest apiRequest = new APIRequest(TestConstant.SAMPLE_API_NAME, TestConstant.SAMPLE_API_CONTEXT,
                                                    new URL(Utils.getDockerMockServiceURLHttp(apiEndPointPostfixUrl)));
             String API_VERSION_1_0_0 = "1.0.0";
             apiRequest.setVersion(API_VERSION_1_0_0);
@@ -97,9 +95,9 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
             operationsDTOS.add(apiOperationsDTO1);
             apiRequest.setOperationsDTOS(operationsDTOS);
 
-            addToAPIList(SAMPLE_API_NAME, apiRequest);
+            addToAPIList(TestConstant.SAMPLE_API_NAME, apiRequest);
         } catch (APIManagerIntegrationTestException | MalformedURLException e) {
-            LOGGER.error("Error creating the APIRequest instance for API name: " + SAMPLE_API_NAME);
+            LOGGER.error("Error creating the APIRequest instance for API name: " + TestConstant.SAMPLE_API_NAME);
         }
     }
 
