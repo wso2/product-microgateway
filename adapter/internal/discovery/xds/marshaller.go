@@ -79,9 +79,8 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	}
 
 	analytics := &enforcer.Analytics{
-		Enabled:   config.Analytics.Enabled,
-		AuthUrl:   config.Analytics.Enforcer.AuthURL,
-		AuthToken: config.Analytics.Enforcer.AuthToken,
+		Enabled:          config.Analytics.Enabled,
+		ConfigProperties: config.Analytics.Enforcer.ConfigProperties,
 		Service: &enforcer.Service{
 			Port:           config.Analytics.Enforcer.EnforcerLogReceiver.Port,
 			MaxHeaderLimit: config.Analytics.Enforcer.EnforcerLogReceiver.MaxHeaderLimit,
@@ -238,6 +237,7 @@ func MarshalAPIList(apiList *types.APIList) *subscription.APIList {
 			ApiType:          api.APIType,
 			Uuid:             api.UUID,
 			IsDefaultVersion: api.IsDefaultVersion,
+			LcState: 		  api.APIStatus,
 		}
 		apis = append(apis, newAPI)
 	}

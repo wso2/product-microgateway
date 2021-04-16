@@ -52,7 +52,7 @@ public class APIManagerInitializeTestCase extends APIMLifecycleBaseTest {
         String configTomlPath = configToml.getPath();
 
         try {
-            super.startAPIMWithMGW(configTomlPath, true);
+            super.startAPIMWithMGW(configTomlPath, true, true);
         } catch (MicroGWTestException | IOException e) {
             Assert.fail("Error starting the APIM server with MGW", e);
         }

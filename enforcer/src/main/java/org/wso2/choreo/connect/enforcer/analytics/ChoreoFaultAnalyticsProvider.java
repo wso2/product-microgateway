@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.API;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Application;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Error;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.ExtendedAPI;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.MetaInfo;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Operation;
@@ -42,11 +43,11 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 /**
  * Generate FaultDTO for the errors generated from enforcer.
  */
-public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
+public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
     private final RequestContext requestContext;
-    private static final Logger logger = LogManager.getLogger(MgwFaultAnalyticsProvider.class);
+    private static final Logger logger = LogManager.getLogger(ChoreoFaultAnalyticsProvider.class);
 
-    public MgwFaultAnalyticsProvider(RequestContext requestContext) {
+    public ChoreoFaultAnalyticsProvider(RequestContext requestContext) {
         this.requestContext = requestContext;
     }
 
@@ -87,7 +88,7 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
 
     @Override
     public API getApi() {
-        API api = new API();
+        ExtendedAPI api = new ExtendedAPI();
         api.setApiId(AnalyticsUtils.getAPIId(requestContext));
         api.setApiCreator(AnalyticsUtils.setDefaultIfNull(
                 requestContext.getAuthenticationContext() == null
@@ -99,6 +100,7 @@ public class MgwFaultAnalyticsProvider implements AnalyticsDataProvider {
                 requestContext.getMatchedAPI().getAPIConfig().getBasePath()) == null
                 ? APIConstants.SUPER_TENANT_DOMAIN_NAME
                 : requestContext.getMatchedAPI().getAPIConfig().getBasePath());
+        api.setOrganizationId(requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
         return api;
     }
 

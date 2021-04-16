@@ -17,6 +17,10 @@
 package model
 
 import (
+	"errors"
+	"net/url"
+	"strings"
+
 	parser "github.com/mitchellh/mapstructure"
 	"github.com/wso2/adapter/config"
 	"github.com/wso2/adapter/internal/svcdiscovery"
@@ -43,6 +47,7 @@ type MgwSwagger struct {
 	xThrottlingTier  string
 	xWso2AuthHeader  string
 	disableSecurity  bool
+	OrganizationID   string
 }
 
 // EndpointSecurity contains the SandBox/Production endpoint security
@@ -281,6 +286,49 @@ func (swagger *MgwSwagger) setXWso2AuthHeader() {
 
 func (swagger *MgwSwagger) setDisableSecurity() {
 	swagger.disableSecurity = ResolveDisableSecurity(swagger.vendorExtensions)
+}
+
+// Validate method confirms that the mgwSwagger has all required fields in the required format.
+// This needs to be checked prior to generate router/enforcer related resources.
+func (swagger *MgwSwagger) Validate() error {
+	if len(swagger.productionUrls) == 0 && len(swagger.sandboxUrls) == 0 {
+		logger.LoggerOasparser.Errorf("No Endpoints are provided for the API %s:%s",
+			swagger.title, swagger.version)
+		return errors.New("No Endpoints are provided for the API")
+	}
+	if len(swagger.productionUrls) > 0 {
+		err := swagger.productionUrls[0].validateEndpoint()
+		if err != nil {
+			logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
+				swagger.title, swagger.version, err)
+			return err
+		}
+	}
+
+	if len(swagger.sandboxUrls) > 0 {
+		err := swagger.sandboxUrls[0].validateEndpoint()
+		if err != nil {
+			logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
+				swagger.title, swagger.version, err)
+			return err
+		}
+	}
+	return nil
+}
+
+func (endpoint *Endpoint) validateEndpoint() error {
+	if len(endpoint.ServiceDiscoveryString) > 0 {
+		return nil
+	}
+	if len(endpoint.Host) == 0 {
+		return errors.New("Empty Hostname is provided")
+	}
+	if strings.HasPrefix(endpoint.Host, "/") {
+		return errors.New("Relative paths are not supported as endpoint URLs")
+	}
+	urlString := endpoint.URLType + "://" + endpoint.Host
+	_, err := url.ParseRequestURI(urlString)
+	return err
 }
 
 // getXWso2Endpoints extracts and generate the Endpoint Objects from the vendor extension map.

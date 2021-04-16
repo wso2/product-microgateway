@@ -41,6 +41,7 @@ import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
@@ -149,10 +150,20 @@ public class JWTAuthenticator implements Authenticator {
                                     .isAuthorized());
                         }
                         if (!apiKeyValidationInfoDTO.isAuthorized()) {
+                            if (GeneralErrorCodeConstants.API_BLOCKED_CODE == apiKeyValidationInfoDTO
+                                    .getValidationStatus()) {
+                                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                                        GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                                        GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
+                                throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
+                                        apiKeyValidationInfoDTO.getValidationStatus(),
+                                        GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                            }
                             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                                     apiKeyValidationInfoDTO.getValidationStatus(),
-                                    "User is NOT authorized to access the Resource. " +
-                                            "API Subscription validation failed.");
+                                    "User is NOT authorized to access the Resource. "
+                                            + "API Subscription validation failed.");
                         }
                     }
                 }

@@ -210,6 +210,7 @@ public class JWTUtil {
         ServiceLoader<JWTTransformer> loader = ServiceLoader.load(JWTTransformer.class);
         Iterator<JWTTransformer> classIterator = loader.iterator();
         Map<String, JWTTransformer> jwtTransformersMap = new HashMap<>();
+
         if (!classIterator.hasNext()) {
             log.debug("No JWTTransformers found.");
             return jwtTransformersMap;

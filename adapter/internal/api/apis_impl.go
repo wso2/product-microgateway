@@ -73,6 +73,7 @@ type ProjectAPI struct {
 	SecurityScheme             []string
 	endpointImplementationType string
 	AuthHeader                 string
+	OrganizationID             string
 	EndpointSecurity           config.EndpointSecurity
 }
 
@@ -210,11 +211,17 @@ func verifyMandatoryFields(apiJSON config.APIJsonData) error {
 
 	if apiJSON.Data.EndpointConfig.ProductionEndpoints.Endpoint == "" &&
 		apiJSON.Data.EndpointConfig.SandBoxEndpoints.Endpoint == "" {
-		errMsg = errMsg + "API production and sandbox enpoints "
+		errMsg = errMsg + "API production and sandbox endpoints "
 	}
 
 	if errMsg != "" {
 		errMsg = errMsg + "fields cannot be empty for " + apiName + " " + apiVersion
+		return errors.New(errMsg)
+	}
+
+	if strings.HasPrefix(apiJSON.Data.EndpointConfig.ProductionEndpoints.Endpoint, "/") ||
+		strings.HasPrefix(apiJSON.Data.EndpointConfig.SandBoxEndpoints.Endpoint, "/") {
+		errMsg = "relative urls are not supported for API production and sandbox endpoints"
 		return errors.New(errMsg)
 	}
 	return nil
@@ -336,14 +343,14 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	apiContent.EndpointSecurity.Production.Password = apiProject.EndpointSecurity.Production.Password
 	apiContent.EndpointSecurity.Production.Username = apiProject.EndpointSecurity.Production.Username
 	apiContent.EndpointSecurity.Production.SecurityType = apiProject.EndpointSecurity.Production.SecurityType
+	apiContent.OrganizationID = apiProject.OrganizationID
 
 	if apiProject.APIType == mgw.HTTP {
 		apiContent.APIDefinition = apiProject.SwaggerJsn
-		xds.UpdateAPI(apiContent)
 	} else if apiProject.APIType == mgw.WS {
 		apiContent.APIDefinition = apiProject.APIJsn
-		xds.UpdateAPI(apiContent)
 	}
+	xds.UpdateAPI(apiContent)
 }
 
 func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData) {
@@ -385,6 +392,10 @@ func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData)
 		SandBox:    sandBoxEpSecurity,
 		Production: prodEpSecurity,
 	}
+
+	// organization ID would remain empty string if unassigned
+	apiProject.OrganizationID = apiObject.Data.OrganizationID
+
 	apiProject.EndpointSecurity = epSecurity
 }
 

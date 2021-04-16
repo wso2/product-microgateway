@@ -20,7 +20,6 @@ package adapter
 
 import (
 	"crypto/tls"
-
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/wso2/adapter/internal/api/restserver"
@@ -31,7 +30,10 @@ import (
 	subscriptionservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/subscription"
 	throttleservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/throtlle"
 	wso2_server "github.com/wso2/adapter/internal/discovery/protocol/server/v3"
+	"github.com/wso2/adapter/internal/health"
+	healthservice "github.com/wso2/adapter/internal/health/api/wso2/health/service"
 	"github.com/wso2/adapter/internal/tlsutils"
+	"strings"
 
 	"context"
 	"flag"
@@ -83,7 +85,7 @@ func init() {
 
 const grpcMaxConcurrentStreams = 1000000
 
-func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server, enforcerSdsServer wso2_server.Server,
+func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServer wso2_server.Server, enforcerSdsServer wso2_server.Server,
 	enforcerAppDsSrv wso2_server.Server, enforcerAPIDsSrv wso2_server.Server, enforcerAppPolicyDsSrv wso2_server.Server,
 	enforcerSubPolicyDsSrv wso2_server.Server, enforcerAppKeyMappingDsSrv wso2_server.Server,
 	enforcerKeyManagerDsSrv wso2_server.Server, enforcerRevokedTokenDsSrv wso2_server.Server,
@@ -128,16 +130,19 @@ func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server,
 	keymanagerservice.RegisterRevokedTokenDiscoveryServiceServer(grpcServer, enforcerRevokedTokenDsSrv)
 	throttleservice.RegisterThrottleDataDiscoveryServiceServer(grpcServer, enforcerThrottleDataDsSrv)
 
+	// register health service
+	healthservice.RegisterHealthServer(grpcServer, &health.Server{})
+
 	logger.LoggerMgw.Info("port: ", port, " management server listening")
 	go func() {
+		// if control plane enabled wait until it starts
+		if conf.ControlPlane.Enabled {
+			// wait current goroutine forever for until control plane starts
+			health.WaitForControlPlane()
+		}
+		logger.LoggerMgw.Info("Starting XDS GRPC server.")
 		if err = grpcServer.Serve(lis); err != nil {
 			logger.LoggerMgw.Error(err)
-		}
-	}()
-
-	go func() {
-		if err = auth.Init(); err != nil {
-			logger.LoggerMgw.Error("Error while initializing autherization component.", err)
 		}
 	}()
 }
@@ -186,7 +191,7 @@ func Run(conf *config.Config) {
 	enforcerRevokedTokenDsSrv := wso2_server.NewServer(ctx, enforcerRevokedTokenCache, &cb.Callbacks{})
 	enforcerThrottleDataDsSrv := wso2_server.NewServer(ctx, enforcerThrottleDataCache, &cb.Callbacks{})
 
-	runManagementServer(srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
+	runManagementServer(conf, srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
 		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, enforcerKeyManagerDsSrv,
 		enforcerRevokedTokenDsSrv, enforcerThrottleDataDsSrv, port)
 
@@ -206,7 +211,13 @@ func Run(conf *config.Config) {
 		xds.UpdateEnforcerApis(env, apis)
 	}
 
-	go restserver.StartRestServer(conf)
+	// Adapter REST API
+	if conf.Adapter.Server.Enabled {
+		if err := auth.Init(); err != nil {
+			logger.LoggerMgw.Error("Error while initializing authorization component.", err)
+		}
+		go restserver.StartRestServer(conf)
+	}
 
 	eventHubEnabled := conf.ControlPlane.Enabled
 	if eventHubEnabled {
@@ -278,12 +289,16 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 			if err != nil {
 				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
 			}
+			health.SetControlPlaneRestAPIStatus(err == nil)
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 			logger.LoggerMgw.Errorf("Error occurred when retrieveing APIs from control plane: %v", data.Err)
+			isNoAPIArtifacts := data.ErrorCode == 404 && strings.Contains(data.Err.Error(), "No Api artifacts found")
+			health.SetControlPlaneRestAPIStatus(isNoAPIArtifacts)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			i--
 			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
+			health.SetControlPlaneRestAPIStatus(false)
 			go func(d synchronizer.SyncAPIResponse) {
 				// Retry fetching from control plane after a configured time interval
 				if conf.ControlPlane.RetryInterval == 0 {

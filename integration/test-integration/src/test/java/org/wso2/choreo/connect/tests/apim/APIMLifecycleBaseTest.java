@@ -128,16 +128,15 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @throws MicroGWTestException -  Exception throws by the method call of changeAPILifeCycleStatusToPublish() in
      *                              APIPublisherRestClient.java.
      */
-    protected HttpResponse publishAPI(String apiId, RestAPIPublisherImpl publisherRestClient,
+    protected HttpResponse changeLCStateAPI(String apiId, String targetState, RestAPIPublisherImpl publisherRestClient,
                                       boolean isRequireReSubscription) throws MicroGWTestException {
         String lifecycleChecklist = null;
         if (isRequireReSubscription) {
             lifecycleChecklist = "Requires re-subscription when publishing the API:true";
         }
         try {
-            HttpResponse response = publisherRestClient.changeAPILifeCycleStatus(apiId,
-                                                                                 APILifeCycleAction.PUBLISH.getAction(),
-                                                                                 lifecycleChecklist);
+            HttpResponse response = publisherRestClient
+                    .changeAPILifeCycleStatus(apiId, targetState, lifecycleChecklist);
             if (Objects.isNull(response)) {
                 throw new MicroGWTestException("Error while publishing the API. API Id : " + apiId);
             }
@@ -192,10 +191,9 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
                 throw new MicroGWTestException("Error in creating and deploying API Revision", e);
             }
             //Publish the API
-            HttpResponse publishAPIResponse = publishAPI(createAPIResponse.getData(), publisherRestClient,
-                                                         isRequireReSubscription);
-            if (!(publishAPIResponse.getResponseCode() == HttpStatus.SC_OK &&
-                    APILifeCycleState.PUBLISHED.getState().equals(publishAPIResponse.getData()))) {
+            HttpResponse publishAPIResponse = changeLCStateAPI(createAPIResponse.getData(),
+                    APILifeCycleAction.PUBLISH.getAction(), publisherRestClient, isRequireReSubscription);
+            if (!(publishAPIResponse.getResponseCode() == HttpStatus.SC_OK && APILifeCycleState.PUBLISHED.getState().equals(publishAPIResponse.getData()))) {
                 throw new MicroGWTestException(
                         "Error in API Publishing" + getAPIIdentifierStringFromAPIRequest(apiRequest) + "Response Code:"
                                 + publishAPIResponse.getResponseCode() + " Response Data :" + publishAPIResponse
@@ -247,7 +245,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
     protected void copyAndPublishCopiedAPI(String apiID, String newAPIVersion, RestAPIPublisherImpl publisherRestClient,
                                            boolean isRequireReSubscription) throws MicroGWTestException, ApiException {
         APIDTO apidto = copyAPI(apiID, newAPIVersion, publisherRestClient);
-        publishAPI(apidto.getId(), publisherRestClient, isRequireReSubscription);
+        changeLCStateAPI(apidto.getId(), APILifeCycleAction.PUBLISH.getAction(), publisherRestClient, isRequireReSubscription);
     }
 
     /**

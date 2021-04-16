@@ -244,4 +244,16 @@ public interface ApiOrBuilder extends
    */
   com.google.protobuf.ByteString
       getVhostBytes();
+
+  /**
+   * <code>string organizationId = 17;</code>
+   * @return The organizationId.
+   */
+  java.lang.String getOrganizationId();
+  /**
+   * <code>string organizationId = 17;</code>
+   * @return The bytes for organizationId.
+   */
+  com.google.protobuf.ByteString
+      getOrganizationIdBytes();
 }

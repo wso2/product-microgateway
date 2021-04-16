@@ -3,5 +3,6 @@
     image: wso2/choreo-connect-mock-backend:latest
     ports:
       - "2383:2383"
+      - "2399:2399"
     links:
       - router

@@ -311,6 +311,12 @@ func TestGenerateRegex(t *testing.T) {
 			isMatched:     true,
 		},
 		{
+			inputpath:     "/v2/pet/*",
+			userInputPath: "/v2/pet/",
+			message:       "when the resource ends with *, empty string substitution fails.",
+			isMatched:     true,
+		},
+		{
 			inputpath:     "/v2/pet/{petId}.api",
 			userInputPath: "/v2/pet/findByIdstatus=availabe",
 			message:       "when the resource path param suffixed",

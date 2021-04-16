@@ -153,7 +153,21 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
      * @throws IOException          if an error while starting the mock-backend
      */
     protected void startAPIMWithMGW(String confPath, boolean tlsEnabled) throws MicroGWTestException, IOException {
-        apiManagerWithMgwServerInstance = new APIManagerWithMgwServerInstance(confPath, tlsEnabled);
+        startAPIMWithMGW(confPath, tlsEnabled, false);
+    }
+
+    /**
+     * start the mgw docker environment and mock backend.
+     *
+     * @param confPath   - external conf.toml file location
+     * @param tlsEnabled - true if the tls based backend server is required additionally
+     * @param includeCustomImpl - true if it is required to include the test-integration jar
+     * @throws MicroGWTestException if something goes wrong while copying server configs
+     * @throws IOException          if an error while starting the mock-backend
+     */
+    protected void startAPIMWithMGW(String confPath, boolean tlsEnabled, boolean includeCustomImpl)
+            throws MicroGWTestException, IOException {
+        apiManagerWithMgwServerInstance = new APIManagerWithMgwServerInstance(confPath, tlsEnabled, includeCustomImpl);
         apiManagerWithMgwServerInstance.startMGW();
     }
 

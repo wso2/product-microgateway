@@ -121,6 +121,13 @@ public class APIConstants {
     }
 
     /**
+     * Holds the common set of constants related to life cycle states.
+     */
+    public static class LifecycleStatus {
+        public static final String BLOCKED = "BLOCKED";
+    }
+
+    /**
      * Holds the common set of constants for validating the JWT tokens.
      */
     public static class JwtTokenConstants {
@@ -333,7 +340,8 @@ public class APIConstants {
         UNAUTHENTICATED("401", 401),
         UNAUTHORIZED("403", 403),
         NOTFOUND("404", 404),
-        THROTTLED("429", 429);
+        THROTTLED("429", 429),
+        SERVICE_UNAVAILABLE("503", 503);
 
         private String value;
         private int code;
