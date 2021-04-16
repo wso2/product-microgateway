@@ -53,7 +53,7 @@ spec:
             - mountPath: /home/wso2/lib/dropins
               name: dropins-vol
           image: wso2/choreo-connect-enforcer:0.9.0-beta-SNAPSHOT
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: ENFORCER_PRIVATE_KEY_PATH
               value: "/home/wso2/security/keystore/mg.key"
@@ -96,18 +96,18 @@ spec:
             - containerPort: 8081
             - containerPort: 8082
           startupProbe:
-            tcpSocket:
-              port: 8081
+            exec:
+              command: [ "sh", "check_health.sh" ]
             periodSeconds: 5
             failureThreshold: 30
           livenessProbe:
-            tcpSocket:
-              port: 8081
+            exec:
+              command: [ "sh", "check_health.sh" ]
             initialDelaySeconds: 10
             periodSeconds: 30
           readinessProbe:
-            tcpSocket:
-              port: 8081
+            exec:
+              command: [ "sh", "check_health.sh" ]
             initialDelaySeconds: 8
             periodSeconds: 5
         - name: choreo-connect-router
@@ -117,7 +117,7 @@ spec:
             - mountPath: /home/wso2/security/truststore
               name: router-truststore-vol
           image: wso2/choreo-connect-router:0.9.0-beta-SNAPSHOT
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: ROUTER_ADMIN_HOST
               value: "0.0.0.0"
@@ -158,6 +158,9 @@ spec:
               port: 9095
               path: /health
               scheme: HTTPS
+              httpHeaders:
+                - name: Host
+                  value: localhost
             failureThreshold: 30
             periodSeconds: 5
           livenessProbe:
@@ -165,6 +168,9 @@ spec:
               port: 9095
               path: /health
               scheme: HTTPS
+              httpHeaders:
+                - name: Host
+                  value: localhost
             initialDelaySeconds: 20
             periodSeconds: 10
           readinessProbe:
@@ -172,6 +178,9 @@ spec:
               port: 9095
               path: /health
               scheme: HTTPS
+              httpHeaders:
+                - name: Host
+                  value: localhost
             initialDelaySeconds: 20
             periodSeconds: 5
       volumes:

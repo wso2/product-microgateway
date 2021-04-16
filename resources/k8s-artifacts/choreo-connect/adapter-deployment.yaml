@@ -49,8 +49,12 @@ spec:
               subPath: log_config.toml
               name: logconfig-toml-vol
           image: wso2/choreo-connect-adapter:0.9.0-beta-SNAPSHOT
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
+            - name: ADAPTER_PRIVATE_KEY_PATH
+              value: "/home/wso2/security/keystore/mg.key"
+            - name: ADAPTER_PUBLIC_CERT_PATH
+              value: "/home/wso2/security/keystore/mg.pem"
             - name: cp_admin_pwd
               value: "admin"
             - name: adapter_admin_pwd
@@ -66,13 +70,13 @@ spec:
             - containerPort: 18000
             - containerPort: 9843
           livenessProbe:
-            tcpSocket:
-              port: 9843
+            exec:
+              command: [ "sh", "check_health.sh" ]
             initialDelaySeconds: 10
             periodSeconds: 30
           readinessProbe:
-            tcpSocket:
-              port: 9843
+            exec:
+              command: [ "sh", "check_health.sh" ]
             initialDelaySeconds: 8
             periodSeconds: 5
       volumes:

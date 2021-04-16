@@ -43,6 +43,7 @@ const (
 	pkgTLSUtils     = "github.com/wso2/adapter/internal/tlsutils"
 	pkgSubscription = "github.com/wso2/adapter/internal/subscription"
 	pkgXdsCallbacks = "github.com/wso2/adapter/internal/discovery/xds"
+	pkgHealth       = "github.com/wso2/adapter/internal/health"
 )
 
 // logger package references
@@ -58,6 +59,7 @@ var (
 	LoggerTLSUtils     *logrus.Logger
 	LoggerSubscription *logrus.Logger
 	LoggerXdsCallbacks *logrus.Logger
+	LoggerHealth       *logrus.Logger
 )
 
 func init() {
@@ -78,5 +80,6 @@ func UpdateLoggers() {
 	LoggerTLSUtils = logging.InitPackageLogger(pkgTLSUtils)
 	LoggerSubscription = logging.InitPackageLogger(pkgSubscription)
 	LoggerXdsCallbacks = logging.InitPackageLogger(pkgXdsCallbacks)
+	LoggerHealth = logging.InitPackageLogger(pkgHealth)
 	logrus.Info("Updated loggers")
 }

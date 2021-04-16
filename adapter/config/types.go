@@ -66,6 +66,8 @@ type Config struct {
 	Adapter struct {
 		// Server represents the configuration related to REST API (to which the apictl requests)
 		Server struct {
+			// Enabled the serving the REST API
+			Enabled bool `default:"true"`
 			// Host name of the server
 			Host string
 			// Port of the server
@@ -119,7 +121,7 @@ type Config struct {
 		SecuredListenerPort     uint32
 		ClusterTimeoutInSeconds time.Duration
 		KeyStore                keystore
-		SystemHost              string
+		SystemHost              string `default:"localhost"`
 
 		// Global CORS configurations.
 		Cors struct {
