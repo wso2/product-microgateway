@@ -14,7 +14,6 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-# TODO: (VirajSalaka) finalize jdk 11 image
 FROM adoptopenjdk/openjdk11:jre-11.0.10_9-alpine
 RUN apk update && apk upgrade --no-cache
 

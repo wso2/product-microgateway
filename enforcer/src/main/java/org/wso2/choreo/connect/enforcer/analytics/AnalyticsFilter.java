@@ -18,28 +18,26 @@
 
 package org.wso2.choreo.connect.enforcer.analytics;
 
-import io.envoyproxy.envoy.data.accesslog.v3.HTTPAccessLogEntry;
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration;
-import org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder;
-import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
-import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
-import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
+import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is the filter is for Analytics.
@@ -51,18 +49,26 @@ import java.util.Map;
 public class AnalyticsFilter {
     private static final Logger logger = LogManager.getLogger(AnalyticsFilter.class);
     private static AnalyticsFilter analyticsFilter;
-    private static final String AUTH_TOKEN_KEY = "auth.api.token";
-    private static final String AUTH_URL = "auth.api.url";
+    private static AnalyticsEventPublisher publisher;
 
     private AnalyticsFilter() {
-        Map<String, String> configuration = new HashMap<>(2);
-        configuration.put(AUTH_TOKEN_KEY, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthToken());
-        configuration.put(AUTH_URL, ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getAuthURL());
-        AnalyticsCommonConfiguration commonConfiguration = new AnalyticsCommonConfiguration(configuration);
-//        commonConfiguration.setResponseSchema("CHOREO_RESPONSE");
-//        commonConfiguration.setFaultSchema("CHOREO_ERROR");
-        AnalyticsServiceReferenceHolder.getInstance().setConfigurations(commonConfiguration);
-        // TODO: (VirajSalaka) Load Class
+        Map<String, String> configuration =
+                ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties();
+        boolean isChoreoDeployment = configuration.containsKey(AnalyticsConstants.IS_CHOREO_DEPLOYMENT_CONFIG_KEY)
+                && configuration.get(AnalyticsConstants.IS_CHOREO_DEPLOYMENT_CONFIG_KEY)
+                .toLowerCase().equals("true");
+        String customAnalyticsPublisher =
+                ConfigHolder.getInstance().getConfig().getAnalyticsConfig().getConfigProperties()
+                        .get(AnalyticsConstants.PUBLISHER_IMPL_CONFIG_KEY);
+        Map<String, String> publisherConfig = new HashMap<>(2);
+        for (Map.Entry<String, String> entry : configuration.entrySet()) {
+            // We are always expecting <String, String> Map as configuration.
+            publisherConfig.put(entry.getKey(), getEnvValue(entry.getValue()).toString());
+        }
+        publisher = loadAnalyticsPublisher(customAnalyticsPublisher, isChoreoDeployment);
+        if (publisher != null) {
+            publisher.init(publisherConfig);
+        }
     }
 
     public static AnalyticsFilter getInstance() {
@@ -77,28 +83,10 @@ public class AnalyticsFilter {
     }
 
     public void handleGRPCLogMsg(StreamAccessLogsMessage message) {
-        for (int i = 0; i < message.getHttpLogs().getLogEntryCount(); i++) {
-            HTTPAccessLogEntry logEntry = message.getHttpLogs().getLogEntry(i);
-            logger.trace("Received logEntry from Router " + message.getIdentifier().getNode() +
-                    " : " + message.toString());
-            if (doNotPublishEvent(logEntry)) {
-                logger.debug("LogEntry is ignored as it is already published by the enforcer.");
-                continue;
-            }
-            AnalyticsDataProvider provider = new MgwAnalyticsProvider(logEntry);
-            // If the APIName is not available, the event should not be published.
-            // 404 errors are not logged due to this.
-            if (provider.getEventCategory() == EventCategory.FAULT
-                    && provider.getFaultType() == FaultCategory.OTHER) {
-                continue;
-            }
-            GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-            try {
-                dataCollector.collectData();
-                logger.debug("Event is published.");
-            } catch (AnalyticsException e) {
-                logger.error("Error while publishing the event to the analytics portal.", e);
-            }
+        if (publisher != null) {
+            publisher.handleGRPCLogMsg(message);
+        } else {
+            logger.error("Cannot publish the analytics event as analytics publisher is null.");
         }
     }
 
@@ -139,6 +127,9 @@ public class AnalyticsFilter {
                 requestContext.getMatchedResourcePath().getPath());
 
         requestContext.addMetadataToMap(MetadataConstants.DESTINATION, resolveEndpoint(requestContext));
+
+        requestContext.addMetadataToMap(MetadataConstants.API_ORGANIZATION_ID,
+                requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
     }
 
     private String resolveEndpoint(RequestContext requestContext) {
@@ -156,7 +147,11 @@ public class AnalyticsFilter {
     }
 
     public void handleFailureRequest(RequestContext requestContext) {
-        MgwFaultAnalyticsProvider provider = new MgwFaultAnalyticsProvider(requestContext);
+        if (publisher == null) {
+            logger.error("Cannot publish the failure event as analytics publisher is null.");
+            return;
+        }
+        ChoreoFaultAnalyticsProvider provider = new ChoreoFaultAnalyticsProvider(requestContext);
         // To avoid incrementing counter for options call
         if (provider.getProxyResponseCode() == 200 || provider.getProxyResponseCode() == 204) {
             return;
@@ -170,15 +165,56 @@ public class AnalyticsFilter {
         }
     }
 
-    private boolean doNotPublishEvent(HTTPAccessLogEntry logEntry) {
-        // If ext_auth_denied request comes, the event is already published from the enforcer.
-        // There is a chance that the analytics event is published from enforcer and then result in ext_authz_error
-        // responseCodeDetail due to some error/exception within enforcer implementation. This scenario is not
-        // handled as it should be fixed from enforcer.
-        return (!StringUtils.isEmpty(logEntry.getResponse().getResponseCodeDetails()))
-                && logEntry.getResponse().getResponseCodeDetails()
-                .equals(AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL)
-                // Token endpoint calls needs to be removed as well
-                && (!AnalyticsConstants.TOKEN_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()));
+    private static AnalyticsEventPublisher loadAnalyticsPublisher(String className, boolean isChoreoDeployment) {
+
+        // For the choreo deployment, class name need not to be provided.
+        if (StringUtils.isEmpty(className)) {
+            logger.debug("Proceeding with default analytics publisher.");
+            if (isChoreoDeployment) {
+                return new DefaultAnalyticsEventPublisher(AnalyticsConstants.CHOREO_RESPONSE_SCHEMA,
+                        AnalyticsConstants.CHOREO_FAULT_SCHEMA);
+            }
+            return new DefaultAnalyticsEventPublisher();
+        }
+
+        try {
+            Class<AnalyticsEventPublisher> clazz = (Class<AnalyticsEventPublisher>) Class.forName(className);
+            Constructor<AnalyticsEventPublisher> constructor = clazz.getConstructor();
+            AnalyticsEventPublisher publisher = constructor.newInstance();
+            logger.info("Proceeding with the custom analytics publisher implementation: " + className);
+            return publisher;
+        } catch (ClassNotFoundException e) {
+            logger.error("Error while loading the custom analytics publisher class.", e);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException
+                | NoSuchMethodException e) {
+            logger.error("Error while generating AnalyticsEventPublisherInstance from the class", e);
+        }
+        return null;
+    }
+
+    // TODO: (RajithRoshan) Avoid Code duplication and process the map entries while initial env variable based
+    // resolution.
+    private Object getEnvValue(Object configValue) {
+        if (configValue instanceof String) {
+            String value = (String) configValue;
+            return replaceEnvRegex(value);
+        } else if (configValue instanceof char[]) {
+            String value = String.valueOf((char[]) configValue);
+            return replaceEnvRegex(value).toCharArray();
+        }
+        return configValue;
+    }
+
+    private String replaceEnvRegex(String value) {
+        Matcher m = Pattern.compile("\\$env\\{(.*?)\\}").matcher(value);
+        if (value.contains(Constants.ENV_PREFIX)) {
+            while (m.find()) {
+                String envName = value.substring(m.start() + 5, m.end() - 1);
+                if (System.getenv(envName) != null) {
+                    value = value.replace(value.substring(m.start(), m.end()), System.getenv(envName));
+                }
+            }
+        }
+        return value;
     }
 }

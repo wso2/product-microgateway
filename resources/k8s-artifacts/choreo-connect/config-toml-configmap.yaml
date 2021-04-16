@@ -232,6 +232,32 @@ data:
         # Certificate Filepath within enforcer
         certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
+    [analytics]
+      enabled = false
+      [analytics.adapter]
+        bufferFlushInterval = "1s"
+        bufferSizeBytes = 16384
+        gRPCRequestTimeout = "20s"
+
+      [analytics.enforcer]
+        [analytics.enforcer.configProperties]
+          authURL = "$env{analytics_authURL}"
+          authToken = "$env{analytics_authToken}"
+
+        [analytics.enforcer.LogReceiver]
+          port = 18090
+          maxMessageSize = 1000000000
+          maxHeaderLimit = 8192
+          #keep alive time of the external authz connection
+          keepAliveTime = 600
+
+          [analytics.enforcer.LogReceiver.threadPool]
+            coreSize = 10
+            maxSize = 100
+            #keep alive time of threads in seconds
+            keepAliveTime = 600
+            queueSize = 1000
+
     [controlPlane]
       enabled = false
       serviceUrl = "https://wso2apim:9443/"

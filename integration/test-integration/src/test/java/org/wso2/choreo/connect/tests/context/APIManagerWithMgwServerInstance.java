@@ -63,8 +63,23 @@ public class APIManagerWithMgwServerInstance extends MgwServerImpl {
      * @throws MicroGWTestException if something goes wrong while copying server configs
      */
     public APIManagerWithMgwServerInstance(String confPath, boolean tlsEnabled) throws MicroGWTestException,
-                                                                                       IOException {
-        createTmpMgwSetup(false);
+            IOException {
+        this(confPath, tlsEnabled, false);
+    }
+
+    /**
+     * initialize a docker environment using docker compose with test-integration jar copied with.
+     *
+     * @param confPath          - external conf.toml path
+     * @param tlsEnabled        - if the backend needs to have the tls enabled server additionally
+     * @param includeCustomImpl - if the test-integration jar needs to be included
+     * @throws IOException          if something goes wrong while adding the mock backend to the docker-compose.yaml
+     * @throws MicroGWTestException if something goes wrong while copying server configs
+     */
+    public APIManagerWithMgwServerInstance(String confPath, boolean tlsEnabled, boolean includeCustomImpl)
+            throws MicroGWTestException,
+            IOException {
+        createTmpMgwSetup(includeCustomImpl);
         if (!StringUtils.isEmpty(confPath)) {
             Utils.copyFile(confPath,
                     mgwTmpServerPath + File.separator + "docker-compose" + File.separator + "choreo-connect-with-apim"

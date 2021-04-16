@@ -81,6 +81,10 @@ spec:
               value: "admin"
             - name: tm_admin_pwd
               value: "admin"
+            - name: analytics_authURL
+              value: "https://localhost:8080"
+            - name: analytics_authToken
+              value: ""
           resources:
             requests:
               memory: "250Mi"
