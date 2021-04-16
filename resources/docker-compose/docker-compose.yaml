@@ -39,6 +39,8 @@ services:
       - ../resources/adapter/security:/home/wso2/security
       - ./conf:/home/wso2/conf
     environment:
+      - ADAPTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
+      - ADAPTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
       - cp_admin_pwd=admin
       - adapter_admin_pwd=admin
     ports:

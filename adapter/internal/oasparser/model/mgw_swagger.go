@@ -47,6 +47,7 @@ type MgwSwagger struct {
 	xThrottlingTier  string
 	xWso2AuthHeader  string
 	disableSecurity  bool
+	OrganizationID   string
 }
 
 // EndpointSecurity contains the SandBox/Production endpoint security

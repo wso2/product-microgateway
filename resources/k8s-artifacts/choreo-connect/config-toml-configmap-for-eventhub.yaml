@@ -27,6 +27,7 @@ data:
 
     # server: configuration related to REST API
     [adapter.server]
+      enabled = true
       host = "0.0.0.0"
       port = "9843"
       tokenTTL = "1h"
@@ -34,6 +35,11 @@ data:
       [[adapter.server.users]]
         username = "admin"
         password = "$env{adapter_admin_pwd}"
+
+    # default vhosts mapping for standalone mode
+    [[adapter.vhostMapping]]
+      environment = "Production and Sandbox"
+      vhost = "localhost"
 
     [adapter.keystore]
       certPath = "/home/wso2/security/keystore/mg.pem"
@@ -61,6 +67,8 @@ data:
       securedListenerHost = "0.0.0.0"
       securedListenerPort = 9095
       clusterTimeoutInSeconds = 20
+      # system hostname for system API resources (eg: /testkey and /health)
+      systemHost = "localhost"
 
     [router.keystore]
       certPath = "/home/wso2/security/keystore/mg.pem"
@@ -78,7 +86,7 @@ data:
     [router.upstream.tls]
       minimumProtocolVersion = "TLS1_1"
       maximumProtocolVersion = "TLS1_2"
-      ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"  
+      ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"
       # the default endpoint certificates
       trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
       verifyHostName = true
@@ -123,7 +131,7 @@ data:
 
     [enforcer.jwtIssuer]
       enabled = true
-      issuer = "https://localhost:9095/testkey"
+      issuer = "https://adapter:9095/testkey"
       encoding = "base64" # base64,base64url
       claimDialect = ""
       signingAlgorithm = "SHA256withRSA"
@@ -231,6 +239,32 @@ data:
         consumerKeyClaim = ""
         # Certificate Filepath within enforcer
         certificateFilePath = "/home/wso2/security/truststore/mg.pem"
+
+    [analytics]
+      enabled = false
+      [analytics.adapter]
+        bufferFlushInterval = "1s"
+        bufferSizeBytes = 16384
+        gRPCRequestTimeout = "20s"
+
+      [analytics.enforcer]
+        [analytics.enforcer.configProperties]
+          authURL = "$env{analytics_authURL}"
+          authToken = "$env{analytics_authToken}"
+
+        [analytics.enforcer.LogReceiver]
+          port = 18090
+          maxMessageSize = 1000000000
+          maxHeaderLimit = 8192
+          #keep alive time of the external authz connection
+          keepAliveTime = 600
+
+          [analytics.enforcer.LogReceiver.threadPool]
+            coreSize = 10
+            maxSize = 100
+            #keep alive time of threads in seconds
+            keepAliveTime = 600
+            queueSize = 1000
 
     # Control plane's connection details
     [controlPlane]

@@ -31,4 +31,5 @@ message Api {
 	string authorizationHeader = 14;
 	bool disableSecurity = 15;
 	string vhost = 16;
+	string organizationId = 17;
 }

@@ -1,6 +1,7 @@
 [adapter]
 # The configuration file for mgw
 [adapter.server]
+enabled = true
 host = "0.0.0.0"
 port = "9843"
 
@@ -149,3 +150,30 @@ skipSSLVerification=true
 # Message broker connection URL of the control plane
 [controlPlane.jmsConnectionParameters]
 eventListeningEndpoints = ["amqp://admin:admin@apim:5672?retries='5'&connectdelay='30000'"]
+
+[analytics]
+enabled = true
+[analytics.adapter]
+bufferFlushInterval = "1s"
+bufferSizeBytes = 16384
+gRPCRequestTimeout = "20s"
+
+[analytics.enforcer]
+[analytics.enforcer.configProperties]
+authURL = "$env{analytics_authURL}"
+authToken = "$env{analytics_authToken}"
+"publisher.reporter.class" = "org.wso2.choreo.connect.tests.CustomMetricReporter"
+
+[analytics.enforcer.LogReceiver]
+port = 18090
+maxMessageSize = 1000000000
+maxHeaderLimit = 8192
+#keep alive time of the external authz connection
+keepAliveTime = 600
+
+[analytics.enforcer.LogReceiver.threadPool]
+coreSize = 10
+maxSize = 100
+#keep alive time of threads in seconds
+keepAliveTime = 600
+queueSize = 1000

@@ -66,6 +66,8 @@ type Config struct {
 	Adapter struct {
 		// Server represents the configuration related to REST API (to which the apictl requests)
 		Server struct {
+			// Enabled the serving the REST API
+			Enabled bool `default:"true"`
 			// Host name of the server
 			Host string
 			// Port of the server
@@ -119,7 +121,7 @@ type Config struct {
 		SecuredListenerPort     uint32
 		ClusterTimeoutInSeconds time.Duration
 		KeyStore                keystore
-		SystemHost              string
+		SystemHost              string `default:"localhost"`
 
 		// Global CORS configurations.
 		Cors struct {
@@ -304,8 +306,8 @@ type analytics struct {
 	}
 
 	Enforcer struct {
-		AuthURL             string      `toml:"authURL"`
-		AuthToken           string      `toml:"authToken"`
+	// TODO: (VirajSalaka) convert it to map[string]{}interface
+		ConfigProperties    map[string]string
 		EnforcerLogReceiver authService `toml:"LogReceiver"`
 	}
 }
@@ -371,6 +373,7 @@ type APIContent struct {
 	SecurityScheme     []string
 	EndpointSecurity   EndpointSecurity
 	AuthHeader         string
+	OrganizationID     string
 }
 
 // APIJsonData contains everything necessary to extract api.json/api.yaml file
@@ -384,6 +387,7 @@ type APIJsonData struct {
 		EndpointImplementationType string   `json:"endpointImplementationType,omitempty"`
 		AuthorizationHeader        string   `json:"authorizationHeader,omitempty"`
 		SecurityScheme             []string `json:"securityScheme,omitempty"`
+		OrganizationID             string   `json:"organizationId,omitempty"`
 		EndpointConfig             struct {
 			EndpointType     string `json:"endpoint_type,omitempty"`
 			EndpointSecurity struct {

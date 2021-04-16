@@ -14,7 +14,6 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-# TODO: (VirajSalaka) finalize jdk 11 image
 FROM adoptopenjdk/openjdk11:jre-11.0.10_9-alpine
 RUN apk update && apk upgrade --no-cache
 
@@ -28,6 +27,7 @@ ARG MG_USER_GROUP=wso2
 ARG MG_USER_GROUP_ID=802
 ARG MG_USER_HOME=/home/${MG_USER}
 ARG MG_VERSION=1.0-SNAPSHOT
+ARG GRPC_HEALTH_PROBE_PATH=/bin/grpc_health_probe
 
 ENV VERSION=${MG_VERSION}
 ENV JAVA_OPTS=""
@@ -55,12 +55,16 @@ RUN \
     && mkdir ${MG_USER_HOME}/lib && mkdir -p ${MG_USER_HOME}/mg/security && mkdir -p ${MG_USER_HOME}/mg/logs  \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
 
+COPY maven/grpc_health_probe-linux-amd64 ${GRPC_HEALTH_PROBE_PATH}
+RUN chmod +x ${GRPC_HEALTH_PROBE_PATH}
+
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 
 COPY maven/ lib/
 COPY maven/conf conf
 COPY maven/security security
+COPY check_health.sh .
 COPY maven/LICENSE.txt .
 
 CMD java $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -cp "lib/*:lib/dropins/*" org.wso2.choreo.connect.enforcer.server.AuthServer

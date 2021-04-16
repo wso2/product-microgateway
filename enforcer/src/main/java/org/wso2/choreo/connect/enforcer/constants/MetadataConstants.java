@@ -30,6 +30,7 @@ public class MetadataConstants {
     public static final String API_VERSION_KEY = "ApiVersion";
     public static final String API_TYPE_KEY = "ApiType";
     public static final String API_CREATOR_TENANT_DOMAIN_KEY = "ApiCreatorTenantDomain";
+    public static final String API_ORGANIZATION_ID = "ApiOrganizationId";
 
     public static final String APP_ID_KEY = "ApplicationId";
     public static final String APP_KEY_TYPE_KEY = "ApplicationKeyType";
