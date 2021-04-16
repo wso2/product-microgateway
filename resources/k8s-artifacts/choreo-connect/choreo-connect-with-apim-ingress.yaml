@@ -49,6 +49,9 @@ spec:
                     number: 9095
 
 ---
+# The following ingress resource in only for the debugging purposes
+# and check router related config_dumps etc. In a production scenario
+# make sure to remove this.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
