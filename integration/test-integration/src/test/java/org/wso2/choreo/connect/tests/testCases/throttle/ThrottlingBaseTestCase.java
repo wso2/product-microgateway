@@ -89,13 +89,18 @@ public class ThrottlingBaseTestCase extends APIMLifecycleBaseTest {
         HttpResponse response;
         boolean isThrottled = false;
         for (int j = 0; j <= expectedCount + throttleBuffer; j++) {
+            // give additional space for throttle decision to arrive
+            if (j == expectedCount) {
+                Thread.sleep(2000);
+            }
+
             response = HTTPSClientUtils.doGet(url.toString(), headers);
             log.info("============== Response {}, {}", response.getResponseCode(), response.getData());
             if (response.getResponseCode() == 429) {
                 isThrottled = true;
                 break;
             }
-            Thread.sleep(700);
+            Thread.sleep(500);
         }
         return isThrottled;
     }
