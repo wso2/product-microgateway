@@ -33,6 +33,7 @@ import (
 	"github.com/wso2/adapter/internal/health"
 	healthservice "github.com/wso2/adapter/internal/health/api/wso2/health/service"
 	"github.com/wso2/adapter/internal/tlsutils"
+	"strings"
 
 	"context"
 	"flag"
@@ -287,14 +288,15 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 		if data.Resp != nil {
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
 			logger.LoggerMgw.Debug("Pushing data to router and enforcer")
-			health.SetControlPlaneRestAPIStatus(true)
 			err := synchronizer.PushAPIProjects(data.Resp, envs)
 			if err != nil {
 				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
 			}
+			health.SetControlPlaneRestAPIStatus(err == nil)
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 			logger.LoggerMgw.Errorf("Error occurred when retrieveing APIs from control plane: %v", data.Err)
-			health.SetControlPlaneRestAPIStatus(true)
+			isNoAPIArtifacts := data.ErrorCode == 404 && strings.Contains(data.Err.Error(), "No Api artifacts found")
+			health.SetControlPlaneRestAPIStatus(isNoAPIArtifacts)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			i--
