@@ -56,6 +56,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import javax.ws.rs.core.Response;
 import javax.xml.xpath.XPathExpressionException;
 
@@ -74,8 +75,24 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      */
     private static Map<Integer, String> apiRequestListByIndex = new LinkedHashMap<>();
 
+    /**
+     * Map of the predefined application info. Key represents the application name and the value represents the
+     * Application instance.
+     */
+    private static Map<String, Application> applicationListByName = new LinkedHashMap<>();
+
+    /**
+     * Map that binds the index of the application to the application name.
+     */
+    private static Map<Integer, String> applicationListByIndex = new LinkedHashMap<>();
+
     static {
-        // list of predefined api requests
+        // list of predefined applications.
+        addToApplicationList("SubscriptionValidationTestApp",
+                new Application("SubscriptionValidationTestApp",
+                        "Test Application for SubscriptionValidationTestCase",
+                        TestConstant.APPLICATION_TIER.UNLIMITED,
+                        ApplicationDTO.TokenTypeEnum.JWT));
         String apiEndPointPostfixUrl = "/v2";
 
         try {
@@ -546,10 +563,10 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
     }
 
     /**
-     * Create application for the given name using the restAPIStore. Then, create the client key and the client secret
+     * Create the given application using the restAPIStore. Then, create the client key and the client secret
      * associated to that application.
      *
-     * @param app          - definition of the application to be created as
+     * @param app          - definition of the application to be created
      * @param restAPIStore - instance of the RestAPIStoreImpl
      * @return the created application and associated client key and the client secret
      * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
@@ -579,6 +596,80 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
     }
 
     /**
+     * Create the list of applications given in the list using the restAPIStore. Then, create the client key and
+     * the client secret associated to those applications.
+     *
+     * @param appList  - list of applications to be created
+     * @param restAPIStore - instance of the RestAPIStoreImpl
+     * @return map of created application and associated client key and the client secret
+     * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
+     * @throws MicroGWTestException                                   if error happens while creating the application or
+     *                                                                if the application already exists
+     */
+    public Map<String, ApplicationCreationResponse> createApplicationsWithKeys(List<ApplicationDTO> appList,
+                                                                               RestAPIStoreImpl restAPIStore)
+            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
+        Map<String, ApplicationCreationResponse> response = new HashMap<>();
+        for (ApplicationDTO app : appList) {
+            response.put(app.getName(), createApplicationWithKeys(app, restAPIStore));
+        }
+        return response;
+    }
+
+    /**
+     * Create application for the given name using the restAPIStore. Then, create the client key and the client secret
+     * associated to that application.
+     *
+     * @param appIndex     - index of the relevant application in the predefined list 'applicationListByIndex'
+     * @param restAPIStore - instance of the RestAPIStoreImpl
+     * @return the created application and associated client key and the client secret
+     * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
+     * @throws MicroGWTestException                                   if error happens while creating the application or
+     *                                                                if the application already exists
+     */
+    protected ApplicationCreationResponse createApplicationWithKeys(int appIndex,
+                                                                    RestAPIStoreImpl restAPIStore)
+            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
+        return createApplicationWithKeys(applicationListByIndex.get(appIndex), restAPIStore);
+    }
+
+    /**
+     * Create application for the given name using the restAPIStore. Then, create the client key and the client secret
+     * associated to that application.
+     *
+     * @param appName      - name of the application to be created as mentioned in the predefined list
+     *                     'applicationListByName'
+     * @param restAPIStore - instance of the RestAPIStoreImpl
+     * @return the created application and associated client key and the client secret
+     * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
+     * @throws MicroGWTestException                                   if error happens while creating the application or
+     *                                                                if the application already exists
+     */
+    protected ApplicationCreationResponse createApplicationWithKeys(String appName,
+                                                                    RestAPIStoreImpl restAPIStore)
+            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
+        Application newApp = applicationListByName.get(appName);
+        org.wso2.carbon.automation.test.utils.http.client.HttpResponse applicationResponse =
+                restAPIStore.createApplication(newApp.getAppName(), newApp.getDescription(), newApp.getThrottleTier(),
+                        newApp.getTokenType());
+        if (Objects.isNull(applicationResponse)) {
+            throw new MicroGWTestException("Could not create the application: " + appName);
+        }
+        String applicationId = applicationResponse.getData();
+
+        ArrayList<String> grantTypes = new ArrayList<>();
+        grantTypes.add(APIMIntegrationConstants.GRANT_TYPE.PASSWORD);
+        grantTypes.add(APIMIntegrationConstants.GRANT_TYPE.CLIENT_CREDENTIAL);
+        ApplicationKeyDTO applicationKeyDTO = restAPIStore.generateKeys(applicationId,
+                TestConstant.DEFAULT_TOKEN_VALIDITY_TIME, "",
+                ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION,
+                null, grantTypes);
+
+        return new ApplicationCreationResponse(applicationId, applicationKeyDTO.getConsumerKey(),
+                applicationKeyDTO.getConsumerSecret());
+    }
+
+    /**
      * Create list of applications for the given list of names using the restAPIStore. Then, create the client key and
      * the client secret associated to those applications.
      *
@@ -590,12 +681,35 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @throws MicroGWTestException                                   if error happens while creating the application or
      *                                                                if the application already exists
      */
-    public Map<String, ApplicationCreationResponse> createApplicationsWithKeys(List<ApplicationDTO> appNameList,
-                                                                               RestAPIStoreImpl restAPIStore)
+    public Map<String, ApplicationCreationResponse> createApplicationsWithKeysByName(
+            List<String> appNameList, RestAPIStoreImpl restAPIStore)
             throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
         Map<String, ApplicationCreationResponse> response = new HashMap<>();
-        for (ApplicationDTO app : appNameList) {
-            response.put(app.getName(), createApplicationWithKeys(app, restAPIStore));
+        for (String appName : appNameList) {
+            response.put(appName, createApplicationWithKeys(appName, restAPIStore));
+        }
+        return response;
+    }
+
+    /**
+     * Create list of applications for the given list of indices in the predefined app list 'applicationListByIndex'.
+     * Then, create the client key and the client secret associated to those applications.
+     *
+     * @param appIndexList - list of application indices to be created as mentioned in the predefined list
+     *                     'applicationListByIndex'
+     * @param restAPIStore - instance of the RestAPIStoreImpl
+     * @return map of created application and associated client key and the client secret
+     * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
+     * @throws MicroGWTestException                                   if error happens while creating the application or
+     *                                                                if the application already exists
+     */
+    public Map<String, ApplicationCreationResponse> createApplicationsWithKeysByIndex(
+            List<Integer> appIndexList, RestAPIStoreImpl restAPIStore)
+            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
+        Map<String, ApplicationCreationResponse> response = new HashMap<>();
+        for (int appIndex : appIndexList) {
+            String appName = applicationListByIndex.get(appIndex);
+            response.put(appName, createApplicationWithKeys(appName, restAPIStore));
         }
         return response;
     }
@@ -630,6 +744,11 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         return accessTokenGenerationResponse.getString("access_token");
     }
 
+    private static void addToApplicationList(String appName, Application application) {
+        applicationListByName.put(appName, application);
+        applicationListByIndex.put(applicationListByIndex.size(), appName);
+    }
+
     protected static void addToAPIList(String apiName, APIRequest apiRequest) {
         apiRequestListByAPIName.put(apiName, apiRequest);
         apiRequestListByIndex.put(apiRequestListByIndex.size(), apiName);
@@ -642,6 +761,40 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
     protected static APIRequest getAPIRequest(int apiIndex) {
         String apiName = apiRequestListByIndex.get(apiIndex);
         return apiRequestListByAPIName.get(apiName);
+    }
+
+    /**
+     * This class represents the application details required to create an application using the RestAPIStoreImpl.
+     */
+    private static class Application {
+        private String appName;
+        private String description;
+        private String throttleTier;
+        private ApplicationDTO.TokenTypeEnum tokenType;
+
+        Application(String appName, String description, String throttleTier,
+                    ApplicationDTO.TokenTypeEnum tokenType) {
+            this.appName = appName;
+            this.description = description;
+            this.throttleTier = throttleTier;
+            this.tokenType = tokenType;
+        }
+
+        String getAppName() {
+            return appName;
+        }
+
+        String getDescription() {
+            return description;
+        }
+
+        String getThrottleTier() {
+            return throttleTier;
+        }
+
+        org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO.TokenTypeEnum getTokenType() {
+            return tokenType;
+        }
     }
 
     /**

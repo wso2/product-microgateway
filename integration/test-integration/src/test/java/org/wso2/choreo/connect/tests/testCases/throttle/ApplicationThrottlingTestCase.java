@@ -20,8 +20,6 @@ package org.wso2.choreo.connect.tests.testCases.throttle;
 
 import com.google.common.net.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -30,24 +28,18 @@ import org.wso2.am.integration.clients.admin.ApiResponse;
 import org.wso2.am.integration.clients.admin.api.dto.ApplicationThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
 import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
-import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 
 public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
-    private static final Logger log = LoggerFactory.getLogger(ApplicationThrottlingTestCase.class);
     private ApplicationThrottlePolicyDTO requestCountPolicyDTO;
     private final Map<String, String> requestHeaders = new HashMap<>();
     String endpointURL;

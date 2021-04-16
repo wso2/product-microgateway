@@ -24,7 +24,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
@@ -38,8 +37,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static org.testng.Assert.assertEquals;
@@ -57,12 +54,8 @@ public class SubscriptionValidationTestCase extends APIMLifecycleBaseTest {
         super.init();
 
         // Creating the application
-        ApplicationDTO app = new ApplicationDTO();
-        app.setName("SubscriptionValidationTestApp");
-        app.setDescription("Test Application for SubscriptionValidationTestCase");
-        app.setThrottlingPolicy(TestConstant.APPLICATION_TIER.UNLIMITED);
-        app.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
-        ApplicationCreationResponse appCreationResponse = createApplicationWithKeys(app, restAPIStore);
+        ApplicationCreationResponse appCreationResponse = createApplicationWithKeys(
+                "SubscriptionValidationTestApp", restAPIStore);
         applicationId = appCreationResponse.getApplicationId();
 
         // create the request headers after generating the access token
