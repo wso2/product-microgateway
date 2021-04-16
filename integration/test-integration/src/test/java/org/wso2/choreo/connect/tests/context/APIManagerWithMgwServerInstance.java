@@ -76,9 +76,11 @@ public class APIManagerWithMgwServerInstance extends MgwServerImpl {
         Logger enforcerLogger = LoggerFactory.getLogger("Enforcer");
         Logger adapterLogger = LoggerFactory.getLogger("Adapter");
         Logger routerLogger = LoggerFactory.getLogger("Router");
+        Logger apimLogger = LoggerFactory.getLogger("APIM");
         Slf4jLogConsumer enforcerLogConsumer = new Slf4jLogConsumer(enforcerLogger);
         Slf4jLogConsumer adapterLogConsumer = new Slf4jLogConsumer(adapterLogger);
         Slf4jLogConsumer routerLogConsumer = new Slf4jLogConsumer(routerLogger);
+        Slf4jLogConsumer apimLogConsumer = new Slf4jLogConsumer(apimLogger);
         String dockerComposePath =
                 mgwTmpServerPath + File.separator + "docker-compose" + File.separator + "choreo-connect-with-apim"
                         + File.separator + "docker-compose.yaml";
@@ -89,9 +91,9 @@ public class APIManagerWithMgwServerInstance extends MgwServerImpl {
                 .withLogConsumer("enforcer", enforcerLogConsumer)
                 .withLogConsumer("adapter", adapterLogConsumer)
                 .withLogConsumer("router", routerLogConsumer)
-                .waitingFor(
-                TestConstant.APIM_SERVICE_NAME_IN_DOCKER_COMPOSE,
-                Wait.forLogMessage("\\/apim:9443/carbon\\/", 1));
+                .withLogConsumer("apim", apimLogConsumer)
+                .waitingFor(TestConstant.APIM_SERVICE_NAME_IN_DOCKER_COMPOSE,
+                        Wait.forLogMessage("\\/apim:9443\\/carbon\\/", 1));
 
         if (Boolean.parseBoolean(System.getenv(MgwServerInstance.ENFORCER_DEBUG_ENV))) {
             environment.withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5006");

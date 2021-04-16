@@ -76,11 +76,6 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      */
     private static Map<Integer, String> apiRequestListByIndex = new LinkedHashMap<>();
 
-    /**
-     * Map that binds the index of the application to the application name.
-     */
-    private static Map<Integer, String> applicationListByIndex = new LinkedHashMap<>();
-
     static {
         // list of predefined api requests
         String apiEndPointPostfixUrl = "/v2";
