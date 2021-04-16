@@ -81,7 +81,7 @@ type API struct {
 	Policy           string `json:"policy"`
 	APIType          string `json:"apiType"`
 	IsDefaultVersion bool   `json:"isDefaultVersion"`
-	APIStatus        string `json:"apiStatus"`
+	APIStatus        string `json:"status"`
 	TenantID         int32  `json:"tenanId,omitempty"`
 	TenantDomain     string `json:"tenanDomain,omitempty"`
 	TimeStamp        int64  `json:"timeStamp,omitempty"`

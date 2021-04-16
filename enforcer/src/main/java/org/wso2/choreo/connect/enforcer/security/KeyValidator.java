@@ -22,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.models.API;
@@ -226,6 +227,10 @@ public class KeyValidator {
                 && !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
             infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
             infoDTO.setType(type);
+            infoDTO.setAuthorized(false);
+            return infoDTO;
+        } else if (APIConstants.LifecycleStatus.BLOCKED.equals(api.getLcState())) {
+            infoDTO.setValidationStatus(GeneralErrorCodeConstants.API_BLOCKED_CODE);
             infoDTO.setAuthorized(false);
             return infoDTO;
         }

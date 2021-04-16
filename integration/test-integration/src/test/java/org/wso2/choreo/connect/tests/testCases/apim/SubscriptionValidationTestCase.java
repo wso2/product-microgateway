@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.tests.testCases.subscription;
+package org.wso2.choreo.connect.tests.testCases.apim;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.awaitility.Awaitility;
@@ -33,7 +33,6 @@ import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
-import org.wso2.choreo.connect.tests.utils.HttpClient;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

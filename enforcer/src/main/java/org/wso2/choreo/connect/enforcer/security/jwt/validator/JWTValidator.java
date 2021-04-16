@@ -75,7 +75,8 @@ public class JWTValidator {
             return validateToken(signedJWTInfo);
         }
         jwtValidationInfo.setValid(false);
-        jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_GENERAL_ERROR);
+        jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+        logger.error("No matching issuer found for the token with issuer : " + issuer);
         return jwtValidationInfo;
     }
 
