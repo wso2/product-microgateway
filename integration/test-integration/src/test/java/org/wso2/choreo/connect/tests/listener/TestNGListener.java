@@ -19,11 +19,14 @@
 package org.wso2.choreo.connect.tests.listener;
 
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.testng.ITestResult;
 import org.testng.TestListenerAdapter;
 
 import java.io.PrintStream;
 import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Test listener for listening to test events.
@@ -39,6 +42,13 @@ public class TestNGListener extends TestListenerAdapter {
     private static final String YELLOW = "\u001B[33m";
     private static final String BLUE = "\u001B[34m";
     private static final String BOLD = "\u001B[1m";
+
+    public TestNGListener() {
+        super();
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
+        Logger.getLogger("").setLevel(Level.WARNING);
+    }
 
     @Override
     public void beforeConfiguration(ITestResult tr) {
