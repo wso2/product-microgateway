@@ -46,6 +46,7 @@ func SetControlPlaneRestAPIStatus(status bool) {
 func WaitForControlPlane() {
 	jmsStarted := false
 	restAPIStarted := false
+	// if wait for both jmsStarted and restAPIStarted becomes true
 	for !jmsStarted || !restAPIStarted {
 		select {
 		case jmsStarted = <-controlPlaneJmsStatusChan:
@@ -55,5 +56,5 @@ func WaitForControlPlane() {
 		}
 	}
 	controlPlaneStarted = true
-	logger.LoggerHealth.Info("Control Plane started successfully.")
+	logger.LoggerHealth.Info("Successfully connected to the control plane.")
 }
