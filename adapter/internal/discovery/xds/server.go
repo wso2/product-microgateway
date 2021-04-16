@@ -980,7 +980,7 @@ func restorePreviousState(label string) {
 * Flow -->
 * 1. Update the enforcer
 * 2. Listen for the discovery request from client.
-* 3. If success, set the current state as the success state else, restore the previous state.
+* 3. If success, set the current state as the success state. Otherwise, restore the previous state.
 * 4. Update the router
 **/
 func watchEnforcerResponse() {
