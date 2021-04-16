@@ -24,7 +24,10 @@ ARG MG_USER_ID=802
 ARG MG_USER_GROUP=wso2
 ARG MG_USER_GROUP_ID=802
 ARG MG_USER_HOME=/home/${MG_USER}
-ENV GRPC_HEALTH_PROBE_PATH=/bin/grpc_health_probe
+ARG GRPC_HEALTH_PROBE_PATH=/bin/grpc_health_probe
+
+ENV ADAPTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
+ENV ADAPTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
 
 ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\
@@ -47,6 +50,7 @@ USER ${MG_USER}
 COPY maven/security security
 COPY maven/conf conf
 COPY maven/adapter-ubuntu adapter
+COPY check_health.sh .
 COPY maven/LICENSE.txt .
 
 CMD ./adapter

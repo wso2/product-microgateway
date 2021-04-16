@@ -93,17 +93,17 @@ spec:
             - containerPort: 8082
           startupProbe:
             exec:
-              command: [ "/bin/grpc_health_probe", "-addr", "localhost:8081", "-tls", "-tls-ca-cert", "$(ENFORCER_PUBLIC_CERT_PATH)", "-tls-client-cert", "$(ENFORCER_PUBLIC_CERT_PATH)", "-tls-client-key", "$(ENFORCER_PRIVATE_KEY_PATH)" ]
+              command: [ "sh", "check_health.sh" ]
             periodSeconds: 5
             failureThreshold: 30
           livenessProbe:
             exec:
-              command: [ "/bin/grpc_health_probe", "-addr", "localhost:8081", "-tls", "-tls-ca-cert", "$(ENFORCER_PUBLIC_CERT_PATH)", "-tls-client-cert", "$(ENFORCER_PUBLIC_CERT_PATH)", "-tls-client-key", "$(ENFORCER_PRIVATE_KEY_PATH)" ]
+              command: [ "sh", "check_health.sh" ]
             initialDelaySeconds: 10
             periodSeconds: 30
           readinessProbe:
             exec:
-              command: [ "/bin/grpc_health_probe", "-addr", "localhost:8081", "-tls", "-tls-ca-cert", "$(ENFORCER_PUBLIC_CERT_PATH)", "-tls-client-cert", "$(ENFORCER_PUBLIC_CERT_PATH)", "-tls-client-key", "$(ENFORCER_PRIVATE_KEY_PATH)" ]
+              command: [ "sh", "check_health.sh" ]
             initialDelaySeconds: 8
             periodSeconds: 5
         - name: choreo-connect-router

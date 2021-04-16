@@ -28,6 +28,7 @@ ARG MG_USER_GROUP=wso2
 ARG MG_USER_GROUP_ID=802
 ARG MG_USER_HOME=/home/${MG_USER}
 ARG MG_VERSION=1.0-SNAPSHOT
+ARG GRPC_HEALTH_PROBE_PATH=/bin/grpc_health_probe
 
 ENV VERSION=${MG_VERSION}
 ENV JAVA_OPTS=""
@@ -36,7 +37,6 @@ ENV ENFORCER_HOME=${MG_USER_HOME}
 ENV ENFORCER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
 ENV ENFORCER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
 ENV TRUSTED_CA_CERTS_PATH=/home/wso2/security/truststore
-ENV GRPC_HEALTH_PROBE_PATH=/bin/grpc_health_probe
 ENV ADAPTER_HOST_NAME=adapter
 ENV ADAPTER_HOST=adapter
 ENV ADAPTER_XDS_PORT=18000
@@ -65,6 +65,7 @@ USER ${MG_USER}
 COPY maven/ lib/
 COPY maven/conf conf
 COPY maven/security security
+COPY check_health.sh .
 COPY maven/LICENSE.txt .
 
 CMD java $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -cp "lib/*:lib/dropins/*" org.wso2.choreo.connect.enforcer.server.AuthServer
