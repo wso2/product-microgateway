@@ -16,12 +16,10 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.tests.testCases.throttle;
+package org.wso2.choreo.connect.tests.testCases.apim.throttle;
 
 import com.google.common.net.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -29,26 +27,20 @@ import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.admin.ApiResponse;
 import org.wso2.am.integration.clients.admin.api.dto.ApplicationThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
-import org.wso2.am.integration.clients.admin.api.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
 import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
-import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 
-public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
-    private SubscriptionThrottlePolicyDTO requestCountPolicyDTO;
+public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
+    private ApplicationThrottlePolicyDTO requestCountPolicyDTO;
     private final Map<String, String> requestHeaders = new HashMap<>();
     String endpointURL;
     long requestCount = 15L;
@@ -62,27 +54,24 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
         String policyTimeUnit = "min";
         Integer policyUnitTime = 1;
         String policyDispName = "15PerMin";
-        String policyDesc = "This is a test subscription throttle policy";
+        String policyDesc = "This is a test application throttle policy";
         RequestCountLimitDTO reqCountLimit =
                 DtoFactory.createRequestCountLimitDTO(policyTimeUnit, policyUnitTime, requestCount);
         ThrottleLimitDTO defaultLimit =
                 DtoFactory.createThrottleLimitDTO(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT, reqCountLimit, null);
         requestCountPolicyDTO = DtoFactory
-                .createSubscriptionThrottlePolicyDTO(policyName, policyDispName, policyDesc, false, defaultLimit,-1,
-                        -1, 100, "min", new ArrayList<>(),
-                        true, "", 0);
+                .createApplicationThrottlePolicyDTO(policyName, policyDispName, policyDesc, false, defaultLimit);
 
-        // Add the subscription throttling policy
-        ApiResponse<SubscriptionThrottlePolicyDTO> addedPolicy =
-                restAPIAdmin.addSubscriptionThrottlingPolicy(requestCountPolicyDTO);
-        Assert.assertEquals(addedPolicy.getStatusCode(), HttpStatus.SC_CREATED);
+        // Add the application throttling policy
+        ApiResponse<ApplicationThrottlePolicyDTO> addedPolicy =
+                restAPIAdmin.addApplicationThrottlingPolicy(requestCountPolicyDTO);
         requestCountPolicyDTO = addedPolicy.getData();
 
         // creating the application
         ApplicationDTO app = new ApplicationDTO();
-        app.setName("SubThrottlingApp");
-        app.setDescription("Test Application for Subscription Throttling");
-        app.setThrottlingPolicy(TestConstant.APPLICATION_TIER.UNLIMITED);
+        app.setName("AppThrottlingApp");
+        app.setDescription("Test Application for Application Throttling");
+        app.setThrottlingPolicy(policyName);
         app.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
         ApplicationCreationResponse appResponse = createApplicationWithKeys(app, restAPIStore);
         Assert.assertNotNull(appResponse.getApplicationId(), "Application ID can't be null");
@@ -94,26 +83,28 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
         requestHeaders.put(HttpHeaders.CONTENT_TYPE, "application/json");
 
-        String apiId = createThrottleApi(policyName, TestConstant.API_TIER.UNLIMITED,
+        String apiId = createThrottleApi(TestConstant.API_TIER.UNLIMITED, TestConstant.API_TIER.UNLIMITED,
                 TestConstant.API_TIER.UNLIMITED);
         // get a predefined api request
         endpointURL = getThrottleAPIEndpoint();
+        endpointURL = Utils.getServiceURLHttps(TestConstant.SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
 
-        HttpResponse subscriptionResponse = subscribeToAPI(apiId, applicationId, policyName, restAPIStore);
+        HttpResponse subscriptionResponse = subscribeToAPI(apiId, applicationId,
+                TestConstant.SUBSCRIPTION_TIER.UNLIMITED, restAPIStore);
         assertEquals(subscriptionResponse.getResponseCode(), HttpStatus.SC_OK, "Failed to subscribe to the API");
         // this is to wait until policy deployment is complete in case it didn't complete already
         Thread.sleep(TestConstant.DEPLOYMENT_WAIT_TIME);
     }
 
-    @Test(description = "Test Subscription throttling")
-    public void testSubscriptionLevelThrottling() throws Exception {
+    @Test(description = "Test application throttling")
+    public void testApplicationLevelThrottling() throws Exception {
         Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, requestCount),
-                "Request not throttled by request count condition in subscription tier");
+                "Request not throttled by request count condition in application tier");
     }
 
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
         super.cleanUp();
-        restAPIAdmin.deleteSubscriptionThrottlingPolicy(requestCountPolicyDTO.getPolicyId());
+        restAPIAdmin.deleteApplicationThrottlingPolicy(requestCountPolicyDTO.getPolicyId());
     }
 }

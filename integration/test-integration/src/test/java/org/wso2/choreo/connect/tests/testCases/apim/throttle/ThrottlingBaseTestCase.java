@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.tests.testCases.throttle;
+package org.wso2.choreo.connect.tests.testCases.apim.throttle;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.awaitility.Awaitility;

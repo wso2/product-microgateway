@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.choreo.connect.tests.testCases.throttle;
+package org.wso2.choreo.connect.tests.testCases.apim.throttle;
 
 import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
