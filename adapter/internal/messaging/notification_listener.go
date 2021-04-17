@@ -53,7 +53,7 @@ const (
 	policyCreate                = "POLICY_CREATE"
 	policyUpdate                = "POLICY_UPDATE"
 	policyDelete                = "POLICY_DELETE"
- 	blockedStatus				= "BLOCKED"
+	blockedStatus               = "BLOCKED"
 )
 
 // var variables
@@ -175,7 +175,7 @@ func handleLifeCycleEvents(data []byte) {
 	configuredEnvs := conf.ControlPlane.EnvironmentLabels
 	logger.LoggerMsg.Debugf("%s : %s API life cycle state change event triggered", apiEvent.APIName, apiEvent.APIVersion)
 	if len(configuredEnvs) == 0 {
-		configuredEnvs = append(configuredEnvs, eh.DefaultGatewayLabelValue)
+		configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
 	}
 	for _, configuredEnv := range configuredEnvs {
 		if _, ok := eh.APIListMap[configuredEnv]; ok {
