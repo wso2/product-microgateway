@@ -39,7 +39,7 @@ data:
     # default vhosts mapping for standalone mode
     [[adapter.vhostMapping]]
       environment = "Production and Sandbox"
-      vhost = "localhost"
+      vhost = "gw.wso2.com"
 
     [adapter.keystore]
       certPath = "/home/wso2/security/keystore/mg.pem"
@@ -68,7 +68,7 @@ data:
       securedListenerPort = 9095
       clusterTimeoutInSeconds = 20
       # system hostname for system API resources (eg: /testkey and /health)
-      systemHost = "localhost"
+      systemHost = "gw.wso2.com"
 
     [router.keystore]
       certPath = "/home/wso2/security/keystore/mg.pem"
@@ -131,7 +131,7 @@ data:
 
     [enforcer.jwtIssuer]
       enabled = true
-      issuer = "https://adapter:9095/testkey"
+      issuer = "https://gw.wso2.com/testkey"
       encoding = "base64" # base64,base64url
       claimDialect = ""
       signingAlgorithm = "SHA256withRSA"
@@ -215,7 +215,7 @@ data:
     # Issuer 1
     [[security.enforcer.tokenService]]
       name="Resident Key Manager"
-      issuer = "https://wso2apim:9443/oauth2/token"
+      issuer = "https://apim.wso2.com/oauth2/token"
       certificateAlias = ""
       # URL of the JWKs endpoint
       jwksURL = ""
@@ -229,7 +229,7 @@ data:
     # Issuer 2
     [[security.enforcer.tokenService]]
         name="MGW"
-        issuer = "https://adapter:9095/testkey"
+        issuer = "https://gw.wso2.com/testkey"
         certificateAlias = "mgw"
         # URL of the JWKs endpoint
         jwksURL = ""
@@ -277,5 +277,3 @@ data:
       # Message broker connection URL of the control plane
       [controlPlane.jmsConnectionParameters]
         eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@wso2apim:5672?retries='10'&connectdelay='30'"]
-
-

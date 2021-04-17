@@ -23,7 +23,7 @@ metadata:
     app: choreo-connect-deployment
   name: router
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: choreo-connect-deployment
   ports:
@@ -31,10 +31,7 @@ spec:
       port: 9000
       targetPort: 9000
       protocol: TCP
-      nodePort: 30202
     - name: "https-router"
       port: 9095
       targetPort: 9095
       protocol: TCP
-      nodePort: 30201
-

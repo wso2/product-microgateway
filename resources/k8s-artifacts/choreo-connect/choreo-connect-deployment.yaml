@@ -69,6 +69,8 @@ spec:
               value: "18000"
             - name: ENFORCER_LABEL
               value: "Production and Sandbox"
+            - name: ENFORCER_REGION
+              value: "UNKNOWN"
             - name: XDS_MAX_MSG_SIZE
               value: "4194304"
             - name: XDS_MAX_RETRIES
@@ -141,6 +143,8 @@ spec:
               value: "127.0.0.1"
             - name: ENFORCER_PORT
               value: "8081"
+            - name: ENFORCER_ANALYTICS_RECEIVER_PORT
+              value: "18090"
             - name: ENFORCER_CA_CERT_PATH
               value: "/home/wso2/security/truststore/mg.pem"
           resources:
@@ -160,7 +164,7 @@ spec:
               scheme: HTTPS
               httpHeaders:
                 - name: Host
-                  value: localhost
+                  value: gw.wso2.com
             failureThreshold: 30
             periodSeconds: 5
           livenessProbe:
@@ -170,7 +174,7 @@ spec:
               scheme: HTTPS
               httpHeaders:
                 - name: Host
-                  value: localhost
+                  value: gw.wso2.com
             initialDelaySeconds: 20
             periodSeconds: 10
           readinessProbe:
@@ -180,7 +184,7 @@ spec:
               scheme: HTTPS
               httpHeaders:
                 - name: Host
-                  value: localhost
+                  value: gw.wso2.com
             initialDelaySeconds: 20
             periodSeconds: 5
       volumes:
