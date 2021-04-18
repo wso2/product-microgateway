@@ -361,11 +361,12 @@ public class JWTAuthenticator implements Authenticator {
 
         String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
         String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
-        return validateSubscriptionUsingKeyManager(apiContext, apiVersion, jwtValidationInfo);
+        String uuid = requestContext.getMatchedAPI().getAPIConfig().getUuid();
+        return validateSubscriptionUsingKeyManager(uuid, apiContext, apiVersion, jwtValidationInfo);
     }
 
-    private APIKeyValidationInfoDTO validateSubscriptionUsingKeyManager(String apiContext, String apiVersion,
-            JWTValidationInfo jwtValidationInfo) throws APISecurityException {
+    private APIKeyValidationInfoDTO validateSubscriptionUsingKeyManager(String uuid, String apiContext,
+            String apiVersion, JWTValidationInfo jwtValidationInfo) throws APISecurityException {
 
         String tenantDomain = "carbon.super"; //TODO : get correct tenant domain
 
@@ -373,7 +374,7 @@ public class JWTAuthenticator implements Authenticator {
         String keyManager = jwtValidationInfo.getKeyManager();
         if (consumerKey != null && keyManager != null) {
             return ReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain)
-                    .validateSubscription(apiContext, apiVersion, consumerKey, keyManager);
+                    .validateSubscription(uuid, apiContext, apiVersion, consumerKey, keyManager);
         }
         log.debug("Cannot call Key Manager to validate subscription. "
                 + "Payload of the token does not contain the Authorized party - the party to which the ID Token was "

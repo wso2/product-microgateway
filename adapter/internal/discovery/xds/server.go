@@ -228,6 +228,7 @@ func UpdateAPI(apiContent config.APIContent) {
 
 	if apiContent.APIType == mgw.HTTP {
 		mgwSwagger = operator.GetMgwSwagger(apiContent.APIDefinition)
+		mgwSwagger.SetID(apiContent.UUID)
 		mgwSwagger.SetName(apiContent.Name)
 		mgwSwagger.SetVersion(apiContent.Version)
 		mgwSwagger.SetSecurityScheme(apiContent.SecurityScheme)
