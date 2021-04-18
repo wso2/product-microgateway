@@ -39,8 +39,8 @@
             <outputDirectory>security/truststore</outputDirectory>
         </file>
         <file>
-            <source>../resources/mgw-websocket.wasm</source>
-            <outputDirectory></outputDirectory>
+            <source>target/mgw-wasm/mgw-websocket.wasm</source>
+            <outputDirectory>wasm/websocket</outputDirectory>
         </file>
     </files>
     <fileSets>
