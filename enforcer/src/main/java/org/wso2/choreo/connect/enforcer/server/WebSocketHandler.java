@@ -28,7 +28,7 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.websocket.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketFrameContext;
-import org.wso2.choreo.connect.enforcer.websocket.WebSocketResponseObject;
+import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleResponse;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,7 +37,7 @@ import java.util.Map;
 /**
  * WebSocketHandler handles requests coming through websocket frame service.
  */
-public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, WebSocketResponseObject> {
+public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, WebSocketThrottleResponse> {
     private static final Logger logger = LogManager.getLogger(WebSocketHandler.class);
 
     /**
@@ -46,7 +46,7 @@ public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, W
      * @return WebSocketResponseObject - Response sent via WebSocketFrameService
      */
     @Override
-    public WebSocketResponseObject process(WebSocketFrameRequest webSocketFrameRequest) {
+    public WebSocketThrottleResponse process(WebSocketFrameRequest webSocketFrameRequest) {
         WebSocketAPI matchedAPI = APIFactory.getInstance().getMatchedAPI(webSocketFrameRequest);
         if (matchedAPI == null) {
             return null;

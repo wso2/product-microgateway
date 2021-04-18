@@ -27,6 +27,10 @@ message WebSocketFrameResponse {
     }
 
     Code throttle_state = 1;
+
+  int32 error_code = 2;
+  string error_message = 3;
+  string error_description = 4;
 }
 
 // message MetadataValue {

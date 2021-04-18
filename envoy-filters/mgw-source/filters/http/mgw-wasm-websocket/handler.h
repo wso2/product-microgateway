@@ -24,7 +24,7 @@ class HandlerCallbacks{
 public:
     virtual ~HandlerCallbacks() = default;
 
-    virtual void updateFilterState(ResponseStatus state);
+    virtual void updateFilterState(ResponseStatus status);
 
     virtual void updateHandlerState(HandlerState state);
 };

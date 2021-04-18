@@ -17,6 +17,8 @@ private static final long serialVersionUID = 0L;
   }
   private WebSocketFrameResponse() {
     throttleState_ = 0;
+    errorMessage_ = "";
+    errorDescription_ = "";
   }
 
   @java.lang.Override
@@ -53,6 +55,23 @@ private static final long serialVersionUID = 0L;
             int rawValue = input.readEnum();
 
             throttleState_ = rawValue;
+            break;
+          }
+          case 16: {
+
+            errorCode_ = input.readInt32();
+            break;
+          }
+          case 26: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            errorMessage_ = s;
+            break;
+          }
+          case 34: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            errorDescription_ = s;
             break;
           }
           default: {
@@ -247,6 +266,93 @@ private static final long serialVersionUID = 0L;
     return result == null ? org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code.UNRECOGNIZED : result;
   }
 
+  public static final int ERROR_CODE_FIELD_NUMBER = 2;
+  private int errorCode_;
+  /**
+   * <code>int32 error_code = 2;</code>
+   * @return The errorCode.
+   */
+  @java.lang.Override
+  public int getErrorCode() {
+    return errorCode_;
+  }
+
+  public static final int ERROR_MESSAGE_FIELD_NUMBER = 3;
+  private volatile java.lang.Object errorMessage_;
+  /**
+   * <code>string error_message = 3;</code>
+   * @return The errorMessage.
+   */
+  @java.lang.Override
+  public java.lang.String getErrorMessage() {
+    java.lang.Object ref = errorMessage_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      errorMessage_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string error_message = 3;</code>
+   * @return The bytes for errorMessage.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getErrorMessageBytes() {
+    java.lang.Object ref = errorMessage_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      errorMessage_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int ERROR_DESCRIPTION_FIELD_NUMBER = 4;
+  private volatile java.lang.Object errorDescription_;
+  /**
+   * <code>string error_description = 4;</code>
+   * @return The errorDescription.
+   */
+  @java.lang.Override
+  public java.lang.String getErrorDescription() {
+    java.lang.Object ref = errorDescription_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      errorDescription_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string error_description = 4;</code>
+   * @return The bytes for errorDescription.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getErrorDescriptionBytes() {
+    java.lang.Object ref = errorDescription_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      errorDescription_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -264,6 +370,15 @@ private static final long serialVersionUID = 0L;
     if (throttleState_ != org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code.UNKNOWN.getNumber()) {
       output.writeEnum(1, throttleState_);
     }
+    if (errorCode_ != 0) {
+      output.writeInt32(2, errorCode_);
+    }
+    if (!getErrorMessageBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, errorMessage_);
+    }
+    if (!getErrorDescriptionBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 4, errorDescription_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -276,6 +391,16 @@ private static final long serialVersionUID = 0L;
     if (throttleState_ != org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code.UNKNOWN.getNumber()) {
       size += com.google.protobuf.CodedOutputStream
         .computeEnumSize(1, throttleState_);
+    }
+    if (errorCode_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(2, errorCode_);
+    }
+    if (!getErrorMessageBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, errorMessage_);
+    }
+    if (!getErrorDescriptionBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, errorDescription_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -293,6 +418,12 @@ private static final long serialVersionUID = 0L;
     org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse other = (org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse) obj;
 
     if (throttleState_ != other.throttleState_) return false;
+    if (getErrorCode()
+        != other.getErrorCode()) return false;
+    if (!getErrorMessage()
+        .equals(other.getErrorMessage())) return false;
+    if (!getErrorDescription()
+        .equals(other.getErrorDescription())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -306,6 +437,12 @@ private static final long serialVersionUID = 0L;
     hash = (19 * hash) + getDescriptor().hashCode();
     hash = (37 * hash) + THROTTLE_STATE_FIELD_NUMBER;
     hash = (53 * hash) + throttleState_;
+    hash = (37 * hash) + ERROR_CODE_FIELD_NUMBER;
+    hash = (53 * hash) + getErrorCode();
+    hash = (37 * hash) + ERROR_MESSAGE_FIELD_NUMBER;
+    hash = (53 * hash) + getErrorMessage().hashCode();
+    hash = (37 * hash) + ERROR_DESCRIPTION_FIELD_NUMBER;
+    hash = (53 * hash) + getErrorDescription().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -441,6 +578,12 @@ private static final long serialVersionUID = 0L;
       super.clear();
       throttleState_ = 0;
 
+      errorCode_ = 0;
+
+      errorMessage_ = "";
+
+      errorDescription_ = "";
+
       return this;
     }
 
@@ -468,6 +611,9 @@ private static final long serialVersionUID = 0L;
     public org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse buildPartial() {
       org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse result = new org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse(this);
       result.throttleState_ = throttleState_;
+      result.errorCode_ = errorCode_;
+      result.errorMessage_ = errorMessage_;
+      result.errorDescription_ = errorDescription_;
       onBuilt();
       return result;
     }
@@ -518,6 +664,17 @@ private static final long serialVersionUID = 0L;
       if (other == org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.getDefaultInstance()) return this;
       if (other.throttleState_ != 0) {
         setThrottleStateValue(other.getThrottleStateValue());
+      }
+      if (other.getErrorCode() != 0) {
+        setErrorCode(other.getErrorCode());
+      }
+      if (!other.getErrorMessage().isEmpty()) {
+        errorMessage_ = other.errorMessage_;
+        onChanged();
+      }
+      if (!other.getErrorDescription().isEmpty()) {
+        errorDescription_ = other.errorDescription_;
+        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -598,6 +755,189 @@ private static final long serialVersionUID = 0L;
     public Builder clearThrottleState() {
       
       throttleState_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private int errorCode_ ;
+    /**
+     * <code>int32 error_code = 2;</code>
+     * @return The errorCode.
+     */
+    @java.lang.Override
+    public int getErrorCode() {
+      return errorCode_;
+    }
+    /**
+     * <code>int32 error_code = 2;</code>
+     * @param value The errorCode to set.
+     * @return This builder for chaining.
+     */
+    public Builder setErrorCode(int value) {
+      
+      errorCode_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int32 error_code = 2;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearErrorCode() {
+      
+      errorCode_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object errorMessage_ = "";
+    /**
+     * <code>string error_message = 3;</code>
+     * @return The errorMessage.
+     */
+    public java.lang.String getErrorMessage() {
+      java.lang.Object ref = errorMessage_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        errorMessage_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string error_message = 3;</code>
+     * @return The bytes for errorMessage.
+     */
+    public com.google.protobuf.ByteString
+        getErrorMessageBytes() {
+      java.lang.Object ref = errorMessage_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        errorMessage_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string error_message = 3;</code>
+     * @param value The errorMessage to set.
+     * @return This builder for chaining.
+     */
+    public Builder setErrorMessage(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      errorMessage_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string error_message = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearErrorMessage() {
+      
+      errorMessage_ = getDefaultInstance().getErrorMessage();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string error_message = 3;</code>
+     * @param value The bytes for errorMessage to set.
+     * @return This builder for chaining.
+     */
+    public Builder setErrorMessageBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      errorMessage_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object errorDescription_ = "";
+    /**
+     * <code>string error_description = 4;</code>
+     * @return The errorDescription.
+     */
+    public java.lang.String getErrorDescription() {
+      java.lang.Object ref = errorDescription_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        errorDescription_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string error_description = 4;</code>
+     * @return The bytes for errorDescription.
+     */
+    public com.google.protobuf.ByteString
+        getErrorDescriptionBytes() {
+      java.lang.Object ref = errorDescription_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        errorDescription_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string error_description = 4;</code>
+     * @param value The errorDescription to set.
+     * @return This builder for chaining.
+     */
+    public Builder setErrorDescription(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      errorDescription_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string error_description = 4;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearErrorDescription() {
+      
+      errorDescription_ = getDefaultInstance().getErrorDescription();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string error_description = 4;</code>
+     * @param value The bytes for errorDescription to set.
+     * @return This builder for chaining.
+     */
+    public Builder setErrorDescriptionBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      errorDescription_ = value;
       onChanged();
       return this;
     }

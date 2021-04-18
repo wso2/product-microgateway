@@ -17,4 +17,34 @@ public interface WebSocketFrameResponseOrBuilder extends
    * @return The throttleState.
    */
   org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse.Code getThrottleState();
+
+  /**
+   * <code>int32 error_code = 2;</code>
+   * @return The errorCode.
+   */
+  int getErrorCode();
+
+  /**
+   * <code>string error_message = 3;</code>
+   * @return The errorMessage.
+   */
+  java.lang.String getErrorMessage();
+  /**
+   * <code>string error_message = 3;</code>
+   * @return The bytes for errorMessage.
+   */
+  com.google.protobuf.ByteString
+      getErrorMessageBytes();
+
+  /**
+   * <code>string error_description = 4;</code>
+   * @return The errorDescription.
+   */
+  java.lang.String getErrorDescription();
+  /**
+   * <code>string error_description = 4;</code>
+   * @return The bytes for errorDescription.
+   */
+  com.google.protobuf.ByteString
+      getErrorDescriptionBytes();
 }

@@ -134,7 +134,7 @@ FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
     request.set_remote_ip(upstream_address);
     // Read ext_authz_metadata_ metdata saved as a member variable
     *request.mutable_metadata() = *this->metadata_;
-    if(this->handler_state_ == HandlerState::OK){
+    if(this->handler_state_ == HandlerState::OK && this->throttle_state_ == ThrottleState::UnderLimit){
       LOG_INFO(std::string("gRPC bidi stream available. publishing frame data..."));
       auto ack = this->stream_handler_->send(request, false);
       if (ack != WasmResult::Ok) {
@@ -147,6 +147,8 @@ FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
     if(this->throttle_state_ == ThrottleState::UnderLimit || this->throttle_state_ == ThrottleState::FailureModeAllowed){
       return FilterDataStatus::Continue;
     }else{
+      HeaderStringPairs empty;
+      sendLocalResponse(429,"Resource exhausted", "Throttling limit reached", empty, GrpcStatus::InvalidCode);
       return FilterDataStatus::StopIterationNoBuffer;
     }
   }else{
@@ -195,7 +197,7 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
     request.set_remote_ip(upstream_address);
     // Read ext_authz_metadata_ metdata saved as a member variable
     *request.mutable_metadata() = *this->metadata_;
-    if(this->handler_state_ == HandlerState::OK){
+    if(this->handler_state_ == HandlerState::OK && this->throttle_state_ == ThrottleState::UnderLimit){
       LOG_INFO(std::string("gRPC bidi stream available. publishing frame data..."));
       auto ack = this->stream_handler_->send(request, false);
       if (ack != WasmResult::Ok) {
@@ -208,6 +210,8 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
     if(this->throttle_state_ == ThrottleState::UnderLimit || this->throttle_state_ == ThrottleState::FailureModeAllowed){
       return FilterDataStatus::Continue;
     }else{
+      HeaderStringPairs empty;
+      sendLocalResponse(429,"Resource exhausted", "Throttling limit reached", empty, GrpcStatus::InvalidCode);
       return FilterDataStatus::StopIterationNoBuffer;
     }
   }else{
@@ -237,10 +241,10 @@ void MgwWebSocketContext::updateFilterState(ResponseStatus status){
   LOG_INFO(std::string("updateFilterState") + std::to_string(static_cast<int>(status)));
   if(status == ResponseStatus::OK){
     this->throttle_state_ = ThrottleState::UnderLimit;
-    LOG_TRACE("mgw_wasm_websocket filter state changed to UnderLimit");
+    LOG_INFO("mgw_wasm_websocket filter state changed to UnderLimit");
   }else if(status == ResponseStatus::OverLimit){
     this->throttle_state_ = ThrottleState::OverLimit;
-    LOG_TRACE("mgw_wasm_websocket filter state changed to OverLimit");
+    LOG_INFO("mgw_wasm_websocket filter state changed to OverLimit !!!");
   }else{
     LOG_INFO("Enforcer throttle decision unknown");
   }

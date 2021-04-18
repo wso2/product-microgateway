@@ -53,20 +53,23 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
         if (!this.throttleKeysInitiated) {
             initializeThrottleKeys(webSocketFrameRequest);
         }
-        logger.info(webSocketFrameRequest.toString());
-        logger.info(webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap());
+        //logger.info(webSocketFrameRequest.toString());
+        //logger.info(webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap());
 //        logger.info(webSocketFrameRequest.getFilterMetadata().getMetadataList().get(1));
 //        logger.info(webSocketFrameRequest.getFilterMetadata().getField());
-         WebSocketResponseObject webSocketResponseObject = webSocketHandler.process(webSocketFrameRequest);
+        WebSocketThrottleResponse webSocketThrottleResponse = webSocketHandler.process(webSocketFrameRequest);
         //streamId = getStreamId(webSocketFrameRequest);
         //WebSocketFrameService.addObserver(streamId, this);
-        if (webSocketResponseObject == WebSocketResponseObject.OK) {
+        if (webSocketThrottleResponse.getWebSocketThrottleState() == WebSocketThrottleState.OK) {
             WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
                     WebSocketFrameResponse.Code.OK).build();
             responseStreamObserver.onNext(response);
         } else {
             WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
-                    WebSocketFrameResponse.Code.OVER_LIMIT).build();
+                    WebSocketFrameResponse.Code.OVER_LIMIT)
+                    .setErrorCode(Integer.parseInt(webSocketThrottleResponse.getErrorCode()))
+                    .setErrorMessage(webSocketThrottleResponse.getErrorMessage())
+                    .setErrorDescription(webSocketThrottleResponse.getErrorDescription()).build();
             responseStreamObserver.onNext(response);
         }
     }

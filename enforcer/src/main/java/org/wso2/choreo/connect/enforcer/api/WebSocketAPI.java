@@ -26,9 +26,10 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
+import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetaDataFilter;
-import org.wso2.choreo.connect.enforcer.websocket.WebSocketResponseObject;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleFilter;
+import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -145,13 +146,22 @@ public class WebSocketAPI implements API {
     }
 
     public void initFilters() {
+        // Cors Filter
+        CorsFilter corsFilter = new CorsFilter();
+        this.filters.add(corsFilter);
+        // Auth Filter
         AuthFilter authFilter = new AuthFilter();
         authFilter.init(apiConfig);
-        CorsFilter corsFilter = new CorsFilter();
+        this.filters.add(authFilter);
+        // Throttle Filter if throttling is enabled
+        if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
+            ThrottleFilter throttleFilter = new ThrottleFilter();
+            throttleFilter.init(apiConfig);
+            this.filters.add(throttleFilter);
+        }
+        // WebSocketMetadata filter
         WebSocketMetaDataFilter metaDataFilter = new WebSocketMetaDataFilter();
         metaDataFilter.init(apiConfig);
-        this.filters.add(corsFilter);
-        this.filters.add(authFilter);
         this.filters.add(metaDataFilter);
     }
 
@@ -166,13 +176,23 @@ public class WebSocketAPI implements API {
         }
     }
 
-    public WebSocketResponseObject processFramedata(RequestContext requestContext) {
+    public WebSocketThrottleResponse processFramedata(RequestContext requestContext) {
         logger.info("XXXXXXXXX processMetadata" + requestContext.toString());
         if (executeUpgradeFilterChain(requestContext)) {
             logger.info("XXXXXXXXXXXXXXXXXXXX Successful");
-            return WebSocketResponseObject.OK;
+            WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
+            webSocketThrottleResponse.setOkState();
+            return webSocketThrottleResponse;
         }
-        return WebSocketResponseObject.OVER_LIMIT;
+        WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
+        webSocketThrottleResponse.setOverLimitState();
+        webSocketThrottleResponse.setErrorCode(requestContext.getProperties().
+                get(APIConstants.MessageFormat.STATUS_CODE).toString());
+        webSocketThrottleResponse.setErrorMessage(requestContext.getProperties()
+                .get(APIConstants.MessageFormat.ERROR_MESSAGE).toString());
+        webSocketThrottleResponse.setErrorDescription(requestContext.getProperties()
+                .get(APIConstants.MessageFormat.ERROR_DESCRIPTION).toString());
+        return webSocketThrottleResponse;
     }
 
 
