@@ -41,6 +41,7 @@ public class APIConstants {
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
     public static final String DEFAULT_ISSUER = "Resident Key Manager";
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
+    public static final String WSO2_PUBLIC_CERTIFICATE_ALIAS = "wso2carbon";
     public static final String HTTPS_PROTOCOL = "https";
     public static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
     public static final String BANDWIDTH_TYPE = "bandwidthVolume";
@@ -196,6 +197,7 @@ public class APIConstants {
         public static final String ENABLE_TOKEN_ENCRYPTION = "enable_token_encryption";
         public static final String ENABLE_OAUTH_APP_CREATION = "enable_oauth_app_creation";
         public static final String DEFAULT_KEY_MANAGER = "Resident Key Manager";
+        public static final String APIM_PUBLISHER_ISSUER = "APIM Publisher";
         public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
         public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Resident Key Manager";
 

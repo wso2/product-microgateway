@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 public class ExtendedTokenIssuerDto extends TokenIssuerDto {
     private String name;
     private boolean validateSubscriptions;
+    private String alias;
 
 
     public ExtendedTokenIssuerDto(String issuer) {
@@ -46,6 +47,14 @@ public class ExtendedTokenIssuerDto extends TokenIssuerDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCertificateAlias() {
+        return alias;
+    }
+
+    public void setCertificateAlias(String alias) {
+        this.alias = alias;
     }
 }
 

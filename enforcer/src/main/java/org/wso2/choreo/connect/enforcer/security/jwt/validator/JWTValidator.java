@@ -114,7 +114,7 @@ public class JWTValidator {
 
     protected boolean validateSignature(SignedJWT signedJWT) throws EnforcerException {
 
-        String certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
+        String certificateAlias = this.tokenIssuer.getCertificateAlias();
         try {
             String keyID = signedJWT.getHeader().getKeyID();
             if (StringUtils.isNotEmpty(keyID)) {

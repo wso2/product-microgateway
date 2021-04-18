@@ -191,9 +191,14 @@ public class ConfigHolder {
             // Load jwt transformers map.
             config.setJwtTransformerMap(JWTUtil.loadJWTTransformers());
             String certificateAlias = jwtIssuer.getCertificateAlias();
-            if (certificateAlias.isBlank() && APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(jwtIssuer.getName())) {
-                certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
+            if (certificateAlias.isBlank()) {
+                if (APIConstants.KeyManager.APIM_PUBLISHER_ISSUER.equals(jwtIssuer.getName())) {
+                    certificateAlias = APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
+                } else if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(jwtIssuer.getName())) {
+                    certificateAlias = APIConstants.WSO2_PUBLIC_CERTIFICATE_ALIAS;
+                }
             }
+            issuerDto.setCertificateAlias(certificateAlias);
             if (!certificateAlias.isBlank()) {
                 try {
                     Certificate cert = TLSUtils.getCertificateFromFile(jwtIssuer.getCertificateFilePath());
