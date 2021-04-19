@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -49,8 +48,9 @@ import (
 )
 
 var (
-	version           int32
-	mutexForXdsUpdate sync.Mutex
+	version             int32
+	mutexForXdsUpdate   sync.Mutex
+	mutexForCacheUpdate sync.Mutex
 
 	cache                              envoy_cachev3.SnapshotCache
 	enforcerCache                      wso2_cache.SnapshotCache
@@ -441,25 +441,17 @@ func mergeResourceArrays(resourceArrays [][]types.Resource) []types.Resource {
 func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 
 	// TODO: (VirajSalaka) check possible optimizations, Since the number of labels are low by design it should not be an issue
-	if reflect.DeepEqual(newLabels, oldLabels) {
-		for _, oldLabel := range oldLabels {
-			logger.LoggerXds.Infof("new labels contains old label")
+
+	for _, newLabel := range newLabels {
+		_, _, _, _, apis := GenerateEnvoyResoucesForLabel(newLabel)
+		UpdateEnforcerApis(newLabel, apis, "")
+		logger.LoggerXds.Debugf("Xds Cache is updated for the newly added label : %v", newLabel)
+	}
+	for _, oldLabel := range oldLabels {
+		if !arrayContains(newLabels, oldLabel) {
 			_, _, _, _, apis := GenerateEnvoyResoucesForLabel(oldLabel)
-			UpdateEnforcerApis(oldLabel, apis)
+			UpdateEnforcerApis(oldLabel, apis, "")
 			logger.LoggerXds.Debugf("Xds Cache is updated for the already existing label : %v", oldLabel)
-		}
-	} else {
-		for _, newLabel := range newLabels {
-			_, _, _, _, apis := GenerateEnvoyResoucesForLabel(newLabel)
-			UpdateEnforcerApis(newLabel, apis)
-			logger.LoggerXds.Debugf("Xds Cache is updated for the newly added label : %v", newLabel)
-		}
-		for _, oldLabel := range oldLabels {
-			if !arrayContains(newLabels, oldLabel) {
-				_, _, _, _, apis := GenerateEnvoyResoucesForLabel(oldLabel)
-				UpdateEnforcerApis(oldLabel, apis)
-				logger.LoggerXds.Debugf("Xds Cache is updated for the already existing label : %v", oldLabel)
-			}
 		}
 	}
 
@@ -555,9 +547,12 @@ func UpdateEnforcerConfig(configFile *config.Config) {
 }
 
 // UpdateEnforcerApis Sets new update to the enforcer's Apis
-func UpdateEnforcerApis(label string, apis []types.Resource) {
+func UpdateEnforcerApis(label string, apis []types.Resource, version string) {
 
-	version := rand.Intn(maxRandomInt)
+	if version == "" {
+		version = fmt.Sprint(rand.Intn(maxRandomInt))
+	}
+
 	snap := wso2_cache.NewSnapshot(fmt.Sprint(version), nil, apis, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	snap.Consistent()
 
@@ -851,10 +846,12 @@ func UpdateEnforcerThrottleData(throttleData *throttle.ThrottleData) {
 
 // buildAndStoreSuccessState method builds the latest successful enforcer and router resources and returns as
 // state structs.
-func buildAndStoreSuccessState(label string) {
+func buildAndStoreSuccessState(label string, version string) {
 	// Copy the current status maps to new maps, since assigning maps is by reference.
 
 	// Enforcer resources
+	mutexForCacheUpdate.Lock()
+	defer mutexForCacheUpdate.Unlock()
 	newAPIMgwSwaggerMap := make(map[string]mgw.MgwSwagger)
 	for k, v := range apiMgwSwaggerMap {
 		newAPIMgwSwaggerMap[k] = v
@@ -906,6 +903,7 @@ func buildAndStoreSuccessState(label string) {
 		OpenAPIEnforcerApisMap:   newOpenAPIEnforcerApisMap,
 		APIToVhostsMap:           newAPIToVhostsMap,
 		APIUUIDToGatewayToVhosts: newAPIUUIDToGatewayToVhosts,
+		Version:                  version,
 	}
 	routerNewState := RouterResourceState{
 		APIRoutesMap:           newOpenAPIRoutesMap,
@@ -913,63 +911,30 @@ func buildAndStoreSuccessState(label string) {
 		APIEndpointsMap:        newOpenAPIEndpointsMap,
 		EnvoyListenerConfigMap: newEnvoyListenerConfigMap,
 		EnvoyRouteConfigMap:    newEnvoyRouteConfigMap,
+		Version:                version,
 	}
 	SetSuccessState(label, enforcerNewState, routerNewState)
 }
 
 // restorePreviousState retrive the last successful state from the state cache and restore the date to the maps.
-func restorePreviousState(label string) {
+func restorePreviousState(label string) string {
 	// Get the last known successful state of enforcer and router from the state cache
 	enforcerOldState, routerOldState := GetLastSuccessState(label)
 	// Initialize new maps and populate the success state from the retrieved state cache.
 
 	// Enforcer resources
-	apiMgwSwaggerMap = make(map[string]mgw.MgwSwagger)
-	for k, v := range enforcerOldState.Apis {
-		apiMgwSwaggerMap[k] = v
-	}
-	openAPIEnforcerApisMap = make(map[string]types.Resource)
-	for k, v := range enforcerOldState.OpenAPIEnforcerApisMap {
-		openAPIEnforcerApisMap[k] = v
-	}
-	apiToVhostsMap = make(map[string]map[string]struct{})
-	for k, v := range enforcerOldState.APIToVhostsMap {
-		intermediate := make(map[string]struct{})
-		for k1, v1 := range v {
-			intermediate[k1] = v1
-		}
-		apiToVhostsMap[k] = intermediate
-	}
-	apiUUIDToGatewayToVhosts = make(map[string]map[string]string)
-	for k, v := range enforcerOldState.APIUUIDToGatewayToVhosts {
-		intermediate := make(map[string]string)
-		for k1, v1 := range v {
-			intermediate[k1] = v1
-		}
-		apiUUIDToGatewayToVhosts[k] = intermediate
-	}
+	apiMgwSwaggerMap = enforcerOldState.Apis
+	openAPIEnforcerApisMap = enforcerOldState.OpenAPIEnforcerApisMap
+	apiToVhostsMap = enforcerOldState.APIToVhostsMap
+	apiUUIDToGatewayToVhosts = enforcerOldState.APIUUIDToGatewayToVhosts
 
 	// Router resources
-	openAPIRoutesMap = make(map[string][]*routev3.Route)
-	for k, v := range routerOldState.APIRoutesMap {
-		openAPIRoutesMap[k] = v
-	}
-	openAPIClustersMap = make(map[string][]*clusterv3.Cluster)
-	for k, v := range routerOldState.APIClustersMap {
-		openAPIClustersMap[k] = v
-	}
-	openAPIEndpointsMap = make(map[string][]*corev3.Address)
-	for k, v := range routerOldState.APIEndpointsMap {
-		openAPIEndpointsMap[k] = v
-	}
-	envoyListenerConfigMap = make(map[string][]*listenerv3.Listener)
-	for k, v := range routerOldState.EnvoyListenerConfigMap {
-		envoyListenerConfigMap[k] = v
-	}
-	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
-	for k, v := range routerOldState.EnvoyRouteConfigMap {
-		envoyRouteConfigMap[k] = v
-	}
+	openAPIRoutesMap = routerOldState.APIRoutesMap
+	openAPIClustersMap = routerOldState.APIClustersMap
+	openAPIEndpointsMap = routerOldState.APIEndpointsMap
+	envoyListenerConfigMap = routerOldState.EnvoyListenerConfigMap
+	envoyRouteConfigMap = routerOldState.EnvoyRouteConfigMap
+	return enforcerOldState.Version
 }
 
 /** This method will listen to the callback messages from the xds protocol.
@@ -988,15 +953,15 @@ func watchEnforcerResponse() {
 		requestEvent := <-GetRequestEventChannel()
 		logger.LoggerXds.Debugf("xds Request from client version : %s", requestEvent.Version)
 		if requestEvent.IsError {
-			logger.LoggerXds.Debugf("Applying config failed. Last success versio of enforcer : %s", requestEvent.Version)
-			restorePreviousState(requestEvent.Node)
+			logger.LoggerXds.Infof("Applying config failed. Last success version of enforcer : %s", requestEvent.Version)
+			lastSuccessVersion := restorePreviousState(requestEvent.Node)
 			_, _, _, _, apis := GenerateEnvoyResoucesForLabel(requestEvent.Node)
-			UpdateEnforcerApis(requestEvent.Node, apis)
+			UpdateEnforcerApis(requestEvent.Node, apis, lastSuccessVersion)
 		} else {
-			logger.LoggerXds.Debugf("Success Response from client for version: %s", requestEvent.Version)
+			logger.LoggerXds.Infof("Successfully updated APIs in Client for version: %s", requestEvent.Version)
 
 			// Successful message, set the current state of the enforcer apis to the state cache.
-			buildAndStoreSuccessState(requestEvent.Node)
+			buildAndStoreSuccessState(requestEvent.Node, requestEvent.Version)
 
 			// Generate the router resources and update the router.
 			listeners, clusters, routes, endpoints, _ := GenerateEnvoyResoucesForLabel(requestEvent.Node)

@@ -30,10 +30,9 @@ import (
 
 // RequestEvent is the event that is published by the xds callback (onStreamRequest)
 type RequestEvent struct {
-	IsError    bool
-	Version    string
-	Node       string
-	IsResponse bool
+	IsError bool
+	Version string
+	Node    string
 }
 
 // EnforcerAPIState Stores the last success state of the enforcer apis
@@ -42,6 +41,7 @@ type EnforcerAPIState struct {
 	OpenAPIEnforcerApisMap   map[string]types.Resource
 	APIUUIDToGatewayToVhosts map[string]map[string]string
 	APIToVhostsMap           map[string]map[string]struct{}
+	Version                  string
 }
 
 // RouterResourceState Stores the last successful state of the router resources
@@ -51,6 +51,7 @@ type RouterResourceState struct {
 	APIEndpointsMap        map[string][]*corev3.Address
 	EnvoyListenerConfigMap map[string][]*listenerv3.Listener // Listener Configuration map
 	EnvoyRouteConfigMap    map[string]*routev3.RouteConfiguration
+	Version                string
 }
 
 var (
@@ -68,7 +69,7 @@ var (
 
 // NewRequestEvent create new change event
 func NewRequestEvent() RequestEvent {
-	return RequestEvent{false, "", "", false}
+	return RequestEvent{false, "", ""}
 }
 
 // GetRequestEventChannel returns the state change channel.
@@ -90,7 +91,7 @@ func SetSuccessState(label string, enforerSuccessState EnforcerAPIState, routerS
 }
 
 // GetLastSuccessState returns the successful enforcer state and router state which belongs to the provided label
-func GetLastSuccessState(label string) (EnforcerAPIState, RouterResourceState) {
+func GetLastSuccessState(label string) (*EnforcerAPIState, *RouterResourceState) {
 	var stateEnforcer EnforcerAPIState
 	var stateRouter RouterResourceState
 
@@ -100,5 +101,5 @@ func GetLastSuccessState(label string) (EnforcerAPIState, RouterResourceState) {
 	if successState, ok := routerState[label]; ok {
 		stateRouter = successState
 	}
-	return stateEnforcer, stateRouter
+	return &stateEnforcer, &stateRouter
 }

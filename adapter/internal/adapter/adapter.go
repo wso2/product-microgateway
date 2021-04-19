@@ -20,6 +20,8 @@ package adapter
 
 import (
 	"crypto/tls"
+	"strings"
+
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/wso2/adapter/internal/api/restserver"
@@ -33,7 +35,6 @@ import (
 	"github.com/wso2/adapter/internal/health"
 	healthservice "github.com/wso2/adapter/internal/health/api/wso2/health/service"
 	"github.com/wso2/adapter/internal/tlsutils"
-	"strings"
 
 	"context"
 	"flag"
@@ -208,7 +209,7 @@ func Run(conf *config.Config) {
 	for _, env := range envs {
 		listeners, clusters, routes, endpoints, apis := xds.GenerateEnvoyResoucesForLabel(env)
 		xds.UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners)
-		xds.UpdateEnforcerApis(env, apis)
+		xds.UpdateEnforcerApis(env, apis, "")
 	}
 
 	// Adapter REST API
