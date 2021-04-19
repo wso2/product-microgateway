@@ -78,7 +78,9 @@ public class ThrottlingBaseTestCase extends APIMLifecycleBaseTest {
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
                 isResponseAvailable(endpointURL, headers));
         // This buffer is to avoid failures due to delays in evaluating throttle conditions at TM
-        int throttleBuffer = 4;
+        // here it sets the final throttle request count twice as the limit set in the policy.
+        // it will make sure throttle will happen even if the throttle window passed.
+        long throttleBuffer = expectedCount + 2;
 
         URIBuilder url = new URIBuilder(endpointURL);
         if (queryParams != null) {
@@ -90,10 +92,6 @@ public class ThrottlingBaseTestCase extends APIMLifecycleBaseTest {
         HttpResponse response;
         boolean isThrottled = false;
         for (int j = 0; j <= expectedCount + throttleBuffer; j++) {
-            // give additional space for throttle decision to arrive
-            if (j == expectedCount) {
-                Thread.sleep(3000);
-            }
 
             response = HTTPSClientUtils.doGet(url.toString(), headers);
             log.info("============== Response {}, {}", response.getResponseCode(), response.getData());
@@ -101,7 +99,7 @@ public class ThrottlingBaseTestCase extends APIMLifecycleBaseTest {
                 isThrottled = true;
                 break;
             }
-            Thread.sleep(500);
+            Thread.sleep(1000);
         }
         return isThrottled;
     }
