@@ -53,7 +53,7 @@ public class RequestHandler {
             return responseObject;
         } else if (logger.isDebugEnabled()) {
             APIConfig api = matchedAPI.getAPIConfig();
-            logger.debug("API {}/{} found in the cache", api.getBasePath(), api.getVersion());
+            logger.debug("API {}/{} found in the cache", api::getBasePath, api::getVersion);
         }
 
         RequestContext requestContext = buildRequestContext(matchedAPI, request);
@@ -82,6 +82,7 @@ public class RequestHandler {
         ResourceConfig resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api).headers(headers).requestID(requestID).address(address).prodClusterHeader(prodCluster)
-                .sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis).build();
+                .sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
+                .traceId(request.getAttributes().getRequest().getHttp().getId()).build();
     }
 }
