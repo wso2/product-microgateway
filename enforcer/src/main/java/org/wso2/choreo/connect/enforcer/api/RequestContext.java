@@ -102,7 +102,6 @@ public class RequestContext {
         private AuthenticationContext authenticationContext = new AuthenticationContext();
         private String requestID;
         private String clientIp;
-        private String traceId;
 
 
         public Builder(String requestPath) {
@@ -163,11 +162,6 @@ public class RequestContext {
             return this;
         }
 
-        public Builder traceId(String traceId) {
-            this.traceId = traceId;
-            return this;
-        }
-
         public RequestContext build() {
             RequestContext requestContext = new RequestContext();
             requestContext.matchedResourcePath = this.matchedResourceConfig;
@@ -184,7 +178,6 @@ public class RequestContext {
             requestContext.requestID = this.requestID;
             requestContext.clientIp = this.clientIp;
             requestContext.responseHeaders = new HashMap<>();
-            requestContext.traceId = this.traceId;
             String[] queryParts = this.requestPath.split("\\?");
             String queryPrams = queryParts.length > 1 ? queryParts[1] : "";
 

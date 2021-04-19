@@ -100,4 +100,3 @@ data:
     rootLogger.appenderRef.ENFORCER_LOGFILE.ref = ENFORCER_LOGFILE
     rootLogger.appenderRef.ENFORCER_ACCESS_LOG.ref = ENFORCER_ACCESS_LOG
 
-

@@ -343,8 +343,7 @@ public class JWTAuthenticator implements Authenticator {
                     .validateScopes(tokenValidationContext);
             if (valid) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Scope validation successful for the resource: " + matchingResource + ", user: "
-                            + jwtValidationInfo.getUser());
+                    log.debug("Scope validation successful for the resource: " + matchingResource.getPath());
                 }
             } else {
                 String message = "User is NOT authorized to access the Resource: " + matchingResource.getPath()

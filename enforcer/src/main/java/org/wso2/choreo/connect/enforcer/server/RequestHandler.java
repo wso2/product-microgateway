@@ -83,6 +83,6 @@ public class RequestHandler {
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api).headers(headers).requestID(requestID).address(address).prodClusterHeader(prodCluster)
                 .sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
-                .traceId(request.getAttributes().getRequest().getHttp().getId()).build();
+                .build();
     }
 }
