@@ -23,7 +23,7 @@ services:
       - ROUTER_ADMIN_HOST=0.0.0.0
       - ROUTER_ADMIN_PORT=9000
       - ROUTER_CLUSTER=default_cluster
-      - ROUTER_LABEL=Production and Sandbox
+      - ROUTER_LABEL=Default
       - ROUTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
       - ROUTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
       - ADAPTER_HOST=adapter
@@ -85,7 +85,7 @@ services:
       - ADAPTER_HOST_NAME=adapter
       - ADAPTER_HOST=adapter
       - ADAPTER_XDS_PORT=18000
-      - ENFORCER_LABEL=Production and Sandbox
+      - ENFORCER_LABEL=Default
       - ENFORCER_REGION=UNKNOWN
       - XDS_MAX_MSG_SIZE=4194304
       - XDS_MAX_RETRIES=3

@@ -20,6 +20,8 @@ package adapter
 
 import (
 	"crypto/tls"
+	"strings"
+
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/wso2/adapter/internal/api/restserver"
@@ -33,7 +35,6 @@ import (
 	"github.com/wso2/adapter/internal/health"
 	healthservice "github.com/wso2/adapter/internal/health/api/wso2/health/service"
 	"github.com/wso2/adapter/internal/tlsutils"
-	"strings"
 
 	"context"
 	"flag"
@@ -70,8 +71,6 @@ var (
 
 const (
 	ads = "ads"
-	// DefaultGatewayLabelValue represents the default value for an environment
-	DefaultGatewayLabelValue string = "Production and Sandbox"
 )
 
 func init() {
@@ -202,7 +201,7 @@ func Run(conf *config.Config) {
 
 	// If no environments are configured, default gateway label value is assigned.
 	if len(envs) == 0 {
-		envs = append(envs, DefaultGatewayLabelValue)
+		envs = append(envs, config.DefaultGatewayName)
 	}
 
 	for _, env := range envs {

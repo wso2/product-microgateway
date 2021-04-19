@@ -46,7 +46,8 @@ var (
 )
 
 // DefaultGatewayName represents the name of the default gateway
-const DefaultGatewayName = "Production and Sandbox" // TODO: should be changed to "Default"
+const DefaultGatewayName = "Default"
+
 // DefaultGatewayVHost represents the default vhost of default gateway environment if it is not configured
 const DefaultGatewayVHost = "localhost" // TODO (renuka): check this with pubuduG and raji: do we want this?
 // for /testtoken and /health check, if user not configured default env, we have no vhost

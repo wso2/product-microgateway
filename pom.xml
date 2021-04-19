@@ -340,7 +340,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <andes.client.version>3.3.12</andes.client.version>
-        <carbon.apimgt.version>9.0.114</carbon.apimgt.version>
+        <carbon.apimgt.version>9.0.168</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
         <commons.io.version>2.6</commons.io.version>
@@ -377,7 +377,7 @@
         <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
         <lmax.version>3.4.2.wso2v1</lmax.version>
         <download.maven.plugin.version>1.6.1</download.maven.plugin.version>
-        <apictl.version>4.0.0-beta</apictl.version>
+        <apictl.version>4.0.0-rc1</apictl.version>
         <grpc.healthProbe.version>0.3.6</grpc.healthProbe.version>
     </properties>
 </project>
