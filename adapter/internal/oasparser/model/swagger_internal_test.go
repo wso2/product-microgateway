@@ -48,7 +48,6 @@ func TestSetInfoSwagger(t *testing.T) {
 			},
 
 			MgwSwagger{
-				id:          "v1",
 				apiType:     "HTTP",
 				description: "Swagger definition",
 				title:       "petsore",
@@ -66,7 +65,6 @@ func TestSetInfoSwagger(t *testing.T) {
 				},
 			},
 			MgwSwagger{
-				id:          "",
 				apiType:     "HTTP",
 				description: "",
 				title:       "",

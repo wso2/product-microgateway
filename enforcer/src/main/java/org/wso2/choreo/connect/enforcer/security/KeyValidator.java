@@ -192,7 +192,7 @@ public class KeyValidator {
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("API not found in the datastore for " + context + ":" + version);
+                    log.debug("API not found in the datastore for API UUID :" + uuid);
                 }
             }
         } else {
