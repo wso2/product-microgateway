@@ -193,7 +193,7 @@ allowCredentials = false
 [[security.enforcer.tokenService]]
   name="Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
-  certificateAlias = ""
+  certificateAlias = "wso2carbon"
   # URL of the JWKs endpoint
   jwksURL = ""
   # Validate subscribed APIs
@@ -232,6 +232,10 @@ allowCredentials = false
 
 [analytics]
   enabled = false
+  [analytics.adapter]
+    bufferFlushInterval = "1s"
+    bufferSizeBytes = 16384
+    gRPCRequestTimeout = "20s"
   [analytics.enforcer]
     [analytics.enforcer.configProperties]
       authURL = "$env{analytics_authURL}"
