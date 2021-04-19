@@ -34,7 +34,6 @@ import (
 //
 // No operation specific information is extracted.
 func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
-	swagger.id = swagger2.ID
 	if swagger2.Info != nil {
 		swagger.description = swagger2.Info.Description
 		swagger.title = swagger2.Info.Title

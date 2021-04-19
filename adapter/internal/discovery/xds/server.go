@@ -65,21 +65,21 @@ var (
 
 	// Vhosts entry maps, these maps updated with delta changes (when an API added, only added its entry only)
 	// These maps are managed separately for API-CTL and APIM, since when deploying an project from API-CTL there is no API uuid
-	apiUUIDToGatewayToVhosts map[string]map[string]string   // API_UUID to gateway-env to vhost (for un-deploying APIs from APIM or Choreo)
-	apiToVhostsMap           map[string]map[string]struct{} // APIName:Version to VHosts set (for un-deploying APIs from API-CTL)
+	apiUUIDToGatewayToVhosts map[string]map[string]string   // API_UUID -> gateway-env -> vhost (for un-deploying APIs from APIM or Choreo)
+	apiToVhostsMap           map[string]map[string]struct{} // APIName:Version -> VHosts set (for un-deploying APIs from API-CTL)
 
 	// Vhost:APIName:Version as map key
-	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // MgwSwagger struct map
-	openAPIEnvoyMap        map[string][]string             // Envoy Label Array map
-	openAPIRoutesMap       map[string][]*routev3.Route     // Envoy Routes map
-	openAPIClustersMap     map[string][]*clusterv3.Cluster // Envoy Clusters map
-	openAPIEndpointsMap    map[string][]*corev3.Address    // Envoy Endpoints map
-	openAPIEnforcerApisMap map[string]types.Resource       // API Resource map
+	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // Vhost:APIName:Version -> MgwSwagger struct map
+	openAPIEnvoyMap        map[string][]string             // Vhost:APIName:Version -> Envoy Label Array map
+	openAPIRoutesMap       map[string][]*routev3.Route     // Vhost:APIName:Version -> Envoy Routes map
+	openAPIClustersMap     map[string][]*clusterv3.Cluster // Vhost:APIName:Version -> Envoy Clusters map
+	openAPIEndpointsMap    map[string][]*corev3.Address    // Vhost:APIName:Version -> Envoy Endpoints map
+	openAPIEnforcerApisMap map[string]types.Resource       // Vhost:APIName:Version -> API Resource map
 
 	// Envoy Label as map key
-	envoyUpdateVersionMap  map[string]int64                       // XDS version map
-	envoyListenerConfigMap map[string][]*listenerv3.Listener      // Listener Configuration map
-	envoyRouteConfigMap    map[string]*routev3.RouteConfiguration // Routes Configuration map
+	envoyUpdateVersionMap  map[string]int64                       // GW-Label -> XDS version map
+	envoyListenerConfigMap map[string][]*listenerv3.Listener      // GW-Label -> Listener Configuration map
+	envoyRouteConfigMap    map[string]*routev3.RouteConfiguration // GW-Label -> Routes Configuration map
 
 	// Common Enforcer Label as map key
 	enforcerConfigMap                map[string][]types.Resource
@@ -228,6 +228,7 @@ func UpdateAPI(apiContent config.APIContent) {
 
 	if apiContent.APIType == mgw.HTTP {
 		mgwSwagger = operator.GetMgwSwagger(apiContent.APIDefinition)
+		mgwSwagger.SetID(apiContent.UUID)
 		mgwSwagger.SetName(apiContent.Name)
 		mgwSwagger.SetVersion(apiContent.Version)
 		mgwSwagger.SetSecurityScheme(apiContent.SecurityScheme)

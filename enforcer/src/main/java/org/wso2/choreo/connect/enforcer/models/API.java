@@ -118,7 +118,7 @@ public class API implements CacheableEntity<String> {
 
     public String getCacheKey() {
 
-        return context + DELEM_PERIOD + version;
+        return apiUUID;
     }
 
     public String getApiType() {

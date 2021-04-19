@@ -162,6 +162,11 @@ func (swagger *MgwSwagger) GetID() string {
 	return swagger.id
 }
 
+// SetID set the Id of the API
+func (swagger *MgwSwagger) SetID(id string) {
+	swagger.id = id
+}
+
 // SetName sets the name of the API
 func (swagger *MgwSwagger) SetName(name string) {
 	swagger.title = name

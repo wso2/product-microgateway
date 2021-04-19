@@ -54,11 +54,10 @@ public interface SubscriptionDataStore {
     /**
      * Get API by Context and Version.
      *
-     * @param context Context of the API
-     * @param version Version of the API
+     * @param uuid UUID of the API
      * @return {@link API} entry represented by Context and Version.
      */
-    API getApiByContextAndVersion(String context, String version);
+    API getApiByContextAndVersion(String uuid);
 
     /**
      * Gets Subscription by ID.
