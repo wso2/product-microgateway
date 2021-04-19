@@ -41,15 +41,9 @@ spec:
               name: enforcer-truststore-vol
             - mountPath: /home/wso2/security/keystore
               name: enforcer-keystore-vol
-            - mountPath: /home/wso2/conf/config.toml
-              subPath: config.toml
-              name: config-toml-vol
             - mountPath: /home/wso2/conf/log4j2.properties
               subPath: log4j2.properties
               name: log4j2-vol
-            - mountPath: /home/wso2/conf/log_config.toml
-              subPath: log_config.toml
-              name: logconfig-toml-vol
             - mountPath: /home/wso2/lib/dropins
               name: dropins-vol
           image: wso2/choreo-connect-enforcer:0.9.0-beta-SNAPSHOT

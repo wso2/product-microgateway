@@ -37,7 +37,8 @@ services:
         max-file: "5"
     volumes:
       - ../resources/adapter/security:/home/wso2/security
-      - ./conf:/home/wso2/conf
+      - ./conf/log_config.toml:/home/wso2/conf/log_config.toml
+      - ./conf/config.toml:/home/wso2/conf/config.toml
     environment:
       - ADAPTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
       - ADAPTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
@@ -54,7 +55,7 @@ services:
         max-file: "5"
     volumes:
       - ../resources/enforcer/security:/home/wso2/security
-      - ./conf:/home/wso2/conf
+      - ./conf/log4j2.properties:/home/wso2/conf/log4j2.properties
       - ../resources/enforcer/dropins:/home/wso2/lib/dropins
     links:
       - adapter
