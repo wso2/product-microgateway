@@ -112,4 +112,24 @@ public class JwtTestCase {
         Assert.assertTrue(response.getHeaders().containsKey("www-authenticate"),
                 "\"www-authenticate\" is not available");
     }
+
+    @Test(description = "Test to check with JWT where the JWT header cannot be parsed")
+    public void invokeJWTHeaderParseExceptionTest() throws Exception {
+
+        // Set header
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + "aaa.bbb.ccc");
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/pet/2") , headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,
+                "Response code mismatched");
+        Assert.assertEquals(response.getData(), "{\"error_message\":\"Invalid Credentials\"," +
+                        "\"code\":\"900901\",\"error_description\":\"Not a JWT token. Failed to decode " +
+                        "the token header. Make sure you have provided the correct security credentials\"}",
+                "Response message mismatched");
+        Assert.assertTrue(response.getHeaders().containsKey("www-authenticate"),
+                "\"www-authenticate\" is not available");
+    }
 }
