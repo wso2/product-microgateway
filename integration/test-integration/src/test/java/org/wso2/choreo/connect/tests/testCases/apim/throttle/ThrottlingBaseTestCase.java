@@ -92,7 +92,7 @@ public class ThrottlingBaseTestCase extends APIMLifecycleBaseTest {
         for (int j = 0; j <= expectedCount + throttleBuffer; j++) {
             // give additional space for throttle decision to arrive
             if (j == expectedCount) {
-                Thread.sleep(2000);
+                Thread.sleep(3000);
             }
 
             response = HTTPSClientUtils.doGet(url.toString(), headers);
