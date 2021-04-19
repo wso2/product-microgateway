@@ -85,6 +85,8 @@ public class APIConstants {
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
     public static final String X_FORWARDED_FOR = "x-forwarded-for";
 
+    public static final String LOG_TRACE_ID = "traceId";
+
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
      */

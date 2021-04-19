@@ -175,7 +175,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 // MarshalSubscriptionList converts the data into SubscriptionList proto type
 func MarshalSubscriptionList(subList *types.SubscriptionList) *subscription.SubscriptionList {
 	subscriptions := []*subscription.Subscription{}
-
+	var tenantDomain = ""
 	for _, sb := range subList.List {
 		sub := &subscription.Subscription{
 			SubscriptionId:    fmt.Sprint(sb.SubscriptionID),
@@ -186,6 +186,12 @@ func MarshalSubscriptionList(subList *types.SubscriptionList) *subscription.Subs
 			TimeStamp:         sb.TimeStamp,
 			TenantId:          sb.TenantID,
 			TenantDomain:      sb.TenantDomain,
+		}
+		if sb.TenantDomain == "" {
+			if tenantDomain == "" {
+				tenantDomain = getControlPlaneConnectedTenantDomain()
+			}
+			sub.TenantDomain = tenantDomain
 		}
 		subscriptions = append(subscriptions, sub)
 	}
@@ -198,7 +204,7 @@ func MarshalSubscriptionList(subList *types.SubscriptionList) *subscription.Subs
 // MarshalApplicationList converts the data into ApplicationList proto type
 func MarshalApplicationList(appList *types.ApplicationList) *subscription.ApplicationList {
 	applications := []*subscription.Application{}
-
+	var tenantDomain = ""
 	for _, app := range appList.List {
 		application := &subscription.Application{
 			Uuid:         app.UUID,
@@ -214,6 +220,13 @@ func MarshalApplicationList(appList *types.ApplicationList) *subscription.Applic
 			TenantDomain: app.TenantDomain,
 			Timestamp:    app.TimeStamp,
 		}
+		if app.TenantDomain == "" {
+			if tenantDomain == "" {
+				tenantDomain = getControlPlaneConnectedTenantDomain()
+			}
+			application.TenantDomain = tenantDomain
+		}
+
 		applications = append(applications, application)
 	}
 

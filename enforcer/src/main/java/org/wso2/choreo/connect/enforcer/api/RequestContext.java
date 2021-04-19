@@ -53,6 +53,7 @@ public class RequestContext {
     private Map<String, String> responseHeaders;
     private Map<String, String> metadataMap = new HashMap<>();
     private String requestPathTemplate;
+    private String traceId;
 
     // Request Timestamp is required for analytics
     private long requestTimeStamp;
