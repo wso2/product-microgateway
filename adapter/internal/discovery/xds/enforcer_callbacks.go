@@ -50,7 +50,7 @@ func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryReque
 	if resource.APIType == request.GetTypeUrl() {
 		requestEvent := NewRequestEvent()
 		if request.ErrorDetail != nil {
-			logger.LoggerXdsCallbacks.Errorf("stream request on stream id: %d Request: %v", id, request)
+			logger.LoggerXdsCallbacks.Errorf("stream request on stream id: %d Error: %s", id, request.ErrorDetail.Message)
 			requestEvent.IsError = true
 		}
 		requestEvent.Node = request.GetNode().GetId()
