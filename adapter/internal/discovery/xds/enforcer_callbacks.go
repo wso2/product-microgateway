@@ -21,6 +21,7 @@ import (
 	"context"
 
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
+	"github.com/wso2/adapter/internal/discovery/protocol/resource/v3"
 	logger "github.com/wso2/adapter/loggers"
 )
 
@@ -45,6 +46,17 @@ func (cb *Callbacks) OnStreamClosed(id int64) {
 // OnStreamRequest prints debug logs
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
 	logger.LoggerXdsCallbacks.Debugf("stream request on stream id: %d Request: %v", id, request)
+	requestEventChannel := GetRequestEventChannel()
+	if resource.APIType == request.GetTypeUrl() {
+		requestEvent := NewRequestEvent()
+		if request.ErrorDetail != nil {
+			logger.LoggerXdsCallbacks.Errorf("stream request on stream id: %d Error: %s", id, request.ErrorDetail.Message)
+			requestEvent.IsError = true
+		}
+		requestEvent.Node = request.GetNode().GetId()
+		requestEvent.Version = request.VersionInfo
+		requestEventChannel <- requestEvent
+	}
 	return nil
 }
 

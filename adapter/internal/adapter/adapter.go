@@ -207,7 +207,7 @@ func Run(conf *config.Config) {
 	for _, env := range envs {
 		listeners, clusters, routes, endpoints, apis := xds.GenerateEnvoyResoucesForLabel(env)
 		xds.UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners)
-		xds.UpdateEnforcerApis(env, apis)
+		xds.UpdateEnforcerApis(env, apis, "")
 	}
 
 	// Adapter REST API
