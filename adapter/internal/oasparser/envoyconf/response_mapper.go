@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@
 package envoyconf
 
 import (
+	"strconv"
+
 	access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
@@ -27,19 +29,16 @@ import (
 
 func getErrorResponseMappers() []*hcmv3.ResponseMapper {
 	return []*hcmv3.ResponseMapper{
-		genErrorResponseMapper(101503, "Connection failed", "UF"),
-		genErrorResponseMapper(101504, "Connection timed out", ""),
-		genErrorResponseMapper(101505, "Connection timed out", ""),
-		genErrorResponseMapper(101506, "Connection timed out", "DPE"),
-		genErrorResponseMapper(101507, "Connection timed out", ""),
+		genErrorResponseMapper(900900, "Unclassified Authentication Failure",
+			"Error during validating the request", "UAEX"),
 	}
 }
 
-func genErrorResponseMapper(errorCode int32, message string, flag string) *hcmv3.ResponseMapper {
+func genErrorResponseMapper(errorCode int32, message string, description string, flag string) *hcmv3.ResponseMapper {
 	errorMsgMap := make(map[string]*structpb.Value)
-	errorMsgMap["code"] = structpb.NewNumberValue(float64(errorCode))
+	errorMsgMap["code"] = structpb.NewStringValue(strconv.FormatInt(int64(errorCode), 10))
 	errorMsgMap["message"] = structpb.NewStringValue(message)
-	errorMsgMap["description"] = structpb.NewStringValue("%LOCAL_REPLY_BODY%")
+	errorMsgMap["description"] = structpb.NewStringValue(description)
 
 	mapper := &hcmv3.ResponseMapper{
 		Filter: &access_logv3.AccessLogFilter{
