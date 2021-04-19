@@ -38,8 +38,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static org.testng.Assert.assertEquals;
@@ -57,7 +55,7 @@ public class SubscriptionValidationTestCase extends APIMLifecycleBaseTest {
         super.init();
 
         // Creating the application
-        ApplicationCreationResponse appCreationResponse = createApplicationAndClientKeyClientSecret(
+        ApplicationCreationResponse appCreationResponse = createApplicationWithKeys(
                 "SubscriptionValidationTestApp", restAPIStore);
         applicationId = appCreationResponse.getApplicationId();
 
@@ -69,13 +67,13 @@ public class SubscriptionValidationTestCase extends APIMLifecycleBaseTest {
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
         // get a predefined api request
-        apiRequest = getAPIRequest("SubscriptionValidationTestAPI");
+        apiRequest = getAPIRequest(TestConstant.SAMPLE_API_NAME);
         apiRequest.setProvider(user.getUserName());
 
         // create and publish the api
         apiId = createAndPublishAPIWithoutRequireReSubscription(apiRequest, restAPIPublisher);
 
-        endpointURL = Utils.getServiceURLHttps("/subscriptionValidationTestAPI/1.0.0/pet/findByStatus");
+        endpointURL = Utils.getServiceURLHttps(TestConstant.SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
     }
 
     @Test(description = "Send a request to a unsubscribed REST API and check if the API invocation is forbidden")
@@ -123,30 +121,12 @@ public class SubscriptionValidationTestCase extends APIMLifecycleBaseTest {
         org.wso2.choreo.connect.tests.util.HttpResponse analyticsResponse =
                 HttpClientRequest.doGet("http://localhost:2399/analytics/get", new HashMap<>());
         Assert.assertNotNull(analyticsResponse);
-        Assert.assertTrue(analyticsResponse.getData().contains("SubscriptionValidationTestAPI"),
+        Assert.assertTrue(analyticsResponse.getData().contains(TestConstant.SAMPLE_API_NAME),
                 analyticsResponse.getData());
     }
 
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
         super.cleanUp();
-    }
-
-    private Callable<Boolean> isResponseAvailable(String URL, Map<String, String> requestHeaders) {
-        return new Callable<Boolean>() {
-            public Boolean call() {
-                return checkForResponse(URL, requestHeaders);
-            }
-        };
-    }
-
-    private Boolean checkForResponse(String URL, Map<String, String> requestHeaders) {
-        org.wso2.choreo.connect.tests.util.HttpResponse response;
-        try {
-            response = HttpsClientRequest.doGet(URL, requestHeaders);
-        } catch (IOException e) {
-            return false;
-        }
-        return Objects.nonNull(response);
     }
 }

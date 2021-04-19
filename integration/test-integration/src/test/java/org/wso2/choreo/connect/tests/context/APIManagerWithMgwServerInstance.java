@@ -19,7 +19,10 @@
 package org.wso2.choreo.connect.tests.context;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.wso2.choreo.connect.tests.mockbackend.MockBackendServer;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -85,14 +88,31 @@ public class APIManagerWithMgwServerInstance extends MgwServerImpl {
                     mgwTmpServerPath + File.separator + "docker-compose" + File.separator + "choreo-connect-with-apim"
                             + File.separator + "conf" + File.separator + "config.toml");
         }
+        Logger enforcerLogger = LoggerFactory.getLogger("Enforcer");
+        Logger adapterLogger = LoggerFactory.getLogger("Adapter");
+        Logger routerLogger = LoggerFactory.getLogger("Router");
+        Logger apimLogger = LoggerFactory.getLogger("APIM");
+        Slf4jLogConsumer enforcerLogConsumer = new Slf4jLogConsumer(enforcerLogger);
+        Slf4jLogConsumer adapterLogConsumer = new Slf4jLogConsumer(adapterLogger);
+        Slf4jLogConsumer routerLogConsumer = new Slf4jLogConsumer(routerLogger);
+        Slf4jLogConsumer apimLogConsumer = new Slf4jLogConsumer(apimLogger);
         String dockerComposePath =
                 mgwTmpServerPath + File.separator + "docker-compose" + File.separator + "choreo-connect-with-apim"
                         + File.separator + "docker-compose.yaml";
         // add mock backend service to the docker-compose.yaml file
         MockBackendServer.addMockBackendServiceToDockerCompose(dockerComposePath, tlsEnabled);
 
-        environment = new DockerComposeContainer(new File(dockerComposePath)).withLocalCompose(true).waitingFor(
-                TestConstant.APIM_SERVICE_NAME_IN_DOCKER_COMPOSE,
-                Wait.forLogMessage("\\/localhost:9443\\/carbon\\/", 1));
+        environment = new DockerComposeContainer(new File(dockerComposePath)).withLocalCompose(true)
+                .withLogConsumer("enforcer", enforcerLogConsumer)
+                .withLogConsumer("adapter", adapterLogConsumer)
+                .withLogConsumer("router", routerLogConsumer)
+                .withLogConsumer("apim", apimLogConsumer)
+                .waitingFor(TestConstant.APIM_SERVICE_NAME_IN_DOCKER_COMPOSE,
+                        Wait.forLogMessage(".*/apim:9443/carbon/", 1));
+
+        if (Boolean.parseBoolean(System.getenv(MgwServerInstance.ENFORCER_DEBUG_ENV))) {
+            environment.withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5006");
+        }
+
     }
 }

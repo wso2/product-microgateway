@@ -1,10 +1,14 @@
-[adapter]
 # The configuration file for mgw
+
+[adapter] # --------------------------------------------------------
+
+# server: configuration related to REST API
 [adapter.server]
 enabled = true
 host = "0.0.0.0"
 port = "9843"
-
+tokenTTL = "1h"
+tokenPrivateKeyPath = "/home/wso2/security/keystore/mg.key"
 [[adapter.server.users]]
 username = "admin"
 password = "admin"
@@ -17,17 +21,21 @@ keyPath = "/home/wso2/security/keystore/mg.key"
 location = "/home/wso2/security/truststore"
 
 [adapter.consul]
-# todo rumesh check whether we need to have certPath and KeyPath
 enable = false
 url = "https://169.254.1.1:8501" # scheme + host ip + port
 pollInterval = 5 # seconds
-aclTokenFilePath = ""
+aclToken = "d3a2a719-4221-8c65-5212-58d4727427ac"
+mgwServiceName = "wso2"
+serviceMeshEnabled = false
 # certs for tls
-caCertPath = "/home/wso2/security/truststore/consul/consul-agent-ca.pem"
-certPath = "/home/wso2/security/truststore/consul/local-dc-client-consul-0.pem"
-keyPath = "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem"
+caCertFile = "/home/wso2/security/truststore/consul/consul-agent-ca.pem"
+certFile = "/home/wso2/security/truststore/consul/local-dc-client-consul-0.pem"
+keyFile = "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem"
 
-[router]
+
+[router] # --------------------------------------------------------
+listenerHost = "0.0.0.0"
+listenerPort = 9090
 securedListenerHost = "0.0.0.0"
 securedListenerPort = 9095
 clusterTimeoutInSeconds = 20
@@ -54,65 +62,127 @@ trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
 verifyHostName = true
 disableSslVerification = false
 
-[enforcer]
+[enforcer] # --------------------------------------------------------
+
 [enforcer.authService]
-  port = 8081
-  maxMessageSize = 1000000000
-  maxHeaderLimit = 8192
-  #keep alive time of the external authz connection
-  keepAliveTime = 600
-  [enforcer.authService.threadPool]
-    coreSize = 400
-    maxSize = 500
-    #keep alive time of threads in seconds
-    keepAliveTime = 600
-    queueSize = 1000
+port = 8081
+maxMessageSize = 1000000000
+maxHeaderLimit = 8192
+#keep alive time of the external authz connection
+keepAliveTime = 600
+[enforcer.authService.threadPool]
+coreSize = 400
+maxSize = 500
+#keep alive time of threads in seconds
+keepAliveTime = 600
+queueSize = 1000
 
 [enforcer.apimCredentials]
-    username="admin"
-    password="admin"
+username="admin"
+password="admin"
 
 [enforcer.cache]
-  enabled = true
-  maximumSize = 10000
-  expiryTime = 15
+enabled = true
+maximumSize = 10000
+expiryTime = 15
 
 [enforcer.jwtGenerator]
-    enable = false
-    encoding = "base64" # base64,base64url
-    claimDialect = "http://wso2.org/claims"
-    convertDialect = false
-    header = "X-JWT-Assertion"
-    signingAlgorithm = "SHA256withRSA"
-    enableUserClaims = false
-    gatewayGeneratorImpl = "org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
-    claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
-    publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
-    privateKeyPath = "/home/wso2/security/keystore/mg.key"
+enable = true
+encoding = "base64" # base64,base64url
+claimDialect = "http://wso2.org/claims"
+convertDialect = false
+header = "X-JWT-Assertion"
+signingAlgorithm = "SHA256withRSA"
+enableUserClaims = false
+gatewayGeneratorImpl = "org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
+claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
+publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
+privateKeyPath = "/home/wso2/security/keystore/mg.key"
 
 [enforcer.jwtIssuer]
-  enabled = true
-  issuer = "https://localhost:9095/testkey"
-  encoding = "base64" # base64,base64url
-  claimDialect = ""
-  signingAlgorithm = "SHA256withRSA"
-  publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
-  privateKeyPath = "/home/wso2/security/keystore/mg.key"
-  validityPeriod = 3600 # seconds
-  [[enforcer.jwtIssuer.jwtUser]]
-    username = "admin"
-    password = "admin"
+enabled = true
+issuer = "https://localhost:9095/testkey"
+encoding = "base64" # base64,base64url
+claimDialect = ""
+signingAlgorithm = "SHA256withRSA"
+publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
+privateKeyPath = "/home/wso2/security/keystore/mg.key"
+validityPeriod = 3600 # seconds
+[[enforcer.jwtIssuer.jwtUser]]
+username = "admin"
+password = "admin"
+
+# Throttling configurations
+[enforcer.throttling]
+# Connect with the central traffic manager
+enableGlobalEventPublishing = true
+# Enable global advanced throttling based on request header conditions
+enableHeaderConditions = true
+# Enable global advanced throttling based on request query parameter conditions
+enableQueryParamConditions = true
+# Enable global advanced throttling based on jwt claim conditions
+enableJwtClaimConditions = true
+# The message broker context factory
+jmsConnectionInitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
+# The message broker connection URL
+jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://apim:5672'"
+# Throttling configurations related to event publishing using a binary connection
+[enforcer.throttling.publisher]
+# Credentials required to establish connection between Traffic Manager
+username = "admin"
+password = "admin"
+# Receiver URL and the authentication URL of the Traffic manager node/nodes
+[[enforcer.throttling.publisher.urlGroup]]
+receiverURLs = ["tcp://apim:9611"]
+authURLs = ["ssl://apim:9711"]
+# Data publisher object pool configurations
+[enforcer.throttling.publisher.pool]
+maxIdleDataPublishingAgents = 1000
+initIdleObjectDataPublishingAgents = 200
+# Data publisher thread pool configurations
+publisherThreadPoolCoreSize = 200
+publisherThreadPoolMaximumSize = 1000
+publisherThreadPoolKeepAliveTime = 200
+[enforcer.throttling.publisher.agent]
+# SSL Protocols
+sslEnabledProtocols = "TLSv1.2"
+# ciphers
+ciphers="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256  ,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256, TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_DSS_WITH_AES_128_GCM_SHA256  ,TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
+# The size of the queue event disruptor which handles events before they are published.
+# The value specified should always be the result of an exponent with 2 as the base.
+queueSize = 32768
+# The maximum number of events in a batch sent to the queue event disruptor at a given time
+batchSize = 200
+# The number of threads that will be reserved to handle events at the time you start
+corePoolSize = 1
+# Socket timeout
+socketTimeoutMS = 30000
+# The maximum number of threads that should be reserved at any given time to handle events
+maxPoolSize = 1
+# The amount of time which threads in excess of the core pool size may remain idle before being terminated.
+keepAliveTimeInPool = 20
+# The time interval between reconnection
+reconnectionInterval = 30
+# TCP connection pool configurations (for data publishing)
+maxTransportPoolSize = 250
+maxIdleConnections = 250
+evictionTimePeriod = 5500
+minIdleTimeInPool = 5000
+# SSL connection pool configurations (for authentication)
+secureMaxTransportPoolSize = 250
+secureMaxIdleConnections = 250
+secureEvictionTimePeriod = 5500
+secureMinIdleTimeInPool = 5000
 
 [security]
 
 [security.adapter]
-  enableOutboundAuthHeader = false
-  authorizationHeader = "authorization"
+enableOutboundAuthHeader = false
+authorizationHeader = "authorization"
 
 [security.enforcer]
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1
-[[security.enforcer.tokenService]]
   name="Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
   certificateAlias = "wso2carbon"
@@ -127,17 +197,17 @@ disableSslVerification = false
 
 # Issuer 2
 [[security.enforcer.tokenService]]
-    name="MGW"
-    issuer = "https://localhost:9095/testkey"
-    certificateAlias = "mgw"
-    # URL of the JWKs endpoint
-    jwksURL = ""
-    # Validate subscribed APIs
-    validateSubscription = false
-    # The claim in which the consumer key of the application is coming
-    consumerKeyClaim = ""
-    # Certificate Filepath within enforcer
-    certificateFilePath = "/home/wso2/security/truststore/mg.pem"
+name="MGW"
+issuer = "https://localhost:9095/testkey"
+certificateAlias = "mgw"
+# URL of the JWKs endpoint
+jwksURL = ""
+# Validate subscribed APIs
+validateSubscription = false
+# The claim in which the consumer key of the application is coming
+consumerKeyClaim = ""
+# Certificate Filepath within enforcer
+certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 # Issuer 3
 [[security.enforcer.tokenService]]

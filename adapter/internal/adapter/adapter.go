@@ -232,13 +232,10 @@ func Run(conf *config.Config) {
 		go synchronizer.UpdateRevokedTokens()
 		// Fetch Key Managers from APIM
 		synchronizer.FetchKeyManagersOnStartUp(conf)
-	}
-
-	throttlingEnabled := conf.Enforcer.Throttling.EnableGlobalEventPublishing
-	if throttlingEnabled {
 		go synchronizer.UpdateKeyTemplates()
 		go synchronizer.UpdateBlockingConditions()
 	}
+
 OUTER:
 	for {
 		select {
