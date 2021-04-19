@@ -125,9 +125,9 @@ public class JwtTestCase {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,
                 "Response code mismatched");
-        Assert.assertEquals(response.getData(), "{\"error_message\":\"Unclassified Authentication Failure\"," +
-                        "\"code\":\"900900\",\"error_description\":" +
-                        "\"Not a JWT token. Failed to decode the token header.\"}",
+        Assert.assertEquals(response.getData(), "{\"error_message\":\"Invalid Credentials\"," +
+                        "\"code\":\"900901\",\"error_description\":\"Not a JWT token. Failed to decode " +
+                        "the token header. Make sure you have provided the correct security credentials\"}",
                 "Response message mismatched");
         Assert.assertTrue(response.getHeaders().containsKey("www-authenticate"),
                 "\"www-authenticate\" is not available");
