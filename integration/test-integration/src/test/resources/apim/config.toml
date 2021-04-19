@@ -183,18 +183,17 @@ authorizationHeader = "authorization"
 [security.enforcer]
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1
-[[security.enforcer.tokenService]]
-name="Resident Key Manager"
-issuer = "https://localhost:9443/oauth2/token"
-certificateAlias = ""
-# URL of the JWKs endpoint
-jwksURL = ""
-# Validate subscribed APIs
-validateSubscription = false
-# The claim in which the consumer key of the application is coming
-consumerKeyClaim = "azp"
-# Certificate Filepath within enforcer
-certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+  name="Resident Key Manager"
+  issuer = "https://localhost:9443/oauth2/token"
+  certificateAlias = "wso2carbon"
+  # URL of the JWKs endpoint
+  jwksURL = ""
+  # Validate subscribed APIs
+  validateSubscription = false
+  # The claim in which the consumer key of the application is coming
+  consumerKeyClaim = "azp"
+  # Certificate Filepath within enforcer
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 # Issuer 2
 [[security.enforcer.tokenService]]
@@ -209,6 +208,13 @@ validateSubscription = false
 consumerKeyClaim = ""
 # Certificate Filepath within enforcer
 certificateFilePath = "/home/wso2/security/truststore/mg.pem"
+
+# Issuer 3
+[[security.enforcer.tokenService]]
+    name="APIM Publisher"
+    issuer = "https://localhost:9443/publisher"
+    certificateAlias = ""
+    certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 [controlPlane]
 enabled = true

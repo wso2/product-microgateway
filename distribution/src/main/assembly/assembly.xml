@@ -38,6 +38,7 @@
             <directory>../resources/k8s-artifacts</directory>
             <excludes>
                 <exclude>./choreo-connect/config-toml-configmap.yaml</exclude>
+                <exclude>./choreo-connect/choreo-connect-ingress.yaml</exclude>
             </excludes>
             <outputDirectory>choreo-connect-${project.version}/k8s-artifacts/choreo-connect-with-apim</outputDirectory>
         </fileSet>
@@ -46,6 +47,7 @@
             <excludes>
                 <exclude>./apim/**</exclude>
                 <exclude>./choreo-connect/config-toml-configmap-for-eventhub.yaml</exclude>
+                <exclude>./choreo-connect/choreo-connect-with-apim-ingress.yaml</exclude>
             </excludes>
             <outputDirectory>choreo-connect-${project.version}/k8s-artifacts/</outputDirectory>
         </fileSet>

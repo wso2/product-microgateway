@@ -178,7 +178,7 @@ allowCredentials = true
 [[security.enforcer.tokenService]]
   name="Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
-  certificateAlias = ""
+  certificateAlias = "wso2carbon"
   # URL of the JWKs endpoint
   jwksURL = ""
   # Validate subscribed APIs
@@ -205,6 +205,13 @@ allowCredentials = true
     consumerKeyClaim = ""
     # Certificate Filepath within enforcer
     certificateFilePath = "/home/wso2/security/truststore/mg.pem"
+
+# Issuer 3
+[[security.enforcer.tokenService]]
+    name="APIM Publisher"
+    issuer = "https://localhost:9443/publisher"
+    certificateAlias = "gateway_certificate_alias"
+    certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 [controlPlane]
 enabled = false
