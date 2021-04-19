@@ -101,12 +101,14 @@ public class JWTAuthenticator implements Authenticator {
         String version = requestContext.getMatchedAPI().getAPIConfig().getVersion();
         context = context + "/" + version;
         ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
-        String httpMethod = requestContext.getMatchedResourcePath().getMethod().toString();
         SignedJWTInfo signedJWTInfo;
         try {
             signedJWTInfo = getSignedJwt(jwtToken);
         } catch (ParseException | IllegalArgumentException e) {
-            throw new SecurityException("Not a JWT token. Failed to decode the token header.", e);
+            log.error("Failed to decode the token header", e);
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    "Not a JWT token. Failed to decode the token header", e);
         }
         JWTClaimsSet claims = signedJWTInfo.getJwtClaimsSet();
         String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
@@ -285,7 +287,8 @@ public class JWTAuthenticator implements Authenticator {
                         CacheProvider.getGatewayJWTTokenCache().put(jwtTokenCacheKey, endUserToken);
                     } catch (JWTGeneratorException e) {
                         log.error("Error while Generating Backend JWT", e);
-                        throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                 APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
                     }
                 }
@@ -294,7 +297,8 @@ public class JWTAuthenticator implements Authenticator {
                     endUserToken = jwtGenerator.generateToken(jwtInfoDto);
                 } catch (JWTGeneratorException e) {
                     log.error("Error while Generating Backend JWT", e);
-                    throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            APISecurityConstants.API_AUTH_GENERAL_ERROR,
                             APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
                 }
             }
@@ -352,7 +356,8 @@ public class JWTAuthenticator implements Authenticator {
         } catch (EnforcerException e) {
             String message = "Error while accessing backend services for token scope validation";
             log.error(message, e);
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, message, e);
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR, message, e);
         }
     }
 
