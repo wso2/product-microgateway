@@ -48,7 +48,8 @@ RUN chmod +x ${GRPC_HEALTH_PROBE_PATH}
 WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 COPY maven/security security
-COPY maven/conf conf
+COPY maven/conf/config.toml conf/
+COPY maven/conf/log_config.toml conf/
 COPY maven/adapter-ubuntu adapter
 COPY check_health.sh .
 COPY maven/LICENSE.txt .
