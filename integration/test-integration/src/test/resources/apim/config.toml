@@ -141,7 +141,7 @@ disableSslVerification = false
 
 # Issuer 3
 [[security.enforcer.tokenService]]
-    name="APIM_Publisher"
+    name="APIM Publisher"
     issuer = "https://localhost:9443/publisher"
     certificateAlias = ""
     certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"

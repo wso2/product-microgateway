@@ -192,13 +192,6 @@ allowCredentials = true
      remoteClaim = "sub"
      localClaim = "CUSTOM-CLAIM"
 
-# Issuer 3
-[[security.enforcer.tokenService]]
-    name="APIM_Publisher"
-    issuer = "https://localhost:9443/publisher"
-    certificateAlias = ""
-    certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
-
 # Issuer 2
 [[security.enforcer.tokenService]]
     name="MGW"
