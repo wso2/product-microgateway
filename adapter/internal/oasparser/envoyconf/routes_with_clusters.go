@@ -18,6 +18,7 @@
 package envoyconf
 
 import (
+	"google.golang.org/protobuf/types/known/durationpb"
 	"net"
 	"regexp"
 
@@ -497,7 +498,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 					},
 					Substitution: endpointBasepath,
 				},
-				UpgradeConfigs: getUpgradeConfig(apiType),
+				UpgradeConfigs:    getUpgradeConfig(apiType),
+				MaxStreamDuration: getMaxStreamDuration(apiType),
 			},
 		}
 	} else {
@@ -832,4 +834,16 @@ func createAddress(remoteHost string, port uint32) *corev3.Address {
 		},
 	}}
 	return &address
+}
+
+func getMaxStreamDuration(apiType string) *routev3.RouteAction_MaxStreamDuration {
+	var maxStreamDuration *routev3.RouteAction_MaxStreamDuration = nil
+	if apiType == mgw.WS {
+		maxStreamDuration = &routev3.RouteAction_MaxStreamDuration{
+			MaxStreamDuration: &durationpb.Duration{
+				Seconds: 60 * 60 * 24,
+			},
+		}
+	}
+	return maxStreamDuration
 }
