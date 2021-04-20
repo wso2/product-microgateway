@@ -63,7 +63,7 @@ WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 
 COPY maven/ lib/
-COPY maven/conf conf
+COPY maven/conf/log4j2.properties conf/log4j2.properties
 COPY maven/security security
 COPY check_health.sh .
 COPY maven/LICENSE.txt .

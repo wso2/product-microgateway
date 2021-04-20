@@ -217,6 +217,13 @@ allowCredentials = false
     # Certificate Filepath within enforcer
     certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
+# Issuer 3
+[[security.enforcer.tokenService]]
+  name="APIM Publisher"
+  issuer = "https://localhost:9443/publisher"
+  certificateAlias = ""
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
 # Control plane's connection details
 [controlPlane]
   enabled = true

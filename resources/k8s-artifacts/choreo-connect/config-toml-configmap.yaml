@@ -75,7 +75,7 @@ data:
       keyPath = "/home/wso2/security/keystore/mg.key"
 
     [router.cors]
-    enabled = false
+    enabled = true
     allowOrigins = ["*"]
     allowMethods = ["GET","PUT","POST","DELETE","PATCH","OPTIONS"]
     allowHeaders = ["authorization","Access-Control-Allow-Origin","Content-Type","SOAPAction","apikey", "testKey", "Internal-Key"]
@@ -243,7 +243,7 @@ data:
     # Issuer 3
     [[security.enforcer.tokenService]]
         name="APIM Publisher"
-        issuer = "https://localhost:9443/publisher"
+        issuer = "https://apim.wso2.com/publisher"
         certificateAlias = ""
         certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
