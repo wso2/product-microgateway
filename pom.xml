@@ -21,7 +21,7 @@
     <groupId>org.wso2.am.choreo.connect</groupId>
     <artifactId>choreo-connect-parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.9.0-beta-SNAPSHOT</version>
+    <version>0.9.0-beta</version>
     <name>Choreo Connect - Parent</name>
 
     <url>https://wso2.org</url>
@@ -40,7 +40,7 @@
         <url>https://github.com/wso2/product-microgateway.git</url>
         <developerConnection>scm:git:https://github.com/wso2/product-microgateway.git</developerConnection>
         <connection>scm:git:https://github.com/wso2/product-microgateway.git</connection>
-        <tag>HEAD</tag>
+        <tag>v0.9.0-beta</tag>
     </scm>
 
     <modules>
