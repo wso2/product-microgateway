@@ -155,13 +155,10 @@ type Config struct {
 		Cache           cache
 		Throttling      throttlingConfig
 		JwtIssuer       jwtIssuer
+		AuthHeader      authHeader
 	}
 
 	Security struct {
-		Adapter struct {
-			EnableOutboundAuthHeader bool   `toml:"enableOutboundAuthHeader"`
-			AuthorizationHeader      string `toml:"authorizationHeader"`
-		}
 		Enforcer struct {
 			TokenService []tokenService
 		}
@@ -317,6 +314,11 @@ type routerLogPublisher struct {
 	BufferFlushInterval time.Duration `toml:"bufferFlushInterval"`
 	BufferSizeBytes     uint32        `toml:"bufferSizeBytes"`
 	GRPCRequestTimeout  time.Duration `toml:"gRPCRequestTimeout"`
+}
+
+type authHeader struct {
+	EnableOutboundAuthHeader bool `json:"enableOutboundAuthHeader"`
+	AuthorizationHeader string `json:"authorizationHeader"`
 }
 
 type jwtIssuer struct {

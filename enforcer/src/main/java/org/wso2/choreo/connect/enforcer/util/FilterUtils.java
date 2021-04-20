@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
@@ -507,6 +508,17 @@ public class FilterUtils {
         }
 
         return clientIp;
+    }
+
+    public static String getAuthHeaderName(RequestContext requestContext) {
+        AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
+        String authHeaderName = requestContext.getMatchedAPI().getAPIConfig().getAuthHeader();
+        if (StringUtils.isEmpty(authHeaderName) && StringUtils.isEmpty(authHeader.getAuthorizationHeader())) {
+            authHeaderName = authHeader.getAuthorizationHeader();
+        } else {
+            authHeaderName = APIConstants.AUTHORIZATION_HEADER_DEFAULT;
+        }
+        return authHeaderName.toLowerCase();
     }
 
     /**

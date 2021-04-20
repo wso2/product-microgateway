@@ -365,7 +365,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	prodClusterName := params.prodClusterName
 	sandClusterName := params.sandClusterName
 	endpointBasepath := params.endpointBasePath
-	authHeader := params.AuthHeader
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
@@ -373,7 +372,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		action        *routev3.Route_Route
 		match         *routev3.RouteMatch
 		decorator     *routev3.Decorator
-		removeHeaders []string
 		resourcePath  string
 	)
 
@@ -426,25 +424,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		decorator = &routev3.Decorator{
 			Operation: resourcePath,
 		}
-	}
-
-	conf, errReadConfig := config.ReadConfigs()
-	if errReadConfig != nil {
-		logger.LoggerOasparser.Fatal("Error loading configuration. ", errReadConfig)
-	}
-
-	if !conf.Security.Adapter.EnableOutboundAuthHeader {
-		var internalKey string = "Internal-Key"
-		logger.LoggerOasparser.Debugf("removeHeader: %v", authHeader)
-		if authHeader == "" {
-			authHeader = conf.Security.Adapter.AuthorizationHeader
-		}
-		removeHeaders = append(removeHeaders, authHeader)
-		removeHeaders = append(removeHeaders, internalKey)
-	}
-
-	if len(removeHeaders) == 0 {
-		removeHeaders = nil
 	}
 
 	var contextExtensions = make(map[string]string)
@@ -542,7 +521,6 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		TypedPerFilterConfig: map[string]*any.Any{
 			wellknown.HTTPExternalAuthorization: filter,
 		},
-		RequestHeadersToRemove: removeHeaders,
 	}
 	return &router
 }

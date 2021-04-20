@@ -41,6 +41,7 @@ import org.wso2.choreo.connect.discovery.config.enforcer.ThrottleAgent;
 import org.wso2.choreo.connect.discovery.config.enforcer.Throttling;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsReceiverConfigDTO;
+import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CacheDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
@@ -56,6 +57,7 @@ import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTUtil;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.choreo.connect.enforcer.util.TLSUtils;
+import org.wso2.gateway.discovery.config.enforcer.AuthHeader;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -145,8 +147,17 @@ public class ConfigHolder {
         // Read jwt issuer configurations
         populateJWTIssuerConfigurations(config.getJwtIssuer());
 
+        populateAuthHeaderConfigurations(config.getAuthHeader());
+
         // resolve string variables provided as environment variables.
         resolveConfigsWithEnvs(this.config);
+    }
+
+    private void populateAuthHeaderConfigurations(AuthHeader authHeader) {
+        AuthHeaderDto authHeaderDto = new AuthHeaderDto();
+        authHeaderDto.setAuthorizationHeader(authHeader.getAuthorizationHeader());
+        authHeaderDto.setEnableOutboundAuthHeader(authHeader.getEnableOutboundAuthHeader());
+        config.setAuthHeader(authHeaderDto);
     }
 
     private void populateAuthService(Service cdsAuth) {

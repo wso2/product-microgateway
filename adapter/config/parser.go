@@ -88,7 +88,6 @@ func ReadConfigs() (*Config, error) {
 			logger.Fatal("Error parsing the configuration ", parseErr)
 			return
 		}
-		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem())
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem())
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Security)).Elem())
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem())

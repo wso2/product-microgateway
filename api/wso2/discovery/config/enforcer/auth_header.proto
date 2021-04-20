@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package wso2.discovery.config.enforcer;
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
+option java_package = "org.wso2.gateway.discovery.config.enforcer";
+option java_outer_classname = "AuthHeaderProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: SSL]
+
+// Listener and client certificate store model
+message AuthHeader {
+    // Enable outbound auth header
+    bool enableOutboundAuthHeader = 1;
+
+    // Auth header name
+    string authorizationHeader = 2;
+}

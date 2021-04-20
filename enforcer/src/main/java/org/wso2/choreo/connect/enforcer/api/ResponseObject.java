@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.enforcer.api;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -30,8 +31,17 @@ public class ResponseObject {
     private String errorMessage;
     private String errorDescription;
     private Map<String, String> headerMap;
+    private ArrayList<String> removeHeaderMap = new ArrayList<>();
     private Map<String, String> metaDataMap;
     private boolean isDirectResponse = false;
+
+    public ArrayList<String> getRemoveHeaderMap() {
+        return removeHeaderMap;
+    }
+
+    public void setRemoveHeaderMap(ArrayList<String> removeHeaderMap) {
+        this.removeHeaderMap = removeHeaderMap;
+    }
 
     public ResponseObject(String correlationID) {
         this.correlationID = correlationID;

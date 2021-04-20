@@ -104,6 +104,10 @@ allowCredentials = true
         username = "admin"
         password = "admin"
 
+[enforcer.authHeader]
+    enableOutboundAuthHeader = false
+    authorizationHeader = "authorization"
+
 # Throttling configurations
 [enforcer.throttling]
     # Connect with the central traffic manager
@@ -167,10 +171,6 @@ allowCredentials = true
         secureMinIdleTimeInPool = 5000
 
 [security]
-
-[security.adapter]
-  enableOutboundAuthHeader = false
-  authorizationHeader = "authorization"
 
 [security.enforcer]
 # JWT token authorization configurations. You can provide multiple JWT issuers

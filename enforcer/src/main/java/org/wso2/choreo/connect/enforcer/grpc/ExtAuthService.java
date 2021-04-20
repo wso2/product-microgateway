@@ -115,6 +115,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                         }
                 );
             }
+            okResponseBuilder.addAllHeadersToRemove(responseObject.getRemoveHeaderMap());
+
             Struct.Builder structBuilder = Struct.newBuilder();
             if (responseObject.getMetaDataMap() != null) {
                 responseObject.getMetaDataMap().forEach((key, value) ->

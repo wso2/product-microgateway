@@ -156,4 +156,19 @@ public interface ConfigOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder getAnalyticsOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 12;</code>
+   * @return Whether the authHeader field is set.
+   */
+  boolean hasAuthHeader();
+  /**
+   * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 12;</code>
+   * @return The authHeader.
+   */
+  org.wso2.gateway.discovery.config.enforcer.AuthHeader getAuthHeader();
+  /**
+   * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 12;</code>
+   */
+  org.wso2.gateway.discovery.config.enforcer.AuthHeaderOrBuilder getAuthHeaderOrBuilder();
 }

@@ -130,6 +130,10 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		},
 		Cache:     cache,
 		Analytics: analytics,
+		AuthHeader: &enforcer.AuthHeader{
+        			EnableOutboundAuthHeader :    config.Enforcer.AuthHeader.EnableOutboundAuthHeader,
+        			AuthorizationHeader :    config.Enforcer.AuthHeader.AuthorizationHeader,
+        		},
 		Throttling: &enforcer.Throttling{
 			EnableGlobalEventPublishing:        config.Enforcer.Throttling.EnableGlobalEventPublishing,
 			EnableHeaderConditions:             config.Enforcer.Throttling.EnableHeaderConditions,

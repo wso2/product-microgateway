@@ -143,6 +143,10 @@ data:
         username = "admin"
         password = "$env{enforcer_admin_pwd}"
 
+    [enforcer.authHeader]
+      enableOutboundAuthHeader = false
+      authorizationHeader = "authorization"
+
     # Throttling configurations
     [enforcer.throttling]
       # Connect with the central traffic manager
@@ -206,10 +210,6 @@ data:
           secureMinIdleTimeInPool = 5000
 
     [security]
-
-    [security.adapter]
-      enableOutboundAuthHeader = false
-      authorizationHeader = "authorization"
 
     [security.enforcer]
     # JWT token authorization configurations. You can provide multiple JWT issuers

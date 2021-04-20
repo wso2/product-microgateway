@@ -357,12 +357,7 @@ func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData)
 	apiProject.APIType = strings.ToUpper(apiObject.Data.APIType)
 	apiProject.APILifeCycleStatus = strings.ToUpper(apiObject.Data.LifeCycleStatus)
 
-	if apiObject.Data.AuthorizationHeader != "" {
-		apiProject.AuthHeader = apiObject.Data.AuthorizationHeader
-	} else {
-		conf, _ := config.ReadConfigs()
-		apiProject.AuthHeader = conf.Security.Adapter.AuthorizationHeader
-	}
+	apiProject.AuthHeader = apiObject.Data.AuthorizationHeader
 
 	apiProject.SecurityScheme = apiObject.Data.SecurityScheme
 

@@ -24,6 +24,7 @@ import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ public class RequestContext {
     private Map<String, String> responseHeaders;
     private Map<String, String> metadataMap = new HashMap<>();
     private String requestPathTemplate;
+    private ArrayList<String> removeHeaders;
     private String traceId;
 
     // Request Timestamp is required for analytics
@@ -102,6 +104,7 @@ public class RequestContext {
         private AuthenticationContext authenticationContext = new AuthenticationContext();
         private String requestID;
         private String clientIp;
+        private ArrayList<String> removeHeaders;
 
 
         public Builder(String requestPath) {
@@ -178,6 +181,7 @@ public class RequestContext {
             requestContext.requestID = this.requestID;
             requestContext.clientIp = this.clientIp;
             requestContext.responseHeaders = new HashMap<>();
+            requestContext.removeHeaders = new ArrayList<>();
             String[] queryParts = this.requestPath.split("\\?");
             String queryPrams = queryParts.length > 1 ? queryParts[1] : "";
 
@@ -282,6 +286,15 @@ public class RequestContext {
             responseHeaders = new TreeMap<>();
         }
         responseHeaders.put(key, value);
+    }
+
+    /**
+     * Returns the introduced response headers.
+     *
+     * @return response headers
+     */
+    public ArrayList<String> getRemoveHeaders() {
+        return removeHeaders;
     }
 
     /**
