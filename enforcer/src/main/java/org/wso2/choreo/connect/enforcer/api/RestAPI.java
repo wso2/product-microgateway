@@ -105,7 +105,6 @@ public class RestAPI implements API {
             String authHeaderName = FilterUtils.getAuthHeaderName(requestContext);
             requestContext.getRemoveHeaders().add(authHeaderName);
         }
-        requestContext.getRemoveHeaders().add(APIConstants.INTERNAL_KEY_HEADER);
 
         if (executeFilterChain(requestContext)) {
             responseObject.setRemoveHeaderMap(requestContext.getRemoveHeaders());

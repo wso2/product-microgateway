@@ -47,7 +47,6 @@ public class APIConstants {
     public static final String BANDWIDTH_TYPE = "bandwidthVolume";
     public static final String INTERNAL_WEB_APP_EP = "/internal/data/v1";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
-    public static final String INTERNAL_KEY_HEADER = "Internal-Key";
     public static final String AUTHORIZATION_BASIC = "Basic ";
     public static final String AUTHORIZATION_BEARER = "Bearer ";
     public static final String HEADER_TENANT = "xWSO2Tenant";
