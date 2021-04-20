@@ -513,9 +513,10 @@ public class FilterUtils {
     public static String getAuthHeaderName(RequestContext requestContext) {
         AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
         String authHeaderName = requestContext.getMatchedAPI().getAPIConfig().getAuthHeader();
-        if (StringUtils.isEmpty(authHeaderName) && StringUtils.isEmpty(authHeader.getAuthorizationHeader())) {
+        if (StringUtils.isEmpty(authHeaderName) && !StringUtils.isEmpty(authHeader.getAuthorizationHeader())) {
             authHeaderName = authHeader.getAuthorizationHeader();
-        } else {
+        }
+        if (StringUtils.isEmpty(authHeaderName)) {
             authHeaderName = APIConstants.AUTHORIZATION_HEADER_DEFAULT;
         }
         return authHeaderName.toLowerCase();
