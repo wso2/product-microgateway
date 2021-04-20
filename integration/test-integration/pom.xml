@@ -219,7 +219,6 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -243,12 +242,10 @@
         <dependency>
             <groupId>org.wso2.am.analytics.publisher</groupId>
             <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
-            <version>1.0.0-BETA2</version>
         </dependency>
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>3.1.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
