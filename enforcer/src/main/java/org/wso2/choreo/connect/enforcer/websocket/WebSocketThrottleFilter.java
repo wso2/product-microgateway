@@ -112,7 +112,7 @@ public class WebSocketThrottleFilter implements Filter {
                 FilterUtils.setThrottleErrorToContext(requestContext, errorCode, ThrottleConstants.THROTTLE_OUT_MESSAGE,
                         ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                 requestContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON, reason);
-                ThrottleUtils.setRetryAfterHeader(requestContext, apiDecision.getResetAt());
+                ThrottleUtils.setRetryAfterWebsocket(requestContext, apiDecision.getResetAt());
                 return true;
             }
 
@@ -127,7 +127,7 @@ public class WebSocketThrottleFilter implements Filter {
                             ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                     requestContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                             ThrottleConstants.THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
-                    ThrottleUtils.setRetryAfterHeader(requestContext, subDecision.getResetAt());
+                    ThrottleUtils.setRetryAfterWebsocket(requestContext, subDecision.getResetAt());
                     return true;
                 }
                 log.debug("Proceeding since stopOnQuotaReach is false");
@@ -147,7 +147,7 @@ public class WebSocketThrottleFilter implements Filter {
                         ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                 requestContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
                         ThrottleConstants.THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
-                ThrottleUtils.setRetryAfterHeader(requestContext, appDecision.getResetAt());
+                ThrottleUtils.setRetryAfterWebsocket(requestContext, appDecision.getResetAt());
                 return true;
             }
             log.info(">>>>>>>>>>>>>>>>>>>>>>>>>> 4");
@@ -268,7 +268,7 @@ public class WebSocketThrottleFilter implements Filter {
     }
 
     private Decision checkApiThrottled(String throttleKey, String tier, RequestContext context) {
-        log.debug("Checking if request is throttled at API/Resource level for tier: {}, key: {}", tier, throttleKey);
+        log.debug("Checking if request is throttled at API level for tier: {}, key: {}", tier, throttleKey);
         Decision decision = new Decision();
 
         if (ThrottleConstants.UNLIMITED_TIER.equals(tier)) {
@@ -277,7 +277,7 @@ public class WebSocketThrottleFilter implements Filter {
 
         if (isGlobalThrottlingEnabled) {
             decision = dataHolder.isAdvancedThrottled(throttleKey, context);
-            log.debug("API/Resource Level throttle decision: {}", decision.isThrottled());
+            log.debug("API Level throttle decision: {}", decision.isThrottled());
             return decision;
         }
         return decision;

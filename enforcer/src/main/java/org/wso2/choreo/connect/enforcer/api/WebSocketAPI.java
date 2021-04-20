@@ -26,6 +26,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
+import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetaDataFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleFilter;
@@ -177,21 +178,17 @@ public class WebSocketAPI implements API {
     }
 
     public WebSocketThrottleResponse processFramedata(RequestContext requestContext) {
-        logger.info("XXXXXXXXX processMetadata" + requestContext.toString());
+        logger.info("processMetadata" + requestContext.toString());
         if (executeUpgradeFilterChain(requestContext)) {
-            logger.info("XXXXXXXXXXXXXXXXXXXX Successful");
+            logger.info("Successful");
             WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
             webSocketThrottleResponse.setOkState();
             return webSocketThrottleResponse;
         }
         WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
         webSocketThrottleResponse.setOverLimitState();
-        webSocketThrottleResponse.setErrorCode(requestContext.getProperties().
-                get(APIConstants.MessageFormat.STATUS_CODE).toString());
-        webSocketThrottleResponse.setErrorMessage(requestContext.getProperties()
-                .get(APIConstants.MessageFormat.ERROR_MESSAGE).toString());
-        webSocketThrottleResponse.setErrorDescription(requestContext.getProperties()
-                .get(APIConstants.MessageFormat.ERROR_DESCRIPTION).toString());
+        webSocketThrottleResponse.setThrottlePeriod(
+                (Long) requestContext.getProperties().get(ThrottleConstants.HEADER_RETRY_AFTER));
         return webSocketThrottleResponse;
     }
 

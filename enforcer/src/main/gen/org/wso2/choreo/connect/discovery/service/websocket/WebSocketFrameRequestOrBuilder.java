@@ -83,4 +83,10 @@ public interface WebSocketFrameRequestOrBuilder extends
    */
   com.google.protobuf.ByteString
       getRemoteIpBytes();
+
+  /**
+   * <code>bytes payload = 5;</code>
+   * @return The payload.
+   */
+  com.google.protobuf.ByteString getPayload();
 }

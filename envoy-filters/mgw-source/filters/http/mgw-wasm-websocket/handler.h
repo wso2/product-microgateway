@@ -27,6 +27,8 @@ public:
     virtual void updateFilterState(ResponseStatus status);
 
     virtual void updateHandlerState(HandlerState state);
+
+    virtual void updateThrottlePeriod(const int throttle_period);
 };
 
 class StreamHanlderClient{

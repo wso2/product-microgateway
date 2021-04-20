@@ -14,6 +14,8 @@ message WebSocketFrameRequest {
   int32 frame_length = 3;
 
   string remote_ip = 4;
+
+  bytes payload = 5;
 }
 
 message WebSocketFrameResponse {
@@ -26,11 +28,9 @@ message WebSocketFrameResponse {
         OVER_LIMIT = 2;
     }
 
-    Code throttle_state = 1;
+  Code throttle_state = 1;
 
-  int32 error_code = 2;
-  string error_message = 3;
-  string error_description = 4;
+  int64 throttle_period = 2;
 }
 
 // message MetadataValue {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "proxy_wasm_intrinsics.h"
-//#include <google/protobuf/struct.pb.h>
 #include <memory>
 #include <string>
 
@@ -39,17 +38,20 @@ public:
   
   void updateFilterState(ResponseStatus status) override;
   void updateHandlerState(HandlerState state) override;
+  void updateThrottlePeriod(const int throttle_period) override;
   
 
 private:
   MgwGrpcStreamHandler* stream_handler_{};
   HandlerState handler_state_;
   std::string node_id_;
-  //Metadata* ext_authz_metadata_{};
-  bool isDataFrame(const std::string_view data);
   ThrottleState throttle_state_{ThrottleState::UnderLimit};
   bool failure_mode_deny_;
   std::unique_ptr<Metadata> metadata_{new Metadata};
+  int throttle_period_;
+  
+  bool isDataFrame(const std::string_view data);
+  void establishNewStream();
 
 };
 

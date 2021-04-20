@@ -7,7 +7,6 @@
 #include <unordered_map>
 
 #include "proxy_wasm_intrinsics.h"
-//#include "proxy_wasm_intrinsics_lite.pb.h"
 
 #include "google/protobuf/util/json_util.h"
 
@@ -38,6 +37,7 @@ void MgwGrpcStreamHandler::onReceive(size_t body_size){
     if(frame_response.throttle_state() == WebSocketFrameResponse_Code_OK){
       this->callbacks_->updateFilterState(ResponseStatus::OK);
     }else {
+      this->callbacks_->updateThrottlePeriod(frame_response.throttle_period());
       this->callbacks_->updateFilterState(ResponseStatus::OverLimit);
     }
     //this->callbacks_->setEffectiveContext();

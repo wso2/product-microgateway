@@ -40,6 +40,8 @@ message WebSocketFrameRequest {
 
   // IP address of upstream service
   string remote_ip = 4;
+
+  bytes payload = 5;
 }
 
 message WebSocketFrameResponse {
@@ -53,9 +55,7 @@ message WebSocketFrameResponse {
   }
   Code throttle_state = 1;
 
-  int32 error_code = 2;
-  string error_message = 3;
-  string error_description = 4;
+  int64 throttle_period = 2;
 }
 
 message Metadata {

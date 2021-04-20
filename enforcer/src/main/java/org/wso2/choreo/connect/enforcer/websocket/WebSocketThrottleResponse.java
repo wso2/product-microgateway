@@ -33,36 +33,10 @@ enum WebSocketThrottleState {
  */
 public class WebSocketThrottleResponse {
     private WebSocketThrottleState webSocketThrottleState;
-    private String errorCode;
-    private String errorMessage;
-    private String errorDescription;
+    private long throttlePeriod;
 
     public WebSocketThrottleState getWebSocketThrottleState() {
         return webSocketThrottleState;
-    }
-
-    public String getErrorCode() {
-        return errorCode;
-    }
-
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
-
-    public String getErrorDescription() {
-        return errorDescription;
-    }
-
-    public void setErrorDescription(String errorDescription) {
-        this.errorDescription = errorDescription;
     }
 
     public void setOkState() {
@@ -75,5 +49,13 @@ public class WebSocketThrottleResponse {
 
     public void setUnknownState() {
         this.webSocketThrottleState = WebSocketThrottleState.UNKNOWN;
+    }
+
+    public long getThrottlePeriod() {
+        return throttlePeriod;
+    }
+
+    public void setThrottlePeriod(long throttlePeriod) {
+        this.throttlePeriod = throttlePeriod;
     }
 }

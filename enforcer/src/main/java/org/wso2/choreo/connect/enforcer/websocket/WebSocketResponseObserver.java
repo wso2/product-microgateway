@@ -26,7 +26,6 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.grpc.WebSocketFrameService;
 import org.wso2.choreo.connect.enforcer.server.WebSocketHandler;
 
-
 import java.util.Map;
 
 /**
@@ -50,26 +49,31 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
 
     @Override
     public void onNext(WebSocketFrameRequest webSocketFrameRequest) {
+        logger.info(webSocketFrameRequest.toString());
+        logger.info(webSocketFrameRequest.getPayload().toStringUtf8());
+        logger.info(webSocketFrameRequest.getPayload().toByteArray());
+//        Draft_6455 decoder = new Draft_6455();
+//        try {
+//            List<Framedata> frames = decoder.translateFrame(
+//                    ByteBuffer.wrap(webSocketFrameRequest.getPayload().toByteArray()));
+//            logger.info(Arrays.toString(frames.toArray()));
+//        } catch (InvalidDataException e) {
+//           logger.error(e);
+//        }
         if (!this.throttleKeysInitiated) {
             initializeThrottleKeys(webSocketFrameRequest);
         }
-        //logger.info(webSocketFrameRequest.toString());
-        //logger.info(webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap());
-//        logger.info(webSocketFrameRequest.getFilterMetadata().getMetadataList().get(1));
-//        logger.info(webSocketFrameRequest.getFilterMetadata().getField());
+
         WebSocketThrottleResponse webSocketThrottleResponse = webSocketHandler.process(webSocketFrameRequest);
-        //streamId = getStreamId(webSocketFrameRequest);
-        //WebSocketFrameService.addObserver(streamId, this);
         if (webSocketThrottleResponse.getWebSocketThrottleState() == WebSocketThrottleState.OK) {
             WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
                     WebSocketFrameResponse.Code.OK).build();
             responseStreamObserver.onNext(response);
         } else {
+            logger.info("throttle period" + webSocketThrottleResponse.getThrottlePeriod());
             WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
-                    WebSocketFrameResponse.Code.OVER_LIMIT)
-                    .setErrorCode(Integer.parseInt(webSocketThrottleResponse.getErrorCode()))
-                    .setErrorMessage(webSocketThrottleResponse.getErrorMessage())
-                    .setErrorDescription(webSocketThrottleResponse.getErrorDescription()).build();
+                    WebSocketFrameResponse.Code.OVER_LIMIT).setThrottlePeriod(
+                    webSocketThrottleResponse.getThrottlePeriod()).build();
             responseStreamObserver.onNext(response);
         }
     }

@@ -173,12 +173,13 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 // }
 
 func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {
-
+	// remove node_id
+	// move hardcoded values to config
 	config := &wrappers.StringValue{
 		Value: `{
 			"node_id": "mgw_node_1",
 			"rate_limit_service": "ext-authz",
-			"timeout": "10s",
+			"timeout": "20s",
 			"failure_mode_deny": "true"
 		}`,
 	}

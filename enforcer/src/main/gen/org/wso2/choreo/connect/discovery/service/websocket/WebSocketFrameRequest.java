@@ -18,6 +18,7 @@ private static final long serialVersionUID = 0L;
   private WebSocketFrameRequest() {
     nodeId_ = "";
     remoteIp_ = "";
+    payload_ = com.google.protobuf.ByteString.EMPTY;
   }
 
   @java.lang.Override
@@ -78,6 +79,11 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             remoteIp_ = s;
+            break;
+          }
+          case 42: {
+
+            payload_ = input.readBytes();
             break;
           }
           default: {
@@ -257,6 +263,17 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int PAYLOAD_FIELD_NUMBER = 5;
+  private com.google.protobuf.ByteString payload_;
+  /**
+   * <code>bytes payload = 5;</code>
+   * @return The payload.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString getPayload() {
+    return payload_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -283,6 +300,9 @@ private static final long serialVersionUID = 0L;
     if (!getRemoteIpBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 4, remoteIp_);
     }
+    if (!payload_.isEmpty()) {
+      output.writeBytes(5, payload_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -305,6 +325,10 @@ private static final long serialVersionUID = 0L;
     }
     if (!getRemoteIpBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, remoteIp_);
+    }
+    if (!payload_.isEmpty()) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBytesSize(5, payload_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -332,6 +356,8 @@ private static final long serialVersionUID = 0L;
         != other.getFrameLength()) return false;
     if (!getRemoteIp()
         .equals(other.getRemoteIp())) return false;
+    if (!getPayload()
+        .equals(other.getPayload())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -353,6 +379,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getFrameLength();
     hash = (37 * hash) + REMOTE_IP_FIELD_NUMBER;
     hash = (53 * hash) + getRemoteIp().hashCode();
+    hash = (37 * hash) + PAYLOAD_FIELD_NUMBER;
+    hash = (53 * hash) + getPayload().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -498,6 +526,8 @@ private static final long serialVersionUID = 0L;
 
       remoteIp_ = "";
 
+      payload_ = com.google.protobuf.ByteString.EMPTY;
+
       return this;
     }
 
@@ -532,6 +562,7 @@ private static final long serialVersionUID = 0L;
       }
       result.frameLength_ = frameLength_;
       result.remoteIp_ = remoteIp_;
+      result.payload_ = payload_;
       onBuilt();
       return result;
     }
@@ -593,6 +624,9 @@ private static final long serialVersionUID = 0L;
       if (!other.getRemoteIp().isEmpty()) {
         remoteIp_ = other.remoteIp_;
         onChanged();
+      }
+      if (other.getPayload() != com.google.protobuf.ByteString.EMPTY) {
+        setPayload(other.getPayload());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1009,6 +1043,40 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       remoteIp_ = value;
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.ByteString payload_ = com.google.protobuf.ByteString.EMPTY;
+    /**
+     * <code>bytes payload = 5;</code>
+     * @return The payload.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getPayload() {
+      return payload_;
+    }
+    /**
+     * <code>bytes payload = 5;</code>
+     * @param value The payload to set.
+     * @return This builder for chaining.
+     */
+    public Builder setPayload(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      payload_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bytes payload = 5;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearPayload() {
+      
+      payload_ = getDefaultInstance().getPayload();
       onChanged();
       return this;
     }

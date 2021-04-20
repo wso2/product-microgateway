@@ -18,17 +18,7 @@ BUILD_DIR_MOUNT_DEST=/build
 
 ENVOY_BUILD_IMAGE=envoyproxy/envoy-build-ubuntu:e33c93e6d79804bf95ff80426d10bdcc9096c785
 
-# START_COMMAND=("/bin/sh" -c 'cd source/mgw-source/filters/http/mgw-wasm-websocket \
-#                             && bazel build //:mgw-websocket.wasm \
-#                             && tar czf mgw-websocket.tar.gz -C /build bazel-bin/mgw-websocket.wasm \
-#                             && cp -a bazel-bin/mgw-websocket.wasm /build')
- 
-
-# START_COMMAND=("/bin/sh" -c 'cd source/mgw-source/filters/http/mgw-wasm-websocket \
-#                             && bazel build //:mgw-websocket.wasm \
-#                             && cp -a bazel-bin/mgw-websocket.wasm /build \
-#                             && tar cfz mgw.tar.gz bazel-bin/mgw-websocket.wasm \
-#                             && cp -a mgw.tar.gz /build')
+# websocket.wasm
 
 START_COMMAND=("/bin/bash" "-lc" "groupadd --gid $(id -g) -f envoygroup \
     && useradd -o --uid $(id -u) --gid $(id -g) --no-create-home --home-dir /build envoybuild \
