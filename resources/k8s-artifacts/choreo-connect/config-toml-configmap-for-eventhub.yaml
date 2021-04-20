@@ -140,7 +140,7 @@ data:
       validityPeriod = 3600 # seconds
       [[enforcer.jwtIssuer.jwtUser]]
         username = "admin"
-        password = "admin"
+        password = "$env{enforcer_admin_pwd}"
 
     # Throttling configurations
     [enforcer.throttling]
@@ -243,7 +243,7 @@ data:
     # Issuer 3
     [[security.enforcer.tokenService]]
         name="APIM Publisher"
-        issuer = "https://localhost:9443/publisher"
+        issuer = "https://apim.wso2.com/publisher"
         certificateAlias = ""
         certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 

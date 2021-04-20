@@ -17,7 +17,7 @@ kind: Service
 metadata:
   name: wso2apim
 spec:
-  type: NodePort
+  type: ClusterIP
   # label keys and values that must match in order to receive traffic for this service
   selector:
     deployment: wso2apim
@@ -26,28 +26,21 @@ spec:
     - name: pass-through-http
       port: 8280
       targetPort: 8280
-      nodePort: 32004
     - name: pass-through-https
       port: 8243
       targetPort: 8243
-      nodePort: 32003
     - name: servlet-http
       port: 9763
       targetPort: 9763
-      nodePort: 32002
     - name: servlet-https
       port: 9443
       targetPort: 9443
-      nodePort: 32001
     - name: jms-port
       port: 5672
       targetPort: 5672
-      nodePort: 32005
     - name: binary-receiver
       port: 9611
       targetPort: 9611
-      nodePort: 32006
     - name: binary-auth
       port: 9711
       targetPort: 9711
-      nodePort: 32007
