@@ -54,6 +54,7 @@ public class RequestContext {
     private Map<String, String> responseHeaders;
     private Map<String, String> metadataMap = new HashMap<>();
     private String requestPathTemplate;
+    private String traceId;
     // Consist of web socket frame related data like frame length, remote IP
     private WebSocketFrameContext webSocketFrameContext;
 

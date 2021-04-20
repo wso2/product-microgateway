@@ -30,6 +30,7 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
+import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,11 +70,12 @@ public class RestAPI implements API {
         }
 
         this.apiLifeCycleState = api.getApiLifeCycleState();
-        this.apiConfig = new APIConfig.Builder(name).vhost(vhost).basePath(basePath).version(version)
+        this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState)
                 .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
                 .productionUrls(productionUrls).sandboxUrls(sandboxUrls)
-                .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity()).build();
+                .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
+                .organizationId(api.getOrganizationId()).build();
         initFilters();
         return basePath;
     }
@@ -125,7 +127,7 @@ public class RestAPI implements API {
             if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
-            if (analyticsEnabled) {
+            if (analyticsEnabled && !FilterUtils.isSkippedAnalyticsFaultEvent(responseObject.getErrorCode())) {
                 AnalyticsFilter.getInstance().handleFailureRequest(requestContext);
                 responseObject.setMetaDataMap(new HashMap<>(0));
             }

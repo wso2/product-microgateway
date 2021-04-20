@@ -19,6 +19,7 @@ package envoyconf
 
 import (
 	"errors"
+	"fmt"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
@@ -219,7 +220,7 @@ func CreateVirtualHosts(vhostToRouteArrayMap map[string][]*routev3.Route) []*rou
 	for vhost, routes := range vhostToRouteArrayMap {
 		virtualHost := &routev3.VirtualHost{
 			Name:    vhost,
-			Domains: []string{vhost},
+			Domains: []string{vhost, fmt.Sprint(vhost, ":*")},
 			Routes:  routes,
 		}
 		virtualHosts = append(virtualHosts, virtualHost)

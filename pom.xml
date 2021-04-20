@@ -21,7 +21,7 @@
     <groupId>org.wso2.am.choreo.connect</groupId>
     <artifactId>choreo-connect-parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.9.0-beta-SNAPSHOT</version>
+    <version>0.9.0-beta2-SNAPSHOT</version>
     <name>Choreo Connect - Parent</name>
 
     <url>https://wso2.org</url>
@@ -333,6 +333,22 @@
                 <version>4.0.0-beta</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.am.analytics.publisher</groupId>
+                <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
+                <version>${analytics.publisher.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${awaitility.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${apache.httpcomponents.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -340,7 +356,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <andes.client.version>3.3.12</andes.client.version>
-        <carbon.apimgt.version>9.0.114</carbon.apimgt.version>
+        <carbon.apimgt.version>9.0.168</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
         <commons.io.version>2.6</commons.io.version>
@@ -377,6 +393,10 @@
         <apache.commons.version>1.5.6.wso2v1</apache.commons.version>
         <lmax.version>3.4.2.wso2v1</lmax.version>
         <download.maven.plugin.version>1.6.1</download.maven.plugin.version>
-        <apictl.version>4.0.0-beta</apictl.version>
+        <apictl.version>4.0.0-rc1</apictl.version>
+        <grpc.healthProbe.version>0.3.6</grpc.healthProbe.version>
+        <analytics.publisher.client.version>1.0.0</analytics.publisher.client.version>
+        <awaitility.version>3.1.2</awaitility.version>
+        <apache.httpcomponents.version>4.5.13</apache.httpcomponents.version>
     </properties>
 </project>

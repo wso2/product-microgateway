@@ -23,7 +23,7 @@ metadata:
     app: choreo-connect-adapter
   name: adapter
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: choreo-connect-adapter
   ports:
@@ -35,4 +35,3 @@ spec:
       port: 9843
       targetPort: 9843
       protocol: TCP
-      nodePort: 30200

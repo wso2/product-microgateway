@@ -18,14 +18,15 @@
 
 package org.wso2.choreo.connect.enforcer.config.dto;
 
+import java.util.Map;
+
 /**
  * Holds the analytics data publishing related Configuration.
  */
 public class AnalyticsDTO {
 
     private boolean isEnabled;
-    private String authURL;
-    private String authToken;
+    private Map<String, String> configProperties;
     private AnalyticsReceiverConfigDTO serverConfig;
 
     public boolean isEnabled() {
@@ -36,27 +37,19 @@ public class AnalyticsDTO {
         isEnabled = enabled;
     }
 
-    public String getAuthURL() {
-        return authURL;
-    }
-
-    public void setAuthURL(String authURL) {
-        this.authURL = authURL;
-    }
-
-    public String getAuthToken() {
-        return authToken;
-    }
-
-    public void setAuthToken(String authToken) {
-        this.authToken = authToken;
-    }
-
     public AnalyticsReceiverConfigDTO getServerConfig() {
         return serverConfig;
     }
 
     public void setServerConfig(AnalyticsReceiverConfigDTO serverConfig) {
         this.serverConfig = serverConfig;
+    }
+
+    public Map<String, String> getConfigProperties() {
+        return configProperties;
+    }
+
+    public void setConfigProperties(Map<String, String> configProperties) {
+        this.configProperties = configProperties;
     }
 }

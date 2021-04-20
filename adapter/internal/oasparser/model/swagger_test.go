@@ -74,3 +74,25 @@ func TestSetInfoSwaggerWebSocket(t *testing.T) {
 	}
 
 }
+
+func TestValidate(t *testing.T) {
+	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_prod_sand_extensions.yaml"
+	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
+	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
+	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
+	err = mgwSwaggerForOpenapi.Validate()
+	assert.Nil(t, err, "Validation Error should not be present when servers URL is properly provided.")
+
+	mgwSwaggerForOpenapi.GetProdEndpoints()[0].Host = ("/")
+	err = mgwSwaggerForOpenapi.Validate()
+	assert.NotNil(t, err, "Validation Error should not be present when production URL is /")
+
+	mgwSwaggerForOpenapi.GetProdEndpoints()[0].Host = ("abc.com")
+	mgwSwaggerForOpenapi.GetSandEndpoints()[0].Host = ("/")
+	err = mgwSwaggerForOpenapi.Validate()
+	assert.NotNil(t, err, "Validation Error should not be present when sandbox URL is /")
+
+	mgwSwaggerForOpenapi.GetSandEndpoints()[0].Host = ("/abc/abc")
+	err = mgwSwaggerForOpenapi.Validate()
+	assert.NotNil(t, err, "Validation Error should not be present when servers URL is relative URL")
+}

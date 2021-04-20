@@ -56,7 +56,7 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
 	// Populate data from the config
-	ehConfigs := conf.ControlPlane.EventHub
+	ehConfigs := conf.ControlPlane
 	ehURL := ehConfigs.ServiceURL
 	// If the eventHub URL is configured with trailing slash
 	if strings.HasSuffix(ehURL, "/") {
@@ -179,13 +179,13 @@ func UpdateRevokedTokens() {
 			logger.LoggerSync.Errorf("Error occurred while fetching revoked tokens from control plane: %v", data.Err)
 			go func() {
 				// Retry fetching from control plane after a configured time interval
-				if conf.ControlPlane.EventHub.RetryInterval == 0 {
+				if conf.ControlPlane.RetryInterval == 0 {
 					// Assign default retry interval
-					conf.ControlPlane.EventHub.RetryInterval = 5
+					conf.ControlPlane.RetryInterval = 5
 				}
 				logger.LoggerSync.Debugf("Time Duration for retrying: %v",
-					conf.ControlPlane.EventHub.RetryInterval*time.Second)
-				time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
+					conf.ControlPlane.RetryInterval*time.Second)
+				time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
 				logger.LoggerSync.Info("Retrying to get revoked tokens from control plane.")
 				RetrieveTokens(c)
 			}()

@@ -49,13 +49,18 @@ import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.net.ssl.SSLContext;
 
@@ -68,6 +73,7 @@ public class FilterUtils {
     public static final String HOST_NAME_VERIFIER = "httpclient.hostnameVerifier";
     public static final String STRICT = "Strict";
     public static final String ALLOW_ALL = "AllowAll";
+    public static final List<String> SKIPPED_FAULT_CODES = new ArrayList<>(Arrays.asList("700700"));
 
     public static String getMaskedToken(String token) {
 
@@ -276,6 +282,15 @@ public class FilterUtils {
         return BigInteger.ZERO;
     }
 
+    /**
+     * Generates Authentication Context for the Internal Key Authenticator.
+     * @param tokenIdentifier
+     * @param payload
+     * @param api
+     * @param apiLevelPolicy
+     * @return
+     * @throws java.text.ParseException
+     */
     public static AuthenticationContext generateAuthenticationContext(String tokenIdentifier, JWTClaimsSet payload,
                                                                       JSONObject api, String apiLevelPolicy)
             throws java.text.ParseException {
@@ -297,6 +312,11 @@ public class FilterUtils {
             authContext.setApiPublisher(api.getAsString(APIConstants.JwtTokenConstants.API_PUBLISHER));
 
         }
+        authContext.setApplicationName(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME);
+        authContext.setApplicationId(UUID.nameUUIDFromBytes(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME.
+                getBytes(StandardCharsets.UTF_8)).toString());
+        authContext.setApplicationTier(APIConstants.UNLIMITED_TIER);
+        authContext.setSubscriber(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME);
         return authContext;
     }
 
@@ -489,4 +509,15 @@ public class FilterUtils {
         return clientIp;
     }
 
+    /**
+     * Check whether the fault event is a one that should be published to analytics server.
+     * @param errorCode The error code returned during the filter process
+     * @return whether the fault scenario should be skipped from publishing to analytics server.
+     */
+    public static boolean isSkippedAnalyticsFaultEvent(String errorCode) {
+        if (SKIPPED_FAULT_CODES.contains(errorCode)) {
+            return true;
+        }
+        return false;
+    }
 }

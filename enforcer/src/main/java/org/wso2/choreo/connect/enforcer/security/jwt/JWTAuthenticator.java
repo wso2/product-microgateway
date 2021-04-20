@@ -41,6 +41,7 @@ import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
@@ -100,12 +101,14 @@ public class JWTAuthenticator implements Authenticator {
         String version = requestContext.getMatchedAPI().getAPIConfig().getVersion();
         context = context + "/" + version;
         ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
-        String httpMethod = requestContext.getMatchedResourcePath().getMethod().toString();
         SignedJWTInfo signedJWTInfo;
         try {
             signedJWTInfo = getSignedJwt(jwtToken);
         } catch (ParseException | IllegalArgumentException e) {
-            throw new SecurityException("Not a JWT token. Failed to decode the token header.", e);
+            log.error("Failed to decode the token header", e);
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    "Not a JWT token. Failed to decode the token header", e);
         }
         JWTClaimsSet claims = signedJWTInfo.getJwtClaimsSet();
         String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
@@ -149,10 +152,20 @@ public class JWTAuthenticator implements Authenticator {
                                     .isAuthorized());
                         }
                         if (!apiKeyValidationInfoDTO.isAuthorized()) {
+                            if (GeneralErrorCodeConstants.API_BLOCKED_CODE == apiKeyValidationInfoDTO
+                                    .getValidationStatus()) {
+                                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                                        GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                                        GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
+                                throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
+                                        apiKeyValidationInfoDTO.getValidationStatus(),
+                                        GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                            }
                             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                                     apiKeyValidationInfoDTO.getValidationStatus(),
-                                    "User is NOT authorized to access the Resource. " +
-                                            "API Subscription validation failed.");
+                                    "User is NOT authorized to access the Resource. "
+                                            + "API Subscription validation failed.");
                         }
                     }
                 }
@@ -274,7 +287,8 @@ public class JWTAuthenticator implements Authenticator {
                         CacheProvider.getGatewayJWTTokenCache().put(jwtTokenCacheKey, endUserToken);
                     } catch (JWTGeneratorException e) {
                         log.error("Error while Generating Backend JWT", e);
-                        throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                 APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
                     }
                 }
@@ -283,7 +297,8 @@ public class JWTAuthenticator implements Authenticator {
                     endUserToken = jwtGenerator.generateToken(jwtInfoDto);
                 } catch (JWTGeneratorException e) {
                     log.error("Error while Generating Backend JWT", e);
-                    throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            APISecurityConstants.API_AUTH_GENERAL_ERROR,
                             APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
                 }
             }
@@ -328,8 +343,7 @@ public class JWTAuthenticator implements Authenticator {
                     .validateScopes(tokenValidationContext);
             if (valid) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Scope validation successful for the resource: " + matchingResource + ", user: "
-                            + jwtValidationInfo.getUser());
+                    log.debug("Scope validation successful for the resource: " + matchingResource.getPath());
                 }
             } else {
                 String message = "User is NOT authorized to access the Resource: " + matchingResource.getPath()
@@ -341,7 +355,8 @@ public class JWTAuthenticator implements Authenticator {
         } catch (EnforcerException e) {
             String message = "Error while accessing backend services for token scope validation";
             log.error(message, e);
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, message, e);
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR, message, e);
         }
     }
 
@@ -350,11 +365,12 @@ public class JWTAuthenticator implements Authenticator {
 
         String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
         String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
-        return validateSubscriptionUsingKeyManager(apiContext, apiVersion, jwtValidationInfo);
+        String uuid = requestContext.getMatchedAPI().getAPIConfig().getUuid();
+        return validateSubscriptionUsingKeyManager(uuid, apiContext, apiVersion, jwtValidationInfo);
     }
 
-    private APIKeyValidationInfoDTO validateSubscriptionUsingKeyManager(String apiContext, String apiVersion,
-            JWTValidationInfo jwtValidationInfo) throws APISecurityException {
+    private APIKeyValidationInfoDTO validateSubscriptionUsingKeyManager(String uuid, String apiContext,
+            String apiVersion, JWTValidationInfo jwtValidationInfo) throws APISecurityException {
 
         String tenantDomain = "carbon.super"; //TODO : get correct tenant domain
 
@@ -362,7 +378,7 @@ public class JWTAuthenticator implements Authenticator {
         String keyManager = jwtValidationInfo.getKeyManager();
         if (consumerKey != null && keyManager != null) {
             return ReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain)
-                    .validateSubscription(apiContext, apiVersion, consumerKey, keyManager);
+                    .validateSubscription(uuid, apiContext, apiVersion, consumerKey, keyManager);
         }
         log.debug("Cannot call Key Manager to validate subscription. "
                 + "Payload of the token does not contain the Authorized party - the party to which the ID Token was "

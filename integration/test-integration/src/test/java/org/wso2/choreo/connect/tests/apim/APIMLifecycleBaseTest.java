@@ -56,6 +56,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import javax.ws.rs.core.Response;
 import javax.xml.xpath.XPathExpressionException;
 
@@ -88,18 +89,14 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
     static {
         // list of predefined applications.
         addToApplicationList("SubscriptionValidationTestApp",
-                             new Application("SubscriptionValidationTestApp",
-                                             "Test Application for SubscriptionValidationTestCase",
-                                             TestConstant.APPLICATION_TIER.UNLIMITED,
-                                             ApplicationDTO.TokenTypeEnum.JWT));
-
-        // list of predefined api requests
-        String apiName = "SubscriptionValidationTestAPI";
-        String apiContext = "subscriptionValidationTestAPI";
+                new Application("SubscriptionValidationTestApp",
+                        "Test Application for SubscriptionValidationTestCase",
+                        TestConstant.APPLICATION_TIER.UNLIMITED,
+                        ApplicationDTO.TokenTypeEnum.JWT));
         String apiEndPointPostfixUrl = "/v2";
 
         try {
-            APIRequest apiRequest = new APIRequest(apiName, apiContext,
+            APIRequest apiRequest = new APIRequest(TestConstant.SAMPLE_API_NAME, TestConstant.SAMPLE_API_CONTEXT,
                                                    new URL(Utils.getDockerMockServiceURLHttp(apiEndPointPostfixUrl)));
             String API_VERSION_1_0_0 = "1.0.0";
             apiRequest.setVersion(API_VERSION_1_0_0);
@@ -115,9 +112,9 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
             operationsDTOS.add(apiOperationsDTO1);
             apiRequest.setOperationsDTOS(operationsDTOS);
 
-            addToAPIList(apiName, apiRequest);
+            addToAPIList(TestConstant.SAMPLE_API_NAME, apiRequest);
         } catch (APIManagerIntegrationTestException | MalformedURLException e) {
-            LOGGER.error("Error creating the APIRequest instance for API name: " + apiName);
+            LOGGER.error("Error creating the APIRequest instance for API name: " + TestConstant.SAMPLE_API_NAME);
         }
     }
 
@@ -131,16 +128,15 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @throws MicroGWTestException -  Exception throws by the method call of changeAPILifeCycleStatusToPublish() in
      *                              APIPublisherRestClient.java.
      */
-    protected HttpResponse publishAPI(String apiId, RestAPIPublisherImpl publisherRestClient,
+    protected HttpResponse changeLCStateAPI(String apiId, String targetState, RestAPIPublisherImpl publisherRestClient,
                                       boolean isRequireReSubscription) throws MicroGWTestException {
         String lifecycleChecklist = null;
         if (isRequireReSubscription) {
             lifecycleChecklist = "Requires re-subscription when publishing the API:true";
         }
         try {
-            HttpResponse response = publisherRestClient.changeAPILifeCycleStatus(apiId,
-                                                                                 APILifeCycleAction.PUBLISH.getAction(),
-                                                                                 lifecycleChecklist);
+            HttpResponse response = publisherRestClient
+                    .changeAPILifeCycleStatus(apiId, targetState, lifecycleChecklist);
             if (Objects.isNull(response)) {
                 throw new MicroGWTestException("Error while publishing the API. API Id : " + apiId);
             }
@@ -163,6 +159,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
     protected HttpResponse subscribeToAPI(String apiId, String applicationId, String tier,
                                           RestAPIStoreImpl storeRestClient) throws MicroGWTestException {
         HttpResponse response = storeRestClient.createSubscription(apiId, applicationId, tier);
+        waitForXdsDeployment();
         if (Objects.isNull(response)) {
             throw new MicroGWTestException(
                     "Error while subscribing to the API. API Id : " + apiId + ", Application Id: " + applicationId);
@@ -194,16 +191,16 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
                 throw new MicroGWTestException("Error in creating and deploying API Revision", e);
             }
             //Publish the API
-            HttpResponse publishAPIResponse = publishAPI(createAPIResponse.getData(), publisherRestClient,
-                                                         isRequireReSubscription);
-            if (!(publishAPIResponse.getResponseCode() == HttpStatus.SC_OK &&
-                    APILifeCycleState.PUBLISHED.getState().equals(publishAPIResponse.getData()))) {
+            HttpResponse publishAPIResponse = changeLCStateAPI(createAPIResponse.getData(),
+                    APILifeCycleAction.PUBLISH.getAction(), publisherRestClient, isRequireReSubscription);
+            if (!(publishAPIResponse.getResponseCode() == HttpStatus.SC_OK && APILifeCycleState.PUBLISHED.getState().equals(publishAPIResponse.getData()))) {
                 throw new MicroGWTestException(
                         "Error in API Publishing" + getAPIIdentifierStringFromAPIRequest(apiRequest) + "Response Code:"
                                 + publishAPIResponse.getResponseCode() + " Response Data :" + publishAPIResponse
                                 .getData());
             }
             LOGGER.info("API Published :" + getAPIIdentifierStringFromAPIRequest(apiRequest));
+            waitForXdsDeployment();
             return createAPIResponse.getData();
         } else {
             throw new MicroGWTestException(
@@ -248,7 +245,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
     protected void copyAndPublishCopiedAPI(String apiID, String newAPIVersion, RestAPIPublisherImpl publisherRestClient,
                                            boolean isRequireReSubscription) throws MicroGWTestException, ApiException {
         APIDTO apidto = copyAPI(apiID, newAPIVersion, publisherRestClient);
-        publishAPI(apidto.getId(), publisherRestClient, isRequireReSubscription);
+        changeLCStateAPI(apidto.getId(), APILifeCycleAction.PUBLISH.getAction(), publisherRestClient, isRequireReSubscription);
     }
 
     /**
@@ -320,7 +317,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         // Deploy Revision to gateway
         List<APIRevisionDeployUndeployRequest> apiRevisionDeployRequestList = new ArrayList<>();
         APIRevisionDeployUndeployRequest apiRevisionDeployRequest = new APIRevisionDeployUndeployRequest();
-        apiRevisionDeployRequest.setName("Production and Sandbox");
+        apiRevisionDeployRequest.setName("Default");
         apiRevisionDeployRequest.setVhost("localhost");
         apiRevisionDeployRequest.setDisplayOnDevportal(true);
         apiRevisionDeployRequestList.add(apiRevisionDeployRequest);
@@ -366,7 +363,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         // Un deploy Revisions
         List<APIRevisionDeployUndeployRequest> apiRevisionUndeployRequestList = new ArrayList<>();
         APIRevisionDeployUndeployRequest apiRevisionUnDeployRequest = new APIRevisionDeployUndeployRequest();
-        apiRevisionUnDeployRequest.setName("Production and Sandbox");
+        apiRevisionUnDeployRequest.setName("Default");
         apiRevisionUnDeployRequest.setVhost("localhost");
         apiRevisionUnDeployRequest.setDisplayOnDevportal(true);
         apiRevisionUndeployRequestList.add(apiRevisionUnDeployRequest);
@@ -442,7 +439,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         // Deploy Revision to gateway
         List<APIRevisionDeployUndeployRequest> apiRevisionDeployRequestList = new ArrayList<>();
         APIRevisionDeployUndeployRequest apiRevisionDeployRequest = new APIRevisionDeployUndeployRequest();
-        apiRevisionDeployRequest.setName("Production and Sandbox");
+        apiRevisionDeployRequest.setName("Default");
         apiRevisionDeployRequest.setName("localhost");
         apiRevisionDeployRequest.setDisplayOnDevportal(true);
         apiRevisionDeployRequestList.add(apiRevisionDeployRequest);
@@ -489,7 +486,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         // Un deploy Revisions
         List<APIRevisionDeployUndeployRequest> apiRevisionUndeployRequestList = new ArrayList<>();
         APIRevisionDeployUndeployRequest apiRevisionUnDeployRequest = new APIRevisionDeployUndeployRequest();
-        apiRevisionUnDeployRequest.setName("Production and Sandbox");
+        apiRevisionUnDeployRequest.setName("Default");
         apiRevisionUnDeployRequest.setName("localhost");
         apiRevisionUnDeployRequest.setDisplayOnDevportal(true);
         apiRevisionUndeployRequestList.add(apiRevisionUnDeployRequest);
@@ -564,43 +561,23 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
     }
 
     /**
-     * Create application for the given name using the restAPIStore. Then, create the client key and the client secret
+     * Create the given application using the restAPIStore. Then, create the client key and the client secret
      * associated to that application.
      *
-     * @param appIndex     - index of the relevant application in the predefined list 'applicationListByIndex'
+     * @param app          - definition of the application to be created
      * @param restAPIStore - instance of the RestAPIStoreImpl
      * @return the created application and associated client key and the client secret
      * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
-     * @throws MicroGWTestException                                   if error happens while creating the application or
-     *                                                                if the application already exists
+     * @throws MicroGWTestException                                   if error happens while creating the application
+     *                                                                or if the application already exists
      */
-    protected ApplicationCreationResponse createApplicationAndClientKeyClientSecret(int appIndex,
-                                                                                    RestAPIStoreImpl restAPIStore)
+    protected ApplicationCreationResponse createApplicationWithKeys(ApplicationDTO app, RestAPIStoreImpl restAPIStore)
             throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
-        return createApplicationAndClientKeyClientSecret(applicationListByIndex.get(appIndex), restAPIStore);
-    }
-
-    /**
-     * Create application for the given name using the restAPIStore. Then, create the client key and the client secret
-     * associated to that application.
-     *
-     * @param appName      - name of the application to be created as mentioned in the predefined list
-     *                     'applicationListByName'
-     * @param restAPIStore - instance of the RestAPIStoreImpl
-     * @return the created application and associated client key and the client secret
-     * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
-     * @throws MicroGWTestException                                   if error happens while creating the application or
-     *                                                                if the application already exists
-     */
-    protected ApplicationCreationResponse createApplicationAndClientKeyClientSecret(String appName,
-                                                                                    RestAPIStoreImpl restAPIStore)
-            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
-        Application newApp = applicationListByName.get(appName);
-        org.wso2.carbon.automation.test.utils.http.client.HttpResponse applicationResponse =
-                restAPIStore.createApplication(newApp.getAppName(), newApp.getDescription(), newApp.getThrottleTier(),
-                                               newApp.getTokenType());
+        HttpResponse applicationResponse =
+                restAPIStore.createApplication(app.getName(), app.getDescription(), app.getThrottlingPolicy(),
+                                               app.getTokenType());
         if (Objects.isNull(applicationResponse)) {
-            throw new MicroGWTestException("Could not create the application: " + appName);
+            throw new MicroGWTestException("Could not create the application: " + app.getName());
         }
         String applicationId = applicationResponse.getData();
 
@@ -617,6 +594,80 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
     }
 
     /**
+     * Create the list of applications given in the list using the restAPIStore. Then, create the client key and
+     * the client secret associated to those applications.
+     *
+     * @param appList  - list of applications to be created
+     * @param restAPIStore - instance of the RestAPIStoreImpl
+     * @return map of created application and associated client key and the client secret
+     * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
+     * @throws MicroGWTestException                                   if error happens while creating the application or
+     *                                                                if the application already exists
+     */
+    public Map<String, ApplicationCreationResponse> createApplicationsWithKeys(List<ApplicationDTO> appList,
+                                                                               RestAPIStoreImpl restAPIStore)
+            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
+        Map<String, ApplicationCreationResponse> response = new HashMap<>();
+        for (ApplicationDTO app : appList) {
+            response.put(app.getName(), createApplicationWithKeys(app, restAPIStore));
+        }
+        return response;
+    }
+
+    /**
+     * Create application for the given name using the restAPIStore. Then, create the client key and the client secret
+     * associated to that application.
+     *
+     * @param appIndex     - index of the relevant application in the predefined list 'applicationListByIndex'
+     * @param restAPIStore - instance of the RestAPIStoreImpl
+     * @return the created application and associated client key and the client secret
+     * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
+     * @throws MicroGWTestException                                   if error happens while creating the application or
+     *                                                                if the application already exists
+     */
+    protected ApplicationCreationResponse createApplicationWithKeys(int appIndex,
+                                                                    RestAPIStoreImpl restAPIStore)
+            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
+        return createApplicationWithKeys(applicationListByIndex.get(appIndex), restAPIStore);
+    }
+
+    /**
+     * Create application for the given name using the restAPIStore. Then, create the client key and the client secret
+     * associated to that application.
+     *
+     * @param appName      - name of the application to be created as mentioned in the predefined list
+     *                     'applicationListByName'
+     * @param restAPIStore - instance of the RestAPIStoreImpl
+     * @return the created application and associated client key and the client secret
+     * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
+     * @throws MicroGWTestException                                   if error happens while creating the application or
+     *                                                                if the application already exists
+     */
+    protected ApplicationCreationResponse createApplicationWithKeys(String appName,
+                                                                    RestAPIStoreImpl restAPIStore)
+            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
+        Application newApp = applicationListByName.get(appName);
+        org.wso2.carbon.automation.test.utils.http.client.HttpResponse applicationResponse =
+                restAPIStore.createApplication(newApp.getAppName(), newApp.getDescription(), newApp.getThrottleTier(),
+                        newApp.getTokenType());
+        if (Objects.isNull(applicationResponse)) {
+            throw new MicroGWTestException("Could not create the application: " + appName);
+        }
+        String applicationId = applicationResponse.getData();
+
+        ArrayList<String> grantTypes = new ArrayList<>();
+        grantTypes.add(APIMIntegrationConstants.GRANT_TYPE.PASSWORD);
+        grantTypes.add(APIMIntegrationConstants.GRANT_TYPE.CLIENT_CREDENTIAL);
+        ApplicationKeyDTO applicationKeyDTO = restAPIStore.generateKeys(applicationId,
+                TestConstant.DEFAULT_TOKEN_VALIDITY_TIME, "",
+                ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION,
+                null, grantTypes);
+
+        return new ApplicationCreationResponse(applicationId, applicationKeyDTO.getConsumerKey(),
+                applicationKeyDTO.getConsumerSecret());
+    }
+
+    /**
      * Create list of applications for the given list of names using the restAPIStore. Then, create the client key and
      * the client secret associated to those applications.
      *
@@ -628,12 +679,12 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @throws MicroGWTestException                                   if error happens while creating the application or
      *                                                                if the application already exists
      */
-    public Map<String, ApplicationCreationResponse> createApplicationAndClientKeyClientSecretbyListOfAppNames(
+    public Map<String, ApplicationCreationResponse> createApplicationsWithKeysByName(
             List<String> appNameList, RestAPIStoreImpl restAPIStore)
             throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
         Map<String, ApplicationCreationResponse> response = new HashMap<>();
         for (String appName : appNameList) {
-            response.put(appName, createApplicationAndClientKeyClientSecret(appName, restAPIStore));
+            response.put(appName, createApplicationWithKeys(appName, restAPIStore));
         }
         return response;
     }
@@ -650,13 +701,13 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @throws MicroGWTestException                                   if error happens while creating the application or
      *                                                                if the application already exists
      */
-    public Map<String, ApplicationCreationResponse> createApplicationAndClientKeyClientSecretByListOfAppIndices(
+    public Map<String, ApplicationCreationResponse> createApplicationsWithKeysByIndex(
             List<Integer> appIndexList, RestAPIStoreImpl restAPIStore)
             throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
         Map<String, ApplicationCreationResponse> response = new HashMap<>();
         for (int appIndex : appIndexList) {
             String appName = applicationListByIndex.get(appIndex);
-            response.put(appName, createApplicationAndClientKeyClientSecret(appName, restAPIStore));
+            response.put(appName, createApplicationWithKeys(appName, restAPIStore));
         }
         return response;
     }
@@ -696,7 +747,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         applicationListByIndex.put(applicationListByIndex.size(), appName);
     }
 
-    private static void addToAPIList(String apiName, APIRequest apiRequest) {
+    protected static void addToAPIList(String apiName, APIRequest apiRequest) {
         apiRequestListByAPIName.put(apiName, apiRequest);
         apiRequestListByIndex.put(apiRequestListByIndex.size(), apiName);
     }
@@ -709,7 +760,6 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         String apiName = apiRequestListByIndex.get(apiIndex);
         return apiRequestListByAPIName.get(apiName);
     }
-
 
     /**
      * This class represents the application details required to create an application using the RestAPIStoreImpl.

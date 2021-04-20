@@ -17,6 +17,10 @@
 package model
 
 import (
+	"errors"
+	"net/url"
+	"strings"
+
 	parser "github.com/mitchellh/mapstructure"
 	"github.com/wso2/adapter/config"
 	"github.com/wso2/adapter/internal/svcdiscovery"
@@ -28,21 +32,22 @@ import (
 // the root level of the openAPI definition. The pathItem level information is represented
 // by the resources array which contains the MgwResource entries.
 type MgwSwagger struct {
-	id               string
-	apiType          string
-	description      string
-	title            string
-	version          string
-	vendorExtensions map[string]interface{}
-	productionUrls   []Endpoint //
-	sandboxUrls      []Endpoint
-	resources        []Resource
-	xWso2Basepath    string
-	xWso2Cors        *CorsConfig
-	securityScheme   []string
-	xThrottlingTier  string
-	xWso2AuthHeader  string
-	disableSecurity  bool
+	id                  string
+	apiType             string
+	description         string
+	title               string
+	version             string
+	vendorExtensions    map[string]interface{}
+	productionUrls      []Endpoint //
+	sandboxUrls         []Endpoint
+	resources           []Resource
+	xWso2Basepath       string
+	xWso2Cors           *CorsConfig
+	securityScheme      []string
+	xWso2ThrottlingTier string
+	xWso2AuthHeader     string
+	disableSecurity     bool
+	OrganizationID      string
 }
 
 // EndpointSecurity contains the SandBox/Production endpoint security
@@ -142,9 +147,9 @@ func (swagger *MgwSwagger) GetDescription() string {
 	return swagger.description
 }
 
-// GetXThrottlingTier returns the Throttling tier via the vendor extension.
-func (swagger *MgwSwagger) GetXThrottlingTier() string {
-	return swagger.xThrottlingTier
+// GetXWso2ThrottlingTier returns the Throttling tier via the vendor extension.
+func (swagger *MgwSwagger) GetXWso2ThrottlingTier() string {
+	return swagger.xWso2ThrottlingTier
 }
 
 // GetDisableSecurity returns the authType via the vendor extension.
@@ -155,6 +160,11 @@ func (swagger *MgwSwagger) GetDisableSecurity() bool {
 // GetID returns the Id of the API
 func (swagger *MgwSwagger) GetID() string {
 	return swagger.id
+}
+
+// SetID set the Id of the API
+func (swagger *MgwSwagger) SetID(id string) {
+	swagger.id = id
 }
 
 // SetName sets the name of the API
@@ -201,7 +211,7 @@ func (swagger *MgwSwagger) SetXWso2Extenstions() {
 	swagger.setXWso2PrdoductionEndpoint()
 	swagger.setXWso2SandboxEndpoint()
 	swagger.setXWso2Cors()
-	swagger.setXThrottlingTier()
+	swagger.setXWso2ThrottlingTier()
 	swagger.setDisableSecurity()
 	swagger.setXWso2AuthHeader()
 }
@@ -252,10 +262,10 @@ func (swagger *MgwSwagger) setXWso2SandboxEndpoint() {
 	}
 }
 
-func (swagger *MgwSwagger) setXThrottlingTier() {
-	tier := ResolveXThrottlingTier(swagger.vendorExtensions)
+func (swagger *MgwSwagger) setXWso2ThrottlingTier() {
+	tier := ResolveThrottlingTier(swagger.vendorExtensions)
 	if tier != "" {
-		swagger.xThrottlingTier = tier
+		swagger.xWso2ThrottlingTier = tier
 	}
 }
 
@@ -281,6 +291,49 @@ func (swagger *MgwSwagger) setXWso2AuthHeader() {
 
 func (swagger *MgwSwagger) setDisableSecurity() {
 	swagger.disableSecurity = ResolveDisableSecurity(swagger.vendorExtensions)
+}
+
+// Validate method confirms that the mgwSwagger has all required fields in the required format.
+// This needs to be checked prior to generate router/enforcer related resources.
+func (swagger *MgwSwagger) Validate() error {
+	if len(swagger.productionUrls) == 0 && len(swagger.sandboxUrls) == 0 {
+		logger.LoggerOasparser.Errorf("No Endpoints are provided for the API %s:%s",
+			swagger.title, swagger.version)
+		return errors.New("No Endpoints are provided for the API")
+	}
+	if len(swagger.productionUrls) > 0 {
+		err := swagger.productionUrls[0].validateEndpoint()
+		if err != nil {
+			logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
+				swagger.title, swagger.version, err)
+			return err
+		}
+	}
+
+	if len(swagger.sandboxUrls) > 0 {
+		err := swagger.sandboxUrls[0].validateEndpoint()
+		if err != nil {
+			logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
+				swagger.title, swagger.version, err)
+			return err
+		}
+	}
+	return nil
+}
+
+func (endpoint *Endpoint) validateEndpoint() error {
+	if len(endpoint.ServiceDiscoveryString) > 0 {
+		return nil
+	}
+	if len(endpoint.Host) == 0 {
+		return errors.New("Empty Hostname is provided")
+	}
+	if strings.HasPrefix(endpoint.Host, "/") {
+		return errors.New("Relative paths are not supported as endpoint URLs")
+	}
+	urlString := endpoint.URLType + "://" + endpoint.Host
+	_, err := url.ParseRequestURI(urlString)
+	return err
 }
 
 // getXWso2Endpoints extracts and generate the Endpoint Objects from the vendor extension map.
@@ -383,11 +436,17 @@ func generateGlobalCors() *CorsConfig {
 	}
 }
 
-// ResolveXThrottlingTier extracts the value of x-throttling-tier extension.
-// if the property is not available, an empty string is returned.
-func ResolveXThrottlingTier(vendorExtensions map[string]interface{}) string {
+// ResolveThrottlingTier extracts the value of x-wso2-throttling-tier and
+// x-throttling-tier extension. if x-wso2-throttling-tier is available it
+// will be prioritized.
+// if both the properties are not available, an empty string is returned.
+func ResolveThrottlingTier(vendorExtensions map[string]interface{}) string {
 	xTier := ""
-	if y, found := vendorExtensions[xThrottlingTier]; found {
+	if x, found := vendorExtensions[xWso2ThrottlingTier]; found {
+		if val, ok := x.(string); ok {
+			xTier = val
+		}
+	} else if y, found := vendorExtensions[xThrottlingTier]; found {
 		if val, ok := y.(string); ok {
 			xTier = val
 		}

@@ -33,8 +33,9 @@ public class APISecurityException extends Exception {
         this.errorCode = errorCode;
     }
 
-    public APISecurityException(int errorCode, String message, Throwable cause) {
+    public APISecurityException(int statusCode, int errorCode, String message, Throwable cause) {
         super(message, cause);
+        this.statusCode = statusCode;
         this.errorCode = errorCode;
     }
 

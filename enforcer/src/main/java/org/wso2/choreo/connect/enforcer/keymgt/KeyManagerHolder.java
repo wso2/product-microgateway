@@ -66,10 +66,8 @@ public class KeyManagerHolder {
     }
 
     public void init() {
-        if (ConfigHolder.getInstance().getConfig().getEventHub().isEnabled()) {
-            KeyManagerDiscoveryClient keyManagerDs = KeyManagerDiscoveryClient.getInstance();
-            keyManagerDs.watchKeyManagers();
-        }
+        KeyManagerDiscoveryClient keyManagerDs = KeyManagerDiscoveryClient.getInstance();
+        keyManagerDs.watchKeyManagers();
     }
 
     public void populateKMIssuerConfiguration(List<KeyManagerConfig> kmIssuers) {

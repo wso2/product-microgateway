@@ -41,19 +41,13 @@ spec:
               name: enforcer-truststore-vol
             - mountPath: /home/wso2/security/keystore
               name: enforcer-keystore-vol
-            - mountPath: /home/wso2/conf/config.toml
-              subPath: config.toml
-              name: config-toml-vol
             - mountPath: /home/wso2/conf/log4j2.properties
               subPath: log4j2.properties
               name: log4j2-vol
-            - mountPath: /home/wso2/conf/log_config.toml
-              subPath: log_config.toml
-              name: logconfig-toml-vol
             - mountPath: /home/wso2/lib/dropins
               name: dropins-vol
-          image: wso2/choreo-connect-enforcer:0.9.0-beta-SNAPSHOT
-          imagePullPolicy: Always
+          image: wso2/choreo-connect-enforcer:0.9.0-beta2-SNAPSHOT
+          imagePullPolicy: IfNotPresent
           env:
             - name: ENFORCER_PRIVATE_KEY_PATH
               value: "/home/wso2/security/keystore/mg.key"
@@ -68,7 +62,9 @@ spec:
             - name: ADAPTER_XDS_PORT
               value: "18000"
             - name: ENFORCER_LABEL
-              value: "Production and Sandbox"
+              value: "Default"
+            - name: ENFORCER_REGION
+              value: "UNKNOWN"
             - name: XDS_MAX_MSG_SIZE
               value: "4194304"
             - name: XDS_MAX_RETRIES
@@ -81,6 +77,10 @@ spec:
               value: "admin"
             - name: tm_admin_pwd
               value: "admin"
+            - name: analytics_authURL
+              value: "https://localhost:8080"
+            - name: analytics_authToken
+              value: ""
           resources:
             requests:
               memory: "250Mi"
@@ -92,18 +92,18 @@ spec:
             - containerPort: 8081
             - containerPort: 8082
           startupProbe:
-            tcpSocket:
-              port: 8081
+            exec:
+              command: [ "sh", "check_health.sh" ]
             periodSeconds: 5
             failureThreshold: 30
           livenessProbe:
-            tcpSocket:
-              port: 8081
+            exec:
+              command: [ "sh", "check_health.sh" ]
             initialDelaySeconds: 10
             periodSeconds: 30
           readinessProbe:
-            tcpSocket:
-              port: 8081
+            exec:
+              command: [ "sh", "check_health.sh" ]
             initialDelaySeconds: 8
             periodSeconds: 5
         - name: choreo-connect-router
@@ -112,8 +112,8 @@ spec:
               name: router-keystore-vol
             - mountPath: /home/wso2/security/truststore
               name: router-truststore-vol
-          image: wso2/choreo-connect-router:0.9.0-beta-SNAPSHOT
-          imagePullPolicy: Always
+          image: wso2/choreo-connect-router:0.9.0-beta2-SNAPSHOT
+          imagePullPolicy: IfNotPresent
           env:
             - name: ROUTER_ADMIN_HOST
               value: "0.0.0.0"
@@ -122,7 +122,7 @@ spec:
             - name: ROUTER_CLUSTER
               value: "default_cluster"
             - name: ROUTER_LABEL
-              value: "Production and Sandbox"
+              value: "Default"
             - name: ROUTER_PRIVATE_KEY_PATH
               value: "/home/wso2/security/keystore/mg.key"
             - name: ROUTER_PUBLIC_CERT_PATH
@@ -137,6 +137,8 @@ spec:
               value: "127.0.0.1"
             - name: ENFORCER_PORT
               value: "8081"
+            - name: ENFORCER_ANALYTICS_RECEIVER_PORT
+              value: "18090"
             - name: ENFORCER_CA_CERT_PATH
               value: "/home/wso2/security/truststore/mg.pem"
           resources:
@@ -154,6 +156,9 @@ spec:
               port: 9095
               path: /health
               scheme: HTTPS
+              httpHeaders:
+                - name: Host
+                  value: gw.wso2.com
             failureThreshold: 30
             periodSeconds: 5
           livenessProbe:
@@ -161,6 +166,9 @@ spec:
               port: 9095
               path: /health
               scheme: HTTPS
+              httpHeaders:
+                - name: Host
+                  value: gw.wso2.com
             initialDelaySeconds: 20
             periodSeconds: 10
           readinessProbe:
@@ -168,6 +176,9 @@ spec:
               port: 9095
               path: /health
               scheme: HTTPS
+              httpHeaders:
+                - name: Host
+                  value: gw.wso2.com
             initialDelaySeconds: 20
             periodSeconds: 5
       volumes:

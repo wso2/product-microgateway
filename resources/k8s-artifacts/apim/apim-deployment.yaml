@@ -44,6 +44,14 @@ spec:
               memory: "2Gi"
             requests:
               memory: "2Gi"
+          startupProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - nc -z localhost 9443
+            periodSeconds: 10
+            failureThreshold: 30
           livenessProbe:
             exec:
               command:

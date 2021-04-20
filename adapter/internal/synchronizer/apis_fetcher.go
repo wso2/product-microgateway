@@ -69,7 +69,7 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse) {
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
 	// Populate data from the config
-	ehConfigs := conf.ControlPlane.EventHub
+	ehConfigs := conf.ControlPlane
 	ehURL := ehConfigs.ServiceURL
 	// If the eventHub URL is configured with trailing slash
 	if strings.HasSuffix(ehURL, "/") {
@@ -260,7 +260,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
 	// Take the configured labels from the adapter
-	configuredEnvs := conf.ControlPlane.EventHub.EnvironmentLabels
+	configuredEnvs := conf.ControlPlane.EnvironmentLabels
 	//finalEnvs contains the actual envrionments that the adapter should update
 	var finalEnvs []string
 	if len(configuredEnvs) > 0 {
@@ -307,12 +307,12 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 			go func(d SyncAPIResponse) {
 				// Retry fetching from control plane after a configured time interval
 				// Retry fetching from control plane after a configured time interval
-				if conf.ControlPlane.EventHub.RetryInterval == 0 {
+				if conf.ControlPlane.RetryInterval == 0 {
 					// Assign default retry interval
-					conf.ControlPlane.EventHub.RetryInterval = 5
+					conf.ControlPlane.RetryInterval = 5
 				}
-				logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.EventHub.RetryInterval*time.Second)
-				time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
+				logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
+				time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
 				logger.LoggerSync.Info("Retrying to fetch API data from control plane.")
 				FetchAPIs(&updatedAPIID, finalEnvs, c)
 			}(data)

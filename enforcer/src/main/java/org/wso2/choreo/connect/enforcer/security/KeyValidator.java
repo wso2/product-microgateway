@@ -22,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.models.API;
@@ -48,17 +49,17 @@ public class KeyValidator {
 
     private static final Logger log = LogManager.getLogger(KeyValidator.class);
 
-    public APIKeyValidationInfoDTO validateSubscription(String apiContext, String apiVersion, String consumerKey,
-                                                        String keyManager) {
+    public APIKeyValidationInfoDTO validateSubscription(String uuid, String apiContext, String apiVersion,
+                                                        String consumerKey, String keyManager) {
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
 
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Before validating subscriptions");
-                log.debug("Validation Info : { context : " + apiContext + " , " + "version : " + apiVersion
-                        + " , consumerKey : " + consumerKey + " }");
+                log.debug("Validation Info : { uuid : " + uuid + " , context : " + apiContext +
+                        " , version : " + apiVersion + " , consumerKey : " + consumerKey + " }");
             }
-            validateSubscriptionDetails(apiContext, apiVersion, consumerKey, keyManager, apiKeyValidationInfoDTO);
+            validateSubscriptionDetails(uuid, apiContext, apiVersion, consumerKey, keyManager, apiKeyValidationInfoDTO);
             if (log.isDebugEnabled()) {
                 log.debug("After validating subscriptions");
             }
@@ -126,8 +127,8 @@ public class KeyValidator {
         return scopesValidated;
     }
 
-    private boolean validateSubscriptionDetails(String context, String version, String consumerKey, String keyManager,
-            APIKeyValidationInfoDTO infoDTO) throws EnforcerException {
+    private boolean validateSubscriptionDetails(String uuid, String context, String version, String consumerKey,
+            String keyManager, APIKeyValidationInfoDTO infoDTO) throws EnforcerException {
         boolean defaultVersionInvoked = false;
         String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(context);
         if (apiTenantDomain == null) {
@@ -140,12 +141,12 @@ public class KeyValidator {
             version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
         }
 
-        validateSubscriptionDetails(infoDTO, context, version, consumerKey, keyManager, defaultVersionInvoked);
+        validateSubscriptionDetails(infoDTO, uuid, context, version, consumerKey, keyManager, defaultVersionInvoked);
         return infoDTO.isAuthorized();
     }
 
-    private APIKeyValidationInfoDTO validateSubscriptionDetails(APIKeyValidationInfoDTO infoDTO, String context,
-            String version, String consumerKey, String keyManager, boolean defaultVersionInvoked) {
+    private APIKeyValidationInfoDTO validateSubscriptionDetails(APIKeyValidationInfoDTO infoDTO, String uuid,
+            String context, String version, String consumerKey, String keyManager, boolean defaultVersionInvoked) {
         String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(context);
         if (apiTenantDomain == null) {
             apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -161,7 +162,7 @@ public class KeyValidator {
         //TODO add a check to see whether datastore is initialized an load data using rest api if it is not loaded
         // TODO: (VirajSalaka) Handle the scenario where the event is dropped.
         if (datastore != null) {
-            api = datastore.getApiByContextAndVersion(context, version);
+            api = datastore.getApiByContextAndVersion(uuid);
             if (api != null) {
                 key = datastore.getKeyMappingByKeyAndKeyManager(consumerKey, keyManager);
                 if (key != null) {
@@ -191,7 +192,7 @@ public class KeyValidator {
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("API not found in the datastore for " + context + ":" + version);
+                    log.debug("API not found in the datastore for API UUID :" + uuid);
                 }
             }
         } else {
@@ -226,6 +227,10 @@ public class KeyValidator {
                 && !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
             infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
             infoDTO.setType(type);
+            infoDTO.setAuthorized(false);
+            return infoDTO;
+        } else if (APIConstants.LifecycleStatus.BLOCKED.equals(api.getLcState())) {
+            infoDTO.setValidationStatus(GeneralErrorCodeConstants.API_BLOCKED_CODE);
             infoDTO.setAuthorized(false);
             return infoDTO;
         }

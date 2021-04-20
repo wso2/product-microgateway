@@ -123,4 +123,16 @@ public interface APIsOrBuilder extends
    */
   com.google.protobuf.ByteString
       getUuidBytes();
+
+  /**
+   * <code>string lcState = 11;</code>
+   * @return The lcState.
+   */
+  java.lang.String getLcState();
+  /**
+   * <code>string lcState = 11;</code>
+   * @return The bytes for lcState.
+   */
+  com.google.protobuf.ByteString
+      getLcStateBytes();
 }
