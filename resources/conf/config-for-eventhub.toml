@@ -44,6 +44,7 @@
   securedListenerHost = "0.0.0.0"
   securedListenerPort = 9095
   clusterTimeoutInSeconds = 20
+  enforcerResponseTimeoutInSeconds = 20
   # system hostname for system API resources (eg: /testkey and /health)
   systemHost = "localhost"
 
@@ -193,7 +194,7 @@ allowCredentials = false
 [[security.enforcer.tokenService]]
   name="Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
-  certificateAlias = ""
+  certificateAlias = "wso2carbon"
   # URL of the JWKs endpoint
   jwksURL = ""
   # Validate subscribed APIs
