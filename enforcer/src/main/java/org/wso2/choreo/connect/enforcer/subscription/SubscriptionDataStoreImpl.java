@@ -21,7 +21,6 @@ package org.wso2.choreo.connect.enforcer.subscription;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.subscription.APIs;
-import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.discovery.ApiListDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.discovery.ApplicationDiscoveryClient;
@@ -89,10 +88,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.appPolicyMap = new ConcurrentHashMap<>();
         this.apiPolicyMap = new ConcurrentHashMap<>();
         this.subscriptionMap = new ConcurrentHashMap<>();
-        //TODO: Enable data loading tasks if event hub is enabled
-        if (ConfigHolder.getInstance().getConfig().getEventHub().isEnabled()) {
-            initializeLoadingTasks();
-        }
+        initializeLoadingTasks();
     }
 
     @Override
@@ -107,10 +103,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public API getApiByContextAndVersion(String context, String version) {
-
-        String key = context + DELEM_PERIOD + version;
-        return apiMap.get(key);
+    public API getApiByContextAndVersion(String uuid) {
+        return apiMap.get(uuid);
     }
 
     @Override
@@ -210,7 +204,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             newApi.setContext(api.getContext());
             newApi.setApiTier(api.getPolicy());
             newApi.setApiUUID(api.getUuid());
-
+            newApi.setLcState(api.getLcState());
             newApiMap.put(newApi.getCacheKey(), newApi);
         }
         if (log.isDebugEnabled()) {

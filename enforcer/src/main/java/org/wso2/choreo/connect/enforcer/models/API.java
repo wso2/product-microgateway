@@ -37,6 +37,7 @@ public class API implements CacheableEntity<String> {
     private String apiType = null;
     private boolean isDefaultVersion = false;
     private String apiUUID = null;
+    private String lcState = null;
 
     private List<URLMapping> urlMappings = new ArrayList<>();
 
@@ -117,7 +118,7 @@ public class API implements CacheableEntity<String> {
 
     public String getCacheKey() {
 
-        return context + DELEM_PERIOD + version;
+        return apiUUID;
     }
 
     public String getApiType() {
@@ -128,6 +129,14 @@ public class API implements CacheableEntity<String> {
     public void setApiType(String apiType) {
 
         this.apiType = apiType;
+    }
+
+    public String getLcState() {
+        return lcState;
+    }
+
+    public void setLcState(String lcState) {
+        this.lcState = lcState;
     }
 
     @Override

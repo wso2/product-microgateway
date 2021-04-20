@@ -66,6 +66,8 @@ type Config struct {
 	Adapter struct {
 		// Server represents the configuration related to REST API (to which the apictl requests)
 		Server struct {
+			// Enabled the serving the REST API
+			Enabled bool `default:"true"`
 			// Host name of the server
 			Host string
 			// Port of the server
@@ -113,13 +115,14 @@ type Config struct {
 
 	// Envoy Listener Component related configurations.
 	Envoy struct {
-		ListenerHost            string
-		ListenerPort            uint32
-		SecuredListenerHost     string
-		SecuredListenerPort     uint32
-		ClusterTimeoutInSeconds time.Duration
-		KeyStore                keystore
-		SystemHost              string
+		ListenerHost                     string
+		ListenerPort                     uint32
+		SecuredListenerHost              string
+		SecuredListenerPort              uint32
+		ClusterTimeoutInSeconds          time.Duration
+		EnforcerResponseTimeoutInSeconds time.Duration `default:"20"`
+		KeyStore                         keystore
+		SystemHost                       string `default:"localhost"`
 
 		// Global CORS configurations.
 		Cors struct {
@@ -146,7 +149,6 @@ type Config struct {
 	} `toml:"router"`
 
 	Enforcer struct {
-		EventHub        eventHub
 		ApimCredentials apimCredentials
 		AuthService     authService
 		JwtGenerator    jwtGenerator
@@ -305,8 +307,8 @@ type analytics struct {
 	}
 
 	Enforcer struct {
-		AuthURL             string      `toml:"authURL"`
-		AuthToken           string      `toml:"authToken"`
+		// TODO: (VirajSalaka) convert it to map[string]{}interface
+		ConfigProperties    map[string]string
 		EnforcerLogReceiver authService `toml:"LogReceiver"`
 	}
 }
@@ -343,19 +345,17 @@ type APICtlUser struct {
 
 // ControlPlane struct contains configurations related to the API Manager
 type controlPlane struct {
-	EventHub struct {
-		Enabled                 bool          `toml:"enabled"`
-		ServiceURL              string        `toml:"serviceUrl"`
-		Username                string        `toml:"username"`
-		Password                string        `toml:"password"`
-		SyncApisOnStartUp       bool          `toml:"syncApisOnStartUp"`
-		EnvironmentLabels       []string      `toml:"environmentLabels"`
-		RetryInterval           time.Duration `toml:"retryInterval"`
-		SkipSSLVerification     bool          `toml:"skipSSLVerification"`
-		JmsConnectionParameters struct {
-			EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
-		} `toml:"jmsConnectionParameters"`
-	} `toml:"eventHub"`
+	Enabled                 bool          `toml:"enabled"`
+	ServiceURL              string        `toml:"serviceUrl"`
+	Username                string        `toml:"username"`
+	Password                string        `toml:"password"`
+	SyncApisOnStartUp       bool          `toml:"syncApisOnStartUp"`
+	EnvironmentLabels       []string      `toml:"environmentLabels"`
+	RetryInterval           time.Duration `toml:"retryInterval"`
+	SkipSSLVerification     bool          `toml:"skipSSLVerification"`
+	JmsConnectionParameters struct {
+		EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
+	} `toml:"jmsConnectionParameters"`
 }
 
 // APIContent contains everything necessary to create an API
@@ -374,6 +374,7 @@ type APIContent struct {
 	SecurityScheme     []string
 	EndpointSecurity   EndpointSecurity
 	AuthHeader         string
+	OrganizationID     string
 }
 
 // APIJsonData contains everything necessary to extract api.json/api.yaml file
@@ -387,6 +388,7 @@ type APIJsonData struct {
 		EndpointImplementationType string   `json:"endpointImplementationType,omitempty"`
 		AuthorizationHeader        string   `json:"authorizationHeader,omitempty"`
 		SecurityScheme             []string `json:"securityScheme,omitempty"`
+		OrganizationID             string   `json:"organizationId,omitempty"`
 		EndpointConfig             struct {
 			EndpointType     string `json:"endpoint_type,omitempty"`
 			EndpointSecurity struct {

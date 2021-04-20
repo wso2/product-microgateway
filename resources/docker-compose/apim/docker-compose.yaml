@@ -14,7 +14,7 @@ services:
     volumes:
       - ./conf/deployment.toml:/home/wso2carbon/wso2am-4.0.0-beta/repository/conf/deployment.toml
   router:
-    image: wso2/choreo-connect-router:0.9.0-beta-SNAPSHOT
+    image: wso2/choreo-connect-router:0.9.0-beta2-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -23,7 +23,7 @@ services:
       - ROUTER_ADMIN_HOST=0.0.0.0
       - ROUTER_ADMIN_PORT=9000
       - ROUTER_CLUSTER=default_cluster
-      - ROUTER_LABEL=Production and Sandbox
+      - ROUTER_LABEL=Default
       - ROUTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
       - ROUTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
       - ADAPTER_HOST=adapter
@@ -42,7 +42,7 @@ services:
       - adapter
       - enforcer
   adapter:
-    image: wso2/choreo-connect-adapter:0.9.0-beta-SNAPSHOT
+    image: wso2/choreo-connect-adapter:0.9.0-beta2-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -52,10 +52,11 @@ services:
         condition: service_healthy
     volumes:
       - ../resources/adapter/security:/home/wso2/security
-      - ./conf/log4j2.properties:/home/wso2/conf/log4j2.properties
       - ./conf/log_config.toml:/home/wso2/conf/log_config.toml
       - ./conf/config.toml:/home/wso2/conf/config.toml
     environment:
+      - ADAPTER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
+      - ADAPTER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem
       - cp_admin_pwd=admin
       - adapter_admin_pwd=admin
     ports:
@@ -64,14 +65,14 @@ services:
     links:
       - apim
   enforcer:
-    image: wso2/choreo-connect-enforcer:0.9.0-beta-SNAPSHOT
+    image: wso2/choreo-connect-enforcer:0.9.0-beta2-SNAPSHOT
     logging:
       options:
         max-size: "20m"
         max-file: "5"
     volumes:
       - ../resources/enforcer/security:/home/wso2/security
-      - ./conf:/home/wso2/conf
+      - ./conf/log4j2.properties:/home/wso2/conf/log4j2.properties
       - ../resources/enforcer/dropins:/home/wso2/lib/dropins
     links:
       - adapter
@@ -83,7 +84,7 @@ services:
       - ADAPTER_HOST_NAME=adapter
       - ADAPTER_HOST=adapter
       - ADAPTER_XDS_PORT=18000
-      - ENFORCER_LABEL=Production and Sandbox
+      - ENFORCER_LABEL=Default
       - ENFORCER_REGION=UNKNOWN
       - XDS_MAX_MSG_SIZE=4194304
       - XDS_MAX_RETRIES=3

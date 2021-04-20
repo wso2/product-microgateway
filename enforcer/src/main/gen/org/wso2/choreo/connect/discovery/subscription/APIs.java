@@ -28,6 +28,7 @@ private static final long serialVersionUID = 0L;
     policy_ = "";
     apiType_ = "";
     uuid_ = "";
+    lcState_ = "";
   }
 
   @java.lang.Override
@@ -124,6 +125,12 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             uuid_ = s;
+            break;
+          }
+          case 90: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            lcState_ = s;
             break;
           }
           default: {
@@ -499,6 +506,44 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int LCSTATE_FIELD_NUMBER = 11;
+  private volatile java.lang.Object lcState_;
+  /**
+   * <code>string lcState = 11;</code>
+   * @return The lcState.
+   */
+  @java.lang.Override
+  public java.lang.String getLcState() {
+    java.lang.Object ref = lcState_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      lcState_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string lcState = 11;</code>
+   * @return The bytes for lcState.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getLcStateBytes() {
+    java.lang.Object ref = lcState_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      lcState_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -543,6 +588,9 @@ private static final long serialVersionUID = 0L;
     if (!getUuidBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 10, uuid_);
     }
+    if (!getLcStateBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 11, lcState_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -584,6 +632,9 @@ private static final long serialVersionUID = 0L;
     if (!getUuidBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, uuid_);
     }
+    if (!getLcStateBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, lcState_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -622,6 +673,8 @@ private static final long serialVersionUID = 0L;
     }
     if (!getUuid()
         .equals(other.getUuid())) return false;
+    if (!getLcState()
+        .equals(other.getLcState())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -656,6 +709,8 @@ private static final long serialVersionUID = 0L;
     }
     hash = (37 * hash) + UUID_FIELD_NUMBER;
     hash = (53 * hash) + getUuid().hashCode();
+    hash = (37 * hash) + LCSTATE_FIELD_NUMBER;
+    hash = (53 * hash) + getLcState().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -817,6 +872,8 @@ private static final long serialVersionUID = 0L;
       }
       uuid_ = "";
 
+      lcState_ = "";
+
       return this;
     }
 
@@ -857,6 +914,7 @@ private static final long serialVersionUID = 0L;
         result.urlMappings_ = urlMappingsBuilder_.build();
       }
       result.uuid_ = uuid_;
+      result.lcState_ = lcState_;
       onBuilt();
       return result;
     }
@@ -941,6 +999,10 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getUuid().isEmpty()) {
         uuid_ = other.uuid_;
+        onChanged();
+      }
+      if (!other.getLcState().isEmpty()) {
+        lcState_ = other.lcState_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -1726,6 +1788,82 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       uuid_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object lcState_ = "";
+    /**
+     * <code>string lcState = 11;</code>
+     * @return The lcState.
+     */
+    public java.lang.String getLcState() {
+      java.lang.Object ref = lcState_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        lcState_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string lcState = 11;</code>
+     * @return The bytes for lcState.
+     */
+    public com.google.protobuf.ByteString
+        getLcStateBytes() {
+      java.lang.Object ref = lcState_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        lcState_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string lcState = 11;</code>
+     * @param value The lcState to set.
+     * @return This builder for chaining.
+     */
+    public Builder setLcState(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      lcState_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string lcState = 11;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearLcState() {
+      
+      lcState_ = getDefaultInstance().getLcState();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string lcState = 11;</code>
+     * @param value The bytes for lcState to set.
+     * @return This builder for chaining.
+     */
+    public Builder setLcStateBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      lcState_ = value;
       onChanged();
       return this;
     }

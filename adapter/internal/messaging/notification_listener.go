@@ -43,7 +43,7 @@ const (
 	deployAPIToGateway          = "DEPLOY_API_IN_GATEWAY"
 	applicationRegistration     = "APPLICATION_REGISTRATION_CREATE"
 	removeApplicationKeyMapping = "REMOVE_APPLICATION_KEYMAPPING"
-	apiLifeCycleChange          = "API_LIFECYCLE_CHANGE"
+	apiLifeCycleChange          = "LIFECYCLE_CHANGE"
 	applicationCreate           = "APPLICATION_CREATE"
 	applicationUpdate           = "APPLICATION_UPDATE"
 	applicationDelete           = "APPLICATION_DELETE"
@@ -53,6 +53,7 @@ const (
 	policyCreate                = "POLICY_CREATE"
 	policyUpdate                = "POLICY_UPDATE"
 	policyDelete                = "POLICY_DELETE"
+	blockedStatus               = "BLOCKED"
 )
 
 // var variables
@@ -81,8 +82,11 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 		}
 		logger.LoggerMsg.Debugf("\n\n[%s]", decodedByte)
 		eventType = notification.Event.PayloadData.EventType
+		logger.LoggerMsg.Debugf("Event type : %s", eventType)
 
-		if strings.Contains(eventType, apiEventType) {
+		if strings.Contains(eventType, apiLifeCycleChange) {
+			handleLifeCycleEvents(decodedByte)
+		} else if strings.Contains(eventType, apiEventType) {
 			handleAPIEvents(decodedByte, eventType)
 		} else if strings.Contains(eventType, applicationEventType) {
 			handleApplicationEvents(decodedByte, eventType)
@@ -118,9 +122,9 @@ func handleAPIEvents(data []byte, eventType string) {
 		}
 		if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
 			conf, _ := config.ReadConfigs()
-			configuredEnvs := conf.ControlPlane.EventHub.EnvironmentLabels
+			configuredEnvs := conf.ControlPlane.EnvironmentLabels
 			if len(configuredEnvs) == 0 {
-				configuredEnvs = append(configuredEnvs, eh.DefaultGatewayLabelValue)
+				configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
 			}
 			for _, configuredEnv := range configuredEnvs {
 				if configuredEnv == env {
@@ -158,6 +162,32 @@ func handleAPIEvents(data []byte, eventType string) {
 						xds.UpdateEnforcerAPIList(env, xds.MarshalAPIList(eh.APIListMap[env]))
 						break
 					}
+				}
+			}
+		}
+	}
+}
+
+func handleLifeCycleEvents(data []byte) {
+	var apiEvent APIEvent
+	json.Unmarshal([]byte(string(data)), &apiEvent)
+	conf, _ := config.ReadConfigs()
+	configuredEnvs := conf.ControlPlane.EnvironmentLabels
+	logger.LoggerMsg.Debugf("%s : %s API life cycle state change event triggered", apiEvent.APIName, apiEvent.APIVersion)
+	if len(configuredEnvs) == 0 {
+		configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
+	}
+	for _, configuredEnv := range configuredEnvs {
+		if _, ok := eh.APIListMap[configuredEnv]; ok {
+			apiListOfEnv := eh.APIListMap[configuredEnv].List
+			for i := range apiListOfEnv {
+				if apiEvent.UUID == apiListOfEnv[i].UUID && (apiListOfEnv[i].APIStatus == blockedStatus ||
+					apiEvent.APIStatus == blockedStatus) {
+					//If previous or current state is 'Blocked' only we update the xds. All other states are neglected at the gateway
+					logger.LoggerMsg.Infof("Lifecycle state changed from %s to %s", apiListOfEnv[i].APIStatus, apiEvent.APIStatus)
+					apiListOfEnv[i].APIStatus = apiEvent.APIStatus
+					xds.UpdateEnforcerAPIList(configuredEnv, xds.MarshalAPIList(eh.APIListMap[configuredEnv]))
+					break
 				}
 			}
 		}

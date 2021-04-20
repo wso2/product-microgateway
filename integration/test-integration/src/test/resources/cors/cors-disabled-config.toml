@@ -4,6 +4,7 @@
 
 # server: configuration related to REST API
 [adapter.server]
+  enabled = true
   host = "0.0.0.0"
   port = "9843"
   tokenTTL = "1h"
@@ -210,17 +211,15 @@ allowCredentials = false
     certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 [controlPlane]
-# Control plane's eventHub details
-[controlPlane.eventHub]
-  enabled = true
+  enabled = false
   serviceUrl = "https://apim:9443/"
   username="admin"
   password="$env{cp_admin_pwd}"
-  environmentLabels = ["Production and Sandbox"]
+  environmentLabels = ["Default"]
   retryInterval = 5
   skipSSLVerification=true
   # Message broker connection URL of the control plane
-    [controlPlane.eventHub.jmsConnectionParameters]
+    [controlPlane.jmsConnectionParameters]
         eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
 
 [analytics]

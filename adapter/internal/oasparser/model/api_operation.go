@@ -49,7 +49,7 @@ func (operation *Operation) GetTier() string {
 
 // NewOperation Creates and returns operation type object
 func NewOperation(method string, security []map[string][]string, extensions map[string]interface{}) Operation {
-	tier := ResolveXThrottlingTier(extensions)
+	tier := ResolveThrottlingTier(extensions)
 	disableSecurity := ResolveDisableSecurity(extensions)
 	return Operation{method, security, tier, disableSecurity}
 }

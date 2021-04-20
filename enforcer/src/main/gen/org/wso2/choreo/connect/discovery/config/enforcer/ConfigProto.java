@@ -32,45 +32,41 @@ public final class ConfigProto {
       "proto\022\036wso2.discovery.config.enforcer\032)w" +
       "so2/discovery/config/enforcer/cert.proto" +
       "\032-wso2/discovery/config/enforcer/securit" +
-      "y.proto\032.wso2/discovery/config/enforcer/" +
-      "event_hub.proto\0323wso2/discovery/config/e" +
-      "nforcer/am_credentials.proto\032,wso2/disco" +
-      "very/config/enforcer/service.proto\0322wso2" +
-      "/discovery/config/enforcer/jwt_generator" +
-      ".proto\032/wso2/discovery/config/enforcer/j" +
-      "wt_issuer.proto\032/wso2/discovery/config/e" +
-      "nforcer/throttling.proto\032*wso2/discovery" +
-      "/config/enforcer/cache.proto\032.wso2/disco" +
-      "very/config/enforcer/analytics.proto\"\270\005\n" +
-      "\006Config\022:\n\010security\030\001 \001(\0132(.wso2.discove" +
-      "ry.config.enforcer.Security\022;\n\010keystore\030" +
-      "\002 \001(\0132).wso2.discovery.config.enforcer.C" +
-      "ertStore\022=\n\ntruststore\030\003 \001(\0132).wso2.disc" +
-      "overy.config.enforcer.CertStore\022:\n\010event" +
-      "hub\030\004 \001(\0132(.wso2.discovery.config.enforc" +
-      "er.EventHub\022<\n\013authService\030\005 \001(\0132\'.wso2." +
-      "discovery.config.enforcer.Service\022F\n\017api" +
-      "mCredentials\030\006 \001(\0132-.wso2.discovery.conf" +
-      "ig.enforcer.AmCredentials\022B\n\014jwtGenerato" +
-      "r\030\007 \001(\0132,.wso2.discovery.config.enforcer" +
-      ".JWTGenerator\022>\n\nthrottling\030\010 \001(\0132*.wso2" +
-      ".discovery.config.enforcer.Throttling\0224\n" +
-      "\005cache\030\t \001(\0132%.wso2.discovery.config.enf" +
-      "orcer.Cache\022<\n\tjwtIssuer\030\n \001(\0132).wso2.di" +
-      "scovery.config.enforcer.JWTIssuer\022<\n\tana" +
-      "lytics\030\013 \001(\0132).wso2.discovery.config.enf" +
-      "orcer.AnalyticsB\222\001\n1org.wso2.choreo.conn" +
-      "ect.discovery.config.enforcerB\013ConfigPro" +
-      "toP\001ZNgithub.com/envoyproxy/go-control-p" +
-      "lane/wso2/discovery/config/enforcer;enfo" +
-      "rcerb\006proto3"
+      "y.proto\0323wso2/discovery/config/enforcer/" +
+      "am_credentials.proto\032,wso2/discovery/con" +
+      "fig/enforcer/service.proto\0322wso2/discove" +
+      "ry/config/enforcer/jwt_generator.proto\032/" +
+      "wso2/discovery/config/enforcer/jwt_issue" +
+      "r.proto\032/wso2/discovery/config/enforcer/" +
+      "throttling.proto\032*wso2/discovery/config/" +
+      "enforcer/cache.proto\032.wso2/discovery/con" +
+      "fig/enforcer/analytics.proto\"\374\004\n\006Config\022" +
+      ":\n\010security\030\001 \001(\0132(.wso2.discovery.confi" +
+      "g.enforcer.Security\022;\n\010keystore\030\002 \001(\0132)." +
+      "wso2.discovery.config.enforcer.CertStore" +
+      "\022=\n\ntruststore\030\003 \001(\0132).wso2.discovery.co" +
+      "nfig.enforcer.CertStore\022<\n\013authService\030\005" +
+      " \001(\0132\'.wso2.discovery.config.enforcer.Se" +
+      "rvice\022F\n\017apimCredentials\030\006 \001(\0132-.wso2.di" +
+      "scovery.config.enforcer.AmCredentials\022B\n" +
+      "\014jwtGenerator\030\007 \001(\0132,.wso2.discovery.con" +
+      "fig.enforcer.JWTGenerator\022>\n\nthrottling\030" +
+      "\010 \001(\0132*.wso2.discovery.config.enforcer.T" +
+      "hrottling\0224\n\005cache\030\t \001(\0132%.wso2.discover" +
+      "y.config.enforcer.Cache\022<\n\tjwtIssuer\030\n \001" +
+      "(\0132).wso2.discovery.config.enforcer.JWTI" +
+      "ssuer\022<\n\tanalytics\030\013 \001(\0132).wso2.discover" +
+      "y.config.enforcer.AnalyticsB\222\001\n1org.wso2" +
+      ".choreo.connect.discovery.config.enforce" +
+      "rB\013ConfigProtoP\001ZNgithub.com/envoyproxy/" +
+      "go-control-plane/wso2/discovery/config/e" +
+      "nforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           org.wso2.choreo.connect.discovery.config.enforcer.CertStoreProto.getDescriptor(),
           org.wso2.choreo.connect.discovery.config.enforcer.SecurityProto.getDescriptor(),
-          org.wso2.choreo.connect.discovery.config.enforcer.EventHubProto.getDescriptor(),
           org.wso2.choreo.connect.discovery.config.enforcer.AmCredentialsProto.getDescriptor(),
           org.wso2.choreo.connect.discovery.config.enforcer.ServiceProto.getDescriptor(),
           org.wso2.choreo.connect.discovery.config.enforcer.JWTGeneratorProto.getDescriptor(),
@@ -84,10 +80,9 @@ public final class ConfigProto {
     internal_static_wso2_discovery_config_enforcer_Config_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Config_descriptor,
-        new java.lang.String[] { "Security", "Keystore", "Truststore", "Eventhub", "AuthService", "ApimCredentials", "JwtGenerator", "Throttling", "Cache", "JwtIssuer", "Analytics", });
+        new java.lang.String[] { "Security", "Keystore", "Truststore", "AuthService", "ApimCredentials", "JwtGenerator", "Throttling", "Cache", "JwtIssuer", "Analytics", });
     org.wso2.choreo.connect.discovery.config.enforcer.CertStoreProto.getDescriptor();
     org.wso2.choreo.connect.discovery.config.enforcer.SecurityProto.getDescriptor();
-    org.wso2.choreo.connect.discovery.config.enforcer.EventHubProto.getDescriptor();
     org.wso2.choreo.connect.discovery.config.enforcer.AmCredentialsProto.getDescriptor();
     org.wso2.choreo.connect.discovery.config.enforcer.ServiceProto.getDescriptor();
     org.wso2.choreo.connect.discovery.config.enforcer.JWTGeneratorProto.getDescriptor();

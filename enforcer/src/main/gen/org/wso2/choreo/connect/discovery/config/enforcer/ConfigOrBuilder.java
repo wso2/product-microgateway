@@ -53,21 +53,6 @@ public interface ConfigOrBuilder extends
   org.wso2.choreo.connect.discovery.config.enforcer.CertStoreOrBuilder getTruststoreOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-   * @return Whether the eventhub field is set.
-   */
-  boolean hasEventhub();
-  /**
-   * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-   * @return The eventhub.
-   */
-  org.wso2.choreo.connect.discovery.config.enforcer.EventHub getEventhub();
-  /**
-   * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-   */
-  org.wso2.choreo.connect.discovery.config.enforcer.EventHubOrBuilder getEventhubOrBuilder();
-
-  /**
    * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
    * @return Whether the authService field is set.
    */

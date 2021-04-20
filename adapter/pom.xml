@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.am.choreo.connect</groupId>
         <artifactId>choreo-connect-parent</artifactId>
-        <version>0.9.0-beta-SNAPSHOT</version>
+        <version>0.9.0-beta2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -75,26 +75,26 @@
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
                 <configuration>
-                  <images>
-                    <image>
-                        <alias>choreo-connect-adapter</alias>
-                        <name>wso2/choreo-connect-adapter:${project.version}</name>
-                      <build>
-                        <contextDir>${project.basedir}/src/main/resources</contextDir>
-                        <assembly>
-                            <descriptor>${project.basedir}/src/main/assembly/assembly.xml</descriptor>
-                        </assembly>
-                        <args>
-                            <!-- The Args in the dockerfile seems to overridden by plugin-->
-                            <MG_USER>wso2</MG_USER>
-                            <MG_USER_ID>802</MG_USER_ID>
-                            <MG_USER_GROUP>wso2</MG_USER_GROUP>
-                            <MG_USER_GROUP_ID>802</MG_USER_GROUP_ID>
-                            <MG_USER_HOME>/home/wso2</MG_USER_HOME>
-                        </args>
-                      </build>
-                    </image>
-                  </images>
+                    <images>
+                        <image>
+                            <alias>choreo-connect-adapter</alias>
+                            <name>wso2/choreo-connect-adapter:${project.version}</name>
+                            <build>
+                                <contextDir>${project.basedir}/src/main/resources</contextDir>
+                                <assembly>
+                                    <descriptor>${project.basedir}/src/main/assembly/assembly.xml</descriptor>
+                                </assembly>
+                                <args>
+                                    <!-- The Args in the dockerfile seems to overridden by plugin-->
+                                    <MG_USER>wso2</MG_USER>
+                                    <MG_USER_ID>802</MG_USER_ID>
+                                    <MG_USER_GROUP>wso2</MG_USER_GROUP>
+                                    <MG_USER_GROUP_ID>802</MG_USER_GROUP_ID>
+                                    <MG_USER_HOME>/home/wso2</MG_USER_HOME>
+                                </args>
+                            </build>
+                        </image>
+                    </images>
                 </configuration>
                 <executions>
                     <execution>
@@ -105,7 +105,26 @@
                         </goals>
                     </execution>
                 </executions>
-              </plugin>
+            </plugin>
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>download-grpc-health-probe</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>
+                                https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v${grpc.healthProbe.version}/grpc_health_probe-linux-amd64
+                            </url>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

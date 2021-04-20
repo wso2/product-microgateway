@@ -36,6 +36,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.choreo.connect.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.grpc.ExtAuthService;
+import org.wso2.choreo.connect.enforcer.grpc.HealthService;
 import org.wso2.choreo.connect.enforcer.grpc.WebSocketFrameService;
 import org.wso2.choreo.connect.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
@@ -142,6 +143,7 @@ public class AuthServer {
                 .keepAliveTime(authServerConfig.getKeepAliveTime(), TimeUnit.SECONDS).bossEventLoopGroup(bossGroup)
                 .workerEventLoopGroup(workerGroup)
                 .addService(ServerInterceptors.intercept(new ExtAuthService(), new AccessLogInterceptor()))
+                .addService(new HealthService())
                 .addService(new WebSocketFrameService())
                 .maxInboundMessageSize(authServerConfig.getMaxMessageSize())
                 .maxInboundMetadataSize(authServerConfig.getMaxHeaderLimit()).channelType(NioServerSocketChannel.class)

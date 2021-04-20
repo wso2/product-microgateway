@@ -27,6 +27,7 @@ data:
 
     # server: configuration related to REST API
     [adapter.server]
+      enabled = true
       host = "0.0.0.0"
       port = "9843"
       tokenTTL = "1h"
@@ -34,6 +35,11 @@ data:
       [[adapter.server.users]]
         username = "admin"
         password = "$env{adapter_admin_pwd}"
+
+    # default vhosts mapping for standalone mode
+    [[adapter.vhostMapping]]
+      environment = "Default"
+      vhost = "gw.wso2.com"
 
     [adapter.keystore]
       certPath = "/home/wso2/security/keystore/mg.pem"
@@ -61,13 +67,16 @@ data:
       securedListenerHost = "0.0.0.0"
       securedListenerPort = 9095
       clusterTimeoutInSeconds = 20
+      enforcerResponseTimeoutInSeconds = 20
+      # system hostname for system API resources (eg: /testkey and /health)
+      systemHost = "gw.wso2.com"
 
     [router.keystore]
       certPath = "/home/wso2/security/keystore/mg.pem"
       keyPath = "/home/wso2/security/keystore/mg.key"
 
     [router.cors]
-    enabled = false
+    enabled = true
     allowOrigins = ["*"]
     allowMethods = ["GET","PUT","POST","DELETE","PATCH","OPTIONS"]
     allowHeaders = ["authorization","Access-Control-Allow-Origin","Content-Type","SOAPAction","apikey", "testKey", "Internal-Key"]
@@ -78,7 +87,7 @@ data:
     [router.upstream.tls]
       minimumProtocolVersion = "TLS1_1"
       maximumProtocolVersion = "TLS1_2"
-      ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"  
+      ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"
       # the default endpoint certificates
       trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
       verifyHostName = true
@@ -123,7 +132,7 @@ data:
 
     [enforcer.jwtIssuer]
       enabled = true
-      issuer = "https://localhost:9095/testkey"
+      issuer = "https://gw.wso2.com/testkey"
       encoding = "base64" # base64,base64url
       claimDialect = ""
       signingAlgorithm = "SHA256withRSA"
@@ -207,8 +216,8 @@ data:
     # Issuer 1
     [[security.enforcer.tokenService]]
       name="Resident Key Manager"
-      issuer = "https://wso2apim:9443/oauth2/token"
-      certificateAlias = ""
+      issuer = "https://apim.wso2.com/oauth2/token"
+      certificateAlias = "wso2carbon"
       # URL of the JWKs endpoint
       jwksURL = ""
       # Validate subscribed APIs
@@ -221,7 +230,7 @@ data:
     # Issuer 2
     [[security.enforcer.tokenService]]
         name="MGW"
-        issuer = "https://adapter:9095/testkey"
+        issuer = "https://gw.wso2.com/testkey"
         certificateAlias = "mgw"
         # URL of the JWKs endpoint
         jwksURL = ""
@@ -232,19 +241,47 @@ data:
         # Certificate Filepath within enforcer
         certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
-    [controlPlane]
+    # Issuer 3
+    [[security.enforcer.tokenService]]
+        name="APIM Publisher"
+        issuer = "https://apim.wso2.com/publisher"
+        certificateAlias = ""
+        certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
-    # Control plane's eventHub details
-    [controlPlane.eventHub]
+    [analytics]
+      enabled = false
+      [analytics.adapter]
+        bufferFlushInterval = "1s"
+        bufferSizeBytes = 16384
+        gRPCRequestTimeout = "20s"
+
+      [analytics.enforcer]
+        [analytics.enforcer.configProperties]
+          authURL = "$env{analytics_authURL}"
+          authToken = "$env{analytics_authToken}"
+
+        [analytics.enforcer.LogReceiver]
+          port = 18090
+          maxMessageSize = 1000000000
+          maxHeaderLimit = 8192
+          #keep alive time of the external authz connection
+          keepAliveTime = 600
+
+          [analytics.enforcer.LogReceiver.threadPool]
+            coreSize = 10
+            maxSize = 100
+            #keep alive time of threads in seconds
+            keepAliveTime = 600
+            queueSize = 1000
+
+    [controlPlane]
       enabled = false
       serviceUrl = "https://wso2apim:9443/"
       username="admin"
       password="$env{cp_admin_pwd}"
-      environmentLabels = ["Production and Sandbox"]
+      environmentLabels = ["Default"]
       retryInterval = 5
       skipSSLVerification=true
       # Message broker connection URL of the control plane
-      [controlPlane.eventHub.jmsConnectionParameters]
+      [controlPlane.jmsConnectionParameters]
         eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@wso2apim:5672?retries='10'&connectdelay='30'"]
-
-

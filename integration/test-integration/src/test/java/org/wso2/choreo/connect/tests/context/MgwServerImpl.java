@@ -59,7 +59,7 @@ public abstract class MgwServerImpl implements MgwServer {
         try {
             environment.start();
         } catch (Exception e) {
-            log.error("Error occurs when docker-compose up");
+            log.error("Error occurred when docker-compose up: {}", e.getMessage());
         }
         Awaitility.await().pollInterval(5, TimeUnit.SECONDS).atMost(150, TimeUnit.SECONDS).until(isBackendAvailable());
         if (!checkForBackendAvailability()) {

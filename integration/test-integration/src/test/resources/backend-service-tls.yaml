@@ -4,5 +4,6 @@
     command: java -cp "lib/*" org.wso2.choreo.connect.mockbackend.MockBackEndServer -tls-enabled
     ports:
       - "2383:2383"
+      - "2399:2399"
     links:
       - router

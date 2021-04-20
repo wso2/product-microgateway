@@ -59,7 +59,7 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
 	// Populate data from the config
-	ehConfigs := conf.ControlPlane.EventHub
+	ehConfigs := conf.ControlPlane
 	ehURL := ehConfigs.ServiceURL
 	// If the eventHub URL is configured with trailing slash
 	if strings.HasSuffix(ehURL, "/") {
@@ -137,8 +137,8 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 
 func retryFetchData(conf *config.Config, errorMessage string, err error) {
 	logger.LoggerSync.Debugf("Time Duration for retrying: %v",
-		conf.ControlPlane.EventHub.RetryInterval*time.Second)
-	time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
+		conf.ControlPlane.RetryInterval*time.Second)
+	time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
 	FetchKeyManagersOnStartUp(conf)
 	retryAttempt++
 	if retryAttempt >= retryCount {

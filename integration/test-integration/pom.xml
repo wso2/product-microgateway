@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.am.choreo.connect</groupId>
         <artifactId>integration</artifactId>
-        <version>0.9.0-beta-SNAPSHOT</version>
+        <version>0.9.0-beta2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -76,8 +76,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -213,13 +213,12 @@
         <dependency>
             <groupId>org.wso2.am.choreo.connect</groupId>
             <artifactId>mock-backend-server</artifactId>
-            <version>0.9.0-beta-SNAPSHOT</version>
+            <version>0.9.0-beta2-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -233,7 +232,7 @@
         <dependency>
             <groupId>org.wso2.am.choreo.connect</groupId>
             <artifactId>org.wso2.choreo.connect.enforcer</artifactId>
-            <version>0.9.0-beta-SNAPSHOT</version>
+            <version>0.9.0-beta2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.am</groupId>
@@ -241,9 +240,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.wso2.am.analytics.publisher</groupId>
+            <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>3.1.2</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.java-websocket/Java-WebSocket -->

@@ -20,6 +20,7 @@ package adapter
 
 import (
 	"crypto/tls"
+	"strings"
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
@@ -31,6 +32,8 @@ import (
 	subscriptionservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/subscription"
 	throttleservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/throtlle"
 	wso2_server "github.com/wso2/adapter/internal/discovery/protocol/server/v3"
+	"github.com/wso2/adapter/internal/health"
+	healthservice "github.com/wso2/adapter/internal/health/api/wso2/health/service"
 	"github.com/wso2/adapter/internal/tlsutils"
 
 	"context"
@@ -68,8 +71,6 @@ var (
 
 const (
 	ads = "ads"
-	// DefaultGatewayLabelValue represents the default value for an environment
-	DefaultGatewayLabelValue string = "Production and Sandbox"
 )
 
 func init() {
@@ -83,7 +84,7 @@ func init() {
 
 const grpcMaxConcurrentStreams = 1000000
 
-func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server, enforcerSdsServer wso2_server.Server,
+func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServer wso2_server.Server, enforcerSdsServer wso2_server.Server,
 	enforcerAppDsSrv wso2_server.Server, enforcerAPIDsSrv wso2_server.Server, enforcerAppPolicyDsSrv wso2_server.Server,
 	enforcerSubPolicyDsSrv wso2_server.Server, enforcerAppKeyMappingDsSrv wso2_server.Server,
 	enforcerKeyManagerDsSrv wso2_server.Server, enforcerRevokedTokenDsSrv wso2_server.Server,
@@ -128,16 +129,19 @@ func runManagementServer(server xdsv3.Server, enforcerServer wso2_server.Server,
 	keymanagerservice.RegisterRevokedTokenDiscoveryServiceServer(grpcServer, enforcerRevokedTokenDsSrv)
 	throttleservice.RegisterThrottleDataDiscoveryServiceServer(grpcServer, enforcerThrottleDataDsSrv)
 
+	// register health service
+	healthservice.RegisterHealthServer(grpcServer, &health.Server{})
+
 	logger.LoggerMgw.Info("port: ", port, " management server listening")
 	go func() {
+		// if control plane enabled wait until it starts
+		if conf.ControlPlane.Enabled {
+			// wait current goroutine forever for until control plane starts
+			health.WaitForControlPlane()
+		}
+		logger.LoggerMgw.Info("Starting XDS GRPC server.")
 		if err = grpcServer.Serve(lis); err != nil {
 			logger.LoggerMgw.Error(err)
-		}
-	}()
-
-	go func() {
-		if err = auth.Init(); err != nil {
-			logger.LoggerMgw.Error("Error while initializing autherization component.", err)
 		}
 	}()
 }
@@ -186,29 +190,35 @@ func Run(conf *config.Config) {
 	enforcerRevokedTokenDsSrv := wso2_server.NewServer(ctx, enforcerRevokedTokenCache, &cb.Callbacks{})
 	enforcerThrottleDataDsSrv := wso2_server.NewServer(ctx, enforcerThrottleDataCache, &cb.Callbacks{})
 
-	runManagementServer(srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
+	runManagementServer(conf, srv, enforcerXdsSrv, enforcerSdsSrv, enforcerAppDsSrv, enforcerAPIDsSrv,
 		enforcerAppPolicyDsSrv, enforcerSubPolicyDsSrv, enforcerAppKeyMappingDsSrv, enforcerKeyManagerDsSrv,
 		enforcerRevokedTokenDsSrv, enforcerThrottleDataDsSrv, port)
 
 	// Set enforcer startup configs
 	xds.UpdateEnforcerConfig(conf)
 
-	envs := conf.ControlPlane.EventHub.EnvironmentLabels
+	envs := conf.ControlPlane.EnvironmentLabels
 
 	// If no environments are configured, default gateway label value is assigned.
 	if len(envs) == 0 {
-		envs = append(envs, DefaultGatewayLabelValue)
+		envs = append(envs, config.DefaultGatewayName)
 	}
 
 	for _, env := range envs {
 		listeners, clusters, routes, endpoints, apis := xds.GenerateEnvoyResoucesForLabel(env)
 		xds.UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners)
-		xds.UpdateEnforcerApis(env, apis)
+		xds.UpdateEnforcerApis(env, apis, "")
 	}
 
-	go restserver.StartRestServer(conf)
+	// Adapter REST API
+	if conf.Adapter.Server.Enabled {
+		if err := auth.Init(); err != nil {
+			logger.LoggerMgw.Error("Error while initializing authorization component.", err)
+		}
+		go restserver.StartRestServer(conf)
+	}
 
-	eventHubEnabled := conf.ControlPlane.EventHub.Enabled
+	eventHubEnabled := conf.ControlPlane.Enabled
 	if eventHubEnabled {
 		// Load subscription data
 		eventhub.LoadSubscriptionData(conf)
@@ -221,13 +231,10 @@ func Run(conf *config.Config) {
 		go synchronizer.UpdateRevokedTokens()
 		// Fetch Key Managers from APIM
 		synchronizer.FetchKeyManagersOnStartUp(conf)
-	}
-
-	throttlingEnabled := conf.Enforcer.Throttling.EnableGlobalEventPublishing
-	if throttlingEnabled {
 		go synchronizer.UpdateKeyTemplates()
 		go synchronizer.UpdateBlockingConditions()
 	}
+
 OUTER:
 	for {
 		select {
@@ -255,7 +262,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 	// NOTE: Currently controle plane API does not support multiple labels in the same
 	// request. Hence until that is fixed, we have to make seperate requests.
 	// Checking the envrionments to fetch the APIs from
-	envs := conf.ControlPlane.EventHub.EnvironmentLabels
+	envs := conf.ControlPlane.EnvironmentLabels
 	// Create a channel for the byte slice (response from the APIs from control plane)
 	c := make(chan synchronizer.SyncAPIResponse)
 	if len(envs) > 0 {
@@ -281,20 +288,24 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 			if err != nil {
 				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
 			}
+			health.SetControlPlaneRestAPIStatus(err == nil)
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 			logger.LoggerMgw.Errorf("Error occurred when retrieveing APIs from control plane: %v", data.Err)
+			isNoAPIArtifacts := data.ErrorCode == 404 && strings.Contains(data.Err.Error(), "No Api artifacts found")
+			health.SetControlPlaneRestAPIStatus(isNoAPIArtifacts)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			i--
 			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
+			health.SetControlPlaneRestAPIStatus(false)
 			go func(d synchronizer.SyncAPIResponse) {
 				// Retry fetching from control plane after a configured time interval
-				if conf.ControlPlane.EventHub.RetryInterval == 0 {
+				if conf.ControlPlane.RetryInterval == 0 {
 					// Assign default retry interval
-					conf.ControlPlane.EventHub.RetryInterval = 5
+					conf.ControlPlane.RetryInterval = 5
 				}
-				logger.LoggerMgw.Debugf("Time Duration for retrying: %v", conf.ControlPlane.EventHub.RetryInterval*time.Second)
-				time.Sleep(conf.ControlPlane.EventHub.RetryInterval * time.Second)
+				logger.LoggerMgw.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
+				time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
 				logger.LoggerMgw.Infof("Retrying to fetch API data from control plane.")
 				synchronizer.FetchAPIs(&d.APIUUID, d.GatewayLabels, c)
 			}(data)

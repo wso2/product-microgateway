@@ -37,6 +37,8 @@ public class APIConfig {
     private String apiLifeCycleState;
     private String authorizationHeader;
     private EndpointSecurity endpointSecurity;
+    private String organizationId;
+    private String uuid;
 
     private List<String> securitySchemes = new ArrayList<>();
     private String tier = ThrottleConstants.UNLIMITED_TIER;
@@ -55,6 +57,14 @@ public class APIConfig {
         return sandboxUrls;
     }
 
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
     /**
      * Implements builder pattern to build an API Config object.
      */
@@ -70,6 +80,8 @@ public class APIConfig {
         private String apiLifeCycleState;
         private String authorizationHeader;
         private EndpointSecurity endpointSecurity;
+        private String organizationId;
+        private String uuid;
 
         private List<String> securitySchemes = new ArrayList<>();
         private String tier = ThrottleConstants.UNLIMITED_TIER;
@@ -145,6 +157,16 @@ public class APIConfig {
             return this;
         }
 
+        public Builder organizationId(String organizationId) {
+            this.organizationId = organizationId;
+            return this;
+        }
+
+        public Builder uuid(String uuid) {
+            this.uuid = uuid;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -161,6 +183,8 @@ public class APIConfig {
             apiConfig.endpointSecurity = this.endpointSecurity;
             apiConfig.authorizationHeader = this.authorizationHeader;
             apiConfig.disableSecurity = this.disableSecurity;
+            apiConfig.organizationId = this.organizationId;
+            apiConfig.uuid = this.uuid;
             return apiConfig;
         }
     }

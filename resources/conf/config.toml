@@ -4,6 +4,7 @@
 
 # server: configuration related to REST API
 [adapter.server]
+  enabled = true
   host = "0.0.0.0"
   port = "9843"
   tokenTTL = "1h"
@@ -14,7 +15,7 @@
 
 # default vhosts mapping for standalone mode
 [[adapter.vhostMapping]]
-  environment = "Production and Sandbox"
+  environment = "Default"
   vhost = "localhost"
 
 [adapter.keystore]
@@ -43,6 +44,7 @@
   securedListenerHost = "0.0.0.0"
   securedListenerPort = 9095
   clusterTimeoutInSeconds = 20
+  enforcerResponseTimeoutInSeconds = 20
   # system hostname for system API resources (eg: /testkey and /health)
   systemHost = "localhost"
 
@@ -121,7 +123,7 @@ allowCredentials = false
 # Throttling configurations
 [enforcer.throttling]
   # Connect with the central traffic manager
-  enableGlobalEventPublishing = true
+  enableGlobalEventPublishing = false
   # Enable global advanced throttling based on request header conditions
   enableHeaderConditions = false
   # Enable global advanced throttling based on request query parameter conditions
@@ -192,7 +194,7 @@ allowCredentials = false
 [[security.enforcer.tokenService]]
   name="Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
-  certificateAlias = ""
+  certificateAlias = "wso2carbon"
   # URL of the JWKs endpoint
   jwksURL = ""
   # Validate subscribed APIs
@@ -216,18 +218,24 @@ allowCredentials = false
     # Certificate Filepath within enforcer
     certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
+# Issuer 3
+[[security.enforcer.tokenService]]
+    name="APIM Publisher"
+    issuer = "https://localhost:9443/publisher"
+    certificateAlias = ""
+    certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+# Control plane's connection details
 [controlPlane]
-# Control plane's eventHub details
-[controlPlane.eventHub]
   enabled = false
   serviceUrl = "https://apim:9443/"
   username="admin"
   password="$env{cp_admin_pwd}"
-  environmentLabels = ["Production and Sandbox"]
+  environmentLabels = ["Default"]
   retryInterval = 5
   skipSSLVerification=true
   # Message broker connection URL of the control plane
-    [controlPlane.eventHub.jmsConnectionParameters]
+    [controlPlane.jmsConnectionParameters]
         eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
 
 [analytics]
@@ -238,8 +246,9 @@ allowCredentials = false
     gRPCRequestTimeout = "20s"
 
   [analytics.enforcer]
-    authURL = "$env{analytics_authURL}"
-    authToken = "$env{analytics_authToken}"
+    [analytics.enforcer.configProperties]
+      authURL = "$env{analytics_authURL}"
+      authToken = "$env{analytics_authToken}"
 
     [analytics.enforcer.LogReceiver]
       port = 18090

@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wso2.am.choreo.connect</groupId>
         <artifactId>choreo-connect-parent</artifactId>
-        <version>0.9.0-beta-SNAPSHOT</version>
+        <version>0.9.0-beta2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -231,6 +231,23 @@
                         <configuration>
                             <protoSourceRoot>${project.parent.basedir}/api</protoSourceRoot>
                             <outputDirectory>${project.build.sourceDirectory}/../gen/</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>download-grpc-health-probe</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v${grpc.healthProbe.version}/grpc_health_probe-linux-amd64</url>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

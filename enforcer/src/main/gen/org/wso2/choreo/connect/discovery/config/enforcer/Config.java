@@ -91,19 +91,6 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
-          case 34: {
-            org.wso2.choreo.connect.discovery.config.enforcer.EventHub.Builder subBuilder = null;
-            if (eventhub_ != null) {
-              subBuilder = eventhub_.toBuilder();
-            }
-            eventhub_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.EventHub.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(eventhub_);
-              eventhub_ = subBuilder.buildPartial();
-            }
-
-            break;
-          }
           case 42: {
             org.wso2.choreo.connect.discovery.config.enforcer.Service.Builder subBuilder = null;
             if (authService_ != null) {
@@ -303,32 +290,6 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public org.wso2.choreo.connect.discovery.config.enforcer.CertStoreOrBuilder getTruststoreOrBuilder() {
     return getTruststore();
-  }
-
-  public static final int EVENTHUB_FIELD_NUMBER = 4;
-  private org.wso2.choreo.connect.discovery.config.enforcer.EventHub eventhub_;
-  /**
-   * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-   * @return Whether the eventhub field is set.
-   */
-  @java.lang.Override
-  public boolean hasEventhub() {
-    return eventhub_ != null;
-  }
-  /**
-   * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-   * @return The eventhub.
-   */
-  @java.lang.Override
-  public org.wso2.choreo.connect.discovery.config.enforcer.EventHub getEventhub() {
-    return eventhub_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.EventHub.getDefaultInstance() : eventhub_;
-  }
-  /**
-   * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-   */
-  @java.lang.Override
-  public org.wso2.choreo.connect.discovery.config.enforcer.EventHubOrBuilder getEventhubOrBuilder() {
-    return getEventhub();
   }
 
   public static final int AUTHSERVICE_FIELD_NUMBER = 5;
@@ -536,9 +497,6 @@ private static final long serialVersionUID = 0L;
     if (truststore_ != null) {
       output.writeMessage(3, getTruststore());
     }
-    if (eventhub_ != null) {
-      output.writeMessage(4, getEventhub());
-    }
     if (authService_ != null) {
       output.writeMessage(5, getAuthService());
     }
@@ -580,10 +538,6 @@ private static final long serialVersionUID = 0L;
     if (truststore_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(3, getTruststore());
-    }
-    if (eventhub_ != null) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(4, getEventhub());
     }
     if (authService_ != null) {
       size += com.google.protobuf.CodedOutputStream
@@ -643,11 +597,6 @@ private static final long serialVersionUID = 0L;
       if (!getTruststore()
           .equals(other.getTruststore())) return false;
     }
-    if (hasEventhub() != other.hasEventhub()) return false;
-    if (hasEventhub()) {
-      if (!getEventhub()
-          .equals(other.getEventhub())) return false;
-    }
     if (hasAuthService() != other.hasAuthService()) return false;
     if (hasAuthService()) {
       if (!getAuthService()
@@ -705,10 +654,6 @@ private static final long serialVersionUID = 0L;
     if (hasTruststore()) {
       hash = (37 * hash) + TRUSTSTORE_FIELD_NUMBER;
       hash = (53 * hash) + getTruststore().hashCode();
-    }
-    if (hasEventhub()) {
-      hash = (37 * hash) + EVENTHUB_FIELD_NUMBER;
-      hash = (53 * hash) + getEventhub().hashCode();
     }
     if (hasAuthService()) {
       hash = (37 * hash) + AUTHSERVICE_FIELD_NUMBER;
@@ -893,12 +838,6 @@ private static final long serialVersionUID = 0L;
         truststore_ = null;
         truststoreBuilder_ = null;
       }
-      if (eventhubBuilder_ == null) {
-        eventhub_ = null;
-      } else {
-        eventhub_ = null;
-        eventhubBuilder_ = null;
-      }
       if (authServiceBuilder_ == null) {
         authService_ = null;
       } else {
@@ -981,11 +920,6 @@ private static final long serialVersionUID = 0L;
         result.truststore_ = truststore_;
       } else {
         result.truststore_ = truststoreBuilder_.build();
-      }
-      if (eventhubBuilder_ == null) {
-        result.eventhub_ = eventhub_;
-      } else {
-        result.eventhub_ = eventhubBuilder_.build();
       }
       if (authServiceBuilder_ == null) {
         result.authService_ = authService_;
@@ -1078,9 +1012,6 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasTruststore()) {
         mergeTruststore(other.getTruststore());
-      }
-      if (other.hasEventhub()) {
-        mergeEventhub(other.getEventhub());
       }
       if (other.hasAuthService()) {
         mergeAuthService(other.getAuthService());
@@ -1487,125 +1418,6 @@ private static final long serialVersionUID = 0L;
         truststore_ = null;
       }
       return truststoreBuilder_;
-    }
-
-    private org.wso2.choreo.connect.discovery.config.enforcer.EventHub eventhub_;
-    private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.config.enforcer.EventHub, org.wso2.choreo.connect.discovery.config.enforcer.EventHub.Builder, org.wso2.choreo.connect.discovery.config.enforcer.EventHubOrBuilder> eventhubBuilder_;
-    /**
-     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-     * @return Whether the eventhub field is set.
-     */
-    public boolean hasEventhub() {
-      return eventhubBuilder_ != null || eventhub_ != null;
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-     * @return The eventhub.
-     */
-    public org.wso2.choreo.connect.discovery.config.enforcer.EventHub getEventhub() {
-      if (eventhubBuilder_ == null) {
-        return eventhub_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.EventHub.getDefaultInstance() : eventhub_;
-      } else {
-        return eventhubBuilder_.getMessage();
-      }
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-     */
-    public Builder setEventhub(org.wso2.choreo.connect.discovery.config.enforcer.EventHub value) {
-      if (eventhubBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        eventhub_ = value;
-        onChanged();
-      } else {
-        eventhubBuilder_.setMessage(value);
-      }
-
-      return this;
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-     */
-    public Builder setEventhub(
-        org.wso2.choreo.connect.discovery.config.enforcer.EventHub.Builder builderForValue) {
-      if (eventhubBuilder_ == null) {
-        eventhub_ = builderForValue.build();
-        onChanged();
-      } else {
-        eventhubBuilder_.setMessage(builderForValue.build());
-      }
-
-      return this;
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-     */
-    public Builder mergeEventhub(org.wso2.choreo.connect.discovery.config.enforcer.EventHub value) {
-      if (eventhubBuilder_ == null) {
-        if (eventhub_ != null) {
-          eventhub_ =
-            org.wso2.choreo.connect.discovery.config.enforcer.EventHub.newBuilder(eventhub_).mergeFrom(value).buildPartial();
-        } else {
-          eventhub_ = value;
-        }
-        onChanged();
-      } else {
-        eventhubBuilder_.mergeFrom(value);
-      }
-
-      return this;
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-     */
-    public Builder clearEventhub() {
-      if (eventhubBuilder_ == null) {
-        eventhub_ = null;
-        onChanged();
-      } else {
-        eventhub_ = null;
-        eventhubBuilder_ = null;
-      }
-
-      return this;
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-     */
-    public org.wso2.choreo.connect.discovery.config.enforcer.EventHub.Builder getEventhubBuilder() {
-      
-      onChanged();
-      return getEventhubFieldBuilder().getBuilder();
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-     */
-    public org.wso2.choreo.connect.discovery.config.enforcer.EventHubOrBuilder getEventhubOrBuilder() {
-      if (eventhubBuilder_ != null) {
-        return eventhubBuilder_.getMessageOrBuilder();
-      } else {
-        return eventhub_ == null ?
-            org.wso2.choreo.connect.discovery.config.enforcer.EventHub.getDefaultInstance() : eventhub_;
-      }
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.EventHub eventhub = 4;</code>
-     */
-    private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.config.enforcer.EventHub, org.wso2.choreo.connect.discovery.config.enforcer.EventHub.Builder, org.wso2.choreo.connect.discovery.config.enforcer.EventHubOrBuilder> 
-        getEventhubFieldBuilder() {
-      if (eventhubBuilder_ == null) {
-        eventhubBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.choreo.connect.discovery.config.enforcer.EventHub, org.wso2.choreo.connect.discovery.config.enforcer.EventHub.Builder, org.wso2.choreo.connect.discovery.config.enforcer.EventHubOrBuilder>(
-                getEventhub(),
-                getParentForChildren(),
-                isClean());
-        eventhub_ = null;
-      }
-      return eventhubBuilder_;
     }
 
     private org.wso2.choreo.connect.discovery.config.enforcer.Service authService_;
