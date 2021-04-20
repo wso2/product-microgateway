@@ -49,6 +49,7 @@ import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -59,6 +60,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.net.ssl.SSLContext;
 
@@ -280,6 +282,15 @@ public class FilterUtils {
         return BigInteger.ZERO;
     }
 
+    /**
+     * Generates Authentication Context for the Internal Key Authenticator.
+     * @param tokenIdentifier
+     * @param payload
+     * @param api
+     * @param apiLevelPolicy
+     * @return
+     * @throws java.text.ParseException
+     */
     public static AuthenticationContext generateAuthenticationContext(String tokenIdentifier, JWTClaimsSet payload,
                                                                       JSONObject api, String apiLevelPolicy)
             throws java.text.ParseException {
@@ -301,6 +312,11 @@ public class FilterUtils {
             authContext.setApiPublisher(api.getAsString(APIConstants.JwtTokenConstants.API_PUBLISHER));
 
         }
+        authContext.setApplicationName(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME);
+        authContext.setApplicationId(UUID.nameUUIDFromBytes(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME.
+                getBytes(StandardCharsets.UTF_8)).toString());
+        authContext.setApplicationTier(APIConstants.UNLIMITED_TIER);
+        authContext.setSubscriber(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME);
         return authContext;
     }
 

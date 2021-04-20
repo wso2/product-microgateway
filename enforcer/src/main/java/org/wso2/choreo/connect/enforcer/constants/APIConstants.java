@@ -175,6 +175,7 @@ public class APIConstants {
         public static final String INTERNAL_KEY = "internal-key";
         public static final String PARAM_SEPARATOR = "&";
         public static final String PARAM_VALUE_SEPARATOR = "=";
+        public static final String INTERNAL_KEY_APP_NAME = "internal-key-app";
 
     }
 
