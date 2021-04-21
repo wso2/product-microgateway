@@ -20,12 +20,18 @@ package org.wso2.choreo.connect.enforcer.websocket;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.java_websocket.drafts.Draft_6455;
+import org.java_websocket.enums.Opcode;
+import org.java_websocket.exceptions.InvalidDataException;
+import org.java_websocket.framing.Framedata;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.grpc.WebSocketFrameService;
 import org.wso2.choreo.connect.enforcer.server.WebSocketHandler;
 
+import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,32 +48,58 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
     private final WebSocketHandler webSocketHandler = new WebSocketHandler();
     private String streamId;
     private boolean throttleKeysInitiated;
+    private Draft_6455 decoder;
 
     public WebSocketResponseObserver(StreamObserver<WebSocketFrameResponse> responseStreamObserver) {
         this.responseStreamObserver = responseStreamObserver;
+        this.decoder = new Draft_6455();
     }
 
     @Override
     public void onNext(WebSocketFrameRequest webSocketFrameRequest) {
         logger.debug("Websocket frame received");
+        logger.info(webSocketFrameRequest.getFrameLength());
+        try {
+            // In case a stream of websocket frames are intercepted by the filter, envoy will buffer them as mini
+            // batches and aggregate the frames. In that case if we directly send the frames to traffic manager, the
+            // frame count will be wrong. Instead we can decode the buffer into frames and then process them
+            // individually for throttling.
+            List<Framedata> frames = decoder.translateFrame(
+                    ByteBuffer.wrap(webSocketFrameRequest.getPayload().toByteArray()));
+            frames.forEach((framedata -> {
+                // Only consider text, binary and continous frames
+                if (framedata.getOpcode() == Opcode.TEXT || framedata.getOpcode() == Opcode.BINARY
+                    || framedata.getOpcode() == Opcode.CONTINUOUS) {
+                    WebSocketFrameRequest webSocketFrameRequestClone = webSocketFrameRequest.toBuilder()
+                            .setFrameLength(framedata.getPayloadData().remaining()).build();
+                    WebSocketThrottleResponse webSocketThrottleResponse = webSocketHandler
+                            .process(webSocketFrameRequestClone);
+                    if (WebSocketThrottleState.OK == webSocketThrottleResponse.getWebSocketThrottleState()) {
+                        WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
+                                WebSocketFrameResponse.Code.OK).build();
+                        responseStreamObserver.onNext(response);
+                    } else if (WebSocketThrottleState.OVER_LIMIT == webSocketThrottleResponse
+                            .getWebSocketThrottleState()) {
+                        logger.debug("throttle period" + webSocketThrottleResponse.getThrottlePeriod());
+                        WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
+                                WebSocketFrameResponse.Code.OVER_LIMIT).setThrottlePeriod(
+                                webSocketThrottleResponse.getThrottlePeriod()).build();
+                        responseStreamObserver.onNext(response);
+                    } else {
+                        WebSocketFrameResponse webSocketFrameResponse = WebSocketFrameResponse.newBuilder()
+                                .setThrottleState(WebSocketFrameResponse.Code.UNKNOWN).build();
+                        responseStreamObserver.onNext(webSocketFrameResponse);
+                    }
+                } else {
+                    logger.info("Websocket frame type not related to throttling");
+                }
+            }));
+        } catch (InvalidDataException e) {
+            logger.error(e);
+        }
+
         if (!this.throttleKeysInitiated) {
             initializeThrottleKeys(webSocketFrameRequest);
-        }
-        WebSocketThrottleResponse webSocketThrottleResponse = webSocketHandler.process(webSocketFrameRequest);
-        if (WebSocketThrottleState.OK == webSocketThrottleResponse.getWebSocketThrottleState()) {
-            WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
-                    WebSocketFrameResponse.Code.OK).build();
-            responseStreamObserver.onNext(response);
-        } else if (WebSocketThrottleState.OVER_LIMIT == webSocketThrottleResponse.getWebSocketThrottleState()) {
-            logger.debug("throttle period" + webSocketThrottleResponse.getThrottlePeriod());
-            WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
-                    WebSocketFrameResponse.Code.OVER_LIMIT).setThrottlePeriod(
-                    webSocketThrottleResponse.getThrottlePeriod()).build();
-            responseStreamObserver.onNext(response);
-        } else {
-            WebSocketFrameResponse webSocketFrameResponse = WebSocketFrameResponse.newBuilder().setThrottleState(
-                    WebSocketFrameResponse.Code.UNKNOWN).build();
-            responseStreamObserver.onNext(webSocketFrameResponse);
         }
     }
 
@@ -82,6 +114,7 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
         WebSocketFrameService.removeObserver(streamId);
     }
 
+    // Not used for throttling purposes currently. Only kept as a reference
     private void initializeThrottleKeys(WebSocketFrameRequest webSocketFrameRequest) {
         Map<String, String> extAuthMetadata = webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap();
         String basePath = extAuthMetadata.get(APIConstants.GW_BASE_PATH_PARAM);
