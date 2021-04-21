@@ -955,17 +955,22 @@ func restorePreviousState(label string) string {
 * If success ==> store the current state as the last success state
 * Flow -->
 * 1. Update the enforcer
-* 2. Listen for the discovery request from client.
-* 3. If success, set the current state as the success state. Otherwise, restore the previous state.
-* 4. Update the router
+* 2. Listen for the discovery request from enforcer and router.
+* 3. If enforcer success, update the router, otherwise restore both enforcer and router to the last known success state
+* 4. If router failed, restore both router and enforcer to the last known success version
+* 5. If router success, store the current state as the success state
 **/
 func watchXDSRequest() {
 	successRequestCount := 0
 	for {
 		requestEvent := <-GetRequestEventChannel()
-		logger.LoggerXds.Debugf("xds Request from client version : %s", requestEvent.Version)
+		logger.LoggerXds.Debugf("xds Request from client version : %v", requestEvent)
 		if requestEvent.Router {
 			if !requestEvent.IsError {
+				/**
+				*	In success scenario, router will send 3 requests (for clusters, routes and listeners)
+				*	Inorder to be a successful update to the router, all 3 responses should be successful.
+				 */
 				successRequestCount++
 				if successRequestCount == 3 {
 					successRequestCount = 0
@@ -975,7 +980,7 @@ func watchXDSRequest() {
 				// Successful message from router, set the current state of the enforcer apis to the state cache.
 			} else {
 				successRequestCount = 0
-				logger.LoggerXds.Infof("Applying config failed in router. Last success version : %s", requestEvent.Version)
+				logger.LoggerXds.Errorf("Applying config failed in Router. Last success version : %s", requestEvent.Version)
 				logger.LoggerXds.Infof("Falling back both enforcer and router to previous successful version: %s", requestEvent.Version)
 				lastSuccessVersion := restorePreviousState(requestEvent.Node)
 				_, _, _, _, apis := GenerateEnvoyResoucesForLabel(requestEvent.Node)
@@ -983,7 +988,8 @@ func watchXDSRequest() {
 			}
 		} else {
 			if requestEvent.IsError {
-				logger.LoggerXds.Infof("Applying config failed. Last success version of enforcer : %s", requestEvent.Version)
+				logger.LoggerXds.Errorf("Applying config failed in Enforcer. Last success version of enforcer : %s", requestEvent.Version)
+				logger.LoggerXds.Infof("Falling back both enforcer and router to previous successful version: %s", requestEvent.Version)
 				lastSuccessVersion := restorePreviousState(requestEvent.Node)
 				_, _, _, _, apis := GenerateEnvoyResoucesForLabel(requestEvent.Node)
 				UpdateEnforcerApis(requestEvent.Node, apis, lastSuccessVersion)
