@@ -178,7 +178,7 @@ func Run(conf *config.Config) {
 	enforcerRevokedTokenCache := xds.GetEnforcerRevokedTokenCache()
 	enforcerThrottleDataCache := xds.GetEnforcerThrottleDataCache()
 
-	srv := xdsv3.NewServer(ctx, cache, nil)
+	srv := xdsv3.NewServer(ctx, cache, &cb.RouterCallbacks{})
 	enforcerXdsSrv := wso2_server.NewServer(ctx, enforcerCache, &cb.Callbacks{})
 	enforcerSdsSrv := wso2_server.NewServer(ctx, enforcerSubscriptionCache, &cb.Callbacks{})
 	enforcerAppDsSrv := wso2_server.NewServer(ctx, enforcerApplicationCache, &cb.Callbacks{})
@@ -206,7 +206,7 @@ func Run(conf *config.Config) {
 
 	for _, env := range envs {
 		listeners, clusters, routes, endpoints, apis := xds.GenerateEnvoyResoucesForLabel(env)
-		xds.UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners)
+		xds.UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners, "")
 		xds.UpdateEnforcerApis(env, apis, "")
 	}
 

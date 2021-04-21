@@ -157,7 +157,7 @@ func init() {
 	enforcerRevokedTokensMap = make(map[string][]types.Resource)
 	enforcerThrottleData = &throttle.ThrottleData{}
 	rand.Seed(time.Now().UnixNano())
-	go watchEnforcerResponse()
+	go watchXDSRequest()
 }
 
 // GetXdsCache returns xds server cache.
@@ -523,17 +523,20 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 }
 
 //use UpdateXdsCacheWithLock to avoid race conditions
-func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) {
-	version := rand.Intn(maxRandomInt)
+func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource, version string) {
+	if version == "" {
+		version = fmt.Sprint(rand.Intn(maxRandomInt))
+	}
+
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	// Will be updated once decide to move to incremental XDS
-	snap := envoy_cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil)
+	snap := envoy_cachev3.NewSnapshot(version, endpoints, clusters, routes, listeners, nil, nil)
 	snap.Consistent()
 	err := cache.SetSnapshot(label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)
 	}
-	logger.LoggerXds.Infof("New Router cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New Router cache update for the label: " + label + " version: " + version)
 }
 
 // UpdateEnforcerConfig Sets new update to the enforcer's configuration
@@ -688,10 +691,10 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 
 // UpdateXdsCacheWithLock uses mutex and lock to avoid different go routines updating XDS at the same time
 func UpdateXdsCacheWithLock(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource,
-	listeners []types.Resource) {
+	listeners []types.Resource, version string) {
 	mutexForXdsUpdate.Lock()
 	defer mutexForXdsUpdate.Unlock()
-	updateXdsCache(label, endpoints, clusters, routes, listeners)
+	updateXdsCache(label, endpoints, clusters, routes, listeners, version)
 }
 
 // ListApis returns a list of objects that holds info about each API
@@ -956,24 +959,34 @@ func restorePreviousState(label string) string {
 * 3. If success, set the current state as the success state. Otherwise, restore the previous state.
 * 4. Update the router
 **/
-func watchEnforcerResponse() {
+func watchXDSRequest() {
 	for {
 		requestEvent := <-GetRequestEventChannel()
 		logger.LoggerXds.Debugf("xds Request from client version : %s", requestEvent.Version)
-		if requestEvent.IsError {
-			logger.LoggerXds.Infof("Applying config failed. Last success version of enforcer : %s", requestEvent.Version)
-			lastSuccessVersion := restorePreviousState(requestEvent.Node)
-			_, _, _, _, apis := GenerateEnvoyResoucesForLabel(requestEvent.Node)
-			UpdateEnforcerApis(requestEvent.Node, apis, lastSuccessVersion)
+		if requestEvent.Router {
+			if !requestEvent.IsError {
+				logger.LoggerXds.Infof("Successfully updated APIs in Router for version: %s", requestEvent.Version)
+				// Successful message from router, set the current state of the enforcer apis to the state cache.
+				buildAndStoreSuccessState(requestEvent.Node, requestEvent.Version)
+			} else {
+				logger.LoggerXds.Infof("Applying config failed in router. Last success version : %s", requestEvent.Version)
+				logger.LoggerXds.Infof("Falling back both enforcer and router to previous successful version", requestEvent.Version)
+				lastSuccessVersion := restorePreviousState(requestEvent.Node)
+				_, _, _, _, apis := GenerateEnvoyResoucesForLabel(requestEvent.Node)
+				UpdateEnforcerApis(requestEvent.Node, apis, lastSuccessVersion)
+			}
 		} else {
-			logger.LoggerXds.Infof("Successfully updated APIs in Client for version: %s", requestEvent.Version)
-
-			// Successful message, set the current state of the enforcer apis to the state cache.
-			buildAndStoreSuccessState(requestEvent.Node, requestEvent.Version)
-
-			// Generate the router resources and update the router.
-			listeners, clusters, routes, endpoints, _ := GenerateEnvoyResoucesForLabel(requestEvent.Node)
-			UpdateXdsCacheWithLock(requestEvent.Node, endpoints, clusters, routes, listeners)
+			if requestEvent.IsError {
+				logger.LoggerXds.Infof("Applying config failed. Last success version of enforcer : %s", requestEvent.Version)
+				lastSuccessVersion := restorePreviousState(requestEvent.Node)
+				_, _, _, _, apis := GenerateEnvoyResoucesForLabel(requestEvent.Node)
+				UpdateEnforcerApis(requestEvent.Node, apis, lastSuccessVersion)
+			} else {
+				logger.LoggerXds.Infof("Successfully updated APIs in Enforcer for version: %s", requestEvent.Version)
+				// Generate the router resources and update the router.
+				listeners, clusters, routes, endpoints, _ := GenerateEnvoyResoucesForLabel(requestEvent.Node)
+				UpdateXdsCacheWithLock(requestEvent.Node, endpoints, clusters, routes, listeners, requestEvent.Version)
+			}
 		}
 	}
 }
