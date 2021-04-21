@@ -186,6 +186,9 @@ func MarshalSubscriptionList(subList *types.SubscriptionList) *subscription.Subs
 			TimeStamp:         sb.TimeStamp,
 			TenantId:          sb.TenantID,
 			TenantDomain:      sb.TenantDomain,
+			SubscriptionUUID:  sb.SubscriptionUUID,
+			ApiUUID:           sb.APIUUID,
+			AppUUID:           sb.ApplicationUUID,
 		}
 		if sb.TenantDomain == "" {
 			if tenantDomain == "" {
@@ -250,7 +253,7 @@ func MarshalAPIList(apiList *types.APIList) *subscription.APIList {
 			ApiType:          api.APIType,
 			Uuid:             api.UUID,
 			IsDefaultVersion: api.IsDefaultVersion,
-			LcState: 		  api.APIStatus,
+			LcState:          api.APIStatus,
 		}
 		apis = append(apis, newAPI)
 	}

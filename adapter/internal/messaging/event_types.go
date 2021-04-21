@@ -126,8 +126,11 @@ type ApplicationEvent struct {
 // SubscriptionEvent for struct subscription events
 type SubscriptionEvent struct {
 	SubscriptionID    int32  `json:"subscriptionId"`
+	SubscriptionUUID  string `json:"subscriptionUUID"`
 	APIID             int32  `json:"apiId"`
+	APIUUID           string `json:"apiUUID"`
 	ApplicationID     int32  `json:"applicationId"`
+	ApplicationUUID   string `json:"applicationUUID"`
 	PolicyID          string `json:"policyId"`
 	SubscriptionState string `json:"subscriptionState"`
 	Event

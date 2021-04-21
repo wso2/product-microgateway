@@ -20,9 +20,12 @@ package types
 // Subscription for struct subscription
 type Subscription struct {
 	SubscriptionID    int32  `json:"subscriptionId"`
+	SubscriptionUUID  string `json:"subscriptionUUID"`
 	PolicyID          string `json:"policyId"`
 	APIID             int32  `json:"apiId"`
+	APIUUID           string `json:"apiUUID"`
 	AppID             int32  `json:"appId" json:"applicationId"`
+	ApplicationUUID   string `json:"applicationUUID"`
 	SubscriptionState string `json:"subscriptionState"`
 	TenantID          int32  `json:"tenanId,omitempty"`
 	TenantDomain      string `json:"tenanDomain,omitempty"`

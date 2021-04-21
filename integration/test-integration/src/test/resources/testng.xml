@@ -46,27 +46,27 @@
             <class name="org.wso2.choreo.connect.tests.testCases.apiDeploy.QSGTestCase"/>
         </classes>
     </test>
-    <test name="micro-gw-with-backend-tls" preserve-order="true" parallel="false">
-        <classes>
-            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithBackendTls"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.backendtls.BackendTLSTestcase"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.security.CorsTestCase"/>
-        </classes>
-    </test>
-    <test name="micro-gw-with-jwt-config" preserve-order="true" parallel="false">
-        <classes>
-            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithJwtConfig"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.security.CorsTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.jwtGenerator.JwtGeneratorTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.jwtGenerator.JwtTransformerTestCase"/>
-        </classes>
-    </test>
-    <test name="micro-gw-with-jwt-config-and-transformer" preserve-order="true" parallel="false">
-        <classes>
-            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithJwtConfigAndTransformer"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.jwtGenerator.CustomJwtTransformerTestCase"/>
-        </classes>
-    </test>
+<!--    <test name="micro-gw-with-backend-tls" preserve-order="true" parallel="false">-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithBackendTls"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.backendtls.BackendTLSTestcase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.security.CorsTestCase"/>-->
+<!--        </classes>-->
+<!--    </test>-->
+<!--    <test name="micro-gw-with-jwt-config" preserve-order="true" parallel="false">-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithJwtConfig"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.security.CorsTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.jwtGenerator.JwtGeneratorTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.jwtGenerator.JwtTransformerTestCase"/>-->
+<!--        </classes>-->
+<!--    </test>-->
+<!--    <test name="micro-gw-with-jwt-config-and-transformer" preserve-order="true" parallel="false">-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithJwtConfigAndTransformer"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.jwtGenerator.CustomJwtTransformerTestCase"/>-->
+<!--        </classes>-->
+<!--    </test>-->
     <test name="mgw-micro-with-apim" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.testCaseBefore.APIManagerInitializeTestCase"/>

@@ -64,7 +64,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     // Maps for keeping Subscription related details.
     private Map<ApplicationKeyMappingCacheKey, ApplicationKeyMapping> applicationKeyMappingMap;
-    private Map<Integer, Application> applicationMap;
+    private Map<String, Application> applicationMap;
     private Map<String, API> apiMap;
     private Map<String, ApiPolicy> apiPolicyMap;
     private Map<String, SubscriptionPolicy> subscriptionPolicyMap;
@@ -124,7 +124,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public Subscription getSubscriptionById(int appId, int apiId) {
+    public Subscription getSubscriptionById(String appId, String apiId) {
 
         return subscriptionMap.get(SubscriptionDataStoreUtil.getSubscriptionCacheKey(appId, apiId));
     }
@@ -151,10 +151,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         for (org.wso2.choreo.connect.discovery.subscription.Subscription subscription : subscriptionList) {
             Subscription newSubscription = new Subscription();
-            newSubscription.setSubscriptionId(subscription.getSubscriptionId());
+            newSubscription.setSubscriptionId(subscription.getSubscriptionUUID());
             newSubscription.setPolicyId(subscription.getPolicyId());
-            newSubscription.setApiId(subscription.getApiId());
-            newSubscription.setAppId(subscription.getAppId());
+            newSubscription.setApiUUID(subscription.getApiUUID());
+            newSubscription.setAppUUID(subscription.getAppUUID());
             newSubscription.setSubscriptionState(subscription.getSubscriptionState());
             newSubscription.setTimeStamp(subscription.getTimeStamp());
 
@@ -169,7 +169,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
 
     public void addApplications(List<org.wso2.choreo.connect.discovery.subscription.Application> applicationList) {
-        Map<Integer, Application> newApplicationMap = new ConcurrentHashMap<>();
+        Map<String, Application> newApplicationMap = new ConcurrentHashMap<>();
 
         for (org.wso2.choreo.connect.discovery.subscription.Application application : applicationList) {
             Application newApplication = new Application();
@@ -354,7 +354,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public void addOrUpdateApplication(Application application) {
         applicationMap.remove(application.getId());
-        applicationMap.put(application.getId(), application);
+        applicationMap.put(application.getCacheKey(), application);
     }
 
     @Override

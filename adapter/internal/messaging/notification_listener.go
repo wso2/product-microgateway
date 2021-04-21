@@ -251,7 +251,8 @@ func handleApplicationEvents(data []byte, eventType string) {
 func handleSubscriptionEvents(data []byte, eventType string) {
 	var subscriptionEvent SubscriptionEvent
 	json.Unmarshal([]byte(string(data)), &subscriptionEvent)
-	sub := types.Subscription{SubscriptionID: subscriptionEvent.SubscriptionID, PolicyID: subscriptionEvent.PolicyID,
+	sub := types.Subscription{SubscriptionID: subscriptionEvent.SubscriptionID, SubscriptionUUID: subscriptionEvent.SubscriptionUUID,
+		PolicyID: subscriptionEvent.PolicyID, APIUUID: subscriptionEvent.APIUUID, ApplicationUUID: subscriptionEvent.ApplicationUUID,
 		APIID: subscriptionEvent.APIID, AppID: subscriptionEvent.ApplicationID, SubscriptionState: subscriptionEvent.SubscriptionState,
 		TenantID: subscriptionEvent.TenantID, TenantDomain: subscriptionEvent.TenantDomain, TimeStamp: subscriptionEvent.TimeStamp}
 
