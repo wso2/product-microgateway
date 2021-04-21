@@ -44,6 +44,7 @@ public class ApictlUtils {
     public static final String SUCCESSFULLY_UNDEPLOYED_RESPONSE = "API undeployed";
 
     public static final String ENDPOINT_CERTIFICATES = "Endpoint-certificates";
+    public static final String DEPLOYMENT_ENVIRONMENTS_YAML = "deployment_environments.yaml";
 
     public static final String APICTL_PATH = File.separator + "apictl" + File.separator;
     public static final String API_PROJECTS_PATH = File.separator + "apiProjects" + File.separator;
@@ -51,6 +52,8 @@ public class ApictlUtils {
             "openAPIs" + File.separator;
     public static final String BACKEND_CERTS_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
             "certs" + File.separator;
+    public static final String DEPLOYMENT_ENVIRONMENTS_YAML_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
+            "deploymentEnvironments" + File.separator;
     public static final String MGW_ADAPTER_CERTS_PATH =
             File.separator + "server-tmp" + File.separator + "docker-compose" + File.separator + "resources"
                     + File.separator + "adapter" + File.separator + "security" + File.separator + "truststore"
@@ -87,7 +90,7 @@ public class ApictlUtils {
      */
     public static String createProjectZip(String openApiFile, String apiProjectName, String backendCert) throws IOException, MicroGWTestException {
         try {
-            createProject(openApiFile, apiProjectName, backendCert);
+            createProject(openApiFile, apiProjectName, backendCert, null);
         } catch (MicroGWTestException e) {
             if (!e.getMessage().equals("Project already exists")) {
                 throw e;
@@ -106,10 +109,12 @@ public class ApictlUtils {
      * @param apiProjectName expected name of the project that gets created
      * @param backendCert name of the backend cert file that should be included in the
      *                    Endpoint-certificates folder in the API project
+     * @param deployEnvYamlFile deployment_environments.yaml file of API project
      * @throws IOException if the runtime fails to execute the apictl command
      * @throws MicroGWTestException if apictl was unable to create the project
      */
-    public static void createProject(String openApiFile, String apiProjectName, String backendCert) throws IOException, MicroGWTestException {
+    public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile)
+            throws IOException, MicroGWTestException {
         String targetDir = Utils.getTargetDirPath();
         String openApiFilePath;
         if(openApiFile.startsWith("https://") || openApiFile.startsWith("http://")) {
@@ -137,6 +142,11 @@ public class ApictlUtils {
                     targetDir + BACKEND_CERTS_PATH + backendCert,
                     projectPathToCreate + File.separator + ENDPOINT_CERTIFICATES
                             + File.separator + "backend.crt");
+        }
+        if (deployEnvYamlFile != null) {
+            Utils.copyFile(
+                    targetDir + DEPLOYMENT_ENVIRONMENTS_YAML_PATH + deployEnvYamlFile,
+                    projectPathToCreate + File.separator + DEPLOYMENT_ENVIRONMENTS_YAML);
         }
         log.info("Created API project " + apiProjectName);
     }

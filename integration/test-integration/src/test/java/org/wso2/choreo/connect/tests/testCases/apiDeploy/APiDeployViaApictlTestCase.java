@@ -12,7 +12,7 @@ public class APiDeployViaApictlTestCase {
 
     @BeforeClass
     public void createApiProject() throws IOException, MicroGWTestException {
-        ApictlUtils.createProject( "deploy_openAPI.yaml", "apictl_petstore", null);
+        ApictlUtils.createProject( "deploy_openAPI.yaml", "apictl_petstore", null, null);
         ApictlUtils.addEnv("apictl_test");
     }
 
