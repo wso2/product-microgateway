@@ -1,5 +1,6 @@
 package org.wso2.choreo.connect.tests.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.choreo.connect.tests.context.MicroGWTestException;
@@ -8,7 +9,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class ApictlUtils {
@@ -31,6 +34,7 @@ public class ApictlUtils {
     public static final String PASSWORD_FLAG = "-p";
     public static final String FILE_FLAG = "-f";
     public static final String ENV_FLAG = "-e";
+    public static final String VHOST_FLAG = "-t";
     public static final String OVERRIDE_FLAG = "-o";
     public static final String NAME_FLAG = "-n";
     public static final String VERSION_FLAG = "-v";
@@ -272,22 +276,27 @@ public class ApictlUtils {
      * @param apiName name of the API (in api.yaml) to undeploy
      * @param apiVersion version of the API
      * @param mgwEnv name of the apictl mgw env the API was deployed
+     * @param vhost vhost of the API to be undeployed from
      * @throws MicroGWTestException if apictl was unable to undeploy the API
      */
-    public static void undeployAPI(String apiName, String apiVersion, String mgwEnv) throws MicroGWTestException {
+    public static void undeployAPI(String apiName, String apiVersion, String mgwEnv, String vhost) throws MicroGWTestException {
         String[] cmdArray = { MG, UNDEPLOY, API };
-        String[] argsArray = { NAME_FLAG, apiName, VERSION_FLAG, apiVersion, ENV_FLAG, mgwEnv };
+        List<String> args = new ArrayList<>(Arrays.asList(NAME_FLAG, apiName, VERSION_FLAG, apiVersion, ENV_FLAG, mgwEnv));
+        if (StringUtils.isNotEmpty(vhost)) {
+            args.addAll(Arrays.asList(VHOST_FLAG, vhost));
+        }
+        String[] argsArray = args.toArray(String[]::new);
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
             if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFULLY_UNDEPLOYED_RESPONSE)) {
                 throw new MicroGWTestException("Unable to undeploy API: "
-                        + apiName + " from microgateway adapter environment: " + mgwEnv);
+                        + apiName + " from microgateway adapter environment: " + mgwEnv + " vhost: " + vhost);
             }
         } catch (IOException e) {
             throw new MicroGWTestException("Unable to undeploy API: "
                     + apiName + " to microgateway adapter environment: " + mgwEnv, e);
         }
-        log.info("Deployed API project: " + apiName + " to microgateway adapter environment: " + mgwEnv);
+        log.info("Undeployed API project: " + apiName + " from microgateway adapter environment: " + mgwEnv + " vhost: " + vhost);
     }
 
     /**

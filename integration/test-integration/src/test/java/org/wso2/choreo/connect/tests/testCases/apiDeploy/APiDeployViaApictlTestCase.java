@@ -12,7 +12,7 @@ public class APiDeployViaApictlTestCase {
 
     @BeforeClass
     public void createApiProject() throws IOException, MicroGWTestException {
-        ApictlUtils.createProject( "deploy_openAPI.yaml", "apictl_petstore", null, null);
+        ApictlUtils.createProject( "deploy_openAPI.yaml", "apictl_petstore", null, "apictl_test_deploy_env.yaml");
         ApictlUtils.addEnv("apictl_test");
     }
 
@@ -22,9 +22,14 @@ public class APiDeployViaApictlTestCase {
         ApictlUtils.deployAPI("apictl_petstore", "apictl_test");
     }
 
-    @Test
+    @Test(description = "Undeploy an API from a specific vhost only")
+    public void undeployAPIFromSpecificVhost() throws MicroGWTestException {
+        ApictlUtils.undeployAPI("SwaggerPetstoreDeploy", "1.0.5", "apictl_test", "us.wso2.com");
+    }
+
+    @Test(description = "Undeploy from all vhosts", dependsOnMethods = {"undeployAPIFromSpecificVhost"})
     public void undeployAPI() throws MicroGWTestException {
-        ApictlUtils.undeployAPI("SwaggerPetstoreDeploy", "1.0.5", "apictl_test");
+        ApictlUtils.undeployAPI("SwaggerPetstoreDeploy", "1.0.5", "apictl_test", null);
     }
 
     @AfterClass

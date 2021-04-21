@@ -105,6 +105,6 @@ public class VhostAPICtlTestCase {
         Assert.assertEquals(sandResponse.getData(), ResponseConstants.RESPONSE_BODY,
                 "Response message mismatch.");
 
-        // TODO: (renuka) check 404 message for
+        // TODO: (renuka) check 404 for non existing resources
     }
 }
