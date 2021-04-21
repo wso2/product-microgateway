@@ -104,12 +104,6 @@ FilterHeadersStatus MgwWebSocketContext::onRequestHeaders(uint32_t, bool) {
 
 FilterHeadersStatus MgwWebSocketContext::onResponseHeaders(uint32_t, bool) {
   LOG_TRACE(std::string("onResponseHeaders called mgw_WASM_websocket") + std::to_string(id()));
-  // auto result = getResponseHeaderPairs();
-  // auto pairs = result->pairs();
-  // LOG_TRACE(std::string("headers: ") + std::to_string(pairs.size()));
-  // for (auto& p : pairs) {
-  //   LOG_TRACE(std::string(p.first) + std::string(" -> ") + std::string(p.second));
-  // }
   return FilterHeadersStatus::Continue;
 }
 
@@ -141,19 +135,19 @@ FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
     // If no gRPC stream, try to open a new stream and then send. 
     if(this->throttle_state_ == ThrottleState::UnderLimit){
       if(this->handler_state_ == HandlerState::OK){
-        LOG_INFO(std::string("gRPC bidi stream available. publishing frame data..."));
+        LOG_TRACE(std::string("gRPC bidi stream available. publishing frame data..."));
         auto ack = this->stream_handler_->send(request, false);
         if (ack != WasmResult::Ok) {
-          LOG_INFO(std::string("error sending frame data")+ toString(ack));
+          LOG_TRACE(std::string("error sending frame data")+ toString(ack));
         }
-        LOG_INFO(std::string("frame data successfully sent:"+ toString(ack)));
+        LOG_TRACE(std::string("frame data successfully sent:"+ toString(ack)));
       }else{
         establishNewStream();
         auto ack = this->stream_handler_->send(request, false);
         if (ack != WasmResult::Ok) {
-          LOG_INFO(std::string("error sending frame data")+ toString(ack));
+          LOG_TRACE(std::string("error sending frame data")+ toString(ack));
         }
-        LOG_INFO(std::string("frame data successfully sent:"+ toString(ack)));
+        LOG_TRACE(std::string("frame data successfully sent:"+ toString(ack)));
       }
       return FilterDataStatus::Continue;
     // If throttle state is FailureModeAllowed, then try to esatblish a new gRPC stream and 
@@ -175,7 +169,6 @@ FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
       struct timeval now;
       int rc = gettimeofday(&now, NULL);
       if(rc == 0){
-        LOG_INFO("time:"+ std::to_string(now.tv_sec));
         if(this->throttle_period_ <= now.tv_sec){
           this->throttle_state_ = ThrottleState::UnderLimit;
           // publish to enforcer
@@ -184,7 +177,6 @@ FilterDataStatus MgwWebSocketContext::onRequestBody(size_t body_buffer_length,
           return FilterDataStatus::StopIterationNoBuffer;
         }
       }else{
-        LOG_INFO("no time");
         return FilterDataStatus::StopIterationNoBuffer;
       }
     }
@@ -215,25 +207,26 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
     request.set_remote_ip(upstream_address);
     // Read ext_authz_metadata_ metdata saved as a member variable
     *request.mutable_metadata() = *this->metadata_;
+    request.set_payload(std::string(body->view()));
 
     // Perform throttling logic.
     // If the throttle state is underlimit and if the gRPC stream is open, send WebSocketFrameRequest. 
     // If no gRPC stream, try to open a new stream and then send. 
     if(this->throttle_state_ == ThrottleState::UnderLimit){
       if(this->handler_state_ == HandlerState::OK){
-        LOG_INFO(std::string("gRPC bidi stream available. publishing frame data..."));
+        LOG_TRACE(std::string("gRPC bidi stream available. publishing frame data..."));
         auto ack = this->stream_handler_->send(request, false);
         if (ack != WasmResult::Ok) {
-          LOG_INFO(std::string("error sending frame data")+ toString(ack));
+          LOG_TRACE(std::string("error sending frame data")+ toString(ack));
         }
-        LOG_INFO(std::string("frame data successfully sent:"+ toString(ack)));
+        LOG_TRACE(std::string("frame data successfully sent:"+ toString(ack)));
       }else{
         establishNewStream();
         auto ack = this->stream_handler_->send(request, false);
         if (ack != WasmResult::Ok) {
-          LOG_INFO(std::string("error sending frame data")+ toString(ack));
+          LOG_TRACE(std::string("error sending frame data")+ toString(ack));
         }
-        LOG_INFO(std::string("frame data successfully sent:"+ toString(ack)));
+        LOG_TRACE(std::string("frame data successfully sent:"+ toString(ack)));
       }
       return FilterDataStatus::Continue;
     // If throttle state is FailureModeAllowed, then try to esatblish a new gRPC stream and 
@@ -255,7 +248,6 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
       struct timeval now;
       int rc = gettimeofday(&now, NULL);
       if(rc == 0){
-        LOG_INFO("time:"+ std::to_string(now.tv_sec));
         if(this->throttle_period_ <= now.tv_sec){
           this->throttle_state_ = ThrottleState::UnderLimit;
           // publish to enforcer
@@ -264,7 +256,6 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
           return FilterDataStatus::StopIterationNoBuffer;
         }
       }else{
-        LOG_INFO("no time");
         return FilterDataStatus::StopIterationNoBuffer;
       }
     }
@@ -280,29 +271,25 @@ void MgwWebSocketContext::onLog() { LOG_WARN(std::string("onLog " + std::to_stri
 
 void MgwWebSocketContext::onDelete() { 
   LOG_WARN(std::string("onDelete " + std::to_string(id())));
-  std::stringstream pointer_address;
-  pointer_address << this->stream_handler_;
-  LOG_INFO("handler pointer delete >>>"+ pointer_address.str());
-  //this->stream_handler_->close();
  }
 
 // Callback used by the handler to pass the throttle response received by the gRPC stream.
 void MgwWebSocketContext::updateFilterState(ResponseStatus status){
-  LOG_INFO(std::string("updateFilterState") + std::to_string(static_cast<int>(status)));
+  LOG_TRACE(std::string("updateFilterState") + std::to_string(static_cast<int>(status)));
   if(status == ResponseStatus::OK){
     this->throttle_state_ = ThrottleState::UnderLimit;
-    LOG_INFO("mgw_wasm_websocket filter state changed to UnderLimit");
+    LOG_TRACE("mgw_wasm_websocket filter state changed to UnderLimit");
   }else if(status == ResponseStatus::OverLimit){
     this->throttle_state_ = ThrottleState::OverLimit;
-    LOG_INFO("mgw_wasm_websocket filter state changed to OverLimit !!!");
+    LOG_TRACE("mgw_wasm_websocket filter state changed to OverLimit !!!");
   }else{
-    LOG_INFO("Enforcer throttle decision unknown");
+    LOG_TRACE("Enforcer throttle decision unknown");
   }
 }
 
 // Callback used by the handler to update the handler state reference in the filter.
 void MgwWebSocketContext::updateHandlerState(HandlerState state){
-    LOG_INFO(std::string("updateHandlerState") + std::to_string(static_cast<int>(state)));
+    LOG_TRACE(std::string("updateHandlerState") + std::to_string(static_cast<int>(state)));
     this->handler_state_ = state;
     if(this->failure_mode_deny_){
       this->throttle_state_ = ThrottleState::FailureModeBlocked;
@@ -314,23 +301,16 @@ void MgwWebSocketContext::updateHandlerState(HandlerState state){
 // Check for data frames by reading the opcode and validate frame length of min 3.
 bool MgwWebSocketContext::isDataFrame(const std::string_view data){
   int frame_opcode = data[0] & 0x0F;
-  // if(frame_opcode >= 0 && frame_opcode <= 7){
-  //   return true;
-  // }else{
-  //   return false;
-  // }
   if(!(frame_opcode >= 8 && frame_opcode <= 15) && data.length() >= 3){
-    LOG_INFO(">>>>>>>>>>>>>>>> data frame detected !!!");
     return true;
   }else{
-    LOG_INFO(">>>>>>>>>>>>>>>> control frame detected !!!");
     return false;
   }
 }
 
 // Establish a new gRPC stream.
 void MgwWebSocketContext::establishNewStream() {
-  LOG_INFO("establish new stream called >>>>>>>>>>>>>>>");
+  LOG_TRACE("establish new stream called");
   this->stream_handler_ = new MgwGrpcStreamHandler(this);
   GrpcService grpc_service;
   MgwWebSocketRootContext *r = dynamic_cast<MgwWebSocketRootContext*>(root());
@@ -346,7 +326,6 @@ void MgwWebSocketContext::establishNewStream() {
     this->handler_state_ = HandlerState::OK;
     // TODO : check throttle_period and decide
     if(this->throttle_state_ == ThrottleState::FailureModeBlocked || this->throttle_state_ == ThrottleState::FailureModeAllowed){
-      LOG_INFO(">>>>>>>>>>>>><<<<<<<<<<<<<< restoring throttle state after reconnecting");
       this->throttle_state_ = ThrottleState::UnderLimit;
     }
     LOG_TRACE(std::string("gRPC bidi stream created successfully"));     
@@ -356,5 +335,5 @@ void MgwWebSocketContext::establishNewStream() {
 // Callback used by the handler to update throttle period.
 void MgwWebSocketContext::updateThrottlePeriod(const int throttle_period){
   this->throttle_period_ = throttle_period;
-  LOG_INFO("Throttle period updated to"+ std::to_string(throttle_period));
+  LOG_TRACE("Throttle period updated to"+ std::to_string(throttle_period));
 }

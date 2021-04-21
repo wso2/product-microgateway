@@ -113,11 +113,9 @@ public class WebSocketAPI implements API {
 
     @Override
     public boolean executeFilterChain(RequestContext requestContext) {
-        logger.info("normal filter chain");
         boolean proceed;
         for (Filter filter : getHttpFilters()) {
             proceed = filter.handleRequest(requestContext);
-            logger.info("proceed:" + proceed);
             if (!proceed) {
                 return false;
             }
@@ -126,11 +124,9 @@ public class WebSocketAPI implements API {
     }
 
     public boolean executeUpgradeFilterChain(RequestContext requestContext) {
-        logger.info("upgrade filter chain");
         boolean proceed;
         for (Filter filter : getUpgradeFilters()) {
             proceed = filter.handleRequest(requestContext);
-            logger.info("procced" + proceed);
             if (!proceed) {
                 return false;
             }
@@ -179,9 +175,8 @@ public class WebSocketAPI implements API {
     }
 
     public WebSocketThrottleResponse processFramedata(RequestContext requestContext) {
-        logger.info("processMetadata" + requestContext.toString());
+        logger.trace("processFramedata called");
         if (executeUpgradeFilterChain(requestContext)) {
-            logger.info("Successful");
             WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
             webSocketThrottleResponse.setOkState();
             return webSocketThrottleResponse;

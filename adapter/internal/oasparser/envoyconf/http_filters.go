@@ -82,20 +82,16 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 
 // UpgradeFilters that are applied in websocket upgrade mode
 func getUpgradeFilters() []*hcmv3.HttpFilter {
-	// TODO : (LahiruUdayanga) Configure the custom C++ filter.
 	cors := &hcmv3.HttpFilter{
 		Name:       wellknown.CORS,
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
 	}
 	extAauth := getExtAuthzHTTPFilter()
-	// enable mgwWebSocket when envoy binary with mgw_websocket filter is used
-	//mgwWebSocket := getMgwWebSocketFilter()
 	mgwWebSocketWASM := getMgwWebSocketWASMFilter()
 	router := getRouterHTTPFilter()
 	upgradeFilters := []*hcmv3.HttpFilter{
 		cors,
 		extAauth,
-		//mgwWebSocket,
 		mgwWebSocketWASM,
 		router,
 	}
@@ -136,43 +132,7 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 	return &extAuthzFilter
 }
 
-// func getMgwWebSocketFilter() *hcmv3.HttpFilter {
-// 	mgwWebsocketConfig := &mgw_websocket.RateLimit{
-// 		Domain:          "rl",
-// 		RatelimitType:   "default",
-// 		Timeout:         ptypes.DurationProto(20 * time.Second),
-// 		FailureModeDeny: false,
-// 		RateLimitService: &rls.RateLimitServiceConfig{
-// 			GrpcService: &corev3.GrpcService{
-// 				TargetSpecifier: &corev3.GrpcService_EnvoyGrpc_{
-// 					EnvoyGrpc: &corev3.GrpcService_EnvoyGrpc{
-// 						ClusterName: extAuthzClusterName,
-// 					},
-// 				},
-// 				Timeout: ptypes.DurationProto(20 * time.Second),
-// 			},
-// 		},
-// 	}
-// 	ext, err2 := proto.Marshal(mgwWebsocketConfig)
-// 	if err2 != nil {
-// 		logger.LoggerOasparser.Error(err2)
-// 	}
-// 	mgwWebSocketFilter := hcmv3.HttpFilter{
-// 		Name: mgwWebSocketFilterName,
-// 		ConfigType: &hcmv3.HttpFilter_TypedConfig{
-// 			TypedConfig: &any.Any{
-// 				TypeUrl: "type.googleapis.com/envoy.extensions.filters.http.mgw_websocket.v3.RateLimit",
-// 				Value:   ext,
-// 			},
-// 		},
-// 	}
-// 	return &mgwWebSocketFilter
-//
-// }
-
 func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {
-	// remove node_id
-	// move hardcoded values to config
 	config := &wrappers.StringValue{
 		Value: `{
 			"node_id": "mgw_node_1",

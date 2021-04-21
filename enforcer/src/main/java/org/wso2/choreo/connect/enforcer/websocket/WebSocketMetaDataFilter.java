@@ -60,7 +60,7 @@ public class WebSocketMetaDataFilter implements Filter {
                 getNullableStringValue(String.valueOf(authenticationContext.getSpikeArrestLimit())));
         logger.info(">>>>>>>>>>" + authenticationContext.getSubscriberTenantDomain());
         requestContext.addMetadataToMap(MetadataConstants.SUBSCRIBER_TENANT_DOMAIN,
-                MetadataConstants.DEFAULT_SUBSCRIBER_TENANT);
+                getNullableStringValue(authenticationContext.getSubscriberTenantDomain()));
         requestContext.addMetadataToMap(MetadataConstants.SPIKE_ARREST_UNIT,
                 getNullableStringValue(authenticationContext.getSpikeArrestUnit()));
         requestContext.addMetadataToMap(MetadataConstants.STOP_ON_QUOTA,

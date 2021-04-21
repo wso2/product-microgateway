@@ -77,10 +77,8 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         address = FilterUtils.getClientIp(headers, address);
         ResourceConfig resourceConfig = null;
         if (api.getAPIConfig().getApiType().equals(APIConstants.ApiType.REST)) {
-            logger.info("RESSSST");
             resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
         } else {
-            logger.info("WEBSOCKET");
             resourceConfig = APIFactory.getInstance().getMatchedBasePath(api, requestPath);
         }
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)

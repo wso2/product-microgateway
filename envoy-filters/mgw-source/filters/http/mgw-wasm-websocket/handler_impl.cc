@@ -26,14 +26,14 @@ MgwGrpcStreamHandler::MgwGrpcStreamHandler(HandlerCallbacks *callbacks){
 }
 
 MgwGrpcStreamHandler::~MgwGrpcStreamHandler(){
-  LOG_INFO("XXXXXXXXXXXXXXXXXXX Handler destructed");
+  LOG_TRACE("Handler destructed");
 }
 
 void MgwGrpcStreamHandler::onReceive(size_t body_size){
-    LOG_INFO("gRPC streaming onReceive");
+    LOG_TRACE("gRPC streaming onReceive");
     WasmDataPtr message = getBufferBytes(WasmBufferType::GrpcReceiveBuffer, 0, body_size);
     const WebSocketFrameResponse& frame_response = message->proto<WebSocketFrameResponse>();
-    LOG_INFO(WebSocketFrameResponse_Code_Name(frame_response.throttle_state()));
+    LOG_TRACE(WebSocketFrameResponse_Code_Name(frame_response.throttle_state()));
     if(frame_response.throttle_state() == WebSocketFrameResponse_Code_OK){
       this->callbacks_->updateFilterState(ResponseStatus::OK);
     }else {
@@ -45,8 +45,7 @@ void MgwGrpcStreamHandler::onReceive(size_t body_size){
 };
 
 void MgwGrpcStreamHandler::onRemoteClose(GrpcStatus status){
-    LOG_INFO(std::string("gRPC streaming onRemoteClose") + std::to_string(static_cast<int>(status)));
-    //this->*context_->updateConnectionStatus(false);
+    LOG_TRACE(std::string("gRPC streaming onRemoteClose") + std::to_string(static_cast<int>(status)));
     this->callbacks_->updateHandlerState(HandlerState::Error);
 };
 

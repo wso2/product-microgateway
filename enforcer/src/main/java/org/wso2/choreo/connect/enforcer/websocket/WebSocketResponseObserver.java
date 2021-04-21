@@ -49,28 +49,17 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
 
     @Override
     public void onNext(WebSocketFrameRequest webSocketFrameRequest) {
-        logger.info(webSocketFrameRequest.toString());
-        logger.info(webSocketFrameRequest.getPayload().toStringUtf8());
-        logger.info(webSocketFrameRequest.getPayload().toByteArray());
-//        Draft_6455 decoder = new Draft_6455();
-//        try {
-//            List<Framedata> frames = decoder.translateFrame(
-//                    ByteBuffer.wrap(webSocketFrameRequest.getPayload().toByteArray()));
-//            logger.info(Arrays.toString(frames.toArray()));
-//        } catch (InvalidDataException e) {
-//           logger.error(e);
-//        }
+        logger.debug("Websocket frame received");
         if (!this.throttleKeysInitiated) {
             initializeThrottleKeys(webSocketFrameRequest);
         }
-
         WebSocketThrottleResponse webSocketThrottleResponse = webSocketHandler.process(webSocketFrameRequest);
         if (webSocketThrottleResponse.getWebSocketThrottleState() == WebSocketThrottleState.OK) {
             WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
                     WebSocketFrameResponse.Code.OK).build();
             responseStreamObserver.onNext(response);
         } else {
-            logger.info("throttle period" + webSocketThrottleResponse.getThrottlePeriod());
+            logger.debug("throttle period" + webSocketThrottleResponse.getThrottlePeriod());
             WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
                     WebSocketFrameResponse.Code.OVER_LIMIT).setThrottlePeriod(
                     webSocketThrottleResponse.getThrottlePeriod()).build();
@@ -80,7 +69,7 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
 
     @Override
     public void onError(Throwable throwable) {
-        logger.info("websocket metadata service onError: " + throwable.toString());
+        logger.error("websocket metadata service onError: " + throwable.toString());
         WebSocketFrameService.removeObserver(streamId);
     }
 

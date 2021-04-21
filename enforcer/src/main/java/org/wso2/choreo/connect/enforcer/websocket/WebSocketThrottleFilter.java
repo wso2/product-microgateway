@@ -45,13 +45,11 @@ public class WebSocketThrottleFilter implements Filter {
     }
 
     @Override public boolean handleRequest(RequestContext requestContext) {
-        log.info("Throttle filter received the request");
 
         if (doThrottle(requestContext)) {
             // breaking filter chain since request is throttled
             return false;
         }
-        log.info("XXXXXXXXXXXXX not thrpttled");
         // publish throttle event and continue the filter chain
         ThrottleAgent.publishNonThrottledEvent(getThrottleEventMap(requestContext));
         return true;
@@ -60,7 +58,6 @@ public class WebSocketThrottleFilter implements Filter {
 
     private boolean doThrottle(RequestContext requestContext) {
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> handleRequest");
         if (authContext != null) {
             APIConfig api = requestContext.getMatchedAPI().getAPIConfig();
             String apiContext = api.getBasePath();
@@ -74,8 +71,6 @@ public class WebSocketThrottleFilter implements Filter {
             String clientIp = requestContext.getWebSocketFrameContext().getRemoteIp();
             String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
             String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
-            boolean isApiLevelTriggered = false;
-            log.info(">>>>>>>>>>>>>>>>>>>>>>>>>> 1");
             if (apiTenantDomain == null) {
                 apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
             }
@@ -98,10 +93,8 @@ public class WebSocketThrottleFilter implements Filter {
                     return true;
                 }
             }
-            log.info(">>>>>>>>>>>>>>>>>>>>>>>>>> 2");
 
-            // Checking API and Resource level throttling. If API tier is defined,
-            // we ignore the resource level tier definition.
+            // Checking API level throttling.
             Decision apiDecision = checkApiThrottled(apiThrottleKey, apiTier, requestContext);
             if (apiDecision.isThrottled()) {
                 log.debug("Setting api throttle out response");
@@ -133,11 +126,8 @@ public class WebSocketThrottleFilter implements Filter {
                 log.debug("Proceeding since stopOnQuotaReach is false");
             }
 
-            log.info(">>>>>>>>>>>>>>>>>>>>>>>>>> 3");
-
             // Checking Application level throttling
             String appThrottleKey = appId + ':' + authorizedUser;
-            log.info("appKey >>>>>>>>>>>>>>" + appThrottleKey);
             Decision appDecision = checkAppLevelThrottled(appThrottleKey, appTier);
             if (appDecision.isThrottled()) {
                 log.debug("Setting application throttle out response");
@@ -150,7 +140,6 @@ public class WebSocketThrottleFilter implements Filter {
                 ThrottleUtils.setRetryAfterWebsocket(requestContext, appDecision.getResetAt());
                 return true;
             }
-            log.info(">>>>>>>>>>>>>>>>>>>>>>>>>> 4");
         }
         return false;
     }
