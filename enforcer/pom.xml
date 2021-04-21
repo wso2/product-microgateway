@@ -276,7 +276,6 @@
         <dependency>
             <groupId>io.envoyproxy.controlplane</groupId>
             <artifactId>api</artifactId>
-            <version>0.1.27</version>
         </dependency>
         <dependency>
             <groupId>net.minidev</groupId>
