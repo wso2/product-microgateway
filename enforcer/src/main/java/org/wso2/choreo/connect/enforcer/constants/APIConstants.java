@@ -41,6 +41,7 @@ public class APIConstants {
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
     public static final String DEFAULT_ISSUER = "Resident Key Manager";
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
+    public static final String WSO2_PUBLIC_CERTIFICATE_ALIAS = "wso2carbon";
     public static final String HTTPS_PROTOCOL = "https";
     public static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
     public static final String BANDWIDTH_TYPE = "bandwidthVolume";
@@ -83,6 +84,8 @@ public class APIConstants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String API_TRACE_KEY = "X-TRACE-KEY";
     public static final String X_FORWARDED_FOR = "x-forwarded-for";
+
+    public static final String LOG_TRACE_ID = "traceId";
 
     /**
      * Holds the common set of constants related to the output status codes of the security validations.
@@ -172,6 +175,7 @@ public class APIConstants {
         public static final String INTERNAL_KEY = "internal-key";
         public static final String PARAM_SEPARATOR = "&";
         public static final String PARAM_VALUE_SEPARATOR = "=";
+        public static final String INTERNAL_KEY_APP_NAME = "internal-key-app";
 
     }
 
@@ -196,6 +200,7 @@ public class APIConstants {
         public static final String ENABLE_TOKEN_ENCRYPTION = "enable_token_encryption";
         public static final String ENABLE_OAUTH_APP_CREATION = "enable_oauth_app_creation";
         public static final String DEFAULT_KEY_MANAGER = "Resident Key Manager";
+        public static final String APIM_PUBLISHER_ISSUER = "APIM Publisher";
         public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
         public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Resident Key Manager";
 

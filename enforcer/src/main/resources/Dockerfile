@@ -39,7 +39,7 @@ ENV TRUSTED_CA_CERTS_PATH=/home/wso2/security/truststore
 ENV ADAPTER_HOST_NAME=adapter
 ENV ADAPTER_HOST=adapter
 ENV ADAPTER_XDS_PORT=18000
-ENV ENFORCER_LABEL="Production and Sandbox"
+ENV ENFORCER_LABEL="Default"
 ENV XDS_MAX_MSG_SIZE=4194304
 ENV XDS_MAX_RETRIES=3
 
@@ -52,7 +52,8 @@ ARG MOTD="\n\
 RUN \
     addgroup -S -g ${MG_USER_GROUP_ID} ${MG_USER_GROUP} \
     && adduser -S -u ${MG_USER_ID} -h ${MG_USER_HOME} -G ${MG_USER_GROUP} ${MG_USER} \
-    && mkdir ${MG_USER_HOME}/lib && mkdir -p ${MG_USER_HOME}/mg/security && mkdir -p ${MG_USER_HOME}/mg/logs  \
+    && mkdir ${MG_USER_HOME}/lib && mkdir -p ${MG_USER_HOME}/logs \
+    && chown ${MG_USER}:${MG_USER_GROUP} -R ${MG_USER_HOME} \
     && echo '[ ! -z "${TERM}" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc; echo "${MOTD}" > /etc/motd
 
 COPY maven/grpc_health_probe-linux-amd64 ${GRPC_HEALTH_PROBE_PATH}
@@ -62,9 +63,9 @@ WORKDIR ${MG_USER_HOME}
 USER ${MG_USER}
 
 COPY maven/ lib/
-COPY maven/conf conf
+COPY maven/conf/log4j2.properties conf/log4j2.properties
 COPY maven/security security
 COPY check_health.sh .
 COPY maven/LICENSE.txt .
 
-CMD java $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -cp "lib/*:lib/dropins/*" org.wso2.choreo.connect.enforcer.server.AuthServer
+CMD java -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="${ENFORCER_HOME}/logs/heap-dump.hprof" $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -cp "lib/*:lib/dropins/*" org.wso2.choreo.connect.enforcer.server.AuthServer

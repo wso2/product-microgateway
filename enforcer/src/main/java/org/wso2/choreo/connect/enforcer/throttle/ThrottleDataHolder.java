@@ -364,7 +364,8 @@ public class ThrottleDataHolder {
             }
             if (conf.isJwtClaimConditionsEnabled()
                     && (claimConditions != null && !claimConditions.getValues().isEmpty())) {
-                if (!isJwtClaimPresent(req, claimConditions)) {
+                Map<String, String> c = ThrottleUtils.getJWTClaims(req.getAuthenticationContext().getCallerToken());
+                if (c == null || !isJwtClaimPresent(c, claimConditions)) {
                     isThrottled = false;
                 }
             }
@@ -505,12 +506,11 @@ public class ThrottleDataHolder {
         return status;
     }
 
-    private boolean isJwtClaimPresent(RequestContext req, ThrottleCondition.JWTClaimConditions conditions) {
-        Map<String, String> assertions = ThrottleUtils.getJWTClaims(req.getAuthenticationContext().getCallerToken());
+    private boolean isJwtClaimPresent(Map<String, String> claims, ThrottleCondition.JWTClaimConditions conditions) {
         boolean status = true;
 
         for (Map.Entry<String, String> jwtClaim : conditions.getValues().entrySet()) {
-            String value = assertions.get(jwtClaim.getKey());
+            String value = claims.get(jwtClaim.getKey());
             if (value == null) {
                 status = false;
                 break;

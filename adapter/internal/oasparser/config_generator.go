@@ -156,7 +156,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 		SandboxUrls:         sandUrls,
 		Resources:           resources,
 		ApiLifeCycleState:   lifeCycleState,
-		Tier:                mgwSwagger.GetXThrottlingTier(),
+		Tier:                mgwSwagger.GetXWso2ThrottlingTier(),
 		SecurityScheme:      mgwSwagger.GetSetSecurityScheme(),
 		EndpointSecurity:    endpointSecurityDetails,
 		AuthorizationHeader: mgwSwagger.GetXWSO2AuthHeader(),

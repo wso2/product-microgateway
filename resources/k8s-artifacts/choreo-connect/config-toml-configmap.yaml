@@ -38,7 +38,7 @@ data:
 
     # default vhosts mapping for standalone mode
     [[adapter.vhostMapping]]
-      environment = "Production and Sandbox"
+      environment = "Default"
       vhost = "gw.wso2.com"
 
     [adapter.keystore]
@@ -67,6 +67,7 @@ data:
       securedListenerHost = "0.0.0.0"
       securedListenerPort = 9095
       clusterTimeoutInSeconds = 20
+      enforcerResponseTimeoutInSeconds = 20
       # system hostname for system API resources (eg: /testkey and /health)
       systemHost = "gw.wso2.com"
 
@@ -75,7 +76,7 @@ data:
       keyPath = "/home/wso2/security/keystore/mg.key"
 
     [router.cors]
-    enabled = false
+    enabled = true
     allowOrigins = ["*"]
     allowMethods = ["GET","PUT","POST","DELETE","PATCH","OPTIONS"]
     allowHeaders = ["authorization","Access-Control-Allow-Origin","Content-Type","SOAPAction","apikey", "testKey", "Internal-Key"]
@@ -216,7 +217,7 @@ data:
     [[security.enforcer.tokenService]]
       name="Resident Key Manager"
       issuer = "https://apim.wso2.com/oauth2/token"
-      certificateAlias = ""
+      certificateAlias = "wso2carbon"
       # URL of the JWKs endpoint
       jwksURL = ""
       # Validate subscribed APIs
@@ -239,6 +240,13 @@ data:
         consumerKeyClaim = ""
         # Certificate Filepath within enforcer
         certificateFilePath = "/home/wso2/security/truststore/mg.pem"
+
+    # Issuer 3
+    [[security.enforcer.tokenService]]
+        name="APIM Publisher"
+        issuer = "https://apim.wso2.com/publisher"
+        certificateAlias = ""
+        certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
     [analytics]
       enabled = false
@@ -271,7 +279,7 @@ data:
       serviceUrl = "https://wso2apim:9443/"
       username="admin"
       password="$env{cp_admin_pwd}"
-      environmentLabels = ["Production and Sandbox"]
+      environmentLabels = ["Default"]
       retryInterval = 5
       skipSSLVerification=true
       # Message broker connection URL of the control plane

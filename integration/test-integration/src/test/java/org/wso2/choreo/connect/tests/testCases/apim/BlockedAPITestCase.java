@@ -55,7 +55,7 @@ public class BlockedAPITestCase extends APIMLifecycleBaseTest {
         super.init();
 
         // Creating the application
-        APIMLifecycleBaseTest.ApplicationCreationResponse appCreationResponse = createApplicationAndClientKeyClientSecret(
+        APIMLifecycleBaseTest.ApplicationCreationResponse appCreationResponse = createApplicationWithKeys(
                 "SubscriptionValidationTestApp", restAPIStore);
         applicationId = appCreationResponse.getApplicationId();
 
@@ -67,13 +67,13 @@ public class BlockedAPITestCase extends APIMLifecycleBaseTest {
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
         // get a predefined api request
-        apiRequest = getAPIRequest("SubscriptionValidationTestAPI");
+        apiRequest = getAPIRequest(TestConstant.SAMPLE_API_NAME);
         apiRequest.setProvider(user.getUserName());
 
         // create and publish the api
         apiId = createAndPublishAPIWithoutRequireReSubscription(apiRequest, restAPIPublisher);
 
-        endpointURL = Utils.getServiceURLHttps("/subscriptionValidationTestAPI/1.0.0/pet/findByStatus");
+        endpointURL = Utils.getServiceURLHttps(TestConstant.SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
         HttpResponse subscriptionResponse = subscribeToAPI(apiId, applicationId,
                 TestConstant.SUBSCRIPTION_TIER.UNLIMITED, restAPIStore);
 

@@ -126,6 +126,7 @@ public class AuthFilter implements Filter {
     private AuthenticationResponse authenticate(Authenticator authenticator, RequestContext requestContext) {
         try {
             AuthenticationContext  authenticate = authenticator.authenticate(requestContext);
+            requestContext.setAuthenticationContext(authenticate);
             if (authenticate.isAuthenticated()) {
                 updateClusterHeaderAndCheckEnv(requestContext, authenticate);
                 return new AuthenticationResponse(true, false,

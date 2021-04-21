@@ -103,10 +103,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public API getApiByContextAndVersion(String context, String version) {
-
-        String key = context + DELEM_PERIOD + version;
-        return apiMap.get(key);
+    public API getApiByContextAndVersion(String uuid) {
+        return apiMap.get(uuid);
     }
 
     @Override
