@@ -328,6 +328,9 @@ func (endpoint *Endpoint) validateEndpoint() error {
 	if len(endpoint.Host) == 0 {
 		return errors.New("Empty Hostname is provided")
 	}
+	if endpoint.Port >= 65535 {
+		return errors.New("Port value should be less than 65535")
+	}
 	if strings.HasPrefix(endpoint.Host, "/") {
 		return errors.New("Relative paths are not supported as endpoint URLs")
 	}
