@@ -178,8 +178,8 @@ secureMaxIdleConnections = 250
 secureEvictionTimePeriod = 5500
 secureMinIdleTimeInPool = 5000
 
-[enforcer.tokenService]
 # JWT token authorization configurations. You can provide multiple JWT issuers
+[[enforcer.tokenService]]
 # Issuer 1
   name="Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
