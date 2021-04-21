@@ -54,16 +54,20 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
             initializeThrottleKeys(webSocketFrameRequest);
         }
         WebSocketThrottleResponse webSocketThrottleResponse = webSocketHandler.process(webSocketFrameRequest);
-        if (webSocketThrottleResponse.getWebSocketThrottleState() == WebSocketThrottleState.OK) {
+        if (WebSocketThrottleState.OK == webSocketThrottleResponse.getWebSocketThrottleState()) {
             WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
                     WebSocketFrameResponse.Code.OK).build();
             responseStreamObserver.onNext(response);
-        } else {
+        } else if (WebSocketThrottleState.OVER_LIMIT == webSocketThrottleResponse.getWebSocketThrottleState()) {
             logger.debug("throttle period" + webSocketThrottleResponse.getThrottlePeriod());
             WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
                     WebSocketFrameResponse.Code.OVER_LIMIT).setThrottlePeriod(
                     webSocketThrottleResponse.getThrottlePeriod()).build();
             responseStreamObserver.onNext(response);
+        } else {
+            WebSocketFrameResponse webSocketFrameResponse = WebSocketFrameResponse.newBuilder().setThrottleState(
+                    WebSocketFrameResponse.Code.UNKNOWN).build();
+            responseStreamObserver.onNext(webSocketFrameResponse);
         }
     }
 
@@ -84,10 +88,11 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
         String version = extAuthMetadata.get(APIConstants.GW_VERSION_PARAM);
         String applicationId = extAuthMetadata.get(MetadataConstants.APP_ID);
         String streamId = extAuthMetadata.get(MetadataConstants.GRPC_STREAM_ID);
+        String authorizedUser = extAuthMetadata.get(MetadataConstants.USERNAME);
         String apiContext = basePath + ':' + version;
         this.apiThrottleKey = apiContext;
         this.subscriptionThrottleKey = applicationId + ":" + apiContext;
-        this.applicationThrottleKey = applicationId;
+        this.applicationThrottleKey = applicationId + ":" + authorizedUser;
         this.streamId = streamId;
         WebSocketFrameService.addObserver(streamId, this);
         this.throttleKeysInitiated = true;

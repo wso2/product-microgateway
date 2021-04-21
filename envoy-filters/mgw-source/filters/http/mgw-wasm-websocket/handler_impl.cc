@@ -18,6 +18,7 @@
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameRequest;
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameResponse;
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameResponse_Code_OK;
+using envoy::extensions::filters::http::mgw_wasm_websocket::v3::WebSocketFrameResponse_Code_OVER_LIMIT;
 using envoy::extensions::filters::http::mgw_wasm_websocket::v3::Config;
 
 
@@ -30,30 +31,30 @@ MgwGrpcStreamHandler::~MgwGrpcStreamHandler(){
 }
 
 void MgwGrpcStreamHandler::onReceive(size_t body_size){
-    LOG_TRACE("gRPC streaming onReceive");
-    WasmDataPtr message = getBufferBytes(WasmBufferType::GrpcReceiveBuffer, 0, body_size);
-    const WebSocketFrameResponse& frame_response = message->proto<WebSocketFrameResponse>();
-    LOG_TRACE(WebSocketFrameResponse_Code_Name(frame_response.throttle_state()));
-    if(frame_response.throttle_state() == WebSocketFrameResponse_Code_OK){
-      this->callbacks_->updateFilterState(ResponseStatus::OK);
-    }else {
-      this->callbacks_->updateThrottlePeriod(frame_response.throttle_period());
-      this->callbacks_->updateFilterState(ResponseStatus::OverLimit);
-    }
-    //this->callbacks_->setEffectiveContext();
-    //this->callbacks_->updateFilterState(frame_response.throttle_state());
+  LOG_TRACE("gRPC streaming onReceive");
+  WasmDataPtr message = getBufferBytes(WasmBufferType::GrpcReceiveBuffer, 0, body_size);
+  const WebSocketFrameResponse& frame_response = message->proto<WebSocketFrameResponse>();
+  LOG_TRACE(WebSocketFrameResponse_Code_Name(frame_response.throttle_state()));
+  if(frame_response.throttle_state() == WebSocketFrameResponse_Code_OK){
+    this->callbacks_->updateFilterState(ResponseStatus::OK);
+  } else if (frame_response.throttle_state() == WebSocketFrameResponse_Code_OVER_LIMIT){
+    this->callbacks_->updateThrottlePeriod(frame_response.throttle_period());
+    this->callbacks_->updateFilterState(ResponseStatus::OverLimit);
+  } else {
+    this->callbacks_->updateFilterState(ResponseStatus::OK);
+  }
 };
 
 void MgwGrpcStreamHandler::onRemoteClose(GrpcStatus status){
-    LOG_TRACE(std::string("gRPC streaming onRemoteClose") + std::to_string(static_cast<int>(status)));
-    this->callbacks_->updateHandlerState(HandlerState::Error);
+  LOG_TRACE(std::string("gRPC streaming onRemoteClose") + std::to_string(static_cast<int>(status)));
+  this->callbacks_->updateHandlerState(HandlerState::Error);
 };
 
 bool MgwGrpcStreamHandler::sendMessage(WebSocketFrameRequest request){
-    auto res = send(request, true);
-      if(res != WasmResult::Ok){
-        return false;
-      }else{
-        return true;
-      }; 
+  auto res = send(request, true);
+  if(res != WasmResult::Ok){
+    return false;
+  }else{
+    return true;
+  }; 
 };

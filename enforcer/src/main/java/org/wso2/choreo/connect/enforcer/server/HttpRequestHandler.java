@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -76,10 +76,10 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         }
         address = FilterUtils.getClientIp(headers, address);
         ResourceConfig resourceConfig = null;
-        if (api.getAPIConfig().getApiType().equals(APIConstants.ApiType.REST)) {
-            resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
-        } else {
+        if (APIConstants.ApiType.WEB_SOCKET.equals(api.getAPIConfig().getApiType())) {
             resourceConfig = APIFactory.getInstance().getMatchedBasePath(api, requestPath);
+        } else {
+            resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
         }
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api).headers(headers).requestID(requestID).address(address).prodClusterHeader(prodCluster)

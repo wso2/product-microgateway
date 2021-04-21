@@ -812,7 +812,7 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		endpointBasePath:  endpointBasePath,
 		corsPolicy:        swagger.GetCorsConfig(),
 		resourcePathParam: "",
-		resourceMethods:   []string{"GET"},
+		resourceMethods:   getDefaultResourceMethods(swagger.GetAPIType()),
 	}
 
 	if resource != nil {
@@ -847,4 +847,12 @@ func getMaxStreamDuration(apiType string) *routev3.RouteAction_MaxStreamDuration
 		}
 	}
 	return maxStreamDuration
+}
+
+func getDefaultResourceMethods(apiType string) []string {
+	var defaultResourceMethods []string = nil
+	if apiType == mgw.WS {
+		defaultResourceMethods = []string{"GET"}
+	}
+	return defaultResourceMethods
 }

@@ -66,16 +66,16 @@ public class APIFactory {
         ConcurrentHashMap<String, API> newApis = new ConcurrentHashMap<>();
 
         for (Api api : apis) {
-            if (api.getApiType().equals(APIConstants.ApiType.REST)) {
-                RestAPI enforcerApi = new RestAPI();
-                enforcerApi.init(api);
-                String apiKey = getApiKey(enforcerApi);
-                newApis.put(apiKey, enforcerApi);
-            } else {
+            if (APIConstants.ApiType.WEB_SOCKET.equals(api.getApiType())) {
                 WebSocketAPI webSocketAPI = new WebSocketAPI();
                 webSocketAPI.init(api);
                 String apiKey = getApiKey(webSocketAPI);
                 newApis.put(apiKey, webSocketAPI);
+            } else {
+                RestAPI enforcerApi = new RestAPI();
+                enforcerApi.init(api);
+                String apiKey = getApiKey(enforcerApi);
+                newApis.put(apiKey, enforcerApi);
             }
 
         }

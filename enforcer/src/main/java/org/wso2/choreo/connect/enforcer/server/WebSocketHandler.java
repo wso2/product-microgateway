@@ -49,13 +49,19 @@ public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, W
     public WebSocketThrottleResponse process(WebSocketFrameRequest webSocketFrameRequest) {
         WebSocketAPI matchedAPI = APIFactory.getInstance().getMatchedAPI(webSocketFrameRequest);
         if (matchedAPI == null) {
-            return null;
+            WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
+            webSocketThrottleResponse.setUnknownState();
+            String basePath = webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap()
+                    .get(APIConstants.GW_BASE_PATH_PARAM);
+            String version = webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap()
+                    .get(APIConstants.GW_VERSION_PARAM);
+            logger.info("API {}/{} not found in the cache", basePath, version);
+            return webSocketThrottleResponse;
         } else if (logger.isDebugEnabled()) {
             APIConfig api = matchedAPI.getAPIConfig();
             logger.info("API {}/{} found in the cache", api.getBasePath(), api.getVersion());
         }
         RequestContext requestContext = buildRequestContext(matchedAPI, webSocketFrameRequest);
-        logger.info(requestContext.toString());
         return matchedAPI.processFramedata(requestContext);
     }
 

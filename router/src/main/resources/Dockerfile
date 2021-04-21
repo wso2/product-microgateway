@@ -24,8 +24,6 @@ ARG MG_USER_GROUP=wso2
 ARG MG_USER_GROUP_ID=802
 ARG MG_USER_HOME=/home/${MG_USER}
 
-#COPY maven/mgw-websocket.wasm /usr/local/bin/mgw-websocket.wasm
-#RUN chmod go+r /etc/envoy/envoy.yaml /usr/local/bin/mgw-websocket.wasm
 ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\
  --------------------------------- \n\
