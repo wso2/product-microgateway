@@ -29,6 +29,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 
 	"github.com/golang/protobuf/ptypes"
+	"github.com/wso2/adapter/config"
 	logger "github.com/wso2/adapter/loggers"
 )
 
@@ -80,11 +81,8 @@ func getUpgradeFilters() []*hcmv3.HttpFilter {
 
 // getExtAuthzHTTPFilter gets ExtAauthz http filter.
 func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
+	conf, _ := config.ReadConfigs()
 	extAuthzConfig := &ext_authv3.ExtAuthz{
-		WithRequestBody: &ext_authv3.BufferSettings{
-			MaxRequestBytes:     1024,
-			AllowPartialMessage: false,
-		},
 		// This would clear the route cache only if there is a header added/removed or changed
 		// within ext-authz filter. Without this configuration, the API cannot have production
 		// and sandbox endpoints both at once as the cluster is set based on the header added
@@ -98,7 +96,7 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 						ClusterName: extAuthzClusterName,
 					},
 				},
-				Timeout: ptypes.DurationProto(20 * time.Second),
+				Timeout: ptypes.DurationProto(conf.Envoy.EnforcerResponseTimeoutInSeconds * time.Second),
 			},
 		},
 	}
