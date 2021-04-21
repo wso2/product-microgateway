@@ -23,14 +23,29 @@ import (
 	access_logv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
+	"github.com/wso2/adapter/internal/err"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func getErrorResponseMappers() []*hcmv3.ResponseMapper {
 	return []*hcmv3.ResponseMapper{
-		genErrorResponseMapper(900900, "Unclassified Authentication Failure",
-			"Error during validating the request", "UAEX"),
+		genErrorResponseMapper(err.NotFoundCode, err.NotFoundMessage, err.NotFoundDescription, "NR"),
+		genErrorResponseMapper(err.UaexCode, err.UaexMessage, err.UaexDecription, "UAEX"),
+		genErrorResponseMapper(err.UfCode, err.UfMessage, "%LOCAL_REPLY_BODY%", "UF"),
+		genErrorResponseMapper(err.UtCode, err.UtMessage, "%LOCAL_REPLY_BODY%", "UT"),
+		genErrorResponseMapper(err.UoCode, err.UoMessage, "%LOCAL_REPLY_BODY%", "UO"),
+		genErrorResponseMapper(err.UrxCode, err.UrxMessage, "%LOCAL_REPLY_BODY%", "URX"),
+		genErrorResponseMapper(err.NcCode, err.NcMessage, "%LOCAL_REPLY_BODY%", "NC"),
+		genErrorResponseMapper(err.UhCode, err.UhMessage, "%LOCAL_REPLY_BODY%", "UH"),
+		genErrorResponseMapper(err.UrCode, err.UrMessage, "%LOCAL_REPLY_BODY%", "UR"),
+		genErrorResponseMapper(err.UcCode, err.UcMessage, "%LOCAL_REPLY_BODY%", "UC"),
+		genErrorResponseMapper(err.LrCode, err.LrMessage, "%LOCAL_REPLY_BODY%", "LR"),
+		genErrorResponseMapper(err.IhCode, err.IhMessage, "%LOCAL_REPLY_BODY%", "IH"),
+		genErrorResponseMapper(err.SiCode, err.SiMessage, "%LOCAL_REPLY_BODY%", "SI"),
+		genErrorResponseMapper(err.DpeCode, err.DpeMessage, "%LOCAL_REPLY_BODY%", "DPE"),
+		genErrorResponseMapper(err.UpeCode, err.UpeMessage, "%LOCAL_REPLY_BODY%", "UPE"),
+		genErrorResponseMapper(err.UmsdrCode, err.UmsdrMessage, "%LOCAL_REPLY_BODY%", "UMSDR"),
 	}
 }
 
