@@ -330,7 +330,7 @@
                 <groupId>org.wso2.am</groupId>
                 <artifactId>org.wso2.am.integration.common.test.utils</artifactId>
                 <!-- TODO:Dinusha - bump the version to 4.0.0-latest -->
-                <version>4.0.0-beta</version>
+                <version>4.0.0-SNAPSHOT</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -356,7 +356,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <andes.client.version>3.3.12</andes.client.version>
-        <carbon.apimgt.version>9.0.168</carbon.apimgt.version>
+        <carbon.apimgt.version>9.0.174</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
         <commons.io.version>2.6</commons.io.version>

@@ -1,8 +1,7 @@
 [server]
 hostname = "apim"
-node_ip = "127.0.0.1"
+
 #offset=0
-mode = "single" #single or ha
 base_path = "${carbon.protocol}://${carbon.host}:${carbon.management.port}"
 #discard_empty_caches = false
 server_role = "default"
@@ -61,7 +60,11 @@ ws_endpoint = "ws://localhost:9099"
 wss_endpoint = "wss://localhost:8099"
 http_endpoint = "http://localhost:9090"
 https_endpoint = "https://localhost:9095"
+websub_event_receiver_http_endpoint = "http://localhost:9021"
+websub_event_receiver_https_endpoint = "https://localhost:8021"
 
+[apim.sync_runtime_artifacts.gateway]
+gateway_labels =["Default"]
 #[apim.cache.gateway_token]
 #enable = true
 #expiry_time = "900s"
