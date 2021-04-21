@@ -115,13 +115,14 @@ type Config struct {
 
 	// Envoy Listener Component related configurations.
 	Envoy struct {
-		ListenerHost            string
-		ListenerPort            uint32
-		SecuredListenerHost     string
-		SecuredListenerPort     uint32
-		ClusterTimeoutInSeconds time.Duration
-		KeyStore                keystore
-		SystemHost              string `default:"localhost"`
+		ListenerHost                     string
+		ListenerPort                     uint32
+		SecuredListenerHost              string
+		SecuredListenerPort              uint32
+		ClusterTimeoutInSeconds          time.Duration
+		EnforcerResponseTimeoutInSeconds time.Duration `default:"20"`
+		KeyStore                         keystore
+		SystemHost                       string `default:"localhost"`
 
 		// Global CORS configurations.
 		Cors struct {
@@ -306,7 +307,7 @@ type analytics struct {
 	}
 
 	Enforcer struct {
-	// TODO: (VirajSalaka) convert it to map[string]{}interface
+		// TODO: (VirajSalaka) convert it to map[string]{}interface
 		ConfigProperties    map[string]string
 		EnforcerLogReceiver authService `toml:"LogReceiver"`
 	}
