@@ -149,6 +149,7 @@ type Config struct {
 	} `toml:"router"`
 
 	Enforcer struct {
+		TokenService [] tokenService
 		ApimCredentials apimCredentials
 		AuthService     authService
 		JwtGenerator    jwtGenerator
@@ -156,12 +157,6 @@ type Config struct {
 		Throttling      throttlingConfig
 		JwtIssuer       jwtIssuer
 		AuthHeader      authHeader
-	}
-
-	Security struct {
-		Enforcer struct {
-			TokenService []tokenService
-		}
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`

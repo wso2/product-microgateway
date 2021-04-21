@@ -20,6 +20,7 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private Config() {
+    tokenService_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -42,6 +43,7 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
+    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -53,16 +55,12 @@ private static final long serialVersionUID = 0L;
             done = true;
             break;
           case 10: {
-            org.wso2.choreo.connect.discovery.config.enforcer.Security.Builder subBuilder = null;
-            if (security_ != null) {
-              subBuilder = security_.toBuilder();
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              tokenService_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.config.enforcer.Issuer>();
+              mutable_bitField0_ |= 0x00000001;
             }
-            security_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Security.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(security_);
-              security_ = subBuilder.buildPartial();
-            }
-
+            tokenService_.add(
+                input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Issuer.parser(), extensionRegistry));
             break;
           }
           case 18: {
@@ -210,6 +208,9 @@ private static final long serialVersionUID = 0L;
       throw new com.google.protobuf.InvalidProtocolBufferException(
           e).setUnfinishedMessage(this);
     } finally {
+      if (((mutable_bitField0_ & 0x00000001) != 0)) {
+        tokenService_ = java.util.Collections.unmodifiableList(tokenService_);
+      }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
     }
@@ -227,30 +228,44 @@ private static final long serialVersionUID = 0L;
             org.wso2.choreo.connect.discovery.config.enforcer.Config.class, org.wso2.choreo.connect.discovery.config.enforcer.Config.Builder.class);
   }
 
-  public static final int SECURITY_FIELD_NUMBER = 1;
-  private org.wso2.choreo.connect.discovery.config.enforcer.Security security_;
+  public static final int TOKENSERVICE_FIELD_NUMBER = 1;
+  private java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Issuer> tokenService_;
   /**
-   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
-   * @return Whether the security field is set.
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
    */
   @java.lang.Override
-  public boolean hasSecurity() {
-    return security_ != null;
+  public java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Issuer> getTokenServiceList() {
+    return tokenService_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
-   * @return The security.
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.config.enforcer.Security getSecurity() {
-    return security_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Security.getDefaultInstance() : security_;
+  public java.util.List<? extends org.wso2.choreo.connect.discovery.config.enforcer.IssuerOrBuilder> 
+      getTokenServiceOrBuilderList() {
+    return tokenService_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
    */
   @java.lang.Override
-  public org.wso2.choreo.connect.discovery.config.enforcer.SecurityOrBuilder getSecurityOrBuilder() {
-    return getSecurity();
+  public int getTokenServiceCount() {
+    return tokenService_.size();
+  }
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.Issuer getTokenService(int index) {
+    return tokenService_.get(index);
+  }
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.IssuerOrBuilder getTokenServiceOrBuilder(
+      int index) {
+    return tokenService_.get(index);
   }
 
   public static final int KEYSTORE_FIELD_NUMBER = 2;
@@ -527,8 +542,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (security_ != null) {
-      output.writeMessage(1, getSecurity());
+    for (int i = 0; i < tokenService_.size(); i++) {
+      output.writeMessage(1, tokenService_.get(i));
     }
     if (keystore_ != null) {
       output.writeMessage(2, getKeystore());
@@ -569,9 +584,9 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (security_ != null) {
+    for (int i = 0; i < tokenService_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(1, getSecurity());
+        .computeMessageSize(1, tokenService_.get(i));
     }
     if (keystore_ != null) {
       size += com.google.protobuf.CodedOutputStream
@@ -628,11 +643,8 @@ private static final long serialVersionUID = 0L;
     }
     org.wso2.choreo.connect.discovery.config.enforcer.Config other = (org.wso2.choreo.connect.discovery.config.enforcer.Config) obj;
 
-    if (hasSecurity() != other.hasSecurity()) return false;
-    if (hasSecurity()) {
-      if (!getSecurity()
-          .equals(other.getSecurity())) return false;
-    }
+    if (!getTokenServiceList()
+        .equals(other.getTokenServiceList())) return false;
     if (hasKeystore() != other.hasKeystore()) return false;
     if (hasKeystore()) {
       if (!getKeystore()
@@ -694,9 +706,9 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    if (hasSecurity()) {
-      hash = (37 * hash) + SECURITY_FIELD_NUMBER;
-      hash = (53 * hash) + getSecurity().hashCode();
+    if (getTokenServiceCount() > 0) {
+      hash = (37 * hash) + TOKENSERVICE_FIELD_NUMBER;
+      hash = (53 * hash) + getTokenServiceList().hashCode();
     }
     if (hasKeystore()) {
       hash = (37 * hash) + KEYSTORE_FIELD_NUMBER;
@@ -870,16 +882,17 @@ private static final long serialVersionUID = 0L;
     private void maybeForceBuilderInitialization() {
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
+        getTokenServiceFieldBuilder();
       }
     }
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      if (securityBuilder_ == null) {
-        security_ = null;
+      if (tokenServiceBuilder_ == null) {
+        tokenService_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
       } else {
-        security_ = null;
-        securityBuilder_ = null;
+        tokenServiceBuilder_.clear();
       }
       if (keystoreBuilder_ == null) {
         keystore_ = null;
@@ -967,10 +980,15 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.choreo.connect.discovery.config.enforcer.Config buildPartial() {
       org.wso2.choreo.connect.discovery.config.enforcer.Config result = new org.wso2.choreo.connect.discovery.config.enforcer.Config(this);
-      if (securityBuilder_ == null) {
-        result.security_ = security_;
+      int from_bitField0_ = bitField0_;
+      if (tokenServiceBuilder_ == null) {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          tokenService_ = java.util.Collections.unmodifiableList(tokenService_);
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.tokenService_ = tokenService_;
       } else {
-        result.security_ = securityBuilder_.build();
+        result.tokenService_ = tokenServiceBuilder_.build();
       }
       if (keystoreBuilder_ == null) {
         result.keystore_ = keystore_;
@@ -1070,8 +1088,31 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(org.wso2.choreo.connect.discovery.config.enforcer.Config other) {
       if (other == org.wso2.choreo.connect.discovery.config.enforcer.Config.getDefaultInstance()) return this;
-      if (other.hasSecurity()) {
-        mergeSecurity(other.getSecurity());
+      if (tokenServiceBuilder_ == null) {
+        if (!other.tokenService_.isEmpty()) {
+          if (tokenService_.isEmpty()) {
+            tokenService_ = other.tokenService_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureTokenServiceIsMutable();
+            tokenService_.addAll(other.tokenService_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.tokenService_.isEmpty()) {
+          if (tokenServiceBuilder_.isEmpty()) {
+            tokenServiceBuilder_.dispose();
+            tokenServiceBuilder_ = null;
+            tokenService_ = other.tokenService_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+            tokenServiceBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getTokenServiceFieldBuilder() : null;
+          } else {
+            tokenServiceBuilder_.addAllMessages(other.tokenService_);
+          }
+        }
       }
       if (other.hasKeystore()) {
         mergeKeystore(other.getKeystore());
@@ -1131,124 +1172,246 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
+    private int bitField0_;
 
-    private org.wso2.choreo.connect.discovery.config.enforcer.Security security_;
-    private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.config.enforcer.Security, org.wso2.choreo.connect.discovery.config.enforcer.Security.Builder, org.wso2.choreo.connect.discovery.config.enforcer.SecurityOrBuilder> securityBuilder_;
-    /**
-     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
-     * @return Whether the security field is set.
-     */
-    public boolean hasSecurity() {
-      return securityBuilder_ != null || security_ != null;
+    private java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Issuer> tokenService_ =
+      java.util.Collections.emptyList();
+    private void ensureTokenServiceIsMutable() {
+      if (!((bitField0_ & 0x00000001) != 0)) {
+        tokenService_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.config.enforcer.Issuer>(tokenService_);
+        bitField0_ |= 0x00000001;
+       }
     }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Issuer, org.wso2.choreo.connect.discovery.config.enforcer.Issuer.Builder, org.wso2.choreo.connect.discovery.config.enforcer.IssuerOrBuilder> tokenServiceBuilder_;
+
     /**
-     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
-     * @return The security.
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
      */
-    public org.wso2.choreo.connect.discovery.config.enforcer.Security getSecurity() {
-      if (securityBuilder_ == null) {
-        return security_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Security.getDefaultInstance() : security_;
+    public java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Issuer> getTokenServiceList() {
+      if (tokenServiceBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(tokenService_);
       } else {
-        return securityBuilder_.getMessage();
+        return tokenServiceBuilder_.getMessageList();
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
      */
-    public Builder setSecurity(org.wso2.choreo.connect.discovery.config.enforcer.Security value) {
-      if (securityBuilder_ == null) {
+    public int getTokenServiceCount() {
+      if (tokenServiceBuilder_ == null) {
+        return tokenService_.size();
+      } else {
+        return tokenServiceBuilder_.getCount();
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Issuer getTokenService(int index) {
+      if (tokenServiceBuilder_ == null) {
+        return tokenService_.get(index);
+      } else {
+        return tokenServiceBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+     */
+    public Builder setTokenService(
+        int index, org.wso2.choreo.connect.discovery.config.enforcer.Issuer value) {
+      if (tokenServiceBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        security_ = value;
+        ensureTokenServiceIsMutable();
+        tokenService_.set(index, value);
         onChanged();
       } else {
-        securityBuilder_.setMessage(value);
+        tokenServiceBuilder_.setMessage(index, value);
       }
-
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
      */
-    public Builder setSecurity(
-        org.wso2.choreo.connect.discovery.config.enforcer.Security.Builder builderForValue) {
-      if (securityBuilder_ == null) {
-        security_ = builderForValue.build();
+    public Builder setTokenService(
+        int index, org.wso2.choreo.connect.discovery.config.enforcer.Issuer.Builder builderForValue) {
+      if (tokenServiceBuilder_ == null) {
+        ensureTokenServiceIsMutable();
+        tokenService_.set(index, builderForValue.build());
         onChanged();
       } else {
-        securityBuilder_.setMessage(builderForValue.build());
+        tokenServiceBuilder_.setMessage(index, builderForValue.build());
       }
-
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
      */
-    public Builder mergeSecurity(org.wso2.choreo.connect.discovery.config.enforcer.Security value) {
-      if (securityBuilder_ == null) {
-        if (security_ != null) {
-          security_ =
-            org.wso2.choreo.connect.discovery.config.enforcer.Security.newBuilder(security_).mergeFrom(value).buildPartial();
-        } else {
-          security_ = value;
+    public Builder addTokenService(org.wso2.choreo.connect.discovery.config.enforcer.Issuer value) {
+      if (tokenServiceBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
         }
+        ensureTokenServiceIsMutable();
+        tokenService_.add(value);
         onChanged();
       } else {
-        securityBuilder_.mergeFrom(value);
+        tokenServiceBuilder_.addMessage(value);
       }
-
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
      */
-    public Builder clearSecurity() {
-      if (securityBuilder_ == null) {
-        security_ = null;
+    public Builder addTokenService(
+        int index, org.wso2.choreo.connect.discovery.config.enforcer.Issuer value) {
+      if (tokenServiceBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureTokenServiceIsMutable();
+        tokenService_.add(index, value);
         onChanged();
       } else {
-        security_ = null;
-        securityBuilder_ = null;
+        tokenServiceBuilder_.addMessage(index, value);
       }
-
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
      */
-    public org.wso2.choreo.connect.discovery.config.enforcer.Security.Builder getSecurityBuilder() {
-      
-      onChanged();
-      return getSecurityFieldBuilder().getBuilder();
+    public Builder addTokenService(
+        org.wso2.choreo.connect.discovery.config.enforcer.Issuer.Builder builderForValue) {
+      if (tokenServiceBuilder_ == null) {
+        ensureTokenServiceIsMutable();
+        tokenService_.add(builderForValue.build());
+        onChanged();
+      } else {
+        tokenServiceBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
      */
-    public org.wso2.choreo.connect.discovery.config.enforcer.SecurityOrBuilder getSecurityOrBuilder() {
-      if (securityBuilder_ != null) {
-        return securityBuilder_.getMessageOrBuilder();
+    public Builder addTokenService(
+        int index, org.wso2.choreo.connect.discovery.config.enforcer.Issuer.Builder builderForValue) {
+      if (tokenServiceBuilder_ == null) {
+        ensureTokenServiceIsMutable();
+        tokenService_.add(index, builderForValue.build());
+        onChanged();
       } else {
-        return security_ == null ?
-            org.wso2.choreo.connect.discovery.config.enforcer.Security.getDefaultInstance() : security_;
+        tokenServiceBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+     */
+    public Builder addAllTokenService(
+        java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.config.enforcer.Issuer> values) {
+      if (tokenServiceBuilder_ == null) {
+        ensureTokenServiceIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, tokenService_);
+        onChanged();
+      } else {
+        tokenServiceBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+     */
+    public Builder clearTokenService() {
+      if (tokenServiceBuilder_ == null) {
+        tokenService_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+      } else {
+        tokenServiceBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+     */
+    public Builder removeTokenService(int index) {
+      if (tokenServiceBuilder_ == null) {
+        ensureTokenServiceIsMutable();
+        tokenService_.remove(index);
+        onChanged();
+      } else {
+        tokenServiceBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Issuer.Builder getTokenServiceBuilder(
+        int index) {
+      return getTokenServiceFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.IssuerOrBuilder getTokenServiceOrBuilder(
+        int index) {
+      if (tokenServiceBuilder_ == null) {
+        return tokenService_.get(index);  } else {
+        return tokenServiceBuilder_.getMessageOrBuilder(index);
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
      */
-    private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.config.enforcer.Security, org.wso2.choreo.connect.discovery.config.enforcer.Security.Builder, org.wso2.choreo.connect.discovery.config.enforcer.SecurityOrBuilder> 
-        getSecurityFieldBuilder() {
-      if (securityBuilder_ == null) {
-        securityBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.choreo.connect.discovery.config.enforcer.Security, org.wso2.choreo.connect.discovery.config.enforcer.Security.Builder, org.wso2.choreo.connect.discovery.config.enforcer.SecurityOrBuilder>(
-                getSecurity(),
+    public java.util.List<? extends org.wso2.choreo.connect.discovery.config.enforcer.IssuerOrBuilder> 
+         getTokenServiceOrBuilderList() {
+      if (tokenServiceBuilder_ != null) {
+        return tokenServiceBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(tokenService_);
+      }
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Issuer.Builder addTokenServiceBuilder() {
+      return getTokenServiceFieldBuilder().addBuilder(
+          org.wso2.choreo.connect.discovery.config.enforcer.Issuer.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Issuer.Builder addTokenServiceBuilder(
+        int index) {
+      return getTokenServiceFieldBuilder().addBuilder(
+          index, org.wso2.choreo.connect.discovery.config.enforcer.Issuer.getDefaultInstance());
+    }
+    /**
+     * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+     */
+    public java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Issuer.Builder> 
+         getTokenServiceBuilderList() {
+      return getTokenServiceFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Issuer, org.wso2.choreo.connect.discovery.config.enforcer.Issuer.Builder, org.wso2.choreo.connect.discovery.config.enforcer.IssuerOrBuilder> 
+        getTokenServiceFieldBuilder() {
+      if (tokenServiceBuilder_ == null) {
+        tokenServiceBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.config.enforcer.Issuer, org.wso2.choreo.connect.discovery.config.enforcer.Issuer.Builder, org.wso2.choreo.connect.discovery.config.enforcer.IssuerOrBuilder>(
+                tokenService_,
+                ((bitField0_ & 0x00000001) != 0),
                 getParentForChildren(),
                 isClean());
-        security_ = null;
+        tokenService_ = null;
       }
-      return securityBuilder_;
+      return tokenServiceBuilder_;
     }
 
     private org.wso2.choreo.connect.discovery.config.enforcer.CertStore keystore_;

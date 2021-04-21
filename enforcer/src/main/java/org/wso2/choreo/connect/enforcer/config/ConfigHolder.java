@@ -34,7 +34,6 @@ import org.wso2.choreo.connect.discovery.config.enforcer.Issuer;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer;
 import org.wso2.choreo.connect.discovery.config.enforcer.PublisherPool;
-import org.wso2.choreo.connect.discovery.config.enforcer.Security;
 import org.wso2.choreo.connect.discovery.config.enforcer.Service;
 import org.wso2.choreo.connect.discovery.config.enforcer.TMURLGroup;
 import org.wso2.choreo.connect.discovery.config.enforcer.ThrottleAgent;
@@ -127,7 +126,7 @@ public class ConfigHolder {
         populateAuthService(config.getAuthService());
 
         // Read jwt token configuration
-        populateJWTIssuerConfiguration(config.getSecurity());
+        populateJWTIssuerConfiguration(config.getTokenServiceList());
 
         // Read credentials used to connect with APIM services
         populateAPIMCredentials(config.getApimCredentials());
@@ -178,9 +177,8 @@ public class ConfigHolder {
     }
 
 
-    private void populateJWTIssuerConfiguration(Security security) {
+    private void populateJWTIssuerConfiguration(List<Issuer> cdsIssuers) {
         configIssuerList = new ArrayList<>();
-        List<Issuer> cdsIssuers = security.getTokenServiceList();
         try {
             setTrustStoreForJWT(KeyStore.getInstance(KeyStore.getDefaultType()));
             getTrustStoreForJWT().load(null);

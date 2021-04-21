@@ -8,19 +8,28 @@ public interface ConfigOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
-   * @return Whether the security field is set.
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
    */
-  boolean hasSecurity();
+  java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Issuer> 
+      getTokenServiceList();
   /**
-   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
-   * @return The security.
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
    */
-  org.wso2.choreo.connect.discovery.config.enforcer.Security getSecurity();
+  org.wso2.choreo.connect.discovery.config.enforcer.Issuer getTokenService(int index);
   /**
-   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
    */
-  org.wso2.choreo.connect.discovery.config.enforcer.SecurityOrBuilder getSecurityOrBuilder();
+  int getTokenServiceCount();
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+   */
+  java.util.List<? extends org.wso2.choreo.connect.discovery.config.enforcer.IssuerOrBuilder> 
+      getTokenServiceOrBuilderList();
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.IssuerOrBuilder getTokenServiceOrBuilder(
+      int index);
 
   /**
    * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>

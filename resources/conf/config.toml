@@ -124,6 +124,42 @@ allowCredentials = false
   enableOutboundAuthHeader = false
   authorizationHeader = "authorization"
 
+# JWT token authorization configurations. You can provide multiple JWT issuers
+# Issuer 1
+[[enforcer.tokenService]]
+  name="Resident Key Manager"
+  issuer = "https://localhost:9443/oauth2/token"
+  certificateAlias = "wso2carbon"
+  # URL of the JWKs endpoint
+  jwksURL = ""
+  # Validate subscribed APIs
+  validateSubscription = false
+  # The claim in which the consumer key of the application is coming
+  consumerKeyClaim = "azp"
+  # Certificate Filepath within enforcer
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+# Issuer 2
+[[enforcer.tokenService]]
+    name="MGW"
+    issuer = "https://localhost:9095/testkey"
+    certificateAlias = "mgw"
+    # URL of the JWKs endpoint
+    jwksURL = ""
+    # Validate subscribed APIs
+    validateSubscription = false
+    # The claim in which the consumer key of the application is coming
+    consumerKeyClaim = ""
+    # Certificate Filepath within enforcer
+    certificateFilePath = "/home/wso2/security/truststore/mg.pem"
+
+# Issuer 3
+[[enforcer.tokenService]]
+    name="APIM Publisher"
+    issuer = "https://localhost:9443/publisher"
+    certificateAlias = ""
+    certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
 # Throttling configurations
 [enforcer.throttling]
   # Connect with the central traffic manager
@@ -185,45 +221,6 @@ allowCredentials = false
       secureMaxIdleConnections = 250
       secureEvictionTimePeriod = 5500
       secureMinIdleTimeInPool = 5000
-
-[security]
-
-[security.enforcer]
-# JWT token authorization configurations. You can provide multiple JWT issuers
-# Issuer 1
-[[security.enforcer.tokenService]]
-  name="Resident Key Manager"
-  issuer = "https://localhost:9443/oauth2/token"
-  certificateAlias = "wso2carbon"
-  # URL of the JWKs endpoint
-  jwksURL = ""
-  # Validate subscribed APIs
-  validateSubscription = false
-  # The claim in which the consumer key of the application is coming
-  consumerKeyClaim = "azp"
-  # Certificate Filepath within enforcer
-  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
-
-# Issuer 2
-[[security.enforcer.tokenService]]
-    name="MGW"
-    issuer = "https://localhost:9095/testkey"
-    certificateAlias = "mgw"
-    # URL of the JWKs endpoint
-    jwksURL = ""
-    # Validate subscribed APIs
-    validateSubscription = false
-    # The claim in which the consumer key of the application is coming
-    consumerKeyClaim = ""
-    # Certificate Filepath within enforcer
-    certificateFilePath = "/home/wso2/security/truststore/mg.pem"
-
-# Issuer 3
-[[security.enforcer.tokenService]]
-    name="APIM Publisher"
-    issuer = "https://localhost:9443/publisher"
-    certificateAlias = ""
-    certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 # Control plane's connection details
 [controlPlane]
