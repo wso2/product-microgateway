@@ -30,26 +30,26 @@ import (
 
 func getErrorResponseMappers() []*hcmv3.ResponseMapper {
 	return []*hcmv3.ResponseMapper{
-		genErrorResponseMapper(err.NotFoundCode, err.NotFoundMessage, err.NotFoundDescription, "NR"),
-		genErrorResponseMapper(err.UaexCode, err.UaexMessage, err.UaexDecription, "UAEX"),
-		genErrorResponseMapper(err.UfCode, err.UfMessage, "%LOCAL_REPLY_BODY%", "UF"),
-		genErrorResponseMapper(err.UtCode, err.UtMessage, "%LOCAL_REPLY_BODY%", "UT"),
-		genErrorResponseMapper(err.UoCode, err.UoMessage, "%LOCAL_REPLY_BODY%", "UO"),
-		genErrorResponseMapper(err.UrxCode, err.UrxMessage, "%LOCAL_REPLY_BODY%", "URX"),
-		genErrorResponseMapper(err.NcCode, err.NcMessage, "%LOCAL_REPLY_BODY%", "NC"),
-		genErrorResponseMapper(err.UhCode, err.UhMessage, "%LOCAL_REPLY_BODY%", "UH"),
-		genErrorResponseMapper(err.UrCode, err.UrMessage, "%LOCAL_REPLY_BODY%", "UR"),
-		genErrorResponseMapper(err.UcCode, err.UcMessage, "%LOCAL_REPLY_BODY%", "UC"),
-		genErrorResponseMapper(err.LrCode, err.LrMessage, "%LOCAL_REPLY_BODY%", "LR"),
-		genErrorResponseMapper(err.IhCode, err.IhMessage, "%LOCAL_REPLY_BODY%", "IH"),
-		genErrorResponseMapper(err.SiCode, err.SiMessage, "%LOCAL_REPLY_BODY%", "SI"),
-		genErrorResponseMapper(err.DpeCode, err.DpeMessage, "%LOCAL_REPLY_BODY%", "DPE"),
-		genErrorResponseMapper(err.UpeCode, err.UpeMessage, "%LOCAL_REPLY_BODY%", "UPE"),
-		genErrorResponseMapper(err.UmsdrCode, err.UmsdrMessage, "%LOCAL_REPLY_BODY%", "UMSDR"),
+		genErrorResponseMapper(err.NotFoundCode, err.NotFoundCode, err.NotFoundMessage, err.NotFoundDescription, "NR"),
+		genErrorResponseMapper(500, err.UaexCode, err.UaexMessage, err.UaexDecription, "UAEX"),
+		genErrorResponseMapper(503, err.UfCode, err.UfMessage, "%LOCAL_REPLY_BODY%", "UF"),
+		genErrorResponseMapper(504, err.UtCode, err.UtMessage, "%LOCAL_REPLY_BODY%", "UT"),
+		genErrorResponseMapper(503, err.UoCode, err.UoMessage, "%LOCAL_REPLY_BODY%", "UO"),
+		genErrorResponseMapper(500, err.UrxCode, err.UrxMessage, "%LOCAL_REPLY_BODY%", "URX"),
+		genErrorResponseMapper(500, err.NcCode, err.NcMessage, "%LOCAL_REPLY_BODY%", "NC"),
+		genErrorResponseMapper(503, err.UhCode, err.UhMessage, "%LOCAL_REPLY_BODY%", "UH"),
+		genErrorResponseMapper(503, err.UrCode, err.UrMessage, "%LOCAL_REPLY_BODY%", "UR"),
+		genErrorResponseMapper(503, err.UcCode, err.UcMessage, "%LOCAL_REPLY_BODY%", "UC"),
+		genErrorResponseMapper(503, err.LrCode, err.LrMessage, "%LOCAL_REPLY_BODY%", "LR"),
+		genErrorResponseMapper(400, err.IhCode, err.IhMessage, "%LOCAL_REPLY_BODY%", "IH"),
+		genErrorResponseMapper(500, err.SiCode, err.SiMessage, "%LOCAL_REPLY_BODY%", "SI"),
+		genErrorResponseMapper(500, err.DpeCode, err.DpeMessage, "%LOCAL_REPLY_BODY%", "DPE"),
+		genErrorResponseMapper(500, err.UpeCode, err.UpeMessage, "%LOCAL_REPLY_BODY%", "UPE"),
+		genErrorResponseMapper(500, err.UmsdrCode, err.UmsdrMessage, "%LOCAL_REPLY_BODY%", "UMSDR"),
 	}
 }
 
-func genErrorResponseMapper(errorCode int32, message string, description string, flag string) *hcmv3.ResponseMapper {
+func genErrorResponseMapper(statusCode uint32, errorCode int32, message string, description string, flag string) *hcmv3.ResponseMapper {
 	errorMsgMap := make(map[string]*structpb.Value)
 	errorMsgMap["code"] = structpb.NewStringValue(strconv.FormatInt(int64(errorCode), 10))
 	errorMsgMap["message"] = structpb.NewStringValue(message)
@@ -64,7 +64,7 @@ func genErrorResponseMapper(errorCode int32, message string, description string,
 				},
 			},
 		},
-		StatusCode: wrapperspb.UInt32(500),
+		StatusCode: wrapperspb.UInt32(statusCode),
 		BodyFormatOverride: &corev3.SubstitutionFormatString{
 			Format: &corev3.SubstitutionFormatString_JsonFormat{
 				JsonFormat: &structpb.Struct{
