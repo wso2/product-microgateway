@@ -58,7 +58,6 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
     @Override
     public void onNext(WebSocketFrameRequest webSocketFrameRequest) {
         logger.debug("Websocket frame received");
-        logger.info(webSocketFrameRequest.getFrameLength());
         try {
             // In case a stream of websocket frames are intercepted by the filter, envoy will buffer them as mini
             // batches and aggregate the frames. In that case if we directly send the frames to traffic manager, the
@@ -91,7 +90,7 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
                         responseStreamObserver.onNext(webSocketFrameResponse);
                     }
                 } else {
-                    logger.info("Websocket frame type not related to throttling");
+                    logger.debug("Websocket frame type not related to throttling");
                 }
             }));
         } catch (InvalidDataException e) {

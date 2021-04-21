@@ -80,7 +80,7 @@ public class WebSocketAPI implements API {
             if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
-            logger.info(requestContext.getMetadataMap());
+            logger.debug(requestContext.getMetadataMap());
             responseObject.setMetaDataMap(requestContext.getMetadataMap());
         } else {
             // If a enforcer stops with a false, it will be passed directly to the client.
