@@ -21,12 +21,14 @@ import io.envoyproxy.envoy.service.auth.v3.CheckRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.discovery.ApiDiscoveryClient;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -64,10 +66,18 @@ public class APIFactory {
         ConcurrentHashMap<String, API> newApis = new ConcurrentHashMap<>();
 
         for (Api api : apis) {
-            RestAPI enforcerApi = new RestAPI();
-            enforcerApi.init(api);
-            String apiKey = getApiKey(enforcerApi);
-            newApis.put(apiKey, enforcerApi);
+            if (APIConstants.ApiType.WEB_SOCKET.equals(api.getApiType())) {
+                WebSocketAPI webSocketAPI = new WebSocketAPI();
+                webSocketAPI.init(api);
+                String apiKey = getApiKey(webSocketAPI);
+                newApis.put(apiKey, webSocketAPI);
+            } else {
+                RestAPI enforcerApi = new RestAPI();
+                enforcerApi.init(api);
+                String apiKey = getApiKey(enforcerApi);
+                newApis.put(apiKey, enforcerApi);
+            }
+
         }
 
         if (logger.isDebugEnabled()) {
@@ -94,12 +104,34 @@ public class APIFactory {
         return apis.get(apiKey);
     }
 
+    public WebSocketAPI getMatchedAPI(WebSocketFrameRequest webSocketFrameRequest) {
+        Map<String, String> extAuthMetadata = webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap();
+        String vHost = extAuthMetadata.get(APIConstants.GW_VHOST_PARAM);
+        String basePath = extAuthMetadata.get(APIConstants.GW_BASE_PATH_PARAM);
+        String version = extAuthMetadata.get(APIConstants.GW_VERSION_PARAM);
+        String apiKey = getApiKey(vHost, basePath, version);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Looking for matching API with basepath: {} and version: {}", basePath, version);
+        }
+        return (WebSocketAPI) apis.get(apiKey);
+    }
+
     public ResourceConfig getMatchedResource(API api, String matchedResourcePath, String method) {
         List<ResourceConfig> resourceConfigList = api.getAPIConfig().getResources();
         return resourceConfigList.stream()
                 .filter(resourceConfig -> resourceConfig.getPath().equals(matchedResourcePath)).
                         filter(resourceConfig -> (method == null) || resourceConfig.getMethod()
                                 .equals(ResourceConfig.HttpMethods.valueOf(method))).findFirst().orElse(null);
+    }
+
+    // For WebSocket APIs since there are no resources in WebSocket APIs.
+    public ResourceConfig getMatchedBasePath(API api, String basePath) {
+        ResourceConfig resourceConfig = new ResourceConfig();
+        if (api.getAPIConfig().getBasePath().equals(basePath)) {
+            resourceConfig.setPath(basePath);
+            resourceConfig.setMethod(ResourceConfig.HttpMethods.GET);
+        }
+        return resourceConfig;
     }
 
     private String getApiKey(API api) {

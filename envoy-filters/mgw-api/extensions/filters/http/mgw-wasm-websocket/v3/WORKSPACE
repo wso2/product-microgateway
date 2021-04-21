@@ -1,0 +1,1 @@
+workspace(name = "mgw_wasm_websocket_api")
