@@ -960,17 +960,23 @@ func restorePreviousState(label string) string {
 * 4. Update the router
 **/
 func watchXDSRequest() {
+	successRequestCount := 0
 	for {
 		requestEvent := <-GetRequestEventChannel()
 		logger.LoggerXds.Debugf("xds Request from client version : %s", requestEvent.Version)
 		if requestEvent.Router {
 			if !requestEvent.IsError {
-				logger.LoggerXds.Infof("Successfully updated APIs in Router for version: %s", requestEvent.Version)
+				successRequestCount++
+				if successRequestCount == 3 {
+					successRequestCount = 0
+					logger.LoggerXds.Infof("Successfully updated APIs in Router for version: %s", requestEvent.Version)
+					buildAndStoreSuccessState(requestEvent.Node, requestEvent.Version)
+				}
 				// Successful message from router, set the current state of the enforcer apis to the state cache.
-				buildAndStoreSuccessState(requestEvent.Node, requestEvent.Version)
 			} else {
+				successRequestCount = 0
 				logger.LoggerXds.Infof("Applying config failed in router. Last success version : %s", requestEvent.Version)
-				logger.LoggerXds.Infof("Falling back both enforcer and router to previous successful version", requestEvent.Version)
+				logger.LoggerXds.Infof("Falling back both enforcer and router to previous successful version: %s", requestEvent.Version)
 				lastSuccessVersion := restorePreviousState(requestEvent.Node)
 				_, _, _, _, apis := GenerateEnvoyResoucesForLabel(requestEvent.Node)
 				UpdateEnforcerApis(requestEvent.Node, apis, lastSuccessVersion)

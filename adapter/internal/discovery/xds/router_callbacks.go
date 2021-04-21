@@ -34,6 +34,12 @@ type typeState struct {
 type RouterCallbacks struct {
 }
 
+var lastReceived = typeState{
+	version:          "",
+	isEventPublished: false,
+	isError:          false,
+}
+
 // Report logs the fetches and requests.
 func (cb *RouterCallbacks) Report() {}
 
@@ -57,8 +63,9 @@ func (cb *RouterCallbacks) OnStreamRequest(id int64, request *discovery.Discover
 	enforcerEvent.Node = request.GetNode().GetId()
 	enforcerEvent.Version = request.VersionInfo
 	enforcerEvent.Router = true
+	logger.LoggerXdsCallbacks.Debugf("stream request with type %s version %s", request.GetTypeUrl(), request.GetVersionInfo())
 	if request.ErrorDetail != nil {
-		logger.LoggerXdsCallbacks.Errorf("Error stream request on stream id: %d Error: %s", id, request.ErrorDetail.Message)
+		logger.LoggerXdsCallbacks.Errorf("Error stream request on stream id: %d type: %s Error: %s", id, request.GetTypeUrl(), request.ErrorDetail.Message)
 		enforcerEvent.IsError = true
 	}
 	enforcerEventChannel <- enforcerEvent
