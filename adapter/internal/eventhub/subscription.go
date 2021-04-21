@@ -177,6 +177,7 @@ func LoadSubscriptionData(configFile *config.Config) {
 }
 
 // InvokeService invokes the internal data resource
+// This function is only called during the startup in all the cases.
 func InvokeService(endpoint string, responseType interface{}, queryParamMap map[string]string, c chan response,
 	retryAttempt int) {
 
@@ -276,6 +277,7 @@ func retrieveAPIListFromChannel(c chan response) {
 						APIListMap[response.GatewayLabel] = newResponse.(*types.APIList)
 					} else {
 						// API Details retrieved after startup contains single API per response.
+						// Not used as this channel is not updated after the startup
 						if len(apiListResponse.List) == 1 {
 							APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List,
 								apiListResponse.List[0])

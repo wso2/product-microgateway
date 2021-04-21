@@ -138,15 +138,36 @@ func handleAPIEvents(data []byte, eventType string) {
 								return
 							}
 						}
-						queryParamMap := make(map[string]string, 3)
-						queryParamMap[eh.GatewayLabelParam] = configuredEnv
-						queryParamMap[eh.ContextParam] = apiEvent.Context
-						queryParamMap[eh.VersionParam] = apiEvent.Version
-						// TODO: (VirajSalaka) Fix the REST API call once the APIM Event hub implementation is fixed.
-						// TODO: (VirajSalaka) Optimize the number of requests sent to /apis endpoint as the same API is returned
-						// repeatedly. (If Eventhub implementation is not fixed)
-						go eh.InvokeService(eh.ApisEndpoint, eh.APIListMap[env], queryParamMap,
-							eh.APIListChannel, 0)
+						var apiEvent APIEvent
+						json.Unmarshal([]byte(string(data)), &apiEvent)
+						api := types.API{
+							APIID:    apiEvent.APIID,
+							UUID:     apiEvent.UUID,
+							Provider: apiEvent.APIProvider,
+							// hardcoded as default version is not assigned at the moment.
+							IsDefaultVersion: false,
+							APIStatus:        apiEvent.APIStatus,
+							TenantID:         apiEvent.TenantID,
+							TenantDomain:     apiEvent.TenantDomain,
+							TimeStamp:        apiEvent.TimeStamp,
+						}
+
+						// Currently the API Deploy/Remove event and the other API events use different keys
+						// Added this logic to prevent any failures if the API Manager implementation is changed.
+						if apiEvent.APIName != "" {
+							api.Name = apiEvent.APIName
+						} else {
+							api.Name = apiEvent.Name
+						}
+
+						if apiEvent.APIVersion != "" {
+							api.Version = apiEvent.APIVersion
+						} else {
+							api.Version = apiEvent.Version
+						}
+
+						eh.APIListMap[env].List = append(eh.APIListMap[env].List, api)
+						xds.UpdateEnforcerAPIList(env, xds.MarshalAPIList(eh.APIListMap[env]))
 					}
 				}
 			}
