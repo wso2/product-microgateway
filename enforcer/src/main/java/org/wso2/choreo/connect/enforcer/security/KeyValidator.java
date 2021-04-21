@@ -166,7 +166,7 @@ public class KeyValidator {
             if (api != null) {
                 key = datastore.getKeyMappingByKeyAndKeyManager(consumerKey, keyManager);
                 if (key != null) {
-                    app = datastore.getApplicationById(key.getApplicationId());
+                    app = datastore.getApplicationById(key.getApplicationUUID());
                     if (app != null) {
                         sub = datastore.getSubscriptionById(app.getUUID(), api.getApiUUID());
                         if (sub != null) {

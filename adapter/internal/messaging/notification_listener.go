@@ -211,7 +211,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 		applicationKeyMapping := types.ApplicationKeyMapping{ApplicationID: applicationRegistrationEvent.ApplicationID,
 			ConsumerKey: applicationRegistrationEvent.ConsumerKey, KeyType: applicationRegistrationEvent.KeyType,
 			KeyManager: applicationRegistrationEvent.KeyManager, TenantID: -1, TenantDomain: applicationRegistrationEvent.TenantDomain,
-			TimeStamp: applicationRegistrationEvent.TimeStamp}
+			TimeStamp: applicationRegistrationEvent.TimeStamp, ApplicationUUID: applicationRegistrationEvent.ApplicationUUID}
 
 		if isLaterEvent(applicationKeyMappingTimeStampMap, fmt.Sprint(applicationRegistrationEvent.ApplicationID),
 			applicationRegistrationEvent.TimeStamp) {

@@ -12,10 +12,11 @@ option java_multiple_files = true;
 // ApplicationKeyMapping data model
 message ApplicationKeyMapping {
     string consumerKey = 1;
-	string keyType = 2;
-	string keyManager = 3;
-	int32 applicationId = 4;
-	int32 tenantId = 5;
+		string keyType = 2;
+		string keyManager = 3;
+		int32 applicationId = 4;
+		int32 tenantId = 5;
     string tenantDomain = 6;
     int64 timestamp = 7;
+    string applicationUUID = 8;
 }

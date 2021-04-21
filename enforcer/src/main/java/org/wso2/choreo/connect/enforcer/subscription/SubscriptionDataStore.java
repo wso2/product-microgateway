@@ -37,10 +37,10 @@ public interface SubscriptionDataStore {
     /**
      * Gets an {@link Application} by Id.
      *
-     * @param appId Id of the Application
+     * @param appUUID Id of the Application
      * @return {@link Application} with the appId
      */
-    Application getApplicationById(int appId);
+    Application getApplicationById(String appUUID);
 
     /**
      * Gets the {@link ApplicationKeyMapping} entry by Key.

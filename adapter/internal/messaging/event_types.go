@@ -103,10 +103,11 @@ type APIEvent struct {
 
 // ApplicationRegistrationEvent for struct application registration events
 type ApplicationRegistrationEvent struct {
-	ApplicationID int32  `json:"applicationId"`
-	ConsumerKey   string `json:"consumerKey"`
-	KeyType       string `json:"keyType"`
-	KeyManager    string `json:"keyManager"`
+	ApplicationID   int32  `json:"applicationId"`
+	ApplicationUUID string `json:"applicationUUID"`
+	ConsumerKey     string `json:"consumerKey"`
+	KeyType         string `json:"keyType"`
+	KeyManager      string `json:"keyManager"`
 	Event
 }
 

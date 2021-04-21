@@ -314,13 +314,14 @@ func MarshalKeyMappingList(keyMappingList *types.ApplicationKeyMappingList) *sub
 
 	for _, mapping := range keyMappingList.List {
 		keyMapping := &subscription.ApplicationKeyMapping{
-			ConsumerKey:   mapping.ConsumerKey,
-			KeyType:       mapping.KeyType,
-			KeyManager:    mapping.KeyManager,
-			ApplicationId: mapping.ApplicationID,
-			TenantId:      mapping.TenantID,
-			TenantDomain:  mapping.TenantDomain,
-			Timestamp:     mapping.TimeStamp,
+			ConsumerKey:     mapping.ConsumerKey,
+			KeyType:         mapping.KeyType,
+			KeyManager:      mapping.KeyManager,
+			ApplicationId:   mapping.ApplicationID,
+			ApplicationUUID: mapping.ApplicationUUID,
+			TenantId:        mapping.TenantID,
+			TenantDomain:    mapping.TenantDomain,
+			Timestamp:       mapping.TimeStamp,
 		}
 
 		applicationKeyMappings = append(applicationKeyMappings, keyMapping)

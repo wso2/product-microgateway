@@ -92,9 +92,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public Application getApplicationById(int appId) {
+    public Application getApplicationById(String appUUID) {
 
-        return applicationMap.get(appId);
+        return applicationMap.get(appUUID);
     }
 
     @Override
@@ -267,6 +267,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 applicationKeyMappingList) {
             ApplicationKeyMapping mapping = new ApplicationKeyMapping();
             mapping.setApplicationId(applicationKeyMapping.getApplicationId());
+            mapping.setApplicationUUID(applicationKeyMapping.getApplicationUUID());
             mapping.setConsumerKey(applicationKeyMapping.getConsumerKey());
             mapping.setKeyType(applicationKeyMapping.getKeyType());
             mapping.setKeyManager(applicationKeyMapping.getKeyManager());
