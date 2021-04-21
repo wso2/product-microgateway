@@ -186,12 +186,9 @@ allowCredentials = false
       secureEvictionTimePeriod = 5500
       secureMinIdleTimeInPool = 5000
 
-[security]
-
-[security.enforcer]
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1
-[[security.enforcer.tokenService]]
+[[enforcer.tokenService]]
   name="Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
   certificateAlias = "wso2carbon"
@@ -205,7 +202,7 @@ allowCredentials = false
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 # Issuer 2
-[[security.enforcer.tokenService]]
+[[enforcer.tokenService]]
     name="MGW"
     issuer = "https://localhost:9095/testkey"
     certificateAlias = "mgw"
@@ -219,7 +216,7 @@ allowCredentials = false
     certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 # Issuer 3
-[[security.enforcer.tokenService]]
+[[enforcer.tokenService]]
   name="APIM Publisher"
   issuer = "https://localhost:9443/publisher"
   certificateAlias = ""

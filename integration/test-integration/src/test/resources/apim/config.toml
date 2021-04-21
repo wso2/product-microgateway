@@ -194,7 +194,7 @@ secureMinIdleTimeInPool = 5000
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 # Issuer 2
-[[security.enforcer.tokenService]]
+[[enforcer.tokenService]]
 name="MGW"
 issuer = "https://localhost:9095/testkey"
 certificateAlias = "mgw"
@@ -208,7 +208,7 @@ consumerKeyClaim = ""
 certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 # Issuer 3
-[[security.enforcer.tokenService]]
+[[enforcer.tokenService]]
     name="APIM Publisher"
     issuer = "https://localhost:9443/publisher"
     certificateAlias = ""
