@@ -54,6 +54,8 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
 			}
 			endpoint := getHostandBasepathandPort(serverEntry.URL)
 			swagger.productionUrls = append(swagger.productionUrls, endpoint)
+			// Basepath is assigned from servers URL's basepath
+			swagger.xWso2Basepath = endpoint.Basepath
 		}
 	}
 }

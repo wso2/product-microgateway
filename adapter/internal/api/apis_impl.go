@@ -137,7 +137,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
 		} else if (strings.Contains(file.Name, apiYAMLFile) || strings.Contains(file.Name, apiJSONFile)) &&
-			!strings.Contains(file.Name, openAPIDir){
+			!strings.Contains(file.Name, openAPIDir) {
 			loggers.LoggerAPI.Debugf("fileName : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
@@ -257,7 +257,12 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 			}
 		}
 		// first update the API for vhost
-		updateAPI(vhost, apiInfo, apiProject, environments)
+		apiContent := generateAPIContent(vhost, apiInfo, apiProject, environments)
+		// In APIM mode, it is required to skip rather than rejecting the whole API deployment.
+		if xds.ValidateAPI(apiContent) != nil {
+			continue
+		}
+		xds.UpdateAPI(apiContent)
 	}
 
 	// undeploy APIs with other vhosts in the same gateway environment
@@ -315,17 +320,25 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 			append(vhostToEnvsMap[environment.DeploymentVhost], environment.DeploymentEnvironment)
 	}
 
+	// From this all the APIs would be validated prior to update Xds Caches.
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
-		updateAPI(vhost, apiInfo, apiProject, environments)
+		apiContent := generateAPIContent(vhost, apiInfo, apiProject, environments)
+		err := xds.ValidateAPI(apiContent)
+		if err != nil {
+			return err
+		}
+	}
+
+	// After the API is validated against all the vhosts, update xds cache.
+	for vhost, environments := range vhostToEnvsMap {
+		apiContent := generateAPIContent(vhost, apiInfo, apiProject, environments)
+		xds.UpdateAPI(apiContent)
 	}
 	return nil
 }
 
-func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) {
-	if len(environments) == 0 {
-		environments = append(environments, config.DefaultGatewayName)
-	}
+func generateAPIContent(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) config.APIContent {
 	var apiContent config.APIContent
 	apiContent.UUID = apiInfo.ID
 	apiContent.VHost = vhost
@@ -350,7 +363,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	} else if apiProject.APIType == mgw.WS {
 		apiContent.APIDefinition = apiProject.APIJsn
 	}
-	xds.UpdateAPI(apiContent)
+	return apiContent
 }
 
 func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData) {

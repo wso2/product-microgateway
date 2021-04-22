@@ -215,6 +215,64 @@ func GetEnforcerThrottleDataCache() wso2_cache.SnapshotCache {
 	return enforcerThrottleDataCache
 }
 
+// ValidateAPI validates the API Content prior to xds update.
+func ValidateAPI(apiContent config.APIContent) error {
+	// validate API Type
+	if !(apiContent.APIType == mgw.HTTP || apiContent.APIType == mgw.WS) {
+		logger.LoggerXds.Errorf("API type : %s not currently supported with WSO2 Microgateway", apiContent.APIType)
+		return errors.New("API is not applied as provided type is not supported")
+	}
+
+	mgwSwagger := populateMgwSwaggerFromAPIContent(apiContent)
+	for apiKey, swaggerEntry := range apiMgwSwaggerMap {
+		vhost, vhostExtractErr := ExtractVhostFromAPIIdentifier(apiKey)
+		if vhostExtractErr != nil {
+			// if vhost is not extracted, the code will continue
+			continue
+		}
+		if swaggerEntry.GetXWso2Basepath() == mgwSwagger.GetXWso2Basepath() && apiContent.VHost == vhost {
+			logger.LoggerXds.Errorf("API %s:%s:%s already exists under provided basePath : %s ",
+				vhost, swaggerEntry.GetTitle(), mgwSwagger.GetVersion(), swaggerEntry.GetXWso2Basepath())
+			return errors.New("API is not applied as basePath is already available")
+		}
+	}
+
+	validationErr := mgwSwagger.Validate()
+	if validationErr != nil {
+		logger.LoggerOasparser.Errorf("Validation failed for the API. %s:%s:%s",
+			apiContent.VHost, mgwSwagger.GetTitle(), mgwSwagger.GetVersion())
+		return validationErr
+	}
+	return nil
+}
+
+// TODO: (VirajSalaka) Optimize such that the same method is not called twice over one API Update.
+func populateMgwSwaggerFromAPIContent(apiContent config.APIContent) mgw.MgwSwagger {
+	var modifiedMgwSwagger mgw.MgwSwagger
+	if apiContent.APIType == mgw.HTTP {
+		modifiedMgwSwagger = operator.GetMgwSwagger(apiContent.APIDefinition)
+		modifiedMgwSwagger.SetID(apiContent.UUID)
+		modifiedMgwSwagger.SetName(apiContent.Name)
+		modifiedMgwSwagger.SetVersion(apiContent.Version)
+		modifiedMgwSwagger.SetSecurityScheme(apiContent.SecurityScheme)
+		modifiedMgwSwagger.SetXWso2AuthHeader(apiContent.AuthHeader)
+		modifiedMgwSwagger.OrganizationID = apiContent.OrganizationID
+	} else if apiContent.APIType == mgw.WS {
+		modifiedMgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
+		modifiedMgwSwagger.OrganizationID = apiContent.OrganizationID
+	} else {
+		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
+		return modifiedMgwSwagger
+	}
+
+	if (len(modifiedMgwSwagger.GetProdEndpoints()) == 0 || modifiedMgwSwagger.GetProdEndpoints()[0].Host == "/") &&
+		(len(modifiedMgwSwagger.GetSandEndpoints()) == 0 || modifiedMgwSwagger.GetSandEndpoints()[0].Host == "/") {
+		modifiedMgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
+		modifiedMgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
+	}
+	return modifiedMgwSwagger
+}
+
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
 func UpdateAPI(apiContent config.APIContent) {
 	var newLabels []string
@@ -228,34 +286,12 @@ func UpdateAPI(apiContent config.APIContent) {
 	l.Lock()
 	defer l.Unlock()
 
-	if apiContent.APIType == mgw.HTTP {
-		mgwSwagger = operator.GetMgwSwagger(apiContent.APIDefinition)
-		mgwSwagger.SetID(apiContent.UUID)
-		mgwSwagger.SetName(apiContent.Name)
-		mgwSwagger.SetVersion(apiContent.Version)
-		mgwSwagger.SetSecurityScheme(apiContent.SecurityScheme)
-		mgwSwagger.SetXWso2AuthHeader(apiContent.AuthHeader)
-		mgwSwagger.OrganizationID = apiContent.OrganizationID
-	} else if apiContent.APIType == mgw.WS {
-		mgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
-		mgwSwagger.OrganizationID = apiContent.OrganizationID
-	} else {
-		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
-		logger.LoggerXds.Error("API type not currently supported with WSO2 Microgateway")
-	}
+	mgwSwagger = populateMgwSwaggerFromAPIContent(apiContent)
 
-	if (len(mgwSwagger.GetProdEndpoints()) == 0 || mgwSwagger.GetProdEndpoints()[0].Host == "/") &&
-		(len(mgwSwagger.GetSandEndpoints()) == 0 || mgwSwagger.GetSandEndpoints()[0].Host == "/") {
-		mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
-		mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
-	}
-
-	validationErr := mgwSwagger.Validate()
-	if validationErr != nil {
-		logger.LoggerOasparser.Errorf("Validation failed for the API. %s:%s", mgwSwagger.GetTitle(), mgwSwagger.GetVersion())
+	// TODO: (VirajSalaka) Use pointers
+	if mgwSwagger.GetTitle() == "" {
 		return
 	}
-
 	apiIdentifier := GenerateIdentifierForAPI(apiContent.VHost, apiContent.Name, apiContent.Version)
 	//TODO: (SuKSW) Uncomment the below section depending on MgwSwagger.Resource ids
 	//TODO: (SuKSW) Update the existing API if the basepath already exists
@@ -294,6 +330,7 @@ func UpdateAPI(apiContent config.APIContent) {
 	if svcdiscovery.IsServiceDiscoveryEnabled {
 		startConsulServiceDiscovery() //consul service discovery starting point
 	}
+	return
 }
 
 // GetVhostOfAPI returns the vhost of API deployed in the given gateway environment

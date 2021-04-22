@@ -18,9 +18,10 @@
 package envoyconf
 
 import (
-	"google.golang.org/protobuf/types/known/durationpb"
 	"net"
 	"regexp"
+
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -369,11 +370,11 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
-		router        routev3.Route
-		action        *routev3.Route_Route
-		match         *routev3.RouteMatch
-		decorator     *routev3.Decorator
-		resourcePath  string
+		router       routev3.Route
+		action       *routev3.Route_Route
+		match        *routev3.RouteMatch
+		decorator    *routev3.Decorator
+		resourcePath string
 	)
 
 	// OPTIONS is always added even if it is not listed under resources
@@ -461,7 +462,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		Value:   b.Bytes(),
 	}
 
-	if xWso2Basepath != "" {
+	// if xWso2Basepath is not different compared to endpointBasepath, no need to substitute.
+	if xWso2Basepath != "" && xWso2Basepath != endpointBasepath {
 		action = &routev3.Route_Route{
 			Route: &routev3.RouteAction{
 				HostRewriteSpecifier: hostRewriteSpecifier,
