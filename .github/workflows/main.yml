@@ -31,4 +31,4 @@ jobs:
       - name: Build with Maven
         run: |
           export PATH="${HOME}/go/bin:${PATH}"
-          mvn clean install
+          mvn clean install -PRelease
