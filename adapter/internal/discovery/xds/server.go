@@ -51,6 +51,9 @@ var (
 	version             int32
 	mutexForXdsUpdate   sync.Mutex
 	mutexForCacheUpdate sync.Mutex
+	mutexForAPIUpdate   sync.Mutex
+	doneChannel         = make(chan string)
+	lockCount           = 0
 
 	cache                              envoy_cachev3.SnapshotCache
 	enforcerCache                      wso2_cache.SnapshotCache
@@ -224,9 +227,14 @@ func UpdateAPI(apiContent config.APIContent) {
 	}
 
 	//TODO: (VirajSalaka) Optimize locking
-	var l sync.Mutex
-	l.Lock()
-	defer l.Unlock()
+
+	mutexForAPIUpdate.Lock()
+	lockCount++
+	logger.LoggerXds.Debugf("Lock Acquired.... %d", lockCount)
+	defer func() {
+		logger.LoggerXds.Debugf("Lock Released.... %d", lockCount)
+		mutexForAPIUpdate.Unlock()
+	}()
 
 	if apiContent.APIType == mgw.HTTP {
 		mgwSwagger = operator.GetMgwSwagger(apiContent.APIDefinition)
@@ -294,6 +302,9 @@ func UpdateAPI(apiContent config.APIContent) {
 	if svcdiscovery.IsServiceDiscoveryEnabled {
 		startConsulServiceDiscovery() //consul service discovery starting point
 	}
+	logger.LoggerXds.Debugf("Waiting for done channel....")
+	done := <-doneChannel
+	logger.LoggerXds.Debugf("Received %s", done)
 }
 
 // GetVhostOfAPI returns the vhost of API deployed in the given gateway environment
@@ -925,6 +936,7 @@ func buildAndStoreSuccessState(label string, version string) {
 		Version:                version,
 	}
 	SetSuccessState(label, enforcerNewState, routerNewState)
+	doneChannel <- "Done"
 }
 
 // restorePreviousState retrive the last successful state from the state cache and restore the date to the maps.
@@ -962,6 +974,7 @@ func restorePreviousState(label string) string {
 **/
 func watchXDSRequest() {
 	successRequestCount := 0
+	currentEnforcerVersion := ""
 	for {
 		requestEvent := <-GetRequestEventChannel()
 		logger.LoggerXds.Debugf("xds Request from client version : %v", requestEvent)
@@ -971,14 +984,20 @@ func watchXDSRequest() {
 				*	In success scenario, router will send 3 requests (for clusters, routes and listeners)
 				*	Inorder to be a successful update to the router, all 3 responses should be successful.
 				 */
-				successRequestCount++
+				//successRequestCount[requestEvent.Version]++
+
+				if currentEnforcerVersion == requestEvent.Version {
+					successRequestCount++
+				}
 				if successRequestCount == 3 {
 					successRequestCount = 0
+					// Successful update from router, set the current state of the enforcer apis to the state cache.
+					//delete(successRequestCount, requestEvent.Version)
 					logger.LoggerXds.Infof("Successfully updated APIs in Router for version: %s", requestEvent.Version)
 					buildAndStoreSuccessState(requestEvent.Node, requestEvent.Version)
 				}
-				// Successful message from router, set the current state of the enforcer apis to the state cache.
 			} else {
+				// Error in router.
 				successRequestCount = 0
 				logger.LoggerXds.Errorf("Applying config failed in Router. Last success version : %s", requestEvent.Version)
 				logger.LoggerXds.Infof("Falling back both enforcer and router to previous successful version: %s", requestEvent.Version)
@@ -994,6 +1013,7 @@ func watchXDSRequest() {
 				_, _, _, _, apis := GenerateEnvoyResoucesForLabel(requestEvent.Node)
 				UpdateEnforcerApis(requestEvent.Node, apis, lastSuccessVersion)
 			} else {
+				currentEnforcerVersion = requestEvent.Version
 				logger.LoggerXds.Infof("Successfully updated APIs in Enforcer for version: %s", requestEvent.Version)
 				// Generate the router resources and update the router.
 				listeners, clusters, routes, endpoints, _ := GenerateEnvoyResoucesForLabel(requestEvent.Node)

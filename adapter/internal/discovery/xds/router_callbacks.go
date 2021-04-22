@@ -34,12 +34,6 @@ type typeState struct {
 type RouterCallbacks struct {
 }
 
-var lastReceived = typeState{
-	version:          "",
-	isEventPublished: false,
-	isError:          false,
-}
-
 // Report logs the fetches and requests.
 func (cb *RouterCallbacks) Report() {}
 
