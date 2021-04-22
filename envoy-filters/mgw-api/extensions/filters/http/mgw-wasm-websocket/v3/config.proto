@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package envoy.extensions.filters.http.mgw_wasm_websocket.v3;
+
+import "google/protobuf/duration.proto";
+
+// this proto represents configuration for the example filter
+message Config {
+    string node_id = 1;
+
+    string rate_limit_service = 2;
+    
+    google.protobuf.Duration timeout = 3;
+
+    bool failure_mode_deny = 4;
+}

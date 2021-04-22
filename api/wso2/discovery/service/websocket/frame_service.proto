@@ -1,0 +1,64 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+syntax = "proto3";
+
+package envoy.extensions.filters.http.mgw_wasm_websocket.v3;
+
+option java_package = "org.wso2.choreo.connect.discovery.service.websocket";
+option java_outer_classname = "MgwWebSocketProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: WebSocketFrameService]
+service WebSocketFrameService {
+  rpc PublishFrameData(stream WebSocketFrameRequest) returns (stream WebSocketFrameResponse) {}
+}
+
+message WebSocketFrameRequest {
+  // Unique Id / label of the router
+  string node_id = 1;
+
+  // Ext_authz metadata
+  Metadata metadata = 2;
+
+  // Web socket frame length
+  int32 frame_length = 3;
+
+  // IP address of upstream service
+  string remote_ip = 4;
+
+  bytes payload = 5;
+}
+
+message WebSocketFrameResponse {
+  enum Code {
+          // The response code is not known.
+          UNKNOWN = 0;
+          // The response code to notify that the number of requests are under limit.
+          OK = 1;
+          // The response code to notify that the number of requests are over limit.
+          OVER_LIMIT = 2;
+  }
+  Code throttle_state = 1;
+
+  int64 throttle_period = 2;
+}
+
+message Metadata {
+  map<string,string> ext_authz_metadata = 1;
+}
+

@@ -36,7 +36,7 @@ import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
-import org.wso2.choreo.connect.enforcer.server.RequestHandler;
+import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
 
 /**
  * This is the gRPC server written to match with the envoy ext-authz filter proto file. Envoy proxy call this service.
@@ -44,12 +44,12 @@ import org.wso2.choreo.connect.enforcer.server.RequestHandler;
  */
 public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
-    private RequestHandler requestHandler = new RequestHandler();
+    private HttpRequestHandler requestHandler = new HttpRequestHandler();
 
     @Override
     public void check(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
         ThreadContext.put(APIConstants.LOG_TRACE_ID, request.getAttributes().getRequest().getHttp().getId());
-        ResponseObject responseObject = requestHandler.process(request, responseObserver);
+        ResponseObject responseObject = requestHandler.process(request);
         CheckResponse response = buildResponse(request, responseObject);
         responseObserver.onNext(response);
         // When you are done, you must call onCompleted.

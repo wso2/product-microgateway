@@ -28,7 +28,9 @@ import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
+import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse;
+import org.wso2.choreo.connect.enforcer.websocket.MetadataConstants;
 
 /**
  * Intercepts the gRPC request comes to the enforcer and logs the request access data.
@@ -49,6 +51,12 @@ public class AccessLogInterceptor implements ServerInterceptor {
                         CheckRequest checkRequest = (CheckRequest) message;
                         enforcerServerCall.setStartTime(System.currentTimeMillis());
                         enforcerServerCall.setTraceId(checkRequest.getAttributes().getRequest().getHttp().getId());
+                        super.onMessage(message);
+                    } else if (message instanceof WebSocketFrameRequest) {
+                        WebSocketFrameRequest webSocketFrameRequest = (WebSocketFrameRequest) message;
+                        enforcerServerCall.setStartTime(System.currentTimeMillis());
+                        enforcerServerCall.setTraceId(webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap()
+                                .get(MetadataConstants.REQUEST_ID));
                         super.onMessage(message);
                     }
                 }
@@ -77,6 +85,12 @@ public class AccessLogInterceptor implements ServerInterceptor {
                 // log pattern -> trace ID, gRPC method name, response status code, response time
                 logger.info(String.format("%s %s %d %d", traceId, serverCall.getMethodDescriptor().getFullMethodName(),
                         checkResponse.getStatus().getCode(), responseTimeMillis));
+            } else if (message instanceof WebSocketFrameResponse) {
+                long responseTimeMillis = System.currentTimeMillis() - startTime;
+                WebSocketFrameResponse webSocketFrameResponse = (WebSocketFrameResponse) message;
+                // log pattern -> trace ID, gRPC method name, throttle state, response time
+                logger.info(String.format("%s %s %s %d", traceId, serverCall.getMethodDescriptor().getFullMethodName(),
+                        webSocketFrameResponse.getThrottleState(), responseTimeMillis));
             }
         }
 

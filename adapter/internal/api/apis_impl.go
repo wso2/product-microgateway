@@ -136,7 +136,8 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			}
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
-		} else if strings.Contains(file.Name, apiYAMLFile) || strings.Contains(file.Name, apiJSONFile) {
+		} else if (strings.Contains(file.Name, apiYAMLFile) || strings.Contains(file.Name, apiJSONFile)) &&
+			!strings.Contains(file.Name, openAPIDir){
 			loggers.LoggerAPI.Debugf("fileName : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
@@ -175,7 +176,6 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 		}
 	}
 	if apiProject.APIJsn == nil {
-		// TODO : (LahiruUdayanga) Handle the default behaviour after when the APIDeployTestCase test is fixed.
 		// If no api.yaml file is included in the zip folder, return with error.
 		err := errors.New("could not find api.yaml or api.json")
 		loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())

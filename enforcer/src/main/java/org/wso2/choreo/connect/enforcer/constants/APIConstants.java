@@ -364,4 +364,12 @@ public class APIConstants {
         }
     }
 
+    /**
+     *  Holds the values for API types
+     */
+    public static class ApiType {
+        public static final String WEB_SOCKET = "WS";
+        public static final String REST = "HTTP";
+    }
+
 }
