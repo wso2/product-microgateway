@@ -349,7 +349,7 @@ func DeleteAPIs(vhost, apiName, version string, environments []string) error {
 	if _, ok := vhosts[vhost]; ok {
 		if len(vhosts) == 1 {
 			// if this is the final vhost delete map entry
-			logger.LoggerXds.Debugf("There are no vhosts for the API %v and clean vhost entry with name:version from maps",
+			logger.LoggerXds.Debugf("The API %v is not exists with any vhost. Hence clean vhost entry from the map 'apiToVhostsMap'",
 				apiNameVersionID)
 			delete(apiToVhostsMap, apiNameVersionID)
 		} else {

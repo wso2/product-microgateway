@@ -282,7 +282,9 @@ public class ApictlUtils {
     public static void undeployAPI(String apiName, String apiVersion, String mgwEnv, String vhost) throws MicroGWTestException {
         String[] cmdArray = { MG, UNDEPLOY, API };
         List<String> args = new ArrayList<>(Arrays.asList(NAME_FLAG, apiName, VERSION_FLAG, apiVersion, ENV_FLAG, mgwEnv));
+        String loggedVhost = "<EMPTY_VHOST>";
         if (StringUtils.isNotEmpty(vhost)) {
+            loggedVhost = vhost;
             args.addAll(Arrays.asList(VHOST_FLAG, vhost));
         }
         String[] argsArray = args.toArray(String[]::new);
@@ -290,13 +292,13 @@ public class ApictlUtils {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
             if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFULLY_UNDEPLOYED_RESPONSE)) {
                 throw new MicroGWTestException("Unable to undeploy API: "
-                        + apiName + " from microgateway adapter environment: " + mgwEnv + " vhost: " + vhost);
+                        + apiName + " from microgateway adapter environment: " + mgwEnv + " vhost: " + loggedVhost);
             }
         } catch (IOException e) {
             throw new MicroGWTestException("Unable to undeploy API: "
-                    + apiName + " to microgateway adapter environment: " + mgwEnv, e);
+                    + apiName + " from microgateway adapter environment: " + mgwEnv + " vhost: " + loggedVhost, e);
         }
-        log.info("Undeployed API project: " + apiName + " from microgateway adapter environment: " + mgwEnv + " vhost: " + vhost);
+        log.info("Undeployed API project: " + apiName + " from microgateway adapter environment: " + mgwEnv + " vhost: " + loggedVhost);
     }
 
     /**
