@@ -19,7 +19,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	issuers := []*enforcer.Issuer{}
 	urlGroups := []*enforcer.TMURLGroup{}
 
-	for _, issuer := range config.Security.Enforcer.TokenService {
+	for _, issuer := range config.Enforcer.Security.TokenService {
 		claimMaps := []*enforcer.ClaimMapping{}
 		for _, claimMap := range issuer.ClaimMapping {
 			claim := &enforcer.ClaimMapping{
@@ -127,6 +127,10 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		AuthService: authService,
 		Security: &enforcer.Security{
 			TokenService: issuers,
+			AuthHeader: &enforcer.AuthHeader{
+				EnableOutboundAuthHeader :    config.Enforcer.Security.AuthHeader.EnableOutboundAuthHeader,
+				AuthorizationHeader :    config.Enforcer.Security.AuthHeader.AuthorizationHeader,
+			},
 		},
 		Cache:     cache,
 		Analytics: analytics,

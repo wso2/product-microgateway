@@ -184,7 +184,8 @@ public class JWTAuthenticator implements Authenticator {
                     if (securityInfo.getEnabled() &&
                             APIConstants.AUTHORIZATION_HEADER_BASIC.
                                     equalsIgnoreCase(securityInfo.getSecurityType())) {
-                        // use constants
+                        requestContext.getRemoveHeaders().remove(APIConstants.AUTHORIZATION_HEADER_DEFAULT
+                                .toLowerCase());
                         requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                                 APIConstants.AUTHORIZATION_HEADER_BASIC + ' ' +
                                         Base64.getEncoder().encodeToString((securityInfo.getUsername() +
@@ -239,11 +240,7 @@ public class JWTAuthenticator implements Authenticator {
 
     private String retrieveAuthHeaderValue(RequestContext requestContext) {
         Map<String, String> headers = requestContext.getHeaders();
-        String authHeader = requestContext.getMatchedAPI().getAPIConfig().getAuthHeader().toLowerCase();
-        if (StringUtils.isEmpty(authHeader)) {
-            authHeader = APIConstants.AUTHORIZATION_HEADER_DEFAULT.toLowerCase();
-        }
-        return headers.get(authHeader);
+        return headers.get(FilterUtils.getAuthHeaderName(requestContext));
     }
 
     @Override

@@ -72,6 +72,9 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
             try {
                 // Extract internal from the request while removing it from the msg context.
                 String internalKey = extractInternalKey(requestContext);
+                // Remove internal key from outbound request
+                requestContext.getRemoveHeaders().add(securityParam);
+
                 if (StringUtils.isEmpty(internalKey)) {
                     log.error("Cannot find Internal key header");
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),

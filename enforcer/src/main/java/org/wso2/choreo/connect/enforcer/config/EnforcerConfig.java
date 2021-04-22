@@ -21,6 +21,7 @@ package org.wso2.choreo.connect.enforcer.config;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
+import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CacheDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
@@ -48,6 +49,7 @@ public class EnforcerConfig {
     private String privateKeyPath = "";
     private AnalyticsDTO analyticsConfig;
     private Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
+    private AuthHeaderDto authHeader;
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -144,4 +146,13 @@ public class EnforcerConfig {
     public void setJwtTransformerMap(Map<String, JWTTransformer> jwtTransformerMap) {
         this.jwtTransformerMap = jwtTransformerMap;
     }
+
+    public AuthHeaderDto getAuthHeader() {
+        return authHeader;
+    }
+
+    public void setAuthHeader(AuthHeaderDto authHeader) {
+        this.authHeader = authHeader;
+    }
 }
+
