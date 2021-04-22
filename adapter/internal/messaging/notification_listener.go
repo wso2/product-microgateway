@@ -109,14 +109,18 @@ func handleAPIEvents(data []byte, eventType string) {
 	)
 
 	json.Unmarshal([]byte(string(data)), &apiEvent)
+	if !belongsToTenant(apiEvent.TenantDomain) {
+		logger.LoggerMsg.Debugf("API event for the API %s:%s is dropped due to having non related tenantDomain : %s",
+			apiEvent.APIName, apiEvent.APIVersion, apiEvent.TenantDomain)
+		return
+	}
+
 	// Per each revision, synchronization should happen.
 	if strings.EqualFold(deployAPIToGateway, apiEvent.Event.Type) {
 		go synchronizer.FetchAPIsFromControlPlane(apiEvent.UUID, apiEvent.GatewayLabels)
 	}
 
-	// TODO: (VirajSalaka) Handle API Blocked event
 	for _, env := range apiEvent.GatewayLabels {
-		// TODO: (VirajSalaka) This stores unnecessary keyvalue pairs as well.
 		if isLaterEvent(apiListTimeStampMap, apiEvent.UUID+":"+env, currentTimeStamp) {
 			return
 		}
@@ -171,6 +175,11 @@ func handleAPIEvents(data []byte, eventType string) {
 func handleLifeCycleEvents(data []byte) {
 	var apiEvent APIEvent
 	json.Unmarshal([]byte(string(data)), &apiEvent)
+	if !belongsToTenant(apiEvent.TenantDomain) {
+		logger.LoggerMsg.Debugf("API Lifecycle event for the API %s:%s is dropped due to having non related tenantDomain : %s",
+			apiEvent.APIName, apiEvent.APIVersion, apiEvent.TenantDomain)
+		return
+	}
 	conf, _ := config.ReadConfigs()
 	configuredEnvs := conf.ControlPlane.EnvironmentLabels
 	logger.LoggerMsg.Debugf("%s : %s API life cycle state change event triggered", apiEvent.APIName, apiEvent.APIVersion)
@@ -208,6 +217,12 @@ func handleApplicationEvents(data []byte, eventType string) {
 		var applicationRegistrationEvent ApplicationRegistrationEvent
 		json.Unmarshal([]byte(string(data)), &applicationRegistrationEvent)
 
+		if !belongsToTenant(applicationRegistrationEvent.TenantDomain) {
+			logger.LoggerMsg.Debugf("Application Registration event for the Consumer Key : %s is dropped due to having non related tenantDomain : %s",
+				applicationRegistrationEvent.ConsumerKey, applicationRegistrationEvent.TenantDomain)
+			return
+		}
+
 		applicationKeyMapping := types.ApplicationKeyMapping{ApplicationID: applicationRegistrationEvent.ApplicationID,
 			ConsumerKey: applicationRegistrationEvent.ConsumerKey, KeyType: applicationRegistrationEvent.KeyType,
 			KeyManager: applicationRegistrationEvent.KeyManager, TenantID: -1, TenantDomain: applicationRegistrationEvent.TenantDomain,
@@ -223,6 +238,13 @@ func handleApplicationEvents(data []byte, eventType string) {
 	} else {
 		var applicationEvent ApplicationEvent
 		json.Unmarshal([]byte(string(data)), &applicationEvent)
+
+		if !belongsToTenant(applicationEvent.TenantDomain) {
+			logger.LoggerMsg.Debugf("Application event for the Application : %s (with uuid %s) is dropped due to having non related tenantDomain : %s",
+				applicationEvent.ApplicationName, applicationEvent.UUID, applicationEvent.TenantDomain)
+			return
+		}
+
 		application := types.Application{UUID: applicationEvent.UUID, ID: applicationEvent.ApplicationID,
 			Name: applicationEvent.ApplicationName, SubName: applicationEvent.Subscriber,
 			Policy: applicationEvent.ApplicationPolicy, TokenType: applicationEvent.TokenType,
@@ -251,6 +273,13 @@ func handleApplicationEvents(data []byte, eventType string) {
 func handleSubscriptionEvents(data []byte, eventType string) {
 	var subscriptionEvent SubscriptionEvent
 	json.Unmarshal([]byte(string(data)), &subscriptionEvent)
+	if !belongsToTenant(subscriptionEvent.TenantDomain) {
+		// TODO: (VirajSalaka) Fix once this is merged.
+		// logger.LoggerMsg.Debugf("Subscription event for the Application : %s and API %s is dropped due to having non related tenantDomain : %s",
+		// subscriptionEvent., applicationEvent.UUID, applicationEvent.TenantDomain)
+		return
+	}
+
 	sub := types.Subscription{SubscriptionID: subscriptionEvent.SubscriptionID, PolicyID: subscriptionEvent.PolicyID,
 		APIID: subscriptionEvent.APIID, AppID: subscriptionEvent.ApplicationID, SubscriptionState: subscriptionEvent.SubscriptionState,
 		TenantID: subscriptionEvent.TenantID, TenantDomain: subscriptionEvent.TenantDomain, TimeStamp: subscriptionEvent.TimeStamp}
@@ -419,4 +448,25 @@ func isLaterEvent(timeStampMap map[string]int64, mapKey string, currentTimeStamp
 	}
 	timeStampMap[mapKey] = currentTimeStamp
 	return false
+}
+
+// getControlPlaneConnectedTenantDomain returns the tenant domain of the user used to authenticate with event hub.
+func getControlPlaneConnectedTenantDomain() string {
+	// Read configurations to get the control plane authenticated user
+	conf, errReadConfig := config.ReadConfigs()
+	if errReadConfig != nil {
+		// This has to be error. For debugging purpose info
+		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
+	}
+	// Populate data from the config
+	cpTenantAdminUser := conf.ControlPlane.Username
+	tenantDomain := strings.Split(cpTenantAdminUser, "@")
+	if len(tenantDomain) > 1 {
+		return tenantDomain[len(tenantDomain)-1]
+	}
+	return "carbon.super"
+}
+
+func belongsToTenant(tenantDomain string) bool {
+	return getControlPlaneConnectedTenantDomain() == tenantDomain
 }
