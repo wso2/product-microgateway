@@ -38,7 +38,7 @@ public class JwtTransformerTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
+        jwtTokenProd = TokenUtil.getJwtForPetstoreForBasicAPI(TestConstant.KEY_TYPE_PRODUCTION, null, false);
     }
 
     @Test(description = "Test default jwt claim mapping")
@@ -47,7 +47,7 @@ public class JwtTransformerTestCase {
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/jwttoken") , headers);
+                "/v2/basicAPI/jwttoken") , headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
 

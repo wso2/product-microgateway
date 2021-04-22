@@ -53,7 +53,7 @@ public class JwtGeneratorTestCase {
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         HttpResponse response = HttpsClientRequest
-                .doGet(Utils.getServiceURLHttps("v2/jwtheader"), headers);
+                .doGet(Utils.getServiceURLHttps("v2/basicAPI/jwtheader"), headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), ResponseConstants.VALID_JWT_RESPONSE);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
@@ -65,7 +65,7 @@ public class JwtGeneratorTestCase {
         //test endpoint with token
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/jwttoken") , headers);
+                "/v2/basicAPI/jwttoken") , headers);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), 200, "Response code mismatched");
 

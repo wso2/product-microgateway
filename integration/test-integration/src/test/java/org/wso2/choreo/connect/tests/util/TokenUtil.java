@@ -196,4 +196,20 @@ public class TokenUtil {
         application.setId((int) (Math.random() * 1000));
         return getJWT(api, application, "Unlimited", keyType, 3600, scopes, isInternalKey);
     }
+
+    public static String getJwtForPetstoreForBasicAPI(String keyType, String scopes, boolean isInternalKey) throws Exception {
+        API api = new API();
+        api.setName("PetStoreAPI");
+        api.setContext("v2/basicAPI");
+        api.setProdEndpoint(Utils.getMockServiceURLHttp("/echo/prod"));
+        api.setVersion("1.0.5");
+        api.setProvider("admin");
+
+        //Define application info
+        ApplicationDTO application = new ApplicationDTO();
+        application.setName("jwtApp");
+        application.setTier("Unlimited");
+        application.setId((int) (Math.random() * 1000));
+        return getJWT(api, application, "Unlimited", keyType, 3600, scopes, isInternalKey);
+    }
 }

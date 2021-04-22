@@ -36,7 +36,7 @@ public class InternalKeyTestCase extends BaseTestCase {
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
-        internalKey = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, true);
+        internalKey = TokenUtil.getJwtForPetstoreForBasicAPI(TestConstant.KEY_TYPE_PRODUCTION, null, true);
     }
 
     @Test(description = "Test to check the InternalKey is working")
@@ -44,7 +44,7 @@ public class InternalKeyTestCase extends BaseTestCase {
         // Set header
         Map<String, String> headers = new HashMap<>();
         headers.put("Internal-Key", internalKey);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/basicAPI/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
@@ -55,7 +55,7 @@ public class InternalKeyTestCase extends BaseTestCase {
         // Set header
         Map<String, String> headers = new HashMap<>();
         headers.put("Internal-Key", TestConstant.INVALID_JWT_TOKEN);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/basicAPI/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
@@ -68,7 +68,7 @@ public class InternalKeyTestCase extends BaseTestCase {
         // Set header
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Internal-Key", TestConstant.EXPIRED_INTERNAL_KEY_TOKEN);
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/basicAPI/pet/2") , headers);
 
         Assert.assertNotNull(response);
         Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");
