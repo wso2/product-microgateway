@@ -92,6 +92,7 @@ public class WebSocketThrottleFilter implements Filter {
                 apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
             }
 
+            // Check for blocking conditions
             if (dataHolder.isBlockingConditionsPresent()) {
                 String appBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
                 String subBlockingKey = apiContext + ":" + apiVersion + ":" + authContext.getSubscriber()
@@ -126,6 +127,7 @@ public class WebSocketThrottleFilter implements Filter {
                 return true;
             }
 
+            // Checking subscription level throttling.
             String subThrottleKey = getSubscriptionThrottleKey(appId, apiContext, apiVersion);
             Decision subDecision = checkSubscriptionLevelThrottled(subThrottleKey, subTier);
             if (subDecision.isThrottled()) {

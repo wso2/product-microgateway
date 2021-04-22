@@ -80,7 +80,7 @@ public class WebSocketAPI implements API {
             if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());
             }
-            logger.info(requestContext.getMetadataMap());
+            logger.debug("ext_authz metadata: {}", requestContext.getMetadataMap());
             responseObject.setMetaDataMap(requestContext.getMetadataMap());
         } else {
             // If a enforcer stops with a false, it will be passed directly to the client.
@@ -175,7 +175,8 @@ public class WebSocketAPI implements API {
     }
 
     public WebSocketThrottleResponse processFramedata(RequestContext requestContext) {
-        logger.trace("processFramedata called");
+        logger.trace("processFramedata called for websocket frame with basepath : {}", requestContext
+                .getMatchedAPI().getAPIConfig().getBasePath());
         if (executeUpgradeFilterChain(requestContext)) {
             WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
             webSocketThrottleResponse.setOkState();

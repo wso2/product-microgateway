@@ -265,12 +265,12 @@ FilterDataStatus MgwWebSocketContext::onResponseBody(size_t body_buffer_length,
   }
 }
 
-void MgwWebSocketContext::onDone() { LOG_WARN(std::string("onDone " + std::to_string(id()))); }
+void MgwWebSocketContext::onDone() { LOG_TRACE(std::string("onDone " + std::to_string(id()))); }
 
-void MgwWebSocketContext::onLog() { LOG_WARN(std::string("onLog " + std::to_string(id()))); }
+void MgwWebSocketContext::onLog() { LOG_TRACE(std::string("onLog " + std::to_string(id()))); }
 
 void MgwWebSocketContext::onDelete() { 
-  LOG_WARN(std::string("onDelete " + std::to_string(id())));
+  LOG_TRACE(std::string("onDelete " + std::to_string(id())));
  }
 
 // Callback used by the handler to pass the throttle response received by the gRPC stream.
