@@ -19,13 +19,6 @@ package xds
 import (
 	"github.com/wso2/adapter/config"
 	logger "github.com/wso2/adapter/loggers"
-	"strings"
-)
-
-//constants related to utility functions
-const (
-	tenantDomainSeparator = "@"
-	superTenantDomain     = "carbon.super"
 )
 
 // getEnvironmentsToBeDeleted returns an slice of environments APIs to be u-deployed from
@@ -82,22 +75,4 @@ func updateVhostInternalMaps(apiContent config.APIContent, gwEnvs []string) {
 		envToVhostMap[env] = apiContent.VHost
 	}
 	apiUUIDToGatewayToVhosts[apiContent.UUID] = envToVhostMap
-}
-
-// getControlPlaneConnectedTenantDomain returns the tenant domain of the user used to authenticate with event hub.
-func getControlPlaneConnectedTenantDomain() string {
-	// Read configurations to get the control plane authenticated user
-	conf, errReadConfig := config.ReadConfigs()
-	if errReadConfig != nil {
-		// This has to be error. For debugging purpose info
-		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
-	}
-	// Populate data from the config
-	cpTenantAdminUser := conf.ControlPlane.Username;
-	tenantDomain := strings.Split(cpTenantAdminUser, tenantDomainSeparator)
-	if len(tenantDomain) > 1 {
-		return tenantDomain[len(tenantDomain)-1]
-	}
-	return superTenantDomain
-
 }
