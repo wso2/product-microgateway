@@ -313,7 +313,19 @@ func TestGenerateRegex(t *testing.T) {
 		{
 			inputpath:     "/v2/pet/*",
 			userInputPath: "/v2/pet/",
+			message:       "when the resource ends with *, empty string with / substitution fails.",
+			isMatched:     true,
+		},
+		{
+			inputpath:     "/v2/pet/*",
+			userInputPath: "/v2/pet",
 			message:       "when the resource ends with *, empty string substitution fails.",
+			isMatched:     true,
+		},
+		{
+			inputpath:     "/v2/pet/*",
+			userInputPath: "/v2/pet/foo/bar",
+			message:       "when the resource ends with *, multiple trailing slashes substitution fails.",
 			isMatched:     true,
 		},
 		{
