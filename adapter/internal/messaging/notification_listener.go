@@ -110,8 +110,16 @@ func handleAPIEvents(data []byte, eventType string) {
 
 	json.Unmarshal([]byte(string(data)), &apiEvent)
 	if !belongsToTenant(apiEvent.TenantDomain) {
+		apiName := apiEvent.APIName
+		if apiEvent.APIName == "" {
+			apiName = apiEvent.Name
+		}
+		apiVersion := apiEvent.Version
+		if apiEvent.Version == "" {
+			apiVersion = apiEvent.Version
+		}
 		logger.LoggerMsg.Debugf("API event for the API %s:%s is dropped due to having non related tenantDomain : %s",
-			apiEvent.APIName, apiEvent.APIVersion, apiEvent.TenantDomain)
+			apiName, apiVersion, apiEvent.TenantDomain)
 		return
 	}
 
