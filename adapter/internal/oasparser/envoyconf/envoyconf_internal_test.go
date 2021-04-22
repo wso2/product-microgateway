@@ -329,6 +329,12 @@ func TestGenerateRegex(t *testing.T) {
 			isMatched:     true,
 		},
 		{
+			inputpath:     "/v2/pet/*",
+			userInputPath: "/v2/pet123",
+			message:       "when the resource ends with *, trailing characters passing",
+			isMatched:     false,
+		},
+		{
 			inputpath:     "/v2/pet/{petId}.api",
 			userInputPath: "/v2/pet/findByIdstatus=availabe",
 			message:       "when the resource path param suffixed",

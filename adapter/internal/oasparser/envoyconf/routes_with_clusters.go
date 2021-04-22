@@ -691,7 +691,7 @@ func basepathConsistent(basePath string) string {
 // TODO: (VirajSalaka) Improve regex specifically for strings, integers etc.
 func generateRegex(fullpath string) string {
 	pathParaRegex := "([^/]+)"
-	wildCardRegex := "(.*)"
+	wildCardRegex := "((/(.*))*)"
 	endRegex := "(\\?([^/]+))?"
 	newPath := ""
 
