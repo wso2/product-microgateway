@@ -166,17 +166,17 @@ public class KeyValidator {
             if (api != null) {
                 key = datastore.getKeyMappingByKeyAndKeyManager(consumerKey, keyManager);
                 if (key != null) {
-                    app = datastore.getApplicationById(key.getApplicationId());
+                    app = datastore.getApplicationById(key.getApplicationUUID());
                     if (app != null) {
-                        sub = datastore.getSubscriptionById(app.getId(), api.getApiId());
+                        sub = datastore.getSubscriptionById(app.getUUID(), api.getApiUUID());
                         if (sub != null) {
                             if (log.isDebugEnabled()) {
                                 log.debug("All information is retrieved from the inmemory data store.");
                             }
                         } else {
                             if (log.isDebugEnabled()) {
-                                log.debug("Valid subscription not found for appId " + app.getId() + " and apiId " + api
-                                        .getApiId());
+                                log.debug("Valid subscription not found for appId " + app.getUUID() +
+                                        " and apiId " + api.getApiUUID());
                             }
                         }
                     } else {

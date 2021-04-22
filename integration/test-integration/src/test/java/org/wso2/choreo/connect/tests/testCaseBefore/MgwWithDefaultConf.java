@@ -40,10 +40,12 @@ public class MgwWithDefaultConf extends BaseTestCase {
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
         super.startMGW();
-        ApictlUtils.createProject( "prod_and_sand_openAPI.yaml", "prod_and_sand_petstore", null);
-        ApictlUtils.createProject( "prod_openAPI.yaml", "prod_petstore", null);
-        ApictlUtils.createProject( "sand_openAPI.yaml", "sand_petstore", null);
-        ApictlUtils.createProject( "security_openAPI.yaml", "custom_authheader_petstore", null);
+        ApictlUtils.createProject( "prod_and_sand_openAPI.yaml", "prod_and_sand_petstore", null, null);
+        ApictlUtils.createProject( "prod_openAPI.yaml", "prod_petstore", null, null);
+        ApictlUtils.createProject( "sand_openAPI.yaml", "sand_petstore", null, null);
+        ApictlUtils.createProject( "security_openAPI.yaml", "custom_authheader_petstore", null, null);
+        ApictlUtils.createProject( "vhost1_openAPI.yaml", "vhost1_petstore", null, "vhost1_deploy_env.yaml");
+        ApictlUtils.createProject( "vhost2_openAPI.yaml", "vhost2_petstore", null, "vhost2_deploy_env.yaml");
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
@@ -53,6 +55,8 @@ public class MgwWithDefaultConf extends BaseTestCase {
         ApictlUtils.deployAPI("prod_petstore", "test");
         ApictlUtils.deployAPI("sand_petstore", "test");
         ApictlUtils.deployAPI("custom_authheader_petstore", "test");
+        ApictlUtils.deployAPI("vhost1_petstore", "test");
+        ApictlUtils.deployAPI("vhost2_petstore", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 

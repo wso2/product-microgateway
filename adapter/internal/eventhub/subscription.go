@@ -133,7 +133,6 @@ func LoadSubscriptionData(configFile *config.Config) {
 	}
 
 	var response response
-	go retrieveAPIListFromChannel(APIListChannel)
 
 	for i := 1; i <= len(resources); i++ {
 		response = <-responseChannel
@@ -174,9 +173,11 @@ func LoadSubscriptionData(configFile *config.Config) {
 			}
 		}
 	}
+	retrieveAPIListFromChannel(APIListChannel)
 }
 
 // InvokeService invokes the internal data resource
+// This function is only called during the startup in all the cases.
 func InvokeService(endpoint string, responseType interface{}, queryParamMap map[string]string, c chan response,
 	retryAttempt int) {
 
@@ -252,13 +253,13 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 }
 
 func retrieveAPIListFromChannel(c chan response) {
+	responseCount := 0
 	for response := range c {
 		responseType := reflect.TypeOf(response.Type).Elem()
 		newResponse := reflect.New(responseType).Interface()
-
+		responseCount++
 		if response.Error == nil && response.Payload != nil {
 			err := json.Unmarshal(response.Payload, &newResponse)
-
 			if err != nil {
 				logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the APIList response received for: "+
 					response.Endpoint, err)
@@ -271,21 +272,17 @@ func retrieveAPIListFromChannel(c chan response) {
 							logger.LoggerSubscription.Debugf("Received API List information for API : %s", api.UUID)
 						}
 					}
-					if _, ok := APIListMap[response.GatewayLabel]; !ok {
-						// During the startup
-						APIListMap[response.GatewayLabel] = newResponse.(*types.APIList)
-					} else {
-						// API Details retrieved after startup contains single API per response.
-						if len(apiListResponse.List) == 1 {
-							APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List,
-								apiListResponse.List[0])
-						}
-					}
+					APIListMap[response.GatewayLabel] = newResponse.(*types.APIList)
 					xds.UpdateEnforcerAPIList(response.GatewayLabel, xds.MarshalAPIList(APIListMap[response.GatewayLabel]))
 				default:
 					logger.LoggerSubscription.Warnf("APIList Type DTO is not recieved. Unknown type %T", t)
 				}
 			}
+		}
+		// As this method is only triggered during the startup, the response count should be equal to number of gateway labels
+		// If the number of gateway labels is zero, then the default label will be assigned. So the for loop is only iterated once
+		if responseCount == len(conf.ControlPlane.EnvironmentLabels) || len(conf.ControlPlane.EnvironmentLabels) == 0 {
+			break
 		}
 	}
 }

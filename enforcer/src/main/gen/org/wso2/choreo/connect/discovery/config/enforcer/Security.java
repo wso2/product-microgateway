@@ -63,6 +63,19 @@ private static final long serialVersionUID = 0L;
                 input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Issuer.parser(), extensionRegistry));
             break;
           }
+          case 18: {
+            org.wso2.gateway.discovery.config.enforcer.AuthHeader.Builder subBuilder = null;
+            if (authHeader_ != null) {
+              subBuilder = authHeader_.toBuilder();
+            }
+            authHeader_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.AuthHeader.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(authHeader_);
+              authHeader_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -138,6 +151,32 @@ private static final long serialVersionUID = 0L;
     return tokenService_.get(index);
   }
 
+  public static final int AUTHHEADER_FIELD_NUMBER = 2;
+  private org.wso2.gateway.discovery.config.enforcer.AuthHeader authHeader_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
+   * @return Whether the authHeader field is set.
+   */
+  @java.lang.Override
+  public boolean hasAuthHeader() {
+    return authHeader_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
+   * @return The authHeader.
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.AuthHeader getAuthHeader() {
+    return authHeader_ == null ? org.wso2.gateway.discovery.config.enforcer.AuthHeader.getDefaultInstance() : authHeader_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
+   */
+  @java.lang.Override
+  public org.wso2.gateway.discovery.config.enforcer.AuthHeaderOrBuilder getAuthHeaderOrBuilder() {
+    return getAuthHeader();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -155,6 +194,9 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < tokenService_.size(); i++) {
       output.writeMessage(1, tokenService_.get(i));
     }
+    if (authHeader_ != null) {
+      output.writeMessage(2, getAuthHeader());
+    }
     unknownFields.writeTo(output);
   }
 
@@ -167,6 +209,10 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < tokenService_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(1, tokenService_.get(i));
+    }
+    if (authHeader_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(2, getAuthHeader());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -185,6 +231,11 @@ private static final long serialVersionUID = 0L;
 
     if (!getTokenServiceList()
         .equals(other.getTokenServiceList())) return false;
+    if (hasAuthHeader() != other.hasAuthHeader()) return false;
+    if (hasAuthHeader()) {
+      if (!getAuthHeader()
+          .equals(other.getAuthHeader())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -199,6 +250,10 @@ private static final long serialVersionUID = 0L;
     if (getTokenServiceCount() > 0) {
       hash = (37 * hash) + TOKENSERVICE_FIELD_NUMBER;
       hash = (53 * hash) + getTokenServiceList().hashCode();
+    }
+    if (hasAuthHeader()) {
+      hash = (37 * hash) + AUTHHEADER_FIELD_NUMBER;
+      hash = (53 * hash) + getAuthHeader().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -344,6 +399,12 @@ private static final long serialVersionUID = 0L;
       } else {
         tokenServiceBuilder_.clear();
       }
+      if (authHeaderBuilder_ == null) {
+        authHeader_ = null;
+      } else {
+        authHeader_ = null;
+        authHeaderBuilder_ = null;
+      }
       return this;
     }
 
@@ -379,6 +440,11 @@ private static final long serialVersionUID = 0L;
         result.tokenService_ = tokenService_;
       } else {
         result.tokenService_ = tokenServiceBuilder_.build();
+      }
+      if (authHeaderBuilder_ == null) {
+        result.authHeader_ = authHeader_;
+      } else {
+        result.authHeader_ = authHeaderBuilder_.build();
       }
       onBuilt();
       return result;
@@ -453,6 +519,9 @@ private static final long serialVersionUID = 0L;
             tokenServiceBuilder_.addAllMessages(other.tokenService_);
           }
         }
+      }
+      if (other.hasAuthHeader()) {
+        mergeAuthHeader(other.getAuthHeader());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -722,6 +791,125 @@ private static final long serialVersionUID = 0L;
         tokenService_ = null;
       }
       return tokenServiceBuilder_;
+    }
+
+    private org.wso2.gateway.discovery.config.enforcer.AuthHeader authHeader_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.AuthHeader, org.wso2.gateway.discovery.config.enforcer.AuthHeader.Builder, org.wso2.gateway.discovery.config.enforcer.AuthHeaderOrBuilder> authHeaderBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
+     * @return Whether the authHeader field is set.
+     */
+    public boolean hasAuthHeader() {
+      return authHeaderBuilder_ != null || authHeader_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
+     * @return The authHeader.
+     */
+    public org.wso2.gateway.discovery.config.enforcer.AuthHeader getAuthHeader() {
+      if (authHeaderBuilder_ == null) {
+        return authHeader_ == null ? org.wso2.gateway.discovery.config.enforcer.AuthHeader.getDefaultInstance() : authHeader_;
+      } else {
+        return authHeaderBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
+     */
+    public Builder setAuthHeader(org.wso2.gateway.discovery.config.enforcer.AuthHeader value) {
+      if (authHeaderBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        authHeader_ = value;
+        onChanged();
+      } else {
+        authHeaderBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
+     */
+    public Builder setAuthHeader(
+        org.wso2.gateway.discovery.config.enforcer.AuthHeader.Builder builderForValue) {
+      if (authHeaderBuilder_ == null) {
+        authHeader_ = builderForValue.build();
+        onChanged();
+      } else {
+        authHeaderBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
+     */
+    public Builder mergeAuthHeader(org.wso2.gateway.discovery.config.enforcer.AuthHeader value) {
+      if (authHeaderBuilder_ == null) {
+        if (authHeader_ != null) {
+          authHeader_ =
+            org.wso2.gateway.discovery.config.enforcer.AuthHeader.newBuilder(authHeader_).mergeFrom(value).buildPartial();
+        } else {
+          authHeader_ = value;
+        }
+        onChanged();
+      } else {
+        authHeaderBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
+     */
+    public Builder clearAuthHeader() {
+      if (authHeaderBuilder_ == null) {
+        authHeader_ = null;
+        onChanged();
+      } else {
+        authHeader_ = null;
+        authHeaderBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.AuthHeader.Builder getAuthHeaderBuilder() {
+      
+      onChanged();
+      return getAuthHeaderFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
+     */
+    public org.wso2.gateway.discovery.config.enforcer.AuthHeaderOrBuilder getAuthHeaderOrBuilder() {
+      if (authHeaderBuilder_ != null) {
+        return authHeaderBuilder_.getMessageOrBuilder();
+      } else {
+        return authHeader_ == null ?
+            org.wso2.gateway.discovery.config.enforcer.AuthHeader.getDefaultInstance() : authHeader_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.gateway.discovery.config.enforcer.AuthHeader, org.wso2.gateway.discovery.config.enforcer.AuthHeader.Builder, org.wso2.gateway.discovery.config.enforcer.AuthHeaderOrBuilder> 
+        getAuthHeaderFieldBuilder() {
+      if (authHeaderBuilder_ == null) {
+        authHeaderBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.gateway.discovery.config.enforcer.AuthHeader, org.wso2.gateway.discovery.config.enforcer.AuthHeader.Builder, org.wso2.gateway.discovery.config.enforcer.AuthHeaderOrBuilder>(
+                getAuthHeader(),
+                getParentForChildren(),
+                isClean());
+        authHeader_ = null;
+      }
+      return authHeaderBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

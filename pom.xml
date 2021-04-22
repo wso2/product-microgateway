@@ -43,13 +43,34 @@
         <tag>HEAD</tag>
     </scm>
 
-    <modules>
-        <module>adapter</module>
-        <module>enforcer</module>
-        <module>router</module>
-        <module>distribution</module>
-        <module>integration</module>
-    </modules>
+    <profiles>
+        <profile>
+            <id>Dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>adapter</module>
+                <module>enforcer</module>
+                <module>distribution</module>
+                <module>integration</module>
+            </modules>
+        </profile>
+
+        <!-- Building the router module during a release build only. In dev mode building router is not needed
+        frequently as it not changed-->
+        <profile>
+            <id>Release</id>
+            <modules>
+                <module>router</module>
+                <module>adapter</module>
+                <module>enforcer</module>
+                <module>distribution</module>
+                <module>integration</module>
+            </modules>
+        </profile>
+    </profiles>
+
     <build>
         <pluginManagement>
             <plugins>

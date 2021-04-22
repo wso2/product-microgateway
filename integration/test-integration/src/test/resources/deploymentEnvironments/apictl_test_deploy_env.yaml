@@ -1,0 +1,14 @@
+type: deployment_environments
+version: v4.0.0
+data:
+  - # set default vhost from configs: localhost
+    displayOnDevportal: true
+    deploymentEnvironment: Default
+  - # use vhost defined here
+    displayOnDevportal: true
+    deploymentVhost: us.wso2.com
+    deploymentEnvironment: Default
+  - # use vhost defined here
+    displayOnDevportal: true
+    deploymentVhost: eu.wso2.com
+    deploymentEnvironment: Default

@@ -36,8 +36,8 @@ public class MgwWithBackendTls extends BaseTestCase {
         String confPath = targetDir + TestConstant.TEST_RESOURCES_PATH + File.separator + "cors" + File.separator
                 + "cors-disabled-config.toml";
         super.startMGW(confPath, true);
-        ApictlUtils.createProject("backend_tsl_openAPI.yaml", "backend_tsl_petstore", "backend_tls.crt");
-        ApictlUtils.createProject( "cors_openAPI.yaml", "cors_petstore", null);
+        ApictlUtils.createProject("backend_tsl_openAPI.yaml", "backend_tsl_petstore", "backend_tls.crt", null);
+        ApictlUtils.createProject( "cors_openAPI.yaml", "cors_petstore", null, null);
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");

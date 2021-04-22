@@ -73,8 +73,8 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 	// As the first cluster is always related to API level cluster
 	apiLevelCluster := clusters[0]
 	pathLevelCluster := clusters[1]
-	assert.Equal(t, apiLevelCluster.GetName(), "clusterProd_SwaggerPetstore1.0.0", "API Level cluster name mismatch")
-	assert.Contains(t, pathLevelCluster.GetName(), "clusterProd_SwaggerPetstore1.0.0_", "Resource Level cluster name mismatch")
+	assert.Equal(t, apiLevelCluster.GetName(), "clusterProd_localhost_SwaggerPetstore1.0.0", "API Level cluster name mismatch")
+	assert.Contains(t, pathLevelCluster.GetName(), "clusterProd_localhost_SwaggerPetstore1.0.0_", "Resource Level cluster name mismatch")
 
 	apiLevelClusterHost := apiLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
 		GetAddress().GetSocketAddress().GetAddress()
@@ -126,8 +126,8 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 		assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
 		productionCluster := clusters[0]
 		sandBoxCluster := clusters[1]
-		assert.Equal(t, productionCluster.GetName(), "clusterProd_EchoWebSocket1.0", "Production cluster name mismatch")
-		assert.Equal(t, sandBoxCluster.GetName(), "clusterSand_EchoWebSocket1.0", "Sandbox cluster name mismatch")
+		assert.Equal(t, productionCluster.GetName(), "clusterProd_localhost_EchoWebSocket1.0", "Production cluster name mismatch")
+		assert.Equal(t, sandBoxCluster.GetName(), "clusterSand_localhost_EchoWebSocket1.0", "Sandbox cluster name mismatch")
 
 		productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 		productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
@@ -149,7 +149,7 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 	if strings.HasSuffix(apiYamlFilePath, "api_prod.yaml") {
 		assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
 		productionCluster := clusters[0]
-		assert.Equal(t, productionCluster.GetName(), "clusterProd_prodws1.0", "Production cluster name mismatch")
+		assert.Equal(t, productionCluster.GetName(), "clusterProd_localhost_prodws1.0", "Production cluster name mismatch")
 
 		productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 		productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
@@ -166,7 +166,7 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 	if strings.HasSuffix(apiYamlFilePath, "api_sand.yaml") {
 		assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
 		sandBoxCluster := clusters[0]
-		assert.Equal(t, sandBoxCluster.GetName(), "clusterSand_sandbox1.0", "Production cluster name mismatch")
+		assert.Equal(t, sandBoxCluster.GetName(), "clusterSand_localhost_sandbox1.0", "Production cluster name mismatch")
 
 		sandBoxClusterHost := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 		sandBoxClusterPort := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()

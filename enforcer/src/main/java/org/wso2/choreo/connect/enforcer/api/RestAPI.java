@@ -26,6 +26,7 @@ import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
@@ -97,8 +98,16 @@ public class RestAPI implements API {
     public ResponseObject process(RequestContext requestContext) {
         ResponseObject responseObject = new ResponseObject(requestContext.getRequestID());
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
-        if (executeFilterChain(requestContext)) {
 
+        // Process to-be-removed headers
+        AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
+        if (!authHeader.isEnableOutboundAuthHeader()) {
+            String authHeaderName = FilterUtils.getAuthHeaderName(requestContext);
+            requestContext.getRemoveHeaders().add(authHeaderName);
+        }
+
+        if (executeFilterChain(requestContext)) {
+            responseObject.setRemoveHeaderMap(requestContext.getRemoveHeaders());
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
             if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
                 responseObject.setHeaderMap(requestContext.getResponseHeaders());

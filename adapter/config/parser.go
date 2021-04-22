@@ -63,6 +63,12 @@ const (
 	envConfigPrefix = "$env"
 )
 
+//constants related to utility functions
+const (
+	tenantDomainSeparator = "@"
+	superTenantDomain     = "carbon.super"
+)
+
 // ReadConfigs implements adapter configuration read operation. The read operation will happen only once, hence
 // the consistancy is ensured.
 //
@@ -90,7 +96,6 @@ func ReadConfigs() (*Config, error) {
 		}
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem())
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem())
-		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Security)).Elem())
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem())
 	})
 	return adapterConfig, e
@@ -169,15 +174,17 @@ func ReadLogConfigs() (*LogConfig, error) {
 		_, err := os.Stat(GetMgwHome() + relativeLogConfigPath)
 		if err != nil {
 			logger.Fatal("Log configuration file not found.", err)
+			panic(err)
 		}
 		content, readErr := ioutil.ReadFile(mgwHome + relativeLogConfigPath)
 		if readErr != nil {
 			logger.Fatal("Error reading log configurations. ", readErr)
-			return
+			panic(err)
 		}
 		parseErr := toml.Unmarshal(content, adapterLogConfig)
 		if parseErr != nil {
 			logger.Fatal("Error parsing the log configuration ", parseErr)
+			panic(parseErr)
 		}
 
 	})
@@ -201,4 +208,18 @@ func GetMgwHome() string {
 		}
 	})
 	return mgwHome
+}
+
+// GetControlPlaneConnectedTenantDomain returns the tenant domain of the user used to authenticate with event hub.
+func GetControlPlaneConnectedTenantDomain() string {
+	// Read configurations to get the control plane authenticated user
+	conf, _ := ReadConfigs()
+
+	// Populate data from the config
+	cpTenantAdminUser := conf.ControlPlane.Username
+	tenantDomain := strings.Split(cpTenantAdminUser, tenantDomainSeparator)
+	if len(tenantDomain) > 1 {
+		return tenantDomain[len(tenantDomain)-1]
+	}
+	return superTenantDomain
 }

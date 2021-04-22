@@ -19,7 +19,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	issuers := []*enforcer.Issuer{}
 	urlGroups := []*enforcer.TMURLGroup{}
 
-	for _, issuer := range config.Security.Enforcer.TokenService {
+	for _, issuer := range config.Enforcer.Security.TokenService {
 		claimMaps := []*enforcer.ClaimMapping{}
 		for _, claimMap := range issuer.ClaimMapping {
 			claim := &enforcer.ClaimMapping{
@@ -127,6 +127,10 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		AuthService: authService,
 		Security: &enforcer.Security{
 			TokenService: issuers,
+			AuthHeader: &enforcer.AuthHeader{
+				EnableOutboundAuthHeader :    config.Enforcer.Security.AuthHeader.EnableOutboundAuthHeader,
+				AuthorizationHeader :    config.Enforcer.Security.AuthHeader.AuthorizationHeader,
+			},
 		},
 		Cache:     cache,
 		Analytics: analytics,
@@ -186,10 +190,13 @@ func MarshalSubscriptionList(subList *types.SubscriptionList) *subscription.Subs
 			TimeStamp:         sb.TimeStamp,
 			TenantId:          sb.TenantID,
 			TenantDomain:      sb.TenantDomain,
+			SubscriptionUUID:  sb.SubscriptionUUID,
+			ApiUUID:           sb.APIUUID,
+			AppUUID:           sb.ApplicationUUID,
 		}
 		if sb.TenantDomain == "" {
 			if tenantDomain == "" {
-				tenantDomain = getControlPlaneConnectedTenantDomain()
+				tenantDomain = config.GetControlPlaneConnectedTenantDomain()
 			}
 			sub.TenantDomain = tenantDomain
 		}
@@ -204,7 +211,6 @@ func MarshalSubscriptionList(subList *types.SubscriptionList) *subscription.Subs
 // MarshalApplicationList converts the data into ApplicationList proto type
 func MarshalApplicationList(appList *types.ApplicationList) *subscription.ApplicationList {
 	applications := []*subscription.Application{}
-	var tenantDomain = ""
 	for _, app := range appList.List {
 		application := &subscription.Application{
 			Uuid:         app.UUID,
@@ -221,10 +227,7 @@ func MarshalApplicationList(appList *types.ApplicationList) *subscription.Applic
 			Timestamp:    app.TimeStamp,
 		}
 		if app.TenantDomain == "" {
-			if tenantDomain == "" {
-				tenantDomain = getControlPlaneConnectedTenantDomain()
-			}
-			application.TenantDomain = tenantDomain
+			application.TenantDomain = config.GetControlPlaneConnectedTenantDomain()
 		}
 
 		applications = append(applications, application)
@@ -250,7 +253,7 @@ func MarshalAPIList(apiList *types.APIList) *subscription.APIList {
 			ApiType:          api.APIType,
 			Uuid:             api.UUID,
 			IsDefaultVersion: api.IsDefaultVersion,
-			LcState: 		  api.APIStatus,
+			LcState:          api.APIStatus,
 		}
 		apis = append(apis, newAPI)
 	}
@@ -311,13 +314,14 @@ func MarshalKeyMappingList(keyMappingList *types.ApplicationKeyMappingList) *sub
 
 	for _, mapping := range keyMappingList.List {
 		keyMapping := &subscription.ApplicationKeyMapping{
-			ConsumerKey:   mapping.ConsumerKey,
-			KeyType:       mapping.KeyType,
-			KeyManager:    mapping.KeyManager,
-			ApplicationId: mapping.ApplicationID,
-			TenantId:      mapping.TenantID,
-			TenantDomain:  mapping.TenantDomain,
-			Timestamp:     mapping.TimeStamp,
+			ConsumerKey:     mapping.ConsumerKey,
+			KeyType:         mapping.KeyType,
+			KeyManager:      mapping.KeyManager,
+			ApplicationId:   mapping.ApplicationID,
+			ApplicationUUID: mapping.ApplicationUUID,
+			TenantId:        mapping.TenantID,
+			TenantDomain:    mapping.TenantDomain,
+			Timestamp:       mapping.TimeStamp,
 		}
 
 		applicationKeyMappings = append(applicationKeyMappings, keyMapping)

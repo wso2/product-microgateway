@@ -34,13 +34,13 @@ import org.wso2.choreo.connect.discovery.config.enforcer.Issuer;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer;
 import org.wso2.choreo.connect.discovery.config.enforcer.PublisherPool;
-import org.wso2.choreo.connect.discovery.config.enforcer.Security;
 import org.wso2.choreo.connect.discovery.config.enforcer.Service;
 import org.wso2.choreo.connect.discovery.config.enforcer.TMURLGroup;
 import org.wso2.choreo.connect.discovery.config.enforcer.ThrottleAgent;
 import org.wso2.choreo.connect.discovery.config.enforcer.Throttling;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsReceiverConfigDTO;
+import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CacheDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
@@ -56,6 +56,7 @@ import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTUtil;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.conf.AgentConfiguration;
 import org.wso2.choreo.connect.enforcer.util.TLSUtils;
+import org.wso2.gateway.discovery.config.enforcer.AuthHeader;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -125,7 +126,7 @@ public class ConfigHolder {
         populateAuthService(config.getAuthService());
 
         // Read jwt token configuration
-        populateJWTIssuerConfiguration(config.getSecurity());
+        populateJWTIssuerConfiguration(config.getSecurity().getTokenServiceList());
 
         // Read credentials used to connect with APIM services
         populateAPIMCredentials(config.getApimCredentials());
@@ -145,8 +146,17 @@ public class ConfigHolder {
         // Read jwt issuer configurations
         populateJWTIssuerConfigurations(config.getJwtIssuer());
 
+        populateAuthHeaderConfigurations(config.getSecurity().getAuthHeader());
+
         // resolve string variables provided as environment variables.
         resolveConfigsWithEnvs(this.config);
+    }
+
+    private void populateAuthHeaderConfigurations(AuthHeader authHeader) {
+        AuthHeaderDto authHeaderDto = new AuthHeaderDto();
+        authHeaderDto.setAuthorizationHeader(authHeader.getAuthorizationHeader());
+        authHeaderDto.setEnableOutboundAuthHeader(authHeader.getEnableOutboundAuthHeader());
+        config.setAuthHeader(authHeaderDto);
     }
 
     private void populateAuthService(Service cdsAuth) {
@@ -167,9 +177,8 @@ public class ConfigHolder {
     }
 
 
-    private void populateJWTIssuerConfiguration(Security security) {
+    private void populateJWTIssuerConfiguration(List<Issuer> cdsIssuers) {
         configIssuerList = new ArrayList<>();
-        List<Issuer> cdsIssuers = security.getTokenServiceList();
         try {
             setTrustStoreForJWT(KeyStore.getInstance(KeyStore.getDefaultType()));
             getTrustStoreForJWT().load(null);

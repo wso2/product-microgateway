@@ -30,7 +30,7 @@ public class SubscriptionDataStoreUtil {
         return context + DELEM_PERIOD + version;
     }
 
-    public static String getSubscriptionCacheKey(int appId, int apiId) {
+    public static String getSubscriptionCacheKey(String appId, String apiId) {
 
         return appId + DELEM_PERIOD + apiId;
     }

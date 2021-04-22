@@ -37,7 +37,7 @@ target
 vendor
 
 # envoy filters
-envoy-filters/bazel-*
+envoy-filters/**/bazel-*
 envoy-filters/.vscode
 envoy-filters/.idea
 

@@ -1,0 +1,6 @@
+type: deployment_environments
+version: v4.0.0
+data:
+  - # set default vhost from configs: localhost
+    displayOnDevportal: true
+    deploymentEnvironment: Default
