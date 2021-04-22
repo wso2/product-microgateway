@@ -174,4 +174,12 @@ public class ThrottleUtils {
         }
     }
 
+    public static void setRetryAfterWebsocket(RequestContext requestContext, Long retryTimestamp) {
+        if (retryTimestamp != null) {
+            Date date = new Date(retryTimestamp);
+            long timeInSeconds = date.getTime() / 1000L;
+            requestContext.getProperties().put(ThrottleConstants.HEADER_RETRY_AFTER, timeInSeconds);
+        }
+    }
+
 }

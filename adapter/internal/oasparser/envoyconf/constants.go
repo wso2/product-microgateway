@@ -29,6 +29,12 @@ const (
 	grpcAccessLogName         string = "envoy.http_grpc_access_log"
 	httpConManagerStartPrefix string = "ingress_http"
 	extAuthzPerRouteName      string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
+	mgwWebSocketFilterName     string = "envoy.filters.http.mgw_websocket"
+	mgwWebSocketWASMFilterName string = "envoy.filters.http.mgw_WASM_websocket"
+	mgwWASMVmID                string = "mgw_WASM_vm"
+	mgwWASMVmRuntime           string = "envoy.wasm.runtime.v8"
+	mgwWebSocketWASMFilterRoot string = "mgw_WASM_websocket_root"
+	mgwWebSocketWASM           string = "/home/wso2/wasm/websocket/mgw-websocket.wasm"
 )
 
 const (

@@ -25,12 +25,19 @@ import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	routerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
+	wasm_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/wasm/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
+	wasmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/wasm/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
+	"github.com/golang/protobuf/ptypes/wrappers"
 
+	//rls "github.com/envoyproxy/go-control-plane/envoy/config/ratelimit/v3"
+	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/adapter/config"
 	logger "github.com/wso2/adapter/loggers"
+	//mgw_websocket "github.com/wso2/micro-gw/internal/oasparser/envoyconf/api"
+	"github.com/golang/protobuf/ptypes/any"
 )
 
 // getHTTPFilters generates httpFilter configuration
@@ -75,8 +82,20 @@ func getRouterHTTPFilter() *hcmv3.HttpFilter {
 
 // UpgradeFilters that are applied in websocket upgrade mode
 func getUpgradeFilters() []*hcmv3.HttpFilter {
-	// TODO : (LahiruUdayanga) Configure the custom C++ filter.
-	return getHTTPFilters()
+	cors := &hcmv3.HttpFilter{
+		Name:       wellknown.CORS,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
+	}
+	extAauth := getExtAuthzHTTPFilter()
+	mgwWebSocketWASM := getMgwWebSocketWASMFilter()
+	router := getRouterHTTPFilter()
+	upgradeFilters := []*hcmv3.HttpFilter{
+		cors,
+		extAauth,
+		mgwWebSocketWASM,
+		router,
+	}
+	return upgradeFilters
 }
 
 // getExtAuthzHTTPFilter gets ExtAauthz http filter.
@@ -111,4 +130,63 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 		},
 	}
 	return &extAuthzFilter
+}
+
+func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {
+	config := &wrappers.StringValue{
+		Value: `{
+			"node_id": "mgw_node_1",
+			"rate_limit_service": "ext-authz",
+			"timeout": "20s",
+			"failure_mode_deny": "true"
+		}`,
+	}
+	a, err := proto.Marshal(config)
+	if err != nil {
+		logger.LoggerOasparser.Error(err)
+	}
+	mgwWebsocketWASMConfig := wasmv3.PluginConfig{
+		Name:   mgwWebSocketWASMFilterName,
+		RootId: mgwWebSocketWASMFilterRoot,
+		Vm: &wasmv3.PluginConfig_VmConfig{
+			VmConfig: &wasmv3.VmConfig{
+				VmId:             mgwWASMVmID,
+				Runtime:          mgwWASMVmRuntime,
+				AllowPrecompiled: true,
+				Code: &corev3.AsyncDataSource{
+					Specifier: &corev3.AsyncDataSource_Local{
+						Local: &corev3.DataSource{
+							Specifier: &corev3.DataSource_Filename{
+								Filename: mgwWebSocketWASM,
+							},
+						},
+					},
+				},
+			},
+		},
+		Configuration: &any.Any{
+			TypeUrl: "type.googleapis.com/google.protobuf.StringValue",
+			Value:   a,
+		},
+	}
+
+	mgwWebSocketWASMFilterConfig := &wasm_filter_v3.Wasm{
+		Config: &mgwWebsocketWASMConfig,
+	}
+
+	ext, err2 := proto.Marshal(mgwWebSocketWASMFilterConfig)
+	if err2 != nil {
+		logger.LoggerOasparser.Error(err2)
+	}
+	mgwWebSocketFilter := hcmv3.HttpFilter{
+		Name: mgwWebSocketWASMFilterName,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{
+			TypedConfig: &any.Any{
+				TypeUrl: "type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm",
+				Value:   ext,
+			},
+		},
+	}
+	return &mgwWebSocketFilter
+
 }

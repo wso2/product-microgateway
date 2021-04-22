@@ -38,6 +38,10 @@
             <source>../resources/security/mg.pem</source>
             <outputDirectory>security/truststore</outputDirectory>
         </file>
+        <file>
+            <source>target/mgw-wasm/mgw-websocket.wasm</source>
+            <outputDirectory>wasm/websocket</outputDirectory>
+        </file>
     </files>
     <fileSets>
       <fileSet>

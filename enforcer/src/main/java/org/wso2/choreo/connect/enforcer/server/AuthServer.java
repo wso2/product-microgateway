@@ -37,6 +37,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.choreo.connect.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.grpc.ExtAuthService;
 import org.wso2.choreo.connect.enforcer.grpc.HealthService;
+import org.wso2.choreo.connect.enforcer.grpc.WebSocketFrameService;
 import org.wso2.choreo.connect.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
@@ -143,6 +144,7 @@ public class AuthServer {
                 .workerEventLoopGroup(workerGroup)
                 .addService(ServerInterceptors.intercept(new ExtAuthService(), new AccessLogInterceptor()))
                 .addService(new HealthService())
+                .addService(ServerInterceptors.intercept(new WebSocketFrameService(), new AccessLogInterceptor()))
                 .maxInboundMessageSize(authServerConfig.getMaxMessageSize())
                 .maxInboundMetadataSize(authServerConfig.getMaxHeaderLimit()).channelType(NioServerSocketChannel.class)
                 .executor(enforcerWorkerPool.getExecutor())
