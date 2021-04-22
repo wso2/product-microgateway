@@ -72,4 +72,16 @@ public interface ApplicationKeyMappingOrBuilder extends
    * @return The timestamp.
    */
   long getTimestamp();
+
+  /**
+   * <code>string applicationUUID = 8;</code>
+   * @return The applicationUUID.
+   */
+  java.lang.String getApplicationUUID();
+  /**
+   * <code>string applicationUUID = 8;</code>
+   * @return The bytes for applicationUUID.
+   */
+  com.google.protobuf.ByteString
+      getApplicationUUIDBytes();
 }

@@ -78,4 +78,40 @@ public interface SubscriptionOrBuilder extends
    */
   com.google.protobuf.ByteString
       getTenantDomainBytes();
+
+  /**
+   * <code>string subscriptionUUID = 9;</code>
+   * @return The subscriptionUUID.
+   */
+  java.lang.String getSubscriptionUUID();
+  /**
+   * <code>string subscriptionUUID = 9;</code>
+   * @return The bytes for subscriptionUUID.
+   */
+  com.google.protobuf.ByteString
+      getSubscriptionUUIDBytes();
+
+  /**
+   * <code>string appUUID = 10;</code>
+   * @return The appUUID.
+   */
+  java.lang.String getAppUUID();
+  /**
+   * <code>string appUUID = 10;</code>
+   * @return The bytes for appUUID.
+   */
+  com.google.protobuf.ByteString
+      getAppUUIDBytes();
+
+  /**
+   * <code>string apiUUID = 11;</code>
+   * @return The apiUUID.
+   */
+  java.lang.String getApiUUID();
+  /**
+   * <code>string apiUUID = 11;</code>
+   * @return The bytes for apiUUID.
+   */
+  com.google.protobuf.ByteString
+      getApiUUIDBytes();
 }

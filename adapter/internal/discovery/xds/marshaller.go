@@ -186,6 +186,9 @@ func MarshalSubscriptionList(subList *types.SubscriptionList) *subscription.Subs
 			TimeStamp:         sb.TimeStamp,
 			TenantId:          sb.TenantID,
 			TenantDomain:      sb.TenantDomain,
+			SubscriptionUUID:  sb.SubscriptionUUID,
+			ApiUUID:           sb.APIUUID,
+			AppUUID:           sb.ApplicationUUID,
 		}
 		if sb.TenantDomain == "" {
 			if tenantDomain == "" {
@@ -250,7 +253,7 @@ func MarshalAPIList(apiList *types.APIList) *subscription.APIList {
 			ApiType:          api.APIType,
 			Uuid:             api.UUID,
 			IsDefaultVersion: api.IsDefaultVersion,
-			LcState: 		  api.APIStatus,
+			LcState:          api.APIStatus,
 		}
 		apis = append(apis, newAPI)
 	}
@@ -311,13 +314,14 @@ func MarshalKeyMappingList(keyMappingList *types.ApplicationKeyMappingList) *sub
 
 	for _, mapping := range keyMappingList.List {
 		keyMapping := &subscription.ApplicationKeyMapping{
-			ConsumerKey:   mapping.ConsumerKey,
-			KeyType:       mapping.KeyType,
-			KeyManager:    mapping.KeyManager,
-			ApplicationId: mapping.ApplicationID,
-			TenantId:      mapping.TenantID,
-			TenantDomain:  mapping.TenantDomain,
-			Timestamp:     mapping.TimeStamp,
+			ConsumerKey:     mapping.ConsumerKey,
+			KeyType:         mapping.KeyType,
+			KeyManager:      mapping.KeyManager,
+			ApplicationId:   mapping.ApplicationID,
+			ApplicationUUID: mapping.ApplicationUUID,
+			TenantId:        mapping.TenantID,
+			TenantDomain:    mapping.TenantDomain,
+			Timestamp:       mapping.TimeStamp,
 		}
 
 		applicationKeyMappings = append(applicationKeyMappings, keyMapping)

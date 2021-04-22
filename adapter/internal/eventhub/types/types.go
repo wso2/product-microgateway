@@ -20,9 +20,12 @@ package types
 // Subscription for struct subscription
 type Subscription struct {
 	SubscriptionID    int32  `json:"subscriptionId"`
+	SubscriptionUUID  string `json:"subscriptionUUID"`
 	PolicyID          string `json:"policyId"`
 	APIID             int32  `json:"apiId"`
+	APIUUID           string `json:"apiUUID"`
 	AppID             int32  `json:"appId" json:"applicationId"`
+	ApplicationUUID   string `json:"applicationUUID"`
 	SubscriptionState string `json:"subscriptionState"`
 	TenantID          int32  `json:"tenanId,omitempty"`
 	TenantDomain      string `json:"tenanDomain,omitempty"`
@@ -56,13 +59,14 @@ type ApplicationList struct {
 
 // ApplicationKeyMapping for struct applicationKeyMapping
 type ApplicationKeyMapping struct {
-	ApplicationID int32  `json:"applicationId"`
-	ConsumerKey   string `json:"consumerKey"`
-	KeyType       string `json:"keyType"`
-	KeyManager    string `json:"keyManager"`
-	TenantID      int32  `json:"tenanId,omitempty"`
-	TenantDomain  string `json:"tenanDomain,omitempty"`
-	TimeStamp     int64  `json:"timeStamp,omitempty"`
+	ApplicationID   int32  `json:"applicationId"`
+	ApplicationUUID string `json:"applicationUUID"`
+	ConsumerKey     string `json:"consumerKey"`
+	KeyType         string `json:"keyType"`
+	KeyManager      string `json:"keyManager"`
+	TenantID        int32  `json:"tenanId,omitempty"`
+	TenantDomain    string `json:"tenanDomain,omitempty"`
+	TimeStamp       int64  `json:"timeStamp,omitempty"`
 }
 
 // ApplicationKeyMappingList for struct list of applicationKeyMapping

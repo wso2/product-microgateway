@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Entity for keeping Application related information. Represents an Application in APIM.
  */
-public class Application implements CacheableEntity<Integer> {
+public class Application implements CacheableEntity<String> {
 
     private Integer id = null;
     private String uuid;
@@ -91,9 +91,9 @@ public class Application implements CacheableEntity<Integer> {
         this.tokenType = tokenType;
     }
 
-    public Integer getCacheKey() {
+    public String getCacheKey() {
 
-        return getId();
+        return uuid;
     }
 
     public List<String> getGroupIds() {
