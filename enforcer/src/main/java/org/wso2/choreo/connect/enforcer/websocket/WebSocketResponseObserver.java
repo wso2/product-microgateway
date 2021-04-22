@@ -57,7 +57,9 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
 
     @Override
     public void onNext(WebSocketFrameRequest webSocketFrameRequest) {
-        logger.debug("Websocket frame received");
+        logger.debug("Websocket frame received for api:basepath : {}:{}", webSocketFrameRequest.getMetadata()
+                .getExtAuthzMetadataMap().get(APIConstants.GW_API_NAME_PARAM), webSocketFrameRequest.getMetadata()
+                .getExtAuthzMetadataMap().get(APIConstants.GW_BASE_PATH_PARAM));
         try {
             // In case a stream of websocket frames are intercepted by the filter, envoy will buffer them as mini
             // batches and aggregate the frames. In that case if we directly send the frames to traffic manager, the
@@ -79,18 +81,19 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
                         responseStreamObserver.onNext(response);
                     } else if (WebSocketThrottleState.OVER_LIMIT == webSocketThrottleResponse
                             .getWebSocketThrottleState()) {
-                        logger.debug("throttle period" + webSocketThrottleResponse.getThrottlePeriod());
+                        logger.debug("throttle out period" + webSocketThrottleResponse.getThrottlePeriod());
                         WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
                                 WebSocketFrameResponse.Code.OVER_LIMIT).setThrottlePeriod(
                                 webSocketThrottleResponse.getThrottlePeriod()).build();
                         responseStreamObserver.onNext(response);
                     } else {
+                        logger.debug("throttle state of the connection is not available in enforcer");
                         WebSocketFrameResponse webSocketFrameResponse = WebSocketFrameResponse.newBuilder()
                                 .setThrottleState(WebSocketFrameResponse.Code.UNKNOWN).build();
                         responseStreamObserver.onNext(webSocketFrameResponse);
                     }
                 } else {
-                    logger.debug("Websocket frame type not related to throttling");
+                    logger.debug("Websocket frame type not related to throttling: {}", framedata.getOpcode());
                 }
             }));
         } catch (InvalidDataException e) {
@@ -104,7 +107,7 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
 
     @Override
     public void onError(Throwable throwable) {
-        logger.error("websocket metadata service onError: " + throwable.toString());
+        logger.error("websocket frame service onError: " + throwable.toString());
         WebSocketFrameService.removeObserver(streamId);
     }
 
