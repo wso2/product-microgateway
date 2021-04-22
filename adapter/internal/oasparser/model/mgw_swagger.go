@@ -325,7 +325,7 @@ func (endpoint *Endpoint) validateEndpoint() error {
 	if len(endpoint.ServiceDiscoveryString) > 0 {
 		return nil
 	}
-	if endpoint.Port >= 65535 {
+	if endpoint.Port > 65535 {
 		return errors.New("Endpoint port value should be less than 65535")
 	}
 	if len(endpoint.Host) == 0 {
