@@ -259,7 +259,8 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 		// first update the API for vhost
 		apiContent := generateAPIContent(vhost, apiInfo, apiProject, environments)
 		// In APIM mode, it is required to skip rather than rejecting the whole API deployment.
-		if xds.ValidateAPI(apiContent) != nil {
+		// IN APIM scenario, APIM does the validation. Hence the override remains true.
+		if xds.ValidateAPI(apiContent, true) != nil {
 			continue
 		}
 		xds.UpdateAPI(apiContent)
@@ -324,7 +325,7 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
 		apiContent := generateAPIContent(vhost, apiInfo, apiProject, environments)
-		err := xds.ValidateAPI(apiContent)
+		err := xds.ValidateAPI(apiContent, overrideValue)
 		if err != nil {
 			return err
 		}

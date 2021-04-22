@@ -331,7 +331,7 @@ func TestGenerateRegex(t *testing.T) {
 		{
 			inputpath:     "/v2/pet/*",
 			userInputPath: "/v2/pet123",
-			message:       "when the resource ends with *, trailing characters passing",
+			message:       "when the resource ends with *, trailing characters substitution passes",
 			isMatched:     false,
 		},
 		{

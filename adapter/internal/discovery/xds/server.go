@@ -216,7 +216,7 @@ func GetEnforcerThrottleDataCache() wso2_cache.SnapshotCache {
 }
 
 // ValidateAPI validates the API Content prior to xds update.
-func ValidateAPI(apiContent config.APIContent) error {
+func ValidateAPI(apiContent config.APIContent, override bool) error {
 	// validate API Type
 	if !(apiContent.APIType == mgw.HTTP || apiContent.APIType == mgw.WS) {
 		logger.LoggerXds.Errorf("API type : %s not currently supported with WSO2 Microgateway", apiContent.APIType)
@@ -228,6 +228,10 @@ func ValidateAPI(apiContent config.APIContent) error {
 		vhost, vhostExtractErr := ExtractVhostFromAPIIdentifier(apiKey)
 		if vhostExtractErr != nil {
 			// if vhost is not extracted, the code will continue
+			continue
+		}
+		// when override is true, the basepath validation should not happen
+		if override && apiKey == GenerateIdentifierForAPI(apiContent.VHost, mgwSwagger.GetTitle(), mgwSwagger.GetVersion()) {
 			continue
 		}
 		if swaggerEntry.GetXWso2Basepath() == mgwSwagger.GetXWso2Basepath() && apiContent.VHost == vhost {
