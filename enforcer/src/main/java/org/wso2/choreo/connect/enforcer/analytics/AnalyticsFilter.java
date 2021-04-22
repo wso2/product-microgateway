@@ -106,7 +106,8 @@ public class AnalyticsFilter {
                 FilterUtils.getTenantDomainFromRequestURL(
                         requestContext.getMatchedAPI().getAPIConfig().getBasePath()) == null
                         ? APIConstants.SUPER_TENANT_DOMAIN_NAME
-                        : requestContext.getMatchedAPI().getAPIConfig().getBasePath());
+                        : FilterUtils.getTenantDomainFromRequestURL(
+                                requestContext.getMatchedAPI().getAPIConfig().getBasePath()));
 
         // Default Value would be PRODUCTION
         requestContext.addMetadataToMap(MetadataConstants.APP_KEY_TYPE_KEY,
