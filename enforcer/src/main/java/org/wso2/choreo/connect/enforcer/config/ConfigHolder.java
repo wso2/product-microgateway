@@ -126,7 +126,7 @@ public class ConfigHolder {
         populateAuthService(config.getAuthService());
 
         // Read jwt token configuration
-        populateJWTIssuerConfiguration(config.getTokenServiceList());
+        populateJWTIssuerConfiguration(config.getSecurity().getTokenServiceList());
 
         // Read credentials used to connect with APIM services
         populateAPIMCredentials(config.getApimCredentials());
@@ -146,7 +146,7 @@ public class ConfigHolder {
         // Read jwt issuer configurations
         populateJWTIssuerConfigurations(config.getJwtIssuer());
 
-        populateAuthHeaderConfigurations(config.getAuthHeader());
+        populateAuthHeaderConfigurations(config.getSecurity().getAuthHeader());
 
         // resolve string variables provided as environment variables.
         resolveConfigsWithEnvs(this.config);

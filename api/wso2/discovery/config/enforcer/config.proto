@@ -10,8 +10,7 @@ import "wso2/discovery/config/enforcer/jwt_issuer.proto";
 import "wso2/discovery/config/enforcer/throttling.proto";
 import "wso2/discovery/config/enforcer/cache.proto";
 import "wso2/discovery/config/enforcer/analytics.proto";
-import "wso2/discovery/config/enforcer/auth_header.proto";
-import "wso2/discovery/config/enforcer/issuer.proto";
+import "wso2/discovery/config/enforcer/security.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
 option java_package = "org.wso2.choreo.connect.discovery.config.enforcer";
@@ -22,7 +21,7 @@ option java_multiple_files = true;
 
 // Enforcer config model
 message Config {
-    repeated Issuer tokenService = 1;
+    Security security = 1;
 
     CertStore keystore = 2;
 
@@ -41,6 +40,4 @@ message Config {
     JWTIssuer jwtIssuer = 10;
 
     Analytics analytics = 11;
-
-    AuthHeader authHeader = 12;
 }

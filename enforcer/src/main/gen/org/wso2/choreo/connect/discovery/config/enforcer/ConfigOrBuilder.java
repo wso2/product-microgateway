@@ -8,28 +8,19 @@ public interface ConfigOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+   * @return Whether the security field is set.
    */
-  java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Issuer> 
-      getTokenServiceList();
+  boolean hasSecurity();
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
+   * @return The security.
    */
-  org.wso2.choreo.connect.discovery.config.enforcer.Issuer getTokenService(int index);
+  org.wso2.choreo.connect.discovery.config.enforcer.Security getSecurity();
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
+   * <code>.wso2.discovery.config.enforcer.Security security = 1;</code>
    */
-  int getTokenServiceCount();
-  /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
-   */
-  java.util.List<? extends org.wso2.choreo.connect.discovery.config.enforcer.IssuerOrBuilder> 
-      getTokenServiceOrBuilderList();
-  /**
-   * <code>repeated .wso2.discovery.config.enforcer.Issuer tokenService = 1;</code>
-   */
-  org.wso2.choreo.connect.discovery.config.enforcer.IssuerOrBuilder getTokenServiceOrBuilder(
-      int index);
+  org.wso2.choreo.connect.discovery.config.enforcer.SecurityOrBuilder getSecurityOrBuilder();
 
   /**
    * <code>.wso2.discovery.config.enforcer.CertStore keystore = 2;</code>
@@ -165,19 +156,4 @@ public interface ConfigOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder getAnalyticsOrBuilder();
-
-  /**
-   * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 12;</code>
-   * @return Whether the authHeader field is set.
-   */
-  boolean hasAuthHeader();
-  /**
-   * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 12;</code>
-   * @return The authHeader.
-   */
-  org.wso2.gateway.discovery.config.enforcer.AuthHeader getAuthHeader();
-  /**
-   * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 12;</code>
-   */
-  org.wso2.gateway.discovery.config.enforcer.AuthHeaderOrBuilder getAuthHeaderOrBuilder();
 }

@@ -143,10 +143,6 @@ data:
         username = "admin"
         password = "admin"
 
-    [enforcer.authHeader]
-    enableOutboundAuthHeader = false
-    authorizationHeader = "authorization"
-
     # Throttling configurations
     [enforcer.throttling]
       # Connect with the central traffic manager
@@ -209,9 +205,15 @@ data:
           secureEvictionTimePeriod = 5500
           secureMinIdleTimeInPool = 5000
 
-    # JWT token authorization configurations. You can provide multiple JWT issuers
+  [enforcer.security]
+
+    [enforcer.security.authHeader]
+    enableOutboundAuthHeader = false
+    authorizationHeader = "authorization"
+
+  # JWT token authorization configurations. You can provide multiple JWT issuers
     # Issuer 1
-    [[enforcer.tokenService]]
+    [[enforcer.security.tokenService]]
       name="Resident Key Manager"
       issuer = "https://apim.wso2.com/oauth2/token"
       certificateAlias = "wso2carbon"
@@ -225,7 +227,7 @@ data:
       certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
     # Issuer 2
-    [[enforcer.tokenService]]
+    [[enforcer.security.tokenService]]
         name="MGW"
         issuer = "https://gw.wso2.com/testkey"
         certificateAlias = "mgw"
@@ -239,7 +241,7 @@ data:
         certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
     # Issuer 3
-    [[enforcer.tokenService]]
+    [[enforcer.security.tokenService]]
         name="APIM Publisher"
         issuer = "https://apim.wso2.com/publisher"
         certificateAlias = ""

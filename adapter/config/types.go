@@ -149,19 +149,23 @@ type Config struct {
 	} `toml:"router"`
 
 	Enforcer struct {
-		TokenService [] tokenService
+		Security        security
 		ApimCredentials apimCredentials
 		AuthService     authService
 		JwtGenerator    jwtGenerator
 		Cache           cache
 		Throttling      throttlingConfig
 		JwtIssuer       jwtIssuer
-		AuthHeader      authHeader
 	}
 
 	ControlPlane controlPlane `toml:"controlPlane"`
 
 	Analytics analytics `toml:"analytics"`
+}
+
+type security struct {
+	TokenService []tokenService
+	AuthHeader   authHeader
 }
 
 type apimCredentials struct {
@@ -312,8 +316,8 @@ type routerLogPublisher struct {
 }
 
 type authHeader struct {
-	EnableOutboundAuthHeader bool `json:"enableOutboundAuthHeader"`
-	AuthorizationHeader string `json:"authorizationHeader"`
+	EnableOutboundAuthHeader bool   `json:"enableOutboundAuthHeader"`
+	AuthorizationHeader      string `json:"authorizationHeader"`
 }
 
 type jwtIssuer struct {
