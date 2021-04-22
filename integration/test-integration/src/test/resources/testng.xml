@@ -36,7 +36,6 @@
     <test name="micro-gw-with-default-config" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithDefaultConf"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.vhost.VhostAPICtlTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.apiDeploy.APiDeployViaRestTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.apiDeploy.APiDeployViaApictlTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.endpoints.ProductionSandboxTestCase"/>
@@ -45,6 +44,7 @@
             <class name="org.wso2.choreo.connect.tests.testCases.jwtValidator.InternalKeyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.jwtValidator.CustomAuthHeaderTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.apiDeploy.QSGTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.vhost.VhostAPICtlTestCase"/>
         </classes>
     </test>
     <test name="micro-gw-with-backend-tls" preserve-order="true" parallel="false">

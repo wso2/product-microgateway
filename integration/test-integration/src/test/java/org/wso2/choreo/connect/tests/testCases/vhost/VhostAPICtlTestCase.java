@@ -30,6 +30,8 @@ import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.TokenUtil;
 import org.wso2.choreo.connect.tests.util.Utils;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +40,8 @@ public class VhostAPICtlTestCase {
     private String jwtTokenSand;
     private static final String LOCALHOST = "localhost";
     private static final String US_HOST = "us.wso2.com";
+    private static final String RESOURCE_PATH_FIND_BY_STATUS = "/v2/vhost/pet/findByStatus";
+    private static final String RESOURCE_PATH_INVENTORY = "/v2/vhost/store/inventory";
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
@@ -47,14 +51,14 @@ public class VhostAPICtlTestCase {
     }
 
     @Test(description = "Invoke APIs with same API name, version, context and different backends - vhost: localhost")
-    public void invokeSameNameLocalhostAPI() throws Exception {
+    public void invokeSameAPINameVhost1APIDiffBackend() throws Exception {
         // APIs deployed in vhost: localhost -------------------
         // Production endpoint
         Map<String, String> prodHeaders = new HashMap<>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         prodHeaders.put(HttpHeaderNames.HOST.toString(), LOCALHOST);
         HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/vhost/pet/findByStatus"), prodHeaders);
+                RESOURCE_PATH_FIND_BY_STATUS), prodHeaders);
 
         Assert.assertNotNull(prodResponse);
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
@@ -67,7 +71,7 @@ public class VhostAPICtlTestCase {
         sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
         sandHeaders.put(HttpHeaderNames.HOST.toString(), LOCALHOST);
         HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/vhost/pet/findByStatus"), sandHeaders);
+                RESOURCE_PATH_FIND_BY_STATUS), sandHeaders);
 
         Assert.assertNotNull(sandResponse);
         Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
@@ -77,14 +81,14 @@ public class VhostAPICtlTestCase {
     }
 
     @Test(description = "Invoke APIs with same API name, version, context and different backends - vhost: us.wso2.com")
-    public void invokeSameNameUSHostAPI() throws Exception {
+    public void invokeSameAPINameVhost2APIDiffBackend() throws Exception {
         // APIs deployed in vhost: us.wso2.com -------------------
         // Production endpoint
         Map<String, String> prodHeaders = new HashMap<>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
         prodHeaders.put(HttpHeaderNames.HOST.toString(), US_HOST);
         HttpResponse prodResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/vhost/pet/findByStatus") , prodHeaders);
+                RESOURCE_PATH_FIND_BY_STATUS) , prodHeaders);
 
         Assert.assertNotNull(prodResponse);
         Assert.assertEquals(prodResponse.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
@@ -97,14 +101,38 @@ public class VhostAPICtlTestCase {
         sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenSand);
         sandHeaders.put(HttpHeaderNames.HOST.toString(), US_HOST);
         HttpResponse sandResponse = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/vhost/pet/findByStatus"), sandHeaders);
+                RESOURCE_PATH_FIND_BY_STATUS), sandHeaders);
 
         Assert.assertNotNull(sandResponse);
         Assert.assertEquals(sandResponse.getResponseCode(), HttpStatus.SC_OK, "Response code mismatched");
         // response from backend 1
         Assert.assertEquals(sandResponse.getData(), ResponseConstants.RESPONSE_BODY,
                 "Response message mismatch.");
+    }
 
-        // TODO: (renuka) check 404 for non existing resources
+    @Test(description = "Invoke APIs with same API name, version, context and different resources - vhost: localhost")
+    public void invokeSameAPINameVhost1APIxistingResource () throws Exception {
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put(HttpHeaderNames.HOST.toString(), LOCALHOST);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                RESOURCE_PATH_INVENTORY) , headers);
+
+        Assert.assertNotNull(response, "Production endpoint response should not be null");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
+        Assert.assertEquals(response.getData(), ResponseConstants.STORE_INVENTORY_RESPONSE,
+                "Response message mismatch.");
+    }
+
+    @Test(description = "Invoke APIs with same API name, version, context and different resources - vhost: us.wso2.com")
+    public void invokeSameAPINameVhost2APINonExistingResource () throws Exception {
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtTokenProd);
+        headers.put(HttpHeaderNames.HOST.toString(), US_HOST);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                RESOURCE_PATH_INVENTORY) , headers);
+
+        Assert.assertNotNull(response, "Production endpoint response should not be null");
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_NOT_FOUND,"Response code mismatched");
     }
 }
