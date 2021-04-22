@@ -81,7 +81,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 	if len(mgwSwagger.GetProdEndpoints()) > 0 {
 		apiLevelEndpointProd = mgwSwagger.GetProdEndpoints()
 		apilevelAddressP := createAddress(apiLevelEndpointProd[0].Host, apiLevelEndpointProd[0].Port)
-		apiLevelClusterNameProd = strings.TrimSpace(prodClustersConfigNamePrefix +
+		apiLevelClusterNameProd = strings.TrimSpace(prodClustersConfigNamePrefix + vHost + "_" +
 			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
 		apilevelClusterProd = createCluster(apilevelAddressP, apiLevelClusterNameProd, apiLevelEndpointProd[0].URLType,
 			upstreamCerts)
@@ -107,7 +107,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 				"for the API %v:%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion)
 		} else {
 			apilevelAddressSand := createAddress(apiLevelEndpointSand[0].Host, apiLevelEndpointSand[0].Port)
-			apiLevelClusterNameSand = strings.TrimSpace(sandClustersConfigNamePrefix +
+			apiLevelClusterNameSand = strings.TrimSpace(sandClustersConfigNamePrefix + vHost + "_" +
 				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
 			apilevelClusterSand = createCluster(apilevelAddressSand, apiLevelClusterNameSand, apiLevelEndpointSand[0].URLType,
 				upstreamCerts)

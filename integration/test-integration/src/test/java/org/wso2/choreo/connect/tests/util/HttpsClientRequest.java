@@ -61,11 +61,14 @@ public class HttpsClientRequest {
                 }
                 httpResponse = new HttpResponse(sb.toString(), conn.getResponseCode());
             } catch (IOException ex) {
-                rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()
-                        , Charset.defaultCharset()));
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    sb.append(line);
+                InputStream errorStream = conn.getErrorStream();
+                if (errorStream != null) {
+                    rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()
+                            , Charset.defaultCharset()));
+                    String line;
+                    while ((line = rd.readLine()) != null) {
+                        sb.append(line);
+                    }
                 }
                 httpResponse = new HttpResponse(sb.toString(), conn.getResponseCode());
             } finally {

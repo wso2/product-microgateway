@@ -40,6 +40,8 @@
                             ${basedir}/target/test-integration-${project.version}.jar
                         </jwt_transformer_jar>
                         <apictl_version>${apictl.version}</apictl_version>
+                        <!-- allowRestrictedHeaders enabled for allowing to send host header with requests, for testing vhost feature -->
+                        <sun.net.http.allowRestrictedHeaders>true</sun.net.http.allowRestrictedHeaders>
                     </systemPropertyVariables>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>

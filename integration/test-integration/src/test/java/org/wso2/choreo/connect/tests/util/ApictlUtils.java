@@ -1,5 +1,6 @@
 package org.wso2.choreo.connect.tests.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.choreo.connect.tests.context.MicroGWTestException;
@@ -8,7 +9,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class ApictlUtils {
@@ -31,6 +34,7 @@ public class ApictlUtils {
     public static final String PASSWORD_FLAG = "-p";
     public static final String FILE_FLAG = "-f";
     public static final String ENV_FLAG = "-e";
+    public static final String VHOST_FLAG = "-t";
     public static final String OVERRIDE_FLAG = "-o";
     public static final String NAME_FLAG = "-n";
     public static final String VERSION_FLAG = "-v";
@@ -44,6 +48,7 @@ public class ApictlUtils {
     public static final String SUCCESSFULLY_UNDEPLOYED_RESPONSE = "API undeployed";
 
     public static final String ENDPOINT_CERTIFICATES = "Endpoint-certificates";
+    public static final String DEPLOYMENT_ENVIRONMENTS_YAML = "deployment_environments.yaml";
 
     public static final String APICTL_PATH = File.separator + "apictl" + File.separator;
     public static final String API_PROJECTS_PATH = File.separator + "apiProjects" + File.separator;
@@ -51,6 +56,8 @@ public class ApictlUtils {
             "openAPIs" + File.separator;
     public static final String BACKEND_CERTS_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
             "certs" + File.separator;
+    public static final String DEPLOYMENT_ENVIRONMENTS_YAML_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
+            "deploymentEnvironments" + File.separator;
     public static final String MGW_ADAPTER_CERTS_PATH =
             File.separator + "server-tmp" + File.separator + "docker-compose" + File.separator + "resources"
                     + File.separator + "adapter" + File.separator + "security" + File.separator + "truststore"
@@ -87,7 +94,7 @@ public class ApictlUtils {
      */
     public static String createProjectZip(String openApiFile, String apiProjectName, String backendCert) throws IOException, MicroGWTestException {
         try {
-            createProject(openApiFile, apiProjectName, backendCert);
+            createProject(openApiFile, apiProjectName, backendCert, null);
         } catch (MicroGWTestException e) {
             if (!e.getMessage().equals("Project already exists")) {
                 throw e;
@@ -106,10 +113,12 @@ public class ApictlUtils {
      * @param apiProjectName expected name of the project that gets created
      * @param backendCert name of the backend cert file that should be included in the
      *                    Endpoint-certificates folder in the API project
+     * @param deployEnvYamlFile deployment_environments.yaml file of API project
      * @throws IOException if the runtime fails to execute the apictl command
      * @throws MicroGWTestException if apictl was unable to create the project
      */
-    public static void createProject(String openApiFile, String apiProjectName, String backendCert) throws IOException, MicroGWTestException {
+    public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile)
+            throws IOException, MicroGWTestException {
         String targetDir = Utils.getTargetDirPath();
         String openApiFilePath;
         if(openApiFile.startsWith("https://") || openApiFile.startsWith("http://")) {
@@ -137,6 +146,11 @@ public class ApictlUtils {
                     targetDir + BACKEND_CERTS_PATH + backendCert,
                     projectPathToCreate + File.separator + ENDPOINT_CERTIFICATES
                             + File.separator + "backend.crt");
+        }
+        if (deployEnvYamlFile != null) {
+            Utils.copyFile(
+                    targetDir + DEPLOYMENT_ENVIRONMENTS_YAML_PATH + deployEnvYamlFile,
+                    projectPathToCreate + File.separator + DEPLOYMENT_ENVIRONMENTS_YAML);
         }
         log.info("Created API project " + apiProjectName);
     }
@@ -262,22 +276,29 @@ public class ApictlUtils {
      * @param apiName name of the API (in api.yaml) to undeploy
      * @param apiVersion version of the API
      * @param mgwEnv name of the apictl mgw env the API was deployed
+     * @param vhost vhost of the API to be undeployed from
      * @throws MicroGWTestException if apictl was unable to undeploy the API
      */
-    public static void undeployAPI(String apiName, String apiVersion, String mgwEnv) throws MicroGWTestException {
+    public static void undeployAPI(String apiName, String apiVersion, String mgwEnv, String vhost) throws MicroGWTestException {
         String[] cmdArray = { MG, UNDEPLOY, API };
-        String[] argsArray = { NAME_FLAG, apiName, VERSION_FLAG, apiVersion, ENV_FLAG, mgwEnv };
+        List<String> args = new ArrayList<>(Arrays.asList(NAME_FLAG, apiName, VERSION_FLAG, apiVersion, ENV_FLAG, mgwEnv));
+        String loggedVhost = "<EMPTY_VHOST>";
+        if (StringUtils.isNotEmpty(vhost)) {
+            loggedVhost = vhost;
+            args.addAll(Arrays.asList(VHOST_FLAG, vhost));
+        }
+        String[] argsArray = args.toArray(String[]::new);
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
             if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFULLY_UNDEPLOYED_RESPONSE)) {
                 throw new MicroGWTestException("Unable to undeploy API: "
-                        + apiName + " from microgateway adapter environment: " + mgwEnv);
+                        + apiName + " from microgateway adapter environment: " + mgwEnv + " vhost: " + loggedVhost);
             }
         } catch (IOException e) {
             throw new MicroGWTestException("Unable to undeploy API: "
-                    + apiName + " to microgateway adapter environment: " + mgwEnv, e);
+                    + apiName + " from microgateway adapter environment: " + mgwEnv + " vhost: " + loggedVhost, e);
         }
-        log.info("Deployed API project: " + apiName + " to microgateway adapter environment: " + mgwEnv);
+        log.info("Undeployed API project: " + apiName + " from microgateway adapter environment: " + mgwEnv + " vhost: " + loggedVhost);
     }
 
     /**

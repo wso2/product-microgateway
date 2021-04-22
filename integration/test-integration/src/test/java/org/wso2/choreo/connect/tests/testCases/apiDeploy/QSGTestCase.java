@@ -39,7 +39,7 @@ public class QSGTestCase {
 
     @BeforeClass
     public void createApiProject() throws IOException, MicroGWTestException {
-        ApictlUtils.createProject( "https://petstore.swagger.io/v2/swagger.json", "qsg_petstore", null);
+        ApictlUtils.createProject( "https://petstore.swagger.io/v2/swagger.json", "qsg_petstore", null, null);
     }
 
     @Test
