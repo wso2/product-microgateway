@@ -479,23 +479,6 @@ func isLaterEvent(timeStampMap map[string]int64, mapKey string, currentTimeStamp
 	return false
 }
 
-// getControlPlaneConnectedTenantDomain returns the tenant domain of the user used to authenticate with event hub.
-func getControlPlaneConnectedTenantDomain() string {
-	// Read configurations to get the control plane authenticated user
-	conf, errReadConfig := config.ReadConfigs()
-	if errReadConfig != nil {
-		// This has to be error. For debugging purpose info
-		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
-	}
-	// Populate data from the config
-	cpTenantAdminUser := conf.ControlPlane.Username
-	tenantDomain := strings.Split(cpTenantAdminUser, "@")
-	if len(tenantDomain) > 1 {
-		return tenantDomain[len(tenantDomain)-1]
-	}
-	return "carbon.super"
-}
-
 func belongsToTenant(tenantDomain string) bool {
-	return getControlPlaneConnectedTenantDomain() == tenantDomain
+	return config.GetControlPlaneConnectedTenantDomain() == tenantDomain
 }
