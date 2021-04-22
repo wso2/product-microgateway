@@ -24,6 +24,7 @@ private static final long serialVersionUID = 0L;
     keyType_ = "";
     keyManager_ = "";
     tenantDomain_ = "";
+    applicationUUID_ = "";
   }
 
   @java.lang.Override
@@ -93,6 +94,12 @@ private static final long serialVersionUID = 0L;
           case 56: {
 
             timestamp_ = input.readInt64();
+            break;
+          }
+          case 66: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            applicationUUID_ = s;
             break;
           }
           default: {
@@ -312,6 +319,44 @@ private static final long serialVersionUID = 0L;
     return timestamp_;
   }
 
+  public static final int APPLICATIONUUID_FIELD_NUMBER = 8;
+  private volatile java.lang.Object applicationUUID_;
+  /**
+   * <code>string applicationUUID = 8;</code>
+   * @return The applicationUUID.
+   */
+  @java.lang.Override
+  public java.lang.String getApplicationUUID() {
+    java.lang.Object ref = applicationUUID_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      applicationUUID_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string applicationUUID = 8;</code>
+   * @return The bytes for applicationUUID.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getApplicationUUIDBytes() {
+    java.lang.Object ref = applicationUUID_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      applicationUUID_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -347,6 +392,9 @@ private static final long serialVersionUID = 0L;
     if (timestamp_ != 0L) {
       output.writeInt64(7, timestamp_);
     }
+    if (!getApplicationUUIDBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 8, applicationUUID_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -380,6 +428,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeInt64Size(7, timestamp_);
     }
+    if (!getApplicationUUIDBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, applicationUUID_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -409,6 +460,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getTenantDomain())) return false;
     if (getTimestamp()
         != other.getTimestamp()) return false;
+    if (!getApplicationUUID()
+        .equals(other.getApplicationUUID())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -435,6 +488,8 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
         getTimestamp());
+    hash = (37 * hash) + APPLICATIONUUID_FIELD_NUMBER;
+    hash = (53 * hash) + getApplicationUUID().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -586,6 +641,8 @@ private static final long serialVersionUID = 0L;
 
       timestamp_ = 0L;
 
+      applicationUUID_ = "";
+
       return this;
     }
 
@@ -619,6 +676,7 @@ private static final long serialVersionUID = 0L;
       result.tenantId_ = tenantId_;
       result.tenantDomain_ = tenantDomain_;
       result.timestamp_ = timestamp_;
+      result.applicationUUID_ = applicationUUID_;
       onBuilt();
       return result;
     }
@@ -691,6 +749,10 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getTimestamp() != 0L) {
         setTimestamp(other.getTimestamp());
+      }
+      if (!other.getApplicationUUID().isEmpty()) {
+        applicationUUID_ = other.applicationUUID_;
+        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1114,6 +1176,82 @@ private static final long serialVersionUID = 0L;
     public Builder clearTimestamp() {
       
       timestamp_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object applicationUUID_ = "";
+    /**
+     * <code>string applicationUUID = 8;</code>
+     * @return The applicationUUID.
+     */
+    public java.lang.String getApplicationUUID() {
+      java.lang.Object ref = applicationUUID_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        applicationUUID_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string applicationUUID = 8;</code>
+     * @return The bytes for applicationUUID.
+     */
+    public com.google.protobuf.ByteString
+        getApplicationUUIDBytes() {
+      java.lang.Object ref = applicationUUID_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        applicationUUID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string applicationUUID = 8;</code>
+     * @param value The applicationUUID to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApplicationUUID(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      applicationUUID_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string applicationUUID = 8;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearApplicationUUID() {
+      
+      applicationUUID_ = getDefaultInstance().getApplicationUUID();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string applicationUUID = 8;</code>
+     * @param value The bytes for applicationUUID to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApplicationUUIDBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      applicationUUID_ = value;
       onChanged();
       return this;
     }

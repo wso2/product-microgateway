@@ -37,10 +37,10 @@ public interface SubscriptionDataStore {
     /**
      * Gets an {@link Application} by Id.
      *
-     * @param appId Id of the Application
+     * @param appUUID Id of the Application
      * @return {@link Application} with the appId
      */
-    Application getApplicationById(int appId);
+    Application getApplicationById(String appUUID);
 
     /**
      * Gets the {@link ApplicationKeyMapping} entry by Key.
@@ -62,11 +62,11 @@ public interface SubscriptionDataStore {
     /**
      * Gets Subscription by ID.
      *
-     * @param appId Application associated with the Subscription
-     * @param apiId Api associated with the Subscription
+     * @param appUUID Application associated with the Subscription (uuid)
+     * @param apiUUID Api associated with the Subscription (uuid)
      * @return {@link Subscription}
      */
-    Subscription getSubscriptionById(int appId, int apiId);
+    Subscription getSubscriptionById(String appUUID, String apiUUID);
 
     /**
      * Gets API Throttling Policy by the name and Tenant Id.

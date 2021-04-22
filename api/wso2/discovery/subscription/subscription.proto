@@ -11,12 +11,15 @@ option java_multiple_files = true;
 
 // Subscription data model
 message Subscription {
-    string subscriptionId = 1;
-    string policyId = 2;
+	string subscriptionId = 1;
+	string policyId = 2;
 	int32 apiId = 3;
 	int32 appId = 4;
 	string subscriptionState = 5;
 	int64 timeStamp = 6;
 	int32 tenantId = 7;
-    string tenantDomain = 8;
+	string tenantDomain = 8;
+	string subscriptionUUID = 9;
+	string appUUID = 10;
+	string apiUUID = 11;
 }

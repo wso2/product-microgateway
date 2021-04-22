@@ -24,6 +24,9 @@ private static final long serialVersionUID = 0L;
     policyId_ = "";
     subscriptionState_ = "";
     tenantDomain_ = "";
+    subscriptionUUID_ = "";
+    appUUID_ = "";
+    apiUUID_ = "";
   }
 
   @java.lang.Override
@@ -98,6 +101,24 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             tenantDomain_ = s;
+            break;
+          }
+          case 74: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            subscriptionUUID_ = s;
+            break;
+          }
+          case 82: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            appUUID_ = s;
+            break;
+          }
+          case 90: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            apiUUID_ = s;
             break;
           }
           default: {
@@ -328,6 +349,120 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int SUBSCRIPTIONUUID_FIELD_NUMBER = 9;
+  private volatile java.lang.Object subscriptionUUID_;
+  /**
+   * <code>string subscriptionUUID = 9;</code>
+   * @return The subscriptionUUID.
+   */
+  @java.lang.Override
+  public java.lang.String getSubscriptionUUID() {
+    java.lang.Object ref = subscriptionUUID_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      subscriptionUUID_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string subscriptionUUID = 9;</code>
+   * @return The bytes for subscriptionUUID.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getSubscriptionUUIDBytes() {
+    java.lang.Object ref = subscriptionUUID_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      subscriptionUUID_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int APPUUID_FIELD_NUMBER = 10;
+  private volatile java.lang.Object appUUID_;
+  /**
+   * <code>string appUUID = 10;</code>
+   * @return The appUUID.
+   */
+  @java.lang.Override
+  public java.lang.String getAppUUID() {
+    java.lang.Object ref = appUUID_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      appUUID_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string appUUID = 10;</code>
+   * @return The bytes for appUUID.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getAppUUIDBytes() {
+    java.lang.Object ref = appUUID_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      appUUID_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int APIUUID_FIELD_NUMBER = 11;
+  private volatile java.lang.Object apiUUID_;
+  /**
+   * <code>string apiUUID = 11;</code>
+   * @return The apiUUID.
+   */
+  @java.lang.Override
+  public java.lang.String getApiUUID() {
+    java.lang.Object ref = apiUUID_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      apiUUID_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string apiUUID = 11;</code>
+   * @return The bytes for apiUUID.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getApiUUIDBytes() {
+    java.lang.Object ref = apiUUID_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      apiUUID_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -366,6 +501,15 @@ private static final long serialVersionUID = 0L;
     if (!getTenantDomainBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 8, tenantDomain_);
     }
+    if (!getSubscriptionUUIDBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 9, subscriptionUUID_);
+    }
+    if (!getAppUUIDBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 10, appUUID_);
+    }
+    if (!getApiUUIDBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 11, apiUUID_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -403,6 +547,15 @@ private static final long serialVersionUID = 0L;
     if (!getTenantDomainBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, tenantDomain_);
     }
+    if (!getSubscriptionUUIDBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, subscriptionUUID_);
+    }
+    if (!getAppUUIDBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, appUUID_);
+    }
+    if (!getApiUUIDBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, apiUUID_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -434,6 +587,12 @@ private static final long serialVersionUID = 0L;
         != other.getTenantId()) return false;
     if (!getTenantDomain()
         .equals(other.getTenantDomain())) return false;
+    if (!getSubscriptionUUID()
+        .equals(other.getSubscriptionUUID())) return false;
+    if (!getAppUUID()
+        .equals(other.getAppUUID())) return false;
+    if (!getApiUUID()
+        .equals(other.getApiUUID())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -462,6 +621,12 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getTenantId();
     hash = (37 * hash) + TENANTDOMAIN_FIELD_NUMBER;
     hash = (53 * hash) + getTenantDomain().hashCode();
+    hash = (37 * hash) + SUBSCRIPTIONUUID_FIELD_NUMBER;
+    hash = (53 * hash) + getSubscriptionUUID().hashCode();
+    hash = (37 * hash) + APPUUID_FIELD_NUMBER;
+    hash = (53 * hash) + getAppUUID().hashCode();
+    hash = (37 * hash) + APIUUID_FIELD_NUMBER;
+    hash = (53 * hash) + getApiUUID().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -615,6 +780,12 @@ private static final long serialVersionUID = 0L;
 
       tenantDomain_ = "";
 
+      subscriptionUUID_ = "";
+
+      appUUID_ = "";
+
+      apiUUID_ = "";
+
       return this;
     }
 
@@ -649,6 +820,9 @@ private static final long serialVersionUID = 0L;
       result.timeStamp_ = timeStamp_;
       result.tenantId_ = tenantId_;
       result.tenantDomain_ = tenantDomain_;
+      result.subscriptionUUID_ = subscriptionUUID_;
+      result.appUUID_ = appUUID_;
+      result.apiUUID_ = apiUUID_;
       onBuilt();
       return result;
     }
@@ -723,6 +897,18 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getTenantDomain().isEmpty()) {
         tenantDomain_ = other.tenantDomain_;
+        onChanged();
+      }
+      if (!other.getSubscriptionUUID().isEmpty()) {
+        subscriptionUUID_ = other.subscriptionUUID_;
+        onChanged();
+      }
+      if (!other.getAppUUID().isEmpty()) {
+        appUUID_ = other.appUUID_;
+        onChanged();
+      }
+      if (!other.getApiUUID().isEmpty()) {
+        apiUUID_ = other.apiUUID_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -1178,6 +1364,234 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       tenantDomain_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object subscriptionUUID_ = "";
+    /**
+     * <code>string subscriptionUUID = 9;</code>
+     * @return The subscriptionUUID.
+     */
+    public java.lang.String getSubscriptionUUID() {
+      java.lang.Object ref = subscriptionUUID_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        subscriptionUUID_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string subscriptionUUID = 9;</code>
+     * @return The bytes for subscriptionUUID.
+     */
+    public com.google.protobuf.ByteString
+        getSubscriptionUUIDBytes() {
+      java.lang.Object ref = subscriptionUUID_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        subscriptionUUID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string subscriptionUUID = 9;</code>
+     * @param value The subscriptionUUID to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSubscriptionUUID(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      subscriptionUUID_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string subscriptionUUID = 9;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearSubscriptionUUID() {
+      
+      subscriptionUUID_ = getDefaultInstance().getSubscriptionUUID();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string subscriptionUUID = 9;</code>
+     * @param value The bytes for subscriptionUUID to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSubscriptionUUIDBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      subscriptionUUID_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object appUUID_ = "";
+    /**
+     * <code>string appUUID = 10;</code>
+     * @return The appUUID.
+     */
+    public java.lang.String getAppUUID() {
+      java.lang.Object ref = appUUID_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        appUUID_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string appUUID = 10;</code>
+     * @return The bytes for appUUID.
+     */
+    public com.google.protobuf.ByteString
+        getAppUUIDBytes() {
+      java.lang.Object ref = appUUID_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        appUUID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string appUUID = 10;</code>
+     * @param value The appUUID to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAppUUID(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      appUUID_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string appUUID = 10;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearAppUUID() {
+      
+      appUUID_ = getDefaultInstance().getAppUUID();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string appUUID = 10;</code>
+     * @param value The bytes for appUUID to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAppUUIDBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      appUUID_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object apiUUID_ = "";
+    /**
+     * <code>string apiUUID = 11;</code>
+     * @return The apiUUID.
+     */
+    public java.lang.String getApiUUID() {
+      java.lang.Object ref = apiUUID_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        apiUUID_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string apiUUID = 11;</code>
+     * @return The bytes for apiUUID.
+     */
+    public com.google.protobuf.ByteString
+        getApiUUIDBytes() {
+      java.lang.Object ref = apiUUID_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        apiUUID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string apiUUID = 11;</code>
+     * @param value The apiUUID to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApiUUID(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      apiUUID_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string apiUUID = 11;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearApiUUID() {
+      
+      apiUUID_ = getDefaultInstance().getApiUUID();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string apiUUID = 11;</code>
+     * @param value The bytes for apiUUID to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApiUUIDBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      apiUUID_ = value;
       onChanged();
       return this;
     }

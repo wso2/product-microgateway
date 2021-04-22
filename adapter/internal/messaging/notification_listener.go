@@ -150,15 +150,36 @@ func handleAPIEvents(data []byte, eventType string) {
 								return
 							}
 						}
-						queryParamMap := make(map[string]string, 3)
-						queryParamMap[eh.GatewayLabelParam] = configuredEnv
-						queryParamMap[eh.ContextParam] = apiEvent.Context
-						queryParamMap[eh.VersionParam] = apiEvent.Version
-						// TODO: (VirajSalaka) Fix the REST API call once the APIM Event hub implementation is fixed.
-						// TODO: (VirajSalaka) Optimize the number of requests sent to /apis endpoint as the same API is returned
-						// repeatedly. (If Eventhub implementation is not fixed)
-						go eh.InvokeService(eh.ApisEndpoint, eh.APIListMap[env], queryParamMap,
-							eh.APIListChannel, 0)
+						var apiEvent APIEvent
+						json.Unmarshal([]byte(string(data)), &apiEvent)
+						api := types.API{
+							APIID:    apiEvent.APIID,
+							UUID:     apiEvent.UUID,
+							Provider: apiEvent.APIProvider,
+							// hardcoded as default version is not assigned at the moment.
+							IsDefaultVersion: false,
+							APIStatus:        apiEvent.APIStatus,
+							TenantID:         apiEvent.TenantID,
+							TenantDomain:     apiEvent.TenantDomain,
+							TimeStamp:        apiEvent.TimeStamp,
+						}
+
+						// Currently the API Deploy/Remove event and the other API events use different keys
+						// Added this logic to prevent any failures if the API Manager implementation is changed.
+						if apiEvent.APIName != "" {
+							api.Name = apiEvent.APIName
+						} else {
+							api.Name = apiEvent.Name
+						}
+
+						if apiEvent.APIVersion != "" {
+							api.Version = apiEvent.APIVersion
+						} else {
+							api.Version = apiEvent.Version
+						}
+
+						eh.APIListMap[env].List = append(eh.APIListMap[env].List, api)
+						xds.UpdateEnforcerAPIList(env, xds.MarshalAPIList(eh.APIListMap[env]))
 					}
 				}
 			}
@@ -234,7 +255,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 		applicationKeyMapping := types.ApplicationKeyMapping{ApplicationID: applicationRegistrationEvent.ApplicationID,
 			ConsumerKey: applicationRegistrationEvent.ConsumerKey, KeyType: applicationRegistrationEvent.KeyType,
 			KeyManager: applicationRegistrationEvent.KeyManager, TenantID: -1, TenantDomain: applicationRegistrationEvent.TenantDomain,
-			TimeStamp: applicationRegistrationEvent.TimeStamp}
+			TimeStamp: applicationRegistrationEvent.TimeStamp, ApplicationUUID: applicationRegistrationEvent.ApplicationUUID}
 
 		if isLaterEvent(applicationKeyMappingTimeStampMap, fmt.Sprint(applicationRegistrationEvent.ApplicationID),
 			applicationRegistrationEvent.TimeStamp) {
@@ -282,13 +303,13 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 	var subscriptionEvent SubscriptionEvent
 	json.Unmarshal([]byte(string(data)), &subscriptionEvent)
 	if !belongsToTenant(subscriptionEvent.TenantDomain) {
-		// TODO: (VirajSalaka) Fix once this is merged.
-		// logger.LoggerMsg.Debugf("Subscription event for the Application : %s and API %s is dropped due to having non related tenantDomain : %s",
-		// subscriptionEvent., applicationEvent.UUID, applicationEvent.TenantDomain)
+		logger.LoggerMsg.Debugf("Subscription event for the Application : %s and API %s is dropped due to having non related tenantDomain : %s",
+			subscriptionEvent.ApplicationUUID, subscriptionEvent.APIUUID, subscriptionEvent.TenantDomain)
 		return
 	}
 
-	sub := types.Subscription{SubscriptionID: subscriptionEvent.SubscriptionID, PolicyID: subscriptionEvent.PolicyID,
+	sub := types.Subscription{SubscriptionID: subscriptionEvent.SubscriptionID, SubscriptionUUID: subscriptionEvent.SubscriptionUUID,
+		PolicyID: subscriptionEvent.PolicyID, APIUUID: subscriptionEvent.APIUUID, ApplicationUUID: subscriptionEvent.ApplicationUUID,
 		APIID: subscriptionEvent.APIID, AppID: subscriptionEvent.ApplicationID, SubscriptionState: subscriptionEvent.SubscriptionState,
 		TenantID: subscriptionEvent.TenantID, TenantDomain: subscriptionEvent.TenantDomain, TimeStamp: subscriptionEvent.TimeStamp}
 

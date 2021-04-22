@@ -28,10 +28,11 @@ public class Subscription implements CacheableEntity<String> {
 
     private String subscriptionId = null;
     private String policyId = null;
-    private Integer apiId = null;
-    private Integer appId = null;
+    private String apiUUID = null;
+    private String appUUID = null;
     private String subscriptionState = null;
     private long timeStamp;
+
     public String getSubscriptionId() {
 
         return subscriptionId;
@@ -52,26 +53,6 @@ public class Subscription implements CacheableEntity<String> {
         this.policyId = policyId;
     }
 
-    public Integer getApiId() {
-
-        return apiId;
-    }
-
-    public void setApiId(Integer apiId) {
-
-        this.apiId = apiId;
-    }
-
-    public Integer getAppId() {
-
-        return appId;
-    }
-
-    public void setAppId(Integer appId) {
-
-        this.appId = appId;
-    }
-
     public String getSubscriptionState() {
 
         return subscriptionState;
@@ -85,7 +66,7 @@ public class Subscription implements CacheableEntity<String> {
     @Override
     public String getCacheKey() {
 
-        return SubscriptionDataStoreUtil.getSubscriptionCacheKey(getAppId(), getApiId());
+        return SubscriptionDataStoreUtil.getSubscriptionCacheKey(getAppUUID(), getApiUUID());
     }
 
     public long getTimeStamp() {
@@ -104,11 +85,27 @@ public class Subscription implements CacheableEntity<String> {
         return "Subscription{" +
                 "subscriptionId='" + subscriptionId + '\'' +
                 ", policyId='" + policyId + '\'' +
-                ", apiId=" + apiId +
-                ", appId=" + appId +
+                ", apiId=" + apiUUID +
+                ", appId=" + appUUID +
                 ", subscriptionState='" + subscriptionState + '\'' +
                 ", timeStamp=" + timeStamp +
                 '}';
+    }
+
+    public String getApiUUID() {
+        return apiUUID;
+    }
+
+    public void setApiUUID(String apiUUID) {
+        this.apiUUID = apiUUID;
+    }
+
+    public String getAppUUID() {
+        return appUUID;
+    }
+
+    public void setAppUUID(String appUUID) {
+        this.appUUID = appUUID;
     }
 }
 
