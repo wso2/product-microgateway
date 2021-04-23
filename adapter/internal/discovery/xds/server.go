@@ -69,8 +69,12 @@ var (
 	apiUUIDToGatewayToVhosts map[string]map[string]string   // API_UUID -> gateway-env -> vhost (for un-deploying APIs from APIM or Choreo)
 	apiToVhostsMap           map[string]map[string]struct{} // APIName:Version -> VHosts set (for un-deploying APIs from API-CTL)
 
+	internalSwaggerMap struct {
+		sync.RWMutex
+		apiMgwSwaggerMap              map[string]mgw.MgwSwagger // Vhost:APIName:Version -> MgwSwagger struct map
+		vhostBasePathToNameVersionMap map[string]string         // Vhost:BasePath -> APIName:Version
+	}
 	// Vhost:APIName:Version as map key
-	apiMgwSwaggerMap       map[string]mgw.MgwSwagger       // Vhost:APIName:Version -> MgwSwagger struct map
 	openAPIEnvoyMap        map[string][]string             // Vhost:APIName:Version -> Envoy Label Array map
 	openAPIRoutesMap       map[string][]*routev3.Route     // Vhost:APIName:Version -> Envoy Routes map
 	openAPIClustersMap     map[string][]*clusterv3.Cluster // Vhost:APIName:Version -> Envoy Clusters map
@@ -135,7 +139,9 @@ func init() {
 
 	apiUUIDToGatewayToVhosts = make(map[string]map[string]string)
 	apiToVhostsMap = make(map[string]map[string]struct{})
-	apiMgwSwaggerMap = make(map[string]mgw.MgwSwagger)
+
+	internalSwaggerMap.apiMgwSwaggerMap = make(map[string]mgw.MgwSwagger)
+	internalSwaggerMap.vhostBasePathToNameVersionMap = make(map[string]string)
 	openAPIEnvoyMap = make(map[string][]string)
 	openAPIEnforcerApisMap = make(map[string]types.Resource)
 	openAPIRoutesMap = make(map[string][]*routev3.Route)
@@ -224,20 +230,17 @@ func ValidateAPI(apiContent config.APIContent, override bool) error {
 	}
 
 	mgwSwagger := populateMgwSwaggerFromAPIContent(apiContent)
-	for apiKey, swaggerEntry := range apiMgwSwaggerMap {
-		vhost, vhostExtractErr := ExtractVhostFromAPIIdentifier(apiKey)
-		if vhostExtractErr != nil {
-			// if vhost is not extracted, the code will continue
-			continue
-		}
-		// when override is true, the basepath validation should not happen
-		if override && apiKey == GenerateIdentifierForAPI(apiContent.VHost, mgwSwagger.GetTitle(), mgwSwagger.GetVersion()) {
-			continue
-		}
-		if swaggerEntry.GetXWso2Basepath() == mgwSwagger.GetXWso2Basepath() && apiContent.VHost == vhost {
+	basePathMapKey := apiContent.VHost + ":" + mgwSwagger.GetXWso2Basepath()
+	internalSwaggerMap.RLock()
+	nameVersionEntry, ok := internalSwaggerMap.vhostBasePathToNameVersionMap[basePathMapKey]
+	internalSwaggerMap.RUnlock()
+	// If the API is found in basePathMap, it should be invalidated unless override flag is set to true.
+	if ok {
+		// if the override is enabled and the title version remains same against the vhost:basepath entry it is valid
+		if !(override && nameVersionEntry == mgwSwagger.GetTitle()+":"+mgwSwagger.GetVersion()) {
 			logger.LoggerXds.Errorf("API %s:%s:%s already exists under provided basePath : %s ",
-				vhost, swaggerEntry.GetTitle(), mgwSwagger.GetVersion(), swaggerEntry.GetXWso2Basepath())
-			return errors.New("API is not applied as basePath is already available")
+				apiContent.VHost, mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), mgwSwagger.GetXWso2Basepath())
+			return errors.New("API is not applied as basePath is already used")
 		}
 	}
 
@@ -297,17 +300,7 @@ func UpdateAPI(apiContent config.APIContent) {
 		return
 	}
 	apiIdentifier := GenerateIdentifierForAPI(apiContent.VHost, apiContent.Name, apiContent.Version)
-	//TODO: (SuKSW) Uncomment the below section depending on MgwSwagger.Resource ids
-	//TODO: (SuKSW) Update the existing API if the basepath already exists
-	//existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
-	// if exists {
-	// 	if reflect.DeepEqual(mgwSwagger, existingMgwSwagger) {
-	// 		logger.LoggerXds.Infof("API %v already exists. No changes to apply.", apiIdentifier)
-	// 		return
-	// 	}
-	// }
-	apiMgwSwaggerMap[apiIdentifier] = mgwSwagger
-	//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
+	addEntryToAPIMgwSwaggerMap(apiContent.VHost, mgwSwagger)
 	// TODO: commented the following line as the implementation is not supported yet.
 	//newLabels = model.GetXWso2Label(openAPIV3Struct.ExtensionProps)
 	//:TODO: since currently labels are not taking from x-wso2-label, I have made it to be taken from the method
@@ -426,12 +419,13 @@ func DeleteAPIWithAPIMEvent(uuid, name, version string, environments []string) {
 
 // deleteAPI deletes an API, its resources and updates the caches of given environments
 func deleteAPI(apiIdentifier string, environments []string) error {
-	_, exists := apiMgwSwaggerMap[apiIdentifier]
+	internalSwaggerMap.RLock()
+	_, exists := internalSwaggerMap.apiMgwSwaggerMap[apiIdentifier]
+	internalSwaggerMap.RUnlock()
 	if !exists {
 		logger.LoggerXds.Infof("Unable to delete API " + apiIdentifier + ". Does not exist.")
 		return errors.New(mgw.NotFound)
 	}
-
 	existingLabels := openAPIEnvoyMap[apiIdentifier]
 	toBeDelEnvs, toBeKeptEnvs := getEnvironmentsToBeDeleted(existingLabels, environments)
 
@@ -454,8 +448,8 @@ func deleteAPI(apiIdentifier string, environments []string) error {
 	//resources that belongs to the remaining APIs
 	updateXdsCacheOnAPIAdd(toBeDelEnvs, []string{})
 
-	delete(openAPIEnvoyMap, apiIdentifier)  //delete labels
-	delete(apiMgwSwaggerMap, apiIdentifier) //delete mgwSwagger
+	delete(openAPIEnvoyMap, apiIdentifier)    //delete labels
+	deleteFromAPIMgwSwaggerMap(apiIdentifier) //delete mgwSwagger
 	//TODO: (SuKSW) clean any remaining in label wise maps, if this is the last API of that label
 	logger.LoggerXds.Infof("Deleted API. %v", apiIdentifier)
 	return nil
@@ -741,14 +735,15 @@ func UpdateXdsCacheWithLock(label string, endpoints []types.Resource, clusters [
 // ListApis returns a list of objects that holds info about each API
 func ListApis(apiType string, limit *int64) *apiModel.APIMeta {
 	var limitValue int
+	internalSwaggerMap.RLock()
 	if limit == nil {
-		limitValue = len(apiMgwSwaggerMap)
+		limitValue = len(internalSwaggerMap.apiMgwSwaggerMap)
 	} else {
 		limitValue = int(*limit)
 	}
 	var apisArray []*apiModel.APIMetaListItem
 	i := 0
-	for apiIdentifier, mgwSwagger := range apiMgwSwaggerMap {
+	for apiIdentifier, mgwSwagger := range internalSwaggerMap.apiMgwSwaggerMap {
 		if i == limitValue {
 			break
 		}
@@ -769,7 +764,8 @@ func ListApis(apiType string, limit *int64) *apiModel.APIMeta {
 		}
 	}
 	var apiMetaObject apiModel.APIMeta
-	apiMetaObject.Total = int64(len(apiMgwSwaggerMap))
+	apiMetaObject.Total = int64(len(internalSwaggerMap.apiMgwSwaggerMap))
+	internalSwaggerMap.RUnlock()
 	apiMetaObject.Count = int64(len(apisArray))
 	apiMetaObject.List = apisArray
 	return &apiMetaObject
@@ -778,7 +774,9 @@ func ListApis(apiType string, limit *int64) *apiModel.APIMeta {
 // IsAPIExist returns whether a given API exists
 func IsAPIExist(vhost, name, version string) (exists bool) {
 	apiIdentifier := GenerateIdentifierForAPI(vhost, name, version)
-	_, exists = apiMgwSwaggerMap[apiIdentifier]
+	internalSwaggerMap.RLock()
+	_, exists = internalSwaggerMap.apiMgwSwaggerMap[apiIdentifier]
+	internalSwaggerMap.RUnlock()
 	return exists
 }
 
@@ -904,10 +902,16 @@ func buildAndStoreSuccessState(label string, version string) {
 	// Enforcer resources
 	mutexForCacheUpdate.Lock()
 	defer mutexForCacheUpdate.Unlock()
+	internalSwaggerMap.RLock()
 	newAPIMgwSwaggerMap := make(map[string]mgw.MgwSwagger)
-	for k, v := range apiMgwSwaggerMap {
+	for k, v := range internalSwaggerMap.apiMgwSwaggerMap {
 		newAPIMgwSwaggerMap[k] = v
 	}
+	newBasePathAPIMap := make(map[string]string)
+	for k, v := range internalSwaggerMap.vhostBasePathToNameVersionMap {
+		newBasePathAPIMap[k] = v
+	}
+	internalSwaggerMap.RUnlock()
 	newOpenAPIEnforcerApisMap := make(map[string]types.Resource)
 	for k, v := range openAPIEnforcerApisMap {
 		newOpenAPIEnforcerApisMap[k] = v
@@ -952,6 +956,7 @@ func buildAndStoreSuccessState(label string, version string) {
 	}
 	enforcerNewState := EnforcerAPIState{
 		Apis:                     newAPIMgwSwaggerMap,
+		BasePathAPIMap:           newBasePathAPIMap,
 		OpenAPIEnforcerApisMap:   newOpenAPIEnforcerApisMap,
 		APIToVhostsMap:           newAPIToVhostsMap,
 		APIUUIDToGatewayToVhosts: newAPIUUIDToGatewayToVhosts,
@@ -975,7 +980,10 @@ func restorePreviousState(label string) string {
 	// Initialize new maps and populate the success state from the retrieved state cache.
 
 	// Enforcer resources
-	apiMgwSwaggerMap = enforcerOldState.Apis
+	internalSwaggerMap.Lock()
+	internalSwaggerMap.apiMgwSwaggerMap = enforcerOldState.Apis
+	internalSwaggerMap.vhostBasePathToNameVersionMap = enforcerOldState.BasePathAPIMap
+	internalSwaggerMap.Unlock()
 	openAPIEnforcerApisMap = enforcerOldState.OpenAPIEnforcerApisMap
 	apiToVhostsMap = enforcerOldState.APIToVhostsMap
 	apiUUIDToGatewayToVhosts = enforcerOldState.APIUUIDToGatewayToVhosts
@@ -1020,4 +1028,27 @@ func watchEnforcerResponse() {
 			UpdateXdsCacheWithLock(requestEvent.Node, endpoints, clusters, routes, listeners)
 		}
 	}
+}
+
+func addEntryToAPIMgwSwaggerMap(vhost string, mgwSwagger mgw.MgwSwagger) {
+	apiIdentifier := GenerateIdentifierForAPI(vhost, mgwSwagger.GetTitle(), mgwSwagger.GetVersion())
+	internalSwaggerMap.Lock()
+	internalSwaggerMap.apiMgwSwaggerMap[apiIdentifier] = mgwSwagger
+	internalSwaggerMap.vhostBasePathToNameVersionMap[vhost+":"+mgwSwagger.GetXWso2Basepath()] = mgwSwagger.GetTitle() + ":" + mgwSwagger.GetVersion()
+	internalSwaggerMap.Unlock()
+}
+
+func deleteFromAPIMgwSwaggerMap(apiIdentifier string) {
+	vhost, err := ExtractVhostFromAPIIdentifier(apiIdentifier)
+	if err != nil {
+		logger.LoggerXds.Errorf("Error while extracting the vhost for API deletion")
+		return
+	}
+	internalSwaggerMap.Lock()
+	mgwSwagger, ok := internalSwaggerMap.apiMgwSwaggerMap[apiIdentifier]
+	if ok {
+		delete(internalSwaggerMap.apiMgwSwaggerMap, apiIdentifier)                                        //delete labels
+		delete(internalSwaggerMap.vhostBasePathToNameVersionMap, vhost+":"+mgwSwagger.GetXWso2Basepath()) //delete mgwSwagger
+	}
+	internalSwaggerMap.Unlock()
 }

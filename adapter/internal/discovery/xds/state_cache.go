@@ -38,6 +38,7 @@ type RequestEvent struct {
 // EnforcerAPIState Stores the last success state of the enforcer apis
 type EnforcerAPIState struct {
 	Apis                     map[string]oasModel.MgwSwagger
+	BasePathAPIMap           map[string]string // vhost:basePath -> APIName:APIVersion
 	OpenAPIEnforcerApisMap   map[string]types.Resource
 	APIUUIDToGatewayToVhosts map[string]map[string]string
 	APIToVhostsMap           map[string]map[string]struct{}
