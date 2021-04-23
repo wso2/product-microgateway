@@ -137,7 +137,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
 		} else if (strings.Contains(file.Name, apiYAMLFile) || strings.Contains(file.Name, apiJSONFile)) &&
-			!strings.Contains(file.Name, openAPIDir){
+			!strings.Contains(file.Name, openAPIDir) {
 			loggers.LoggerAPI.Debugf("fileName : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
@@ -362,6 +362,7 @@ func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData)
 	apiProject.SecurityScheme = apiObject.Data.SecurityScheme
 
 	var apiHashValue string = generateHashValue(apiObject.Data.APIName, apiObject.Data.APIName)
+	loggers.LoggerAPI.Infof("apiHashValue env value %v", apiHashValue)
 
 	endpointConfig := apiObject.Data.EndpointConfig
 
@@ -403,7 +404,7 @@ func generateHashValue(apiName string, apiVersion string) string {
 func resolveEnvValueForEndpointConfig(envKey string, defaultVal string) string {
 	envValue, exists := os.LookupEnv(envKey)
 	if exists {
-		loggers.LoggerAPI.Debugf("resolve env value %v", envValue)
+		loggers.LoggerAPI.Infof("resolve env value %v", envValue)
 		return envValue
 	}
 	return defaultVal

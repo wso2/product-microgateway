@@ -54,6 +54,7 @@ const (
 	policyUpdate                = "POLICY_UPDATE"
 	policyDelete                = "POLICY_DELETE"
 	blockedStatus               = "BLOCKED"
+	prototyped                  = "PROTOTYPED"
 )
 
 // var variables
@@ -219,10 +220,13 @@ func handleLifeCycleEvents(data []byte) {
 		if _, ok := eh.APIListMap[configuredEnv]; ok {
 			apiListOfEnv := eh.APIListMap[configuredEnv].List
 			for i := range apiListOfEnv {
-				logger.LoggerMsg.Infof("Lifecycle state changed from %s to %s", apiListOfEnv[i].APIStatus, apiEvent.APIStatus)
-				apiListOfEnv[i].APIStatus = apiEvent.APIStatus
-				xds.UpdateEnforcerAPIList(configuredEnv, xds.MarshalAPIList(eh.APIListMap[configuredEnv]))
-				break
+				if apiEvent.UUID == apiListOfEnv[i].UUID {
+					//If previous or current state is 'Blocked' or 'prototyped' we update the xds. All other states are neglected at the gateway
+					logger.LoggerMsg.Infof("Lifecycle state changed from %s to %s", apiListOfEnv[i].APIStatus, apiEvent.APIStatus)
+					apiListOfEnv[i].APIStatus = apiEvent.APIStatus
+					xds.UpdateEnforcerAPIList(configuredEnv, xds.MarshalAPIList(eh.APIListMap[configuredEnv]))
+					break
+				}
 			}
 		}
 	}
