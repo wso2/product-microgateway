@@ -48,6 +48,7 @@ const (
 
 // Constants to represent errors
 const (
-	AlreadyExists string = "ALREADY_EXISTS"
-	NotFound      string = "NOT_FOUND"
+	AlreadyExists     string = "ALREADY_EXISTS"
+	NotFound          string = "NOT_FOUND"
+	ValidationFailure string = "VALIDATION_FAILURE"
 )

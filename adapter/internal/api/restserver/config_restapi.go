@@ -19,11 +19,12 @@ package restserver
 
 import (
 	"crypto/tls"
-	"github.com/wso2/adapter/internal/discovery/xds"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/wso2/adapter/internal/discovery/xds"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/loads"
@@ -145,6 +146,14 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
 		err := apiServer.ApplyAPIProjectInStandaloneMode(jsonByteArray, params.Override)
 		if err != nil {
+			if strings.Contains(err.Error(), constants.ValidationFailure) {
+				errorResp := api_individual.NewPostApisConflict()
+				payload := &models.Error{
+					Description: err.Error(),
+				}
+				errorResp.Payload = payload
+				return errorResp
+			}
 			switch err.Error() {
 			case constants.AlreadyExists:
 				return api_individual.NewPostApisConflict()

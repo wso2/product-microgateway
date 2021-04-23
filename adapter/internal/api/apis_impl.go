@@ -327,7 +327,7 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 		apiContent := generateAPIContent(vhost, apiInfo, apiProject, environments)
 		err := xds.ValidateAPI(apiContent, overrideValue)
 		if err != nil {
-			return err
+			return errors.New(mgw.ValidationFailure + " : " + err.Error())
 		}
 	}
 
