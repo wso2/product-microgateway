@@ -22,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
+import org.wso2.choreo.connect.discovery.subscription.APIs;
 import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -84,6 +85,19 @@ public class APIFactory {
             logger.debug("Total APIs in new cache: {}", newApis.size());
         }
         this.apis = newApis;
+    }
+
+    public void updateApis(List<APIs> apisList) {
+        for (APIs api : apisList) {
+            for (Map.Entry<String, API> entry : apis.entrySet()) {
+                String apiKey = entry.getKey();
+                API updatedAPI = entry.getValue();
+                if (updatedAPI.getAPIConfig().getUuid().equals(api.getUuid())) {
+                    updatedAPI.getAPIConfig().setApiLifeCycleState(api.getLcState());
+                }
+                apis.put(apiKey, updatedAPI);
+            }
+        }
     }
 
     public void removeApi(API api) {

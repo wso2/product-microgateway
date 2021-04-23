@@ -13,7 +13,7 @@ option java_multiple_files = true;
 
 // APIs data model
 message APIs {
-    string apiId = 1;
+  string apiId = 1;
 	string name = 2;
 	string provider = 3;
 	string version = 4;

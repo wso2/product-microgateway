@@ -259,6 +259,37 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
     }
 
     /**
+     * Create and publish an API.
+     *
+     * @param apiRequest              - Instance of APIRequest
+     * @param vhost                   - Vhost to deploy
+     * @param publisherRestClient     - Instance of RestAPIPublisherImpl
+     * @throws MicroGWTestException - Exception throws by API create and publish activities.
+     */
+    protected String createAndDeployAPI(APIRequest apiRequest, String vhost,
+                                         RestAPIPublisherImpl publisherRestClient)
+            throws MicroGWTestException, ApiException {
+        //Create the API
+        HttpResponse createAPIResponse = publisherRestClient.addAPI(apiRequest);
+        if (Objects.nonNull(createAPIResponse) && createAPIResponse.getResponseCode() == HttpStatus.SC_CREATED
+                && !StringUtils.isEmpty(createAPIResponse.getData())) {
+            LOGGER.info("API Created :" + getAPIIdentifierStringFromAPIRequest(apiRequest));
+            // Create Revision and Deploy to Gateway
+            try {
+                createAPIRevisionAndDeploy(createAPIResponse.getData(), vhost, publisherRestClient);
+            } catch (JSONException e) {
+                throw new MicroGWTestException("Error in creating and deploying API Revision", e);
+            }
+            waitForXdsDeployment();
+            return createAPIResponse.getData();
+        } else {
+            throw new MicroGWTestException(
+                    "Error in API Creation." + getAPIIdentifierStringFromAPIRequest(apiRequest) + "Response Code:"
+                            + createAPIResponse.getResponseCode() + " Response Data :" + createAPIResponse.getData());
+        }
+    }
+
+    /**
      * Create and publish a API with re-subscription not required.
      *
      * @param apiRequest          - Instance of APIRequest

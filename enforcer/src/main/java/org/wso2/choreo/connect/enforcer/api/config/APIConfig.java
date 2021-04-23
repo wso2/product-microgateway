@@ -235,4 +235,8 @@ public class APIConfig {
     public List<ResourceConfig> getResources() {
         return resources;
     }
+
+    public void setApiLifeCycleState(String state) {
+        this.apiLifeCycleState = state;
+    }
 }

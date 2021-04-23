@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.service.subscription.ApiListDiscoveryServiceGrpc;
 import org.wso2.choreo.connect.discovery.subscription.APIList;
 import org.wso2.choreo.connect.discovery.subscription.APIs;
+import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.discovery.scheduler.XdsSchedulerManager;
@@ -132,6 +133,7 @@ public class ApiListDiscoveryClient implements Runnable {
                     for (Any res : response.getResourcesList()) {
                         apiList.addAll(res.unpack(APIList.class).getListList());
                     }
+                    APIFactory.getInstance().updateApis(apiList);
                     subscriptionDataStore.addApis(apiList);
                     ack();
                 } catch (Exception e) {
