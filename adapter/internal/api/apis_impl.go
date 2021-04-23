@@ -137,7 +137,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
 		} else if (strings.Contains(file.Name, apiYAMLFile) || strings.Contains(file.Name, apiJSONFile)) &&
-			!strings.Contains(file.Name, openAPIDir){
+			!strings.Contains(file.Name, openAPIDir) {
 			loggers.LoggerAPI.Debugf("fileName : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
@@ -256,8 +256,11 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 				}
 			}
 		}
+
+		// allEnvironments represent all the environments the API should be deployed
+		allEnvironments := xds.GetAllEnvironments(apiInfo.ID, environments)
 		// first update the API for vhost
-		updateAPI(vhost, apiInfo, apiProject, environments)
+		updateAPI(vhost, apiInfo, apiProject, allEnvironments)
 	}
 
 	// undeploy APIs with other vhosts in the same gateway environment

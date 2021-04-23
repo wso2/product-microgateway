@@ -296,6 +296,25 @@ func UpdateAPI(apiContent config.APIContent) {
 	}
 }
 
+// GetAllEnvironments returns all the environments merging new environments with already deployed environments
+// of the API
+func GetAllEnvironments(apiUUID string, newEnvironments []string) []string {
+	// allEnvironments represent all the environments the API should be deployed
+	var allEnvironments []string
+	if existingEnvs, exists := apiUUIDToGatewayToVhosts[apiUUID]; exists {
+		for _, env := range newEnvironments {
+			// update allEnvironments with already existing environments
+			existingEnvs[env] = "_" // add env as key to the map
+		}
+		for env := range existingEnvs {
+			allEnvironments = append(allEnvironments, env)
+		}
+	} else {
+		allEnvironments = newEnvironments
+	}
+	return allEnvironments
+}
+
 // GetVhostOfAPI returns the vhost of API deployed in the given gateway environment
 func GetVhostOfAPI(apiUUID, environment string) (vhost string, exists bool) {
 	if envToVhost, ok := apiUUIDToGatewayToVhosts[apiUUID]; ok {
