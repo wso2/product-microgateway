@@ -76,6 +76,14 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
             switch (statusCode) {
                 case 401:
                 case 403:
+                    // For Denied policies, the status code remains 403, but it is categorized
+                    // under throttling
+                    if (requestContext.getProperties().containsKey(APIConstants.MessageFormat.ERROR_CODE)) {
+                        if (AnalyticsConstants.BLOCKED_ERROR_CODE == Integer.parseInt(requestContext.getProperties()
+                                        .get(APIConstants.MessageFormat.ERROR_CODE).toString())) {
+                            return FaultCategory.THROTTLED;
+                        }
+                    }
                     return FaultCategory.AUTH;
                 case 429:
                     return FaultCategory.THROTTLED;
