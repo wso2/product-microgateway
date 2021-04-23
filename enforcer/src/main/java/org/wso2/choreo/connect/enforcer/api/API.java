@@ -29,9 +29,7 @@ import java.util.List;
 public interface API {
     List<Filter> getFilters();
 
-   void removeFilter(Filter filters);
-
-   void addFilters(List<Filter> filters);
+    void updateFilters(List<Filter> filters);
 
     String init(Api api);
 

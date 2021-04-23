@@ -52,12 +52,7 @@ public class RestAPI implements API {
     }
 
     @Override
-    public void removeFilter(Filter filter) {
-        this.filters.remove(filter);
-    }
-
-    @Override
-    public void addFilters(List<Filter> filters) {
+    public void updateFilters(List<Filter> filters) {
         for (Filter filter : filters) {
             this.filters.clear();
             this.filters.add(filter);
