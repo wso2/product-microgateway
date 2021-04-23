@@ -258,7 +258,9 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 		}
 
 		// allEnvironments represent all the environments the API should be deployed
-		allEnvironments := xds.GetAllEnvironments(apiInfo.ID, environments)
+		allEnvironments := xds.GetAllEnvironments(apiInfo.ID, vhost, environments)
+		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
+			allEnvironments, vhost, apiInfo.Name, apiInfo.Version, apiInfo.ID)
 		// first update the API for vhost
 		updateAPI(vhost, apiInfo, apiProject, allEnvironments)
 	}

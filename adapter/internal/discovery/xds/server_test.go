@@ -71,31 +71,43 @@ func TestGetAllEnvironments(t *testing.T) {
 
 	tests := []struct {
 		name            string
-		uuid            string
+		uuid, vhost     string
 		newEnvironment  []string
 		allEnvironments []string
 	}{
 		{
-			name:            "No_existing_environments",
+			name:            "No_existing_environments_new_API",
 			uuid:            "new-uuid-xxxxx",
+			vhost:           "us.wso2.com",
 			newEnvironment:  []string{"Default", "eu-region"},
 			allEnvironments: []string{"Default", "eu-region"},
 		},
 		{
-			name:            "Some_existing_environments-1",
-			uuid:            "222-PetStore-org2",
+			name:            "Existing_API_new_vhost",
+			uuid:            "333-Pizza-org1",
+			vhost:           "new.vhost",
 			newEnvironment:  []string{"Default", "eu-region"},
 			allEnvironments: []string{"Default", "eu-region"},
 		},
 		{
-			name:            "Some_existing_environments-2",
+			name:            "Some_existing_environments",
 			uuid:            "222-PetStore-org2",
-			newEnvironment:  []string{"us-region", "eu-region"},
-			allEnvironments: []string{"Default", "us-region", "eu-region"},
+			vhost:           "org2.foo.com",
+			newEnvironment:  []string{"eu-region"},
+			allEnvironments: []string{"Default", "eu-region"},
+		},
+
+		{
+			name:            "new_environments",
+			uuid:            "222-PetStore-org2",
+			vhost:           "org2.foo.com",
+			newEnvironment:  []string{"Default", "eu-region"},
+			allEnvironments: []string{"Default", "eu-region"},
 		},
 		{
 			name:            "All_existing_environments",
-			uuid:            "444-Pizza-org2",
+			uuid:            "111-PetStore-org",
+			vhost:           "org2.foo.com",
 			newEnvironment:  []string{"Default", "us-region"},
 			allEnvironments: []string{"Default", "us-region"},
 		},
@@ -103,7 +115,7 @@ func TestGetAllEnvironments(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			allEnvironments := GetAllEnvironments(test.uuid, test.newEnvironment)
+			allEnvironments := GetAllEnvironments(test.uuid, test.vhost, test.newEnvironment)
 			sort.Strings(allEnvironments)
 			sort.Strings(test.allEnvironments)
 			if !reflect.DeepEqual(test.allEnvironments, allEnvironments) {

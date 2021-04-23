@@ -297,20 +297,17 @@ func UpdateAPI(apiContent config.APIContent) {
 }
 
 // GetAllEnvironments returns all the environments merging new environments with already deployed environments
-// of the API
-func GetAllEnvironments(apiUUID string, newEnvironments []string) []string {
+// of the given vhost of the API
+func GetAllEnvironments(apiUUID, vhost string, newEnvironments []string) []string {
 	// allEnvironments represent all the environments the API should be deployed
-	var allEnvironments []string
+	allEnvironments := newEnvironments
 	if existingEnvs, exists := apiUUIDToGatewayToVhosts[apiUUID]; exists {
-		for _, env := range newEnvironments {
+		for env, vh := range existingEnvs {
 			// update allEnvironments with already existing environments
-			existingEnvs[env] = "_" // add env as key to the map
+			if vh == vhost && !arrayContains(allEnvironments, env) {
+				allEnvironments = append(allEnvironments, env)
+			}
 		}
-		for env := range existingEnvs {
-			allEnvironments = append(allEnvironments, env)
-		}
-	} else {
-		allEnvironments = newEnvironments
 	}
 	return allEnvironments
 }
