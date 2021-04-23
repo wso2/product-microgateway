@@ -114,7 +114,13 @@ paths:
           schema:
             $ref: '#/definitions/DeployResponse'
         401:
-          $ref: '#/responses/Unauthorized'         
+          $ref: '#/responses/Unauthorized'
+        400:
+          description: |
+            Bad Request
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
         409:
           description: |
             Conflict.

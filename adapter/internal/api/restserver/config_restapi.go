@@ -147,7 +147,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		err := apiServer.ApplyAPIProjectInStandaloneMode(jsonByteArray, params.Override)
 		if err != nil {
 			if strings.Contains(err.Error(), constants.ValidationFailure) {
-				errorResp := api_individual.NewPostApisConflict()
+				errorResp := api_individual.NewPostApisBadRequest()
 				payload := &models.Error{
 					Description: err.Error(),
 				}
