@@ -47,7 +47,11 @@ public class RestAPI implements API {
     private String apiLifeCycleState;
 
     @Override
-    public List<Filter> getFilters() {
+    public List<Filter> getFilters(RequestContext requestContext) {
+        if (APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(requestContext.getMatchedAPI().
+                getAPIConfig().getApiLifeCycleState())) {
+            initFilters();
+        }
         return filters;
     }
 
@@ -167,7 +171,7 @@ public class RestAPI implements API {
         return resource;
     }
 
-    private void initFilters() {
+    public void initFilters() {
         CorsFilter corsFilter = new CorsFilter();
         this.filters.add(corsFilter);
         // TODO : re-vist the logic with apim prototype implemetation
