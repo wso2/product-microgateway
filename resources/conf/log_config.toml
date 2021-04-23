@@ -13,11 +13,11 @@ Compress = true
 # LogLevels = "DEBG", "FATL", "ERRO", "WARN", "INFO", "PANC"
 
 [[pkg]]
-name = "github.com/wso2/adapter/pkg/adapter"
+name = "github.com/wso2/adapter/internal/adapter"
 logLevel = "INFO"
 
 [[pkg]]
-name = "github.com/wso2/adapter/pkg/oasparser"
+name = "github.com/wso2/adapter/internal/oasparser"
 logLevel = "INFO"
 
 
