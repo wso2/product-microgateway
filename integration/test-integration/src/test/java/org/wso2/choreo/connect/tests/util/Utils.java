@@ -394,6 +394,10 @@ public class Utils {
         return new URL(new URL("http://mockBackend:" + TestConstant.MOCK_SERVER_PORT), servicePath).toString();
     }
 
+    public static String getDockerMockService2URLHttp(String servicePath) throws MalformedURLException {
+        return new URL(new URL("http://mockBackend:" + TestConstant.MOCK_SERVER2_PORT), servicePath).toString();
+    }
+
     public static String getAPIMServiceURLHttps(String servicePath) throws MalformedURLException {
         return new URL(new URL("https://localhost:" + TestConstant.APIM_SERVLET_TRP_HTTPS_PORT), servicePath)
                 .toString();

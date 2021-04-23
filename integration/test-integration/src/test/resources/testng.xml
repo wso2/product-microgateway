@@ -78,6 +78,7 @@
 <!--            <class name="org.wso2.choreo.connect.tests.testCases.apim.throttle.DenyConditionTestCase"/>-->
             <class name="org.wso2.choreo.connect.tests.testCases.apim.SubscriptionValidationTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.apim.BlockedAPITestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.apim.VhostAPIMTestCase"/>
         </classes>
     </test>
 </suite>
