@@ -93,6 +93,11 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
                         "Test Application for SubscriptionValidationTestCase",
                         TestConstant.APPLICATION_TIER.UNLIMITED,
                         ApplicationDTO.TokenTypeEnum.JWT));
+        addToApplicationList("VhostTestApp",
+                new Application("VhostTestApp",
+                        "Test Application for VhostAPIMTestCase",
+                        TestConstant.APPLICATION_TIER.UNLIMITED,
+                        ApplicationDTO.TokenTypeEnum.JWT));
         String apiEndPointPostfixUrl = "/v2";
 
         try {
@@ -108,13 +113,41 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
             apiOperationsDTO1.setTarget("/pet/findByStatus");
             apiOperationsDTO1.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
 
+            APIOperationsDTO apiOperationsDTO2 = new APIOperationsDTO();
+            apiOperationsDTO2.setVerb("GET");
+            apiOperationsDTO2.setTarget("/store/inventory");
+            apiOperationsDTO2.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
+
             List<APIOperationsDTO> operationsDTOS = new ArrayList<>();
             operationsDTOS.add(apiOperationsDTO1);
+            operationsDTOS.add(apiOperationsDTO2);
             apiRequest.setOperationsDTOS(operationsDTOS);
 
             addToAPIList(TestConstant.SAMPLE_API_NAME, apiRequest);
         } catch (APIManagerIntegrationTestException | MalformedURLException e) {
             LOGGER.error("Error creating the APIRequest instance for API name: " + TestConstant.SAMPLE_API_NAME);
+        }
+
+        try {
+            APIRequest apiRequest = new APIRequest(TestConstant.SAMPLE_API2_NAME, TestConstant.SAMPLE_API2_CONTEXT,
+                    new URL(Utils.getDockerMockService2URLHttp(apiEndPointPostfixUrl)));
+            String API_VERSION_1_0_0 = "1.0.0";
+            apiRequest.setVersion(API_VERSION_1_0_0);
+            apiRequest.setTiersCollection(TestConstant.API_TIER.UNLIMITED);
+            apiRequest.setTier(TestConstant.API_TIER.UNLIMITED);
+
+            APIOperationsDTO apiOperationsDTO1 = new APIOperationsDTO();
+            apiOperationsDTO1.setVerb("GET");
+            apiOperationsDTO1.setTarget("/pet/findByStatus");
+            apiOperationsDTO1.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
+
+            List<APIOperationsDTO> operationsDTOS = new ArrayList<>();
+            operationsDTOS.add(apiOperationsDTO1);
+            apiRequest.setOperationsDTOS(operationsDTOS);
+
+            addToAPIList(TestConstant.SAMPLE_API2_NAME, apiRequest);
+        } catch (APIManagerIntegrationTestException | MalformedURLException e) {
+            LOGGER.error("Error creating the APIRequest instance for API name: " + TestConstant.SAMPLE_API2_NAME);
         }
     }
 
@@ -179,6 +212,22 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
                                          RestAPIPublisherImpl publisherRestClient,
                                          boolean isRequireReSubscription)
             throws MicroGWTestException, ApiException {
+        return createAndPublishAPI(apiRequest, "localhost", publisherRestClient, isRequireReSubscription);
+    }
+
+    /**
+     * Create and publish an API.
+     *
+     * @param apiRequest              - Instance of APIRequest
+     * @param vhost                   - Vhost to deploy
+     * @param publisherRestClient     - Instance of RestAPIPublisherImpl
+     * @param isRequireReSubscription - If publish with re-subscription required option true else false.
+     * @throws MicroGWTestException - Exception throws by API create and publish activities.
+     */
+    protected String createAndPublishAPI(APIRequest apiRequest, String vhost,
+                                         RestAPIPublisherImpl publisherRestClient,
+                                         boolean isRequireReSubscription)
+            throws MicroGWTestException, ApiException {
         //Create the API
         HttpResponse createAPIResponse = publisherRestClient.addAPI(apiRequest);
         if (Objects.nonNull(createAPIResponse) && createAPIResponse.getResponseCode() == HttpStatus.SC_CREATED
@@ -186,7 +235,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
             LOGGER.info("API Created :" + getAPIIdentifierStringFromAPIRequest(apiRequest));
             // Create Revision and Deploy to Gateway
             try {
-                createAPIRevisionAndDeploy(createAPIResponse.getData(), publisherRestClient);
+                createAPIRevisionAndDeploy(createAPIResponse.getData(), vhost, publisherRestClient);
             } catch (JSONException e) {
                 throw new MicroGWTestException("Error in creating and deploying API Revision", e);
             }
@@ -220,6 +269,19 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
                                                                      RestAPIPublisherImpl publisherRestClient)
             throws MicroGWTestException, ApiException {
         return createAndPublishAPI(apiRequest, publisherRestClient, false);
+    }
+
+    /**
+     * Create and publish a API with re-subscription not required.
+     *
+     * @param apiRequest          - Instance of APIRequest
+     * @param publisherRestClient - Instance of RestAPIPublisherImpl
+     * @throws MicroGWTestException - Exception throws by API create and publish activities.
+     */
+    protected String createAndPublishAPIWithoutRequireReSubscription(APIRequest apiRequest, String vhost,
+                                                                     RestAPIPublisherImpl publisherRestClient)
+            throws MicroGWTestException, ApiException {
+        return createAndPublishAPI(apiRequest, vhost, publisherRestClient, false);
     }
 
     /**
@@ -286,6 +348,18 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      */
     protected String createAPIRevisionAndDeploy(String apiId, RestAPIPublisherImpl restAPIPublisher)
             throws ApiException, JSONException {
+        return createAPIRevisionAndDeploy(apiId, "localhost", restAPIPublisher);
+    }
+
+    /**
+     * Create API Revision and Deploy to gateway with provided vhost using REST API.
+     *
+     * @param apiId            -  API UUID
+     * @param vhost            -  VHost to deploy the API
+     * @param restAPIPublisher -  Instance of APIPublisherRestClient
+     */
+    protected String createAPIRevisionAndDeploy(String apiId, String vhost, RestAPIPublisherImpl restAPIPublisher)
+            throws ApiException, JSONException {
         int HTTP_RESPONSE_CODE_OK = Response.Status.OK.getStatusCode();
         int HTTP_RESPONSE_CODE_CREATED = Response.Status.CREATED.getStatusCode();
         String revisionUUID = null;
@@ -318,10 +392,9 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         List<APIRevisionDeployUndeployRequest> apiRevisionDeployRequestList = new ArrayList<>();
         APIRevisionDeployUndeployRequest apiRevisionDeployRequest = new APIRevisionDeployUndeployRequest();
         apiRevisionDeployRequest.setName("Default");
-        apiRevisionDeployRequest.setVhost("localhost");
+        apiRevisionDeployRequest.setVhost(vhost);
         apiRevisionDeployRequest.setDisplayOnDevportal(true);
         apiRevisionDeployRequestList.add(apiRevisionDeployRequest);
-        apiRevisionDeployRequest.setVhost("localhost");
         HttpResponse apiRevisionsDeployResponse = restAPIPublisher.deployAPIRevision(apiId, revisionUUID,
                                                                                      apiRevisionDeployRequestList);
         assertEquals(apiRevisionsDeployResponse.getResponseCode(), HTTP_RESPONSE_CODE_CREATED,
@@ -364,7 +437,6 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         List<APIRevisionDeployUndeployRequest> apiRevisionUndeployRequestList = new ArrayList<>();
         APIRevisionDeployUndeployRequest apiRevisionUnDeployRequest = new APIRevisionDeployUndeployRequest();
         apiRevisionUnDeployRequest.setName("Default");
-        apiRevisionUnDeployRequest.setVhost("localhost");
         apiRevisionUnDeployRequest.setDisplayOnDevportal(true);
         apiRevisionUndeployRequestList.add(apiRevisionUnDeployRequest);
         HttpResponse apiRevisionsUnDeployResponse = restAPIPublisher.undeployAPIRevision(apiId, revisionUUID,
@@ -440,7 +512,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         List<APIRevisionDeployUndeployRequest> apiRevisionDeployRequestList = new ArrayList<>();
         APIRevisionDeployUndeployRequest apiRevisionDeployRequest = new APIRevisionDeployUndeployRequest();
         apiRevisionDeployRequest.setName("Default");
-        apiRevisionDeployRequest.setName("localhost");
+        apiRevisionDeployRequest.setVhost("localhost");
         apiRevisionDeployRequest.setDisplayOnDevportal(true);
         apiRevisionDeployRequestList.add(apiRevisionDeployRequest);
         HttpResponse apiRevisionsDeployResponse = restAPIPublisher.deployAPIProductRevision(apiId, revisionUUID,
@@ -487,7 +559,6 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
         List<APIRevisionDeployUndeployRequest> apiRevisionUndeployRequestList = new ArrayList<>();
         APIRevisionDeployUndeployRequest apiRevisionUnDeployRequest = new APIRevisionDeployUndeployRequest();
         apiRevisionUnDeployRequest.setName("Default");
-        apiRevisionUnDeployRequest.setName("localhost");
         apiRevisionUnDeployRequest.setDisplayOnDevportal(true);
         apiRevisionUndeployRequestList.add(apiRevisionUnDeployRequest);
         HttpResponse apiRevisionsUnDeployResponse = restAPIPublisher.undeployAPIProductRevision(apiId, revisionUUID,

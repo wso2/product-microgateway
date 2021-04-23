@@ -67,24 +67,30 @@ public class APIManagerWithMgwServerInstance extends MgwServerImpl {
      */
     public APIManagerWithMgwServerInstance(String confPath, boolean tlsEnabled) throws MicroGWTestException,
             IOException {
-        this(confPath, tlsEnabled, false);
+        this(null, confPath, tlsEnabled, false);
     }
 
     /**
      * initialize a docker environment using docker compose with test-integration jar copied with.
      *
-     * @param confPath          - external conf.toml path
+     * @param apimConfPath      - external APIM deployment.toml path
+     * @param ccConfPath        - external conf.toml path
      * @param tlsEnabled        - if the backend needs to have the tls enabled server additionally
      * @param includeCustomImpl - if the test-integration jar needs to be included
      * @throws IOException          if something goes wrong while adding the mock backend to the docker-compose.yaml
      * @throws MicroGWTestException if something goes wrong while copying server configs
      */
-    public APIManagerWithMgwServerInstance(String confPath, boolean tlsEnabled, boolean includeCustomImpl)
+    public APIManagerWithMgwServerInstance(String apimConfPath, String ccConfPath, boolean tlsEnabled, boolean includeCustomImpl)
             throws MicroGWTestException,
             IOException {
         createTmpMgwSetup(includeCustomImpl);
-        if (!StringUtils.isEmpty(confPath)) {
-            Utils.copyFile(confPath,
+        if (StringUtils.isNotEmpty(apimConfPath)) {
+            Utils.copyFile(apimConfPath,
+                    mgwTmpServerPath + File.separator + "docker-compose" + File.separator + "choreo-connect-with-apim"
+                            + File.separator + "conf" + File.separator + "deployment.toml");
+        }
+        if (StringUtils.isNotEmpty(ccConfPath)) {
+            Utils.copyFile(ccConfPath,
                     mgwTmpServerPath + File.separator + "docker-compose" + File.separator + "choreo-connect-with-apim"
                             + File.separator + "conf" + File.separator + "config.toml");
         }

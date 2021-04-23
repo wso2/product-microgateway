@@ -44,15 +44,23 @@ public class APIManagerInitializeTestCase extends APIMLifecycleBaseTest {
 
     @BeforeTest(description = "start the mgw along with apim server")
     void start() throws Exception {
-        URL configToml = getClass().getClassLoader().getResource("apim/config.toml");
-        if (configToml == null) {
+        URL ccConfigToml = getClass().getClassLoader().getResource("apim/config.toml");
+        if (ccConfigToml == null) {
             throw new MicroGWTestException(
                     "Config toml cannot be found. Hence, not starting the API Manager server with Mgw server");
         }
-        String configTomlPath = configToml.getPath();
+        String ccConfigTomlPath = ccConfigToml.getPath();
+
+        // Configure multiple vhosts in API-M
+        URL apimDeploymentToml = getClass().getClassLoader().getResource("apim/vhost-deployment.toml");
+        if (apimDeploymentToml == null) {
+            throw new MicroGWTestException("APIM Deployment toml configured with vhosts cannot be found. " +
+                    "Hence, not starting the API Manager server with Mgw server");
+        }
+        String apimDeploymentTomlPath = apimDeploymentToml.getPath();
 
         try {
-            super.startAPIMWithMGW(configTomlPath, true, true);
+            super.startAPIMWithMGW(apimDeploymentTomlPath, ccConfigTomlPath, true, true);
         } catch (MicroGWTestException | IOException e) {
             Assert.fail("Error starting the APIM server with MGW", e);
         }
