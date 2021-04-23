@@ -38,7 +38,7 @@ spec:
             - "wso2apim"
       containers:
         - name: wso2apim
-          image: wso2am/wso2am:4.0.0-rc-alpine
+          image: wso2/wso2am:4.0.0-alpine
           resources:
             limits:
               memory: "2Gi"
