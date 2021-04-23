@@ -346,7 +346,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	apiContent.EndpointSecurity.SandBox.Enabled = apiProject.EndpointSecurity.SandBox.Enabled
 	apiContent.EndpointSecurity.SandBox.Password = apiProject.EndpointSecurity.SandBox.Password
 	apiContent.EndpointSecurity.SandBox.Username = apiProject.EndpointSecurity.SandBox.Username
-	apiContent.EndpointSecurity.SandBox.SecurityType = apiProject.EndpointSecurity.Production.SecurityType
+	apiContent.EndpointSecurity.SandBox.SecurityType = apiProject.EndpointSecurity.SandBox.SecurityType
 	apiContent.OrganizationID = apiProject.OrganizationID
 
 	if apiProject.APIType == mgw.HTTP {
