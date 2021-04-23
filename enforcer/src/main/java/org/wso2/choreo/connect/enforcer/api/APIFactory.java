@@ -23,11 +23,15 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.discovery.subscription.APIs;
+import org.wso2.choreo.connect.enforcer.Filter;
 import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.discovery.ApiDiscoveryClient;
+import org.wso2.choreo.connect.enforcer.security.AuthFilter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,6 +98,19 @@ public class APIFactory {
                 API updatedAPI = entry.getValue();
                 if (updatedAPI.getAPIConfig().getUuid().equals(api.getUuid())) {
                     updatedAPI.getAPIConfig().setApiLifeCycleState(api.getLcState());
+                    if (APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(api.getLcState())) {
+                        updatedAPI.removeFilter(new AuthFilter());
+                    } else {
+                        List<Filter> filters = new ArrayList<>();
+                        AuthFilter authFilter = new AuthFilter();
+                        CorsFilter corsFilter = new CorsFilter();
+                        authFilter.init(updatedAPI.getAPIConfig());
+                        corsFilter.init(updatedAPI.getAPIConfig());
+
+                        filters.add(authFilter);
+                        filters.add(corsFilter);
+                        updatedAPI.addFilters(filters);
+                    }
                 }
                 apis.put(apiKey, updatedAPI);
             }

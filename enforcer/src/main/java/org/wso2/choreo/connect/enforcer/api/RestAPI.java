@@ -47,12 +47,21 @@ public class RestAPI implements API {
     private String apiLifeCycleState;
 
     @Override
-    public List<Filter> getFilters(RequestContext requestContext) {
-        if (APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(requestContext.getMatchedAPI().
-                getAPIConfig().getApiLifeCycleState())) {
-            initFilters();
-        }
+    public List<Filter> getFilters() {
         return filters;
+    }
+
+    @Override
+    public void removeFilter(Filter filter) {
+        this.filters.remove(filter);
+    }
+
+    @Override
+    public void addFilters(List<Filter> filters) {
+        for (Filter filter : filters) {
+            this.filters.clear();
+            this.filters.add(filter);
+        }
     }
 
     @Override
@@ -187,4 +196,5 @@ public class RestAPI implements API {
             this.filters.add(throttleFilter);
         }
     }
+
 }

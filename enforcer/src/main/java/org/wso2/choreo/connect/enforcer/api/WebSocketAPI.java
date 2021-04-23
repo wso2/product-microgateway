@@ -53,6 +53,16 @@ public class WebSocketAPI implements API {
     }
 
     @Override
+    public void removeFilter(Filter filters) {
+        return;
+    }
+
+    @Override
+    public void addFilters(List<Filter> filters) {
+        return;
+    }
+
+    @Override
     public String init(Api api) {
         String vhost = api.getVhost();
         String basePath = api.getBasePath();
