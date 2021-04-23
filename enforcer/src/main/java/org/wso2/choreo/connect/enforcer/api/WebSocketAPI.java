@@ -53,12 +53,7 @@ public class WebSocketAPI implements API {
     }
 
     @Override
-    public void removeFilter(Filter filters) {
-        return;
-    }
-
-    @Override
-    public void addFilters(List<Filter> filters) {
+    public void updateFilters(List<Filter> filters) {
         return;
     }
 
