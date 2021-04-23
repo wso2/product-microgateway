@@ -462,8 +462,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		Value:   b.Bytes(),
 	}
 
-	// if xWso2Basepath is not different compared to endpointBasepath, no need to substitute.
-	if xWso2Basepath != "" && xWso2Basepath != endpointBasepath {
+	if xWso2Basepath != "" {
 		action = &routev3.Route_Route{
 			Route: &routev3.RouteAction{
 				HostRewriteSpecifier: hostRewriteSpecifier,

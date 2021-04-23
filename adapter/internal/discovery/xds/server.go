@@ -334,7 +334,6 @@ func UpdateAPI(apiContent config.APIContent) {
 	if svcdiscovery.IsServiceDiscoveryEnabled {
 		startConsulServiceDiscovery() //consul service discovery starting point
 	}
-	return
 }
 
 // GetVhostOfAPI returns the vhost of API deployed in the given gateway environment

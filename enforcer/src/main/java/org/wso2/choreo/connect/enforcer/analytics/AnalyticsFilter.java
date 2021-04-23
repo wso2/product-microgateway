@@ -102,12 +102,11 @@ public class AnalyticsFilter {
         requestContext.addMetadataToMap(MetadataConstants.API_NAME_KEY, apiName);
         requestContext.addMetadataToMap(MetadataConstants.API_VERSION_KEY, apiVersion);
         requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, apiType);
+
+        String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(
+                requestContext.getMatchedAPI().getAPIConfig().getBasePath());
         requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY,
-                FilterUtils.getTenantDomainFromRequestURL(
-                        requestContext.getMatchedAPI().getAPIConfig().getBasePath()) == null
-                        ? APIConstants.SUPER_TENANT_DOMAIN_NAME
-                        : FilterUtils.getTenantDomainFromRequestURL(
-                                requestContext.getMatchedAPI().getAPIConfig().getBasePath()));
+                tenantDomain == null ? APIConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
 
         // Default Value would be PRODUCTION
         requestContext.addMetadataToMap(MetadataConstants.APP_KEY_TYPE_KEY,

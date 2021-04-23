@@ -322,14 +322,15 @@ func (swagger *MgwSwagger) Validate() error {
 	err := swagger.validateBasePath()
 	if err != nil {
 		logger.LoggerOasparser.Errorf("Error while parsing the API %s:%s - %v", swagger.title, swagger.version, err)
+		return err
 	}
 	return nil
 }
 
 func (swagger *MgwSwagger) validateBasePath() error {
 	if xWso2BasePath == "" {
-		return errors.New("Empty Basepath is provided. use x-wso2-basePath extension, basePath (if OpenAPI v2 definition is used)" +
-			" servers entry (if OpenAPI v3 definition is used) with non empty context")
+		return errors.New("Empty Basepath is provided. Either use x-wso2-basePath extension or assign basePath (if OpenAPI v2 definition is used)" +
+			" / servers entry (if OpenAPI v3 definition is used) with non empty context.")
 	}
 	return nil
 }
