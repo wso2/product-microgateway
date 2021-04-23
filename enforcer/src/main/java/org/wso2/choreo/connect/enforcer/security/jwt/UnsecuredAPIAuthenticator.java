@@ -20,9 +20,14 @@ package org.wso2.choreo.connect.enforcer.security.jwt;
 
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
+import org.wso2.choreo.connect.enforcer.models.API;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
+import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
+import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStore;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 /**
@@ -31,7 +36,8 @@ import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 public class UnsecuredAPIAuthenticator implements Authenticator {
 
-    @Override public boolean canAuthenticate(RequestContext requestContext) {
+    @Override
+    public boolean canAuthenticate(RequestContext requestContext) {
         // Retrieve the disable security value. If security is disabled, then you can proceed directly with the
         // authentication.
         if (isDisableSecurity(requestContext.getMatchedResourcePath())) {
@@ -40,7 +46,22 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
         return false;
     }
 
-    @Override public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
+    @Override
+    public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
+        String uuid = requestContext.getMatchedAPI().getAPIConfig().getUuid();
+        String context = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
+        String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(context);
+        SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
+                .getTenantSubscriptionStore(apiTenantDomain);
+        API api = datastore.getApiByContextAndVersion(uuid);
+        if (api != null && APIConstants.LifecycleStatus.BLOCKED.equals(api.getLcState())) {
+            requestContext.getProperties()
+                    .put(APIConstants.MessageFormat.ERROR_MESSAGE, GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+            requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                    GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
+            throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
+                    GeneralErrorCodeConstants.API_BLOCKED_CODE, GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+        }
         return FilterUtils.generateAuthenticationContext(requestContext);
     }
 
