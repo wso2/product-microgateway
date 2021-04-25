@@ -33,6 +33,7 @@ type RequestEvent struct {
 	IsError bool
 	Version string
 	Node    string
+	Router  bool
 }
 
 // EnforcerAPIState Stores the last success state of the enforcer apis
@@ -65,11 +66,15 @@ var (
 
 	// routerState is to store the current success state of the router
 	routerState = make(map[string]RouterResourceState)
+
+	// enforcerToRouterVersion map stores the success enforcer config version to the success router version.
+	// helps in rollback
+	enforcerToRouterVersion = make(map[string]string)
 )
 
 // NewRequestEvent create new change event
 func NewRequestEvent() RequestEvent {
-	return RequestEvent{false, "", ""}
+	return RequestEvent{false, "", "", false}
 }
 
 // GetRequestEventChannel returns the state change channel.

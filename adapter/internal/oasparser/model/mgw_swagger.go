@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"net/url"
+	"regexp"
 	"strings"
 
 	parser "github.com/mitchellh/mapstructure"
@@ -296,6 +297,12 @@ func (swagger *MgwSwagger) setDisableSecurity() {
 // Validate method confirms that the mgwSwagger has all required fields in the required format.
 // This needs to be checked prior to generate router/enforcer related resources.
 func (swagger *MgwSwagger) Validate() error {
+	versionMatcher := regexp.MustCompile(`^[a-zA-Z0-9_.-]*$`)
+	if !versionMatcher.Match([]byte(swagger.version)) {
+		logger.LoggerOasparser.Errorf("API version should be in proper format '^[a-zA-Z0-9_.-]*$' %s:%s",
+			swagger.title, swagger.version)
+		return errors.New("API Version should be in proper format '^[a-zA-Z0-9_.-]*$'")
+	}
 	if len(swagger.productionUrls) == 0 && len(swagger.sandboxUrls) == 0 {
 		logger.LoggerOasparser.Errorf("No Endpoints are provided for the API %s:%s",
 			swagger.title, swagger.version)
@@ -345,6 +352,9 @@ func (endpoint *Endpoint) validateEndpoint() error {
 	if len(endpoint.Host) == 0 {
 		return errors.New("Empty Hostname is provided")
 	}
+	// if endpoint.Port >= 65535 {
+	// 	return errors.New("Port value should be less than 65535")
+	// }
 	if strings.HasPrefix(endpoint.Host, "/") {
 		return errors.New("Relative paths are not supported as endpoint URLs")
 	}
