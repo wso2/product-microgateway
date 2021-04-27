@@ -362,7 +362,6 @@ func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData)
 	apiProject.SecurityScheme = apiObject.Data.SecurityScheme
 
 	var apiHashValue string = generateHashValue(apiObject.Data.APIName, apiObject.Data.APIName)
-	loggers.LoggerAPI.Infof("apiHashValue env value %v", apiHashValue)
 
 	endpointConfig := apiObject.Data.EndpointConfig
 
@@ -404,7 +403,7 @@ func generateHashValue(apiName string, apiVersion string) string {
 func resolveEnvValueForEndpointConfig(envKey string, defaultVal string) string {
 	envValue, exists := os.LookupEnv(envKey)
 	if exists {
-		loggers.LoggerAPI.Infof("resolve env value %v", envValue)
+		loggers.LoggerAPI.Debugf("resolve env value %v", envValue)
 		return envValue
 	}
 	return defaultVal
