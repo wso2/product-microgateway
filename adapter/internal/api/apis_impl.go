@@ -361,7 +361,7 @@ func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData)
 
 	apiProject.SecurityScheme = apiObject.Data.SecurityScheme
 
-	var apiHashValue string = generateHashValue(apiObject.Data.APIName, apiObject.Data.APIName)
+	var apiHashValue string = generateHashValue(apiObject.Data.APIName, apiObject.Data.APIVersion)
 
 	endpointConfig := apiObject.Data.EndpointConfig
 
