@@ -15,7 +15,8 @@
 # -----------------------------------------------------------------------
 
 FROM alpine:3.13.4
-LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
+LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
+RUN apk update && apk upgrade --no-cache
 
 ENV LANG=C.UTF-8
 
