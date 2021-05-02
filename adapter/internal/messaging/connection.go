@@ -44,14 +44,35 @@ func connectToRabbitMQ(url string) (*amqp.Connection, error) {
 // is closed unexpectedly.
 func (c *Consumer) reconnect(key string) {
 	var err error
-	conErr := <-c.conn.NotifyClose(make(chan *amqp.Error))
-	if conErr != nil {
+	shouldReconnect := false
+	connClose := <-c.conn.NotifyClose(make(chan *amqp.Error))
+	connBlocked := c.conn.NotifyBlocked(make(chan amqp.Blocking))
+	chClose := c.channel.NotifyClose(make(chan *amqp.Error))
+
+	if connClose != nil {
+		shouldReconnect = true
 		logger.LoggerMsg.Errorf("CRITICAL: Connection dropped for %s, reconnecting...", key)
+	}
+
+	if connBlocked != nil {
+		shouldReconnect = true
+		logger.LoggerMsg.Errorf("CRITICAL: Connection blocked for %s, reconnecting...", key)
+	}
+
+	if chClose != nil {
+		shouldReconnect = true
+		logger.LoggerMsg.Errorf("CRITICAL: Channel closed for %s, reconnecting...", key)
+	}
+
+	if shouldReconnect {
 		c.conn.Close()
 		c, rabbitConn, err = connectionRetry(key)
 		if err != nil {
 			logger.LoggerMsg.Errorf("Cannot establish connection for topic %s", key)
 		}
+	} else {
+		logger.LoggerMsg.Infof("NotifyClose from the connection and channel are %v and %v respectively, NotifyBlocked from the connection is %v",
+			connClose, connBlocked, chClose)
 	}
 }
 
