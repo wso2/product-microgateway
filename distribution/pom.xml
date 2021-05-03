@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.am.choreo.connect</groupId>
         <artifactId>choreo-connect-parent</artifactId>
-        <version>0.9.1-SNAPSHOT</version>
+        <version>0.9.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
