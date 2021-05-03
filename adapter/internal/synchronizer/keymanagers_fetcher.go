@@ -120,11 +120,7 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 
 	if resp.StatusCode == http.StatusOK {
 		var keyManagers []eventhubTypes.KeyManager
-		err := json.Unmarshal(responseBytes, &keyManagers)
-		if err != nil {
-			logger.LoggerMsg.Errorf("Error occurred while unmarshelling Key Managers event data %v", err)
-			return
-		}
+		json.Unmarshal(responseBytes, &keyManagers)
 
 		for _, kmConfig := range keyManagers {
 			xds.KeyManagerList = append(xds.KeyManagerList, kmConfig)
