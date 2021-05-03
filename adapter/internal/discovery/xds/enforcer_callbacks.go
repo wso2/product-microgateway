@@ -45,7 +45,8 @@ func (cb *Callbacks) OnStreamClosed(id int64) {
 
 // OnStreamRequest prints debug logs
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
-	logger.LoggerXdsCallbacks.Debugf("stream request on stream id: %d Request: %v", id, request)
+	logger.LoggerXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
+		id, request.GetNode(), request.GetVersionInfo(), request.GetTypeUrl())
 	requestEventChannel := GetRequestEventChannel()
 	if resource.APIType == request.GetTypeUrl() {
 		requestEvent := NewRequestEvent()
@@ -62,16 +63,17 @@ func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryReque
 
 // OnStreamResponse prints debug logs
 func (cb *Callbacks) OnStreamResponse(id int64, request *discovery.DiscoveryRequest, response *discovery.DiscoveryResponse) {
-	logger.LoggerXdsCallbacks.Debugf("stream request on stream id: %d Response: %v", id, response)
+	logger.LoggerXdsCallbacks.Debugf("stream request on stream id: %d node: %s for type: %s version: %s",
+		id, request.GetNode(), request.GetTypeUrl(), response.GetVersionInfo())
 }
 
 // OnFetchRequest prints debug logs
 func (cb *Callbacks) OnFetchRequest(_ context.Context, req *discovery.DiscoveryRequest) error {
-	logger.LoggerXdsCallbacks.Debugf("fetch request : %v", req)
+	logger.LoggerXdsCallbacks.Debugf("fetch request from node: %s, version: %s, for type: %s", req.Node.Id, req.VersionInfo, req.TypeUrl)
 	return nil
 }
 
 // OnFetchResponse prints debug logs
 func (cb *Callbacks) OnFetchResponse(req *discovery.DiscoveryRequest, res *discovery.DiscoveryResponse) {
-	logger.LoggerXdsCallbacks.Debugf("fetch response : %v", res)
+	logger.LoggerXdsCallbacks.Debugf("fetch response to node: %s, version: %s, for type: %s", req.Node.Id, req.VersionInfo, res.TypeUrl)
 }
