@@ -50,7 +50,7 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 		var kmConfigMap map[string]interface{}
 		unmarshalErr := json.Unmarshal([]byte(string(d.Body)), &notification)
 		if unmarshalErr != nil {
-			logger.LoggerMsg.Errorf("Error occured while unmarshalling event data %v", unmarshalErr)
+			logger.LoggerMsg.Errorf("Error occurred while unmarshalling key manager event data %v", unmarshalErr.Error())
 			return
 		}
 		logger.LoggerMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
@@ -68,7 +68,8 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 			if _, ok := err.(base64.CorruptInputError); ok {
 				logger.LoggerMsg.Error("\nbase64 input is corrupt, check the provided key")
 			}
-			logger.LoggerMsg.Errorf("Error occured %v", err)
+
+			logger.LoggerMsg.Errorf("Error occurred while decoding the notification event %v", err)
 			return
 		}
 
@@ -83,7 +84,11 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 				xds.GenerateAndUpdateKeyManagerList()
 			} else if decodedByte != nil {
 				logger.LoggerMsg.Infof("decoded stream %s", string(decodedByte))
-				json.Unmarshal([]byte(string(decodedByte)), &kmConfigMap)
+				err := json.Unmarshal([]byte(string(decodedByte)), &kmConfigMap)
+				if err != nil {
+					logger.LoggerMsg.Errorf("Error occurred while unmarshalling key manager config map %v", err)
+					return
+				}
 
 				if strings.EqualFold(actionAdd, notification.Event.PayloadData.Action) ||
 					strings.EqualFold(actionUpdate, notification.Event.PayloadData.Action) {

@@ -72,7 +72,7 @@ func (c *Consumer) reconnect(key string) {
 		}
 	} else {
 		logger.LoggerMsg.Infof("NotifyClose from the connection and channel are %v and %v respectively, NotifyBlocked from the connection is %v",
-			connClose, connBlocked, chClose)
+			connClose, chClose, connBlocked)
 	}
 }
 
