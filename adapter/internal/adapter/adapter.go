@@ -280,7 +280,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 	// Wait for each environment to return it's result
 	for i := 0; i < len(envs); i++ {
 		data := <-c
-		logger.LoggerMgw.Debugf("Receiving data for an environment: %v", string(data.Resp))
+		logger.LoggerMgw.Debug("Receiving data for an environment")
 		if data.Resp != nil {
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
 			logger.LoggerMgw.Debug("Pushing data to router and enforcer")
@@ -290,7 +290,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 			}
 			health.SetControlPlaneRestAPIStatus(err == nil)
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-			logger.LoggerMgw.Errorf("Error occurred when retrieveing APIs from control plane: %v", data.Err)
+			logger.LoggerMgw.Errorf("Error occurred when retrieving APIs from control plane: %v", data.Err)
 			isNoAPIArtifacts := data.ErrorCode == 404 && strings.Contains(data.Err.Error(), "No Api artifacts found")
 			health.SetControlPlaneRestAPIStatus(isNoAPIArtifacts)
 		} else {
