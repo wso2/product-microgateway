@@ -136,22 +136,23 @@ func retrieveAMQPURLList() []amqpFailoverURL {
 		amqpConnectionURL := strings.Split(conURL, "?")[0]
 		u, err := url.Parse(conURL)
 		if err != nil {
-			panic(err)
-		}
-		m, _ := url.ParseQuery(u.RawQuery)
-		if m["connectdelay"] != nil {
-			connectdelay := m["connectdelay"][0]
-			delay, err = strconv.Atoi(connectdelay[1 : len(connectdelay)-1])
-		}
+			logger.LoggerMsg.Errorf("Error occured %v", err)
+		} else {
+			m, _ := url.ParseQuery(u.RawQuery)
+			if m["connectdelay"] != nil {
+				connectdelay := m["connectdelay"][0]
+				delay, _ = strconv.Atoi(connectdelay[1 : len(connectdelay)-1])
+			}
 
-		if m["retries"] != nil {
-			retrycount := m["retries"][0]
-			retries, err = strconv.Atoi(retrycount[1 : len(retrycount)-1])
-		}
+			if m["retries"] != nil {
+				retrycount := m["retries"][0]
+				retries, _ = strconv.Atoi(retrycount[1 : len(retrycount)-1])
+			}
 
-		failoverurlObj := amqpFailoverURL{url: amqpConnectionURL, retryCount: retries,
-			connectionDelay: delay}
-		amqlURLList = append(amqlURLList, failoverurlObj)
+			failoverurlObj := amqpFailoverURL{url: amqpConnectionURL, retryCount: retries,
+				connectionDelay: delay}
+			amqlURLList = append(amqlURLList, failoverurlObj)
+		}
 	}
 	return amqlURLList
 }

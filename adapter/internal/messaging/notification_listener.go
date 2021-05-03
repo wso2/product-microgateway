@@ -72,18 +72,22 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 	for d := range deliveries {
 		var notification EventNotification
 		var eventType string
-		json.Unmarshal([]byte(string(d.Body)), &notification)
+		unmarshalErr := json.Unmarshal([]byte(string(d.Body)), &notification)
+		if unmarshalErr != nil {
+			logger.LoggerMsg.Errorf("Error occured while unmarshalling event data %v", unmarshalErr)
+			return
+		}
+		logger.LoggerMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
 		var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Event)
 		if err != nil {
 			if _, ok := err.(base64.CorruptInputError); ok {
-				panic("\nbase64 input is corrupt, check the provided key")
+				logger.LoggerMsg.Error("\nbase64 input is corrupt, check the provided key")
 			}
-			panic(err)
+			logger.LoggerMsg.Errorf("Error occured %v", err)
+			continue
 		}
 		logger.LoggerMsg.Debugf("\n\n[%s]", decodedByte)
 		eventType = notification.Event.PayloadData.EventType
-		logger.LoggerMsg.Debugf("Event type : %s", eventType)
-
 		if strings.Contains(eventType, apiLifeCycleChange) {
 			handleLifeCycleEvents(decodedByte)
 		} else if strings.Contains(eventType, apiEventType) {
