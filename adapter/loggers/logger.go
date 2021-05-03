@@ -32,34 +32,36 @@ When you add a new logger instance add the related package name as a constant
 
 // package name constants
 const (
-	pkgAPI          = "github.com/wso2/adapter/internal/api"
-	pkgAuth         = "github.com/wso2/adapter/internal/auth"
-	pkgMgw          = "github.com/wso2/adapter/internal/adapter"
-	pkgOasparser    = "github.com/wso2/adapter/internal/oasparser"
-	pkgXds          = "github.com/wso2/adapter/internal/discovery/xds"
-	pkgSync         = "github.com/wso2/adapter/internal/synchronizer"
-	pkgMsg          = "github.com/wso2/adapter/internal/messaging"
-	pkgSvcDiscovery = "github.com/wso2/adapter/internal/svcDiscovery"
-	pkgTLSUtils     = "github.com/wso2/adapter/internal/tlsutils"
-	pkgSubscription = "github.com/wso2/adapter/internal/subscription"
-	pkgXdsCallbacks = "github.com/wso2/adapter/internal/discovery/xds"
-	pkgHealth       = "github.com/wso2/adapter/internal/health"
+	pkgAPI                = "github.com/wso2/adapter/internal/api"
+	pkgAuth               = "github.com/wso2/adapter/internal/auth"
+	pkgMgw                = "github.com/wso2/adapter/internal/adapter"
+	pkgOasparser          = "github.com/wso2/adapter/internal/oasparser"
+	pkgXds                = "github.com/wso2/adapter/internal/discovery/xds"
+	pkgSync               = "github.com/wso2/adapter/internal/synchronizer"
+	pkgMsg                = "github.com/wso2/adapter/internal/messaging"
+	pkgSvcDiscovery       = "github.com/wso2/adapter/internal/svcDiscovery"
+	pkgTLSUtils           = "github.com/wso2/adapter/internal/tlsutils"
+	pkgSubscription       = "github.com/wso2/adapter/internal/subscription"
+	pkgXdsCallbacks       = "github.com/wso2/adapter/internal/discovery/xds/enforcercallbacks"
+	pkgHealth             = "github.com/wso2/adapter/internal/health"
+	pkgRouterXdsCallbacks = "github.com/wso2/adapter/internal/discovery/xds/routercallbacks"
 )
 
 // logger package references
 var (
-	LoggerAPI          *logrus.Logger
-	LoggerAuth         *logrus.Logger
-	LoggerMgw          *logrus.Logger
-	LoggerOasparser    *logrus.Logger
-	LoggerXds          *logrus.Logger
-	LoggerSync         *logrus.Logger
-	LoggerMsg          *logrus.Logger
-	LoggerSvcDiscovery *logrus.Logger
-	LoggerTLSUtils     *logrus.Logger
-	LoggerSubscription *logrus.Logger
-	LoggerXdsCallbacks *logrus.Logger
-	LoggerHealth       *logrus.Logger
+	LoggerAPI                *logrus.Logger
+	LoggerAuth               *logrus.Logger
+	LoggerMgw                *logrus.Logger
+	LoggerOasparser          *logrus.Logger
+	LoggerXds                *logrus.Logger
+	LoggerSync               *logrus.Logger
+	LoggerMsg                *logrus.Logger
+	LoggerSvcDiscovery       *logrus.Logger
+	LoggerTLSUtils           *logrus.Logger
+	LoggerSubscription       *logrus.Logger
+	LoggerXdsCallbacks       *logrus.Logger
+	LoggerHealth             *logrus.Logger
+	LoggerRouterXdsCallbacks *logrus.Logger
 )
 
 func init() {
@@ -81,5 +83,6 @@ func UpdateLoggers() {
 	LoggerSubscription = logging.InitPackageLogger(pkgSubscription)
 	LoggerXdsCallbacks = logging.InitPackageLogger(pkgXdsCallbacks)
 	LoggerHealth = logging.InitPackageLogger(pkgHealth)
+	LoggerRouterXdsCallbacks = logging.InitPackageLogger(pkgRouterXdsCallbacks)
 	logrus.Info("Updated loggers")
 }
