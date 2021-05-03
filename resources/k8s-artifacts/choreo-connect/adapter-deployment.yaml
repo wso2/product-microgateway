@@ -45,7 +45,7 @@ spec:
             - mountPath: /home/wso2/conf/log_config.toml
               subPath: log_config.toml
               name: logconfig-toml-vol
-          image: wso2/choreo-connect-adapter:0.9.0
+          image: wso2/choreo-connect-adapter:0.9.0.1
           imagePullPolicy: IfNotPresent
           env:
             - name: ADAPTER_PRIVATE_KEY_PATH

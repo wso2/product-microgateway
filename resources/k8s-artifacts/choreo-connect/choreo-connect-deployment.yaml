@@ -46,7 +46,7 @@ spec:
               name: log4j2-vol
             - mountPath: /home/wso2/lib/dropins
               name: dropins-vol
-          image: wso2/choreo-connect-enforcer:0.9.0
+          image: wso2/choreo-connect-enforcer:0.9.0.1
           imagePullPolicy: IfNotPresent
           env:
             - name: ENFORCER_PRIVATE_KEY_PATH
@@ -112,7 +112,7 @@ spec:
               name: router-keystore-vol
             - mountPath: /home/wso2/security/truststore
               name: router-truststore-vol
-          image: wso2/choreo-connect-router:0.9.0
+          image: wso2/choreo-connect-router:0.9.0.1
           imagePullPolicy: IfNotPresent
           env:
             - name: ROUTER_ADMIN_HOST
