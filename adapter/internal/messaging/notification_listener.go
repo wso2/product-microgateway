@@ -75,7 +75,7 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 		unmarshalErr := json.Unmarshal([]byte(string(d.Body)), &notification)
 		if unmarshalErr != nil {
 			logger.LoggerMsg.Errorf("Error occured while unmarshalling event data %v", unmarshalErr)
-			return
+			continue
 		}
 		logger.LoggerMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
 		var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Event)
