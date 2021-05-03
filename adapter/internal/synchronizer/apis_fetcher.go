@@ -290,7 +290,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 	go FetchAPIs(&updatedAPIID, finalEnvs, c)
 	for {
 		data := <-c
-		logger.LoggerSync.Debugf("Receing data for an envrionment: %v", string(data.Resp))
+		logger.LoggerSync.Debug("Receiving data for an environment")
 		if data.Resp != nil {
 			// For successfull fetches, data.Resp would return a byte slice with API project(s)
 			logger.LoggerSync.Info("Pushing data to router and enforcer")
@@ -300,7 +300,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 			}
 			break
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-			logger.LoggerSync.Errorf("Error occurred when retrieveing APIs from control plane: %v", data.Err)
+			logger.LoggerSync.Errorf("Error occurred when retrieving APIs from control plane: %v", data.Err)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
