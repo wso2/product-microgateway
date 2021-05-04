@@ -44,14 +44,35 @@ func connectToRabbitMQ(url string) (*amqp.Connection, error) {
 // is closed unexpectedly.
 func (c *Consumer) reconnect(key string) {
 	var err error
-	conErr := <-c.conn.NotifyClose(make(chan *amqp.Error))
-	if conErr != nil {
+	shouldReconnect := false
+	connClose := <-c.conn.NotifyClose(make(chan *amqp.Error))
+	connBlocked := c.conn.NotifyBlocked(make(chan amqp.Blocking))
+	chClose := c.channel.NotifyClose(make(chan *amqp.Error))
+
+	if connClose != nil {
+		shouldReconnect = true
 		logger.LoggerMsg.Errorf("CRITICAL: Connection dropped for %s, reconnecting...", key)
+	}
+
+	if connBlocked != nil {
+		shouldReconnect = true
+		logger.LoggerMsg.Errorf("CRITICAL: Connection blocked for %s, reconnecting...", key)
+	}
+
+	if chClose != nil {
+		shouldReconnect = true
+		logger.LoggerMsg.Errorf("CRITICAL: Channel closed for %s, reconnecting...", key)
+	}
+
+	if shouldReconnect {
 		c.conn.Close()
 		c, rabbitConn, err = connectionRetry(key)
 		if err != nil {
 			logger.LoggerMsg.Errorf("Cannot establish connection for topic %s", key)
 		}
+	} else {
+		logger.LoggerMsg.Infof("NotifyClose from the connection and channel are %v and %v respectively, NotifyBlocked from the connection is %v",
+			connClose, chClose, connBlocked)
 	}
 }
 
@@ -115,22 +136,23 @@ func retrieveAMQPURLList() []amqpFailoverURL {
 		amqpConnectionURL := strings.Split(conURL, "?")[0]
 		u, err := url.Parse(conURL)
 		if err != nil {
-			panic(err)
-		}
-		m, _ := url.ParseQuery(u.RawQuery)
-		if m["connectdelay"] != nil {
-			connectdelay := m["connectdelay"][0]
-			delay, err = strconv.Atoi(connectdelay[1 : len(connectdelay)-1])
-		}
+			logger.LoggerMsg.Errorf("Error occured %v", err)
+		} else {
+			m, _ := url.ParseQuery(u.RawQuery)
+			if m["connectdelay"] != nil {
+				connectdelay := m["connectdelay"][0]
+				delay, _ = strconv.Atoi(connectdelay[1 : len(connectdelay)-1])
+			}
 
-		if m["retries"] != nil {
-			retrycount := m["retries"][0]
-			retries, err = strconv.Atoi(retrycount[1 : len(retrycount)-1])
-		}
+			if m["retries"] != nil {
+				retrycount := m["retries"][0]
+				retries, _ = strconv.Atoi(retrycount[1 : len(retrycount)-1])
+			}
 
-		failoverurlObj := amqpFailoverURL{url: amqpConnectionURL, retryCount: retries,
-			connectionDelay: delay}
-		amqlURLList = append(amqlURLList, failoverurlObj)
+			failoverurlObj := amqpFailoverURL{url: amqpConnectionURL, retryCount: retries,
+				connectionDelay: delay}
+			amqlURLList = append(amqlURLList, failoverurlObj)
+		}
 	}
 	return amqlURLList
 }
