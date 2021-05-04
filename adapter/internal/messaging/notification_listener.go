@@ -367,7 +367,7 @@ func handlePolicyEvents(data []byte, eventType string) {
 	} else if strings.EqualFold(subscriptionEventType, policyEvent.PolicyType) {
 		var subscriptionPolicyEvent SubscriptionPolicyEvent
 		subPolicyErr := json.Unmarshal([]byte(string(data)), &subscriptionPolicyEvent)
-		if err != nil {
+		if subPolicyErr != nil {
 			logger.LoggerMsg.Errorf("Error occurred while unmarshalling Subscription Policy event data %v", subPolicyErr)
 			return
 		}
