@@ -21,7 +21,7 @@
     <groupId>org.wso2.am.choreo.connect</groupId>
     <artifactId>choreo-connect-parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.9.0.2</version>
+    <version>0.9.1-SNAPSHOT</version>
     <name>Choreo Connect - Parent</name>
 
     <url>https://wso2.org</url>
@@ -331,23 +331,11 @@
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
                 <version>${carbon.apimgt.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                        <artifactId>jackson-databind</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.common.analytics</artifactId>
                 <version>${carbon.apimgt.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                        <artifactId>jackson-databind</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
@@ -358,11 +346,6 @@
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-jcl</artifactId>
                 <version>${log4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.databind.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.am</groupId>
@@ -396,7 +379,7 @@
         <carbon.apimgt.version>9.0.174</carbon.apimgt.version>
         <build.helper.plugin.version>3.2.0</build.helper.plugin.version>
         <commons.version>3.9</commons.version>
-        <commons.io.version>2.7</commons.io.version>
+        <commons.io.version>2.6</commons.io.version>
         <envoy.controlplane.api.version>0.1.28</envoy.controlplane.api.version>
         <geronimo.jms11.spec.version>1.1.1.wso2v1</geronimo.jms11.spec.version>
         <grpc.netty.shaded.version>1.32.1</grpc.netty.shaded.version>
@@ -436,6 +419,5 @@
         <analytics.publisher.client.version>1.0.0</analytics.publisher.client.version>
         <awaitility.version>3.1.2</awaitility.version>
         <apache.httpcomponents.version>4.5.13</apache.httpcomponents.version>
-        <jackson.databind.version>2.10.5.1</jackson.databind.version>
     </properties>
 </project>
