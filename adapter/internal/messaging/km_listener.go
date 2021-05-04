@@ -84,9 +84,9 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 				xds.GenerateAndUpdateKeyManagerList()
 			} else if decodedByte != nil {
 				logger.LoggerMsg.Infof("decoded stream %s", string(decodedByte))
-				err := json.Unmarshal([]byte(string(decodedByte)), &kmConfigMap)
-				if err != nil {
-					logger.LoggerMsg.Errorf("Error occurred while unmarshalling key manager config map %v", err)
+				kmConfigMapErr := json.Unmarshal([]byte(string(decodedByte)), &kmConfigMap)
+				if kmConfigMapErr != nil {
+					logger.LoggerMsg.Errorf("Error occurred while unmarshalling key manager config map %v", kmConfigMapErr)
 					return
 				}
 

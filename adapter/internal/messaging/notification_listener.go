@@ -72,9 +72,9 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 	for d := range deliveries {
 		var notification EventNotification
 		var eventType string
-		unmarshalErr := json.Unmarshal([]byte(string(d.Body)), &notification)
-		if unmarshalErr != nil {
-			logger.LoggerMsg.Errorf("Error occured while unmarshalling event data %v", unmarshalErr)
+		notificationErr := json.Unmarshal([]byte(string(d.Body)), &notification)
+		if notificationErr != nil {
+			logger.LoggerMsg.Errorf("Error occurred while unmarshalling event data %v", notificationErr)
 			continue
 		}
 		logger.LoggerMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
@@ -83,7 +83,6 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 			if _, ok := err.(base64.CorruptInputError); ok {
 				logger.LoggerMsg.Error("\nbase64 input is corrupt, check the provided key")
 			}
-			//
 			logger.LoggerMsg.Errorf("Error occurred while decoding the notification event %v", err)
 			continue
 		}
@@ -113,9 +112,9 @@ func handleAPIEvents(data []byte, eventType string) {
 		currentTimeStamp int64 = apiEvent.Event.TimeStamp
 	)
 
-	err := json.Unmarshal([]byte(string(data)), &apiEvent)
-	if err != nil {
-		logger.LoggerMsg.Errorf("Error occurred while unmarshalling API event data %v", err)
+	apiEventErr := json.Unmarshal([]byte(string(data)), &apiEvent)
+	if apiEventErr != nil {
+		logger.LoggerMsg.Errorf("Error occurred while unmarshalling API event data %v", apiEventErr)
 		return
 	}
 	if !belongsToTenant(apiEvent.TenantDomain) {
@@ -188,9 +187,9 @@ func handleAPIEvents(data []byte, eventType string) {
 
 func handleLifeCycleEvents(data []byte) {
 	var apiEvent APIEvent
-	err := json.Unmarshal([]byte(string(data)), &apiEvent)
-	if err != nil {
-		logger.LoggerMsg.Errorf("Error occurred while unmarshalling Lifecycle event data %v", err)
+	apiLCEventErr := json.Unmarshal([]byte(string(data)), &apiEvent)
+	if apiLCEventErr != nil {
+		logger.LoggerMsg.Errorf("Error occurred while unmarshalling Lifecycle event data %v", apiLCEventErr)
 		return
 	}
 	if !belongsToTenant(apiEvent.TenantDomain) {
@@ -233,9 +232,9 @@ func handleApplicationEvents(data []byte, eventType string) {
 	if strings.EqualFold(applicationRegistration, eventType) ||
 		strings.EqualFold(removeApplicationKeyMapping, eventType) {
 		var applicationRegistrationEvent ApplicationRegistrationEvent
-		err := json.Unmarshal([]byte(string(data)), &applicationRegistrationEvent)
-		if err != nil {
-			logger.LoggerMsg.Errorf("Error occurred while unmarshalling Application Registration event data %v", err)
+		appRegEventErr := json.Unmarshal([]byte(string(data)), &applicationRegistrationEvent)
+		if appRegEventErr != nil {
+			logger.LoggerMsg.Errorf("Error occurred while unmarshalling Application Registration event data %v", appRegEventErr)
 			return
 		}
 
@@ -259,9 +258,9 @@ func handleApplicationEvents(data []byte, eventType string) {
 		xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingList(eh.AppKeyMappingList))
 	} else {
 		var applicationEvent ApplicationEvent
-		err := json.Unmarshal([]byte(string(data)), &applicationEvent)
-		if err != nil {
-			logger.LoggerMsg.Errorf("Error occurred while unmarshalling Application event data %v", err)
+		appEventErr := json.Unmarshal([]byte(string(data)), &applicationEvent)
+		if appEventErr != nil {
+			logger.LoggerMsg.Errorf("Error occurred while unmarshalling Application event data %v", appEventErr)
 			return
 		}
 
@@ -298,9 +297,9 @@ func handleApplicationEvents(data []byte, eventType string) {
 // handleSubscriptionRelatedEvents to process subscription related events
 func handleSubscriptionEvents(data []byte, eventType string) {
 	var subscriptionEvent SubscriptionEvent
-	err := json.Unmarshal([]byte(string(data)), &subscriptionEvent)
-	if err != nil {
-		logger.LoggerMsg.Errorf("Error occurred while unmarshalling Subscription event data %v", err)
+	subEventErr := json.Unmarshal([]byte(string(data)), &subscriptionEvent)
+	if subEventErr != nil {
+		logger.LoggerMsg.Errorf("Error occurred while unmarshalling Subscription event data %v", subEventErr)
 		return
 	}
 	if !belongsToTenant(subscriptionEvent.TenantDomain) {
@@ -332,9 +331,9 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 // handlePolicyRelatedEvents to process policy related events
 func handlePolicyEvents(data []byte, eventType string) {
 	var policyEvent PolicyInfo
-	err := json.Unmarshal([]byte(string(data)), &policyEvent)
-	if err != nil {
-		logger.LoggerMsg.Errorf("Error occurred while unmarshalling Throttling Policy event data %v", err)
+	policyEventErr := json.Unmarshal([]byte(string(data)), &policyEvent)
+	if policyEventErr != nil {
+		logger.LoggerMsg.Errorf("Error occurred while unmarshalling Throttling Policy event data %v", policyEventErr)
 		return
 	}
 	// TODO: Handle policy events
@@ -368,7 +367,7 @@ func handlePolicyEvents(data []byte, eventType string) {
 	} else if strings.EqualFold(subscriptionEventType, policyEvent.PolicyType) {
 		var subscriptionPolicyEvent SubscriptionPolicyEvent
 		subPolicyErr := json.Unmarshal([]byte(string(data)), &subscriptionPolicyEvent)
-		if err != nil {
+		if subPolicyErr != nil {
 			logger.LoggerMsg.Errorf("Error occurred while unmarshalling Subscription Policy event data %v", subPolicyErr)
 			return
 		}
