@@ -243,6 +243,16 @@ public class MockBackEndServer extends Thread {
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });
+            // For OpenAPI v3 related tests
+            httpServer.createContext("/v3" + "/pet/findByStatus", exchange -> {
+
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
+                        Constants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
             httpServer.start();
             backEndServerUrl = "http://localhost:" + backEndServerPort;
         } catch (Exception ex) {

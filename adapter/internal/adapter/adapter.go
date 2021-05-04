@@ -32,6 +32,7 @@ import (
 	subscriptionservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/subscription"
 	throttleservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/throtlle"
 	wso2_server "github.com/wso2/adapter/internal/discovery/protocol/server/v3"
+	routercb "github.com/wso2/adapter/internal/discovery/xds/routercallbacks"
 	"github.com/wso2/adapter/internal/health"
 	healthservice "github.com/wso2/adapter/internal/health/api/wso2/health/service"
 	"github.com/wso2/adapter/internal/tlsutils"
@@ -178,7 +179,7 @@ func Run(conf *config.Config) {
 	enforcerRevokedTokenCache := xds.GetEnforcerRevokedTokenCache()
 	enforcerThrottleDataCache := xds.GetEnforcerThrottleDataCache()
 
-	srv := xdsv3.NewServer(ctx, cache, nil)
+	srv := xdsv3.NewServer(ctx, cache, &routercb.Callbacks{})
 	enforcerXdsSrv := wso2_server.NewServer(ctx, enforcerCache, &cb.Callbacks{})
 	enforcerSdsSrv := wso2_server.NewServer(ctx, enforcerSubscriptionCache, &cb.Callbacks{})
 	enforcerAppDsSrv := wso2_server.NewServer(ctx, enforcerApplicationCache, &cb.Callbacks{})

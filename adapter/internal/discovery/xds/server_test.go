@@ -17,6 +17,8 @@
 package xds
 
 import (
+	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -59,6 +61,65 @@ func TestGetVhostOfAPI(t *testing.T) {
 			}
 			if exists != test.exists {
 				t.Errorf("expected existing bool value %v but found %v", test.exists, exists)
+			}
+		})
+	}
+}
+
+func TestGetAllEnvironments(t *testing.T) {
+	setupInternalMemoryMapsWithTestSamples()
+
+	tests := []struct {
+		name            string
+		uuid, vhost     string
+		newEnvironment  []string
+		allEnvironments []string
+	}{
+		{
+			name:            "No_existing_environments_new_API",
+			uuid:            "new-uuid-xxxxx",
+			vhost:           "us.wso2.com",
+			newEnvironment:  []string{"Default", "eu-region"},
+			allEnvironments: []string{"Default", "eu-region"},
+		},
+		{
+			name:            "Existing_API_new_vhost",
+			uuid:            "333-Pizza-org1",
+			vhost:           "new.vhost",
+			newEnvironment:  []string{"Default", "eu-region"},
+			allEnvironments: []string{"Default", "eu-region"},
+		},
+		{
+			name:            "Some_existing_environments",
+			uuid:            "222-PetStore-org2",
+			vhost:           "org2.foo.com",
+			newEnvironment:  []string{"eu-region"},
+			allEnvironments: []string{"Default", "eu-region"},
+		},
+
+		{
+			name:            "new_environments",
+			uuid:            "222-PetStore-org2",
+			vhost:           "org2.foo.com",
+			newEnvironment:  []string{"Default", "eu-region"},
+			allEnvironments: []string{"Default", "eu-region"},
+		},
+		{
+			name:            "All_existing_environments",
+			uuid:            "111-PetStore-org",
+			vhost:           "org2.foo.com",
+			newEnvironment:  []string{"Default", "us-region"},
+			allEnvironments: []string{"Default", "us-region"},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			allEnvironments := GetAllEnvironments(test.uuid, test.vhost, test.newEnvironment)
+			sort.Strings(allEnvironments)
+			sort.Strings(test.allEnvironments)
+			if !reflect.DeepEqual(test.allEnvironments, allEnvironments) {
+				t.Errorf("expected environments %v but found %v", test.allEnvironments, allEnvironments)
 			}
 		})
 	}

@@ -44,6 +44,7 @@
             <class name="org.wso2.choreo.connect.tests.testCases.jwtValidator.InternalKeyTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.jwtValidator.CustomAuthHeaderTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.apiDeploy.QSGTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.apiDeploy.OpenAPIV3TestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.vhost.VhostAPICtlTestCase"/>
         </classes>
     </test>

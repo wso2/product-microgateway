@@ -15,13 +15,12 @@
  *
  */
 
-package xds
+package routercallbacks
 
 import (
 	"context"
 
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
-	"github.com/wso2/adapter/internal/discovery/protocol/resource/v3"
 	logger "github.com/wso2/adapter/loggers"
 )
 
@@ -34,46 +33,35 @@ func (cb *Callbacks) Report() {}
 
 // OnStreamOpen prints debug logs
 func (cb *Callbacks) OnStreamOpen(_ context.Context, id int64, typ string) error {
-	logger.LoggerXdsCallbacks.Debugf("stream %d open for %s\n", id, typ)
+	logger.LoggerRouterXdsCallbacks.Debugf("stream %d open for %s\n", id, typ)
 	return nil
 }
 
 // OnStreamClosed prints debug logs
 func (cb *Callbacks) OnStreamClosed(id int64) {
-	logger.LoggerXdsCallbacks.Debugf("stream %d closed\n", id)
+	logger.LoggerRouterXdsCallbacks.Debugf("stream %d closed\n", id)
 }
 
 // OnStreamRequest prints debug logs
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
-	logger.LoggerXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
-		id, request.GetNode(), request.GetVersionInfo(), request.GetTypeUrl())
-	requestEventChannel := GetRequestEventChannel()
-	if resource.APIType == request.GetTypeUrl() {
-		requestEvent := NewRequestEvent()
-		if request.ErrorDetail != nil {
-			logger.LoggerXdsCallbacks.Errorf("stream request on stream id: %d Error: %s", id, request.ErrorDetail.Message)
-			requestEvent.IsError = true
-		}
-		requestEvent.Node = request.GetNode().GetId()
-		requestEvent.Version = request.VersionInfo
-		requestEventChannel <- requestEvent
-	}
+	logger.LoggerRouterXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
+		id, request.Node.Id, request.VersionInfo, request.TypeUrl)
 	return nil
 }
 
 // OnStreamResponse prints debug logs
 func (cb *Callbacks) OnStreamResponse(id int64, request *discovery.DiscoveryRequest, response *discovery.DiscoveryResponse) {
-	logger.LoggerXdsCallbacks.Debugf("stream request on stream id: %d node: %s for type: %s version: %s",
-		id, request.GetNode(), request.GetTypeUrl(), response.GetVersionInfo())
+	logger.LoggerRouterXdsCallbacks.Debugf("stream response on stream id: %d, to node: %s, version: %s, for type: %v", id,
+		request.Node.Id, response.VersionInfo, response.TypeUrl)
 }
 
 // OnFetchRequest prints debug logs
 func (cb *Callbacks) OnFetchRequest(_ context.Context, req *discovery.DiscoveryRequest) error {
-	logger.LoggerXdsCallbacks.Debugf("fetch request from node: %s, version: %s, for type: %s", req.Node.Id, req.VersionInfo, req.TypeUrl)
+	logger.LoggerRouterXdsCallbacks.Debugf("fetch request from node %s, version: %s, for type %s", req.Node.Id, req.VersionInfo, req.TypeUrl)
 	return nil
 }
 
 // OnFetchResponse prints debug logs
 func (cb *Callbacks) OnFetchResponse(req *discovery.DiscoveryRequest, res *discovery.DiscoveryResponse) {
-	logger.LoggerXdsCallbacks.Debugf("fetch response to node: %s, version: %s, for type: %s", req.Node.Id, req.VersionInfo, res.TypeUrl)
+	logger.LoggerRouterXdsCallbacks.Debugf("fetch response to node: %s, version: %s, for type %s", req.Node.Id, req.VersionInfo, res.TypeUrl)
 }

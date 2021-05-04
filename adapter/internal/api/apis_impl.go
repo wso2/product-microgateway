@@ -137,7 +137,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			upstreamCerts = append(upstreamCerts, unzippedFileBytes...)
 			upstreamCerts = append(upstreamCerts, newLineByteArray...)
 		} else if (strings.Contains(file.Name, apiYAMLFile) || strings.Contains(file.Name, apiJSONFile)) &&
-			!strings.Contains(file.Name, openAPIDir){
+			!strings.Contains(file.Name, openAPIDir) {
 			loggers.LoggerAPI.Debugf("fileName : %v", file.Name)
 			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
@@ -256,8 +256,13 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 				}
 			}
 		}
+
+		// allEnvironments represent all the environments the API should be deployed
+		allEnvironments := xds.GetAllEnvironments(apiInfo.ID, vhost, environments)
+		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
+			allEnvironments, vhost, apiInfo.Name, apiInfo.Version, apiInfo.ID)
 		// first update the API for vhost
-		updateAPI(vhost, apiInfo, apiProject, environments)
+		updateAPI(vhost, apiInfo, apiProject, allEnvironments)
 	}
 
 	// undeploy APIs with other vhosts in the same gateway environment
@@ -343,6 +348,10 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	apiContent.EndpointSecurity.Production.Password = apiProject.EndpointSecurity.Production.Password
 	apiContent.EndpointSecurity.Production.Username = apiProject.EndpointSecurity.Production.Username
 	apiContent.EndpointSecurity.Production.SecurityType = apiProject.EndpointSecurity.Production.SecurityType
+	apiContent.EndpointSecurity.SandBox.Enabled = apiProject.EndpointSecurity.SandBox.Enabled
+	apiContent.EndpointSecurity.SandBox.Password = apiProject.EndpointSecurity.SandBox.Password
+	apiContent.EndpointSecurity.SandBox.Username = apiProject.EndpointSecurity.SandBox.Username
+	apiContent.EndpointSecurity.SandBox.SecurityType = apiProject.EndpointSecurity.SandBox.SecurityType
 	apiContent.OrganizationID = apiProject.OrganizationID
 
 	if apiProject.APIType == mgw.HTTP {

@@ -76,6 +76,14 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
             switch (statusCode) {
                 case 401:
                 case 403:
+                    // For Denied policies, the status code remains 403, but it is categorized
+                    // under throttling
+                    if (requestContext.getProperties().containsKey(APIConstants.MessageFormat.ERROR_CODE)) {
+                        if (AnalyticsConstants.BLOCKED_ERROR_CODE == Integer.parseInt(requestContext.getProperties()
+                                        .get(APIConstants.MessageFormat.ERROR_CODE).toString())) {
+                            return FaultCategory.THROTTLED;
+                        }
+                    }
                     return FaultCategory.AUTH;
                 case 429:
                     return FaultCategory.THROTTLED;
@@ -96,10 +104,10 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         api.setApiType(requestContext.getMatchedAPI().getAPIConfig().getApiType());
         api.setApiName(requestContext.getMatchedAPI().getAPIConfig().getName());
         api.setApiVersion(requestContext.getMatchedAPI().getAPIConfig().getVersion());
-        api.setApiCreatorTenantDomain(FilterUtils.getTenantDomainFromRequestURL(
-                requestContext.getMatchedAPI().getAPIConfig().getBasePath()) == null
-                ? APIConstants.SUPER_TENANT_DOMAIN_NAME
-                : requestContext.getMatchedAPI().getAPIConfig().getBasePath());
+        String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(
+                requestContext.getMatchedAPI().getAPIConfig().getBasePath());
+        api.setApiCreatorTenantDomain(
+                tenantDomain == null ? APIConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
         api.setOrganizationId(requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
         return api;
     }
