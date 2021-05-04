@@ -48,7 +48,11 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 		var notification EventKeyManagerNotification
 		// var keyManagerConfig resourceTypes.KeymanagerConfig
 		var kmConfigMap map[string]interface{}
-		json.Unmarshal([]byte(string(d.Body)), &notification)
+		unmarshalErr := json.Unmarshal([]byte(string(d.Body)), &notification)
+		if unmarshalErr != nil {
+			logger.LoggerMsg.Errorf("Error occurred while unmarshalling key manager event data %v", unmarshalErr.Error())
+			return
+		}
 		logger.LoggerMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
 		for i := range xds.KeyManagerList {
 			if strings.EqualFold(notification.Event.PayloadData.Name, xds.KeyManagerList[i].Name) {
@@ -80,7 +84,11 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 				xds.GenerateAndUpdateKeyManagerList()
 			} else if decodedByte != nil {
 				logger.LoggerMsg.Infof("decoded stream %s", string(decodedByte))
-				json.Unmarshal([]byte(string(decodedByte)), &kmConfigMap)
+				kmConfigMapErr := json.Unmarshal([]byte(string(decodedByte)), &kmConfigMap)
+				if kmConfigMapErr != nil {
+					logger.LoggerMsg.Errorf("Error occurred while unmarshalling key manager config map %v", kmConfigMapErr)
+					return
+				}
 
 				if strings.EqualFold(actionAdd, notification.Event.PayloadData.Action) ||
 					strings.EqualFold(actionUpdate, notification.Event.PayloadData.Action) {
