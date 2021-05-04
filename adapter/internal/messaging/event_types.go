@@ -113,14 +113,14 @@ type ApplicationRegistrationEvent struct {
 
 // ApplicationEvent for struct application events
 type ApplicationEvent struct {
-	UUID              string   `json:"uuid"`
-	ApplicationID     int32    `json:"applicationId"`
-	ApplicationName   string   `json:"applicationName"`
-	TokenType         string   `json:"tokenType"`
-	ApplicationPolicy string   `json:"applicationPolicy"`
-	Attributes        []string `json:"attributes"`
-	Subscriber        string   `json:"subscriber"`
-	GroupID           []string `json:"groupIds"`
+	UUID              string      `json:"uuid"`
+	ApplicationID     int32       `json:"applicationId"`
+	ApplicationName   string      `json:"applicationName"`
+	TokenType         string      `json:"tokenType"`
+	ApplicationPolicy string      `json:"applicationPolicy"`
+	Attributes        interface{} `json:"attributes"`
+	Subscriber        string      `json:"subscriber"`
+	GroupID           []string    `json:"groupIds"`
 	Event
 }
 
