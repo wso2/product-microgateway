@@ -259,7 +259,6 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
                                 + " with expected response : " + expectedResponse);
 
             if (response != null) {
-                log.info("Data: " + response.getData());
                 if (response.getData().contains(expectedResponse)) {
                     log.info("API :" + apiName + " with version: " + apiVersion + " with expected response "
                                         + expectedResponse + " found");
