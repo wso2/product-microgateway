@@ -142,6 +142,7 @@
                             <exclude>log4j:*</exclude>
                             <exclude>org.ops4j.pax.logging:*</exclude>
                             <exclude>org.json:json</exclude>
+                            <exclude>jline:*</exclude>
                         </excludes>
                     </artifactSet>
                 </configuration>
@@ -256,6 +257,16 @@
     </build>
 
     <dependencies>
+        <!--   Following netty-codec-http and netty-codec-http2 added to override default versions
+        due to security purposes  -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http2</artifactId>
+        </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
