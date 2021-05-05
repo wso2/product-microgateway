@@ -83,7 +83,7 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 			if _, ok := err.(base64.CorruptInputError); ok {
 				logger.LoggerMsg.Error("\nbase64 input is corrupt, check the provided key")
 			}
-			logger.LoggerMsg.Errorf("Error occured %v", err)
+			logger.LoggerMsg.Errorf("Error occured while decoding notification data %v", err)
 			continue
 		}
 		logger.LoggerMsg.Debugf("\n\n[%s]", decodedByte)
