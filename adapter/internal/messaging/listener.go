@@ -56,7 +56,7 @@ func ProcessEvents(config *config.Config) {
 	amqpURIArray = retrieveAMQPURLList()
 	bindingKeys := []string{notification, keymanager, tokenRevocation, throttleData}
 
-	logger.LoggerMsg.Infof("dialing %q", maskUrl(amqpURIArray[0].url)+"/")
+	logger.LoggerMsg.Infof("dialing %q", maskURL(amqpURIArray[0].url)+"/")
 	rabbitConn, err = connectToRabbitMQ(amqpURIArray[0].url + "/")
 	health.SetControlPlaneJmsStatus(err == nil)
 
