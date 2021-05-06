@@ -20,6 +20,7 @@ package messaging
 
 import (
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -93,7 +94,7 @@ func connectionRetry(key string) (*Consumer, *amqp.Connection, error) {
 			retryInterval = 10 * time.Second
 		}
 		logger.LoggerMsg.Infof("Retrying to connect with %s in every %d seconds until exceed %d attempts",
-			amqpURIArray[j].url, amqpURIArray[j].connectionDelay, maxAttempt)
+			maskUrl(amqpURIArray[j].url), amqpURIArray[j].connectionDelay, maxAttempt)
 
 		for i := 1; i <= maxAttempt; i++ {
 
@@ -110,14 +111,14 @@ func connectionRetry(key string) (*Consumer, *amqp.Connection, error) {
 
 			if key != "" && len(key) > 0 {
 				logger.LoggerMsg.Infof("Retry attempt %d for the %s to connect with topic %s has failed. Retrying after %d seconds", i,
-					amqpURIArray[j].url, key, amqpURIArray[j].connectionDelay)
+					maskUrl(amqpURIArray[j].url), key, amqpURIArray[j].connectionDelay)
 			} else {
-				logger.LoggerMsg.Infof("Retry attempt %d for the %s has failed. Retrying after %d seconds", i, amqpURIArray[j].url, amqpURIArray[j].connectionDelay)
+				logger.LoggerMsg.Infof("Retry attempt %d for the %s has failed. Retrying after %d seconds", i, maskUrl(amqpURIArray[j].url), amqpURIArray[j].connectionDelay)
 			}
 			time.Sleep(retryInterval)
 		}
 		if i == maxAttempt {
-			logger.LoggerMsg.Infof("Exceeds maximum connection retry attempts %d for %s", maxAttempt, amqpURIArray[j].url)
+			logger.LoggerMsg.Infof("Exceeds maximum connection retry attempts %d for %s", maxAttempt, maskUrl(amqpURIArray[j].url))
 		}
 	}
 	return nil, rabbitConn, err
@@ -136,7 +137,7 @@ func retrieveAMQPURLList() []amqpFailoverURL {
 		amqpConnectionURL := strings.Split(conURL, "?")[0]
 		u, err := url.Parse(conURL)
 		if err != nil {
-			logger.LoggerMsg.Errorf("Error occured %v", err)
+			logger.LoggerMsg.Errorf("Error occured %s", maskUrl(err.Error()))
 		} else {
 			m, _ := url.ParseQuery(u.RawQuery)
 			if m["connectdelay"] != nil {
@@ -155,6 +156,15 @@ func retrieveAMQPURLList() []amqpFailoverURL {
 		}
 	}
 	return amqlURLList
+}
+
+func maskUrl(url string) string {
+	pattern := regexp.MustCompile(`\/\/([a-zA-Z].*)@\b`)
+	matches := pattern.FindStringSubmatch(url)
+	if len(matches) > 1 {
+		return strings.ReplaceAll(url, matches[1], "******")
+	}
+	return url
 }
 
 type amqpFailoverURL struct {
