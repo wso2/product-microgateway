@@ -28,7 +28,7 @@ import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.APIMLifecycleBaseTest;
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -83,7 +83,7 @@ public class BlockedAPITestCase extends APIMLifecycleBaseTest {
     }
 
     @Test(description = "Send a request to a subscribed REST API in a published state")
-    public void testPublishedStateAPI() throws IOException, MicroGWTestException, InterruptedException {
+    public void testPublishedStateAPI() throws IOException, CCTestException, InterruptedException {
         Thread.sleep(3000);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(endpointURL, requestHeaders);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL + ". HttpResponse");
@@ -94,7 +94,7 @@ public class BlockedAPITestCase extends APIMLifecycleBaseTest {
     }
 
     @Test(description = "Send a request to a blocked  REST API and check 700700 error code is received", dependsOnMethods = "testPublishedStateAPI")
-    public void testBlockedStateAPI() throws IOException, MicroGWTestException, InterruptedException {
+    public void testBlockedStateAPI() throws IOException, CCTestException, InterruptedException {
         changeLCStateAPI(apiId, APILifeCycleAction.BLOCK.getAction(), restAPIPublisher, false);
         Thread.sleep(3000);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(endpointURL, requestHeaders);
@@ -106,7 +106,7 @@ public class BlockedAPITestCase extends APIMLifecycleBaseTest {
     }
 
     @Test(description = "Re publish the blocked API and test", dependsOnMethods = "testBlockedStateAPI")
-    public void testRePublishAPI() throws IOException, MicroGWTestException, InterruptedException {
+    public void testRePublishAPI() throws IOException, CCTestException, InterruptedException {
         changeLCStateAPI(apiId, APILifeCycleAction.RE_PUBLISH.getAction(), restAPIPublisher, false);
         Thread.sleep(3000);
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(endpointURL, requestHeaders);

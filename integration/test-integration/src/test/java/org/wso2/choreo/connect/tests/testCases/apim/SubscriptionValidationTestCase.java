@@ -28,7 +28,7 @@ import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.APIMLifecycleBaseTest;
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -77,7 +77,7 @@ public class SubscriptionValidationTestCase extends APIMLifecycleBaseTest {
     }
 
     @Test(description = "Send a request to a unsubscribed REST API and check if the API invocation is forbidden")
-    public void testAPIsForInvalidSubscription() throws MicroGWTestException, MalformedURLException {
+    public void testAPIsForInvalidSubscription() throws CCTestException, MalformedURLException {
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
                 isResponseAvailable(endpointURL, requestHeaders));
 
@@ -85,7 +85,7 @@ public class SubscriptionValidationTestCase extends APIMLifecycleBaseTest {
         try {
             response = HttpsClientRequest.doGet(endpointURL, requestHeaders);
         } catch (IOException e) {
-            throw new MicroGWTestException("Error occurred while invoking the endpoint: " + endpointURL, e);
+            throw new CCTestException("Error occurred while invoking the endpoint: " + endpointURL, e);
         }
         Assert.assertTrue(response.getResponseCode() == HttpStatus.SC_FORBIDDEN && response.getData()
                                   .contains(TestConstant.RESOURCE_FORBIDDEN_CODE),
@@ -95,7 +95,7 @@ public class SubscriptionValidationTestCase extends APIMLifecycleBaseTest {
 
     @Test(description = "Send a request to a subscribed REST API returning 200 and check if the expected result is "
             + "received", dependsOnMethods = "testAPIsForInvalidSubscription")
-    public void testAPIsForValidSubscription() throws IOException, MicroGWTestException {
+    public void testAPIsForValidSubscription() throws IOException, CCTestException {
         HttpResponse subscriptionResponse = subscribeToAPI(apiId, applicationId,
                                                            TestConstant.SUBSCRIPTION_TIER.UNLIMITED, restAPIStore);
 

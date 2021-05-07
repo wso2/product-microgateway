@@ -18,16 +18,14 @@
 
 package org.wso2.choreo.connect.tests.context;
 
+import java.io.IOException;
+
 /**
- * Exception to be thrown by test utilities.
+ * Interface for test Server implementation.
  */
-public class MicroGWTestException extends Exception {
+public interface ChoreoConnect {
 
-    public MicroGWTestException(String message) {
-        super(message);
-    }
+    void startChoreoConnect() throws IOException, InterruptedException;
 
-    public MicroGWTestException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    void stopChoreoConnect();
 }

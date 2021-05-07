@@ -20,22 +20,25 @@ package org.wso2.choreo.connect.tests.testCaseBefore;
 import java.io.File;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
-import org.wso2.choreo.connect.tests.common.BaseTestCase;
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CcInstance;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
 
 import java.util.concurrent.TimeUnit;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
-public class MgwWithBackendTls extends BaseTestCase {
+public class CcWithBackendTls {
+    CcInstance microGWServer;
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
         String targetDir = Utils.getTargetDirPath();
-        String confPath = targetDir + TestConstant.TEST_RESOURCES_PATH + File.separator + "cors" + File.separator
-                + "cors-disabled-config.toml";
-        super.startMGW(confPath, true);
+        String confPath = targetDir + TestConstant.TEST_RESOURCES_PATH + TestConstant.CONFIGS_DIR
+                + File.separator + "cors-disabled-config.toml";
+        microGWServer = new CcInstance(confPath, true);
+        microGWServer.startChoreoConnect();
+
         ApictlUtils.createProject("backend_tsl_openAPI.yaml", "backend_tsl_petstore", "backend_tls.crt", null);
         ApictlUtils.createProject( "cors_openAPI.yaml", "cors_petstore", null, null);
 
@@ -48,8 +51,8 @@ public class MgwWithBackendTls extends BaseTestCase {
     }
 
     @AfterTest(description = "stop the setup")
-    void stop() throws MicroGWTestException {
-        super.stopMGW();
+    void stop() throws CCTestException {
+        microGWServer.stopChoreoConnect();
         ApictlUtils.removeEnv("test");
     }
 }

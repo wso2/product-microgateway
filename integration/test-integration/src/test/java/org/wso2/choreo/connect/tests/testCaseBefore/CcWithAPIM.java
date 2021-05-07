@@ -29,39 +29,30 @@ import org.wso2.am.integration.test.impl.RestAPIStoreImpl;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
 import org.wso2.am.integration.test.utils.bean.DCRParamRequest;
 import org.wso2.choreo.connect.tests.apim.APIMLifecycleBaseTest;
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
+import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-public class APIManagerInitializeTestCase extends APIMLifecycleBaseTest {
+public class CcWithAPIM extends APIMLifecycleBaseTest {
 
     @BeforeTest(description = "start the mgw along with apim server")
     void start() throws Exception {
-        URL ccConfigToml = getClass().getClassLoader().getResource("apim/config.toml");
-        if (ccConfigToml == null) {
-            throw new MicroGWTestException(
-                    "Config toml cannot be found. Hence, not starting the API Manager server with Mgw server");
-        }
-        String ccConfigTomlPath = ccConfigToml.getPath();
-
-        // Configure multiple vhosts in API-M
-        URL apimDeploymentToml = getClass().getClassLoader().getResource("apim/vhost-deployment.toml");
-        if (apimDeploymentToml == null) {
-            throw new MicroGWTestException("APIM Deployment toml configured with vhosts cannot be found. " +
-                    "Hence, not starting the API Manager server with Mgw server");
-        }
-        String apimDeploymentTomlPath = apimDeploymentToml.getPath();
-
+        String targetDir = Utils.getTargetDirPath();
+        String apimDeploymentTomlPath = targetDir + TestConstant.TEST_RESOURCES_PATH + TestConstant.CONFIGS_DIR
+                + File.separator + "vhost-deployment.toml";
+        String ccConfigTomlPath = targetDir + TestConstant.TEST_RESOURCES_PATH + TestConstant.CONFIGS_DIR
+                + File.separator + "controlplane-enabled-config.toml";
         try {
-            super.startAPIMWithMGW(apimDeploymentTomlPath, ccConfigTomlPath, true, true);
-        } catch (MicroGWTestException | IOException e) {
+            super.startAPIMWithMGW(apimDeploymentTomlPath, ccConfigTomlPath, true);
+        } catch (CCTestException | IOException e) {
             Assert.fail("Error starting the APIM server with MGW", e);
         }
 
