@@ -18,7 +18,7 @@
 
 package org.wso2.choreo.connect.tests.mockbackend;
 
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.File;
@@ -42,10 +42,10 @@ public class MockBackendServer {
      *
      * @param dockerComposePath - path for the mgw setup docker-compose file
      * @throws IOException          if something goes wrong while file operations
-     * @throws MicroGWTestException if something goes wrong while copying the config file
+     * @throws CCTestException if something goes wrong while copying the config file
      */
     public static void addMockBackendServiceToDockerCompose(String dockerComposePath)
-            throws IOException, MicroGWTestException {
+            throws IOException, CCTestException {
         addMockBackendServiceToDockerCompose(dockerComposePath, false);
     }
 
@@ -55,10 +55,10 @@ public class MockBackendServer {
      * @param dockerComposePath - path for the mgw setup docker-compose file
      * @param tlsEnabled        - if the backend needs to have the tls enabled server
      * @throws IOException          if something goes wrong while file operations
-     * @throws MicroGWTestException if something goes wrong while copying the config file
+     * @throws CCTestException if something goes wrong while copying the config file
      */
     public static void addMockBackendServiceToDockerCompose(String dockerComposePath, boolean tlsEnabled)
-            throws IOException, MicroGWTestException {
+            throws IOException, CCTestException {
 
         File targetClassesDir = new File(MockBackendServer.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());

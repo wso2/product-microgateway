@@ -22,7 +22,6 @@ import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.choreo.connect.tests.common.BaseTestCase;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
@@ -38,7 +37,7 @@ import java.util.Map;
  * Api deploy test cases.
  *
  */
-public class APiDeployViaRestTestCase extends BaseTestCase {
+public class APiDeployViaRestTestCase {
 
     @Test(description = "Test to check the api deployment is working")
     public void apiDeployTest() throws Exception {

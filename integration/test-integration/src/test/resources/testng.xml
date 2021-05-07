@@ -35,7 +35,7 @@
     </test>
     <test name="micro-gw-with-default-config" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithDefaultConf"/>
+            <class name="org.wso2.choreo.connect.tests.testCaseBefore.CcWithDefaultConf"/>
             <class name="org.wso2.choreo.connect.tests.testCases.apiDeploy.APiDeployViaRestTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.apiDeploy.APiDeployViaApictlTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.endpoints.ProductionSandboxTestCase"/>
@@ -50,14 +50,14 @@
     </test>
     <test name="micro-gw-with-backend-tls" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithBackendTls"/>
+            <class name="org.wso2.choreo.connect.tests.testCaseBefore.CcWithBackendTls"/>
             <class name="org.wso2.choreo.connect.tests.testCases.backendtls.BackendTLSTestcase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.security.CorsTestCase"/>
         </classes>
     </test>
     <test name="micro-gw-with-jwt-config" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithJwtConfig"/>
+            <class name="org.wso2.choreo.connect.tests.testCaseBefore.CcWithJwtConfig"/>
             <class name="org.wso2.choreo.connect.tests.testCases.security.CorsTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.jwtGenerator.JwtGeneratorTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testCases.jwtGenerator.JwtTransformerTestCase"/>
@@ -65,21 +65,21 @@
     </test>
     <test name="micro-gw-with-jwt-config-and-transformer" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.choreo.connect.tests.testCaseBefore.MgwWithJwtConfigAndTransformer"/>
+            <class name="org.wso2.choreo.connect.tests.testCaseBefore.CcWithJwtConfigAndTransformer"/>
             <class name="org.wso2.choreo.connect.tests.testCases.jwtGenerator.CustomJwtTransformerTestCase"/>
         </classes>
     </test>
-    <test name="mgw-micro-with-apim" preserve-order="true" parallel="false">
-        <classes>
-            <class name="org.wso2.choreo.connect.tests.testCaseBefore.APIManagerInitializeTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.apim.throttle.AdvanceThrottlingTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.apim.throttle.ApplicationThrottlingTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.apim.throttle.SubscriptionThrottlingTestCase"/>
-<!--            TODO: (Praminda) this requires upgrade in apim throttle dependency. enable after upgrade-->
-<!--            <class name="org.wso2.choreo.connect.tests.testCases.apim.throttle.DenyConditionTestCase"/>-->
-            <class name="org.wso2.choreo.connect.tests.testCases.apim.SubscriptionValidationTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.apim.BlockedAPITestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testCases.apim.VhostAPIMTestCase"/>
-        </classes>
-    </test>
+<!--    <test name="mgw-micro-with-apim" preserve-order="true" parallel="false">-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCaseBefore.CcWithAPIM"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.apim.throttle.AdvanceThrottlingTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.apim.throttle.ApplicationThrottlingTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.apim.throttle.SubscriptionThrottlingTestCase"/>-->
+<!--&lt;!&ndash;            TODO: (Praminda) this requires upgrade in apim throttle dependency. enable after upgrade&ndash;&gt;-->
+<!--&lt;!&ndash;            <class name="org.wso2.choreo.connect.tests.testCases.apim.throttle.DenyConditionTestCase"/>&ndash;&gt;-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.apim.SubscriptionValidationTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.apim.BlockedAPITestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.apim.VhostAPIMTestCase"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 </suite>

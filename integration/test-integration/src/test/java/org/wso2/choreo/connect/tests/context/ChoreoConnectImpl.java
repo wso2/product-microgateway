@@ -23,8 +23,10 @@ import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
+import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.File;
@@ -35,27 +37,26 @@ import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-public abstract class MgwServerImpl implements MgwServer {
 
-    private static final Logger log = LoggerFactory.getLogger(MgwServerImpl.class);
+public abstract class ChoreoConnectImpl implements ChoreoConnect {
+
+    static final String ENFORCER_DEBUG_ENV = "ENFORCER_DEBUG";
+    private static final Logger log = LoggerFactory.getLogger(ChoreoConnectImpl.class);
     DockerComposeContainer environment;
 
-    String targetDir;
-    String mgwTmpServerPath;
-    String mgwServerPath;
+    String ccTempPath;
+    String ccExtractedPath;
 
-    MgwServerImpl() throws IOException {
-        targetDir = Utils.getTargetDirPath();
-        mgwTmpServerPath = targetDir + File.separator + "server-tmp";
-
+    ChoreoConnectImpl() throws IOException {
         final Properties properties = new Properties();
         properties.load(getClass().getClassLoader().getResourceAsStream("project.properties"));
-        mgwServerPath = targetDir + File.separator + "micro-gwtmp" + File.separator + "choreo-connect-" + properties
-                .getProperty("version");
+
+        ccExtractedPath = Utils.getTargetDirPath() + File.separator + "choreo-connect-" + properties.getProperty("version");
+        ccTempPath = Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH;
     }
 
     @Override
-    public void startMGW() throws IOException {
+    public void startChoreoConnect() throws IOException {
         try {
             environment.start();
         } catch (Exception e) {
@@ -68,7 +69,7 @@ public abstract class MgwServerImpl implements MgwServer {
     }
 
     @Override
-    public void stopMGW() {
+    public void stopChoreoConnect() {
         environment.stop();
     }
 
@@ -101,16 +102,30 @@ public abstract class MgwServerImpl implements MgwServer {
     /**
      * This will create a separate mgw setup in the target directory to execute the tests.
      *
-     * @param customJwtTransformerEnabled - whether the custom JWT transformer is enabled or not
-     * @throws MicroGWTestException if an error occurs while file copy operation
+     * @throws CCTestException if an error occurs while file copy operation
      */
-    void createTmpMgwSetup(boolean customJwtTransformerEnabled) throws MicroGWTestException {
-        Utils.copyDirectory(mgwServerPath, mgwTmpServerPath);
-        if (customJwtTransformerEnabled) {
-            Utils.copyFile(System.getProperty("jwt_transformer_jar"),
-                    targetDir + File.separator + "server-tmp" + File.separator + "docker-compose" + File.separator
-                            + "resources" + File.separator + "enforcer" + File.separator + "dropins" + File.separator
-                            + "jwt-transformer.jar");
+    void createTmpMgwSetup() throws CCTestException {
+        Utils.copyDirectory(ccExtractedPath, ccTempPath);
+    }
+
+    public void addCcLoggersToEnv() {
+        Logger enforcerLogger = LoggerFactory.getLogger("Enforcer");
+        Logger adapterLogger = LoggerFactory.getLogger("Adapter");
+        Logger routerLogger = LoggerFactory.getLogger("Router");
+        Slf4jLogConsumer enforcerLogConsumer = new Slf4jLogConsumer(enforcerLogger);
+        Slf4jLogConsumer adapterLogConsumer = new Slf4jLogConsumer(adapterLogger);
+        Slf4jLogConsumer routerLogConsumer = new Slf4jLogConsumer(routerLogger);
+        environment.withLogConsumer("enforcer", enforcerLogConsumer)
+                .withLogConsumer("adapter", adapterLogConsumer)
+                .withLogConsumer("router", routerLogConsumer);
+        if (Boolean.parseBoolean(System.getenv(ENFORCER_DEBUG_ENV))) {
+            environment.withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5006");
         }
+    }
+
+    public void addCustomJwtTransformer() throws CCTestException {
+        Utils.copyFile(System.getProperty("jwt_transformer_jar"),
+                Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH
+                        + File.separator + "jwt-transformer.jar");
     }
 }

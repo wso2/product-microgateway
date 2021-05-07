@@ -23,14 +23,13 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,12 +37,12 @@ public class QSGTestCase {
     private static final String encodedCredentials = "Basic YWRtaW46YWRtaW4=";
 
     @BeforeClass
-    public void createApiProject() throws IOException, MicroGWTestException {
+    public void createApiProject() throws IOException, CCTestException {
         ApictlUtils.createProject( "https://petstore.swagger.io/v2/swagger.json", "qsg_petstore", null, null);
     }
 
     @Test
-    public void deployAPI() throws MicroGWTestException {
+    public void deployAPI() throws CCTestException {
         ApictlUtils.login("test");
         ApictlUtils.deployAPI("qsg_petstore", "test");
     }

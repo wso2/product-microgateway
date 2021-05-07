@@ -24,7 +24,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
-import org.wso2.choreo.connect.tests.common.BaseTestCase;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -34,7 +33,7 @@ import org.wso2.choreo.connect.tests.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OpenAPIV3TestCase  extends BaseTestCase {
+public class OpenAPIV3TestCase {
     protected String jwtToken;
 
     @BeforeClass(description = "initialise the setup")

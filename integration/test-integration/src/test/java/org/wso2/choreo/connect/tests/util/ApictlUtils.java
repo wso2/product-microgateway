@@ -3,7 +3,7 @@ package org.wso2.choreo.connect.tests.util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -58,10 +58,9 @@ public class ApictlUtils {
             "certs" + File.separator;
     public static final String DEPLOYMENT_ENVIRONMENTS_YAML_PATH = TestConstant.TEST_RESOURCES_PATH + File.separator +
             "deploymentEnvironments" + File.separator;
-    public static final String MGW_ADAPTER_CERTS_PATH =
-            File.separator + "server-tmp" + File.separator + "docker-compose" + File.separator + "resources"
-                    + File.separator + "adapter" + File.separator + "security" + File.separator + "truststore"
-                    + File.separator;
+    public static final String MGW_ADAPTER_CERTS_PATH = TestConstant.CC_TEMP_PATH + TestConstant.DOCKER_COMPOSE_DIR
+            + File.separator + "resources" + File.separator + "adapter" + File.separator + "security"
+            + File.separator + "truststore" + File.separator;
     public static final String APICTL_CERTS_PATH = File.separator +
             ".wso2apictl" + File.separator + "certs" + File.separator;
 
@@ -90,12 +89,12 @@ public class ApictlUtils {
      *                    Endpoint-certificates folder in the API project
      * @return absolute path of the zipped API project
      * @throws IOException if the runtime fails to execute the apictl command
-     * @throws MicroGWTestException if apictl was unable to create the project
+     * @throws CCTestException if apictl was unable to create the project
      */
-    public static String createProjectZip(String openApiFile, String apiProjectName, String backendCert) throws IOException, MicroGWTestException {
+    public static String createProjectZip(String openApiFile, String apiProjectName, String backendCert) throws IOException, CCTestException {
         try {
             createProject(openApiFile, apiProjectName, backendCert, null);
-        } catch (MicroGWTestException e) {
+        } catch (CCTestException e) {
             if (!e.getMessage().equals("Project already exists")) {
                 throw e;
             }
@@ -115,10 +114,10 @@ public class ApictlUtils {
      *                    Endpoint-certificates folder in the API project
      * @param deployEnvYamlFile deployment_environments.yaml file of API project
      * @throws IOException if the runtime fails to execute the apictl command
-     * @throws MicroGWTestException if apictl was unable to create the project
+     * @throws CCTestException if apictl was unable to create the project
      */
     public static void createProject(String openApiFile, String apiProjectName, String backendCert, String deployEnvYamlFile)
-            throws IOException, MicroGWTestException {
+            throws IOException, CCTestException {
         String targetDir = Utils.getTargetDirPath();
         String openApiFilePath;
         if(openApiFile.startsWith("https://") || openApiFile.startsWith("http://")) {
@@ -135,9 +134,9 @@ public class ApictlUtils {
 
         if (responseLines[1]!= null && !PROJECT_INITIALIZED_RESPONSE.equals(responseLines[1].trim())) {
             if ((projectPathToCreate + ALREADY_EXISTS_RESPONSE).equals(responseLines[0].trim())) {
-                throw new MicroGWTestException("Project already exists");
+                throw new CCTestException("Project already exists");
             } else {
-                throw new MicroGWTestException("Could not initialize API project: " + apiProjectName
+                throw new CCTestException("Could not initialize API project: " + apiProjectName
                         + " using the API definition: " + openApiFile);
             }
         }
@@ -159,18 +158,18 @@ public class ApictlUtils {
      * Add a microgateway adapter env to apictl
      *
      * @param mgwEnv name of the apictl mgw env
-     * @throws MicroGWTestException if apictl was unable to add the env
+     * @throws CCTestException if apictl was unable to add the env
      */
-    public static void addEnv(String mgwEnv) throws MicroGWTestException {
+    public static void addEnv(String mgwEnv) throws CCTestException {
         String[] cmdArray = { MG, ADD, ENV };
         String[] argsArray = { mgwEnv, ADAPTER_FLAG, "https://localhost:9843" };
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
             if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFUL_ADD_ENV_RESPONSE)) {
-                throw new MicroGWTestException("Unable to add microgateway adapter env to apictl");
+                throw new CCTestException("Unable to add microgateway adapter env to apictl");
             }
         } catch (IOException e) {
-            throw new MicroGWTestException("Unable to add microgateway adapter env to apictl", e);
+            throw new CCTestException("Unable to add microgateway adapter env to apictl", e);
         }
         // copy mgw public cert to apictl's cert folder
         //${home_dir}/security/truststore/mg.pem -> ${home_dir}/.wso2apictl/certs/mg.pem
@@ -185,16 +184,16 @@ public class ApictlUtils {
      * Remove a microgateway adapter env from apictl
      *
      * @param mgwEnv name of the apictl mgw env
-     * @throws MicroGWTestException if apictl was unable to remove the env
+     * @throws CCTestException if apictl was unable to remove the env
      */
-    public static void removeEnv(String mgwEnv) throws MicroGWTestException {
+    public static void removeEnv(String mgwEnv) throws CCTestException {
         String[] cmdArray = { MG, REMOVE, ENV };
         String[] argsArray = { mgwEnv };
         try {
             log.info("Removing apictl microgateway environment: " + mgwEnv);
             runApictlCommand(cmdArray, argsArray, 1);
         } catch (IOException e) {
-            throw new MicroGWTestException("Unable to remove microgateway adapter env from apictl", e);
+            throw new CCTestException("Unable to remove microgateway adapter env from apictl", e);
         }
     }
 
@@ -202,21 +201,21 @@ public class ApictlUtils {
      * Login to a microgateway adapter env in apictl
      *
      * @param mgwEnv name of the apictl mgw env
-     * @throws MicroGWTestException if apictl was unable to login to the env
+     * @throws CCTestException if apictl was unable to login to the env
      *                  i.e. if apictl was unable to get an access token from mgw and save
      */
-    public static void login(String mgwEnv) throws MicroGWTestException {
+    public static void login(String mgwEnv) throws CCTestException {
         String[] cmdArray = { MG, LOGIN };
         String[] argsArray = { mgwEnv, USER_FLAG, "admin", PASSWORD_FLAG, "admin" };
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 2);
 
             if (responseLines[1]!= null && !responseLines[1].startsWith(SUCCESSFUL_LOGIN_RESPONSE)) {
-                throw new MicroGWTestException("Unable to login to apictl microgateway adapter env:"
+                throw new CCTestException("Unable to login to apictl microgateway adapter env:"
                         + mgwEnv);
             }
         } catch (IOException e) {
-            throw new MicroGWTestException("Unable to login to apictl microgateway adapter env:"
+            throw new CCTestException("Unable to login to apictl microgateway adapter env:"
                     + mgwEnv, e);
         }
         log.info("Logged into apictl microgateway environment: " + mgwEnv);
@@ -226,19 +225,19 @@ public class ApictlUtils {
      * Logout from a microgateway adapter env in apictl
      *
      * @param mgwEnv name of the apictl mgw env
-     * @throws MicroGWTestException if apictl was unable to logout from the env
+     * @throws CCTestException if apictl was unable to logout from the env
      */
-    public static void logout(String mgwEnv) throws MicroGWTestException {
+    public static void logout(String mgwEnv) throws CCTestException {
         String[] cmdArray = { MG, LOGOUT };
         String[] argsArray = { mgwEnv };
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
             if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFUL_LOGOUT_RESPONSE)) {
-                throw new MicroGWTestException("Unable to logout from apictl microgateway adapter env: "
+                throw new CCTestException("Unable to logout from apictl microgateway adapter env: "
                     + mgwEnv);
             }
         } catch (IOException e) {
-            throw new MicroGWTestException("Unable to logout out from apictl microgateway adapter env: "
+            throw new CCTestException("Unable to logout out from apictl microgateway adapter env: "
                     + mgwEnv, e);
         }
         log.info("Logged out from apictl microgateway environment: " + mgwEnv);
@@ -249,9 +248,9 @@ public class ApictlUtils {
      *
      * @param apiProjectName API project that represents the API
      * @param mgwEnv name of the apictl mgw env
-     * @throws MicroGWTestException if apictl was unable to deploy the API to the apictl mgw env
+     * @throws CCTestException if apictl was unable to deploy the API to the apictl mgw env
      */
-    public static void deployAPI(String apiProjectName, String mgwEnv) throws MicroGWTestException {
+    public static void deployAPI(String apiProjectName, String mgwEnv) throws CCTestException {
         String targetDir = Utils.getTargetDirPath();
         String projectPath = targetDir + API_PROJECTS_PATH + apiProjectName;
 
@@ -260,11 +259,11 @@ public class ApictlUtils {
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
             if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFULLY_DEPLOYED_RESPONSE)) {
-                throw new MicroGWTestException("Unable to deploy API project: "
+                throw new CCTestException("Unable to deploy API project: "
                         + apiProjectName + " to microgateway adapter environment: " + mgwEnv);
             }
         } catch (IOException e) {
-            throw new MicroGWTestException("Unable to deploy API project: "
+            throw new CCTestException("Unable to deploy API project: "
                     + apiProjectName + " to microgateway adapter environment: " + mgwEnv, e);
         }
         log.info("Deployed API project: " + apiProjectName + " to microgateway adapter environment: " + mgwEnv);
@@ -277,9 +276,9 @@ public class ApictlUtils {
      * @param apiVersion version of the API
      * @param mgwEnv name of the apictl mgw env the API was deployed
      * @param vhost vhost of the API to be undeployed from
-     * @throws MicroGWTestException if apictl was unable to undeploy the API
+     * @throws CCTestException if apictl was unable to undeploy the API
      */
-    public static void undeployAPI(String apiName, String apiVersion, String mgwEnv, String vhost) throws MicroGWTestException {
+    public static void undeployAPI(String apiName, String apiVersion, String mgwEnv, String vhost) throws CCTestException {
         String[] cmdArray = { MG, UNDEPLOY, API };
         List<String> args = new ArrayList<>(Arrays.asList(NAME_FLAG, apiName, VERSION_FLAG, apiVersion, ENV_FLAG, mgwEnv));
         String loggedVhost = "<EMPTY_VHOST>";
@@ -291,11 +290,11 @@ public class ApictlUtils {
         try {
             String[] responseLines = runApictlCommand(cmdArray, argsArray, 1);
             if (responseLines[0]!= null && !responseLines[0].startsWith(SUCCESSFULLY_UNDEPLOYED_RESPONSE)) {
-                throw new MicroGWTestException("Unable to undeploy API: "
+                throw new CCTestException("Unable to undeploy API: "
                         + apiName + " from microgateway adapter environment: " + mgwEnv + " vhost: " + loggedVhost);
             }
         } catch (IOException e) {
-            throw new MicroGWTestException("Unable to undeploy API: "
+            throw new CCTestException("Unable to undeploy API: "
                     + apiName + " from microgateway adapter environment: " + mgwEnv + " vhost: " + loggedVhost, e);
         }
         log.info("Undeployed API project: " + apiName + " from microgateway adapter environment: " + mgwEnv + " vhost: " + loggedVhost);

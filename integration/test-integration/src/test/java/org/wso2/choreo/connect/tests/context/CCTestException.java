@@ -18,14 +18,16 @@
 
 package org.wso2.choreo.connect.tests.context;
 
-import java.io.IOException;
-
 /**
- * Interface for test Server implementation.
+ * Exception to be thrown by test utilities.
  */
-public interface MgwServer {
+public class CCTestException extends Exception {
 
-    void startMGW() throws IOException, InterruptedException;
+    public CCTestException(String message) {
+        super(message);
+    }
 
-    void stopMGW();
+    public CCTestException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

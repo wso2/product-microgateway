@@ -48,9 +48,8 @@ import org.wso2.carbon.integration.common.admin.client.UserManagementClient;
 import org.wso2.carbon.integration.common.utils.LoginLogoutClient;
 import org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.choreo.connect.tests.common.BaseTestCase;
-import org.wso2.choreo.connect.tests.context.APIManagerWithMgwServerInstance;
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CcWithApimInstance;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 
@@ -64,10 +63,10 @@ import java.util.concurrent.Callable;
 
 import javax.xml.xpath.XPathExpressionException;
 
-public class APIMWithMgwBaseTest extends BaseTestCase {
+public class APIMWithMgwBaseTest {
     private static final Logger log = LoggerFactory.getLogger(APIMWithMgwBaseTest.class);
 
-    private static APIManagerWithMgwServerInstance apiManagerWithMgwServerInstance;
+    private static CcWithApimInstance apiManagerWithMgwServerInstance;
     protected AutomationContext apimServerContext, superTenantKeyManagerContext;
     protected UserManagementClient userManagementClient;
     protected RemoteUserStoreManagerServiceClient remoteUserStoreManagerServiceClient;
@@ -86,12 +85,12 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
     protected String apimServiceURLHttps;
     protected TestUserMode userMode;
 
-    protected void init() throws MicroGWTestException, XPathExpressionException {
+    protected void init() throws CCTestException, XPathExpressionException {
         userMode = TestUserMode.SUPER_TENANT_ADMIN;
         init(userMode);
     }
 
-    protected void init(TestUserMode userMode) throws MicroGWTestException, XPathExpressionException {
+    protected void init(TestUserMode userMode) throws CCTestException, XPathExpressionException {
         apimServerContext = new AutomationContext(TestConstant.AM_PRODUCT_GROUP_NAME,
                                                   TestConstant.AM_ALL_IN_ONE_INSTANCE, userMode);
 
@@ -140,7 +139,7 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
                     new ApplicationManagementClient(apimServerContext.getContextUrls().getBackEndUrl(),
                                                     keyManagerSessionCookie);
         } catch (Exception e) {
-            throw new MicroGWTestException(e.getMessage(), e);
+            throw new CCTestException(e.getMessage(), e);
         }
     }
 
@@ -149,11 +148,11 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
      *
      * @param confPath   - external conf.toml file location
      * @param tlsEnabled - true if the tls based backend server is required additionally
-     * @throws MicroGWTestException if something goes wrong while copying server configs
+     * @throws CCTestException if something goes wrong while copying server configs
      * @throws IOException          if an error while starting the mock-backend
      */
-    protected void startAPIMWithMGW(String confPath, boolean tlsEnabled) throws MicroGWTestException, IOException {
-        startAPIMWithMGW(null, confPath, tlsEnabled, false);
+    protected void startAPIMWithMGW(String confPath, boolean tlsEnabled) throws CCTestException, IOException {
+        startAPIMWithMGW(null, confPath, tlsEnabled);
     }
 
     /**
@@ -162,21 +161,20 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
      * @param apimDeploymentTomlPath - external APIM deployment.toml file location
      * @param ccConfigTomlPath       - external CC conf.toml file location
      * @param tlsEnabled             - true if the tls based backend server is required additionally
-     * @param includeCustomImpl      - true if it is required to include the test-integration jar
-     * @throws MicroGWTestException if something goes wrong while copying server configs
+     * @throws CCTestException if something goes wrong while copying server configs
      * @throws IOException          if an error while starting the mock-backend
      */
-    protected void startAPIMWithMGW(String apimDeploymentTomlPath, String ccConfigTomlPath, boolean tlsEnabled, boolean includeCustomImpl)
-            throws MicroGWTestException, IOException {
-        apiManagerWithMgwServerInstance = new APIManagerWithMgwServerInstance(apimDeploymentTomlPath, ccConfigTomlPath, tlsEnabled, includeCustomImpl);
-        apiManagerWithMgwServerInstance.startMGW();
+    protected void startAPIMWithMGW(String apimDeploymentTomlPath, String ccConfigTomlPath, boolean tlsEnabled)
+            throws CCTestException, IOException {
+        apiManagerWithMgwServerInstance = new CcWithApimInstance(apimDeploymentTomlPath, ccConfigTomlPath, tlsEnabled);
+        apiManagerWithMgwServerInstance.startChoreoConnect();
     }
 
     /**
      * stop the apim, mgw servers and the mock backend.
      */
     protected void stopAPIMWithMGW() {
-        apiManagerWithMgwServerInstance.stopMGW();
+        apiManagerWithMgwServerInstance.stopChoreoConnect();
     }
 
 
@@ -225,11 +223,11 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
      * @param apiName          - API name
      * @param apiVersion       - API version
      * @param expectedResponse - Expected response
-     * @throws MicroGWTestException if something goes wrong when getting the tenant identifier
+     * @throws CCTestException if something goes wrong when getting the tenant identifier
      */
     protected void waitForAPIDeploymentSync(String apiProvider, String apiName, String apiVersion,
                                   String expectedResponse)
-            throws XPathExpressionException, MicroGWTestException {
+            throws XPathExpressionException, CCTestException {
 
         long currentTime = System.currentTimeMillis();
         long waitTime = currentTime + (60 * 1000);
@@ -280,7 +278,7 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
      * @param apiProvider - Provider of the API
      * @return tenatDomain/tenantId/
      */
-    private String getTenantIdentifier(String apiProvider) throws MicroGWTestException {
+    private String getTenantIdentifier(String apiProvider) throws CCTestException {
         int tenantId = -1234;
         String providerTenantDomain = MultitenantUtils.getTenantDomain(apiProvider);
         try {
@@ -299,7 +297,7 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
                 new LoginLogoutClient(apimServerContext).login();
             }
         } catch (Exception e) {
-            throw new MicroGWTestException(e.getMessage(), e);
+            throw new CCTestException(e.getMessage(), e);
         }
         return providerTenantDomain + "/" + tenantId + "/";
     }
@@ -309,17 +307,17 @@ public class APIMWithMgwBaseTest extends BaseTestCase {
      *
      * @param automationContext - automation context instance of given server
      * @return - created session cookie variable
-     * @throws MicroGWTestException if creating session cookie fails
+     * @throws CCTestException if creating session cookie fails
      */
     private String createSession(AutomationContext automationContext)
-            throws MicroGWTestException {
+            throws CCTestException {
         org.wso2.carbon.integration.common.utils.LoginLogoutClient loginLogoutClient;
         try {
             loginLogoutClient = new LoginLogoutClient(automationContext);
             return loginLogoutClient.login();
         } catch (Exception e) {
             log.error("session creation error", e);
-            throw new MicroGWTestException("Session creation error", e);
+            throw new CCTestException("Session creation error", e);
         }
     }
 

@@ -25,7 +25,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -120,13 +120,13 @@ public class Utils {
      * Check whether given port is in use or not.
      *
      * @param port - port number
-     * @throws MicroGWTestException if port is already in use
+     * @throws CCTestException if port is already in use
      */
-    public static void checkPortAvailability(int port) throws MicroGWTestException {
+    public static void checkPortAvailability(int port) throws CCTestException {
 
         //check whether http port is already occupied
         if (isPortOpen(port)) {
-            throw new MicroGWTestException("Unable to start carbon server on port " +
+            throw new CCTestException("Unable to start carbon server on port " +
                                                    (port) + " : Port already in use");
         }
     }
@@ -318,15 +318,15 @@ public class Utils {
      *
      * @param sourceLocation file location.
      * @param destLocation   copy destination.
-     * @throws MicroGWTestException
+     * @throws CCTestException
      */
-    public static void copyFile(String sourceLocation, String destLocation) throws MicroGWTestException {
+    public static void copyFile(String sourceLocation, String destLocation) throws CCTestException {
         File source = new File(sourceLocation);
         File destination = new File(destLocation);
         try {
             FileUtils.copyFile(source, destination);
         } catch (IOException e) {
-            throw new MicroGWTestException("error while copying file. ", e);
+            throw new CCTestException("error while copying file. ", e);
         }
     }
 
@@ -335,15 +335,15 @@ public class Utils {
      *
      * @param sourceLocation folder location.
      * @param destLocation   copy destination.
-     * @throws MicroGWTestException
+     * @throws CCTestException
      */
-    public static void copyDirectory(String sourceLocation, String destLocation) throws MicroGWTestException {
+    public static void copyDirectory(String sourceLocation, String destLocation) throws CCTestException {
         File source = new File(sourceLocation);
         File destination = new File(destLocation);
         try {
             FileUtils.copyDirectory(source, destination);
         } catch (IOException e) {
-            throw new MicroGWTestException("error while copying directory. ");
+            throw new CCTestException("error while copying directory. ");
         }
     }
 
@@ -353,14 +353,14 @@ public class Utils {
      * @param httpResponse - Response that containing the JSON object in it response data.
      * @param key          - key of the JSON value the need to retrieve.
      * @return String - The value of provided key as a String
-     * @throws MicroGWTestException - Exception throws when resolving the JSON object in the HTTP response
+     * @throws CCTestException - Exception throws when resolving the JSON object in the HTTP response
      */
-    protected String getValueFromJSON(HttpResponse httpResponse, String key) throws MicroGWTestException {
+    protected String getValueFromJSON(HttpResponse httpResponse, String key) throws CCTestException {
         try {
             JSONObject jsonObject = new JSONObject(httpResponse.getData());
             return jsonObject.get(key).toString();
         } catch (JSONException e) {
-            throw new MicroGWTestException("Exception thrown when resolving the JSON object in the HTTP response ", e);
+            throw new CCTestException("Exception thrown when resolving the JSON object in the HTTP response ", e);
         }
     }
 
