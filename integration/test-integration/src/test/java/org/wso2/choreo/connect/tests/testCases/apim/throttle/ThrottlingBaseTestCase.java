@@ -29,7 +29,7 @@ import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.am.integration.test.utils.http.HTTPSClientUtils;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.apim.APIMLifecycleBaseTest;
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
@@ -46,7 +46,7 @@ public class ThrottlingBaseTestCase extends APIMLifecycleBaseTest {
     private static final Logger log = LoggerFactory.getLogger(ThrottlingBaseTestCase.class);
 
     protected String createThrottleApi(String tiers, String apiTier, String resTier) throws MalformedURLException,
-            APIManagerIntegrationTestException, MicroGWTestException, ApiException {
+            APIManagerIntegrationTestException, CCTestException, ApiException {
         APIRequest apiRequest = new APIRequest(TestConstant.SAMPLE_API_NAME, TestConstant.SAMPLE_API_CONTEXT,
                 new URL(Utils.getDockerMockServiceURLHttp("/v2")));
         String API_VERSION_1_0_0 = "1.0.0";

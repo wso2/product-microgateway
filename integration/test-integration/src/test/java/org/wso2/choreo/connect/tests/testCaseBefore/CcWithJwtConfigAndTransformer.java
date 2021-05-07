@@ -19,8 +19,8 @@ package org.wso2.choreo.connect.tests.testCaseBefore;
 
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
-import org.wso2.choreo.connect.tests.common.BaseTestCase;
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CcInstance;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -28,26 +28,28 @@ import org.wso2.choreo.connect.tests.util.Utils;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
-public class MgwWithJwtConfig extends BaseTestCase {
+public class CcWithJwtConfigAndTransformer {
+    CcInstance microGWServer;
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
         String targetDir = Utils.getTargetDirPath();
-        String confPath = targetDir + TestConstant.TEST_RESOURCES_PATH + File.separator +
-                "jwtGenerator" + File.separator + "config.toml";
-        ApictlUtils.createProject( "global_cors_openAPI.yaml", "global_cors_petstore", null, null);
-        super.startMGW(confPath);
+        String confPath = targetDir + TestConstant.TEST_RESOURCES_PATH + TestConstant.CONFIGS_DIR
+                + File.separator + "jwt-generator-config.toml";
+
+        microGWServer = new CcInstance(confPath);
+        microGWServer.addCustomJwtTransformer();
+        microGWServer.startChoreoConnect();
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
         ApictlUtils.deployAPI("petstore", "test");
-        ApictlUtils.deployAPI("global_cors_petstore", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 
     @AfterTest(description = "stop the setup")
-    void stop() throws MicroGWTestException {
-        super.stopMGW();
+    void stop() throws CCTestException {
+        microGWServer.stopChoreoConnect();
         ApictlUtils.removeEnv("test");
     }
 }

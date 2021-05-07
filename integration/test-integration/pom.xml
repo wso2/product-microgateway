@@ -65,7 +65,7 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <target>
-                                <unzip src="${basedir}/../../distribution/target/choreo-connect-${project.version}.zip" dest="${basedir}/../test-integration/target/micro-gwtmp" />
+                                <unzip src="${basedir}/../../distribution/target/choreo-connect-${project.version}.zip" dest="${basedir}/../test-integration/target" />
                             </target>
                         </configuration>
                         <goals>

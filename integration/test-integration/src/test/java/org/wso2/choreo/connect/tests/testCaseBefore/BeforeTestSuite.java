@@ -19,7 +19,7 @@ package org.wso2.choreo.connect.tests.testCaseBefore;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeSuite;
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ import java.io.IOException;
 public class BeforeTestSuite {
 
     @BeforeSuite
-    public void checkVersion() throws IOException, MicroGWTestException {
+    public void checkVersion() throws IOException, CCTestException {
         String versionByApictl = ApictlUtils.getVersion();
         String versionFromPomXml = System.getProperty("apictl_version");
         Assert.assertEquals(versionByApictl, versionFromPomXml,"Expected apictl version is not downloaded");

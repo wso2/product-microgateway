@@ -22,8 +22,8 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import org.wso2.choreo.connect.tests.common.BaseTestCase;
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CcInstance;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
@@ -35,11 +35,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class MgwWithDefaultConf extends BaseTestCase {
+public class CcWithDefaultConf {
+    CcInstance microGWServer;
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        super.startMGW();
+        microGWServer = new CcInstance();
+        microGWServer.startChoreoConnect();
+
         ApictlUtils.createProject( "prod_and_sand_openAPI.yaml", "prod_and_sand_petstore", null, null);
         ApictlUtils.createProject( "prod_openAPI.yaml", "prod_petstore", null, null);
         ApictlUtils.createProject( "sand_openAPI.yaml", "sand_petstore", null, null);
@@ -89,8 +92,8 @@ public class MgwWithDefaultConf extends BaseTestCase {
     }
 
     @AfterTest(description = "stop the setup")
-    void stop() throws MicroGWTestException {
-        super.stopMGW();
+    void stop() throws CCTestException {
+        microGWServer.stopChoreoConnect();
         ApictlUtils.removeEnv("test");
     }
 }

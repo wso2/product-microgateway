@@ -44,7 +44,7 @@ import org.wso2.am.integration.test.utils.bean.APIRevisionRequest;
 import org.wso2.carbon.automation.engine.context.beans.User;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.common.model.API;
-import org.wso2.choreo.connect.tests.context.MicroGWTestException;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
@@ -158,11 +158,11 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param publisherRestClient     - Instance of APIPublisherRestClient
      * @param isRequireReSubscription - If publish with re-subscription required option true else false.
      * @return HttpResponse - Response of the API Publishing activity
-     * @throws MicroGWTestException -  Exception throws by the method call of changeAPILifeCycleStatusToPublish() in
+     * @throws CCTestException -  Exception throws by the method call of changeAPILifeCycleStatusToPublish() in
      *                              APIPublisherRestClient.java.
      */
     protected HttpResponse changeLCStateAPI(String apiId, String targetState, RestAPIPublisherImpl publisherRestClient,
-                                      boolean isRequireReSubscription) throws MicroGWTestException {
+                                      boolean isRequireReSubscription) throws CCTestException {
         String lifecycleChecklist = null;
         if (isRequireReSubscription) {
             lifecycleChecklist = "Requires re-subscription when publishing the API:true";
@@ -171,11 +171,11 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
             HttpResponse response = publisherRestClient
                     .changeAPILifeCycleStatus(apiId, targetState, lifecycleChecklist);
             if (Objects.isNull(response)) {
-                throw new MicroGWTestException("Error while publishing the API. API Id : " + apiId);
+                throw new CCTestException("Error while publishing the API. API Id : " + apiId);
             }
             return response;
         } catch (ApiException e) {
-            throw new MicroGWTestException("Error while publishing the API. API Id : " + apiId);
+            throw new CCTestException("Error while publishing the API. API Id : " + apiId);
         }
     }
 
@@ -186,15 +186,15 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param applicationId   - UUID of the application
      * @param storeRestClient - Instance of APIPublisherRestClient
      * @return HttpResponse - Response of the API subscribe action
-     * @throws MicroGWTestException if the response of the create subscription is null. This may null when there is an
+     * @throws CCTestException if the response of the create subscription is null. This may null when there is an
      *                              error while subscribing to the API or when the subscription already exists.
      */
     protected HttpResponse subscribeToAPI(String apiId, String applicationId, String tier,
-                                          RestAPIStoreImpl storeRestClient) throws MicroGWTestException {
+                                          RestAPIStoreImpl storeRestClient) throws CCTestException {
         HttpResponse response = storeRestClient.createSubscription(apiId, applicationId, tier);
         waitForXdsDeployment();
         if (Objects.isNull(response)) {
-            throw new MicroGWTestException(
+            throw new CCTestException(
                     "Error while subscribing to the API. API Id : " + apiId + ", Application Id: " + applicationId);
         }
         return response;
@@ -206,12 +206,12 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param apiRequest              - Instance of APIRequest
      * @param publisherRestClient     - Instance of RestAPIPublisherImpl
      * @param isRequireReSubscription - If publish with re-subscription required option true else false.
-     * @throws MicroGWTestException - Exception throws by API create and publish activities.
+     * @throws CCTestException - Exception throws by API create and publish activities.
      */
     protected String createAndPublishAPI(APIRequest apiRequest,
                                          RestAPIPublisherImpl publisherRestClient,
                                          boolean isRequireReSubscription)
-            throws MicroGWTestException, ApiException {
+            throws CCTestException, ApiException {
         return createAndPublishAPI(apiRequest, "localhost", publisherRestClient, isRequireReSubscription);
     }
 
@@ -222,12 +222,12 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param vhost                   - Vhost to deploy
      * @param publisherRestClient     - Instance of RestAPIPublisherImpl
      * @param isRequireReSubscription - If publish with re-subscription required option true else false.
-     * @throws MicroGWTestException - Exception throws by API create and publish activities.
+     * @throws CCTestException - Exception throws by API create and publish activities.
      */
     protected String createAndPublishAPI(APIRequest apiRequest, String vhost,
                                          RestAPIPublisherImpl publisherRestClient,
                                          boolean isRequireReSubscription)
-            throws MicroGWTestException, ApiException {
+            throws CCTestException, ApiException {
         //Create the API
         HttpResponse createAPIResponse = publisherRestClient.addAPI(apiRequest);
         if (Objects.nonNull(createAPIResponse) && createAPIResponse.getResponseCode() == HttpStatus.SC_CREATED
@@ -237,13 +237,13 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
             try {
                 createAPIRevisionAndDeploy(createAPIResponse.getData(), vhost, publisherRestClient);
             } catch (JSONException e) {
-                throw new MicroGWTestException("Error in creating and deploying API Revision", e);
+                throw new CCTestException("Error in creating and deploying API Revision", e);
             }
             //Publish the API
             HttpResponse publishAPIResponse = changeLCStateAPI(createAPIResponse.getData(),
                     APILifeCycleAction.PUBLISH.getAction(), publisherRestClient, isRequireReSubscription);
             if (!(publishAPIResponse.getResponseCode() == HttpStatus.SC_OK && APILifeCycleState.PUBLISHED.getState().equals(publishAPIResponse.getData()))) {
-                throw new MicroGWTestException(
+                throw new CCTestException(
                         "Error in API Publishing" + getAPIIdentifierStringFromAPIRequest(apiRequest) + "Response Code:"
                                 + publishAPIResponse.getResponseCode() + " Response Data :" + publishAPIResponse
                                 .getData());
@@ -252,7 +252,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
             waitForXdsDeployment();
             return createAPIResponse.getData();
         } else {
-            throw new MicroGWTestException(
+            throw new CCTestException(
                     "Error in API Creation." + getAPIIdentifierStringFromAPIRequest(apiRequest) + "Response Code:"
                             + createAPIResponse.getResponseCode() + " Response Data :" + createAPIResponse.getData());
         }
@@ -263,11 +263,11 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      *
      * @param apiRequest          - Instance of APIRequest
      * @param publisherRestClient - Instance of RestAPIPublisherImpl
-     * @throws MicroGWTestException - Exception throws by API create and publish activities.
+     * @throws CCTestException - Exception throws by API create and publish activities.
      */
     protected String createAndPublishAPIWithoutRequireReSubscription(APIRequest apiRequest,
                                                                      RestAPIPublisherImpl publisherRestClient)
-            throws MicroGWTestException, ApiException {
+            throws CCTestException, ApiException {
         return createAndPublishAPI(apiRequest, publisherRestClient, false);
     }
 
@@ -276,11 +276,11 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      *
      * @param apiRequest          - Instance of APIRequest
      * @param publisherRestClient - Instance of RestAPIPublisherImpl
-     * @throws MicroGWTestException - Exception throws by API create and publish activities.
+     * @throws CCTestException - Exception throws by API create and publish activities.
      */
     protected String createAndPublishAPIWithoutRequireReSubscription(APIRequest apiRequest, String vhost,
                                                                      RestAPIPublisherImpl publisherRestClient)
-            throws MicroGWTestException, ApiException {
+            throws CCTestException, ApiException {
         return createAndPublishAPI(apiRequest, vhost, publisherRestClient, false);
     }
 
@@ -302,10 +302,10 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param newAPIVersion           - New API version need to create
      * @param publisherRestClient     - Instance of APIPublisherRestClient
      * @param isRequireReSubscription - If publish with re-subscription required option true else false.
-     * @throws MicroGWTestException -Exception throws by copyAPI() and publishAPI() method calls
+     * @throws CCTestException -Exception throws by copyAPI() and publishAPI() method calls
      */
     protected void copyAndPublishCopiedAPI(String apiID, String newAPIVersion, RestAPIPublisherImpl publisherRestClient,
-                                           boolean isRequireReSubscription) throws MicroGWTestException, ApiException {
+                                           boolean isRequireReSubscription) throws CCTestException, ApiException {
         APIDTO apidto = copyAPI(apiID, newAPIVersion, publisherRestClient);
         changeLCStateAPI(apidto.getId(), APILifeCycleAction.PUBLISH.getAction(), publisherRestClient, isRequireReSubscription);
     }
@@ -318,20 +318,20 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param storeRestClient     - Instance of APIStoreRestClient
      * @param applicationId       - UUID of the Application that the API need to subscribe.
      * @param tier                - Tier that needs to be subscribed.
-     * @throws MicroGWTestException - Exception throws by API create publish and subscribe a API activities.
+     * @throws CCTestException - Exception throws by API create publish and subscribe a API activities.
      */
     protected String createPublishAndSubscribeToAPI(APIRequest apiRequest,
                                                     RestAPIPublisherImpl publisherRestClient,
                                                     RestAPIStoreImpl storeRestClient, String applicationId,
                                                     String tier)
-            throws MicroGWTestException, ApiException, XPathExpressionException {
+            throws CCTestException, ApiException, XPathExpressionException {
         String apiId = createAndPublishAPI(apiRequest, publisherRestClient, false);
         waitForAPIDeploymentSync(user.getUserName(), apiRequest.getName(), apiRequest.getVersion(),
                                  APIMIntegrationConstants.IS_API_EXISTS);
         HttpResponse httpResponseSubscribeAPI = subscribeToAPI(apiId, applicationId, tier, storeRestClient);
         if (!(httpResponseSubscribeAPI.getResponseCode() == HttpStatus.SC_OK &&
                 !StringUtils.isEmpty(httpResponseSubscribeAPI.getData()))) {
-            throw new MicroGWTestException("Error in API Subscribe." +
+            throw new CCTestException("Error in API Subscribe." +
                                                    getAPIIdentifierStringFromAPIRequest(apiRequest) +
                                                    "Response Code:" + httpResponseSubscribeAPI
                     .getResponseCode());
@@ -409,7 +409,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param restAPIPublisher -  Instance of APIPublisherRestClient
      */
     protected String undeployAndDeleteAPIRevisions(String apiId, RestAPIPublisherImpl restAPIPublisher)
-            throws ApiException, JSONException, XPathExpressionException, MicroGWTestException {
+            throws ApiException, JSONException, XPathExpressionException, CCTestException {
         int HTTP_RESPONSE_CODE_OK = Response.Status.OK.getStatusCode();
         int HTTP_RESPONSE_CODE_CREATED = Response.Status.CREATED.getStatusCode();
         String revisionUUID = null;
@@ -620,14 +620,14 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param httpResponse - Response that containing the JSON object in it response data.
      * @param key          - key of the JSON value the need to retrieve.
      * @return String - The value of provided key as a String
-     * @throws MicroGWTestException - Exception throws when resolving the JSON object in the HTTP response
+     * @throws CCTestException - Exception throws when resolving the JSON object in the HTTP response
      */
-    protected String getValueFromJSON(HttpResponse httpResponse, String key) throws MicroGWTestException {
+    protected String getValueFromJSON(HttpResponse httpResponse, String key) throws CCTestException {
         try {
             JSONObject jsonObject = new JSONObject(httpResponse.getData());
             return jsonObject.get(key).toString();
         } catch (JSONException e) {
-            throw new MicroGWTestException("Exception thrown when resolving the JSON object in the HTTP response ", e);
+            throw new CCTestException("Exception thrown when resolving the JSON object in the HTTP response ", e);
         }
     }
 
@@ -639,16 +639,16 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param restAPIStore - instance of the RestAPIStoreImpl
      * @return the created application and associated client key and the client secret
      * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
-     * @throws MicroGWTestException                                   if error happens while creating the application
+     * @throws CCTestException                                   if error happens while creating the application
      *                                                                or if the application already exists
      */
     protected ApplicationCreationResponse createApplicationWithKeys(ApplicationDTO app, RestAPIStoreImpl restAPIStore)
-            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
+            throws org.wso2.am.integration.clients.store.api.ApiException, CCTestException {
         HttpResponse applicationResponse =
                 restAPIStore.createApplication(app.getName(), app.getDescription(), app.getThrottlingPolicy(),
                                                app.getTokenType());
         if (Objects.isNull(applicationResponse)) {
-            throw new MicroGWTestException("Could not create the application: " + app.getName());
+            throw new CCTestException("Could not create the application: " + app.getName());
         }
         String applicationId = applicationResponse.getData();
 
@@ -672,12 +672,12 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param restAPIStore - instance of the RestAPIStoreImpl
      * @return map of created application and associated client key and the client secret
      * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
-     * @throws MicroGWTestException                                   if error happens while creating the application or
+     * @throws CCTestException                                   if error happens while creating the application or
      *                                                                if the application already exists
      */
     public Map<String, ApplicationCreationResponse> createApplicationsWithKeys(List<ApplicationDTO> appList,
                                                                                RestAPIStoreImpl restAPIStore)
-            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
+            throws org.wso2.am.integration.clients.store.api.ApiException, CCTestException {
         Map<String, ApplicationCreationResponse> response = new HashMap<>();
         for (ApplicationDTO app : appList) {
             response.put(app.getName(), createApplicationWithKeys(app, restAPIStore));
@@ -693,12 +693,12 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param restAPIStore - instance of the RestAPIStoreImpl
      * @return the created application and associated client key and the client secret
      * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
-     * @throws MicroGWTestException                                   if error happens while creating the application or
+     * @throws CCTestException                                   if error happens while creating the application or
      *                                                                if the application already exists
      */
     protected ApplicationCreationResponse createApplicationWithKeys(int appIndex,
                                                                     RestAPIStoreImpl restAPIStore)
-            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
+            throws org.wso2.am.integration.clients.store.api.ApiException, CCTestException {
         return createApplicationWithKeys(applicationListByIndex.get(appIndex), restAPIStore);
     }
 
@@ -711,18 +711,18 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param restAPIStore - instance of the RestAPIStoreImpl
      * @return the created application and associated client key and the client secret
      * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
-     * @throws MicroGWTestException                                   if error happens while creating the application or
+     * @throws CCTestException                                   if error happens while creating the application or
      *                                                                if the application already exists
      */
     protected ApplicationCreationResponse createApplicationWithKeys(String appName,
                                                                     RestAPIStoreImpl restAPIStore)
-            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
+            throws org.wso2.am.integration.clients.store.api.ApiException, CCTestException {
         Application newApp = applicationListByName.get(appName);
         org.wso2.carbon.automation.test.utils.http.client.HttpResponse applicationResponse =
                 restAPIStore.createApplication(newApp.getAppName(), newApp.getDescription(), newApp.getThrottleTier(),
                         newApp.getTokenType());
         if (Objects.isNull(applicationResponse)) {
-            throw new MicroGWTestException("Could not create the application: " + appName);
+            throw new CCTestException("Could not create the application: " + appName);
         }
         String applicationId = applicationResponse.getData();
 
@@ -747,12 +747,12 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param restAPIStore - instance of the RestAPIStoreImpl
      * @return map of created application and associated client key and the client secret
      * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
-     * @throws MicroGWTestException                                   if error happens while creating the application or
+     * @throws CCTestException                                   if error happens while creating the application or
      *                                                                if the application already exists
      */
     public Map<String, ApplicationCreationResponse> createApplicationsWithKeysByName(
             List<String> appNameList, RestAPIStoreImpl restAPIStore)
-            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
+            throws org.wso2.am.integration.clients.store.api.ApiException, CCTestException {
         Map<String, ApplicationCreationResponse> response = new HashMap<>();
         for (String appName : appNameList) {
             response.put(appName, createApplicationWithKeys(appName, restAPIStore));
@@ -769,12 +769,12 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param restAPIStore - instance of the RestAPIStoreImpl
      * @return map of created application and associated client key and the client secret
      * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
-     * @throws MicroGWTestException                                   if error happens while creating the application or
+     * @throws CCTestException                                   if error happens while creating the application or
      *                                                                if the application already exists
      */
     public Map<String, ApplicationCreationResponse> createApplicationsWithKeysByIndex(
             List<Integer> appIndexList, RestAPIStoreImpl restAPIStore)
-            throws org.wso2.am.integration.clients.store.api.ApiException, MicroGWTestException {
+            throws org.wso2.am.integration.clients.store.api.ApiException, CCTestException {
         Map<String, ApplicationCreationResponse> response = new HashMap<>();
         for (int appIndex : appIndexList) {
             String appName = applicationListByIndex.get(appIndex);
@@ -793,11 +793,11 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
      * @param restAPIStore   - instance of the RestAPIStoreImpl
      * @return the user access token
      * @throws MalformedURLException if the URL is malformed
-     * @throws MicroGWTestException  if an error occurs while generating the user access token
+     * @throws CCTestException  if an error occurs while generating the user access token
      */
     protected String generateUserAccessToken(String consumerKey, String consumerSecret, String[] scopes,
                                              User user, RestAPIStoreImpl restAPIStore)
-            throws MalformedURLException, MicroGWTestException {
+            throws MalformedURLException, CCTestException {
         String requestBody = "grant_type=password&username=" + user.getUserName() + "&password=" + user.getPassword() +
                 "&scope=" + String.join(" ", scopes);
         URL tokenEndpointURL = new URL(apimServiceURLHttps + "oauth2/token");
@@ -808,7 +808,7 @@ public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
                     restAPIStore.generateUserAccessKey(consumerKey, consumerSecret, requestBody, tokenEndpointURL)
                             .getData());
         } catch (APIManagerIntegrationTestException e) {
-            throw new MicroGWTestException("Error occurred while generating the user access token.", e);
+            throw new CCTestException("Error occurred while generating the user access token.", e);
         }
         return accessTokenGenerationResponse.getString("access_token");
     }
