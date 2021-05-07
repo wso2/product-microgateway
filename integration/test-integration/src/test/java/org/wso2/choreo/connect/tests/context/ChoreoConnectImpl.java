@@ -38,6 +38,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 
+/**
+ * Implementation class to be extended by the Choreo Connect instance
+ */
 public abstract class ChoreoConnectImpl implements ChoreoConnect {
 
     static final String ENFORCER_DEBUG_ENV = "ENFORCER_DEBUG";
@@ -55,22 +58,34 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         ccTempPath = Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH;
     }
 
-    @Override
-    public void startChoreoConnect() throws IOException {
+    public void start() throws CCTestException {
         try {
             environment.start();
         } catch (Exception e) {
-            log.error("Error occurred when docker-compose up: {}", e.getMessage());
+            throw new CCTestException("Error occurred when docker-compose up: {}", e);
         }
-        Awaitility.await().pollInterval(5, TimeUnit.SECONDS).atMost(150, TimeUnit.SECONDS).until(isBackendAvailable());
-        if (!checkForBackendAvailability()) {
-            log.error("MockBackend is not started");
-        }
+        Awaitility.await().pollInterval(5, TimeUnit.SECONDS).atMost(150, TimeUnit.SECONDS)
+                .until(isBackendAvailable());
     }
 
-    @Override
-    public void stopChoreoConnect() {
+    public void stop() {
         environment.stop();
+    }
+
+    /**
+     * Check if the Choreo Connect instance is healthy
+     *
+     * @return a Callable that checks if the CC instance is healthy
+     */
+    public Callable<Boolean> isHealthy() {
+        return this::checkCCInstanceHealth;
+    }
+
+    private Boolean checkCCInstanceHealth() throws IOException {
+        Map<String, String> headers = new HashMap<>(0);
+        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttp(
+                "/health"), headers);
+        return response != null && response.getResponseCode() == HttpStatus.SC_OK;
     }
 
     /**
@@ -79,11 +94,7 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
      * @return a Callable that checks if the backend is available
      */
     private Callable<Boolean> isBackendAvailable() {
-        return new Callable<Boolean>() {
-            public Boolean call() throws Exception {
-                return checkForBackendAvailability();
-            }
-        };
+        return this::checkForBackendAvailability;
     }
 
     /**
@@ -93,7 +104,7 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
      * @throws IOException if an error occurs when invoking the backend URL
      */
     private Boolean checkForBackendAvailability() throws IOException {
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         HttpResponse response = HttpClientRequest.doGet(Utils.getMockServiceURLHttp(
                 "/v2/pet/3"), headers);
         return response != null && response.getResponseCode() == HttpStatus.SC_OK;
@@ -123,7 +134,7 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         }
     }
 
-    public void addCustomJwtTransformer() throws CCTestException {
+    public static void addCustomJwtTransformer() throws CCTestException {
         Utils.copyFile(System.getProperty("jwt_transformer_jar"),
                 Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH
                         + File.separator + "jwt-transformer.jar");

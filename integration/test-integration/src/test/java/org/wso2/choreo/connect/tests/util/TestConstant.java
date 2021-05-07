@@ -36,7 +36,7 @@ public class TestConstant {
 
     public static final String KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String KEY_TYPE_SANDBOX = "SANDBOX";
-    public static final long DEPLOYMENT_WAIT_TIME = 15000;
+    public static final int DEPLOYMENT_WAIT_TIME = 15000;
 
     public static final String INVALID_JWT_TOKEN = "eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNN" +
             "V0kyTkRBelpHUXpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XST" +
@@ -79,10 +79,8 @@ public class TestConstant {
     public final static int MOCK_SERVER2_PORT = 2390;
     public final static int APIM_SERVLET_TRP_HTTPS_PORT = 9443;
     public final static int APIM_SERVLET_TRP_HTTP_PORT = 9763;
-    public static final String SAMPLE_API_NAME = "PetStore";
-    public static final String SAMPLE_API_CONTEXT = "petstore";
-    public static final String SAMPLE_API2_NAME = "PetStore2";
-    public static final String SAMPLE_API2_CONTEXT = "petstore2";
+    public static final String MOCK_BACKEND_BASEPATH = "/v2";
+    public static final String BEFORE_STARTING_CC_API_CONTEXT = "before_starting_CC";
 
     public static final int INVALID_CREDENTIALS_CODE = 900901;
     public static final String RESOURCE_FORBIDDEN_CODE = "900908";
@@ -93,7 +91,9 @@ public class TestConstant {
 
     public static final String TEST_RESOURCES_PATH = File.separator + "test-classes";
     public static final String CONFIGS_DIR = File.separator + "configs";
-    public static final String CC_TEMP_PATH = File.separator + "choreo-conect-temp";
+    public static final String TEST_DOCKER_COMPOSE_DIR = File.separator + "dockerCompose";
+    public static final String CC_TEMP_PATH = File.separator + "choreo-connect-temp";
+
     public static final String DOCKER_COMPOSE_DIR = File.separator + "docker-compose";
     public static final String CONFIG_TOML_PATH = File.separator + "conf" + File.separator + "config.toml";
     public static final String DEPLYMNT_TOML_PATH = File.separator + "conf" + File.separator + "deployment.toml";
