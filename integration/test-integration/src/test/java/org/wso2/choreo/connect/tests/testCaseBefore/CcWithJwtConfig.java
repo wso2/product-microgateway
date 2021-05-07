@@ -22,24 +22,19 @@ import org.testng.annotations.BeforeTest;
 import org.wso2.choreo.connect.tests.context.CcInstance;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
-import org.wso2.choreo.connect.tests.util.TestConstant;
-import org.wso2.choreo.connect.tests.util.Utils;
 
-import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 public class CcWithJwtConfig {
-    CcInstance microGWServer;
+    CcInstance ccInstance;
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        String targetDir = Utils.getTargetDirPath();
-        String confPath = targetDir + TestConstant.TEST_RESOURCES_PATH + TestConstant.CONFIGS_DIR
-                + File.separator + "jwt-generator-config.toml";
-        ApictlUtils.createProject( "global_cors_openAPI.yaml", "global_cors_petstore", null, null);
+        ApictlUtils.createProject( "global_cors_openAPI.yaml", "global_cors_petstore",
+                null, null);
 
-        microGWServer = new CcInstance(confPath);
-        microGWServer.startChoreoConnect();
+        ccInstance = new CcInstance.Builder().withNewConfig("jwt-generator-config.toml").build();
+        ccInstance.start();
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
@@ -50,7 +45,7 @@ public class CcWithJwtConfig {
 
     @AfterTest(description = "stop the setup")
     void stop() throws CCTestException {
-        microGWServer.stopChoreoConnect();
+        ccInstance.stop();
         ApictlUtils.removeEnv("test");
     }
 }

@@ -93,7 +93,9 @@ public class TestConstant {
 
     public static final String TEST_RESOURCES_PATH = File.separator + "test-classes";
     public static final String CONFIGS_DIR = File.separator + "configs";
-    public static final String CC_TEMP_PATH = File.separator + "choreo-conect-temp";
+    public static final String TEST_DOCKER_COMPOSE_DIR = File.separator + "dockerCompose";
+    public static final String CC_TEMP_PATH = File.separator + "choreo-connect-temp";
+
     public static final String DOCKER_COMPOSE_DIR = File.separator + "docker-compose";
     public static final String CONFIG_TOML_PATH = File.separator + "conf" + File.separator + "config.toml";
     public static final String DEPLYMNT_TOML_PATH = File.separator + "conf" + File.separator + "deployment.toml";

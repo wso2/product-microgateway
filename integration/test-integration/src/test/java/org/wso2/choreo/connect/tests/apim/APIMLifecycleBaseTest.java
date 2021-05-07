@@ -62,7 +62,7 @@ import javax.xml.xpath.XPathExpressionException;
 
 import static org.testng.Assert.assertEquals;
 
-public class APIMLifecycleBaseTest extends APIMWithMgwBaseTest {
+public class APIMLifecycleBaseTest extends ApimBaseTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(APIMLifecycleBaseTest.class);
 
     /**

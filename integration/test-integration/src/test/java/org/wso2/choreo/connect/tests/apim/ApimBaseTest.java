@@ -33,9 +33,6 @@ import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationInfoDTO;
 import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationListDTO;
 import org.wso2.am.integration.clients.store.api.v1.dto.SubscriptionDTO;
 import org.wso2.am.integration.clients.store.api.v1.dto.SubscriptionListDTO;
-import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
-import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
-import org.wso2.am.integration.test.impl.RestAPIStoreImpl;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
 import org.wso2.am.integration.test.utils.bean.APIMURLBean;
 import org.wso2.am.integration.test.utils.http.HttpRequestUtil;
@@ -48,13 +45,11 @@ import org.wso2.carbon.integration.common.admin.client.UserManagementClient;
 import org.wso2.carbon.integration.common.utils.LoginLogoutClient;
 import org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.choreo.connect.tests.context.CcWithApimInstance;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,11 +58,10 @@ import java.util.concurrent.Callable;
 
 import javax.xml.xpath.XPathExpressionException;
 
-public class APIMWithMgwBaseTest {
-    private static final Logger log = LoggerFactory.getLogger(APIMWithMgwBaseTest.class);
+public class ApimBaseTest extends ApimBaseTestAbstract {
+    private static final Logger log = LoggerFactory.getLogger(ApimBaseTest.class);
 
-    private static CcWithApimInstance apiManagerWithMgwServerInstance;
-    protected AutomationContext apimServerContext, superTenantKeyManagerContext;
+    protected AutomationContext superTenantKeyManagerContext;
     protected UserManagementClient userManagementClient;
     protected RemoteUserStoreManagerServiceClient remoteUserStoreManagerServiceClient;
     protected ClaimMetaDataMgtAdminClient remoteClaimMetaDataMgtAdminClient;
@@ -76,48 +70,19 @@ public class APIMWithMgwBaseTest {
     protected TenantManagementServiceClient tenantManagementServiceClient;
     protected String keyManagerSessionCookie;
     protected String keyManagerSuperTenantSessionCookie;
-    protected RestAPIStoreImpl restAPIStore;
-    protected RestAPIPublisherImpl restAPIPublisher;
-    protected RestAPIAdminImpl restAPIAdmin;
+
     protected User user;
-    protected APIMURLBean apimServiceUrls;
     protected String apimServiceURLHttp;
-    protected String apimServiceURLHttps;
-    protected TestUserMode userMode;
 
     protected void init() throws CCTestException, XPathExpressionException {
-        userMode = TestUserMode.SUPER_TENANT_ADMIN;
-        init(userMode);
-    }
-
-    protected void init(TestUserMode userMode) throws CCTestException, XPathExpressionException {
-        apimServerContext = new AutomationContext(TestConstant.AM_PRODUCT_GROUP_NAME,
-                                                  TestConstant.AM_ALL_IN_ONE_INSTANCE, userMode);
-
+        super.init();
         superTenantKeyManagerContext = new AutomationContext(TestConstant.AM_PRODUCT_GROUP_NAME,
                                                              TestConstant.AM_ALL_IN_ONE_INSTANCE,
                                                              TestUserMode.SUPER_TENANT_ADMIN);
 
-        apimServiceUrls = new APIMURLBean(apimServerContext.getContextUrls());
         apimServiceURLHttp = apimServiceUrls.getWebAppURLHttp();
-        apimServiceURLHttps = apimServiceUrls.getWebAppURLHttps();
 
         user = apimServerContext.getContextTenant().getContextUser();
-
-        restAPIPublisher = new RestAPIPublisherImpl(
-                apimServerContext.getContextTenant().getContextUser().getUserNameWithoutDomain(),
-                apimServerContext.getContextTenant().getContextUser().getPassword(),
-                apimServerContext.getContextTenant().getDomain(), apimServiceURLHttps);
-
-        restAPIStore = new RestAPIStoreImpl(
-                apimServerContext.getContextTenant().getContextUser().getUserNameWithoutDomain(),
-                apimServerContext.getContextTenant().getContextUser().getPassword(),
-                apimServerContext.getContextTenant().getDomain(), apimServiceURLHttps);
-
-        restAPIAdmin = new RestAPIAdminImpl(
-                apimServerContext.getContextTenant().getContextUser().getUserNameWithoutDomain(),
-                apimServerContext.getContextTenant().getContextUser().getPassword(),
-                apimServerContext.getContextTenant().getDomain(), apimServiceURLHttps);
 
         try {
             keyManagerSessionCookie = createSession(apimServerContext);
@@ -141,56 +106,6 @@ public class APIMWithMgwBaseTest {
         } catch (Exception e) {
             throw new CCTestException(e.getMessage(), e);
         }
-    }
-
-    /**
-     * start the mgw docker environment and mock backend.
-     *
-     * @param confPath   - external conf.toml file location
-     * @param tlsEnabled - true if the tls based backend server is required additionally
-     * @throws CCTestException if something goes wrong while copying server configs
-     * @throws IOException          if an error while starting the mock-backend
-     */
-    protected void startAPIMWithMGW(String confPath, boolean tlsEnabled) throws CCTestException, IOException {
-        startAPIMWithMGW(null, confPath, tlsEnabled);
-    }
-
-    /**
-     * start the mgw docker environment and mock backend.
-     *
-     * @param apimDeploymentTomlPath - external APIM deployment.toml file location
-     * @param ccConfigTomlPath       - external CC conf.toml file location
-     * @param tlsEnabled             - true if the tls based backend server is required additionally
-     * @throws CCTestException if something goes wrong while copying server configs
-     * @throws IOException          if an error while starting the mock-backend
-     */
-    protected void startAPIMWithMGW(String apimDeploymentTomlPath, String ccConfigTomlPath, boolean tlsEnabled)
-            throws CCTestException, IOException {
-        apiManagerWithMgwServerInstance = new CcWithApimInstance(apimDeploymentTomlPath, ccConfigTomlPath, tlsEnabled);
-        apiManagerWithMgwServerInstance.startChoreoConnect();
-    }
-
-    /**
-     * stop the apim, mgw servers and the mock backend.
-     */
-    protected void stopAPIMWithMGW() {
-        apiManagerWithMgwServerInstance.stopChoreoConnect();
-    }
-
-
-    /**
-     * Helper method to set the SSL context.
-     */
-    protected void setSSlSystemProperties() {
-        URL certificatesTrustStore = getClass().getClassLoader()
-                .getResource("keystore/client-truststore.jks");
-        if (certificatesTrustStore != null) {
-            System.setProperty("javax.net.ssl.trustStore", certificatesTrustStore.getPath());
-        } else {
-            log.error("Truststore is not set.");
-        }
-        System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
-        System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
     }
 
     /**

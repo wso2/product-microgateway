@@ -25,7 +25,7 @@ import java.io.IOException;
  */
 public interface ChoreoConnect {
 
-    void startChoreoConnect() throws IOException, InterruptedException;
+    void start() throws IOException, InterruptedException;
 
-    void stopChoreoConnect();
+    void stop();
 }

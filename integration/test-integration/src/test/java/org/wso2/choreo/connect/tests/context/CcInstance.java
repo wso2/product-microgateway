@@ -35,44 +35,63 @@ public class CcInstance extends ChoreoConnectImpl {
     /**
      * initialize a docker environment using docker compose.
      *
-     * @throws IOException
-     * @throws CCTestException
-     */
-    public CcInstance() throws IOException, CCTestException {
-        this(null, false);
-
-    }
-
-    /**
-     * initialize a docker environment using docker compose.
-     *
-     * @param confPath external conf.toml path
-     * @throws IOException
-     * @throws CCTestException
-     */
-    public CcInstance(String confPath) throws IOException, CCTestException {
-        this(confPath, false);
-    }
-
-    /**
-     * initialize a docker environment using docker compose.
-     *
-     * @param confPath   external conf.toml path
+     * @param confFileName   external conf.toml path
      * @param tlsEnabled if the backend needs to have the tls enabled server additionally
      * @throws IOException
      * @throws CCTestException
      */
-    public CcInstance(String confPath, boolean tlsEnabled) throws IOException, CCTestException {
+    private CcInstance(String dockerComposeFile, String confFileName, boolean tlsEnabled, boolean withCustomJwtTransformer)
+            throws IOException, CCTestException {
         createTmpMgwSetup();
-        if (!StringUtils.isEmpty(confPath)) {
-            Utils.copyFile(confPath,
+        String targetDir = Utils.getTargetDirPath();
+        if (!StringUtils.isEmpty(confFileName)) {
+            Utils.copyFile(targetDir + TestConstant.TEST_RESOURCES_PATH + TestConstant.CONFIGS_DIR
+                            + File.separator + confFileName,
                     ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR + TestConstant.CONFIG_TOML_PATH);
+        }
+        if (withCustomJwtTransformer) {
+            addCustomJwtTransformer();
+        }
+
+        if (!StringUtils.isEmpty(dockerComposeFile)) {
+            Utils.copyFile(targetDir + TestConstant.TEST_RESOURCES_PATH
+                    + TestConstant.TEST_DOCKER_COMPOSE_DIR + File.separator + dockerComposeFile,
+                    ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR + TestConstant.DOCKER_COMPOSE_YAML_PATH);
         }
         String dockerComposePath = ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR
                         + TestConstant.DOCKER_COMPOSE_YAML_PATH;
-
         MockBackendServer.addMockBackendServiceToDockerCompose(dockerComposePath, tlsEnabled);
         environment = new DockerComposeContainer(new File(dockerComposePath)).withLocalCompose(true);
         addCcLoggersToEnv();
+    }
+
+    public static class Builder {
+        String dockerComposeFile;
+        String confFileName;
+        boolean tlsEnabled = false;
+        boolean withCustomJwtTransformer = false;
+
+        public Builder withNewDockerCompose(String dockerComposeFile) {
+            this.dockerComposeFile = dockerComposeFile;
+            return this;
+        }
+
+        public Builder withNewConfig(String confFileName){
+            this.confFileName = confFileName;
+            return this;
+        }
+        public Builder withBackendTsl(){
+            this.tlsEnabled = true;
+            return this;
+        }
+        public Builder withCustomJwtTransformer() throws CCTestException {
+            this.withCustomJwtTransformer = true;
+            return this;
+        }
+
+        public CcInstance build() throws IOException, CCTestException {
+            return new CcInstance(this.dockerComposeFile, this.confFileName, this.tlsEnabled,
+                    this.withCustomJwtTransformer);
+        }
     }
 }

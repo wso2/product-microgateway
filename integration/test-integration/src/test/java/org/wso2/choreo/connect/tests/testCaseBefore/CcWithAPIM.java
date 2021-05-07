@@ -28,39 +28,33 @@ import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.impl.RestAPIStoreImpl;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
 import org.wso2.am.integration.test.utils.bean.DCRParamRequest;
-import org.wso2.choreo.connect.tests.apim.APIMLifecycleBaseTest;
-import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.apim.ApimBaseTestAbstract;
+import org.wso2.choreo.connect.tests.context.ApimInstance;
+import org.wso2.choreo.connect.tests.context.CcInstance;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
-import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-public class CcWithAPIM extends APIMLifecycleBaseTest {
+public class CcWithAPIM extends ApimBaseTestAbstract {
+    ApimInstance apimInstance;
+    CcInstance ccInstance;
 
     @BeforeTest(description = "start the mgw along with apim server")
     void start() throws Exception {
-        String targetDir = Utils.getTargetDirPath();
-        String apimDeploymentTomlPath = targetDir + TestConstant.TEST_RESOURCES_PATH + TestConstant.CONFIGS_DIR
-                + File.separator + "vhost-deployment.toml";
-        String ccConfigTomlPath = targetDir + TestConstant.TEST_RESOURCES_PATH + TestConstant.CONFIGS_DIR
-                + File.separator + "controlplane-enabled-config.toml";
-        try {
-            super.startAPIMWithMGW(apimDeploymentTomlPath, ccConfigTomlPath, true);
-        } catch (CCTestException | IOException e) {
-            Assert.fail("Error starting the APIM server with MGW", e);
-        }
+        apimInstance = new ApimInstance();
+        apimInstance.startAPIM();
 
         // set ssl properties needed to run the apim server. eg: truststore cert, truststore password, https protocols
         setSSlSystemProperties();
 
         Awaitility.await().atMost(2, TimeUnit.MINUTES);
-        Awaitility.await().pollInterval(20, TimeUnit.SECONDS).atMost(2, TimeUnit.MINUTES).until(isAPIMServerStarted());
+        Awaitility.await().pollInterval(20, TimeUnit.SECONDS)
+                .atMost(2, TimeUnit.MINUTES).until(isAPIMServerStarted());
         Assert.assertTrue(checkForAPIMServerStartup(), "APIM server has not started properly");
 
         String dcrURL = Utils.getAPIMServiceURLHttps("/client-registration/v0.17/register");
@@ -100,11 +94,18 @@ public class CcWithAPIM extends APIMLifecycleBaseTest {
         super.init();
         Assert.assertNotNull(restAPIPublisher, "restAPIPublisher");
         Assert.assertNotNull(restAPIStore, "restAPIStore");
+
+        ccInstance = new CcInstance.Builder().withNewDockerCompose("cc-in-common-network-docker-compose.yaml")
+                .withNewConfig("controlplane-enabled-config.toml").withBackendTsl().build();
+        ccInstance.start();
+        Awaitility.await().pollInterval(20, TimeUnit.SECONDS)
+                .atMost(3, TimeUnit.MINUTES).until(ccInstance.isHealthy());
     }
 
     @AfterTest(description = "stop the setup")
     public void destroy() {
-        super.stopAPIMWithMGW();
+        ccInstance.stop();
+        apimInstance.stopAPIM();
     }
 
     private Callable<Boolean> isAPIMServerStarted() {
