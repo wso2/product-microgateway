@@ -20,9 +20,10 @@ package messaging
 
 import (
 	"fmt"
-	"github.com/wso2/adapter/internal/health"
 	"strings"
 	"time"
+
+	"github.com/wso2/adapter/internal/health"
 
 	"github.com/streadway/amqp"
 	"github.com/wso2/adapter/config"
@@ -55,7 +56,7 @@ func ProcessEvents(config *config.Config) {
 	amqpURIArray = retrieveAMQPURLList()
 	bindingKeys := []string{notification, keymanager, tokenRevocation, throttleData}
 
-	logger.LoggerMsg.Infof("dialing %q", amqpURIArray[0].url+"/")
+	logger.LoggerMsg.Infof("dialing %q", maskURL(amqpURIArray[0].url)+"/")
 	rabbitConn, err = connectToRabbitMQ(amqpURIArray[0].url + "/")
 	health.SetControlPlaneJmsStatus(err == nil)
 
