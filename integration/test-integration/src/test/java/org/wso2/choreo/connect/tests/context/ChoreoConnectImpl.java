@@ -55,8 +55,7 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         ccTempPath = Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH;
     }
 
-    @Override
-    public void startChoreoConnect() throws IOException {
+    public void start() throws IOException {
         try {
             environment.start();
         } catch (Exception e) {
@@ -68,9 +67,25 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         }
     }
 
-    @Override
-    public void stopChoreoConnect() {
+    public void stop() {
         environment.stop();
+    }
+
+    /**
+     * Check if the Choreo Connect instance is healthy
+     *
+     * @return a Callable that checks if the CC instance is healthy
+     * @throws IOException - if an error occurs during the http request
+     */
+    public Callable<Boolean> isHealthy() throws IOException {
+        return this::checkCCInstanceHealth;
+    }
+
+    private Boolean checkCCInstanceHealth() throws IOException {
+        Map<String, String> headers = new HashMap<String, String>(0);
+        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttp(
+                "/health"), headers);
+        return response != null && response.getResponseCode() == HttpStatus.SC_OK;
     }
 
     /**
@@ -79,11 +94,7 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
      * @return a Callable that checks if the backend is available
      */
     private Callable<Boolean> isBackendAvailable() {
-        return new Callable<Boolean>() {
-            public Boolean call() throws Exception {
-                return checkForBackendAvailability();
-            }
-        };
+        return this::checkForBackendAvailability;
     }
 
     /**
@@ -123,7 +134,7 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         }
     }
 
-    public void addCustomJwtTransformer() throws CCTestException {
+    public static void addCustomJwtTransformer() throws CCTestException {
         Utils.copyFile(System.getProperty("jwt_transformer_jar"),
                 Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH + TestConstant.DROPINS_FOLDER_PATH
                         + File.separator + "jwt-transformer.jar");

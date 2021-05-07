@@ -22,24 +22,16 @@ import org.testng.annotations.BeforeTest;
 import org.wso2.choreo.connect.tests.context.CcInstance;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
-import org.wso2.choreo.connect.tests.util.TestConstant;
-import org.wso2.choreo.connect.tests.util.Utils;
 
-import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 public class CcWithJwtConfigAndTransformer {
-    CcInstance microGWServer;
+    CcInstance ccInstance;
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        String targetDir = Utils.getTargetDirPath();
-        String confPath = targetDir + TestConstant.TEST_RESOURCES_PATH + TestConstant.CONFIGS_DIR
-                + File.separator + "jwt-generator-config.toml";
-
-        microGWServer = new CcInstance(confPath);
-        microGWServer.addCustomJwtTransformer();
-        microGWServer.startChoreoConnect();
+        ccInstance = new CcInstance.Builder().withNewConfig("jwt-generator-config.toml").withCustomJwtTransformer().build();
+        ccInstance.start();
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
@@ -49,7 +41,7 @@ public class CcWithJwtConfigAndTransformer {
 
     @AfterTest(description = "stop the setup")
     void stop() throws CCTestException {
-        microGWServer.stopChoreoConnect();
+        ccInstance.stop();
         ApictlUtils.removeEnv("test");
     }
 }

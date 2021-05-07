@@ -36,12 +36,12 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class CcWithDefaultConf {
-    CcInstance microGWServer;
+    CcInstance ccInstance;
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        microGWServer = new CcInstance();
-        microGWServer.startChoreoConnect();
+        ccInstance = new CcInstance.Builder().build();
+        ccInstance.start();
 
         ApictlUtils.createProject( "prod_and_sand_openAPI.yaml", "prod_and_sand_petstore", null, null);
         ApictlUtils.createProject( "prod_openAPI.yaml", "prod_petstore", null, null);
@@ -93,7 +93,7 @@ public class CcWithDefaultConf {
 
     @AfterTest(description = "stop the setup")
     void stop() throws CCTestException {
-        microGWServer.stopChoreoConnect();
+        ccInstance.stop();
         ApictlUtils.removeEnv("test");
     }
 }

@@ -17,7 +17,6 @@
  */
 package org.wso2.choreo.connect.tests.testCaseBefore;
 
-import java.io.File;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.wso2.choreo.connect.tests.context.CcInstance;
@@ -25,19 +24,14 @@ import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.ApictlUtils;
 
 import java.util.concurrent.TimeUnit;
-import org.wso2.choreo.connect.tests.util.TestConstant;
-import org.wso2.choreo.connect.tests.util.Utils;
 
 public class CcWithBackendTls {
-    CcInstance microGWServer;
+    CcInstance ccInstance;
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        String targetDir = Utils.getTargetDirPath();
-        String confPath = targetDir + TestConstant.TEST_RESOURCES_PATH + TestConstant.CONFIGS_DIR
-                + File.separator + "cors-disabled-config.toml";
-        microGWServer = new CcInstance(confPath, true);
-        microGWServer.startChoreoConnect();
+        ccInstance = new CcInstance.Builder().withNewConfig("cors-disabled-config.toml").withBackendTsl().build();
+        ccInstance.start();
 
         ApictlUtils.createProject("backend_tsl_openAPI.yaml", "backend_tsl_petstore", "backend_tls.crt", null);
         ApictlUtils.createProject( "cors_openAPI.yaml", "cors_petstore", null, null);
@@ -52,7 +46,7 @@ public class CcWithBackendTls {
 
     @AfterTest(description = "stop the setup")
     void stop() throws CCTestException {
-        microGWServer.stopChoreoConnect();
+        ccInstance.stop();
         ApictlUtils.removeEnv("test");
     }
 }
