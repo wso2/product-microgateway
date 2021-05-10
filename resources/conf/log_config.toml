@@ -3,7 +3,7 @@
 ## Adapter root Level configurations
 
 logfile = "logs/adapter.log" # This file will be created inside adapter container.
-logLevel = "INFO"
+logLevel = "INFO" # LogLevels can be "DEBG", "FATL", "ERRO", "WARN", "INFO", "PANC"
 
 [rotation]
 MaxSize = 10    # In MegaBytes (MB)
@@ -15,7 +15,7 @@ Compress = true
 
 [[pkg]]
 name = "github.com/wso2/adapter/internal/adapter"
-logLevel = "INFO"
+logLevel = "INFO" # LogLevels can be "DEBG", "FATL", "ERRO", "WARN", "INFO", "PANC"
 
 [[pkg]]
 name = "github.com/wso2/adapter/internal/oasparser"
