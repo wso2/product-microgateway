@@ -36,7 +36,7 @@ public class TestConstant {
 
     public static final String KEY_TYPE_PRODUCTION = "PRODUCTION";
     public static final String KEY_TYPE_SANDBOX = "SANDBOX";
-    public static final long DEPLOYMENT_WAIT_TIME = 15000;
+    public static final int DEPLOYMENT_WAIT_TIME = 15000;
 
     public static final String INVALID_JWT_TOKEN = "eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNN" +
             "V0kyTkRBelpHUXpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XST" +
@@ -79,8 +79,7 @@ public class TestConstant {
     public final static int MOCK_SERVER2_PORT = 2390;
     public final static int APIM_SERVLET_TRP_HTTPS_PORT = 9443;
     public final static int APIM_SERVLET_TRP_HTTP_PORT = 9763;
-    public static final String SAMPLE_API_NAME = "PetStore";
-    public static final String SAMPLE_API_CONTEXT = "petstore";
+    public static final String MOCK_BACKEND_BASEPATH = "/v2";
     public static final String SAMPLE_API2_NAME = "PetStore2";
     public static final String SAMPLE_API2_CONTEXT = "petstore2";
 
