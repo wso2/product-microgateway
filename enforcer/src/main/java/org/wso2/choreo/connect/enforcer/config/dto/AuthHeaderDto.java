@@ -24,6 +24,7 @@ package org.wso2.choreo.connect.enforcer.config.dto;
 public class AuthHeaderDto {
     private boolean enableOutboundAuthHeader = false;
     private String authorizationHeader = "";
+    private String testConsoleHeaderName = "";
 
     public String getAuthorizationHeader() {
         return authorizationHeader;
@@ -39,5 +40,13 @@ public class AuthHeaderDto {
 
     public void setEnableOutboundAuthHeader(boolean enableOutboundAuthHeader) {
         this.enableOutboundAuthHeader = enableOutboundAuthHeader;
+    }
+
+    public void setTestConsoleHeaderName(String testConsoleHeaderName) {
+        this.testConsoleHeaderName = testConsoleHeaderName;
+    }
+
+    public String getTestConsoleHeaderName() {
+        return testConsoleHeaderName;
     }
 }

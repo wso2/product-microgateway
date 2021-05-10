@@ -318,6 +318,7 @@ type routerLogPublisher struct {
 type authHeader struct {
 	EnableOutboundAuthHeader bool   `json:"enableOutboundAuthHeader"`
 	AuthorizationHeader      string `json:"authorizationHeader"`
+	TestConsoleHeaderName    string `json:"testConsoleHeaderName"`
 }
 
 type jwtIssuer struct {

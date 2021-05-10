@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.Filter;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
@@ -84,7 +85,8 @@ public class AuthFilter implements Filter {
             Authenticator jwtAuthenticator = new JWTAuthenticator();
             authenticators.add(jwtAuthenticator);
         }
-        Authenticator authenticator = new InternalAPIKeyAuthenticator(APIConstants.JwtTokenConstants.INTERNAL_KEY);
+        Authenticator authenticator = new InternalAPIKeyAuthenticator(
+                ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName());
         authenticators.add(authenticator);
     
         Authenticator unsecuredAPIAuthenticator = new UnsecuredAPIAuthenticator();
