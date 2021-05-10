@@ -64,11 +64,11 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 18: {
-            org.wso2.gateway.discovery.config.enforcer.AuthHeader.Builder subBuilder = null;
+            org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader.Builder subBuilder = null;
             if (authHeader_ != null) {
               subBuilder = authHeader_.toBuilder();
             }
-            authHeader_ = input.readMessage(org.wso2.gateway.discovery.config.enforcer.AuthHeader.parser(), extensionRegistry);
+            authHeader_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader.parser(), extensionRegistry);
             if (subBuilder != null) {
               subBuilder.mergeFrom(authHeader_);
               authHeader_ = subBuilder.buildPartial();
@@ -152,7 +152,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int AUTHHEADER_FIELD_NUMBER = 2;
-  private org.wso2.gateway.discovery.config.enforcer.AuthHeader authHeader_;
+  private org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader authHeader_;
   /**
    * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
    * @return Whether the authHeader field is set.
@@ -166,14 +166,14 @@ private static final long serialVersionUID = 0L;
    * @return The authHeader.
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.AuthHeader getAuthHeader() {
-    return authHeader_ == null ? org.wso2.gateway.discovery.config.enforcer.AuthHeader.getDefaultInstance() : authHeader_;
+  public org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader getAuthHeader() {
+    return authHeader_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader.getDefaultInstance() : authHeader_;
   }
   /**
    * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
    */
   @java.lang.Override
-  public org.wso2.gateway.discovery.config.enforcer.AuthHeaderOrBuilder getAuthHeaderOrBuilder() {
+  public org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderOrBuilder getAuthHeaderOrBuilder() {
     return getAuthHeader();
   }
 
@@ -793,9 +793,9 @@ private static final long serialVersionUID = 0L;
       return tokenServiceBuilder_;
     }
 
-    private org.wso2.gateway.discovery.config.enforcer.AuthHeader authHeader_;
+    private org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader authHeader_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.AuthHeader, org.wso2.gateway.discovery.config.enforcer.AuthHeader.Builder, org.wso2.gateway.discovery.config.enforcer.AuthHeaderOrBuilder> authHeaderBuilder_;
+        org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader, org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderOrBuilder> authHeaderBuilder_;
     /**
      * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
      * @return Whether the authHeader field is set.
@@ -807,9 +807,9 @@ private static final long serialVersionUID = 0L;
      * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
      * @return The authHeader.
      */
-    public org.wso2.gateway.discovery.config.enforcer.AuthHeader getAuthHeader() {
+    public org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader getAuthHeader() {
       if (authHeaderBuilder_ == null) {
-        return authHeader_ == null ? org.wso2.gateway.discovery.config.enforcer.AuthHeader.getDefaultInstance() : authHeader_;
+        return authHeader_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader.getDefaultInstance() : authHeader_;
       } else {
         return authHeaderBuilder_.getMessage();
       }
@@ -817,7 +817,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
      */
-    public Builder setAuthHeader(org.wso2.gateway.discovery.config.enforcer.AuthHeader value) {
+    public Builder setAuthHeader(org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader value) {
       if (authHeaderBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -834,7 +834,7 @@ private static final long serialVersionUID = 0L;
      * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
      */
     public Builder setAuthHeader(
-        org.wso2.gateway.discovery.config.enforcer.AuthHeader.Builder builderForValue) {
+        org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader.Builder builderForValue) {
       if (authHeaderBuilder_ == null) {
         authHeader_ = builderForValue.build();
         onChanged();
@@ -847,11 +847,11 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
      */
-    public Builder mergeAuthHeader(org.wso2.gateway.discovery.config.enforcer.AuthHeader value) {
+    public Builder mergeAuthHeader(org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader value) {
       if (authHeaderBuilder_ == null) {
         if (authHeader_ != null) {
           authHeader_ =
-            org.wso2.gateway.discovery.config.enforcer.AuthHeader.newBuilder(authHeader_).mergeFrom(value).buildPartial();
+            org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader.newBuilder(authHeader_).mergeFrom(value).buildPartial();
         } else {
           authHeader_ = value;
         }
@@ -879,7 +879,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.AuthHeader.Builder getAuthHeaderBuilder() {
+    public org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader.Builder getAuthHeaderBuilder() {
       
       onChanged();
       return getAuthHeaderFieldBuilder().getBuilder();
@@ -887,23 +887,23 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
      */
-    public org.wso2.gateway.discovery.config.enforcer.AuthHeaderOrBuilder getAuthHeaderOrBuilder() {
+    public org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderOrBuilder getAuthHeaderOrBuilder() {
       if (authHeaderBuilder_ != null) {
         return authHeaderBuilder_.getMessageOrBuilder();
       } else {
         return authHeader_ == null ?
-            org.wso2.gateway.discovery.config.enforcer.AuthHeader.getDefaultInstance() : authHeader_;
+            org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader.getDefaultInstance() : authHeader_;
       }
     }
     /**
      * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.gateway.discovery.config.enforcer.AuthHeader, org.wso2.gateway.discovery.config.enforcer.AuthHeader.Builder, org.wso2.gateway.discovery.config.enforcer.AuthHeaderOrBuilder> 
+        org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader, org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderOrBuilder> 
         getAuthHeaderFieldBuilder() {
       if (authHeaderBuilder_ == null) {
         authHeaderBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.gateway.discovery.config.enforcer.AuthHeader, org.wso2.gateway.discovery.config.enforcer.AuthHeader.Builder, org.wso2.gateway.discovery.config.enforcer.AuthHeaderOrBuilder>(
+            org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader, org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderOrBuilder>(
                 getAuthHeader(),
                 getParentForChildren(),
                 isClean());

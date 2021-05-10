@@ -128,8 +128,9 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		Security: &enforcer.Security{
 			TokenService: issuers,
 			AuthHeader: &enforcer.AuthHeader{
-				EnableOutboundAuthHeader :    config.Enforcer.Security.AuthHeader.EnableOutboundAuthHeader,
-				AuthorizationHeader :    config.Enforcer.Security.AuthHeader.AuthorizationHeader,
+				EnableOutboundAuthHeader: config.Enforcer.Security.AuthHeader.EnableOutboundAuthHeader,
+				AuthorizationHeader:      config.Enforcer.Security.AuthHeader.AuthorizationHeader,
+				TestConsoleHeaderName:    config.Enforcer.Security.AuthHeader.TestConsoleHeaderName,
 			},
 		},
 		Cache:     cache,

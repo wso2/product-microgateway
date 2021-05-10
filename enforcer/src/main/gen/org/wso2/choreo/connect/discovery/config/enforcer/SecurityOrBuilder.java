@@ -40,9 +40,9 @@ public interface SecurityOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
    * @return The authHeader.
    */
-  org.wso2.gateway.discovery.config.enforcer.AuthHeader getAuthHeader();
+  org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader getAuthHeader();
   /**
    * <code>.wso2.discovery.config.enforcer.AuthHeader authHeader = 2;</code>
    */
-  org.wso2.gateway.discovery.config.enforcer.AuthHeaderOrBuilder getAuthHeaderOrBuilder();
+  org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderOrBuilder getAuthHeaderOrBuilder();
 }

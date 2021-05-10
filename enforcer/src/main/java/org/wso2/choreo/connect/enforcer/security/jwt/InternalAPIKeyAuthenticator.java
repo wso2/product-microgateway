@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
@@ -55,7 +56,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
 
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
-        String internalKey = requestContext.getHeaders().get(APIConstants.JwtTokenConstants.INTERNAL_KEY);
+        String internalKey = requestContext.getHeaders().get(
+                ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName());
         if (internalKey != null && internalKey.split("\\.").length == 3) {
             return true;
         }

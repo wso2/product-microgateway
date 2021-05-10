@@ -45,7 +45,7 @@ public final class SecurityProto {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           org.wso2.choreo.connect.discovery.config.enforcer.IssuerProto.getDescriptor(),
-          org.wso2.gateway.discovery.config.enforcer.AuthHeaderProto.getDescriptor(),
+          org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderProto.getDescriptor(),
         });
     internal_static_wso2_discovery_config_enforcer_Security_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -54,7 +54,7 @@ public final class SecurityProto {
         internal_static_wso2_discovery_config_enforcer_Security_descriptor,
         new java.lang.String[] { "TokenService", "AuthHeader", });
     org.wso2.choreo.connect.discovery.config.enforcer.IssuerProto.getDescriptor();
-    org.wso2.gateway.discovery.config.enforcer.AuthHeaderProto.getDescriptor();
+    org.wso2.choreo.connect.discovery.config.enforcer.AuthHeaderProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)
