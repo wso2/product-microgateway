@@ -305,11 +305,11 @@ public class Utils {
      *
      * @param delayTime The time in milliseconds for the program to be delayed.
      */
-    public static void delay(int delayTime) {
+    public static void delay(int delayTime, String msgIfInterrupted) {
         try {
             Thread.sleep(delayTime);
         } catch (InterruptedException ex) {
-            Assert.fail("thread sleep interrupted!");
+            Assert.fail(msgIfInterrupted);
         }
     }
 
