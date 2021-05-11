@@ -40,8 +40,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-
 /**
  * Test case to check the behaviour when APIs are blocked from APIM publisher lifecycle tab.
  *
@@ -53,9 +51,9 @@ public class BlockedAPITestCase extends ApimBaseTest {
     private Map<String, String> requestHeaders;
     private String endpointURL;
 
-    public static final String SAMPLE_API_NAME = "BlockedAPI";
-    public static final String SAMPLE_API_CONTEXT = "blocked";
-    public static final String SAMPLE_API_VERSION = "1.0.0";
+    private static final String SAMPLE_API_NAME = "BlockedAPI";
+    private static final String SAMPLE_API_CONTEXT = "blocked";
+    private static final String SAMPLE_API_VERSION = "1.0.0";
 
     @BeforeClass(alwaysRun = true, description = "initialise the setup")
     void setEnvironment() throws Exception {
@@ -73,11 +71,11 @@ public class BlockedAPITestCase extends ApimBaseTest {
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
         // get a predefined api request
-        apiRequest = PublisherUtils.createSampleAPIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT, SAMPLE_API_VERSION);
-        apiRequest.setProvider(user.getUserName());
+        apiRequest = PublisherUtils.createSampleAPIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT, SAMPLE_API_VERSION,
+                user.getUserName());
 
         // create and publish the api
-        apiId = PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient, false);
+        apiId = PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient);
 
         endpointURL = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
         StoreUtils.subscribeToAPI(apiId, applicationId,

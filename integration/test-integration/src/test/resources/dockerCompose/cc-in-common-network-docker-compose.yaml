@@ -5,7 +5,7 @@ networks:
       name: control-plane_and_cc
 services:
   router:
-    image: wso2/choreo-connect-router:0.9.0
+    image: wso2/choreo-connect-router:0.9.1-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -29,11 +29,10 @@ services:
       - "9095:9095"
       - "9000:9000"
       - "9090:9090"
-    links:
-      - adapter
-      - enforcer
+    networks:
+      - with_apim
   adapter:
-    image: wso2/choreo-connect-adapter:0.9.0
+    image: wso2/choreo-connect-adapter:0.9.1-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -53,7 +52,7 @@ services:
     networks:
       - with_apim
   enforcer:
-    image: wso2/choreo-connect-enforcer:0.9.0
+    image: wso2/choreo-connect-enforcer:0.9.1-SNAPSHOT
     logging:
       options:
         max-size: "20m"
@@ -62,8 +61,6 @@ services:
       - ../resources/enforcer/security:/home/wso2/security
       - ./conf/log4j2.properties:/home/wso2/conf/log4j2.properties
       - ../resources/enforcer/dropins:/home/wso2/lib/dropins
-    links:
-      - adapter
     environment:
       - ENFORCER_PRIVATE_KEY_PATH=/home/wso2/security/keystore/mg.key
       - ENFORCER_PUBLIC_CERT_PATH=/home/wso2/security/keystore/mg.pem

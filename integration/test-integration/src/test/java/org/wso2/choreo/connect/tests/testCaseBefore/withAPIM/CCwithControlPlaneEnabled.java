@@ -17,15 +17,26 @@
  */
 package org.wso2.choreo.connect.tests.testCaseBefore.withAPIM;
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import org.awaitility.Awaitility;
+import org.junit.Test;
+import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.wso2.carbon.automation.engine.context.TestUserMode;
+import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.context.CcInstance;
+import org.wso2.choreo.connect.tests.util.HttpResponse;
+import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class CCwithControlPlaneEnabled {
@@ -36,9 +47,20 @@ public class CCwithControlPlaneEnabled {
         ccInstance = new CcInstance.Builder().withNewDockerCompose("cc-in-common-network-docker-compose.yaml")
                 .withNewConfig("controlplane-enabled-config.toml").withBackendTsl().build();
         ccInstance.start();
-        Awaitility.await().atMost(2, TimeUnit.MINUTES);
-//        Awaitility.await().pollDelay(1, TimeUnit.MINUTES).pollInterval(20, TimeUnit.SECONDS)
-//                .atMost(4, TimeUnit.MINUTES).until(ccInstance.isHealthy());
+        Awaitility.await().pollDelay(1, TimeUnit.MINUTES).pollInterval(20, TimeUnit.SECONDS)
+                .atMost(4, TimeUnit.MINUTES).until(ccInstance.isHealthy());
+    }
+
+    @Test
+    public void testInvokeApiDeployedBeforeStartingCC() throws CCTestException,IOException {
+        String token = HttpsClientRequest.requestTestKey();
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + token);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps( "/"
+                + TestConstant.BEFORE_STARTING_CC_API_CONTEXT + "/pet/findByStatus?status=available") , headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
     }
 
     @AfterTest

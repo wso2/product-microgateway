@@ -39,11 +39,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.testng.Assert.assertEquals;
-
 public class SubscriptionValidationTestCase extends ApimBaseTest {
 
-    private APIRequest apiRequest;
     private String apiId;
     private String applicationId;
     private Map<String, String> requestHeaders;
@@ -54,7 +51,7 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
     public static final String SAMPLE_API_VERSION = "1.0.0";
 
     @BeforeClass(alwaysRun = true, description = "initialise the setup")
-    void setEnvironment() throws Exception {
+    void setEnvironment() throws CCTestException, MalformedURLException {
         super.initWithSuperTenant();
 
         // Creating the application
@@ -68,22 +65,20 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
         requestHeaders = new HashMap<>();
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
-        // get a predefined api request
-        apiRequest = PublisherUtils.createSampleAPIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT, SAMPLE_API_VERSION);
-        apiRequest.setProvider(user.getUserName());
-
         // create and publish the api
-        apiId = PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient, false);
+        APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT, SAMPLE_API_VERSION,
+                user.getUserName());
+        apiId = PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient);
 
         endpointURL = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
     }
 
     @Test(description = "Send a request to a unsubscribed REST API and check if the API invocation is forbidden")
-    public void testAPIsForInvalidSubscription() throws CCTestException, MalformedURLException {
+    public void testAPIsForInvalidSubscription() throws CCTestException {
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
                 HttpsClientRequest.isResponseAvailable(endpointURL, requestHeaders));
 
-        org.wso2.choreo.connect.tests.util.HttpResponse response;
+        HttpResponse response;
         try {
             response = HttpsClientRequest.doGet(endpointURL, requestHeaders);
         } catch (IOException e) {
@@ -114,7 +109,7 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        org.wso2.choreo.connect.tests.util.HttpResponse analyticsResponse =
+        HttpResponse analyticsResponse =
                 HttpClientRequest.doGet("http://localhost:2399/analytics/get", new HashMap<>());
         Assert.assertNotNull(analyticsResponse);
         Assert.assertTrue(analyticsResponse.getData().contains(SAMPLE_API_NAME),

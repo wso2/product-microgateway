@@ -72,7 +72,7 @@ public class ThrottlingBaseTestCase extends ApimBaseTest {
         apiRequest.setOperationsDTOS(operationsDTOS);
 
         // get a predefined api request
-        return PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient, false);
+        return PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient);
     }
 
     protected String getThrottleAPIEndpoint() throws MalformedURLException {

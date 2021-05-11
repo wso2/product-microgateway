@@ -82,12 +82,12 @@ public class VhostAPIMTestCase extends ApimBaseTest {
         requestHeaders2.put(HttpHeaderNames.HOST.toString(), US_HOST);
 
         // get a predefined api request
-        APIRequest apiRequest1 = PublisherUtils.createSampleAPIRequest(SAMPLE_API_1_NAME, SAMPLE_API_1_CONTEXT, SAMPLE_API_VERSION);
-        apiRequest1.setProvider(user.getUserName());
+        APIRequest apiRequest1 = PublisherUtils.createSampleAPIRequest(SAMPLE_API_1_NAME, SAMPLE_API_1_CONTEXT,
+                SAMPLE_API_VERSION, user.getUserName());
 
         // get a predefined api request
-        APIRequest apiRequest2 = PublisherUtils.createSampleAPIRequest(SAMPLE_API_2_NAME, SAMPLE_API_2_CONTEXT, SAMPLE_API_VERSION);
-        apiRequest2.setProvider(user.getUserName());
+        APIRequest apiRequest2 = PublisherUtils.createSampleAPIRequest(SAMPLE_API_2_NAME, SAMPLE_API_2_CONTEXT,
+                SAMPLE_API_VERSION, user.getUserName());
 
         // create and publish the api
         apiId1 = PublisherUtils.createAndPublishAPI(apiRequest1, LOCALHOST, publisherRestClient, false);

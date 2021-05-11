@@ -113,10 +113,4 @@ public class ApimBaseTest {
                 TestConstant.APPLICATION_TIER.UNLIMITED,
                 ApplicationDTO.TokenTypeEnum.JWT);
     }
-
-    public void checkIfBasicApimClientsAreReady() {
-        Assert.assertNotNull(adminRestClient, "APIM REST API Client for Admin has not been Initialized");
-        Assert.assertNotNull(publisherRestClient, "APIM REST API Client for Publisher has not been Initialized");
-        Assert.assertNotNull(storeRestClient, "APIM REST API Client for Store has not been Initialized");
-    }
 }

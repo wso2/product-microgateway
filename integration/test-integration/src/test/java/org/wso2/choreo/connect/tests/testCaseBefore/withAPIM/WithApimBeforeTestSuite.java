@@ -21,19 +21,24 @@ package org.wso2.choreo.connect.tests.testCaseBefore.withAPIM;
 import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
-import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
 import org.wso2.am.integration.test.ClientAuthenticator;
 import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.impl.RestAPIStoreImpl;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
+import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.am.integration.test.utils.bean.DCRParamRequest;
+import org.wso2.choreo.connect.tests.apim.ApimAdvancedBaseTest;
+import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
+import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.context.ApimInstance;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
+import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.IOException;
@@ -42,7 +47,11 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-public class WithApimBeforeTestSuite {
+/**
+ * This class extends the ApimAdvancedBaseTest in order to check whether all the APIM REST clients
+ * can be initialized as expected when needed.
+ */
+public class WithApimBeforeTestSuite extends ApimAdvancedBaseTest {
     private static final Logger log = LoggerFactory.getLogger(WithApimBeforeTestSuite.class);
     ApimInstance apimInstance;
 
@@ -90,6 +99,16 @@ public class WithApimBeforeTestSuite {
                                                                       RestAPIAdminImpl.password,
                                                                       APIMIntegrationConstants.SUPER_TENANT_DOMAIN);
         ClientAuthenticator.makeDCRRequest(adminPortalParamRequest);
+
+        super.initWithSuperTenant();
+        String sampleApiName = "ApiBeforeStartingCC";
+        String sampleApiVersion = "1.0.0";
+        APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(sampleApiName,
+                TestConstant.BEFORE_STARTING_CC_API_CONTEXT, sampleApiVersion, user.getUserName());
+        PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient);
+        // TODO: (SuKSW) Following method doesn't seem to work, remove if not necessary
+        //waitForAPIDeploymentSync(user.getUserName(), sampleApiName, sampleApiVersion);
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for API deployment");
     }
 
     @AfterSuite(description = "stop the setup")

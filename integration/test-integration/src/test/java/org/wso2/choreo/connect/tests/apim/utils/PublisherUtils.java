@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.choreo.connect.tests.apim.utils;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
@@ -12,10 +29,8 @@ import org.wso2.am.integration.clients.publisher.api.ApiException;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.*;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
-import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
 import org.wso2.am.integration.test.utils.bean.*;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
-import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -36,13 +51,24 @@ public class PublisherUtils {
      *
      * @param apiRequest              - Instance of APIRequest
      * @param publisherRestClient     - Instance of RestAPIPublisherImpl
+     * @throws CCTestException - Exception throws by API create and publish activities.
+     */
+    public static String createAndPublishAPI(APIRequest apiRequest,
+                                             RestAPIPublisherImpl publisherRestClient) throws CCTestException {
+        return createAndPublishAPI(apiRequest, "localhost", publisherRestClient, false);
+    }
+
+    /**
+     * Create and publish an API with isRequireReSubscription param.
+     *
+     * @param apiRequest              - Instance of APIRequest
+     * @param publisherRestClient     - Instance of RestAPIPublisherImpl
      * @param isRequireReSubscription - If publish with re-subscription required option true else false.
      * @throws CCTestException - Exception throws by API create and publish activities.
      */
     public static String createAndPublishAPI(APIRequest apiRequest,
                                          RestAPIPublisherImpl publisherRestClient,
-                                         boolean isRequireReSubscription)
-            throws CCTestException, ApiException {
+                                         boolean isRequireReSubscription) throws CCTestException {
         return createAndPublishAPI(apiRequest, "localhost", publisherRestClient, isRequireReSubscription);
     }
 
@@ -264,18 +290,23 @@ public class PublisherUtils {
      */
     public static String createAndPublishAPI(APIRequest apiRequest, String vhost,
                                          RestAPIPublisherImpl publisherRestClient,
-                                         boolean isRequireReSubscription)
-            throws CCTestException, ApiException {
+                                         boolean isRequireReSubscription) throws CCTestException {
         //Create the API
-        HttpResponse createAPIResponse = publisherRestClient.addAPI(apiRequest);
+        HttpResponse createAPIResponse;
+        try {
+            createAPIResponse = publisherRestClient.addAPI(apiRequest);
+        } catch (ApiException e) {
+            throw new CCTestException("Error while creating an API", e);
+        }
+
         if (Objects.nonNull(createAPIResponse) && createAPIResponse.getResponseCode() == HttpStatus.SC_CREATED
                 && !StringUtils.isEmpty(createAPIResponse.getData())) {
             log.info("API Created :" + getAPIIdentifierStringFromAPIRequest(apiRequest));
             // Create Revision and Deploy to Gateway
             try {
                 createAPIRevisionAndDeploy(createAPIResponse.getData(), vhost, publisherRestClient);
-            } catch (JSONException e) {
-                throw new CCTestException("Error in creating and deploying API Revision", e);
+            } catch (JSONException | ApiException e) {
+                throw new CCTestException("Error while creating and deploying API Revision", e);
             }
             //Publish the API
             HttpResponse publishAPIResponse = changeLCStateAPI(createAPIResponse.getData(),
@@ -311,7 +342,7 @@ public class PublisherUtils {
      *
      * @param apiId            -  API UUID
      * @param vhost            -  VHost to deploy the API
-     * @param restAPIPublisher -  Instance of APIPublisherRestClient
+     * @param publisherRestClient -  Instance of APIPublisherRestClient
      */
     public static String createAPIRevisionAndDeploy(String apiId, String vhost, RestAPIPublisherImpl publisherRestClient)
             throws ApiException, JSONException {
@@ -385,12 +416,17 @@ public class PublisherUtils {
         }
     }
 
-    public static APIRequest createSampleAPIRequest(String apiName, String apiContext, String apiVersion)
-            throws MalformedURLException, APIManagerIntegrationTestException {
-
-        APIRequest apiRequest = new APIRequest(apiName, apiContext,
-                new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)));
+    public static APIRequest createSampleAPIRequest(String apiName, String apiContext, String apiVersion,
+                                                    String provider) throws CCTestException {
+        APIRequest apiRequest;
+        try {
+            apiRequest = new APIRequest(apiName, apiContext,
+                    new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)));
+        } catch (MalformedURLException | APIManagerIntegrationTestException e) {
+            throw new CCTestException("Error while creating API Request", e);
+        }
         apiRequest.setVersion(apiVersion);
+        apiRequest.setProvider(provider);
         apiRequest.setTiersCollection(TestConstant.API_TIER.UNLIMITED);
         apiRequest.setTier(TestConstant.API_TIER.UNLIMITED);
 
