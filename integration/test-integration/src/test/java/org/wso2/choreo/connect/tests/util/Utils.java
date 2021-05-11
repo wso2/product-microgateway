@@ -364,7 +364,6 @@ public class Utils {
         }
     }
 
-
     public static String getTargetDirPath() {
         File targetClassesDir = new File(Utils.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());

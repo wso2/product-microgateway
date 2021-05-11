@@ -149,7 +149,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         Utils.delay(10000, "Couldn't wait until the API was deployed in Choreo Connect");
         Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, limit5Req),
                 "Request not throttled by request count condition in api tier");
-        Thread.sleep(40000); // wait until throttle decision expires
+        Utils.delay(40000, "Could not wait until the throttle decision expired");
     }
 
     @Test(description = "Test Advance throttling with IP Condition", dependsOnMethods = {"testAPILevelThrottling"})

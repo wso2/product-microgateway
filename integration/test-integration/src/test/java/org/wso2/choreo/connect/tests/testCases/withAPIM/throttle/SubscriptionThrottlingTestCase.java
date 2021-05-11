@@ -105,7 +105,7 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
 
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
-        super.cleanUp();
+        StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
         adminRestClient.deleteSubscriptionThrottlingPolicy(requestCountPolicyDTO.getPolicyId());
     }
 }

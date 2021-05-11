@@ -22,6 +22,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterClass;
 import org.wso2.am.integration.clients.publisher.api.ApiException;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
@@ -31,6 +32,7 @@ import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
@@ -80,7 +82,7 @@ public class ThrottlingBaseTestCase extends ApimBaseTest {
     protected boolean isThrottled(String endpointURL, Map<String, String> headers, Map<String, String> queryParams,
                                   long expectedCount) throws InterruptedException, IOException, URISyntaxException {
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
-                isResponseAvailable(endpointURL, headers));
+                HttpsClientRequest.isResponseAvailable(endpointURL, headers));
         // This buffer is to avoid failures due to delays in evaluating throttle conditions at TM
         // here it sets the final throttle request count twice as the limit set in the policy.
         // it will make sure throttle will happen even if the throttle window passed.
@@ -106,6 +108,11 @@ public class ThrottlingBaseTestCase extends ApimBaseTest {
             Thread.sleep(1000);
         }
         return isThrottled;
+    }
+
+    @AfterClass
+    public void removeAllApis() throws CCTestException {
+        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
     }
 
 }

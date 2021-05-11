@@ -81,7 +81,7 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
     @Test(description = "Send a request to a unsubscribed REST API and check if the API invocation is forbidden")
     public void testAPIsForInvalidSubscription() throws CCTestException, MalformedURLException {
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
-                isResponseAvailable(endpointURL, requestHeaders));
+                HttpsClientRequest.isResponseAvailable(endpointURL, requestHeaders));
 
         org.wso2.choreo.connect.tests.util.HttpResponse response;
         try {
@@ -100,7 +100,7 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
     public void testAPIsForValidSubscription() throws IOException, CCTestException {
         StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
-                isResponseAvailable(endpointURL, requestHeaders));
+                HttpsClientRequest.isResponseAvailable(endpointURL, requestHeaders));
         HttpClientRequest.doGet("http://localhost:2399/analytics/clear", new HashMap<>());
         HttpResponse response = HttpsClientRequest.doGet(endpointURL, requestHeaders);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL + ". HttpResponse");
@@ -123,6 +123,7 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
 
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
-        super.cleanUp();
+        StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
+        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
     }
 }

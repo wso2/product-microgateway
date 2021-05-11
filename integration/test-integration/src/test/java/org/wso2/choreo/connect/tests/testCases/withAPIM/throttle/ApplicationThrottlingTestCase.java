@@ -99,7 +99,7 @@ public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
 
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
-        super.cleanUp();
+        StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
         adminRestClient.deleteApplicationThrottlingPolicy(requestCountPolicyDTO.getPolicyId());
     }
 }
