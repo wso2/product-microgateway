@@ -73,9 +73,6 @@ public class ApimAdvancedBaseTest extends ApimBaseTest {
 
     protected ApimAdvancedBaseTest(TestUserMode userMode) throws CCTestException {
         super.initWithSuperTenant();
-
-        //apimServiceURLHttp = apimServiceUrls.getWebAppURLHttp();
-
         try {
             superTenantKeyManagerContext = new AutomationContext(TestConstant.AM_PRODUCT_GROUP_NAME,
                     TestConstant.AM_ALL_IN_ONE_INSTANCE,
@@ -187,54 +184,4 @@ public class ApimAdvancedBaseTest extends ApimBaseTest {
         }
         return providerTenantDomain + "/" + tenantId + "/";
     }
-
-
-
-
-
-//    /**
-//     * Cleaning up the API manager by removing all APIs and applications other than default application
-//     *
-//     * @throws Exception - occurred when calling the apis
-//     */
-//    protected void cleanUp() throws Exception {
-//
-//        if (Objects.isNull(apimStoreClient)) {
-//            return;
-//        }
-//        ApplicationListDTO applicationListDTO = apimStoreClient.getAllApps();
-//        if (applicationListDTO.getList() != null) {
-//            for (ApplicationInfoDTO applicationInfoDTO : applicationListDTO.getList()) {
-//                SubscriptionListDTO subsDTO = apimStoreClient
-//                        .getAllSubscriptionsOfApplication(applicationInfoDTO.getApplicationId());
-//                if (subsDTO != null && subsDTO.getList() != null) {
-//                    for (SubscriptionDTO subscriptionDTO : subsDTO.getList()) {
-//                        apimStoreClient.removeSubscription(subscriptionDTO.getSubscriptionId());
-//                    }
-//                }
-//                if (!APIMIntegrationConstants.OAUTH_DEFAULT_APPLICATION_NAME.equals(applicationInfoDTO.getName())) {
-//                    apimStoreClient.deleteApplication(applicationInfoDTO.getApplicationId());
-//                }
-//            }
-//        }
-//
-//        if (Objects.isNull(apimPublisherClient)) {
-//            return;
-//        }
-//        APIProductListDTO allApiProducts = apimPublisherClient.getAllApiProducts();
-//        List<APIProductInfoDTO> apiProductListDTO = allApiProducts.getList();
-//
-//        if (apiProductListDTO != null) {
-//            for (APIProductInfoDTO apiProductInfoDTO : apiProductListDTO) {
-//                apimPublisherClient.deleteApiProduct(apiProductInfoDTO.getId());
-//            }
-//        }
-//
-//        APIListDTO apiListDTO = apimPublisherClient.getAllAPIs();
-//        if (apiListDTO != null && apiListDTO.getList() != null) {
-//            for (APIInfoDTO apiInfoDTO : apiListDTO.getList()) {
-//                apimPublisherClient.deleteAPI(apiInfoDTO.getId());
-//            }
-//        }
-//    }
 }

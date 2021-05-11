@@ -6,9 +6,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.integration.clients.store.api.ApiException;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationKeyDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationKeyGenerateRequestDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.*;
 import org.wso2.am.integration.test.impl.RestAPIStoreImpl;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
@@ -90,7 +88,7 @@ public class StoreUtils {
      * associated to that application.
      *
      * @param app          - definition of the application to be created
-     * @param restAPIStore - instance of the RestAPIStoreImpl
+     * @param storeRestClient - instance of the RestAPIStoreImpl
      * @return the created application and associated client key and the client secret
      * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
      * @throws CCTestException                                   if error happens while creating the application
@@ -119,5 +117,31 @@ public class StoreUtils {
 
     public static String getSubscriptionInfoString(String apiId, String applicationId, String tier) {
         return "API Id : " + apiId + ", Application Id: " + applicationId + " Tier: " + tier;
+    }
+
+
+    public static void removeAllSubscriptionsAndAppsFromStore(RestAPIStoreImpl storeRestClient) throws CCTestException {
+        if (Objects.isNull(storeRestClient)) {
+            return;
+        }
+        try {
+            ApplicationListDTO applicationListDTO = storeRestClient.getAllApps();
+            if (applicationListDTO.getList() != null) {
+                for (ApplicationInfoDTO applicationInfoDTO : applicationListDTO.getList()) {
+                    SubscriptionListDTO subsDTO = storeRestClient
+                            .getAllSubscriptionsOfApplication(applicationInfoDTO.getApplicationId());
+                    if (subsDTO != null && subsDTO.getList() != null) {
+                        for (SubscriptionDTO subscriptionDTO : subsDTO.getList()) {
+                            storeRestClient.removeSubscription(subscriptionDTO.getSubscriptionId());
+                        }
+                    }
+                    if (!APIMIntegrationConstants.OAUTH_DEFAULT_APPLICATION_NAME.equals(applicationInfoDTO.getName())) {
+                        storeRestClient.deleteApplication(applicationInfoDTO.getApplicationId());
+                    }
+                }
+            }
+        } catch (org.wso2.am.integration.clients.store.api.ApiException e) {
+            throw new CCTestException("Error while removing Subscriptions and Apps from Store", e);
+        }
     }
 }

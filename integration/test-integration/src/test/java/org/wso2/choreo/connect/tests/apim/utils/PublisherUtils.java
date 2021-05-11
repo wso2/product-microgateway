@@ -9,8 +9,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.integration.clients.publisher.api.ApiException;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.*;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
@@ -424,5 +423,38 @@ public class PublisherUtils {
                 " API Provider Name :" + apiRequest.getProvider() + " ";
     }
 
+    public static void removeAllApisFromPublisher(RestAPIPublisherImpl publisherRestClient) throws CCTestException {
+        if (Objects.isNull(publisherRestClient)) {
+            return;
+        }
+        try {
+            APIListDTO apiListDTO = publisherRestClient.getAllAPIs();
+            if (apiListDTO != null && apiListDTO.getList() != null) {
+                for (APIInfoDTO apiInfoDTO : apiListDTO.getList()) {
+                    publisherRestClient.deleteAPI(apiInfoDTO.getId());
+                }
+            }
+        } catch (APIManagerIntegrationTestException | ApiException e) {
+            throw new CCTestException("Error while removing APIs from Publisher", e);
+        }
+    }
+
+    public static void removeAllApiProductsFromPublisher(RestAPIPublisherImpl publisherRestClient) throws CCTestException {
+        if (Objects.isNull(publisherRestClient)) {
+            return;
+        }
+        try {
+            APIProductListDTO allApiProducts = publisherRestClient.getAllApiProducts();
+            List<APIProductInfoDTO> apiProductListDTO = allApiProducts.getList();
+
+            if (apiProductListDTO != null) {
+                for (APIProductInfoDTO apiProductInfoDTO : apiProductListDTO) {
+                    publisherRestClient.deleteApiProduct(apiProductInfoDTO.getId());
+                }
+            }
+        } catch (ApiException e) {
+            throw new CCTestException("Error while removing API Products from Publisher", e);
+        }
+    }
 
 }

@@ -22,6 +22,7 @@ import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeSuite;
 import org.wso2.am.integration.test.ClientAuthenticator;
@@ -53,10 +54,8 @@ public class WithApimBeforeTestSuite {
         // set ssl properties needed to run the apim server. eg: truststore cert, truststore password, https protocols
         setSSlSystemProperties();
 
-        Awaitility.await().atMost(2, TimeUnit.MINUTES);
-        Awaitility.await().pollInterval(20, TimeUnit.SECONDS)
-                .atMost(2, TimeUnit.MINUTES).until(isAPIMServerStarted());
-        Assert.assertTrue(checkForAPIMServerStartup(), "APIM server has not started properly");
+        Awaitility.await().pollDelay(2, TimeUnit.MINUTES).pollInterval(20, TimeUnit.SECONDS)
+                .atMost(4, TimeUnit.MINUTES).until(isAPIMServerStarted());
 
         String dcrURL = Utils.getAPIMServiceURLHttps("/client-registration/v0.17/register");
         //DCR call for publisher app
@@ -93,7 +92,7 @@ public class WithApimBeforeTestSuite {
         ClientAuthenticator.makeDCRRequest(adminPortalParamRequest);
     }
 
-    @AfterTest(description = "stop the setup")
+    @AfterSuite(description = "stop the setup")
     public void stopAPIM() {
         apimInstance.stopAPIM();
     }

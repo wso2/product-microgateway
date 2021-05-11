@@ -27,7 +27,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
-import org.wso2.choreo.connect.tests.apim.APIMLifecycleClient;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
@@ -41,15 +40,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.testng.Assert.assertEquals;
-
 public class VhostAPIMTestCase extends ApimBaseTest {
 
-    private APIRequest apiRequest1;
-    private APIRequest apiRequest2;
     private String apiId1;
-    private String apiId2;
-    private String applicationId;
     private Map<String, String> requestHeaders1;
     private Map<String, String> requestHeaders2;
     private String api1endpointURL1;
@@ -73,7 +66,7 @@ public class VhostAPIMTestCase extends ApimBaseTest {
 
         // Creating the application
         AppWithConsumerKey appCreationResponse = StoreUtils.createApplicationWithKeys(sampleApp, storeRestClient);
-        applicationId = appCreationResponse.getApplicationId();
+        String applicationId = appCreationResponse.getApplicationId();
 
         // create the request headers after generating the access token
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
@@ -89,16 +82,16 @@ public class VhostAPIMTestCase extends ApimBaseTest {
         requestHeaders2.put(HttpHeaderNames.HOST.toString(), US_HOST);
 
         // get a predefined api request
-        apiRequest1 = PublisherUtils.createSampleAPIRequest(SAMPLE_API_1_NAME, SAMPLE_API_1_CONTEXT, SAMPLE_API_VERSION);
+        APIRequest apiRequest1 = PublisherUtils.createSampleAPIRequest(SAMPLE_API_1_NAME, SAMPLE_API_1_CONTEXT, SAMPLE_API_VERSION);
         apiRequest1.setProvider(user.getUserName());
 
         // get a predefined api request
-        apiRequest2 = PublisherUtils.createSampleAPIRequest(SAMPLE_API_2_NAME, SAMPLE_API_2_CONTEXT, SAMPLE_API_VERSION);
+        APIRequest apiRequest2 = PublisherUtils.createSampleAPIRequest(SAMPLE_API_2_NAME, SAMPLE_API_2_CONTEXT, SAMPLE_API_VERSION);
         apiRequest2.setProvider(user.getUserName());
 
         // create and publish the api
         apiId1 = PublisherUtils.createAndPublishAPI(apiRequest1, LOCALHOST, publisherRestClient, false);
-        apiId2 = PublisherUtils.createAndPublishAPI(apiRequest2, US_HOST, publisherRestClient, false);
+        String apiId2 = PublisherUtils.createAndPublishAPI(apiRequest2, US_HOST, publisherRestClient, false);
 
         api1endpointURL1 = Utils.getServiceURLHttps(SAMPLE_API_1_CONTEXT + "/1.0.0/pet/findByStatus");
         api1endpointURL2 = Utils.getServiceURLHttps(SAMPLE_API_1_CONTEXT + "/1.0.0/store/inventory");
@@ -152,7 +145,7 @@ public class VhostAPIMTestCase extends ApimBaseTest {
 
     private void testInvokeAPI(String endpoint, Map<String,String> headers, int statusCode, String responseBody) throws IOException {
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
-                isResponseAvailable(endpoint, headers));
+                HttpsClientRequest.isResponseAvailable(endpoint, headers));
         org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest.doGet(endpoint, headers);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + ". HttpResponse");
         Assert.assertEquals(response.getResponseCode(), statusCode,
@@ -165,6 +158,7 @@ public class VhostAPIMTestCase extends ApimBaseTest {
 
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
-        super.cleanUp();
+        StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
+        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
     }
 }

@@ -120,7 +120,8 @@ public class BlockedAPITestCase extends ApimBaseTest {
     }
 
     @AfterClass(alwaysRun = true)
-    public void destroy() throws Exception {
-        super.cleanUp();
+    public void destroy() throws CCTestException {
+        StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
+        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
     }
 }

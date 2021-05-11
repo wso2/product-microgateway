@@ -46,9 +46,7 @@ public class ApimInstance {
         Slf4jLogConsumer apimLogConsumer = new Slf4jLogConsumer(apimLogger);
         environment = new DockerComposeContainer(new File(dockerComposePath))
                 .withLocalCompose(true)
-                .withLogConsumer("apim", apimLogConsumer)
-                .waitingFor(TestConstant.APIM_SERVICE_NAME_IN_DOCKER_COMPOSE,
-                        Wait.forLogMessage(".*/apim:9443/carbon/", 1));
+                .withLogConsumer("apim", apimLogConsumer);
     }
 
     public void startAPIM() {

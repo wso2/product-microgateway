@@ -29,6 +29,8 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.Callable;
 
 /**
  * This class can be used to send http request.
@@ -239,5 +241,23 @@ public class HttpsClientRequest {
             connection.setRequestProperty(e.getKey(), e.getValue());
         }
         connection.setRequestMethod(method);
+    }
+
+    public static Callable<Boolean> isResponseAvailable(String URL, Map<String, String> requestHeaders) {
+        return new Callable<Boolean>() {
+            public Boolean call() {
+                return checkForResponse(URL, requestHeaders);
+            }
+        };
+    }
+
+    private static Boolean checkForResponse(String URL, Map<String, String> requestHeaders) {
+        org.wso2.choreo.connect.tests.util.HttpResponse response;
+        try {
+            response = HttpsClientRequest.doGet(URL, requestHeaders);
+        } catch (IOException e) {
+            return false;
+        }
+        return Objects.nonNull(response);
     }
 }

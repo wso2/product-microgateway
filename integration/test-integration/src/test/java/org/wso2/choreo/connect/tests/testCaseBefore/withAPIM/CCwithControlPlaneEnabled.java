@@ -28,23 +28,17 @@ import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class CCwithSuperTenantUser {
-    ApimBaseTest apimClient;
+public class CCwithControlPlaneEnabled {
     CcInstance ccInstance;
 
     @BeforeTest
-    public void prepareApimClientsForSuperTenantUserAndStartCC() throws IOException, CCTestException,
-            XPathExpressionException {
-
-        TestUserMode userMode = TestUserMode.SUPER_TENANT_ADMIN;
-        apimClient = new ApimBaseTest(userMode);
-        apimClient.checkIfBasicApimClientsAreReady();
-
+    public void startChoreoConnect() throws IOException, CCTestException {
         ccInstance = new CcInstance.Builder().withNewDockerCompose("cc-in-common-network-docker-compose.yaml")
                 .withNewConfig("controlplane-enabled-config.toml").withBackendTsl().build();
         ccInstance.start();
-        Awaitility.await().pollInterval(20, TimeUnit.SECONDS)
-                .atMost(3, TimeUnit.MINUTES).until(ccInstance.isHealthy());
+        Awaitility.await().atMost(2, TimeUnit.MINUTES);
+//        Awaitility.await().pollDelay(1, TimeUnit.MINUTES).pollInterval(20, TimeUnit.SECONDS)
+//                .atMost(4, TimeUnit.MINUTES).until(ccInstance.isHealthy());
     }
 
     @AfterTest

@@ -55,16 +55,13 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         ccTempPath = Utils.getTargetDirPath() + TestConstant.CC_TEMP_PATH;
     }
 
-    public void start() throws IOException {
+    public void start() throws CCTestException {
         try {
             environment.start();
         } catch (Exception e) {
-            log.error("Error occurred when docker-compose up: {}", e.getMessage());
+            throw new CCTestException("Error occurred when docker-compose up: {}", e);
         }
         Awaitility.await().pollInterval(5, TimeUnit.SECONDS).atMost(150, TimeUnit.SECONDS).until(isBackendAvailable());
-        if (!checkForBackendAvailability()) {
-            log.error("MockBackend is not started");
-        }
     }
 
     public void stop() {
