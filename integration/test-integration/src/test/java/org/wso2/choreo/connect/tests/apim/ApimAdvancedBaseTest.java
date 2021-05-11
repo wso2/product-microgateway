@@ -18,7 +18,9 @@ Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 
 package org.wso2.choreo.connect.tests.apim;
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.apache.commons.codec.binary.Base64;
+import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.admin.clients.application.ApplicationManagementClient;
@@ -45,8 +47,10 @@ import org.wso2.carbon.integration.common.utils.LoginLogoutClient;
 import org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -54,9 +58,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.xpath.XPathExpressionException;
 
+/**
+ * This class only needs to be used if at least one of the following clients are required for the test case.
+ * ApimBaseTest can be extended for any class that interacts only with Admin, Publisher and/or Store
+ */
 public class ApimAdvancedBaseTest extends ApimBaseTest {
     private static final Logger log = LoggerFactory.getLogger(ApimAdvancedBaseTest.class);
 
@@ -67,12 +76,13 @@ public class ApimAdvancedBaseTest extends ApimBaseTest {
     protected ApplicationManagementClient applicationManagementClient;
     protected String keyManagerSessionCookie;
 
+    public void initWithSuperTenant() throws CCTestException {
+        TestUserMode userMode = TestUserMode.SUPER_TENANT_ADMIN;
+        init(userMode);
+    }
 
-
-    protected String apimServiceURLHttp;
-
-    protected ApimAdvancedBaseTest(TestUserMode userMode) throws CCTestException {
-        super.initWithSuperTenant();
+    public void  init(TestUserMode userMode) throws CCTestException {
+        super.init(userMode);
         try {
             superTenantKeyManagerContext = new AutomationContext(TestConstant.AM_PRODUCT_GROUP_NAME,
                     TestConstant.AM_ALL_IN_ONE_INSTANCE,
@@ -109,11 +119,9 @@ public class ApimAdvancedBaseTest extends ApimBaseTest {
      * @param apiProvider      - Provider of the API
      * @param apiName          - API name
      * @param apiVersion       - API version
-     * @param expectedResponse - Expected response
      * @throws CCTestException if something goes wrong when getting the tenant identifier
      */
-    protected void waitForAPIDeploymentSync(String apiProvider, String apiName, String apiVersion,
-                                            String expectedResponse)
+    protected void waitForAPIDeploymentSync(String apiProvider, String apiName, String apiVersion)
             throws XPathExpressionException, CCTestException {
 
         long currentTime = System.currentTimeMillis();
@@ -141,12 +149,12 @@ public class ApimAdvancedBaseTest extends ApimBaseTest {
 
             log.info("WAIT for availability of API: " + apiName + " with version: " + apiVersion
                     + " with provider: " + apiProvider + " with Tenant Identifier: " + tenantIdentifier
-                    + " with expected response : " + expectedResponse);
+                    + " with expected response : " + APIMIntegrationConstants.IS_API_EXISTS);
 
             if (response != null) {
-                if (response.getData().contains(expectedResponse)) {
+                if (response.getData().contains(APIMIntegrationConstants.IS_API_EXISTS)) {
                     log.info("API :" + apiName + " with version: " + apiVersion + " with expected response "
-                            + expectedResponse + " found");
+                            + APIMIntegrationConstants.IS_API_EXISTS + " found");
                     break;
                 } else {
                     try {

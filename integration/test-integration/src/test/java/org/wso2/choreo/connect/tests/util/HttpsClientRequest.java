@@ -18,10 +18,16 @@
 
 package org.wso2.choreo.connect.tests.util;
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import org.apache.commons.lang3.StringUtils;
+import org.wso2.choreo.connect.tests.context.CCTestException;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -259,5 +265,21 @@ public class HttpsClientRequest {
             return false;
         }
         return Objects.nonNull(response);
+    }
+
+    public static String requestTestKey() throws CCTestException {
+        String encodedCredentials = "Basic YWRtaW46YWRtaW4=";
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), encodedCredentials);
+        HttpResponse response = null;
+        try {
+            response = doPost(Utils.getServiceURLHttps("/testkey") ,"scope=read:pets",  headers);
+        } catch (IOException e) {
+            throw new CCTestException("Error while retrieving test key", e);
+        }
+        if (response != null && response.getResponseCode() == HttpStatus.SC_OK) {
+            return response.getData() ;
+        } else throw new CCTestException("Error retrieving test key, either Choreo Connect has not started properly"
+            + "or invalid credentials");
     }
 }

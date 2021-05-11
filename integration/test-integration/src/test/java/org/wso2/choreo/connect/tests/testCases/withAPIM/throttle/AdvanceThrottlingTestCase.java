@@ -146,7 +146,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
 
         // create Revision and Deploy to Gateway
         PublisherUtils.createAPIRevisionAndDeploy(apiId, publisherRestClient);
-        Utils.delay(10000, "Couldn't wait until the API was deployed in Choreo Connect");
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Couldn't wait until the API was deployed in Choreo Connect");
         Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, limit5Req),
                 "Request not throttled by request count condition in api tier");
         Utils.delay(40000, "Could not wait until the throttle decision expired");
