@@ -30,7 +30,7 @@ public class CcWithJwtConfigAndTransformer {
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        ccInstance = new CcInstance.Builder().withNewConfig("jwt-generator-config.toml").withCustomJwtTransformer().build();
+        ccInstance = new CcInstance.Builder().withNewConfig("jwt-generator-config.toml").withAllCustomImpls().build();
         ccInstance.start();
 
         ApictlUtils.addEnv("test");

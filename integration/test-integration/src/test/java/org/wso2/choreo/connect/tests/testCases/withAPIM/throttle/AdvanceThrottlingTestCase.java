@@ -53,7 +53,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
 
 public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
     private final String THROTTLED_IP = "10.100.1.22";
@@ -132,6 +131,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         endpointURL = getThrottleAPIEndpoint();
 
         StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
+        // this is to wait until policy deployment is complete in case it didn't complete already
         Thread.sleep(TestConstant.DEPLOYMENT_WAIT_TIME);
     }
 
@@ -234,6 +234,8 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         AppWithConsumerKey appCreationResponse = StoreUtils.createApplicationWithKeys(app, storeRestClient);
         StoreUtils.subscribeToAPI(apiId, appCreationResponse.getApplicationId(),
                 TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted when waiting for the " +
+                "subscription to be deployed");
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
                 appCreationResponse.getConsumerKey(), appCreationResponse.getConsumerSecret(),
                 new String[]{}, user, storeRestClient);
@@ -306,6 +308,8 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
 
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
+        StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
+        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
         adminRestClient.deleteAdvancedThrottlingPolicy(apiPolicyId);
         adminRestClient.deleteAdvancedThrottlingPolicy(conditionalPolicyId);
     }

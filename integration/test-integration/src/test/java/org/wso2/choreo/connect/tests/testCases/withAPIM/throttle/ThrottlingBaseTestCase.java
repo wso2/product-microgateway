@@ -23,7 +23,6 @@ import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
-import org.wso2.am.integration.clients.publisher.api.ApiException;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
 import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
@@ -52,12 +51,11 @@ public class ThrottlingBaseTestCase extends ApimBaseTest {
     public static final String SAMPLE_API_VERSION = "1.0.0";
 
     protected String createThrottleApi(String tiers, String apiTier, String resTier) throws MalformedURLException,
-            APIManagerIntegrationTestException, CCTestException, ApiException {
+            APIManagerIntegrationTestException, CCTestException {
         APIRequest apiRequest = new APIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT,
                 new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)));
-        String API_VERSION_1_0_0 = SAMPLE_API_VERSION;
         apiRequest.setProvider(user.getUserName());
-        apiRequest.setVersion(API_VERSION_1_0_0);
+        apiRequest.setVersion(SAMPLE_API_VERSION);
         apiRequest.setTiersCollection(tiers);
         apiRequest.setTier(apiTier);
         apiRequest.setApiTier(apiTier);
@@ -91,7 +89,6 @@ public class ThrottlingBaseTestCase extends ApimBaseTest {
         URIBuilder url = new URIBuilder(endpointURL);
         if (queryParams != null) {
             for (Map.Entry<String, String> entry : queryParams.entrySet()) {
-                System.out.println(entry.getKey() + "/" + entry.getValue());
                 url.addParameter(entry.getKey(), entry.getValue());
             }
         }
@@ -109,10 +106,4 @@ public class ThrottlingBaseTestCase extends ApimBaseTest {
         }
         return isThrottled;
     }
-
-    @AfterClass
-    public void removeAllApis() throws CCTestException {
-        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
-    }
-
 }

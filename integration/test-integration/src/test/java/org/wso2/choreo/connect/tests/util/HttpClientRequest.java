@@ -22,6 +22,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -280,7 +281,7 @@ public class HttpClientRequest {
     }
 
     public static HttpResponse retryPostRequestUntilDeployed(String requestUrl, Map<String, String> headers,
-                                                             String body) throws IOException, InterruptedException {
+                                                             String body) throws CCTestException, InterruptedException {
         HttpResponse response;
         int retryCount = 0;
         do {
@@ -293,7 +294,7 @@ public class HttpClientRequest {
     }
 
     public static HttpResponse retryGetRequestUntilDeployed(String requestUrl, Map<String, String> headers)
-            throws IOException, InterruptedException {
+            throws CCTestException, InterruptedException {
         HttpResponse response;
         int retryCount = 0;
         do {

@@ -20,25 +20,27 @@ package org.wso2.choreo.connect.tests.testCases.withAPIM;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import org.awaitility.Awaitility;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
+import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
-import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
-import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class VhostAPIMTestCase extends ApimBaseTest {
 
@@ -85,8 +87,8 @@ public class VhostAPIMTestCase extends ApimBaseTest {
         APIRequest apiRequest1 = PublisherUtils.createSampleAPIRequest(SAMPLE_API_1_NAME, SAMPLE_API_1_CONTEXT,
                 SAMPLE_API_VERSION, user.getUserName());
 
-        // get a predefined api request
-        APIRequest apiRequest2 = PublisherUtils.createSampleAPIRequest(SAMPLE_API_2_NAME, SAMPLE_API_2_CONTEXT,
+        // get a predefined api request with different resources
+        APIRequest apiRequest2 = createCustomAPIRequest(SAMPLE_API_2_NAME, SAMPLE_API_2_CONTEXT,
                 SAMPLE_API_VERSION, user.getUserName());
 
         // create and publish the api
@@ -95,26 +97,26 @@ public class VhostAPIMTestCase extends ApimBaseTest {
 
         api1endpointURL1 = Utils.getServiceURLHttps(SAMPLE_API_1_CONTEXT + "/1.0.0/pet/findByStatus");
         api1endpointURL2 = Utils.getServiceURLHttps(SAMPLE_API_1_CONTEXT + "/1.0.0/store/inventory");
-        api2endpointURL1 = Utils.getServiceURLHttps(SAMPLE_API_2_NAME + "/1.0.0/pet/findByStatus");
-        api2endpointURL2 = Utils.getServiceURLHttps(SAMPLE_API_2_NAME + "/1.0.0/store/inventory");
+        api2endpointURL1 = Utils.getServiceURLHttps(SAMPLE_API_2_CONTEXT + "/1.0.0/pet/findByStatus");
+        api2endpointURL2 = Utils.getServiceURLHttps(SAMPLE_API_2_CONTEXT + "/1.0.0/store/inventory");
 
         StoreUtils.subscribeToAPI(apiId1, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
         StoreUtils.subscribeToAPI(apiId2, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
     }
 
     @Test
-    public void testAPIsWithDeployedVhost() throws IOException {
+    public void testAPIsWithDeployedVhost() throws CCTestException {
         // VHOST: localhost, resource: /pet/findByStatus
-        testInvokeAPI(api1endpointURL1, requestHeaders1, HttpStatus.SC_SUCCESS, ResponseConstants.RESPONSE_BODY);
+        Utils.testInvokeAPI(api1endpointURL1, requestHeaders1, HttpStatus.SC_SUCCESS, ResponseConstants.RESPONSE_BODY);
 
         // VHOST: localhost, resource: /store/inventory
-        testInvokeAPI(api1endpointURL2, requestHeaders1, HttpStatus.SC_SUCCESS, ResponseConstants.STORE_INVENTORY_RESPONSE);
+        Utils.testInvokeAPI(api1endpointURL2, requestHeaders1, HttpStatus.SC_SUCCESS, ResponseConstants.STORE_INVENTORY_RESPONSE);
 
         // VHOST: localhost, resource: /pet/findByStatus
-        testInvokeAPI(api2endpointURL1, requestHeaders2, HttpStatus.SC_SUCCESS, ResponseConstants.API_SANDBOX_RESPONSE);
+        Utils.testInvokeAPI(api2endpointURL1, requestHeaders2, HttpStatus.SC_SUCCESS, ResponseConstants.API_SANDBOX_RESPONSE);
 
         // VHOST: localhost, /store/inventory should be 404 since this resource is not found in the API
-        testInvokeAPI(api2endpointURL2, requestHeaders2, HttpStatus.SC_NOT_FOUND, null);
+        Utils.testInvokeAPI(api2endpointURL2, requestHeaders2, HttpStatus.SC_NOT_FOUND, null);
     }
 
     @Test (dependsOnMethods = {"testAPIsWithDeployedVhost"})
@@ -123,11 +125,11 @@ public class VhostAPIMTestCase extends ApimBaseTest {
         PublisherUtils.undeployAndDeleteAPIRevisions(apiId1, publisherRestClient);
 
         // VHOST: localhost - 404
-        testInvokeAPI(api1endpointURL1, requestHeaders1, HttpStatus.SC_NOT_FOUND, null);
-        testInvokeAPI(api1endpointURL2, requestHeaders1, HttpStatus.SC_NOT_FOUND, null);
+        Utils.testInvokeAPI(api1endpointURL1, requestHeaders1, HttpStatus.SC_NOT_FOUND, null);
+        Utils.testInvokeAPI(api1endpointURL2, requestHeaders1, HttpStatus.SC_NOT_FOUND, null);
 
         // VHOST: localhost, resource: /pet/findByStatus - 200
-        testInvokeAPI(api2endpointURL1, requestHeaders2, HttpStatus.SC_SUCCESS, ResponseConstants.API_SANDBOX_RESPONSE);
+        Utils.testInvokeAPI(api2endpointURL1, requestHeaders2, HttpStatus.SC_SUCCESS, ResponseConstants.API_SANDBOX_RESPONSE);
     }
 
     @Test (dependsOnMethods = {"testUndeployAPIsFromVhost"})
@@ -136,29 +138,36 @@ public class VhostAPIMTestCase extends ApimBaseTest {
         PublisherUtils.createAPIRevisionAndDeploy(apiId1, LOCALHOST, publisherRestClient);
 
         // VHOST: localhost - 200
-        testInvokeAPI(api1endpointURL1, requestHeaders1, HttpStatus.SC_SUCCESS, ResponseConstants.RESPONSE_BODY);
-        testInvokeAPI(api1endpointURL2, requestHeaders1, HttpStatus.SC_SUCCESS, ResponseConstants.STORE_INVENTORY_RESPONSE);
+        Utils.testInvokeAPI(api1endpointURL1, requestHeaders1, HttpStatus.SC_SUCCESS, ResponseConstants.RESPONSE_BODY);
+        Utils.testInvokeAPI(api1endpointURL2, requestHeaders1, HttpStatus.SC_SUCCESS, ResponseConstants.STORE_INVENTORY_RESPONSE);
 
         // VHOST: localhost, resource: /pet/findByStatus - 200
-        testInvokeAPI(api2endpointURL1, requestHeaders2, HttpStatus.SC_SUCCESS, ResponseConstants.API_SANDBOX_RESPONSE);
-    }
-
-    private void testInvokeAPI(String endpoint, Map<String,String> headers, int statusCode, String responseBody) throws IOException {
-        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
-                HttpsClientRequest.isResponseAvailable(endpoint, headers));
-        org.wso2.choreo.connect.tests.util.HttpResponse response = HttpsClientRequest.doGet(endpoint, headers);
-        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + ". HttpResponse");
-        Assert.assertEquals(response.getResponseCode(), statusCode,
-                "Status code mismatched. Response code: " + response.getResponseCode());
-        if (statusCode != HttpStatus.SC_NOT_FOUND) {
-            Assert.assertEquals(response.getData(), responseBody,
-                    "Response message mismatched. Response Data: " + response.getData());
-        }
+        Utils.testInvokeAPI(api2endpointURL1, requestHeaders2, HttpStatus.SC_SUCCESS, ResponseConstants.API_SANDBOX_RESPONSE);
     }
 
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
         StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
         PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
+    }
+
+    private APIRequest createCustomAPIRequest(String apiName, String apiContext, String apiVersion, String provider)
+            throws MalformedURLException, APIManagerIntegrationTestException {
+        APIRequest apiRequest = new APIRequest(apiName, apiContext,
+                new URL(Utils.getDockerMockService2URLHttp(TestConstant.MOCK_BACKEND_BASEPATH)));
+        apiRequest.setVersion(apiVersion);
+        apiRequest.setProvider(provider);
+        apiRequest.setTiersCollection(TestConstant.API_TIER.UNLIMITED);
+        apiRequest.setTier(TestConstant.API_TIER.UNLIMITED);
+
+        APIOperationsDTO apiOperationsDTO1 = new APIOperationsDTO();
+        apiOperationsDTO1.setVerb("GET");
+        apiOperationsDTO1.setTarget("/pet/findByStatus");
+        apiOperationsDTO1.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
+
+        List<APIOperationsDTO> operationsDTOS = new ArrayList<>();
+        operationsDTOS.add(apiOperationsDTO1);
+        apiRequest.setOperationsDTOS(operationsDTOS);
+        return apiRequest;
     }
 }

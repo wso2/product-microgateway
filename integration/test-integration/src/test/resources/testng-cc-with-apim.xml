@@ -35,15 +35,15 @@
     </test>
     <test name="cc-with-control-plane-enabled" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.choreo.connect.tests.testCaseBefore.withAPIM.CCwithControlPlaneEnabled"/>
+            <class name="org.wso2.choreo.connect.tests.testCaseBefore.withAPIM.CcWithControlPlaneEnabled"/>
             <class name="org.wso2.choreo.connect.tests.testCases.withAPIM.throttle.AdvanceThrottlingTestCase"/>
-<!--            <class name="org.wso2.choreo.connect.tests.testCases.withAPIM.throttle.ApplicationThrottlingTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testCases.withAPIM.throttle.SubscriptionThrottlingTestCase"/>-->
-<!--&lt;!&ndash;            TODO: (Praminda) this requires upgrade in apim throttle dependency. enable after upgrade&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="org.wso2.choreo.connect.tests.testCases.withAPIM.throttle.DenyConditionTestCase"/>&ndash;&gt;-->
-<!--            <class name="org.wso2.choreo.connect.tests.testCases.withAPIM.SubscriptionValidationTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testCases.withAPIM.BlockedAPITestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testCases.withAPIM.VhostAPIMTestCase"/>-->
+            <class name="org.wso2.choreo.connect.tests.testCases.withAPIM.throttle.ApplicationThrottlingTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.withAPIM.throttle.SubscriptionThrottlingTestCase"/>
+<!--            TODO: (Praminda) this requires upgrade in apim throttle dependency. enable after upgrade-->
+<!--            <class name="org.wso2.choreo.connect.tests.testCases.withAPIM.throttle.DenyConditionTestCase"/>-->
+            <class name="org.wso2.choreo.connect.tests.testCases.withAPIM.SubscriptionValidationTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.withAPIM.BlockedAPITestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testCases.withAPIM.VhostAPIMTestCase"/>
         </classes>
     </test>
 </suite>

@@ -32,6 +32,7 @@ import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
+import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -106,6 +107,7 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
     @AfterClass(alwaysRun = true)
     public void destroy() throws Exception {
         StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
+        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
         adminRestClient.deleteSubscriptionThrottlingPolicy(requestCountPolicyDTO.getPolicyId());
     }
 }

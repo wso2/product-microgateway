@@ -18,8 +18,10 @@
 
 package org.wso2.choreo.connect.tests.util;
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.io.FileUtils;
+import org.awaitility.Awaitility;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -38,6 +40,7 @@ import java.net.URL;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -298,6 +301,20 @@ public class Utils {
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getData(), responseData);
         Assert.assertEquals(responseCode, response.getResponseCode(), "Response code mismatched");
+    }
+
+    public static void testInvokeAPI(String endpoint, Map<String,String> headers, int expectedStatusCode,
+                               String expectedResponseBody) throws CCTestException {
+        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
+                HttpsClientRequest.isResponseAvailable(endpoint, headers));
+        HttpResponse response = HttpsClientRequest.doGet(endpoint, headers);
+        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
+        Assert.assertEquals(response.getResponseCode(), expectedStatusCode,
+                "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
+        if (expectedStatusCode != HttpStatus.SC_NOT_FOUND) {
+            Assert.assertEquals(response.getData(), expectedResponseBody, "Response message mismatched. Endpoint:"
+                    + endpoint + " HttpResponse ");
+        }
     }
 
     /**

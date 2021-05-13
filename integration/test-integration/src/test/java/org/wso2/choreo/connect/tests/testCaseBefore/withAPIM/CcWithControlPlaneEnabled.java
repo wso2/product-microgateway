@@ -39,16 +39,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class CCwithControlPlaneEnabled {
+public class CcWithControlPlaneEnabled {
     CcInstance ccInstance;
 
     @BeforeTest
     public void startChoreoConnect() throws IOException, CCTestException {
         ccInstance = new CcInstance.Builder().withNewDockerCompose("cc-in-common-network-docker-compose.yaml")
-                .withNewConfig("controlplane-enabled-config.toml").withBackendTsl().build();
+                .withNewConfig("controlplane-enabled-config.toml")
+                .withBackendServiceFile("backend-service-with-tls-and-network.yaml")
+                .withAllCustomImpls().build();
         ccInstance.start();
-        Awaitility.await().pollDelay(1, TimeUnit.MINUTES).pollInterval(20, TimeUnit.SECONDS)
-                .atMost(4, TimeUnit.MINUTES).until(ccInstance.isHealthy());
+        Awaitility.await().pollDelay(10, TimeUnit.SECONDS).pollInterval(10, TimeUnit.SECONDS)
+                .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
     }
 
     @Test
