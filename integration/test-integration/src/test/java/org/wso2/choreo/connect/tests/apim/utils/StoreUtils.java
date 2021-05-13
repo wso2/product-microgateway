@@ -55,7 +55,7 @@ public class StoreUtils {
      * @throws CCTestException  if an error occurs while generating the user access token
      */
     public static String generateUserAccessToken(String apimServiceURLHttps, String consumerKey, String consumerSecret,
-                                                 String[] scopes, User user, RestAPIStoreImpl restAPIStore)
+                                                 String[] scopes, User user, RestAPIStoreImpl storeRestClient)
             throws CCTestException {
 
         String requestBody = "grant_type=password&username=" + user.getUserName() + "&password=" + user.getPassword() +
@@ -64,7 +64,7 @@ public class StoreUtils {
         try {
             URL tokenEndpointURL = new URL(apimServiceURLHttps + "oauth2/token");
             accessTokenGenerationResponse = new JSONObject(
-                    restAPIStore.generateUserAccessKey(consumerKey, consumerSecret, requestBody, tokenEndpointURL)
+                    storeRestClient.generateUserAccessKey(consumerKey, consumerSecret, requestBody, tokenEndpointURL)
                             .getData());
         } catch (MalformedURLException | APIManagerIntegrationTestException e) {
             throw new CCTestException("Error occurred while generating the user access token.", e);

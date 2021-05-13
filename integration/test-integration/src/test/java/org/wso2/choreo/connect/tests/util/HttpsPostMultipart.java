@@ -18,6 +18,8 @@
 
 package org.wso2.choreo.connect.tests.util;
 
+import org.wso2.choreo.connect.tests.context.CCTestException;
+
 import javax.net.ssl.*;
 import java.io.*;
 import java.net.URL;
@@ -131,7 +133,7 @@ public class HttpsPostMultipart {
      * @throws IOException
      * @return HttpResponse
      */
-    public HttpResponse getResponse() throws IOException {
+    public HttpResponse getResponse() throws CCTestException {
         writer.flush();
         writer.append("--" + boundary + "--").append(LINE);
         writer.close();

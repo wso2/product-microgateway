@@ -78,12 +78,7 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
                 HttpsClientRequest.isResponseAvailable(endpointURL, requestHeaders));
 
-        HttpResponse response;
-        try {
-            response = HttpsClientRequest.doGet(endpointURL, requestHeaders);
-        } catch (IOException e) {
-            throw new CCTestException("Error occurred while invoking the endpoint: " + endpointURL, e);
-        }
+        HttpResponse response = HttpsClientRequest.doGet(endpointURL, requestHeaders);
         Assert.assertTrue(response.getResponseCode() == HttpStatus.SC_FORBIDDEN && response.getData()
                                   .contains(TestConstant.RESOURCE_FORBIDDEN_CODE),
                           "The user invoking the API should not be granted access to the required resource. Response "

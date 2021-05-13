@@ -40,7 +40,7 @@ public class CcInstance extends ChoreoConnectImpl {
      * @throws IOException
      * @throws CCTestException
      */
-    private CcInstance(String dockerComposeFile, String confFileName, boolean tlsEnabled, boolean withCustomJwtTransformer)
+    private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile, boolean withCustomJwtTransformer)
             throws IOException, CCTestException {
         createTmpMgwSetup();
         String targetDir = Utils.getTargetDirPath();
@@ -60,7 +60,7 @@ public class CcInstance extends ChoreoConnectImpl {
         }
         String dockerComposePath = ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR
                         + TestConstant.DOCKER_COMPOSE_YAML_PATH;
-        MockBackendServer.addMockBackendServiceToDockerCompose(dockerComposePath, tlsEnabled);
+        MockBackendServer.addMockBackendServiceToDockerCompose(dockerComposePath, backendServiceFile);
         environment = new DockerComposeContainer(new File(dockerComposePath)).withLocalCompose(true);
         addCcLoggersToEnv();
     }
@@ -68,8 +68,9 @@ public class CcInstance extends ChoreoConnectImpl {
     public static class Builder {
         String dockerComposeFile;
         String confFileName;
-        boolean tlsEnabled = false;
+        String backendServiceFile;
         boolean withCustomJwtTransformer = false;
+        boolean withAnalyticsMetricImpl = false;
 
         public Builder withNewDockerCompose(String dockerComposeFile) {
             this.dockerComposeFile = dockerComposeFile;
@@ -80,17 +81,19 @@ public class CcInstance extends ChoreoConnectImpl {
             this.confFileName = confFileName;
             return this;
         }
-        public Builder withBackendTsl(){
-            this.tlsEnabled = true;
+        public Builder withBackendServiceFile(String backendServiceFile){
+            this.backendServiceFile = backendServiceFile;
             return this;
         }
-        public Builder withCustomJwtTransformer() throws CCTestException {
+        //Currently both added via same jar
+        public Builder withAllCustomImpls() throws CCTestException {
             this.withCustomJwtTransformer = true;
+            this.withAnalyticsMetricImpl = false;
             return this;
         }
 
         public CcInstance build() throws IOException, CCTestException {
-            return new CcInstance(this.dockerComposeFile, this.confFileName, this.tlsEnabled,
+            return new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
                     this.withCustomJwtTransformer);
         }
     }

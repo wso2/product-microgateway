@@ -5,10 +5,6 @@ networks:
 services:
   apim:
     image: wso2/wso2am:4.0.0-alpine
-    healthcheck:
-      test: ["CMD", "nc", "-z","localhost", "9443"]
-      interval: 10s
-      retries: 50
     ports:
       - "9763:9763"
       - "9443:9443"

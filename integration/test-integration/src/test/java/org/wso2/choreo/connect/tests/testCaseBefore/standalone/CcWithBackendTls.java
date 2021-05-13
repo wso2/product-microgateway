@@ -30,7 +30,8 @@ public class CcWithBackendTls {
 
     @BeforeTest(description = "initialise the setup")
     void start() throws Exception {
-        ccInstance = new CcInstance.Builder().withNewConfig("cors-disabled-config.toml").withBackendTsl().build();
+        ccInstance = new CcInstance.Builder().withNewConfig("cors-disabled-config.toml")
+                .withBackendServiceFile("backend-service-tls.yaml").build();
         ccInstance.start();
 
         ApictlUtils.createProject("backend_tsl_openAPI.yaml", "backend_tsl_petstore", "backend_tls.crt", null);

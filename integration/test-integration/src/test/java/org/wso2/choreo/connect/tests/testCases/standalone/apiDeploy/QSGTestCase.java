@@ -48,7 +48,7 @@ public class QSGTestCase {
     }
 
     @Test
-    public void invokeAPI() throws IOException {
+    public void invokeAPI() throws CCTestException, IOException {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(HttpHeaderNames.AUTHORIZATION.toString(), encodedCredentials);
         HttpResponse response = HttpsClientRequest.doPost(Utils.getServiceURLHttps(

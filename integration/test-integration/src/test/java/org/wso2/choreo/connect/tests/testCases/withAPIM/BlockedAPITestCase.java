@@ -36,7 +36,6 @@ import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,9 +44,7 @@ import java.util.Map;
  *
  */
 public class BlockedAPITestCase extends ApimBaseTest {
-    private APIRequest apiRequest;
     private String apiId;
-    private String applicationId;
     private Map<String, String> requestHeaders;
     private String endpointURL;
 
@@ -61,7 +58,7 @@ public class BlockedAPITestCase extends ApimBaseTest {
 
         // Creating the application
         AppWithConsumerKey appCreationResponse = StoreUtils.createApplicationWithKeys(sampleApp, storeRestClient);
-        applicationId = appCreationResponse.getApplicationId();
+        String applicationId = appCreationResponse.getApplicationId();
 
         // create the request headers after generating the access token
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
@@ -71,7 +68,7 @@ public class BlockedAPITestCase extends ApimBaseTest {
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
         // get a predefined api request
-        apiRequest = PublisherUtils.createSampleAPIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT, SAMPLE_API_VERSION,
+        APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT, SAMPLE_API_VERSION,
                 user.getUserName());
 
         // create and publish the api
@@ -83,7 +80,7 @@ public class BlockedAPITestCase extends ApimBaseTest {
     }
 
     @Test(description = "Send a request to a subscribed REST API in a published state")
-    public void testPublishedStateAPI() throws IOException, CCTestException, InterruptedException {
+    public void testPublishedStateAPI() throws CCTestException, InterruptedException {
         Thread.sleep(3000);
         HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(endpointURL, requestHeaders);
         Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpointURL + ". HttpResponse");
@@ -94,7 +91,7 @@ public class BlockedAPITestCase extends ApimBaseTest {
     }
 
     @Test(description = "Send a request to a blocked  REST API and check 700700 error code is received", dependsOnMethods = "testPublishedStateAPI")
-    public void testBlockedStateAPI() throws IOException, CCTestException, InterruptedException {
+    public void testBlockedStateAPI() throws CCTestException, InterruptedException {
         PublisherUtils.changeLCStateAPI(apiId, APILifeCycleAction.BLOCK.getAction(), publisherRestClient, false);
         Thread.sleep(3000);
         HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(endpointURL, requestHeaders);
@@ -106,7 +103,7 @@ public class BlockedAPITestCase extends ApimBaseTest {
     }
 
     @Test(description = "Re publish the blocked API and test", dependsOnMethods = "testBlockedStateAPI")
-    public void testRePublishAPI() throws IOException, CCTestException, InterruptedException {
+    public void testRePublishAPI() throws CCTestException, InterruptedException {
         PublisherUtils.changeLCStateAPI(apiId, APILifeCycleAction.RE_PUBLISH.getAction(), publisherRestClient, false);
         Thread.sleep(3000);
         HttpResponse response = HttpClientRequest.retryGetRequestUntilDeployed(endpointURL, requestHeaders);

@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.tests.mockbackend;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.Utils;
 
@@ -46,29 +47,29 @@ public class MockBackendServer {
      */
     public static void addMockBackendServiceToDockerCompose(String dockerComposePath)
             throws IOException, CCTestException {
-        addMockBackendServiceToDockerCompose(dockerComposePath, false);
+        addMockBackendServiceToDockerCompose(dockerComposePath, null);
     }
 
     /**
      * Get Mock backend server module root path.
      *
      * @param dockerComposePath - path for the mgw setup docker-compose file
-     * @param tlsEnabled        - if the backend needs to have the tls enabled server
+     * @param backendServiceFile  backendService different to the default, to be appended to docker-compose file
      * @throws IOException          if something goes wrong while file operations
      * @throws CCTestException if something goes wrong while copying the config file
      */
-    public static void addMockBackendServiceToDockerCompose(String dockerComposePath, boolean tlsEnabled)
+    public static void addMockBackendServiceToDockerCompose(String dockerComposePath, String backendServiceFile)
             throws IOException, CCTestException {
 
         File targetClassesDir = new File(MockBackendServer.class.getProtectionDomain().getCodeSource().
                 getLocation().getPath());
         String targetDir = targetClassesDir.getParentFile().toString();
         String backendService = MockBackendServer.class.getClassLoader()
-                .getResource("backend-service.yaml").getPath();
-        if (tlsEnabled) {
+                .getResource("dockerCompose/backend-service.yaml").getPath();
+        if (StringUtils.isNotEmpty(backendServiceFile)) {
             // if tls enabled, the command in docker-compose should be overridden
             backendService = MockBackendServer.class.getClassLoader()
-                    .getResource("backend-service-tls.yaml").getPath();
+                    .getResource("dockerCompose/" + backendServiceFile).getPath();
         }
 
         // Input files
