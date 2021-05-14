@@ -38,6 +38,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 
+/**
+ * Implementation class to be extended by the Choreo Connect instance
+ */
 public abstract class ChoreoConnectImpl implements ChoreoConnect {
 
     static final String ENFORCER_DEBUG_ENV = "ENFORCER_DEBUG";
@@ -61,7 +64,8 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         } catch (Exception e) {
             throw new CCTestException("Error occurred when docker-compose up: {}", e);
         }
-        Awaitility.await().pollInterval(5, TimeUnit.SECONDS).atMost(150, TimeUnit.SECONDS).until(isBackendAvailable());
+        Awaitility.await().pollInterval(5, TimeUnit.SECONDS).atMost(150, TimeUnit.SECONDS)
+                .until(isBackendAvailable());
     }
 
     public void stop() {
@@ -72,14 +76,13 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
      * Check if the Choreo Connect instance is healthy
      *
      * @return a Callable that checks if the CC instance is healthy
-     * @throws IOException - if an error occurs during the http request
      */
-    public Callable<Boolean> isHealthy() throws IOException {
+    public Callable<Boolean> isHealthy() {
         return this::checkCCInstanceHealth;
     }
 
     private Boolean checkCCInstanceHealth() throws IOException {
-        Map<String, String> headers = new HashMap<String, String>(0);
+        Map<String, String> headers = new HashMap<>(0);
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttp(
                 "/health"), headers);
         return response != null && response.getResponseCode() == HttpStatus.SC_OK;
@@ -101,7 +104,7 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
      * @throws IOException if an error occurs when invoking the backend URL
      */
     private Boolean checkForBackendAvailability() throws IOException {
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         HttpResponse response = HttpClientRequest.doGet(Utils.getMockServiceURLHttp(
                 "/v2/pet/3"), headers);
         return response != null && response.getResponseCode() == HttpStatus.SC_OK;

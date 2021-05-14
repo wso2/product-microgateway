@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.Test;
 import org.wso2.am.integration.test.ClientAuthenticator;
 import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
@@ -32,10 +31,8 @@ import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.am.integration.test.utils.bean.DCRParamRequest;
 import org.wso2.choreo.connect.tests.apim.ApimAdvancedBaseTest;
-import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.context.ApimInstance;
-import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -48,8 +45,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This class extends the ApimAdvancedBaseTest in order to check whether all the APIM REST clients
- * can be initialized as expected when needed.
+ * This class starts the API Manager instance before the entire test suite.
+ * Here the class extends the ApimAdvancedBaseTest class in order to check whether
+ * all the APIM REST clients can be initialized as expected when needed.
  */
 public class WithApimBeforeTestSuite extends ApimAdvancedBaseTest {
     private static final Logger log = LoggerFactory.getLogger(WithApimBeforeTestSuite.class);

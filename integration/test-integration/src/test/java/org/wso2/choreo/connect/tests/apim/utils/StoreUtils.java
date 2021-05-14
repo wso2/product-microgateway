@@ -49,10 +49,9 @@ public class StoreUtils {
      * @param consumerSecret - consumer secret
      * @param scopes         - scopes
      * @param user           - user
-     * @param restAPIStore   - instance of the RestAPIStoreImpl
+     * @param storeRestClient - instance of the RestAPIStoreImpl
      * @return the user access token
-     * @throws MalformedURLException if the URL is malformed
-     * @throws CCTestException  if an error occurs while generating the user access token
+     * @throws CCTestException if an error occurs while generating the user access token
      */
     public static String generateUserAccessToken(String apimServiceURLHttps, String consumerKey, String consumerSecret,
                                                  String[] scopes, User user, RestAPIStoreImpl storeRestClient)
@@ -78,11 +77,10 @@ public class StoreUtils {
      * @param apiId           - UUID of the API
      * @param applicationId   - UUID of the application
      * @param storeRestClient - Instance of APIPublisherRestClient
-     * @return HttpResponse - Response of the API subscribe action
      * @throws CCTestException if the response of the create subscription is null. This may null when there is an
      *                              error while subscribing to the API or when the subscription already exists.
      */
-    public static String subscribeToAPI(String apiId, String applicationId, String tier,
+    public static void subscribeToAPI(String apiId, String applicationId, String tier,
                                           RestAPIStoreImpl storeRestClient) throws CCTestException {
         HttpResponse response = storeRestClient.createSubscription(apiId, applicationId, tier);
         if (Objects.isNull(response)) {
@@ -96,19 +94,16 @@ public class StoreUtils {
                     "Response Code:" + response.getResponseCode());
         }
         log.info("API Subscribed :" + getSubscriptionInfoString(apiId, applicationId, tier));
-        return apiId;
     }
 
     /**
-     * Create the given application using the apimStoreClient. Then, create the client key and the client secret
-     * associated to that application.
+     * Create the given application using the storeRestClient. Then, retrieve and return the client key and the
+     * client secret associated to that application, using the dto AppWithConsumerKey.
      *
      * @param app          - definition of the application to be created
-     * @param storeRestClient - instance of the RestAPIStoreImpl
+     * @param storeRestClient - an instance of RestAPIStoreImpl
      * @return the created application and associated client key and the client secret
-     * @throws org.wso2.am.integration.clients.store.api.ApiException if error happens while generating the keys
-     * @throws CCTestException                                   if error happens while creating the application
-     *                                                                or if the application already exists
+     * @throws CCTestException if an error occurs while creating the application or generating keys
      */
     public static AppWithConsumerKey createApplicationWithKeys(Application app, RestAPIStoreImpl storeRestClient)
             throws CCTestException {
@@ -141,6 +136,11 @@ public class StoreUtils {
     }
 
 
+    /**
+     * Remove all Subscriptions and Applications accessible via a given Store REST API client
+     * @param storeRestClient - an instance of RestAPIStoreImpl
+     * @throws CCTestException if an error occurs while removing Subscriptions and Applications from API Manager
+     */
     public static void removeAllSubscriptionsAndAppsFromStore(RestAPIStoreImpl storeRestClient) throws CCTestException {
         if (Objects.isNull(storeRestClient)) {
             return;

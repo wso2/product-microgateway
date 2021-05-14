@@ -24,16 +24,12 @@ import org.junit.Test;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
-import org.wso2.carbon.automation.engine.context.TestUserMode;
-import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.context.CcInstance;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
-
-import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,13 +39,13 @@ public class CcWithControlPlaneEnabled {
     CcInstance ccInstance;
 
     @BeforeTest
-    public void startChoreoConnect() throws IOException, CCTestException {
+    public void startChoreoConnect() throws Exception {
         ccInstance = new CcInstance.Builder().withNewDockerCompose("cc-in-common-network-docker-compose.yaml")
                 .withNewConfig("controlplane-enabled-config.toml")
                 .withBackendServiceFile("backend-service-with-tls-and-network.yaml")
                 .withAllCustomImpls().build();
         ccInstance.start();
-        Awaitility.await().pollDelay(10, TimeUnit.SECONDS).pollInterval(10, TimeUnit.SECONDS)
+        Awaitility.await().pollDelay(20, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
     }
 
