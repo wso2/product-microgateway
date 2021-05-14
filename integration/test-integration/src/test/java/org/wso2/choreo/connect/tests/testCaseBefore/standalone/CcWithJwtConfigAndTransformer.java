@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.tests.testCaseBefore.standalone;
 
+import org.awaitility.Awaitility;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.wso2.choreo.connect.tests.context.CcInstance;
@@ -32,6 +33,9 @@ public class CcWithJwtConfigAndTransformer {
     void start() throws Exception {
         ccInstance = new CcInstance.Builder().withNewConfig("jwt-generator-config.toml").withAllCustomImpls().build();
         ccInstance.start();
+        //TODO: (SuKSW) Check why this fails
+//        Awaitility.await().pollDelay(20, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
+//                .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");

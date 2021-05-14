@@ -21,7 +21,7 @@ package org.wso2.choreo.connect.tests.context;
 import java.io.IOException;
 
 /**
- * Interface for test Server implementation.
+ * Interface for Choreo Connect instance implementation
  */
 public interface ChoreoConnect {
 

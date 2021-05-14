@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.tests.testCaseBefore.standalone;
 
+import org.awaitility.Awaitility;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.wso2.choreo.connect.tests.context.CcInstance;
@@ -33,6 +34,8 @@ public class CcWithBackendTls {
         ccInstance = new CcInstance.Builder().withNewConfig("cors-disabled-config.toml")
                 .withBackendServiceFile("backend-service-tls.yaml").build();
         ccInstance.start();
+        Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
+                .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
 
         ApictlUtils.createProject("backend_tsl_openAPI.yaml", "backend_tsl_petstore", "backend_tls.crt", null);
         ApictlUtils.createProject( "cors_openAPI.yaml", "cors_petstore", null, null);

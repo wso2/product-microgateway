@@ -18,6 +18,7 @@
 package org.wso2.choreo.connect.tests.testCaseBefore.standalone;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
+import org.awaitility.Awaitility;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -42,6 +43,8 @@ public class CcWithDefaultConf {
     void start() throws Exception {
         ccInstance = new CcInstance.Builder().build();
         ccInstance.start();
+        Awaitility.await().pollDelay(5, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
+                .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
 
         ApictlUtils.createProject( "prod_and_sand_openAPI.yaml", "prod_and_sand_petstore", null, null);
         ApictlUtils.createProject( "prod_openAPI.yaml", "prod_petstore", null, null);

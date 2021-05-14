@@ -19,7 +19,7 @@
 package org.wso2.choreo.connect.tests.context;
 
 /**
- * Exception to be thrown by test utilities.
+ * Exception to be thrown during Choreo Connect tests
  */
 public class CCTestException extends Exception {
 

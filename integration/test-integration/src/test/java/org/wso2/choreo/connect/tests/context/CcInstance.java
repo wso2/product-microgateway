@@ -28,17 +28,18 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Mgw server instance class.
+ * Choreo Connect instance class.
  */
 public class CcInstance extends ChoreoConnectImpl {
 
     /**
-     * initialize a docker environment using docker compose.
+     * Initialize a docker compose container environment for Choreo Connect
      *
-     * @param confFileName   external conf.toml path
-     * @param tlsEnabled if the backend needs to have the tls enabled server additionally
-     * @throws IOException
-     * @throws CCTestException
+     * @param confFileName  - a conf.toml filename in integration/test-integration/src/test/resources/configs
+     * @param backendServiceFile - a file in integration/test-integration/src/test/resources/dockerCompose
+     *                          with docker-compose service section
+     * @throws IOException if an error occurs while appending backend service to docker-compose file
+     * @throws CCTestException if an error occurs while appending backend service to docker-compose file
      */
     private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile, boolean withCustomJwtTransformer)
             throws IOException, CCTestException {
@@ -86,7 +87,7 @@ public class CcInstance extends ChoreoConnectImpl {
             return this;
         }
         //Currently both added via same jar
-        public Builder withAllCustomImpls() throws CCTestException {
+        public Builder withAllCustomImpls() {
             this.withCustomJwtTransformer = true;
             this.withAnalyticsMetricImpl = false;
             return this;

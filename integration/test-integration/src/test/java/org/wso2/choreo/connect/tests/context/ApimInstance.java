@@ -22,21 +22,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.File;
 
 /**
- * APIM with Mgw server instance class.
+ * API Manager instance class.
  */
 public class ApimInstance {
     private static final Logger log = LoggerFactory.getLogger(ApimInstance.class);
     DockerComposeContainer environment;
 
     /**
-     * initialize a docker environment using docker compose with test-integration jar copied with.
+     * Initialize a docker compose container environment for API Manager
      *
      * @throws CCTestException if something goes wrong while copying server configs
      */
@@ -67,7 +66,7 @@ public class ApimInstance {
         String apimSetupDir = targetDir + File.separator + "apim";
 
         //Both files are directly given here to avoid ApimInstance being configurable.
-        //This is to encourage starting API Manager only once for the complete test suit.
+        //This is to encourage starting API Manager only once for the complete test suite.
         String dockerComposeSource = testResourcesDir + TestConstant.TEST_DOCKER_COMPOSE_DIR
                 + File.separator + "apim-in-common-network-docker-compose.yaml";
         String dockerComposeDest = apimSetupDir + TestConstant.DOCKER_COMPOSE_YAML_PATH;

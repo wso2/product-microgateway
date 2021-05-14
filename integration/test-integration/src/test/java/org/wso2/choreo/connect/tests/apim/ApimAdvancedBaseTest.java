@@ -18,28 +18,17 @@ Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 
 package org.wso2.choreo.connect.tests.apim;
 
-import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.apache.commons.codec.binary.Base64;
-import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.am.admin.clients.application.ApplicationManagementClient;
 import org.wso2.am.admin.clients.claim.ClaimMetaDataMgtAdminClient;
 import org.wso2.am.admin.clients.oauth.OAuthAdminServiceClient;
 import org.wso2.am.admin.clients.user.RemoteUserStoreManagerServiceClient;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIProductInfoDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIProductListDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationInfoDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationListDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.SubscriptionDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.SubscriptionListDTO;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
 import org.wso2.am.integration.test.utils.http.HttpRequestUtil;
 import org.wso2.carbon.automation.engine.context.AutomationContext;
 import org.wso2.carbon.automation.engine.context.TestUserMode;
-import org.wso2.carbon.automation.engine.context.beans.User;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.carbon.integration.common.admin.client.TenantManagementServiceClient;
 import org.wso2.carbon.integration.common.admin.client.UserManagementClient;
@@ -47,24 +36,19 @@ import org.wso2.carbon.integration.common.utils.LoginLogoutClient;
 import org.wso2.carbon.tenant.mgt.stub.beans.xsd.TenantInfoBean;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
-import org.wso2.choreo.connect.tests.util.HttpClientRequest;
-import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
-import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import javax.xml.xpath.XPathExpressionException;
 
 /**
+ * A base testcase class for advanced use cases
+ *
  * This class only needs to be used if at least one of the following clients are required for the test case.
- * ApimBaseTest can be extended for any class that interacts only with Admin, Publisher and/or Store
+ * ApimBaseTest can be extended by any testcase class that interacts only with Admin, Publisher and/or Store
  */
 public class ApimAdvancedBaseTest extends ApimBaseTest {
     private static final Logger log = LoggerFactory.getLogger(ApimAdvancedBaseTest.class);
@@ -74,13 +58,27 @@ public class ApimAdvancedBaseTest extends ApimBaseTest {
     protected ClaimMetaDataMgtAdminClient remoteClaimMetaDataMgtAdminClient;
     protected OAuthAdminServiceClient oAuthAdminServiceClient;
     protected ApplicationManagementClient applicationManagementClient;
+    protected TenantManagementServiceClient tenantManagementServiceClient;
     protected String keyManagerSessionCookie;
+    protected String keyManagerSuperTenantSessionCookie;
 
+    /**
+     * Initialize all REST clients for API Manager in Super Tenant Admin user mode
+     *
+     * @throws CCTestException if an error occurs while initializing a client
+     */
     public void initWithSuperTenant() throws CCTestException {
         TestUserMode userMode = TestUserMode.SUPER_TENANT_ADMIN;
         init(userMode);
     }
 
+    /**
+     * Initialize all REST clients for API Manager including Admin, Publisher and Store client that
+     * are defined in the super class
+     *
+     * @param userMode - a enum value of TestUserMode
+     * @throws CCTestException if an error occurs while initializing a client
+     */
     public void  init(TestUserMode userMode) throws CCTestException {
         super.init(userMode);
         try {

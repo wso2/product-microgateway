@@ -459,6 +459,11 @@ public class PublisherUtils {
                 " API Provider Name :" + apiRequest.getProvider() + " ";
     }
 
+    /**
+     * Remove all APIs accessible via a given Store REST API client
+     * @param publisherRestClient - an instance of RestAPIPublisherImpl
+     * @throws CCTestException if an error occurs while removing APIs from API Manager
+     */
     public static void removeAllApisFromPublisher(RestAPIPublisherImpl publisherRestClient) throws CCTestException {
         if (Objects.isNull(publisherRestClient)) {
             return;
