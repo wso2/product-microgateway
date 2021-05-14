@@ -137,6 +137,8 @@ spec:
               value: "127.0.0.1"
             - name: ENFORCER_PORT
               value: "8081"
+            - name: ENFORCER_ANALYTICS_HOST
+              value: "127.0.0.1"
             - name: ENFORCER_ANALYTICS_RECEIVER_PORT
               value: "18090"
             - name: ENFORCER_CA_CERT_PATH
