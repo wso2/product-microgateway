@@ -28,9 +28,9 @@ import (
 	"github.com/wso2/adapter/config"
 	"github.com/wso2/adapter/internal/discovery/xds"
 	eh "github.com/wso2/adapter/internal/eventhub"
-	"github.com/wso2/adapter/internal/eventhub/types"
+	"github.com/wso2/adapter/pkg/eventhub/types"
 	"github.com/wso2/adapter/internal/synchronizer"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
 // constant variables

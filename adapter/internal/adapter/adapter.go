@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import (
 	wso2_server "github.com/wso2/adapter/internal/discovery/protocol/server/v3"
 	enforcerCallbacks "github.com/wso2/adapter/internal/discovery/xds/enforcercallbacks"
 	routercb "github.com/wso2/adapter/internal/discovery/xds/routercallbacks"
-	"github.com/wso2/adapter/internal/health"
-	healthservice "github.com/wso2/adapter/internal/health/api/wso2/health/service"
+	"github.com/wso2/adapter/pkg/health"
+	healthservice "github.com/wso2/adapter/pkg/health/api/wso2/health/service"
 	"github.com/wso2/adapter/internal/tlsutils"
 
 	"context"
@@ -50,9 +50,9 @@ import (
 	"github.com/wso2/adapter/config"
 	"github.com/wso2/adapter/internal/discovery/xds"
 	"github.com/wso2/adapter/internal/eventhub"
-	"github.com/wso2/adapter/internal/messaging"
+	"github.com/wso2/adapter/pkg/messaging"
 	"github.com/wso2/adapter/internal/synchronizer"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/pkg/loggers"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

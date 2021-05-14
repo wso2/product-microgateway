@@ -25,7 +25,7 @@ import (
 	"github.com/streadway/amqp"
 	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/keymgt"
 	"github.com/wso2/adapter/internal/discovery/xds"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
 func handleTokenRevocation(deliveries <-chan amqp.Delivery, done chan error) {

@@ -35,7 +35,7 @@ import (
 	mgw "github.com/wso2/adapter/internal/oasparser/model"
 	"github.com/wso2/adapter/internal/oasparser/utills"
 	"github.com/wso2/adapter/internal/tlsutils"
-	"github.com/wso2/adapter/loggers"
+	"github.com/wso2/adapter/pkg/loggers"
 )
 
 // API Controller related constants

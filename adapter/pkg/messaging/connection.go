@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"github.com/streadway/amqp"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
 // Try to connect to the RabbitMQ server as long as it takes to establish a connection

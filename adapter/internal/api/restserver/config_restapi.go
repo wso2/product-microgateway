@@ -1,6 +1,6 @@
 // This file is safe to edit. Once it exists it will not be overwritten
 
-// Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,10 +38,10 @@ import (
 	"github.com/wso2/adapter/internal/api/restserver/operations/api_individual"
 	"github.com/wso2/adapter/internal/api/restserver/operations/authorization"
 	"github.com/wso2/adapter/internal/auth"
-	"github.com/wso2/adapter/internal/health"
+	"github.com/wso2/adapter/pkg/health"
 	constants "github.com/wso2/adapter/internal/oasparser/model"
 	"github.com/wso2/adapter/internal/tlsutils"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
 var (

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package loggers
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/adapter/internal/logging"
+	"github.com/wso2/adapter/pkg/logging"
 )
 
 /* loggers should be initiated only for the main packages
@@ -42,7 +42,7 @@ const (
 	pkgSvcDiscovery         = "github.com/wso2/adapter/internal/svcDiscovery"
 	pkgTLSUtils             = "github.com/wso2/adapter/internal/tlsutils"
 	pkgSubscription         = "github.com/wso2/adapter/internal/subscription"
-	pkgHealth               = "github.com/wso2/adapter/internal/health"
+	pkgHealth               = "github.com/wso2/adapter/pkg/health"
 	pkgRouterXdsCallbacks   = "github.com/wso2/adapter/internal/discovery/xds/routercallbacks"
 	pkgEnforcerXdsCallbacks = "github.com/wso2/adapter/internal/discovery/xds/enforcercallbacks"
 )

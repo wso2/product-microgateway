@@ -23,11 +23,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wso2/adapter/internal/health"
+	"github.com/wso2/adapter/pkg/health"
 
 	"github.com/streadway/amqp"
 	"github.com/wso2/adapter/config"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
 var (

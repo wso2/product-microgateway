@@ -28,7 +28,7 @@ import (
 	"sync"
 
 	"github.com/wso2/adapter/config"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
 var (

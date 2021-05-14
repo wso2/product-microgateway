@@ -20,7 +20,7 @@ package model
 import (
 	"github.com/go-openapi/spec"
 	"github.com/google/uuid"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
 // SetInfoSwagger populates the MgwSwagger object with the properties within the openAPI v2

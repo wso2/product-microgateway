@@ -26,7 +26,7 @@ import (
 	"github.com/wso2/adapter/internal/synchronizer"
 
 	"github.com/streadway/amqp"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
 const (

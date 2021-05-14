@@ -9,8 +9,8 @@ import (
 	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/config/enforcer"
 	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/keymgt"
 	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/subscription"
-	"github.com/wso2/adapter/internal/eventhub/types"
-	logger "github.com/wso2/adapter/loggers"
+	"github.com/wso2/adapter/pkg/eventhub/types"
+	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
 // MarshalConfig will marshal a Config struct - read from the config toml - to

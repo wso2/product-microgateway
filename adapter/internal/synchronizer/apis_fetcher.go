@@ -40,7 +40,7 @@ import (
 	"github.com/wso2/adapter/internal/tlsutils"
 
 	apiServer "github.com/wso2/adapter/internal/api"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
 const (

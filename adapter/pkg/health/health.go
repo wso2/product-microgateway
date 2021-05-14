@@ -19,8 +19,8 @@ package health
 
 import (
 	"context"
-	healthservice "github.com/wso2/adapter/internal/health/api/wso2/health/service"
-	logger "github.com/wso2/adapter/loggers"
+	healthservice "github.com/wso2/adapter/pkg/health/api/wso2/health/service"
+	logger "github.com/wso2/adapter/pkg/loggers"
 	"sync"
 )
 
