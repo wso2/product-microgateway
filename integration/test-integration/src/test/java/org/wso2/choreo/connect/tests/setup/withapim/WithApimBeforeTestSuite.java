@@ -28,14 +28,11 @@ import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.impl.RestAPIStoreImpl;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
-import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.am.integration.test.utils.bean.DCRParamRequest;
 import org.wso2.choreo.connect.tests.apim.ApimAdvancedBaseTest;
-import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.context.ApimInstance;
 import org.wso2.choreo.connect.tests.util.HttpClientRequest;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
-import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.IOException;
@@ -97,16 +94,6 @@ public class WithApimBeforeTestSuite extends ApimAdvancedBaseTest {
                                                                       RestAPIAdminImpl.password,
                                                                       APIMIntegrationConstants.SUPER_TENANT_DOMAIN);
         ClientAuthenticator.makeDCRRequest(adminPortalParamRequest);
-
-        super.initWithSuperTenant();
-        String sampleApiName = "ApiBeforeStartingCC";
-        String sampleApiVersion = "1.0.0";
-        APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(sampleApiName,
-                TestConstant.BEFORE_STARTING_CC_API_CONTEXT, sampleApiVersion, user.getUserName());
-        PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient);
-        // TODO: (SuKSW) Following method doesn't seem to work, remove if not necessary
-        //waitForAPIDeploymentSync(user.getUserName(), sampleApiName, sampleApiVersion);
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for API deployment");
     }
 
     @AfterSuite(description = "stop the setup")
