@@ -80,7 +80,6 @@ public class TestConstant {
     public final static int APIM_SERVLET_TRP_HTTPS_PORT = 9443;
     public final static int APIM_SERVLET_TRP_HTTP_PORT = 9763;
     public static final String MOCK_BACKEND_BASEPATH = "/v2";
-    public static final String BEFORE_STARTING_CC_API_CONTEXT = "before_starting_CC";
 
     public static final int INVALID_CREDENTIALS_CODE = 900901;
     public static final String RESOURCE_FORBIDDEN_CODE = "900908";
@@ -195,5 +194,12 @@ public class TestConstant {
 
         public SUBSCRIPTION_TIER() {
         }
+    }
+
+    public static final class SRARTUP_TEST {
+        public static final String API_NAME = "ApiBeforeStartingCC";
+        public static final String API_CONTEXT = "before_starting_CC";
+        public static final String API_VERSION = "1.0.0";
+        public static final String APP_NAME = "AppBeforeStartingCC";
     }
 }

@@ -76,7 +76,7 @@ public class ThrottlingBaseTestCase extends ApimBaseTest {
         return Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
     }
 
-    protected boolean isThrottled(String endpointURL, Map<String, String> headers, Map<String, String> queryParams,
+    public static boolean isThrottled(String endpointURL, Map<String, String> headers, Map<String, String> queryParams,
                                   long expectedCount) throws InterruptedException, IOException, URISyntaxException {
         Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
                 HttpsClientRequest.isResponseAvailable(endpointURL, headers));

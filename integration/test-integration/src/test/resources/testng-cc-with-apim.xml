@@ -35,7 +35,9 @@
     </test>
     <test name="cc-with-control-plane-enabled" preserve-order="true" parallel="false">
         <classes>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.PrepForStartupDiscoveryTestCase"/>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcWithControlPlaneEnabled"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.StartupDiscoveryTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.AdvanceThrottlingTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.ApplicationThrottlingTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.SubscriptionThrottlingTestCase"/>
