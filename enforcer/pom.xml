@@ -140,6 +140,11 @@
                         <excludes>
                             <exclude>org.apache.logging:*</exclude>
                             <exclude>log4j:*</exclude>
+                            <exclude>org.slf4j:slf4j-log4j12</exclude>
+                            <exclude>org.apache.logging.log4j:log4j-slf4j-impl</exclude>
+                            <exclude>org.apache.logging.log4j:log4j-api</exclude>
+                            <exclude>org.apache.logging.log4j:log4j-core</exclude>
+                            <exclude>org.apache.logging.log4j:log4j-jcl</exclude>
                             <exclude>org.ops4j.pax.logging:*</exclude>
                             <exclude>org.json:json</exclude>
                             <exclude>jline:*</exclude>
@@ -171,7 +176,7 @@
                                 org.apache.logging.log4j, org.json.wso2
                             </includeGroupIds>
                             <includeArtifactIds>
-                                log4j-api, log4j-core, log4j-jcl, json
+                                log4j-api, log4j-core, log4j-jcl, json, log4j-slf4j-impl
                             </includeArtifactIds>
                         </configuration>
                     </execution>
@@ -322,10 +327,6 @@
             <artifactId>log4j-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
@@ -387,6 +388,10 @@
             <artifactId>Java-WebSocket</artifactId>
             <version>1.5.1</version>
         </dependency>
-
+        <!-- slf4j binding -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+        </dependency>
     </dependencies>
 </project>
