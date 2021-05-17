@@ -48,9 +48,12 @@ import (
 )
 
 var (
-	version             int32
+	version int32
+	// TODO: (VirajSalaka) Remove Unused mutexes.
 	mutexForXdsUpdate   sync.Mutex
 	mutexForCacheUpdate sync.Mutex
+
+	mutexForInternalMapUpdate sync.Mutex
 
 	cache                              envoy_cachev3.SnapshotCache
 	enforcerCache                      wso2_cache.SnapshotCache
@@ -157,7 +160,7 @@ func init() {
 	enforcerRevokedTokensMap = make(map[string][]types.Resource)
 	enforcerThrottleData = &throttle.ThrottleData{}
 	rand.Seed(time.Now().UnixNano())
-	go watchEnforcerResponse()
+	// go watchEnforcerResponse()
 }
 
 // GetXdsCache returns xds server cache.
@@ -223,11 +226,6 @@ func UpdateAPI(apiContent config.APIContent) {
 		apiContent.Environments = []string{config.DefaultGatewayName}
 	}
 
-	//TODO: (VirajSalaka) Optimize locking
-	var l sync.Mutex
-	l.Lock()
-	defer l.Unlock()
-
 	if apiContent.APIType == mgw.HTTP {
 		mgwSwagger = operator.GetMgwSwagger(apiContent.APIDefinition)
 		mgwSwagger.SetID(apiContent.UUID)
@@ -266,6 +264,10 @@ func UpdateAPI(apiContent config.APIContent) {
 	// 		return
 	// 	}
 	// }
+
+	mutexForInternalMapUpdate.Lock()
+	defer mutexForInternalMapUpdate.Unlock()
+
 	apiMgwSwaggerMap[apiIdentifier] = mgwSwagger
 	//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
 	// TODO: commented the following line as the implementation is not supported yet.
@@ -282,9 +284,8 @@ func UpdateAPI(apiContent config.APIContent) {
 
 	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, apiContent.UpstreamCerts,
 		apiContent.VHost)
-	// TODO: (VirajSalaka) Decide if the routes and listeners need their own map since it is not going to be changed based on API at the moment.
+
 	openAPIRoutesMap[apiIdentifier] = routes
-	// openAPIListenersMap[apiMapKey] = listeners
 	openAPIClustersMap[apiIdentifier] = clusters
 	openAPIEndpointsMap[apiIdentifier] = endpoints
 	openAPIEnforcerApisMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiContent.LifeCycleStatus,
@@ -324,6 +325,10 @@ func GetVhostOfAPI(apiUUID, environment string) (vhost string, exists bool) {
 // DeleteAPIs deletes an API, its resources and updates the caches of given environments
 func DeleteAPIs(vhost, apiName, version string, environments []string) error {
 	apiNameVersionID := GenerateIdentifierForAPIWithoutVhost(apiName, version)
+
+	mutexForInternalMapUpdate.Lock()
+	defer mutexForInternalMapUpdate.Unlock()
+
 	vhosts, found := apiToVhostsMap[apiNameVersionID]
 	if !found {
 		logger.LoggerXds.Infof("Unable to delete API %v. API does not exist.", apiNameVersionID)
@@ -378,6 +383,10 @@ func DeleteAPIs(vhost, apiName, version string, environments []string) error {
 // DeleteAPIWithAPIMEvent deletes API with the given UUID from the given gw environments
 func DeleteAPIWithAPIMEvent(uuid, name, version string, environments []string) {
 	apiIdentifiers := make(map[string]struct{})
+
+	mutexForInternalMapUpdate.Lock()
+	defer mutexForInternalMapUpdate.Unlock()
+
 	for gw, vhost := range apiUUIDToGatewayToVhosts[uuid] {
 		// delete from only specified environments
 		if arrayContains(environments, gw) {
@@ -469,16 +478,17 @@ func mergeResourceArrays(resourceArrays [][]types.Resource) []types.Resource {
 func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 
 	// TODO: (VirajSalaka) check possible optimizations, Since the number of labels are low by design it should not be an issue
-
 	for _, newLabel := range newLabels {
-		_, _, _, _, apis := GenerateEnvoyResoucesForLabel(newLabel)
+		listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(newLabel)
 		UpdateEnforcerApis(newLabel, apis, "")
+		UpdateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
 		logger.LoggerXds.Debugf("Xds Cache is updated for the newly added label : %v", newLabel)
 	}
 	for _, oldLabel := range oldLabels {
 		if !arrayContains(newLabels, oldLabel) {
-			_, _, _, _, apis := GenerateEnvoyResoucesForLabel(oldLabel)
+			listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(oldLabel)
 			UpdateEnforcerApis(oldLabel, apis, "")
+			UpdateXdsCacheWithLock(oldLabel, endpoints, clusters, routes, listeners)
 			logger.LoggerXds.Debugf("Xds Cache is updated for the already existing label : %v", oldLabel)
 		}
 	}
@@ -965,6 +975,7 @@ func restorePreviousState(label string) string {
 	return enforcerOldState.Version
 }
 
+// TODO: (VirajSalaka) Remove after the fallback mechanism implementation, if it remains unused.
 /** This method will listen to the callback messages from the xds protocol.
 * A message will be published for each xds client request (for API resources only)
 * Based on the message (error/ success) the current state of the resources will be changed.
