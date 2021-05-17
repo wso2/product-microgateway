@@ -107,28 +107,35 @@ public class StoreUtils {
      */
     public static AppWithConsumerKey createApplicationWithKeys(Application app, RestAPIStoreImpl storeRestClient)
             throws CCTestException {
+        String applicationId = createApplication(app, storeRestClient);
+        ApplicationKeyDTO applicationKeyDTO = generateKeysForApp(applicationId, storeRestClient);
+        return new AppWithConsumerKey(applicationId, applicationKeyDTO.getConsumerKey(),
+                applicationKeyDTO.getConsumerSecret());
+    }
+
+    public static String createApplication(Application app, RestAPIStoreImpl storeRestClient) throws CCTestException {
         HttpResponse applicationResponse = storeRestClient.createApplication(app.getName(), app.getDescription(),
                 app.getThrottleTier(), app.getTokenType());
         if (Objects.isNull(applicationResponse)) {
             throw new CCTestException("Could not create the application: " + app.getName());
         }
-        String applicationId = applicationResponse.getData();
+        return applicationResponse.getData();
+    }
 
+    public static ApplicationKeyDTO generateKeysForApp(String appId, RestAPIStoreImpl storeRestClient) throws CCTestException {
         ArrayList<String> grantTypes = new ArrayList<>();
         grantTypes.add(APIMIntegrationConstants.GRANT_TYPE.PASSWORD);
         grantTypes.add(APIMIntegrationConstants.GRANT_TYPE.CLIENT_CREDENTIAL);
         ApplicationKeyDTO applicationKeyDTO;
         try {
-            applicationKeyDTO = storeRestClient.generateKeys(applicationId,
+            applicationKeyDTO = storeRestClient.generateKeys(appId,
                     TestConstant.DEFAULT_TOKEN_VALIDITY_TIME, "",
                     ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION,
                     null, grantTypes);
         } catch (ApiException e) {
             throw new CCTestException("Error while generating consumer keys from APIM Store", e);
         }
-
-        return new AppWithConsumerKey(applicationId, applicationKeyDTO.getConsumerKey(),
-                applicationKeyDTO.getConsumerSecret());
+        return applicationKeyDTO;
     }
 
     public static String getSubscriptionInfoString(String apiId, String applicationId, String tier) {

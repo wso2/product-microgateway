@@ -81,7 +81,7 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         return this::checkCCInstanceHealth;
     }
 
-    private Boolean checkCCInstanceHealth() throws IOException {
+    public Boolean checkCCInstanceHealth() throws IOException {
         Map<String, String> headers = new HashMap<>(0);
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttp(
                 "/health"), headers);
