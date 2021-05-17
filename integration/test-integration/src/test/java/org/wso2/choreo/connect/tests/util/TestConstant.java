@@ -195,4 +195,11 @@ public class TestConstant {
         public SUBSCRIPTION_TIER() {
         }
     }
+
+    public static final class SRARTUP_TEST {
+        public static final String API_NAME = "ApiBeforeStartingCC";
+        public static final String API_CONTEXT = "before_starting_CC";
+        public static final String API_VERSION = "1.0.0";
+        public static final String APP_NAME = "AppBeforeStartingCC";
+    }
 }
