@@ -36,7 +36,7 @@ import (
 	"github.com/wso2/adapter/internal/discovery/xds"
 	eventhubTypes "github.com/wso2/adapter/pkg/eventhub/types"
 	"github.com/wso2/adapter/internal/tlsutils"
-	logger "github.com/wso2/adapter/pkg/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
 )
 
 const (
@@ -122,7 +122,7 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 		var keyManagers []eventhubTypes.KeyManager
 		err := json.Unmarshal(responseBytes, &keyManagers)
 		if err != nil {
-			logger.LoggerMsg.Errorf("Error occurred while unmarshelling Key Managers event data %v", err)
+			logger.LoggerInternalMsg.Errorf("Error occurred while unmarshelling Key Managers event data %v", err)
 			return
 		}
 

@@ -23,7 +23,7 @@ import (
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/wso2/adapter/internal/discovery/protocol/resource/v3"
 	xds "github.com/wso2/adapter/internal/discovery/xds"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
 )
 
 // Callbacks is used to debug the xds server related communication.

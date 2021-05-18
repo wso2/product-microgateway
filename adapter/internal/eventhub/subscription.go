@@ -33,7 +33,7 @@ import (
 	"github.com/wso2/adapter/internal/discovery/xds"
 	"github.com/wso2/adapter/pkg/eventhub/types"
 	"github.com/wso2/adapter/internal/tlsutils"
-	logger "github.com/wso2/adapter/pkg/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
 )
 
 const (

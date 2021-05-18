@@ -25,20 +25,20 @@ import (
 	"github.com/streadway/amqp"
 	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/keymgt"
 	"github.com/wso2/adapter/internal/discovery/xds"
-	logger "github.com/wso2/adapter/pkg/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
+	msg "github.com/wso2/adapter/pkg/messaging"
 )
 
 func handleTokenRevocation(deliveries <-chan amqp.Delivery, done chan error) {
-
 	for d := range deliveries {
-		var notification EventTokenRevocationNotification
+		var notification msg.EventTokenRevocationNotification
 		unmarshalErr := json.Unmarshal([]byte(string(d.Body)), &notification)
 		if unmarshalErr != nil {
-			logger.LoggerMsg.Errorf("Error occurred while unmarshalling revoked token event data %v", unmarshalErr)
+			logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling revoked token event data %v", unmarshalErr)
 			continue
 		}
-		logger.LoggerMsg.Infof("Event %s is received", notification.Event.PayloadData.Type)
-		logger.LoggerMsg.Printf("RevokedToken: %s, Token Type: %s", notification.Event.PayloadData.RevokedToken,
+		logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.Type)
+		logger.LoggerInternalMsg.Printf("RevokedToken: %s, Token Type: %s", notification.Event.PayloadData.RevokedToken,
 			notification.Event.PayloadData.Type)
 		var stokens []types.Resource
 		t := &keymgt.RevokedToken{}
@@ -48,6 +48,6 @@ func handleTokenRevocation(deliveries <-chan amqp.Delivery, done chan error) {
 		xds.UpdateEnforcerRevokedTokens(stokens)
 		d.Ack(false)
 	}
-	logger.LoggerMsg.Infof("handle: deliveries channel closed")
+	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
 	done <- nil
 }

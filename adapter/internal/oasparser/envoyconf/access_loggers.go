@@ -24,7 +24,7 @@ import (
 	grpc_accesslogv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/grpc/v3"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/adapter/config"
-	logger "github.com/wso2/adapter/pkg/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 

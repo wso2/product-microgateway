@@ -44,7 +44,7 @@ import (
 	envoyconf "github.com/wso2/adapter/internal/oasparser/envoyconf"
 	mgw "github.com/wso2/adapter/internal/oasparser/model"
 	"github.com/wso2/adapter/internal/oasparser/operator"
-	logger "github.com/wso2/adapter/pkg/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
 )
 
 var (

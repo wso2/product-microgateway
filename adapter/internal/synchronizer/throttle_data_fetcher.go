@@ -37,7 +37,7 @@ import (
 	"github.com/wso2/adapter/internal/discovery/xds"
 	"github.com/wso2/adapter/internal/tlsutils"
 
-	logger "github.com/wso2/adapter/pkg/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
 )
 
 const (
@@ -154,7 +154,7 @@ func UpdateKeyTemplates() {
 		if data.Resp != nil {
 			templates := []string{}
 			err := json.Unmarshal(data.Resp, &templates)
-			logger.LoggerMsg.Debugf("Key Templates: %s", string(data.Resp))
+			logger.LoggerInternalMsg.Debugf("Key Templates: %s", string(data.Resp))
 			if err != nil {
 				logger.LoggerSync.Errorf("Error occurred while unmarshalling key templates %v", err)
 			}
@@ -193,7 +193,7 @@ func UpdateBlockingConditions() {
 		data := <-c
 		if data.Resp != nil {
 			conditions := BlockConditions{}
-			logger.LoggerMsg.Infof("Blocking Conditions: %s", string(data.Resp))
+			logger.LoggerInternalMsg.Infof("Blocking Conditions: %s", string(data.Resp))
 			err := json.Unmarshal(data.Resp, &conditions)
 			if err != nil {
 				logger.LoggerSync.Errorf("Error occurred while unmarshalling blocking conditions %v", err)

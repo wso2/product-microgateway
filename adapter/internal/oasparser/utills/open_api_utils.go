@@ -26,7 +26,7 @@ import (
 	"unicode"
 
 	"github.com/ghodss/yaml"
-	logger "github.com/wso2/adapter/pkg/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
 )
 
 // ToJSON converts a single YAML document into a JSON document

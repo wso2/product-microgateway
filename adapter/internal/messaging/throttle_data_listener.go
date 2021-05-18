@@ -21,12 +21,13 @@ package messaging
 import (
 	"encoding/json"
 
+	"github.com/streadway/amqp"
 	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/throttle"
 	"github.com/wso2/adapter/internal/discovery/xds"
 	"github.com/wso2/adapter/internal/synchronizer"
 
-	"github.com/streadway/amqp"
-	logger "github.com/wso2/adapter/pkg/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
+	msg "github.com/wso2/adapter/pkg/messaging"
 )
 
 const (
@@ -40,14 +41,14 @@ const (
 // handleThrottleData handles Key template and Blocking condition in throttle data event.
 func handleThrottleData(deliveries <-chan amqp.Delivery, done chan error) {
 	for d := range deliveries {
-		var data EventThrottleData
+		var data msg.EventThrottleData
 		var throttleData *throttle.ThrottleData
 		e := json.Unmarshal([]byte(string(d.Body)), &data)
 		if e != nil {
-			logger.LoggerMsg.Errorf("Couldn't parse throttle data message. %v", e)
+			logger.LoggerInternalMsg.Errorf("Couldn't parse throttle data message. %v", e)
 			return
 		}
-		logger.LoggerMsg.Debugf("Throttle Data: %s", string(d.Body))
+		logger.LoggerInternalMsg.Debugf("Throttle Data: %s", string(d.Body))
 
 		payload := data.Event.PayloadData
 		if payload.BlockingCondition != "" {
@@ -62,7 +63,7 @@ func handleThrottleData(deliveries <-chan amqp.Delivery, done chan error) {
 				var ipCondition synchronizer.IPCondition
 				ipError := json.Unmarshal([]byte(payload.ConditionValue), &ipCondition)
 				if ipError != nil {
-					logger.LoggerMsg.Errorf("Couldn't parse condition value as IPCondition. %v", ipError)
+					logger.LoggerInternalMsg.Errorf("Couldn't parse condition value as IPCondition. %v", ipError)
 					return
 				}
 				ip := &throttle.IPCondition{
@@ -107,6 +108,6 @@ func handleThrottleData(deliveries <-chan amqp.Delivery, done chan error) {
 		xds.UpdateEnforcerThrottleData(throttleData)
 		d.Ack(false)
 	}
-	logger.LoggerMsg.Infof("handle: deliveries channel closed")
+	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
 	done <- nil
 }

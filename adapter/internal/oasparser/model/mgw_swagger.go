@@ -24,7 +24,7 @@ import (
 	parser "github.com/mitchellh/mapstructure"
 	"github.com/wso2/adapter/config"
 	"github.com/wso2/adapter/internal/svcdiscovery"
-	logger "github.com/wso2/adapter/pkg/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
 )
 
 // MgwSwagger represents the object structure holding the information related to the

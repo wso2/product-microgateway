@@ -50,9 +50,9 @@ import (
 	"github.com/wso2/adapter/config"
 	"github.com/wso2/adapter/internal/discovery/xds"
 	"github.com/wso2/adapter/internal/eventhub"
-	"github.com/wso2/adapter/pkg/messaging"
+	"github.com/wso2/adapter/internal/messaging"
 	"github.com/wso2/adapter/internal/synchronizer"
-	logger "github.com/wso2/adapter/pkg/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

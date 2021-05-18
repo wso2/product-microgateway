@@ -29,7 +29,7 @@ import (
 	"time"
 
 	"github.com/wso2/adapter/config"
-	logger "github.com/wso2/adapter/pkg/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
 )
 
 var (
