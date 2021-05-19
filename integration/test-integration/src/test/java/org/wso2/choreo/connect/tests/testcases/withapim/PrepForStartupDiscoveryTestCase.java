@@ -28,6 +28,7 @@ import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
@@ -48,49 +49,7 @@ public class PrepForStartupDiscoveryTestCase extends ApimBaseTest {
     @BeforeTest
     private void createApiAppSubsEtc() throws Exception {
         super.initWithSuperTenant();
-
-        /*
-         * Create and publish API
-         */
-        APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(TestConstant.SRARTUP_TEST.API_NAME,
-                TestConstant.SRARTUP_TEST.API_CONTEXT, TestConstant.SRARTUP_TEST.API_VERSION, user.getUserName());
-        String apiId = PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient);
-        // TODO: (SuKSW) Following method doesn't seem to work, remove if not necessary
-        //waitForAPIDeploymentSync(user.getUserName(), sampleApiName, sampleApiVersion);
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for API deployment");
-
-        /*
-         * Create Application
-         */
-        Application app = new Application(TestConstant.SRARTUP_TEST.APP_NAME, TestConstant.APPLICATION_TIER.UNLIMITED);
-        String applicationId = StoreUtils.createApplication(app, storeRestClient);
-
-        /*
-         * Subscribe to application
-         */
-        StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
-
-        /*
-         * Add API level throttling policy - Similar to testAPILevelThrottling in AdvanceThrottlingTestCase
-         */
-        String apiPolicyName = "BeforeStartupAPIPolicy";
-        RequestCountLimitDTO threePerMin = DtoFactory.createRequestCountLimitDTO("min", 1, 5L);
-        ThrottleLimitDTO defaultLimit = DtoFactory.createThrottleLimitDTO(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT, threePerMin,
-                null);
-        AdvancedThrottlePolicyDTO apiPolicyDto = DtoFactory.createAdvancedThrottlePolicyDTO(apiPolicyName, "",
-                "", false, defaultLimit, new ArrayList<>());
-        adminRestClient.addAdvancedThrottlingPolicy(apiPolicyDto);
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for Throttle policy deployment");
-
-        HttpResponse api = publisherRestClient.getAPI(apiId);
-        Gson gson = new Gson();
-        APIDTO apidto = gson.fromJson(api.getData(), APIDTO.class);
-        apidto.setApiThrottlingPolicy(apiPolicyName);
-        APIDTO updatedAPI = publisherRestClient.updateAPI(apidto, apiId);
-        Assert.assertEquals(updatedAPI.getApiThrottlingPolicy(), apiPolicyName, "API tier not updated.");
-
-        // create Revision and Deploy to Gateway
-        PublisherUtils.createAPIRevisionAndDeploy(apiId, publisherRestClient);
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for deployment");
+        ApimResourceProcessor apimResourceProcessor = new ApimResourceProcessor();
+        apimResourceProcessor.createApisAppsSubs(user.getUserName(), publisherRestClient, storeRestClient);
     }
 }

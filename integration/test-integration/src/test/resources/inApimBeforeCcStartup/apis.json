@@ -1,0 +1,14 @@
+[
+  {
+    "name": "ApiBeforeStartingCC",
+    "version": "1.0.0",
+    "context": "before_starting_CC",
+    "operationsDTOS": [
+      {
+        "verb": "GET",
+        "target": "/pet/findByStatus",
+        "throttlingPolicy": "Unlimited"
+      }
+    ]
+  }
+]

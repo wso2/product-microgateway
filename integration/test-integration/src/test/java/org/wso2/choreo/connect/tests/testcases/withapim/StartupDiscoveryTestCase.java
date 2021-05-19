@@ -93,13 +93,13 @@ public class StartupDiscoveryTestCase extends ApimBaseTest {
                 "Response message mismatched. Endpoint:" + endpointURL + " HttpResponse ");
     }
 
-    @Test(dependsOnMethods = "invokeApiWithKeyManagerAccessToken")
-    public void invokeApiToTestThrottling() throws Exception {
-        String endpointURL = Utils.getServiceURLHttps(TestConstant.SRARTUP_TEST.API_CONTEXT
-                + "/1.0.0/pet/findByStatus");
-        Assert.assertTrue(ThrottlingBaseTestCase.isThrottled(endpointURL,
-                requestHeaders, null, 5L),
-                "Request not throttled by request count condition in api tier");
-        Utils.delay(40000, "Could not wait until the throttle decision expired");
-    }
+//    @Test(dependsOnMethods = "invokeApiWithKeyManagerAccessToken")
+//    public void invokeApiToTestThrottling() throws Exception {
+//        String endpointURL = Utils.getServiceURLHttps(TestConstant.SRARTUP_TEST.API_CONTEXT
+//                + "/1.0.0/pet/findByStatus");
+//        Assert.assertTrue(ThrottlingBaseTestCase.isThrottled(endpointURL,
+//                requestHeaders, null, 5L),
+//                "Request not throttled by request count condition in api tier");
+//        Utils.delay(40000, "Could not wait until the throttle decision expired");
+//    }
 }
