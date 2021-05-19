@@ -62,7 +62,7 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
         try {
             environment.start();
         } catch (Exception e) {
-            throw new CCTestException("Error occurred when docker-compose up: {}", e);
+            throw new CCTestException("Error occurred when Choreo Connect docker-compose up: {}", e);
         }
         Awaitility.await().pollInterval(5, TimeUnit.SECONDS).atMost(150, TimeUnit.SECONDS)
                 .until(isBackendAvailable());

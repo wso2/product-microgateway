@@ -68,7 +68,7 @@ public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
         requestCountPolicyDTO = addedPolicy.getData();
 
         // creating the application
-        Application app = new Application("AppThrottlingApp", policyName, ApplicationDTO.TokenTypeEnum.JWT);
+        Application app = new Application("AppThrottlingApp", policyName);
         AppWithConsumerKey appResponse = StoreUtils.createApplicationWithKeys(app, storeRestClient);
         Assert.assertNotNull(appResponse.getApplicationId(), "Application ID can't be null");
         String applicationId = appResponse.getApplicationId();

@@ -41,7 +41,8 @@ public class CcInstance extends ChoreoConnectImpl {
      * @throws IOException if an error occurs while appending backend service to docker-compose file
      * @throws CCTestException if an error occurs while appending backend service to docker-compose file
      */
-    private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile, boolean withCustomJwtTransformer)
+    private CcInstance(String dockerComposeFile, String confFileName, String backendServiceFile,
+                       boolean withCustomJwtTransformer, boolean withAnalyticsMetricImpl)
             throws IOException, CCTestException {
         createTmpMgwSetup();
         String targetDir = Utils.getTargetDirPath();
@@ -50,7 +51,7 @@ public class CcInstance extends ChoreoConnectImpl {
                             + File.separator + confFileName,
                     ccTempPath + TestConstant.DOCKER_COMPOSE_CC_DIR + TestConstant.CONFIG_TOML_PATH);
         }
-        if (withCustomJwtTransformer) {
+        if (withCustomJwtTransformer && withAnalyticsMetricImpl) {
             addCustomJwtTransformer();
         }
 
@@ -89,13 +90,13 @@ public class CcInstance extends ChoreoConnectImpl {
         //Currently both added via same jar
         public Builder withAllCustomImpls() {
             this.withCustomJwtTransformer = true;
-            this.withAnalyticsMetricImpl = false;
+            this.withAnalyticsMetricImpl = true;
             return this;
         }
 
         public CcInstance build() throws IOException, CCTestException {
             return new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
-                    this.withCustomJwtTransformer);
+                    this.withCustomJwtTransformer, this.withAnalyticsMetricImpl);
         }
     }
 }
