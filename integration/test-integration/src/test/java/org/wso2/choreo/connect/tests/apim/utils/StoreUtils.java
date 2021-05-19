@@ -113,6 +113,14 @@ public class StoreUtils {
                 applicationKeyDTO.getConsumerSecret());
     }
 
+    /**
+     * Create Application in API Manager and return the App Id
+     *
+     * @param app               - Application dto object
+     * @param storeRestClient   - an instance of RestAPIStoreImpl
+     * @return appId
+     * @throws CCTestException if an error occurs while creating the application
+     */
     public static String createApplication(Application app, RestAPIStoreImpl storeRestClient) throws CCTestException {
         HttpResponse applicationResponse = storeRestClient.createApplication(app.getName(), app.getDescription(),
                 app.getThrottleTier(), app.getTokenType());
@@ -122,6 +130,14 @@ public class StoreUtils {
         return applicationResponse.getData();
     }
 
+    /**
+     * Generate Consumer key and Secret for an App
+     *
+     * @param appId             - App id
+     * @param storeRestClient   - an instance of RestAPIStoreImpl
+     * @return an ApplicationKeyDTO object containing Consumer key and Secret
+     * @throws CCTestException if an error occurs while generating keys
+     */
     public static ApplicationKeyDTO generateKeysForApp(String appId, RestAPIStoreImpl storeRestClient) throws CCTestException {
         ArrayList<String> grantTypes = new ArrayList<>();
         grantTypes.add(APIMIntegrationConstants.GRANT_TYPE.PASSWORD);
