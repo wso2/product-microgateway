@@ -24,7 +24,6 @@ import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
@@ -63,8 +62,7 @@ public class PrepForStartupDiscoveryTestCase extends ApimBaseTest {
         /*
          * Create Application
          */
-        Application app = new Application(TestConstant.SRARTUP_TEST.APP_NAME, TestConstant.APPLICATION_TIER.UNLIMITED,
-                ApplicationDTO.TokenTypeEnum.JWT);
+        Application app = new Application(TestConstant.SRARTUP_TEST.APP_NAME, TestConstant.APPLICATION_TIER.UNLIMITED);
         String applicationId = StoreUtils.createApplication(app, storeRestClient);
 
         /*

@@ -19,6 +19,7 @@ package org.wso2.choreo.connect.tests.testcases.withapim;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import org.awaitility.Awaitility;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -40,6 +41,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class StartupDiscoveryTestCase extends ApimBaseTest {
     private Map<String, String> appIdByAppName;
@@ -82,7 +84,13 @@ public class StartupDiscoveryTestCase extends ApimBaseTest {
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
         String endpointURL = Utils.getServiceURLHttps(TestConstant.SRARTUP_TEST.API_CONTEXT
                 + "/1.0.0/pet/findByStatus");
-        Utils.testInvokeAPI(endpointURL, requestHeaders, HttpStatus.SC_SUCCESS, ResponseConstants.RESPONSE_BODY);
+        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
+                HttpsClientRequest.isResponseAvailable(endpointURL, requestHeaders));
+        HttpResponse response = HttpsClientRequest.doGet(endpointURL, requestHeaders);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_SUCCESS,
+                "Status code mismatched. Endpoint:" + endpointURL + " HttpResponse ");
+        Assert.assertEquals(response.getData(), ResponseConstants.RESPONSE_BODY,
+                "Response message mismatched. Endpoint:" + endpointURL + " HttpResponse ");
     }
 
     @Test(dependsOnMethods = "invokeApiWithKeyManagerAccessToken")

@@ -141,9 +141,6 @@
                                 <replaceregexp file="resources/docker-compose/docker-compose.yaml" match="wso2\/choreo-connect\-router\:.*" replace="wso2/choreo-connect-router:${project.version}" byline="true" />
                                 <replaceregexp file="resources/docker-compose/docker-compose.yaml" match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true" />
                                 <replaceregexp file="resources/docker-compose/docker-compose.yaml" match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true" />
-                                <replaceregexp file="integration/test-integration/src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-router\:.*" replace="wso2/choreo-connect-router:${project.version}" byline="true" />
-                                <replaceregexp file="integration/test-integration/src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true" />
-                                <replaceregexp file="integration/test-integration/src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true" />
                                 <replaceregexp file="remove-containers.sh" match="micro_gw_version=.*" replace="micro_gw_version=${project.version}" byline="true" />
                             </target>
                         </configuration>

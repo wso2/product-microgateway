@@ -17,18 +17,19 @@
  */
 package org.wso2.choreo.connect.tests.apim.dto;
 
-public class Application {
-    private String appName;
-    private String description;
-    private String throttleTier;
-    private org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO.TokenTypeEnum tokenType;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
 
-    public Application(String appName, String throttleTier,
-                       org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO.TokenTypeEnum tokenType) {
+public class Application {
+    private final String appName;
+    private final String description;
+    private final String throttleTier;
+    private final ApplicationDTO.TokenTypeEnum tokenType;
+
+    public Application(String appName, String throttleTier) {
         this.appName = appName;
         this.description = "An application";
         this.throttleTier = throttleTier;
-        this.tokenType = tokenType;
+        this.tokenType = ApplicationDTO.TokenTypeEnum.JWT;
     }
 
     public String getName() {
@@ -43,7 +44,7 @@ public class Application {
         return throttleTier;
     }
 
-    public org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO.TokenTypeEnum getTokenType() {
+    public ApplicationDTO.TokenTypeEnum getTokenType() {
         return tokenType;
     }
 }

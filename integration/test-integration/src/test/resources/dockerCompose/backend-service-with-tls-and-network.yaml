@@ -6,4 +6,4 @@
       - "2383:2383"
       - "2399:2399"
     networks:
-      - with_apim
+      - cc_internal
