@@ -1,8 +1,10 @@
 version: "2.4"
 networks:
-  with_apim:
+  cc_internal:
+    name: cc_internal
+  apim_and_cc:
     external:
-      name: control-plane_and_cc
+      name: apim_and_cc
 services:
   router:
     image: wso2/choreo-connect-router:0.9.1-SNAPSHOT
@@ -30,7 +32,7 @@ services:
       - "9000:9000"
       - "9090:9090"
     networks:
-      - with_apim
+      - cc_internal
   adapter:
     image: wso2/choreo-connect-adapter:0.9.1-SNAPSHOT
     logging:
@@ -50,7 +52,8 @@ services:
       - "18000:18000"
       - "9843:9843"
     networks:
-      - with_apim
+      - cc_internal
+      - apim_and_cc
   enforcer:
     image: wso2/choreo-connect-enforcer:0.9.1-SNAPSHOT
     logging:
@@ -79,6 +82,7 @@ services:
       - analytics_authURL=https://localhost:8080
       - analytics_authToken=
     networks:
-      - with_apim
+      - cc_internal
+      - apim_and_cc
     ports:
       - "8081:8081"

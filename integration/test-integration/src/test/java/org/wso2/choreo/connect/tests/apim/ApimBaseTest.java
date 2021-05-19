@@ -18,7 +18,6 @@
 
 package org.wso2.choreo.connect.tests.apim;
 
-import org.wso2.am.integration.clients.store.api.v1.dto.*;
 import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.impl.RestAPIStoreImpl;
@@ -93,8 +92,6 @@ public class ApimBaseTest {
             throw new CCTestException("Error while initializing automation context for APIM REST API clients", e);
         }
 
-        sampleApp = new Application("SampleApp",
-                TestConstant.APPLICATION_TIER.UNLIMITED,
-                ApplicationDTO.TokenTypeEnum.JWT);
+        sampleApp = new Application("SampleApp", TestConstant.APPLICATION_TIER.UNLIMITED);
     }
 }

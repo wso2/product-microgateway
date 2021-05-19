@@ -28,7 +28,6 @@ import org.wso2.am.integration.clients.admin.ApiResponse;
 import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
@@ -75,8 +74,7 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
         requestCountPolicyDTO = addedPolicy.getData();
 
         // creating the application
-        Application app = new Application("SubThrottlingApp", TestConstant.APPLICATION_TIER.UNLIMITED,
-                ApplicationDTO.TokenTypeEnum.JWT);
+        Application app = new Application("SubThrottlingApp", TestConstant.APPLICATION_TIER.UNLIMITED);
         AppWithConsumerKey appResponse = StoreUtils.createApplicationWithKeys(app, storeRestClient);
         Assert.assertNotNull(appResponse.getApplicationId(), "Application ID can't be null");
         String applicationId = appResponse.getApplicationId();

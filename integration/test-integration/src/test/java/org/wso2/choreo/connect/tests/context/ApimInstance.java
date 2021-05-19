@@ -52,7 +52,7 @@ public class ApimInstance {
         try {
             environment.start();
         } catch (Exception e) {
-            log.error("Error occurred when docker-compose up: {}", e.getMessage());
+            log.error("Error occurred when APIM docker-compose up: {}", e.getMessage());
         }
     }
 

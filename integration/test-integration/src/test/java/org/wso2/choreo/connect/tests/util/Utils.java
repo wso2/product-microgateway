@@ -303,19 +303,7 @@ public class Utils {
         Assert.assertEquals(responseCode, response.getResponseCode(), "Response code mismatched");
     }
 
-    public static void testInvokeAPI(String endpoint, Map<String,String> headers, int expectedStatusCode,
-                               String expectedResponseBody) throws CCTestException {
-        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(60, TimeUnit.SECONDS).until(
-                HttpsClientRequest.isResponseAvailable(endpoint, headers));
-        HttpResponse response = HttpsClientRequest.doGet(endpoint, headers);
-        Assert.assertNotNull(response, "Error occurred while invoking the endpoint " + endpoint + " HttpResponse ");
-        Assert.assertEquals(response.getResponseCode(), expectedStatusCode,
-                "Status code mismatched. Endpoint:" + endpoint + " HttpResponse ");
-        if (expectedStatusCode != HttpStatus.SC_NOT_FOUND) {
-            Assert.assertEquals(response.getData(), expectedResponseBody, "Response message mismatched. Endpoint:"
-                    + endpoint + " HttpResponse ");
-        }
-    }
+
 
     /**
      * Delay the program for a given time period

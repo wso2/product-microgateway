@@ -36,7 +36,6 @@ import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
@@ -115,8 +114,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         Assert.assertNotNull(conditionalPolicyId, "The policy ID cannot be null or empty");
 
         // creating the application
-        Application app = new Application("AdvanceThrottlingApp", TestConstant.APPLICATION_TIER.UNLIMITED,
-                ApplicationDTO.TokenTypeEnum.JWT);
+        Application app = new Application("AdvanceThrottlingApp", TestConstant.APPLICATION_TIER.UNLIMITED);
         AppWithConsumerKey appCreationResponse = StoreUtils.createApplicationWithKeys(app, storeRestClient);
         String applicationId = appCreationResponse.getApplicationId();
         // create the request headers after generating the access token
@@ -229,8 +227,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         Assert.assertEquals(apidto.getApiThrottlingPolicy(), conditionalPolicyName,
                 "API tier not updated.");
 
-        Application app = new Application(THROTTLED_CLAIM, TestConstant.APPLICATION_TIER.UNLIMITED,
-                ApplicationDTO.TokenTypeEnum.JWT);
+        Application app = new Application(THROTTLED_CLAIM, TestConstant.APPLICATION_TIER.UNLIMITED);
         AppWithConsumerKey appCreationResponse = StoreUtils.createApplicationWithKeys(app, storeRestClient);
         StoreUtils.subscribeToAPI(apiId, appCreationResponse.getApplicationId(),
                 TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
