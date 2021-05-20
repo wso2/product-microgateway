@@ -25,12 +25,13 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIOperationsDTO;
-import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
-import org.wso2.am.integration.test.utils.bean.APIRequest;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationInfoDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationKeyDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationListDTO;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
-import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
@@ -39,17 +40,20 @@ import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class VhostAPIMTestCase extends ApimBaseTest {
+public class VhostApimTestCase extends ApimBaseTest {
+    private final String LOCALHOST = "localhost";
+    private final String US_HOST = "us.wso2.com";
+
+    public static final String API_1_NAME = "VHostAPI1";
+    public static final String API_2_NAME = "VHostAPI2";
+    public static final String APPLICATION_NAME = "VHostApp";
 
     private String apiId1;
+    private String apiContext1;
+    private String apiContext2;
     private Map<String, String> requestHeaders1;
     private Map<String, String> requestHeaders2;
     private String api1endpointURL1;
@@ -57,28 +61,24 @@ public class VhostAPIMTestCase extends ApimBaseTest {
     private String api2endpointURL1;
     private String api2endpointURL2;
 
-    private final String LOCALHOST = "localhost";
-    private final String US_HOST = "us.wso2.com";
-
-    public static final String SAMPLE_API_1_NAME = "VHostAPI1";
-    public static final String SAMPLE_API_1_CONTEXT = "vhostApi1";
-    public static final String SAMPLE_API_2_NAME = "VHostAPI2";
-    public static final String SAMPLE_API_2_CONTEXT = "vhostApi2";
-    public static final String SAMPLE_API_VERSION = "1.0.0";
-
     //TODO: (renuka) Test with multiple gateway environments
     @BeforeClass(alwaysRun = true, description = "initialize setup")
     void setup() throws Exception {
         super.initWithSuperTenant();
 
-        // Creating the application
-        AppWithConsumerKey appCreationResponse = StoreUtils.createApplicationWithKeys(sampleApp, storeRestClient);
-        String applicationId = appCreationResponse.getApplicationId();
+        applicationNameToId = findApplicationId(new String[]{APPLICATION_NAME});
+        String applicationId = applicationNameToId.get(APPLICATION_NAME);
 
-        // create the request headers after generating the access token
-        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
-                appCreationResponse.getConsumerKey(), appCreationResponse.getConsumerSecret(),
-                new String[]{"PRODUCTION"}, user, storeRestClient);
+        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
+                user, storeRestClient);
+
+        //Get details of created APIs
+        apiNameToInfo = findApiId(new String[]{API_1_NAME, API_2_NAME});
+        APIInfoDTO apiInfoDTO1 = apiNameToInfo.get(API_1_NAME);
+        APIInfoDTO apiInfoDTO2 = apiNameToInfo.get(API_2_NAME);
+        apiId1 = apiInfoDTO1.getId();
+        apiContext1 = apiInfoDTO1.getContext();
+        apiContext2 = apiInfoDTO2.getContext();
 
         requestHeaders1 = new HashMap<>();
         requestHeaders1.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
@@ -88,25 +88,10 @@ public class VhostAPIMTestCase extends ApimBaseTest {
         requestHeaders2.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
         requestHeaders2.put(HttpHeaderNames.HOST.toString(), US_HOST);
 
-        // get a predefined api request
-        APIRequest apiRequest1 = PublisherUtils.createSampleAPIRequest(SAMPLE_API_1_NAME, SAMPLE_API_1_CONTEXT,
-                SAMPLE_API_VERSION, user.getUserName());
-
-        // get a predefined api request with different resources
-        APIRequest apiRequest2 = createCustomAPIRequest(SAMPLE_API_2_NAME, SAMPLE_API_2_CONTEXT,
-                SAMPLE_API_VERSION, user.getUserName());
-
-        // create and publish the api
-        apiId1 = PublisherUtils.createAndPublishAPI(apiRequest1, LOCALHOST, publisherRestClient, false);
-        String apiId2 = PublisherUtils.createAndPublishAPI(apiRequest2, US_HOST, publisherRestClient, false);
-
-        api1endpointURL1 = Utils.getServiceURLHttps(SAMPLE_API_1_CONTEXT + "/1.0.0/pet/findByStatus");
-        api1endpointURL2 = Utils.getServiceURLHttps(SAMPLE_API_1_CONTEXT + "/1.0.0/store/inventory");
-        api2endpointURL1 = Utils.getServiceURLHttps(SAMPLE_API_2_CONTEXT + "/1.0.0/pet/findByStatus");
-        api2endpointURL2 = Utils.getServiceURLHttps(SAMPLE_API_2_CONTEXT + "/1.0.0/store/inventory");
-
-        StoreUtils.subscribeToAPI(apiId1, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
-        StoreUtils.subscribeToAPI(apiId2, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
+        api1endpointURL1 = Utils.getServiceURLHttps(apiContext1 + "/1.0.0/pet/findByStatus");
+        api1endpointURL2 = Utils.getServiceURLHttps(apiContext1 + "/1.0.0/store/inventory");
+        api2endpointURL1 = Utils.getServiceURLHttps(apiContext2 + "/1.0.0/pet/findByStatus");
+        api2endpointURL2 = Utils.getServiceURLHttps(apiContext2 + "/1.0.0/store/inventory");
     }
 
     @Test
@@ -116,6 +101,9 @@ public class VhostAPIMTestCase extends ApimBaseTest {
 
         // VHOST: localhost, resource: /store/inventory
         testInvokeAPI(api1endpointURL2, requestHeaders1, HttpStatus.SC_SUCCESS, ResponseConstants.STORE_INVENTORY_RESPONSE);
+
+        // VHOST: localhost, resource: /pet/findByStatus, requestHeader_host: us.wso2.com
+        testInvokeAPI(api1endpointURL1, requestHeaders2, HttpStatus.SC_NOT_FOUND, ResponseConstants.RESPONSE_BODY);
 
         // VHOST: localhost, resource: /pet/findByStatus
         testInvokeAPI(api2endpointURL1, requestHeaders2, HttpStatus.SC_SUCCESS, ResponseConstants.API_SANDBOX_RESPONSE);
@@ -162,31 +150,5 @@ public class VhostAPIMTestCase extends ApimBaseTest {
             Assert.assertEquals(response.getData(), expectedResponseBody, "Response message mismatched. Endpoint:"
                     + endpoint + " HttpResponse ");
         }
-    }
-
-    @AfterClass(alwaysRun = true)
-    public void destroy() throws Exception {
-        StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
-        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
-    }
-
-    private APIRequest createCustomAPIRequest(String apiName, String apiContext, String apiVersion, String provider)
-            throws MalformedURLException, APIManagerIntegrationTestException {
-        APIRequest apiRequest = new APIRequest(apiName, apiContext,
-                new URL(Utils.getDockerMockService2URLHttp(TestConstant.MOCK_BACKEND_BASEPATH)));
-        apiRequest.setVersion(apiVersion);
-        apiRequest.setProvider(provider);
-        apiRequest.setTiersCollection(TestConstant.API_TIER.UNLIMITED);
-        apiRequest.setTier(TestConstant.API_TIER.UNLIMITED);
-
-        APIOperationsDTO apiOperationsDTO1 = new APIOperationsDTO();
-        apiOperationsDTO1.setVerb("GET");
-        apiOperationsDTO1.setTarget("/pet/findByStatus");
-        apiOperationsDTO1.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
-
-        List<APIOperationsDTO> operationsDTOS = new ArrayList<>();
-        operationsDTOS.add(apiOperationsDTO1);
-        apiRequest.setOperationsDTOS(operationsDTOS);
-        return apiRequest;
     }
 }

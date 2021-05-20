@@ -18,9 +18,15 @@
 
 package org.wso2.choreo.connect.tests.apim;
 
+import org.wso2.am.integration.clients.publisher.api.ApiException;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationInfoDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationListDTO;
 import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.impl.RestAPIStoreImpl;
+import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
 import org.wso2.am.integration.test.utils.bean.*;
 import org.wso2.carbon.automation.engine.context.AutomationContext;
 import org.wso2.carbon.automation.engine.context.TestUserMode;
@@ -30,12 +36,17 @@ import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 
 import javax.xml.xpath.XPathExpressionException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * A base testcase class for all testcases that uses REST clients of Admin, Publisher and Store
  * of API Manager
  */
 public class ApimBaseTest {
+    protected Map<String, String> applicationNameToId;
+    protected Map<String, APIInfoDTO> apiNameToInfo;
 
     protected AutomationContext apimServerContext;
     protected AutomationContext superTenantKeyManagerContext;
@@ -93,5 +104,31 @@ public class ApimBaseTest {
         }
 
         sampleApp = new Application("SampleApp", TestConstant.APPLICATION_TIER.UNLIMITED);
+    }
+
+    protected Map<String, APIInfoDTO> findApiId(String[] apiNames) throws APIManagerIntegrationTestException, ApiException {
+        Map<String, APIInfoDTO> apiNameInfoMap = new HashMap<>();
+        APIListDTO apiListDTO  = publisherRestClient.getAllAPIs();
+        for (APIInfoDTO apiInfoDTO : Objects.requireNonNull(apiListDTO.getList())) {
+            for (String apiName : apiNames) {
+                if (apiName.equals(apiInfoDTO.getName())) {
+                    apiNameInfoMap.put(apiName, apiInfoDTO);
+                }
+            }
+        }
+        return apiNameInfoMap;
+    }
+
+    protected Map<String, String> findApplicationId(String[] applicationNames) throws Exception {
+        Map<String, String> appNameIdMap = new HashMap<>();
+        ApplicationListDTO applicationListDTO = storeRestClient.getAllApps();
+        for (ApplicationInfoDTO applicationInfoDTO : Objects.requireNonNull(applicationListDTO.getList())) {
+            for (String appName : applicationNames) {
+                if (appName.equals(applicationInfoDTO.getName())) {
+                    appNameIdMap.put(appName, applicationInfoDTO.getApplicationId());
+                }
+            }
+        }
+        return appNameIdMap;
     }
 }

@@ -23,12 +23,15 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.context.CcInstance;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.Utils;
+
 import java.util.concurrent.TimeUnit;
 
 public class CcWithControlPlaneEnabled extends ApimBaseTest {
     CcInstance ccInstance;
 
-    @Test // Not BeforeTest because this has to run after PrepForStartupDiscoveryTestCase
+    @Test // Not BeforeTest because this has to run after ApimPreparations
     public void startChoreoConnect() throws Exception {
         ccInstance = new CcInstance.Builder().withNewDockerCompose("cc-in-common-network-docker-compose.yaml")
                 .withNewConfig("controlplane-enabled-config.toml")
@@ -38,6 +41,8 @@ public class CcWithControlPlaneEnabled extends ApimBaseTest {
         Awaitility.await().pollDelay(20, TimeUnit.SECONDS).pollInterval(5, TimeUnit.SECONDS)
                 .atMost(2, TimeUnit.MINUTES).until(ccInstance.isHealthy());
         Assert.assertTrue(ccInstance.checkCCInstanceHealth());
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for " +
+                "resources to be pulled from API Manager");
     }
 
     @AfterTest

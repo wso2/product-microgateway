@@ -24,6 +24,13 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
+import org.wso2.am.integration.clients.store.api.ApiException;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationInfoDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationKeyDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationListDTO;
+import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
 import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
@@ -37,6 +44,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class SubscriptionValidationTestCase extends ApimBaseTest {
@@ -46,31 +54,28 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
     private Map<String, String> requestHeaders;
     private String endpointURL;
 
-    public static final String SAMPLE_API_NAME = "SubscriptionValidation";
-    public static final String SAMPLE_API_CONTEXT = "subs_validation";
-    public static final String SAMPLE_API_VERSION = "1.0.0";
+    public static final String API_NAME = "SubscriptionValidationApi";
+    public static final String APPLICATION_NAME = "SubscriptionValidationApp";
 
     @BeforeClass(alwaysRun = true, description = "initialise the setup")
-    void setEnvironment() throws CCTestException, MalformedURLException {
+    void setEnvironment() throws Exception {
         super.initWithSuperTenant();
 
-        // Creating the application
-        AppWithConsumerKey appCreationResponse = StoreUtils.createApplicationWithKeys(sampleApp, storeRestClient);
-        applicationId = appCreationResponse.getApplicationId();
+        applicationNameToId = findApplicationId(new String[]{APPLICATION_NAME});
+        applicationId = applicationNameToId.get(APPLICATION_NAME);
 
-        // create the request headers after generating the access token
-        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
-                appCreationResponse.getConsumerKey(), appCreationResponse.getConsumerSecret(),
-                new String[]{"PRODUCTION"}, user, storeRestClient);
+        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
+                user, storeRestClient);
         requestHeaders = new HashMap<>();
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
-        // create and publish the api
-        APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT, SAMPLE_API_VERSION,
-                user.getUserName());
-        apiId = PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient);
+        //Get details of created API
+        apiNameToInfo = findApiId(new String[]{API_NAME});
+        APIInfoDTO apiInfoDTO = apiNameToInfo.get(API_NAME);
+        String apiContext = apiInfoDTO.getContext();
+        apiId = apiInfoDTO.getId();
 
-        endpointURL = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
+        endpointURL = Utils.getServiceURLHttps(apiContext + "/1.0.0/pet/findByStatus");
     }
 
     @Test(description = "Send a request to a unsubscribed REST API and check if the API invocation is forbidden")
@@ -107,13 +112,7 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
         HttpResponse analyticsResponse =
                 HttpClientRequest.doGet("http://localhost:2399/analytics/get", new HashMap<>());
         Assert.assertNotNull(analyticsResponse);
-        Assert.assertTrue(analyticsResponse.getData().contains(SAMPLE_API_NAME),
+        Assert.assertTrue(analyticsResponse.getData().contains(API_NAME),
                 analyticsResponse.getData());
-    }
-
-    @AfterClass(alwaysRun = true)
-    public void destroy() throws Exception {
-        StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
-        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
     }
 }

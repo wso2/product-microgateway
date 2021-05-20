@@ -2,6 +2,8 @@ package org.wso2.choreo.connect.tests.apim;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
 import org.wso2.am.integration.test.impl.RestAPIStoreImpl;
 import org.wso2.choreo.connect.tests.apim.dto.Api;
@@ -16,14 +18,17 @@ import org.wso2.choreo.connect.tests.util.Utils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class ApimResourceProcessor {
-    private static final String BEFORE_CC_STARTUP_FOLDER = File.separator + "inApimBeforeCcStartup" + File.separator;
+    private static final Logger log = LoggerFactory.getLogger(ApimResourceProcessor.class);
+    private static final String BEFORE_CC_STARTUP_FOLDER = File.separator + "apimApisAppsSubs" + File.separator;
     private static final String APIS_FILE = "apis.json";
     private static final String APPLICATIONS_FILE = "applications.json";
     private static final String SUBSCRIPTION_FILE = "subscriptions.json";
@@ -36,17 +41,24 @@ public class ApimResourceProcessor {
     private final Map<String, String> applicationNameToId = new HashMap<>();
 
     public void createApisAppsSubs(String apiProvider, RestAPIPublisherImpl publisherRestClient,
-                                   RestAPIStoreImpl storeRestClient) throws CCTestException {
+                                   RestAPIStoreImpl storeRestClient) throws CCTestException, MalformedURLException {
         createApisAndUpdateMap(apiProvider, publisherRestClient);
         createAppsAndUpdateMap(storeRestClient);
         createSubscriptions(storeRestClient);
     }
 
-    private void createApisAndUpdateMap(String apiProvider, RestAPIPublisherImpl publisherRestClient) throws CCTestException {
+    private void createApisAndUpdateMap(String apiProvider, RestAPIPublisherImpl publisherRestClient) throws CCTestException, MalformedURLException {
         List<Api> apis = readApisFromJsonFile(Utils.getTargetDirPath()
                 + TestConstant.TEST_RESOURCES_PATH + BEFORE_CC_STARTUP_FOLDER + APIS_FILE);
         for (Api api : apis) {
-            String apiId = PublisherUtils.createAndPublishAPI(api, apiProvider, publisherRestClient);
+            String apiId = PublisherUtils.createAPI(api, apiProvider, publisherRestClient);
+            if (Objects.isNull(api.getVhosts())) {
+                PublisherUtils.deployAndPublishAPI(apiId, api.getName(), "localhost", publisherRestClient, false);
+            } else {
+                for (String vhost: api.getVhosts()) {
+                    PublisherUtils.deployAndPublishAPI(apiId, api.getName(), vhost, publisherRestClient, false);
+                }
+            }
             apiNameToId.put(api.getName(), apiId);
         }
     }
@@ -67,6 +79,7 @@ public class ApimResourceProcessor {
             String apiId = apiNameToId.get(subscription.getApiName());
             String applicationId = applicationNameToId.get(subscription.getAppName());
             StoreUtils.subscribeToAPI(apiId, applicationId, subscription.getTier(), storeRestClient);
+            log.info("Created Subscription for API:" + subscription.getApiName() + " App:" + subscription.getAppName());
         }
     }
 

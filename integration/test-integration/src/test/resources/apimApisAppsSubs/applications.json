@@ -1,0 +1,22 @@
+[
+  {
+    "appName": "AdvanceThrottlingApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "SubscriptionThrottlingApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "BlockedApiApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "VHostApp",
+    "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "SubscriptionValidationApp",
+    "throttleTier": "Unlimited"
+  }
+]

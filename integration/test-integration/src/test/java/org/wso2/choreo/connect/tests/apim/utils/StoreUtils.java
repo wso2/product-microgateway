@@ -33,6 +33,7 @@ import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -41,6 +42,16 @@ import java.util.Objects;
 
 public class StoreUtils {
     private static final Logger log = LoggerFactory.getLogger(StoreUtils.class);
+
+    public static String generateUserAccessToken(String apimServiceURLHttps, String applicationId, User user,
+                                                 RestAPIStoreImpl storeRestClient) throws CCTestException {
+        ApplicationKeyDTO applicationKeyDTO = StoreUtils.generateKeysForApp(applicationId, storeRestClient);
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for the " +
+                "Applications Registration event to be received by the CC");
+        return StoreUtils.generateUserAccessToken(apimServiceURLHttps,
+                applicationKeyDTO.getConsumerKey(), applicationKeyDTO.getConsumerSecret(),
+                new String[]{"PRODUCTION"}, user, storeRestClient);
+    }
 
     /**
      * Generate the user access token for the grant type password.
@@ -93,7 +104,7 @@ public class StoreUtils {
                     getSubscriptionInfoString(apiId, applicationId, tier) +
                     "Response Code:" + response.getResponseCode());
         }
-        log.info("API Subscribed :" + getSubscriptionInfoString(apiId, applicationId, tier));
+        log.info("API Subscribed. " + getSubscriptionInfoString(apiId, applicationId, tier));
     }
 
     /**
@@ -127,6 +138,7 @@ public class StoreUtils {
         if (Objects.isNull(applicationResponse)) {
             throw new CCTestException("Could not create the application: " + app.getName());
         }
+        log.info("Application Created. Name:" + app.getName() + " ThrottleTier:" + app.getThrottleTier());
         return applicationResponse.getData();
     }
 
@@ -155,7 +167,7 @@ public class StoreUtils {
     }
 
     public static String getSubscriptionInfoString(String apiId, String applicationId, String tier) {
-        return "API Id : " + apiId + ", Application Id: " + applicationId + " Tier: " + tier;
+        return "API_Id:" + apiId + " Application_Id:" + applicationId + " Tier:" + tier;
     }
 
 

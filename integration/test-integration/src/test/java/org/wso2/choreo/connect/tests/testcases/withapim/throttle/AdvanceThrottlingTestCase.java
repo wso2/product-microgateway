@@ -36,6 +36,7 @@ import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
+import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
@@ -59,6 +60,8 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
     private final String THROTTLED_QUERY_PARAM = "name";
     private final String THROTTLED_QUERY_PARAM_VALUE = "admin";
     private final String THROTTLED_CLAIM = "ClaimApp";
+    private static final String API_NAME = "AdvancedThrottlingApi";
+    private static final String APPLICATION_NAME = "AdvanceThrottlingApp";
     private final Map<String, String> requestHeaders = new HashMap<>();
     private final String apiPolicyName = "APIPolicyWithDefaultLimit";
     private final String conditionalPolicyName = "APIPolicyWithConditionLimit";
@@ -113,24 +116,22 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         conditionalPolicyId = addedConditionPolicyDto.getPolicyId();
         Assert.assertNotNull(conditionalPolicyId, "The policy ID cannot be null or empty");
 
-        // creating the application
-        Application app = new Application("AdvanceThrottlingApp", TestConstant.APPLICATION_TIER.UNLIMITED);
-        AppWithConsumerKey appCreationResponse = StoreUtils.createApplicationWithKeys(app, storeRestClient);
-        String applicationId = appCreationResponse.getApplicationId();
-        // create the request headers after generating the access token
-        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
-                appCreationResponse.getConsumerKey(), appCreationResponse.getConsumerSecret(),
-                new String[]{}, user, storeRestClient);
+        // Find app ID
+        applicationNameToId = findApplicationId(new String[]{APPLICATION_NAME});
+        String applicationId = applicationNameToId.get(APPLICATION_NAME);
+
+        // Create access token
+        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
+                user, storeRestClient);
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
-        apiId = createThrottleApi(TestConstant.API_TIER.UNLIMITED, TestConstant.API_TIER.UNLIMITED,
-                TestConstant.API_TIER.UNLIMITED);
-        // get a predefined api request
-        endpointURL = getThrottleAPIEndpoint();
+        // Get details of created API
+        apiNameToInfo = findApiId(new String[]{API_NAME});
+        APIInfoDTO apiInfoDTO = apiNameToInfo.get(API_NAME);
+        String apiContext = apiInfoDTO.getContext();
+        apiId = apiInfoDTO.getId();
 
-        StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
-        // this is to wait until policy deployment is complete in case it didn't complete already
-        Thread.sleep(TestConstant.DEPLOYMENT_WAIT_TIME);
+        endpointURL = Utils.getServiceURLHttps(apiContext + "/1.0.0/pet/findByStatus");
     }
 
     @Test(description = "Test API level throttling with default limits")
@@ -300,14 +301,5 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
                 "JWT Claim conditional group", claimGrp, limit));
 
         return conditionalGroups;
-    }
-
-
-    @AfterClass(alwaysRun = true)
-    public void destroy() throws Exception {
-        StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
-        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
-        adminRestClient.deleteAdvancedThrottlingPolicy(apiPolicyId);
-        adminRestClient.deleteAdvancedThrottlingPolicy(conditionalPolicyId);
     }
 }
