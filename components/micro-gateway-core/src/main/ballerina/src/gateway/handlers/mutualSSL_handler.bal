@@ -122,7 +122,7 @@ public type MutualSSLHandler object {
         if (mutualSSLStatus is boolean && mutualSSLStatus) {
             printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake status: PASSED");
             doMTSLFilterRequest(req, invocationContext);
-        } else if (mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient)
+        } else if ((mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient))
             || certAuthCheck) {
             // Return error if cert validation failed when cert validation is required for API.
             printError(KEY_AUTHN_FILTER, "Certificate validation has failed");
