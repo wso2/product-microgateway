@@ -20,18 +20,15 @@ package org.wso2.choreo.connect.tests.testcases.withapim.throttle;
 
 import com.google.common.net.HttpHeaders;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.admin.ApiResponse;
 import org.wso2.am.integration.clients.admin.api.dto.ApplicationThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
-import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
-import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -40,6 +37,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
+    private static final String API_NAME = "ApplicationThrottlingApi";
+    private static final String API_CONTEXT = "application_throttling";
+    private static final String APPLICATION_NAME = "ApplicationThrottlingApp";
+
     private ApplicationThrottlePolicyDTO requestCountPolicyDTO;
     private final Map<String, String> requestHeaders = new HashMap<>();
     String endpointURL;
@@ -67,39 +68,28 @@ public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
                 adminRestClient.addApplicationThrottlingPolicy(requestCountPolicyDTO);
         requestCountPolicyDTO = addedPolicy.getData();
 
-        // creating the application
-        Application app = new Application("AppThrottlingApp", policyName);
-        AppWithConsumerKey appResponse = StoreUtils.createApplicationWithKeys(app, storeRestClient);
-        Assert.assertNotNull(appResponse.getApplicationId(), "Application ID can't be null");
-        String applicationId = appResponse.getApplicationId();
+        // Get API ID
+        String apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
 
-        // create the request headers after generating the access token
-        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, appResponse.getConsumerKey(),
-                appResponse.getConsumerSecret(), new String[]{}, user, storeRestClient);
+        // creating the application
+        Application app = new Application(APPLICATION_NAME, policyName);
+        String applicationId = StoreUtils.createApplication(app, storeRestClient);
+
+        StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED,
+                storeRestClient);
+
+        // Create access token
+        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
+                user, storeRestClient);
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
         requestHeaders.put(HttpHeaders.CONTENT_TYPE, "application/json");
 
-        String apiId = createThrottleApi(TestConstant.API_TIER.UNLIMITED, TestConstant.API_TIER.UNLIMITED,
-                TestConstant.API_TIER.UNLIMITED);
-        // get a predefined api request
-        endpointURL = getThrottleAPIEndpoint();
-        endpointURL = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
-
-        StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
-        // this is to wait until policy deployment is complete in case it didn't complete already
-        Thread.sleep(TestConstant.DEPLOYMENT_WAIT_TIME);
+        endpointURL = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
     }
 
     @Test(description = "Test application throttling")
     public void testApplicationLevelThrottling() throws Exception {
         Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, requestCount),
                 "Request not throttled by request count condition in application tier");
-    }
-
-    @AfterClass(alwaysRun = true)
-    public void destroy() throws Exception {
-        StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
-        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
-        adminRestClient.deleteApplicationThrottlingPolicy(requestCountPolicyDTO.getPolicyId());
     }
 }

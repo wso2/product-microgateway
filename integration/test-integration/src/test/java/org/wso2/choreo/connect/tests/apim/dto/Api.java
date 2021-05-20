@@ -10,20 +10,22 @@ public class Api {
     String name;
     String version;
     String context;
+    String endpointUrl;
     String tiersCollection;
     String tier;
     List<APIOperationsDTO> operationsDTOS;
-    String vhost;
+    String[] vhosts;
 
-    public Api(String name, String version, String context, String tiersCollection, String tier,
-               List<APIOperationsDTO> operationsDTOS, String vhost) {
+    public Api(String name, String version, String context, String endpointUrl, String tiersCollection, String tier,
+               List<APIOperationsDTO> operationsDTOS, String[] vhosts) {
         this.name = name;
         this.version = version;
         this.context = context;
+        this.endpointUrl = context;
         this.tiersCollection = tiersCollection;
         this.tier = tier;
         this.operationsDTOS = operationsDTOS;
-        this.vhost = vhost;
+        this.vhosts = vhosts;
     }
 
     public String getName() {
@@ -38,6 +40,10 @@ public class Api {
         return context;
     }
 
+    public String getEndpointUrl() {
+        return endpointUrl;
+    }
+
     public String getTiersCollection() {
         return tiersCollection;
     }
@@ -50,7 +56,7 @@ public class Api {
         return operationsDTOS;
     }
 
-    public String getVhost() {
-        return vhost;
+    public String[] getVhosts() {
+        return vhosts;
     }
 }

@@ -31,6 +31,7 @@ import java.io.IOException;
  * Choreo Connect instance class.
  */
 public class CcInstance extends ChoreoConnectImpl {
+    private static volatile CcInstance instance = null;
 
     /**
      * Initialize a docker compose container environment for Choreo Connect
@@ -67,6 +68,12 @@ public class CcInstance extends ChoreoConnectImpl {
         addCcLoggersToEnv();
     }
 
+    public static CcInstance getInstance() throws CCTestException {
+        if (instance != null) {
+            return instance;
+        } else throw new CCTestException("CcInstance not initialized");
+    }
+
     public static class Builder {
         String dockerComposeFile;
         String confFileName;
@@ -95,8 +102,9 @@ public class CcInstance extends ChoreoConnectImpl {
         }
 
         public CcInstance build() throws IOException, CCTestException {
-            return new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
-                    this.withCustomJwtTransformer, this.withAnalyticsMetricImpl);
+            instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
+                                this.withCustomJwtTransformer, this.withAnalyticsMetricImpl);
+            return instance;
         }
     }
 }

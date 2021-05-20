@@ -15,40 +15,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.choreo.connect.tests.testcases.withapim;
+package org.wso2.choreo.connect.tests.setup.withapim;
 
-import com.google.gson.Gson;
-import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
-import org.wso2.am.integration.clients.admin.api.dto.AdvancedThrottlePolicyDTO;
-import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
-import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
-import org.wso2.am.integration.test.impl.DtoFactory;
-import org.wso2.am.integration.test.utils.bean.APIRequest;
-import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
-import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
-import org.wso2.choreo.connect.tests.util.TestConstant;
-import org.wso2.choreo.connect.tests.util.Utils;
-
-import java.util.ArrayList;
 
 /**
  * APIs, Apps, Subs created here will be used to test whether
  * resources that existed in APIM were pulled by CC during startup
  * (in StartupDiscoveryTestCase). This class must run before CcWithControlPlaneEnabled
  */
-public class PrepForStartupDiscoveryTestCase extends ApimBaseTest {
+public class ApimPreparations extends ApimBaseTest {
+
     /**
      * Initialize the clients in the super class and create APIs, Apps, Subscriptions etc.
      */
     @BeforeTest
     private void createApiAppSubsEtc() throws Exception {
         super.initWithSuperTenant();
+        StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
+        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
+
         ApimResourceProcessor apimResourceProcessor = new ApimResourceProcessor();
         apimResourceProcessor.createApisAppsSubs(user.getUserName(), publisherRestClient, storeRestClient);
     }

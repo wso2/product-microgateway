@@ -36,7 +36,6 @@ import javax.xml.xpath.XPathExpressionException;
  * of API Manager
  */
 public class ApimBaseTest {
-
     protected AutomationContext apimServerContext;
     protected AutomationContext superTenantKeyManagerContext;
     protected APIMURLBean apimServiceUrls;

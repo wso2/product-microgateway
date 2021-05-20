@@ -21,20 +21,16 @@ package org.wso2.choreo.connect.tests.testcases.withapim;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.awaitility.Awaitility;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
-import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
-import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.*;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -46,31 +42,24 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
     private Map<String, String> requestHeaders;
     private String endpointURL;
 
-    public static final String SAMPLE_API_NAME = "SubscriptionValidation";
-    public static final String SAMPLE_API_CONTEXT = "subs_validation";
-    public static final String SAMPLE_API_VERSION = "1.0.0";
+    public static final String API_NAME = "SubscriptionValidationApi";
+    private static final String API_CONTEXT = "subs_validation";
+    public static final String APPLICATION_NAME = "SubscriptionValidationApp";
 
     @BeforeClass(alwaysRun = true, description = "initialise the setup")
-    void setEnvironment() throws CCTestException, MalformedURLException {
+    void setEnvironment() throws Exception {
         super.initWithSuperTenant();
 
-        // Creating the application
-        AppWithConsumerKey appCreationResponse = StoreUtils.createApplicationWithKeys(sampleApp, storeRestClient);
-        applicationId = appCreationResponse.getApplicationId();
+        // Get App ID and API ID
+        applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
+        apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
 
-        // create the request headers after generating the access token
-        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
-                appCreationResponse.getConsumerKey(), appCreationResponse.getConsumerSecret(),
-                new String[]{"PRODUCTION"}, user, storeRestClient);
+        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
+                user, storeRestClient);
         requestHeaders = new HashMap<>();
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
-        // create and publish the api
-        APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT, SAMPLE_API_VERSION,
-                user.getUserName());
-        apiId = PublisherUtils.createAndPublishAPI(apiRequest, publisherRestClient);
-
-        endpointURL = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
+        endpointURL = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
     }
 
     @Test(description = "Send a request to a unsubscribed REST API and check if the API invocation is forbidden")
@@ -107,13 +96,7 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
         HttpResponse analyticsResponse =
                 HttpClientRequest.doGet("http://localhost:2399/analytics/get", new HashMap<>());
         Assert.assertNotNull(analyticsResponse);
-        Assert.assertTrue(analyticsResponse.getData().contains(SAMPLE_API_NAME),
+        Assert.assertTrue(analyticsResponse.getData().contains(API_NAME),
                 analyticsResponse.getData());
-    }
-
-    @AfterClass(alwaysRun = true)
-    public void destroy() throws Exception {
-        StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
-        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
     }
 }

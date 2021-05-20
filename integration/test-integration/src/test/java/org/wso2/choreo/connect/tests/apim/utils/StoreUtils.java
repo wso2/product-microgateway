@@ -33,6 +33,7 @@ import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -41,6 +42,16 @@ import java.util.Objects;
 
 public class StoreUtils {
     private static final Logger log = LoggerFactory.getLogger(StoreUtils.class);
+
+    public static String generateUserAccessToken(String apimServiceURLHttps, String applicationId, User user,
+                                                 RestAPIStoreImpl storeRestClient) throws CCTestException {
+        ApplicationKeyDTO applicationKeyDTO = StoreUtils.generateKeysForApp(applicationId, storeRestClient);
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for the " +
+                "Applications Registration event to be received by the CC");
+        return StoreUtils.generateUserAccessToken(apimServiceURLHttps,
+                applicationKeyDTO.getConsumerKey(), applicationKeyDTO.getConsumerSecret(),
+                new String[]{"PRODUCTION"}, user, storeRestClient);
+    }
 
     /**
      * Generate the user access token for the grant type password.
@@ -77,10 +88,11 @@ public class StoreUtils {
      * @param apiId           - UUID of the API
      * @param applicationId   - UUID of the application
      * @param storeRestClient - Instance of APIPublisherRestClient
+     * @return Subscription ID
      * @throws CCTestException if the response of the create subscription is null. This may null when there is an
      *                              error while subscribing to the API or when the subscription already exists.
      */
-    public static void subscribeToAPI(String apiId, String applicationId, String tier,
+    public static String subscribeToAPI(String apiId, String applicationId, String tier,
                                           RestAPIStoreImpl storeRestClient) throws CCTestException {
         HttpResponse response = storeRestClient.createSubscription(apiId, applicationId, tier);
         if (Objects.isNull(response)) {
@@ -93,7 +105,8 @@ public class StoreUtils {
                     getSubscriptionInfoString(apiId, applicationId, tier) +
                     "Response Code:" + response.getResponseCode());
         }
-        log.info("API Subscribed :" + getSubscriptionInfoString(apiId, applicationId, tier));
+        log.info("API Subscribed. " + getSubscriptionInfoString(apiId, applicationId, tier));
+        return response.getData();
     }
 
     /**
@@ -127,6 +140,7 @@ public class StoreUtils {
         if (Objects.isNull(applicationResponse)) {
             throw new CCTestException("Could not create the application: " + app.getName());
         }
+        log.info("Application Created. Name:" + app.getName() + " ThrottleTier:" + app.getThrottleTier());
         return applicationResponse.getData();
     }
 
@@ -155,7 +169,7 @@ public class StoreUtils {
     }
 
     public static String getSubscriptionInfoString(String apiId, String applicationId, String tier) {
-        return "API Id : " + apiId + ", Application Id: " + applicationId + " Tier: " + tier;
+        return "API_Id:" + apiId + " Application_Id:" + applicationId + " Tier:" + tier;
     }
 
 
@@ -182,6 +196,23 @@ public class StoreUtils {
                     if (!APIMIntegrationConstants.OAUTH_DEFAULT_APPLICATION_NAME.equals(applicationInfoDTO.getName())) {
                         storeRestClient.deleteApplication(applicationInfoDTO.getApplicationId());
                     }
+                }
+            }
+        } catch (org.wso2.am.integration.clients.store.api.ApiException e) {
+            throw new CCTestException("Error while removing Subscriptions and Apps from Store", e);
+        }
+    }
+
+    public static void removeAllSubscriptionsForAnApp(String appId, RestAPIStoreImpl storeRestClient) throws CCTestException {
+        if (Objects.isNull(storeRestClient)) {
+            return;
+        }
+        try {
+            SubscriptionListDTO subsDTO = storeRestClient
+                    .getAllSubscriptionsOfApplication(appId);
+            if (subsDTO != null && subsDTO.getList() != null) {
+                for (SubscriptionDTO subscriptionDTO : subsDTO.getList()) {
+                    storeRestClient.removeSubscription(subscriptionDTO.getSubscriptionId());
                 }
             }
         } catch (org.wso2.am.integration.clients.store.api.ApiException e) {

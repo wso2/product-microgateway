@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -33,19 +33,32 @@
             <class name="org.wso2.choreo.connect.tests.setup.withapim.WithApimBeforeTestSuite"/>
         </classes>
     </test>
-    <test name="cc-with-control-plane-enabled" preserve-order="true" parallel="false">
+    <test name="apis-apps-subs-pulled-at-startup" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.PrepForStartupDiscoveryTestCase"/>
+            <!-- Clean and create APIs, Applications, Subscriptions BEFORE starting Choreo Connect  -->
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparations"/>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcWithControlPlaneEnabled"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.StartupDiscoveryTestCase"/>
+
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.SubscriptionValidationTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase"/>
+        </classes>
+    </test>
+    <test name="apis-apps-subs-received-via-eventhub" preserve-order="true" parallel="false">
+        <classes>
+            <!-- Clean and create APIs, Applications, Subscriptions AFTER starting Choreo Connect  -->
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparations"/>
+
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.AdvanceThrottlingTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.ApplicationThrottlingTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.SubscriptionThrottlingTestCase"/>
-<!--            TODO: (Praminda) this requires upgrade in apim throttle dependency. enable after upgrade-->
+            <!--            TODO: (Praminda) this requires upgrade in apim throttle dependency. enable after upgrade-->
 <!--            <class name="org.wso2.choreo.connect.tests.testcases.with_apim.throttle.DenyConditionTestCase"/>-->
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.SubscriptionThrottlingTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.SubscriptionValidationTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedAPITestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostAPIMTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase"/>
+
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.CcShutdownExecutor"/>
         </classes>
     </test>
 </suite>

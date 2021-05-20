@@ -21,7 +21,6 @@ package org.wso2.choreo.connect.tests.testcases.withapim.throttle;
 import com.google.common.net.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.admin.ApiResponse;
@@ -29,9 +28,7 @@ import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
-import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
-import org.wso2.choreo.connect.tests.apim.dto.Application;
-import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -40,9 +37,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
 
 public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
+    private static final String APPLICATION_NAME = "SubscriptionThrottlingApp";
+
     private SubscriptionThrottlePolicyDTO requestCountPolicyDTO;
     private final Map<String, String> requestHeaders = new HashMap<>();
     String endpointURL;
@@ -73,19 +71,16 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
         Assert.assertEquals(addedPolicy.getStatusCode(), HttpStatus.SC_CREATED);
         requestCountPolicyDTO = addedPolicy.getData();
 
-        // creating the application
-        Application app = new Application("SubThrottlingApp", TestConstant.APPLICATION_TIER.UNLIMITED);
-        AppWithConsumerKey appResponse = StoreUtils.createApplicationWithKeys(app, storeRestClient);
-        Assert.assertNotNull(appResponse.getApplicationId(), "Application ID can't be null");
-        String applicationId = appResponse.getApplicationId();
+        // Get App ID
+        String applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
 
-        // create the request headers after generating the access token
-        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps,
-                appResponse.getConsumerKey(), appResponse.getConsumerSecret(),
-                new String[]{}, user, storeRestClient);
+        // Create access token
+        String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
+                user, storeRestClient);
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
         requestHeaders.put(HttpHeaders.CONTENT_TYPE, "application/json");
 
+        // Cannot create before defining the policy in this class. Policy name must be included in api.
         String apiId = createThrottleApi(policyName, TestConstant.API_TIER.UNLIMITED,
                 TestConstant.API_TIER.UNLIMITED);
         // get a predefined api request
@@ -100,12 +95,5 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
     public void testSubscriptionLevelThrottling() throws Exception {
         Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, requestCount),
                 "Request not throttled by request count condition in subscription tier");
-    }
-
-    @AfterClass(alwaysRun = true)
-    public void destroy() throws Exception {
-        StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
-        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
-        adminRestClient.deleteSubscriptionThrottlingPolicy(requestCountPolicyDTO.getPolicyId());
     }
 }

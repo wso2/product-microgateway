@@ -21,6 +21,8 @@ package org.wso2.choreo.connect.tests.util;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.apache.commons.compress.utils.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -39,6 +41,10 @@ import java.util.concurrent.Callable;
  * This class can be used to send http request.
  */
 public class HttpsClientRequest {
+    private static final int maxRetryCount = 10;
+    private static final int retryIntervalMillis = 3000;
+
+    private static final Logger log = LoggerFactory.getLogger(HttpsClientRequest.class);
     /**
      * Sends an HTTP GET request to a url.
      *
@@ -72,6 +78,28 @@ public class HttpsClientRequest {
      */
     public static HttpResponse doGet(String requestUrl) throws CCTestException {
         return doGet(requestUrl, new HashMap<>());
+    }
+
+    public static HttpResponse retryGetRequestUntilDeployed(String requestUrl, Map<String, String> headers)
+            throws CCTestException, InterruptedException {
+        HttpResponse response;
+        int retryCount = 0;
+        do {
+            log.info("Trying request with url : " + requestUrl);
+            response = HttpsClientRequest.doGet(requestUrl, headers);
+            retryCount++;
+        } while (response.getResponseCode() == 404 && response.getResponseMessage().contains("Not Found") &&
+                shouldRetry(retryCount));
+        return response;
+    }
+
+    private static boolean shouldRetry(int retryCount) throws InterruptedException {
+        if(retryCount >= maxRetryCount) {
+            log.info("Retrying of the request is finished");
+            return false;
+        }
+        Thread.sleep(retryIntervalMillis);
+        return true;
     }
 
     /**
