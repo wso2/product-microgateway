@@ -35,17 +35,25 @@
     </test>
     <test name="cc-with-control-plane-enabled" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.PrepForStartupDiscoveryTestCase"/>
+            <!-- Clean and create APIs, Applications, Subscriptions BEFORE starting Choreo Connect  -->
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparations"/>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcWithControlPlaneEnabled"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.StartupDiscoveryTestCase"/>
+
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.AdvanceThrottlingTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.SubscriptionValidationTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase"/>
+
+            <!-- Clean and create APIs, Applications, Subscriptions AFTER starting Choreo Connect  -->
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparations"/>
+
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.ApplicationThrottlingTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.SubscriptionThrottlingTestCase"/>
-<!--            TODO: (Praminda) this requires upgrade in apim throttle dependency. enable after upgrade-->
+            <!--            TODO: (Praminda) this requires upgrade in apim throttle dependency. enable after upgrade-->
 <!--            <class name="org.wso2.choreo.connect.tests.testcases.with_apim.throttle.DenyConditionTestCase"/>-->
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.SubscriptionValidationTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedAPITestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostAPIMTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase"/>
         </classes>
     </test>
 </suite>

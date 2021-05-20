@@ -166,8 +166,4 @@ public class DenyConditionTestCase extends ThrottlingBaseTestCase {
         return response.getResponseCode() == HttpStatus.SC_FORBIDDEN;
     }
 
-    @AfterClass(alwaysRun = true)
-    public void destroy() throws Exception {
-        super.cleanUp();
-    }
 }

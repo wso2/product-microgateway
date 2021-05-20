@@ -289,7 +289,7 @@ public class HttpClientRequest {
             response = HttpsClientRequest.doPost(requestUrl, body, headers);
             retryCount++;
         } while (response != null && response.getResponseCode() == 404 && response.getResponseMessage()
-                .contains("Not Found") && retry(retryCount));
+                .contains("Not Found") && shouldRetry(retryCount));
         return response;
     }
 
@@ -301,12 +301,12 @@ public class HttpClientRequest {
             log.info("Trying request with url : " + requestUrl);
             response = HttpsClientRequest.doGet(requestUrl, headers);
             retryCount++;
-        } while (response != null && response.getResponseCode() == 404 && response.getResponseMessage()
-                .contains("Not Found") && retry(retryCount));
+        } while (response.getResponseCode() == 404 && response.getResponseMessage().contains("Not Found") &&
+                shouldRetry(retryCount));
         return response;
     }
 
-    private static boolean retry(int retryCount) throws InterruptedException {
+    private static boolean shouldRetry(int retryCount) throws InterruptedException {
         if(retryCount >= maxRetryCount) {
             log.info("Retrying of the request is finished");
             return false;
