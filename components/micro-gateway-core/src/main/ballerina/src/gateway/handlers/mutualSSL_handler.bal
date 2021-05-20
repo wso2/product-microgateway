@@ -55,8 +55,21 @@ public type MutualSSLHandler object {
     # or the `AuthenticationError` in case of an error.
     public function process(http:Request req) returns boolean | http:AuthenticationError {
         string|error mutualSSLVerifyClient = getMutualSSL();
-        if (mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient) 
-                && req.mutualSslHandshake[STATUS] != PASSED) {
+
+        boolean certHeaderExist = false;
+        if (self.headerName != "" && req.hasHeader(self.headerName)) {
+            printDebug(KEY_AUTHN_FILTER, "Mutual ssl expected header " + self.headerName + " present in the request");
+            certHeaderExist = true;
+        }
+        printDebug(KEY_AUTHN_FILTER, "isClientCertificateValidationEnabled " + self.isClientCertificateValidationEnabled.toString());
+
+        // Set certAuthCheck to true when it is required to validate the cert in header or context and
+        // precheck of mtls handshake being passed or cert present in header has passed.
+        boolean certAuthCheck = (self.isClientCertificateValidationEnabled && req.mutualSslHandshake[STATUS] == PASSED) ||
+            (!self.isClientCertificateValidationEnabled && certHeaderExist);
+
+        if (mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient)
+            && !certAuthCheck) {
             if (req.mutualSslHandshake[STATUS] == FAILED) {
                 printError(KEY_AUTHN_FILTER, "MutualSSL handshake status: FAILED");
             }
@@ -65,61 +78,65 @@ public type MutualSSLHandler object {
             runtime:InvocationContext invocationContext = runtime:getInvocationContext();
             invocationContext.attributes[CHALLENGE_STRING] = challengeString;
             // provided more generic error code to avoid security issues.
-            setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS); 
-            return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");            
+            setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+            return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");
         }
-        if (req.mutualSslHandshake[STATUS] == PASSED) {
-            boolean | http:AuthenticationError mutualSSLStatus = false;
-            runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-            if (mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient)) {
-                string apiVersion = invocationContext.attributes[API_VERSION_PROPERTY].toString();
-                string apiName = invocationContext.attributes[API_NAME].toString();
-                if (self.headerName != "" &&  req.hasHeader(self.headerName)) {
-                    printDebug(KEY_AUTHN_FILTER, "Mutual ssl expected header " + self.headerName + " present in the request");
-                    //If certificate header is present and if validation is disabled for client certificate present
-                    //in the context (i.e. 'isClientCertificateValidationEnabled' is false), then we should always
-                    //validate the certificate present in the header.
-                    //This scenario represents where mtls is required between client and mgw, but mtls is not enabled
-                    //between LB and mgw. So microgateway only validates the certificate present in the header, which
-                    //is the client certificate not the certificate in the context which is always going to be
-                    //LB certificate, but will not be present in the context due to no MTLS between mgw and LB.
-                    if (!self.isClientCertificateValidationEnabled) {
-                        mutualSSLStatus = self.checkCertificatePresentInHeader(req, apiName, apiVersion);
-                    } else { // if client certificate validation enabled for the certificate present in context
-                        //((i.e. 'isClientCertificateValidationEnabled' is true))and header is also present then both
-                        //should be validated.
-                        //This is the scenario where both client certificate is also should be verified and mtls is
-                        //also enabled between mgw and LB. So both client certificate present in the header should be
-                        //validated and the LB certificate present in the context.
-                        // When validating the certificate in the context we do not need to validate it with the alias
-                        //list present in the config as this would always be the LB certificate.
-                        mutualSSLStatus =  self.checkCertificatePresentInContext(req, apiName, apiVersion, false);
-                        if (mutualSSLStatus is boolean && mutualSSLStatus) {
-                            mutualSSLStatus = self.checkCertificatePresentInHeader(req, apiName, apiVersion);
-                        }
-                    }
-                } else {
-                //If certificate not in the header, then irrespective of the config
-                //'isClientCertificateValidationEnabled' validating  the certificate in request context is mandatory.
-                //(This case is when there is no LB fronted.)
-                //And also cert should be validated against with the API alias list. This is because the certificate
-                //available via the context would be the client certificate,not the LB one. Hence the
-                //'isValidateCertificateWithAPI' value is set as true.
-                    mutualSSLStatus =  self.checkCertificatePresentInContext(req, apiName, apiVersion, true);
-                }
+
+        boolean|http:AuthenticationError mutualSSLStatus = false;
+        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+        string apiVersion = invocationContext.attributes[API_VERSION_PROPERTY].toString();
+        string apiName = invocationContext.attributes[API_NAME].toString();
+        if (certHeaderExist) {
+            //If certificate header is present and if validation is disabled for client certificate present
+            //in the context (i.e. 'isClientCertificateValidationEnabled' is false), then we should always
+            //validate the certificate present in the header.
+            //This scenario represents where mtls is required between client and mgw, but mtls is not enabled
+            //between LB and mgw. So microgateway only validates the certificate present in the header, which
+            //is the client certificate not the certificate in the context which is always going to be
+            //LB certificate, but will not be present in the context due to no MTLS between mgw and LB.
+            if (!self.isClientCertificateValidationEnabled) {
+                mutualSSLStatus = self.checkCertificatePresentInHeader(req, apiName, apiVersion);
+            } else {                // if client certificate validation enabled for the certificate present in context
+                //((i.e. 'isClientCertificateValidationEnabled' is true))and header is also present then both
+                //should be validated.
+                //This is the scenario where both client certificate is also should be verified and mtls is
+                //also enabled between mgw and LB. So both client certificate present in the header should be
+                //validated and the LB certificate present in the context.
+                // When validating the certificate in the context we do not need to validate it with the alias
+                //list present in the config as this would always be the LB certificate.
+                mutualSSLStatus = self.checkCertificatePresentInContext(req, apiName, apiVersion, false);
                 if (mutualSSLStatus is boolean && mutualSSLStatus) {
-                    printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake status: PASSED");
-                    doMTSLFilterRequest(req, invocationContext);
-                } else {
-                    return mutualSSLStatus;
+                    mutualSSLStatus = self.checkCertificatePresentInHeader(req, apiName, apiVersion);
                 }
             }
+        } else {
+            //If certificate not in the header, then irrespective of the config
+            //'isClientCertificateValidationEnabled' validating  the certificate in request context is mandatory.
+            //(This case is when there is no LB fronted.)
+            //And also cert should be validated against with the API alias list. This is because the certificate
+            //available via the context would be the client certificate,not the LB one. Hence the
+            //'isValidateCertificateWithAPI' value is set as true.
+            mutualSSLStatus = self.checkCertificatePresentInContext(req, apiName, apiVersion, true);
+        }
+
+        if (mutualSSLStatus is boolean && mutualSSLStatus) {
+            printDebug(KEY_AUTHN_FILTER, "MutualSSL handshake status: PASSED");
+            doMTSLFilterRequest(req, invocationContext);
+        } else if (mutualSSLVerifyClient is string && stringutils:equalsIgnoreCase(MANDATORY, mutualSSLVerifyClient)
+            || certAuthCheck) {
+            // Return error if cert validation failed when cert validation is required for API.
+            printError(KEY_AUTHN_FILTER, "Certificate validation has failed");
+            return mutualSSLStatus;
         }
         return true;
     }
 
     function checkCertificatePresentInContext(http:Request req, string apiName, string apiVersion,
-                    boolean isValidateCertificateWithAPI) returns boolean | http:AuthenticationError {
+        boolean isValidateCertificateWithAPI) returns boolean|http:AuthenticationError {
+        if (req.mutualSslHandshake[STATUS] != PASSED) {
+            setErrorMessageToInvocationContext(API_AUTH_INVALID_CREDENTIALS);
+            return prepareAuthenticationError("Failed to authenticate with MutualSSL handler");
+        }
         printDebug(KEY_AUTHN_FILTER, "Checking the certificate present in the request context.");
         string? cert = req.mutualSslHandshake["base64EncodedCert"];
         var cacheKey = cert.toString() + apiName + apiVersion;
