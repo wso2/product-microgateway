@@ -19,7 +19,6 @@ package org.wso2.choreo.connect.tests.setup.withapim;
 
 import org.awaitility.Awaitility;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.context.CcInstance;
@@ -43,10 +42,5 @@ public class CcWithControlPlaneEnabled extends ApimBaseTest {
         Assert.assertTrue(ccInstance.checkCCInstanceHealth());
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for " +
                 "resources to be pulled from API Manager");
-    }
-
-    @AfterTest
-    public void stop() {
-        ccInstance.stop();
     }
 }

@@ -88,10 +88,11 @@ public class StoreUtils {
      * @param apiId           - UUID of the API
      * @param applicationId   - UUID of the application
      * @param storeRestClient - Instance of APIPublisherRestClient
+     * @return Subscription ID
      * @throws CCTestException if the response of the create subscription is null. This may null when there is an
      *                              error while subscribing to the API or when the subscription already exists.
      */
-    public static void subscribeToAPI(String apiId, String applicationId, String tier,
+    public static String subscribeToAPI(String apiId, String applicationId, String tier,
                                           RestAPIStoreImpl storeRestClient) throws CCTestException {
         HttpResponse response = storeRestClient.createSubscription(apiId, applicationId, tier);
         if (Objects.isNull(response)) {
@@ -105,6 +106,7 @@ public class StoreUtils {
                     "Response Code:" + response.getResponseCode());
         }
         log.info("API Subscribed. " + getSubscriptionInfoString(apiId, applicationId, tier));
+        return response.getData();
     }
 
     /**
@@ -194,6 +196,23 @@ public class StoreUtils {
                     if (!APIMIntegrationConstants.OAUTH_DEFAULT_APPLICATION_NAME.equals(applicationInfoDTO.getName())) {
                         storeRestClient.deleteApplication(applicationInfoDTO.getApplicationId());
                     }
+                }
+            }
+        } catch (org.wso2.am.integration.clients.store.api.ApiException e) {
+            throw new CCTestException("Error while removing Subscriptions and Apps from Store", e);
+        }
+    }
+
+    public static void removeAllSubscriptionsForAnApp(String appId, RestAPIStoreImpl storeRestClient) throws CCTestException {
+        if (Objects.isNull(storeRestClient)) {
+            return;
+        }
+        try {
+            SubscriptionListDTO subsDTO = storeRestClient
+                    .getAllSubscriptionsOfApplication(appId);
+            if (subsDTO != null && subsDTO.getList() != null) {
+                for (SubscriptionDTO subscriptionDTO : subsDTO.getList()) {
+                    storeRestClient.removeSubscription(subscriptionDTO.getSubscriptionId());
                 }
             }
         } catch (org.wso2.am.integration.clients.store.api.ApiException e) {

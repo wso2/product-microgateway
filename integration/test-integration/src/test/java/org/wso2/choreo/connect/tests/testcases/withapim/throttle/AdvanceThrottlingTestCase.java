@@ -22,6 +22,7 @@ import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
 import org.apache.http.HttpStatus;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.admin.ApiResponse;
@@ -70,6 +71,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
     private final long limitNoThrottle = 20L;
     private final long limit1000Req = 1000L;
     private String apiId;
+    private String applicationId;
     private String endpointURL;
     private String apiPolicyId;
     private String conditionalPolicyId;
@@ -117,7 +119,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         Assert.assertNotNull(conditionalPolicyId, "The policy ID cannot be null or empty");
 
         // Get App ID and API ID
-        String applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
+        applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
         apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
 
         // Create access token
@@ -296,4 +298,15 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
 
         return conditionalGroups;
     }
+
+// TODO: (SuKSW) following needs to work to add this to the first set of testcases
+
+//    @AfterClass
+//    public void destroy() throws Exception {
+//        StoreUtils.removeAllSubscriptionsForAnApp(applicationId, storeRestClient);
+//        storeRestClient.removeApplicationById(applicationId);
+//        publisherRestClient.deleteAPI(apiId);
+//        adminRestClient.deleteAdvancedThrottlingPolicy(apiPolicyId);
+//        adminRestClient.deleteAdvancedThrottlingPolicy(conditionalPolicyId);
+//    }
 }
