@@ -22,7 +22,6 @@ import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
 import org.apache.http.HttpStatus;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.admin.ApiResponse;
@@ -36,10 +35,10 @@ import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleConditionDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
 import org.wso2.am.integration.clients.publisher.api.v1.dto.APIDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
 import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
 import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
@@ -61,6 +60,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
     private final String THROTTLED_QUERY_PARAM_VALUE = "admin";
     private final String THROTTLED_CLAIM = "ClaimApp";
     private static final String API_NAME = "AdvancedThrottlingApi";
+    private static final String API_CONTEXT = "advanced_throttling";
     private static final String APPLICATION_NAME = "AdvanceThrottlingApp";
     private final Map<String, String> requestHeaders = new HashMap<>();
     private final String apiPolicyName = "APIPolicyWithDefaultLimit";
@@ -116,22 +116,16 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         conditionalPolicyId = addedConditionPolicyDto.getPolicyId();
         Assert.assertNotNull(conditionalPolicyId, "The policy ID cannot be null or empty");
 
-        // Find app ID
-        applicationNameToId = findApplicationId(new String[]{APPLICATION_NAME});
-        String applicationId = applicationNameToId.get(APPLICATION_NAME);
+        // Get App ID and API ID
+        String applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
+        apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
 
         // Create access token
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
-        // Get details of created API
-        apiNameToInfo = findApiId(new String[]{API_NAME});
-        APIInfoDTO apiInfoDTO = apiNameToInfo.get(API_NAME);
-        String apiContext = apiInfoDTO.getContext();
-        apiId = apiInfoDTO.getId();
-
-        endpointURL = Utils.getServiceURLHttps(apiContext + "/1.0.0/pet/findByStatus");
+        endpointURL = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
     }
 
     @Test(description = "Test API level throttling with default limits")

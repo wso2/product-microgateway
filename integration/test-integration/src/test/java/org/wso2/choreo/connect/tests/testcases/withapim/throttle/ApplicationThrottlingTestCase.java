@@ -26,8 +26,8 @@ import org.wso2.am.integration.clients.admin.ApiResponse;
 import org.wso2.am.integration.clients.admin.api.dto.ApplicationThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -38,6 +38,7 @@ import java.util.Map;
 
 public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
     private static final String API_NAME = "ApplicationThrottlingApi";
+    private static final String API_CONTEXT = "application_throttling";
     private static final String APPLICATION_NAME = "ApplicationThrottlingApp";
 
     private ApplicationThrottlePolicyDTO requestCountPolicyDTO;
@@ -67,11 +68,8 @@ public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
                 adminRestClient.addApplicationThrottlingPolicy(requestCountPolicyDTO);
         requestCountPolicyDTO = addedPolicy.getData();
 
-        // Get details of created API
-        apiNameToInfo = findApiId(new String[]{API_NAME});
-        APIInfoDTO apiInfoDTO = apiNameToInfo.get(API_NAME);
-        String apiContext = apiInfoDTO.getContext();
-        String apiId = apiInfoDTO.getId();
+        // Get API ID
+        String apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
 
         // creating the application
         Application app = new Application(APPLICATION_NAME, policyName);
@@ -86,7 +84,7 @@ public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
         requestHeaders.put(HttpHeaders.CONTENT_TYPE, "application/json");
 
-        endpointURL = Utils.getServiceURLHttps(apiContext + "/1.0.0/pet/findByStatus");
+        endpointURL = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
     }
 
     @Test(description = "Test application throttling")

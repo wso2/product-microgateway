@@ -22,16 +22,11 @@ import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.awaitility.Awaitility;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationInfoDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationKeyDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationListDTO;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
@@ -48,12 +43,11 @@ public class VhostApimTestCase extends ApimBaseTest {
     private final String US_HOST = "us.wso2.com";
 
     public static final String API_1_NAME = "VHostAPI1";
-    public static final String API_2_NAME = "VHostAPI2";
+    private static final String API_1_CONTEXT = "vhostApi1";
+    private static final String API_2_CONTEXT = "vhostApi2";
     public static final String APPLICATION_NAME = "VHostApp";
 
     private String apiId1;
-    private String apiContext1;
-    private String apiContext2;
     private Map<String, String> requestHeaders1;
     private Map<String, String> requestHeaders2;
     private String api1endpointURL1;
@@ -66,19 +60,12 @@ public class VhostApimTestCase extends ApimBaseTest {
     void setup() throws Exception {
         super.initWithSuperTenant();
 
-        applicationNameToId = findApplicationId(new String[]{APPLICATION_NAME});
-        String applicationId = applicationNameToId.get(APPLICATION_NAME);
+        // Get App ID and API IDs
+        String applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
+        apiId1 = ApimResourceProcessor.apiNameToId.get(API_1_NAME);
 
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
-
-        //Get details of created APIs
-        apiNameToInfo = findApiId(new String[]{API_1_NAME, API_2_NAME});
-        APIInfoDTO apiInfoDTO1 = apiNameToInfo.get(API_1_NAME);
-        APIInfoDTO apiInfoDTO2 = apiNameToInfo.get(API_2_NAME);
-        apiId1 = apiInfoDTO1.getId();
-        apiContext1 = apiInfoDTO1.getContext();
-        apiContext2 = apiInfoDTO2.getContext();
 
         requestHeaders1 = new HashMap<>();
         requestHeaders1.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
@@ -88,10 +75,10 @@ public class VhostApimTestCase extends ApimBaseTest {
         requestHeaders2.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
         requestHeaders2.put(HttpHeaderNames.HOST.toString(), US_HOST);
 
-        api1endpointURL1 = Utils.getServiceURLHttps(apiContext1 + "/1.0.0/pet/findByStatus");
-        api1endpointURL2 = Utils.getServiceURLHttps(apiContext1 + "/1.0.0/store/inventory");
-        api2endpointURL1 = Utils.getServiceURLHttps(apiContext2 + "/1.0.0/pet/findByStatus");
-        api2endpointURL2 = Utils.getServiceURLHttps(apiContext2 + "/1.0.0/store/inventory");
+        api1endpointURL1 = Utils.getServiceURLHttps(API_1_CONTEXT + "/1.0.0/pet/findByStatus");
+        api1endpointURL2 = Utils.getServiceURLHttps(API_1_CONTEXT + "/1.0.0/store/inventory");
+        api2endpointURL1 = Utils.getServiceURLHttps(API_2_CONTEXT + "/1.0.0/pet/findByStatus");
+        api2endpointURL2 = Utils.getServiceURLHttps(API_2_CONTEXT + "/1.0.0/store/inventory");
     }
 
     @Test

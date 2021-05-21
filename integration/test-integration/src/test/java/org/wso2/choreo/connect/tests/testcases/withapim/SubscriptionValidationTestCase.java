@@ -21,30 +21,18 @@ package org.wso2.choreo.connect.tests.testcases.withapim;
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import org.awaitility.Awaitility;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIListDTO;
-import org.wso2.am.integration.clients.store.api.ApiException;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationInfoDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationKeyDTO;
-import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationListDTO;
-import org.wso2.am.integration.test.utils.APIManagerIntegrationTestException;
-import org.wso2.am.integration.test.utils.bean.APIRequest;
 import org.wso2.choreo.connect.mockbackend.ResponseConstants;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
-import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
-import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.*;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class SubscriptionValidationTestCase extends ApimBaseTest {
@@ -55,27 +43,23 @@ public class SubscriptionValidationTestCase extends ApimBaseTest {
     private String endpointURL;
 
     public static final String API_NAME = "SubscriptionValidationApi";
+    private static final String API_CONTEXT = "subs_validation";
     public static final String APPLICATION_NAME = "SubscriptionValidationApp";
 
     @BeforeClass(alwaysRun = true, description = "initialise the setup")
     void setEnvironment() throws Exception {
         super.initWithSuperTenant();
 
-        applicationNameToId = findApplicationId(new String[]{APPLICATION_NAME});
-        applicationId = applicationNameToId.get(APPLICATION_NAME);
+        // Get App ID and API ID
+        applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
+        apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
 
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
                 user, storeRestClient);
         requestHeaders = new HashMap<>();
         requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
-        //Get details of created API
-        apiNameToInfo = findApiId(new String[]{API_NAME});
-        APIInfoDTO apiInfoDTO = apiNameToInfo.get(API_NAME);
-        String apiContext = apiInfoDTO.getContext();
-        apiId = apiInfoDTO.getId();
-
-        endpointURL = Utils.getServiceURLHttps(apiContext + "/1.0.0/pet/findByStatus");
+        endpointURL = Utils.getServiceURLHttps(API_CONTEXT + "/1.0.0/pet/findByStatus");
     }
 
     @Test(description = "Send a request to a unsubscribed REST API and check if the API invocation is forbidden")

@@ -36,6 +36,18 @@
     ]
   },
   {
+    "name": "SubscriptionValidationApi",
+    "version": "1.0.0",
+    "context": "subs_validation",
+    "operationsDTOS": [
+      {
+        "verb": "GET",
+        "target": "/pet/findByStatus",
+        "throttlingPolicy": "Unlimited"
+      }
+    ]
+  },
+  {
     "name": "VHostAPI1",
     "version": "1.0.0",
     "context": "vhostApi1",
@@ -58,18 +70,6 @@
     "context": "vhostApi2",
     "vhosts": ["us.wso2.com"],
     "endpointUrl": "http://mockBackend:2390/v2",
-    "operationsDTOS": [
-      {
-        "verb": "GET",
-        "target": "/pet/findByStatus",
-        "throttlingPolicy": "Unlimited"
-      }
-    ]
-  },
-  {
-    "name": "SubscriptionValidationApi",
-    "version": "1.0.0",
-    "context": "subs_validation",
     "operationsDTOS": [
       {
         "verb": "GET",
