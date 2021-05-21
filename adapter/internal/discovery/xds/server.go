@@ -25,10 +25,10 @@ import (
 	"sync"
 	"time"
 
-	subscription "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/subscription"
-	throttle "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/throttle"
+	subscription "github.com/wso2/adapter/pkg/discovery/api/wso2/discovery/subscription"
+	throttle "github.com/wso2/adapter/pkg/discovery/api/wso2/discovery/throttle"
 
-	wso2_cache "github.com/wso2/adapter/internal/discovery/protocol/cache/v3"
+	wso2_cache "github.com/wso2/adapter/pkg/discovery/protocol/cache/v3"
 	"github.com/wso2/adapter/internal/svcdiscovery"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"

@@ -21,8 +21,6 @@ import (
 	"context"
 
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
-	"github.com/wso2/adapter/internal/discovery/protocol/resource/v3"
-	xds "github.com/wso2/adapter/internal/discovery/xds"
 	logger "github.com/wso2/adapter/internal/loggers"
 )
 
@@ -48,17 +46,18 @@ func (cb *Callbacks) OnStreamClosed(id int64) {
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
 	logger.LoggerEnforcerXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
 		id, request.GetNode(), request.GetVersionInfo(), request.GetTypeUrl())
-	requestEventChannel := xds.GetRequestEventChannel()
-	if resource.APIType == request.GetTypeUrl() {
-		requestEvent := xds.NewRequestEvent()
-		if request.ErrorDetail != nil {
-			logger.LoggerEnforcerXdsCallbacks.Errorf("stream request on stream id: %d Error: %s", id, request.ErrorDetail.Message)
-			requestEvent.IsError = true
-		}
-		requestEvent.Node = request.GetNode().GetId()
-		requestEvent.Version = request.VersionInfo
-		requestEventChannel <- requestEvent
-	}
+	// TODO: (VirajSalaka) Remove the commented logic once the fallback is implemented.
+	// requestEventChannel := xds.GetRequestEventChannel()
+	// if resource.APIType == request.GetTypeUrl() {
+	// 	requestEvent := xds.NewRequestEvent()
+	// 	if request.ErrorDetail != nil {
+	// 		logger.LoggerEnforcerXdsCallbacks.Errorf("stream request on stream id: %d Error: %s", id, request.ErrorDetail.Message)
+	// 		requestEvent.IsError = true
+	// 	}
+	// 	requestEvent.Node = request.GetNode().GetId()
+	// 	requestEvent.Version = request.VersionInfo
+	// 	requestEventChannel <- requestEvent
+	// }
 	return nil
 }
 

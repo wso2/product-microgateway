@@ -24,19 +24,19 @@ import (
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
-	"github.com/wso2/adapter/internal/api/restserver"
+	restserver "github.com/wso2/adapter/internal/api/restserver"
 	"github.com/wso2/adapter/internal/auth"
-	apiservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/api"
-	configservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/config"
-	keymanagerservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/keymgt"
-	subscriptionservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/subscription"
-	throttleservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/throtlle"
-	wso2_server "github.com/wso2/adapter/internal/discovery/protocol/server/v3"
 	enforcerCallbacks "github.com/wso2/adapter/internal/discovery/xds/enforcercallbacks"
 	routercb "github.com/wso2/adapter/internal/discovery/xds/routercallbacks"
+	apiservice "github.com/wso2/adapter/pkg/discovery/api/wso2/discovery/service/api"
+	configservice "github.com/wso2/adapter/pkg/discovery/api/wso2/discovery/service/config"
+	keymanagerservice "github.com/wso2/adapter/pkg/discovery/api/wso2/discovery/service/keymgt"
+	subscriptionservice "github.com/wso2/adapter/pkg/discovery/api/wso2/discovery/service/subscription"
+	throttleservice "github.com/wso2/adapter/pkg/discovery/api/wso2/discovery/service/throtlle"
+	wso2_server "github.com/wso2/adapter/pkg/discovery/protocol/server/v3"
 	"github.com/wso2/adapter/pkg/health"
 	healthservice "github.com/wso2/adapter/pkg/health/api/wso2/health/service"
-	"github.com/wso2/adapter/internal/tlsutils"
+	"github.com/wso2/adapter/pkg/tlsutils"
 
 	"context"
 	"flag"
@@ -50,9 +50,9 @@ import (
 	"github.com/wso2/adapter/config"
 	"github.com/wso2/adapter/internal/discovery/xds"
 	"github.com/wso2/adapter/internal/eventhub"
+	logger "github.com/wso2/adapter/internal/loggers"
 	"github.com/wso2/adapter/internal/messaging"
 	"github.com/wso2/adapter/internal/synchronizer"
-	logger "github.com/wso2/adapter/internal/loggers"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -92,10 +92,10 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServe
 	enforcerThrottleDataDsSrv wso2_server.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
+	publicKeyLocation, privateKeyLocation, truststoreLocation := restserver.GetKeyLocations()
+	cert, err := tlsutils.GetServerCertificate(publicKeyLocation, privateKeyLocation)
 
-	cert, err := tlsutils.GetServerCertificate()
-
-	caCertPool := tlsutils.GetTrustedCertPool()
+	caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
 
 	if err == nil {
 		grpcOptions = append(grpcOptions, grpc.Creds(

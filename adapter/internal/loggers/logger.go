@@ -40,7 +40,6 @@ const (
 	pkgSync                 = "github.com/wso2/adapter/internal/synchronizer"
 	pkgInternalMsg          = "github.com/wso2/adapter/internal/messaging"
 	pkgSvcDiscovery         = "github.com/wso2/adapter/internal/svcDiscovery"
-	pkgTLSUtils             = "github.com/wso2/adapter/internal/tlsutils"
 	pkgSubscription         = "github.com/wso2/adapter/internal/subscription"
 	pkgRouterXdsCallbacks   = "github.com/wso2/adapter/internal/discovery/xds/routercallbacks"
 	pkgEnforcerXdsCallbacks = "github.com/wso2/adapter/internal/discovery/xds/enforcercallbacks"
@@ -56,7 +55,6 @@ var (
 	LoggerSync                 *logrus.Logger
 	LoggerInternalMsg          *logrus.Logger
 	LoggerSvcDiscovery         *logrus.Logger
-	LoggerTLSUtils             *logrus.Logger
 	LoggerSubscription         *logrus.Logger
 	LoggerRouterXdsCallbacks   *logrus.Logger
 	LoggerEnforcerXdsCallbacks *logrus.Logger
@@ -77,7 +75,6 @@ func UpdateLoggers() {
 	LoggerSync = logging.InitPackageLogger(pkgSync)
 	LoggerInternalMsg = logging.InitPackageLogger(pkgInternalMsg)
 	LoggerSvcDiscovery = logging.InitPackageLogger(pkgSvcDiscovery)
-	LoggerTLSUtils = logging.InitPackageLogger(pkgTLSUtils)
 	LoggerSubscription = logging.InitPackageLogger(pkgSubscription)
 	LoggerRouterXdsCallbacks = logging.InitPackageLogger(pkgRouterXdsCallbacks)
 	LoggerEnforcerXdsCallbacks = logging.InitPackageLogger(pkgEnforcerXdsCallbacks)

@@ -33,10 +33,11 @@ import (
 
 	"github.com/wso2/adapter/config"
 	"github.com/wso2/adapter/internal/auth"
-	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/throttle"
 	"github.com/wso2/adapter/internal/discovery/xds"
-	"github.com/wso2/adapter/internal/tlsutils"
+	"github.com/wso2/adapter/pkg/discovery/api/wso2/discovery/throttle"
+	"github.com/wso2/adapter/pkg/tlsutils"
 
+	restserver "github.com/wso2/adapter/internal/api/restserver"
 	logger "github.com/wso2/adapter/internal/loggers"
 )
 
@@ -86,7 +87,8 @@ func FetchThrottleData(endpoint string, c chan SyncAPIResponse) {
 	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
 	tr := &http.Transport{}
 	if !skipSSL {
-		caCertPool := tlsutils.GetTrustedCertPool()
+		_, _, truststoreLocation := restserver.GetKeyLocations()
+		caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
 		tr = &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
 		}

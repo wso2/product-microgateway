@@ -23,7 +23,7 @@ import (
 
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/streadway/amqp"
-	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/keymgt"
+	"github.com/wso2/adapter/pkg/discovery/api/wso2/discovery/keymgt"
 	"github.com/wso2/adapter/internal/discovery/xds"
 	logger "github.com/wso2/adapter/internal/loggers"
 	msg "github.com/wso2/adapter/pkg/messaging"

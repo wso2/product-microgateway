@@ -34,12 +34,14 @@ When you add a new logger instance add the related package name as a constant
 const (
 	pkgMsg                  = "github.com/wso2/adapter/pkg/messaging"
 	pkgHealth               = "github.com/wso2/adapter/pkg/health"
+	pkgTLSUtils             = "github.com/wso2/adapter/pkg/tlsutils"
 )
 
 // logger package references
 var (
 	LoggerMsg                  *logrus.Logger
 	LoggerHealth               *logrus.Logger
+	LoggerTLSUtils             *logrus.Logger
 )
 
 func init() {
@@ -50,5 +52,6 @@ func init() {
 func UpdateLoggers() {
 	LoggerMsg = logging.InitPackageLogger(pkgMsg)
 	LoggerHealth = logging.InitPackageLogger(pkgHealth)
+	LoggerTLSUtils = logging.InitPackageLogger(pkgTLSUtils)
 	logrus.Info("Updated loggers")
 }

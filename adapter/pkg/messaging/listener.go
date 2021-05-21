@@ -20,18 +20,12 @@ package messaging
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/streadway/amqp"
-	"github.com/wso2/adapter/config"
 	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
 var (
-	// MgwConfig represents the configuration
-	MgwConfig *config.Config
-	// Lifetime represents the lifetime of an event
-	Lifetime = 0 * time.Second
 	amqpURI  string
 	// RabbitConn represents the ampq connection
 	RabbitConn       *amqp.Connection
@@ -41,10 +35,6 @@ var (
 )
 
 const (
-	// Exchange represents the  string constant: "amq.topic"
-	Exchange string = "amq.topic"
-	// ExchangeType represents the  string constant: "topic"
-	ExchangeType string = "topic"
 	consumerTag  string = "jms-consumer"
 )
 

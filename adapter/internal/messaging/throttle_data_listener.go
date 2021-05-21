@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 
 	"github.com/streadway/amqp"
-	"github.com/wso2/adapter/internal/discovery/api/wso2/discovery/throttle"
+	"github.com/wso2/adapter/pkg/discovery/api/wso2/discovery/throttle"
 	"github.com/wso2/adapter/internal/discovery/xds"
 	"github.com/wso2/adapter/internal/synchronizer"
 

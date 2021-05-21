@@ -32,11 +32,12 @@ import (
 	"time"
 
 	"github.com/wso2/adapter/config"
+	restserver "github.com/wso2/adapter/internal/api/restserver"
 	"github.com/wso2/adapter/internal/auth"
 	"github.com/wso2/adapter/internal/discovery/xds"
-	eventhubTypes "github.com/wso2/adapter/pkg/eventhub/types"
-	"github.com/wso2/adapter/internal/tlsutils"
 	logger "github.com/wso2/adapter/internal/loggers"
+	eventhubTypes "github.com/wso2/adapter/pkg/eventhub/types"
+	"github.com/wso2/adapter/pkg/tlsutils"
 )
 
 const (
@@ -78,7 +79,8 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
 	tr := &http.Transport{}
 	if !skipSSL {
-		caCertPool := tlsutils.GetTrustedCertPool()
+		_, _, truststoreLocation := restserver.GetKeyLocations()
+		caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
 		tr = &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
 		}

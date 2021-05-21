@@ -29,6 +29,9 @@ import (
 	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
+// EventListeningEndpoints represents the list of endpoints
+var EventListeningEndpoints  []string
+
 // ConnectToRabbitMQ function tries to connect to the RabbitMQ server as long as it takes to establish a connection
 func ConnectToRabbitMQ(url string) (*amqp.Connection, error) {
 	var err error = nil
@@ -160,7 +163,7 @@ func retryExponentially(key string, url string, retryInterval time.Duration) (*C
 // RetrieveAMQPURLList function extract AMQPURLList from EventListening connection url
 func RetrieveAMQPURLList() []AmqpFailoverURL {
 	var connectionURLList []string
-	connectionURLList = MgwConfig.ControlPlane.JmsConnectionParameters.EventListeningEndpoints
+	connectionURLList = EventListeningEndpoints
 
 	amqlURLList := []AmqpFailoverURL{}
 

@@ -29,11 +29,12 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/wso2/adapter/config"
+	restserver "github.com/wso2/adapter/internal/api/restserver"
 	"github.com/wso2/adapter/internal/auth"
 	"github.com/wso2/adapter/internal/discovery/xds"
-	"github.com/wso2/adapter/pkg/eventhub/types"
-	"github.com/wso2/adapter/internal/tlsutils"
 	logger "github.com/wso2/adapter/internal/loggers"
+	"github.com/wso2/adapter/pkg/eventhub/types"
+	"github.com/wso2/adapter/pkg/tlsutils"
 )
 
 const (
@@ -206,7 +207,8 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	logger.LoggerSubscription.Debugf("Skip SSL Verification: %v", skipSSL)
 	tr := &http.Transport{}
 	if !skipSSL {
-		caCertPool := tlsutils.GetTrustedCertPool()
+		_, _, truststoreLocation := restserver.GetKeyLocations()
+		caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
 		tr = &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
 		}

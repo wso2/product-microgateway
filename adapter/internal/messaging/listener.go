@@ -20,6 +20,7 @@ package messaging
 
 import (
 	"strings"
+	"fmt"
 	"time"
 
 	"github.com/wso2/adapter/pkg/health"
@@ -29,17 +30,22 @@ import (
 	msg "github.com/wso2/adapter/pkg/messaging"
 )
 
+var lifetime = 0 * time.Second
+
 const (
 	notification    string = "notification"
 	keymanager      string = "keymanager"
 	tokenRevocation string = "tokenRevocation"
 	throttleData    string = "throttleData"
+    exchange string = "amq.topic"
+    exchangeType string = "topic"
 )
 
 // ProcessEvents to pass event consumption
 func ProcessEvents(config *config.Config) {
 	var err error
-	msg.MgwConfig = config
+	//msg.MgwConfig = config
+	passConfigToPkg(config)
 	msg.AmqpURIArray = msg.RetrieveAMQPURLList()
 	bindingKeys := []string{notification, keymanager, tokenRevocation, throttleData}
 
@@ -56,9 +62,9 @@ func ProcessEvents(config *config.Config) {
 				if err != nil {
 					logger.LoggerInternalMsg.Fatalf("%s", err)
 				}
-				if msg.Lifetime > 0 {
-					logger.LoggerInternalMsg.Debugf("running %s events for %s", key, msg.Lifetime)
-					time.Sleep(msg.Lifetime)
+				if lifetime > 0 {
+					logger.LoggerInternalMsg.Debugf("running %s events for %s", key, lifetime)
+					time.Sleep(lifetime)
 				} else {
 					logger.LoggerInternalMsg.Infof("process of receiving %s events running forever", key)
 					select {}
@@ -73,28 +79,26 @@ func ProcessEvents(config *config.Config) {
 	}
 }
 
-func handleEvent(c *msg.Consumer, key string) (error){
+func handleEvent(c *msg.Consumer, key string) (error) {
 	var err error
 
 	logger.LoggerInternalMsg.Debugf("got Connection, getting Channel for %s events", key)
 	c.Channel, err = c.Conn.Channel()
 	if err != nil {
-		//return nil, fmt.Errorf("Channel: %s", err)
-		logger.LoggerInternalMsg.Errorf("Channel: %s", err)
+		return fmt.Errorf("Channel: %s", err)
 	}
 
-	logger.LoggerInternalMsg.Debugf("got Channel, declaring Exchange (%q)", msg.Exchange)
+	logger.LoggerInternalMsg.Debugf("got Channel, declaring Exchange (%q)", exchange)
 	if err = c.Channel.ExchangeDeclare(
-		msg.Exchange,     // name of the exchange
-		msg.ExchangeType, // type
+		exchange,     // name of the exchange
+		exchangeType, // type
 		true,             // durable
 		false,            // delete when complete
 		false,            // internal
 		false,            // noWait
 		nil,              // arguments
 	); err != nil {
-		logger.LoggerInternalMsg.Errorf("Exchange Declare: %s", err)
-		//return nil, fmt.Errorf("Exchange Declare: %s", err)
+		return fmt.Errorf("Exchange Declare: %s", err)
 	}
 
 	logger.LoggerInternalMsg.Infof("declared Exchange, declaring Queue %q", key+"queue")
@@ -107,8 +111,7 @@ func handleEvent(c *msg.Consumer, key string) (error){
 		nil,   // arguments
 	)
 	if err != nil {
-		logger.LoggerInternalMsg.Errorf("Queue Declare: %s", err)
-		//return nil, fmt.Errorf("Queue Declare: %s", err)
+		return fmt.Errorf("Queue Declare: %s", err)
 	}
 
 	logger.LoggerInternalMsg.Debugf("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
@@ -117,12 +120,11 @@ func handleEvent(c *msg.Consumer, key string) (error){
 	if err = c.Channel.QueueBind(
 		queue.Name,   // name of the queue
 		key,          // bindingKey
-		msg.Exchange, // sourceExchange
+		exchange, // sourceExchange
 		false,        // noWait
 		nil,          // arguments
 	); err != nil {
-		logger.LoggerInternalMsg.Errorf("Queue Bind: %s", err)
-		//return nil, fmt.Errorf("Queue Bind: %s", err)
+		return fmt.Errorf("Queue Bind: %s", err)
 	}
 	logger.LoggerInternalMsg.Infof("Queue bound to Exchange, starting Consume (consumer tag %q) events", c.Tag)
 	deliveries, err := c.Channel.Consume(
@@ -143,5 +145,9 @@ func handleEvent(c *msg.Consumer, key string) (error){
 	} else if strings.EqualFold(key, throttleData) {
 		go handleThrottleData(deliveries, c.Done)
 	}
-	return err
+	return nil
+}
+
+func passConfigToPkg(config *config.Config) {
+    msg.EventListeningEndpoints = config.ControlPlane.JmsConnectionParameters.EventListeningEndpoints
 }

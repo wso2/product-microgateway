@@ -34,7 +34,7 @@ import (
 	xds "github.com/wso2/adapter/internal/discovery/xds"
 	mgw "github.com/wso2/adapter/internal/oasparser/model"
 	"github.com/wso2/adapter/internal/oasparser/utills"
-	"github.com/wso2/adapter/internal/tlsutils"
+	"github.com/wso2/adapter/pkg/tlsutils"
 	"github.com/wso2/adapter/internal/loggers"
 )
 
