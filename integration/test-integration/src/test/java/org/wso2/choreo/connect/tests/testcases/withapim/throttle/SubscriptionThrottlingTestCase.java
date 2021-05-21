@@ -21,18 +21,14 @@ package org.wso2.choreo.connect.tests.testcases.withapim.throttle;
 import com.google.common.net.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.admin.ApiResponse;
 import org.wso2.am.integration.clients.admin.api.dto.RequestCountLimitDTO;
 import org.wso2.am.integration.clients.admin.api.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.am.integration.clients.admin.api.dto.ThrottleLimitDTO;
-import org.wso2.am.integration.clients.publisher.api.v1.dto.APIInfoDTO;
 import org.wso2.am.integration.test.impl.DtoFactory;
-import org.wso2.choreo.connect.tests.apim.dto.AppWithConsumerKey;
-import org.wso2.choreo.connect.tests.apim.dto.Application;
-import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
+import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
@@ -75,9 +71,8 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
         Assert.assertEquals(addedPolicy.getStatusCode(), HttpStatus.SC_CREATED);
         requestCountPolicyDTO = addedPolicy.getData();
 
-        // Find app ID
-        applicationNameToId = findApplicationId(new String[]{APPLICATION_NAME});
-        String applicationId = applicationNameToId.get(APPLICATION_NAME);
+        // Get App ID
+        String applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
 
         // Create access token
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,

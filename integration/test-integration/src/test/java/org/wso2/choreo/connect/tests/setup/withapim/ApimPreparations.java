@@ -22,8 +22,6 @@ import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
-import org.wso2.choreo.connect.tests.util.TestConstant;
-import org.wso2.choreo.connect.tests.util.Utils;
 
 /**
  * APIs, Apps, Subs created here will be used to test whether
@@ -31,14 +29,15 @@ import org.wso2.choreo.connect.tests.util.Utils;
  * (in StartupDiscoveryTestCase). This class must run before CcWithControlPlaneEnabled
  */
 public class ApimPreparations extends ApimBaseTest {
+
     /**
      * Initialize the clients in the super class and create APIs, Apps, Subscriptions etc.
      */
     @BeforeTest
     private void createApiAppSubsEtc() throws Exception {
         super.initWithSuperTenant();
-        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
         StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
+        PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
 
         ApimResourceProcessor apimResourceProcessor = new ApimResourceProcessor();
         apimResourceProcessor.createApisAppsSubs(user.getUserName(), publisherRestClient, storeRestClient);
