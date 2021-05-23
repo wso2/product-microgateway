@@ -30,7 +30,7 @@ import (
 	configservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/config"
 	keymanagerservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/keymgt"
 	subscriptionservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/subscription"
-	throttleservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/throtlle"
+	throttleservice "github.com/wso2/adapter/internal/discovery/api/wso2/discovery/service/throttle"
 	wso2_server "github.com/wso2/adapter/internal/discovery/protocol/server/v3"
 	enforcerCallbacks "github.com/wso2/adapter/internal/discovery/xds/enforcercallbacks"
 	routercb "github.com/wso2/adapter/internal/discovery/xds/routercallbacks"
