@@ -25,7 +25,6 @@ import org.wso2.am.integration.test.utils.bean.*;
 import org.wso2.carbon.automation.engine.context.AutomationContext;
 import org.wso2.carbon.automation.engine.context.TestUserMode;
 import org.wso2.carbon.automation.engine.context.beans.User;
-import org.wso2.choreo.connect.tests.apim.dto.Application;
 import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 
@@ -46,7 +45,6 @@ public class ApimBaseTest {
     protected RestAPIStoreImpl storeRestClient;
 
     protected User user;
-    protected Application sampleApp;
 
     /**
      * Initialize Admin, Publisher and Store REST clients for API Manager in Super Tenant Admin user mode
@@ -90,7 +88,5 @@ public class ApimBaseTest {
         } catch (XPathExpressionException e) {
             throw new CCTestException("Error while initializing automation context for APIM REST API clients", e);
         }
-
-        sampleApp = new Application("SampleApp", TestConstant.APPLICATION_TIER.UNLIMITED);
     }
 }

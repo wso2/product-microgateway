@@ -72,6 +72,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
     private final long limit1000Req = 1000L;
     private String apiId;
     private String applicationId;
+    private String claimApplicationId;
     private String endpointURL;
     private String apiPolicyId;
     private String conditionalPolicyId;
@@ -226,6 +227,7 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
 
         Application app = new Application(THROTTLED_CLAIM, TestConstant.APPLICATION_TIER.UNLIMITED);
         AppWithConsumerKey appCreationResponse = StoreUtils.createApplicationWithKeys(app, storeRestClient);
+        claimApplicationId = appCreationResponse.getApplicationId();
         StoreUtils.subscribeToAPI(apiId, appCreationResponse.getApplicationId(),
                 TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted when waiting for the " +
@@ -301,12 +303,13 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
 
 // TODO: (SuKSW) following needs to work to add this to the first set of testcases
 
-//    @AfterClass
-//    public void destroy() throws Exception {
-//        StoreUtils.removeAllSubscriptionsForAnApp(applicationId, storeRestClient);
-//        storeRestClient.removeApplicationById(applicationId);
-//        publisherRestClient.deleteAPI(apiId);
-//        adminRestClient.deleteAdvancedThrottlingPolicy(apiPolicyId);
-//        adminRestClient.deleteAdvancedThrottlingPolicy(conditionalPolicyId);
-//    }
+    @AfterClass
+    public void destroy() throws Exception {
+        StoreUtils.removeAllSubscriptionsForAnApp(applicationId, storeRestClient);
+        StoreUtils.removeAllSubscriptionsForAnApp(claimApplicationId, storeRestClient);
+        storeRestClient.removeApplicationById(applicationId);
+        publisherRestClient.deleteAPI(apiId);
+        adminRestClient.deleteAdvancedThrottlingPolicy(apiPolicyId);
+        adminRestClient.deleteAdvancedThrottlingPolicy(conditionalPolicyId);
+    }
 }

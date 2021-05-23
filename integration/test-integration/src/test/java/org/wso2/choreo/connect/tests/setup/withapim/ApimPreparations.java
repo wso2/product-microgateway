@@ -17,11 +17,24 @@
  */
 package org.wso2.choreo.connect.tests.setup.withapim;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
+import org.wso2.am.integration.test.ClientAuthenticator;
+import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
+import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
+import org.wso2.am.integration.test.impl.RestAPIStoreImpl;
+import org.wso2.am.integration.test.utils.base.APIMIntegrationConstants;
+import org.wso2.am.integration.test.utils.bean.DCRParamRequest;
 import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
+import org.wso2.choreo.connect.tests.util.Utils;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * APIs, Apps, Subs created here will be used to test whether
@@ -29,7 +42,7 @@ import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
  * (in StartupDiscoveryTestCase). This class must run before CcWithControlPlaneEnabled
  */
 public class ApimPreparations extends ApimBaseTest {
-
+    private static final Logger log = LoggerFactory.getLogger(ApimPreparations.class);
     /**
      * Initialize the clients in the super class and create APIs, Apps, Subscriptions etc.
      */
@@ -41,5 +54,58 @@ public class ApimPreparations extends ApimBaseTest {
 
         ApimResourceProcessor apimResourceProcessor = new ApimResourceProcessor();
         apimResourceProcessor.createApisAppsSubs(user.getUserName(), publisherRestClient, storeRestClient);
+    }
+
+    @BeforeSuite
+    private void setSystemPropertiesForApimClientsAndCheckIfSet() throws MalformedURLException {
+        setSSlSystemProperties();
+        String dcrURL = Utils.getAPIMServiceURLHttps("/client-registration/v0.17/register");
+        //DCR call for publisher app
+        DCRParamRequest publisherParamRequest = new DCRParamRequest(RestAPIPublisherImpl.appName,
+                RestAPIPublisherImpl.callBackURL,
+                RestAPIPublisherImpl.tokenScope,
+                RestAPIPublisherImpl.appOwner,
+                RestAPIPublisherImpl.grantType, dcrURL,
+                RestAPIPublisherImpl.username,
+                RestAPIPublisherImpl.password,
+                APIMIntegrationConstants.SUPER_TENANT_DOMAIN);
+        ClientAuthenticator.makeDCRRequest(publisherParamRequest);
+
+        //DCR call for dev portal app
+        DCRParamRequest devPortalParamRequest = new DCRParamRequest(RestAPIStoreImpl.appName,
+                RestAPIStoreImpl.callBackURL,
+                RestAPIStoreImpl.tokenScope,
+                RestAPIStoreImpl.appOwner,
+                RestAPIStoreImpl.grantType, dcrURL,
+                RestAPIStoreImpl.username,
+                RestAPIStoreImpl.password,
+                APIMIntegrationConstants.SUPER_TENANT_DOMAIN);
+        ClientAuthenticator.makeDCRRequest(devPortalParamRequest);
+
+        // DCR call for admin portal app
+        DCRParamRequest adminPortalParamRequest = new DCRParamRequest(RestAPIAdminImpl.appName,
+                RestAPIAdminImpl.callBackURL,
+                RestAPIAdminImpl.tokenScope,
+                RestAPIAdminImpl.appOwner,
+                RestAPIAdminImpl.grantType, dcrURL,
+                RestAPIAdminImpl.username,
+                RestAPIAdminImpl.password,
+                APIMIntegrationConstants.SUPER_TENANT_DOMAIN);
+        ClientAuthenticator.makeDCRRequest(adminPortalParamRequest);
+    }
+
+    /**
+     * Helper method to set the SSL context.
+     */
+    protected void setSSlSystemProperties() {
+        URL certificatesTrustStore = getClass().getClassLoader()
+                .getResource("keystore/client-truststore.jks");
+        if (certificatesTrustStore != null) {
+            System.setProperty("javax.net.ssl.trustStore", certificatesTrustStore.getPath());
+        } else {
+            log.error("Truststore is not set.");
+        }
+        System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
+        System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
     }
 }

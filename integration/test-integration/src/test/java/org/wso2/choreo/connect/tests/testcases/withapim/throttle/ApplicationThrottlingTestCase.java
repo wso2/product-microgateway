@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.tests.testcases.withapim.throttle;
 
 import com.google.common.net.HttpHeaders;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.admin.ApiResponse;
@@ -45,6 +46,8 @@ public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
     private final Map<String, String> requestHeaders = new HashMap<>();
     String endpointURL;
     long requestCount = 15L;
+    String apiId;
+    String applicationId;
 
     @BeforeClass(alwaysRun = true)
     public void setEnvironment() throws Exception {
@@ -69,11 +72,11 @@ public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
         requestCountPolicyDTO = addedPolicy.getData();
 
         // Get API ID
-        String apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
+        apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
 
         // creating the application
         Application app = new Application(APPLICATION_NAME, policyName);
-        String applicationId = StoreUtils.createApplication(app, storeRestClient);
+        applicationId = StoreUtils.createApplication(app, storeRestClient);
 
         StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED,
                 storeRestClient);
@@ -91,5 +94,13 @@ public class ApplicationThrottlingTestCase extends ThrottlingBaseTestCase {
     public void testApplicationLevelThrottling() throws Exception {
         Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, requestCount),
                 "Request not throttled by request count condition in application tier");
+    }
+
+    @AfterClass
+    public void destroy() throws Exception {
+        StoreUtils.removeAllSubscriptionsForAnApp(applicationId, storeRestClient);
+        storeRestClient.removeApplicationById(applicationId);
+        publisherRestClient.deleteAPI(apiId);
+        adminRestClient.deleteApplicationThrottlingPolicy(requestCountPolicyDTO.getPolicyId());
     }
 }
