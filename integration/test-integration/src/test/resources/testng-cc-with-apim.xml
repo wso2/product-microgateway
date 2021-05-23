@@ -30,14 +30,16 @@
 
     <test name="before-suite-preparations" parallel="false">
         <classes>
-            <class name="org.wso2.choreo.connect.tests.setup.withapim.WithApimBeforeTestSuite"/>
+            <!-- To avoid apim restarting everytime while writing tests, follow the instructions in integration/test-integration/readme.md -->
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimStartupShutdownExecutor"/>
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimClientsPreparer"/>
         </classes>
     </test>
     <test name="apis-apps-subs-pulled-at-startup" preserve-order="true" parallel="false">
         <classes>
             <!-- Clean and create APIs, Applications, Subscriptions BEFORE starting Choreo Connect  -->
-            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparations"/>
-            <class name="org.wso2.choreo.connect.tests.setup.withapim.CcWithControlPlaneEnabled"/>
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparer"/>
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.CcStartupExecutor"/>
 
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.SubscriptionValidationTestCase"/>
@@ -47,7 +49,7 @@
     <test name="apis-apps-subs-received-via-eventhub" preserve-order="true" parallel="false">
         <classes>
             <!-- Clean and create APIs, Applications, Subscriptions AFTER starting Choreo Connect  -->
-            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparations"/>
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparer"/>
 
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.AdvanceThrottlingTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.ApplicationThrottlingTestCase"/>

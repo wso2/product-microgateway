@@ -26,16 +26,17 @@ import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 /**
  * APIs, Apps, Subs created here will be used to test whether
  * resources that existed in APIM were pulled by CC during startup
- * (in StartupDiscoveryTestCase). This class must run before CcWithControlPlaneEnabled
+ * (in StartupDiscoveryTestCase). This class must run before CcStartupExecutor
  */
-public class ApimPreparations extends ApimBaseTest {
-
+public class ApimPreparer extends ApimBaseTest {
     /**
      * Initialize the clients in the super class and create APIs, Apps, Subscriptions etc.
      */
     @BeforeTest
     private void createApiAppSubsEtc() throws Exception {
         super.initWithSuperTenant();
+        // Here, there is a reason we clean first: Within the test tag "apis-apps-subs-received-via-eventhub", we
+        // not only test the "CREATE" events, but also the "DELETE" events
         StoreUtils.removeAllSubscriptionsAndAppsFromStore(storeRestClient);
         PublisherUtils.removeAllApisFromPublisher(publisherRestClient);
 
