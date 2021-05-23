@@ -21,6 +21,7 @@ package org.wso2.choreo.connect.tests.testcases.withapim.throttle;
 import com.google.common.net.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.am.integration.clients.admin.ApiResponse;
@@ -45,6 +46,9 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
     private final Map<String, String> requestHeaders = new HashMap<>();
     String endpointURL;
     long requestCount = 15L;
+    String apiId;
+    String applicationId;
+    String subscriptionId;
 
     @BeforeClass(alwaysRun = true)
     public void setEnvironment() throws Exception {
@@ -72,7 +76,7 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
         requestCountPolicyDTO = addedPolicy.getData();
 
         // Get App ID
-        String applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
+        applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
 
         // Create access token
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
@@ -81,12 +85,12 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
         requestHeaders.put(HttpHeaders.CONTENT_TYPE, "application/json");
 
         // Cannot create before defining the policy in this class. Policy name must be included in api.
-        String apiId = createThrottleApi(policyName, TestConstant.API_TIER.UNLIMITED,
+        apiId = createThrottleApi(policyName, TestConstant.API_TIER.UNLIMITED,
                 TestConstant.API_TIER.UNLIMITED);
         // get a predefined api request
         endpointURL = getThrottleAPIEndpoint();
 
-        StoreUtils.subscribeToAPI(apiId, applicationId, policyName, storeRestClient);
+        subscriptionId = StoreUtils.subscribeToAPI(apiId, applicationId, policyName, storeRestClient);
         // this is to wait until policy deployment is complete in case it didn't complete already
         Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till the policy and API");
     }
@@ -95,5 +99,13 @@ public class SubscriptionThrottlingTestCase extends ThrottlingBaseTestCase {
     public void testSubscriptionLevelThrottling() throws Exception {
         Assert.assertTrue(isThrottled(endpointURL, requestHeaders, null, requestCount),
                 "Request not throttled by request count condition in subscription tier");
+    }
+
+    @AfterClass
+    public void destroy() throws Exception {
+        StoreUtils.removeAllSubscriptionsForAnApp(applicationId, storeRestClient);
+        storeRestClient.removeApplicationById(applicationId);
+        publisherRestClient.deleteAPI(apiId);
+        adminRestClient.deleteSubscriptionThrottlingPolicy(requestCountPolicyDTO.getPolicyId());
     }
 }

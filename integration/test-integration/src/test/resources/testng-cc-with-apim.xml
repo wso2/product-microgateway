@@ -29,6 +29,7 @@
     </listeners>
 
     <test name="before-suite-preparations" parallel="false">
+        <!-- To avoid apim restarting everytime while writing tests, follow the instructions in integration/test-integration/readme.md -->
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.WithApimBeforeTestSuite"/>
         </classes>
