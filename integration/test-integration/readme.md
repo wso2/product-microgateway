@@ -1,5 +1,9 @@
 # Integration Tests
 
+### How to create APIs, Applications, and Subscriptions for testcases
+Add APIs, Applications, and Subscriptions to the json files in `integration/test-integration/src/test/resources/apimApisAppsSubs`
+These will be added to API Manager before starting any of the testcases
+
 ### How to Avoid API Manager restarting everytime the test are run
 
 1. Run the tests ones

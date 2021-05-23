@@ -301,8 +301,6 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
         return conditionalGroups;
     }
 
-// TODO: (SuKSW) following needs to work to add this to the first set of testcases
-
     @AfterClass
     public void destroy() throws Exception {
         StoreUtils.removeAllSubscriptionsForAnApp(applicationId, storeRestClient);
