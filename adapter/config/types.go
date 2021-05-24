@@ -62,105 +62,117 @@ func NewReceiver() chan string {
 // Config represents the adapter configuration.
 // It is created directly from the configuration toml file.
 type Config struct {
-	//Adapter related Configurations
-	Adapter struct {
-		// Server represents the configuration related to REST API (to which the apictl requests)
-		Server struct {
-			// Enabled the serving the REST API
-			Enabled bool `default:"true"`
-			// Host name of the server
-			Host string
-			// Port of the server
-			Port string
-			// APICTL Users
-			Users []APICtlUser `toml:"users"`
-			// Access token validity duration. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". eg: "2h45m"
-			TokenTTL string
-			// Private key to sign the token
-			TokenPrivateKeyPath string
-		}
-		// VhostMapping represents default vhost of gateway environments
-		VhostMapping []struct {
-			// Environment name of the gateway
-			Environment string
-			// Vhost to be default of the environment
-			Vhost string
-		}
-		//Consul represents the configuration required to connect to consul service discovery
-		Consul struct {
-			//Enable whether consul service discovery should be enabled
-			Enable bool
-			//URL url of the consul client in format: http(s)://host:port
-			URL string
-			//PollInterval how frequently consul API should be polled to get updates (in seconds)
-			PollInterval int
-			//ACLToken Access Control Token required to invoke HTTP API
-			ACLToken string
-			//MgwServiceName service name that Microgateway registered in Consul Service Mesh
-			MgwServiceName string
-			//ServiceMeshEnabled whether Consul service mesh is enabled
-			ServiceMeshEnabled bool
-			//CaCertFile path to the CA cert file(PEM encoded) required for tls connection between adapter and a consul client
-			CaCertFile string
-			//CertFile path to the cert file(PEM encoded) required for tls connection between adapter and a consul client
-			CertFile string
-			//KeyFile path to the key file(PEM encoded) required for tls connection between adapter and a consul client
-			KeyFile string
-		}
-		// Keystore contains the keyFile and Cert File of the adapter
-		Keystore keystore
-		//Trusted Certificates
-		Truststore truststore
-	}
-
-	// Envoy Listener Component related configurations.
-	Envoy struct {
-		ListenerHost                     string
-		ListenerPort                     uint32
-		SecuredListenerHost              string
-		SecuredListenerPort              uint32
-		ClusterTimeoutInSeconds          time.Duration
-		EnforcerResponseTimeoutInSeconds time.Duration `default:"20"`
-		KeyStore                         keystore
-		SystemHost                       string `default:"localhost"`
-
-		// Global CORS configurations.
-		Cors struct {
-			Enabled          bool
-			AllowOrigins     []string
-			AllowMethods     []string
-			AllowHeaders     []string
-			AllowCredentials bool
-			ExposeHeaders    []string
-		}
-
-		// Envoy Upstream Related Configurations
-		Upstream struct {
-			//UpstreamTLS related Configuration
-			TLS struct {
-				MinVersion             string `toml:"minimumProtocolVersion"`
-				MaxVersion             string `toml:"maximumProtocolVersion"`
-				Ciphers                string `toml:"ciphers"`
-				CACrtPath              string `toml:"trustedCertPath"`
-				VerifyHostName         bool   `toml:"verifyHostName"`
-				DisableSSLVerification bool   `toml:"disableSslVerification"`
-			}
-		}
-	} `toml:"router"`
-
-	Enforcer struct {
-		Security        security
-		ApimCredentials apimCredentials
-		AuthService     authService
-		JwtGenerator    jwtGenerator
-		Cache           cache
-		Throttling      throttlingConfig
-		JwtIssuer       jwtIssuer
-	}
-
+	Adapter      adapter
+	Envoy        envoy `toml:"router"`
+	Enforcer     enforcer
 	ControlPlane controlPlane `toml:"controlPlane"`
+	Analytics    analytics    `toml:"analytics"`
+}
 
-	Analytics analytics `toml:"analytics"`
+// Adapter related Configurations
+type adapter struct {
+	// Server represents the configuration related to REST API (to which the apictl requests)
+	Server server
+	// VhostMapping represents default vhost of gateway environments
+	VhostMapping []vhostMapping
+	// Consul represents the configuration required to connect to consul service discovery
+	Consul consul
+	// Keystore contains the keyFile and Cert File of the adapter
+	Keystore keystore
+	// Trusted Certificates
+	Truststore truststore
+}
+
+// Envoy Listener Component related configurations.
+type envoy struct {
+	ListenerHost                     string
+	ListenerPort                     uint32
+	SecuredListenerHost              string
+	SecuredListenerPort              uint32
+	ClusterTimeoutInSeconds          time.Duration
+	EnforcerResponseTimeoutInSeconds time.Duration `default:"20"`
+	KeyStore                         keystore
+	SystemHost                       string `default:"localhost"`
+	Cors                             globalCors
+	Upstream                         envoyUpstream
+}
+
+type enforcer struct {
+	Security        security
+	ApimCredentials apimCredentials
+	AuthService     authService
+	JwtGenerator    jwtGenerator
+	Cache           cache
+	Throttling      throttlingConfig
+	JwtIssuer       jwtIssuer
+}
+
+type server struct {
+	// Enabled the serving the REST API
+	Enabled bool `default:"true"`
+	// Host name of the server
+	Host string
+	// Port of the server
+	Port string
+	// APICTL Users
+	Users []APICtlUser `toml:"users"`
+	// Access token validity duration. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". eg: "2h45m"
+	TokenTTL string
+	// Private key to sign the token
+	TokenPrivateKeyPath string
+}
+
+type vhostMapping struct {
+	// Environment name of the gateway
+	Environment string
+	// Vhost to be default of the environment
+	Vhost string
+}
+
+type consul struct {
+	// Enable whether consul service discovery should be enabled
+	Enable bool
+	// URL url of the consul client in format: http(s)://host:port
+	URL string
+	// PollInterval how frequently consul API should be polled to get updates (in seconds)
+	PollInterval int
+	// ACLToken Access Control Token required to invoke HTTP API
+	ACLToken string
+	// MgwServiceName service name that Microgateway registered in Consul Service Mesh
+	MgwServiceName string
+	// ServiceMeshEnabled whether Consul service mesh is enabled
+	ServiceMeshEnabled bool
+	// CaCertFile path to the CA cert file(PEM encoded) required for tls connection between adapter and a consul client
+	CaCertFile string
+	// CertFile path to the cert file(PEM encoded) required for tls connection between adapter and a consul client
+	CertFile string
+	// KeyFile path to the key file(PEM encoded) required for tls connection between adapter and a consul client
+	KeyFile string
+}
+
+// Global CORS configurations
+type globalCors struct {
+	Enabled          bool
+	AllowOrigins     []string
+	AllowMethods     []string
+	AllowHeaders     []string
+	AllowCredentials bool
+	ExposeHeaders    []string
+}
+
+// Envoy Upstream Related Configurations
+type envoyUpstream struct {
+	// UpstreamTLS related Configuration
+	TLS upstreamTLS
+}
+
+type upstreamTLS struct {
+	MinVersion             string `toml:"minimumProtocolVersion"`
+	MaxVersion             string `toml:"maximumProtocolVersion"`
+	Ciphers                string `toml:"ciphers"`
+	CACrtPath              string `toml:"trustedCertPath"`
+	VerifyHostName         bool   `toml:"verifyHostName"`
+	DisableSSLVerification bool   `toml:"disableSslVerification"`
 }
 
 type security struct {
@@ -294,19 +306,21 @@ type cache struct {
 }
 
 type analytics struct {
-	Enabled bool `toml:"enabled"`
+	Enabled  bool `toml:"enabled"`
+	Adapter  analyticsAdapter
+	Enforcer analyticsEnforcer
+}
 
-	Adapter struct {
-		BufferFlushInterval time.Duration `toml:"bufferFlushInterval"`
-		BufferSizeBytes     uint32        `toml:"bufferSizeBytes"`
-		GRPCRequestTimeout  time.Duration `toml:"gRPCRequestTimeout"`
-	}
+type analyticsAdapter struct {
+	BufferFlushInterval time.Duration `toml:"bufferFlushInterval"`
+	BufferSizeBytes     uint32        `toml:"bufferSizeBytes"`
+	GRPCRequestTimeout  time.Duration `toml:"gRPCRequestTimeout"`
+}
 
-	Enforcer struct {
-		// TODO: (VirajSalaka) convert it to map[string]{}interface
-		ConfigProperties    map[string]string
-		EnforcerLogReceiver authService `toml:"LogReceiver"`
-	}
+type analyticsEnforcer struct {
+	// TODO: (VirajSalaka) convert it to map[string]{}interface
+	ConfigProperties    map[string]string
+	EnforcerLogReceiver authService `toml:"LogReceiver"`
 }
 
 type routerLogPublisher struct {
@@ -347,17 +361,19 @@ type APICtlUser struct {
 
 // ControlPlane struct contains configurations related to the API Manager
 type controlPlane struct {
-	Enabled                 bool          `toml:"enabled"`
-	ServiceURL              string        `toml:"serviceUrl"`
-	Username                string        `toml:"username"`
-	Password                string        `toml:"password"`
-	SyncApisOnStartUp       bool          `toml:"syncApisOnStartUp"`
-	EnvironmentLabels       []string      `toml:"environmentLabels"`
-	RetryInterval           time.Duration `toml:"retryInterval"`
-	SkipSSLVerification     bool          `toml:"skipSSLVerification"`
-	JmsConnectionParameters struct {
-		EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
-	} `toml:"jmsConnectionParameters"`
+	Enabled                 bool                    `toml:"enabled"`
+	ServiceURL              string                  `toml:"serviceUrl"`
+	Username                string                  `toml:"username"`
+	Password                string                  `toml:"password"`
+	SyncApisOnStartUp       bool                    `toml:"syncApisOnStartUp"`
+	EnvironmentLabels       []string                `toml:"environmentLabels"`
+	RetryInterval           time.Duration           `toml:"retryInterval"`
+	SkipSSLVerification     bool                    `toml:"skipSSLVerification"`
+	JmsConnectionParameters jmsConnectionParameters `toml:"jmsConnectionParameters"`
+}
+
+type jmsConnectionParameters struct {
+	EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
 }
 
 // APIContent contains everything necessary to create an API
