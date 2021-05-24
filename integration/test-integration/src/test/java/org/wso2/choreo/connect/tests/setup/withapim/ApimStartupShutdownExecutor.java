@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * This class starts the API Manager instance before the entire test suite.
  */
-public class WithApimBeforeTestSuite {
+public class ApimStartupShutdownExecutor {
     ApimInstance apimInstance;
 
     @BeforeSuite(description = "start API Manager")

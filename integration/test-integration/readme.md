@@ -9,16 +9,11 @@ These will be added to API Manager before starting any of the testcases
 1. Run the tests ones
 2. Copy the `apim` folder in the `integration/test-integration/target` to a different location
 3. cd into that `apim` folder and run `docker-compose up`
-4. Comment the `before-suite-preparations` test tag in `integration/test-integration/src/test/resources/testng-cc-with-apim.xml`. 
-   It should look like,
+4. Comment the test class `ApimStartupShutdownExecutor` in `integration/test-integration/src/test/resources/testng-cc-with-apim.xml`. 
+   Then it should look like,
    ```
-   <!--    <test name="before-suite-preparations" parallel="false">-->
-    <!--        <classes>-->
-    <!--            <class name="org.wso2.choreo.connect.tests.setup.withapim.WithApimBeforeTestSuite"/>-->
-    <!--        </classes>-->
-    <!--    </test>-->
-
+    <!--  <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimStartupShutdownExecutor"/> -->
    ```
 5. Now run the tests with `mvn clean install` while in the `integration/test-integration` folder
-6. Once done, uncomment the previously commented `before-suite-preparations` test tag, stop the running apim instance, 
-   and run all the tests with `mvn clean install`.
+6. Once done, uncomment the previously commented `ApimStartupShutdownExecutor` test class, stop the running apim 
+   instance, and run all the tests with `mvn clean install`.

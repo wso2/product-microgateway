@@ -27,10 +27,10 @@ import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.util.concurrent.TimeUnit;
 
-public class CcWithControlPlaneEnabled extends ApimBaseTest {
+public class CcStartupExecutor extends ApimBaseTest {
     CcInstance ccInstance;
 
-    @Test // Not BeforeTest because this has to run after ApimPreparations
+    @Test // Not BeforeTest because this has to run after ApimPreparer
     public void startChoreoConnect() throws Exception {
         ccInstance = new CcInstance.Builder().withNewDockerCompose("cc-in-common-network-docker-compose.yaml")
                 .withNewConfig("controlplane-enabled-config.toml")
