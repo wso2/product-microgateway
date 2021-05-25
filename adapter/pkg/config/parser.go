@@ -31,22 +31,18 @@ import (
 )
 
 var (
-	onceGetMgwHome      sync.Once
-	onceLogConfigRead   sync.Once
-	adapterLogConfig    *LogConfig
-	mgwHome             string
-	e                   error
+	onceGetMgwHome    sync.Once
+	onceLogConfigRead sync.Once
+	adapterLogConfig  *LogConfig
+	mgwHome           string
+	e                 error
 )
 
 const (
 	// The environtmental variable which represents the path of the distribution in host machine.
 	mgwHomeEnvVariable = "MGW_HOME"
-	// RelativeConfigPath is the relative file path where the configuration file is.
-	relativeConfigPath = "/conf/config.toml"
 	// RelativeLogConfigPath is the relative file path where the log configuration file is.
-    relativeLogConfigPath = "/conf/log_config.toml"
-	// The prefix used when configs should be read from environment variables.
-	envConfigPrefix = "$env"
+	relativeLogConfigPath = "/conf/log_config.toml"
 )
 
 // GetMgwHome reads the MGW_HOME environmental variable and returns the value.
