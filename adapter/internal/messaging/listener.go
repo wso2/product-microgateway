@@ -19,8 +19,8 @@
 package messaging
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/wso2/adapter/pkg/health"
@@ -37,20 +37,16 @@ const (
 	keymanager      string = "keymanager"
 	tokenRevocation string = "tokenRevocation"
 	throttleData    string = "throttleData"
-    exchange string = "amq.topic"
-    exchangeType string = "topic"
+	exchange        string = "amq.topic"
+	exchangeType    string = "topic"
 )
 
 // ProcessEvents to pass event consumption
 func ProcessEvents(config *config.Config) {
 	var err error
-	//msg.MgwConfig = config
 	passConfigToPkg(config)
-	msg.AmqpURIArray = msg.RetrieveAMQPURLList()
 	bindingKeys := []string{notification, keymanager, tokenRevocation, throttleData}
-
-	logger.LoggerInternalMsg.Infof("dialing %q", msg.MaskURL(msg.AmqpURIArray[0].URL)+"/")
-	msg.RabbitConn, err = msg.ConnectToRabbitMQ(msg.AmqpURIArray[0].URL + "/")
+	msg.RabbitConn, err = msg.ConnectToRabbitMQ()
 	health.SetControlPlaneJmsStatus(err == nil)
 
 	if err == nil {
@@ -79,7 +75,7 @@ func ProcessEvents(config *config.Config) {
 	}
 }
 
-func handleEvent(c *msg.Consumer, key string) (error) {
+func handleEvent(c *msg.Consumer, key string) error {
 	var err error
 
 	logger.LoggerInternalMsg.Debugf("got Connection, getting Channel for %s events", key)
@@ -92,11 +88,11 @@ func handleEvent(c *msg.Consumer, key string) (error) {
 	if err = c.Channel.ExchangeDeclare(
 		exchange,     // name of the exchange
 		exchangeType, // type
-		true,             // durable
-		false,            // delete when complete
-		false,            // internal
-		false,            // noWait
-		nil,              // arguments
+		true,         // durable
+		false,        // delete when complete
+		false,        // internal
+		false,        // noWait
+		nil,          // arguments
 	); err != nil {
 		return fmt.Errorf("Exchange Declare: %s", err)
 	}
@@ -118,11 +114,11 @@ func handleEvent(c *msg.Consumer, key string) (error) {
 		queue.Name, queue.Messages, queue.Consumers, key)
 
 	if err = c.Channel.QueueBind(
-		queue.Name,   // name of the queue
-		key,          // bindingKey
-		exchange, // sourceExchange
-		false,        // noWait
-		nil,          // arguments
+		queue.Name, // name of the queue
+		key,        // bindingKey
+		exchange,   // sourceExchange
+		false,      // noWait
+		nil,        // arguments
 	); err != nil {
 		return fmt.Errorf("Queue Bind: %s", err)
 	}
@@ -149,5 +145,5 @@ func handleEvent(c *msg.Consumer, key string) (error) {
 }
 
 func passConfigToPkg(config *config.Config) {
-    msg.EventListeningEndpoints = config.ControlPlane.JmsConnectionParameters.EventListeningEndpoints
+	msg.EventListeningEndpoints = config.ControlPlane.JmsConnectionParameters.EventListeningEndpoints
 }

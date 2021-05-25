@@ -30,8 +30,8 @@ var (
 	// RabbitConn represents the ampq connection
 	RabbitConn       *amqp.Connection
 	rabbitCloseError chan *amqp.Error
-	// AmqpURIArray represents an array of AmqpFailoverURL objects
-	AmqpURIArray = make([]AmqpFailoverURL, 0)
+	// amqpURIArray represents an array of amqpFailoverURL objects
+	amqpURIArray = make([]amqpFailoverURL, 0)
 )
 
 const (
