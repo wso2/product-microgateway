@@ -21,8 +21,8 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.33.1)",
-    comments = "Source: wso2/discovery/service/throtlle/tdds.proto")
+    value = "by gRPC proto compiler",
+    comments = "Source: wso2/discovery/service/throttle/tdds.proto")
 public final class ThrottleDataDiscoveryServiceGrpc {
 
   private ThrottleDataDiscoveryServiceGrpc() {}

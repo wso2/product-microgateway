@@ -21,7 +21,7 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.33.1)",
+    value = "by gRPC proto compiler",
     comments = "Source: wso2/discovery/service/websocket/frame_service.proto")
 public final class WebSocketFrameServiceGrpc {
 
