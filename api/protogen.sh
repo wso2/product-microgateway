@@ -15,7 +15,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 set -e
-PROTOC_VERSION=1.20_3
+PROTOC_VERSION=1.34_4
 
 # get script location
 cur_dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
@@ -25,6 +25,9 @@ mkdir -p build/deps
 
 ADAPTER_GEN_DIR=$cur_dir/../adapter/internal/discovery/api
 ENFORCER_GEN_DIR=$cur_dir/../enforcer/src/main/gen
+GREEN='\033[0;32m'
+BOLD="\033[1m"
+NC='\033[0m' # No Color
 
 # download dependency proto archives from github
 echo "Downloading dependencies..."
@@ -41,12 +44,12 @@ mkdir -p build/include/
 cp -r build/deps/udpa/udpa build/include
 cp -r build/deps/envoy/envoy build/include
 cp -r build/deps/validate/validate build/include
-echo " - done"
+printf " - ${GREEN}${BOLD}done${NC}\n"
 
 # generate code for java
 printf "protoc java"
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l java -i proto -i build/include/ -o build/gen/java -d proto/wso2/**
-echo " - done"
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l java -i proto -i build/include/ -o build/gen/java -d proto/wso2/
+printf " - ${GREEN}${BOLD}done${NC}\n"
 
 # generate code for go grpc messages
 # for golang build we have to generate code for each proto dir separately.
@@ -56,19 +59,26 @@ docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-re
 docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/go -d proto/wso2/discovery/keymgt/
 docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/go -d proto/wso2/discovery/subscription/
 docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/go -d proto/wso2/discovery/throttle/
-echo " - done"
+printf " - ${GREEN}${BOLD}done${NC}\n"
+
+# map of proto imports for which we need to update the genrated import path
+# ex: when the go code containing an import to `envoy/service/discovery/v3/discovery.proto`,
+# we need the generated go code's import to be `github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3`
+# not just `envoy/service/discovery/v3`
+import_map=Menvoy/service/discovery/v3/discovery.proto=github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3
 
 # generate code for go grpc services
-printf "protoc go services"
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/go -d proto/wso2/discovery/service/api
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/go -d proto/wso2/discovery/service/config
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/go -d proto/wso2/discovery/service/keymgt
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/go -d proto/wso2/discovery/service/subscription
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/go -d proto/wso2/discovery/service/throttle
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/ws-go -d proto/wso2/discovery/service/websocket
-echo " - done"
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i build/include/ -o build/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/api
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i build/include/ -o build/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/config
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i build/include/ -o build/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/keymgt
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i build/include/ -o build/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/subscription
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i build/include/ -o build/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/throttle
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i build/include/ -o build/gen/ws-go --go-source-relative -d proto/wso2/discovery/service/websocket
+printf "protoc go services - ${GREEN}${BOLD}done${NC}\n"
 
 rm -rf $ADAPTER_GEN_DIR/wso2
 rm -rf $ENFORCER_GEN_DIR/org
 cp -r build/gen/go/ $ADAPTER_GEN_DIR
 cp -r build/gen/java/ $ENFORCER_GEN_DIR
+
+printf "${GREEN}${BOLD}BUILD SUCCESS${NC}\n"
