@@ -20,8 +20,8 @@ PROTOC_VERSION=1.34_4
 # get script location
 cur_dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 cd $cur_dir
-rm -rf build
-mkdir -p build/deps
+rm -rf target
+mkdir -p target/deps
 
 ADAPTER_GEN_DIR=$cur_dir/../adapter/internal/discovery/api
 ENFORCER_GEN_DIR=$cur_dir/../enforcer/src/main/gen
@@ -31,34 +31,34 @@ NC='\033[0m' # No Color
 
 # download dependency proto archives from github
 echo "Downloading dependencies..."
-wget https://github.com/cncf/udpa/archive/5459f2c994033b0afed7e4a70ac7e90c90c1ffee.tar.gz -nv -O build/deps/udpa.tar.gz
-wget https://github.com/envoyproxy/data-plane-api//archive/d6828354ba6b4e67fd34ce41a14cbed9ad081b45.tar.gz -nv -O build/deps/envoy.tar.gz
-wget https://github.com/envoyproxy/protoc-gen-validate/archive/refs/tags/v0.5.0.tar.gz -nv -O build/deps/validate.tar.gz
-mkdir -p build/deps/udpa && tar -xf build/deps/udpa.tar.gz -C build/deps/udpa/ --strip-components 1
-mkdir -p build/deps/envoy && tar -xf build/deps/envoy.tar.gz -C build/deps/envoy/ --strip-components 1
-mkdir -p build/deps/validate && tar -xf build/deps/validate.tar.gz -C build/deps/validate/ --strip-components 1
+wget https://github.com/cncf/udpa/archive/5459f2c994033b0afed7e4a70ac7e90c90c1ffee.tar.gz -nv -O target/deps/udpa.tar.gz
+wget https://github.com/envoyproxy/data-plane-api//archive/d6828354ba6b4e67fd34ce41a14cbed9ad081b45.tar.gz -nv -O target/deps/envoy.tar.gz
+wget https://github.com/envoyproxy/protoc-gen-validate/archive/refs/tags/v0.5.0.tar.gz -nv -O target/deps/validate.tar.gz
+mkdir -p target/deps/udpa && tar -xf target/deps/udpa.tar.gz -C target/deps/udpa/ --strip-components 1
+mkdir -p target/deps/envoy && tar -xf target/deps/envoy.tar.gz -C target/deps/envoy/ --strip-components 1
+mkdir -p target/deps/validate && tar -xf target/deps/validate.tar.gz -C target/deps/validate/ --strip-components 1
 
 printf "Preparing includes"
 # create dependency proto include dir for protoc
-mkdir -p build/include/
-cp -r build/deps/udpa/udpa build/include
-cp -r build/deps/envoy/envoy build/include
-cp -r build/deps/validate/validate build/include
+mkdir -p target/include/
+cp -r target/deps/udpa/udpa target/include
+cp -r target/deps/envoy/envoy target/include
+cp -r target/deps/validate/validate target/include
 printf " - ${GREEN}${BOLD}done${NC}\n"
 
 # generate code for java
 printf "protoc java"
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l java -i proto -i build/include/ -o build/gen/java -d proto/wso2/
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l java -i proto -i target/include/ -o target/gen/java -d proto/wso2/
 printf " - ${GREEN}${BOLD}done${NC}\n"
 
 # generate code for go grpc messages
 # for golang build we have to generate code for each proto dir separately.
 printf "protoc go messages"
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/go -d proto/wso2/discovery/api/
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/go -d proto/wso2/discovery/config/enforcer/
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/go -d proto/wso2/discovery/keymgt/
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/go -d proto/wso2/discovery/subscription/
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i build/include/ -o build/gen/go -d proto/wso2/discovery/throttle/
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i target/include/ -o target/gen/go -d proto/wso2/discovery/api/
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i target/include/ -o target/gen/go -d proto/wso2/discovery/config/enforcer/
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i target/include/ -o target/gen/go -d proto/wso2/discovery/keymgt/
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i target/include/ -o target/gen/go -d proto/wso2/discovery/subscription/
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go --go-source-relative -i proto -i target/include/ -o target/gen/go -d proto/wso2/discovery/throttle/
 printf " - ${GREEN}${BOLD}done${NC}\n"
 
 # map of proto imports for which we need to update the genrated import path
@@ -68,17 +68,17 @@ printf " - ${GREEN}${BOLD}done${NC}\n"
 import_map=Menvoy/service/discovery/v3/discovery.proto=github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3
 
 # generate code for go grpc services
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i build/include/ -o build/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/api
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i build/include/ -o build/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/config
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i build/include/ -o build/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/keymgt
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i build/include/ -o build/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/subscription
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i build/include/ -o build/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/throttle
-docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i build/include/ -o build/gen/ws-go --go-source-relative -d proto/wso2/discovery/service/websocket
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i target/include/ -o target/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/api
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i target/include/ -o target/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/config
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i target/include/ -o target/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/keymgt
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i target/include/ -o target/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/subscription
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i target/include/ -o target/gen/go --go-package-map $import_map --go-source-relative -d proto/wso2/discovery/service/throttle
+docker run -v `pwd`:/defs namely/protoc-all:$PROTOC_VERSION -l go -i proto -i target/include/ -o target/gen/ws-go --go-source-relative -d proto/wso2/discovery/service/websocket
 printf "protoc go services - ${GREEN}${BOLD}done${NC}\n"
 
 rm -rf $ADAPTER_GEN_DIR/wso2
 rm -rf $ENFORCER_GEN_DIR/org
-cp -r build/gen/go/ $ADAPTER_GEN_DIR
-cp -r build/gen/java/ $ENFORCER_GEN_DIR
+cp -r target/gen/go/ $ADAPTER_GEN_DIR
+cp -r target/gen/java/ $ENFORCER_GEN_DIR
 
 printf "${GREEN}${BOLD}BUILD SUCCESS${NC}\n"

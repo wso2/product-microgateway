@@ -35,7 +35,6 @@ target
 *.lock
 *.factorypath
 vendor
-build
 
 # envoy filters
 envoy-filters/**/bazel-*
