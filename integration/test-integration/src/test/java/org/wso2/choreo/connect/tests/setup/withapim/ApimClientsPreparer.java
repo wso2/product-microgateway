@@ -19,7 +19,7 @@ package org.wso2.choreo.connect.tests.setup.withapim;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeTest;
 import org.wso2.am.integration.test.ClientAuthenticator;
 import org.wso2.am.integration.test.impl.RestAPIAdminImpl;
 import org.wso2.am.integration.test.impl.RestAPIPublisherImpl;
@@ -34,7 +34,7 @@ import java.net.URL;
 public class ApimClientsPreparer {
     private static final Logger log = LoggerFactory.getLogger(ApimClientsPreparer.class);
 
-    @BeforeSuite
+    @BeforeTest // Not using the @BeforeSuite annotation to make sure this runs after startAPIM()
     private void setSystemPropertiesForApimClientsAndCheckIfSet() throws MalformedURLException {
         setSSlSystemProperties();
         String dcrURL = Utils.getAPIMServiceURLHttps("/client-registration/v0.17/register");
