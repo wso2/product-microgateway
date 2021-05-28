@@ -41,6 +41,11 @@
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparer"/>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcStartupExecutor"/>
 
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.AdvanceThrottlingTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.ApplicationThrottlingTestCase"/>
+            <!--            TODO: (Praminda) this requires upgrade in apim throttle dependency. enable after upgrade-->
+            <!--            <class name="org.wso2.choreo.connect.tests.testcases.with_apim.throttle.DenyConditionTestCase"/>-->
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.SubscriptionThrottlingTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.SubscriptionValidationTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase"/>
