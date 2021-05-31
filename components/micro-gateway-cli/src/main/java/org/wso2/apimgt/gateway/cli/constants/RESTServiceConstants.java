@@ -62,4 +62,6 @@ public class RESTServiceConstants {
 
     public static final String CERTIFICATE_ALIAS = "Alias";
     public static final String CERTIFICATE_TIER = "Tier";
+
+    public static final String ALL_SERVICES_REGEX_PATH = "/*";
 }

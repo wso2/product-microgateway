@@ -28,12 +28,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.apimgt.gateway.cli.constants.CliConstants;
 import org.wso2.apimgt.gateway.cli.constants.GeneratorConstants;
+import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIInternalException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.model.config.CodeGen;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 import org.wso2.apimgt.gateway.cli.model.template.BallerinaToml;
 import org.wso2.apimgt.gateway.cli.model.template.GenSrcFile;
+import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaOperation;
+import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaPath;
 import org.wso2.apimgt.gateway.cli.model.template.service.BallerinaService;
 import org.wso2.apimgt.gateway.cli.model.template.service.ListenerEndpoint;
 import org.wso2.apimgt.gateway.cli.protobuf.ProtobufParser;
@@ -52,6 +56,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class generates Ballerina Services/Clients for a provided OAS definition.
@@ -59,6 +64,8 @@ import java.util.List;
 public class CodeGenerator {
     private static final Logger logger = LoggerFactory.getLogger(CodeGenerator.class);
     public static String projectName;
+    private boolean generateGlobalFaultResponses = false;
+    private boolean addApiNotFoundService = true;
 
     /**
      * Generates ballerina source for provided Open APIDetailedDTO Definition in {@code definitionPath}.
@@ -114,6 +121,7 @@ public class CodeGenerator {
                         OpenAPICodegenUtils.setAdditionalConfigsDevFirst(api, openAPI, path.toString());
 
                         definitionContext = new BallerinaService().buildContext(openAPI, api);
+                        generateResourceFunctions(definitionContext, genFiles);
                         genFiles.add(generateService(definitionContext));
                         serviceList.add(definitionContext);
                         ballerinaToml.addDependencies(definitionContext);
@@ -147,6 +155,7 @@ public class CodeGenerator {
                             createProtoOpenAPIFile(projectName, openAPI);
                             BallerinaService definitionContext = generateDefinitionContext(openAPI, openAPIContent,
                                     path, true);
+                            generateResourceFunctions(definitionContext, genFiles);
                             genFiles.add(generateService(definitionContext));
                             serviceList.add(definitionContext);
                             ballerinaToml.addDependencies(definitionContext);
@@ -162,11 +171,24 @@ public class CodeGenerator {
             });
         }
 
+        // check whether fault responses is enabled in a service
+        CodeGen codeGenConfig = CmdUtils.getConfig().getCodeGen();
+        if (codeGenConfig != null) {
+            generateGlobalFaultResponses = codeGenConfig.getGlobalFaultResponses();
+        } else {
+            generateGlobalFaultResponses = false;
+        }
+
+        addApiNotFoundService = addApiNotFoundService(serviceList);
+        genFiles.add(generateFaultResponses());
         genFiles.add(generateMainBal(serviceList));
         genFiles.add(generateOpenAPIJsonConstantsBal(serviceList));
         genFiles.add(generateTokenServices());
         genFiles.add(generateHealthCheckService());
         genFiles.add(generateCommonEndpoints());
+        if (generateGlobalFaultResponses && addApiNotFoundService) {
+            genFiles.add(generateAPINotFoundService());
+        }
         CodegenUtils.writeGeneratedSources(genFiles, Paths.get(projectSrcPath), overwrite);
 
         // generate Ballerina.toml file
@@ -177,6 +199,22 @@ public class CodeGenerator {
         CodegenUtils.writeFile(Paths.get(tomlPath), toml.getContent());
         // copy the files inside the extensions folder.
         CmdUtils.copyFolder(CmdUtils.getProjectExtensionsDirectoryPath(projectName), projectSrcPath);
+    }
+
+    private boolean addApiNotFoundService(List<BallerinaService> serviceList) {
+        if (generateGlobalFaultResponses) {
+            // check whether there's already a /* resource with /* base path in the api definitions
+            for (BallerinaService ballerinaService : serviceList) {
+                if (RESTServiceConstants.ALL_SERVICES_REGEX_PATH.equals(ballerinaService.getBasepath())) {
+                    for (Map.Entry<String, BallerinaPath> entry : ballerinaService.getPaths()) {
+                        if (RESTServiceConstants.ALL_SERVICES_REGEX_PATH.equals(entry.getKey())) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private BallerinaService generateDefinitionContext(OpenAPI openAPI, String openAPIContent, Path path,
@@ -234,6 +272,25 @@ public class CodeGenerator {
     }
 
     /**
+     * Generate code for resource function ballerina files.
+     *
+     * @param context model context to be used by the templates
+     * @throws IOException when code generation with specified templates fails
+     */
+    private void generateResourceFunctions(BallerinaService context, List<GenSrcFile> genFiles) throws IOException {
+        for (Map.Entry<String, BallerinaPath> pathEntry : context.getPaths()) {
+            for (Map.Entry<String, BallerinaOperation> operation : pathEntry.getValue().getOperations()) {
+                String concatTitle = context.getQualifiedServiceName() + "_" + operation.getValue().getOperationId();
+                String srcFile = concatTitle + "_" + GeneratorConstants.RESOURCE_FUNCTION_TEMPLATE_NAME +
+                        GeneratorConstants.BALLERINA_EXTENSION;
+                String mainContent = getContentForResourceFunction(operation.getValue(),
+                        GeneratorConstants.RESOURCE_FUNCTION_TEMPLATE_NAME, context, pathEntry.getValue());
+                genFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, mainContent));
+            }
+        }
+    }
+
+    /**
      * Generate code for ballerina toml.
      *
      * @param toml Mustache data holder for Ballerina.toml file
@@ -280,7 +337,7 @@ public class CodeGenerator {
      */
     private GenSrcFile generateTokenServices() throws IOException {
         String srcFile = GeneratorConstants.TOKEN_SERVICES + GeneratorConstants.BALLERINA_EXTENSION;
-        String endpointContent = getContent(CmdUtils.getConfig(), GeneratorConstants.TOKEN_SERVICES);
+        String endpointContent = getContentForTokenService(CmdUtils.getConfig(), GeneratorConstants.TOKEN_SERVICES);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
     }
 
@@ -294,6 +351,64 @@ public class CodeGenerator {
         String srcFile = GeneratorConstants.HEALTH_CHECK + GeneratorConstants.BALLERINA_EXTENSION;
         String endpointContent = getContent(CmdUtils.getConfig(), GeneratorConstants.HEALTH_CHECK);
         return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
+    }
+
+    /**
+     * Generate API not found service. This service will be triggered if the base path is incorrect in the request.
+     *
+     * @return generated source file  {@link GenSrcFile}
+     * @throws IOException when code generation with specified templates fails
+     */
+    private GenSrcFile generateAPINotFoundService() throws IOException {
+        String srcFile = GeneratorConstants.API_NOT_FOUND_SERVICE + GeneratorConstants.BALLERINA_EXTENSION;
+        String endpointContent = getContent(CmdUtils.getConfig(), GeneratorConstants.API_NOT_FOUND_SERVICE);
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
+    }
+
+    /**
+     * Generate the file with fault response payloads.
+     *
+     * @return generated source file  {@link GenSrcFile}
+     * @throws IOException when code generation with specified templates fails
+     */
+    private GenSrcFile generateFaultResponses() throws IOException {
+        String srcFile = GeneratorConstants.FAULT_RESPONSES + GeneratorConstants.BALLERINA_EXTENSION;
+        String endpointContent = getContent(CmdUtils.getConfig(), GeneratorConstants.FAULT_RESPONSES);
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, srcFile, endpointContent);
+    }
+
+    /**
+     * Retrieve generated source content as a String value for resource function.
+     *
+     * @param endpoints    context to be used by template engine
+     * @param templateName name of the template to be used for this code generation
+     * @return String with populated template
+     * @throws IOException when template population fails
+     */
+    private String getContentForResourceFunction(Object endpoints, String templateName,
+                                                 BallerinaService service, BallerinaPath path) throws IOException {
+        Template template = CodegenUtils.compileTemplate(GeneratorConstants.DEFAULT_TEMPLATE_DIR, templateName);
+        Context context = Context.newBuilder(endpoints).combine("service", service).combine("path", path)
+                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
+                .build();
+        return template.apply(context);
+    }
+
+    /**
+     * Retrieve generated source content as a String value for token service.
+     *
+     * @param endpoints    context to be used by template engine
+     * @param templateName name of the template to be used for this code generation
+     * @return String with populated template
+     * @throws IOException when template population fails
+     */
+    private String getContentForTokenService(Object endpoints, String templateName) throws IOException {
+        Template template = CodegenUtils.compileTemplate(GeneratorConstants.DEFAULT_TEMPLATE_DIR, templateName);
+        Context context = Context.newBuilder(endpoints).combine("generateGlobalFaultResponses",
+                generateGlobalFaultResponses && addApiNotFoundService)
+                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, FieldValueResolver.INSTANCE)
+                .build();
+        return template.apply(context);
     }
 
     /**

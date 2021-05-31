@@ -1,0 +1,36 @@
+import wso2/gateway;
+
+{{#paths}}{{#value}}{{#operations}}{{#value}}
+{{#if @root.requestInterceptor}}
+function {{operationId}}_api_request_interceptor_{{cut qualifiedServiceName " "}}() {
+    string {{operationId}}_api_request_interceptor_name = "{{@root.requestInterceptor}}";
+    if({{operationId}}_api_request_interceptor_name.startsWith("java:")) {
+        {{operationId}}_api_request_interceptor_index = gateway:loadInterceptorClass({{operationId}}_api_request_interceptor_name.substring(5, {{operationId}}_api_request_interceptor_name.length()));
+    }
+}
+{{/if}}
+{{#if @root.responseInterceptor}}
+function {{operationId}}_api_response_interceptor_{{cut qualifiedServiceName " "}}() {
+    string {{operationId}}_api_response_interceptor_name = "{{@root.responseInterceptor}}";
+    if({{operationId}}_api_response_interceptor_name.startsWith("java:")) {
+        {{operationId}}_api_response_interceptor_index = gateway:loadInterceptorClass({{operationId}}_api_response_interceptor_name.substring(5, {{operationId}}_api_response_interceptor_name.length()));
+    }
+}
+{{/if}}
+{{#if requestInterceptor}}
+function {{operationId}}_request_interceptor_{{cut qualifiedServiceName " "}}() {
+    string {{operationId}}_request_interceptor_name = "{{requestInterceptor}}";
+    if({{operationId}}_request_interceptor_name.startsWith("java:")) {
+        {{operationId}}_request_interceptor_index = gateway:loadInterceptorClass({{operationId}}_request_interceptor_name.substring(5, {{operationId}}_request_interceptor_name.length()));
+    }
+}
+{{/if}}
+{{#if responseInterceptor}}
+function {{operationId}}_response_interceptor_{{cut qualifiedServiceName " "}}() {
+    string {{operationId}}_response_interceptor_name = "{{responseInterceptor}}";
+    if({{operationId}}_response_interceptor_name.startsWith("java:")) {
+        {{operationId}}_response_interceptor_index = gateway:loadInterceptorClass({{operationId}}_response_interceptor_name.substring(5, {{operationId}}_response_interceptor_name.length()));
+    }
+}
+{{/if}}
+{{/value}}{{/operations}}{{/value}}{{/paths}}

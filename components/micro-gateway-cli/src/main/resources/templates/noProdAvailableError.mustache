@@ -1,7 +1,7 @@
 http:Response res = new;
 res.statusCode = 403;
 string errorMessage = "Production key offered to the API with no production endpoint";
-if (! invocationContext.attributes.hasKey(IS_GRPC)) {
+if (! invocationContext.attributes.hasKey(gateway:IS_GRPC)) {
     json payload = {
         ERROR_CODE: "900901",
         ERROR_MESSAGE: errorMessage

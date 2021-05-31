@@ -120,6 +120,44 @@ public class CLIExecutor {
         runBuildCmd(mgwCommand, project);
     }
 
+    /**
+     * Generate the project using developer first approach (Using OpenAPI definitions).
+     *
+     * @param project          project name
+     * @param openAPIFileNames relative paths of openAPI definitions stored in resources directory.
+     * @param toolkitConfigPath relative path of the toolkit config file
+     * @throws MicroGWTestException
+     */
+    public void generateFromDefinition(String project, String[] openAPIFileNames, String toolkitConfigPath)
+            throws MicroGWTestException, IOException {
+
+        createBackgroundEnv();
+        String mgwCommand = this.cliHome + File.separator + CliConstants.CLI_BIN + File.separator + "micro-gw";
+        runInitCmd(mgwCommand, project);
+        String sourcePath = this.cliHome + File.separator + CliConstants.CLI_LIB + File.separator +
+                CliConstants.CLI_DEPENDENCIES +
+                File.separator + CliConstants.CLI_VALIDATION_DEPENDENCIES;
+        String des = homeDirectory + File.separator + project + File.separator + CliConstants.CLI_LIB + File.separator;
+        copyToolkitConfig(toolkitConfigPath);
+        copyValidationArtifactsToProject(sourcePath, des);
+        copyOpenAPIDefinitionsToProject(project, openAPIFileNames);
+        copyCustomizedPolicyFileFromResources(project);
+        runBuildCmd(mgwCommand, project);
+    }
+
+    private void copyToolkitConfig(String toolkitConfigPath) throws MicroGWTestException {
+        if (toolkitConfigPath != null) {
+            File source = new File(Objects.requireNonNull(getClass().getClassLoader().getResource(toolkitConfigPath))
+                    .getPath());
+            File destination = new File(cliHome + File.separator + "conf" + File.separator + "toolkit-config.toml");
+            try {
+                FileUtils.copyFile(source, destination);
+            } catch (IOException e) {
+                throw new MicroGWTestException("error while copying the toolkit config file. ");
+            }
+        }
+    }
+
     private void copyValidationArtifactsToProject(String sourcePath, String desPath) throws IOException {
         Files.walk(Paths.get(sourcePath)).filter(path -> {
             Path fileName = path.getFileName();

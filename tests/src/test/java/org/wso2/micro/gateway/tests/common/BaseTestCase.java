@@ -136,6 +136,26 @@ public class BaseTestCase {
     }
 
     /**
+     * Initialize the project using developer first approach (Using openAPI definitions).
+     *
+     * @param project           project name
+     * @param openAPIFileNames  relative paths of the openAPI definitions stored inside resources directory.
+     *                          (use forward slash to mention the path)
+     * @param args              additional commandline arguments
+     * @param configFilePath    relative path of the config file (use forward slash to mention the path)
+     * @param toolkitConfigPath relative path of the toolkit config file
+     * @throws Exception
+     */
+    protected void init(String project, String[] openAPIFileNames, String[] args, String configFilePath,
+                        String toolkitConfigPath) throws Exception {
+        initHttpServer();
+        CLIExecutor cliExecutor = CLIExecutor.getInstance();
+        cliExecutor.generateFromDefinition(project, openAPIFileNames, toolkitConfigPath);
+        String balPath = CLIExecutor.getInstance().getLabelJar(project);
+        initAndStartMicroGWServer(configFilePath, balPath, args);
+    }
+
+    /**
      * Restart the microgateway from already built project.
      *
      * @param project          project name

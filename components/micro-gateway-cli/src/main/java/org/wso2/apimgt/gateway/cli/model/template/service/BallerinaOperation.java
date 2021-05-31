@@ -69,6 +69,10 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean isJavaResponseInterceptor;
 
+    // boolean to identify operation is generated or not
+    private boolean methodNotAllowedOperation = false;
+    private boolean methodNotFoundOperation = false;
+
     /**
      * b7a function name of operation level request interceptor.
      */
@@ -208,6 +212,40 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         return buildContext(operation, null);
     }
 
+    /**
+     * This method is used to generate a dummy service for 405 responses.
+     *
+     * @param api API from the definition
+     * @return Ballerina operation
+     * @throws BallerinaServiceGenException
+     * @throws CLICompileTimeException
+     */
+    public BallerinaOperation buildContextForNotAllowed(ExtendedAPI api) throws BallerinaServiceGenException,
+            CLICompileTimeException {
+        this.methodNotAllowedOperation = true;
+        this.isSecured = false;
+        this.isSecuredAssignedFromOperation = true;
+        Operation operation = new Operation();
+        return buildContext(operation, api);
+    }
+
+    /**
+     * This method is used to generate a dummy service for 404 responses.
+     *
+     * @param api API from the definition
+     * @return Ballerina operation
+     * @throws BallerinaServiceGenException
+     * @throws CLICompileTimeException
+     */
+    public BallerinaOperation buildContextForNotFound(ExtendedAPI api) throws BallerinaServiceGenException,
+            CLICompileTimeException {
+        this.methodNotFoundOperation = true;
+        this.isSecured = false;
+        this.isSecuredAssignedFromOperation = true;
+        Operation operation = new Operation();
+        return buildContext(operation, api);
+    }
+
     @Override
     public BallerinaOperation getDefaultValue() {
         return new BallerinaOperation();
@@ -338,5 +376,21 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         if (!this.applicationSecurityOptional && this.authProviders.isEmpty()) {
             OpenAPICodegenUtils.addDefaultAuthProviders(this.authProviders);
         }
+    }
+
+    public boolean isMethodNotAllowedOperation() {
+        return methodNotAllowedOperation;
+    }
+
+    public void setMethodNotAllowedOperation(boolean methodNotAllowedOperation) {
+        this.methodNotAllowedOperation = methodNotAllowedOperation;
+    }
+
+    public boolean isMethodNotFoundOperation() {
+        return methodNotFoundOperation;
+    }
+
+    public void setMethodNotFoundOperation(boolean methodNotFoundOperation) {
+        this.methodNotFoundOperation = methodNotFoundOperation;
     }
 }

@@ -17,3 +17,7 @@ accessControlAllowOrigins=["*"]
 accessControlAllowMethods=["GET","PUT","POST","DELETE","PATCH","OPTIONS"]
 accessControlAllowHeaders=["authorization","Access-Control-Allow-Origin","Content-Type","SOAPAction"]
 accessControlAllowCredentials=false
+
+[codeGen]
+apiFaultResponses = false
+globalFaultResponses = false

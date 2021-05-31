@@ -1,0 +1,37 @@
+import ballerina/http;
+import wso2/gateway;
+
+@http:ServiceConfig {
+    basePath:"/*",
+    auth: {
+        enabled: false
+    } {{#corsConfiguration.corsConfigurationEnabled}},
+    cors: {
+        allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
+        allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
+        allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
+        allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+    }
+    {{/corsConfiguration.corsConfigurationEnabled}}
+}
+@gateway:Filters {
+    skipAll: true
+}
+service apiNotFoundService on apiListener, apiSecureListener {
+    @http:ResourceConfig {
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"],
+        path: "/*",
+        auth: {
+            enabled: false
+        }
+    }
+    resource function handleApiNotFound(http:Caller caller, http:Request req) {
+        http:Response serverResponse = new;
+        serverResponse.statusCode = 404;
+        serverResponse.setJsonPayload(METHOD_NOT_FOUND_RESPONSE);
+        var result = caller->respond(serverResponse);
+        if (result is error) {
+            gateway:printError(gateway:API_NOT_FOUND_SERVICE, "Error when sending response", result);
+        }
+    }
+}

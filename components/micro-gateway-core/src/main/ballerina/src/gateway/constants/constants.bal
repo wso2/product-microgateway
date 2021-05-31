@@ -525,6 +525,7 @@ const string KEY_PILOT_UTIL = "PilotUtil";
 const string API_KEY_PROVIDER = "APIKeyProvider";
 public const string TOKEN_SERVICE = "TokenService";
 public const string HEALTH_CHECK_SERVICE = "HealthCheckService";
+public const string API_NOT_FOUND_SERVICE = "ApiNotFoundService";
 public const string MAIN = "Main function";
 public const string OBSERVABILITY_UTIL = "ObservabilityUtil";
 public const string OBSERVABILITY_METRIC_LISTENER = "ObservabilityMetricListener";
