@@ -17,7 +17,9 @@
 
 package health
 
-import logger "github.com/wso2/adapter/loggers"
+import (
+	logger "github.com/wso2/adapter/pkg/loggers"
+)
 
 var (
 	controlPlaneJmsStatusChan     = make(chan bool)

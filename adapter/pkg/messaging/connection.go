@@ -26,14 +26,19 @@ import (
 	"time"
 
 	"github.com/streadway/amqp"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
-// Try to connect to the RabbitMQ server as long as it takes to establish a connection
-func connectToRabbitMQ(url string) (*amqp.Connection, error) {
+// EventListeningEndpoints represents the list of endpoints
+var EventListeningEndpoints  []string
+
+// ConnectToRabbitMQ function tries to connect to the RabbitMQ server as long as it takes to establish a connection
+func ConnectToRabbitMQ() (*amqp.Connection, error) {
 	var err error = nil
 	var conn *amqp.Connection
-	conn, err = amqp.Dial(url)
+	amqpURIArray = retrieveAMQPURLList()
+	logger.LoggerMsg.Infof("dialing %q", maskURL(amqpURIArray[0].URL)+"/")
+	conn, err = amqp.Dial(amqpURIArray[0].URL + "/")
 	if err == nil {
 		return conn, nil
 	}
@@ -46,9 +51,9 @@ func connectToRabbitMQ(url string) (*amqp.Connection, error) {
 func (c *Consumer) reconnect(key string) {
 	var err error
 	shouldReconnect := false
-	connClose := <-c.conn.NotifyClose(make(chan *amqp.Error))
-	connBlocked := c.conn.NotifyBlocked(make(chan amqp.Blocking))
-	chClose := c.channel.NotifyClose(make(chan *amqp.Error))
+	connClose := <-c.Conn.NotifyClose(make(chan *amqp.Error))
+	connBlocked := c.Conn.NotifyBlocked(make(chan amqp.Blocking))
+	chClose := c.Channel.NotifyClose(make(chan *amqp.Error))
 
 	if connClose != nil {
 		shouldReconnect = true
@@ -66,8 +71,8 @@ func (c *Consumer) reconnect(key string) {
 	}
 
 	if shouldReconnect {
-		c.conn.Close()
-		c, rabbitConn, err = connectionRetry(key)
+		c.Conn.Close()
+		c, RabbitConn, err = connectionRetry(key)
 		if err != nil {
 			logger.LoggerMsg.Errorf("Cannot establish connection for topic %s", key)
 		}
@@ -94,35 +99,35 @@ func connectionRetry(key string) (*Consumer, *amqp.Connection, error) {
 			retryInterval = 10 * time.Second
 		}
 		logger.LoggerMsg.Infof("Retrying to connect with %s in every %d seconds until exceed %d attempts",
-			maskURL(amqpURIArray[j].url), amqpURIArray[j].connectionDelay, maxAttempt)
+			maskURL(amqpURIArray[j].URL), amqpURIArray[j].connectionDelay, maxAttempt)
 
 		for i = 1; i <= maxAttempt; i++ {
 
-			rabbitConn, err = amqp.Dial(amqpURIArray[j].url + "/")
+			RabbitConn, err = amqp.Dial(amqpURIArray[j].URL + "/")
 			if err == nil {
 				if key != "" && len(key) > 0 {
 					logger.LoggerMsg.Infof("Reconnected to topic %s", key)
 					// startup pull
-					c, err := StartConsumer(key)
-					return c, rabbitConn, err
+					c := StartConsumer(key)
+					return c, RabbitConn, nil
 				}
-				return nil, rabbitConn, nil
+				return nil, RabbitConn, nil
 			}
 
 			if key != "" && len(key) > 0 {
 				logger.LoggerMsg.Infof("Retry attempt %d for the %s to connect with topic %s has failed. Retrying after %d seconds", i,
-					maskURL(amqpURIArray[j].url), key, amqpURIArray[j].connectionDelay)
+					maskURL(amqpURIArray[j].URL), key, amqpURIArray[j].connectionDelay)
 			} else {
-				logger.LoggerMsg.Infof("Retry attempt %d for the %s has failed. Retrying after %d seconds", i, maskURL(amqpURIArray[j].url), amqpURIArray[j].connectionDelay)
+				logger.LoggerMsg.Infof("Retry attempt %d for the %s has failed. Retrying after %d seconds", i, maskURL(amqpURIArray[j].URL), amqpURIArray[j].connectionDelay)
 			}
 			time.Sleep(retryInterval)
 		}
 		if i >= maxAttempt {
-			logger.LoggerMsg.Infof("Exceeds maximum connection retry attempts %d for %s", maxAttempt, maskURL(amqpURIArray[j].url))
-			return retryExponentially(key, amqpURIArray[j].url, retryInterval)
+			logger.LoggerMsg.Infof("Exceeds maximum connection retry attempts %d for %s", maxAttempt, maskURL(amqpURIArray[j].URL))
+			return retryExponentially(key, amqpURIArray[j].URL, retryInterval)
 		}
 	}
-	return nil, rabbitConn, err
+	return nil, RabbitConn, err
 }
 
 func retryExponentially(key string, url string, retryInterval time.Duration) (*Consumer, *amqp.Connection, error) {
@@ -133,7 +138,7 @@ func retryExponentially(key string, url string, retryInterval time.Duration) (*C
 	interval := initInterval
 	count := 0
 	for {
-		rabbitConn, err = amqp.Dial(url + "/")
+		RabbitConn, err = amqp.Dial(url + "/")
 		if err != nil {
 			if interval < maxInterval {
 				interval = initInterval + (initInterval * count)
@@ -150,17 +155,17 @@ func retryExponentially(key string, url string, retryInterval time.Duration) (*C
 			if key != "" && len(key) > 0 {
 				logger.LoggerMsg.Infof("Reconnected to topic %s", key)
 				// startup pull
-				c, err := StartConsumer(key)
-				return c, rabbitConn, err
+				c := StartConsumer(key)
+				return c, RabbitConn, nil
 			}
 		}
 	}
 }
 
-//extract AMQPURLList from EventListening connection url
+// retrieveAMQPURLList function extract AMQPURLList from EventListening connection url
 func retrieveAMQPURLList() []amqpFailoverURL {
 	var connectionURLList []string
-	connectionURLList = mgwConfig.ControlPlane.JmsConnectionParameters.EventListeningEndpoints
+	connectionURLList = EventListeningEndpoints
 
 	amqlURLList := []amqpFailoverURL{}
 
@@ -183,7 +188,7 @@ func retrieveAMQPURLList() []amqpFailoverURL {
 				retries, _ = strconv.Atoi(retrycount[1 : len(retrycount)-1])
 			}
 
-			failoverurlObj := amqpFailoverURL{url: amqpConnectionURL, retryCount: retries,
+			failoverurlObj := amqpFailoverURL{URL: amqpConnectionURL, retryCount: retries,
 				connectionDelay: delay}
 			amqlURLList = append(amqlURLList, failoverurlObj)
 		}
@@ -191,6 +196,7 @@ func retrieveAMQPURLList() []amqpFailoverURL {
 	return amqlURLList
 }
 
+// maskURL function mask the incoming url
 func maskURL(url string) string {
 	pattern := regexp.MustCompile(`\/\/([a-zA-Z].*)@\b`)
 	matches := pattern.FindStringSubmatch(url)
@@ -200,8 +206,9 @@ func maskURL(url string) string {
 	return url
 }
 
+// amqpFailoverURL defines the structure of an amqp failover url
 type amqpFailoverURL struct {
-	url             string
+	URL             string
 	retryCount      int
 	connectionDelay int
 }

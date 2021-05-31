@@ -35,7 +35,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/wso2/adapter/config"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
 
 	//mgw_websocket "github.com/wso2/micro-gw/internal/oasparser/envoyconf/api"
 	"github.com/golang/protobuf/ptypes/any"

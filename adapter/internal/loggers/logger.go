@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package loggers
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/adapter/internal/logging"
+	"github.com/wso2/adapter/pkg/logging"
 )
 
 /* loggers should be initiated only for the main packages
@@ -38,11 +38,9 @@ const (
 	pkgOasparser            = "github.com/wso2/adapter/internal/oasparser"
 	pkgXds                  = "github.com/wso2/adapter/internal/discovery/xds"
 	pkgSync                 = "github.com/wso2/adapter/internal/synchronizer"
-	pkgMsg                  = "github.com/wso2/adapter/internal/messaging"
+	pkgInternalMsg          = "github.com/wso2/adapter/internal/messaging"
 	pkgSvcDiscovery         = "github.com/wso2/adapter/internal/svcDiscovery"
-	pkgTLSUtils             = "github.com/wso2/adapter/internal/tlsutils"
 	pkgSubscription         = "github.com/wso2/adapter/internal/subscription"
-	pkgHealth               = "github.com/wso2/adapter/internal/health"
 	pkgRouterXdsCallbacks   = "github.com/wso2/adapter/internal/discovery/xds/routercallbacks"
 	pkgEnforcerXdsCallbacks = "github.com/wso2/adapter/internal/discovery/xds/enforcercallbacks"
 )
@@ -55,11 +53,9 @@ var (
 	LoggerOasparser            *logrus.Logger
 	LoggerXds                  *logrus.Logger
 	LoggerSync                 *logrus.Logger
-	LoggerMsg                  *logrus.Logger
+	LoggerInternalMsg          *logrus.Logger
 	LoggerSvcDiscovery         *logrus.Logger
-	LoggerTLSUtils             *logrus.Logger
 	LoggerSubscription         *logrus.Logger
-	LoggerHealth               *logrus.Logger
 	LoggerRouterXdsCallbacks   *logrus.Logger
 	LoggerEnforcerXdsCallbacks *logrus.Logger
 )
@@ -77,11 +73,9 @@ func UpdateLoggers() {
 	LoggerOasparser = logging.InitPackageLogger(pkgOasparser)
 	LoggerXds = logging.InitPackageLogger(pkgXds)
 	LoggerSync = logging.InitPackageLogger(pkgSync)
-	LoggerMsg = logging.InitPackageLogger(pkgMsg)
+	LoggerInternalMsg = logging.InitPackageLogger(pkgInternalMsg)
 	LoggerSvcDiscovery = logging.InitPackageLogger(pkgSvcDiscovery)
-	LoggerTLSUtils = logging.InitPackageLogger(pkgTLSUtils)
 	LoggerSubscription = logging.InitPackageLogger(pkgSubscription)
-	LoggerHealth = logging.InitPackageLogger(pkgHealth)
 	LoggerRouterXdsCallbacks = logging.InitPackageLogger(pkgRouterXdsCallbacks)
 	LoggerEnforcerXdsCallbacks = logging.InitPackageLogger(pkgEnforcerXdsCallbacks)
 	logrus.Info("Updated loggers")

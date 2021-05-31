@@ -27,8 +27,7 @@ import (
 	"regexp"
 	"sync"
 
-	"github.com/wso2/adapter/config"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/pkg/loggers"
 )
 
 var (
@@ -45,12 +44,10 @@ const (
 )
 
 // GetServerCertificate returns the certificate (used for the restAPI server and xds server) created based on configuration values.
-func GetServerCertificate() (tls.Certificate, error) {
+// Move to pkg. remove config and read from a file path
+func GetServerCertificate(tlsCertificate string, tlsCertificateKey string) (tls.Certificate, error) {
 	certReadErr = nil
 	onceKeyCertsRead.Do(func() {
-		conf, _ := config.ReadConfigs()
-		tlsCertificate := conf.Adapter.Keystore.PublicKeyLocation
-		tlsCertificateKey := conf.Adapter.Keystore.PrivateKeyLocation
 		cert, err := tls.LoadX509KeyPair(string(tlsCertificate), string(tlsCertificateKey))
 		if err != nil {
 			logger.LoggerTLSUtils.Fatal("Error while loading the tls keypair.", err)
@@ -63,11 +60,11 @@ func GetServerCertificate() (tls.Certificate, error) {
 
 // GetTrustedCertPool returns the trusted certificate (used for the restAPI server and xds server) created based on
 // the provided directory/file path.
-func GetTrustedCertPool() *x509.CertPool {
+// Move to pkg
+func GetTrustedCertPool(truststoreLocation string) *x509.CertPool {
 	onceTrustedCertsRead.Do(func() {
 		caCertPool = x509.NewCertPool()
-		conf, _ := config.ReadConfigs()
-		filepath.Walk(conf.Adapter.Truststore.Location, func(path string, info os.FileInfo, err error) error {
+		filepath.Walk(truststoreLocation, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				logger.LoggerTLSUtils.Warn("Error while reading the trusted certificates directory/file.", err)
 			} else {
@@ -90,6 +87,7 @@ func GetTrustedCertPool() *x509.CertPool {
 }
 
 // IsPublicCertificate checks if the file content represents valid public certificate in PEM format.
+// Move to pkg
 func IsPublicCertificate(certContent []byte) bool {
 	certContentPattern := `\-\-\-\-\-BEGIN\sCERTIFICATE\-\-\-\-\-((.|\n)*)\-\-\-\-\-END\sCERTIFICATE\-\-\-\-\-`
 	regex := regexp.MustCompile(certContentPattern)
