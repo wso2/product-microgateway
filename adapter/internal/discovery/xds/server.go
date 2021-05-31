@@ -28,8 +28,8 @@ import (
 	subscription "github.com/wso2/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	throttle "github.com/wso2/adapter/pkg/discovery/api/wso2/discovery/throttle"
 
-	wso2_cache "github.com/wso2/adapter/pkg/discovery/protocol/cache/v3"
 	"github.com/wso2/adapter/internal/svcdiscovery"
+	wso2_cache "github.com/wso2/adapter/pkg/discovery/protocol/cache/v3"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -39,12 +39,12 @@ import (
 	envoy_cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/wso2/adapter/config"
 	apiModel "github.com/wso2/adapter/internal/api/models"
-	eventhubTypes "github.com/wso2/adapter/pkg/eventhub/types"
+	logger "github.com/wso2/adapter/internal/loggers"
 	oasParser "github.com/wso2/adapter/internal/oasparser"
 	envoyconf "github.com/wso2/adapter/internal/oasparser/envoyconf"
 	mgw "github.com/wso2/adapter/internal/oasparser/model"
 	"github.com/wso2/adapter/internal/oasparser/operator"
-	logger "github.com/wso2/adapter/internal/loggers"
+	eventhubTypes "github.com/wso2/adapter/pkg/eventhub/types"
 )
 
 var (
