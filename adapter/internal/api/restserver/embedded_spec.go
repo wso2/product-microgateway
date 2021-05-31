@@ -160,16 +160,6 @@ func init() {
             "description": "Number of APIs (APIMeta objects to return)\n",
             "name": "limit",
             "in": "query"
-          },
-          {
-            "maxLength": 15,
-            "minLength": 1,
-            "pattern": "^[a-zA-Z0-9_.-]*$",
-            "type": "string",
-            "default": "carbon.super",
-            "description": "The organization/ tenant domain which the api is belongs to\n",
-            "name": "orgId",
-            "in": "query"
           }
         ],
         "responses": {
@@ -302,16 +292,6 @@ func init() {
             "type": "string",
             "description": "Name of gateway environments separated by \":\"\n",
             "name": "environments",
-            "in": "query"
-          },
-          {
-            "maxLength": 15,
-            "minLength": 1,
-            "pattern": "^[a-zA-Z0-9_.-]*$",
-            "type": "string",
-            "default": "carbon.super",
-            "description": "The organization/ tenant domain which the api is belongs to\n",
-            "name": "orgId",
             "in": "query"
           }
         ],
@@ -618,16 +598,6 @@ func init() {
             "description": "Number of APIs (APIMeta objects to return)\n",
             "name": "limit",
             "in": "query"
-          },
-          {
-            "maxLength": 15,
-            "minLength": 1,
-            "pattern": "^[a-zA-Z0-9_.-]*$",
-            "type": "string",
-            "default": "carbon.super",
-            "description": "The organization/ tenant domain which the api is belongs to\n",
-            "name": "orgId",
-            "in": "query"
           }
         ],
         "responses": {
@@ -772,16 +742,6 @@ func init() {
             "type": "string",
             "description": "Name of gateway environments separated by \":\"\n",
             "name": "environments",
-            "in": "query"
-          },
-          {
-            "maxLength": 15,
-            "minLength": 1,
-            "pattern": "^[a-zA-Z0-9_.-]*$",
-            "type": "string",
-            "default": "carbon.super",
-            "description": "The organization/ tenant domain which the api is belongs to\n",
-            "name": "orgId",
             "in": "query"
           }
         ],

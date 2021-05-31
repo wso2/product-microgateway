@@ -97,7 +97,6 @@ import (
 // GetApisURL generates an URL for the get apis operation
 type GetApisURL struct {
 	Limit *int64
-	OrgID *string
 	Query *string
 
 	_basePath string
@@ -140,14 +139,6 @@ func (o *GetApisURL) Build() (*url.URL, error) {
 	}
 	if limitQ != "" {
 		qs.Set("limit", limitQ)
-	}
-
-	var orgIDQ string
-	if o.OrgID != nil {
-		orgIDQ = *o.OrgID
-	}
-	if orgIDQ != "" {
-		qs.Set("orgId", orgIDQ)
 	}
 
 	var queryQ string

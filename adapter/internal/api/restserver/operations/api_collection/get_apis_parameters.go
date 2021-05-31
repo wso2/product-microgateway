@@ -98,18 +98,11 @@ import (
 )
 
 // NewGetApisParams creates a new GetApisParams object
-// with the default values initialized.
+//
+// There are no default values defined in the spec.
 func NewGetApisParams() GetApisParams {
 
-	var (
-		// initialize parameters with default values
-
-		orgIDDefault = string("carbon.super")
-	)
-
-	return GetApisParams{
-		OrgID: &orgIDDefault,
-	}
+	return GetApisParams{}
 }
 
 // GetApisParams contains all the bound params for the get apis operation
@@ -128,15 +121,6 @@ type GetApisParams struct {
 	  In: query
 	*/
 	Limit *int64
-	/*The organization/ tenant domain which the api is belongs to
-
-	  Max Length: 15
-	  Min Length: 1
-	  Pattern: ^[a-zA-Z0-9_.-]*$
-	  In: query
-	  Default: "carbon.super"
-	*/
-	OrgID *string
 	/*Optional - Condition to filter APIs. Currently only filtering
 	by API type (HTTP or WebSocket) is supported.
 	"type:http" for HTTP type
@@ -162,11 +146,6 @@ func (o *GetApisParams) BindRequest(r *http.Request, route *middleware.MatchedRo
 
 	qLimit, qhkLimit, _ := qs.GetOK("limit")
 	if err := o.bindLimit(qLimit, qhkLimit, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qOrgID, qhkOrgID, _ := qs.GetOK("orgId")
-	if err := o.bindOrgID(qOrgID, qhkOrgID, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -215,47 +194,6 @@ func (o *GetApisParams) validateLimit(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaximumInt("limit", "query", *o.Limit, 1e+08, false); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// bindOrgID binds and validates parameter OrgID from query.
-func (o *GetApisParams) bindOrgID(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-
-	if raw == "" { // empty values pass all other validations
-		// Default values have been previously initialized by NewGetApisParams()
-		return nil
-	}
-	o.OrgID = &raw
-
-	if err := o.validateOrgID(formats); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// validateOrgID carries on validations for parameter OrgID
-func (o *GetApisParams) validateOrgID(formats strfmt.Registry) error {
-
-	if err := validate.MinLength("orgId", "query", *o.OrgID, 1); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("orgId", "query", *o.OrgID, 15); err != nil {
-		return err
-	}
-
-	if err := validate.Pattern("orgId", "query", *o.OrgID, `^[a-zA-Z0-9_.-]*$`); err != nil {
 		return err
 	}
 

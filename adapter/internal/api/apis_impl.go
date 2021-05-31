@@ -32,10 +32,10 @@ import (
 	"github.com/wso2/adapter/config"
 	apiModel "github.com/wso2/adapter/internal/api/models"
 	xds "github.com/wso2/adapter/internal/discovery/xds"
+	"github.com/wso2/adapter/internal/loggers"
 	mgw "github.com/wso2/adapter/internal/oasparser/model"
 	"github.com/wso2/adapter/internal/oasparser/utills"
 	"github.com/wso2/adapter/pkg/tlsutils"
-	"github.com/wso2/adapter/internal/loggers"
 )
 
 // API Controller related constants
@@ -355,7 +355,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	apiContent.EndpointSecurity.SandBox.SecurityType = apiProject.EndpointSecurity.SandBox.SecurityType
 
 	if apiProject.OrganizationID == "" {
-		apiContent.OrganizationID = "carbon.super"
+		apiContent.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 	} else {
 		apiContent.OrganizationID = apiProject.OrganizationID
 	}

@@ -97,18 +97,11 @@ import (
 )
 
 // NewDeleteApisParams creates a new DeleteApisParams object
-// with the default values initialized.
+//
+// There are no default values defined in the spec.
 func NewDeleteApisParams() DeleteApisParams {
 
-	var (
-		// initialize parameters with default values
-
-		orgIDDefault = string("carbon.super")
-	)
-
-	return DeleteApisParams{
-		OrgID: &orgIDDefault,
-	}
+	return DeleteApisParams{}
 }
 
 // DeleteApisParams contains all the bound params for the delete apis operation
@@ -136,15 +129,6 @@ type DeleteApisParams struct {
 	  In: query
 	*/
 	Environments *string
-	/*The organization/ tenant domain which the api is belongs to
-
-	  Max Length: 15
-	  Min Length: 1
-	  Pattern: ^[a-zA-Z0-9_.-]*$
-	  In: query
-	  Default: "carbon.super"
-	*/
-	OrgID *string
 	/*version of the API
 
 	  Required: true
@@ -181,11 +165,6 @@ func (o *DeleteApisParams) BindRequest(r *http.Request, route *middleware.Matche
 
 	qEnvironments, qhkEnvironments, _ := qs.GetOK("environments")
 	if err := o.bindEnvironments(qEnvironments, qhkEnvironments, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
-	qOrgID, qhkOrgID, _ := qs.GetOK("orgId")
-	if err := o.bindOrgID(qOrgID, qhkOrgID, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -277,47 +256,6 @@ func (o *DeleteApisParams) validateEnvironments(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("environments", "query", *o.Environments, `^[\w\s.-]*(:[\w\s.-]+)*$`); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// bindOrgID binds and validates parameter OrgID from query.
-func (o *DeleteApisParams) bindOrgID(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-
-	if raw == "" { // empty values pass all other validations
-		// Default values have been previously initialized by NewDeleteApisParams()
-		return nil
-	}
-	o.OrgID = &raw
-
-	if err := o.validateOrgID(formats); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// validateOrgID carries on validations for parameter OrgID
-func (o *DeleteApisParams) validateOrgID(formats strfmt.Registry) error {
-
-	if err := validate.MinLength("orgId", "query", *o.OrgID, 1); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("orgId", "query", *o.OrgID, 15); err != nil {
-		return err
-	}
-
-	if err := validate.Pattern("orgId", "query", *o.OrgID, `^[a-zA-Z0-9_.-]*$`); err != nil {
 		return err
 	}
 

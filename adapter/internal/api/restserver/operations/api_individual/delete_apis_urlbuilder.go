@@ -96,7 +96,6 @@ import (
 type DeleteApisURL struct {
 	APIName      string
 	Environments *string
-	OrgID        *string
 	Version      string
 	Vhost        *string
 
@@ -145,14 +144,6 @@ func (o *DeleteApisURL) Build() (*url.URL, error) {
 	}
 	if environmentsQ != "" {
 		qs.Set("environments", environmentsQ)
-	}
-
-	var orgIDQ string
-	if o.OrgID != nil {
-		orgIDQ = *o.OrgID
-	}
-	if orgIDQ != "" {
-		qs.Set("orgId", orgIDQ)
 	}
 
 	versionQ := o.Version
