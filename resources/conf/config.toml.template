@@ -2,136 +2,227 @@
 
 [adapter] # --------------------------------------------------------
 
-# server: configuration related to REST API
+# Configurations required for configuring the deployment parameters that are used for identifying the Choreo Connect Adapter REST APIs
 [adapter.server]
+  # Enable/Disable Choreo Connect Adaptor REST API
   enabled = true
+  # Hostname of the Choreo Connect Adaptor
   host = "0.0.0.0"
+  # Port of the Choreo Connect Adaptor
   port = "9843"
+  # Time to live for the Adaptor access token
   tokenTTL = "1h"
+  # Private key path to use for the token generation
   tokenPrivateKeyPath = "/home/wso2/security/keystore/mg.key"
   [[adapter.server.users]]
     username = "admin"
     password = "$env{adapter_admin_pwd}"
 
-# default vhosts mapping for standalone mode
+# Default virtual host mapping for standalone mode
 [[adapter.vhostMapping]]
+  # The Adapter environment
   environment = "Default"
+  # Virtual host to map to the environment
   vhost = "localhost"
 
+# Configurations of key store used in Choreo Connect Adapter
 [adapter.keystore]
+  # Path of the certificate
   certPath = "/home/wso2/security/keystore/mg.pem"
+  # Path of the private key
   keyPath = "/home/wso2/security/keystore/mg.key"
 
+# Configurations of trust store used in the Choreo Connect Adapter
 [adapter.truststore]
+  # The directory path for the trusted certificates of the Choreo Connect Adaptor
   location = "/home/wso2/security/truststore"
 
+# Configurations related to Consul
 [adapter.consul]
+  # Enable/Disable consul service
   enable = false
+  # Connection url of the Consul HTTP API
   url = "https://169.254.1.1:8501" # scheme + host ip + port
-  pollInterval = 5 # seconds
+  # Time interval (in seconds) in which the Choreo Connect should fetch updates from the Consul service catalog
+  pollInterval = 5
+  # Access Control Token generated using Consul
+  # You should grant read access to services when creating the token
   aclToken = "d3a2a719-4221-8c65-5212-58d4727427ac"
+  # Choreo Connect natively integrates with Consul service mesh.
+  # Therefore a service name is required to be defined inorder to grant access to other services in mesh.
+  # This only need to be defined if service mesh enabled in Consul
   mgwServiceName = "wso2"
+  # Set this to true if service mesh is enabled in Consul
   serviceMeshEnabled = false
-  # certs for tls
+  # Certs for tls
+  # Optional path to the CA certificate used for Consul communication, defaults to the system bundle if not specified
   caCertFile = "/home/wso2/security/truststore/consul/consul-agent-ca.pem"
+  # Optional path to the certificate for Consul communication. If this is set, then you also need to set keyFile
   certFile = "/home/wso2/security/truststore/consul/local-dc-client-consul-0.pem"
+  # Optional path to the private key for Consul communication. If this is set, then you need to also set certFile
   keyFile = "/home/wso2/security/truststore/consul/local-dc-client-consul-0-key.pem"
 
-
+# Configurations required for router to route the traffic from different clients to services
 [router] # --------------------------------------------------------
+  # Host for listener of Router
   listenerHost = "0.0.0.0"
+  # Port for listener of Router
   listenerPort = 9090
+  # Host for secured listener of Router
   securedListenerHost = "0.0.0.0"
+  # Port for secured listener of Router
   securedListenerPort = 9095
+  # The timeout for new network connections to hosts in the cluster in seconds
   clusterTimeoutInSeconds = 20
+  # The timeout for response coming from enforcer to route per API request
   enforcerResponseTimeoutInSeconds = 20
-  # system hostname for system API resources (eg: /testkey and /health)
+  # System hostname for system API resources (eg: /testkey and /health)
   systemHost = "localhost"
 
+# Configurations of key store
 [router.keystore]
+  # Path of the certificate
   certPath = "/home/wso2/security/keystore/mg.pem"
+  # Path of the private key
   keyPath = "/home/wso2/security/keystore/mg.key"
 
+# Cors configurations
 [router.cors]
-enabled = true
-allowOrigins = ["*"]
-allowMethods = ["GET","PUT","POST","DELETE","PATCH","OPTIONS"]
-allowHeaders = ["authorization","Access-Control-Allow-Origin","Content-Type","SOAPAction","apikey", "testKey", "Internal-Key"]
-exposeHeaders = []
-allowCredentials = false
+  # Enable CORS configurations globally for all endpoints and APIs deployed in Choreo Connect Router
+  enabled = true
+  # Allowed origins. Set this to [*] to allow all origins
+  allowOrigins = ["*"]
+  # The content for the access-control-allow-methods header
+  allowMethods = ["GET","PUT","POST","DELETE","PATCH","OPTIONS"]
+  # The content for the access-control-allow-headers header
+  allowHeaders = ["authorization","Access-Control-Allow-Origin","Content-Type","SOAPAction","apikey", "testKey", "Internal-Key"]
+  # The content for the access-control-expose-headers header
+  exposeHeaders = []
+  # Specifies whether the resource allows credentials
+  allowCredentials = false
 
 [router.upstream]
+
+# The configurations for SSL configuration related to the backend connection in Choreo Connect
 [router.upstream.tls]
+  # Minimum TLS protocol version
   minimumProtocolVersion = "TLS1_1"
+  # Maximum TLS protocol version
   maximumProtocolVersion = "TLS1_2"
+  # If specified, the TLS listener will only support the specified ciphers when negotiating TLS 1.0-1.2 
+  # (this setting has no effect when negotiating TLS 1.3)
   ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-SHA, ECDHE-RSA-AES128-SHA, AES128-GCM-SHA256, AES128-SHA, ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-SHA, ECDHE-RSA-AES256-SHA, AES256-GCM-SHA384, AES256-SHA"  
-  # the default endpoint certificates
+  # Path to trusted certificates
   trustedCertPath = "/etc/ssl/certs/ca-certificates.crt"
+  # Enable/Disable Verifying host name
   verifyHostName = true
+  # Disable SSL verification
   disableSslVerification = false
 
 [enforcer] # --------------------------------------------------------
 
+# The configurations of gRPC netty based server in Enforcer that handles the incoming requests in the Choreo Connect
 [enforcer.authService]
+  # Port of the Enforcer auth service
   port = 8081
+  # Maximum message size in bytes
   maxMessageSize = 1000000000
+  # Maximum header size in bytes
   maxHeaderLimit = 8192
-  #keep alive time of the external authz connection
+  # Keep alive time in seconds for connection with the router via external authz service
   keepAliveTime = 600
+  # Thread pool configurations of gRPC netty based server in Enforcer that handles the incoming requests in the Choreo Connect
   [enforcer.authService.threadPool]
+    # Minimum number of workers to keep alive
     coreSize = 400
+    # Maximum pool size
     maxSize = 500
-    #keep alive time of threads in seconds
+    # Timeout in seconds for idle threads waiting for work
     keepAliveTime = 600
+    # Queue size of the worker threads
     queueSize = 1000
 
+# The credentials of the API Manager
 [enforcer.apimCredentials]
   username="admin"
   password="$env{apim_admin_pwd}"
 
+# The configurations of token caching in the Choreo Connect
 [enforcer.cache]
+  # Enable/Disable token cache
   enabled = true
+  # Maximum cache size
   maximumSize = 10000
+  # Expiry time in seconds
   expiryTime = 15
 
+# The configuration of the backend jwt generation in the Choreo Connect
 [enforcer.jwtGenerator]
+  # Enable/Disable backend JWT generation
   enable = false
+  # Encoding of the JWT
   encoding = "base64" # base64,base64url
+  # The JWT access token contains all claims that are defined in the enforcer.jwtGenerator.claimDialect element
+  # The default value of this element is http://wso2.org/claims
+  # To get the list of a specific user's claims that need to be included in the JWT, uncomment this element after enabling the JWT
+  # It will include all claims in http://wso2.org/claims to the JWT access token
   claimDialect = "http://wso2.org/claims"
+  # Remap the OIDC claims into the configured dialect
   convertDialect = false
+  # The name of the HTTP header to which the JWT is attached
   header = "X-JWT-Assertion"
+  # The signing algorithm is used to sign the JWT
   signingAlgorithm = "SHA256withRSA"
+  # Enable/Disable user claims
   enableUserClaims = false
+  # Custom JWT generator
   gatewayGeneratorImpl = "org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
+  # Custom Claim Retriever to add custom claims into JWT
   claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
+  # Public certificate for generated JWT
   publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
+  # Private key path used for JWT generation
   privateKeyPath = "/home/wso2/security/keystore/mg.key"
 
+# The issuer configuration required to generate token at Choreo Connect
 [enforcer.jwtIssuer]
+  # Enable/Disable JWT generation
   enabled = true
+  # Issuer value for the JWT under iss claim
   issuer = "https://localhost:9095/testkey"
+  # Encoding of the JWT
   encoding = "base64" # base64,base64url
+  # A set of claims are identified as a dialect. Different dialects represent the same piece of information with different claim URIs
   claimDialect = ""
+  # The signing algorithm is used to sign the JWT
   signingAlgorithm = "SHA256withRSA"
+  # Public certificate for generated JWT
   publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
+  # Private key path used for JWT generation
   privateKeyPath = "/home/wso2/security/keystore/mg.key"
-  validityPeriod = 3600 # seconds
+  # Validity period of the JWT in seconds
+  validityPeriod = 3600
+  # Configure allowed users to use the JWT generated by the Choreo Connect. You can provide multiple users
   [[enforcer.jwtIssuer.jwtUser]]
     username = "admin"
     password = "$env{enforcer_admin_pwd}"
 
 [enforcer.security]
 
+# Configurations related to Authorization header
 [enforcer.security.authHeader]
+  # Remove authorization header from backend request
   enableOutboundAuthHeader = false
   authorizationHeader = "authorization"
-  testConsoleHeaderName = "internal-key"
+  testConsoleHeaderName = "Internal-Key"
   
 # JWT token authorization configurations. You can provide multiple JWT issuers
 # Issuer 1
 [[enforcer.security.tokenService]]
+  # Provide unique name for the JWT issuer
   name="Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
+  # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
   certificateAlias = "wso2carbon"
   # URL of the JWKs endpoint
   jwksURL = ""
@@ -139,29 +230,34 @@ allowCredentials = false
   validateSubscription = false
   # The claim in which the consumer key of the application is coming
   consumerKeyClaim = "azp"
-  # Certificate Filepath within enforcer
+  # Certificate Filepath within Enforcer
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 # Issuer 2
 [[enforcer.security.tokenService]]
-    name="MGW"
-    issuer = "https://localhost:9095/testkey"
-    certificateAlias = "mgw"
-    # URL of the JWKs endpoint
-    jwksURL = ""
-    # Validate subscribed APIs
-    validateSubscription = false
-    # The claim in which the consumer key of the application is coming
-    consumerKeyClaim = ""
-    # Certificate Filepath within enforcer
-    certificateFilePath = "/home/wso2/security/truststore/mg.pem"
+  # Provide unique name for the JWT issuer
+  name="MGW"
+  issuer = "https://localhost:9095/testkey"
+  # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
+  certificateAlias = "mgw"
+  # URL of the JWKs endpoint
+  jwksURL = ""
+  # Validate subscribed APIs
+  validateSubscription = false
+  # The claim in which the consumer key of the application is coming
+  consumerKeyClaim = ""
+  # Certificate Filepath within Enforcer
+  certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 # Issuer 3
 [[enforcer.security.tokenService]]
-    name="APIM Publisher"
-    issuer = "https://localhost:9443/publisher"
-    certificateAlias = ""
-    certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+  # Provide unique name for the JWT issuer
+  name="APIM Publisher"
+  issuer = "https://localhost:9443/publisher"
+  # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
+  certificateAlias = ""
+  # Certificate Filepath within Enforcer
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 # Throttling configurations
 [enforcer.throttling]
@@ -186,21 +282,28 @@ allowCredentials = false
     [[enforcer.throttling.publisher.urlGroup]]
       receiverURLs = ["tcp://apim:9611"]
       authURLs = ["ssl://apim:9711"]
+
     # Data publisher object pool configurations
     [enforcer.throttling.publisher.pool]
+      # Maximum idle number of connections
       maxIdleDataPublishingAgents = 1000
+      # Minimum idle number of connections
       initIdleObjectDataPublishingAgents = 200
-      # Data publisher thread pool configurations
+      # Thread pool core size
       publisherThreadPoolCoreSize = 200
+      # The maximum size of the thread pool
       publisherThreadPoolMaximumSize = 1000
+      # The timeframe after which the publisher thread pool is terminated in seconds
       publisherThreadPoolKeepAliveTime = 200
+
+    # Data publisher agent configurations
     [enforcer.throttling.publisher.agent]
       # SSL Protocols
       sslEnabledProtocols = "TLSv1.2"
-      # ciphers
-      ciphers="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256  ,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256, TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_DSS_WITH_AES_128_GCM_SHA256  ,TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
-      # The size of the queue event disruptor which handles events before they are published.
-      # The value specified should always be the result of an exponent with 2 as the base.
+      # Ciphers
+      ciphers = "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256  ,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256, TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_DSS_WITH_AES_128_GCM_SHA256  ,TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,TLS_EMPTY_RENEGOTIATION_INFO_SCSV"
+      # The size of the queue event disruptor which handles events before they are published
+      # The value specified should always be the result of an exponent with 2 as the base
       queueSize = 32768
       # The maximum number of events in a batch sent to the queue event disruptor at a given time
       batchSize = 200
@@ -227,18 +330,27 @@ allowCredentials = false
 
 # Control plane's connection details
 [controlPlane]
+  # Enable/Disable Choreo Connect Control plane
   enabled = false
+  # Service URL of the API Manager
   serviceUrl = "https://apim:9443/"
-  username="admin"
-  password="$env{cp_admin_pwd}"
+  # Username of the API Manager user
+  username = "admin"
+  # Password of the API Manager user
+  password = "$env{cp_admin_pwd}"
+  # Environment labels list
   environmentLabels = ["Default"]
+  # Connection retry interval
   retryInterval = 5
-  skipSSLVerification=true
+  # Skip SSL verification
+  skipSSLVerification = false
   # Message broker connection URL of the control plane
-    [controlPlane.jmsConnectionParameters]
-        eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
+  [controlPlane.jmsConnectionParameters]
+    eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
 
+# Analytics configurations for Choreo Connect
 [analytics]
+  # Enable/Disable Analytics in Choreo Connect
   enabled = false
   [analytics.adapter]
     bufferFlushInterval = "1s"
@@ -254,12 +366,12 @@ allowCredentials = false
       port = 18090
       maxMessageSize = 1000000000
       maxHeaderLimit = 8192
-      #keep alive time of the external authz connection
+      # Keep alive time of the external authz connection
       keepAliveTime = 600
 
       [analytics.enforcer.LogReceiver.threadPool]
         coreSize = 10
         maxSize = 100
-        #keep alive time of threads in seconds
+        # Keep alive time of threads in seconds
         keepAliveTime = 600
         queueSize = 1000
