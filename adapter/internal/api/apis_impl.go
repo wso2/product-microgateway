@@ -58,6 +58,7 @@ const (
 	production                 string = "production"
 	sandbox                    string = "sandbox"
 	BasicAuthSecurity          string = "BASIC"
+	orgIDKey                   string = "orgId"
 )
 
 // ProjectAPI contains the extracted from an API project zip
@@ -271,7 +272,7 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 			// ignore if vhost is empty, since it deletes all vhosts of API
 			continue
 		}
-		if err := xds.DeleteAPIs(vhost, apiInfo.Name, apiInfo.Version, environments); err != nil {
+		if err := xds.DeleteAPIs(vhost, apiInfo.Name, apiInfo.Version, environments, ""); err != nil {
 			return err
 		}
 	}
@@ -301,7 +302,7 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 		// if the API already exists in the one of vhost, break deployment of the API
 		exists := false
 		for _, deployment := range apiProject.Deployments {
-			if xds.IsAPIExist(deployment.DeploymentVhost, apiInfo.Name, apiInfo.Version) {
+			if xds.IsAPIExist(deployment.DeploymentVhost, apiInfo.Name, apiInfo.Version, apiProject.OrganizationID) {
 				exists = true
 				break
 			}
@@ -352,7 +353,12 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	apiContent.EndpointSecurity.SandBox.Password = apiProject.EndpointSecurity.SandBox.Password
 	apiContent.EndpointSecurity.SandBox.Username = apiProject.EndpointSecurity.SandBox.Username
 	apiContent.EndpointSecurity.SandBox.SecurityType = apiProject.EndpointSecurity.SandBox.SecurityType
-	apiContent.OrganizationID = apiProject.OrganizationID
+
+	if apiProject.OrganizationID == "" {
+		apiContent.OrganizationID = "carbon.super"
+	} else {
+		apiContent.OrganizationID = apiProject.OrganizationID
+	}
 
 	if apiProject.APIType == mgw.HTTP {
 		apiContent.APIDefinition = apiProject.SwaggerJsn
@@ -444,16 +450,16 @@ func retrieveEndPointSecurityInfo(value string, endPointSecurity config.EpSecuri
 }
 
 // ListApis calls the ListApis method in xds_server.go
-func ListApis(query *string, limit *int64) *apiModel.APIMeta {
+func ListApis(query *string, limit *int64, orgID string) *apiModel.APIMeta {
 	var apiType string
 	if query != nil {
 		queryPair := strings.Split(*query, ":")
 		if queryPair[0] == apiTypeFilterKey {
 			apiType = strings.ToUpper(queryPair[1])
-			return xds.ListApis(apiType, limit)
+			return xds.ListApis(apiType, orgID, limit)
 		}
 	}
-	return xds.ListApis("", limit)
+	return xds.ListApis("", orgID, limit)
 }
 
 func readZipFile(zf *zip.File) ([]byte, error) {

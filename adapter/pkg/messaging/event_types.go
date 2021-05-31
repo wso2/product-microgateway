@@ -76,11 +76,12 @@ type EventKeyManagerNotification struct {
 
 // Event for struct abstract event
 type Event struct {
-	EventID      string `json:"eventId"`
-	TimeStamp    int64  `json:"timeStamp"`
-	Type         string `json:"type"`
-	TenantID     int32  `json:"tenantId"`
-	TenantDomain string `json:"tenantDomain"`
+	EventID        string `json:"eventId"`
+	TimeStamp      int64  `json:"timeStamp"`
+	Type           string `json:"type"`
+	TenantID       int32  `json:"tenantId"`
+	TenantDomain   string `json:"tenantDomain"`
+	OrganizationID string `json:"organizationId"`
 }
 
 // APIEvent for struct API events

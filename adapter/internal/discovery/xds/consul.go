@@ -35,14 +35,14 @@ const (
 	transportSocketName = "envoy.transport_sockets.tls"
 )
 
-func startConsulServiceDiscovery() {
-	for apiKey, clusterList := range openAPIClustersMap {
+func startConsulServiceDiscovery(organizationID string) {
+	for apiKey, clusterList := range orgIDOpenAPIClustersMap[organizationID] {
 		for _, cluster := range clusterList {
 			if consulSyntax, ok := svcdiscovery.ClusterConsulKeyMap[cluster.Name]; ok {
 				svcdiscovery.InitConsul() //initialize consul client and load certs
 				onceUpdateMeshCerts.Do(func() {
 					if svcdiscovery.MeshEnabled {
-						go listenForMeshCertUpdates() //runs in background
+						go listenForMeshCertUpdates(organizationID) //runs in background
 					}
 				})
 				query, errConSyn := svcdiscovery.ParseQueryString(consulSyntax)
@@ -51,24 +51,25 @@ func startConsulServiceDiscovery() {
 					return
 				}
 				logger.LoggerXds.Debugln(query)
-				go getServiceDiscoveryData(query, cluster.Name, apiKey)
+				go getServiceDiscoveryData(query, cluster.Name, apiKey, organizationID)
 			}
 		}
 	}
+
 }
 
-func listenForMeshCertUpdates() {
+func listenForMeshCertUpdates(organizationID string) {
 	for {
 		select {
 		case <-svcdiscovery.MeshUpdateSignal:
-			updateCertsForServiceMesh()
+			updateCertsForServiceMesh(organizationID)
 		}
 	}
 }
 
-func updateCertsForServiceMesh() {
+func updateCertsForServiceMesh(organizationID string) {
 	//update each cluster with new certs
-	for _, clusters := range openAPIClustersMap {
+	for _, clusters := range orgIDOpenAPIClustersMap[organizationID] {
 		for _, cluster := range clusters { //iterate through all clusters
 			if cluster.TransportSocket != nil { //has transport socket==> https/wss
 				if svcdiscovery.MeshCACert == "" || svcdiscovery.MeshServiceKey == "" || svcdiscovery.MeshServiceCert == "" {
@@ -95,12 +96,12 @@ func updateCertsForServiceMesh() {
 	}
 
 	//send the update to Router
-	for apiKey := range openAPIClustersMap {
-		updateXDSClusterCache(apiKey)
+	for apiKey := range orgIDOpenAPIClustersMap[organizationID] {
+		updateXDSClusterCache(apiKey, organizationID)
 	}
 }
 
-func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKey string) {
+func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKey string, orgID string) {
 	doneChan := make(chan bool)
 	svcdiscovery.ClusterConsulDoneChanMap[clusterName] = doneChan
 	resultChan := svcdiscovery.ConsulClientInstance.Poll(query, doneChan)
@@ -112,7 +113,7 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 				return
 			}
 			//stop the process when API is deleted
-			if _, clusterExists := openAPIClustersMap[apiKey]; !clusterExists {
+			if _, clusterExists := orgIDOpenAPIClustersMap[orgID][apiKey]; !clusterExists {
 				logger.LoggerXds.Debugln("Consul service discovery stopped for cluster ", clusterName, " in API ",
 					apiKey, " upon API removal")
 				stopConsulDiscoveryFor(clusterName)
@@ -123,19 +124,19 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 				if !reflect.DeepEqual(val, queryResultsList) {
 					svcdiscovery.SetClusterConsulResultMap(clusterName, queryResultsList)
 					//update the envoy cluster
-					updateCluster(apiKey, clusterName, queryResultsList)
+					updateCluster(apiKey, clusterName, orgID, queryResultsList)
 				}
 			} else {
 				logger.LoggerXds.Debugln("updating cluster from the consul service registry, removed the default host")
 				svcdiscovery.SetClusterConsulResultMap(clusterName, queryResultsList)
-				updateCluster(apiKey, clusterName, queryResultsList)
+				updateCluster(apiKey, clusterName, orgID, queryResultsList)
 			}
 		}
 	}
 }
 
-func updateCluster(apiKey string, clusterName string, queryResultsList []svcdiscovery.Upstream) {
-	if clusterList, available := openAPIClustersMap[apiKey]; available {
+func updateCluster(apiKey string, clusterName string, organizationID string, queryResultsList []svcdiscovery.Upstream) {
+	if clusterList, available := orgIDOpenAPIClustersMap[organizationID][apiKey]; available {
 		for i := range clusterList {
 			if clusterList[i].Name == clusterName {
 				var lbEndpointList []*endpointv3.LbEndpoint
@@ -167,14 +168,14 @@ func updateCluster(apiKey string, clusterName string, queryResultsList []svcdisc
 						},
 					},
 				}
-				updateXDSClusterCache(apiKey)
+				updateXDSClusterCache(apiKey, organizationID)
 			}
 		}
 	}
 }
 
-func updateXDSClusterCache(apiKey string) {
-	for key, envoyLabelList := range openAPIEnvoyMap {
+func updateXDSClusterCache(apiKey string, organizationID string) {
+	for key, envoyLabelList := range orgIDOpenAPIEnvoyMap[organizationID] {
 		if key == apiKey {
 			for _, label := range envoyLabelList {
 				listeners, clusters, routes, endpoints, _ := GenerateEnvoyResoucesForLabel(label)

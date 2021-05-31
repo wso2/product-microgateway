@@ -177,6 +177,16 @@ paths:
           maxLength: 255
           # example: Production and Sandbox:Label1:Label2
           pattern: ^[\w\s.-]*(:[\w\s.-]+)*$
+        - name: orgId
+          description: |
+            The organization/ tenant domain which the api is belongs to
+          in: query
+          type: string
+          required: false
+          default: carbon.super
+          minLength: 1
+          maxLength: 15
+          pattern: ^[a-zA-Z0-9_.-]*$
       responses:
         200:
           description: |
@@ -240,6 +250,16 @@ paths:
           type: integer
           minimum: 1
           maximum: 100000000
+        - name: orgId
+          description: |
+            The organization/ tenant domain which the api is belongs to
+          in: query
+          type: string
+          required: false
+          default: carbon.super
+          minLength: 1
+          maxLength: 15
+          pattern: ^[a-zA-Z0-9_.-]*$
       responses:
         200:
           description: An array of API Metadata
