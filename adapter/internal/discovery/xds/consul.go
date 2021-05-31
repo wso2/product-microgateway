@@ -101,7 +101,7 @@ func updateCertsForServiceMesh(organizationID string) {
 	}
 }
 
-func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKey string, orgID string) {
+func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKey string, organizationID string) {
 	doneChan := make(chan bool)
 	svcdiscovery.ClusterConsulDoneChanMap[clusterName] = doneChan
 	resultChan := svcdiscovery.ConsulClientInstance.Poll(query, doneChan)

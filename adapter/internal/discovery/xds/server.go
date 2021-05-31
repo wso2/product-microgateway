@@ -72,12 +72,12 @@ var (
 	apiUUIDToGatewayToVhosts map[string]map[string]string   // API_UUID -> gateway-env -> vhost (for un-deploying APIs from APIM or Choreo)
 	apiToVhostsMap           map[string]map[string]struct{} // APIName:Version -> VHosts set (for un-deploying APIs from API-CTL)
 
-	orgIDAPIMgwSwaggerMap       map[string]map[string]mgw.MgwSwagger       // OrgId -> Vhost:APIName:Version -> MgwSwagger struct map
-	orgIDOpenAPIEnvoyMap        map[string]map[string][]string             // OrgId -> Vhost:APIName:Version -> Envoy Label Array map
-	orgIDOpenAPIRoutesMap       map[string]map[string][]*routev3.Route     // OrgId -> Vhost:APIName:Version -> Envoy Routes map
-	orgIDOpenAPIClustersMap     map[string]map[string][]*clusterv3.Cluster // OrgId -> Vhost:APIName:Version -> Envoy Clusters map
-	orgIDOpenAPIEndpointsMap    map[string]map[string][]*corev3.Address    // OrgId -> Vhost:APIName:Version -> Envoy Endpoints map
-	orgIDOpenAPIEnforcerApisMap map[string]map[string]types.Resource       // OrgId -> Vhost:APIName:Version -> API Resource map
+	orgIDAPIMgwSwaggerMap       map[string]map[string]mgw.MgwSwagger       // organizationID -> Vhost:APIName:Version -> MgwSwagger struct map
+	orgIDOpenAPIEnvoyMap        map[string]map[string][]string             // organizationID -> Vhost:APIName:Version -> Envoy Label Array map
+	orgIDOpenAPIRoutesMap       map[string]map[string][]*routev3.Route     // organizationID -> Vhost:APIName:Version -> Envoy Routes map
+	orgIDOpenAPIClustersMap     map[string]map[string][]*clusterv3.Cluster // organizationID -> Vhost:APIName:Version -> Envoy Clusters map
+	orgIDOpenAPIEndpointsMap    map[string]map[string][]*corev3.Address    // organizationID -> Vhost:APIName:Version -> Envoy Endpoints map
+	orgIDOpenAPIEnforcerApisMap map[string]map[string]types.Resource       // organizationID -> Vhost:APIName:Version -> API Resource map
 
 	// Envoy Label as map key
 	envoyUpdateVersionMap  map[string]int64                       // GW-Label -> XDS version map
@@ -142,12 +142,12 @@ func init() {
 	envoyListenerConfigMap = make(map[string][]*listenerv3.Listener)
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 
-	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // OrgId -> Vhost:APIName:Version -> MgwSwagger struct map
-	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // OrgId -> Vhost:APIName:Version -> Envoy Label Array map
-	orgIDOpenAPIRoutesMap = make(map[string]map[string][]*routev3.Route)       // OrgId -> Vhost:APIName:Version -> Envoy Routes map
-	orgIDOpenAPIClustersMap = make(map[string]map[string][]*clusterv3.Cluster) // OrgId -> Vhost:APIName:Version -> Envoy Clusters map
-	orgIDOpenAPIEndpointsMap = make(map[string]map[string][]*corev3.Address)   // OrgId -> Vhost:APIName:Version -> Envoy Endpoints map
-	orgIDOpenAPIEnforcerApisMap = make(map[string]map[string]types.Resource)   // OrgId -> Vhost:APIName:Version -> API Resource map
+	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // organizationID -> Vhost:APIName:Version -> MgwSwagger struct map
+	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // organizationID -> Vhost:APIName:Version -> Envoy Label Array map
+	orgIDOpenAPIRoutesMap = make(map[string]map[string][]*routev3.Route)       // organizationID -> Vhost:APIName:Version -> Envoy Routes map
+	orgIDOpenAPIClustersMap = make(map[string]map[string][]*clusterv3.Cluster) // organizationID -> Vhost:APIName:Version -> Envoy Clusters map
+	orgIDOpenAPIEndpointsMap = make(map[string]map[string][]*corev3.Address)   // organizationID -> Vhost:APIName:Version -> Envoy Endpoints map
+	orgIDOpenAPIEnforcerApisMap = make(map[string]map[string]types.Resource)   // organizationID -> Vhost:APIName:Version -> API Resource map
 
 	enforcerConfigMap = make(map[string][]types.Resource)
 	enforcerKeyManagerMap = make(map[string][]types.Resource)
@@ -222,7 +222,7 @@ func GetEnforcerThrottleDataCache() wso2_cache.SnapshotCache {
 func UpdateAPI(apiContent config.APIContent) {
 	var newLabels []string
 	var mgwSwagger mgw.MgwSwagger
-	var orgID = apiContent.OrganizationID
+	var organizationID = apiContent.OrganizationID
 	if len(apiContent.Environments) == 0 {
 		apiContent.Environments = []string{config.DefaultGatewayName}
 	}
@@ -269,7 +269,7 @@ func UpdateAPI(apiContent config.APIContent) {
 	mutexForInternalMapUpdate.Lock()
 	defer mutexForInternalMapUpdate.Unlock()
 
-	// Get the map from orgID map.
+	// Get the map from organizationID map.
 	if _, ok := orgIDAPIMgwSwaggerMap[orgID]; ok {
 		orgIDAPIMgwSwaggerMap[orgID][apiIdentifier] = mgwSwagger
 	} else {
@@ -772,7 +772,7 @@ func UpdateXdsCacheWithLock(label string, endpoints []types.Resource, clusters [
 }
 
 // ListApis returns a list of objects that holds info about each API
-func ListApis(apiType string, orgID string, limit *int64) *apiModel.APIMeta {
+func ListApis(apiType string, organizationID string, limit *int64) *apiModel.APIMeta {
 	var limitValue int
 	if limit == nil {
 		limitValue = len(orgIDAPIMgwSwaggerMap[orgID])
@@ -809,7 +809,7 @@ func ListApis(apiType string, orgID string, limit *int64) *apiModel.APIMeta {
 }
 
 // IsAPIExist returns whether a given API exists
-func IsAPIExist(vhost, name, version string, orgID string) (exists bool) {
+func IsAPIExist(vhost, name, version string, organizationID string) (exists bool) {
 	apiIdentifier := GenerateIdentifierForAPI(vhost, name, version)
 	_, exists = orgIDAPIMgwSwaggerMap[orgID][apiIdentifier]
 	return exists

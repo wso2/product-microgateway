@@ -450,7 +450,7 @@ func retrieveEndPointSecurityInfo(value string, endPointSecurity config.EpSecuri
 }
 
 // ListApis calls the ListApis method in xds_server.go
-func ListApis(query *string, limit *int64, orgID string) *apiModel.APIMeta {
+func ListApis(query *string, limit *int64, organizationID string) *apiModel.APIMeta {
 	var apiType string
 	if query != nil {
 		queryPair := strings.Split(*query, ":")
