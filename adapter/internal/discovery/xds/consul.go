@@ -23,8 +23,8 @@ import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/wso2/adapter/internal/svcdiscovery"
 	logger "github.com/wso2/adapter/internal/loggers"
+	"github.com/wso2/adapter/internal/svcdiscovery"
 )
 
 var (
@@ -113,7 +113,7 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 				return
 			}
 			//stop the process when API is deleted
-			if _, clusterExists := orgIDOpenAPIClustersMap[orgID][apiKey]; !clusterExists {
+			if _, clusterExists := orgIDOpenAPIClustersMap[organizationID][apiKey]; !clusterExists {
 				logger.LoggerXds.Debugln("Consul service discovery stopped for cluster ", clusterName, " in API ",
 					apiKey, " upon API removal")
 				stopConsulDiscoveryFor(clusterName)
@@ -124,12 +124,12 @@ func getServiceDiscoveryData(query svcdiscovery.Query, clusterName string, apiKe
 				if !reflect.DeepEqual(val, queryResultsList) {
 					svcdiscovery.SetClusterConsulResultMap(clusterName, queryResultsList)
 					//update the envoy cluster
-					updateCluster(apiKey, clusterName, orgID, queryResultsList)
+					updateCluster(apiKey, clusterName, organizationID, queryResultsList)
 				}
 			} else {
 				logger.LoggerXds.Debugln("updating cluster from the consul service registry, removed the default host")
 				svcdiscovery.SetClusterConsulResultMap(clusterName, queryResultsList)
-				updateCluster(apiKey, clusterName, orgID, queryResultsList)
+				updateCluster(apiKey, clusterName, organizationID, queryResultsList)
 			}
 		}
 	}

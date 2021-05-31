@@ -234,10 +234,10 @@ func UpdateAPI(apiContent config.APIContent) {
 		mgwSwagger.SetVersion(apiContent.Version)
 		mgwSwagger.SetSecurityScheme(apiContent.SecurityScheme)
 		mgwSwagger.SetXWso2AuthHeader(apiContent.AuthHeader)
-		mgwSwagger.OrganizationID = orgID
+		mgwSwagger.OrganizationID = organizationID
 	} else if apiContent.APIType == mgw.WS {
 		mgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
-		mgwSwagger.OrganizationID = orgID
+		mgwSwagger.OrganizationID = organizationID
 	} else {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
 		logger.LoggerXds.Error("API type not currently supported with WSO2 Microgateway")
@@ -270,12 +270,13 @@ func UpdateAPI(apiContent config.APIContent) {
 	defer mutexForInternalMapUpdate.Unlock()
 
 	// Get the map from organizationID map.
-	if _, ok := orgIDAPIMgwSwaggerMap[orgID]; ok {
-		orgIDAPIMgwSwaggerMap[orgID][apiIdentifier] = mgwSwagger
+
+	if _, ok := orgIDAPIMgwSwaggerMap[organizationID]; ok {
+		orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier] = mgwSwagger
 	} else {
 		mgwSwaggerMap := make(map[string]mgw.MgwSwagger)
 		mgwSwaggerMap[apiIdentifier] = mgwSwagger
-		orgIDAPIMgwSwaggerMap[orgID] = mgwSwaggerMap
+		orgIDAPIMgwSwaggerMap[organizationID] = mgwSwaggerMap
 	}
 
 	//TODO: (VirajSalaka) Handle OpenAPIs which does not have label (Current Impl , it will be labelled as default)
@@ -286,11 +287,11 @@ func UpdateAPI(apiContent config.APIContent) {
 	newLabels = apiContent.Environments
 	logger.LoggerXds.Infof("Added/Updated the content under OpenAPI Key : %v", apiIdentifier)
 	logger.LoggerXds.Debugf("Newly added labels for the OpenAPI Key : %v are %v", apiIdentifier, newLabels)
-	oldLabels, _ := orgIDOpenAPIEnvoyMap[orgID][apiIdentifier]
+	oldLabels, _ := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiIdentifier, oldLabels)
 
-	if _, ok := orgIDOpenAPIEnvoyMap[orgID]; ok {
-		orgIDOpenAPIEnvoyMap[orgID][apiIdentifier] = newLabels
+	if _, ok := orgIDOpenAPIEnvoyMap[organizationID]; ok {
+		orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier] = newLabels
 	} else {
 		openAPIEnvoyMap := make(map[string][]string)
 		openAPIEnvoyMap[apiIdentifier] = newLabels
@@ -301,38 +302,38 @@ func UpdateAPI(apiContent config.APIContent) {
 	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, apiContent.UpstreamCerts,
 		apiContent.VHost)
 
-	if _, ok := orgIDOpenAPIRoutesMap[orgID]; ok {
-		orgIDOpenAPIRoutesMap[orgID][apiIdentifier] = routes
+	if _, ok := orgIDOpenAPIRoutesMap[organizationID]; ok {
+		orgIDOpenAPIRoutesMap[organizationID][apiIdentifier] = routes
 	} else {
 		routesMap := make(map[string][]*routev3.Route)
 		routesMap[apiIdentifier] = routes
-		orgIDOpenAPIRoutesMap[orgID] = routesMap
+		orgIDOpenAPIRoutesMap[organizationID] = routesMap
 	}
 
-	if _, ok := orgIDOpenAPIClustersMap[orgID]; ok {
-		orgIDOpenAPIClustersMap[orgID][apiIdentifier] = clusters
+	if _, ok := orgIDOpenAPIClustersMap[organizationID]; ok {
+		orgIDOpenAPIClustersMap[organizationID][apiIdentifier] = clusters
 	} else {
 		clustersMap := make(map[string][]*clusterv3.Cluster)
 		clustersMap[apiIdentifier] = clusters
-		orgIDOpenAPIClustersMap[orgID] = clustersMap
+		orgIDOpenAPIClustersMap[organizationID] = clustersMap
 	}
 
-	if _, ok := orgIDOpenAPIEndpointsMap[orgID]; ok {
-		orgIDOpenAPIEndpointsMap[orgID][apiIdentifier] = endpoints
+	if _, ok := orgIDOpenAPIEndpointsMap[organizationID]; ok {
+		orgIDOpenAPIEndpointsMap[organizationID][apiIdentifier] = endpoints
 	} else {
 		endpointMap := make(map[string][]*corev3.Address)
 		endpointMap[apiIdentifier] = endpoints
-		orgIDOpenAPIEndpointsMap[orgID] = endpointMap
+		orgIDOpenAPIEndpointsMap[organizationID] = endpointMap
 	}
 
-	if _, ok := orgIDOpenAPIEnforcerApisMap[orgID]; ok {
+	if _, ok := orgIDOpenAPIEnforcerApisMap[organizationID]; ok {
 		orgIDOpenAPIEnforcerApisMap[apiContent.OrganizationID][apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiContent.LifeCycleStatus,
 			apiContent.EndpointSecurity, apiContent.VHost)
 	} else {
 		enforcerAPIMap := make(map[string]types.Resource)
 		enforcerAPIMap[apiIdentifier] = oasParser.GetEnforcerAPI(mgwSwagger, apiContent.LifeCycleStatus,
 			apiContent.EndpointSecurity, apiContent.VHost)
-		orgIDOpenAPIEnforcerApisMap[orgID] = enforcerAPIMap
+		orgIDOpenAPIEnforcerApisMap[organizationID] = enforcerAPIMap
 	}
 
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
@@ -548,7 +549,7 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	var endpointArray []*corev3.Address
 	var apis []types.Resource
 
-	for orgID, entityMap := range orgIDOpenAPIEnvoyMap {
+	for organizationID, entityMap := range orgIDOpenAPIEnvoyMap {
 		for apiKey, labels := range entityMap {
 			if arrayContains(labels, label) {
 				vhost, err := ExtractVhostFromAPIIdentifier(apiKey)
@@ -557,10 +558,10 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 						err.Error())
 					continue
 				}
-				clusterArray = append(clusterArray, orgIDOpenAPIClustersMap[orgID][apiKey]...)
-				vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], orgIDOpenAPIRoutesMap[orgID][apiKey]...)
-				endpointArray = append(endpointArray, orgIDOpenAPIEndpointsMap[orgID][apiKey]...)
-				enfocerAPI, ok := orgIDOpenAPIEnforcerApisMap[orgID][apiKey]
+				clusterArray = append(clusterArray, orgIDOpenAPIClustersMap[organizationID][apiKey]...)
+				vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
+				endpointArray = append(endpointArray, orgIDOpenAPIEndpointsMap[organizationID][apiKey]...)
+				enfocerAPI, ok := orgIDOpenAPIEnforcerApisMap[organizationID][apiKey]
 				if ok {
 					apis = append(apis, enfocerAPI)
 				}
@@ -775,13 +776,13 @@ func UpdateXdsCacheWithLock(label string, endpoints []types.Resource, clusters [
 func ListApis(apiType string, organizationID string, limit *int64) *apiModel.APIMeta {
 	var limitValue int
 	if limit == nil {
-		limitValue = len(orgIDAPIMgwSwaggerMap[orgID])
+		limitValue = len(orgIDAPIMgwSwaggerMap[organizationID])
 	} else {
 		limitValue = int(*limit)
 	}
 	var apisArray []*apiModel.APIMetaListItem
 	i := 0
-	for apiIdentifier, mgwSwagger := range orgIDAPIMgwSwaggerMap[orgID] {
+	for apiIdentifier, mgwSwagger := range orgIDAPIMgwSwaggerMap[organizationID] {
 		if i == limitValue {
 			break
 		}
@@ -791,7 +792,7 @@ func ListApis(apiType string, organizationID string, limit *int64) *apiModel.API
 			apiMetaListItem.Version = mgwSwagger.GetVersion()
 			apiMetaListItem.APIType = mgwSwagger.GetAPIType()
 			apiMetaListItem.Context = mgwSwagger.GetXWso2Basepath()
-			apiMetaListItem.GatewayEnvs = orgIDOpenAPIEnvoyMap[orgID][apiIdentifier]
+			apiMetaListItem.GatewayEnvs = orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
 			vhost := "ERROR"
 			if vh, err := ExtractVhostFromAPIIdentifier(apiIdentifier); err == nil {
 				vhost = vh
@@ -802,7 +803,7 @@ func ListApis(apiType string, organizationID string, limit *int64) *apiModel.API
 		}
 	}
 	var apiMetaObject apiModel.APIMeta
-	apiMetaObject.Total = int64(len(orgIDAPIMgwSwaggerMap[orgID]))
+	apiMetaObject.Total = int64(len(orgIDAPIMgwSwaggerMap[organizationID]))
 	apiMetaObject.Count = int64(len(apisArray))
 	apiMetaObject.List = apisArray
 	return &apiMetaObject
@@ -811,7 +812,7 @@ func ListApis(apiType string, organizationID string, limit *int64) *apiModel.API
 // IsAPIExist returns whether a given API exists
 func IsAPIExist(vhost, name, version string, organizationID string) (exists bool) {
 	apiIdentifier := GenerateIdentifierForAPI(vhost, name, version)
-	_, exists = orgIDAPIMgwSwaggerMap[orgID][apiIdentifier]
+	_, exists = orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]
 	return exists
 }
 
