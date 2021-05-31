@@ -456,10 +456,10 @@ func ListApis(query *string, limit *int64, organizationID string) *apiModel.APIM
 		queryPair := strings.Split(*query, ":")
 		if queryPair[0] == apiTypeFilterKey {
 			apiType = strings.ToUpper(queryPair[1])
-			return xds.ListApis(apiType, orgID, limit)
+			return xds.ListApis(apiType, organizationID, limit)
 		}
 	}
-	return xds.ListApis("", orgID, limit)
+	return xds.ListApis("", organizationID, limit)
 }
 
 func readZipFile(zf *zip.File) ([]byte, error) {
