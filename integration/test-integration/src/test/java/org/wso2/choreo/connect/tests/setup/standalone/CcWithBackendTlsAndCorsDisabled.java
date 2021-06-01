@@ -26,7 +26,7 @@ import org.wso2.choreo.connect.tests.util.ApictlUtils;
 
 import java.util.concurrent.TimeUnit;
 
-public class CcWithBackendTls {
+public class CcWithBackendTlsAndCorsDisabled {
     CcInstance ccInstance;
 
     @BeforeTest(description = "initialise the setup")
