@@ -286,6 +286,7 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 // between create and update using the override param
 func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 	apiProject, err := extractAPIProject(payload)
+	apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 	if err != nil {
 		return err
 	}

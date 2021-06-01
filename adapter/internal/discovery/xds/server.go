@@ -335,6 +335,7 @@ func UpdateAPI(apiContent config.APIContent) {
 			apiContent.EndpointSecurity, apiContent.VHost)
 		orgIDOpenAPIEnforcerApisMap[organizationID] = enforcerAPIMap
 	}
+	logger.LoggerXds.Info("Add API == OrgId Swagger Map for tenat ===>>>", organizationID, orgIDAPIMgwSwaggerMap[organizationID])
 
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
 	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
@@ -372,6 +373,8 @@ func GetVhostOfAPI(apiUUID, environment string) (vhost string, exists bool) {
 func DeleteAPIs(vhost, apiName, version string, environments []string, organizationID string) error {
 	apiNameVersionID := GenerateIdentifierForAPIWithoutVhost(apiName, version)
 
+	logger.LoggerXds.Info("DeleteAPIs == OrgId Swagger Map for tenat ===>>>", organizationID, orgIDAPIMgwSwaggerMap[organizationID])
+
 	mutexForInternalMapUpdate.Lock()
 	defer mutexForInternalMapUpdate.Unlock()
 
@@ -387,6 +390,7 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 		deletedVhosts := make(map[string]struct{})
 		for vh := range vhosts {
 			apiIdentifier := GenerateIdentifierForAPI(vh, apiName, version)
+			logger.LoggerXds.Info("Deleting from all vhosts", apiIdentifier, organizationID)
 			// TODO: (renuka) optimize to update cache only once after updating all maps
 			if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
 				// Update apiToVhostsMap with already deleted vhosts in the loop
@@ -429,6 +433,7 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 // DeleteAPIWithAPIMEvent deletes API with the given UUID from the given gw environments
 func DeleteAPIWithAPIMEvent(uuid, name, version string, environments []string, organizationID string) {
 	apiIdentifiers := make(map[string]struct{})
+	logger.LoggerXds.Info("OrgId Swagger Map for tenat ===>>>", organizationID, orgIDAPIMgwSwaggerMap[organizationID])
 
 	mutexForInternalMapUpdate.Lock()
 	defer mutexForInternalMapUpdate.Unlock()
@@ -458,6 +463,7 @@ func DeleteAPIWithAPIMEvent(uuid, name, version string, environments []string, o
 // deleteAPI deletes an API, its resources and updates the caches of given environments
 func deleteAPI(apiIdentifier string, environments []string, organizationID string) error {
 	_, exists := orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]
+	logger.LoggerXds.Info("OrgId Swagger Map for tenat ===>>>", organizationID, orgIDAPIMgwSwaggerMap[organizationID])
 	if !exists {
 		logger.LoggerXds.Infof("Unable to delete API " + apiIdentifier + ". Does not exist.")
 		return errors.New(mgw.NotFound)

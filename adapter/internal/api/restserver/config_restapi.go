@@ -128,6 +128,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		if params.Environments != nil {
 			environments = strings.Split(*params.Environments, ":")
 		}
+		logger.LoggerAPI.Info("Delete API ====>>>>", tenantDomain)
 		err := xds.DeleteAPIs(vhost, params.APIName, params.Version, environments, tenantDomain)
 		if err == nil {
 			return api_individual.NewDeleteApisOK()
@@ -147,6 +148,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(
 		params api_individual.PostApisParams, principal *models.Principal) middleware.Responder {
 		jsonByteArray, _ := ioutil.ReadAll(params.File)
+		logger.LoggerAPI.Info("Delete API ====>>>>", tenantDomain)
 		err := apiServer.ApplyAPIProjectInStandaloneMode(jsonByteArray, params.Override)
 		if err != nil {
 			switch err.Error() {
