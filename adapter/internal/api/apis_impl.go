@@ -239,6 +239,10 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 		return err
 	}
 
+	if apiProject.OrganizationID == "" {
+		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
+	}
+
 	// vhostsToRemove contains vhosts and environments to undeploy
 	vhostsToRemove := make(map[string][]string)
 
@@ -271,7 +275,7 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 			// ignore if vhost is empty, since it deletes all vhosts of API
 			continue
 		}
-		if err := xds.DeleteAPIs(vhost, apiInfo.Name, apiInfo.Version, environments, ""); err != nil {
+		if err := xds.DeleteAPIs(vhost, apiInfo.Name, apiInfo.Version, environments, apiProject.OrganizationID); err != nil {
 			return err
 		}
 	}
@@ -352,12 +356,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	apiContent.EndpointSecurity.SandBox.Password = apiProject.EndpointSecurity.SandBox.Password
 	apiContent.EndpointSecurity.SandBox.Username = apiProject.EndpointSecurity.SandBox.Username
 	apiContent.EndpointSecurity.SandBox.SecurityType = apiProject.EndpointSecurity.SandBox.SecurityType
-
-	if apiProject.OrganizationID == "" {
-		apiContent.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
-	} else {
-		apiContent.OrganizationID = apiProject.OrganizationID
-	}
+	apiContent.OrganizationID = apiProject.OrganizationID
 
 	if apiProject.APIType == mgw.HTTP {
 		apiContent.APIDefinition = apiProject.SwaggerJsn
