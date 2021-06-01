@@ -35,13 +35,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wso2/adapter/config"
-	"github.com/wso2/adapter/internal/auth"
-	"github.com/wso2/adapter/pkg/tlsutils"
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/auth"
+	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
-	apiServer "github.com/wso2/adapter/internal/api"
-	restserver "github.com/wso2/adapter/internal/api/restserver"
-	logger "github.com/wso2/adapter/internal/loggers"
+	apiServer "github.com/wso2/product-microgateway/adapter/internal/api"
+	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
 const (

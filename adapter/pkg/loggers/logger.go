@@ -21,7 +21,7 @@ package loggers
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/adapter/pkg/logging"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 /* loggers should be initiated only for the main packages
@@ -32,9 +32,9 @@ When you add a new logger instance add the related package name as a constant
 
 // package name constants
 const (
-	pkgMsg                  = "github.com/wso2/adapter/pkg/messaging"
-	pkgHealth               = "github.com/wso2/adapter/pkg/health"
-	pkgTLSUtils             = "github.com/wso2/adapter/pkg/tlsutils"
+	pkgMsg                  = "github.com/wso2/product-microgateway/adapter/pkg/messaging"
+	pkgHealth               = "github.com/wso2/product-microgateway/adapter/pkg/health"
+	pkgTLSUtils             = "github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
 // logger package references

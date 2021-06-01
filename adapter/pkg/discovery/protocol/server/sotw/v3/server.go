@@ -29,7 +29,7 @@ import (
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/server/sotw/v3"
-	"github.com/wso2/adapter/pkg/discovery/protocol/resource/v3"
+	"github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/resource/v3"
 )
 
 // NewServer creates handlers from a config watcher and callbacks.

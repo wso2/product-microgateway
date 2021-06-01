@@ -19,8 +19,8 @@ package api
 import (
 	"encoding/json"
 	"github.com/ghodss/yaml"
-	"github.com/wso2/adapter/config"
-	"github.com/wso2/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
 func parseDeployments(data []byte) ([]Deployment, error) {

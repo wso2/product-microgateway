@@ -25,7 +25,7 @@ import (
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	oasModel "github.com/wso2/adapter/internal/oasparser/model"
+	oasModel "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 )
 
 // RequestEvent is the event that is published by the xds callback (onStreamRequest)

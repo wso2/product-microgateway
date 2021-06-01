@@ -17,7 +17,7 @@
 package xds
 
 import (
-	"github.com/wso2/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/config"
 	"reflect"
 	"testing"
 )

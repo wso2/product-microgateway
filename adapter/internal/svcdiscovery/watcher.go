@@ -28,8 +28,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/wso2/adapter/config"
-	logger "github.com/wso2/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/config"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
 var (

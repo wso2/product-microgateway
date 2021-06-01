@@ -22,7 +22,7 @@ import (
 	"fmt"
 
 	"github.com/streadway/amqp"
-	logger "github.com/wso2/adapter/pkg/loggers"
+	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 )
 
 var (

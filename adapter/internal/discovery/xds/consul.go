@@ -23,8 +23,8 @@ import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/wso2/adapter/internal/svcdiscovery"
-	logger "github.com/wso2/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
 var (

@@ -21,7 +21,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
-	logger "github.com/wso2/adapter/internal/loggers"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"io/ioutil"
 	"net/http"
 	"strconv"

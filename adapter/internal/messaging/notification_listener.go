@@ -25,13 +25,13 @@ import (
 	"strings"
 
 	"github.com/streadway/amqp"
-	"github.com/wso2/adapter/config"
-	"github.com/wso2/adapter/internal/discovery/xds"
-	eh "github.com/wso2/adapter/internal/eventhub"
-	"github.com/wso2/adapter/internal/synchronizer"
-	"github.com/wso2/adapter/pkg/eventhub/types"
-	logger "github.com/wso2/adapter/internal/loggers"
-	msg "github.com/wso2/adapter/pkg/messaging"
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
+	eh "github.com/wso2/product-microgateway/adapter/internal/eventhub"
+	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
+	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
 // constant variables

@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/adapter/internal/oasparser/utills"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 )
 
 func TestFindSwaggerVersion(t *testing.T) {

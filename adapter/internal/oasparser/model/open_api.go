@@ -25,7 +25,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/uuid"
-	logger "github.com/wso2/adapter/internal/loggers"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
 // SetInfoOpenAPI populates the MgwSwagger object with the properties within the openAPI v3 definition.

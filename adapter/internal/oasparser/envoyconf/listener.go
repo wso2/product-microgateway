@@ -30,8 +30,8 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/wrappers"
 
-	"github.com/wso2/adapter/config"
-	logger "github.com/wso2/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/config"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
 // CreateRoutesConfigForRds generates the default RouteConfiguration.

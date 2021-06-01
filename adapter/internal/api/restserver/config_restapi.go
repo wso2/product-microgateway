@@ -19,7 +19,7 @@ package restserver
 
 import (
 	"crypto/tls"
-	"github.com/wso2/adapter/internal/discovery/xds"
+	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -30,18 +30,18 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"github.com/wso2/adapter/config"
-	apiServer "github.com/wso2/adapter/internal/api"
-	"github.com/wso2/adapter/internal/api/models"
-	"github.com/wso2/adapter/internal/api/restserver/operations"
-	"github.com/wso2/adapter/internal/api/restserver/operations/api_collection"
-	"github.com/wso2/adapter/internal/api/restserver/operations/api_individual"
-	"github.com/wso2/adapter/internal/api/restserver/operations/authorization"
-	"github.com/wso2/adapter/internal/auth"
-	logger "github.com/wso2/adapter/internal/loggers"
-	constants "github.com/wso2/adapter/internal/oasparser/model"
-	"github.com/wso2/adapter/pkg/health"
-	"github.com/wso2/adapter/pkg/tlsutils"
+	"github.com/wso2/product-microgateway/adapter/config"
+	apiServer "github.com/wso2/product-microgateway/adapter/internal/api"
+	"github.com/wso2/product-microgateway/adapter/internal/api/models"
+	"github.com/wso2/product-microgateway/adapter/internal/api/restserver/operations"
+	"github.com/wso2/product-microgateway/adapter/internal/api/restserver/operations/api_collection"
+	"github.com/wso2/product-microgateway/adapter/internal/api/restserver/operations/api_individual"
+	"github.com/wso2/product-microgateway/adapter/internal/api/restserver/operations/authorization"
+	"github.com/wso2/product-microgateway/adapter/internal/auth"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	constants "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
+	"github.com/wso2/product-microgateway/adapter/pkg/health"
+	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
 var (
