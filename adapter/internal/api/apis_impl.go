@@ -58,7 +58,6 @@ const (
 	production                 string = "production"
 	sandbox                    string = "sandbox"
 	BasicAuthSecurity          string = "BASIC"
-	orgIDKey                   string = "orgId"
 )
 
 // ProjectAPI contains the extracted from an API project zip
