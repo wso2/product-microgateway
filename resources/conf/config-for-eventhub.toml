@@ -31,8 +31,8 @@
 
 [enforcer] 
 [enforcer.apimCredentials]
-  username="admin"
-  password="$env{apim_admin_pwd}"
+  username = "admin"
+  password = "$env{apim_admin_pwd}"
 
 [enforcer.jwtIssuer]
   enabled = true
@@ -49,9 +49,15 @@
       authURLs = ["ssl://apim:9711"]
 
 [enforcer.security]
+[enforcer.security.authHeader]
+  enableOutboundAuthHeader = false
+  authorizationHeader = "authorization"
+  testConsoleHeaderName = "Internal-Key"
+
 [[enforcer.security.tokenService]]
   name="Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
+  certificateAlias = "wso2carbon"
   jwksURL = ""
   validateSubscription = false
   consumerKeyClaim = "azp"
@@ -60,6 +66,7 @@
 [[enforcer.security.tokenService]]
   name="MGW"
   issuer = "https://localhost:9095/testkey"
+  certificateAlias = "mgw"
   jwksURL = ""
   validateSubscription = false
   consumerKeyClaim = ""
