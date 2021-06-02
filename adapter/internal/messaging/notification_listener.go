@@ -120,7 +120,7 @@ func handleAPIEvents(data []byte, eventType string) {
 		return
 	}
 
-	if config.IsNormalOperationMode() && !belongsToTenant(apiEvent.TenantDomain) {
+	if !belongsToTenant(apiEvent.TenantDomain) {
 		apiName := apiEvent.APIName
 		if apiEvent.APIName == "" {
 			apiName = apiEvent.Name
@@ -195,7 +195,7 @@ func handleLifeCycleEvents(data []byte) {
 		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling Lifecycle event data %v", apiLCEventErr)
 		return
 	}
-	if config.IsNormalOperationMode() && !belongsToTenant(apiEvent.TenantDomain) {
+	if !belongsToTenant(apiEvent.TenantDomain) {
 		logger.LoggerInternalMsg.Debugf("API Lifecycle event for the API %s:%s is dropped due to having non related tenantDomain : %s",
 			apiEvent.APIName, apiEvent.APIVersion, apiEvent.TenantDomain)
 		return
@@ -241,7 +241,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 			return
 		}
 
-		if config.IsNormalOperationMode() && !belongsToTenant(applicationRegistrationEvent.TenantDomain) {
+		if !belongsToTenant(applicationRegistrationEvent.TenantDomain) {
 			logger.LoggerInternalMsg.Debugf("Application Registration event for the Consumer Key : %s is dropped due to having non related tenantDomain : %s",
 				applicationRegistrationEvent.ConsumerKey, applicationRegistrationEvent.TenantDomain)
 			return
@@ -267,7 +267,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 			return
 		}
 
-		if config.IsNormalOperationMode() && !belongsToTenant(applicationEvent.TenantDomain) {
+		if !belongsToTenant(applicationEvent.TenantDomain) {
 			logger.LoggerInternalMsg.Debugf("Application event for the Application : %s (with uuid %s) is dropped due to having non related tenantDomain : %s",
 				applicationEvent.ApplicationName, applicationEvent.UUID, applicationEvent.TenantDomain)
 			return
@@ -305,7 +305,7 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling Subscription event data %v", subEventErr)
 		return
 	}
-	if config.IsNormalOperationMode() && !belongsToTenant(subscriptionEvent.TenantDomain) {
+	if !belongsToTenant(subscriptionEvent.TenantDomain) {
 		logger.LoggerInternalMsg.Debugf("Subscription event for the Application : %s and API %s is dropped due to having non related tenantDomain : %s",
 			subscriptionEvent.ApplicationUUID, subscriptionEvent.APIUUID, subscriptionEvent.TenantDomain)
 		return
@@ -490,5 +490,7 @@ func isLaterEvent(timeStampMap map[string]int64, mapKey string, currentTimeStamp
 }
 
 func belongsToTenant(tenantDomain string) bool {
-	return config.GetControlPlaneConnectedTenantDomain() == tenantDomain
+	// TODO : enable this once the events are fixed in apim
+	// return config.GetControlPlaneConnectedTenantDomain() == tenantDomain
+	return true
 }

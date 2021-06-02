@@ -223,10 +223,3 @@ func GetControlPlaneConnectedTenantDomain() string {
 	}
 	return superTenantDomain
 }
-
-// IsNormalOperationMode returns whether CC is working in normal mode or choreo mode
-// If this parameter is not configured or set to normal, return true.
-func IsNormalOperationMode() bool {
-	conf, _ := ReadConfigs()
-	return conf.ControlPlane.OperationMode == "" || conf.ControlPlane.OperationMode == "default"
-}
