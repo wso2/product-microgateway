@@ -228,5 +228,5 @@ func GetControlPlaneConnectedTenantDomain() string {
 // If this parameter is not configured or set to normal, return true.
 func IsNormalOperationMode() bool {
 	conf, _ := ReadConfigs()
-	return conf.ControlPlane.OperationMode == "" || conf.ControlPlane.OperationMode == "normal"
+	return conf.ControlPlane.OperationMode == "" || conf.ControlPlane.OperationMode == "default"
 }
