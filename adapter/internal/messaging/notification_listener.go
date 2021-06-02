@@ -490,5 +490,5 @@ func isLaterEvent(timeStampMap map[string]int64, mapKey string, currentTimeStamp
 }
 
 func belongsToTenant(tenantDomain string) bool {
-	return !config.IsNormalOperationMode() && config.GetControlPlaneConnectedTenantDomain() == tenantDomain
+	return config.IsNormalOperationMode() && config.GetControlPlaneConnectedTenantDomain() == tenantDomain
 }
