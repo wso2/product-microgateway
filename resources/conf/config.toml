@@ -47,6 +47,7 @@
 [[enforcer.security.tokenService]]
   name="Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
+  certificateAlias = "wso2carbon"
   jwksURL = ""
   validateSubscription = false
   consumerKeyClaim = "azp"
@@ -55,10 +56,16 @@
 [[enforcer.security.tokenService]]
   name="MGW"
   issuer = "https://localhost:9095/testkey"
+  certificateAlias = "mgw"
   jwksURL = ""
   validateSubscription = false
   consumerKeyClaim = ""
   certificateFilePath = "/home/wso2/security/truststore/mg.pem"
+
+[[enforcer.security.tokenService]]
+  name="APIM Publisher"
+  issuer = "https://localhost:9443/publisher"
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 [enforcer.throttling]
   enableGlobalEventPublishing = false

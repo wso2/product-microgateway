@@ -4,13 +4,13 @@
 
 # Configurations required for configuring the deployment parameters that are used for identifying the Choreo Connect Adapter REST APIs
 [adapter.server]
-  # Enable/Disable Choreo Connect Adaptor REST API
+  # Enable/Disable Choreo Connect Adapter REST API
   enabled = true
-  # Hostname of the Choreo Connect Adaptor
+  # Hostname of the Choreo Connect Adapter
   host = "0.0.0.0"
-  # Port of the Choreo Connect Adaptor
+  # Port of the Choreo Connect Adapter
   port = "9843"
-  # Time to live for the Adaptor access token
+  # Time to live for the Adapter access token
   tokenTTL = "1h"
   # Private key path to use for the token generation
   tokenPrivateKeyPath = "/home/wso2/security/keystore/mg.key"
@@ -34,7 +34,7 @@
 
 # Configurations of trust store used in the Choreo Connect Adapter
 [adapter.truststore]
-  # The directory path for the trusted certificates of the Choreo Connect Adaptor
+  # The directory path for the trusted certificates of the Choreo Connect Adapter
   location = "/home/wso2/security/truststore"
 
 # Configurations related to Consul
@@ -48,8 +48,8 @@
   # Access Control Token generated using Consul
   # You should grant read access to services when creating the token
   aclToken = "d3a2a719-4221-8c65-5212-58d4727427ac"
-  # Choreo Connect natively integrates with Consul service mesh.
-  # Therefore a service name is required to be defined inorder to grant access to other services in mesh.
+  # Choreo Connect natively integrates with Consul service mesh
+  # Therefore a service name is required to be defined inorder to grant access to other services in mesh
   # This only need to be defined if service mesh enabled in Consul
   mgwServiceName = "wso2"
   # Set this to true if service mesh is enabled in Consul

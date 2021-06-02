@@ -65,6 +65,11 @@
   consumerKeyClaim = ""
   certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
+[[enforcer.security.tokenService]]
+  name="APIM Publisher"
+  issuer = "https://localhost:9443/publisher"
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
 [controlPlane]
   enabled = true
   serviceUrl = "https://apim:9443/"

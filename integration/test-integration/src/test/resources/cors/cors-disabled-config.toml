@@ -16,34 +16,6 @@ allowCredentials = false
   jmsConnectionInitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
   jmsConnectionProviderUrl = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://apim:5672'"
 
-[enforcer.security]
-[[enforcer.security.tokenService]]
-  name="Resident Key Manager"
-  issuer = "https://localhost:9443/oauth2/token"
-  certificateAlias = ""
-  jwksURL = ""
-  validateSubscription = false
-  consumerKeyClaim = "azp"
-  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
-
-[[enforcer.security.tokenService]]
-    name="MGW"
-    issuer = "https://localhost:9095/testkey"
-    certificateAlias = "mgw"
-    jwksURL = ""
-    validateSubscription = false
-    consumerKeyClaim = ""
-    certificateFilePath = "/home/wso2/security/truststore/mg.pem"
-
-[[enforcer.security.tokenService]]
-  name="MGW"
-  issuer = "https://localhost:9095/testkey"
-  certificateAlias = "mgw"
-  jwksURL = ""
-  validateSubscription = false
-  consumerKeyClaim = ""
-  certificateFilePath = "/home/wso2/security/truststore/mg.pem"
-
 [controlPlane]
   enabled = false
   serviceUrl = "https://apim:9443/"
