@@ -17,19 +17,21 @@
 package org.wso2.apimgt.gateway.cli.model.template.service;
 
 import io.swagger.v3.oas.models.parameters.Parameter;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
 
 /**
  * Wraps the {@link Parameter} from swagger models for easier templating.
- *
  */
 public class BallerinaParameter implements BallerinaOpenAPIObject<BallerinaParameter, Parameter> {
+
     private String name;
     private String in;
     private String description;
     private Boolean required;
     private Boolean allowEmptyValue;
+    private String escapedName;
 
     @Override
     public BallerinaParameter buildContext(Parameter parameter) throws BallerinaServiceGenException {
@@ -38,11 +40,16 @@ public class BallerinaParameter implements BallerinaOpenAPIObject<BallerinaParam
 
     @Override
     public BallerinaParameter buildContext(Parameter parameter, ExtendedAPI api) throws BallerinaServiceGenException {
-        this.name = parameter.getName();
+        String parameterName = parameter.getName();
+        this.name = parameterName;
         this.in = parameter.getIn();
         this.description = parameter.getDescription();
         this.required = parameter.getRequired();
         this.allowEmptyValue = parameter.getAllowEmptyValue();
+        this.escapedName = "'" + parameterName;
+        if (!StringUtils.isAlphanumeric(parameterName)) {
+            this.escapedName = parameterName;
+        }
         return this;
     }
 
@@ -75,4 +82,11 @@ public class BallerinaParameter implements BallerinaOpenAPIObject<BallerinaParam
         this.allowEmptyValue = allowEmptyValue;
     }
 
+    public String getEscapedName() {
+        return escapedName;
+    }
+
+    public void setEscapedName(String escapedName) {
+        this.escapedName = escapedName;
+    }
 }
