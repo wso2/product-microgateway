@@ -19,11 +19,12 @@ package restserver
 
 import (
 	"crypto/tls"
-	"github.com/wso2/adapter/internal/discovery/xds"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/wso2/adapter/internal/discovery/xds"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/loads"
@@ -62,6 +63,9 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.MultipartformConsumer = runtime.DiscardConsumer
 
 	api.JSONProducer = runtime.JSONProducer()
+
+	// Get the organizationId
+	tenantDomain := config.GetControlPlaneConnectedTenantDomain()
 
 	// Applies when the Authorization header is set with the Basic scheme
 	api.BasicAuthAuth = func(username, password string) (*models.Principal, error) {
@@ -124,7 +128,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		if params.Environments != nil {
 			environments = strings.Split(*params.Environments, ":")
 		}
-		err := xds.DeleteAPIs(vhost, params.APIName, params.Version, environments)
+		err := xds.DeleteAPIs(vhost, params.APIName, params.Version, environments, tenantDomain)
 		if err == nil {
 			return api_individual.NewDeleteApisOK()
 		}
@@ -138,7 +142,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.APICollectionGetApisHandler = api_collection.GetApisHandlerFunc(func(
 		params api_collection.GetApisParams, principal *models.Principal) middleware.Responder {
 
-		return api_collection.NewGetApisOK().WithPayload(apiServer.ListApis(params.Query, params.Limit))
+		return api_collection.NewGetApisOK().WithPayload(apiServer.ListApis(params.Query, params.Limit, tenantDomain))
 	})
 	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(
 		params api_individual.PostApisParams, principal *models.Principal) middleware.Responder {

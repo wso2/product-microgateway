@@ -28,9 +28,9 @@ import (
 	"github.com/wso2/adapter/config"
 	"github.com/wso2/adapter/internal/discovery/xds"
 	eh "github.com/wso2/adapter/internal/eventhub"
+	logger "github.com/wso2/adapter/internal/loggers"
 	"github.com/wso2/adapter/internal/synchronizer"
 	"github.com/wso2/adapter/pkg/eventhub/types"
-	logger "github.com/wso2/adapter/internal/loggers"
 	msg "github.com/wso2/adapter/pkg/messaging"
 )
 
@@ -119,6 +119,7 @@ func handleAPIEvents(data []byte, eventType string) {
 		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling API event data %v", apiEventErr)
 		return
 	}
+
 	if !belongsToTenant(apiEvent.TenantDomain) {
 		apiName := apiEvent.APIName
 		if apiEvent.APIName == "" {
@@ -170,7 +171,7 @@ func handleAPIEvents(data []byte, eventType string) {
 				}
 			}
 		} else if strings.EqualFold(removeAPIFromGateway, apiEvent.Event.Type) {
-			xds.DeleteAPIWithAPIMEvent(apiEvent.UUID, apiEvent.Name, apiEvent.Version, apiEvent.GatewayLabels)
+			xds.DeleteAPIWithAPIMEvent(apiEvent.UUID, apiEvent.Name, apiEvent.Version, apiEvent.GatewayLabels, apiEvent.TenantDomain)
 			logger.LoggerInternalMsg.Debugf("Undeployed API from router")
 			if _, ok := eh.APIListMap[env]; ok {
 				apiListOfEnv := eh.APIListMap[env].List
@@ -489,5 +490,7 @@ func isLaterEvent(timeStampMap map[string]int64, mapKey string, currentTimeStamp
 }
 
 func belongsToTenant(tenantDomain string) bool {
-	return config.GetControlPlaneConnectedTenantDomain() == tenantDomain
+	// TODO : enable this once the events are fixed in apim
+	// return config.GetControlPlaneConnectedTenantDomain() == tenantDomain
+	return true
 }
