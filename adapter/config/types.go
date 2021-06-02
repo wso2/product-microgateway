@@ -355,7 +355,6 @@ type controlPlane struct {
 	EnvironmentLabels       []string      `toml:"environmentLabels"`
 	RetryInterval           time.Duration `toml:"retryInterval"`
 	SkipSSLVerification     bool          `toml:"skipSSLVerification"`
-	OperationMode           string        `toml:"operationMode"`
 	JmsConnectionParameters struct {
 		EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
 	} `toml:"jmsConnectionParameters"`
