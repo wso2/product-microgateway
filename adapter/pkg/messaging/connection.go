@@ -52,7 +52,7 @@ func init() {
 var EventListeningEndpoints []string
 
 // ConnectToRabbitMQ function tries to connect to the RabbitMQ server as long as it takes to establish a connection
-func ConnectToRabbitMQ() (*amqp.Connection, error) {
+func connectToRabbitMQ() (*amqp.Connection, error) {
 	var err error = nil
 	var conn *amqp.Connection
 	amqpURIArray = retrieveAMQPURLList()
@@ -307,4 +307,22 @@ func handleEvent(c *Consumer, key string) error {
 		}
 	}
 	return nil
+}
+
+// ProcessEvents to pass event consumption
+func ProcessEvents(eventListeningEndpoints []string) error {
+	var err error
+	EventListeningEndpoints = eventListeningEndpoints
+	bindingKeys := []string{notification, keymanager, tokenRevocation, throttleData}
+	err = StartJMSConnection()
+
+	if err == nil {
+		for i, key := range bindingKeys {
+			logger.LoggerMsg.Infof("Establishing consumer index %v for key %s ", i, key)
+			go func(key string) {
+				StartConsumer(key)
+			}(key)
+		}
+	}
+	return err
 }

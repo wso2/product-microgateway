@@ -24,44 +24,18 @@ import (
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
 
 	"github.com/wso2/product-microgateway/adapter/config"
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
 var lifetime = 0 * time.Second
 
-const (
-	notification    string = "notification"
-	keymanager      string = "keymanager"
-	tokenRevocation string = "tokenRevocation"
-	throttleData    string = "throttleData"
-	exchange        string = "amq.topic"
-	exchangeType    string = "topic"
-)
-
 // ProcessEvents to pass event consumption
 func ProcessEvents(config *config.Config) {
-	var err error
-	passConfigToPkg(config)
-	bindingKeys := []string{notification, keymanager, tokenRevocation, throttleData}
-	msg.RabbitConn, err = msg.ConnectToRabbitMQ()
+	err := msg.ProcessEvents(config.ControlPlane.JmsConnectionParameters.EventListeningEndpoints)
 	health.SetControlPlaneJmsStatus(err == nil)
 
 	go handleNotification()
 	go handleKMConfiguration()
 	go handleThrottleData()
 	go handleTokenRevocation()
-
-	if err == nil {
-		for i, key := range bindingKeys {
-			logger.LoggerInternalMsg.Infof("Establishing consumer index %v for key %s ", i, key)
-			go func(key string) {
-				msg.StartConsumer(key)
-			}(key)
-		}
-	}
-}
-
-func passConfigToPkg(config *config.Config) {
-	msg.EventListeningEndpoints = config.ControlPlane.JmsConnectionParameters.EventListeningEndpoints
 }

@@ -50,6 +50,13 @@ const (
 	exchangeType    string = "topic"
 )
 
+// StartJMSConnection initiates the JMS Connection
+func StartJMSConnection() error {
+	var err error
+	RabbitConn, err = connectToRabbitMQ()
+	return err
+}
+
 // StartConsumer for provided key consume data
 func StartConsumer(key string) *Consumer {
 	c := &Consumer{
