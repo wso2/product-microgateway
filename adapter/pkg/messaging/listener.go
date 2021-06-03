@@ -20,13 +20,14 @@ package messaging
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/streadway/amqp"
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 )
 
 var (
-	amqpURI  string
+	amqpURI string
 	// RabbitConn represents the ampq connection
 	RabbitConn       *amqp.Connection
 	rabbitCloseError chan *amqp.Error
@@ -34,12 +35,23 @@ var (
 	amqpURIArray = make([]amqpFailoverURL, 0)
 )
 
+var lifetime = 0 * time.Second
+
 const (
-	consumerTag  string = "jms-consumer"
+	consumerTag string = "jms-consumer"
+)
+
+const (
+	notification    string = "notification"
+	keymanager      string = "keymanager"
+	tokenRevocation string = "tokenRevocation"
+	throttleData    string = "throttleData"
+	exchange        string = "amq.topic"
+	exchangeType    string = "topic"
 )
 
 // StartConsumer for provided key consume data
-func StartConsumer(key string) (*Consumer) {
+func StartConsumer(key string) *Consumer {
 	c := &Consumer{
 		Conn:    nil,
 		Channel: nil,
@@ -51,6 +63,22 @@ func StartConsumer(key string) (*Consumer) {
 	go func() {
 		c.reconnect(key)
 	}()
+	err := handleEvent(c, key)
+	if err != nil {
+		logger.LoggerMsg.Fatalf("%s", err)
+	}
+	if lifetime > 0 {
+		logger.LoggerMsg.Debugf("running %s events for %s", key, lifetime)
+		time.Sleep(lifetime)
+	} else {
+		logger.LoggerMsg.Infof("process of receiving %s events running forever", key)
+		select {}
+	}
+
+	logger.LoggerMsg.Infof("shutting down")
+	if err := c.Shutdown(); err != nil {
+		logger.LoggerMsg.Fatalf("error during shutdown: %s", err)
+	}
 
 	return c
 }

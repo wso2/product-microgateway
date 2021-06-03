@@ -21,10 +21,9 @@ package messaging
 import (
 	"encoding/json"
 
-	"github.com/streadway/amqp"
-	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
+	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
 
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
@@ -39,8 +38,8 @@ const (
 )
 
 // handleThrottleData handles Key template and Blocking condition in throttle data event.
-func handleThrottleData(deliveries <-chan amqp.Delivery, done chan error) {
-	for d := range deliveries {
+func handleThrottleData() {
+	for d := range msg.ThrottleDataChannel {
 		var data msg.EventThrottleData
 		var throttleData *throttle.ThrottleData
 		e := json.Unmarshal([]byte(string(d.Body)), &data)
@@ -109,5 +108,4 @@ func handleThrottleData(deliveries <-chan amqp.Delivery, done chan error) {
 		d.Ack(false)
 	}
 	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
-	done <- nil
 }

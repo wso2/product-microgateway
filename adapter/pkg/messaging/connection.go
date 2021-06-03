@@ -19,6 +19,7 @@
 package messaging
 
 import (
+	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -29,8 +30,26 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 )
 
+var (
+	// NotificationChannel stores the Events for notifications
+	NotificationChannel chan amqp.Delivery
+	// KeyManagerChannel stores the key manager eventsv
+	KeyManagerChannel chan amqp.Delivery
+	// RevokedTokenChannel stores the revoked token events
+	RevokedTokenChannel chan amqp.Delivery
+	// ThrottleDataChannel stores the throttling related events
+	ThrottleDataChannel chan amqp.Delivery
+)
+
+func init() {
+	NotificationChannel = make(chan amqp.Delivery)
+	KeyManagerChannel = make(chan amqp.Delivery)
+	RevokedTokenChannel = make(chan amqp.Delivery)
+	ThrottleDataChannel = make(chan amqp.Delivery)
+}
+
 // EventListeningEndpoints represents the list of endpoints
-var EventListeningEndpoints  []string
+var EventListeningEndpoints []string
 
 // ConnectToRabbitMQ function tries to connect to the RabbitMQ server as long as it takes to establish a connection
 func ConnectToRabbitMQ() (*amqp.Connection, error) {
@@ -211,4 +230,81 @@ type amqpFailoverURL struct {
 	URL             string
 	retryCount      int
 	connectionDelay int
+}
+
+func handleEvent(c *Consumer, key string) error {
+	var err error
+
+	logger.LoggerMsg.Debugf("got Connection, getting Channel for %s events", key)
+	c.Channel, err = c.Conn.Channel()
+	if err != nil {
+		return fmt.Errorf("Channel: %s", err)
+	}
+
+	logger.LoggerMsg.Debugf("got Channel, declaring Exchange (%q)", exchange)
+	if err = c.Channel.ExchangeDeclare(
+		exchange,     // name of the exchange
+		exchangeType, // type
+		true,         // durable
+		false,        // delete when complete
+		false,        // internal
+		false,        // noWait
+		nil,          // arguments
+	); err != nil {
+		return fmt.Errorf("Exchange Declare: %s", err)
+	}
+
+	logger.LoggerMsg.Infof("declared Exchange, declaring Queue %q", key+"queue")
+	queue, err := c.Channel.QueueDeclare(
+		"",    // name of the queue
+		false, // durable
+		true,  // delete when usused
+		false, // exclusive
+		false, // noWait
+		nil,   // arguments
+	)
+	if err != nil {
+		return fmt.Errorf("Queue Declare: %s", err)
+	}
+
+	logger.LoggerMsg.Debugf("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
+		queue.Name, queue.Messages, queue.Consumers, key)
+
+	if err = c.Channel.QueueBind(
+		queue.Name, // name of the queue
+		key,        // bindingKey
+		exchange,   // sourceExchange
+		false,      // noWait
+		nil,        // arguments
+	); err != nil {
+		return fmt.Errorf("Queue Bind: %s", err)
+	}
+	logger.LoggerMsg.Infof("Queue bound to Exchange, starting Consume (consumer tag %q) events", c.Tag)
+	deliveries, err := c.Channel.Consume(
+		queue.Name, // name
+		c.Tag,      // consumerTag,
+		false,      // noAck
+		false,      // exclusive
+		false,      // noLocal
+		false,      // noWait
+		nil,        // arguments
+	)
+	if strings.EqualFold(key, notification) {
+		for event := range deliveries {
+			NotificationChannel <- event
+		}
+	} else if strings.EqualFold(key, keymanager) {
+		for event := range deliveries {
+			KeyManagerChannel <- event
+		}
+	} else if strings.EqualFold(key, tokenRevocation) {
+		for event := range deliveries {
+			RevokedTokenChannel <- event
+		}
+	} else if strings.EqualFold(key, throttleData) {
+		for event := range deliveries {
+			ThrottleDataChannel <- event
+		}
+	}
+	return nil
 }

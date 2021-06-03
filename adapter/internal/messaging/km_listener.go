@@ -23,10 +23,9 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/streadway/amqp"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
-	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
@@ -40,12 +39,12 @@ const (
 )
 
 // handleKMEvent
-func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
+func handleKMConfiguration() {
 	var (
 		indexOfKeymanager int
 		isFound           bool
 	)
-	for d := range deliveries {
+	for d := range msg.KeyManagerChannel {
 		var notification msg.EventKeyManagerNotification
 		// var keyManagerConfig resourceTypes.KeymanagerConfig
 		var kmConfigMap map[string]interface{}
@@ -110,5 +109,4 @@ func handleKMConfiguration(deliveries <-chan amqp.Delivery, done chan error) {
 		d.Ack(false)
 	}
 	logger.LoggerInternalMsg.Info("handle: deliveries channel closed")
-	done <- nil
 }
