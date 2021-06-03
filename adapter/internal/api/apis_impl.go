@@ -32,10 +32,10 @@ import (
 	"github.com/wso2/product-microgateway/adapter/config"
 	apiModel "github.com/wso2/product-microgateway/adapter/internal/api/models"
 	xds "github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
+	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
-	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
 // API Controller related constants
@@ -239,6 +239,10 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 		return err
 	}
 
+	if apiProject.OrganizationID == "" {
+		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
+	}
+
 	// vhostsToRemove contains vhosts and environments to undeploy
 	vhostsToRemove := make(map[string][]string)
 
@@ -271,7 +275,7 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 			// ignore if vhost is empty, since it deletes all vhosts of API
 			continue
 		}
-		if err := xds.DeleteAPIs(vhost, apiInfo.Name, apiInfo.Version, environments); err != nil {
+		if err := xds.DeleteAPIs(vhost, apiInfo.Name, apiInfo.Version, environments, apiProject.OrganizationID); err != nil {
 			return err
 		}
 	}
@@ -282,6 +286,7 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 // between create and update using the override param
 func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 	apiProject, err := extractAPIProject(payload)
+	apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 	if err != nil {
 		return err
 	}
@@ -301,7 +306,7 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 		// if the API already exists in the one of vhost, break deployment of the API
 		exists := false
 		for _, deployment := range apiProject.Deployments {
-			if xds.IsAPIExist(deployment.DeploymentVhost, apiInfo.Name, apiInfo.Version) {
+			if xds.IsAPIExist(deployment.DeploymentVhost, apiInfo.Name, apiInfo.Version, apiProject.OrganizationID) {
 				exists = true
 				break
 			}
@@ -444,16 +449,16 @@ func retrieveEndPointSecurityInfo(value string, endPointSecurity config.EpSecuri
 }
 
 // ListApis calls the ListApis method in xds_server.go
-func ListApis(query *string, limit *int64) *apiModel.APIMeta {
+func ListApis(query *string, limit *int64, organizationID string) *apiModel.APIMeta {
 	var apiType string
 	if query != nil {
 		queryPair := strings.Split(*query, ":")
 		if queryPair[0] == apiTypeFilterKey {
 			apiType = strings.ToUpper(queryPair[1])
-			return xds.ListApis(apiType, limit)
+			return xds.ListApis(apiType, organizationID, limit)
 		}
 	}
-	return xds.ListApis("", limit)
+	return xds.ListApis("", organizationID, limit)
 }
 
 func readZipFile(zf *zip.File) ([]byte, error) {

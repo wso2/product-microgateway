@@ -230,7 +230,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 			vhostToEnvsMap[environment.Vhost] = append(vhostToEnvsMap[environment.Vhost], environment.Name)
 		}
 
-		logger.LoggerSync.Debugf("Starting zip reading: %v", file.Name)
+		logger.LoggerSync.Infof("Start deploying api from file (API_ID:REVISION_ID).zip : %v", file.Name)
 		f, err := file.Open()
 		if err != nil {
 			logger.LoggerSync.Errorf("Error reading zip file: %v", err)
