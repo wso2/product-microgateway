@@ -25,7 +25,6 @@ package synchronizer
 import (
 	"archive/zip"
 	"bytes"
-	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -86,24 +85,6 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse) {
 
 	// Check if TLS is enabled
 	skipSSL := ehConfigs.SkipSSLVerification
-	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
-	tr := &http.Transport{}
-	if !skipSSL {
-		_, _, truststoreLocation := restserver.GetKeyLocations()
-		caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	}
-
-	// Configuring the http client
-	client := &http.Client{
-		Transport: tr,
-	}
 
 	// Create a HTTP request
 	req, err := http.NewRequest("GET", ehURL, nil)
@@ -130,7 +111,7 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse) {
 	req.Header.Set(authorization, basicAuth)
 	// Make the request
 	logger.LoggerSync.Debug("Sending the controle plane request")
-	resp, err := client.Do(req)
+	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 	// In the event of a connection error, the error would not be nil, then return the error
 	// If the error is not null, proceed
 	if err != nil {

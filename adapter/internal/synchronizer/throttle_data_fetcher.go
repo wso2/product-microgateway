@@ -23,7 +23,6 @@
 package synchronizer
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -106,7 +105,7 @@ func FetchThrottleData(endpoint string, c chan SyncAPIResponse) {
 	req.Header.Set(authorization, basicAuth)
 
 	logger.LoggerSync.Debug("Sending the throttle data request to Traffic Manager")
-	resp, err := client.Do(req)
+	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 	if err != nil {
 		logger.LoggerSync.Errorf("Error occurred while fetching data from Traffic manager: %v. %v", endpoint, err)
 		respSyncAPI.Err = err

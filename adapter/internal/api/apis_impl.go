@@ -64,6 +64,7 @@ const (
 type ProjectAPI struct {
 	APIJsn                     []byte
 	Deployments                []Deployment
+	RevisionID				   int
 	SwaggerJsn                 []byte // TODO: (SuKSW) change to OpenAPIJsn
 	UpstreamCerts              []byte
 	APIType                    string
@@ -341,6 +342,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	apiContent.VHost = vhost
 	apiContent.Name = apiInfo.Name
 	apiContent.Version = apiInfo.Version
+	apiContent.RevisionID = apiProject.RevisionID
 	apiContent.APIType = apiProject.APIType
 	apiContent.LifeCycleStatus = apiProject.APILifeCycleStatus
 	apiContent.UpstreamCerts = apiProject.UpstreamCerts
@@ -370,6 +372,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData) {
 	apiProject.APIType = strings.ToUpper(apiObject.Data.APIType)
 	apiProject.APILifeCycleStatus = strings.ToUpper(apiObject.Data.LifeCycleStatus)
+	apiProject.RevisionID = apiObject.Data.RevisionID
 
 	apiProject.AuthHeader = apiObject.Data.AuthorizationHeader
 

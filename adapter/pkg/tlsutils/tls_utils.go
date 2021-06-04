@@ -21,7 +21,9 @@ package tlsutils
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"github.com/wso2/adapter/internal/api/restserver"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -39,8 +41,9 @@ var (
 )
 
 const (
-	pemExtension string = ".pem"
-	crtExtension string = ".crt"
+	pemExtension  string = ".pem"
+	crtExtension  string = ".crt"
+	authorization string = "Authorization"
 )
 
 // GetServerCertificate returns the certificate (used for the restAPI server and xds server) created based on configuration values.
@@ -95,4 +98,28 @@ func IsPublicCertificate(certContent []byte) bool {
 		return true
 	}
 	return false
+}
+
+// InvokeControlPlane sends request to the control plane and returns the response
+func InvokeControlPlane(req *http.Request, skipSSL bool) (*http.Response, error) {
+	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
+	tr := &http.Transport{}
+	if !skipSSL {
+		_, _, truststoreLocation := restserver.GetKeyLocations()
+		caCertPool := GetTrustedCertPool(truststoreLocation)
+		tr = &http.Transport{
+			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
+		}
+	} else {
+		tr = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+	}
+
+	// Configuring the http client
+	client := &http.Client{
+		Transport: tr,
+	}
+	logger.LoggerSync.Debug("Sending the control plane request")
+	return client.Do(req)
 }

@@ -404,6 +404,7 @@ type APIContent struct {
 	EndpointSecurity   EndpointSecurity
 	AuthHeader         string
 	OrganizationID     string
+	RevisionID		   int
 }
 
 // APIJsonData contains everything necessary to extract api.json/api.yaml file
@@ -412,6 +413,7 @@ type APIJsonData struct {
 		APIName                    string   `json:"name,omitempty"`
 		APIContext                 string   `json:"context,omitempty"`
 		APIVersion                 string   `json:"version,omitempty"`
+		RevisionID				   int      `json:"revisionId,omitempty"`
 		APIType                    string   `json:"type,omitempty"`
 		LifeCycleStatus            string   `json:"lifeCycleStatus,omitempty"`
 		EndpointImplementationType string   `json:"endpointImplementationType,omitempty"`

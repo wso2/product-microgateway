@@ -18,9 +18,15 @@
 package xds
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wso2/adapter/internal/auth"
+	"github.com/wso2/adapter/internal/tlsutils"
 	"math/rand"
+	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -337,10 +343,45 @@ func UpdateAPI(apiContent config.APIContent) {
 	}
 
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
-	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
+	revisionStatus := updateXdsCacheOnAPIAdd(oldLabels, newLabels)
+	if revisionStatus {
+		// send updated revision to control plane
+		logger.LoggerXds.Infof("Send updated revision to control plane : %v, RevisionID %v", apiIdentifier,
+		apiContent.RevisionID)
+		sendRevisionUpdate(apiIdentifier, apiContent.RevisionID)
+
+	}
 	if svcdiscovery.IsServiceDiscoveryEnabled {
 		startConsulServiceDiscovery(apiContent.OrganizationID) //consul service discovery starting point
 	}
+}
+
+func sendRevisionUpdate(apiIdentifier string, revisionID int) {
+	values := map[string]string{apiIdentifier: strconv.Itoa(revisionID)}
+	jsonValue, _ := json.Marshal(values)
+	revisionEP := "hello"
+
+	conf, _ := config.ReadConfigs()
+	ehConfigs := conf.ControlPlane
+	ehURL := ehConfigs.ServiceURL
+	ehUname := ehConfigs.Username
+	ehPass := ehConfigs.Password
+	skipSSL := ehConfigs.SkipSSLVerification
+
+	// Create a HTTP request
+	if strings.HasSuffix(ehURL, "/") {
+		ehURL += revisionEP
+	} else {
+		ehURL += "/" + revisionEP
+	}
+	req, _ := http.NewRequest("POST", ehURL, bytes.NewBuffer(jsonValue))
+
+	// Setting authorization header
+	basicAuth := "Basic " + auth.GetBasicAuth(ehUname, ehPass)
+	req.Header.Set("authorization", basicAuth)
+
+	_, _ = tlsutils.InvokeControlPlane(req, skipSSL)
+
 }
 
 // GetAllEnvironments returns all the environments merging new environments with already deployed environments
@@ -521,14 +562,20 @@ func mergeResourceArrays(resourceArrays [][]types.Resource) []types.Resource {
 // when this method is called, openAPIEnvoy map is updated.
 // Old labels refers to the previously assigned labels
 // New labels refers to the the updated labels
-func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
-
+func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) bool {
+	revisionStatus := false
 	// TODO: (VirajSalaka) check possible optimizations, Since the number of labels are low by design it should not be an issue
 	for _, newLabel := range newLabels {
 		listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(newLabel)
 		UpdateEnforcerApis(newLabel, apis, "")
-		UpdateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
+		success := UpdateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
 		logger.LoggerXds.Debugf("Xds Cache is updated for the newly added label : %v", newLabel)
+		if success {
+			// if even one label was updated with latest revision, we take the revision as deployed.
+			// (other labels also will get updated successfully)
+			revisionStatus = success
+			continue
+		}
 	}
 	for _, oldLabel := range oldLabels {
 		if !arrayContains(newLabels, oldLabel) {
@@ -538,10 +585,11 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 			logger.LoggerXds.Debugf("Xds Cache is updated for the already existing label : %v", oldLabel)
 		}
 	}
-
+	return revisionStatus
 }
 
 // GenerateEnvoyResoucesForLabel generates envoy resources for a given label
+// This method will list out all APIs mapped to the label. and generate envoy resources for all of these APIs.
 func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Resource, []types.Resource,
 	[]types.Resource, []types.Resource) {
 	var clusterArray []*clusterv3.Cluster
@@ -601,7 +649,7 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 }
 
 //use UpdateXdsCacheWithLock to avoid race conditions
-func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) {
+func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) bool {
 	version := rand.Intn(maxRandomInt)
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	// Will be updated once decide to move to incremental XDS
@@ -610,8 +658,10 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	err := cache.SetSnapshot(label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)
+		return false
 	}
-	logger.LoggerXds.Infof("New Router cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New Router cache updated for the label: " + label + " version: " + fmt.Sprint(version))
+	return true
 }
 
 // UpdateEnforcerConfig Sets new update to the enforcer's configuration
@@ -766,10 +816,10 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 
 // UpdateXdsCacheWithLock uses mutex and lock to avoid different go routines updating XDS at the same time
 func UpdateXdsCacheWithLock(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource,
-	listeners []types.Resource) {
+	listeners []types.Resource) bool {
 	mutexForXdsUpdate.Lock()
 	defer mutexForXdsUpdate.Unlock()
-	updateXdsCache(label, endpoints, clusters, routes, listeners)
+	return updateXdsCache(label, endpoints, clusters, routes, listeners)
 }
 
 // ListApis returns a list of objects that holds info about each API
