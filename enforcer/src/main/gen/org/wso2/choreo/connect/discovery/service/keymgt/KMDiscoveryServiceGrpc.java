@@ -21,7 +21,7 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.33.1)",
+    value = "by gRPC proto compiler",
     comments = "Source: wso2/discovery/service/keymgt/kmds.proto")
 public final class KMDiscoveryServiceGrpc {
 

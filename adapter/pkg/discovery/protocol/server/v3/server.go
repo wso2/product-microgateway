@@ -26,7 +26,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/config"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/keymgt"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/subscription"
-	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/throtlle"
+	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/throttle"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/resource/v3"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/server/sotw/v3"
 	"google.golang.org/grpc/codes"
