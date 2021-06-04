@@ -23,7 +23,7 @@ cd $cur_dir
 rm -rf target
 mkdir -p target/deps
 
-ADAPTER_GEN_DIR=$cur_dir/../adapter/internal/discovery/api
+ADAPTER_GEN_DIR=$cur_dir/../adapter/pkg/discovery/api
 ENFORCER_GEN_DIR=$cur_dir/../enforcer/src/main/gen
 GREEN='\033[0;32m'
 BOLD="\033[1m"
