@@ -1,6 +1,6 @@
 // This file is safe to edit. Once it exists it will not be overwritten
 
-// Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@ package restserver
 
 import (
 	"crypto/tls"
-	"github.com/wso2/adapter/internal/discovery/xds"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/wso2/adapter/internal/discovery/xds"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/loads"
@@ -38,10 +39,10 @@ import (
 	"github.com/wso2/adapter/internal/api/restserver/operations/api_individual"
 	"github.com/wso2/adapter/internal/api/restserver/operations/authorization"
 	"github.com/wso2/adapter/internal/auth"
-	"github.com/wso2/adapter/internal/health"
+	logger "github.com/wso2/adapter/internal/loggers"
 	constants "github.com/wso2/adapter/internal/oasparser/model"
-	"github.com/wso2/adapter/internal/tlsutils"
-	logger "github.com/wso2/adapter/loggers"
+	"github.com/wso2/adapter/pkg/health"
+	"github.com/wso2/adapter/pkg/tlsutils"
 )
 
 var (
@@ -62,6 +63,9 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.MultipartformConsumer = runtime.DiscardConsumer
 
 	api.JSONProducer = runtime.JSONProducer()
+
+	// Get the organizationId
+	tenantDomain := config.GetControlPlaneConnectedTenantDomain()
 
 	// Applies when the Authorization header is set with the Basic scheme
 	api.BasicAuthAuth = func(username, password string) (*models.Principal, error) {
@@ -124,7 +128,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 		if params.Environments != nil {
 			environments = strings.Split(*params.Environments, ":")
 		}
-		err := xds.DeleteAPIs(vhost, params.APIName, params.Version, environments)
+		err := xds.DeleteAPIs(vhost, params.APIName, params.Version, environments, tenantDomain)
 		if err == nil {
 			return api_individual.NewDeleteApisOK()
 		}
@@ -138,7 +142,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 	api.APICollectionGetApisHandler = api_collection.GetApisHandlerFunc(func(
 		params api_collection.GetApisParams, principal *models.Principal) middleware.Responder {
 
-		return api_collection.NewGetApisOK().WithPayload(apiServer.ListApis(params.Query, params.Limit))
+		return api_collection.NewGetApisOK().WithPayload(apiServer.ListApis(params.Query, params.Limit, tenantDomain))
 	})
 	api.APIIndividualPostApisHandler = api_individual.PostApisHandlerFunc(func(
 		params api_individual.PostApisParams, principal *models.Principal) middleware.Responder {
@@ -164,7 +168,8 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 
 // The TLS configuration before HTTPS server starts.
 func configureTLS(tlsConfig *tls.Config) {
-	cert, err := tlsutils.GetServerCertificate()
+	publicKeyLocation, privateKeyLocation, _ := GetKeyLocations()
+	cert, err := tlsutils.GetServerCertificate(publicKeyLocation, privateKeyLocation)
 	if err == nil {
 		tlsConfig.Certificates = []tls.Certificate{cert}
 	}
@@ -227,4 +232,13 @@ func StartRestServer(config *config.Config) {
 		logger.LoggerAPI.Fatal(err)
 		health.RestService.SetStatus(false)
 	}
+}
+
+// GetKeyLocations function returns the public key path and private key path
+func GetKeyLocations() (string, string, string) {
+	conf, _ := config.ReadConfigs()
+	publicKeyLocation := conf.Adapter.Keystore.PublicKeyLocation
+	privateKeyLocation := conf.Adapter.Keystore.PrivateKeyLocation
+	truststoreLocation := conf.Adapter.Truststore.Location
+	return publicKeyLocation, privateKeyLocation, truststoreLocation
 }

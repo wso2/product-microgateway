@@ -28,7 +28,7 @@ import (
 	"github.com/wso2/adapter/config"
 	"github.com/wso2/adapter/internal/oasparser/model"
 	"github.com/wso2/adapter/internal/oasparser/utills"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
 )
 
 // GetMgwSwagger converts the openAPI v3 and v2 content

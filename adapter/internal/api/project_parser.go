@@ -20,7 +20,7 @@ import (
 	"encoding/json"
 	"github.com/ghodss/yaml"
 	"github.com/wso2/adapter/config"
-	"github.com/wso2/adapter/loggers"
+	"github.com/wso2/adapter/internal/loggers"
 )
 
 func parseDeployments(data []byte) ([]Deployment, error) {

@@ -23,7 +23,7 @@ import (
 
 	logger "github.com/sirupsen/logrus"
 	"github.com/wso2/adapter/config"
-	_ "github.com/wso2/adapter/internal/logging"
+	_ "github.com/wso2/adapter/pkg/logging"
 	"github.com/wso2/adapter/internal/adapter"
 )
 

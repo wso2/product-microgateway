@@ -39,7 +39,7 @@ import (
 	"github.com/wso2/adapter/config"
 	"github.com/wso2/adapter/internal/oasparser/model"
 	"github.com/wso2/adapter/internal/svcdiscovery"
-	logger "github.com/wso2/adapter/loggers"
+	logger "github.com/wso2/adapter/internal/loggers"
 
 	"strings"
 	"time"
