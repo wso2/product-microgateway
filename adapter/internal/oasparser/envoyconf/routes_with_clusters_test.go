@@ -67,14 +67,14 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil, "localhost")
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil, "localhost", "carbon.super")
 
 	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
 	// As the first cluster is always related to API level cluster
 	apiLevelCluster := clusters[0]
 	pathLevelCluster := clusters[1]
-	assert.Equal(t, apiLevelCluster.GetName(), "clusterProd_localhost_SwaggerPetstore1.0.0", "API Level cluster name mismatch")
-	assert.Contains(t, pathLevelCluster.GetName(), "clusterProd_localhost_SwaggerPetstore1.0.0_", "Resource Level cluster name mismatch")
+	assert.Equal(t, apiLevelCluster.GetName(), "carbon.super_clusterProd_localhost_SwaggerPetstore1.0.0", "API Level cluster name mismatch")
+	assert.Contains(t, pathLevelCluster.GetName(), "carbon.super_clusterProd_localhost_SwaggerPetstore1.0.0_", "Resource Level cluster name mismatch")
 
 	apiLevelClusterHost := apiLevelCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().
 		GetAddress().GetSocketAddress().GetAddress()
@@ -120,14 +120,14 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
 	mgwSwagger := operator.GetMgwSwaggerWebSocket(apiJsn)
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, "localhost")
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, "localhost", "carbon.super")
 
 	if strings.HasSuffix(apiYamlFilePath, "api.yaml") {
 		assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
 		productionCluster := clusters[0]
 		sandBoxCluster := clusters[1]
-		assert.Equal(t, productionCluster.GetName(), "clusterProd_localhost_EchoWebSocket1.0", "Production cluster name mismatch")
-		assert.Equal(t, sandBoxCluster.GetName(), "clusterSand_localhost_EchoWebSocket1.0", "Sandbox cluster name mismatch")
+		assert.Equal(t, productionCluster.GetName(), "carbon.super_clusterProd_localhost_EchoWebSocket1.0", "Production cluster name mismatch")
+		assert.Equal(t, sandBoxCluster.GetName(), "carbon.super_clusterSand_localhost_EchoWebSocket1.0", "Sandbox cluster name mismatch")
 
 		productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 		productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
@@ -149,7 +149,7 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 	if strings.HasSuffix(apiYamlFilePath, "api_prod.yaml") {
 		assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
 		productionCluster := clusters[0]
-		assert.Equal(t, productionCluster.GetName(), "clusterProd_localhost_prodws1.0", "Production cluster name mismatch")
+		assert.Equal(t, productionCluster.GetName(), "carbon.super_clusterProd_localhost_prodws1.0", "Production cluster name mismatch")
 
 		productionClusterHost := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 		productionClusterPort := productionCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
@@ -166,7 +166,7 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 	if strings.HasSuffix(apiYamlFilePath, "api_sand.yaml") {
 		assert.Equal(t, len(clusters), 1, "Number of clusters created incorrect")
 		sandBoxCluster := clusters[0]
-		assert.Equal(t, sandBoxCluster.GetName(), "clusterSand_localhost_sandbox1.0", "Production cluster name mismatch")
+		assert.Equal(t, sandBoxCluster.GetName(), "carbon.super_clusterSand_localhost_sandbox1.0", "Production cluster name mismatch")
 
 		sandBoxClusterHost := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetAddress()
 		sandBoxClusterPort := sandBoxCluster.GetLoadAssignment().GetEndpoints()[0].GetLbEndpoints()[0].GetEndpoint().GetAddress().GetSocketAddress().GetPortValue()
@@ -278,7 +278,7 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
 	mgwSwagger := operator.GetMgwSwaggerWebSocket(apiJsn)
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, "localhost")
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, "localhost", "carbon.super")
 	assert.NotNil(t, routes, "CreateRoutesWithClusters failed: returned routes nil")
 	assert.NotNil(t, clusters, "CreateRoutesWithClusters failed: returned clusters nil")
 }
