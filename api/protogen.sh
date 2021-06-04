@@ -78,7 +78,7 @@ printf "protoc go services - ${GREEN}${BOLD}done${NC}\n"
 
 rm -rf $ADAPTER_GEN_DIR/wso2
 rm -rf $ENFORCER_GEN_DIR/org
-cp -r target/gen/go/ $ADAPTER_GEN_DIR
-cp -r target/gen/java/ $ENFORCER_GEN_DIR
+cp -r target/gen/go/* $ADAPTER_GEN_DIR
+cp -r target/gen/java/* $ENFORCER_GEN_DIR
 
 printf "${GREEN}${BOLD}BUILD SUCCESS${NC}\n"

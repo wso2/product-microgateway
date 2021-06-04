@@ -68,21 +68,6 @@ public interface ConfigOrBuilder extends
   org.wso2.choreo.connect.discovery.config.enforcer.ServiceOrBuilder getAuthServiceOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-   * @return Whether the apimCredentials field is set.
-   */
-  boolean hasApimCredentials();
-  /**
-   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-   * @return The apimCredentials.
-   */
-  org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials getApimCredentials();
-  /**
-   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-   */
-  org.wso2.choreo.connect.discovery.config.enforcer.AmCredentialsOrBuilder getApimCredentialsOrBuilder();
-
-  /**
    * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
    * @return Whether the jwtGenerator field is set.
    */

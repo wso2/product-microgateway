@@ -1,41 +1,20 @@
 [router]
 [router.cors]
   enabled = false
-  allowOrigins = ["*"]
-  allowMethods = ["GET","PUT","POST","DELETE","PATCH","OPTIONS"]
-  allowHeaders = ["authorization","Access-Control-Allow-Origin","Content-Type","SOAPAction","apikey", "testKey", "Internal-Key"]
-  exposeHeaders = []
-  allowCredentials = false
 
 [enforcer]
 [enforcer.jwtGenerator]
   enable = true
-  encoding = "base64"
-  claimDialect = "http://wso2.org/claims"
-  convertDialect = false
-  header = "X-JWT-Assertion"
-  signingAlgorithm = "SHA256withRSA"
-  enableUserClaims = false
-  gatewayGeneratorImpl = "org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
-  claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
-  publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
-  privateKeyPath = "/home/wso2/security/keystore/mg.key"
 
 [enforcer.throttling]
   enableGlobalEventPublishing = true
   enableHeaderConditions = true
   enableQueryParamConditions = true
   enableJwtClaimConditions = true
-  jmsConnectionInitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
   jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://apim:5672'"
 
 [controlPlane]
   enabled = true
-  serviceUrl = "https://apim:9443/"
-  username="admin"
-  password="admin"
-  environmentLabels = ["Default"]
-  retryInterval = 5
   skipSSLVerification=true
   [controlPlane.jmsConnectionParameters]
     eventListeningEndpoints = ["amqp://admin:admin@apim:5672?retries='5'&connectdelay='30000'"]

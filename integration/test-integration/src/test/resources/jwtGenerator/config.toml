@@ -1,6 +1,5 @@
 [router]
 [router.cors]
-  enabled = true
   allowOrigins = ["http://test1.com", "http://test2.com"]
   allowMethods = ["GET","PUT","POST"]
   allowHeaders = ["Authorization","X-PINGOTHER"]
@@ -10,33 +9,13 @@
 [enforcer]
 [enforcer.jwtGenerator]
   enable = true
-  encoding = "base64" 
-  claimDialect = "http://wso2.org/claims"
-  convertDialect = false
-  header = "X-JWT-Assertion"
-  signingAlgorithm = "SHA256withRSA"
-  enableUserClaims = false
-  gatewayGeneratorImpl = "org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl"
-  claimsExtractorImpl = "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever"
-  publicCertificatePath = "/home/wso2/security/truststore/mg.pem"
-  privateKeyPath = "/home/wso2/security/keystore/mg.key"
 
 [enforcer.throttling]
-  enableGlobalEventPublishing = false
-  enableHeaderConditions = false
-  enableQueryParamConditions = false
-  enableJwtClaimConditions = false
-  jmsConnectionInitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
   jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
  
 [enforcer.security]
-[enforcer.security.authHeader]
-  enableOutboundAuthHeader = false
-  authorizationHeader = "authorization"
-  testConsoleHeaderName = "Internal-Key"
-
 [[enforcer.security.tokenService]]
-  name="Resident Key Manager"
+  name = "Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
   certificateAlias = "wso2carbon"
   jwksURL = ""
@@ -57,18 +36,12 @@
   certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 [[enforcer.security.tokenService]]
-  name="APIM Publisher"
+  name = "APIM Publisher"
   issuer = "https://localhost:9443/publisher"
   certificateAlias = "gateway_certificate_alias"
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 [controlPlane]
-  enabled = false
-  serviceUrl = "https://apim:9443/"
-  username = "admin"
-  password = "admin"
-  environmentLabels = ["Default"]
-  retryInterval = 5
   skipSSLVerification = true
   [controlPlane.jmsConnectionParameters]
     eventListeningEndpoints = ["amqp://admin:admin@localhost:5672?retries='5'&connectdelay='30000'"]

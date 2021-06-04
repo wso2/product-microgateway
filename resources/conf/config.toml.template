@@ -142,11 +142,6 @@
     # Queue size of the worker threads
     queueSize = 1000
 
-# The credentials of the API Manager
-[enforcer.apimCredentials]
-  username="admin"
-  password="$env{apim_admin_pwd}"
-
 # The configurations of token caching in the Choreo Connect
 [enforcer.cache]
   # Enable/Disable token cache
@@ -220,7 +215,7 @@
 # Issuer 1
 [[enforcer.security.tokenService]]
   # Provide unique name for the JWT issuer
-  name="Resident Key Manager"
+  name = "Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
   # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
   certificateAlias = "wso2carbon"
@@ -236,7 +231,7 @@
 # Issuer 2
 [[enforcer.security.tokenService]]
   # Provide unique name for the JWT issuer
-  name="MGW"
+  name = "MGW"
   issuer = "https://localhost:9095/testkey"
   # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
   certificateAlias = "mgw"
@@ -252,7 +247,7 @@
 # Issuer 3
 [[enforcer.security.tokenService]]
   # Provide unique name for the JWT issuer
-  name="APIM Publisher"
+  name = "APIM Publisher"
   issuer = "https://localhost:9443/publisher"
   # Alias name given in Enforcer truststore for the public certificate of the JWT issuer
   certificateAlias = ""

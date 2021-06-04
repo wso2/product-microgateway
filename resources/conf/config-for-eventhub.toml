@@ -1,12 +1,4 @@
 [adapter] 
-[adapter.server]
-  enabled = true
-  port = "9843"
-  tokenPrivateKeyPath = "/home/wso2/security/keystore/mg.key"
-  [[adapter.server.users]]
-    username = "admin"
-    password = "$env{adapter_admin_pwd}"
-
 [adapter.keystore]
   certPath = "/home/wso2/security/keystore/mg.pem"
   keyPath = "/home/wso2/security/keystore/mg.key"
@@ -29,11 +21,7 @@
   verifyHostName = true
   disableSslVerification = false
 
-[enforcer] 
-[enforcer.apimCredentials]
-  username = "admin"
-  password = "$env{apim_admin_pwd}"
-
+[enforcer]
 [enforcer.jwtIssuer]
   enabled = true
   issuer = "https://localhost:9095/testkey"
@@ -49,13 +37,8 @@
       authURLs = ["ssl://apim:9711"]
 
 [enforcer.security]
-[enforcer.security.authHeader]
-  enableOutboundAuthHeader = false
-  authorizationHeader = "authorization"
-  testConsoleHeaderName = "Internal-Key"
-
 [[enforcer.security.tokenService]]
-  name="Resident Key Manager"
+  name = "Resident Key Manager"
   issuer = "https://localhost:9443/oauth2/token"
   certificateAlias = "wso2carbon"
   jwksURL = ""
@@ -64,7 +47,7 @@
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
 [[enforcer.security.tokenService]]
-  name="MGW"
+  name = "MGW"
   issuer = "https://localhost:9095/testkey"
   certificateAlias = "mgw"
   jwksURL = ""
@@ -73,7 +56,7 @@
   certificateFilePath = "/home/wso2/security/truststore/mg.pem"
 
 [[enforcer.security.tokenService]]
-  name="APIM Publisher"
+  name = "APIM Publisher"
   issuer = "https://localhost:9443/publisher"
   certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
 
@@ -83,7 +66,6 @@
   username = "admin"
   password = "$env{cp_admin_pwd}"
   environmentLabels = ["Default"]
-  retryInterval = 5
   skipSSLVerification = true
   [controlPlane.jmsConnectionParameters]
     eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]

@@ -1,28 +1,10 @@
 [router] 
 [router.cors]
 enabled = false
-allowOrigins = ["*"]
-allowMethods = ["GET","PUT","POST","DELETE","PATCH","OPTIONS"]
-allowHeaders = ["authorization","Access-Control-Allow-Origin","Content-Type","SOAPAction","apikey", "testKey", "Internal-Key"]
-exposeHeaders = []
-allowCredentials = false
 
 [enforcer]
 [enforcer.throttling]
   enableGlobalEventPublishing = true
-  enableHeaderConditions = false
-  enableQueryParamConditions = false
-  enableJwtClaimConditions = false
-  jmsConnectionInitialContextFactory = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory"
-  jmsConnectionProviderUrl = "amqp://admin:$env{tm_admin_pwd}@carbon/carbon?brokerlist='tcp://apim:5672'"
 
 [controlPlane]
-  enabled = false
-  serviceUrl = "https://apim:9443/"
-  username="admin"
-  password="$env{cp_admin_pwd}"
-  environmentLabels = ["Default"]
-  retryInterval = 5
   skipSSLVerification=true
-  [controlPlane.jmsConnectionParameters]
-    eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]

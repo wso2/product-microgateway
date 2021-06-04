@@ -96,10 +96,6 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	}
 
 	return &enforcer.Config{
-		ApimCredentials: &enforcer.AmCredentials{
-			Username: config.Enforcer.ApimCredentials.Username,
-			Password: config.Enforcer.ApimCredentials.Password,
-		},
 		JwtGenerator: &enforcer.JWTGenerator{
 			Enable:                config.Enforcer.JwtGenerator.Enable,
 			Encoding:              config.Enforcer.JwtGenerator.Encoding,

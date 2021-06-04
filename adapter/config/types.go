@@ -99,7 +99,6 @@ type envoy struct {
 
 type enforcer struct {
 	Security        security
-	ApimCredentials apimCredentials
 	AuthService     authService
 	JwtGenerator    jwtGenerator
 	Cache           cache
@@ -178,11 +177,6 @@ type upstreamTLS struct {
 type security struct {
 	TokenService []tokenService
 	AuthHeader   authHeader
-}
-
-type apimCredentials struct {
-	Username string
-	Password string
 }
 
 type authService struct {

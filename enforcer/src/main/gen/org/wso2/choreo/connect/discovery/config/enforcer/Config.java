@@ -104,19 +104,6 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
-          case 50: {
-            org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials.Builder subBuilder = null;
-            if (apimCredentials_ != null) {
-              subBuilder = apimCredentials_.toBuilder();
-            }
-            apimCredentials_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(apimCredentials_);
-              apimCredentials_ = subBuilder.buildPartial();
-            }
-
-            break;
-          }
           case 58: {
             org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator.Builder subBuilder = null;
             if (jwtGenerator_ != null) {
@@ -318,32 +305,6 @@ private static final long serialVersionUID = 0L;
     return getAuthService();
   }
 
-  public static final int APIMCREDENTIALS_FIELD_NUMBER = 6;
-  private org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials apimCredentials_;
-  /**
-   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-   * @return Whether the apimCredentials field is set.
-   */
-  @java.lang.Override
-  public boolean hasApimCredentials() {
-    return apimCredentials_ != null;
-  }
-  /**
-   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-   * @return The apimCredentials.
-   */
-  @java.lang.Override
-  public org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials getApimCredentials() {
-    return apimCredentials_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials.getDefaultInstance() : apimCredentials_;
-  }
-  /**
-   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-   */
-  @java.lang.Override
-  public org.wso2.choreo.connect.discovery.config.enforcer.AmCredentialsOrBuilder getApimCredentialsOrBuilder() {
-    return getApimCredentials();
-  }
-
   public static final int JWTGENERATOR_FIELD_NUMBER = 7;
   private org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator jwtGenerator_;
   /**
@@ -500,9 +461,6 @@ private static final long serialVersionUID = 0L;
     if (authService_ != null) {
       output.writeMessage(5, getAuthService());
     }
-    if (apimCredentials_ != null) {
-      output.writeMessage(6, getApimCredentials());
-    }
     if (jwtGenerator_ != null) {
       output.writeMessage(7, getJwtGenerator());
     }
@@ -542,10 +500,6 @@ private static final long serialVersionUID = 0L;
     if (authService_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(5, getAuthService());
-    }
-    if (apimCredentials_ != null) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(6, getApimCredentials());
     }
     if (jwtGenerator_ != null) {
       size += com.google.protobuf.CodedOutputStream
@@ -602,11 +556,6 @@ private static final long serialVersionUID = 0L;
       if (!getAuthService()
           .equals(other.getAuthService())) return false;
     }
-    if (hasApimCredentials() != other.hasApimCredentials()) return false;
-    if (hasApimCredentials()) {
-      if (!getApimCredentials()
-          .equals(other.getApimCredentials())) return false;
-    }
     if (hasJwtGenerator() != other.hasJwtGenerator()) return false;
     if (hasJwtGenerator()) {
       if (!getJwtGenerator()
@@ -658,10 +607,6 @@ private static final long serialVersionUID = 0L;
     if (hasAuthService()) {
       hash = (37 * hash) + AUTHSERVICE_FIELD_NUMBER;
       hash = (53 * hash) + getAuthService().hashCode();
-    }
-    if (hasApimCredentials()) {
-      hash = (37 * hash) + APIMCREDENTIALS_FIELD_NUMBER;
-      hash = (53 * hash) + getApimCredentials().hashCode();
     }
     if (hasJwtGenerator()) {
       hash = (37 * hash) + JWTGENERATOR_FIELD_NUMBER;
@@ -844,12 +789,6 @@ private static final long serialVersionUID = 0L;
         authService_ = null;
         authServiceBuilder_ = null;
       }
-      if (apimCredentialsBuilder_ == null) {
-        apimCredentials_ = null;
-      } else {
-        apimCredentials_ = null;
-        apimCredentialsBuilder_ = null;
-      }
       if (jwtGeneratorBuilder_ == null) {
         jwtGenerator_ = null;
       } else {
@@ -925,11 +864,6 @@ private static final long serialVersionUID = 0L;
         result.authService_ = authService_;
       } else {
         result.authService_ = authServiceBuilder_.build();
-      }
-      if (apimCredentialsBuilder_ == null) {
-        result.apimCredentials_ = apimCredentials_;
-      } else {
-        result.apimCredentials_ = apimCredentialsBuilder_.build();
       }
       if (jwtGeneratorBuilder_ == null) {
         result.jwtGenerator_ = jwtGenerator_;
@@ -1015,9 +949,6 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasAuthService()) {
         mergeAuthService(other.getAuthService());
-      }
-      if (other.hasApimCredentials()) {
-        mergeApimCredentials(other.getApimCredentials());
       }
       if (other.hasJwtGenerator()) {
         mergeJwtGenerator(other.getJwtGenerator());
@@ -1537,125 +1468,6 @@ private static final long serialVersionUID = 0L;
         authService_ = null;
       }
       return authServiceBuilder_;
-    }
-
-    private org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials apimCredentials_;
-    private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials, org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AmCredentialsOrBuilder> apimCredentialsBuilder_;
-    /**
-     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-     * @return Whether the apimCredentials field is set.
-     */
-    public boolean hasApimCredentials() {
-      return apimCredentialsBuilder_ != null || apimCredentials_ != null;
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-     * @return The apimCredentials.
-     */
-    public org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials getApimCredentials() {
-      if (apimCredentialsBuilder_ == null) {
-        return apimCredentials_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials.getDefaultInstance() : apimCredentials_;
-      } else {
-        return apimCredentialsBuilder_.getMessage();
-      }
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-     */
-    public Builder setApimCredentials(org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials value) {
-      if (apimCredentialsBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        apimCredentials_ = value;
-        onChanged();
-      } else {
-        apimCredentialsBuilder_.setMessage(value);
-      }
-
-      return this;
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-     */
-    public Builder setApimCredentials(
-        org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials.Builder builderForValue) {
-      if (apimCredentialsBuilder_ == null) {
-        apimCredentials_ = builderForValue.build();
-        onChanged();
-      } else {
-        apimCredentialsBuilder_.setMessage(builderForValue.build());
-      }
-
-      return this;
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-     */
-    public Builder mergeApimCredentials(org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials value) {
-      if (apimCredentialsBuilder_ == null) {
-        if (apimCredentials_ != null) {
-          apimCredentials_ =
-            org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials.newBuilder(apimCredentials_).mergeFrom(value).buildPartial();
-        } else {
-          apimCredentials_ = value;
-        }
-        onChanged();
-      } else {
-        apimCredentialsBuilder_.mergeFrom(value);
-      }
-
-      return this;
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-     */
-    public Builder clearApimCredentials() {
-      if (apimCredentialsBuilder_ == null) {
-        apimCredentials_ = null;
-        onChanged();
-      } else {
-        apimCredentials_ = null;
-        apimCredentialsBuilder_ = null;
-      }
-
-      return this;
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-     */
-    public org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials.Builder getApimCredentialsBuilder() {
-      
-      onChanged();
-      return getApimCredentialsFieldBuilder().getBuilder();
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-     */
-    public org.wso2.choreo.connect.discovery.config.enforcer.AmCredentialsOrBuilder getApimCredentialsOrBuilder() {
-      if (apimCredentialsBuilder_ != null) {
-        return apimCredentialsBuilder_.getMessageOrBuilder();
-      } else {
-        return apimCredentials_ == null ?
-            org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials.getDefaultInstance() : apimCredentials_;
-      }
-    }
-    /**
-     * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-     */
-    private com.google.protobuf.SingleFieldBuilderV3<
-        org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials, org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AmCredentialsOrBuilder> 
-        getApimCredentialsFieldBuilder() {
-      if (apimCredentialsBuilder_ == null) {
-        apimCredentialsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials, org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AmCredentialsOrBuilder>(
-                getApimCredentials(),
-                getParentForChildren(),
-                isClean());
-        apimCredentials_ = null;
-      }
-      return apimCredentialsBuilder_;
     }
 
     private org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator jwtGenerator_;
