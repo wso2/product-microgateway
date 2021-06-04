@@ -31,7 +31,7 @@ var lifetime = 0 * time.Second
 
 // ProcessEvents to pass event consumption
 func ProcessEvents(config *config.Config) {
-	err := msg.ProcessEvents(config.ControlPlane.JmsConnectionParameters.EventListeningEndpoints)
+	err := msg.InitiateJMSConnection(config.ControlPlane.JmsConnectionParameters.EventListeningEndpoints)
 	health.SetControlPlaneJmsStatus(err == nil)
 
 	go handleNotification()

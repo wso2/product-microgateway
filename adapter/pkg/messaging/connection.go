@@ -127,7 +127,7 @@ func connectionRetry(key string) (*Consumer, *amqp.Connection, error) {
 				if key != "" && len(key) > 0 {
 					logger.LoggerMsg.Infof("Reconnected to topic %s", key)
 					// startup pull
-					c := StartConsumer(key)
+					c := startConsumer(key)
 					return c, RabbitConn, nil
 				}
 				return nil, RabbitConn, nil
@@ -174,7 +174,7 @@ func retryExponentially(key string, url string, retryInterval time.Duration) (*C
 			if key != "" && len(key) > 0 {
 				logger.LoggerMsg.Infof("Reconnected to topic %s", key)
 				// startup pull
-				c := StartConsumer(key)
+				c := startConsumer(key)
 				return c, RabbitConn, nil
 			}
 		}
@@ -309,18 +309,18 @@ func handleEvent(c *Consumer, key string) error {
 	return nil
 }
 
-// ProcessEvents to pass event consumption
-func ProcessEvents(eventListeningEndpoints []string) error {
+// InitiateJMSConnection to pass event consumption
+func InitiateJMSConnection(eventListeningEndpoints []string) error {
 	var err error
 	EventListeningEndpoints = eventListeningEndpoints
 	bindingKeys := []string{notification, keymanager, tokenRevocation, throttleData}
-	err = StartJMSConnection()
+	RabbitConn, err = connectToRabbitMQ()
 
 	if err == nil {
 		for i, key := range bindingKeys {
 			logger.LoggerMsg.Infof("Establishing consumer index %v for key %s ", i, key)
 			go func(key string) {
-				StartConsumer(key)
+				startConsumer(key)
 			}(key)
 		}
 	}
