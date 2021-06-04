@@ -4,7 +4,7 @@ package wso2.discovery.service.keymgt;
 
 import "envoy/service/discovery/v3/discovery.proto";
 
-option go_package = "github.com/praminda/go-control-plane/wso2/discovery/service/keymgt";
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/service/keymgt";
 option java_package = "org.wso2.choreo.connect.discovery.service.keymgt";
 option java_outer_classname = "KmdsProto";
 option java_multiple_files = true;

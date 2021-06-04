@@ -32,10 +32,11 @@ public final class KmdsProto {
       "coveryResponse\"\000(\0010\001\022q\n\020FetchKeyManagers" +
       "\022,.envoy.service.discovery.v3.DiscoveryR" +
       "equest\032-.envoy.service.discovery.v3.Disc" +
-      "overyResponse\"\000B\206\001\n0org.wso2.choreo.conn" +
+      "overyResponse\"\000B\210\001\n0org.wso2.choreo.conn" +
       "ect.discovery.service.keymgtB\tKmdsProtoP" +
-      "\001ZBgithub.com/praminda/go-control-plane/" +
-      "wso2/discovery/service/keymgt\210\001\001b\006proto3"
+      "\001ZDgithub.com/envoyproxy/go-control-plan" +
+      "e/wso2/discovery/service/keymgt\210\001\001b\006prot" +
+      "o3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
