@@ -251,7 +251,7 @@ func UpdateAPI(apiContent config.APIContent) {
 
 	validationErr := mgwSwagger.Validate()
 	if validationErr != nil {
-		logger.LoggerOasparser.Errorf("Validation failed for the API. %s:%s", mgwSwagger.GetTitle(), mgwSwagger.GetVersion())
+		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s", mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), organizationID)
 		return
 	}
 
@@ -285,8 +285,8 @@ func UpdateAPI(apiContent config.APIContent) {
 	//:TODO: since currently labels are not taking from x-wso2-label, I have made it to be taken from the method
 	// argument.
 	newLabels = apiContent.Environments
-	logger.LoggerXds.Infof("Added/Updated the content under OpenAPI Key : %v", apiIdentifier)
-	logger.LoggerXds.Debugf("Newly added labels for the OpenAPI Key : %v are %v", apiIdentifier, newLabels)
+	logger.LoggerXds.Infof("Added/Updated the content for Organization : %v under OpenAPI Key : %v", organizationID, apiIdentifier)
+	logger.LoggerXds.Debugf("Newly added labels for Organization : %v for the OpenAPI Key : %v are %v", organizationID, apiIdentifier, newLabels)
 	oldLabels, _ := orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier]
 	logger.LoggerXds.Debugf("Already existing labels for the OpenAPI Key : %v are %v", apiIdentifier, oldLabels)
 
@@ -377,22 +377,22 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 
 	vhosts, found := apiToVhostsMap[apiNameVersionID]
 	if !found {
-		logger.LoggerXds.Infof("Unable to delete API %v. API does not exist.", apiNameVersionID)
+		logger.LoggerXds.Infof("Unable to delete API %v from Organization %v. API does not exist.", apiNameVersionID, organizationID)
 		return errors.New(mgw.NotFound)
 	}
 
 	if vhost == "" {
 		// vhost is not defined, delete all vhosts
-		logger.LoggerXds.Infof("No vhost is specified for the API %v deleting from all vhosts", apiNameVersionID)
+		logger.LoggerXds.Infof("No vhost is specified for the API %v in Organizaion %v deleting from all vhosts", apiNameVersionID, organizationID)
 		deletedVhosts := make(map[string]struct{})
 		for vh := range vhosts {
 			apiIdentifier := GenerateIdentifierForAPI(vh, apiName, version)
 			// TODO: (renuka) optimize to update cache only once after updating all maps
 			if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
 				// Update apiToVhostsMap with already deleted vhosts in the loop
-				logger.LoggerXds.Errorf("Error deleting API: %v", apiIdentifier)
-				logger.LoggerXds.Debugf("Update map apiToVhostsMap with deleting already deleted vhosts for API %v",
-					apiIdentifier)
+				logger.LoggerXds.Errorf("Error deleting API: %v of organization: %v", apiIdentifier, organizationID)
+				logger.LoggerXds.Debugf("Update map apiToVhostsMap with deleting already deleted vhosts for API %v in organization: %v",
+					apiIdentifier, organizationID)
 				remainingVhosts := make(map[string]struct{})
 				for v := range vhosts {
 					if _, ok := deletedVhosts[v]; ok {
@@ -442,11 +442,11 @@ func DeleteAPIWithAPIMEvent(uuid, name, version string, environments []string, o
 	}
 	for apiIdentifier := range apiIdentifiers {
 		if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
-			logger.LoggerXds.Errorf("Error undeploying API %v from environments %v", apiIdentifier, environments)
+			logger.LoggerXds.Errorf("Error undeploying API %v of Organiztion %v from environments %v", apiIdentifier, organizationID, environments)
 		} else {
 			// if no error, update internal vhost maps
 			// error only happens when API not found in deleteAPI func
-			logger.LoggerXds.Debugf("Successfully undeployed API %v from environments %v", apiIdentifier, environments)
+			logger.LoggerXds.Debugf("Successfully undeployed API %v of Organization %v from environments %v", apiIdentifier, organizationID, environments)
 			for _, environment := range environments {
 				// delete environment if exists
 				delete(apiUUIDToGatewayToVhosts[uuid], environment)
@@ -459,7 +459,7 @@ func DeleteAPIWithAPIMEvent(uuid, name, version string, environments []string, o
 func deleteAPI(apiIdentifier string, environments []string, organizationID string) error {
 	_, exists := orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]
 	if !exists {
-		logger.LoggerXds.Infof("Unable to delete API " + apiIdentifier + ". Does not exist.")
+		logger.LoggerXds.Infof("Unable to delete API: %v from Organization: %v. API Does not exist.", apiIdentifier, organizationID)
 		return errors.New(mgw.NotFound)
 	}
 
@@ -469,7 +469,7 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 	if len(existingLabels) != len(toBeDelEnvs) {
 		// do not delete from all environments, hence do not clear routes, clusters, endpoints, enforcerAPIs
 		updateXdsCacheOnAPIAdd(toBeDelEnvs, []string{})
-		logger.LoggerXds.Infof("Deleted API. %v", apiIdentifier)
+		logger.LoggerXds.Infof("Deleted API %v of Organization %v", apiIdentifier, organizationID)
 		orgIDOpenAPIEnvoyMap[organizationID][apiIdentifier] = toBeKeptEnvs
 		return nil
 	}
@@ -488,7 +488,7 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 	delete(orgIDOpenAPIEnvoyMap[organizationID], apiIdentifier)  //delete labels
 	delete(orgIDAPIMgwSwaggerMap[organizationID], apiIdentifier) //delete mgwSwagger
 	//TODO: (SuKSW) clean any remaining in label wise maps, if this is the last API of that label
-	logger.LoggerXds.Infof("Deleted API. %v", apiIdentifier)
+	logger.LoggerXds.Infof("Deleted API %v of organization %v", apiIdentifier, organizationID)
 	return nil
 }
 
@@ -554,8 +554,8 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 			if arrayContains(labels, label) {
 				vhost, err := ExtractVhostFromAPIIdentifier(apiKey)
 				if err != nil {
-					logger.LoggerXds.Errorf("Error extracting vhost from API identifier: %v. Ignore deploying the API",
-						err.Error())
+					logger.LoggerXds.Errorf("Error extracting vhost from API identifier: %v for Organization %v. Ignore deploying the API",
+						err.Error(), organizationID)
 					continue
 				}
 				clusterArray = append(clusterArray, orgIDOpenAPIClustersMap[organizationID][apiKey]...)
