@@ -23,11 +23,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wso2/adapter/pkg/health"
+	"github.com/wso2/product-microgateway/adapter/pkg/health"
 
-	"github.com/wso2/adapter/config"
-	logger "github.com/wso2/adapter/internal/loggers"
-	msg "github.com/wso2/adapter/pkg/messaging"
+	"github.com/wso2/product-microgateway/adapter/config"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
 var lifetime = 0 * time.Second

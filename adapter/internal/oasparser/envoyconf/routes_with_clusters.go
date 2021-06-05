@@ -33,13 +33,13 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
-	mgw "github.com/wso2/adapter/internal/oasparser/model"
+	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
-	"github.com/wso2/adapter/config"
-	logger "github.com/wso2/adapter/internal/loggers"
-	"github.com/wso2/adapter/internal/oasparser/model"
-	"github.com/wso2/adapter/internal/svcdiscovery"
+	"github.com/wso2/product-microgateway/adapter/config"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
+	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 
 	"strings"
 	"time"

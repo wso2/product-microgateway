@@ -1,4 +1,4 @@
-module github.com/wso2/adapter
+module github.com/wso2/product-microgateway/adapter
 
 go 1.15
 

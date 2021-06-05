@@ -28,13 +28,13 @@ import (
 	"strconv"
 
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/adapter/config"
-	restserver "github.com/wso2/adapter/internal/api/restserver"
-	"github.com/wso2/adapter/internal/auth"
-	"github.com/wso2/adapter/internal/discovery/xds"
-	logger "github.com/wso2/adapter/internal/loggers"
-	"github.com/wso2/adapter/pkg/eventhub/types"
-	"github.com/wso2/adapter/pkg/tlsutils"
+	"github.com/wso2/product-microgateway/adapter/config"
+	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
+	"github.com/wso2/product-microgateway/adapter/internal/auth"
+	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
 const (

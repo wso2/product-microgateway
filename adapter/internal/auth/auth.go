@@ -28,8 +28,8 @@ import (
 
 	"github.com/lestrrat-go/jwx/jwa"
 	"github.com/lestrrat-go/jwx/jwt"
-	"github.com/wso2/adapter/config"
-	"github.com/wso2/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
 const (

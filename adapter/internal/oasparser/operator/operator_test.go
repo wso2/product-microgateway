@@ -24,10 +24,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wso2/adapter/config"
-	"github.com/wso2/adapter/internal/oasparser/model"
-	"github.com/wso2/adapter/internal/oasparser/operator"
-	"github.com/wso2/adapter/internal/oasparser/utills"
+	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 )
 
 func TestGetMgwSwagger(t *testing.T) {

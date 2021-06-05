@@ -21,7 +21,7 @@ package loggers
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/wso2/adapter/pkg/logging"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 /* loggers should be initiated only for the main packages
@@ -32,17 +32,17 @@ When you add a new logger instance add the related package name as a constant
 
 // package name constants
 const (
-	pkgAPI                  = "github.com/wso2/adapter/internal/api"
-	pkgAuth                 = "github.com/wso2/adapter/internal/auth"
-	pkgMgw                  = "github.com/wso2/adapter/internal/adapter"
-	pkgOasparser            = "github.com/wso2/adapter/internal/oasparser"
-	pkgXds                  = "github.com/wso2/adapter/internal/discovery/xds"
-	pkgSync                 = "github.com/wso2/adapter/internal/synchronizer"
-	pkgInternalMsg          = "github.com/wso2/adapter/internal/messaging"
-	pkgSvcDiscovery         = "github.com/wso2/adapter/internal/svcDiscovery"
-	pkgSubscription         = "github.com/wso2/adapter/internal/subscription"
-	pkgRouterXdsCallbacks   = "github.com/wso2/adapter/internal/discovery/xds/routercallbacks"
-	pkgEnforcerXdsCallbacks = "github.com/wso2/adapter/internal/discovery/xds/enforcercallbacks"
+	pkgAPI                  = "github.com/wso2/product-microgateway/adapter/internal/api"
+	pkgAuth                 = "github.com/wso2/product-microgateway/adapter/internal/auth"
+	pkgMgw                  = "github.com/wso2/product-microgateway/adapter/internal/adapter"
+	pkgOasparser            = "github.com/wso2/product-microgateway/adapter/internal/oasparser"
+	pkgXds                  = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
+	pkgSync                 = "github.com/wso2/product-microgateway/adapter/internal/synchronizer"
+	pkgInternalMsg          = "github.com/wso2/product-microgateway/adapter/internal/messaging"
+	pkgSvcDiscovery         = "github.com/wso2/product-microgateway/adapter/internal/svcDiscovery"
+	pkgSubscription         = "github.com/wso2/product-microgateway/adapter/internal/subscription"
+	pkgRouterXdsCallbacks   = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
+	pkgEnforcerXdsCallbacks = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
 )
 
 // logger package references

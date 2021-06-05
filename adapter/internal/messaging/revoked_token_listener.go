@@ -23,10 +23,10 @@ import (
 
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/streadway/amqp"
-	"github.com/wso2/adapter/pkg/discovery/api/wso2/discovery/keymgt"
-	"github.com/wso2/adapter/internal/discovery/xds"
-	logger "github.com/wso2/adapter/internal/loggers"
-	msg "github.com/wso2/adapter/pkg/messaging"
+	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/keymgt"
+	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
 func handleTokenRevocation(deliveries <-chan amqp.Delivery, done chan error) {

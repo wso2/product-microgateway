@@ -22,9 +22,9 @@ import (
 	"os"
 
 	logger "github.com/sirupsen/logrus"
-	"github.com/wso2/adapter/config"
-	_ "github.com/wso2/adapter/pkg/logging"
-	"github.com/wso2/adapter/internal/adapter"
+	"github.com/wso2/product-microgateway/adapter/config"
+	_ "github.com/wso2/product-microgateway/adapter/pkg/logging"
+	"github.com/wso2/product-microgateway/adapter/internal/adapter"
 )
 
 func main() {
