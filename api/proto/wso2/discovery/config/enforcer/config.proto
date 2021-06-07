@@ -26,15 +26,15 @@ message Config {
 
     CertStore truststore = 3;
 
-    Service authService = 5;
+    Service authService = 4;
 
-    JWTGenerator jwtGenerator = 7;
+    JWTGenerator jwtGenerator = 5;
 
-    Throttling throttling = 8;
+    Throttling throttling = 6;
 
-    Cache cache = 9;
+    Cache cache = 7;
 
-    JWTIssuer jwtIssuer = 10;
+    JWTIssuer jwtIssuer = 8;
 
-    Analytics analytics = 11;
+    Analytics analytics = 9;
 }

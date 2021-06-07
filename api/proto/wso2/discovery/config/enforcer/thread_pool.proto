@@ -16,7 +16,7 @@ message ThreadPool {
     int32 maxSize = 2;
 
     // keep alive time of threads in seconds
-    int32 keepAliveTime = 4;
+    int32 keepAliveTime = 3;
 
-    int32 queueSize = 5;
+    int32 queueSize = 4;
 }

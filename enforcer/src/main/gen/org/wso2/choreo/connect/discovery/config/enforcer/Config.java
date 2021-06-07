@@ -91,7 +91,7 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
-          case 42: {
+          case 34: {
             org.wso2.choreo.connect.discovery.config.enforcer.Service.Builder subBuilder = null;
             if (authService_ != null) {
               subBuilder = authService_.toBuilder();
@@ -104,7 +104,7 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
-          case 58: {
+          case 42: {
             org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator.Builder subBuilder = null;
             if (jwtGenerator_ != null) {
               subBuilder = jwtGenerator_.toBuilder();
@@ -117,7 +117,7 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
-          case 66: {
+          case 50: {
             org.wso2.choreo.connect.discovery.config.enforcer.Throttling.Builder subBuilder = null;
             if (throttling_ != null) {
               subBuilder = throttling_.toBuilder();
@@ -130,7 +130,7 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
-          case 74: {
+          case 58: {
             org.wso2.choreo.connect.discovery.config.enforcer.Cache.Builder subBuilder = null;
             if (cache_ != null) {
               subBuilder = cache_.toBuilder();
@@ -143,7 +143,7 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
-          case 82: {
+          case 66: {
             org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer.Builder subBuilder = null;
             if (jwtIssuer_ != null) {
               subBuilder = jwtIssuer_.toBuilder();
@@ -156,7 +156,7 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
-          case 90: {
+          case 74: {
             org.wso2.choreo.connect.discovery.config.enforcer.Analytics.Builder subBuilder = null;
             if (analytics_ != null) {
               subBuilder = analytics_.toBuilder();
@@ -279,10 +279,10 @@ private static final long serialVersionUID = 0L;
     return getTruststore();
   }
 
-  public static final int AUTHSERVICE_FIELD_NUMBER = 5;
+  public static final int AUTHSERVICE_FIELD_NUMBER = 4;
   private org.wso2.choreo.connect.discovery.config.enforcer.Service authService_;
   /**
-   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
    * @return Whether the authService field is set.
    */
   @java.lang.Override
@@ -290,7 +290,7 @@ private static final long serialVersionUID = 0L;
     return authService_ != null;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
    * @return The authService.
    */
   @java.lang.Override
@@ -298,17 +298,17 @@ private static final long serialVersionUID = 0L;
     return authService_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Service.getDefaultInstance() : authService_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
    */
   @java.lang.Override
   public org.wso2.choreo.connect.discovery.config.enforcer.ServiceOrBuilder getAuthServiceOrBuilder() {
     return getAuthService();
   }
 
-  public static final int JWTGENERATOR_FIELD_NUMBER = 7;
+  public static final int JWTGENERATOR_FIELD_NUMBER = 5;
   private org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator jwtGenerator_;
   /**
-   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
    * @return Whether the jwtGenerator field is set.
    */
   @java.lang.Override
@@ -316,7 +316,7 @@ private static final long serialVersionUID = 0L;
     return jwtGenerator_ != null;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
    * @return The jwtGenerator.
    */
   @java.lang.Override
@@ -324,17 +324,17 @@ private static final long serialVersionUID = 0L;
     return jwtGenerator_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator.getDefaultInstance() : jwtGenerator_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
    */
   @java.lang.Override
   public org.wso2.choreo.connect.discovery.config.enforcer.JWTGeneratorOrBuilder getJwtGeneratorOrBuilder() {
     return getJwtGenerator();
   }
 
-  public static final int THROTTLING_FIELD_NUMBER = 8;
+  public static final int THROTTLING_FIELD_NUMBER = 6;
   private org.wso2.choreo.connect.discovery.config.enforcer.Throttling throttling_;
   /**
-   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
    * @return Whether the throttling field is set.
    */
   @java.lang.Override
@@ -342,7 +342,7 @@ private static final long serialVersionUID = 0L;
     return throttling_ != null;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
    * @return The throttling.
    */
   @java.lang.Override
@@ -350,17 +350,17 @@ private static final long serialVersionUID = 0L;
     return throttling_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Throttling.getDefaultInstance() : throttling_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
    */
   @java.lang.Override
   public org.wso2.choreo.connect.discovery.config.enforcer.ThrottlingOrBuilder getThrottlingOrBuilder() {
     return getThrottling();
   }
 
-  public static final int CACHE_FIELD_NUMBER = 9;
+  public static final int CACHE_FIELD_NUMBER = 7;
   private org.wso2.choreo.connect.discovery.config.enforcer.Cache cache_;
   /**
-   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
    * @return Whether the cache field is set.
    */
   @java.lang.Override
@@ -368,7 +368,7 @@ private static final long serialVersionUID = 0L;
     return cache_ != null;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
    * @return The cache.
    */
   @java.lang.Override
@@ -376,17 +376,17 @@ private static final long serialVersionUID = 0L;
     return cache_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Cache.getDefaultInstance() : cache_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
    */
   @java.lang.Override
   public org.wso2.choreo.connect.discovery.config.enforcer.CacheOrBuilder getCacheOrBuilder() {
     return getCache();
   }
 
-  public static final int JWTISSUER_FIELD_NUMBER = 10;
+  public static final int JWTISSUER_FIELD_NUMBER = 8;
   private org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer jwtIssuer_;
   /**
-   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
    * @return Whether the jwtIssuer field is set.
    */
   @java.lang.Override
@@ -394,7 +394,7 @@ private static final long serialVersionUID = 0L;
     return jwtIssuer_ != null;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
    * @return The jwtIssuer.
    */
   @java.lang.Override
@@ -402,17 +402,17 @@ private static final long serialVersionUID = 0L;
     return jwtIssuer_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer.getDefaultInstance() : jwtIssuer_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
    */
   @java.lang.Override
   public org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuerOrBuilder getJwtIssuerOrBuilder() {
     return getJwtIssuer();
   }
 
-  public static final int ANALYTICS_FIELD_NUMBER = 11;
+  public static final int ANALYTICS_FIELD_NUMBER = 9;
   private org.wso2.choreo.connect.discovery.config.enforcer.Analytics analytics_;
   /**
-   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
    * @return Whether the analytics field is set.
    */
   @java.lang.Override
@@ -420,7 +420,7 @@ private static final long serialVersionUID = 0L;
     return analytics_ != null;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
    * @return The analytics.
    */
   @java.lang.Override
@@ -428,7 +428,7 @@ private static final long serialVersionUID = 0L;
     return analytics_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Analytics.getDefaultInstance() : analytics_;
   }
   /**
-   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
    */
   @java.lang.Override
   public org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder getAnalyticsOrBuilder() {
@@ -459,22 +459,22 @@ private static final long serialVersionUID = 0L;
       output.writeMessage(3, getTruststore());
     }
     if (authService_ != null) {
-      output.writeMessage(5, getAuthService());
+      output.writeMessage(4, getAuthService());
     }
     if (jwtGenerator_ != null) {
-      output.writeMessage(7, getJwtGenerator());
+      output.writeMessage(5, getJwtGenerator());
     }
     if (throttling_ != null) {
-      output.writeMessage(8, getThrottling());
+      output.writeMessage(6, getThrottling());
     }
     if (cache_ != null) {
-      output.writeMessage(9, getCache());
+      output.writeMessage(7, getCache());
     }
     if (jwtIssuer_ != null) {
-      output.writeMessage(10, getJwtIssuer());
+      output.writeMessage(8, getJwtIssuer());
     }
     if (analytics_ != null) {
-      output.writeMessage(11, getAnalytics());
+      output.writeMessage(9, getAnalytics());
     }
     unknownFields.writeTo(output);
   }
@@ -499,27 +499,27 @@ private static final long serialVersionUID = 0L;
     }
     if (authService_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(5, getAuthService());
+        .computeMessageSize(4, getAuthService());
     }
     if (jwtGenerator_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(7, getJwtGenerator());
+        .computeMessageSize(5, getJwtGenerator());
     }
     if (throttling_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(8, getThrottling());
+        .computeMessageSize(6, getThrottling());
     }
     if (cache_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(9, getCache());
+        .computeMessageSize(7, getCache());
     }
     if (jwtIssuer_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(10, getJwtIssuer());
+        .computeMessageSize(8, getJwtIssuer());
     }
     if (analytics_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(11, getAnalytics());
+        .computeMessageSize(9, getAnalytics());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -1355,14 +1355,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.config.enforcer.Service, org.wso2.choreo.connect.discovery.config.enforcer.Service.Builder, org.wso2.choreo.connect.discovery.config.enforcer.ServiceOrBuilder> authServiceBuilder_;
     /**
-     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
      * @return Whether the authService field is set.
      */
     public boolean hasAuthService() {
       return authServiceBuilder_ != null || authService_ != null;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
      * @return The authService.
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.Service getAuthService() {
@@ -1373,7 +1373,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
      */
     public Builder setAuthService(org.wso2.choreo.connect.discovery.config.enforcer.Service value) {
       if (authServiceBuilder_ == null) {
@@ -1389,7 +1389,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
      */
     public Builder setAuthService(
         org.wso2.choreo.connect.discovery.config.enforcer.Service.Builder builderForValue) {
@@ -1403,7 +1403,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
      */
     public Builder mergeAuthService(org.wso2.choreo.connect.discovery.config.enforcer.Service value) {
       if (authServiceBuilder_ == null) {
@@ -1421,7 +1421,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
      */
     public Builder clearAuthService() {
       if (authServiceBuilder_ == null) {
@@ -1435,7 +1435,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.Service.Builder getAuthServiceBuilder() {
       
@@ -1443,7 +1443,7 @@ private static final long serialVersionUID = 0L;
       return getAuthServiceFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.ServiceOrBuilder getAuthServiceOrBuilder() {
       if (authServiceBuilder_ != null) {
@@ -1454,7 +1454,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+     * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.config.enforcer.Service, org.wso2.choreo.connect.discovery.config.enforcer.Service.Builder, org.wso2.choreo.connect.discovery.config.enforcer.ServiceOrBuilder> 
@@ -1474,14 +1474,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator, org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator.Builder, org.wso2.choreo.connect.discovery.config.enforcer.JWTGeneratorOrBuilder> jwtGeneratorBuilder_;
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
      * @return Whether the jwtGenerator field is set.
      */
     public boolean hasJwtGenerator() {
       return jwtGeneratorBuilder_ != null || jwtGenerator_ != null;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
      * @return The jwtGenerator.
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator getJwtGenerator() {
@@ -1492,7 +1492,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
      */
     public Builder setJwtGenerator(org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator value) {
       if (jwtGeneratorBuilder_ == null) {
@@ -1508,7 +1508,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
      */
     public Builder setJwtGenerator(
         org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator.Builder builderForValue) {
@@ -1522,7 +1522,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
      */
     public Builder mergeJwtGenerator(org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator value) {
       if (jwtGeneratorBuilder_ == null) {
@@ -1540,7 +1540,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
      */
     public Builder clearJwtGenerator() {
       if (jwtGeneratorBuilder_ == null) {
@@ -1554,7 +1554,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator.Builder getJwtGeneratorBuilder() {
       
@@ -1562,7 +1562,7 @@ private static final long serialVersionUID = 0L;
       return getJwtGeneratorFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.JWTGeneratorOrBuilder getJwtGeneratorOrBuilder() {
       if (jwtGeneratorBuilder_ != null) {
@@ -1573,7 +1573,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator, org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator.Builder, org.wso2.choreo.connect.discovery.config.enforcer.JWTGeneratorOrBuilder> 
@@ -1593,14 +1593,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.config.enforcer.Throttling, org.wso2.choreo.connect.discovery.config.enforcer.Throttling.Builder, org.wso2.choreo.connect.discovery.config.enforcer.ThrottlingOrBuilder> throttlingBuilder_;
     /**
-     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
      * @return Whether the throttling field is set.
      */
     public boolean hasThrottling() {
       return throttlingBuilder_ != null || throttling_ != null;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
      * @return The throttling.
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.Throttling getThrottling() {
@@ -1611,7 +1611,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
      */
     public Builder setThrottling(org.wso2.choreo.connect.discovery.config.enforcer.Throttling value) {
       if (throttlingBuilder_ == null) {
@@ -1627,7 +1627,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
      */
     public Builder setThrottling(
         org.wso2.choreo.connect.discovery.config.enforcer.Throttling.Builder builderForValue) {
@@ -1641,7 +1641,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
      */
     public Builder mergeThrottling(org.wso2.choreo.connect.discovery.config.enforcer.Throttling value) {
       if (throttlingBuilder_ == null) {
@@ -1659,7 +1659,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
      */
     public Builder clearThrottling() {
       if (throttlingBuilder_ == null) {
@@ -1673,7 +1673,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.Throttling.Builder getThrottlingBuilder() {
       
@@ -1681,7 +1681,7 @@ private static final long serialVersionUID = 0L;
       return getThrottlingFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.ThrottlingOrBuilder getThrottlingOrBuilder() {
       if (throttlingBuilder_ != null) {
@@ -1692,7 +1692,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+     * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.config.enforcer.Throttling, org.wso2.choreo.connect.discovery.config.enforcer.Throttling.Builder, org.wso2.choreo.connect.discovery.config.enforcer.ThrottlingOrBuilder> 
@@ -1712,14 +1712,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.config.enforcer.Cache, org.wso2.choreo.connect.discovery.config.enforcer.Cache.Builder, org.wso2.choreo.connect.discovery.config.enforcer.CacheOrBuilder> cacheBuilder_;
     /**
-     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
      * @return Whether the cache field is set.
      */
     public boolean hasCache() {
       return cacheBuilder_ != null || cache_ != null;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
      * @return The cache.
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.Cache getCache() {
@@ -1730,7 +1730,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
      */
     public Builder setCache(org.wso2.choreo.connect.discovery.config.enforcer.Cache value) {
       if (cacheBuilder_ == null) {
@@ -1746,7 +1746,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
      */
     public Builder setCache(
         org.wso2.choreo.connect.discovery.config.enforcer.Cache.Builder builderForValue) {
@@ -1760,7 +1760,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
      */
     public Builder mergeCache(org.wso2.choreo.connect.discovery.config.enforcer.Cache value) {
       if (cacheBuilder_ == null) {
@@ -1778,7 +1778,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
      */
     public Builder clearCache() {
       if (cacheBuilder_ == null) {
@@ -1792,7 +1792,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.Cache.Builder getCacheBuilder() {
       
@@ -1800,7 +1800,7 @@ private static final long serialVersionUID = 0L;
       return getCacheFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.CacheOrBuilder getCacheOrBuilder() {
       if (cacheBuilder_ != null) {
@@ -1811,7 +1811,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+     * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.config.enforcer.Cache, org.wso2.choreo.connect.discovery.config.enforcer.Cache.Builder, org.wso2.choreo.connect.discovery.config.enforcer.CacheOrBuilder> 
@@ -1831,14 +1831,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer, org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer.Builder, org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuerOrBuilder> jwtIssuerBuilder_;
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
      * @return Whether the jwtIssuer field is set.
      */
     public boolean hasJwtIssuer() {
       return jwtIssuerBuilder_ != null || jwtIssuer_ != null;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
      * @return The jwtIssuer.
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer getJwtIssuer() {
@@ -1849,7 +1849,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
      */
     public Builder setJwtIssuer(org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer value) {
       if (jwtIssuerBuilder_ == null) {
@@ -1865,7 +1865,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
      */
     public Builder setJwtIssuer(
         org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer.Builder builderForValue) {
@@ -1879,7 +1879,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
      */
     public Builder mergeJwtIssuer(org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer value) {
       if (jwtIssuerBuilder_ == null) {
@@ -1897,7 +1897,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
      */
     public Builder clearJwtIssuer() {
       if (jwtIssuerBuilder_ == null) {
@@ -1911,7 +1911,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer.Builder getJwtIssuerBuilder() {
       
@@ -1919,7 +1919,7 @@ private static final long serialVersionUID = 0L;
       return getJwtIssuerFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuerOrBuilder getJwtIssuerOrBuilder() {
       if (jwtIssuerBuilder_ != null) {
@@ -1930,7 +1930,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+     * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer, org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer.Builder, org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuerOrBuilder> 
@@ -1950,14 +1950,14 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.config.enforcer.Analytics, org.wso2.choreo.connect.discovery.config.enforcer.Analytics.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder> analyticsBuilder_;
     /**
-     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
      * @return Whether the analytics field is set.
      */
     public boolean hasAnalytics() {
       return analyticsBuilder_ != null || analytics_ != null;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
      * @return The analytics.
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.Analytics getAnalytics() {
@@ -1968,7 +1968,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
      */
     public Builder setAnalytics(org.wso2.choreo.connect.discovery.config.enforcer.Analytics value) {
       if (analyticsBuilder_ == null) {
@@ -1984,7 +1984,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
      */
     public Builder setAnalytics(
         org.wso2.choreo.connect.discovery.config.enforcer.Analytics.Builder builderForValue) {
@@ -1998,7 +1998,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
      */
     public Builder mergeAnalytics(org.wso2.choreo.connect.discovery.config.enforcer.Analytics value) {
       if (analyticsBuilder_ == null) {
@@ -2016,7 +2016,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
      */
     public Builder clearAnalytics() {
       if (analyticsBuilder_ == null) {
@@ -2030,7 +2030,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.Analytics.Builder getAnalyticsBuilder() {
       
@@ -2038,7 +2038,7 @@ private static final long serialVersionUID = 0L;
       return getAnalyticsFieldBuilder().getBuilder();
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder getAnalyticsOrBuilder() {
       if (analyticsBuilder_ != null) {
@@ -2049,7 +2049,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+     * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         org.wso2.choreo.connect.discovery.config.enforcer.Analytics, org.wso2.choreo.connect.discovery.config.enforcer.Analytics.Builder, org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder> 

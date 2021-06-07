@@ -79,11 +79,11 @@
   # System hostname for system API resources (eg: /testkey and /health)
   systemHost = "localhost"
 
-# Configurations of key store
+# Configurations of key store used in Choreo Connect Router
 [router.keystore]
-  # Path of the certificate
+  # Path of the certificate of the Router
   certPath = "/home/wso2/security/keystore/mg.pem"
-  # Path of the private key
+  # Path of the private key of the Router
   keyPath = "/home/wso2/security/keystore/mg.key"
 
 # Cors configurations
@@ -148,7 +148,7 @@
   enabled = true
   # Maximum cache size
   maximumSize = 10000
-  # Expiry time in seconds
+  # Expiry time in minutes
   expiryTime = 15
 
 # The configuration of the backend jwt generation in the Choreo Connect
@@ -208,6 +208,7 @@
 [enforcer.security.authHeader]
   # Remove authorization header from backend request
   enableOutboundAuthHeader = false
+  # Header name for the authorization token coming from the downstream client
   authorizationHeader = "authorization"
   testConsoleHeaderName = "Internal-Key"
   
@@ -348,25 +349,39 @@
   # Enable/Disable Analytics in Choreo Connect
   enabled = false
   [analytics.adapter]
+    # Buffer flush interval for gRPC access log client in Router
     bufferFlushInterval = "1s"
+    # Buffer size limit for buffer flush to be triggered
     bufferSizeBytes = 16384
+    # gRPC connection timeout for access log service
     gRPCRequestTimeout = "20s"
 
+  # Enforcer related configurations
   [analytics.enforcer]
     [analytics.enforcer.configProperties]
+      # Authentication endpoint for Choreo Analytics Publishing
       authURL = "$env{analytics_authURL}"
+      # Authentication token for Choreo Analytics Publishing
       authToken = "$env{analytics_authToken}"
 
+    # gRPC access log service within Enforcer
     [analytics.enforcer.LogReceiver]
+      # Port
       port = 18090
+      # Maximum message size in bytes
       maxMessageSize = 1000000000
+      # Maximum header size in bytes
       maxHeaderLimit = 8192
-      # Keep alive time of the external authz connection
+      # Keep alive time of gRPC access log connection
       keepAliveTime = 600
 
+      # Thread pool configuration for gRPC access log server
       [analytics.enforcer.LogReceiver.threadPool]
+        # Minimum number of workers to keep alive
         coreSize = 10
+        # Maximum pool size
         maxSize = 100
-        # Keep alive time of threads in seconds
+        # Timeout in seconds for idle threads waiting for work
         keepAliveTime = 600
+        # Queue size of the worker threads
         queueSize = 1000

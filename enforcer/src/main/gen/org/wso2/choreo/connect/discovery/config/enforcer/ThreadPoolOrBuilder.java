@@ -24,13 +24,13 @@ public interface ThreadPoolOrBuilder extends
    * keep alive time of threads in seconds
    * </pre>
    *
-   * <code>int32 keepAliveTime = 4;</code>
+   * <code>int32 keepAliveTime = 3;</code>
    * @return The keepAliveTime.
    */
   int getKeepAliveTime();
 
   /**
-   * <code>int32 queueSize = 5;</code>
+   * <code>int32 queueSize = 4;</code>
    * @return The queueSize.
    */
   int getQueueSize();

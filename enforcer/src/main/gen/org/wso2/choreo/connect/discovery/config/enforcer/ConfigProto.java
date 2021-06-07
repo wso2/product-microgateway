@@ -44,15 +44,15 @@ public final class ConfigProto {
       "curity\022;\n\010keystore\030\002 \001(\0132).wso2.discover" +
       "y.config.enforcer.CertStore\022=\n\ntruststor" +
       "e\030\003 \001(\0132).wso2.discovery.config.enforcer" +
-      ".CertStore\022<\n\013authService\030\005 \001(\0132\'.wso2.d" +
+      ".CertStore\022<\n\013authService\030\004 \001(\0132\'.wso2.d" +
       "iscovery.config.enforcer.Service\022B\n\014jwtG" +
-      "enerator\030\007 \001(\0132,.wso2.discovery.config.e" +
-      "nforcer.JWTGenerator\022>\n\nthrottling\030\010 \001(\013" +
+      "enerator\030\005 \001(\0132,.wso2.discovery.config.e" +
+      "nforcer.JWTGenerator\022>\n\nthrottling\030\006 \001(\013" +
       "2*.wso2.discovery.config.enforcer.Thrott" +
-      "ling\0224\n\005cache\030\t \001(\0132%.wso2.discovery.con" +
-      "fig.enforcer.Cache\022<\n\tjwtIssuer\030\n \001(\0132)." +
+      "ling\0224\n\005cache\030\007 \001(\0132%.wso2.discovery.con" +
+      "fig.enforcer.Cache\022<\n\tjwtIssuer\030\010 \001(\0132)." +
       "wso2.discovery.config.enforcer.JWTIssuer" +
-      "\022<\n\tanalytics\030\013 \001(\0132).wso2.discovery.con" +
+      "\022<\n\tanalytics\030\t \001(\0132).wso2.discovery.con" +
       "fig.enforcer.AnalyticsB\222\001\n1org.wso2.chor" +
       "eo.connect.discovery.config.enforcerB\013Co" +
       "nfigProtoP\001ZNgithub.com/envoyproxy/go-co" +
