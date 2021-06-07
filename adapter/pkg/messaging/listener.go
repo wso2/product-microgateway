@@ -20,7 +20,6 @@ package messaging
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/streadway/amqp"
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
@@ -34,8 +33,6 @@ var (
 	// amqpURIArray represents an array of amqpFailoverURL objects
 	amqpURIArray = make([]amqpFailoverURL, 0)
 )
-
-var lifetime = 0 * time.Second
 
 const (
 	consumerTag string = "jms-consumer"
@@ -65,19 +62,12 @@ func startConsumer(key string) *Consumer {
 	}()
 	err := handleEvent(c, key)
 	if err != nil {
-		logger.LoggerMsg.Fatalf("%s", err)
-	}
-	if lifetime > 0 {
-		logger.LoggerMsg.Debugf("running %s events for %s", key, lifetime)
-		time.Sleep(lifetime)
-	} else {
-		logger.LoggerMsg.Infof("process of receiving %s events running forever", key)
-		select {}
+		logger.LoggerMsg.Fatalf("Error while handling event. %s", err)
 	}
 
-	logger.LoggerMsg.Infof("shutting down")
+	logger.LoggerMsg.Infof("Shutting down the consumer")
 	if err := c.Shutdown(); err != nil {
-		logger.LoggerMsg.Fatalf("error during shutdown: %s", err)
+		logger.LoggerMsg.Fatalf("Error during shutdown: %s", err)
 	}
 
 	return c
@@ -85,15 +75,20 @@ func startConsumer(key string) *Consumer {
 
 // Shutdown when error happens
 func (c *Consumer) Shutdown() error {
+
+	if c.Conn.IsClosed() {
+		logger.LoggerMsg.Infof("AMQP shutdown OK")
+		return nil
+	}
+
 	// will close() the deliveries channel
 	if err := c.Channel.Cancel(c.Tag, true); err != nil {
-		return fmt.Errorf("Consumer cancel failed: %s", err)
+		logger.LoggerMsg.Errorf("Consumer cancel failed: %s", err.Error())
 	}
 
 	if err := c.Conn.Close(); err != nil {
 		return fmt.Errorf("AMQP connection close error: %s", err)
 	}
-
 	defer logger.LoggerMsg.Infof("AMQP shutdown OK")
 
 	// wait for handle() to exit

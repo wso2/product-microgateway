@@ -19,15 +19,11 @@
 package messaging
 
 import (
-	"time"
-
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
-
-var lifetime = 0 * time.Second
 
 // ProcessEvents to pass event consumption
 func ProcessEvents(config *config.Config) {

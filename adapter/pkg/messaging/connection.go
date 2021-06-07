@@ -32,20 +32,20 @@ import (
 
 var (
 	// NotificationChannel stores the Events for notifications
-	NotificationChannel chan amqp.Delivery
+	NotificationChannel chan *amqp.Delivery
 	// KeyManagerChannel stores the key manager eventsv
-	KeyManagerChannel chan amqp.Delivery
+	KeyManagerChannel chan *amqp.Delivery
 	// RevokedTokenChannel stores the revoked token events
-	RevokedTokenChannel chan amqp.Delivery
+	RevokedTokenChannel chan *amqp.Delivery
 	// ThrottleDataChannel stores the throttling related events
-	ThrottleDataChannel chan amqp.Delivery
+	ThrottleDataChannel chan *amqp.Delivery
 )
 
 func init() {
-	NotificationChannel = make(chan amqp.Delivery)
-	KeyManagerChannel = make(chan amqp.Delivery)
-	RevokedTokenChannel = make(chan amqp.Delivery)
-	ThrottleDataChannel = make(chan amqp.Delivery)
+	NotificationChannel = make(chan *amqp.Delivery)
+	KeyManagerChannel = make(chan *amqp.Delivery)
+	RevokedTokenChannel = make(chan *amqp.Delivery)
+	ThrottleDataChannel = make(chan *amqp.Delivery)
 }
 
 // EventListeningEndpoints represents the list of endpoints
@@ -264,11 +264,11 @@ func handleEvent(c *Consumer, key string) error {
 		nil,   // arguments
 	)
 	if err != nil {
-		return fmt.Errorf("Queue Declare: %s", err)
+		return fmt.Errorf("Error while declaring queue: %s", err)
 	}
 
-	logger.LoggerMsg.Debugf("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
-		queue.Name, queue.Messages, queue.Consumers, key)
+	logger.LoggerMsg.Debugf("Binding to Exchange (key %q) after declaring the Queue (%q %d messages, %d consumers)",
+		key, queue.Name, queue.Messages, queue.Consumers)
 
 	if err = c.Channel.QueueBind(
 		queue.Name, // name of the queue
@@ -291,19 +291,19 @@ func handleEvent(c *Consumer, key string) error {
 	)
 	if strings.EqualFold(key, notification) {
 		for event := range deliveries {
-			NotificationChannel <- event
+			NotificationChannel <- &event
 		}
 	} else if strings.EqualFold(key, keymanager) {
 		for event := range deliveries {
-			KeyManagerChannel <- event
+			KeyManagerChannel <- &event
 		}
 	} else if strings.EqualFold(key, tokenRevocation) {
 		for event := range deliveries {
-			RevokedTokenChannel <- event
+			RevokedTokenChannel <- &event
 		}
 	} else if strings.EqualFold(key, throttleData) {
 		for event := range deliveries {
-			ThrottleDataChannel <- event
+			ThrottleDataChannel <- &event
 		}
 	}
 	return nil
@@ -321,6 +321,7 @@ func InitiateJMSConnection(eventListeningEndpoints []string) error {
 			logger.LoggerMsg.Infof("Establishing consumer index %v for key %s ", i, key)
 			go func(key string) {
 				startConsumer(key)
+				select {}
 			}(key)
 		}
 	}
