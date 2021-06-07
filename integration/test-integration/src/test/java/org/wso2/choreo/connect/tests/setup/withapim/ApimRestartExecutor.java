@@ -15,51 +15,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.wso2.choreo.connect.tests.setup.withapim;
 
 import org.awaitility.Awaitility;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeSuite;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.context.ApimInstance;
-import org.wso2.choreo.connect.tests.util.HttpClientRequest;
-import org.wso2.choreo.connect.tests.util.HttpResponse;
-import org.wso2.choreo.connect.tests.util.Utils;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 
-import java.io.IOException;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-/**
- * This class starts the API Manager instance before the entire test suite.
- */
-public class ApimStartupShutdownExecutor {
-    ApimInstance apimInstance;
+public class ApimRestartExecutor {
 
-    @BeforeSuite(description = "start API Manager")
-    void startAPIM() throws Exception {
-        apimInstance = new ApimInstance();
-        apimInstance.startAPIM();
-        Awaitility.await().pollDelay(2, TimeUnit.MINUTES).pollInterval(15, TimeUnit.SECONDS)
+    @Test
+    public void restartApim() throws CCTestException {
+        ApimInstance apimInstance = ApimInstance.getInstance();
+        apimInstance.restartAPIM();
+        Awaitility.await().pollDelay(1, TimeUnit.MINUTES).pollInterval(15, TimeUnit.SECONDS)
                 .atMost(4, TimeUnit.MINUTES).until(isAPIMServerStarted());
-    }
-
-    @AfterSuite(description = "stop API Manager")
-    public void stopAPIM() {
-        apimInstance.stopAPIM();
+        Assert.assertTrue(true); //to make this method run
     }
 
     private Callable<Boolean> isAPIMServerStarted() {
         return new Callable<Boolean>() {
             public Boolean call() throws Exception {
-                return checkForAPIMServerStartup();
+                return ApimInstance.checkForAPIMServerStartup();
             }
         };
-    }
-
-    private Boolean checkForAPIMServerStartup() throws IOException {
-        HttpResponse response = HttpClientRequest.doGet(Utils.getAPIMServiceURLHttp("/services/Version"));
-        return Objects.nonNull(response) && response.getResponseCode() == 200;
     }
 }

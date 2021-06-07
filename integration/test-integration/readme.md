@@ -44,11 +44,8 @@
 1. Run the tests ones
 2. Copy the `apim` folder in the `integration/test-integration/target` to a different location
 3. cd into that `apim` folder and run `docker-compose up`
-4. Comment the test class `ApimStartupShutdownExecutor` in `integration/test-integration/src/test/resources/testng-cc-with-apim.xml`. 
-   Then it should look like,
-   ```
-    <!--  <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimStartupShutdownExecutor"/> -->
-   ```
+4. Search and comment the three `Apim...Executer` the test classes in `integration/test-integration/src/test/resources/testng-cc-with-apim.xml`. 
+   The three classes are `ApimStartupExecutor`, `ApimRestartExecutor` and `ApimShutdownExecutor`.
 5. Now run the tests with `mvn clean install` while in the `integration/test-integration` folder
 6. Once done, uncomment the previously commented `ApimStartupShutdownExecutor` test class, stop the running apim 
    instance, and run all the tests with `mvn clean install`.
@@ -86,8 +83,9 @@ NOTE: Only if an instance with a completely new config is extremely necessary
    NOTE: Adding to both modes is not compulsory
 ## How to Test with a new API-M instance
 NOTE: Not encouraged at all
-1. Create a class similar to `org.wso2.choreo.connect.tests.setup.withapim.ApimStartupShutdownExecutor` and add a
-   `beforeSuite` methods that starts the apim instance
+1. Create a class similar to `org.wso2.choreo.connect.tests.setup.withapim.ApimStartupExecutor` and add a
+   `beforeSuite` methods that starts the apim instance. (Don't have to write a new "shutdownExecuter",
+   the existing can be used as it is. Yet, will have to make the `ApimInstance` class configurable like `CcInstance`)
 2. Add a new testng file and follow the pattern given below
     ```
    <test>
@@ -97,5 +95,6 @@ NOTE: Not encouraged at all
    <test>
    </test>
    <test>
+        <class name="ApimShutdownExecutor"/>
    </test>
    ```
