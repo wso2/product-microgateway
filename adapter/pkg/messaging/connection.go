@@ -235,7 +235,7 @@ type amqpFailoverURL struct {
 func handleEvent(c *Consumer, key string) error {
 	var err error
 
-	logger.LoggerMsg.Debugf("got Connection, getting Channel for %s events", key)
+	logger.LoggerMsg.Debugf("Getting Channel for %s events.", key)
 	c.Channel, err = c.Conn.Channel()
 	if err != nil {
 		return fmt.Errorf("Channel: %s", err)
