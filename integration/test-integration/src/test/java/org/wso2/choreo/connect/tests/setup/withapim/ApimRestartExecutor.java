@@ -18,15 +18,20 @@
 package org.wso2.choreo.connect.tests.setup.withapim;
 
 import org.awaitility.Awaitility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.context.ApimInstance;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 public class ApimRestartExecutor {
+    private static final Logger log = LoggerFactory.getLogger(ApimRestartExecutor.class);
 
     @Test
     public void restartApim() throws CCTestException {
@@ -34,6 +39,9 @@ public class ApimRestartExecutor {
         apimInstance.restartAPIM();
         Awaitility.await().pollDelay(1, TimeUnit.MINUTES).pollInterval(15, TimeUnit.SECONDS)
                 .atMost(4, TimeUnit.MINUTES).until(isAPIMServerStarted());
+        log.info("Waiting for APIM and CC to be ready after APIM restart");
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for APIM and CC to be " +
+                "ready after APIM restart");
         Assert.assertTrue(true); //to make this method run
     }
 
