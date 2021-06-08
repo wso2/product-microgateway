@@ -67,12 +67,12 @@
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase"/>
         </classes>
     </test>
-    <test name="apis-apps-subs-received-after-apim-restart" parallel="false">
-        <classes>
-            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.RestartedApimTestCase"/>
-        </classes>
-    </test>
+<!--    <test name="apis-apps-subs-received-after-apim-restart" parallel="false">-->
+<!--        <classes>-->
+<!--            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.withapim.RestartedApimTestCase"/>-->
+<!--        </classes>-->
+<!--    </test>-->
     <test name="cc-shutdown-and-apim-shutdown" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcShutdownExecutor"/>
