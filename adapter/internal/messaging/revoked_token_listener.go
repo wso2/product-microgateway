@@ -45,7 +45,7 @@ func handleTokenRevocation() {
 		t.Expirytime = notification.Event.PayloadData.ExpiryTime
 		stokens = append(stokens, t)
 		xds.UpdateEnforcerRevokedTokens(stokens)
-		d.Ack(true)
+		d.Ack(false)
 	}
 	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
 }

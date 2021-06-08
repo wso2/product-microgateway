@@ -101,11 +101,11 @@ func handleThrottleData() {
 				KeyTemplates: synchronizer.GetKeyTemplates(),
 			}
 		} else {
-			d.Ack(true)
+			d.Ack(false)
 			continue
 		}
 		xds.UpdateEnforcerThrottleData(throttleData)
-		d.Ack(true)
+		d.Ack(false)
 	}
 	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
 }

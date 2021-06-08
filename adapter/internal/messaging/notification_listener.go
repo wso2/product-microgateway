@@ -100,7 +100,7 @@ func handleNotification() {
 		} else {
 			handlePolicyEvents(decodedByte, eventType)
 		}
-		d.Ack(true)
+		d.Ack(false)
 	}
 	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
 }

@@ -106,7 +106,7 @@ func handleKMConfiguration() {
 				}
 			}
 		}
-		d.Ack(true)
+		d.Ack(false)
 	}
 	logger.LoggerInternalMsg.Info("handle: deliveries channel closed")
 }
