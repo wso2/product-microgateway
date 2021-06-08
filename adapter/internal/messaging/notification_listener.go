@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/streadway/amqp"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	eh "github.com/wso2/product-microgateway/adapter/internal/eventhub"
@@ -69,9 +68,9 @@ var (
 )
 
 // handleNotification to process
-func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
+func handleNotification() {
 
-	for d := range deliveries {
+	for d := range msg.NotificationChannel {
 		var notification msg.EventNotification
 		var eventType string
 		notificationErr := json.Unmarshal([]byte(string(d.Body)), &notification)
@@ -104,7 +103,6 @@ func handleNotification(deliveries <-chan amqp.Delivery, done chan error) {
 		d.Ack(false)
 	}
 	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
-	done <- nil
 }
 
 // handleAPIEvents to process api related data

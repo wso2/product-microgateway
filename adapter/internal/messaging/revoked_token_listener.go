@@ -22,15 +22,14 @@ import (
 	"encoding/json"
 
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	"github.com/streadway/amqp"
-	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/keymgt"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/keymgt"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
-func handleTokenRevocation(deliveries <-chan amqp.Delivery, done chan error) {
-	for d := range deliveries {
+func handleTokenRevocation() {
+	for d := range msg.RevokedTokenChannel {
 		var notification msg.EventTokenRevocationNotification
 		unmarshalErr := json.Unmarshal([]byte(string(d.Body)), &notification)
 		if unmarshalErr != nil {
@@ -49,5 +48,4 @@ func handleTokenRevocation(deliveries <-chan amqp.Delivery, done chan error) {
 		d.Ack(false)
 	}
 	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
-	done <- nil
 }
