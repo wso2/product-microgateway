@@ -48,7 +48,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
     @Override
     public void check(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
-        ThreadContext.put(APIConstants.LOG_TRACE_ID, request.getAttributes().getRequest().getHttp().getId());
+        ThreadContext.put(APIConstants.LOG_TRACE_ID, request.getAttributes().getRequest().getHttp()
+                .getHeadersOrDefault(HttpConstants.X_REQUEST_ID_HEADER,
+                        request.getAttributes().getRequest().getHttp().getId()));
         ResponseObject responseObject = requestHandler.process(request);
         CheckResponse response = buildResponse(request, responseObject);
         responseObserver.onNext(response);
