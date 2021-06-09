@@ -30,6 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameResponse;
+import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.websocket.MetadataConstants;
 
 /**
@@ -50,7 +51,12 @@ public class AccessLogInterceptor implements ServerInterceptor {
                     if (message instanceof CheckRequest) {
                         CheckRequest checkRequest = (CheckRequest) message;
                         enforcerServerCall.setStartTime(System.currentTimeMillis());
-                        enforcerServerCall.setTraceId(checkRequest.getAttributes().getRequest().getHttp().getId());
+                        String requestId = checkRequest.getAttributes().getRequest().getHttp().getId();
+                        // x-request-id equals to envoy access log entries "%REQ(X-REQUEST-ID)%". This allows
+                        // to correlate the same request in Router and the Enforcer. If this header is not coming then
+                        // we set the http request Id property as the default value.
+                        enforcerServerCall.setTraceId(checkRequest.getAttributes().getRequest().getHttp()
+                                .getHeadersOrDefault(HttpConstants.X_REQUEST_ID_HEADER, requestId));
                         super.onMessage(message);
                     } else if (message instanceof WebSocketFrameRequest) {
                         WebSocketFrameRequest webSocketFrameRequest = (WebSocketFrameRequest) message;
