@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	amqpURI  string
+	amqpURI string
 	// RabbitConn represents the ampq connection
 	RabbitConn       *amqp.Connection
 	rabbitCloseError chan *amqp.Error
@@ -35,11 +35,20 @@ var (
 )
 
 const (
-	consumerTag  string = "jms-consumer"
+	consumerTag string = "jms-consumer"
+)
+
+const (
+	notification    string = "notification"
+	keymanager      string = "keymanager"
+	tokenRevocation string = "tokenRevocation"
+	throttleData    string = "throttleData"
+	exchange        string = "amq.topic"
+	exchangeType    string = "topic"
 )
 
 // StartConsumer for provided key consume data
-func StartConsumer(key string) (*Consumer) {
+func startConsumer(key string) *Consumer {
 	c := &Consumer{
 		Conn:    nil,
 		Channel: nil,
@@ -51,21 +60,35 @@ func StartConsumer(key string) (*Consumer) {
 	go func() {
 		c.reconnect(key)
 	}()
+	err := handleEvent(c, key)
+	if err != nil {
+		logger.LoggerMsg.Fatalf("Error while handling event. %s", err)
+	}
+
+	logger.LoggerMsg.Infof("Shutting down the consumer")
+	if err := c.Shutdown(); err != nil {
+		logger.LoggerMsg.Fatalf("Error during shutdown: %s", err)
+	}
 
 	return c
 }
 
 // Shutdown when error happens
 func (c *Consumer) Shutdown() error {
+
+	if c.Conn.IsClosed() {
+		logger.LoggerMsg.Infof("AMQP shutdown OK")
+		return nil
+	}
+
 	// will close() the deliveries channel
 	if err := c.Channel.Cancel(c.Tag, true); err != nil {
-		return fmt.Errorf("Consumer cancel failed: %s", err)
+		logger.LoggerMsg.Errorf("Consumer cancel failed: %s", err.Error())
 	}
 
 	if err := c.Conn.Close(); err != nil {
 		return fmt.Errorf("AMQP connection close error: %s", err)
 	}
-
 	defer logger.LoggerMsg.Infof("AMQP shutdown OK")
 
 	// wait for handle() to exit

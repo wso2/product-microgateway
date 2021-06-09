@@ -19,6 +19,7 @@
 package messaging
 
 import (
+	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -29,11 +30,29 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 )
 
+var (
+	// NotificationChannel stores the Events for notifications
+	NotificationChannel chan *amqp.Delivery
+	// KeyManagerChannel stores the key manager eventsv
+	KeyManagerChannel chan *amqp.Delivery
+	// RevokedTokenChannel stores the revoked token events
+	RevokedTokenChannel chan *amqp.Delivery
+	// ThrottleDataChannel stores the throttling related events
+	ThrottleDataChannel chan *amqp.Delivery
+)
+
+func init() {
+	NotificationChannel = make(chan *amqp.Delivery)
+	KeyManagerChannel = make(chan *amqp.Delivery)
+	RevokedTokenChannel = make(chan *amqp.Delivery)
+	ThrottleDataChannel = make(chan *amqp.Delivery)
+}
+
 // EventListeningEndpoints represents the list of endpoints
-var EventListeningEndpoints  []string
+var EventListeningEndpoints []string
 
 // ConnectToRabbitMQ function tries to connect to the RabbitMQ server as long as it takes to establish a connection
-func ConnectToRabbitMQ() (*amqp.Connection, error) {
+func connectToRabbitMQ() (*amqp.Connection, error) {
 	var err error = nil
 	var conn *amqp.Connection
 	amqpURIArray = retrieveAMQPURLList()
@@ -108,7 +127,7 @@ func connectionRetry(key string) (*Consumer, *amqp.Connection, error) {
 				if key != "" && len(key) > 0 {
 					logger.LoggerMsg.Infof("Reconnected to topic %s", key)
 					// startup pull
-					c := StartConsumer(key)
+					c := startConsumer(key)
 					return c, RabbitConn, nil
 				}
 				return nil, RabbitConn, nil
@@ -155,7 +174,7 @@ func retryExponentially(key string, url string, retryInterval time.Duration) (*C
 			if key != "" && len(key) > 0 {
 				logger.LoggerMsg.Infof("Reconnected to topic %s", key)
 				// startup pull
-				c := StartConsumer(key)
+				c := startConsumer(key)
 				return c, RabbitConn, nil
 			}
 		}
@@ -211,4 +230,100 @@ type amqpFailoverURL struct {
 	URL             string
 	retryCount      int
 	connectionDelay int
+}
+
+func handleEvent(c *Consumer, key string) error {
+	var err error
+
+	logger.LoggerMsg.Debugf("Getting Channel for %s events.", key)
+	c.Channel, err = c.Conn.Channel()
+	if err != nil {
+		return fmt.Errorf("Channel: %s", err)
+	}
+
+	logger.LoggerMsg.Debugf("got Channel, declaring Exchange (%q)", exchange)
+	if err = c.Channel.ExchangeDeclare(
+		exchange,     // name of the exchange
+		exchangeType, // type
+		true,         // durable
+		false,        // delete when complete
+		false,        // internal
+		false,        // noWait
+		nil,          // arguments
+	); err != nil {
+		return fmt.Errorf("Exchange Declare: %s", err)
+	}
+
+	logger.LoggerMsg.Infof("declared Exchange, declaring Queue %q", key+"queue")
+	queue, err := c.Channel.QueueDeclare(
+		"",    // name of the queue
+		false, // durable
+		true,  // delete when usused
+		false, // exclusive
+		false, // noWait
+		nil,   // arguments
+	)
+	if err != nil {
+		return fmt.Errorf("Error while declaring queue: %s", err)
+	}
+
+	logger.LoggerMsg.Debugf("Binding to Exchange (key %q) after declaring the Queue (%q %d messages, %d consumers)",
+		key, queue.Name, queue.Messages, queue.Consumers)
+
+	if err = c.Channel.QueueBind(
+		queue.Name, // name of the queue
+		key,        // bindingKey
+		exchange,   // sourceExchange
+		false,      // noWait
+		nil,        // arguments
+	); err != nil {
+		return fmt.Errorf("Queue Bind: %s", err)
+	}
+	logger.LoggerMsg.Infof("Queue bound to Exchange, starting Consume (consumer tag %q) events", c.Tag)
+	deliveries, err := c.Channel.Consume(
+		queue.Name, // name
+		c.Tag,      // consumerTag,
+		false,      // noAck
+		false,      // exclusive
+		false,      // noLocal
+		false,      // noWait
+		nil,        // arguments
+	)
+	if strings.EqualFold(key, notification) {
+		for event := range deliveries {
+			NotificationChannel <- &event
+		}
+	} else if strings.EqualFold(key, keymanager) {
+		for event := range deliveries {
+			KeyManagerChannel <- &event
+		}
+	} else if strings.EqualFold(key, tokenRevocation) {
+		for event := range deliveries {
+			RevokedTokenChannel <- &event
+		}
+	} else if strings.EqualFold(key, throttleData) {
+		for event := range deliveries {
+			ThrottleDataChannel <- &event
+		}
+	}
+	return nil
+}
+
+// InitiateJMSConnection to pass event consumption
+func InitiateJMSConnection(eventListeningEndpoints []string) error {
+	var err error
+	EventListeningEndpoints = eventListeningEndpoints
+	bindingKeys := []string{notification, keymanager, tokenRevocation, throttleData}
+	RabbitConn, err = connectToRabbitMQ()
+
+	if err == nil {
+		for i, key := range bindingKeys {
+			logger.LoggerMsg.Infof("Establishing consumer index %v for key %s ", i, key)
+			go func(key string) {
+				startConsumer(key)
+				select {}
+			}(key)
+		}
+	}
+	return err
 }
