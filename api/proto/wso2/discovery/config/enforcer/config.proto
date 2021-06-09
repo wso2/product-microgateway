@@ -3,7 +3,6 @@ syntax = "proto3";
 package wso2.discovery.config.enforcer;
 
 import "wso2/discovery/config/enforcer/cert.proto";
-import "wso2/discovery/config/enforcer/am_credentials.proto";
 import "wso2/discovery/config/enforcer/service.proto";
 import "wso2/discovery/config/enforcer/jwt_generator.proto";
 import "wso2/discovery/config/enforcer/jwt_issuer.proto";
@@ -27,17 +26,15 @@ message Config {
 
     CertStore truststore = 3;
 
-    Service authService = 5;
+    Service authService = 4;
 
-    AmCredentials apimCredentials = 6;
+    JWTGenerator jwtGenerator = 5;
 
-    JWTGenerator jwtGenerator = 7;
+    Throttling throttling = 6;
 
-    Throttling throttling = 8;
+    Cache cache = 7;
 
-    Cache cache = 9;
+    JWTIssuer jwtIssuer = 8;
 
-    JWTIssuer jwtIssuer = 10;
-
-    Analytics analytics = 11;
+    Analytics analytics = 9;
 }

@@ -63,7 +63,7 @@ const (
 	envConfigPrefix = "$env"
 )
 
-//constants related to utility functions
+// Constants related to utility functions
 const (
 	tenantDomainSeparator = "@"
 	superTenantDomain     = "carbon.super"
@@ -76,10 +76,11 @@ const (
 // variable's value ("/conf/config.toml"). otherwise, the "MGW_HOME" variable would be set to the directory
 // from where the executable is called from.
 //
-// Returns the configuration object mapped from the configuration file during the startup.
+// Returns the configuration object that is initialized with default values. Changes to the default
+// configuration object is achieved through the configuration file. 
 func ReadConfigs() (*Config, error) {
 	onceConfigRead.Do(func() {
-		adapterConfig = new(Config)
+		adapterConfig = defaultConfig
 		_, err := os.Stat(GetMgwHome() + relativeConfigPath)
 		if err != nil {
 			logger.Fatal("Configuration file not found.", err)

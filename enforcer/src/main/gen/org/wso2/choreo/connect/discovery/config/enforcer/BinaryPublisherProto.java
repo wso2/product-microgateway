@@ -35,11 +35,11 @@ public final class BinaryPublisherProto {
       "g/enforcer/throttle_publisher_pool.proto" +
       "\0323wso2/discovery/config/enforcer/throttl" +
       "e_agent.proto\"\356\001\n\017BinaryPublisher\022\020\n\010use" +
-      "rname\030\002 \001(\t\022\020\n\010password\030\003 \001(\t\022<\n\010urlGrou" +
-      "p\030\004 \003(\0132*.wso2.discovery.config.enforcer" +
-      ".TMURLGroup\022;\n\004pool\030\005 \001(\0132-.wso2.discove" +
+      "rname\030\001 \001(\t\022\020\n\010password\030\002 \001(\t\022<\n\010urlGrou" +
+      "p\030\003 \003(\0132*.wso2.discovery.config.enforcer" +
+      ".TMURLGroup\022;\n\004pool\030\004 \001(\0132-.wso2.discove" +
       "ry.config.enforcer.PublisherPool\022<\n\005agen" +
-      "t\030\006 \001(\0132-.wso2.discovery.config.enforcer" +
+      "t\030\005 \001(\0132-.wso2.discovery.config.enforcer" +
       ".ThrottleAgentB\233\001\n1org.wso2.choreo.conne" +
       "ct.discovery.config.enforcerB\024BinaryPubl" +
       "isherProtoP\001ZNgithub.com/envoyproxy/go-c" +
