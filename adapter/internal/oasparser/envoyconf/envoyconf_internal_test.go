@@ -115,6 +115,8 @@ func TestCreateRoute(t *testing.T) {
 
 	TimeOutConfig := *ptypes.DurationProto(30 * time.Second)
 
+	IdleTimeOutConfig := *ptypes.DurationProto(60 * time.Second)
+
 	expectedRouteActionWithXWso2BasePath := &routev3.Route_Route{
 		Route: &routev3.RouteAction{
 			HostRewriteSpecifier: hostRewriteSpecifier,
@@ -122,7 +124,7 @@ func TestCreateRoute(t *testing.T) {
 			ClusterSpecifier:     clusterSpecifier,
 			UpgradeConfigs:       UpgradeConfigsDisabled,
 			Timeout:              &TimeOutConfig,
-			IdleTimeout:          &TimeOutConfig,
+			IdleTimeout:          &IdleTimeOutConfig,
 		},
 	}
 

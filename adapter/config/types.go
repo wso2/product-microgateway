@@ -100,7 +100,7 @@ type envoy struct {
 
 type timeOuts struct {
 	BackendTimeoutInSeconds time.Duration `toml:"backendTimeoutinSeconds"`
-	IdleTimeoutinSeconds    time.Duration `toml:"idleTimeoutinSeconds"`
+	IdleTimeoutInSeconds    time.Duration `toml:"idleTimeoutinSeconds"`
 }
 
 type enforcer struct {

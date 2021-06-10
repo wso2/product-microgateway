@@ -485,7 +485,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 					Seconds: int64(config.Envoy.TimeOuts.BackendTimeoutInSeconds),
 				},
 				IdleTimeout: &durationpb.Duration{
-					Seconds: int64(config.Envoy.TimeOuts.IdleTimeoutinSeconds),
+					Seconds: int64(config.Envoy.TimeOuts.IdleTimeoutInSeconds),
 				},
 			},
 		}
