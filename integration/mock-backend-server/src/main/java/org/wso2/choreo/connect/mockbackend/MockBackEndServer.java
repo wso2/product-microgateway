@@ -253,6 +253,34 @@ public class MockBackEndServer extends Thread {
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });
+            httpServer.createContext(context + "/timeout40", exchange -> {
+                try {
+                    logger.info("Sleeping 40s...");
+                    Thread.sleep(40000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
+                        Constants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+            httpServer.createContext(context + "/timeout20", exchange -> {
+                try {
+                    logger.info("Sleeping 20s...");
+                    Thread.sleep(20000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                byte[] response = ResponseConstants.RESPONSE_BODY.getBytes();
+                exchange.getResponseHeaders().set(Constants.CONTENT_TYPE,
+                        Constants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
             httpServer.start();
             backEndServerUrl = "http://localhost:" + backEndServerPort;
         } catch (Exception ex) {
