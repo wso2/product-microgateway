@@ -55,4 +55,4 @@ COPY maven/adapter-ubuntu adapter
 COPY check_health.sh .
 COPY maven/LICENSE.txt .
 
-CMD ./adapter
+CMD GRPC_VERBOSITY=debug ./adapter

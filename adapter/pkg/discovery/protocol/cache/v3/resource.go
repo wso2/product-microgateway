@@ -20,6 +20,7 @@ import (
 	envoy_types "github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/api"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/config/enforcer"
+	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/ga"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/keymgt"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
@@ -52,6 +53,8 @@ func GetResponseType(typeURL string) types.ResponseType {
 		return types.RevokedTokens
 	case resource.ThrottleDataType:
 		return types.ThrottleData
+	case resource.GAAPIType:
+		return types.GAAPI
 	}
 	return types.UnknownType
 }
@@ -69,6 +72,8 @@ func GetResourceName(res envoy_types.Resource) string {
 		return fmt.Sprint(v.Name)
 	case *throttle.ThrottleData:
 		return "ThrottleData"
+	case *ga.Api:
+		return fmt.Sprint(v.ApiUUID)
 	default:
 		return ""
 	}

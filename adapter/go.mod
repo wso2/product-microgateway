@@ -25,10 +25,9 @@ require (
 	github.com/sirupsen/logrus v1.7.0
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.6.1
-	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5
-	golang.org/x/tools v0.1.2 // indirect
-	google.golang.org/genproto v0.0.0-20201201144952-b05cb90ed32e // indirect
+	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
+	google.golang.org/genproto v0.0.0-20201201144952-b05cb90ed32e
 	google.golang.org/grpc v1.33.2
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
