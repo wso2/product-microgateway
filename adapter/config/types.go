@@ -95,15 +95,21 @@ type envoy struct {
 	SystemHost                       string `default:"localhost"`
 	Cors                             globalCors
 	Upstream                         envoyUpstream
+	TimeOuts                         timeOuts
+}
+
+type timeOuts struct {
+	BackendTimeoutInSeconds time.Duration `toml:"backendTimeoutinSeconds"`
+	IdleTimeoutInSeconds    time.Duration `toml:"idleTimeoutinSeconds"`
 }
 
 type enforcer struct {
-	Security        security
-	AuthService     authService
-	JwtGenerator    jwtGenerator
-	Cache           cache
-	Throttling      throttlingConfig
-	JwtIssuer       jwtIssuer
+	Security     security
+	AuthService  authService
+	JwtGenerator jwtGenerator
+	Cache        cache
+	Throttling   throttlingConfig
+	JwtIssuer    jwtIssuer
 }
 
 type server struct {

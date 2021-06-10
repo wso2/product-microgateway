@@ -91,6 +91,10 @@ var defaultConfig = &Config{
 				DisableSSLVerification: false,
 			},
 		},
+		TimeOuts: timeOuts{
+			BackendTimeoutInSeconds: 30,
+			IdleTimeoutInSeconds:    60,
+		},
 	},
 	Enforcer: enforcer{
 		Security: security{

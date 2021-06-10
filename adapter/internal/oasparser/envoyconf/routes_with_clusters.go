@@ -33,10 +33,10 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	"github.com/wso2/product-microgateway/adapter/config"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
-	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
@@ -367,6 +367,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	prodClusterName := params.prodClusterName
 	sandClusterName := params.sandClusterName
 	endpointBasepath := params.endpointBasePath
+	config, _ := config.ReadConfigs()
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
@@ -480,6 +481,12 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				},
 				UpgradeConfigs:    getUpgradeConfig(apiType),
 				MaxStreamDuration: getMaxStreamDuration(apiType),
+				Timeout: &durationpb.Duration{
+					Seconds: int64(config.Envoy.TimeOuts.BackendTimeoutInSeconds),
+				},
+				IdleTimeout: &durationpb.Duration{
+					Seconds: int64(config.Envoy.TimeOuts.IdleTimeoutInSeconds),
+				},
 			},
 		}
 	} else {

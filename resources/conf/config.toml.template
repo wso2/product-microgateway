@@ -119,6 +119,13 @@
   # Disable SSL verification
   disableSslVerification = false
 
+# Configure timeout settings related to routes. This will be applicable globally for all the envoy routes.
+[router.timeouts]
+# Specifies the upstream timeout for the route. If not specified, the default is 30s.
+backendTimeoutinSeconds = 30
+# Backend connection idle timeout. The amount of time the request’s stream may be idle.
+idleTimeoutinSeconds = 60
+
 [enforcer] # --------------------------------------------------------
 
 # The configurations of gRPC netty based server in Enforcer that handles the incoming requests in the Choreo Connect
