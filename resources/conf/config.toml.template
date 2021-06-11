@@ -124,7 +124,7 @@
 # Specifies the upstream timeout for the route. If not specified, the default is 30s.
 backendTimeoutinSeconds = 30
 # Backend connection idle timeout. The amount of time the request’s stream may be idle.
-idleTimeoutinSeconds = 60
+idleTimeoutinSeconds = 300
 
 [enforcer] # --------------------------------------------------------
 

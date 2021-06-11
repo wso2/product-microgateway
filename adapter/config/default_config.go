@@ -93,7 +93,7 @@ var defaultConfig = &Config{
 		},
 		TimeOuts: timeOuts{
 			BackendTimeoutInSeconds: 30,
-			IdleTimeoutInSeconds:    60,
+			IdleTimeoutInSeconds:    300,
 		},
 	},
 	Enforcer: enforcer{
