@@ -44,7 +44,5 @@ public class ApimPreparer extends ApimBaseTest {
 
         ApimResourceProcessor apimResourceProcessor = new ApimResourceProcessor();
         apimResourceProcessor.createApisAppsSubs(user.getUserName(), publisherRestClient, storeRestClient);
-        Utils.delay(20000, "Interrupted while waiting for DELETE and" +
-                " CREATE events to be deployed");
     }
 }
