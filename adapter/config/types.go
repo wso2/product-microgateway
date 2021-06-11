@@ -99,8 +99,20 @@ type envoy struct {
 }
 
 type timeOuts struct {
-	BackendTimeoutInSeconds time.Duration `toml:"backendTimeoutinSeconds"`
-	IdleTimeoutInSeconds    time.Duration `toml:"idleTimeoutinSeconds"`
+	Route      route
+	Connection connection
+}
+
+type route struct {
+	RouteTimeoutInSeconds     time.Duration `toml:"routeTimeoutInSeconds"`
+	RouteIdleTimeoutInSeconds time.Duration `toml:"routeIdleTimeoutInSeconds"`
+}
+
+type connection struct {
+	RequestTimeoutInSeconds        time.Duration `toml:"requestTimeoutInSeconds"`
+	RequestHeadersTimeoutInSeconds time.Duration `toml:"requestHeadersTimeoutInSeconds"` // default disabled
+	StreamIdleTimeoutInSeconds     time.Duration `toml:"streamIdleTimeoutInSeconds"`     // Default 5 mins
+	IdleTimeoutInSeconds           time.Duration `toml:"idleTimeoutInSeconds"`           // default 1hr
 }
 
 type enforcer struct {
