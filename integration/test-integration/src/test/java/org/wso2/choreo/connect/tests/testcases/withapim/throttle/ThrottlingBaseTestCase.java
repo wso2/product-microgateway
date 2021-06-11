@@ -101,6 +101,9 @@ public class ThrottlingBaseTestCase extends ApimBaseTest {
                 isThrottled = true;
                 break;
             }
+            if (response.getResponseCode() != 200) {
+                break;
+            }
             Thread.sleep(1000);
         }
         return isThrottled;

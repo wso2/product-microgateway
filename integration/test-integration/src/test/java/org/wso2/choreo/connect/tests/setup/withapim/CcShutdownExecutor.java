@@ -25,7 +25,7 @@ import org.wso2.choreo.connect.tests.context.CcInstance;
 public class CcShutdownExecutor {
 
     @Test
-    public void shutdownCC() throws CCTestException {
+    public void shutdownChoreoConnect() throws CCTestException {
         CcInstance ccInstance = CcInstance.getInstance();
         ccInstance.stop();
         Assert.assertTrue(true); //to make this method run

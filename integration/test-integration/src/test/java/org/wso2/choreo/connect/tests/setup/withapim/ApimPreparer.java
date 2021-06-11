@@ -22,6 +22,8 @@ import org.wso2.choreo.connect.tests.apim.ApimBaseTest;
 import org.wso2.choreo.connect.tests.apim.ApimResourceProcessor;
 import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+import org.wso2.choreo.connect.tests.util.Utils;
 
 /**
  * APIs, Apps, Subs created here will be used to test whether
@@ -42,5 +44,7 @@ public class ApimPreparer extends ApimBaseTest {
 
         ApimResourceProcessor apimResourceProcessor = new ApimResourceProcessor();
         apimResourceProcessor.createApisAppsSubs(user.getUserName(), publisherRestClient, storeRestClient);
+        Utils.delay(20000, "Interrupted while waiting for DELETE and" +
+                " CREATE events to be deployed");
     }
 }
