@@ -92,8 +92,16 @@ var defaultConfig = &Config{
 			},
 		},
 		TimeOuts: timeOuts{
-			BackendTimeoutInSeconds: 30,
-			IdleTimeoutInSeconds:    300,
+			Route: route{
+				RouteTimeoutInSeconds:     30,
+				RouteIdleTimeoutInSeconds: 300,
+			},
+			Connection: connection{
+				RequestTimeoutInSeconds:        0,
+				RequestHeadersTimeoutInSeconds: 0,
+				StreamIdleTimeoutInSeconds:     300,
+				IdleTimeoutInSeconds:           3600,
+			},
 		},
 	},
 	Enforcer: enforcer{

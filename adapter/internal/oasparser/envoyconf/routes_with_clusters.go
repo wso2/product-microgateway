@@ -481,12 +481,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				},
 				UpgradeConfigs:    getUpgradeConfig(apiType),
 				MaxStreamDuration: getMaxStreamDuration(apiType),
-				Timeout: &durationpb.Duration{
-					Seconds: int64(config.Envoy.TimeOuts.BackendTimeoutInSeconds),
-				},
-				IdleTimeout: &durationpb.Duration{
-					Seconds: int64(config.Envoy.TimeOuts.IdleTimeoutInSeconds),
-				},
+				Timeout:           ptypes.DurationProto(config.Envoy.TimeOuts.Route.RouteTimeoutInSeconds * time.Second),
+				IdleTimeout:       ptypes.DurationProto(config.Envoy.TimeOuts.Route.RouteIdleTimeoutInSeconds * time.Second),
 			},
 		}
 	} else {
