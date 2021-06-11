@@ -81,6 +81,7 @@ NOTE: Only if an instance with a completely new config is extremely necessary
    </test>
    ```
    NOTE: Adding to both modes is not compulsory
+
 ## How to Test with a new API-M instance
 NOTE: Not encouraged at all
 1. Create a class similar to `org.wso2.choreo.connect.tests.setup.withapim.ApimStartupExecutor` and add a
