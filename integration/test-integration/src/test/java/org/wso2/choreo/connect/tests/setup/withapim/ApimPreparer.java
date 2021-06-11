@@ -49,7 +49,7 @@ public class ApimPreparer extends ApimBaseTest {
 
         if(ChoreoConnectImpl.checkCCInstanceHealth()) {
             //wait till all resources deleted and are redeployed
-            Utils.delay(60000, "Interrupted while waiting for DELETE and" +
+            Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME*8, "Interrupted while waiting for DELETE and" +
                     " CREATE events to be deployed");
         }
     }
