@@ -79,10 +79,6 @@ public class AdvanceThrottlingTestCase extends ThrottlingBaseTestCase {
 
     @BeforeClass(alwaysRun = true, description = "initialize setup")
     void setup() throws Exception {
-        //Since this is the first apim testcase wait till all resources are deployed
-        Utils.delay(30000, "Interrupted while waiting for DELETE and" +
-                " CREATE events to be deployed");
-
         super.initWithSuperTenant();
         RequestCountLimitDTO threePerMin =
                 DtoFactory.createRequestCountLimitDTO("min", 1, limit5Req);
