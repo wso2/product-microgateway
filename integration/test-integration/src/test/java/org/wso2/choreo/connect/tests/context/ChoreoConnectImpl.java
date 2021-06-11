@@ -31,6 +31,8 @@ import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -87,9 +89,13 @@ public abstract class ChoreoConnectImpl implements ChoreoConnect {
 
     public static Boolean checkCCInstanceHealth() throws IOException {
         Map<String, String> headers = new HashMap<>(0);
-        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttp(
-                "/health"), headers);
-        return response != null && response.getResponseCode() == HttpStatus.SC_OK;
+        try {
+            HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttp(
+                    "/health"), headers);
+            return response != null && response.getResponseCode() == HttpStatus.SC_OK;
+        } catch (ConnectException e) {
+            return false;
+        }
     }
 
     /**
