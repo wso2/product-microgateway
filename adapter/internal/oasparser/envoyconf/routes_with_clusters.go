@@ -698,8 +698,8 @@ func generateRegex(fullpath string) string {
 	newPath := ""
 
 	// Check and replace all the path parameters
-	m1 := regexp.MustCompile(`{([^}]+)}`)
-	newPath = m1.ReplaceAllString(fullpath, pathParaRegex)
+	pathParaCheck := regexp.MustCompile(`{([^}]+)}`)
+	newPath = pathParaCheck.ReplaceAllString(fullpath, pathParaRegex)
 
 	if strings.HasSuffix(newPath, "/*") {
 		newPath = strings.TrimSuffix(newPath, "/*") + wildCardRegex
