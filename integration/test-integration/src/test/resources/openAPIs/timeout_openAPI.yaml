@@ -30,7 +30,7 @@ tags:
 schemes:
   - http
 paths:
-  '/timeout40':
+  '/timeout100':
     get:
       tags:
         - timeout

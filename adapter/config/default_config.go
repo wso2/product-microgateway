@@ -93,7 +93,7 @@ var defaultConfig = &Config{
 		},
 		TimeOuts: timeOuts{
 			Route: route{
-				RouteTimeoutInSeconds:     30,
+				RouteTimeoutInSeconds:     60,
 				RouteIdleTimeoutInSeconds: 300,
 			},
 			Connection: connection{
