@@ -120,7 +120,7 @@
   disableSslVerification = false
 
 [router.timeouts]
-# Configure timeout settings related to routes. This will be applicable globally for all the envoy routes.
+# Configure timeout settings related to routes. This will be applicable globally for all the routes in router.
 [router.timeouts.route]
 # Specifies the upstream timeout for the route. If not specified, the default is 60s.
 routeTimeoutInSeconds = 60
