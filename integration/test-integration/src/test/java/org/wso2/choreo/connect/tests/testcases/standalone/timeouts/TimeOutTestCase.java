@@ -44,13 +44,13 @@ public class TimeOutTestCase {
         jwtToken = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
     }
 
-    @Test(description = "Invoke api with timeout of 40s")
-    public void invokeAPITimeout40() throws Exception {
+    @Test(description = "Invoke api with timeout of 100s")
+    public void invokeAPITimeout100() throws Exception {
         Map<String, String> prodHeaders = new HashMap<String, String>();
         prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
 
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/timeout/timeout40") , prodHeaders);
+                "/v2/timeout/timeout100") , prodHeaders);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_REQUEST_TIMEOUT,"Response code mismatched");
