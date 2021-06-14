@@ -42,6 +42,7 @@ service authorizeService on tokenListenerEndpoint, apiSecureListener {
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the authorize endpoint" };
             errorResponse.setJsonPayload(errMsg);
+            errorResponse.statusCode = 500;
             forwardedResponse = errorResponse;
         }
         var result = caller->respond(forwardedResponse);
@@ -89,6 +90,7 @@ service revokeService on tokenListenerEndpoint, apiSecureListener {
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the revoke endpoint" };
             errorResponse.setJsonPayload(errMsg);
+            errorResponse.statusCode = 500;
             forwardedResponse = errorResponse;
         }
         var result = caller->respond(forwardedResponse);
@@ -136,6 +138,7 @@ service tokenService on tokenListenerEndpoint, apiSecureListener {
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the token endpoint" };
             errorResponse.setJsonPayload(errMsg);
+            errorResponse.statusCode = 500;
             forwardedResponse = errorResponse;
         }
         var result = caller->respond(forwardedResponse);
@@ -183,6 +186,7 @@ service apiKeyService on apiSecureListener {
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while generating API Key token" };
             errorResponse.setJsonPayload(errMsg);
+            errorResponse.statusCode = 500;
             var result = caller->respond(errorResponse);
         }
     }
@@ -225,6 +229,7 @@ service userInfoService on tokenListenerEndpoint, apiSecureListener {
             http:Response errorResponse = new;
             json errMsg = { "error": "error occurred while invoking the user info endpoint" };
             errorResponse.setJsonPayload(errMsg);
+            errorResponse.statusCode = 500;
             forwardedResponse = errorResponse;
         }
         var result = caller->respond(forwardedResponse);
