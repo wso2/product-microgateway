@@ -30,7 +30,7 @@ tags:
 schemes:
   - http
 paths:
-  '/timeout100':
+  '/timeout70':
     get:
       tags:
         - timeout
@@ -53,7 +53,7 @@ paths:
       security:
         - petstore_auth: []
 
-  '/timeout20':
+  '/timeout15':
     get:
       tags:
         - pet

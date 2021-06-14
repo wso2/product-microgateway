@@ -253,10 +253,10 @@ public class MockBackEndServer extends Thread {
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });
-            httpServer.createContext(context + "/timeout100", exchange -> {
+            httpServer.createContext(context + "/timeout70", exchange -> {
                 try {
-                    logger.info("Sleeping 100s...");
-                    Thread.sleep(100000);
+                    logger.info("Sleeping 70s...");
+                    Thread.sleep(70000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -267,10 +267,10 @@ public class MockBackEndServer extends Thread {
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });
-            httpServer.createContext(context + "/timeout20", exchange -> {
+            httpServer.createContext(context + "/timeout15", exchange -> {
                 try {
-                    logger.info("Sleeping 20s...");
-                    Thread.sleep(20000);
+                    logger.info("Sleeping 15s...");
+                    Thread.sleep(15000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

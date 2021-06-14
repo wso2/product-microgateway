@@ -44,30 +44,30 @@ public class TimeOutTestCase {
         jwtToken = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
     }
 
-    @Test(description = "Invoke api with timeout of 100s")
-    public void invokeAPITimeout100() throws Exception {
-        Map<String, String> prodHeaders = new HashMap<String, String>();
-        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
-
-        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/timeout/timeout100") , prodHeaders);
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_REQUEST_TIMEOUT,"Response code mismatched");
-        Assert.assertEquals(response.getData(), "downstream duration timeout",
-                "Response message mismatch.");
-    }
-
-    @Test(description = "Invoke api with timeout of 20s")
-    public void invokeAPITimeout20() throws Exception {
+    @Test(description = "Invoke api with timeout of 15s")
+    public void invokeAPITimeout15() throws Exception {
         Map<String, String> sandHeaders = new HashMap<String, String>();
         sandHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
-                "/v2/timeout/timeout20") , sandHeaders);
+                "/v2/timeout/timeout15") , sandHeaders);
 
         Assert.assertNotNull(response, "API response should not be null");
         Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_OK,"Response code mismatched");
         Assert.assertEquals(response.getData(), ResponseConstants.RESPONSE_BODY,
+                "Response message mismatch.");
+    }
+
+    @Test(description = "Invoke api with timeout of 70s")
+    public void invokeAPITimeout70() throws Exception {
+        Map<String, String> prodHeaders = new HashMap<String, String>();
+        prodHeaders.put(HttpHeaderNames.AUTHORIZATION.toString(), "Bearer " + jwtToken);
+
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps(
+                "/v2/timeout/timeout70") , prodHeaders);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_REQUEST_TIMEOUT,"Response code mismatched");
+        Assert.assertEquals(response.getData(), "downstream duration timeout",
                 "Response message mismatch.");
     }
 }
