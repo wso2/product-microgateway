@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+-->
+
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Choreo-Connect-StandAlone-Mode-Test-Suite" parallel="false">
+    <listeners>
+        <!--Disabled since there are no any pre configured apis -->
+        <!--<listener class-name="org.wso2.micro.gateway.tests.listener.TestExecutionListener"/>-->
+        <listener class-name="org.wso2.choreo.connect.tests.listener.TestNGListener"/>
+    </listeners>
+
+    <test name="before-suite-preparations" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.StandaloneBeforeTestSuite"/>
+        </classes>
+    </test>
+
+    <test name="cc-with-default-config" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithDefaultConf"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaRestTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaApictlTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.ProductionSandboxTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.JwtTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.ScopeTest"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.InternalKeyTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.CustomAuthHeaderTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.QSGTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.OpenAPIV3TestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.vhost.VhostAPICtlTestCase"/>
+        </classes>
+    </test>
+    <test name="cc-with-backend-tls" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithBackendTlsAndCorsDisabled"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.backendtls.BackendTLSTestcase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
+        </classes>
+    </test>
+    <test name="cc-with-jwt-config" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfig"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.security.CorsTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtGeneratorTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.JwtTransformerTestCase"/>
+        </classes>
+    </test>
+    <test name="cc-with-jwt-config-and-transformer" preserve-order="true" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithJwtConfigAndTransformer"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtGenerator.CustomJwtTransformerTestCase"/>
+        </classes>
+    </test>
+</suite>

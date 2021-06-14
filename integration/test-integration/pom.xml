@@ -44,7 +44,8 @@
                         <sun.net.http.allowRestrictedHeaders>true</sun.net.http.allowRestrictedHeaders>
                     </systemPropertyVariables>
                     <suiteXmlFiles>
-                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                        <suiteXmlFile>src/test/resources/testng-cc-standalone.xml</suiteXmlFile>
+                        <suiteXmlFile>src/test/resources/testng-cc-with-apim.xml</suiteXmlFile>
                     </suiteXmlFiles>
                     <systemProperties>
                         <property>
@@ -65,7 +66,10 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <target>
-                                <unzip src="${basedir}/../../distribution/target/choreo-connect-${project.version}.zip" dest="${basedir}/../test-integration/target/micro-gwtmp" />
+                                <unzip src="${basedir}/../../distribution/target/choreo-connect-${project.version}.zip" dest="${basedir}/../test-integration/target" />
+                                <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-router\:.*" replace="wso2/choreo-connect-router:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true" />
+                                <replaceregexp file="src/test/resources/dockerCompose/cc-in-common-network-docker-compose.yaml" match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true" />
                             </target>
                         </configuration>
                         <goals>
