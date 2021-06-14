@@ -119,16 +119,16 @@
   # Disable SSL verification
   disableSslVerification = false
 
-[router.timeouts]
+
 # Configure timeout settings related to routes. This will be applicable globally for all the routes in router.
-[router.timeouts.route]
+[router.upstream.timeouts]
 # Specifies the upstream timeout for the route. If not specified, the default is 60s.
 routeTimeoutInSeconds = 60
 # Backend connection idle timeout. The amount of time the request’s stream may be idle.
 routeIdleTimeoutInSeconds = 300
 
 # Timeouts managed by the connection manager
-[router.timeouts.connection]
+[router.connectionTimeout]
 # The amount of time that Envoy will wait for the entire request to be received
 requestTimeoutInSeconds = 0
 # The amount of time that Envoy will wait for the request headers to be received

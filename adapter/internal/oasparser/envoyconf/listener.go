@@ -102,11 +102,11 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		LocalReplyConfig: &hcmv3.LocalReplyConfig{
 			Mappers: getErrorResponseMappers(),
 		},
-		RequestTimeout:        ptypes.DurationProto(conf.Envoy.TimeOuts.Connection.RequestTimeoutInSeconds * time.Second),        // default disabled
-		RequestHeadersTimeout: ptypes.DurationProto(conf.Envoy.TimeOuts.Connection.RequestHeadersTimeoutInSeconds * time.Second), // default disabled
-		StreamIdleTimeout:     ptypes.DurationProto(conf.Envoy.TimeOuts.Connection.StreamIdleTimeoutInSeconds * time.Second),     // Default 5 mins
+		RequestTimeout:        ptypes.DurationProto(conf.Envoy.Connection.Timeouts.RequestTimeoutInSeconds * time.Second),        // default disabled
+		RequestHeadersTimeout: ptypes.DurationProto(conf.Envoy.Connection.Timeouts.RequestHeadersTimeoutInSeconds * time.Second), // default disabled
+		StreamIdleTimeout:     ptypes.DurationProto(conf.Envoy.Connection.Timeouts.StreamIdleTimeoutInSeconds * time.Second),     // Default 5 mins
 		CommonHttpProtocolOptions: &corev3.HttpProtocolOptions{
-			IdleTimeout: ptypes.DurationProto(conf.Envoy.TimeOuts.Connection.IdleTimeoutInSeconds * time.Second), // Default 1 hr
+			IdleTimeout: ptypes.DurationProto(conf.Envoy.Connection.Timeouts.IdleTimeoutInSeconds * time.Second), // Default 1 hr
 		},
 	}
 

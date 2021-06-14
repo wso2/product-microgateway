@@ -146,7 +146,7 @@ public class HttpsClientRequest {
 
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         conn.setDoOutput(true);
-        conn.setReadTimeout(30000);
+        conn.setReadTimeout(70000);
         conn.setConnectTimeout(15000);
         conn.setDoInput(true);
         conn.setUseCaches(false);
