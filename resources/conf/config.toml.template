@@ -122,8 +122,8 @@
 [router.timeouts]
 # Configure timeout settings related to routes. This will be applicable globally for all the envoy routes.
 [router.timeouts.route]
-# Specifies the upstream timeout for the route. If not specified, the default is 30s.
-routeTimeoutInSeconds = 30
+# Specifies the upstream timeout for the route. If not specified, the default is 60s.
+routeTimeoutInSeconds = 60
 # Backend connection idle timeout. The amount of time the request’s stream may be idle.
 routeIdleTimeoutInSeconds = 300
 
