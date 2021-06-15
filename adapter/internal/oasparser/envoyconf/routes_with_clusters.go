@@ -668,6 +668,9 @@ func generateRoutePaths(xWso2Basepath, basePath, resourcePath string) string {
 		prefix = basepathConsistent(basePath)
 		// TODO: (VirajSalaka) Decide if it is possible to proceed without both basepath options
 	}
+	if strings.Contains(resourcePath, "?") {
+		resourcePath = strings.Split(resourcePath, "?")[0]
+	}
 	fullpath := prefix + resourcePath
 	newPath = generateRegex(fullpath)
 	return newPath
