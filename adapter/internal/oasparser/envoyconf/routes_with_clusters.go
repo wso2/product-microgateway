@@ -668,6 +668,9 @@ func generateRoutePaths(xWso2Basepath, basePath, resourcePath string) string {
 		prefix = basepathConsistent(basePath)
 		// TODO: (VirajSalaka) Decide if it is possible to proceed without both basepath options
 	}
+	if strings.Contains(resourcePath, "?") {
+		resourcePath = strings.Split(resourcePath, "?")[0]
+	}
 	fullpath := prefix + resourcePath
 	newPath = generateRegex(fullpath)
 	return newPath
@@ -694,21 +697,9 @@ func generateRegex(fullpath string) string {
 	endRegex := "(\\?([^/]+))?"
 	newPath := ""
 
-	if strings.Contains(fullpath, "{") && strings.Contains(fullpath, "}") {
-		res1 := strings.Split(fullpath, "/")
-
-		for i, p := range res1 {
-			if strings.Contains(p, "{") && strings.Contains(p, "}") {
-				startP := strings.Index(p, "{")
-				endP := strings.Index(p, "}")
-				res1[i] = p[:startP] + pathParaRegex + p[endP+1:]
-			}
-		}
-		newPath = strings.Join(res1[:], "/")
-
-	} else {
-		newPath = fullpath
-	}
+	// Check and replace all the path parameters
+	matcher := regexp.MustCompile(`{([^}]+)}`)
+	newPath = matcher.ReplaceAllString(fullpath, pathParaRegex)
 
 	if strings.HasSuffix(newPath, "/*") {
 		newPath = strings.TrimSuffix(newPath, "/*") + wildCardRegex
