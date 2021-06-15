@@ -1,0 +1,169 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package org.wso2.choreo.connect.tests.testcases.with_apim.throttle;
+
+import com.google.common.net.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import org.wso2.am.integration.clients.admin.ApiResponse;
+import org.wso2.am.integration.clients.admin.api.dto.BlockingConditionDTO;
+import org.wso2.am.integration.clients.store.api.v1.dto.ApplicationDTO;
+import org.wso2.am.integration.test.utils.http.HTTPSClientUtils;
+import org.wso2.carbon.automation.test.utils.http.client.HttpResponse;
+import org.wso2.choreo.connect.tests.util.TestConstant;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
+public class DenyConditionTestCase extends ThrottlingBaseTestCase {
+    private static final Logger log = LoggerFactory.getLogger(DenyConditionTestCase.class);
+    private final Map<String, String> requestHeaders = new HashMap<>();
+    private String endpointURL;
+    private final String appName = "DenyThrottlingApp";
+
+    @BeforeClass(alwaysRun = true)
+    public void setEnvironment() throws Exception {
+        super.initWithSuperTenant();
+
+        // creating the application
+        ApplicationDTO app = new ApplicationDTO();
+        app.setName(appName);
+        app.setDescription("Test Application for Deny policy Throttling");
+        app.setThrottlingPolicy(TestConstant.APPLICATION_TIER.UNLIMITED);
+        app.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
+        ApplicationCreationResponse appResponse = createApplicationWithKeys(app, restAPIStore);
+        Assert.assertNotNull(appResponse.getApplicationId(), "Application ID can't be null");
+        String applicationId = appResponse.getApplicationId();
+
+        // create the request headers after generating the access token
+        String accessToken = generateUserAccessToken(appResponse.getConsumerKey(),
+                appResponse.getConsumerSecret(), new String[]{}, user, restAPIStore);
+        requestHeaders.put(TestConstant.AUTHORIZATION_HEADER, "Bearer " + accessToken);
+        requestHeaders.put(HttpHeaders.CONTENT_TYPE, "application/json");
+        String apiId = createThrottleApi(TestConstant.SUBSCRIPTION_TIER.UNLIMITED, TestConstant.API_TIER.UNLIMITED,
+                TestConstant.RESOURCE_TIER.UNLIMITED);
+        endpointURL = getThrottleAPIEndpoint();
+
+        HttpResponse subscriptionResponse = subscribeToAPI(apiId, applicationId,
+                TestConstant.SUBSCRIPTION_TIER.UNLIMITED, restAPIStore);
+        assertEquals(subscriptionResponse.getResponseCode(), HttpStatus.SC_OK, "Failed to subscribe to the API");
+    }
+
+    @Test(description = "Test IP deny policy throttling")
+    public void testIPDenyPolicyThrottling() throws Exception {
+        Map<String, Object> ipBlock = new HashMap<>();
+        String fixedIp = "192.16.1.10";
+        ipBlock.put("fixedIp", fixedIp);
+        ipBlock.put("invert", false);
+        requestHeaders.put(HttpHeaders.X_FORWARDED_FOR, fixedIp);
+
+        assertFalse(isBlocked(endpointURL, requestHeaders), "Throttled before adding the IP blocking condition.");
+        BlockingConditionDTO ipCondition = new BlockingConditionDTO();
+        ipCondition.setConditionType(BlockingConditionDTO.ConditionTypeEnum.IP);
+        ipCondition.setConditionValue(ipBlock);
+        ipCondition.setConditionStatus(true);
+
+        ApiResponse<BlockingConditionDTO> ipResponse = adminRestClient.addDenyThrottlingPolicy(ipCondition);
+        waitForXdsDeployment();
+        assertEquals(ipResponse.getStatusCode(), HttpStatus.SC_CREATED);
+        assertTrue(isBlocked(endpointURL, requestHeaders), "IP blocking condition did not apply.");
+        requestHeaders.put(HttpHeaders.X_FORWARDED_FOR, "100.2.4.56");
+
+        adminRestClient.deleteDenyThrottlingPolicy(ipResponse.getData().getConditionId());
+        waitForXdsDeployment();
+        requestHeaders.put(HttpHeaders.X_FORWARDED_FOR, fixedIp);
+        assertFalse(isBlocked(endpointURL, requestHeaders), "IP blocked after removing the condition.");
+        requestHeaders.remove(HttpHeaders.X_FORWARDED_FOR);
+    }
+
+    @Test(description = "Test API deny policy throttling", dependsOnMethods = "testIPDenyPolicyThrottling")
+    public void testAPIDenyPolicyThrottling() throws Exception {
+        assertFalse(isBlocked(endpointURL, requestHeaders), "Throttled before adding the API blocking condition.");
+        BlockingConditionDTO apiCondition = new BlockingConditionDTO();
+        apiCondition.setConditionType(BlockingConditionDTO.ConditionTypeEnum.API);
+        apiCondition.setConditionValue("/petstore/1.0.0");
+        apiCondition.setConditionStatus(true);
+
+        ApiResponse<BlockingConditionDTO> apiResponse = adminRestClient.addDenyThrottlingPolicy(apiCondition);
+        waitForXdsDeployment();
+        assertEquals(apiResponse.getStatusCode(), HttpStatus.SC_CREATED);
+        assertTrue(isBlocked(endpointURL, requestHeaders), "API blocking condition did not apply.");
+
+        adminRestClient.deleteDenyThrottlingPolicy(apiResponse.getData().getConditionId());
+        waitForXdsDeployment();
+        assertFalse(isBlocked(endpointURL, requestHeaders), "API blocked after removing the condition.");
+    }
+
+    @Test(description = "Test Application deny policy throttling", dependsOnMethods = "testAPIDenyPolicyThrottling")
+    public void testApplicationDenyPolicyThrottling() throws Exception {
+        String user = apimServerContext.getContextTenant().getContextUser().getUserNameWithoutDomain();
+        assertFalse(isBlocked(endpointURL, requestHeaders),
+                "Throttled before adding the Application blocking condition.");
+        BlockingConditionDTO appCondition = new BlockingConditionDTO();
+        appCondition.setConditionType(BlockingConditionDTO.ConditionTypeEnum.APPLICATION);
+        appCondition.setConditionValue(user + ':' + appName);
+        appCondition.setConditionStatus(true);
+
+        ApiResponse<BlockingConditionDTO> appResponse = adminRestClient.addDenyThrottlingPolicy(appCondition);
+        waitForXdsDeployment();
+        assertEquals(appResponse.getStatusCode(), HttpStatus.SC_CREATED);
+        assertTrue(isBlocked(endpointURL, requestHeaders), "Application blocking condition did not apply.");
+
+        adminRestClient.deleteDenyThrottlingPolicy(appResponse.getData().getConditionId());
+        waitForXdsDeployment();
+        assertFalse(isBlocked(endpointURL, requestHeaders), "Application blocked after removing the condition.");
+    }
+
+    @Test(description = "Test User deny policy throttling", dependsOnMethods = "testApplicationDenyPolicyThrottling")
+    public void testUserDenyPolicyThrottling() throws Exception {
+        String user = apimServerContext.getContextTenant().getContextUser().getUserNameWithoutDomain();
+        assertFalse(isBlocked(endpointURL, requestHeaders), "Throttled before adding the User blocking condition.");
+        BlockingConditionDTO userCondition = new BlockingConditionDTO();
+        userCondition.setConditionType(BlockingConditionDTO.ConditionTypeEnum.USER);
+        userCondition.setConditionValue(user);
+        userCondition.setConditionStatus(true);
+
+        ApiResponse<BlockingConditionDTO> userResponse = adminRestClient.addDenyThrottlingPolicy(userCondition);
+        waitForXdsDeployment();
+        assertEquals(userResponse.getStatusCode(), HttpStatus.SC_CREATED);
+        assertTrue(isBlocked(endpointURL, requestHeaders), "User blocking condition did not apply.");
+
+        adminRestClient.deleteDenyThrottlingPolicy(userResponse.getData().getConditionId());
+        waitForXdsDeployment();
+        assertFalse(isBlocked(endpointURL, requestHeaders), "User blocked after removing the condition.");
+    }
+
+    private boolean isBlocked(String endpointUrl, Map<String, String> headers) throws IOException {
+        HttpResponse response;
+        response = HTTPSClientUtils.doGet(endpointUrl, headers);
+        log.info("============== Response " + response.getResponseCode());
+        return response.getResponseCode() == HttpStatus.SC_FORBIDDEN;
+    }
+
+}

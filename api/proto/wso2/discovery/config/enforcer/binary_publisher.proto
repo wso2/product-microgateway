@@ -14,9 +14,9 @@ option java_multiple_files = true;
 // [#protodoc-title: BinaryPublisher]
 
 message BinaryPublisher {
-    string username = 2;
-    string password = 3;
-    repeated TMURLGroup urlGroup = 4;
-    PublisherPool pool = 5;
-    ThrottleAgent agent = 6;
+    string username = 1;
+    string password = 2;
+    repeated TMURLGroup urlGroup = 3;
+    PublisherPool pool = 4;
+    ThrottleAgent agent = 5;
 }

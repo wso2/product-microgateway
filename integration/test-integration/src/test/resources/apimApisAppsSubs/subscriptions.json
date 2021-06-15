@@ -1,0 +1,22 @@
+[
+  {
+    "apiName": "AdvancedThrottlingApi",
+    "appName": "AdvanceThrottlingApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "BlockedApi",
+    "appName": "BlockedApiApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "VHostAPI1",
+    "appName": "VHostApp",
+    "tier": "Unlimited"
+  },
+  {
+    "apiName": "VHostAPI2",
+    "appName": "VHostApp",
+    "tier": "Unlimited"
+  }
+]
