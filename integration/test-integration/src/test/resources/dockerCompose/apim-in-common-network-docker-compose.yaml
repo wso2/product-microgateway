@@ -1,0 +1,17 @@
+version: "2.4"
+networks:
+  apim_and_cc:
+    name: apim_and_cc
+services:
+  apim:
+    image: wso2/wso2am:4.0.0-alpine
+    ports:
+      - "9763:9763"
+      - "9443:9443"
+      - "5672:5672"
+      - "8243:8243"
+    volumes:
+      - ./conf/deployment.toml:/home/wso2carbon/wso2am-4.0.0/repository/conf/deployment.toml
+    networks:
+      - apim_and_cc
+  

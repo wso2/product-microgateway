@@ -31,8 +31,8 @@ public final class ThreadPoolProto {
       "\n0wso2/discovery/config/enforcer/thread_" +
       "pool.proto\022\036wso2.discovery.config.enforc" +
       "er\"Y\n\nThreadPool\022\020\n\010coreSize\030\001 \001(\005\022\017\n\007ma" +
-      "xSize\030\002 \001(\005\022\025\n\rkeepAliveTime\030\004 \001(\005\022\021\n\tqu" +
-      "eueSize\030\005 \001(\005B\226\001\n1org.wso2.choreo.connec" +
+      "xSize\030\002 \001(\005\022\025\n\rkeepAliveTime\030\003 \001(\005\022\021\n\tqu" +
+      "eueSize\030\004 \001(\005B\226\001\n1org.wso2.choreo.connec" +
       "t.discovery.config.enforcerB\017ThreadPoolP" +
       "rotoP\001ZNgithub.com/envoyproxy/go-control" +
       "-plane/wso2/discovery/config/enforcer;en" +

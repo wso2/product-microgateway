@@ -18,9 +18,14 @@
 
 package org.wso2.choreo.connect.tests.util;
 
-import javax.net.ssl.HostnameVerifier;
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import org.apache.commons.compress.utils.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.choreo.connect.tests.context.CCTestException;
+
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 import java.io.*;
 import java.net.ProtocolException;
 import java.net.URL;
@@ -29,56 +34,35 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.Callable;
 
 /**
  * This class can be used to send http request.
  */
 public class HttpsClientRequest {
+    private static final int maxRetryCount = 10;
+    private static final int retryIntervalMillis = 3000;
+
+    private static final Logger log = LoggerFactory.getLogger(HttpsClientRequest.class);
     /**
      * Sends an HTTP GET request to a url.
      *
      * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")
      * @param headers - http request header map
      * @return - HttpResponse from the end point
-     * @throws IOException If an error occurs while sending the GET request
+     * @throws CCTestException If an error occurs while sending the GET request
      */
     public static HttpResponse doGet(String requestUrl, Map<String, String> headers)
-            throws IOException {
+            throws CCTestException {
         HttpsURLConnection conn = null;
-        HttpResponse httpResponse;
         try {
             conn = getURLConnection(requestUrl);
             setHeadersAndMethod(conn, headers, TestConstant.HTTP_METHOD_GET);
             conn.connect();
-            StringBuilder sb = new StringBuilder();
-            BufferedReader rd = null;
-            try {
-                rd = new BufferedReader(new InputStreamReader(conn.getInputStream()
-                        , Charset.defaultCharset()));
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    sb.append(line);
-                }
-                httpResponse = new HttpResponse(sb.toString(), conn.getResponseCode());
-            } catch (IOException ex) {
-                InputStream errorStream = conn.getErrorStream();
-                if (errorStream != null) {
-                    rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()
-                            , Charset.defaultCharset()));
-                    String line;
-                    while ((line = rd.readLine()) != null) {
-                        sb.append(line);
-                    }
-                }
-                httpResponse = new HttpResponse(sb.toString(), conn.getResponseCode());
-            } finally {
-                if (rd != null) {
-                    rd.close();
-                }
-            }
-            httpResponse.setHeaders(readHeaders(conn));
-            httpResponse.setResponseMessage(conn.getResponseMessage());
-            return httpResponse;
+            return buildResponse(conn);
+        } catch (IOException | CCTestException e) {
+            throw new CCTestException("Error while sending GET request URL:" + requestUrl, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -90,10 +74,32 @@ public class HttpsClientRequest {
      *
      * @param requestUrl - The URL of the rest. (Example: "http://www.yahoo.com/search?params=value")
      * @return - HttpResponse from the end point
-     * @throws IOException If an error occurs while sending the GET request
+     * @throws CCTestException If an error occurs while sending the GET request
      */
-    public static HttpResponse doGet(String requestUrl) throws IOException {
-        return doGet(requestUrl, new HashMap<String, String>());
+    public static HttpResponse doGet(String requestUrl) throws CCTestException {
+        return doGet(requestUrl, new HashMap<>());
+    }
+
+    public static HttpResponse retryGetRequestUntilDeployed(String requestUrl, Map<String, String> headers)
+            throws CCTestException, InterruptedException {
+        HttpResponse response;
+        int retryCount = 0;
+        do {
+            log.info("Trying request with url : " + requestUrl);
+            response = HttpsClientRequest.doGet(requestUrl, headers);
+            retryCount++;
+        } while (response.getResponseCode() == 404 && response.getResponseMessage().contains("Not Found") &&
+                shouldRetry(retryCount));
+        return response;
+    }
+
+    private static boolean shouldRetry(int retryCount) throws InterruptedException {
+        if(retryCount >= maxRetryCount) {
+            log.info("Retrying of the request is finished");
+            return false;
+        }
+        Thread.sleep(retryIntervalMillis);
+        return true;
     }
 
     /**
@@ -106,52 +112,26 @@ public class HttpsClientRequest {
      * @throws IOException If an error occurs while sending the GET request
      */
     public static HttpResponse doPost(String endpoint, String postBody, Map<String, String> headers)
-            throws IOException {
+            throws CCTestException {
         HttpsURLConnection urlConnection = null;
-        HttpResponse httpResponse;
+        OutputStream outputStream = null;
+        Writer writer = null;
         try {
             urlConnection = getURLConnection(endpoint);
             setHeadersAndMethod(urlConnection, headers, TestConstant.HTTP_METHOD_POST);
-            OutputStream out = urlConnection.getOutputStream();
-            try {
-                Writer writer = new OutputStreamWriter(out, TestConstant.CHARSET_NAME);
-                writer.write(postBody);
-                writer.close();
-            } finally {
-                if (out != null) {
-                    out.close();
-                }
-            }
+            outputStream = urlConnection.getOutputStream();
+
+            writer = new OutputStreamWriter(outputStream, TestConstant.CHARSET_NAME);
+            writer.write(postBody);
+            writer.close();
+            outputStream.close();
             // Get the response
-            StringBuilder sb = new StringBuilder();
-            BufferedReader rd = null;
-            try {
-                rd = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()
-                        , Charset.defaultCharset()));
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    sb.append(line);
-                }
-            } catch (IOException e) {
-                if (urlConnection.getErrorStream() == null) {
-                    return null;
-                }
-                rd = new BufferedReader(new InputStreamReader(urlConnection.getErrorStream()
-                        , Charset.defaultCharset()));
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    sb.append(line);
-                }
-            } finally {
-                if (rd != null) {
-                    rd.close();
-                }
-            }
-            Map<String, String> responseHeaders = readHeaders(urlConnection);
-            httpResponse = new HttpResponse(sb.toString(), urlConnection.getResponseCode(), responseHeaders);
-            httpResponse.setResponseMessage(urlConnection.getResponseMessage());
-            return httpResponse;
-        } finally {
+            return buildResponse(urlConnection);
+        } catch (IOException | CCTestException e) {
+            throw new CCTestException("Error while sending GET request URL:" + endpoint, e);
+        }finally {
+            IOUtils.closeQuietly(writer);
+            IOUtils.closeQuietly(outputStream);
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
@@ -170,12 +150,7 @@ public class HttpsClientRequest {
         conn.setConnectTimeout(15000);
         conn.setDoInput(true);
         conn.setUseCaches(false);
-        conn.setHostnameVerifier(new HostnameVerifier() {
-            @Override
-            public boolean verify(String s, SSLSession sslSession) {
-                return true;
-            }
-        });
+        conn.setHostnameVerifier((s, sslSession) -> true);
         conn.setAllowUserInteraction(false);
         return conn;
     }
@@ -196,42 +171,47 @@ public class HttpsClientRequest {
      * Helper method to set the SSL context.
      */
     static void setSSlSystemProperties() {
-        String certificatesTrustStorePath = HttpsClientRequest.class.getClassLoader()
-                .getResource("keystore/client-truststore.jks").getPath();
+        String certificatesTrustStorePath = Objects.requireNonNull(HttpsClientRequest.class.getClassLoader()
+                .getResource("keystore/client-truststore.jks")).getPath();
         System.setProperty("javax.net.ssl.trustStore", certificatesTrustStorePath);
     }
 
-    static HttpResponse buildResponse(HttpsURLConnection conn) throws IOException {
+    static HttpResponse buildResponse(HttpsURLConnection conn) throws CCTestException {
         HttpResponse httpResponse;
-        StringBuilder sb = new StringBuilder();
-        BufferedReader rd = null;
+        int responseCode;
+        StringBuilder stringBuilder = new StringBuilder();
+        InputStreamReader inputStreamReader = null;
+        BufferedReader bufferedReader = null;
+
         try {
-            rd = new BufferedReader(new InputStreamReader(conn.getInputStream()
-                    , Charset.defaultCharset()));
-            String line;
-            while ((line = rd.readLine()) != null) {
-                sb.append(line);
-            }
-        } catch (IOException ex) {
-            if (conn.getErrorStream() == null) {
-                //log.error("An IOException occurred", ex);
-                return null;
-            }
-            rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()
-                    , Charset.defaultCharset()));
-            String line;
-            while ((line = rd.readLine()) != null) {
-                sb.append(line);
-            }
-        } finally {
-            if (rd != null) {
-                rd.close();
-            }
+            responseCode = conn.getResponseCode();
+        } catch (IOException e) {
+            throw new CCTestException("Error while connecting to the server", e);
         }
-        Map<String, String> responseHeaders = readHeaders(conn);
-        httpResponse = new HttpResponse(sb.toString(), conn.getResponseCode(), responseHeaders);
-        httpResponse.setResponseMessage(conn.getResponseMessage());
-        return httpResponse;
+
+        try {
+            if (responseCode < 400) {
+                inputStreamReader = new InputStreamReader(conn.getInputStream(), Charset.defaultCharset());
+            } else {
+                inputStreamReader = new InputStreamReader(conn.getErrorStream(), Charset.defaultCharset());
+            }
+            bufferedReader = new BufferedReader(inputStreamReader);
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+            bufferedReader.close();
+            inputStreamReader.close();
+
+            httpResponse = new HttpResponse(stringBuilder.toString(), responseCode, readHeaders(conn));
+            httpResponse.setResponseMessage(conn.getResponseMessage());
+            return httpResponse;
+        } catch (IOException e) {
+            throw new CCTestException("Error while reading response input stream", e);
+        } finally {
+            IOUtils.closeQuietly(bufferedReader);
+            IOUtils.closeQuietly(inputStreamReader);
+        }
     }
 
     private static void setHeadersAndMethod(HttpsURLConnection connection, Map<String, String> headers, String method) throws ProtocolException {
@@ -239,5 +219,35 @@ public class HttpsClientRequest {
             connection.setRequestProperty(e.getKey(), e.getValue());
         }
         connection.setRequestMethod(method);
+    }
+
+    public static Callable<Boolean> isResponseAvailable(String URL, Map<String, String> requestHeaders) {
+        return () -> checkForResponse(URL, requestHeaders);
+    }
+
+    private static Boolean checkForResponse(String URL, Map<String, String> requestHeaders) {
+        try {
+            HttpsClientRequest.doGet(URL, requestHeaders);
+        } catch (CCTestException e) {
+            return false;
+        }
+        //because the response from HttpsClientRequest.doGet only becomes null when an exception gets throws
+        return true;
+    }
+
+    public static String requestTestKey() throws CCTestException {
+        String encodedCredentials = "Basic YWRtaW46YWRtaW4=";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaderNames.AUTHORIZATION.toString(), encodedCredentials);
+        HttpResponse response;
+        try {
+            response = doPost(Utils.getServiceURLHttps("/testkey") ,"scope=read:pets",  headers);
+        } catch (IOException e) {
+            throw new CCTestException("Error while retrieving test key", e);
+        }
+        if (response.getResponseCode() == HttpStatus.SC_OK) {
+            return response.getData() ;
+        } else throw new CCTestException("Error retrieving test key, either Choreo Connect has not started properly"
+            + "or invalid credentials");
     }
 }

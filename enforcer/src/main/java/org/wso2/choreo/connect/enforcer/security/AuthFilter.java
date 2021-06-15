@@ -86,7 +86,7 @@ public class AuthFilter implements Filter {
             authenticators.add(jwtAuthenticator);
         }
         Authenticator authenticator = new InternalAPIKeyAuthenticator(
-                ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName());
+                ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
         authenticators.add(authenticator);
     
         Authenticator unsecuredAPIAuthenticator = new UnsecuredAPIAuthenticator();

@@ -62,12 +62,12 @@ private static final long serialVersionUID = 0L;
             maxSize_ = input.readInt32();
             break;
           }
-          case 32: {
+          case 24: {
 
             keepAliveTime_ = input.readInt32();
             break;
           }
-          case 40: {
+          case 32: {
 
             queueSize_ = input.readInt32();
             break;
@@ -126,14 +126,14 @@ private static final long serialVersionUID = 0L;
     return maxSize_;
   }
 
-  public static final int KEEPALIVETIME_FIELD_NUMBER = 4;
+  public static final int KEEPALIVETIME_FIELD_NUMBER = 3;
   private int keepAliveTime_;
   /**
    * <pre>
    * keep alive time of threads in seconds
    * </pre>
    *
-   * <code>int32 keepAliveTime = 4;</code>
+   * <code>int32 keepAliveTime = 3;</code>
    * @return The keepAliveTime.
    */
   @java.lang.Override
@@ -141,10 +141,10 @@ private static final long serialVersionUID = 0L;
     return keepAliveTime_;
   }
 
-  public static final int QUEUESIZE_FIELD_NUMBER = 5;
+  public static final int QUEUESIZE_FIELD_NUMBER = 4;
   private int queueSize_;
   /**
-   * <code>int32 queueSize = 5;</code>
+   * <code>int32 queueSize = 4;</code>
    * @return The queueSize.
    */
   @java.lang.Override
@@ -173,10 +173,10 @@ private static final long serialVersionUID = 0L;
       output.writeInt32(2, maxSize_);
     }
     if (keepAliveTime_ != 0) {
-      output.writeInt32(4, keepAliveTime_);
+      output.writeInt32(3, keepAliveTime_);
     }
     if (queueSize_ != 0) {
-      output.writeInt32(5, queueSize_);
+      output.writeInt32(4, queueSize_);
     }
     unknownFields.writeTo(output);
   }
@@ -197,11 +197,11 @@ private static final long serialVersionUID = 0L;
     }
     if (keepAliveTime_ != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(4, keepAliveTime_);
+        .computeInt32Size(3, keepAliveTime_);
     }
     if (queueSize_ != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(5, queueSize_);
+        .computeInt32Size(4, queueSize_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -577,7 +577,7 @@ private static final long serialVersionUID = 0L;
      * keep alive time of threads in seconds
      * </pre>
      *
-     * <code>int32 keepAliveTime = 4;</code>
+     * <code>int32 keepAliveTime = 3;</code>
      * @return The keepAliveTime.
      */
     @java.lang.Override
@@ -589,7 +589,7 @@ private static final long serialVersionUID = 0L;
      * keep alive time of threads in seconds
      * </pre>
      *
-     * <code>int32 keepAliveTime = 4;</code>
+     * <code>int32 keepAliveTime = 3;</code>
      * @param value The keepAliveTime to set.
      * @return This builder for chaining.
      */
@@ -604,7 +604,7 @@ private static final long serialVersionUID = 0L;
      * keep alive time of threads in seconds
      * </pre>
      *
-     * <code>int32 keepAliveTime = 4;</code>
+     * <code>int32 keepAliveTime = 3;</code>
      * @return This builder for chaining.
      */
     public Builder clearKeepAliveTime() {
@@ -616,7 +616,7 @@ private static final long serialVersionUID = 0L;
 
     private int queueSize_ ;
     /**
-     * <code>int32 queueSize = 5;</code>
+     * <code>int32 queueSize = 4;</code>
      * @return The queueSize.
      */
     @java.lang.Override
@@ -624,7 +624,7 @@ private static final long serialVersionUID = 0L;
       return queueSize_;
     }
     /**
-     * <code>int32 queueSize = 5;</code>
+     * <code>int32 queueSize = 4;</code>
      * @param value The queueSize to set.
      * @return This builder for chaining.
      */
@@ -635,7 +635,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>int32 queueSize = 5;</code>
+     * <code>int32 queueSize = 4;</code>
      * @return This builder for chaining.
      */
     public Builder clearQueueSize() {

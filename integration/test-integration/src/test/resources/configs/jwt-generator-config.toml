@@ -1,0 +1,47 @@
+[router]
+[router.cors]
+  allowOrigins = ["http://test1.com", "http://test2.com"]
+  allowMethods = ["GET","PUT","POST"]
+  allowHeaders = ["Authorization","X-PINGOTHER"]
+  exposeHeaders = ["X-Custom-Header"]
+  allowCredentials = true
+
+[enforcer]
+[enforcer.jwtGenerator]
+  enable = true
+
+[enforcer.throttling]
+  jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
+ 
+[enforcer.security]
+[[enforcer.security.tokenService]]
+  name = "Resident Key Manager"
+  issuer = "https://localhost:9443/oauth2/token"
+  certificateAlias = "wso2carbon"
+  jwksURL = ""
+  validateSubscription = false
+  consumerKeyClaim = "azp"
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+  [[enforcer.security.tokenService.claimMapping]]
+    remoteClaim = "sub"
+    localClaim = "CUSTOM-CLAIM"
+
+[[enforcer.security.tokenService]]
+  name = "MGW"
+  issuer = "https://localhost:9095/testkey"
+  certificateAlias = "mgw"
+  jwksURL = ""
+  validateSubscription = false
+  consumerKeyClaim = ""
+  certificateFilePath = "/home/wso2/security/truststore/mg.pem"
+
+[[enforcer.security.tokenService]]
+  name = "APIM Publisher"
+  issuer = "https://localhost:9443/publisher"
+  certificateAlias = "gateway_certificate_alias"
+  certificateFilePath = "/home/wso2/security/truststore/wso2carbon.pem"
+
+[controlPlane]
+  skipSSLVerification = true
+  [controlPlane.jmsConnectionParameters]
+    eventListeningEndpoints = ["amqp://admin:admin@localhost:5672?retries='5'&connectdelay='30000'"]

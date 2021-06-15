@@ -80,10 +80,11 @@ printf "protoc go services - ${GREEN}${BOLD}done${NC}\n"
 
 rm -rf $ADAPTER_GEN_DIR/wso2
 rm -rf $ENFORCER_GEN_DIR/org
+# Java generated implementations are not required for global adapter related protobufs
 rm -rf target/gen/java/org/wso2/choreo/connect/discovery/ga
 rm -rf target/gen/java/org/wso2/choreo/connect/discovery/service/ga
-cp -r target/gen/go/ $ADAPTER_GEN_DIR
-cp -r target/gen/java/ $ENFORCER_GEN_DIR
+cp -r target/gen/go/* $ADAPTER_GEN_DIR
+cp -r target/gen/java/* $ENFORCER_GEN_DIR
 
 # remove all the containers created
 docker rm -f $(docker ps -a -q -f "ancestor=namely/protoc-all:$PROTOC_VERSION")

@@ -1,0 +1,10 @@
+[router] 
+[router.cors]
+enabled = false
+
+[enforcer]
+[enforcer.throttling]
+  enableGlobalEventPublishing = true
+
+[controlPlane]
+  skipSSLVerification=true

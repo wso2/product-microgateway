@@ -53,107 +53,92 @@ public interface ConfigOrBuilder extends
   org.wso2.choreo.connect.discovery.config.enforcer.CertStoreOrBuilder getTruststoreOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
    * @return Whether the authService field is set.
    */
   boolean hasAuthService();
   /**
-   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
    * @return The authService.
    */
   org.wso2.choreo.connect.discovery.config.enforcer.Service getAuthService();
   /**
-   * <code>.wso2.discovery.config.enforcer.Service authService = 5;</code>
+   * <code>.wso2.discovery.config.enforcer.Service authService = 4;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.ServiceOrBuilder getAuthServiceOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-   * @return Whether the apimCredentials field is set.
-   */
-  boolean hasApimCredentials();
-  /**
-   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-   * @return The apimCredentials.
-   */
-  org.wso2.choreo.connect.discovery.config.enforcer.AmCredentials getApimCredentials();
-  /**
-   * <code>.wso2.discovery.config.enforcer.AmCredentials apimCredentials = 6;</code>
-   */
-  org.wso2.choreo.connect.discovery.config.enforcer.AmCredentialsOrBuilder getApimCredentialsOrBuilder();
-
-  /**
-   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
    * @return Whether the jwtGenerator field is set.
    */
   boolean hasJwtGenerator();
   /**
-   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
    * @return The jwtGenerator.
    */
   org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator getJwtGenerator();
   /**
-   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 7;</code>
+   * <code>.wso2.discovery.config.enforcer.JWTGenerator jwtGenerator = 5;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.JWTGeneratorOrBuilder getJwtGeneratorOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
    * @return Whether the throttling field is set.
    */
   boolean hasThrottling();
   /**
-   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
    * @return The throttling.
    */
   org.wso2.choreo.connect.discovery.config.enforcer.Throttling getThrottling();
   /**
-   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 8;</code>
+   * <code>.wso2.discovery.config.enforcer.Throttling throttling = 6;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.ThrottlingOrBuilder getThrottlingOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
    * @return Whether the cache field is set.
    */
   boolean hasCache();
   /**
-   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
    * @return The cache.
    */
   org.wso2.choreo.connect.discovery.config.enforcer.Cache getCache();
   /**
-   * <code>.wso2.discovery.config.enforcer.Cache cache = 9;</code>
+   * <code>.wso2.discovery.config.enforcer.Cache cache = 7;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.CacheOrBuilder getCacheOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
    * @return Whether the jwtIssuer field is set.
    */
   boolean hasJwtIssuer();
   /**
-   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
    * @return The jwtIssuer.
    */
   org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer getJwtIssuer();
   /**
-   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 10;</code>
+   * <code>.wso2.discovery.config.enforcer.JWTIssuer jwtIssuer = 8;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuerOrBuilder getJwtIssuerOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
    * @return Whether the analytics field is set.
    */
   boolean hasAnalytics();
   /**
-   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
    * @return The analytics.
    */
   org.wso2.choreo.connect.discovery.config.enforcer.Analytics getAnalytics();
   /**
-   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 11;</code>
+   * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder getAnalyticsOrBuilder();
 }

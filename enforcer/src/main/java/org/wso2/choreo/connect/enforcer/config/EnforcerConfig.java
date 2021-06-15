@@ -39,7 +39,6 @@ public class EnforcerConfig {
 
     private AuthServiceConfigurationDto authService;
     private Map<String, ExtendedTokenIssuerDto> issuersMap = new HashMap<>();
-    private CredentialDto apimCredentials;
     private ThrottleConfigDto throttleConfig;
     private JWTConfigurationDto jwtConfigurationDto;
     private CacheDto cacheDto;
@@ -65,14 +64,6 @@ public class EnforcerConfig {
 
     public void setIssuersMap(Map<String, ExtendedTokenIssuerDto> issuersMap) {
         this.issuersMap = issuersMap;
-    }
-
-    public CredentialDto getApimCredentials() {
-        return apimCredentials;
-    }
-
-    public void setApimCredentials(CredentialDto apimCredentials) {
-        this.apimCredentials = apimCredentials;
     }
 
     public ThrottleConfigDto getThrottleConfig() {
