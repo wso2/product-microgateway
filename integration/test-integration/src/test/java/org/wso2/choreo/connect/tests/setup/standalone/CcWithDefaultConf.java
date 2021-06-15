@@ -53,6 +53,8 @@ public class CcWithDefaultConf {
         ApictlUtils.createProject( "vhost1_openAPI.yaml", "vhost1_petstore", null, "vhost1_deploy_env.yaml");
         ApictlUtils.createProject( "vhost2_openAPI.yaml", "vhost2_petstore", null, "vhost2_deploy_env.yaml");
         ApictlUtils.createProject( "openAPI_v3_standard_valid.yaml", "apictl_petstore_v3", null, null);
+        ApictlUtils.createProject( "timeout_openAPI.yaml", "apictl_timeout_v3", null, null);
+
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");
@@ -65,6 +67,7 @@ public class CcWithDefaultConf {
         ApictlUtils.deployAPI("vhost1_petstore", "test");
         ApictlUtils.deployAPI("vhost2_petstore", "test");
         ApictlUtils.deployAPI("apictl_petstore_v3", "test");
+        ApictlUtils.deployAPI("apictl_timeout_v3", "test");
         TimeUnit.SECONDS.sleep(5);
     }
 
