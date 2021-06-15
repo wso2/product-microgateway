@@ -358,6 +358,12 @@ func TestGenerateRegex(t *testing.T) {
 			message:       "when the resource ends with *",
 			isMatched:     true,
 		},
+		{
+			inputpath:     "/v2/pet/pet",
+			userInputPath: "/v2/pet/pet?petId=12343",
+			message:       "when the resource has query params",
+			isMatched:     true,
+		},
 	}
 
 	for _, item := range dataItems {
