@@ -70,7 +70,7 @@ services:
       - ENFORCER_REGION=UNKNOWN
       - XDS_MAX_MSG_SIZE=4194304
       - XDS_MAX_RETRIES=3
-      - JAVA_OPTS=${JAVA_OPTS}
+      - JAVA_OPTS=${JAVA_OPTS} -Xms256m -Xmx1024m
       - apim_admin_pwd=admin
       - enforcer_admin_pwd=admin
       - tm_admin_pwd=admin
