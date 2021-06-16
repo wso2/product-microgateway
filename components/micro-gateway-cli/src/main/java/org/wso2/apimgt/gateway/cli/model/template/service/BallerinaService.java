@@ -24,11 +24,13 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.wso2.apimgt.gateway.cli.codegen.CodeGenerator;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
+import org.wso2.apimgt.gateway.cli.constants.RESTServiceConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLICompileTimeException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
 import org.wso2.apimgt.gateway.cli.model.config.APIKey;
 import org.wso2.apimgt.gateway.cli.model.config.ApplicationSecurity;
+import org.wso2.apimgt.gateway.cli.model.config.CodeGen;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
@@ -74,6 +76,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     private boolean isGrpc;
     //to identify if there is any endpoint with backend security (to insert "import ballerina/auth")
     private boolean hasEpSecurity = false;
+
+    private boolean generateApiFaultResponses = false;
+    private boolean addMethodNotFoundService = false;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private List<String> authProviders;
@@ -219,8 +224,17 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
      * @throws BallerinaServiceGenException when context building fails
      */
     private void setPaths(OpenAPI openAPI) throws BallerinaServiceGenException {
+        CodeGen codeGenConfig = CmdUtils.getConfig().getCodeGen();
+        if (codeGenConfig != null) {
+            this.generateApiFaultResponses = codeGenConfig.getApiFaultResponses();
+        } else {
+            generateApiFaultResponses = false;
+        }
         if (openAPI.getPaths() == null || this.api == null) {
             return;
+        }
+        if (this.generateApiFaultResponses) {
+            addMethodNotFoundPath(openAPI);
         }
 
         this.paths = new LinkedHashSet<>();
@@ -228,7 +242,14 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
         for (Map.Entry<String, PathItem> path : pathList.entrySet()) {
             BallerinaPath balPath = null;
             try {
-                balPath = new BallerinaPath().buildContext(path.getValue(), this.api);
+                // If the path is /* and it was added from code instead of the OAS, then the dummy service is created
+                if (path.getKey().equals(RESTServiceConstants.ALL_SERVICES_REGEX_PATH) &&
+                        this.addMethodNotFoundService) {
+                    balPath = new BallerinaPath().buildContextForNotFound(this.api);
+                } else {
+                    balPath = new BallerinaPath().buildContext(path.getValue(), this.api,
+                            this.generateApiFaultResponses);
+                }
             } catch (CLICompileTimeException e) {
                 throw new CLIRuntimeException("Error while parsing information under path:" + path.getKey() +
                         "in the API \"" + api.getName() + ":" + api.getVersion() + "\".\n\t-" + e.getTerminalMsg(), e);
@@ -236,7 +257,13 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
             balPath.getOperations().forEach(op -> {
                 BallerinaOperation operation = op.getValue();
                 // set the ballerina function name as {http_method}{UUID} ex : get_2345_sdfd_4324_dfds
-                String operationId = op.getKey() + UUID.randomUUID().toString().replaceAll("-", "");
+                String operationId;
+                String randomUUID = UUID.randomUUID().toString().replaceAll("-", "");
+                if (op.getValue().isMethodNotFoundOperation() || op.getValue().isMethodNotAllowedOperation()) {
+                    operationId = op.getKey() + "_InvalidOperation_" + randomUUID;
+                } else {
+                    operationId = op.getKey() + randomUUID;
+                }
                 operation.setOperationId(operationId);
 
                 //set hasEpSecurity to identify if there are operations with backend security config
@@ -477,5 +504,52 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
                 }
             }
         }
+    }
+
+    public boolean isGenerateApiFaultResponses() {
+        return generateApiFaultResponses;
+    }
+
+    public void setGenerateApiFaultResponses(boolean generateApiFaultResponses) {
+        this.generateApiFaultResponses = generateApiFaultResponses;
+    }
+
+    public boolean isAddMethodNotFoundService() {
+        return addMethodNotFoundService;
+    }
+
+    public void setAddMethodNotFoundService(boolean addMethodNotFoundService) {
+        this.addMethodNotFoundService = addMethodNotFoundService;
+    }
+
+    /**
+     * Add the /* service path resource for the existing API if it is currently not available when the apiFaultResponses
+     * is enabled.
+     *
+     * @param openAPI api definition
+     */
+    public void addMethodNotFoundPath(OpenAPI openAPI) {
+        Paths paths = openAPI.getPaths();
+        if (!paths.containsKey(RESTServiceConstants.ALL_SERVICES_REGEX_PATH)) {
+            paths.addPathItem(RESTServiceConstants.ALL_SERVICES_REGEX_PATH, new PathItem());
+            this.addMethodNotFoundService = true;
+        }
+        openAPI.setPaths(paths);
+    }
+
+    public String getRequestInterceptor() {
+        return requestInterceptor;
+    }
+
+    public void setRequestInterceptor(String requestInterceptor) {
+        this.requestInterceptor = requestInterceptor;
+    }
+
+    public String getResponseInterceptor() {
+        return responseInterceptor;
+    }
+
+    public void setResponseInterceptor(String responseInterceptor) {
+        this.responseInterceptor = responseInterceptor;
     }
 }

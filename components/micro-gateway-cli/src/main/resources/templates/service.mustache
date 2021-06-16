@@ -1,5 +1,4 @@
 import ballerina/http;
-import ballerina/time;
 import ballerina/runtime;{{#importModules}}
 import {{.}};{{/importModules}}
 {{#if containerConfig.hasKubernetes}}import ballerina/kubernetes;{{/if}}
@@ -109,224 +108,7 @@ service {{cut qualifiedServiceName " "}} on {{#api.transport}}{{#equals . "http"
     }
     @gateway:RateLimit{policy : "{{resourceTier}}"}
     resource function {{operationId}} (http:Caller outboundEp, http:Request req{{>pathParameters}}) {
-        handleExpectHeaderFor{{cut qualifiedServiceName " "}}(outboundEp, req);
-        runtime:InvocationContext invocationContext = runtime:getInvocationContext();
-
-        map<string> pathParams = { {{#pathParameters}}
-            "{{name}}": <@untainted>{{name}}{{#unless @last}},{{/unless}} {{/pathParameters}}
-        };
-        invocationContext.attributes["pathParams"] = pathParams;
-
-        {{~#if @root.requestInterceptor}}
-        {{#equals @root.requestInterceptor requestInterceptor}}
-        {{else}}
-        if({{operationId}}_api_request_interceptor_index == -1) {
-        {{^@root.isJavaRequestInterceptor}}
-            {{@root.requestInterceptor}}(outboundEp, req);
-            if (invocationContext.attributes.hasKey(gateway:RESPOND_DONE) && <boolean>invocationContext.attributes[gateway:RESPOND_DONE]) {
-                return;
-            }
-        {{/@root.isJavaRequestInterceptor}}
-        } else {
-            if (!gateway:invokeRequestInterceptor({{operationId}}_api_request_interceptor_index, outboundEp, req)) {
-                if (respondFromJavaInterceptor{{cut qualifiedServiceName " "}}(invocationContext, <@untainted>outboundEp)) {
-                    // return only if  interceptor returned false and respond is called from interceptor.
-                    return;
-                }
-            }
-        }{{/equals}}{{/if}}
-        {{#if requestInterceptor}}
-        if({{operationId}}_request_interceptor_index == -1) {
-        {{^isJavaRequestInterceptor}}
-            {{requestInterceptor}}(outboundEp, req);
-            if (invocationContext.attributes.hasKey(gateway:RESPOND_DONE) && <boolean>invocationContext.attributes[gateway:RESPOND_DONE]) {
-                return;
-            }
-        {{/isJavaRequestInterceptor}}
-        } else {
-            if(!gateway:invokeRequestInterceptor({{operationId}}_request_interceptor_index, outboundEp, req)) {
-                if (respondFromJavaInterceptor{{cut qualifiedServiceName " "}}(invocationContext, <@untainted>outboundEp)) {
-                    // return only if interceptor returned false and respond is called from interceptor.
-                    return;
-                }
-            }
-        }
-        {{/if}}
-
-        {{#if isGrpc}}
-            string urlPostfix = <@untainted>req.rawPath;
-        {{else}}
-        string urlPostfix = gateway:replaceFirst(req.rawPath,"{{basepath}}","");
-        {{/if}}
-        if(urlPostfix != "" && !gateway:hasPrefix(urlPostfix, "/")) {
-            urlPostfix = "/" + urlPostfix;
-        }
-        http:Response|error clientResponse;
-        http:Response r = new;
-        clientResponse = r;
-        string destination_attribute;
-        invocationContext.attributes["timeStampRequestOut"] = time:currentTime().time;
-        boolean reinitRequired = false;
-        string failedEtcdKey = "";
-        string failedEtcdKeyConfigValue = "";
-        boolean|error hasUrlChanged;
-        http:ClientConfiguration newConfig;
-        boolean reinitFailed = false;
-        boolean isProdEtcdEnabled = false;
-        boolean isSandEtcdEnabled = false;
-        map<string> endpointEtcdConfigValues = {};
-        {{#endpointConfig.prodEndpoints}}
-            {{#endpointConfig.sandEndpoints}}
-                if("PRODUCTION" == <string>invocationContext.attributes["KEY_TYPE"]) {
-                {{#if hasProdEpConfig}}
-                    {{>useResourceProdEp}}
-                {{else}}
-                    {{>useAPIProdEp}}
-                {{/if}}
-                } else {
-                {{#if hasSandEpConfig}}
-                    {{>useResourceSandEp}}
-                {{else}}
-                    {{>useApiSandEp}}
-                {{/if}}
-                }
-            {{/endpointConfig.sandEndpoints}}
-            {{^endpointConfig.sandEndpoints}}
-                if("PRODUCTION" == <string>invocationContext.attributes["KEY_TYPE"]) {
-                {{#if hasProdEpConfig}}
-                    {{>useResourceProdEp}}
-                {{else}}
-                    {{>useAPIProdEp}}
-                {{/if}}
-                    } else {
-                {{#if hasSandEpConfig}}
-                    {{>useResourceSandEp}}
-                {{else}}
-                    {{>noSandAvailableError}}
-                {{/if}}
-                }
-            {{/endpointConfig.sandEndpoints}}
-        {{/endpointConfig.prodEndpoints}}
-        {{^endpointConfig.prodEndpoints}}
-            {{#endpointConfig.sandEndpoints}}
-                if("SANDBOX" == <string>invocationContext.attributes["KEY_TYPE"]) {
-                {{#if hasSandEpConfig}}
-                    {{>useResourceSandEp}}
-                {{else}}
-                    {{>useApiSandEp}}
-                {{/if}}
-                    } else {
-                {{#if hasProdEpConfig}}
-                    {{>useResourceProdEp}}
-                {{else}}
-                            {{>noProdAvailableError}}
-                {{/if}}
-                }
-            {{/endpointConfig.sandEndpoints}}
-            {{^endpointConfig.sandEndpoints}}
-                {{#if hasSandEpConfig}}
-                    if("SANDBOX" == <string>invocationContext.attributes["KEY_TYPE"]) {
-                    {{>useResourceSandEp}}
-                        } else {
-                    {{#if hasProdEpConfig}}
-                    {{else}}
-                        {{>noProdAvailableError}}
-                    }
-                    {{/if}}
-                {{else}}
-                    {{#if hasProdEpConfig}}
-                    if("PRODUCTION" == <string>invocationContext.attributes["KEY_TYPE"]) {
-                    {{/if}}
-                {{/if}}
-                {{#if hasProdEpConfig}}
-                    {{>useResourceProdEp}}
-                    {{#if hasSandEpConfig}}
-                    {{else}}
-                        } else {
-                            {{>noSandAvailableError}}
-                    {{/if}}
-                    }
-                {{/if}}
-            {{/endpointConfig.sandEndpoints}}
-        {{/endpointConfig.prodEndpoints}}
-        invocationContext.attributes["timeStampResponseIn"] = time:currentTime().time;
-
-
-        if(clientResponse is http:Response) {
-            {{#if responseInterceptor}}
-            if({{operationId}}_response_interceptor_index == -1) {
-            {{^isJavaResponseInterceptor}}
-                {{responseInterceptor}} (outboundEp, clientResponse);
-                if (invocationContext.attributes.hasKey(gateway:RESPOND_DONE) && <boolean>invocationContext.attributes[gateway:RESPOND_DONE]) {
-                    return;
-                }
-            {{/isJavaResponseInterceptor}}
-            } else {
-                if (!gateway:invokeResponseInterceptor({{operationId}}_response_interceptor_index, outboundEp, clientResponse)) {
-                    if (respondFromJavaInterceptor{{cut qualifiedServiceName " "}}(invocationContext, <@untainted>outboundEp)) {
-                        // return only if interceptor returned false and respond is called from interceptor.
-                        return;
-                    }
-                }
-            }{{/if}}
-            {{~#if @root.responseInterceptor}}
-            {{#equals @root.responseInterceptor responseInterceptor}}
-            {{else}}
-            if ({{operationId}}_api_response_interceptor_index == -1) {
-            {{^@root.isJavaResponseInterceptor}}
-                {{@root.responseInterceptor}} (outboundEp, clientResponse);
-                if (invocationContext.attributes.hasKey(gateway:RESPOND_DONE) && <boolean>invocationContext.attributes[gateway:RESPOND_DONE]) {
-                    return;
-                }
-            {{/@root.isJavaResponseInterceptor}}
-            } else {
-                if (!gateway:invokeResponseInterceptor({{operationId}}_api_response_interceptor_index, outboundEp, clientResponse)) {
-                    if (respondFromJavaInterceptor{{cut qualifiedServiceName " "}}(invocationContext, <@untainted>outboundEp)) {
-                        // return only if interceptor returned false and respond is called from interceptor.
-                        return;
-                    }
-                }
-            }{{/equals}}{{/if}}
-
-            invocationContext.attributes[gateway:DID_EP_RESPOND] = true;
-            var outboundResult = outboundEp->respond(clientResponse);
-            if (outboundResult is error) {
-                gateway:printError({{cut qualifiedServiceName " "}}Key, "Error when sending response", outboundResult);
-            }
-        } else {
-            http:Response res = new;
-            res.statusCode = 500;
-            string errorMessage = clientResponse.reason();
-            int errorCode = 101503;
-            string errorDescription = "Error connecting to the back end";
-
-            if(gateway:contains(errorMessage, "connection timed out") || gateway:contains(errorMessage,"Idle timeout triggered")) {
-                errorCode = 101504;
-                errorDescription = "Connection timed out";
-            }
-            if(gateway:contains(errorMessage, "Malformed URL")) {
-                errorCode = 101505;
-                errorDescription = "Malformed URL";
-            }
-            invocationContext.attributes["error_response_code"] = errorCode;
-            invocationContext.attributes["error_response"] = errorDescription;
-            if (! invocationContext.attributes.hasKey(gateway:IS_GRPC)) {
-                json payload = {fault : {
-                                code : errorCode,
-                                message : "Runtime Error",
-                                description : errorDescription
-                            }};
-
-                res.setPayload(payload);
-            } else {
-                gateway:attachGrpcErrorHeaders (res, errorDescription);
-            }
-            gateway:printError({{cut qualifiedServiceName " "}}Key, "Error in client response", clientResponse);
-            var outboundResult = outboundEp->respond(res);
-            if (outboundResult is error) {
-                gateway:printError({{cut qualifiedServiceName " "}}Key, "Error when sending response", outboundResult);
-            }
-        }
+        {{cut qualifiedServiceName " "}}_{{operationId}}_resourceFunction(outboundEp, req{{#pathParameters}}, {{name}} {{/pathParameters}});
     }
 {{/value}}{{/operations}}{{/value}}{{/paths}}
 }
@@ -370,33 +152,18 @@ function respondFromJavaInterceptor{{cut qualifiedServiceName " "}}(runtime:Invo
 }
 
 function initInterceptorIndexes{{cut qualifiedServiceName " "}}() {
-
 {{#paths}}{{#value}}{{#operations}}{{#value}}
     {{#if @root.requestInterceptor}}
-        string {{operationId}}_api_request_interceptor_name = "{{@root.requestInterceptor}}";
-        if({{operationId}}_api_request_interceptor_name.startsWith("java:")) {
-            {{operationId}}_api_request_interceptor_index = gateway:loadInterceptorClass({{operationId}}_api_request_interceptor_name.substring(5, {{operationId}}_api_request_interceptor_name.length()));
-        }
-        {{/if}}
-        {{#if @root.responseInterceptor}}
-        string {{operationId}}_api_response_interceptor_name = "{{@root.responseInterceptor}}";
-        if({{operationId}}_api_response_interceptor_name.startsWith("java:")) {
-            {{operationId}}_api_response_interceptor_index = gateway:loadInterceptorClass({{operationId}}_api_response_interceptor_name.substring(5, {{operationId}}_api_response_interceptor_name.length()));
-        }
-        {{/if}}
-
-        {{#if requestInterceptor}}
-        string {{operationId}}_request_interceptor_name = "{{requestInterceptor}}";
-        if({{operationId}}_request_interceptor_name.startsWith("java:")) {
-            {{operationId}}_request_interceptor_index = gateway:loadInterceptorClass({{operationId}}_request_interceptor_name.substring(5, {{operationId}}_request_interceptor_name.length()));
-        }
-        {{/if}}
-        {{#if responseInterceptor}}
-        string {{operationId}}_response_interceptor_name = "{{responseInterceptor}}";
-        if({{operationId}}_response_interceptor_name.startsWith("java:")) {
-            {{operationId}}_response_interceptor_index = gateway:loadInterceptorClass({{operationId}}_response_interceptor_name.substring(5, {{operationId}}_response_interceptor_name.length()));
-        }
-        {{/if}}
-
+    {{operationId}}_api_request_interceptor_{{cut qualifiedServiceName " "}}();
+    {{/if}}
+    {{#if @root.responseInterceptor}}
+    {{operationId}}_api_response_interceptor_{{cut qualifiedServiceName " "}}();
+    {{/if}}
+    {{#if requestInterceptor}}
+    {{operationId}}_request_interceptor_{{cut qualifiedServiceName " "}}();
+    {{/if}}
+    {{#if responseInterceptor}}
+    {{operationId}}_response_interceptor_{{cut qualifiedServiceName " "}}();
+    {{/if}}
 {{/value}}{{/operations}}{{/value}}{{/paths}}
 }

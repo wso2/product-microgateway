@@ -460,6 +460,18 @@ public class MockBackEndServer extends Thread {
                 exchange.getResponseBody().write(response);
                 exchange.close();
             });
+
+            //to test fault responses
+            String contextV6 = "/v6";
+            httpServer.createContext(contextV6 + "/faultResponse/test", exchange -> {
+                byte[] response = ResponseConstants.petByIdResponseV1.getBytes();
+                exchange.getResponseHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(),
+                        TokenManagementConstants.CONTENT_TYPE_APPLICATION_JSON);
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+                exchange.getResponseBody().write(response);
+                exchange.close();
+            });
+
             httpServer.start();
             backEndServerUrl = "http://localhost:" + backEndServerPort;
         } catch (Exception e) {

@@ -237,4 +237,7 @@ public function addTokenServicesFilterAnnotation() {
     filterConfigAnnotationMap["revokeService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(revokeService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
     filterConfigAnnotationMap["userInfoService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(userInfoService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
     filterConfigAnnotationMap["healthCheckService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(healthCheckService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
+    {{#if generateGlobalFaultResponses}}
+    filterConfigAnnotationMap["apiNotFoundService"] = <gateway:FilterConfiguration?>reflect:getServiceAnnotations(apiNotFoundService, gateway:FILTER_ANN_NAME, gateway:GATEWAY_ANN_PACKAGE);
+    {{/if}}
 }

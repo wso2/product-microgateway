@@ -80,4 +80,9 @@ public class ResponseConstants {
 
     public static final String INVALID_JWT_RESPONSE = "\"{\"header\":\"not available\"}\"";
     public static final String VALID_JWT_RESPONSE = "\"{\"header\":\"available\"}\"";
+
+    public static final String METHOD_NOT_ALLOWED_RESPONSE ="{\"code\":405, \"type\":\"Status report\", " +
+            "\"message\":\"Runtime Error\", \"description\":\"Method not allowed for given API resource\"}";
+    public static final String NOT_FOUND_RESPONSE ="{\"code\":404, \"type\":\"Status report\", " +
+            "\"message\":\"Runtime Error\", \"description\":\"No matching resource found for given API Request\"}";
 }

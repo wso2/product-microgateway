@@ -28,6 +28,7 @@ public class Config {
     private Token token;
     private APICorsConfigurationDTO corsConfiguration;
     private MutualSSL mutualSSL;
+    private CodeGen codeGen;
 
     public Token getToken() {
         return token;
@@ -59,5 +60,13 @@ public class Config {
 
     public void setMutualSSL(MutualSSL mutualSSL) {
         this.mutualSSL = mutualSSL;
+    }
+
+    public CodeGen getCodeGen() {
+        return codeGen;
+    }
+
+    public void setCodeGen(CodeGen codeGen) {
+        this.codeGen = codeGen;
     }
 }
