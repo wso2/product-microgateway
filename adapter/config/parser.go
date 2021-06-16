@@ -31,17 +31,14 @@ import (
 
 	toml "github.com/pelletier/go-toml"
 	logger "github.com/sirupsen/logrus"
+	pkg_conf "github.com/wso2/product-microgateway/adapter/pkg/config"
 )
 
 var (
 	onceConfigRead      sync.Once
 	onceGetDefaultVhost sync.Once
-	onceLogConfigRead   sync.Once
-	onceGetMgwHome      sync.Once
 	adapterConfig       *Config
 	defaultVhost        map[string]string
-	adapterLogConfig    *LogConfig
-	mgwHome             string
 	e                   error
 )
 
@@ -77,15 +74,15 @@ const (
 // from where the executable is called from.
 //
 // Returns the configuration object that is initialized with default values. Changes to the default
-// configuration object is achieved through the configuration file. 
+// configuration object is achieved through the configuration file.
 func ReadConfigs() (*Config, error) {
 	onceConfigRead.Do(func() {
 		adapterConfig = defaultConfig
-		_, err := os.Stat(GetMgwHome() + relativeConfigPath)
+		_, err := os.Stat(pkg_conf.GetMgwHome() + relativeConfigPath)
 		if err != nil {
 			logger.Fatal("Configuration file not found.", err)
 		}
-		content, readErr := ioutil.ReadFile(mgwHome + relativeConfigPath)
+		content, readErr := ioutil.ReadFile(pkg_conf.GetMgwHome() + relativeConfigPath)
 		if readErr != nil {
 			logger.Fatal("Error reading configurations. ", readErr)
 			return
@@ -169,46 +166,21 @@ func resolveEnvValue(value string) string {
 // from where the executable is called from.
 //
 // Returns the log configuration object mapped from the configuration file during the startup.
-func ReadLogConfigs() (*LogConfig, error) {
-	onceLogConfigRead.Do(func() {
-		adapterLogConfig = new(LogConfig)
-		_, err := os.Stat(GetMgwHome() + relativeLogConfigPath)
-		if err != nil {
-			logger.Fatal("Log configuration file not found.", err)
-			panic(err)
-		}
-		content, readErr := ioutil.ReadFile(mgwHome + relativeLogConfigPath)
-		if readErr != nil {
-			logger.Fatal("Error reading log configurations. ", readErr)
-			panic(err)
-		}
-		parseErr := toml.Unmarshal(content, adapterLogConfig)
-		if parseErr != nil {
-			logger.Fatal("Error parsing the log configuration ", parseErr)
-			panic(parseErr)
-		}
-
-	})
-	return adapterLogConfig, e
+func ReadLogConfigs() (*pkg_conf.LogConfig, error) {
+	return pkg_conf.ReadLogConfigs()
 }
 
 // ClearLogConfigInstance removes the existing configuration.
 // Then the log configuration can be re-initialized.
 func ClearLogConfigInstance() {
-	onceLogConfigRead = sync.Once{}
+	pkg_conf.ClearLogConfigInstance()
 }
 
 // GetMgwHome reads the MGW_HOME environmental variable and returns the value.
 // This represent the directory where the distribution is located.
 // If the env variable is not present, the directory from which the executable is triggered will be assigned.
 func GetMgwHome() string {
-	onceGetMgwHome.Do(func() {
-		mgwHome = os.Getenv(mgwHomeEnvVariable)
-		if len(strings.TrimSpace(mgwHome)) == 0 {
-			mgwHome, _ = os.Getwd()
-		}
-	})
-	return mgwHome
+	return pkg_conf.GetMgwHome()
 }
 
 // GetControlPlaneConnectedTenantDomain returns the tenant domain of the user used to authenticate with event hub.
