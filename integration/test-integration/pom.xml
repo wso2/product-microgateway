@@ -35,7 +35,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven.surefire.plugin.version}</version>
                 <configuration>
-                    <argLine>-Xms128m -Xmx512m</argLine>
+                    <argLine>-Xms256m -Xmx1024m</argLine>
                     <systemPropertyVariables>
                         <jwt_transformer_jar>
                             ${basedir}/target/test-integration-${project.version}.jar
