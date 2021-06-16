@@ -36,9 +36,10 @@ import (
 	km "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/keymgt"
 
 	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
-	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/auth"
+	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
@@ -47,8 +48,8 @@ const (
 )
 
 // RetrieveTokens func return tokens
-func RetrieveTokens(c chan SyncAPIResponse) {
-	respSyncAPI := SyncAPIResponse{}
+func RetrieveTokens(c chan sync.SyncAPIResponse) {
+	respSyncAPI := sync.SyncAPIResponse{}
 
 	// Read configurations and derive the eventHub details
 	conf, errReadConfig := config.ReadConfigs()
@@ -96,7 +97,7 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 	req, err := http.NewRequest("GET", ehURL, nil)
 
 	// Setting authorization header
-	req.Header.Set(authorization, basicAuth)
+	req.Header.Set(sync.Authorization, basicAuth)
 	// Make the request
 	logger.LoggerSync.Debug("Sending the control plane request")
 	resp, err := client.Do(req)
@@ -161,7 +162,7 @@ func UpdateRevokedTokens() {
 		// This has to be error. For debugging purpose info
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
-	c := make(chan SyncAPIResponse)
+	c := make(chan sync.SyncAPIResponse)
 	go RetrieveTokens(c)
 	for {
 		data := <-c
