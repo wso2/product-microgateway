@@ -276,7 +276,8 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 	c := make(chan sync.SyncAPIResponse)
 
 	// Get API details.
-	adapter.GetAPIs(c, serviceURL, userName, password, envs, skipSSL, truststoreLocation)
+	adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
+		sync.RuntimeArtifactEndpoint, true)
 
 	for i := 0; i < 1; i++ {
 		data := <-c

@@ -23,18 +23,18 @@ import (
 )
 
 // GetAPIs function calls the FetchAPIs() with relevant environment labels defined in the config.
-func GetAPIs(c chan synchronizer.SyncAPIResponse, serviceURL string, userName string, password string,
-	envs []string, skipSSL bool, truststoreLocation string) {
+func GetAPIs(c chan synchronizer.SyncAPIResponse, id *string, serviceURL string, userName string, password string,
+	envs []string, skipSSL bool, truststoreLocation string, endpoint string, sendType bool) {
 	if len(envs) > 0 {
 		// If the envrionment labels are present, call the controle plane with labels.
 		logger.LoggerAdapter.Debugf("Environments label present: %v", envs)
-		go synchronizer.FetchAPIs(nil, envs, c, serviceURL, userName, password, skipSSL, truststoreLocation,
-			synchronizer.RuntimeArtifactEndpoint, true)
+		go synchronizer.FetchAPIs(id, envs, c, serviceURL, userName, password, skipSSL, truststoreLocation,
+			endpoint, sendType)
 	} else {
 		// If the environments are not give, fetch the APIs from default envrionment
 		logger.LoggerAdapter.Debug("Environments label  NOT present. Hence adding \"default\"")
 		envs = append(envs, "default")
-		go synchronizer.FetchAPIs(nil, nil, c, serviceURL, userName, password, skipSSL, truststoreLocation,
-			synchronizer.RuntimeArtifactEndpoint, true)
+		go synchronizer.FetchAPIs(id, nil, c, serviceURL, userName, password, skipSSL, truststoreLocation,
+			endpoint, sendType)
 	}
 }
