@@ -83,23 +83,6 @@ func FetchThrottleData(endpoint string, c chan SyncAPIResponse) {
 
 	// Check if TLS is enabled
 	skipSSL := ehConfigs.SkipSSLVerification
-	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
-	tr := &http.Transport{}
-	if !skipSSL {
-		_, _, truststoreLocation := restserver.GetKeyLocations()
-		caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	}
-
-	client := &http.Client{
-		Transport: tr,
-	}
 
 	req, err := http.NewRequest("GET", ehURL, nil)
 	req.Header.Set(authorization, basicAuth)

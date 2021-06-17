@@ -22,10 +22,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/wso2/adapter/internal/auth"
-	"github.com/wso2/adapter/internal/tlsutils"
+	"github.com/wso2/adapter/pkg/controlplane"
+	"github.com/wso2/adapter/pkg/tlsutils"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
@@ -347,8 +348,8 @@ func UpdateAPI(apiContent config.APIContent) {
 	if revisionStatus {
 		// send updated revision to control plane
 		logger.LoggerXds.Infof("Send updated revision to control plane : %v, RevisionID %v", apiIdentifier,
-		apiContent.RevisionID)
-		sendRevisionUpdate(apiIdentifier, apiContent.RevisionID)
+			apiContent.RevisionID)
+		sendRevisionUpdate(apiContent.UUID, apiContent.RevisionID, apiContent.Environments, apiContent.VHost, apiContent.OrganizationID)
 
 	}
 	if svcdiscovery.IsServiceDiscoveryEnabled {
@@ -356,32 +357,50 @@ func UpdateAPI(apiContent config.APIContent) {
 	}
 }
 
-func sendRevisionUpdate(apiIdentifier string, revisionID int) {
-	values := map[string]string{apiIdentifier: strconv.Itoa(revisionID)}
-	jsonValue, _ := json.Marshal(values)
-	revisionEP := "hello"
-
+func sendRevisionUpdate(apiID string, revisionID int, env []string, vhost string, organizationID string) {
+	logger.LoggerXds.Debugf("Sending revision deployed message for apiID: %v revisionID: %v "+
+		"vhost: %v organizationId: %v sent to Control plane", apiID, revisionID, vhost, organizationID)
 	conf, _ := config.ReadConfigs()
-	ehConfigs := conf.ControlPlane
-	ehURL := ehConfigs.ServiceURL
-	ehUname := ehConfigs.Username
-	ehPass := ehConfigs.Password
-	skipSSL := ehConfigs.SkipSSLVerification
+	cpConfigs := conf.ControlPlane
+	skipSSL := cpConfigs.SkipSSLVerification
 
-	// Create a HTTP request
-	if strings.HasSuffix(ehURL, "/") {
-		ehURL += revisionEP
-	} else {
-		ehURL += "/" + revisionEP
+	token, err := controlplane.GetAccessToken("apim:api_publish", "password")
+	publisherEP := cpConfigs.ServiceURL + "api/am/publisher/v2/apis/" + apiID + "/deployed-revision"
+
+	if err != nil {
+		logger.LoggerXds.Errorf("Error while retrieving access token for %v :%v", publisherEP, err.Error())
+		return
 	}
-	req, _ := http.NewRequest("POST", ehURL, bytes.NewBuffer(jsonValue))
+	logger.LoggerXds.Debug("Access token retrieved successfully")
+
+	//todo(amali) handle multiple envs
+	values := make([]map[string]string, 1)
+	values[0] = map[string]string{"name": strings.Join(env, ", "), "vhost": vhost}
+	jsonValue, _ := json.Marshal(values)
+
+	req, _ := http.NewRequest("POST", publisherEP, bytes.NewBuffer(jsonValue))
+	// add query parameters
+	queries := url.Values{}
+	queries.Add("revisionId", strconv.Itoa(revisionID))
+	queries.Add("organizationId", organizationID)
+	req.URL.RawQuery = queries.Encode()
 
 	// Setting authorization header
-	basicAuth := "Basic " + auth.GetBasicAuth(ehUname, ehPass)
-	req.Header.Set("authorization", basicAuth)
-
-	_, _ = tlsutils.InvokeControlPlane(req, skipSSL)
-
+	bearerAuth := "Bearer " + token.AccessToken
+	logger.LoggerXds.Info(bearerAuth)
+	req.Header.Set("Authorization", bearerAuth)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
+	if err != nil {
+		logger.LoggerXds.Errorf("Error response from %v : %v", publisherEP, err.Error())
+		return
+	}
+	if resp.StatusCode != http.StatusCreated {
+		logger.LoggerXds.Errorf("Error response status code %v from %v", resp.StatusCode, publisherEP)
+		return
+	}
+	logger.LoggerXds.Debugf("Revision deployed message sent for apiID: %v revisionID: %v "+
+		"vhost: %v organizationId: %v sent to Control plane", apiID, revisionID, vhost, organizationID)
 }
 
 // GetAllEnvironments returns all the environments merging new environments with already deployed environments
@@ -655,6 +674,7 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	// Will be updated once decide to move to incremental XDS
 	snap := envoy_cachev3.NewSnapshot(fmt.Sprint(version), endpoints, clusters, routes, listeners, nil, nil)
 	snap.Consistent()
+	// todo (amali) check wrong config
 	err := cache.SetSnapshot(label, snap)
 	if err != nil {
 		logger.LoggerXds.Error(err)

@@ -21,7 +21,7 @@ package tlsutils
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/wso2/adapter/internal/api/restserver"
+	"github.com/wso2/adapter/config"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -102,10 +102,10 @@ func IsPublicCertificate(certContent []byte) bool {
 
 // InvokeControlPlane sends request to the control plane and returns the response
 func InvokeControlPlane(req *http.Request, skipSSL bool) (*http.Response, error) {
-	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
+	logger.LoggerTLSUtils.Debugf("Skip SSL Verification: %v", skipSSL)
 	tr := &http.Transport{}
 	if !skipSSL {
-		_, _, truststoreLocation := restserver.GetKeyLocations()
+		_, _, truststoreLocation := GetKeyLocations()
 		caCertPool := GetTrustedCertPool(truststoreLocation)
 		tr = &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
@@ -120,6 +120,15 @@ func InvokeControlPlane(req *http.Request, skipSSL bool) (*http.Response, error)
 	client := &http.Client{
 		Transport: tr,
 	}
-	logger.LoggerSync.Debug("Sending the control plane request")
+	logger.LoggerTLSUtils.Debug("Sending the control plane request")
 	return client.Do(req)
+}
+
+// GetKeyLocations function returns the public key path and private key path
+func GetKeyLocations() (string, string, string) {
+	conf, _ := config.ReadConfigs()
+	publicKeyLocation := conf.Adapter.Keystore.PublicKeyLocation
+	privateKeyLocation := conf.Adapter.Keystore.PrivateKeyLocation
+	truststoreLocation := conf.Adapter.Truststore.Location
+	return publicKeyLocation, privateKeyLocation, truststoreLocation
 }

@@ -25,6 +25,7 @@ import (
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
+	"github.com/wso2/product-microgateway/adapter/pkg/controlplane"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
 	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
@@ -92,7 +93,7 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServe
 	enforcerThrottleDataDsSrv wso2_server.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
-	publicKeyLocation, privateKeyLocation, truststoreLocation := restserver.GetKeyLocations()
+	publicKeyLocation, privateKeyLocation, truststoreLocation := tlsutils.GetKeyLocations()
 	cert, err := tlsutils.GetServerCertificate(publicKeyLocation, privateKeyLocation)
 
 	caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
@@ -221,6 +222,9 @@ func Run(conf *config.Config) {
 
 	eventHubEnabled := conf.ControlPlane.Enabled
 	if eventHubEnabled {
+		// Register/Retrieve app client
+		setAppCredentials(conf)
+
 		// Load subscription data
 		eventhub.LoadSubscriptionData(conf)
 
@@ -255,6 +259,39 @@ OUTER:
 		}
 	}
 	logger.LoggerMgw.Info("Bye!")
+}
+
+func setAppCredentials(conf *config.Config) {
+	logger.LoggerMgw.Info("Registering control plane app")
+	clientRegEP := "client-registration/v0.17/register"
+	tokenEP := "oauth2/token"
+	serviceURL := conf.ControlPlane.ServiceURL
+
+	// Create a HTTP request
+	if strings.HasSuffix(serviceURL, "/") {
+		tokenEP = serviceURL + tokenEP
+		clientRegEP = serviceURL + clientRegEP
+	} else {
+		clientRegEP = serviceURL + "/" + clientRegEP
+		tokenEP = serviceURL + "/" + tokenEP
+	}
+
+	cpConf := controlplane.Conf{
+		Username:            conf.ControlPlane.Username,
+		Password:            conf.ControlPlane.Password,
+		ClientRegEP:         clientRegEP,
+		TokenEP:             tokenEP,
+		SkipSSLVerification: conf.ControlPlane.SkipSSLVerification,
+		Owner:               "admin",
+		GrantType:           "password",
+		ClientName:          "local_adapter",
+	}
+	err := controlplane.GetAppCredentials(cpConf)
+	if err != nil {
+		logger.LoggerMgw.Errorf("Error occurred while registering control plane client: %v ", err)
+	} else {
+		logger.LoggerMgw.Infof("Oauth app registered successfully. ClientName: %v", cpConf.ClientName)
+	}
 }
 
 // fetch APIs from control plane during the server start up and push them
