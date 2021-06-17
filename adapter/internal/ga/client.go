@@ -19,14 +19,13 @@ package ga
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
-	"time"
 
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/golang/protobuf/ptypes"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	ga_model "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/ga"
 	stub "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/ga"
 	"google.golang.org/genproto/googleapis/rpc/status"
@@ -72,40 +71,32 @@ func initConnection(xdsURL string) {
 	}
 	// defer conn.Close()
 	client := stub.NewApiGADiscoveryServiceClient(conn)
-
 	streamContext := context.Background()
-	fmt.Println(conn.GetState().String())
-
-	time.Sleep(11 * time.Second)
-
 	xdsStream, err = client.StreamGAApis(streamContext)
-
-	fmt.Println(conn.GetState().String())
 
 	if err != nil {
 		// TODO: (VirajSalaka) handle error
-		fmt.Printf("error while starting client %s \n", err.Error())
+		logger.LoggerGA.Errorf("Error while starting client %s \n", err.Error())
 		return
 	}
+	logger.LoggerGA.Infof("Connection to the global adapter: %s is successful.", xdsURL)
 }
 
 func watchAPIs() {
 	for {
-		fmt.Println("started.")
 		discoveryResponse, err := xdsStream.Recv()
-		fmt.Println("received.")
 		if err == io.EOF {
 			// read done.
 			// TODO: (VirajSalaka) observe the behavior when grpc connection terminates
-			fmt.Println("EOF")
+			logger.LoggerGA.Error("EOF is received from the global adapter.")
 			return
 		}
 		if err != nil {
-			fmt.Printf("Failed to receive a note : %v", err)
+			logger.LoggerGA.Errorf("Failed to receive the discovery response : %v", err)
 			nack(err.Error())
 		} else {
 			lastReceivedResponse = discoveryResponse
-			fmt.Printf("response %v", discoveryResponse)
+			logger.LoggerGA.Debugf("Discovery response is received : %s", discoveryResponse.VersionInfo)
 			addAPIToChannel(discoveryResponse)
 			ack()
 		}
@@ -113,6 +104,7 @@ func watchAPIs() {
 }
 
 func ack() {
+	laskAckedResponse = lastReceivedResponse
 	discoveryRequest := &discovery.DiscoveryRequest{
 		Node:          getAdapterNode(),
 		VersionInfo:   laskAckedResponse.VersionInfo,
@@ -120,7 +112,6 @@ func ack() {
 		ResponseNonce: lastReceivedResponse.Nonce,
 	}
 	xdsStream.Send(discoveryRequest)
-	laskAckedResponse = lastReceivedResponse
 }
 
 func nack(errorMessage string) {
@@ -148,7 +139,7 @@ func getAdapterNode() *core.Node {
 }
 
 // InitAPIXds initializes the connection to the global adapter.
-func InitAPIXds(xdsURL string) {
+func InitGAClient(xdsURL string) {
 	initConnection(xdsURL)
 	go watchAPIs()
 	discoveryRequest := &discovery.DiscoveryRequest{
@@ -157,16 +148,13 @@ func InitAPIXds(xdsURL string) {
 		TypeUrl:     apiTypeURL,
 	}
 	xdsStream.Send(discoveryRequest)
-	fmt.Println("sent")
 	consumeAPIChannel()
 	select {}
 }
 
-// resources:{[type.googleapis.com/wso2.discovery.ga.Api]:{apiUUID:"myapi1"  revisionUUID:"1234"}}  resources:{[type.googleapis.com/wso2.discovery.ga.Api]:{apiUUID:"myapi2"  revisionUUID:"1234"}}  type_url:"type.googleapis.com/wso2.discovery.ga.Api"
-
 func addAPIToChannel(resp *discovery.DiscoveryResponse) {
+	// To keep track of the APIs needs to be deleted.
 	removedAPIMap := make(map[string]string)
-
 	for k, v := range apiRevisionMap {
 		removedAPIMap[k] = v
 	}
@@ -176,12 +164,11 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 		err := ptypes.UnmarshalAny(res, api)
 
 		if err != nil {
-			fmt.Printf("Error while conversion: %s\n", err.Error())
+			logger.LoggerGA.Errorf("Error while unmarshalling: %s\n", err.Error())
 			continue
 		}
 
 		currentRevision, apiFound := apiRevisionMap[api.ApiUUID]
-
 		if apiFound {
 			delete(removedAPIMap, api.ApiUUID)
 			if currentRevision == api.RevisionUUID {
@@ -195,6 +182,7 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 		}
 		GAAPIChannel <- event
 		apiRevisionMap[api.ApiUUID] = api.RevisionUUID
+		logger.LoggerGA.Infof("API Deploy event is added to the channel. %s : %s", api.ApiUUID, api.RevisionUUID)
 	}
 
 	for apiEntry := range removedAPIMap {
@@ -204,11 +192,13 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 		}
 		GAAPIChannel <- event
 		delete(apiRevisionMap, apiEntry)
+		logger.LoggerGA.Infof("API Undeploy event is added to the channel. : %s", apiEntry)
 	}
 }
 
+// TODO: (VirajSalaka) Remove this method once the channel consume logic is implemented.
 func consumeAPIChannel() {
 	for event := range GAAPIChannel {
-		fmt.Printf("Event : %v", event)
+		logger.LoggerGA.Infof("Event : %v", event)
 	}
 }

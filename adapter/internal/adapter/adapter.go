@@ -219,7 +219,7 @@ func Run(conf *config.Config) {
 		go restserver.StartRestServer(conf)
 	}
 
-	// ga.InitAPIXds("ga:18002")
+	// ga.InitGAXds("ga:18002")
 
 	eventHubEnabled := conf.ControlPlane.Enabled
 	if eventHubEnabled {
