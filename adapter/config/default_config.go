@@ -239,6 +239,10 @@ var defaultConfig = &Config{
 			EventListeningEndpoints: []string{"amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"},
 		},
 	},
+	GlobalAdapter: globalAdapter{
+		Enabled:    false,
+		ServiceURL: "ga:18002",
+	},
 	Analytics: analytics{
 		Enabled: false,
 		Adapter: analyticsAdapter{

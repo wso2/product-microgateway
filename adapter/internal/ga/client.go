@@ -138,7 +138,7 @@ func getAdapterNode() *core.Node {
 	}
 }
 
-// InitAPIXds initializes the connection to the global adapter.
+// InitGAClient initializes the connection to the global adapter.
 func InitGAClient(xdsURL string) {
 	initConnection(xdsURL)
 	go watchAPIs()
