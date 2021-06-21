@@ -25,20 +25,11 @@
 4. Assume that API-M and CC have already started and invoke APIs using the util methods. 
    NOTE: Currently, only APIs, Applications, and Subscriptions are deployed via the above json files. Therefore, changes
    on admin side needs to be deployed within the testcase and cleaned within the testcase as well.
-3. Finally, add the same class to both of the following test groups in the `src/test/resources/testng-cc-with-apim.xml`.
-      - `apis-apps-subs-pulled-at-startup`: here, the APIs, Applications, and Subscriptions gets created first, 
+3. Finally, add the class to the `start-pull-and-events-via-eventhub-combined` test group in the `src/test/resources/testng-cc-with-apim.xml`.
+      - here, the APIs, Applications, and Subscriptions gets created first, 
         and CC starts afterwords. Thus, CC pulls them during startup, rather than pulling it after getting a 
-        notification from eventhub. Since only the 1st method of the class actually tests whether the startup pull was
-        successful, we only run the 1st method of the tastcase class. Ex:
-        ```
-        <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase">
-            <methods><include name="testPublishedStateAPI"/></methods>
-        </class>
-        ```
-     - `apis-apps-subs-received-via-eventhub`: the eventhub scenario is tested in the second group of tests. 
-       By the time this group starts running, CC has already started (in the previous group). 
-       Therefore, the `ApimPreparer` first deletes the APIs, Applications, and Subscriptions that were already created, 
-       testing the "DELETE" events that arrive via eventhub. Then creates the same resources again.
+        notification from eventhub. 
+     - The above events, for the eventhub path, we add the tests in a separate class "BasicEventsTestCase"
 
 ### How to Avoid API Manager restarting everytime the test are run
 1. Run the tests ones
@@ -63,24 +54,17 @@ NOTE: Only if an instance with a completely new config is extremely necessary
    `1.`
 4. in the testng file,
    i. for standalone mode, add a new test tag group, and add the new `Cc` class as the first in the group
-   ii. for withapim mode, create **two new** test tag groups and follow the pattern given below
+   ii. for withapim mode, create a test group, and follow the pattern given below
    ```
    <test>
         <class name="ApimPreparer"/>
         <class name="CcStartupExecutor"/>
-        .
-        . . test methods to run . .
-        .
-   </test>
-   <test>
-        <class name="ApimPreparer"/>
         .
         . . test classes to run . .
         .
         <class name="CcShutdownExecutor"/>
    </test>
    ```
-   NOTE: Adding to both modes is not compulsory
 
 ## How to Test with a new API-M instance
 NOTE: Not encouraged at all
