@@ -72,12 +72,12 @@ var (
 	apiUUIDToGatewayToVhosts map[string]map[string]string   // API_UUID -> gateway-env -> vhost (for un-deploying APIs from APIM or Choreo)
 	apiToVhostsMap           map[string]map[string]struct{} // APIName:Version -> VHosts set (for un-deploying APIs from API-CTL)
 
-	orgIDAPIMgwSwaggerMap       map[string]map[string]mgw.MgwSwagger       // organizationID -> Vhost:APIName:Version -> MgwSwagger struct map
-	orgIDOpenAPIEnvoyMap        map[string]map[string][]string             // organizationID -> Vhost:APIName:Version -> Envoy Label Array map
-	orgIDOpenAPIRoutesMap       map[string]map[string][]*routev3.Route     // organizationID -> Vhost:APIName:Version -> Envoy Routes map
-	orgIDOpenAPIClustersMap     map[string]map[string][]*clusterv3.Cluster // organizationID -> Vhost:APIName:Version -> Envoy Clusters map
-	orgIDOpenAPIEndpointsMap    map[string]map[string][]*corev3.Address    // organizationID -> Vhost:APIName:Version -> Envoy Endpoints map
-	orgIDOpenAPIEnforcerApisMap map[string]map[string]types.Resource       // organizationID -> Vhost:APIName:Version -> API Resource map
+	orgIDAPIMgwSwaggerMap       map[string]map[string]mgw.MgwSwagger       // organizationID -> Vhost:APIUUID -> MgwSwagger struct map
+	orgIDOpenAPIEnvoyMap        map[string]map[string][]string             // organizationID -> Vhost:APIUUID -> Envoy Label Array map
+	orgIDOpenAPIRoutesMap       map[string]map[string][]*routev3.Route     // organizationID -> Vhost:APIUUID -> Envoy Routes map
+	orgIDOpenAPIClustersMap     map[string]map[string][]*clusterv3.Cluster // organizationID -> Vhost:APIUUID -> Envoy Clusters map
+	orgIDOpenAPIEndpointsMap    map[string]map[string][]*corev3.Address    // organizationID -> Vhost:APIUUID -> Envoy Endpoints map
+	orgIDOpenAPIEnforcerApisMap map[string]map[string]types.Resource       // organizationID -> Vhost:APIUUID -> API Resource map
 
 	// Envoy Label as map key
 	envoyUpdateVersionMap  map[string]int64                       // GW-Label -> XDS version map
@@ -142,12 +142,12 @@ func init() {
 	envoyListenerConfigMap = make(map[string][]*listenerv3.Listener)
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 
-	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // organizationID -> Vhost:APIName:Version -> MgwSwagger struct map
-	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // organizationID -> Vhost:APIName:Version -> Envoy Label Array map
-	orgIDOpenAPIRoutesMap = make(map[string]map[string][]*routev3.Route)       // organizationID -> Vhost:APIName:Version -> Envoy Routes map
-	orgIDOpenAPIClustersMap = make(map[string]map[string][]*clusterv3.Cluster) // organizationID -> Vhost:APIName:Version -> Envoy Clusters map
-	orgIDOpenAPIEndpointsMap = make(map[string]map[string][]*corev3.Address)   // organizationID -> Vhost:APIName:Version -> Envoy Endpoints map
-	orgIDOpenAPIEnforcerApisMap = make(map[string]map[string]types.Resource)   // organizationID -> Vhost:APIName:Version -> API Resource map
+	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // organizationID -> Vhost:APIUUID -> MgwSwagger struct map
+	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // organizationID -> Vhost:APIUUID -> Envoy Label Array map
+	orgIDOpenAPIRoutesMap = make(map[string]map[string][]*routev3.Route)       // organizationID -> Vhost:APIUUID -> Envoy Routes map
+	orgIDOpenAPIClustersMap = make(map[string]map[string][]*clusterv3.Cluster) // organizationID -> Vhost:APIUUID -> Envoy Clusters map
+	orgIDOpenAPIEndpointsMap = make(map[string]map[string][]*corev3.Address)   // organizationID -> Vhost:APIUUID -> Envoy Endpoints map
+	orgIDOpenAPIEnforcerApisMap = make(map[string]map[string]types.Resource)   // organizationID -> Vhost:APIUUID -> API Resource map
 
 	enforcerConfigMap = make(map[string][]types.Resource)
 	enforcerKeyManagerMap = make(map[string][]types.Resource)
@@ -265,7 +265,7 @@ func UpdateAPI(apiContent config.APIContent) error {
 		return validationErr
 	}
 
-	apiIdentifier := GenerateIdentifierForAPI(apiContent.VHost, apiContent.Name, apiContent.Version)
+	apiIdentifier := GenerateIdentifierForAPIWithUUID(apiContent.VHost, apiContent.UUID)
 	//TODO: (SuKSW) Uncomment the below section depending on MgwSwagger.Resource ids
 	//TODO: (SuKSW) Update the existing API if the basepath already exists
 	//existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
@@ -821,8 +821,8 @@ func ListApis(apiType string, organizationID string, limit *int64) *apiModel.API
 }
 
 // IsAPIExist returns whether a given API exists
-func IsAPIExist(vhost, name, version string, organizationID string) (exists bool) {
-	apiIdentifier := GenerateIdentifierForAPI(vhost, name, version)
+func IsAPIExist(vhost, uuid, organizationID string) (exists bool) {
+	apiIdentifier := GenerateIdentifierForAPIWithUUID(vhost, uuid)
 	_, exists = orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]
 	return exists
 }
@@ -830,6 +830,11 @@ func IsAPIExist(vhost, name, version string, organizationID string) (exists bool
 // GenerateIdentifierForAPI generates an identifier unique to the API
 func GenerateIdentifierForAPI(vhost, name, version string) string {
 	return fmt.Sprint(vhost, apiKeyFieldSeparator, name, apiKeyFieldSeparator, version)
+}
+
+// GenerateIdentifierForAPIWithUUID generates an identifier unique to the API
+func GenerateIdentifierForAPIWithUUID(vhost, uuid string) string {
+	return fmt.Sprint(vhost, apiKeyFieldSeparator, uuid)
 }
 
 // GenerateIdentifierForAPIWithoutVhost generates an identifier unique to the API name and version
@@ -840,7 +845,7 @@ func GenerateIdentifierForAPIWithoutVhost(name, version string) string {
 // ExtractVhostFromAPIIdentifier extracts vhost from the API identifier
 func ExtractVhostFromAPIIdentifier(id string) (string, error) {
 	elem := strings.Split(id, apiKeyFieldSeparator)
-	if len(elem) == 3 {
+	if len(elem) == 2 {
 		return elem[0], nil
 	}
 	err := fmt.Errorf("invalid API identifier: %v", id)

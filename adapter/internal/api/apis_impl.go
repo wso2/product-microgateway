@@ -310,7 +310,7 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 		// if the API already exists in the one of vhost, break deployment of the API
 		exists := false
 		for _, deployment := range apiProject.Deployments {
-			if xds.IsAPIExist(deployment.DeploymentVhost, apiInfo.Name, apiInfo.Version, apiProject.OrganizationID) {
+			if xds.IsAPIExist(deployment.DeploymentVhost, apiInfo.ID, apiProject.OrganizationID) {
 				exists = true
 				break
 			}
