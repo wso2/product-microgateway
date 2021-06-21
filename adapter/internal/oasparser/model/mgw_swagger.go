@@ -276,8 +276,6 @@ func (swagger *MgwSwagger) setXWso2SandboxEndpoint() error {
 		xwso2ResourceEndpoints := getXWso2Endpoints(resource.vendorExtensions, sandboxEndpoints)
 		if xwso2ResourceEndpoints != nil {
 			swagger.resources[i].sandboxUrls = xwso2ResourceEndpoints
-		} else {
-			return errors.New("error encountered when extracting endpoints")
 		}
 	}
 
