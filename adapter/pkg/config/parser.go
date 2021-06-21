@@ -62,10 +62,10 @@ func GetMgwHome() string {
 	return mgwHome
 }
 
-// getLogConfigPath reads the LOG_CONFIG_PATH environmental variable and returns the value.
+// GetLogConfigPath reads the LOG_CONFIG_PATH environmental variable and returns the value.
 // If the env variable is not available, returned value would be the combination of MGW_HOME
 // env variable value + relative log config path
-func getLogConfigPath() string {
+func GetLogConfigPath() string {
 	logConfigPath = os.Getenv(logConfigPathEnvVariable)
 	if len(strings.TrimSpace(logConfigPath)) == 0 {
 		//for backward compatibility
@@ -89,16 +89,14 @@ func getLogConfigPath() string {
 // Returns the log configuration object mapped from the configuration file during the startup.
 func ReadLogConfigs() (*LogConfig, error) {
 	onceLogConfigRead.Do(func() {
-		adapterLogConfig = new(LogConfig)
-		content, readErr := ioutil.ReadFile(getLogConfigPath())
+
+		content, readErr := ioutil.ReadFile(GetLogConfigPath())
 		if readErr != nil {
-			logger.Fatal("Error reading log configurations. ", readErr)
-			panic(readErr)
+			logger.Fatal("Proceeding with default log configuration as error occured while reading log configurations ", readErr)
 		}
 		parseErr := toml.Unmarshal(content, adapterLogConfig)
 		if parseErr != nil {
-			logger.Fatal("Error parsing the log configuration ", parseErr)
-			panic(parseErr)
+			logger.Fatal("Proceeding with default log configuration as error occured while parsing the log configuration ", parseErr)
 		}
 
 	})

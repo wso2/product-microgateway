@@ -176,6 +176,11 @@ func ClearLogConfigInstance() {
 	pkg_conf.ClearLogConfigInstance()
 }
 
+// GetLogConfigPath returns the file location of the log-config path
+func GetLogConfigPath() string {
+	return pkg_conf.GetLogConfigPath()
+}
+
 // GetMgwHome reads the MGW_HOME environmental variable and returns the value.
 // This represent the directory where the distribution is located.
 // If the env variable is not present, the directory from which the executable is triggered will be assigned.
