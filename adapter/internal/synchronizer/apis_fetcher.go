@@ -39,7 +39,6 @@ import (
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
 	apiServer "github.com/wso2/product-microgateway/adapter/internal/api"
-	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 

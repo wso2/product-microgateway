@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/wso2/adapter/internal/auth"
-	"github.com/wso2/adapter/pkg/tlsutils"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+
+    "github.com/wso2/product-microgateway/adapter/internal/auth"
+    "github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
 var (

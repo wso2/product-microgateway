@@ -35,8 +35,6 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
-
-	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 

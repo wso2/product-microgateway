@@ -21,7 +21,6 @@ package tlsutils
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/wso2/adapter/config"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -30,6 +29,7 @@ import (
 	"sync"
 
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
+	"github.com/wso2/product-microgateway/adapter/config"
 )
 
 var (

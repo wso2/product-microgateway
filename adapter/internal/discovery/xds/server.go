@@ -22,8 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/wso2/adapter/pkg/controlplane"
-	"github.com/wso2/adapter/pkg/tlsutils"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -32,6 +30,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/wso2/product-microgateway/adapter/pkg/controlplane"
+	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
 

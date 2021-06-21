@@ -33,8 +33,6 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/wso2/product-microgateway/adapter/config"
 	km "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/keymgt"
-
-	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"

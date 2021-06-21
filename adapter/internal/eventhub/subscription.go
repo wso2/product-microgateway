@@ -28,7 +28,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/wso2/product-microgateway/adapter/config"
-	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
