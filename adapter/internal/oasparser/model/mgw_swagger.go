@@ -257,8 +257,6 @@ func (swagger *MgwSwagger) setXWso2PrdoductionEndpoint() error {
 		xwso2ResourceEndpoints := getXWso2Endpoints(resource.vendorExtensions, productionEndpoints)
 		if xwso2ResourceEndpoints != nil {
 			swagger.resources[i].productionUrls = xwso2ResourceEndpoints
-		} else {
-			return errors.New("error encountered when extracting endpoints")
 		}
 	}
 
