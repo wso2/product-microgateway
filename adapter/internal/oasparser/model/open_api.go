@@ -19,6 +19,7 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 	"net/url"
 	"strconv"
 	"strings"
@@ -37,7 +38,8 @@ import (
 // UUID.
 //
 // No operation specific information is extracted.
-func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
+func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
+	var err error
 	if swagger3.Info != nil {
 		swagger.description = swagger3.Info.Description
 		swagger.title = swagger3.Info.Title
@@ -45,7 +47,11 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
 	}
 
 	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
-	swagger.resources = setResourcesOpenAPI(swagger3)
+	swagger.resources, err = setResourcesOpenAPI(swagger3)
+	if err != nil {
+		return err
+	}
+
 	swagger.apiType = HTTP
 	if isServerURLIsAvailable(swagger3.Servers) {
 		for _, serverEntry := range swagger3.Servers {
@@ -53,10 +59,15 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
 				continue
 			}
 			endpoint := getHostandBasepathandPort(serverEntry.URL)
-			swagger.productionUrls = append(swagger.productionUrls, endpoint)
-			swagger.xWso2Basepath = endpoint.Basepath
+			if endpoint != nil {
+				swagger.productionUrls = append(swagger.productionUrls, *endpoint)
+				swagger.xWso2Basepath = endpoint.Basepath
+			} else {
+				return errors.New("error encountered when parsing the endpoint")
+			}
 		}
 	}
+	return nil
 }
 
 func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.PathItem) Resource {
@@ -78,7 +89,7 @@ func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.Pat
 	return resource
 }
 
-func setResourcesOpenAPI(openAPI openapi3.Swagger) []Resource {
+func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 	var resources []Resource
 	// Check the disable security vendor ext at API level.
 	// If it's present, then the same value should be added to the
@@ -105,14 +116,18 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) []Resource {
 						continue
 					}
 					endpoint := getHostandBasepathandPort(serverEntry.URL)
-					resource.productionUrls = append(resource.productionUrls, endpoint)
+					if endpoint != nil {
+						resource.productionUrls = append(resource.productionUrls, *endpoint)
+					} else {
+						return nil, errors.New("error encountered when parsing the endpoint")
+					}
 				}
 			}
 			resources = append(resources, resource)
 
 		}
 	}
-	return SortResources(resources)
+	return SortResources(resources), nil
 }
 
 func getOperationLevelDetails(operation *openapi3.Operation, method string) Operation {
@@ -136,7 +151,7 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string) Oper
 // or server property.
 //
 // if no scheme is mentioned before the hostname, urlType would be assigned as http
-func getHostandBasepathandPort(rawURL string) Endpoint {
+func getHostandBasepathandPort(rawURL string) *Endpoint {
 	var (
 		basepath string
 		host     string
@@ -148,7 +163,8 @@ func getHostandBasepathandPort(rawURL string) Endpoint {
 	}
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		logger.LoggerOasparser.Fatal(err)
+		logger.LoggerOasparser.Error("Malformed endpoint detected: ", err)
+		return nil
 	}
 
 	host = parsedURL.Hostname()
@@ -172,7 +188,7 @@ func getHostandBasepathandPort(rawURL string) Endpoint {
 		urlType = "https"
 	}
 
-	return Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}
+	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}
 }
 
 // isServerURLIsAvailable checks the availability od server url in openApi3
