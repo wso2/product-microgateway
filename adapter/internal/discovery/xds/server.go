@@ -70,14 +70,14 @@ var (
 	// Vhosts entry maps, these maps updated with delta changes (when an API added, only added its entry only)
 	// These maps are managed separately for API-CTL and APIM, since when deploying an project from API-CTL there is no API uuid
 	apiUUIDToGatewayToVhosts map[string]map[string]string   // API_UUID -> gateway-env -> vhost (for un-deploying APIs from APIM or Choreo)
-	apiToVhostsMap           map[string]map[string]struct{} // APIName:Version -> VHosts set (for un-deploying APIs from API-CTL)
+	apiToVhostsMap           map[string]map[string]struct{} // API_UUID -> VHosts set (for un-deploying APIs from API-CTL)
 
-	orgIDAPIMgwSwaggerMap       map[string]map[string]mgw.MgwSwagger       // organizationID -> Vhost:APIUUID -> MgwSwagger struct map
-	orgIDOpenAPIEnvoyMap        map[string]map[string][]string             // organizationID -> Vhost:APIUUID -> Envoy Label Array map
-	orgIDOpenAPIRoutesMap       map[string]map[string][]*routev3.Route     // organizationID -> Vhost:APIUUID -> Envoy Routes map
-	orgIDOpenAPIClustersMap     map[string]map[string][]*clusterv3.Cluster // organizationID -> Vhost:APIUUID -> Envoy Clusters map
-	orgIDOpenAPIEndpointsMap    map[string]map[string][]*corev3.Address    // organizationID -> Vhost:APIUUID -> Envoy Endpoints map
-	orgIDOpenAPIEnforcerApisMap map[string]map[string]types.Resource       // organizationID -> Vhost:APIUUID -> API Resource map
+	orgIDAPIMgwSwaggerMap       map[string]map[string]mgw.MgwSwagger       // organizationID -> Vhost:API_UUID -> MgwSwagger struct map
+	orgIDOpenAPIEnvoyMap        map[string]map[string][]string             // organizationID -> Vhost:API_UUID -> Envoy Label Array map
+	orgIDOpenAPIRoutesMap       map[string]map[string][]*routev3.Route     // organizationID -> Vhost:API_UUID -> Envoy Routes map
+	orgIDOpenAPIClustersMap     map[string]map[string][]*clusterv3.Cluster // organizationID -> Vhost:API_UUID -> Envoy Clusters map
+	orgIDOpenAPIEndpointsMap    map[string]map[string][]*corev3.Address    // organizationID -> Vhost:API_UUID -> Envoy Endpoints map
+	orgIDOpenAPIEnforcerApisMap map[string]map[string]types.Resource       // organizationID -> Vhost:API_UUID -> API Resource map
 
 	// Envoy Label as map key
 	envoyUpdateVersionMap  map[string]int64                       // GW-Label -> XDS version map
@@ -432,6 +432,63 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 			delete(apiToVhostsMap, apiNameVersionID)
 		} else {
 			delete(apiToVhostsMap[apiNameVersionID], vhost)
+		}
+	}
+	return nil
+}
+
+// DeleteAPIsWithUUID deletes an API, its resources and updates the caches of given environments
+func DeleteAPIsWithUUID(vhost, uuid string, environments []string, organizationID string) error {
+
+	mutexForInternalMapUpdate.Lock()
+	defer mutexForInternalMapUpdate.Unlock()
+
+	vhosts, found := apiToVhostsMap[uuid]
+	if !found {
+		logger.LoggerXds.Infof("Unable to delete API with UUID %v from Organization %v. API does not exist.", uuid, organizationID)
+		return errors.New(mgw.NotFound)
+	}
+
+	if vhost == "" {
+		// vhost is not defined, delete all vhosts
+		logger.LoggerXds.Infof("No vhost is specified for the API with UUID %v in Organizaion %v deleting from all vhosts", uuid, organizationID)
+		deletedVhosts := make(map[string]struct{})
+		for vh := range vhosts {
+			apiIdentifier := GenerateIdentifierForAPIWithUUID(vh, uuid)
+			// TODO: (renuka) optimize to update cache only once after updating all maps
+			if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
+				// Update apiToVhostsMap with already deleted vhosts in the loop
+				logger.LoggerXds.Errorf("Error deleting API: %v of organization: %v", apiIdentifier, organizationID)
+				logger.LoggerXds.Debugf("Update map apiToVhostsMap with deleting already deleted vhosts for API %v in organization: %v",
+					apiIdentifier, organizationID)
+				remainingVhosts := make(map[string]struct{})
+				for v := range vhosts {
+					if _, ok := deletedVhosts[v]; ok {
+						remainingVhosts[v] = void
+					}
+				}
+				apiToVhostsMap[uuid] = remainingVhosts
+				return err
+			}
+			deletedVhosts[vh] = void
+		}
+		delete(apiToVhostsMap, uuid)
+		return nil
+	}
+
+	apiIdentifier := GenerateIdentifierForAPIWithUUID(vhost, uuid)
+	if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
+		return err
+	}
+
+	if _, ok := vhosts[vhost]; ok {
+		if len(vhosts) == 1 {
+			// if this is the final vhost delete map entry
+			logger.LoggerXds.Debugf("The API with UUID %v is not exists with any vhost. Hence clean vhost entry from the map 'apiToVhostsMap'",
+				uuid)
+			delete(apiToVhostsMap, uuid)
+		} else {
+			delete(apiToVhostsMap[uuid], vhost)
 		}
 	}
 	return nil

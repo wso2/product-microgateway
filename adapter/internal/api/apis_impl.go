@@ -279,7 +279,7 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 			// ignore if vhost is empty, since it deletes all vhosts of API
 			continue
 		}
-		if err := xds.DeleteAPIs(vhost, apiInfo.Name, apiInfo.Version, environments, apiProject.OrganizationID); err != nil {
+		if err := xds.DeleteAPIsWithUUID(vhost, apiInfo.ID, environments, apiProject.OrganizationID); err != nil {
 			return err
 		}
 	}
