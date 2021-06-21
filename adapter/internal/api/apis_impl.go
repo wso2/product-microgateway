@@ -266,7 +266,10 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
 			allEnvironments, vhost, apiInfo.Name, apiInfo.Version, apiInfo.ID)
 		// first update the API for vhost
-		updateAPI(vhost, apiInfo, apiProject, allEnvironments)
+		err := updateAPI(vhost, apiInfo, apiProject, allEnvironments)
+		if err != nil {
+			return err
+		}
 	}
 
 	// undeploy APIs with other vhosts in the same gateway environment
@@ -332,7 +335,7 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 	return nil
 }
 
-func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) {
+func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) error {
 	if len(environments) == 0 {
 		environments = append(environments, config.DefaultGatewayName)
 	}
@@ -364,7 +367,11 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	} else if apiProject.APIType == mgw.WS {
 		apiContent.APIDefinition = apiProject.APIJsn
 	}
-	xds.UpdateAPI(apiContent)
+	err := xds.UpdateAPI(apiContent)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData) {

@@ -118,7 +118,8 @@ x-wso2-production-endpoints:
 	}
 
 	for _, item := range dataItems {
-		resultMgwSagger := operator.GetMgwSwagger([]byte(item.inputSwagger))
+		resultMgwSagger, err := operator.GetMgwSwagger([]byte(item.inputSwagger))
+		assert.Nil(t, err, "Error should not be present when openAPI definition is converted to a MgwSwagger object")
 
 		assert.Equal(t, item.resultApiProdEndpoints, resultMgwSagger.GetProdEndpoints(), item.message)
 		if resultMgwSagger.GetResources() != nil {
