@@ -126,6 +126,21 @@
             <artifactId>core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.commons</artifactId>
+            <version>${org.wso2.carbon.analytics-common}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.databridge.commons.binary</artifactId>
+            <version>${org.wso2.carbon.analytics-common}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>${org.wso2.orbit.com.lmax}</version>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.am.microgw</groupId>
             <artifactId>mgw-jwt-generator</artifactId>
         </dependency>
