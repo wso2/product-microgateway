@@ -56,10 +56,12 @@ func connectToRabbitMQ() (*amqp.Connection, error) {
 	var err error = nil
 	var conn *amqp.Connection
 	amqpURIArray = retrieveAMQPURLList()
-	logger.LoggerMsg.Infof("dialing %q", maskURL(amqpURIArray[0].URL)+"/")
-	conn, err = amqp.Dial(amqpURIArray[0].URL + "/")
-	if err == nil {
-		return conn, nil
+	for index, url := range amqpURIArray {
+		logger.LoggerMsg.Infof("Dialing URI [%d] %q", index, maskURL(url.URL)+"/")
+		conn, err = amqp.Dial(url.URL)
+		if err == nil {
+			return conn, nil
+		}
 	}
 	_, conn, err = connectionRetry("")
 	return conn, err
@@ -117,13 +119,14 @@ func connectionRetry(key string) (*Consumer, *amqp.Connection, error) {
 		if retryInterval == 0 {
 			retryInterval = 10 * time.Second
 		}
-		logger.LoggerMsg.Infof("Retrying to connect with %s in every %d seconds until exceed %d attempts",
-			maskURL(amqpURIArray[j].URL), amqpURIArray[j].connectionDelay, maxAttempt)
+		logger.LoggerMsg.Infof("Retrying to connect with %s (URI %d) in every %d seconds until exceed %d attempts",
+			maskURL(amqpURIArray[j].URL), j, amqpURIArray[j].connectionDelay, maxAttempt)
 
 		for i = 1; i <= maxAttempt; i++ {
 
 			RabbitConn, err = amqp.Dial(amqpURIArray[j].URL + "/")
 			if err == nil {
+				logger.LoggerMsg.Infof("Successfully connected to %s (URI %d) after %d attempts", maskURL(amqpURIArray[j].URL), j, i)
 				if key != "" && len(key) > 0 {
 					logger.LoggerMsg.Infof("Reconnected to topic %s", key)
 					// startup pull
@@ -134,51 +137,19 @@ func connectionRetry(key string) (*Consumer, *amqp.Connection, error) {
 			}
 
 			if key != "" && len(key) > 0 {
-				logger.LoggerMsg.Infof("Retry attempt %d for the %s to connect with topic %s has failed. Retrying after %d seconds", i,
-					maskURL(amqpURIArray[j].URL), key, amqpURIArray[j].connectionDelay)
+				logger.LoggerMsg.Infof("Retry attempt %d for the %s (URI %d) to connect with topic %s has failed. Retrying after %d seconds", i,
+					maskURL(amqpURIArray[j].URL), j, key, amqpURIArray[j].connectionDelay)
 			} else {
-				logger.LoggerMsg.Infof("Retry attempt %d for the %s has failed. Retrying after %d seconds", i, maskURL(amqpURIArray[j].URL), amqpURIArray[j].connectionDelay)
+				logger.LoggerMsg.Infof("Retry attempt %d for the %s (URI %d) has failed. Retrying after %d seconds", i, maskURL(amqpURIArray[j].URL), j, amqpURIArray[j].connectionDelay)
 			}
 			time.Sleep(retryInterval)
 		}
-		if i >= maxAttempt {
-			logger.LoggerMsg.Infof("Exceeds maximum connection retry attempts %d for %s", maxAttempt, maskURL(amqpURIArray[j].URL))
-			return retryExponentially(key, amqpURIArray[j].URL, retryInterval)
+		// Retried all the uris in the amqp URI array. Start from begining.
+		if j == len(amqpURIArray)-1 {
+			j = -1
 		}
 	}
 	return nil, RabbitConn, err
-}
-
-func retryExponentially(key string, url string, retryInterval time.Duration) (*Consumer, *amqp.Connection, error) {
-	logger.LoggerMsg.Infof("Trying to connect exponentially for %s", maskURL(url))
-	var err error = nil
-	initInterval := int(retryInterval.Seconds())
-	maxInterval := initInterval * 10
-	interval := initInterval
-	count := 0
-	for {
-		RabbitConn, err = amqp.Dial(url + "/")
-		if err != nil {
-			if interval < maxInterval {
-				interval = initInterval + (initInterval * count)
-				count = count + 1
-			}
-			if key != "" && len(key) > 0 {
-				logger.LoggerMsg.Infof("Retry attempt for the %s to connect with topic %s has failed. Retrying after %d seconds", maskURL(url), key, interval)
-			} else {
-				logger.LoggerMsg.Infof("Retry attempt for the %s has failed. Retrying after %d seconds", maskURL(url), interval)
-			}
-
-			time.Sleep(time.Duration(interval) * time.Second)
-		} else {
-			if key != "" && len(key) > 0 {
-				logger.LoggerMsg.Infof("Reconnected to topic %s", key)
-				// startup pull
-				c := startConsumer(key)
-				return c, RabbitConn, nil
-			}
-		}
-	}
 }
 
 // retrieveAMQPURLList function extract AMQPURLList from EventListening connection url
