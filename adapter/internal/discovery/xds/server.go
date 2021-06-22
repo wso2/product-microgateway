@@ -396,7 +396,7 @@ func sendRevisionUpdate(apiID string, revisionID int, envs []string, vhost strin
 	// Adding 3 retries for revision update sending
 	retries := 0
 	for retries < 3 {
-		retries += retries
+		retries++
 		resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 		if err != nil {
 			logger.LoggerXds.Errorf("Error response from %v for retry attempt %v : %v", publisherEP, retries, err.Error())

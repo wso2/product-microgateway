@@ -280,7 +280,7 @@ func setAppCredentials(conf *config.Config) {
 	// Adding 3 retries for app registration
 	retries := 0
 	for retries < 3 {
-		retries += retries
+		retries++
 		err = controlplane.GetAppCredentials(cpConf)
 		if err != nil {
 			logger.LoggerMgw.Errorf("Error occurred while registering control plane client: retry attempt %v : %v ", retries, err.Error())
