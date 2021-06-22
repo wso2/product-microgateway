@@ -19,6 +19,7 @@ package routercallbacks
 
 import (
 	"context"
+
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
@@ -45,16 +46,6 @@ func (cb *Callbacks) OnStreamClosed(id int64) {
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
 	logger.LoggerRouterXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
 		id, request.Node.Id, request.VersionInfo, request.TypeUrl)
-	// todo(amali)
-	//if resource.APIType == request.GetTypeUrl() {
-	//	requestEvent := xds.NewRequestEvent()
-	//	if request.ErrorDetail != nil {
-	//		logger.LoggerEnforcerXdsCallbacks.Errorf("stream request on stream id: %d Error: %s", id, request.ErrorDetail.Message)
-	//		requestEvent.IsError = true
-	//	}
-	//	requestEvent.Node = request.GetNode().GetId()
-	//	requestEvent.Version = request.VersionInfo
-	//}
 	return nil
 }
 

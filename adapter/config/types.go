@@ -376,6 +376,9 @@ type controlPlane struct {
 	ServiceURL              string                  `toml:"serviceUrl"`
 	Username                string                  `toml:"username"`
 	Password                string                  `toml:"password"`
+	ClientRegisterEndpoint  string                  `toml:"clientRegisterEndpoint"`
+	TokenEndpoint           string                  `toml:"clientRegisterEndpoint"`
+	ClientName              string                  `toml:"clientName"`
 	SyncApisOnStartUp       bool                    `toml:"syncApisOnStartUp"`
 	EnvironmentLabels       []string                `toml:"environmentLabels"`
 	RetryInterval           time.Duration           `toml:"retryInterval"`
@@ -404,7 +407,7 @@ type APIContent struct {
 	EndpointSecurity   EndpointSecurity
 	AuthHeader         string
 	OrganizationID     string
-	RevisionID		   int
+	RevisionID         int
 }
 
 // APIJsonData contains everything necessary to extract api.json/api.yaml file
@@ -413,7 +416,7 @@ type APIJsonData struct {
 		APIName                    string   `json:"name,omitempty"`
 		APIContext                 string   `json:"context,omitempty"`
 		APIVersion                 string   `json:"version,omitempty"`
-		RevisionID				   int      `json:"revisionId,omitempty"`
+		RevisionID                 int      `json:"revisionId,omitempty"`
 		APIType                    string   `json:"type,omitempty"`
 		LifeCycleStatus            string   `json:"lifeCycleStatus,omitempty"`
 		EndpointImplementationType string   `json:"endpointImplementationType,omitempty"`

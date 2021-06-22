@@ -25,10 +25,10 @@ import (
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
-	"github.com/wso2/product-microgateway/adapter/pkg/controlplane"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
 	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
+	"github.com/wso2/product-microgateway/adapter/pkg/controlplane"
 	apiservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/api"
 	configservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/config"
 	keymanagerservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/keymgt"
@@ -263,34 +263,31 @@ OUTER:
 
 func setAppCredentials(conf *config.Config) {
 	logger.LoggerMgw.Info("Registering control plane app")
-	clientRegEP := "client-registration/v0.17/register"
-	tokenEP := "oauth2/token"
-	serviceURL := conf.ControlPlane.ServiceURL
-
-	// Create a HTTP request
-	if strings.HasSuffix(serviceURL, "/") {
-		tokenEP = serviceURL + tokenEP
-		clientRegEP = serviceURL + clientRegEP
-	} else {
-		clientRegEP = serviceURL + "/" + clientRegEP
-		tokenEP = serviceURL + "/" + tokenEP
-	}
+	grantType := "password"
 
 	cpConf := controlplane.Conf{
 		Username:            conf.ControlPlane.Username,
 		Password:            conf.ControlPlane.Password,
-		ClientRegEP:         clientRegEP,
-		TokenEP:             tokenEP,
+		ClientRegEP:         conf.ControlPlane.ClientRegisterEndpoint,
+		TokenEP:             conf.ControlPlane.TokenEndpoint,
 		SkipSSLVerification: conf.ControlPlane.SkipSSLVerification,
-		Owner:               "admin",
-		GrantType:           "password",
-		ClientName:          "local_adapter",
+		Owner:               conf.ControlPlane.Username,
+		GrantType:           grantType,
+		ClientName:          conf.ControlPlane.ClientName,
 	}
-	err := controlplane.GetAppCredentials(cpConf)
-	if err != nil {
-		logger.LoggerMgw.Errorf("Error occurred while registering control plane client: %v ", err)
-	} else {
-		logger.LoggerMgw.Infof("Oauth app registered successfully. ClientName: %v", cpConf.ClientName)
+
+	var err error
+	// Adding 3 retries for app registration
+	retries := 0
+	for retries < 3 {
+		retries += retries
+		err = controlplane.GetAppCredentials(cpConf)
+		if err != nil {
+			logger.LoggerMgw.Errorf("Error occurred while registering control plane client: retry attempt %v : %v ", retries, err.Error())
+		} else {
+			logger.LoggerMgw.Infof("Oauth app registered successfully. ClientName: %v", cpConf.ClientName)
+			break
+		}
 	}
 }
 

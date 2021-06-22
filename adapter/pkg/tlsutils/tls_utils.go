@@ -28,8 +28,8 @@ import (
 	"regexp"
 	"sync"
 
-	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 	"github.com/wso2/product-microgateway/adapter/config"
+	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 )
 
 var (
@@ -102,7 +102,6 @@ func IsPublicCertificate(certContent []byte) bool {
 
 // InvokeControlPlane sends request to the control plane and returns the response
 func InvokeControlPlane(req *http.Request, skipSSL bool) (*http.Response, error) {
-	logger.LoggerTLSUtils.Debugf("Skip SSL Verification: %v", skipSSL)
 	tr := &http.Transport{}
 	if !skipSSL {
 		_, _, truststoreLocation := GetKeyLocations()
@@ -120,7 +119,6 @@ func InvokeControlPlane(req *http.Request, skipSSL bool) (*http.Response, error)
 	client := &http.Client{
 		Transport: tr,
 	}
-	logger.LoggerTLSUtils.Debug("Sending the control plane request")
 	return client.Do(req)
 }
 
