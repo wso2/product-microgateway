@@ -18,9 +18,9 @@
 
 package org.wso2.micro.gateway.core.globalthrottle.databridge.agent.conf;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ballerinalang.jvm.values.api.BMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.util.DataAgentConstants;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.util.DataEndpointConstants;
 
@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  * Data agent configuration.
  */
 public class AgentConfiguration {
-    private static final Logger log = LoggerFactory.getLogger("ballerina");
+    private static final Logger log = LogManager.getLogger(AgentConfiguration.class);
 
     private AgentConfiguration() {
     }

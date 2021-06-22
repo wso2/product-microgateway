@@ -16,8 +16,8 @@
 
 package org.wso2.micro.gateway.core.throttle;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * This class is responsible for maintaining the throttle counters for various throttle policies.
  */
 public class ThrottleCounter {
-    private static final Logger log = LoggerFactory.getLogger(ThrottleCounter.class);
+    private static final Logger log = LogManager.getLogger(ThrottleCounter.class);
 
     private static final Map<String, ThrottleData> apiLevelCounter = new ConcurrentHashMap<>();
     private static final Map<String, ThrottleData> resourceLevelCounter = new ConcurrentHashMap<>();

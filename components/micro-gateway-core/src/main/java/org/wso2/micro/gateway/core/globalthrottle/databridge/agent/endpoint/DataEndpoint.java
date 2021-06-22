@@ -19,8 +19,8 @@
 package org.wso2.micro.gateway.core.globalthrottle.databridge.agent.endpoint;
 
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.exception.SessionTimeoutException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class DataEndpoint {
 
-    private static final Logger log = LoggerFactory.getLogger("ballerina");
+    private static final Logger log = LogManager.getLogger(DataEndpoint.class);
 
     private DataEndpointConnectionWorker connectionWorker;
 

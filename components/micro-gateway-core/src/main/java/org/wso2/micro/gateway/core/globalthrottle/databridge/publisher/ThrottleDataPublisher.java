@@ -18,9 +18,9 @@
 
 package org.wso2.micro.gateway.core.globalthrottle.databridge.publisher;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ballerinalang.jvm.values.api.BMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.DataPublisher;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.exception.DataEndpointAuthenticationException;
@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 public class ThrottleDataPublisher {
     public static ThrottleDataPublisherPool dataPublisherPool;
 
-    private static final Logger log = LoggerFactory.getLogger("ballerina");
+    private static final Logger log = LogManager.getLogger(ThrottleDataPublisher.class);
 
     public static DataPublisher getDataPublisher() {
         return dataPublisher;

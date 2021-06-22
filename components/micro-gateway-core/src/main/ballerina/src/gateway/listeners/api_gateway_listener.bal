@@ -17,7 +17,6 @@
 import ballerina/cache;
 import ballerina/http;
 import ballerina/ 'lang\.object as lang;
-import ballerina/log;
 import ballerina/oauth2;
 import ballerina/stringutils;
 
@@ -61,7 +60,8 @@ public type APIGatewayListener object {
     public function __start() returns error? {
         error? gwListener = self.httpListener.__start();
 
-        log:printInfo(self.listenerType + " listener is active on port " + self.listenerPort.toString());
+        string infoMessage = self.listenerType + " listener is active on port " + self.listenerPort.toString();
+        printInfo(KEY_GW_LISTNER, infoMessage);
         return gwListener;
     }
 

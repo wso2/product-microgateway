@@ -17,8 +17,8 @@
  */
 package org.wso2.micro.gateway.core.globalthrottle.databridge.agent;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.conf.DataEndpointConfiguration;
@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class DataPublisher {
 
-    private static final Logger log = LoggerFactory.getLogger("ballerina");
+    private static final Logger log = LogManager.getLogger(DataPublisher.class);
 
     /**
      * List of group of endpoints where events needs to dispatched when

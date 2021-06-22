@@ -137,11 +137,13 @@ REM Start the gateway using internal ballerina distribution as the runtime
         ECHO WARN: Can't find powershell in the system!
         ECHO WARN: STDERR and STDOUT will be piped to %GW_HOME%\logs\microgateway.log
         SET JAVA_ARGS=-Xms%JAVA_XMS_VALUE% -Xmx%JAVA_XMX_VALUE% -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%GW_HOME%\heap-dump.hprof"
+        CALL :setLog4jProperties
         "%JAVA_HOME%\bin\java.exe" %JAVA_ARGS% -Dmgw-runtime.home"=%GW_HOME%" -Dballerina.home="%GW_HOME%/runtime" -Djava.util.logging.config.class=org.ballerinalang.logging.util.LogConfigReader -Djava.util.logging.manager=org.ballerinalang.logging.BLogManager -jar "%EXEC_FILE%" %BAL_ARGS% --api.usage.data.path="%USAGE_DATA_PATH%" --b7a.config.file="%GW_HOME%\conf\micro-gw.conf" >> "%GW_HOME%\logs\microgateway.log" 2>&1
 
         EXIT /B %ERRORLEVEL%
     ) ELSE (
         SET JAVA_ARGS=-Xms%JAVA_XMS_VALUE% -Xmx%JAVA_XMX_VALUE% -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath='%GW_HOME%\heap-dump.hprof'
+        CALL :setLog4jProperties
         REM Get short path for java_home in case java_home was picked from a
         REM standard installation dir with space in the path ex: "program files"
         FOR %%I IN ("%JAVA_HOME%") DO SET JAVA_HOME=%%~sI
@@ -247,6 +249,13 @@ REM Find metrics is enabled or not via cmd args
     )
     GOTO :isMetricsEnabled
 
+REM add the system variable containing log4j properties file
+:setLog4jProperties
+    SET LOG4J_CONFIGURATION_FILE=%GW_HOME%\conf\log4j2.properties
+    IF EXIST %LOG4J_CONFIGURATION_FILE% (
+        SET JAVA_ARGS=%JAVA_ARGS% -Dlog4j.configurationFile=%LOG4J_CONFIGURATION_FILE%
+    )
+    EXIT /B
 REM -----------------------------------------------------------------------------
 REM --- END OF FUNCTION DEFINITION ---
 REM -----------------------------------------------------------------------------

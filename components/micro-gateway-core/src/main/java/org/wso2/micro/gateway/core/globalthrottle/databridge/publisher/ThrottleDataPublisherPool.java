@@ -21,8 +21,8 @@ package org.wso2.micro.gateway.core.globalthrottle.databridge.publisher;
 import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.StackObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class implemented to hold throttle data publishing agent pool. Reason for implement this is to
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ThrottleDataPublisherPool {
 
-    private static final Logger log = LoggerFactory.getLogger("ballerina");
+    private static final Logger log = LogManager.getLogger(ThrottleDataPublisherPool.class);
 
     private ObjectPool clientPool;
 

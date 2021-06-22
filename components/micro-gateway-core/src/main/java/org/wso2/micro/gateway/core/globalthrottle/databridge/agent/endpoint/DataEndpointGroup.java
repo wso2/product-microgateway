@@ -23,8 +23,8 @@ import com.lmax.disruptor.InsufficientCapacityException;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.utils.DataBridgeThreadFactory;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.DataEndpointAgent;
@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class DataEndpointGroup implements DataEndpointFailureCallback {
 
-    private static final Logger log = LoggerFactory.getLogger("ballerina");
+    private static final Logger log = LogManager.getLogger(DataEndpointGroup.class);
 
     private List<DataEndpoint> dataEndpoints;
 

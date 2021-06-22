@@ -18,15 +18,15 @@
 
 package org.wso2.micro.gateway.core.globalthrottle.databridge.publisher;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ballerinalang.jvm.values.api.BMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class holds the configurations related to binary data publisher.
  */
 public class PublisherConfiguration {
-    private static final Logger log = LoggerFactory.getLogger("ballerina");
+    private static final Logger log = LogManager.getLogger(PublisherConfiguration.class);
 
     private int maxIdleDataPublishingAgents;
     private int initIdleObjectDataPublishingAgents;
