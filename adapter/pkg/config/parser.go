@@ -65,7 +65,8 @@ func GetMgwHome() string {
 // GetLogConfigPath reads the LOG_CONFIG_PATH environmental variable and returns the value.
 // If the env variable is not available, returned value would be the combination of MGW_HOME
 // env variable value + relative log config path
-func GetLogConfigPath() string {
+// Error would be returned if the logConfig file is not available
+func GetLogConfigPath() (string, error) {
 	logConfigPath = os.Getenv(logConfigPathEnvVariable)
 	if len(strings.TrimSpace(logConfigPath)) == 0 {
 		//for backward compatibility
@@ -74,9 +75,9 @@ func GetLogConfigPath() string {
 	_, err := os.Stat(logConfigPath)
 	if err != nil {
 		logger.Fatal("Log configuration file not found.", err)
-		panic(err)
+		return "", err
 	}
-	return logConfigPath
+	return logConfigPath, nil
 }
 
 // ReadLogConfigs implements adapter/proxy log-configuration read operation.The read operation will happen only once, hence
@@ -87,20 +88,24 @@ func GetLogConfigPath() string {
 // from where the executable is called from.
 //
 // Returns the log configuration object mapped from the configuration file during the startup.
-func ReadLogConfigs() (*LogConfig, error) {
+func ReadLogConfigs() *LogConfig {
 	onceLogConfigRead.Do(func() {
-
-		content, readErr := ioutil.ReadFile(GetLogConfigPath())
+		adapterLogConfig = getDefaultLogConfig()
+		filePath, err := GetLogConfigPath()
+		if err != nil {
+			e = err
+		}
+		content, readErr := ioutil.ReadFile(filePath)
 		if readErr != nil {
 			logger.Fatal("Proceeding with default log configuration as error occured while reading log configurations ", readErr)
+		} else {
+			parseErr := toml.Unmarshal(content, adapterLogConfig)
+			if parseErr != nil {
+				logger.Fatal("Proceeding with default log configuration as error occured while parsing the log configuration ", parseErr)
+			}
 		}
-		parseErr := toml.Unmarshal(content, adapterLogConfig)
-		if parseErr != nil {
-			logger.Fatal("Proceeding with default log configuration as error occured while parsing the log configuration ", parseErr)
-		}
-
 	})
-	return adapterLogConfig, e
+	return adapterLogConfig
 }
 
 // ClearLogConfigInstance removes the existing configuration.

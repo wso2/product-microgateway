@@ -158,9 +158,11 @@ func Run(conf *config.Config) {
 	defer cancel()
 
 	// log config watcher
-	// TODO: (VirajSalaka) Implement a rest endpoint to apply configurations
 	watcherLogConf, _ := fsnotify.NewWatcher()
-	errC := watcherLogConf.Add(config.GetLogConfigPath())
+	logConfigPath, errC := config.GetLogConfigPath()
+	if errC == nil {
+		errC = watcherLogConf.Add(logConfigPath)
+	}
 
 	if errC != nil {
 		logger.LoggerMgw.Fatal("Error reading the log configs. ", errC)

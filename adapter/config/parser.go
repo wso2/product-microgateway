@@ -166,7 +166,7 @@ func resolveEnvValue(value string) string {
 // from where the executable is called from.
 //
 // Returns the log configuration object mapped from the configuration file during the startup.
-func ReadLogConfigs() (*pkg_conf.LogConfig, error) {
+func ReadLogConfigs() *pkg_conf.LogConfig {
 	return pkg_conf.ReadLogConfigs()
 }
 
@@ -177,7 +177,7 @@ func ClearLogConfigInstance() {
 }
 
 // GetLogConfigPath returns the file location of the log-config path
-func GetLogConfigPath() string {
+func GetLogConfigPath() (string, error) {
 	return pkg_conf.GetLogConfigPath()
 }
 
