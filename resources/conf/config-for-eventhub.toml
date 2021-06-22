@@ -65,6 +65,8 @@
   serviceUrl = "https://apim:9443/"
   username = "admin"
   password = "$env{cp_admin_pwd}"
+  clientRegisterEndpoint = "https://apim:9443/client-registration/v0.17/register"
+  tokenEndpoint = "https://apim:9443/oauth2/token"
   environmentLabels = ["Default"]
   skipSSLVerification = true
   [controlPlane.jmsConnectionParameters]

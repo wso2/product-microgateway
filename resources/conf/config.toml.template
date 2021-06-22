@@ -354,6 +354,12 @@ idleTimeoutInSeconds = 3600
   username = "admin"
   # Password of the API Manager user
   password = "$env{cp_admin_pwd}"
+  # Client registration endpoint
+  clientRegisterEndpoint = "https://apim:9443/client-registration/v0.17/register"
+  # Token endpoint
+  tokenEndpoint = "https://apim:9443/oauth2/token"
+  # Client name for the oauth app used for control plane REST API invocations
+  clientName := "local_adapter"
   # Environment labels list
   environmentLabels = ["Default"]
   # Connection retry interval
