@@ -504,7 +504,7 @@ func DeleteAPIWithAPIMEvent(uuid, name, version string, environments []string, o
 	for gw, vhost := range apiUUIDToGatewayToVhosts[uuid] {
 		// delete from only specified environments
 		if arrayContains(environments, gw) {
-			id := GenerateIdentifierForAPI(vhost, name, version)
+			id := GenerateIdentifierForAPIWithUUID(vhost, uuid)
 			apiIdentifiers[id] = void
 		}
 	}
