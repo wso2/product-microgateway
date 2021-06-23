@@ -46,6 +46,9 @@ func (cb *Callbacks) OnStreamClosed(id int64) {
 func (cb *Callbacks) OnStreamRequest(id int64, request *discovery.DiscoveryRequest) error {
 	logger.LoggerRouterXdsCallbacks.Debugf("stream request on stream id: %d, from node: %s, version: %s, for type: %s",
 		id, request.Node.Id, request.VersionInfo, request.TypeUrl)
+	if request.ErrorDetail != nil {
+		logger.LoggerEnforcerXdsCallbacks.Errorf("Stream request for type %s on stream id: %d Error: %s", request.GetTypeUrl(), id, request.ErrorDetail.Message)
+	}
 	return nil
 }
 
