@@ -299,7 +299,8 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 			i--
 			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
 			health.SetControlPlaneRestAPIStatus(false)
-			sync.RetryFetchingAPIs(c, serviceURL, userName, password, skipSSL, truststoreLocation, retryInterval, data)
+			sync.RetryFetchingAPIs(c, serviceURL, userName, password, skipSSL, truststoreLocation, retryInterval,
+				data, sync.RuntimeArtifactEndpoint, true)
 		}
 	}
 	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.
