@@ -102,7 +102,7 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable {
             this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
             this.stub = SubscriptionPolicyDiscoveryServiceGrpc.newStub(channel);
         } else if (channel.getState(true) == ConnectivityState.READY) {
-            XdsSchedulerManager.getInstance().stopAPIListDiscoveryScheduling();
+            XdsSchedulerManager.getInstance().stopSubscriptionPolicyDiscoveryScheduling();
         }
     }
 

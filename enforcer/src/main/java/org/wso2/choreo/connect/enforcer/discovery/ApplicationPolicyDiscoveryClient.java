@@ -102,7 +102,7 @@ public class ApplicationPolicyDiscoveryClient implements Runnable {
             this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
             this.stub = ApplicationPolicyDiscoveryServiceGrpc.newStub(channel);
         } else if (channel.getState(true) == ConnectivityState.READY) {
-            XdsSchedulerManager.getInstance().stopAPIListDiscoveryScheduling();
+            XdsSchedulerManager.getInstance().stopApplicationPolicyDiscoveryScheduling();
         }
     }
 
