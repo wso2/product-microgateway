@@ -128,6 +128,7 @@ public class RevokedTokenDiscoveryClient implements Runnable {
         reqObserver = stub.withMaxInboundMessageSize(maxSize).streamTokens(new StreamObserver<DiscoveryResponse>() {
                     @Override
                     public void onNext(DiscoveryResponse response) {
+                        logger.info("Revoked  token event received with version : " + response.getVersionInfo());
                         logger.debug("Received revoked tokens response " + response);
                         XdsSchedulerManager.getInstance().stopRevokedTokenDiscoveryScheduling();
                         latestReceived = response;

@@ -122,6 +122,7 @@ public class ApiDiscoveryClient implements Runnable {
         reqObserver = stub.withMaxInboundMessageSize(maxSize).streamApis(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
+                logger.info("API event received with version : " + response.getVersionInfo());
                 logger.debug("Received API discovery response " + response);
                 XdsSchedulerManager.getInstance().stopAPIDiscoveryScheduling();
                 latestReceived = response;
