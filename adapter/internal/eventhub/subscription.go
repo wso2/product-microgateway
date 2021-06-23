@@ -267,7 +267,7 @@ func retrieveAPIListFromChannel(c chan response) {
 					apiListResponse := newResponse.(*types.APIList)
 					if logger.LoggerSubscription.Level == logrus.DebugLevel {
 						for _, api := range apiListResponse.List {
-							logger.LoggerSubscription.Debugf("Received API List information for API : %s", api.UUID)
+							logger.LoggerSubscription.Infof("Received API List information for API : %s", api.UUID)
 						}
 					}
 					if _, ok := APIListMap[response.GatewayLabel]; !ok {
