@@ -125,7 +125,8 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable {
         reqObserver = stub.streamSubscriptionPolicies(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
-                logger.debug("Received Application discovery response " + response);
+                logger.info("Subscription policy event received with version : " + response.getVersionInfo());
+                logger.debug("Received Subscription  policy discovery response " + response);
                 XdsSchedulerManager.getInstance().stopSubscriptionPolicyDiscoveryScheduling();
                 latestReceived = response;
                 try {

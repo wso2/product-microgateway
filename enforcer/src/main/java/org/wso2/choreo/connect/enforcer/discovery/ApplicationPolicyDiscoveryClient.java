@@ -125,6 +125,7 @@ public class ApplicationPolicyDiscoveryClient implements Runnable {
         reqObserver = stub.streamApplicationPolicies(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
+                logger.info("Application policy event received with version : " + response.getVersionInfo());
                 logger.debug("Received Application Policy discovery response " + response);
                 XdsSchedulerManager.getInstance().stopApplicationPolicyDiscoveryScheduling();
                 latestReceived = response;

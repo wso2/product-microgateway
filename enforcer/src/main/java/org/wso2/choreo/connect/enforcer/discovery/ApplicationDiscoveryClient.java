@@ -125,6 +125,7 @@ public class ApplicationDiscoveryClient implements Runnable {
         reqObserver = stub.streamApplications(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
+                logger.info("Application creation event received with version : " + response.getVersionInfo());
                 logger.debug("Received Application discovery response " + response);
                 XdsSchedulerManager.getInstance().stopApplicationDiscoveryScheduling();
                 latestReceived = response;

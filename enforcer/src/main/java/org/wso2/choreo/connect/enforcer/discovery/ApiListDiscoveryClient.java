@@ -124,6 +124,7 @@ public class ApiListDiscoveryClient implements Runnable {
         reqObserver = stub.streamApiList(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
+                logger.info("API list event received with version : " + response.getVersionInfo());
                 logger.debug("Received Api list discovery response " + response);
                 XdsSchedulerManager.getInstance().stopAPIListDiscoveryScheduling();
                 latestReceived = response;

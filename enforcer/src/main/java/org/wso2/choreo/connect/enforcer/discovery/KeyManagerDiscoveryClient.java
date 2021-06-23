@@ -124,6 +124,7 @@ public class KeyManagerDiscoveryClient implements Runnable {
         reqObserver = stub.streamKeyManagers(new StreamObserver<>() {
             @Override
             public void onNext(DiscoveryResponse response) {
+                logger.info("Key manager event received with version : " + response.getVersionInfo());
                 logger.debug("Received KeyManagers discovery response " + response);
                 XdsSchedulerManager.getInstance().stopKeyManagerDiscoveryScheduling();
                 latestReceived = response;
