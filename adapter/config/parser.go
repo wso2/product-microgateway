@@ -77,7 +77,7 @@ const (
 // from where the executable is called from.
 //
 // Returns the configuration object that is initialized with default values. Changes to the default
-// configuration object is achieved through the configuration file. 
+// configuration object is achieved through the configuration file.
 func ReadConfigs() (*Config, error) {
 	onceConfigRead.Do(func() {
 		adapterConfig = defaultConfig
@@ -98,6 +98,7 @@ func ReadConfigs() (*Config, error) {
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem())
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem())
 		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem())
+		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.GlobalAdapter)).Elem())
 	})
 	return adapterConfig, e
 }

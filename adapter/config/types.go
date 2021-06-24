@@ -370,6 +370,7 @@ type controlPlane struct {
 type globalAdapter struct {
 	Enabled    bool   `toml:"enabled"`
 	ServiceURL string `toml:"serviceUrl"`
+	LocalLabel string `toml:"LocalLabel"`
 }
 
 type jmsConnectionParameters struct {

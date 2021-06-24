@@ -242,6 +242,7 @@ var defaultConfig = &Config{
 	GlobalAdapter: globalAdapter{
 		Enabled:    false,
 		ServiceURL: "ga:18002",
+		LocalLabel: "default",
 	},
 	Analytics: analytics{
 		Enabled: false,

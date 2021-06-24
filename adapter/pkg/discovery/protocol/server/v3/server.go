@@ -168,3 +168,11 @@ func (s *server) FetchThrottleData(ctx context.Context, req *discovery.Discovery
 	req.TypeUrl = resource.ThrottleDataType
 	return s.Fetch(ctx, req)
 }
+
+func (s *server) FetchGAApis(ctx context.Context, req *discovery.DiscoveryRequest) (*discovery.DiscoveryResponse, error) {
+	if req == nil {
+		return nil, status.Errorf(codes.Unavailable, "empty request")
+	}
+	req.TypeUrl = resource.GAAPIType
+	return s.Fetch(ctx, req)
+}

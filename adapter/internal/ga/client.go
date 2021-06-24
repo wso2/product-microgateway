@@ -20,11 +20,11 @@ package ga
 import (
 	"context"
 	"io"
-	"log"
 
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	ga_model "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/ga"
 	stub "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/ga"
@@ -33,17 +33,23 @@ import (
 )
 
 var (
-	apiRevisionMap        map[string]string
-	lastSuccessfulVersion string
-	laskAckedResponse     *discovery.DiscoveryResponse
-	lastReceivedResponse  *discovery.DiscoveryResponse
-	xdsStream             stub.ApiGADiscoveryService_StreamGAApisClient
-
+	// apiRevision Map keeps apiUUID -> revisionUUID. This is used only for the communication between global adapter and adapter
+	// The purpose here is to identify if the certain API's revision is already added to the XDS cache.
+	apiRevisionMap map[string]string
+	// Last Acknowledged Response from the global adapter
+	laskAckedResponse *discovery.DiscoveryResponse
+	// Last Received Response from the global adapter
+	// Last Recieved Response is always is equal to the lastAckedResponse according to current implementation as there is no
+	// validation performed on successfully recieved response.
+	lastReceivedResponse *discovery.DiscoveryResponse
+	// XDS stream for streaming APIs from Global Adapter
+	xdsStream stub.ApiGADiscoveryService_StreamGAApisClient
 	// GAAPIChannel stores the API Events composed from XDS states
 	GAAPIChannel chan *APIEvent
 )
 
 const (
+	// The type url for requesting API Entries from global adapter.
 	apiTypeURL string = "type.googleapis.com/wso2.discovery.ga.Api"
 )
 
@@ -61,25 +67,28 @@ func init() {
 	GAAPIChannel = make(chan *APIEvent)
 }
 
-func initConnection(xdsURL string) {
+func initConnection(xdsURL string) error {
 	// ctx := context.Background()
 	// TODO: (VirajSalaka) Dial or DialContext
+	// TODO: (VirajSalaka) Close Connection
 	conn, err := grpc.Dial(xdsURL, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
-		return
+		// TODO: (VirajSalaka) retries
+		logger.LoggerGA.Error("Error while connecting to the Global Adapter.", err)
+		return err
 	}
-	// defer conn.Close()
+
 	client := stub.NewApiGADiscoveryServiceClient(conn)
 	streamContext := context.Background()
 	xdsStream, err = client.StreamGAApis(streamContext)
 
 	if err != nil {
-		// TODO: (VirajSalaka) handle error
-		logger.LoggerGA.Errorf("Error while starting client %s \n", err.Error())
-		return
+		// TODO: (VirajSalaka) handle error.
+		logger.LoggerGA.Error("Error while starting client. ", err)
+		return err
 	}
 	logger.LoggerGA.Infof("Connection to the global adapter: %s is successful.", xdsURL)
+	return nil
 }
 
 func watchAPIs() {
@@ -92,7 +101,7 @@ func watchAPIs() {
 			return
 		}
 		if err != nil {
-			logger.LoggerGA.Errorf("Failed to receive the discovery response : %v", err)
+			logger.LoggerGA.Errorf("Failed to receive the discovery response ", err)
 			nack(err.Error())
 		} else {
 			lastReceivedResponse = discoveryResponse
@@ -119,10 +128,9 @@ func nack(errorMessage string) {
 		return
 	}
 	discoveryRequest := &discovery.DiscoveryRequest{
-		Node:        getAdapterNode(),
-		VersionInfo: laskAckedResponse.VersionInfo,
-		TypeUrl:     apiTypeURL,
-		// TODO: (VirajSalaka) check with the XDS protocol
+		Node:          getAdapterNode(),
+		VersionInfo:   laskAckedResponse.VersionInfo,
+		TypeUrl:       apiTypeURL,
 		ResponseNonce: lastReceivedResponse.Nonce,
 		ErrorDetail: &status.Status{
 			Message: errorMessage,
@@ -132,23 +140,25 @@ func nack(errorMessage string) {
 }
 
 func getAdapterNode() *core.Node {
+	config, _ := config.ReadConfigs()
 	return &core.Node{
-		// TODO: (VirajSalaka) read from config.
-		Id: "default",
+		Id: config.GlobalAdapter.LocalLabel,
 	}
 }
 
 // InitGAClient initializes the connection to the global adapter.
 func InitGAClient(xdsURL string) {
-	initConnection(xdsURL)
-	go watchAPIs()
-	discoveryRequest := &discovery.DiscoveryRequest{
-		Node:        getAdapterNode(),
-		VersionInfo: "",
-		TypeUrl:     apiTypeURL,
+	err := initConnection(xdsURL)
+	if err != nil {
+		go watchAPIs()
+		discoveryRequest := &discovery.DiscoveryRequest{
+			Node:        getAdapterNode(),
+			VersionInfo: "",
+			TypeUrl:     apiTypeURL,
+		}
+		xdsStream.Send(discoveryRequest)
+		consumeAPIChannel()
 	}
-	xdsStream.Send(discoveryRequest)
-	consumeAPIChannel()
 	select {}
 }
 
