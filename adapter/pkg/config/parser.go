@@ -74,10 +74,9 @@ func GetLogConfigPath() (string, error) {
 	}
 	_, err := os.Stat(logConfigPath)
 	if err != nil {
-		logger.Fatal("Log configuration file not found.", err)
-		return "", err
+		logger.Error("Log configuration file not found.", err)
 	}
-	return logConfigPath, nil
+	return logConfigPath, err
 }
 
 // ReadLogConfigs implements adapter/proxy log-configuration read operation.The read operation will happen only once, hence
@@ -92,16 +91,15 @@ func ReadLogConfigs() *LogConfig {
 	onceLogConfigRead.Do(func() {
 		adapterLogConfig = getDefaultLogConfig()
 		filePath, err := GetLogConfigPath()
-		if err != nil {
-			e = err
-		}
-		content, readErr := ioutil.ReadFile(filePath)
-		if readErr != nil {
-			logger.Fatal("Proceeding with default log configuration as error occured while reading log configurations ", readErr)
-		} else {
-			parseErr := toml.Unmarshal(content, adapterLogConfig)
-			if parseErr != nil {
-				logger.Fatal("Proceeding with default log configuration as error occured while parsing the log configuration ", parseErr)
+		if err == nil {
+			content, readErr := ioutil.ReadFile(filePath)
+			if readErr != nil {
+				logger.Fatal("Proceeding with default log configuration as error occured while reading log configurations ", readErr)
+			} else {
+				parseErr := toml.Unmarshal(content, adapterLogConfig)
+				if parseErr != nil {
+					logger.Fatal("Proceeding with default log configuration as error occured while parsing the log configuration ", parseErr)
+				}
 			}
 		}
 	})
