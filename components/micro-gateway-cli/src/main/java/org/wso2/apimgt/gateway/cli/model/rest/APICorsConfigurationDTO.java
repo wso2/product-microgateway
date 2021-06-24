@@ -32,6 +32,7 @@ public class APICorsConfigurationDTO {
     private Boolean corsConfigurationEnabled = false;
     private List<String> accessControlAllowHeaders = new ArrayList<String>();
     private List<String> accessControlAllowMethods = new ArrayList<String>();
+    private List<String> accessControlExposeHeaders = new ArrayList<String>();
 
     @JsonAlias({"accessControlAllowOrigins", "access_control_allow_origins", "access-control-allow-origins"})
     public List<String> getAccessControlAllowOrigins() {
@@ -77,5 +78,14 @@ public class APICorsConfigurationDTO {
 
     public void setAccessControlAllowMethods(List<String> accessControlAllowMethods) {
         this.accessControlAllowMethods = accessControlAllowMethods;
+    }
+
+    @JsonAlias({"accessControlExposeHeaders", "access_control_expose_headers", "access-control-expose-headers"})
+    public List<String> getAccessControlExposeHeaders() {
+        return accessControlExposeHeaders;
+    }
+
+    public void setAccessControlExposeHeaders(List<String> accessControlExposeHeaders) {
+        this.accessControlExposeHeaders = accessControlExposeHeaders;
     }
 }

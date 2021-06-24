@@ -42,6 +42,7 @@
             <class name="org.wso2.micro.gateway.tests.grpc.BasicGrpcTestCase" />
             <class name="org.wso2.micro.gateway.tests.jwtTransformer.JwtTransformerTestCase"/>
             <class name="org.wso2.micro.gateway.tests.jwtGenerator.JWTGenerationTestCase"/>
+            <class name="org.wso2.micro.gateway.tests.cors.CorsTestCase"/>
         </classes>
     </test>
 
