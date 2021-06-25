@@ -18,6 +18,7 @@
 package model
 
 import (
+	"errors"
 	"github.com/go-openapi/spec"
 	"github.com/google/uuid"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -33,7 +34,7 @@ import (
 // UUID.
 //
 // No operation specific information is extracted.
-func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
+func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	if swagger2.Info != nil {
 		swagger.description = swagger2.Info.Description
 		swagger.title = swagger2.Info.Title
@@ -62,9 +63,15 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 					swagger2.Info.Title, swagger2.Info.Version)
 			}
 		}
-		endpoint := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
-		swagger.productionUrls = append(swagger.productionUrls, endpoint)
+		rawURL := urlScheme + swagger2.Host + swagger2.BasePath
+		endpoint := getHostandBasepathandPort(rawURL)
+		if endpoint != nil {
+			swagger.productionUrls = append(swagger.productionUrls, *endpoint)
+		} else {
+			return errors.New("error encountered when parsing the endpoint")
+		}
 	}
+	return nil
 }
 
 // setResourcesSwagger sets swagger (openapi v2) paths as mgwSwagger resources.

@@ -102,7 +102,7 @@ public class ApplicationPolicyDiscoveryClient implements Runnable {
             this.channel = GRPCUtils.createSecuredChannel(logger, host, port);
             this.stub = ApplicationPolicyDiscoveryServiceGrpc.newStub(channel);
         } else if (channel.getState(true) == ConnectivityState.READY) {
-            XdsSchedulerManager.getInstance().stopAPIListDiscoveryScheduling();
+            XdsSchedulerManager.getInstance().stopApplicationPolicyDiscoveryScheduling();
         }
     }
 
@@ -125,6 +125,7 @@ public class ApplicationPolicyDiscoveryClient implements Runnable {
         reqObserver = stub.streamApplicationPolicies(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
+                logger.info("Application policy event received with version : " + response.getVersionInfo());
                 logger.debug("Received Application Policy discovery response " + response);
                 XdsSchedulerManager.getInstance().stopApplicationPolicyDiscoveryScheduling();
                 latestReceived = response;

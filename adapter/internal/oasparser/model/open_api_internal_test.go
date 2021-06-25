@@ -70,7 +70,8 @@ func TestSetInfoOpenAPI(t *testing.T) {
 	}
 	for _, item := range dataItems {
 		var mgwSwagger MgwSwagger
-		mgwSwagger.SetInfoOpenAPI(item.input)
+		err := mgwSwagger.SetInfoOpenAPI(item.input)
+		assert.Nil(t, err, "Error should not be present when openAPI v3 definition is converted to a MgwSwagger object")
 		assert.Equal(t, item.result, mgwSwagger, item.message)
 	}
 }
@@ -114,7 +115,8 @@ func TestSetResourcesOpenAPI(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources := setResourcesOpenAPI(item.input)
+		resultResources, err := setResourcesOpenAPI(item.input)
+		assert.Nil(t, err, "No error should be encountered when setting resourcers")
 		if item.result != nil {
 			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
 			assert.Equal(t, item.result[0].methods, resultResources[0].GetMethod(), item.message)
@@ -167,7 +169,9 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 	}
 	for _, item := range dataItems {
 		resultResources := getHostandBasepathandPort(item.input)
-		assert.Equal(t, item.result, resultResources, item.message)
+		if resultResources != nil {
+			assert.Equal(t, item.result, *resultResources, item.message)
+		}
 	}
 }
 

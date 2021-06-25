@@ -123,6 +123,7 @@ public class ThrottleDataDiscoveryClient implements Runnable {
                 .streamThrottleData(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
+                logger.info("Throttle data event received with version : " + response.getVersionInfo());
                 logger.debug("Received ThrottleData discovery response " + response);
                 XdsSchedulerManager.getInstance().stopThrottleDataDiscoveryScheduling();
                 latestReceived = response;

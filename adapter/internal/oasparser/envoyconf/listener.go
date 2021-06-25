@@ -20,6 +20,7 @@ package envoyconf
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	listenerv3 "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
@@ -100,6 +101,12 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		HttpFilters: httpFilters,
 		LocalReplyConfig: &hcmv3.LocalReplyConfig{
 			Mappers: getErrorResponseMappers(),
+		},
+		RequestTimeout:        ptypes.DurationProto(conf.Envoy.Connection.Timeouts.RequestTimeoutInSeconds * time.Second),        // default disabled
+		RequestHeadersTimeout: ptypes.DurationProto(conf.Envoy.Connection.Timeouts.RequestHeadersTimeoutInSeconds * time.Second), // default disabled
+		StreamIdleTimeout:     ptypes.DurationProto(conf.Envoy.Connection.Timeouts.StreamIdleTimeoutInSeconds * time.Second),     // Default 5 mins
+		CommonHttpProtocolOptions: &corev3.HttpProtocolOptions{
+			IdleTimeout: ptypes.DurationProto(conf.Envoy.Connection.Timeouts.IdleTimeoutInSeconds * time.Second), // Default 1 hr
 		},
 	}
 
