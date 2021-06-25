@@ -255,7 +255,7 @@
 
 # Throttling configurations related to event publishing using a binary connection
 [throttlingConfig.binary]
-  enabled = true
+  enabled = false
   # Credentials required to establish connection between Traffic Manager
   username = "admin"
   password = "admin"

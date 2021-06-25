@@ -102,7 +102,7 @@ public const string DEFAULT_THROTTLE_ENDPOINT_URL = "https://localhost:9443/endp
 public const string DEFAULT_THROTTLE_ENDPOINT_BASE64_HEADER = "admin:admin";
 
 //global throttling - binary publisher related constants
-public const boolean DEFAULT_TM_BINARY_PUBLISHER_ENABLED = true;
+public const boolean DEFAULT_TM_BINARY_PUBLISHER_ENABLED = false;
 public const string DEFAULT_TM_RECEIVER_URL_GROUP = "tcp://localhost:9611";
 public const string DEFAULT_TM_AUTH_URL_GROUP = "ssl://localhost:9711";
 public const string DEFAULT_TM_USERNAME = "admin";
