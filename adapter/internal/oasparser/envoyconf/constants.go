@@ -23,12 +23,12 @@ const (
 )
 
 const (
-	extAuthzFilterName        string = "envoy.filters.http.ext_authz"
-	transportSocketName       string = "envoy.transport_sockets.tls"
-	fileAccessLogName         string = "envoy.access_loggers.file"
-	grpcAccessLogName         string = "envoy.http_grpc_access_log"
-	httpConManagerStartPrefix string = "ingress_http"
-	extAuthzPerRouteName      string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
+	extAuthzFilterName         string = "envoy.filters.http.ext_authz"
+	transportSocketName        string = "envoy.transport_sockets.tls"
+	fileAccessLogName          string = "envoy.access_loggers.file"
+	grpcAccessLogName          string = "envoy.http_grpc_access_log"
+	httpConManagerStartPrefix  string = "ingress_http"
+	extAuthzPerRouteName       string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
 	mgwWebSocketFilterName     string = "envoy.filters.http.mgw_websocket"
 	mgwWebSocketWASMFilterName string = "envoy.filters.http.mgw_WASM_websocket"
 	mgwWASMVmID                string = "mgw_WASM_vm"
@@ -79,11 +79,13 @@ const (
 const (
 	healthPath  string = "/health"
 	testKeyPath string = "/testkey"
+	readyPath   string = "/ready"
 )
 
 const (
 	// healthEndpointResponse - response from the health endpoint
 	healthEndpointResponse = "{\"status\": \"healthy\"}"
+	readyEndpointResponse  = "{\"status\": \"ready\"}"
 )
 
 const (

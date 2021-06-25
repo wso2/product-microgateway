@@ -660,6 +660,61 @@ func CreateHealthEndpoint() *routev3.Route {
 	return &router
 }
 
+// CreateReadyEndpoint generates a route for the router /ready endpoint
+// Replies with direct response.
+func CreateReadyEndpoint() *routev3.Route {
+	var (
+		router    routev3.Route
+		match     *routev3.RouteMatch
+		decorator *routev3.Decorator
+	)
+
+	match = &routev3.RouteMatch{
+		PathSpecifier: &routev3.RouteMatch_Path{
+			Path: readyPath,
+		},
+	}
+
+	decorator = &routev3.Decorator{
+		Operation: readyPath,
+	}
+
+	perFilterConfig := extAuthService.ExtAuthzPerRoute{
+		Override: &extAuthService.ExtAuthzPerRoute_Disabled{
+			Disabled: true,
+		},
+	}
+
+	b := proto.NewBuffer(nil)
+	b.SetDeterministic(true)
+	_ = b.Marshal(&perFilterConfig)
+	filter := &any.Any{
+		TypeUrl: extAuthzPerRouteName,
+		Value:   b.Bytes(),
+	}
+
+	router = routev3.Route{
+		Name:  readyPath, //Categorize routes with same base path
+		Match: match,
+		Action: &routev3.Route_DirectResponse{
+			DirectResponse: &routev3.DirectResponseAction{
+				Status: 200,
+				Body: &corev3.DataSource{
+					Specifier: &corev3.DataSource_InlineString{
+						InlineString: readyEndpointResponse,
+					},
+				},
+			},
+		},
+		Metadata:  nil,
+		Decorator: decorator,
+		TypedPerFilterConfig: map[string]*any.Any{
+			wellknown.HTTPExternalAuthorization: filter,
+		},
+	}
+	return &router
+}
+
 // generateRoutePaths generates route paths for the api resources.
 func generateRoutePaths(xWso2Basepath, basePath, resourcePath string) string {
 	prefix := ""
