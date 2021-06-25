@@ -18,6 +18,8 @@
 package xds
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -78,6 +80,8 @@ var (
 	orgIDOpenAPIClustersMap     map[string]map[string][]*clusterv3.Cluster // organizationID -> Vhost:API_UUID -> Envoy Clusters map
 	orgIDOpenAPIEndpointsMap    map[string]map[string][]*corev3.Address    // organizationID -> Vhost:API_UUID -> Envoy Endpoints map
 	orgIDOpenAPIEnforcerApisMap map[string]map[string]types.Resource       // organizationID -> Vhost:API_UUID -> API Resource map
+
+	reverseAPINameVersionMap map[string]string
 
 	// Envoy Label as map key
 	envoyUpdateVersionMap  map[string]int64                       // GW-Label -> XDS version map
@@ -142,12 +146,14 @@ func init() {
 	envoyListenerConfigMap = make(map[string][]*listenerv3.Listener)
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 
-	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // organizationID -> Vhost:APIUUID -> MgwSwagger struct map
-	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // organizationID -> Vhost:APIUUID -> Envoy Label Array map
-	orgIDOpenAPIRoutesMap = make(map[string]map[string][]*routev3.Route)       // organizationID -> Vhost:APIUUID -> Envoy Routes map
-	orgIDOpenAPIClustersMap = make(map[string]map[string][]*clusterv3.Cluster) // organizationID -> Vhost:APIUUID -> Envoy Clusters map
-	orgIDOpenAPIEndpointsMap = make(map[string]map[string][]*corev3.Address)   // organizationID -> Vhost:APIUUID -> Envoy Endpoints map
-	orgIDOpenAPIEnforcerApisMap = make(map[string]map[string]types.Resource)   // organizationID -> Vhost:APIUUID -> API Resource map
+	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // organizationID -> Vhost:API_UUID -> MgwSwagger struct map
+	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // organizationID -> Vhost:API_UUID -> Envoy Label Array map
+	orgIDOpenAPIRoutesMap = make(map[string]map[string][]*routev3.Route)       // organizationID -> Vhost:API_UUID -> Envoy Routes map
+	orgIDOpenAPIClustersMap = make(map[string]map[string][]*clusterv3.Cluster) // organizationID -> Vhost:API_UUID -> Envoy Clusters map
+	orgIDOpenAPIEndpointsMap = make(map[string]map[string][]*corev3.Address)   // organizationID -> Vhost:API_UUID -> Envoy Endpoints map
+	orgIDOpenAPIEnforcerApisMap = make(map[string]map[string]types.Resource)   // organizationID -> Vhost:API_UUID -> API Resource map
+
+	reverseAPINameVersionMap = make(map[string]string)
 
 	enforcerConfigMap = make(map[string][]types.Resource)
 	enforcerKeyManagerMap = make(map[string][]types.Resource)
@@ -265,7 +271,14 @@ func UpdateAPI(apiContent config.APIContent) error {
 		return validationErr
 	}
 
-	apiIdentifier := GenerateIdentifierForAPIWithUUID(apiContent.VHost, apiContent.UUID)
+	uniqueIdentifier := apiContent.UUID
+
+	if uniqueIdentifier == "" {
+		// If API is imported from apictl generate hash as the unique ID
+		uniqueIdentifier = GenerateHashedAPINameVersionIDWithoutVhost(apiContent.Name, apiContent.Version)
+		reverseAPINameVersionMap[GenerateIdentifierForAPIWithoutVhost(apiContent.Name, apiContent.Version)] = uniqueIdentifier
+	}
+	apiIdentifier := GenerateIdentifierForAPIWithUUID(apiContent.VHost, uniqueIdentifier)
 	//TODO: (SuKSW) Uncomment the below section depending on MgwSwagger.Resource ids
 	//TODO: (SuKSW) Update the existing API if the basepath already exists
 	//existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
@@ -382,11 +395,12 @@ func GetVhostOfAPI(apiUUID, environment string) (vhost string, exists bool) {
 // DeleteAPIs deletes an API, its resources and updates the caches of given environments
 func DeleteAPIs(vhost, apiName, version string, environments []string, organizationID string) error {
 	apiNameVersionID := GenerateIdentifierForAPIWithoutVhost(apiName, version)
+	apiNameVersionHashedID := reverseAPINameVersionMap[apiNameVersionID]
 
 	mutexForInternalMapUpdate.Lock()
 	defer mutexForInternalMapUpdate.Unlock()
 
-	vhosts, found := apiToVhostsMap[apiNameVersionID]
+	vhosts, found := apiToVhostsMap[apiNameVersionHashedID]
 	if !found {
 		logger.LoggerXds.Infof("Unable to delete API %v from Organization %v. API does not exist.", apiNameVersionID, organizationID)
 		return errors.New(mgw.NotFound)
@@ -397,7 +411,7 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 		logger.LoggerXds.Infof("No vhost is specified for the API %v in Organizaion %v deleting from all vhosts", apiNameVersionID, organizationID)
 		deletedVhosts := make(map[string]struct{})
 		for vh := range vhosts {
-			apiIdentifier := GenerateIdentifierForAPI(vh, apiName, version)
+			apiIdentifier := GenerateIdentifierForAPIWithUUID(vh, apiNameVersionHashedID)
 			// TODO: (renuka) optimize to update cache only once after updating all maps
 			if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
 				// Update apiToVhostsMap with already deleted vhosts in the loop
@@ -410,16 +424,16 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 						remainingVhosts[v] = void
 					}
 				}
-				apiToVhostsMap[apiNameVersionID] = remainingVhosts
+				apiToVhostsMap[apiNameVersionHashedID] = remainingVhosts
 				return err
 			}
 			deletedVhosts[vh] = void
 		}
-		delete(apiToVhostsMap, apiNameVersionID)
+		delete(apiToVhostsMap, apiNameVersionHashedID)
 		return nil
 	}
 
-	apiIdentifier := GenerateIdentifierForAPI(vhost, apiName, version)
+	apiIdentifier := GenerateIdentifierForAPIWithUUID(vhost, apiNameVersionHashedID)
 	if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
 		return err
 	}
@@ -429,9 +443,9 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 			// if this is the final vhost delete map entry
 			logger.LoggerXds.Debugf("The API %v is not exists with any vhost. Hence clean vhost entry from the map 'apiToVhostsMap'",
 				apiNameVersionID)
-			delete(apiToVhostsMap, apiNameVersionID)
+			delete(apiToVhostsMap, apiNameVersionHashedID)
 		} else {
-			delete(apiToVhostsMap[apiNameVersionID], vhost)
+			delete(apiToVhostsMap[apiNameVersionHashedID], vhost)
 		}
 	}
 	return nil
@@ -897,6 +911,17 @@ func GenerateIdentifierForAPIWithUUID(vhost, uuid string) string {
 // GenerateIdentifierForAPIWithoutVhost generates an identifier unique to the API name and version
 func GenerateIdentifierForAPIWithoutVhost(name, version string) string {
 	return fmt.Sprint(name, apiKeyFieldSeparator, version)
+}
+
+// GenerateHashedAPINameVersionIDWithoutVhost generates a hashed identifier unique to the API Name and Version
+func GenerateHashedAPINameVersionIDWithoutVhost(name, version string) string {
+	return generateHashValue(name, version)
+}
+
+func generateHashValue(apiName string, apiVersion string) string {
+	apiNameVersionHash := sha1.New()
+	apiNameVersionHash.Write([]byte(apiName + ":" + apiVersion))
+	return hex.EncodeToString(apiNameVersionHash.Sum(nil)[:])
 }
 
 // ExtractVhostFromAPIIdentifier extracts vhost from the API identifier
