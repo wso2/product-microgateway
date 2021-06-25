@@ -47,6 +47,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.QSGTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.OpenAPIV3TestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.vhost.VhostAPICtlTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.standalone.timeouts.TimeOutTestCase"/>
         </classes>
     </test>
     <test name="cc-with-backend-tls" preserve-order="true" parallel="false">

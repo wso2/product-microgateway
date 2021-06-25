@@ -81,7 +81,7 @@ public class HttpsClientRequest {
     }
 
     public static HttpResponse retryGetRequestUntilDeployed(String requestUrl, Map<String, String> headers)
-            throws CCTestException, InterruptedException {
+            throws CCTestException {
         HttpResponse response;
         int retryCount = 0;
         do {
@@ -93,12 +93,12 @@ public class HttpsClientRequest {
         return response;
     }
 
-    private static boolean shouldRetry(int retryCount) throws InterruptedException {
+    private static boolean shouldRetry(int retryCount) {
         if(retryCount >= maxRetryCount) {
             log.info("Retrying of the request is finished");
             return false;
         }
-        Thread.sleep(retryIntervalMillis);
+        Utils.delay(retryIntervalMillis, "Interrupted while waiting for endpoint to be available");
         return true;
     }
 
@@ -146,7 +146,7 @@ public class HttpsClientRequest {
 
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         conn.setDoOutput(true);
-        conn.setReadTimeout(30000);
+        conn.setReadTimeout(70000);
         conn.setConnectTimeout(15000);
         conn.setDoInput(true);
         conn.setUseCaches(false);

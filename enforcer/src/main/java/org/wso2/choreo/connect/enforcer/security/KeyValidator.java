@@ -174,29 +174,22 @@ public class KeyValidator {
                                 log.debug("All information is retrieved from the inmemory data store.");
                             }
                         } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Valid subscription not found for appId " + app.getUUID() +
-                                        " and apiId " + api.getApiUUID());
-                            }
+                            log.info(
+                                    "Valid subscription not found for application : " + app.getName()
+                                            + " with app uuid : " + app.getUUID() + " and api : " + api.getApiName()
+                                            + " with api uuid : " + api.getApiUUID());
                         }
                     } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Application not found in the datastore for id " + key.getApplicationId());
-                        }
+                        log.info("Application not found in the data store for uuid " + key.getApplicationUUID());
                     }
                 } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug(
-                                "Application keymapping not found in the datastore for id consumerKey " + consumerKey);
-                    }
+                    log.info("Application key mapping not found in the data store for id consumerKey " + consumerKey);
                 }
             } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("API not found in the datastore for API UUID :" + uuid);
-                }
+                log.info("API not found in the data store for API UUID :" + uuid);
             }
         } else {
-            log.error("Subscription datastore is null for tenant domain " + apiTenantDomain);
+            log.error("Subscription data store is null for tenant domain " + apiTenantDomain);
         }
 
         if (api != null && app != null && key != null && sub != null) {
@@ -253,7 +246,6 @@ public class KeyValidator {
         ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy());
         SubscriptionPolicy subPolicy = datastore.getSubscriptionPolicyByName(sub.getPolicyId());
         ApiPolicy apiPolicy = datastore.getApiPolicyByName(api.getApiTier());
-
         boolean isContentAware = false;
         if (appPolicy.isContentAware() || subPolicy.isContentAware() || (apiPolicy != null && apiPolicy
                 .isContentAware())) {

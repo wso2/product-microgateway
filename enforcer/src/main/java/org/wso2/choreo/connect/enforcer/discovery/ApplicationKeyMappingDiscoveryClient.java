@@ -125,6 +125,7 @@ public class ApplicationKeyMappingDiscoveryClient implements Runnable {
         reqObserver = stub.streamApplicationKeyMappings(new StreamObserver<DiscoveryResponse>() {
             @Override
             public void onNext(DiscoveryResponse response) {
+                logger.info("Application key generation event received with version : " + response.getVersionInfo());
                 logger.debug("Received Application Key Mapping discovery response " + response);
                 XdsSchedulerManager.getInstance().stopApplicationKeyMappingDiscoveryScheduling();
                 latestReceived = response;
