@@ -68,10 +68,9 @@ func init() {
 }
 
 func initConnection(xdsURL string) error {
-	// ctx := context.Background()
-	// TODO: (VirajSalaka) Dial or DialContext
 	// TODO: (VirajSalaka) Close Connection
-	conn, err := grpc.Dial(xdsURL, grpc.WithInsecure())
+	// TODO: (VirajSalaka) Bring in connection level configurations
+	conn, err := grpc.Dial(xdsURL, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		// TODO: (VirajSalaka) retries
 		logger.LoggerGA.Error("Error while connecting to the Global Adapter.", err)
@@ -101,7 +100,7 @@ func watchAPIs() {
 			return
 		}
 		if err != nil {
-			logger.LoggerGA.Errorf("Failed to receive the discovery response ", err)
+			logger.LoggerGA.Error("Failed to receive the discovery response ", err)
 			nack(err.Error())
 		} else {
 			lastReceivedResponse = discoveryResponse
