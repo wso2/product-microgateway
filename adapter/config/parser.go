@@ -31,7 +31,7 @@ import (
 
 	toml "github.com/pelletier/go-toml"
 	logger "github.com/sirupsen/logrus"
-	pkg_conf "github.com/wso2/product-microgateway/adapter/pkg/config"
+	pkgconf "github.com/wso2/product-microgateway/adapter/pkg/config"
 )
 
 var (
@@ -78,11 +78,11 @@ const (
 func ReadConfigs() (*Config, error) {
 	onceConfigRead.Do(func() {
 		adapterConfig = defaultConfig
-		_, err := os.Stat(pkg_conf.GetMgwHome() + relativeConfigPath)
+		_, err := os.Stat(pkgconf.GetMgwHome() + relativeConfigPath)
 		if err != nil {
 			logger.Fatal("Configuration file not found.", err)
 		}
-		content, readErr := ioutil.ReadFile(pkg_conf.GetMgwHome() + relativeConfigPath)
+		content, readErr := ioutil.ReadFile(pkgconf.GetMgwHome() + relativeConfigPath)
 		if readErr != nil {
 			logger.Fatal("Error reading configurations. ", readErr)
 			return
@@ -166,26 +166,26 @@ func resolveEnvValue(value string) string {
 // from where the executable is called from.
 //
 // Returns the log configuration object mapped from the configuration file during the startup.
-func ReadLogConfigs() *pkg_conf.LogConfig {
-	return pkg_conf.ReadLogConfigs()
+func ReadLogConfigs() *pkgconf.LogConfig {
+	return pkgconf.ReadLogConfigs()
 }
 
 // ClearLogConfigInstance removes the existing configuration.
 // Then the log configuration can be re-initialized.
 func ClearLogConfigInstance() {
-	pkg_conf.ClearLogConfigInstance()
+	pkgconf.ClearLogConfigInstance()
 }
 
 // GetLogConfigPath returns the file location of the log-config path
 func GetLogConfigPath() (string, error) {
-	return pkg_conf.GetLogConfigPath()
+	return pkgconf.GetLogConfigPath()
 }
 
 // GetMgwHome reads the MGW_HOME environmental variable and returns the value.
 // This represent the directory where the distribution is located.
 // If the env variable is not present, the directory from which the executable is triggered will be assigned.
 func GetMgwHome() string {
-	return pkg_conf.GetMgwHome()
+	return pkgconf.GetMgwHome()
 }
 
 // GetControlPlaneConnectedTenantDomain returns the tenant domain of the user used to authenticate with event hub.

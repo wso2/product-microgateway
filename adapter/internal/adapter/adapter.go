@@ -165,7 +165,7 @@ func Run(conf *config.Config) {
 	}
 
 	if errC != nil {
-		logger.LoggerMgw.Fatal("Error reading the log configs. ", errC)
+		logger.LoggerMgw.Error("Error reading the log configs. ", errC)
 	}
 
 	logger.LoggerMgw.Info("Starting adapter ....")
