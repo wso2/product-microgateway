@@ -147,8 +147,9 @@ func getAdapterNode() *core.Node {
 
 // InitGAClient initializes the connection to the global adapter.
 func InitGAClient(xdsURL string) {
+	logger.LoggerGA.Info("Starting the XDS Client connection to Global Adapter.")
 	err := initConnection(xdsURL)
-	if err != nil {
+	if err == nil {
 		go watchAPIs()
 		discoveryRequest := &discovery.DiscoveryRequest{
 			Node:        getAdapterNode(),

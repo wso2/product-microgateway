@@ -349,9 +349,9 @@
   # Enable Choreo Connect Global adapter client
   enabled = false
   # Global adapter Service URL (<Hostname>:<Port>)
-  serviceUrl = ga:18002
+  serviceUrl = "ga:18002"
   # Local Adapter Label
-  LocalLabel = "$env{LocalLabel}"
+  localLabel = "$env{LocalLabel}"
 
 # Analytics configurations for Choreo Connect
 [analytics]
