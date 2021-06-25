@@ -33,30 +33,15 @@
             <!-- To avoid apim restarting everytime while writing tests, follow the instructions in integration/test-integration/readme.md -->
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimStartupExecutor"/>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimClientsPreparer"/>
-        </classes>
-    </test>
-    <test name="apis-apps-subs-pulled-at-startup" parallel="false">
-        <classes>
+
             <!-- Clean and create APIs, Applications, Subscriptions BEFORE starting Choreo Connect  -->
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparer"/>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcStartupExecutor"/>
-
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase">
-                <methods><include name="testPublishedStateAPI"/></methods>
-            </class>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.SubscriptionValidationTestCase">
-                <methods><include name="testAPIsForInvalidSubscription"/></methods>
-            </class>
-            <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase">
-                <methods><include name="testAPIsWithDeployedVhost"/></methods>
-            </class>
         </classes>
     </test>
-    <test name="apis-apps-subs-received-via-eventhub" parallel="false">
+    <test name="start-pull-and-events-via-eventhub-combined" parallel="false">
         <classes>
-            <!-- Clean and create APIs, Applications, Subscriptions AFTER starting Choreo Connect  -->
-            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparer"/>
-
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BasicEventsTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.AdvanceThrottlingTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.ApplicationThrottlingTestCase"/>
             <!--            TODO: (Praminda) this requires upgrade in apim throttle dependency. enable after upgrade-->
@@ -70,7 +55,8 @@
 <!--    <test name="apis-apps-subs-received-after-apim-restart" parallel="false">-->
 <!--        <classes>-->
 <!--            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.withapim.RestartedApimTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.withapim.ExistingApiTestCase"/>-->
+<!--            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BasicEventsTestCase"/>-->
 <!--        </classes>-->
 <!--    </test>-->
     <test name="cc-shutdown-and-apim-shutdown" parallel="false">
