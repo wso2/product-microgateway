@@ -66,8 +66,7 @@ func TestCreateRouteswithClustersWebsocketSand(t *testing.T) {
 func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string) {
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
-	mgwSwaggerForOpenapi, err := operator.GetMgwSwagger(openapiByteArr)
-	assert.Nil(t, err, "Error should not be present when openAPI definition is converted to a MgwSwagger object")
+	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil, "localhost", "carbon.super")
 
 	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")

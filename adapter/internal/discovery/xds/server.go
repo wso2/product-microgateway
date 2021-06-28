@@ -243,6 +243,14 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 	var organizationID = apiContent.OrganizationID
 	var deployedRevision *notifier.DeployedAPIRevision
 	var err error
+
+	// handle panic
+	defer func() {
+		if r := recover(); r != nil {
+			panic("Xds Cache update failed")
+		}
+	}()
+
 	if len(apiContent.Environments) == 0 {
 		apiContent.Environments = []string{config.DefaultGatewayName}
 	}
@@ -252,6 +260,7 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 		if err != nil {
 			return deployedRevision, err
 		}
+
 		mgwSwagger.SetID(apiContent.UUID)
 		mgwSwagger.SetName(apiContent.Name)
 		mgwSwagger.SetVersion(apiContent.Version)
@@ -268,10 +277,12 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 
 	if (len(mgwSwagger.GetProdEndpoints()) == 0 || mgwSwagger.GetProdEndpoints()[0].Host == "/") &&
 		(len(mgwSwagger.GetSandEndpoints()) == 0 || mgwSwagger.GetSandEndpoints()[0].Host == "/") {
+
 		productionEndpointErr := mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
 		if productionEndpointErr != nil {
 			return deployedRevision, productionEndpointErr
 		}
+
 		sandboxEndpointErr := mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
 		if sandboxEndpointErr != nil {
 			return deployedRevision, sandboxEndpointErr

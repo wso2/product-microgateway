@@ -82,13 +82,13 @@ func TestGetXWso2Basepath(t *testing.T) {
 	}
 }
 
-func TestSetXWso2PrdoductionEndpoint(t *testing.T) {
-	type setXWso2PrdoductionEndpointTestItem struct {
+func TestSetXWso2ProductionEndpoint(t *testing.T) {
+	type setXWso2ProductionEndpointTestItem struct {
 		input   MgwSwagger
 		result  MgwSwagger
 		message string
 	}
-	dataItems := []setXWso2PrdoductionEndpointTestItem{
+	dataItems := []setXWso2ProductionEndpointTestItem{
 		{
 			input: MgwSwagger{
 				vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
