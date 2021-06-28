@@ -98,6 +98,7 @@ var (
 
 	// KeyManagerList to store data
 	KeyManagerList = make([]eventhubTypes.KeyManager, 0)
+	isReady        = false
 )
 
 var void struct{}
@@ -216,6 +217,17 @@ func GetEnforcerRevokedTokenCache() wso2_cache.SnapshotCache {
 //GetEnforcerThrottleDataCache return throttle data cache
 func GetEnforcerThrottleDataCache() wso2_cache.SnapshotCache {
 	return enforcerThrottleDataCache
+}
+
+// DeployReadinessAPI Method to set the status after the last api is fected and updated in router.
+func DeployReadinessAPI(envs []string) {
+	logger.LoggerXds.Infof("Finished fetching APIs from the Control Plane. Deploying the readiness endpoint...")
+	isReady = true
+	for _, env := range envs {
+		listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(env)
+		UpdateXdsCacheWithLock(env, endpoints, clusters, routes, listeners)
+		UpdateEnforcerApis(env, apis, "")
+	}
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
@@ -596,6 +608,12 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 	// Add health endpoint
 	routeHealth := envoyconf.CreateHealthEndpoint()
 	vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], routeHealth)
+
+	// Add the readiness endpoint. isReady flag will be set to true once all the apis are fetched from the control plane
+	if isReady {
+		readynessEndpoint := envoyconf.CreateReadyEndpoint()
+		vhostToRouteArrayMap[systemHost] = append(vhostToRouteArrayMap[systemHost], readynessEndpoint)
+	}
 
 	listenerArray, listenerFound := envoyListenerConfigMap[label]
 	routesConfig, routesConfigFound := envoyRouteConfigMap[label]
