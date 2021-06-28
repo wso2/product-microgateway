@@ -16,10 +16,10 @@
 
 package org.wso2.micro.gateway.core.interceptors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.jvm.values.ObjectValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2.micro.gateway.interceptor.Caller;
 import org.wso2.micro.gateway.interceptor.Interceptor;
 import org.wso2.micro.gateway.interceptor.Request;
@@ -31,7 +31,7 @@ import org.wso2.micro.gateway.interceptor.Response;
 public class InterceptorInvoker {
     private static Interceptor[] interceptorArray;
     private static int index = 0;
-    private static final Logger log = LoggerFactory.getLogger("ballerina");
+    private static final Logger log = LogManager.getLogger(InterceptorInvoker.class);
 
     public static void initiateInterceptorArray(int arraySize) {
         interceptorArray = new Interceptor[arraySize];

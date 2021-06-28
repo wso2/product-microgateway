@@ -16,9 +16,9 @@
 
 package org.wso2.micro.gateway.core.throttle;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ballerinalang.jvm.values.MapValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class ThrottleDataReceiver {
     private static ThrottleDataCleanUpTask throttleDataCleanUpTask;
 
-    private static final Logger log = LoggerFactory.getLogger("ballerina");
+    private static final Logger log = LogManager.getLogger(ThrottleDataReceiver.class);
 
     public static ThrottleCounter getThrottleCounter() {
         return throttleCounter;

@@ -116,7 +116,7 @@ IF EXIST %CONF_OUT_FILE% DEL /Q /F %CONF_OUT_FILE%
     SET usage_path=%GW_HOME%\api-usage-data
     CALL SET USAGE_DATA_PATH=%%usage_path:\=%separator%%%
 
-    CALL :startGateway %*
+    CALL :setupAndRun %*
 
     GOTO END
 
@@ -136,12 +136,10 @@ REM Start the gateway using internal ballerina distribution as the runtime
     IF %ERRORLEVEL% NEQ 0 (
         ECHO WARN: Can't find powershell in the system!
         ECHO WARN: STDERR and STDOUT will be piped to %GW_HOME%\logs\microgateway.log
-        SET JAVA_ARGS=-Xms%JAVA_XMS_VALUE% -Xmx%JAVA_XMX_VALUE% -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%GW_HOME%\heap-dump.hprof"
         "%JAVA_HOME%\bin\java.exe" %JAVA_ARGS% -Dmgw-runtime.home"=%GW_HOME%" -Dballerina.home="%GW_HOME%/runtime" -Djava.util.logging.config.class=org.ballerinalang.logging.util.LogConfigReader -Djava.util.logging.manager=org.ballerinalang.logging.BLogManager -jar "%EXEC_FILE%" %BAL_ARGS% --api.usage.data.path="%USAGE_DATA_PATH%" --b7a.config.file="%GW_HOME%\conf\micro-gw.conf" >> "%GW_HOME%\logs\microgateway.log" 2>&1
 
         EXIT /B %ERRORLEVEL%
     ) ELSE (
-        SET JAVA_ARGS=-Xms%JAVA_XMS_VALUE% -Xmx%JAVA_XMX_VALUE% -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath='%GW_HOME%\heap-dump.hprof'
         REM Get short path for java_home in case java_home was picked from a
         REM standard installation dir with space in the path ex: "program files"
         FOR %%I IN ("%JAVA_HOME%") DO SET JAVA_HOME=%%~sI
@@ -159,7 +157,7 @@ REM Start the gateway using internal ballerina distribution as the runtime
             EXIT /B %ERRORLEVEL%
         ) ELSE (
             REM For powershell version 4 or above , We can use `tee` command for output to both file stream and stdout (Ref: https://en.wikipedia.org/wiki/PowerShell#PowerShell_4.0)
-            CALL POWERSHELL "!JAVA_HOME!\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' '-Djava.util.logging.config.class=org.ballerinalang.logging.util.LogConfigReade' '-Djava.util.logging.manager=org.ballerinalang.logging.BLogManager' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | tee -Append '%GW_HOME%\logs\microgateway.log'
+            CALL POWERSHELL "!JAVA_HOME!\bin\java.exe %JAVA_ARGS% '-Dmgw-runtime.home=%GW_HOME%' '-Dballerina.home=%GW_HOME%/runtime' '-Djava.util.logging.config.class=org.ballerinalang.logging.util.LogConfigReader' '-Djava.util.logging.manager=org.ballerinalang.logging.BLogManager' -jar '%EXEC_FILE%' %BAL_ARGS% --api.usage.data.path='%USAGE_DATA_PATH%' --b7a.config.file='%GW_HOME%\conf\micro-gw.conf' | tee -Append '%GW_HOME%\logs\microgateway.log'
             EXIT /B %ERRORLEVEL%
         )
     )
@@ -247,6 +245,16 @@ REM Find metrics is enabled or not via cmd args
     )
     GOTO :isMetricsEnabled
 
+REM add the system variable containing log4j properties file
+:setupAndRun
+    SET JAVA_ARGS=-Xms%JAVA_XMS_VALUE% -Xmx%JAVA_XMX_VALUE% -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath='%GW_HOME%\heap-dump.hprof'
+    SET LOG4J_CONFIGURATION_FILE_LOCATION=%GW_HOME%\conf\log4j2.properties
+    IF EXIST %LOG4J_CONFIGURATION_FILE_LOCATION% (
+        SET JAVA_ARGS=%JAVA_ARGS% '-Dlog4j.configurationFile=%LOG4J_CONFIGURATION_FILE_LOCATION%'
+    ) ELSE (
+        SET JAVA_ARGS=%JAVA_ARGS% '-Dlog4j.configurationFactory=org.wso2.micro.gateway.core.logging.MgwLog4j2ConfigurationFactory'
+    )
+    GOTO :startGateway
 REM -----------------------------------------------------------------------------
 REM --- END OF FUNCTION DEFINITION ---
 REM -----------------------------------------------------------------------------
