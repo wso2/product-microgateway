@@ -19,7 +19,6 @@ package model
 
 import (
 	"encoding/json"
-	"errors"
 	"net/url"
 	"strconv"
 	"strings"
@@ -38,8 +37,14 @@ import (
 // UUID.
 //
 // No operation specific information is extracted.
-func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
-	var err error
+func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) {
+	// handle panic
+	defer func() {
+		if r := recover(); r != nil {
+			panic("Error occurred while populating the MgwSwagger object")
+		}
+	}()
+
 	if swagger3.Info != nil {
 		swagger.description = swagger3.Info.Description
 		swagger.title = swagger3.Info.Title
@@ -47,10 +52,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 	}
 
 	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
-	swagger.resources, err = setResourcesOpenAPI(swagger3)
-	if err != nil {
-		return err
-	}
+	swagger.resources = setResourcesOpenAPI(swagger3)
 
 	swagger.apiType = HTTP
 	if isServerURLIsAvailable(swagger3.Servers) {
@@ -59,15 +61,10 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 				continue
 			}
 			endpoint := getHostandBasepathandPort(serverEntry.URL)
-			if endpoint != nil {
-				swagger.productionUrls = append(swagger.productionUrls, *endpoint)
-				swagger.xWso2Basepath = endpoint.Basepath
-			} else {
-				return errors.New("error encountered when parsing the endpoint")
-			}
+			swagger.productionUrls = append(swagger.productionUrls, endpoint)
+			swagger.xWso2Basepath = endpoint.Basepath
 		}
 	}
-	return nil
 }
 
 func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.PathItem) Resource {
@@ -89,8 +86,16 @@ func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.Pat
 	return resource
 }
 
-func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
+func setResourcesOpenAPI(openAPI openapi3.Swagger) []Resource {
 	var resources []Resource
+
+	// handle panic
+	defer func() {
+		if r := recover(); r != nil {
+			panic("Error occurred while setting resources")
+		}
+	}()
+	
 	// Check the disable security vendor ext at API level.
 	// If it's present, then the same value should be added to the
 	// resource level if vendor ext is not present at each resource level.
@@ -116,18 +121,14 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 						continue
 					}
 					endpoint := getHostandBasepathandPort(serverEntry.URL)
-					if endpoint != nil {
-						resource.productionUrls = append(resource.productionUrls, *endpoint)
-					} else {
-						return nil, errors.New("error encountered when parsing the endpoint")
-					}
+					resource.productionUrls = append(resource.productionUrls, endpoint)
 				}
 			}
 			resources = append(resources, resource)
 
 		}
 	}
-	return SortResources(resources), nil
+	return SortResources(resources)
 }
 
 func getOperationLevelDetails(operation *openapi3.Operation, method string) Operation {
@@ -151,20 +152,29 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string) Oper
 // or server property.
 //
 // if no scheme is mentioned before the hostname, urlType would be assigned as http
-func getHostandBasepathandPort(rawURL string) *Endpoint {
+func getHostandBasepathandPort(rawURL string) Endpoint {
 	var (
 		basepath string
 		host     string
 		port     uint32
 		urlType  string
 	)
+
+	// handle panic
+	defer func() {
+		if r := recover(); r != nil {
+			logger.LoggerOasparser.Errorf("Malformed endpoint detected. Error while parsing endpoint: %v", r)
+			panic("Error while parsing endpoint")
+		}
+	}()
+
 	if !strings.Contains(rawURL, "://") {
 		rawURL = "http://" + rawURL
 	}
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		logger.LoggerOasparser.Error("Malformed endpoint detected: ", err)
-		return nil
+		logger.LoggerOasparser.Error(err)
+		panic(rawURL)
 	}
 
 	host = parsedURL.Hostname()
@@ -188,7 +198,7 @@ func getHostandBasepathandPort(rawURL string) *Endpoint {
 		urlType = "https"
 	}
 
-	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}
+	return Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}
 }
 
 // isServerURLIsAvailable checks the availability od server url in openApi3

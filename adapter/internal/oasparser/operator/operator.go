@@ -34,13 +34,20 @@ import (
 // GetMgwSwagger converts the openAPI v3 and v2 content
 // To MgwSwagger objects
 // TODO: (VirajSalaka) return the error and handle
-func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
+func GetMgwSwagger(apiContent []byte) model.MgwSwagger {
 	var mgwSwagger model.MgwSwagger
+
+	// handle panic
+	defer func() {
+		if r := recover(); r != nil {
+			panic("Error occurred while converting the API definition to MgwSwagger object")
+		}
+	}()
 
 	apiJsn, err := utills.ToJSON(apiContent)
 	if err != nil {
 		logger.LoggerOasparser.Error("Error converting api file to json", err)
-		return mgwSwagger, err
+		return mgwSwagger
 	}
 	swaggerVerison := utills.FindSwaggerVersion(apiJsn)
 
@@ -51,10 +58,7 @@ func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
 		if err != nil {
 			logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
 		} else {
-			infoSwaggerErr := mgwSwagger.SetInfoSwagger(apiData2)
-			if infoSwaggerErr != nil {
-				return mgwSwagger, infoSwaggerErr
-			}
+			mgwSwagger.SetInfoSwagger(apiData2)
 		}
 
 	} else if swaggerVerison == "3" {
@@ -65,14 +69,11 @@ func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
 		if err != nil {
 			logger.LoggerOasparser.Error("Error openAPI unmarsheliing", err)
 		} else {
-			infoOpenAPIErr := mgwSwagger.SetInfoOpenAPI(*apiData3)
-			if infoOpenAPIErr != nil {
-				return mgwSwagger, infoOpenAPIErr
-			}
+			mgwSwagger.SetInfoOpenAPI(*apiData3)
 		}
 	}
 	mgwSwagger.SetXWso2Extenstions()
-	return mgwSwagger, nil
+	return mgwSwagger
 }
 
 // GetOpenAPIVersionAndJSONContent get the json content and openapi version

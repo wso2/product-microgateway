@@ -237,20 +237,24 @@ func DeployReadinessAPI(envs []string) {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(apiContent config.APIContent) error {
+func UpdateAPI(apiContent config.APIContent) {
 	var newLabels []string
 	var mgwSwagger mgw.MgwSwagger
 	var organizationID = apiContent.OrganizationID
-	var err error
+
+	// handle panic
+	defer func() {
+		if r := recover(); r != nil {
+			panic("Xds Cache update failed")
+		}
+	}()
+
 	if len(apiContent.Environments) == 0 {
 		apiContent.Environments = []string{config.DefaultGatewayName}
 	}
 
 	if apiContent.APIType == mgw.HTTP || apiContent.APIType == mgw.WEBSUB {
-		mgwSwagger, err = operator.GetMgwSwagger(apiContent.APIDefinition)
-		if err != nil {
-			return err
-		}
+		mgwSwagger = operator.GetMgwSwagger(apiContent.APIDefinition)
 		mgwSwagger.SetID(apiContent.UUID)
 		mgwSwagger.SetName(apiContent.Name)
 		mgwSwagger.SetVersion(apiContent.Version)
@@ -267,20 +271,14 @@ func UpdateAPI(apiContent config.APIContent) error {
 
 	if (len(mgwSwagger.GetProdEndpoints()) == 0 || mgwSwagger.GetProdEndpoints()[0].Host == "/") &&
 		(len(mgwSwagger.GetSandEndpoints()) == 0 || mgwSwagger.GetSandEndpoints()[0].Host == "/") {
-		productionEndpointErr := mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
-		if productionEndpointErr != nil {
-			return productionEndpointErr
-		}
-		sandboxEndpointErr := mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
-		if sandboxEndpointErr != nil {
-			return sandboxEndpointErr
-		}
+		mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
+		mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
 	}
 
 	validationErr := mgwSwagger.Validate()
 	if validationErr != nil {
 		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s", mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), organizationID)
-		return validationErr
+		return
 	}
 
 	uniqueIdentifier := apiContent.UUID
@@ -376,7 +374,6 @@ func UpdateAPI(apiContent config.APIContent) error {
 	if svcdiscovery.IsServiceDiscoveryEnabled {
 		startConsulServiceDiscovery(apiContent.OrganizationID) //consul service discovery starting point
 	}
-	return nil
 }
 
 // GetAllEnvironments returns all the environments merging new environments with already deployed environments
