@@ -14,7 +14,8 @@ string tokenContext = gateway:removePrePostSlash(gateway:getConfigValue(gateway:
          allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
          allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
          allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
-         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}],
+         exposeHeaders: [{{#corsConfiguration.accessControlExposeHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlExposeHeaders}}]
     }
     {{/corsConfiguration.corsConfigurationEnabled}}
 }
@@ -60,7 +61,8 @@ service authorizeService on tokenListenerEndpoint, apiSecureListener {
          allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
          allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
          allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
-         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}],
+         exposeHeaders: [{{#corsConfiguration.accessControlExposeHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlExposeHeaders}}]
     }
     {{/corsConfiguration.corsConfigurationEnabled}}
 }
@@ -106,7 +108,8 @@ service revokeService on tokenListenerEndpoint, apiSecureListener {
          allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
          allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
          allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
-         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}],
+         exposeHeaders: [{{#corsConfiguration.accessControlExposeHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlExposeHeaders}}]
     }
     {{/corsConfiguration.corsConfigurationEnabled}}
 }
@@ -152,7 +155,8 @@ service tokenService on tokenListenerEndpoint, apiSecureListener {
          allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
          allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
          allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
-         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}],
+         exposeHeaders: [{{#corsConfiguration.accessControlExposeHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlExposeHeaders}}]
     }
     {{/corsConfiguration.corsConfigurationEnabled}}
 }
@@ -193,7 +197,8 @@ service apiKeyService on apiSecureListener {
          allowOrigins: [{{#corsConfiguration.accessControlAllowOrigins}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowOrigins}}],
          allowCredentials: {{corsConfiguration.accessControlAllowCredentials}},
          allowHeaders: [{{#corsConfiguration.accessControlAllowHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowHeaders}}],
-         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}]
+         allowMethods: [{{#corsConfiguration.accessControlAllowMethods}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlAllowMethods}}],
+         exposeHeaders: [{{#corsConfiguration.accessControlExposeHeaders}}"{{.}}"{{#unless @last}},{{/unless}}{{/corsConfiguration.accessControlExposeHeaders}}]
     }
     {{/corsConfiguration.corsConfigurationEnabled}}
 }

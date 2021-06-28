@@ -43,6 +43,8 @@ public class BaseTestCase {
     protected final static int MOCK_SERVER_PORT = 9443;
 
     private void initHttpServer() {
+        // To allow Origin header to pass in CorsTestCase.
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         boolean isOpen = Utils.isPortOpen(MOCK_SERVER_PORT);
         Assert.assertFalse(isOpen, "Port: " + MOCK_SERVER_PORT + " already in use.");
         mockHttpServer = new MockHttpServer(MOCK_SERVER_PORT);
