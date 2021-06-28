@@ -171,6 +171,32 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 	}
 }
 
+func TestGetHostandBasepathandPortPanic(t *testing.T) {
+	type getHostandBasepathandPortPanicTestItem struct {
+		inputRawURL string
+		panicMessage string
+		message string
+	}
+	dataItems := []getHostandBasepathandPortPanicTestItem {
+		{
+			inputRawURL: "https://{defaultHost}",
+			panicMessage: "Error while parsing endpoint",
+			message: "Should panic when malformed endpoint is provided",
+		},
+		{
+			inputRawURL: "https:..petstore.io/api/v2",
+			panicMessage: "Error while parsing endpoint",
+			message: "Should panic when malformed endpoint is provided",
+		},
+	}
+	for _, item := range dataItems {
+		defer func() {
+			assert.Equal(t, item.panicMessage, recover(), item.message)
+		}()
+		getHostandBasepathandPort(item.inputRawURL)
+	}
+}
+
 func TestGetXWso2Label(t *testing.T) {
 	// TODO: (Vajira) add more test scenarios
 	//newLabels := GetXWso2Label(openAPIV3Struct.ExtensionProps)
