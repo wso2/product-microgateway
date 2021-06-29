@@ -94,11 +94,11 @@ func ReadLogConfigs() *LogConfig {
 		if err == nil {
 			content, readErr := ioutil.ReadFile(filePath)
 			if readErr != nil {
-				logger.Fatal("Proceeding with default log configuration as error occured while reading log configurations ", readErr)
+				logger.Error("Proceeding with default log configuration as error occured while reading log configurations ", readErr)
 			} else {
 				parseErr := toml.Unmarshal(content, adapterLogConfig)
 				if parseErr != nil {
-					logger.Fatal("Proceeding with default log configuration as error occured while parsing the log configuration ", parseErr)
+					logger.Error("Proceeding with default log configuration as error occured while parsing the log configuration ", parseErr)
 				}
 			}
 		}
