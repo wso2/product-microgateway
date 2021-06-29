@@ -96,6 +96,22 @@ type envoy struct {
 	SystemHost                       string `default:"localhost"`
 	Cors                             globalCors
 	Upstream                         envoyUpstream
+	Connection                       connection
+}
+type upstreamTimeout struct {
+	RouteTimeoutInSeconds     time.Duration `toml:"routeTimeoutInSeconds"`
+	RouteIdleTimeoutInSeconds time.Duration `toml:"routeIdleTimeoutInSeconds"`
+}
+
+type connectionTimeouts struct {
+	RequestTimeoutInSeconds        time.Duration `toml:"requestTimeoutInSeconds"`
+	RequestHeadersTimeoutInSeconds time.Duration `toml:"requestHeadersTimeoutInSeconds"` // default disabled
+	StreamIdleTimeoutInSeconds     time.Duration `toml:"streamIdleTimeoutInSeconds"`     // Default 5 mins
+	IdleTimeoutInSeconds           time.Duration `toml:"idleTimeoutInSeconds"`           // default 1hr
+}
+
+type connection struct {
+	Timeouts connectionTimeouts
 }
 
 type enforcer struct {
@@ -163,7 +179,8 @@ type globalCors struct {
 // Envoy Upstream Related Configurations
 type envoyUpstream struct {
 	// UpstreamTLS related Configuration
-	TLS upstreamTLS
+	TLS      upstreamTLS
+	Timeouts upstreamTimeout
 }
 
 type upstreamTLS struct {

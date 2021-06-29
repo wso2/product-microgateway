@@ -90,6 +90,18 @@ var defaultConfig = &Config{
 				VerifyHostName:         true,
 				DisableSSLVerification: false,
 			},
+			Timeouts: upstreamTimeout{
+				RouteTimeoutInSeconds:     60,
+				RouteIdleTimeoutInSeconds: 300,
+			},
+		},
+		Connection: connection{
+			Timeouts: connectionTimeouts{
+				RequestTimeoutInSeconds:        0,
+				RequestHeadersTimeoutInSeconds: 0,
+				StreamIdleTimeoutInSeconds:     300,
+				IdleTimeoutInSeconds:           3600,
+			},
 		},
 	},
 	Enforcer: enforcer{

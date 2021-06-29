@@ -167,8 +167,8 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			}
 
 			if apiObject.Data.EndpointImplementationType == inlineEndpointType {
-				errmsg := "inline endpointImplementationType is not currently supported with WSO2 micro-gateway"
-				loggers.LoggerAPI.Infof(errmsg)
+				errmsg := "inline endpointImplementationType is not currently supported with Choreo Connect"
+				loggers.LoggerAPI.Warnf(errmsg)
 				err = errors.New(errmsg)
 				return apiProject, err
 			}
@@ -181,8 +181,8 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 		loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
 		return apiProject, err
 	} else if apiProject.APIType != mgw.HTTP && apiProject.APIType != mgw.WS {
-		errMsg := "API type is not currently supported with WSO2 micro-gateway"
-		loggers.LoggerAPI.Infof(errMsg)
+		errMsg := "API type is not currently supported with Choreo Connect"
+		loggers.LoggerAPI.Warnf(errMsg)
 		err = errors.New(errMsg)
 		return apiProject, err
 	}
@@ -221,7 +221,7 @@ func verifyMandatoryFields(apiJSON config.APIJsonData) error {
 
 	if strings.HasPrefix(apiJSON.Data.EndpointConfig.ProductionEndpoints.Endpoint, "/") ||
 		strings.HasPrefix(apiJSON.Data.EndpointConfig.SandBoxEndpoints.Endpoint, "/") {
-		errMsg = "relative urls are not supported for API production and sandbox endpoints"
+		errMsg = "Relative urls are not supported for API production and sandbox endpoints"
 		return errors.New(errMsg)
 	}
 	return nil
@@ -242,6 +242,7 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 	if apiProject.OrganizationID == "" {
 		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 	}
+	loggers.LoggerAPI.Infof("Deploying api %s:%s in Organization %s", apiInfo.Name, apiInfo.Version, apiProject.OrganizationID)
 
 	// vhostsToRemove contains vhosts and environments to undeploy
 	vhostsToRemove := make(map[string][]string)
@@ -251,7 +252,7 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 		// search for vhosts in the given environments
 		for _, env := range environments {
 			if existingVhost, exists := xds.GetVhostOfAPI(apiInfo.ID, env); exists {
-				loggers.LoggerAPI.Debugf("API %v:%v with UUID \"%v\" already deployed to vhost: %v",
+				loggers.LoggerAPI.Infof("API %v:%v with UUID \"%v\" already deployed to vhost: %v",
 					apiInfo.Name, apiInfo.Version, apiInfo.ID, existingVhost)
 				if vhost != existingVhost {
 					loggers.LoggerAPI.Infof("Un-deploying API %v:%v with UUID \"%v\" which is already deployed to vhost: %v",
@@ -266,7 +267,10 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
 			allEnvironments, vhost, apiInfo.Name, apiInfo.Version, apiInfo.ID)
 		// first update the API for vhost
-		updateAPI(vhost, apiInfo, apiProject, allEnvironments)
+		err := updateAPI(vhost, apiInfo, apiProject, allEnvironments)
+		if err != nil {
+			return err
+		}
 	}
 
 	// undeploy APIs with other vhosts in the same gateway environment
@@ -332,7 +336,7 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 	return nil
 }
 
-func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) {
+func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) error {
 	if len(environments) == 0 {
 		environments = append(environments, config.DefaultGatewayName)
 	}
@@ -364,7 +368,11 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	} else if apiProject.APIType == mgw.WS {
 		apiContent.APIDefinition = apiProject.APIJsn
 	}
-	xds.UpdateAPI(apiContent)
+	err := xds.UpdateAPI(apiContent)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData) {
