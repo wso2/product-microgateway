@@ -37,7 +37,7 @@ var (
 	// The purpose here is to identify if the certain API's revision is already added to the XDS cache.
 	apiRevisionMap map[string]string
 	// Last Acknowledged Response from the global adapter
-	laskAckedResponse *discovery.DiscoveryResponse
+	lastAckedResponse *discovery.DiscoveryResponse
 	// Last Received Response from the global adapter
 	// Last Recieved Response is always is equal to the lastAckedResponse according to current implementation as there is no
 	// validation performed on successfully recieved response.
@@ -63,12 +63,11 @@ type APIEvent struct {
 
 func init() {
 	apiRevisionMap = make(map[string]string)
-	laskAckedResponse = &discovery.DiscoveryResponse{}
+	lastAckedResponse = &discovery.DiscoveryResponse{}
 	GAAPIChannel = make(chan *APIEvent)
 }
 
 func initConnection(xdsURL string) error {
-	// TODO: (VirajSalaka) Close Connection
 	// TODO: (VirajSalaka) Bring in connection level configurations
 	conn, err := grpc.Dial(xdsURL, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -112,10 +111,10 @@ func watchAPIs() {
 }
 
 func ack() {
-	laskAckedResponse = lastReceivedResponse
+	lastAckedResponse = lastReceivedResponse
 	discoveryRequest := &discovery.DiscoveryRequest{
 		Node:          getAdapterNode(),
-		VersionInfo:   laskAckedResponse.VersionInfo,
+		VersionInfo:   lastAckedResponse.VersionInfo,
 		TypeUrl:       apiTypeURL,
 		ResponseNonce: lastReceivedResponse.Nonce,
 	}
@@ -123,12 +122,12 @@ func ack() {
 }
 
 func nack(errorMessage string) {
-	if laskAckedResponse == nil {
+	if lastAckedResponse == nil {
 		return
 	}
 	discoveryRequest := &discovery.DiscoveryRequest{
 		Node:          getAdapterNode(),
-		VersionInfo:   laskAckedResponse.VersionInfo,
+		VersionInfo:   lastAckedResponse.VersionInfo,
 		TypeUrl:       apiTypeURL,
 		ResponseNonce: lastReceivedResponse.Nonce,
 		ErrorDetail: &status.Status{
