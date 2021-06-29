@@ -55,14 +55,14 @@ const (
 // returns a byte slice of that ZIP file.
 func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL string,
 	userName string, password string, skipSSL bool, truststoreLocation string,
-	runtimeArtifactEndpoint string, sendType bool) {
+	resourceEndpoint string, sendType bool) {
 	logger.LoggerSync.Info("Fetching APIs from Control Plane.")
 	respSyncAPI := SyncAPIResponse{}
-	// NOTE: Getting runtimeArtifactEndpoint as a parameter since GA uses a different endpoint.
+	// NOTE: Getting resourceEndpoint as a parameter since GA and LA use different endpoints.
 	if strings.HasSuffix(serviceURL, "/") {
-		serviceURL += runtimeArtifactEndpoint
+		serviceURL += resourceEndpoint
 	} else {
-		serviceURL += "/" + runtimeArtifactEndpoint
+		serviceURL += "/" + resourceEndpoint
 	}
 	logger.LoggerSync.Debugf("Fetching APIs from the URL %v: ", serviceURL)
 
