@@ -178,7 +178,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                         log.debug("Internal Key authentication successful.");
                     }
                     return FilterUtils.generateAuthenticationContext(tokenIdentifier, payload, api,
-                            requestContext.getMatchedAPI().getAPIConfig().getTier());
+                            requestContext.getMatchedAPI().getAPIConfig().getTier(),
+                            requestContext.getMatchedAPI().getAPIConfig().getUuid());
                 } else {
                     CacheProvider.getGatewayInternalKeyDataCache().invalidate(payload.getJWTID());
                     CacheProvider.getInvalidGatewayInternalKeyCache().put(payload.getJWTID(), "carbon.super");

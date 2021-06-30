@@ -293,7 +293,8 @@ public class FilterUtils {
      * @throws java.text.ParseException
      */
     public static AuthenticationContext generateAuthenticationContext(String tokenIdentifier, JWTClaimsSet payload,
-                                                                      JSONObject api, String apiLevelPolicy)
+                                                                      JSONObject api, String apiLevelPolicy,
+                                                                      String apiUUID)
             throws java.text.ParseException {
 
         AuthenticationContext authContext = new AuthenticationContext();
@@ -305,13 +306,15 @@ public class FilterUtils {
         } else {
             authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
         }
-
         authContext.setApiTier(apiLevelPolicy);
         if (api != null) {
             authContext.setTier(APIConstants.UNLIMITED_TIER);
             authContext.setApiName(api.getAsString(APIConstants.JwtTokenConstants.API_NAME));
             authContext.setApiPublisher(api.getAsString(APIConstants.JwtTokenConstants.API_PUBLISHER));
 
+        }
+        if (!StringUtils.isEmpty(apiUUID)) {
+            authContext.setApiUUID(apiUUID);
         }
         authContext.setApplicationName(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME);
         authContext.setApplicationId(UUID.nameUUIDFromBytes(APIConstants.JwtTokenConstants.INTERNAL_KEY_APP_NAME.
