@@ -75,7 +75,7 @@ where you executed the command.
  
 5. Next, Lets build the project and create a microgateway docker image.
 ```
-micro-gw build petstore --docker-image petstore:v1 --docker-base-image wso2/wso2micro-gw:3.1.0
+micro-gw build petstore --docker-image petstore:v1 --docker-base-image wso2/wso2micro-gw:3.1.1
 ```
 
 Once the build is successful microgateway docker image will be created with name "petstore:v1"
