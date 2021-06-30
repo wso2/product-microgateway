@@ -202,7 +202,10 @@ public class FilterUtils {
         authContext.setStopOnQuotaReach(true);
         authContext.setConsumerKey(null);
         authContext.setCallerToken(null);
-
+        String apiUUID = requestContext.getMatchedAPI().getAPIConfig().getUuid();
+        if (!StringUtils.isEmpty(apiUUID)) {
+            authContext.setApiUUID(apiUUID);
+        }
         return authContext;
     }
 
