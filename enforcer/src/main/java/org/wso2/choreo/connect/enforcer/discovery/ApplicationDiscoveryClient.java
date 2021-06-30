@@ -135,6 +135,7 @@ public class ApplicationDiscoveryClient implements Runnable {
                         applicationList.addAll(res.unpack(ApplicationList.class).getListList());
                     }
                     subscriptionDataStore.addApplications(applicationList);
+                    logger.info("Number of applications received : " + applicationList.size());
                     ack();
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime

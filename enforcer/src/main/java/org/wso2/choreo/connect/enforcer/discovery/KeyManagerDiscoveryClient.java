@@ -131,6 +131,7 @@ public class KeyManagerDiscoveryClient implements Runnable {
                 try {
                     List<KeyManagerConfig> keyManagerConfig = handleResponse(response);
                     kmHolder.populateKMIssuerConfiguration(keyManagerConfig);
+                    logger.info("Number of key managers received : " + keyManagerConfig.size());
                     // TODO: fix recursive ack on ack failure
                     ack();
                 } catch (Exception e) {

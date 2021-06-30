@@ -135,6 +135,7 @@ public class ApplicationPolicyDiscoveryClient implements Runnable {
                         applicationPolicyList.addAll(res.unpack(ApplicationPolicyList.class).getListList());
                     }
                     subscriptionDataStore.addApplicationPolicies(applicationPolicyList);
+                    logger.info("Number of application policies received : " + applicationPolicyList.size());
                     ack();
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime
