@@ -156,7 +156,7 @@ spec:
           startupProbe:
             httpGet:
               port: 9095
-              path: /health
+              path: /ready
               scheme: HTTPS
               httpHeaders:
                 - name: Host
@@ -176,7 +176,7 @@ spec:
           readinessProbe:
             httpGet:
               port: 9095
-              path: /health
+              path: /ready
               scheme: HTTPS
               httpHeaders:
                 - name: Host

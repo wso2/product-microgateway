@@ -60,6 +60,7 @@ func connectToRabbitMQ() (*amqp.Connection, error) {
 		logger.LoggerMsg.Infof("Dialing URI [%d] %q", index, maskURL(url.URL)+"/")
 		conn, err = amqp.Dial(url.URL)
 		if err == nil {
+			logger.LoggerMsg.Infof("Successfully established the AMQP connection on URI [%d], %q", index, maskURL(url.URL)+"/")
 			return conn, nil
 		}
 	}
