@@ -17,9 +17,10 @@
 package xds
 
 import (
-	"github.com/wso2/product-microgateway/adapter/config"
 	"reflect"
 	"testing"
+
+	"github.com/wso2/product-microgateway/adapter/config"
 )
 
 func TestGetEnvironmentsToBeDeleted(t *testing.T) {

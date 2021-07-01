@@ -31,16 +31,20 @@ import (
 )
 
 var (
-	onceGetMgwHome    sync.Once
-	onceLogConfigRead sync.Once
-	adapterLogConfig  *LogConfig
-	mgwHome           string
-	e                 error
+	onceGetMgwHome       sync.Once
+	onceGetLogConfigPath sync.Once
+	onceLogConfigRead    sync.Once
+	adapterLogConfig     *LogConfig
+	mgwHome              string
+	logConfigPath        string
+	e                    error
 )
 
 const (
 	// The environtmental variable which represents the path of the distribution in host machine.
 	mgwHomeEnvVariable = "MGW_HOME"
+	// The environtmental variable which represents the path of the log_config.toml in host machine.
+	logConfigPathEnvVariable = "LOG_CONFIG_PATH"
 	// RelativeLogConfigPath is the relative file path where the log configuration file is.
 	relativeLogConfigPath = "/conf/log_config.toml"
 )
@@ -58,6 +62,23 @@ func GetMgwHome() string {
 	return mgwHome
 }
 
+// GetLogConfigPath reads the LOG_CONFIG_PATH environmental variable and returns the value.
+// If the env variable is not available, returned value would be the combination of MGW_HOME
+// env variable value + relative log config path
+// Error would be returned if the logConfig file is not available
+func GetLogConfigPath() (string, error) {
+	logConfigPath = os.Getenv(logConfigPathEnvVariable)
+	if len(strings.TrimSpace(logConfigPath)) == 0 {
+		//for backward compatibility
+		logConfigPath = GetMgwHome() + relativeLogConfigPath
+	}
+	_, err := os.Stat(logConfigPath)
+	if err != nil {
+		logger.Error("Log configuration file not found.", err)
+	}
+	return logConfigPath, err
+}
+
 // ReadLogConfigs implements adapter/proxy log-configuration read operation.The read operation will happen only once, hence
 // the consistancy is ensured.
 //
@@ -66,25 +87,27 @@ func GetMgwHome() string {
 // from where the executable is called from.
 //
 // Returns the log configuration object mapped from the configuration file during the startup.
-func ReadLogConfigs() (*LogConfig, error) {
+func ReadLogConfigs() *LogConfig {
 	onceLogConfigRead.Do(func() {
-		adapterLogConfig = new(LogConfig)
-		_, err := os.Stat(GetMgwHome() + relativeLogConfigPath)
-		if err != nil {
-			logger.Fatal("Log configuration file not found.", err)
-			panic(err)
+		adapterLogConfig = getDefaultLogConfig()
+		filePath, err := GetLogConfigPath()
+		if err == nil {
+			content, readErr := ioutil.ReadFile(filePath)
+			if readErr != nil {
+				logger.Error("Proceeding with default log configuration as error occured while reading log configurations ", readErr)
+			} else {
+				parseErr := toml.Unmarshal(content, adapterLogConfig)
+				if parseErr != nil {
+					logger.Error("Proceeding with default log configuration as error occured while parsing the log configuration ", parseErr)
+				}
+			}
 		}
-		content, readErr := ioutil.ReadFile(mgwHome + relativeLogConfigPath)
-		if readErr != nil {
-			logger.Fatal("Error reading log configurations. ", readErr)
-			panic(err)
-		}
-		parseErr := toml.Unmarshal(content, adapterLogConfig)
-		if parseErr != nil {
-			logger.Fatal("Error parsing the log configuration ", parseErr)
-			panic(parseErr)
-		}
-
 	})
-	return adapterLogConfig, e
+	return adapterLogConfig
+}
+
+// ClearLogConfigInstance removes the existing configuration.
+// Then the log configuration can be re-initialized.
+func ClearLogConfigInstance() {
+	onceLogConfigRead = sync.Once{}
 }
