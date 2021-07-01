@@ -135,6 +135,7 @@ public class SubscriptionPolicyDiscoveryClient implements Runnable {
                         subscriptionPolicyList.addAll(res.unpack(SubscriptionPolicyList.class).getListList());
                     }
                     subscriptionDataStore.addSubscriptionPolicies(subscriptionPolicyList);
+                    logger.info("Number of subscription policies received : " + subscriptionPolicyList.size());
                     ack();
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime
