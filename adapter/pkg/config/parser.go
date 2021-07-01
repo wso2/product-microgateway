@@ -21,8 +21,11 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -47,6 +50,8 @@ const (
 	logConfigPathEnvVariable = "LOG_CONFIG_PATH"
 	// RelativeLogConfigPath is the relative file path where the log configuration file is.
 	relativeLogConfigPath = "/conf/log_config.toml"
+	// EnvConfigPrefix is used when configs should be read from environment variables.
+	EnvConfigPrefix = "$env"
 )
 
 // GetMgwHome reads the MGW_HOME environmental variable and returns the value.
@@ -110,4 +115,42 @@ func ReadLogConfigs() *LogConfig {
 // Then the log configuration can be re-initialized.
 func ClearLogConfigInstance() {
 	onceLogConfigRead = sync.Once{}
+}
+
+// ResolveConfigEnvValues looks for the string type config values which should be read from environment variables
+// and replace the respective config values from environment variable.
+func ResolveConfigEnvValues(v reflect.Value) {
+	s := v
+	for fieldNum := 0; fieldNum < s.NumField(); fieldNum++ {
+		field := s.Field(fieldNum)
+		if field.Kind() == reflect.String && strings.Contains(fmt.Sprint(field.Interface()), EnvConfigPrefix) {
+			field.SetString(ResolveEnvValue(fmt.Sprint(field.Interface())))
+		}
+		if reflect.TypeOf(field.Interface()).Kind() == reflect.Slice {
+			for index := 0; index < field.Len(); index++ {
+				if field.Index(index).Kind() == reflect.Struct {
+					ResolveConfigEnvValues(field.Index(index).Addr().Elem())
+				} else if field.Index(index).Kind() == reflect.String && strings.Contains(field.Index(index).String(),
+					EnvConfigPrefix) {
+					field.Index(index).SetString(ResolveEnvValue(field.Index(index).String()))
+				}
+			}
+		}
+		if field.Kind() == reflect.Struct {
+			ResolveConfigEnvValues(field.Addr().Elem())
+		}
+	}
+}
+
+// ResolveEnvValue replace the respective config values from environment variable.
+func ResolveEnvValue(value string) string {
+	re := regexp.MustCompile(`(?s)\{(.*)}`) // regex to get everything in between curly brackets
+	m := re.FindStringSubmatch(value)
+	if len(m) > 1 {
+		envValue, exists := os.LookupEnv(m[1])
+		if exists {
+			return strings.ReplaceAll(re.ReplaceAllString(value, envValue), EnvConfigPrefix, "")
+		}
+	}
+	return value
 }

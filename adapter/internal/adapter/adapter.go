@@ -28,6 +28,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
 	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
+	"github.com/wso2/product-microgateway/adapter/pkg/adapter"
 	apiservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/api"
 	configservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/config"
 	keymanagerservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/keymgt"
@@ -36,6 +37,7 @@ import (
 	wso2_server "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/server/v3"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
 	healthservice "github.com/wso2/product-microgateway/adapter/pkg/health/api/wso2/health/service"
+	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
 	"context"
@@ -44,7 +46,6 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -262,26 +263,23 @@ OUTER:
 // fetch APIs from control plane during the server start up and push them
 // to the router and enforcer components.
 func fetchAPIsOnStartUp(conf *config.Config) {
-	// NOTE: Currently controle plane API does not support multiple labels in the same
-	// request. Hence until that is fixed, we have to make seperate requests.
-	// Checking the envrionments to fetch the APIs from
+	// Populate data from config.
+	serviceURL := conf.ControlPlane.ServiceURL
+	userName := conf.ControlPlane.Username
+	password := conf.ControlPlane.Password
 	envs := conf.ControlPlane.EnvironmentLabels
-	// Create a channel for the byte slice (response from the APIs from control plane)
-	c := make(chan synchronizer.SyncAPIResponse)
-	if len(envs) > 0 {
-		// If the envrionment labels are present, call the controle plane
-		// with label concurrently (ControlPlane API is not supported for mutiple labels yet)
-		logger.LoggerMgw.Debugf("Environments label present: %v", envs)
-		go synchronizer.FetchAPIs(nil, envs, c)
-	} else {
-		// If the environments are not give, fetch the APIs from default envrionment
-		logger.LoggerMgw.Debug("Environments label  NOT present. Hence adding \"default\"")
-		envs = append(envs, "default")
-		go synchronizer.FetchAPIs(nil, nil, c)
-	}
+	skipSSL := conf.ControlPlane.SkipSSLVerification
+	retryInterval := conf.ControlPlane.RetryInterval
+	truststoreLocation := conf.Adapter.Truststore.Location
 
-	// Wait for each environment to return it's result
-	for i := 0; i < len(envs); i++ {
+	// Create a channel for the byte slice (response from the APIs from control plane)
+	c := make(chan sync.SyncAPIResponse)
+
+	// Get API details.
+	adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
+		sync.RuntimeArtifactEndpoint, true)
+
+	for i := 0; i < 1; i++ {
 		data := <-c
 		logger.LoggerMgw.Debug("Receiving data for an environment")
 		if data.Resp != nil {
@@ -301,17 +299,8 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 			i--
 			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
 			health.SetControlPlaneRestAPIStatus(false)
-			go func(d synchronizer.SyncAPIResponse) {
-				// Retry fetching from control plane after a configured time interval
-				if conf.ControlPlane.RetryInterval == 0 {
-					// Assign default retry interval
-					conf.ControlPlane.RetryInterval = 5
-				}
-				logger.LoggerMgw.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
-				time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
-				logger.LoggerMgw.Infof("Retrying to fetch API data from control plane.")
-				synchronizer.FetchAPIs(&d.APIUUID, d.GatewayLabels, c)
-			}(data)
+			sync.RetryFetchingAPIs(c, serviceURL, userName, password, skipSSL, truststoreLocation, retryInterval,
+				data, sync.RuntimeArtifactEndpoint, true)
 		}
 	}
 	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.

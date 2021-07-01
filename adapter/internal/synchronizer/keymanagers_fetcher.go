@@ -33,10 +33,11 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
-	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/auth"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
@@ -102,7 +103,7 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 	}
 
 	// Setting authorization header
-	req.Header.Set(authorization, basicAuth)
+	req.Header.Set(sync.Authorization, basicAuth)
 
 	// Make the request
 	logger.LoggerSync.Debug("Sending the control plane request")

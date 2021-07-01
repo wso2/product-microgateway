@@ -21,11 +21,9 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
-	"regexp"
 	"strings"
 	"sync"
 
@@ -54,10 +52,6 @@ const (
 	mgwHomeEnvVariable = "MGW_HOME"
 	// RelativeConfigPath is the relative file path where the configuration file is.
 	relativeConfigPath = "/conf/config.toml"
-	// RelativeLogConfigPath is the relative file path where the log configuration file is.
-	relativeLogConfigPath = "/conf/log_config.toml"
-	// The prefix used when configs should be read from environment variables.
-	envConfigPrefix = "$env"
 )
 
 // Constants related to utility functions
@@ -92,9 +86,9 @@ func ReadConfigs() (*Config, error) {
 			logger.Fatal("Error parsing the configuration ", parseErr)
 			return
 		}
-		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem())
-		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem())
-		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem())
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem())
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem())
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem())
 	})
 	return adapterConfig, e
 }
@@ -120,42 +114,6 @@ func GetDefaultVhost(environment string) (string, bool, error) {
 		return DefaultGatewayVHost, true, nil
 	}
 	return vhost, ok, err
-}
-
-// resolveConfigEnvValues looks for the string type config values which should be read from environment variables
-// and replace the respective config values from environment variable.
-func resolveConfigEnvValues(v reflect.Value) {
-	s := v
-	for fieldNum := 0; fieldNum < s.NumField(); fieldNum++ {
-		field := s.Field(fieldNum)
-		if field.Kind() == reflect.String && strings.Contains(fmt.Sprint(field.Interface()), envConfigPrefix) {
-			field.SetString(resolveEnvValue(fmt.Sprint(field.Interface())))
-		}
-		if reflect.TypeOf(field.Interface()).Kind() == reflect.Slice {
-			for index := 0; index < field.Len(); index++ {
-				if field.Index(index).Kind() == reflect.Struct {
-					resolveConfigEnvValues(field.Index(index).Addr().Elem())
-				} else if field.Index(index).Kind() == reflect.String && strings.Contains(field.Index(index).String(), envConfigPrefix) {
-					field.Index(index).SetString(resolveEnvValue(field.Index(index).String()))
-				}
-			}
-		}
-		if field.Kind() == reflect.Struct {
-			resolveConfigEnvValues(field.Addr().Elem())
-		}
-	}
-}
-
-func resolveEnvValue(value string) string {
-	re := regexp.MustCompile(`(?s)\{(.*)}`) // regex to get everything in between curly brackets
-	m := re.FindStringSubmatch(value)
-	if len(m) > 1 {
-		envValue, exists := os.LookupEnv(m[1])
-		if exists {
-			return strings.ReplaceAll(re.ReplaceAllString(value, envValue), envConfigPrefix, "")
-		}
-	}
-	return value
 }
 
 // ReadLogConfigs implements adapter/proxy log-configuration read operation.The read operation will happen only once, hence

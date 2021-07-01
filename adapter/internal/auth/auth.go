@@ -20,7 +20,6 @@ package auth
 import (
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"io/ioutil"
@@ -39,14 +38,6 @@ const (
 
 var storedPrivateKey *rsa.PrivateKey
 var authTokenDuration *time.Duration
-
-// GetBasicAuth function returns the basicAuth header for the
-// given usename and password.
-// It returns the base64Encoded(username:password)
-func GetBasicAuth(username, password string) string {
-	auth := username + ":" + password
-	return base64.StdEncoding.EncodeToString([]byte(auth))
-}
 
 // ValidateCredentials checks whether the provided username and password are valid
 func ValidateCredentials(username, password string, config *config.Config) bool {
