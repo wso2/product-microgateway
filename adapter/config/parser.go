@@ -21,11 +21,9 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
-	"regexp"
 	"strings"
 	"sync"
 
@@ -54,8 +52,6 @@ const (
 	mgwHomeEnvVariable = "MGW_HOME"
 	// RelativeConfigPath is the relative file path where the configuration file is.
 	relativeConfigPath = "/conf/config.toml"
-	// RelativeLogConfigPath is the relative file path where the log configuration file is.
-	relativeLogConfigPath = "/conf/log_config.toml"
 )
 
 // Constants related to utility functions
