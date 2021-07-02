@@ -371,7 +371,7 @@ idleTimeoutInSeconds = 3600
   # Global adapter Service URL (<Hostname>:<Port>)
   serviceUrl = "ga:18002"
   # Local Adapter Label
-  localLabel = "$env{LocalLabel}"
+  localLabel = "$env{local_label}"
 
 # Analytics configurations for Choreo Connect
 [analytics]
