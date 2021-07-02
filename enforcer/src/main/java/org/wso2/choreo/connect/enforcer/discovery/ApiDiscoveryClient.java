@@ -129,6 +129,7 @@ public class ApiDiscoveryClient implements Runnable {
                 try {
                     List<Api> apis = handleResponse(response);
                     apiFactory.addApis(apis);
+                    logger.info("Number of API artifacts received : " + apis.size());
                     // TODO: (Praminda) fix recursive ack on ack failure
                     ack();
                 } catch (Exception e) {

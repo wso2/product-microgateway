@@ -134,6 +134,7 @@ public class ApiListDiscoveryClient implements Runnable {
                         apiList.addAll(res.unpack(APIList.class).getListList());
                     }
                     subscriptionDataStore.addApis(apiList);
+                    logger.info("Number of APIs received : " + apiList.size());
                     ack();
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime

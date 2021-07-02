@@ -318,4 +318,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 			}(data)
 		}
 	}
+	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.
+	xds.DeployReadinessAPI(envs)
+	logger.LoggerMgw.Info("Fetching APIs at startup is completed...")
 }

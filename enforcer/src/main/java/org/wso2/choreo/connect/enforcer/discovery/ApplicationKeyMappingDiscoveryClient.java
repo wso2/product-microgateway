@@ -135,6 +135,7 @@ public class ApplicationKeyMappingDiscoveryClient implements Runnable {
                         applicationKeyMappingLis.addAll(res.unpack(ApplicationKeyMappingList.class).getListList());
                     }
                     subscriptionDataStore.addApplicationKeyMappings(applicationKeyMappingLis);
+                    logger.info("Number of application key mappings received : " + applicationKeyMappingLis.size());
                     ack();
                 } catch (Exception e) {
                     // catching generic error here to wrap any grpc communication errors in the runtime
