@@ -127,9 +127,9 @@ func TestGetAllEnvironments(t *testing.T) {
 
 func setupInternalMemoryMapsWithTestSamples() {
 	apiToVhostsMap = map[string]map[string]struct{}{
-		// The same API name:version is deployed in two org with two gateway environments
-		"PetStore:v1": {"org1.wso2.com": void, "org2.foo.com": void},
-		"Pizza:v1":    {"org1.foo.com": void, "org2.foo.com": void, "org2.wso2.com": void},
+		// The same API uuid is deployed in two org with two gateway environments
+		"111-PetStore-org1": {"org1.wso2.com": void, "org2.foo.com": void},
+		"333-Pizza-org1":    {"org1.foo.com": void, "org2.foo.com": void, "org2.wso2.com": void},
 	}
 	apiUUIDToGatewayToVhosts = map[string]map[string]string{
 		// PetStore:v1 in Org1
