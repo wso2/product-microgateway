@@ -62,12 +62,12 @@ func startConsumer(key string) *Consumer {
 	}()
 	err := handleEvent(c, key)
 	if err != nil {
-		logger.LoggerMsg.Fatalf("Error while handling event. %s", err)
+		logger.LoggerMsg.Errorf("Error while handling event. %s", err)
 	}
 
 	logger.LoggerMsg.Infof("Shutting down the consumer")
 	if err := c.Shutdown(); err != nil {
-		logger.LoggerMsg.Fatalf("Error during shutdown: %s", err)
+		logger.LoggerMsg.Errorf("Error during shutdown: %s", err)
 	}
 
 	return c
