@@ -60,10 +60,7 @@ func InitPackageLogger(pkgName string) *logrus.Logger {
 	formatter := loggerFormat()
 	logger.SetFormatter(formatter)
 
-	logConf, errReadConfig := config.ReadLogConfigs()
-	if errReadConfig != nil {
-		logger.Error("Error loading log configuration. ", errReadConfig)
-	}
+	logConf := config.ReadLogConfigs()
 
 	// Create the log file if doesn't exist. And append to it if it already exists.
 	_, err := os.OpenFile(logConf.Logfile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)

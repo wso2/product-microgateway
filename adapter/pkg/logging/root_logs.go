@@ -34,10 +34,7 @@ type plainFormatter struct {
 }
 
 func init() {
-	logConf, errReadConfig := config.ReadLogConfigs()
-	if errReadConfig != nil {
-		logrus.Error("Error loading log configuration. ", errReadConfig)
-	}
+	logConf := config.ReadLogConfigs()
 
 	err := initGlobalLogger(logConf.Logfile)
 	if err != nil {
@@ -68,14 +65,8 @@ func initGlobalLogger(filename string) error {
 		logrus.SetOutput(multiWriter)
 	}
 
-	logConf, errReadConfig := config.ReadLogConfigs()
-	if errReadConfig != nil {
-		logrus.Error("Error loading configuration. ", errReadConfig)
-		logrus.SetLevel(logLevelMapper(logConf.LogLevel))
-	} else {
-		logrus.SetLevel(defaultLogLevel)
-	}
-
+	logConf := config.ReadLogConfigs()
+	logrus.SetLevel(logLevelMapper(logConf.LogLevel))
 	return err
 }
 
@@ -117,20 +108,8 @@ func (f *plainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 // All the rotation params reads for the configs and if it occurs
 // a error, all the params are set to the default values.
 func setLogRotation(filename string) io.Writer {
-	logConf, errReadConfig := config.ReadLogConfigs()
+	logConf := config.ReadLogConfigs()
 	var rotationWriter io.Writer
-
-	if errReadConfig != nil {
-		logrus.Error("Error loading log configuration. ", errReadConfig)
-		//set default values
-		rotationWriter = &lumberjack.Logger{
-			Filename:   filename,
-			MaxSize:    10, // megabytes
-			MaxBackups: 3,
-			MaxAge:     2,    //days
-			Compress:   true, // disabled by default
-		}
-	}
 
 	rotationWriter = &lumberjack.Logger{
 		Filename:   filename,
