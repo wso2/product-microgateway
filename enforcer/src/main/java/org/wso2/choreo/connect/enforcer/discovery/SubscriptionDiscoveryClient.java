@@ -135,6 +135,7 @@ public class SubscriptionDiscoveryClient implements Runnable {
                         subscriptionList.addAll(res.unpack(SubscriptionList.class).getListList());
                     }
                     subscriptionDataStore.addSubscriptions(subscriptionList);
+                    logger.info("Number of subscriptions received : " + subscriptionList.size());
                     ack();
 
                 } catch (Exception e) {

@@ -28,6 +28,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
 	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
+	"github.com/wso2/product-microgateway/adapter/internal/ga"
 	"github.com/wso2/product-microgateway/adapter/pkg/adapter"
 	apiservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/api"
 	configservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/config"
@@ -220,6 +221,11 @@ func Run(conf *config.Config) {
 			logger.LoggerMgw.Error("Error while initializing authorization component.", err)
 		}
 		go restserver.StartRestServer(conf)
+	}
+
+	// TODO: (VirajSalaka) Properly configure once the adapter flow is complete.
+	if conf.GlobalAdapter.Enabled {
+		go ga.InitGAClient(conf.GlobalAdapter.ServiceURL)
 	}
 
 	eventHubEnabled := conf.ControlPlane.Enabled

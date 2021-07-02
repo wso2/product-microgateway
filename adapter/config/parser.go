@@ -89,6 +89,7 @@ func ReadConfigs() (*Config, error) {
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem())
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem())
 		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem())
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.GlobalAdapter)).Elem())
 	})
 	return adapterConfig, e
 }

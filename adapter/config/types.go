@@ -62,11 +62,12 @@ func NewReceiver() chan string {
 // Config represents the adapter configuration.
 // It is created directly from the configuration toml file.
 type Config struct {
-	Adapter      adapter
-	Envoy        envoy `toml:"router"`
-	Enforcer     enforcer
-	ControlPlane controlPlane `toml:"controlPlane"`
-	Analytics    analytics    `toml:"analytics"`
+	Adapter       adapter
+	Enforcer      enforcer
+	Envoy         envoy         `toml:"router"`
+	ControlPlane  controlPlane  `toml:"controlPlane"`
+	GlobalAdapter globalAdapter `toml:"globalAdapter"`
+	Analytics     analytics     `toml:"analytics"`
 }
 
 // Adapter related Configurations
@@ -381,6 +382,12 @@ type controlPlane struct {
 	RetryInterval           time.Duration           `toml:"retryInterval"`
 	SkipSSLVerification     bool                    `toml:"skipSSLVerification"`
 	JmsConnectionParameters jmsConnectionParameters `toml:"jmsConnectionParameters"`
+}
+
+type globalAdapter struct {
+	Enabled    bool   `toml:"enabled"`
+	ServiceURL string `toml:"serviceUrl"`
+	LocalLabel string `toml:"localLabel"`
 }
 
 type jmsConnectionParameters struct {

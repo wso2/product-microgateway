@@ -40,6 +40,9 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# To clean go.sum and go.mod
+go mod tidy
+
 GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o target/adapter-ubuntu github.com/wso2/product-microgateway/adapter/cmd/adapter
 if [ $? -ne 0 ]; then 
   echo "FAILED: Build failure"

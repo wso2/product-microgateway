@@ -364,6 +364,15 @@ idleTimeoutInSeconds = 3600
   [controlPlane.jmsConnectionParameters]
     eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
 
+# Global Adapter related configurations
+[globalAdapter]
+  # Enable Choreo Connect Global adapter client
+  enabled = false
+  # Global adapter Service URL (<Hostname>:<Port>)
+  serviceUrl = "ga:18002"
+  # Local Adapter Label
+  localLabel = "$env{local_label}"
+
 # Analytics configurations for Choreo Connect
 [analytics]
   # Enable/Disable Analytics in Choreo Connect
