@@ -63,8 +63,8 @@ func NewReceiver() chan string {
 // It is created directly from the configuration toml file.
 type Config struct {
 	Adapter       adapter
-	Envoy         envoy `toml:"router"`
 	Enforcer      enforcer
+	Envoy         envoy         `toml:"router"`
 	ControlPlane  controlPlane  `toml:"controlPlane"`
 	GlobalAdapter globalAdapter `toml:"globalAdapter"`
 	Analytics     analytics     `toml:"analytics"`
