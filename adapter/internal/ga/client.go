@@ -28,8 +28,11 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	ga_model "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/ga"
 	stub "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/ga"
+
 	"google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	grpcStatus "google.golang.org/grpc/status"
 )
 
 var (
@@ -100,6 +103,11 @@ func watchAPIs() {
 		}
 		if err != nil {
 			logger.LoggerGA.Error("Failed to receive the discovery response ", err)
+			errStatus, _ := grpcStatus.FromError(err)
+			// TODO: (VirajSalaka) implement retries.
+			if errStatus.Code() == codes.Unavailable {
+				logger.LoggerGA.Fatal("Connection stopped. ")
+			}
 			nack(err.Error())
 		} else {
 			lastReceivedResponse = discoveryResponse
