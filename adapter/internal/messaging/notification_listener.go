@@ -255,7 +255,12 @@ func handleApplicationEvents(data []byte, eventType string) {
 			return
 		}
 
-		eh.AppKeyMappingList.List = append(eh.AppKeyMappingList.List, applicationKeyMapping)
+		if strings.EqualFold(removeApplicationKeyMapping, eventType) {
+			removeAppKeyMapping(eh.AppKeyMappingList.List, applicationKeyMapping.ApplicationUUID)
+		} else {
+			eh.AppKeyMappingList.List = append(eh.AppKeyMappingList.List, applicationKeyMapping)
+		}
+
 		xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingList(eh.AppKeyMappingList))
 	} else {
 		var applicationEvent msg.ApplicationEvent
@@ -392,19 +397,10 @@ func handlePolicyEvents(data []byte, eventType string) {
 	}
 }
 
-func removeApplication(applications []types.Application, id int32) []types.Application {
-	// TODO: (VirajSalaka) Improve the search logic with binary search mechanism
-	deleteIndex := -1
-	appName := ""
-	for index, app := range applications {
-		if app.ID == id {
-			deleteIndex = index
-			appName = app.Name
-			break
-		}
-	}
+func removeApplication(applications []types.Application, uuid string) []types.Application {
+	deleteIndex, appName := findAppIndexInList(applications, uuid)
 	if deleteIndex == -1 {
-		logger.LoggerInternalMsg.Infof("Application under id: %d is not available", id)
+		logger.LoggerInternalMsg.Infof("Application under id: %d is not available", uuid)
 		return applications
 	}
 	applications[deleteIndex] = applications[len(applications)-1]
@@ -413,13 +409,7 @@ func removeApplication(applications []types.Application, id int32) []types.Appli
 }
 
 func removeSubscription(subscriptions []types.Subscription, id int32) []types.Subscription {
-	deleteIndex := -1
-	// multiple events are sent in subscription scenario
-	for index, sub := range subscriptions {
-		if sub.SubscriptionID == id {
-			deleteIndex = index
-		}
-	}
+	deleteIndex := findSubscriptionIndexInList(subscriptions, id)
 	if deleteIndex == -1 {
 		logger.LoggerInternalMsg.Infof("Subscription under id: %d is not available", id)
 		return subscriptions
@@ -446,13 +436,7 @@ func updateSubscription(id int32, sub types.Subscription) {
 }
 
 func removeAppPolicy(appPolicies []types.ApplicationPolicy, id int32) []types.ApplicationPolicy {
-	deleteIndex := -1
-	for index, policy := range appPolicies {
-		if policy.ID == id {
-			deleteIndex = index
-			break
-		}
-	}
+	deleteIndex := findAppPolicyIndexInList(appPolicies, id)
 	if deleteIndex == -1 {
 		logger.LoggerInternalMsg.Infof("Application Policy under id: %d is not available", id)
 		return appPolicies
@@ -462,19 +446,81 @@ func removeAppPolicy(appPolicies []types.ApplicationPolicy, id int32) []types.Ap
 }
 
 func removeSubPolicy(subPolicies []types.SubscriptionPolicy, id int32) []types.SubscriptionPolicy {
-	deleteIndex := -1
-	for index, policy := range subPolicies {
-		if policy.ID == id {
-			deleteIndex = index
-			break
-		}
-	}
+	deleteIndex := findSubPolicyIndexInList(subPolicies, id)
 	if deleteIndex == -1 {
 		logger.LoggerInternalMsg.Infof("Subscription Policy under id: %d is not available", id)
 		return subPolicies
 	}
 	subPolicies[deleteIndex] = subPolicies[len(subPolicies)-1]
 	return subPolicies[:len(subPolicies)-1]
+}
+
+func removeAppKeyMapping(keyMappings []types.ApplicationKeyMapping, applicationUUID string) []types.ApplicationKeyMapping {
+	deleteIndex := findAppKeyMappingIndexInList(keyMappings, applicationUUID)
+	if deleteIndex == -1 {
+		logger.LoggerInternalMsg.Infof("Application Key mapping under application ID: %s is not available", applicationUUID)
+		return keyMappings
+	}
+	keyMappings[deleteIndex] = keyMappings[len(keyMappings)-1]
+	return keyMappings[:len(keyMappings)-1]
+}
+
+// findAppIndexInList returns the index and application Name
+func findAppIndexInList(list []types.Application, applicationUUID string) (int, string) {
+	deleteIndex := -1
+	appName := ""
+	for index, app := range list {
+		if app.UUID == applicationUUID {
+			deleteIndex = index
+			appName = app.Name
+			break
+		}
+	}
+	return deleteIndex, appName
+}
+
+func findSubscriptionIndexInList(list []types.Subscription, subscriptionID int32) int {
+	deleteIndex := -1
+	// multiple events are sent in subscription scenario
+	for index, sub := range list {
+		if sub.SubscriptionID == subscriptionID {
+			deleteIndex = index
+		}
+	}
+	return deleteIndex
+}
+
+func findAppPolicyIndexInList(list []types.ApplicationPolicy, policyID int32) int {
+	deleteIndex := -1
+	for index, policy := range list {
+		if policy.ID == policyID {
+			deleteIndex = index
+			break
+		}
+	}
+	return deleteIndex
+}
+
+func findSubPolicyIndexInList(list []types.SubscriptionPolicy, policyID int32) int {
+	deleteIndex := -1
+	for index, policy := range list {
+		if policy.ID == policyID {
+			deleteIndex = index
+			break
+		}
+	}
+	return deleteIndex
+}
+
+func findAppKeyMappingIndexInList(list []types.ApplicationKeyMapping, applicationUUID string) int {
+	deleteIndex := -1
+	for index, keyMapping := range list {
+		if keyMapping.ApplicationUUID == applicationUUID {
+			deleteIndex = index
+			break
+		}
+	}
+	return deleteIndex
 }
 
 func isLaterEvent(timeStampMap map[string]int64, mapKey string, currentTimeStamp int64) bool {
