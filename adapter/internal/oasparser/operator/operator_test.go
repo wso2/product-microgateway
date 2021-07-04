@@ -118,7 +118,8 @@ x-wso2-production-endpoints:
 	}
 
 	for _, item := range dataItems {
-		resultMgwSagger := operator.GetMgwSwagger([]byte(item.inputSwagger))
+		resultMgwSagger, err := operator.GetMgwSwagger([]byte(item.inputSwagger))
+		assert.Nil(t, err, "Error should not be present when openAPI definition is converted to a MgwSwagger object")
 
 		assert.Equal(t, item.resultApiProdEndpoints, resultMgwSagger.GetProdEndpoints(), item.message)
 		if resultMgwSagger.GetResources() != nil {
@@ -224,7 +225,8 @@ func testGetMgwSwaggerWebSocket(t *testing.T, apiYamlFilePath string) {
 	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
-	mgwSwagger := operator.GetMgwSwaggerWebSocket(apiJsn)
+	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiJsn)
+	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	if strings.HasSuffix(apiYamlFilePath, "api.yaml") {
 		assert.Equal(t, mgwSwagger.GetAPIType(), "WS", "API type for websocket mismatch")
 		assert.Equal(t, mgwSwagger.GetTitle(), "EchoWebSocket", "mgwSwagger title mismatch")

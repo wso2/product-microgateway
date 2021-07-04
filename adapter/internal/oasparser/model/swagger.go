@@ -18,6 +18,7 @@
 package model
 
 import (
+	"errors"
 	"github.com/go-openapi/spec"
 	"github.com/google/uuid"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -33,14 +34,7 @@ import (
 // UUID.
 //
 // No operation specific information is extracted.
-func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
-	// handle panic
-	defer func() {
-		if r := recover(); r != nil {
-			panic("Error occurred while populating the MgwSwagger object with API definition properties")
-		}
-	}()
-
+func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 	if swagger2.Info != nil {
 		swagger.description = swagger2.Info.Description
 		swagger.title = swagger2.Info.Title
@@ -69,9 +63,14 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) {
 					swagger2.Info.Title, swagger2.Info.Version)
 			}
 		}
-		endpoint := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
-		swagger.productionUrls = append(swagger.productionUrls, endpoint)
+		endpoint, err := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
+		if err == nil {
+			swagger.productionUrls = append(swagger.productionUrls, *endpoint)
+		} else {
+			return errors.New("error encountered when parsing the endpoint")
+		}
 	}
+	return nil
 }
 
 // setResourcesSwagger sets swagger (openapi v2) paths as mgwSwagger resources.
@@ -183,7 +182,7 @@ func setOperationSwagger(path string, methods []Operation, pathItem spec.PathIte
 
 //SetInfoSwaggerWebSocket populates the mgwSwagger object for web sockets
 // TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
-func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{}) {
+func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{}) error {
 
 	data := apiData["data"].(map[string]interface{})
 	// UUID in the generated api.yaml file is considerd as swagger.id
@@ -201,14 +200,23 @@ func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{
 	if endpointConfig["sandbox_endpoints"] != nil {
 		sandboxEndpoints := endpointConfig["sandbox_endpoints"].(map[string]interface{})
 		sandBoxURL := sandboxEndpoints["url"].(string)
-		sandBoxEndpoint := getHostandBasepathandPortWebSocket(sandBoxURL)
-		swagger.sandboxUrls = append(swagger.sandboxUrls, sandBoxEndpoint)
+		sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(sandBoxURL)
+		if err == nil {
+			swagger.sandboxUrls = append(swagger.sandboxUrls, *sandBoxEndpoint)
+		} else {
+			return err
+		}
 	}
 	if endpointConfig["production_endpoints"] != nil {
 		productionEndpoints := endpointConfig["production_endpoints"].(map[string]interface{})
 		productionURL := productionEndpoints["url"].(string)
-		productionEndpoint := getHostandBasepathandPortWebSocket(productionURL)
-		swagger.productionUrls = append(swagger.productionUrls, productionEndpoint)
+		productionEndpoint, err := getHostandBasepathandPortWebSocket(productionURL)
+		if err == nil {
+			swagger.productionUrls = append(swagger.productionUrls, *productionEndpoint)
+		} else {
+			return err
+		}
 	}
 
+	return nil
 }

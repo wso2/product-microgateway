@@ -66,7 +66,8 @@ func TestCreateRouteswithClustersWebsocketSand(t *testing.T) {
 func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string) {
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
-	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
+	mgwSwaggerForOpenapi, err := operator.GetMgwSwagger(openapiByteArr)
+	assert.Nil(t, err, "Error should not be present when openAPI definition is converted to a MgwSwagger object")
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil, "localhost", "carbon.super")
 
 	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
@@ -119,7 +120,8 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
-	mgwSwagger := operator.GetMgwSwaggerWebSocket(apiJsn)
+	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiJsn)
+	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, "localhost", "carbon.super")
 
 	if strings.HasSuffix(apiYamlFilePath, "api.yaml") {
@@ -277,7 +279,8 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
-	mgwSwagger := operator.GetMgwSwaggerWebSocket(apiJsn)
+	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiJsn)
+	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, "localhost", "carbon.super")
 	assert.NotNil(t, routes, "CreateRoutesWithClusters failed: returned routes nil")
 	assert.NotNil(t, clusters, "CreateRoutesWithClusters failed: returned clusters nil")

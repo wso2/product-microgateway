@@ -53,7 +53,8 @@ func TestGetXWso2Endpoints(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources := getXWso2Endpoints(item.inputVendorExtensions, item.inputEndpointType)
+		resultResources, err := getXWso2Endpoints(item.inputVendorExtensions, item.inputEndpointType)
+		assert.Nil(t, err, "Error should not be present when extracting endpoints from the vendor extension map")
 		assert.Equal(t, item.result, resultResources, item.message)
 	}
 }
@@ -203,7 +204,8 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 		if cors, corsFound := mgwSwag.vendorExtensions[xWso2Cors]; corsFound {
 			assert.NotNil(t, cors, "cors should not be empty")
 		}
-		mgwSwag.SetXWso2Extenstions()
+		err := mgwSwag.SetXWso2Extenstions()
+		assert.Nil(t, err, "Should not encounter an error when setting vendor extensions")
 		assert.Equal(t, item.result.productionUrls, mgwSwag.productionUrls, item.message)
 		if mgwSwag.resources != nil {
 			assert.Equal(t, item.result.resources[0].productionUrls, mgwSwag.resources[0].productionUrls, item.message)

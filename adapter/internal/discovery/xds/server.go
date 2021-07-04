@@ -244,13 +244,6 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 	var deployedRevision *notifier.DeployedAPIRevision
 	var err error
 
-	// handle panic
-	defer func() {
-		if r := recover(); r != nil {
-			panic("Xds Cache update failed")
-		}
-	}()
-
 	if len(apiContent.Environments) == 0 {
 		apiContent.Environments = []string{config.DefaultGatewayName}
 	}
@@ -268,7 +261,10 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 		mgwSwagger.SetXWso2AuthHeader(apiContent.AuthHeader)
 		mgwSwagger.OrganizationID = organizationID
 	} else if apiContent.APIType == mgw.WS {
-		mgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
+		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
+		if err != nil {
+			return err
+		}
 		mgwSwagger.OrganizationID = organizationID
 	} else {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.

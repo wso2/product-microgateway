@@ -39,7 +39,8 @@ func TestSetInfoSwaggerWebSocket(t *testing.T) {
 	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
-	mgwSwagger := operator.GetMgwSwaggerWebSocket(apiJsn)
+	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiJsn)
+	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 
 	dataItems := []setInfoSwaggerWebSocketTestItem{
 		{
@@ -65,7 +66,8 @@ func TestSetInfoSwaggerWebSocket(t *testing.T) {
 	}
 
 	for _, item := range dataItems {
-		item.input.SetInfoSwaggerWebSocket(item.apiData)
+		err := item.input.SetInfoSwaggerWebSocket(item.apiData)
+		assert.Nil(t, err, "Error while populating the mgwSwagger object for web sockets")
 		assert.Equal(t, item.input.GetID(), item.apiData["data"].(map[string]interface{})["id"], "MgwSwagger id mismatch")
 		assert.Equal(t, item.input.GetTitle(), item.apiData["data"].(map[string]interface{})["name"], "MgwSwagger title mismatch")
 		assert.Equal(t, item.input.GetVersion(), item.apiData["data"].(map[string]interface{})["version"], "MgwSwagger version mismatch")
@@ -79,7 +81,8 @@ func TestValidate(t *testing.T) {
 	openapiFilePath := config.GetMgwHome() + "/../adapter/test-resources/envoycodegen/openapi_with_prod_sand_extensions.yaml"
 	openapiByteArr, err := ioutil.ReadFile(openapiFilePath)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
-	mgwSwaggerForOpenapi := operator.GetMgwSwagger(openapiByteArr)
+	mgwSwaggerForOpenapi, err := operator.GetMgwSwagger(openapiByteArr)
+	assert.Nil(t, err, "Error should not be present when openAPI definition is converted to a MgwSwagger object")
 	err = mgwSwaggerForOpenapi.Validate()
 	assert.Nil(t, err, "Validation Error should not be present when servers URL is properly provided.")
 

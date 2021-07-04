@@ -75,7 +75,8 @@ func TestSetInfoSwagger(t *testing.T) {
 	}
 	for _, item := range dataItems {
 		var mgwSwagger MgwSwagger
-		mgwSwagger.SetInfoSwagger(item.input)
+		err := mgwSwagger.SetInfoSwagger(item.input)
+		assert.Nil(t, err, "Error should not be present when openAPI v2 definition is converted to a MgwSwagger object")
 		assert.Equal(t, item.result, mgwSwagger, item.message)
 	}
 }
