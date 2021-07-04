@@ -256,12 +256,12 @@ func handleApplicationEvents(data []byte, eventType string) {
 		}
 
 		if strings.EqualFold(removeApplicationKeyMapping, eventType) {
-			removeAppKeyMapping(eh.AppKeyMappingList.List, applicationKeyMapping.ApplicationUUID)
+			delete(eh.ApplicationKeyMappingMap, applicationKeyMapping.ApplicationUUID)
 		} else {
-			eh.AppKeyMappingList.List = append(eh.AppKeyMappingList.List, applicationKeyMapping)
+			eh.ApplicationKeyMappingMap[applicationKeyMapping.ApplicationUUID] = &applicationKeyMapping
 		}
 
-		xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingList(eh.AppKeyMappingList))
+		xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingMap(eh.ApplicationKeyMappingMap))
 	} else {
 		var applicationEvent msg.ApplicationEvent
 		appEventErr := json.Unmarshal([]byte(string(data)), &applicationEvent)
@@ -287,16 +287,16 @@ func handleApplicationEvents(data []byte, eventType string) {
 		}
 
 		if applicationEvent.Event.Type == applicationCreate {
-			eh.AppList.List = append(eh.AppList.List, application)
+			eh.ApplicationMap[application.UUID] = &application
 			logger.LoggerInternalMsg.Infof("Application %s is added.", applicationEvent.UUID)
 		} else if applicationEvent.Event.Type == applicationUpdate {
-			eh.AppList.List = removeApplication(eh.AppList.List, applicationEvent.UUID)
-			eh.AppList.List = append(eh.AppList.List, application)
-			logger.LoggerInternalMsg.Infof("Application %s is added.", applicationEvent.ApplicationName)
+			eh.ApplicationMap[application.UUID] = &application
+			logger.LoggerInternalMsg.Infof("Application %s is updated.", applicationEvent.ApplicationName)
 		} else if applicationEvent.Event.Type == applicationDelete {
-			eh.AppList.List = removeApplication(eh.AppList.List, applicationEvent.UUID)
+			delete(eh.ApplicationMap, application.UUID)
+			logger.LoggerInternalMsg.Infof("Application %s is deleted.", applicationEvent.UUID)
 		}
-		xds.UpdateEnforcerApplications(xds.MarshalApplicationList(eh.AppList))
+		xds.UpdateEnforcerApplications(xds.MarshalApplicationMap(eh.ApplicationMap))
 	}
 }
 
@@ -323,14 +323,13 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 		return
 	}
 	if subscriptionEvent.Event.Type == subscriptionCreate {
-		updateSubscription(subscriptionEvent.SubscriptionID, sub)
+		eh.SubscriptionMap[sub.SubscriptionID] = &sub
 	} else if subscriptionEvent.Event.Type == subscriptionUpdate {
-		eh.SubList.List = removeSubscription(eh.SubList.List, subscriptionEvent.SubscriptionID)
-		updateSubscription(subscriptionEvent.SubscriptionID, sub)
+		eh.SubscriptionMap[sub.SubscriptionID] = &sub
 	} else if subscriptionEvent.Event.Type == subscriptionDelete {
-		eh.SubList.List = removeSubscription(eh.SubList.List, subscriptionEvent.SubscriptionID)
+		delete(eh.SubscriptionMap, sub.SubscriptionID)
 	}
-	xds.UpdateEnforcerSubscriptions(xds.MarshalSubscriptionList(eh.SubList))
+	xds.UpdateEnforcerSubscriptions(xds.MarshalSubscriptionMap(eh.SubscriptionMap))
 	// EventTypes: SUBSCRIPTIONS_CREATE, SUBSCRIPTIONS_UPDATE, SUBSCRIPTIONS_DELETE
 }
 
@@ -361,14 +360,13 @@ func handlePolicyEvents(data []byte, eventType string) {
 			Name: policyEvent.PolicyName, QuotaType: policyEvent.QuotaType}
 
 		if policyEvent.Event.Type == policyCreate {
-			eh.AppPolicyList.List = append(eh.AppPolicyList.List, applicationPolicy)
+			eh.ApplicationPolicyMap[applicationPolicy.ID] = &applicationPolicy
 		} else if policyEvent.Event.Type == policyUpdate {
-			eh.AppPolicyList.List = removeAppPolicy(eh.AppPolicyList.List, policyEvent.PolicyID)
-			eh.AppPolicyList.List = append(eh.AppPolicyList.List, applicationPolicy)
+			eh.ApplicationPolicyMap[applicationPolicy.ID] = &applicationPolicy
 		} else if policyEvent.Event.Type == policyDelete {
-			eh.AppPolicyList.List = removeAppPolicy(eh.AppPolicyList.List, policyEvent.PolicyID)
+			delete(eh.ApplicationPolicyMap, policyEvent.PolicyID)
 		}
-		xds.UpdateEnforcerApplicationPolicies(xds.MarshalApplicationPolicyList(eh.AppPolicyList))
+		xds.UpdateEnforcerApplicationPolicies(xds.MarshalApplicationPolicyMap(eh.ApplicationPolicyMap))
 
 	} else if strings.EqualFold(subscriptionEventType, policyEvent.PolicyType) {
 		var subscriptionPolicyEvent msg.SubscriptionPolicyEvent
@@ -386,141 +384,14 @@ func handlePolicyEvents(data []byte, eventType string) {
 			TenantDomain: subscriptionPolicyEvent.TenantDomain, TimeStamp: subscriptionPolicyEvent.TimeStamp}
 
 		if subscriptionPolicyEvent.Event.Type == policyCreate {
-			eh.SubPolicyList.List = append(eh.SubPolicyList.List, subscriptionPolicy)
+			eh.SubscriptionPolicyMap[subscriptionPolicy.ID] = &subscriptionPolicy
 		} else if subscriptionPolicyEvent.Event.Type == policyUpdate {
-			eh.SubPolicyList.List = removeSubPolicy(eh.SubPolicyList.List, subscriptionPolicyEvent.PolicyID)
-			eh.SubPolicyList.List = append(eh.SubPolicyList.List, subscriptionPolicy)
+			eh.SubscriptionPolicyMap[subscriptionPolicy.ID] = &subscriptionPolicy
 		} else if subscriptionPolicyEvent.Event.Type == policyDelete {
-			eh.SubPolicyList.List = removeSubPolicy(eh.SubPolicyList.List, subscriptionPolicyEvent.PolicyID)
+			delete(eh.SubscriptionPolicyMap, subscriptionPolicy.ID)
 		}
-		xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalSubscriptionPolicyList(eh.SubPolicyList))
+		xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalSubscriptionPolicyMap(eh.SubscriptionPolicyMap))
 	}
-}
-
-func removeApplication(applications []types.Application, uuid string) []types.Application {
-	deleteIndex, appName := findAppIndexInList(applications, uuid)
-	if deleteIndex == -1 {
-		logger.LoggerInternalMsg.Infof("Application under id: %d is not available", uuid)
-		return applications
-	}
-	applications[deleteIndex] = applications[len(applications)-1]
-	logger.LoggerInternalMsg.Infof("Application %s is deleted.", appName)
-	return applications[:len(applications)-1]
-}
-
-func removeSubscription(subscriptions []types.Subscription, id int32) []types.Subscription {
-	deleteIndex := findSubscriptionIndexInList(subscriptions, id)
-	if deleteIndex == -1 {
-		logger.LoggerInternalMsg.Infof("Subscription under id: %d is not available", id)
-		return subscriptions
-	}
-	subscriptions[deleteIndex] = subscriptions[len(subscriptions)-1]
-	logger.LoggerInternalMsg.Debugf("Subscription under id: %d is deleted.", id)
-	return subscriptions[:len(subscriptions)-1]
-}
-
-func updateSubscription(id int32, sub types.Subscription) {
-	//Iterated in reverse to optimize handling subscription creation scenario.
-	updateIndex := -1
-	for index := len(eh.SubList.List) - 1; index >= 0; index-- {
-		if eh.SubList.List[index].SubscriptionID == id {
-			updateIndex = index
-			break
-		}
-	}
-	if updateIndex == -1 {
-		eh.SubList.List = append(eh.SubList.List, sub)
-		return
-	}
-	eh.SubList.List[updateIndex] = sub
-}
-
-func removeAppPolicy(appPolicies []types.ApplicationPolicy, id int32) []types.ApplicationPolicy {
-	deleteIndex := findAppPolicyIndexInList(appPolicies, id)
-	if deleteIndex == -1 {
-		logger.LoggerInternalMsg.Infof("Application Policy under id: %d is not available", id)
-		return appPolicies
-	}
-	appPolicies[deleteIndex] = appPolicies[len(appPolicies)-1]
-	return appPolicies[:len(appPolicies)-1]
-}
-
-func removeSubPolicy(subPolicies []types.SubscriptionPolicy, id int32) []types.SubscriptionPolicy {
-	deleteIndex := findSubPolicyIndexInList(subPolicies, id)
-	if deleteIndex == -1 {
-		logger.LoggerInternalMsg.Infof("Subscription Policy under id: %d is not available", id)
-		return subPolicies
-	}
-	subPolicies[deleteIndex] = subPolicies[len(subPolicies)-1]
-	return subPolicies[:len(subPolicies)-1]
-}
-
-func removeAppKeyMapping(keyMappings []types.ApplicationKeyMapping, applicationUUID string) []types.ApplicationKeyMapping {
-	deleteIndex := findAppKeyMappingIndexInList(keyMappings, applicationUUID)
-	if deleteIndex == -1 {
-		logger.LoggerInternalMsg.Infof("Application Key mapping under application ID: %s is not available", applicationUUID)
-		return keyMappings
-	}
-	keyMappings[deleteIndex] = keyMappings[len(keyMappings)-1]
-	return keyMappings[:len(keyMappings)-1]
-}
-
-// findAppIndexInList returns the index and application Name
-func findAppIndexInList(list []types.Application, applicationUUID string) (int, string) {
-	deleteIndex := -1
-	appName := ""
-	for index, app := range list {
-		if app.UUID == applicationUUID {
-			deleteIndex = index
-			appName = app.Name
-			break
-		}
-	}
-	return deleteIndex, appName
-}
-
-func findSubscriptionIndexInList(list []types.Subscription, subscriptionID int32) int {
-	deleteIndex := -1
-	// multiple events are sent in subscription scenario
-	for index, sub := range list {
-		if sub.SubscriptionID == subscriptionID {
-			deleteIndex = index
-		}
-	}
-	return deleteIndex
-}
-
-func findAppPolicyIndexInList(list []types.ApplicationPolicy, policyID int32) int {
-	deleteIndex := -1
-	for index, policy := range list {
-		if policy.ID == policyID {
-			deleteIndex = index
-			break
-		}
-	}
-	return deleteIndex
-}
-
-func findSubPolicyIndexInList(list []types.SubscriptionPolicy, policyID int32) int {
-	deleteIndex := -1
-	for index, policy := range list {
-		if policy.ID == policyID {
-			deleteIndex = index
-			break
-		}
-	}
-	return deleteIndex
-}
-
-func findAppKeyMappingIndexInList(list []types.ApplicationKeyMapping, applicationUUID string) int {
-	deleteIndex := -1
-	for index, keyMapping := range list {
-		if keyMapping.ApplicationUUID == applicationUUID {
-			deleteIndex = index
-			break
-		}
-	}
-	return deleteIndex
 }
 
 func isLaterEvent(timeStampMap map[string]int64, mapKey string, currentTimeStamp int64) bool {
