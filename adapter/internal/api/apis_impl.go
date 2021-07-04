@@ -247,7 +247,7 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 			err = fmt.Errorf("%v:%v with UUID \"%v\"", apiInfo.Name, apiInfo.Version, apiInfo.ID)
 		}
 	}()
-	
+
 	if apiProject.OrganizationID == "" {
 		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 	}
@@ -276,7 +276,10 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
 			allEnvironments, vhost, apiInfo.Name, apiInfo.Version, apiInfo.ID)
 		// first update the API for vhost
-		updateAPI(vhost, apiInfo, apiProject, allEnvironments)
+		err := updateAPI(vhost, apiInfo, apiProject, allEnvironments)
+		if err != nil {
+			return fmt.Errorf("%v:%v with UUID \"%v\"", apiInfo.Name, apiInfo.Version, apiInfo.ID)
+		}
 	}
 
 	// undeploy APIs with other vhosts in the same gateway environment
@@ -346,12 +349,13 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (err error)
 
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
-		updateAPI(vhost, apiInfo, apiProject, environments)
+		err := updateAPI(vhost, apiInfo, apiProject, environments)
+		return err
 	}
 	return nil
 }
 
-func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) {
+func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) error {
 	// handle panic
 	defer func() {
 		if r := recover(); r != nil {
@@ -390,7 +394,11 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	} else if apiProject.APIType == mgw.WS {
 		apiContent.APIDefinition = apiProject.APIJsn
 	}
-	xds.UpdateAPI(apiContent)
+	err := xds.UpdateAPI(apiContent)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData) {

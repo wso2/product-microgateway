@@ -70,7 +70,8 @@ func TestSetInfoOpenAPI(t *testing.T) {
 	}
 	for _, item := range dataItems {
 		var mgwSwagger MgwSwagger
-		mgwSwagger.SetInfoOpenAPI(item.input)
+		err := mgwSwagger.SetInfoOpenAPI(item.input)
+		assert.Nil(t, err, "Error should not be present when openAPI v3 definition is converted to a MgwSwagger object")
 		assert.Equal(t, item.result, mgwSwagger, item.message)
 	}
 }
@@ -114,7 +115,8 @@ func TestSetResourcesOpenAPI(t *testing.T) {
 		},
 	}
 	for _, item := range dataItems {
-		resultResources := setResourcesOpenAPI(item.input)
+		resultResources, err := setResourcesOpenAPI(item.input)
+		assert.Nil(t, err, "No error should be encountered when setting resources")
 		if item.result != nil {
 			assert.Equal(t, item.result[0].path, resultResources[0].GetPath(), item.message)
 			assert.Equal(t, item.result[0].methods, resultResources[0].GetMethod(), item.message)
@@ -129,14 +131,14 @@ func TestSetResourcesOpenAPI(t *testing.T) {
 func TestGetHostandBasepathandPort(t *testing.T) {
 	type setResourcesTestItem struct {
 		input   string
-		result  Endpoint
+		result  *Endpoint
 		message string
 	}
 	fmt.Println(os.Getwd())
 	dataItems := []setResourcesTestItem{
 		{
 			input: "https://petstore.io:8000/api/v2",
-			result: Endpoint{
+			result: &Endpoint{
 				Host:     "petstore.io",
 				Basepath: "/api/v2",
 				Port:     8000,
@@ -146,7 +148,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 		},
 		{
 			input: "https://petstore.io:8000/api/v2",
-			result: Endpoint{
+			result: &Endpoint{
 				Host:     "petstore.io",
 				Basepath: "/api/v2",
 				Port:     8000,
@@ -156,7 +158,7 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 		},
 		{
 			input: "petstore.io:8000/api/v2",
-			result: Endpoint{
+			result: &Endpoint{
 				Host:     "petstore.io",
 				Basepath: "/api/v2",
 				Port:     8000,
@@ -164,36 +166,20 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 			},
 			message: "when protocol is not provided",
 		},
+		{
+			input: "https://{defaultHost}",
+			result: nil,
+			message: "when malformed endpoint is provided",
+		},
 	}
 	for _, item := range dataItems {
-		resultResources := getHostandBasepathandPort(item.input)
+		resultResources, err := getHostandBasepathandPort(item.input)
 		assert.Equal(t, item.result, resultResources, item.message)
-	}
-}
-
-func TestGetHostandBasepathandPortPanic(t *testing.T) {
-	type getHostandBasepathandPortPanicTestItem struct {
-		inputRawURL string
-		panicMessage string
-		message string
-	}
-	dataItems := []getHostandBasepathandPortPanicTestItem {
-		{
-			inputRawURL: "https://{defaultHost}",
-			panicMessage: "Error while parsing endpoint",
-			message: "Should panic when malformed endpoint is provided",
-		},
-		{
-			inputRawURL: "https:..petstore.io/api/v2",
-			panicMessage: "Error while parsing endpoint",
-			message: "Should panic when malformed endpoint is provided",
-		},
-	}
-	for _, item := range dataItems {
-		defer func() {
-			assert.Equal(t, item.panicMessage, recover(), item.message)
-		}()
-		getHostandBasepathandPort(item.inputRawURL)
+		if resultResources != nil {
+			assert.Nil(t, err, "Error encountered when processing the endpoint")
+		} else {
+			assert.NotNil(t, err, "Should return an error upon failing to process the endpoint")
+		}
 	}
 }
 

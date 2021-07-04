@@ -237,24 +237,21 @@ func DeployReadinessAPI(envs []string) {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(apiContent config.APIContent) {
+func UpdateAPI(apiContent config.APIContent) error {
 	var newLabels []string
 	var mgwSwagger mgw.MgwSwagger
 	var organizationID = apiContent.OrganizationID
-
-	// handle panic
-	defer func() {
-		if r := recover(); r != nil {
-			panic("Xds Cache update failed")
-		}
-	}()
+	var err error
 
 	if len(apiContent.Environments) == 0 {
 		apiContent.Environments = []string{config.DefaultGatewayName}
 	}
 
 	if apiContent.APIType == mgw.HTTP || apiContent.APIType == mgw.WEBSUB {
-		mgwSwagger = operator.GetMgwSwagger(apiContent.APIDefinition)
+		mgwSwagger, err = operator.GetMgwSwagger(apiContent.APIDefinition)
+		if err != nil {
+			return err
+		}
 		mgwSwagger.SetID(apiContent.UUID)
 		mgwSwagger.SetName(apiContent.Name)
 		mgwSwagger.SetVersion(apiContent.Version)
@@ -262,7 +259,10 @@ func UpdateAPI(apiContent config.APIContent) {
 		mgwSwagger.SetXWso2AuthHeader(apiContent.AuthHeader)
 		mgwSwagger.OrganizationID = organizationID
 	} else if apiContent.APIType == mgw.WS {
-		mgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
+		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
+		if err != nil {
+			return err
+		}
 		mgwSwagger.OrganizationID = organizationID
 	} else {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
@@ -271,14 +271,20 @@ func UpdateAPI(apiContent config.APIContent) {
 
 	if (len(mgwSwagger.GetProdEndpoints()) == 0 || mgwSwagger.GetProdEndpoints()[0].Host == "/") &&
 		(len(mgwSwagger.GetSandEndpoints()) == 0 || mgwSwagger.GetSandEndpoints()[0].Host == "/") {
-		mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
-		mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
+		productionEndpointErr := mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
+		if productionEndpointErr != nil {
+			return productionEndpointErr
+		}
+		sandboxEndpointErr := mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
+		if sandboxEndpointErr != nil {
+			return sandboxEndpointErr
+		}
 	}
 
 	validationErr := mgwSwagger.Validate()
 	if validationErr != nil {
 		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s", mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), organizationID)
-		return
+		return validationErr
 	}
 
 	uniqueIdentifier := apiContent.UUID
@@ -374,6 +380,7 @@ func UpdateAPI(apiContent config.APIContent) {
 	if svcdiscovery.IsServiceDiscoveryEnabled {
 		startConsulServiceDiscovery(apiContent.OrganizationID) //consul service discovery starting point
 	}
+	return nil
 }
 
 // GetAllEnvironments returns all the environments merging new environments with already deployed environments
