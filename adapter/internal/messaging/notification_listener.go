@@ -288,13 +288,13 @@ func handleApplicationEvents(data []byte, eventType string) {
 
 		if applicationEvent.Event.Type == applicationCreate {
 			eh.AppList.List = append(eh.AppList.List, application)
-			logger.LoggerInternalMsg.Infof("Application %s is added.", applicationEvent.ApplicationName)
+			logger.LoggerInternalMsg.Infof("Application %s is added.", applicationEvent.UUID)
 		} else if applicationEvent.Event.Type == applicationUpdate {
-			eh.AppList.List = removeApplication(eh.AppList.List, applicationEvent.ApplicationID)
+			eh.AppList.List = removeApplication(eh.AppList.List, applicationEvent.UUID)
 			eh.AppList.List = append(eh.AppList.List, application)
 			logger.LoggerInternalMsg.Infof("Application %s is added.", applicationEvent.ApplicationName)
 		} else if applicationEvent.Event.Type == applicationDelete {
-			eh.AppList.List = removeApplication(eh.AppList.List, applicationEvent.ApplicationID)
+			eh.AppList.List = removeApplication(eh.AppList.List, applicationEvent.UUID)
 		}
 		xds.UpdateEnforcerApplications(xds.MarshalApplicationList(eh.AppList))
 	}

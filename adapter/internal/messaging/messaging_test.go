@@ -37,9 +37,9 @@ func TestRemoveApplication(t *testing.T) {
 	appArray = append(appArray, application2)
 	appArray = append(appArray, application3)
 
-	appArray = removeApplication(appArray, 1)
+	appArray = removeApplication(appArray, application1.UUID)
 	assert.Len(t, appArray, 2)
-	appArray = removeApplication(appArray, 1)
+	appArray = removeApplication(appArray, application1.UUID)
 	assert.Len(t, appArray, 2)
 	assert.Equal(t, application3.ID, appArray[0].ID)
 	assert.Equal(t, application2.ID, appArray[1].ID)
