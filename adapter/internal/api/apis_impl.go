@@ -180,7 +180,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 		err := errors.New("could not find api.yaml or api.json")
 		loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
 		return apiProject, err
-	} else if apiProject.APIType != mgw.HTTP && apiProject.APIType != mgw.WS {
+	} else if apiProject.APIType != mgw.HTTP && apiProject.APIType != mgw.WS && apiProject.APIType != mgw.WEBSUB {
 		errMsg := "API type is not currently supported with Choreo Connect"
 		loggers.LoggerAPI.Warnf(errMsg)
 		err = errors.New(errMsg)
