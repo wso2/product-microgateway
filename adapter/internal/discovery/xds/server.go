@@ -240,7 +240,7 @@ func UpdateAPI(apiContent config.APIContent) error {
 		apiContent.Environments = []string{config.DefaultGatewayName}
 	}
 
-	if apiContent.APIType == mgw.HTTP {
+	if apiContent.APIType == mgw.HTTP || apiContent.APIType == mgw.WEBSUB {
 		mgwSwagger, err = operator.GetMgwSwagger(apiContent.APIDefinition)
 		if err != nil {
 			return err
