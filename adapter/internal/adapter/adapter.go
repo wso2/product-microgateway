@@ -321,14 +321,13 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 
 // FetchAPIUUIDsFromGlobalAdapter fetches the UUIDs of the APIs at the LA startup from GA
 func FetchAPIUUIDsFromGlobalAdapter(xdsURL string) {
-	// TODO: Get the API UUID list from FetchGAApis gRPC service in GA at startup
-	// Hardcoded the API UUID list for testing
-	apiUUIDList := []string{"a91e74eb-79dc-467f-9840-7c4cd41cbe78", "c2af8811-17df-4d7e-bb25-5033f1c30171"}
-	conf, errConf := config.ReadConfigs()
-	if errConf != nil {
-		logger.LoggerGA.Errorf("Error occurred when reading the configs: %v", errConf)
-		return
-	}
-	eventhub.LoadSubscriptionData(conf)
-	fetchAPIsOnStartUp(conf, apiUUIDList)
+	// TODO: (VirajSalaka) Get the API UUID list from FetchGAApis gRPC service in GA at startup
+	// apiUUIDList := []string{"a91e74eb-79dc-467f-9840-7c4cd41cbe78", "c2af8811-17df-4d7e-bb25-5033f1c30171"}
+	// conf, errConf := config.ReadConfigs()
+	// if errConf != nil {
+	// 	logger.LoggerGA.Errorf("Error occurred when reading the configs: %v", errConf)
+	// 	return
+	// }
+	// eventhub.LoadSubscriptionData(conf)
+	// fetchAPIsOnStartUp(conf, apiUUIDList)
 }
