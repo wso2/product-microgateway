@@ -363,7 +363,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	apiContent.EndpointSecurity.SandBox.SecurityType = apiProject.EndpointSecurity.SandBox.SecurityType
 	apiContent.OrganizationID = apiProject.OrganizationID
 
-	if apiProject.APIType == mgw.HTTP {
+	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBSUB {
 		apiContent.APIDefinition = apiProject.SwaggerJsn
 	} else if apiProject.APIType == mgw.WS {
 		apiContent.APIDefinition = apiProject.APIJsn
