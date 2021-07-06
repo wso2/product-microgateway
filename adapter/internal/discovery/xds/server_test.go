@@ -66,6 +66,30 @@ func TestGetVhostOfAPI(t *testing.T) {
 	}
 }
 
+func TestGenerateIdentifierForAPIWithUUID(t *testing.T) {
+	setupInternalMemoryMapsWithTestSamples()
+	tests := []struct {
+		name  string
+		uuid  string
+		vhost string
+	}{
+		{
+			name:  "Get_identifier_from_uuid_and_vhost",
+			uuid:  "e2cb0839-700b-4226-8239-eead31353f19",
+			vhost: "org2.foo.com",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			identifier := GenerateIdentifierForAPIWithUUID(test.vhost, test.uuid)
+			if identifier != test.vhost+":"+test.uuid {
+				t.Errorf("expected identifier %v but found %v", test.vhost+":"+test.uuid, identifier)
+			}
+		})
+	}
+}
+
 func TestGetAllEnvironments(t *testing.T) {
 	setupInternalMemoryMapsWithTestSamples()
 
