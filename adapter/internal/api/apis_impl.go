@@ -180,7 +180,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 		err := errors.New("could not find api.yaml or api.json")
 		loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
 		return apiProject, err
-	} else if apiProject.APIType != mgw.HTTP && apiProject.APIType != mgw.WS {
+	} else if apiProject.APIType != mgw.HTTP && apiProject.APIType != mgw.WS && apiProject.APIType != mgw.WEBSUB {
 		errMsg := "API type is not currently supported with Choreo Connect"
 		loggers.LoggerAPI.Warnf(errMsg)
 		err = errors.New(errMsg)
@@ -279,7 +279,7 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 			// ignore if vhost is empty, since it deletes all vhosts of API
 			continue
 		}
-		if err := xds.DeleteAPIs(vhost, apiInfo.Name, apiInfo.Version, environments, apiProject.OrganizationID); err != nil {
+		if err := xds.DeleteAPIsWithUUID(vhost, apiInfo.ID, environments, apiProject.OrganizationID); err != nil {
 			return err
 		}
 	}
@@ -310,7 +310,7 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 		// if the API already exists in the one of vhost, break deployment of the API
 		exists := false
 		for _, deployment := range apiProject.Deployments {
-			if xds.IsAPIExist(deployment.DeploymentVhost, apiInfo.Name, apiInfo.Version, apiProject.OrganizationID) {
+			if xds.IsAPIExist(deployment.DeploymentVhost, apiInfo.ID, apiProject.OrganizationID) {
 				exists = true
 				break
 			}
@@ -363,7 +363,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	apiContent.EndpointSecurity.SandBox.SecurityType = apiProject.EndpointSecurity.SandBox.SecurityType
 	apiContent.OrganizationID = apiProject.OrganizationID
 
-	if apiProject.APIType == mgw.HTTP {
+	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBSUB {
 		apiContent.APIDefinition = apiProject.SwaggerJsn
 	} else if apiProject.APIType == mgw.WS {
 		apiContent.APIDefinition = apiProject.APIJsn

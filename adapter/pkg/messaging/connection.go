@@ -32,20 +32,20 @@ import (
 
 var (
 	// NotificationChannel stores the Events for notifications
-	NotificationChannel chan *amqp.Delivery
+	NotificationChannel chan amqp.Delivery
 	// KeyManagerChannel stores the key manager eventsv
-	KeyManagerChannel chan *amqp.Delivery
+	KeyManagerChannel chan amqp.Delivery
 	// RevokedTokenChannel stores the revoked token events
-	RevokedTokenChannel chan *amqp.Delivery
+	RevokedTokenChannel chan amqp.Delivery
 	// ThrottleDataChannel stores the throttling related events
-	ThrottleDataChannel chan *amqp.Delivery
+	ThrottleDataChannel chan amqp.Delivery
 )
 
 func init() {
-	NotificationChannel = make(chan *amqp.Delivery)
-	KeyManagerChannel = make(chan *amqp.Delivery)
-	RevokedTokenChannel = make(chan *amqp.Delivery)
-	ThrottleDataChannel = make(chan *amqp.Delivery)
+	NotificationChannel = make(chan amqp.Delivery)
+	KeyManagerChannel = make(chan amqp.Delivery)
+	RevokedTokenChannel = make(chan amqp.Delivery)
+	ThrottleDataChannel = make(chan amqp.Delivery)
 }
 
 // EventListeningEndpoints represents the list of endpoints
@@ -263,19 +263,19 @@ func handleEvent(c *Consumer, key string) error {
 	)
 	if strings.EqualFold(key, notification) {
 		for event := range deliveries {
-			NotificationChannel <- &event
+			NotificationChannel <- event
 		}
 	} else if strings.EqualFold(key, keymanager) {
 		for event := range deliveries {
-			KeyManagerChannel <- &event
+			KeyManagerChannel <- event
 		}
 	} else if strings.EqualFold(key, tokenRevocation) {
 		for event := range deliveries {
-			RevokedTokenChannel <- &event
+			RevokedTokenChannel <- event
 		}
 	} else if strings.EqualFold(key, throttleData) {
 		for event := range deliveries {
-			ThrottleDataChannel <- &event
+			ThrottleDataChannel <- event
 		}
 	}
 	return nil
