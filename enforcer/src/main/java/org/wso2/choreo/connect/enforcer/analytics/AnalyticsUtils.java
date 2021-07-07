@@ -19,10 +19,11 @@
 package org.wso2.choreo.connect.enforcer.analytics;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
+import org.wso2.choreo.connect.enforcer.models.API;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
+import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 
 /**
  * Common Utility functions
@@ -30,12 +31,7 @@ import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 public class AnalyticsUtils {
 
     public static String getAPIId(RequestContext requestContext) {
-        AuthenticationContext authContext = requestContext.getAuthenticationContext();
-        if (authContext == null || StringUtils.isEmpty(authContext.getApiUUID())) {
-            return generateHash(requestContext.getMatchedAPI().getAPIConfig().getName(),
-                    requestContext.getMatchedAPI().getAPIConfig().getVersion());
-        }
-        return authContext.getApiUUID();
+        return requestContext.getMatchedAPI().getAPIConfig().getUuid();
     }
 
     private static String generateHash(String apiName, String apiVersion) {
@@ -44,6 +40,14 @@ public class AnalyticsUtils {
 
     public static String setDefaultIfNull(String value) {
         return value == null ? AnalyticsConstants.DEFAULT_FOR_UNASSIGNED : value;
+    }
+
+    public static String getAPIProvider(String uuid) {
+        API api = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore().getApiByContextAndVersion(uuid);
+        if (api == null) {
+            return AnalyticsConstants.DEFAULT_FOR_UNASSIGNED;
+        }
+        return api.getApiProvider();
     }
 
     /**
