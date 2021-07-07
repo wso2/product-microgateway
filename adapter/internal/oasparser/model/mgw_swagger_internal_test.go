@@ -204,7 +204,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 		if cors, corsFound := mgwSwag.vendorExtensions[xWso2Cors]; corsFound {
 			assert.NotNil(t, cors, "cors should not be empty")
 		}
-		err := mgwSwag.SetXWso2Extenstions()
+		err := mgwSwag.SetXWso2Extensions()
 		assert.Nil(t, err, "Should not encounter an error when setting vendor extensions")
 		assert.Equal(t, item.result.productionUrls, mgwSwag.productionUrls, item.message)
 		if mgwSwag.resources != nil {
