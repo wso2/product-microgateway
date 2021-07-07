@@ -199,14 +199,14 @@ func (swagger *MgwSwagger) GetSetSecurityScheme() []string {
 	return swagger.securityScheme
 }
 
-// SetXWso2Extenstions set the MgwSwagger object with the properties
+// SetXWso2Extensions set the MgwSwagger object with the properties
 // extracted from vendor extensions.
 // xWso2Basepath, xWso2ProductionEndpoints, and xWso2SandboxEndpoints are assigned
 // based on the vendor extensions.
 //
 // Resource level properties (xwso2ProductionEndpoints and xWso2SandboxEndpoints are
 // also populated at the same time).
-func (swagger *MgwSwagger) SetXWso2Extenstions() error {
+func (swagger *MgwSwagger) SetXWso2Extensions() error {
 	swagger.setXWso2Basepath()
 
 	productionEndpointErr := swagger.setXWso2ProductionEndpoint()
@@ -229,7 +229,7 @@ func (swagger *MgwSwagger) SetXWso2Extenstions() error {
 }
 
 // SetXWso2SandboxEndpointForMgwSwagger set the MgwSwagger object with the SandboxEndpoint when
-// it is not populated by SetXWso2Extenstions
+// it is not populated by SetXWso2Extensions
 func (swagger *MgwSwagger) SetXWso2SandboxEndpointForMgwSwagger(sandBoxURL string) error {
 	var sandboxEndpoints []Endpoint
 	sandboxEndpoint, err := getHostandBasepathandPort(sandBoxURL)
@@ -243,7 +243,7 @@ func (swagger *MgwSwagger) SetXWso2SandboxEndpointForMgwSwagger(sandBoxURL strin
 }
 
 // SetXWso2ProductionEndpointMgwSwagger set the MgwSwagger object with the productionEndpoint when
-// it is not populated by SetXWso2Extenstions
+// it is not populated by SetXWso2Extensions
 func (swagger *MgwSwagger) SetXWso2ProductionEndpointMgwSwagger(productionURL string) error {
 	var productionEndpoints []Endpoint
 	productionEndpoint, err := getHostandBasepathandPort(productionURL)

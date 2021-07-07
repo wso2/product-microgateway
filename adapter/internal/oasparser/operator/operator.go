@@ -71,7 +71,7 @@ func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
 			}
 		}
 	}
-	err = mgwSwagger.SetXWso2Extenstions()
+	err = mgwSwagger.SetXWso2Extensions()
 	if err != nil {
 		return mgwSwagger, err
 	}
