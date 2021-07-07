@@ -355,7 +355,9 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (err error)
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
 		err := updateAPI(vhost, apiInfo, apiProject, environments)
-		return err
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
