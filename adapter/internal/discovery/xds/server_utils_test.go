@@ -17,9 +17,10 @@
 package xds
 
 import (
-	"github.com/wso2/product-microgateway/adapter/config"
 	"reflect"
 	"testing"
+
+	"github.com/wso2/product-microgateway/adapter/config"
 )
 
 func TestGetEnvironmentsToBeDeleted(t *testing.T) {
@@ -94,7 +95,7 @@ func TestUpdateVhostInternalMaps(t *testing.T) {
 		VHost:   "org1.wso2.com",
 	}
 	updateVhostInternalMaps(apiContent, []string{"us-region"})
-	if _, ok := apiToVhostsMap["PetStore:v1"]["org1.wso2.com"]; len(apiToVhostsMap["PetStore:v1"]) != 2 || !ok {
+	if _, ok := apiToVhostsMap["111-PetStore-org1"]["org1.wso2.com"]; len(apiToVhostsMap["111-PetStore-org1"]) != 2 || !ok {
 		t.Errorf("expected the vhost %v in the map only once", "org1.wso2.com")
 	}
 	vhost := apiUUIDToGatewayToVhosts[apiContent.UUID]["us-region"]
@@ -110,7 +111,7 @@ func TestUpdateVhostInternalMaps(t *testing.T) {
 		VHost:   "org1.wso2.com",
 	}
 	updateVhostInternalMaps(apiContent, []string{"us-region"})
-	if _, ok := apiToVhostsMap["NewAPI:v1"]["org1.wso2.com"]; len(apiToVhostsMap["NewAPI:v1"]) != 1 || !ok {
+	if _, ok := apiToVhostsMap["xxx"]["org1.wso2.com"]; len(apiToVhostsMap["xxx"]) != 1 || !ok {
 		t.Errorf("expected the vhost %v in the map only once", "org1.wso2.com")
 	}
 	vhost = apiUUIDToGatewayToVhosts[apiContent.UUID]["us-region"]
