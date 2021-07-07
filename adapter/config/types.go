@@ -385,9 +385,10 @@ type controlPlane struct {
 }
 
 type globalAdapter struct {
-	Enabled    bool   `toml:"enabled"`
-	ServiceURL string `toml:"serviceUrl"`
-	LocalLabel string `toml:"localLabel"`
+	Enabled       bool          `toml:"enabled"`
+	ServiceURL    string        `toml:"serviceUrl"`
+	LocalLabel    string        `toml:"localLabel"`
+	RetryInterval time.Duration `toml:"retryInterval"`
 }
 
 type jmsConnectionParameters struct {

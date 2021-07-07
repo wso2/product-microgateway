@@ -20,10 +20,12 @@ package ga
 import (
 	"context"
 	"io"
+	"time"
 
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/golang/protobuf/ptypes"
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	ga_model "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/ga"
@@ -49,6 +51,8 @@ var (
 	xdsStream stub.ApiGADiscoveryService_StreamGAApisClient
 	// GAAPIChannel stores the API Events composed from XDS states
 	GAAPIChannel chan *APIEvent
+	// If a connection error occurs, true event would be returned
+	connectionFaultChannel chan bool
 )
 
 const (
@@ -68,15 +72,15 @@ func init() {
 	apiRevisionMap = make(map[string]string)
 	lastAckedResponse = &discovery.DiscoveryResponse{}
 	GAAPIChannel = make(chan *APIEvent)
+	connectionFaultChannel = make(chan bool)
 }
 
-func initConnection(xdsURL string) error {
+func initConnection() (*grpc.ClientConn, error) {
 	// TODO: (VirajSalaka) Bring in connection level configurations
-	conn, err := grpc.Dial(xdsURL, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := getGRPCConnection()
 	if err != nil {
-		// TODO: (VirajSalaka) retries
 		logger.LoggerGA.Error("Error while connecting to the Global Adapter.", err)
-		return err
+		return nil, err
 	}
 
 	client := stub.NewApiGADiscoveryServiceClient(conn)
@@ -86,10 +90,10 @@ func initConnection(xdsURL string) error {
 	if err != nil {
 		// TODO: (VirajSalaka) handle error.
 		logger.LoggerGA.Error("Error while starting client. ", err)
-		return err
+		return nil, err
 	}
-	logger.LoggerGA.Infof("Connection to the global adapter: %s is successful.", xdsURL)
-	return nil
+	logger.LoggerGA.Info("Connection to the global adapter is successful.")
+	return conn, nil
 }
 
 func watchAPIs() {
@@ -99,6 +103,7 @@ func watchAPIs() {
 			// read done.
 			// TODO: (VirajSalaka) observe the behavior when grpc connection terminates
 			logger.LoggerGA.Error("EOF is received from the global adapter.")
+			connectionFaultChannel <- true
 			return
 		}
 		if err != nil {
@@ -106,7 +111,9 @@ func watchAPIs() {
 			errStatus, _ := grpcStatus.FromError(err)
 			// TODO: (VirajSalaka) implement retries.
 			if errStatus.Code() == codes.Unavailable {
-				logger.LoggerGA.Fatal("Connection stopped. ")
+				logger.LoggerGA.Error("Connection unavailable.")
+				connectionFaultChannel <- true
+				return
 			}
 			nack(err.Error())
 		} else {
@@ -153,20 +160,20 @@ func getAdapterNode() *core.Node {
 }
 
 // InitGAClient initializes the connection to the global adapter.
-func InitGAClient(xdsURL string) {
+func InitGAClient() {
 	logger.LoggerGA.Info("Starting the XDS Client connection to Global Adapter.")
-	err := initConnection(xdsURL)
-	if err == nil {
-		go watchAPIs()
-		discoveryRequest := &discovery.DiscoveryRequest{
-			Node:        getAdapterNode(),
-			VersionInfo: "",
-			TypeUrl:     apiTypeURL,
+	conn := initializeAndWatch()
+	go consumeAPIChannel()
+	for retryTrueReceived := range connectionFaultChannel {
+		// event is always true
+		if !retryTrueReceived {
+			continue
 		}
-		xdsStream.Send(discoveryRequest)
-		consumeAPIChannel()
+		if conn != nil {
+			conn.Close()
+		}
+		conn = initializeAndWatch()
 	}
-	select {}
 }
 
 func addAPIToChannel(resp *discovery.DiscoveryResponse) {
@@ -218,4 +225,40 @@ func consumeAPIChannel() {
 	for event := range GAAPIChannel {
 		logger.LoggerGA.Infof("Event : %v", event)
 	}
+}
+
+func initializeAndWatch() *grpc.ClientConn {
+	conn, err := initConnection()
+	if err != nil {
+		connectionFaultChannel <- true
+		return conn
+	}
+	go watchAPIs()
+	var lastAppliedVersion string
+	if lastAckedResponse != nil {
+		// If the connection is interrupted in the middle, we need to apply if the version remains same
+		lastAppliedVersion = lastAckedResponse.VersionInfo
+	} else {
+		lastAppliedVersion = ""
+	}
+	discoveryRequest := &discovery.DiscoveryRequest{
+		Node:        getAdapterNode(),
+		VersionInfo: lastAppliedVersion,
+		TypeUrl:     apiTypeURL,
+	}
+	xdsStream.Send(discoveryRequest)
+	return conn
+}
+
+func getGRPCConnection() (*grpc.ClientConn, error) {
+	conf, _ := config.ReadConfigs()
+	retryIntervalSeconds := conf.GlobalAdapter.RetryInterval
+	backOff := grpc_retry.BackoffLinearWithJitter(retryIntervalSeconds*time.Second, 0.5)
+	logger.LoggerGA.Infof("Dialing Global Adapter GRPC Service : %s", conf.GlobalAdapter.ServiceURL)
+	return grpc.Dial(
+		conf.GlobalAdapter.ServiceURL,
+		grpc.WithInsecure(),
+		grpc.WithBlock(),
+		grpc.WithStreamInterceptor(
+			grpc_retry.StreamClientInterceptor(grpc_retry.WithBackoff(backOff))))
 }

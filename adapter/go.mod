@@ -18,6 +18,7 @@ require (
 	github.com/go-openapi/validate v0.19.11
 	github.com/golang/protobuf v1.4.3
 	github.com/google/uuid v1.1.2
+	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/lestrrat-go/jwx v1.1.3
 	github.com/mitchellh/mapstructure v1.3.2

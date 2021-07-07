@@ -225,7 +225,7 @@ func Run(conf *config.Config) {
 
 	// TODO: (VirajSalaka) Properly configure once the adapter flow is complete.
 	if conf.GlobalAdapter.Enabled {
-		go ga.InitGAClient(conf.GlobalAdapter.ServiceURL)
+		go ga.InitGAClient()
 	}
 
 	eventHubEnabled := conf.ControlPlane.Enabled
