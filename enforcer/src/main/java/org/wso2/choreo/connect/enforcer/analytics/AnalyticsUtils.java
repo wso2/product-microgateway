@@ -19,7 +19,6 @@
 package org.wso2.choreo.connect.enforcer.analytics;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
 import org.wso2.choreo.connect.enforcer.models.API;
