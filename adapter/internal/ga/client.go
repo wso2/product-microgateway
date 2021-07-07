@@ -72,7 +72,7 @@ type APIEvent struct {
 func init() {
 	apiRevisionMap = make(map[string]string)
 	lastAckedResponse = &discovery.DiscoveryResponse{}
-	GAAPIChannel = make(chan APIEvent)
+	GAAPIChannel = make(chan APIEvent, 10)
 	isFirstResponse = true
 }
 
