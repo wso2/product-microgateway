@@ -257,8 +257,12 @@ func handleApplicationEvents(data []byte, eventType string) {
 
 		if strings.EqualFold(removeApplicationKeyMapping, eventType) {
 			delete(eh.ApplicationKeyMappingMap, applicationKeyMapping.ApplicationUUID)
+			logger.LoggerInternalMsg.Infof("Application Key Mapping for the applicationID %s is removed.",
+				applicationKeyMapping.ApplicationUUID)
 		} else {
 			eh.ApplicationKeyMappingMap[applicationKeyMapping.ApplicationUUID] = &applicationKeyMapping
+			logger.LoggerInternalMsg.Infof("Application Key Mapping for the applicationID %s is added.",
+				applicationKeyMapping.ApplicationUUID)
 		}
 
 		xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingMap(eh.ApplicationKeyMappingMap))
@@ -291,7 +295,7 @@ func handleApplicationEvents(data []byte, eventType string) {
 			logger.LoggerInternalMsg.Infof("Application %s is added.", applicationEvent.UUID)
 		} else if applicationEvent.Event.Type == applicationUpdate {
 			eh.ApplicationMap[application.UUID] = &application
-			logger.LoggerInternalMsg.Infof("Application %s is updated.", applicationEvent.ApplicationName)
+			logger.LoggerInternalMsg.Infof("Application %s is updated.", applicationEvent.UUID)
 		} else if applicationEvent.Event.Type == applicationDelete {
 			delete(eh.ApplicationMap, application.UUID)
 			logger.LoggerInternalMsg.Infof("Application %s is deleted.", applicationEvent.UUID)
@@ -324,10 +328,13 @@ func handleSubscriptionEvents(data []byte, eventType string) {
 	}
 	if subscriptionEvent.Event.Type == subscriptionCreate {
 		eh.SubscriptionMap[sub.SubscriptionID] = &sub
+		logger.LoggerInternalMsg.Infof("Subscription for %s:%s is added.", subscriptionEvent.APIUUID, subscriptionEvent.ApplicationUUID)
 	} else if subscriptionEvent.Event.Type == subscriptionUpdate {
 		eh.SubscriptionMap[sub.SubscriptionID] = &sub
+		logger.LoggerInternalMsg.Infof("Subscription for %s:%s is updated.", subscriptionEvent.APIUUID, subscriptionEvent.ApplicationUUID)
 	} else if subscriptionEvent.Event.Type == subscriptionDelete {
 		delete(eh.SubscriptionMap, sub.SubscriptionID)
+		logger.LoggerInternalMsg.Infof("Subscription for %s:%s is deleted.", subscriptionEvent.APIUUID, subscriptionEvent.ApplicationUUID)
 	}
 	xds.UpdateEnforcerSubscriptions(xds.MarshalSubscriptionMap(eh.SubscriptionMap))
 	// EventTypes: SUBSCRIPTIONS_CREATE, SUBSCRIPTIONS_UPDATE, SUBSCRIPTIONS_DELETE
@@ -350,21 +357,19 @@ func handlePolicyEvents(data []byte, eventType string) {
 		logger.LoggerInternalMsg.Infof("Policy: %s for policy type: %s", policyEvent.PolicyName, policyEvent.PolicyType)
 	}
 
-	// TODO: (VirajSalaka) Decide if it is required to have API Level Policies
-	// if strings.EqualFold(apiEventType, policyEvent.PolicyType) {
-	// 	var apiPolicyEvent APIPolicyEvent
-	// 	json.Unmarshal([]byte(string(data)), &apiPolicyEvent)
-	// } else
 	if strings.EqualFold(applicationEventType, policyEvent.PolicyType) {
 		applicationPolicy := types.ApplicationPolicy{ID: policyEvent.PolicyID, TenantID: policyEvent.Event.TenantID,
 			Name: policyEvent.PolicyName, QuotaType: policyEvent.QuotaType}
 
 		if policyEvent.Event.Type == policyCreate {
 			eh.ApplicationPolicyMap[applicationPolicy.ID] = &applicationPolicy
+			logger.LoggerInternalMsg.Infof("Application Policy: %s is added.", applicationPolicy.Name)
 		} else if policyEvent.Event.Type == policyUpdate {
 			eh.ApplicationPolicyMap[applicationPolicy.ID] = &applicationPolicy
+			logger.LoggerInternalMsg.Infof("Application Policy: %s is updated.", applicationPolicy.Name)
 		} else if policyEvent.Event.Type == policyDelete {
 			delete(eh.ApplicationPolicyMap, policyEvent.PolicyID)
+			logger.LoggerInternalMsg.Infof("Application Policy: %s is deleted.", applicationPolicy.Name)
 		}
 		xds.UpdateEnforcerApplicationPolicies(xds.MarshalApplicationPolicyMap(eh.ApplicationPolicyMap))
 
@@ -385,10 +390,13 @@ func handlePolicyEvents(data []byte, eventType string) {
 
 		if subscriptionPolicyEvent.Event.Type == policyCreate {
 			eh.SubscriptionPolicyMap[subscriptionPolicy.ID] = &subscriptionPolicy
+			logger.LoggerInternalMsg.Infof("Subscription Policy: %s is added.", subscriptionPolicy.Name)
 		} else if subscriptionPolicyEvent.Event.Type == policyUpdate {
 			eh.SubscriptionPolicyMap[subscriptionPolicy.ID] = &subscriptionPolicy
+			logger.LoggerInternalMsg.Infof("Subscription Policy: %s is updated.", subscriptionPolicy.Name)
 		} else if subscriptionPolicyEvent.Event.Type == policyDelete {
 			delete(eh.SubscriptionPolicyMap, subscriptionPolicy.ID)
+			logger.LoggerInternalMsg.Infof("Subscription Policy: %s is deleted.", subscriptionPolicy.Name)
 		}
 		xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalSubscriptionPolicyMap(eh.SubscriptionPolicyMap))
 	}
