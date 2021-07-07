@@ -279,6 +279,9 @@ function isAPILevelThrottled(string apiContext, string? apiVersion, ConditionalT
     boolean stopOnQuota;
     string apiThrottleKey = apiContext;
     if (apiVersion is string) {
+        if (!apiThrottleKey.endsWith("/" + apiVersion)) {
+            apiThrottleKey += "/" + apiVersion;
+        }
         apiThrottleKey += ":" + apiVersion;
     }
 
@@ -469,6 +472,9 @@ function setThrottleKeysWithVersion(RequestStreamDTO requestStreamDTO, http:Filt
         requestStreamDTO.apiVersion = apiVersion;
     }
     if (apiVersion is string) {
+        if (!requestStreamDTO.apiKey.endsWith("/" + apiVersion)) {
+            requestStreamDTO.apiKey += "/" + apiVersion;
+        }        
         requestStreamDTO.apiKey += ":" + apiVersion;
         requestStreamDTO.subscriptionKey += ":" + apiVersion;
     }

@@ -31,7 +31,7 @@ function {{cut service.qualifiedServiceName " "}}_{{operationId}}_resourceFuncti
     runtime:InvocationContext invocationContext = runtime:getInvocationContext();
 
     map<string> pathParams = { {{#pathParameters}}
-        "{{name}}": <@untainted>'{{name}}{{#unless @last}},{{/unless}} {{/pathParameters}}
+        "{{name}}": <@untainted>{{{escapedName}}}{{#unless @last}},{{/unless}} {{/pathParameters}}
     };
     invocationContext.attributes["pathParams"] = pathParams;
 
