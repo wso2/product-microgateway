@@ -51,7 +51,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		logger.LoggerSync.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
 		return err
 	}
-	logger.LoggerSync.Infof("Start Deploying %d API/s...", len(zipReader.File))
+	logger.LoggerSync.Infof("Start Deploying %d API/s...", len(zipReader.File)-1)
 
 	// apiFiles represents zipped API files fetched from API Manager
 	apiFiles := make(map[string]*zip.File, len(zipReader.File)-1)
@@ -100,7 +100,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		}
 	}
-	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(zipReader.File))
+	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(zipReader.File)-1)
 	// Error nil for successful execution
 	return nil
 }
