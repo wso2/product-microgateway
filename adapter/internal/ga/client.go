@@ -186,6 +186,8 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 	}
 
 	var startupAPIEventArray []*APIEvent
+	// Even if there are no resources available within ga, an empty but non-nil array would be set
+	startupAPIEventArray = make([]*APIEvent, 0)
 	for _, res := range resp.Resources {
 		api := &ga_model.Api{}
 		err := ptypes.UnmarshalAny(res, api)
@@ -246,9 +248,10 @@ func consumeAPIChannel() {
 
 // FetchAPIsFromGA returns the initial state of GA APIs within Adapter
 func FetchAPIsFromGA() []*APIEvent {
-	if initialAPIEventArray != nil {
-		return initialAPIEventArray
+	for {
+		if initialAPIEventArray != nil {
+			return initialAPIEventArray
+		}
+		time.Sleep(1 * time.Second)
 	}
-	time.Sleep(1 * time.Second)
-	return FetchAPIsFromGA()
 }
