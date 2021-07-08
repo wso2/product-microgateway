@@ -44,6 +44,8 @@ const (
 	HTTP string = "HTTP"
 	// WS - API type for websocket APIs
 	WS string = "WS"
+	// WEBSUB - API type for WEBSUB APIs
+	WEBSUB string = "WEBSUB"
 )
 
 // Constants to represent errors

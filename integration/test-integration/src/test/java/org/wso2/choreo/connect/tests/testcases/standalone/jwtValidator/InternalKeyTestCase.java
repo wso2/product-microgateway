@@ -32,13 +32,30 @@ import java.util.Map;
 
 public class InternalKeyTestCase {
     protected String internalKey;
+    protected String tamperedInternalKey;
 
     @BeforeClass(description = "initialise the setup")
     void start() throws Exception {
         internalKey = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, true);
+        tamperedInternalKey = internalKey.substring(0, internalKey.length()-4);
     }
 
+    // First invoke with tampered internal key. This should fail.
     @Test(description = "Test to check the InternalKey is working")
+    public void invokeWithTamperedInternalKey() throws Exception {
+        // Set header
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Internal-Key", tamperedInternalKey);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
+        Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");
+    }
+
+    // When invoke with original token even though the tampered key is in the invalid key cache,
+    // original token should pass.
+    @Test(description = "Test to check the InternalKey is working", dependsOnMethods = "invokeWithTamperedInternalKey")
     public void invokeInternalKeyHeaderSuccessTest() throws Exception {
         // Set header
         Map<String, String> headers = new HashMap<>();
@@ -54,6 +71,19 @@ public class InternalKeyTestCase {
         // Set header
         Map<String, String> headers = new HashMap<>();
         headers.put("Internal-Key", TestConstant.INVALID_JWT_TOKEN);
+        HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
+        Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");
+    }
+
+    // After invoking with original key, it is cacahed as a success token. But again using the tampered key should fail.
+    @Test(description = "Test to check the InternalKey is working", dependsOnMethods = "invokeInternalKeyHeaderSuccessTest")
+    public void invokeAgainWithTamperedInternalKey() throws Exception {
+        // Set header
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Internal-Key", tamperedInternalKey);
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
