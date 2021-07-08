@@ -404,8 +404,8 @@ func removeApplication(applications []types.Application, id int32) []types.Appli
 		}
 	}
 	if deleteIndex == -1 {
-		logger.LoggerInternalMsg.Debugf("Application under id: %d is not available", id)
-		return nil
+		logger.LoggerInternalMsg.Infof("Application under id: %d is not available", id)
+		return applications
 	}
 	applications[deleteIndex] = applications[len(applications)-1]
 	logger.LoggerInternalMsg.Infof("Application %s is deleted.", appName)
@@ -421,8 +421,8 @@ func removeSubscription(subscriptions []types.Subscription, id int32) []types.Su
 		}
 	}
 	if deleteIndex == -1 {
-		logger.LoggerInternalMsg.Debugf("Subscription under id: %d is not available", id)
-		return nil
+		logger.LoggerInternalMsg.Infof("Subscription under id: %d is not available", id)
+		return subscriptions
 	}
 	subscriptions[deleteIndex] = subscriptions[len(subscriptions)-1]
 	logger.LoggerInternalMsg.Debugf("Subscription under id: %d is deleted.", id)
@@ -454,8 +454,8 @@ func removeAppPolicy(appPolicies []types.ApplicationPolicy, id int32) []types.Ap
 		}
 	}
 	if deleteIndex == -1 {
-		logger.LoggerInternalMsg.Debugf("Application Policy under id: %d is not available", id)
-		return nil
+		logger.LoggerInternalMsg.Infof("Application Policy under id: %d is not available", id)
+		return appPolicies
 	}
 	appPolicies[deleteIndex] = appPolicies[len(appPolicies)-1]
 	return appPolicies[:len(appPolicies)-1]
@@ -470,8 +470,8 @@ func removeSubPolicy(subPolicies []types.SubscriptionPolicy, id int32) []types.S
 		}
 	}
 	if deleteIndex == -1 {
-		logger.LoggerInternalMsg.Debugf("Subscription Policy under id: %d is not available", id)
-		return nil
+		logger.LoggerInternalMsg.Infof("Subscription Policy under id: %d is not available", id)
+		return subPolicies
 	}
 	subPolicies[deleteIndex] = subPolicies[len(subPolicies)-1]
 	return subPolicies[:len(subPolicies)-1]

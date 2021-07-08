@@ -122,9 +122,11 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 JWTTokenPayloadInfo jwtTokenPayloadInfo = (JWTTokenPayloadInfo)
                         CacheProvider.getGatewayInternalKeyDataCache().getIfPresent(tokenIdentifier);
                 if (jwtTokenPayloadInfo != null) {
-                    String rawPayload = jwtTokenPayloadInfo.getRawPayload();
-                    isVerified = rawPayload.equals(splitToken[1]) && !isJwtTokenExpired(payload);
-                } else if (CacheProvider.getInvalidGatewayInternalKeyCache().getIfPresent(tokenIdentifier) != null) {
+                    String cachedToken = jwtTokenPayloadInfo.getAccessToken();
+                    isVerified = cachedToken.equals(internalKey) && !isJwtTokenExpired(payload);
+                } else if (CacheProvider.getInvalidGatewayInternalKeyCache().getIfPresent(tokenIdentifier) != null
+                        && internalKey
+                        .equals(CacheProvider.getInvalidGatewayInternalKeyCache().getIfPresent(tokenIdentifier))) {
                     if (log.isDebugEnabled()) {
                         log.debug("Internal Key retrieved from the invalid internal Key cache. Internal Key: "
                                 + FilterUtils.getMaskedToken(splitToken[0]));
@@ -168,7 +170,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                         }
                         jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
                         jwtTokenPayloadInfo.setPayload(payload);
-                        jwtTokenPayloadInfo.setRawPayload(splitToken[1]);
+                        jwtTokenPayloadInfo.setAccessToken(internalKey);
                         CacheProvider.getGatewayInternalKeyDataCache().put(tokenIdentifier, jwtTokenPayloadInfo);
                     }
 
@@ -182,7 +184,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                             requestContext.getMatchedAPI().getAPIConfig().getUuid());
                 } else {
                     CacheProvider.getGatewayInternalKeyDataCache().invalidate(payload.getJWTID());
-                    CacheProvider.getInvalidGatewayInternalKeyCache().put(payload.getJWTID(), "carbon.super");
+                    CacheProvider.getInvalidGatewayInternalKeyCache().put(payload.getJWTID(), internalKey);
                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
