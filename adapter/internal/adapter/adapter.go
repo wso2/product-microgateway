@@ -312,7 +312,7 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 				logger.LoggerMgw.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
 				time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
 				logger.LoggerMgw.Infof("Retrying to fetch API data from control plane.")
-				go synchronizer.FetchAPIs(&d.APIUUID, d.GatewayLabels, c)
+				synchronizer.FetchAPIs(&d.APIUUID, d.GatewayLabels, c)
 			}(data)
 		}
 	}
