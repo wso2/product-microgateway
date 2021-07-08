@@ -247,7 +247,7 @@ func PushAPIProjects(payload []byte, environments []string) error {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
 		}
 	}
-	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(zipReader.File))
+	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(zipReader.File)-1)
 	// Error nil for successful execution
 	return nil
 }
