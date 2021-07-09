@@ -20,6 +20,7 @@ package ga
 import (
 	"context"
 	"io"
+	"time"
 
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
@@ -41,6 +42,10 @@ var (
 	apiRevisionMap map[string]string
 	// Last Acknowledged Response from the global adapter
 	lastAckedResponse *discovery.DiscoveryResponse
+	// initialAPIEventArray is the array where the api events
+	initialAPIEventArray []*APIEvent
+	// isFirstResponse to keep track of the first discovery response received.
+	isFirstResponse bool
 	// Last Received Response from the global adapter
 	// Last Recieved Response is always is equal to the lastAckedResponse according to current implementation as there is no
 	// validation performed on successfully recieved response.
@@ -48,7 +53,7 @@ var (
 	// XDS stream for streaming APIs from Global Adapter
 	xdsStream stub.ApiGADiscoveryService_StreamGAApisClient
 	// GAAPIChannel stores the API Events composed from XDS states
-	GAAPIChannel chan *APIEvent
+	GAAPIChannel chan APIEvent
 )
 
 const (
@@ -67,7 +72,8 @@ type APIEvent struct {
 func init() {
 	apiRevisionMap = make(map[string]string)
 	lastAckedResponse = &discovery.DiscoveryResponse{}
-	GAAPIChannel = make(chan *APIEvent)
+	GAAPIChannel = make(chan APIEvent, 10)
+	isFirstResponse = true
 }
 
 func initConnection(xdsURL string) error {
@@ -171,11 +177,17 @@ func InitGAClient(xdsURL string) {
 
 func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 	// To keep track of the APIs needs to be deleted.
+
 	removedAPIMap := make(map[string]string)
-	for k, v := range apiRevisionMap {
-		removedAPIMap[k] = v
+	if !isFirstResponse {
+		for k, v := range apiRevisionMap {
+			removedAPIMap[k] = v
+		}
 	}
 
+	var startupAPIEventArray []*APIEvent
+	// Even if there are no resources available within ga, an empty but non-nil array would be set
+	startupAPIEventArray = make([]*APIEvent, 0)
 	for _, res := range resp.Resources {
 		api := &ga_model.Api{}
 		err := ptypes.UnmarshalAny(res, api)
@@ -192,18 +204,32 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 				continue
 			}
 		}
-		event := &APIEvent{
+		event := APIEvent{
 			APIUUID:       api.ApiUUID,
 			RevisionUUID:  api.RevisionUUID,
 			IsDeployEvent: true,
 		}
-		GAAPIChannel <- event
+
+		// If it is the first response, the GA would not send it via the channel. Rather
+		// it appends to an array and let the apis_fetcher collect those data.
+		if isFirstResponse {
+			startupAPIEventArray = append(startupAPIEventArray, &event)
+		} else {
+			GAAPIChannel <- event
+		}
 		apiRevisionMap[api.ApiUUID] = api.RevisionUUID
 		logger.LoggerGA.Infof("API Deploy event is added to the channel. %s : %s", api.ApiUUID, api.RevisionUUID)
 	}
 
+	// If it is the first response, it does not contain any remove events.
+	if isFirstResponse {
+		initialAPIEventArray = startupAPIEventArray
+		isFirstResponse = false
+		return
+	}
+
 	for apiEntry := range removedAPIMap {
-		event := &APIEvent{
+		event := APIEvent{
 			APIUUID:       apiEntry,
 			IsDeployEvent: false,
 		}
@@ -217,5 +243,15 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 func consumeAPIChannel() {
 	for event := range GAAPIChannel {
 		logger.LoggerGA.Infof("Event : %v", event)
+	}
+}
+
+// FetchAPIsFromGA returns the initial state of GA APIs within Adapter
+func FetchAPIsFromGA() []*APIEvent {
+	for {
+		if initialAPIEventArray != nil {
+			return initialAPIEventArray
+		}
+		time.Sleep(1 * time.Second)
 	}
 }
