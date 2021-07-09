@@ -48,7 +48,7 @@ const (
 	// GatewayLabelParam is trequired to call /apis endpoint
 	GatewayLabelParam string = "gatewayLabel"
 	// APIUUIDParam is required to call /apis endpoint
-	APIUUIDParam string = "uuid"
+	APIUUIDParam string = "apiId"
 	// ApisEndpoint is the resource path of /apis endpoint
 	ApisEndpoint string = "apis"
 )
