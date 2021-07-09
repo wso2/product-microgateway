@@ -260,7 +260,5 @@ func getGRPCConnection() (*grpc.ClientConn, error) {
 		grpc.WithInsecure(),
 		grpc.WithBlock(),
 		grpc.WithStreamInterceptor(
-			grpc_retry.StreamClientInterceptor(grpc_retry.WithBackoff(backOff))
-		)
-	)
+			grpc_retry.StreamClientInterceptor(grpc_retry.WithBackoff(backOff))))
 }
