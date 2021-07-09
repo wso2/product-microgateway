@@ -43,16 +43,20 @@ var (
 	apiRevisionMap map[string]string
 	// Last Acknowledged Response from the global adapter
 	lastAckedResponse *discovery.DiscoveryResponse
+	// initialAPIEventArray is the array where the api events
+	initialAPIEventArray []*APIEvent
+	// isFirstResponse to keep track of the first discovery response received.
+	isFirstResponse bool
 	// Last Received Response from the global adapter
 	// Last Recieved Response is always is equal to the lastAckedResponse according to current implementation as there is no
 	// validation performed on successfully recieved response.
 	lastReceivedResponse *discovery.DiscoveryResponse
 	// XDS stream for streaming APIs from Global Adapter
 	xdsStream stub.ApiGADiscoveryService_StreamGAApisClient
-	// GAAPIChannel stores the API Events composed from XDS states
-	GAAPIChannel chan *APIEvent
 	// If a connection error occurs, true event would be returned
 	connectionFaultChannel chan bool
+	// GAAPIChannel stores the API Events composed from XDS states
+	GAAPIChannel chan APIEvent
 )
 
 const (
@@ -71,8 +75,9 @@ type APIEvent struct {
 func init() {
 	apiRevisionMap = make(map[string]string)
 	lastAckedResponse = &discovery.DiscoveryResponse{}
-	GAAPIChannel = make(chan *APIEvent)
 	connectionFaultChannel = make(chan bool)
+	GAAPIChannel = make(chan APIEvent, 10)
+	isFirstResponse = true
 }
 
 func initConnection() (*grpc.ClientConn, error) {
@@ -178,11 +183,17 @@ func InitGAClient() {
 
 func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 	// To keep track of the APIs needs to be deleted.
+
 	removedAPIMap := make(map[string]string)
-	for k, v := range apiRevisionMap {
-		removedAPIMap[k] = v
+	if !isFirstResponse {
+		for k, v := range apiRevisionMap {
+			removedAPIMap[k] = v
+		}
 	}
 
+	var startupAPIEventArray []*APIEvent
+	// Even if there are no resources available within ga, an empty but non-nil array would be set
+	startupAPIEventArray = make([]*APIEvent, 0)
 	for _, res := range resp.Resources {
 		api := &ga_model.Api{}
 		err := ptypes.UnmarshalAny(res, api)
@@ -199,18 +210,32 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 				continue
 			}
 		}
-		event := &APIEvent{
+		event := APIEvent{
 			APIUUID:       api.ApiUUID,
 			RevisionUUID:  api.RevisionUUID,
 			IsDeployEvent: true,
 		}
-		GAAPIChannel <- event
+
+		// If it is the first response, the GA would not send it via the channel. Rather
+		// it appends to an array and let the apis_fetcher collect those data.
+		if isFirstResponse {
+			startupAPIEventArray = append(startupAPIEventArray, &event)
+		} else {
+			GAAPIChannel <- event
+		}
 		apiRevisionMap[api.ApiUUID] = api.RevisionUUID
 		logger.LoggerGA.Infof("API Deploy event is added to the channel. %s : %s", api.ApiUUID, api.RevisionUUID)
 	}
 
+	// If it is the first response, it does not contain any remove events.
+	if isFirstResponse {
+		initialAPIEventArray = startupAPIEventArray
+		isFirstResponse = false
+		return
+	}
+
 	for apiEntry := range removedAPIMap {
-		event := &APIEvent{
+		event := APIEvent{
 			APIUUID:       apiEntry,
 			IsDeployEvent: false,
 		}
@@ -252,8 +277,8 @@ func initializeAndWatch() *grpc.ClientConn {
 
 func getGRPCConnection() (*grpc.ClientConn, error) {
 	conf, _ := config.ReadConfigs()
-	retryIntervalSeconds := conf.GlobalAdapter.RetryInterval
-	backOff := grpc_retry.BackoffLinearWithJitter(retryIntervalSeconds*time.Second, 0.5)
+	retryInterval := conf.GlobalAdapter.RetryInterval
+	backOff := grpc_retry.BackoffLinearWithJitter(retryInterval*time.Second, 0.5)
 	logger.LoggerGA.Infof("Dialing Global Adapter GRPC Service : %s", conf.GlobalAdapter.ServiceURL)
 	return grpc.Dial(
 		conf.GlobalAdapter.ServiceURL,
@@ -261,4 +286,14 @@ func getGRPCConnection() (*grpc.ClientConn, error) {
 		grpc.WithBlock(),
 		grpc.WithStreamInterceptor(
 			grpc_retry.StreamClientInterceptor(grpc_retry.WithBackoff(backOff))))
+}
+
+// FetchAPIsFromGA returns the initial state of GA APIs within Adapter
+func FetchAPIsFromGA() []*APIEvent {
+	for {
+		if initialAPIEventArray != nil {
+			return initialAPIEventArray
+		}
+		time.Sleep(1 * time.Second)
+	}
 }
