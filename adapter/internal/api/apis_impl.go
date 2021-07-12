@@ -180,7 +180,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 		err := errors.New("could not find api.yaml or api.json")
 		loggers.LoggerAPI.Errorf("Error occured while reading the api type : %v", err.Error())
 		return apiProject, err
-	} else if apiProject.APIType != mgw.HTTP && apiProject.APIType != mgw.WS && apiProject.APIType != mgw.WEBSUB {
+	} else if apiProject.APIType != mgw.HTTP && apiProject.APIType != mgw.WS && apiProject.APIType != mgw.WEBHOOK {
 		errMsg := "API type is not currently supported with Choreo Connect"
 		loggers.LoggerAPI.Warnf(errMsg)
 		err = errors.New(errMsg)
@@ -363,7 +363,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	apiContent.EndpointSecurity.SandBox.SecurityType = apiProject.EndpointSecurity.SandBox.SecurityType
 	apiContent.OrganizationID = apiProject.OrganizationID
 
-	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBSUB {
+	if apiProject.APIType == mgw.HTTP || apiProject.APIType == mgw.WEBHOOK {
 		apiContent.APIDefinition = apiProject.SwaggerJsn
 	} else if apiProject.APIType == mgw.WS {
 		apiContent.APIDefinition = apiProject.APIJsn
