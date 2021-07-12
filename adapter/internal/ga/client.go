@@ -19,6 +19,7 @@ package ga
 
 import (
 	"context"
+	"crypto/tls"
 	"io"
 	"time"
 
@@ -79,9 +80,7 @@ func init() {
 }
 
 func initConnection(xdsURL string) error {
-	config, _ := config.ReadConfigs()
-	certPool := tlsutils.GetTrustedCertPool(config.Adapter.Truststore.Location)
-	tlsOption := grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(certPool, config.GlobalAdapter.HostName))
+	tlsOption := grpc.WithTransportCredentials(generateTLSCredentialsForXdsClient())
 	// TODO: (VirajSalaka) Bring in connection level configurations
 	conn, err := grpc.Dial(xdsURL, tlsOption, grpc.WithBlock())
 	if err != nil {
@@ -101,6 +100,26 @@ func initConnection(xdsURL string) error {
 	}
 	logger.LoggerGA.Infof("Connection to the global adapter: %s is successful.", xdsURL)
 	return nil
+}
+
+func generateTLSCredentialsForXdsClient() credentials.TransportCredentials {
+	conf, _ := config.ReadConfigs()
+	certPool := tlsutils.GetTrustedCertPool(conf.Adapter.Truststore.Location)
+	// There is a single private-public key pair for XDS server initialization, as well as for XDS client authentication
+	certificate, err := tlsutils.GetServerCertificate(conf.Adapter.Keystore.PublicKeyLocation,
+		conf.Adapter.Keystore.PublicKeyLocation)
+	if err != nil {
+		logger.LoggerGA.Fatal("Error while processing the private-public key pair", err)
+	}
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{certificate},
+		RootCAs:      certPool,
+	}
+	// This option is used if the calling IP and SAN of the certificate is different.
+	if conf.GlobalAdapter.HostName != "" {
+		tlsConfig.ServerName = conf.GlobalAdapter.HostName
+	}
+	return credentials.NewTLS(tlsConfig)
 }
 
 func watchAPIs() {
