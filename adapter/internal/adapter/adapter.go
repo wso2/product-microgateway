@@ -29,6 +29,7 @@ import (
 	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
 	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
 	"github.com/wso2/product-microgateway/adapter/internal/ga"
+	"github.com/wso2/product-microgateway/adapter/internal/messaging"
 	"github.com/wso2/product-microgateway/adapter/pkg/adapter"
 	apiservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/api"
 	configservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/config"
@@ -53,7 +54,6 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/internal/eventhub"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
-	"github.com/wso2/product-microgateway/adapter/internal/messaging"
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -79,7 +79,7 @@ const (
 func init() {
 	flag.BoolVar(&debug, "debug", true, "Use debug logging")
 	flag.BoolVar(&onlyLogging, "onlyLogging", false, "Only demo AccessLogging Service")
-	flag.UintVar(&port, "port", 18000, "Management server port")
+	flag.UintVar(&port, "port", 18005, "Management server port")
 	flag.UintVar(&gatewayPort, "gateway", 18001, "Management server port for HTTP gateway")
 	flag.UintVar(&alsPort, "als", 18090, "Accesslog server port")
 	flag.StringVar(&mode, "ads", ads, "Management server type (ads, xds, rest)")
@@ -226,7 +226,7 @@ func Run(conf *config.Config) {
 	// TODO: (VirajSalaka) Properly configure once the adapter flow is complete.
 	if conf.GlobalAdapter.Enabled {
 		go ga.InitGAClient()
-		FetchAPIUUIDsFromGlobalAdapter(conf.GlobalAdapter.ServiceURL)
+		FetchAPIUUIDsFromGlobalAdapter()
 	}
 
 	eventHubEnabled := conf.ControlPlane.Enabled
@@ -319,15 +319,15 @@ func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	logger.LoggerMgw.Info("Fetching APIs at startup is completed...")
 }
 
-// FetchAPIUUIDsFromGlobalAdapter fetches the UUIDs of the APIs at the LA startup from GA
-func FetchAPIUUIDsFromGlobalAdapter(xdsURL string) {
-	// TODO: (VirajSalaka) Get the API UUID list from FetchGAApis gRPC service in GA at startup
-	// apiUUIDList := []string{"a91e74eb-79dc-467f-9840-7c4cd41cbe78", "c2af8811-17df-4d7e-bb25-5033f1c30171"}
-	// conf, errConf := config.ReadConfigs()
-	// if errConf != nil {
-	// 	logger.LoggerGA.Errorf("Error occurred when reading the configs: %v", errConf)
-	// 	return
-	// }
-	// eventhub.LoadSubscriptionData(conf)
-	// fetchAPIsOnStartUp(conf, apiUUIDList)
+// FetchAPIUUIDsFromGlobalAdapter get the UUIDs of the APIs at the LA startup from GA
+func FetchAPIUUIDsFromGlobalAdapter() {
+	logger.LoggerMgw.Info("Fetching APIs at Local Adapter startup...")
+	apiEventsAtStartup := ga.FetchAPIsFromGA()
+	conf, _ := config.ReadConfigs()
+	var apiUUIDList []string
+	for _, apiEventAtStartup := range apiEventsAtStartup {
+		apiUUIDList = append(apiUUIDList, apiEventAtStartup.APIUUID)
+	}
+	eventhub.LoadSubscriptionData(conf)
+	fetchAPIsOnStartUp(conf, apiUUIDList)
 }

@@ -18,6 +18,8 @@
 package ga
 
 import (
+	"strings"
+
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	eh "github.com/wso2/product-microgateway/adapter/internal/eventhub"
@@ -30,11 +32,7 @@ import (
 func handleAPIEventsFromGA() {
 	for event := range GAAPIChannel {
 		logger.LoggerGA.Infof("Received Event: %v", event)
-		conf, errConf := config.ReadConfigs()
-		if errConf != nil {
-			logger.LoggerGA.Errorf("Error occurred when reading the configs: %v", errConf)
-			return
-		}
+		conf, _ := config.ReadConfigs()
 		configuredEnvs := conf.ControlPlane.EnvironmentLabels
 		if len(configuredEnvs) == 0 {
 			configuredEnvs = append(configuredEnvs, config.DefaultGatewayName)
@@ -43,7 +41,7 @@ func handleAPIEventsFromGA() {
 			go synchronizer.FetchAPIsFromControlPlane(event.APIUUID, configuredEnvs)
 		}
 		for _, env := range configuredEnvs {
-			if event.IsDeployEvent == true {
+			if event.IsDeployEvent {
 				if _, ok := eh.APIListMap[env]; ok {
 					apiListOfEnv := eh.APIListMap[env].List
 					for i := range apiListOfEnv {
@@ -62,14 +60,18 @@ func handleAPIEventsFromGA() {
 					go eh.InvokeService(eh.ApisEndpoint, eh.APIListMap[env], queryParamMap,
 						eh.APIListChannel, 0)
 				}
-			} else if event.IsDeployEvent == false {
+			} else if !event.IsDeployEvent {
 				if _, ok := eh.APIListMap[env]; ok {
 					apiListOfEnv := eh.APIListMap[env].List
+					logger.LoggerGA.Info(apiListOfEnv)
 					for i := range apiListOfEnv {
-						xds.DeleteAPIWithAPIMEvent(event.APIUUID, apiListOfEnv[i].Name, apiListOfEnv[i].Version,
-							configuredEnvs, apiListOfEnv[i].TenantDomain)
-						logger.LoggerGA.Debugf("Removed API from router")
 						if event.APIUUID == apiListOfEnv[i].UUID {
+							// TODO: (Jayanie) Get the Organization ID
+							splitVersion := strings.Split(apiListOfEnv[i].Context, apiListOfEnv[i].Version)
+							organization := strings.Split(splitVersion[0], "/")[1]
+							xds.DeleteAPIWithAPIMEvent(event.APIUUID, apiListOfEnv[i].Name, apiListOfEnv[i].Version,
+								configuredEnvs, organization)
+							logger.LoggerGA.Debugf("Removed API from router")
 							eh.APIListMap[env].List = msg.DeleteAPIFromList(apiListOfEnv, i, event.APIUUID, env)
 							xds.UpdateEnforcerAPIList(env, xds.MarshalAPIList(eh.APIListMap[env]))
 							break
