@@ -71,7 +71,10 @@ func GetMgwSwagger(apiContent []byte) (model.MgwSwagger, error) {
 			}
 		}
 	}
-	mgwSwagger.SetXWso2Extenstions()
+	err = mgwSwagger.SetXWso2Extensions()
+	if err != nil {
+		return mgwSwagger, err
+	}
 	return mgwSwagger, nil
 }
 
@@ -142,14 +145,17 @@ func GetXWso2LabelsWebSocket(webSocketAPIDef model.MgwSwagger) []string {
 /*
 GetMgwSwaggerWebSocket returns a MgwSwagger for the web socket APIs
 */
-func GetMgwSwaggerWebSocket(apiContent []byte) model.MgwSwagger {
+func GetMgwSwaggerWebSocket(apiContent []byte) (model.MgwSwagger, error) {
 	var mgwSwagger model.MgwSwagger
 	var apiData map[string]interface{}
 	unmarshalErr := json.Unmarshal(apiContent, &apiData)
 	if unmarshalErr != nil {
 		logger.LoggerOasparser.Errorf("JSON unmarshalling error: %v", unmarshalErr)
 	}
-	mgwSwagger.SetInfoSwaggerWebSocket(apiData)
-	return mgwSwagger
+	err := mgwSwagger.SetInfoSwaggerWebSocket(apiData)
+	if err != nil {
+		return mgwSwagger, err
+	}
+	return mgwSwagger, nil
 
 }

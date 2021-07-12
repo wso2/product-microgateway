@@ -25,6 +25,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -229,7 +230,7 @@ func verifyMandatoryFields(apiJSON config.APIJsonData) error {
 
 // ApplyAPIProjectFromAPIM accepts an apictl project (as a byte array), list of vhosts with respective environments
 // and updates the xds servers based upon the content.
-func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string) error {
+func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string) (err error) {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
 		return err
@@ -238,6 +239,14 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 	if err != nil {
 		return err
 	}
+
+	// handle panic
+	defer func() {
+		if r := recover(); r != nil {
+			loggers.LoggerAPI.Error("Recovered from panic. ", r)
+			err = fmt.Errorf("%v:%v with UUID \"%v\"", apiInfo.Name, apiInfo.Version, apiInfo.ID)
+		}
+	}()
 
 	if apiProject.OrganizationID == "" {
 		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
@@ -269,7 +278,7 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 		// first update the API for vhost
 		err := updateAPI(vhost, apiInfo, apiProject, allEnvironments)
 		if err != nil {
-			return err
+			return fmt.Errorf("%v:%v with UUID \"%v\"", apiInfo.Name, apiInfo.Version, apiInfo.ID)
 		}
 	}
 
@@ -288,7 +297,7 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 
 // ApplyAPIProjectInStandaloneMode is called by the rest implementation to differentiate
 // between create and update using the override param
-func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
+func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (err error) {
 	apiProject, err := extractAPIProject(payload)
 	apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 	if err != nil {
@@ -298,6 +307,15 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 	if err != nil {
 		return err
 	}
+
+	// handle panic
+	defer func() {
+		if r := recover(); r != nil {
+			loggers.LoggerAPI.Error("Recovered from panic. ", r)
+			err = fmt.Errorf("%v:%v with UUID \"%v\"", apiInfo.Name, apiInfo.Version, apiInfo.ID)
+		}
+	}()
+
 	// TODO (renuka) when len of apiProject.deployments is 0, return err "nothing deployed" <- check
 	var overrideValue bool
 	if override == nil {
@@ -331,12 +349,22 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
-		updateAPI(vhost, apiInfo, apiProject, environments)
+		err := updateAPI(vhost, apiInfo, apiProject, environments)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
 func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) error {
+	// handle panic
+	defer func() {
+		if r := recover(); r != nil {
+			panic(fmt.Sprintf("Error encountered while applying API %v:%v to %v.", apiInfo.Name, apiInfo.Version, vhost))
+		}
+	}()
+
 	if len(environments) == 0 {
 		environments = append(environments, config.DefaultGatewayName)
 	}

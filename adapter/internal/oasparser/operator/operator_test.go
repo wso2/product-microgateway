@@ -225,7 +225,8 @@ func testGetMgwSwaggerWebSocket(t *testing.T, apiYamlFilePath string) {
 	assert.Nil(t, err, "Error while reading the api.yaml file : %v"+apiYamlFilePath)
 	apiJsn, conversionErr := utills.ToJSON(apiYamlByteArr)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
-	mgwSwagger := operator.GetMgwSwaggerWebSocket(apiJsn)
+	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiJsn)
+	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
 	if strings.HasSuffix(apiYamlFilePath, "api.yaml") {
 		assert.Equal(t, mgwSwagger.GetAPIType(), "WS", "API type for websocket mismatch")
 		assert.Equal(t, mgwSwagger.GetTitle(), "EchoWebSocket", "mgwSwagger title mismatch")

@@ -116,7 +116,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 
 	pbst, err := ptypes.MarshalAny(manager)
 	if err != nil {
-		panic(err)
+		logger.LoggerOasparser.Fatal(err)
 	}
 	connectionManagerFilterP := listenerv3.Filter{
 		Name: wellknown.HTTPConnectionManager,
@@ -166,7 +166,6 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 		marshalledTLSFilter, err := ptypes.MarshalAny(tlsFilter)
 		if err != nil {
 			logger.LoggerOasparser.Fatal("Error while Marshalling the downstream TLS Context for the configuration.")
-			panic(err)
 		}
 
 		transportSocket := &corev3.TransportSocket{
@@ -217,7 +216,7 @@ func createListeners(conf *config.Config) []*listenerv3.Listener {
 
 	if len(listeners) == 0 {
 		err := errors.New("No Listeners are configured as no port value is mentioned under securedListenerPort or ListenerPort")
-		panic(err)
+		logger.LoggerOasparser.Fatal(err)
 	}
 	return listeners
 }

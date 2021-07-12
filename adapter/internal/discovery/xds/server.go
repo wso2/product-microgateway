@@ -242,6 +242,7 @@ func UpdateAPI(apiContent config.APIContent) error {
 	var mgwSwagger mgw.MgwSwagger
 	var organizationID = apiContent.OrganizationID
 	var err error
+
 	if len(apiContent.Environments) == 0 {
 		apiContent.Environments = []string{config.DefaultGatewayName}
 	}
@@ -258,7 +259,10 @@ func UpdateAPI(apiContent config.APIContent) error {
 		mgwSwagger.SetXWso2AuthHeader(apiContent.AuthHeader)
 		mgwSwagger.OrganizationID = organizationID
 	} else if apiContent.APIType == mgw.WS {
-		mgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
+		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
+		if err != nil {
+			return err
+		}
 		mgwSwagger.OrganizationID = organizationID
 	} else {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
