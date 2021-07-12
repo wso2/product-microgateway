@@ -29,10 +29,12 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	ga_model "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/ga"
 	stub "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/ga"
+	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
 	"google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	grpcStatus "google.golang.org/grpc/status"
 )
 
@@ -77,8 +79,11 @@ func init() {
 }
 
 func initConnection(xdsURL string) error {
+	config, _ := config.ReadConfigs()
+	certPool := tlsutils.GetTrustedCertPool(config.Adapter.Truststore.Location)
+	tlsOption := grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(certPool, config.GlobalAdapter.HostName))
 	// TODO: (VirajSalaka) Bring in connection level configurations
-	conn, err := grpc.Dial(xdsURL, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(xdsURL, tlsOption, grpc.WithBlock())
 	if err != nil {
 		// TODO: (VirajSalaka) retries
 		logger.LoggerGA.Error("Error while connecting to the Global Adapter.", err)

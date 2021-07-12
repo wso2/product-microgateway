@@ -387,6 +387,7 @@ type controlPlane struct {
 type globalAdapter struct {
 	Enabled    bool   `toml:"enabled"`
 	ServiceURL string `toml:"serviceUrl"`
+	HostName   string `toml:"overwriteHostName"`
 	LocalLabel string `toml:"localLabel"`
 }
 

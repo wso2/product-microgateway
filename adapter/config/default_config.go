@@ -253,7 +253,8 @@ var defaultConfig = &Config{
 	},
 	GlobalAdapter: globalAdapter{
 		Enabled:    false,
-		ServiceURL: "ga:18002",
+		ServiceURL: "global-adapter:18000",
+		HostName:   "",
 		LocalLabel: "default",
 	},
 	Analytics: analytics{
