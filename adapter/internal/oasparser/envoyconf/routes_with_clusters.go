@@ -423,7 +423,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		decorator = &routev3.Decorator{
 			Operation: endpointBasepath,
 		}
-	} else if apiType == mgw.HTTP || apiType == mgw.WEBSUB {
+	} else if apiType == mgw.HTTP || apiType == mgw.WEBHOOK {
 		decorator = &routev3.Decorator{
 			Operation: resourcePath,
 		}
