@@ -24,7 +24,7 @@ import (
 var (
 	controlPlaneJmsStatusChan     = make(chan bool)
 	controlPlaneRestAPIStatusChan = make(chan bool)
-	// ControlPlaneStarted sets the status of the conrol plane starting
+	// ControlPlaneStarted sets the status of the control plane starting
 	ControlPlaneStarted           = false
 )
 
