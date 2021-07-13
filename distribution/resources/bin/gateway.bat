@@ -97,7 +97,7 @@ IF EXIST %CONF_OUT_FILE% (
             GOTO :setJavaOpts
         )
         :setJavaOpts
-            SET JAVA_OPTS="-javaagent:%GW_HOME%\lib\gateway\jmx_prometheus_javaagent-0.12.0.jar=%jmxPort%:%GW_HOME%\conf\Prometheus\config.yml"
+            SET JAVA_OPTS="-javaagent:%GW_HOME%\lib\gateway\jmx_prometheus_javaagent-0.14.0.jar=%jmxPort%:%GW_HOME%\conf\Prometheus\config.yml"
     )
 
 IF EXIST %CONF_OUT_FILE% DEL /Q /F %CONF_OUT_FILE%
