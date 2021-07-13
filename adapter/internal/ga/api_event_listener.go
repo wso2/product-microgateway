@@ -18,8 +18,6 @@
 package ga
 
 import (
-	"strings"
-
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	eh "github.com/wso2/product-microgateway/adapter/internal/eventhub"
@@ -66,11 +64,8 @@ func handleAPIEventsFromGA() {
 					logger.LoggerGA.Info(apiListOfEnv)
 					for i := range apiListOfEnv {
 						if event.APIUUID == apiListOfEnv[i].UUID {
-							// TODO: (Jayanie) Get the Organization ID
-							splitVersion := strings.Split(apiListOfEnv[i].Context, apiListOfEnv[i].Version)
-							organization := strings.Split(splitVersion[0], "/")[1]
 							xds.DeleteAPIWithAPIMEvent(event.APIUUID, apiListOfEnv[i].Name, apiListOfEnv[i].Version,
-								configuredEnvs, organization)
+								configuredEnvs, event.OrganizationUUID)
 							logger.LoggerGA.Debugf("Removed API from router")
 							eh.APIListMap[env].List = msg.DeleteAPIFromList(apiListOfEnv, i, event.APIUUID, env)
 							xds.UpdateEnforcerAPIList(env, xds.MarshalAPIList(eh.APIListMap[env]))
