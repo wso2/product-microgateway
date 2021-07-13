@@ -371,11 +371,12 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	logger.LoggerOasparser.Debug("creating a route....")
 	var (
-		router       routev3.Route
-		action       *routev3.Route_Route
-		match        *routev3.RouteMatch
-		decorator    *routev3.Decorator
-		resourcePath string
+		router                  routev3.Route
+		action                  *routev3.Route_Route
+		match                   *routev3.RouteMatch
+		decorator               *routev3.Decorator
+		resourcePath            string
+		responseHeadersToRemove []string
 	)
 
 	// OPTIONS is always added even if it is not listed under resources
@@ -423,7 +424,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		decorator = &routev3.Decorator{
 			Operation: endpointBasepath,
 		}
-	} else if apiType == mgw.HTTP {
+	} else if apiType == mgw.HTTP || apiType == mgw.WEBHOOK {
 		decorator = &routev3.Decorator{
 			Operation: resourcePath,
 		}
@@ -516,6 +517,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	if corsPolicy != nil {
 		action.Route.Cors = corsPolicy
 	}
+    // remove the 'x-envoy-upstream-service-time' from the response.
+	responseHeadersToRemove = append(responseHeadersToRemove, upstreamServiceTimeHeader)
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
 	router = routev3.Route{
@@ -527,6 +530,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		TypedPerFilterConfig: map[string]*any.Any{
 			wellknown.HTTPExternalAuthorization: filter,
 		},
+		ResponseHeadersToRemove: responseHeadersToRemove,
 	}
 	return &router
 }
