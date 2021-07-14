@@ -330,6 +330,5 @@ func FetchAPIUUIDsFromGlobalAdapter() {
 	for _, apiEventAtStartup := range apiEventsAtStartup {
 		apiUUIDList = append(apiUUIDList, apiEventAtStartup.APIUUID)
 	}
-	eventhub.LoadSubscriptionData(conf)
 	fetchAPIsOnStartUp(conf, apiUUIDList)
 }
