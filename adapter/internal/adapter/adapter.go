@@ -236,8 +236,10 @@ func Run(conf *config.Config) {
 
 		go messaging.ProcessEvents(conf)
 
-		// Fetch APIs from control plane
-		fetchAPIsOnStartUp(conf, nil)
+		// Fetch APIs from control plane when GA is disabled
+		if !conf.GlobalAdapter.Enabled {
+			fetchAPIsOnStartUp(conf, nil)
+		}
 
 		go synchronizer.UpdateRevokedTokens()
 		// Fetch Key Managers from APIM
