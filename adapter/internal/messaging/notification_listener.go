@@ -69,7 +69,7 @@ var (
 
 // handleNotification to process
 func handleNotification() {
-
+	conf, _ := config.ReadConfigs()
 	for d := range msg.NotificationChannel {
 		var notification msg.EventNotification
 		var eventType string
@@ -91,7 +91,7 @@ func handleNotification() {
 		eventType = notification.Event.PayloadData.EventType
 		if strings.Contains(eventType, apiLifeCycleChange) {
 			handleLifeCycleEvents(decodedByte)
-		} else if strings.Contains(eventType, apiEventType) {
+		} else if strings.Contains(eventType, apiEventType) && !conf.GlobalAdapter.Enabled {
 			handleAPIEvents(decodedByte, eventType)
 		} else if strings.Contains(eventType, applicationEventType) {
 			handleApplicationEvents(decodedByte, eventType)

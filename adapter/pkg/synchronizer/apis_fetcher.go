@@ -113,11 +113,10 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 	}
 
 	// Create a HTTP request
-	// Create a HTTP request
 	if apiUUIDList == nil {
-		req, err = http.NewRequest("GET", serviceURL, nil)
+		req, _ = http.NewRequest("GET", serviceURL, nil)
 	} else {
-		req, err = http.NewRequest("POST", serviceURL, bytes.NewBuffer(bodyJSON))
+		req, _ = http.NewRequest("POST", serviceURL, bytes.NewBuffer(bodyJSON))
 	}
 	// Making necessary query parameters for the request
 	q := req.URL.Query()
