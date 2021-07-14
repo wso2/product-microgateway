@@ -28,7 +28,7 @@
         <listener class-name="org.wso2.choreo.connect.tests.listener.TestNGListener"/>
     </listeners>
 
-    <test name="before-suite-preparations" parallel="false">
+    <test name="apim-startup-and-cc-startup" parallel="false">
         <classes>
             <!-- To avoid apim restarting everytime while writing tests, follow the instructions in integration/test-integration/readme.md -->
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimStartupExecutor"/>
@@ -39,8 +39,24 @@
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcStartupExecutor"/>
         </classes>
     </test>
-    <test name="start-pull-and-events-via-eventhub-combined" parallel="false">
+    <test name="apis-apps-subs-pulled-at-startup" parallel="false">
         <classes>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase">
+                <methods><include name="testPublishedStateAPI"/></methods>
+            </class>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.SubscriptionValidationTestCase">
+                <methods><include name="testAPIsForInvalidSubscription"/></methods>
+            </class>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase">
+                <methods><include name="testAPIsWithDeployedVhost"/></methods>
+            </class>
+        </classes>
+    </test>
+    <test name="all-events-received-via-eventhub" parallel="false">
+        <classes>
+            <!-- Clean and create APIs, Applications, Subscriptions AFTER starting Choreo Connect  -->
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparer"/>
+
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.BasicEventsTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.AdvanceThrottlingTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.throttle.ApplicationThrottlingTestCase"/>

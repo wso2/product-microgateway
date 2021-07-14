@@ -11,9 +11,10 @@
         `setup/standalone` folder represents different Choreo Connect instances with different configurations. 
         You can pick accordingly.
 3. Within the testcase, assume that the api has already been deployed and invoke as needed.
-4. In testcases for standalone mode, a base testcase is not used. Therefore, the testcase is not expected to extend 
+4. Test classes does not have a base test class in the standalone mode. Therefore, the test class does not need to extend 
    a parent class.
-5. Importantly, add the testcase to the `src/test/resources/testng-cc-standalone.xml` file
+5. Importantly, add the testcase to the `src/test/resources/testng-cc-standalone.xml` file. Pick the group
+   according to the class you deployed your API in 2. ii. 
 
 ## How to Add a Testcase for withAPIM mode
 1. Add the APIs, Applications, and Subscriptions that needs to be created, to the json files in 
@@ -25,11 +26,20 @@
 4. Assume that API-M and CC have already started and invoke APIs using the util methods. 
    NOTE: Currently, only APIs, Applications, and Subscriptions are deployed via the above json files. Therefore, changes
    on admin side needs to be deployed within the testcase and cleaned within the testcase as well.
-3. Finally, add the class to the `start-pull-and-events-via-eventhub-combined` test group in the `src/test/resources/testng-cc-with-apim.xml`.
-      - here, the APIs, Applications, and Subscriptions gets created first, 
-        and CC starts afterwords. Thus, CC pulls them during startup, rather than pulling it after getting a 
-        notification from eventhub. 
-     - The above events, for the eventhub path, we add the tests in a separate class "BasicEventsTestCase"
+5. Finally, add the same class to one or both of the following test groups in the `src/test/resources/testng-cc-with-apim.xml`. in the `src/test/resources/testng-cc-with-apim.xml`.
+      - `apis-apps-subs-pulled-at-startup`: Here, we create the APIs, Applications, and Subscriptions first 
+        and start CC afterwords. Thus, CC pulls them during startup, rather than pulling it after getting a 
+        notification from eventhub. Since only the 1st method of the class actually tests whether the startup pull was
+        successful, we only run the 1st method of the test class. Ex:
+        ```
+        <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase">
+            <methods><include name="testPublishedStateAPI"/></methods>
+        </class>
+        ```
+      - `all-events-received-via-eventhub`: In this group, we test the eventhub scenario.
+        By the time this group starts running, CC has already started.
+        Therefore, the `ApimPreparer` first deletes the APIs, Applications, and Subscriptions that were already created.
+        Then creates the same resources again, before running the tests.
 
 ### How to Avoid API Manager restarting everytime the test are run
 1. Run the tests ones
