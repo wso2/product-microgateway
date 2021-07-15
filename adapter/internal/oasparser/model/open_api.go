@@ -21,12 +21,17 @@ import (
 	"encoding/json"
 	"errors"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/uuid"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+)
+
+const (
+	hostNameValidator = "^[a-zA-Z0-9]+[a-zA-Z0-9-.]+[0-9a-zA-Z]$"
 )
 
 // SetInfoOpenAPI populates the MgwSwagger object with the properties within the openAPI v3 definition.
@@ -164,6 +169,12 @@ func getHostandBasepathandPort(rawURL string) *Endpoint {
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
 		logger.LoggerOasparser.Error("Malformed endpoint detected: ", err)
+		return nil
+	}
+
+	// Hostname validation
+	if err == nil && !regexp.MustCompile(hostNameValidator).MatchString(parsedURL.Hostname()) {
+		logger.LoggerOasparser.Error("Malformed endpoint detected (Invalid host name) : ", rawURL)
 		return nil
 	}
 
