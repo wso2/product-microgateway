@@ -224,20 +224,23 @@ func Run(conf *config.Config) {
 	}
 
 	// TODO: (VirajSalaka) Properly configure once the adapter flow is complete.
-	if conf.GlobalAdapter.Enabled {
+	gaEnabled := conf.GlobalAdapter.Enabled
+	if gaEnabled {
 		go ga.InitGAClient()
 		FetchAPIUUIDsFromGlobalAdapter()
 	}
 
 	eventHubEnabled := conf.ControlPlane.Enabled
 	if eventHubEnabled {
-		// Load subscription data
-		eventhub.LoadSubscriptionData(conf)
+		// Load subscription data when GA is disabled.
+		if !gaEnabled {
+			eventhub.LoadSubscriptionData(conf, nil)
+		}
 
 		go messaging.ProcessEvents(conf)
 
-		// Fetch APIs from control plane when GA is disabled
-		if !conf.GlobalAdapter.Enabled {
+		// Fetch APIs from control plane when GA is disabled.
+		if !gaEnabled {
 			fetchAPIsOnStartUp(conf, nil)
 		}
 
@@ -330,5 +333,8 @@ func FetchAPIUUIDsFromGlobalAdapter() {
 	for _, apiEventAtStartup := range apiEventsAtStartup {
 		apiUUIDList = append(apiUUIDList, apiEventAtStartup.APIUUID)
 	}
+	// Load subscription data with the received API UUID list when GA is enabled.
+	eventhub.LoadSubscriptionData(conf, apiUUIDList)
+	// Fetch APIs at LA startup with the received API UUID list when GA is enabled.
 	fetchAPIsOnStartUp(conf, apiUUIDList)
 }
