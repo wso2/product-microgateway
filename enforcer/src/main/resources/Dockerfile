@@ -14,7 +14,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-FROM adoptopenjdk/openjdk11:jdk-11.0.11_9-alpine
+FROM adoptopenjdk/openjdk11:jre-11.0.11_9-alpine
 RUN apk update && apk upgrade --no-cache
 
 LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>" 
@@ -22,9 +22,9 @@ LABEL maintainer="WSO2 Docker Maintainers <dev@wso2.org>"
 ENV LANG=C.UTF-8
 
 ARG MG_USER=wso2
-ARG MG_USER_ID=802
+ARG MG_USER_ID=10500
 ARG MG_USER_GROUP=wso2
-ARG MG_USER_GROUP_ID=802
+ARG MG_USER_GROUP_ID=10500
 ARG MG_USER_HOME=/home/${MG_USER}
 ARG MG_VERSION=1.0-SNAPSHOT
 ARG GRPC_HEALTH_PROBE_PATH=/bin/grpc_health_probe

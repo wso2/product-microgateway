@@ -42,7 +42,7 @@ import (
 var (
 	// apiRevision Map keeps apiUUID -> revisionUUID. This is used only for the communication between global adapter and adapter
 	// The purpose here is to identify if the certain API's revision is already added to the XDS cache.
-	apiRevisionMap map[string]string
+	apiRevisionMap map[string]*ga_model.Api
 	// Last Acknowledged Response from the global adapter
 	lastAckedResponse *discovery.DiscoveryResponse
 	// initialAPIEventArray is the array where the api events
@@ -67,13 +67,14 @@ const (
 // APIEvent represents the event corresponding to a single API Deploy or Remove event
 // based on XDS state changes
 type APIEvent struct {
-	APIUUID       string
-	RevisionUUID  string
-	IsDeployEvent bool
+	APIUUID          string
+	RevisionUUID     string
+	IsDeployEvent    bool
+	OrganizationUUID string
 }
 
 func init() {
-	apiRevisionMap = make(map[string]string)
+	apiRevisionMap = make(map[string]*ga_model.Api)
 	lastAckedResponse = &discovery.DiscoveryResponse{}
 	GAAPIChannel = make(chan APIEvent, 10)
 	isFirstResponse = true
@@ -202,7 +203,7 @@ func InitGAClient(xdsURL string) {
 func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 	// To keep track of the APIs needs to be deleted.
 
-	removedAPIMap := make(map[string]string)
+	removedAPIMap := make(map[string]*ga_model.Api)
 	if !isFirstResponse {
 		for k, v := range apiRevisionMap {
 			removedAPIMap[k] = v
@@ -221,17 +222,18 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 			continue
 		}
 
-		currentRevision, apiFound := apiRevisionMap[api.ApiUUID]
+		currentGAAPI, apiFound := apiRevisionMap[api.ApiUUID]
 		if apiFound {
 			delete(removedAPIMap, api.ApiUUID)
-			if currentRevision == api.RevisionUUID {
+			if currentGAAPI.RevisionUUID == api.RevisionUUID {
 				continue
 			}
 		}
 		event := APIEvent{
-			APIUUID:       api.ApiUUID,
-			RevisionUUID:  api.RevisionUUID,
-			IsDeployEvent: true,
+			APIUUID:          api.ApiUUID,
+			RevisionUUID:     api.RevisionUUID,
+			IsDeployEvent:    true,
+			OrganizationUUID: api.OrganizationUUID,
 		}
 
 		// If it is the first response, the GA would not send it via the channel. Rather
@@ -241,7 +243,7 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 		} else {
 			GAAPIChannel <- event
 		}
-		apiRevisionMap[api.ApiUUID] = api.RevisionUUID
+		apiRevisionMap[api.ApiUUID] = api
 		logger.LoggerGA.Infof("API Deploy event is added to the channel. %s : %s", api.ApiUUID, api.RevisionUUID)
 	}
 
@@ -252,10 +254,11 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 		return
 	}
 
-	for apiEntry := range removedAPIMap {
+	for apiEntry, gaAPI := range removedAPIMap {
 		event := APIEvent{
-			APIUUID:       apiEntry,
-			IsDeployEvent: false,
+			APIUUID:          apiEntry,
+			IsDeployEvent:    false,
+			OrganizationUUID: gaAPI.OrganizationUUID,
 		}
 		GAAPIChannel <- event
 		delete(apiRevisionMap, apiEntry)

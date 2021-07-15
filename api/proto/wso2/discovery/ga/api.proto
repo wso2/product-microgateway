@@ -13,4 +13,5 @@ option java_multiple_files = false;
 message Api {
   string apiUUID = 1;
   string revisionUUID = 2;
+  string organizationUUID = 3;
 }
