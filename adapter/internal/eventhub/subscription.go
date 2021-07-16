@@ -289,7 +289,6 @@ func retrieveAPIListFromChannel(c chan response, initialAPIUUIDListMap map[strin
 							// When GA is disabled load all the subscription data
 							APIListMap[response.GatewayLabel] = newResponse.(*types.APIList)
 						}
-
 					} else {
 						// API Details retrieved after startup contains single API per response.
 						if len(apiListResponse.List) == 1 {
