@@ -110,7 +110,7 @@ func generateTLSCredentialsForXdsClient() credentials.TransportCredentials {
 	certPool := tlsutils.GetTrustedCertPool(conf.Adapter.Truststore.Location)
 	// There is a single private-public key pair for XDS server initialization, as well as for XDS client authentication
 	certificate, err := tlsutils.GetServerCertificate(conf.Adapter.Keystore.PublicKeyLocation,
-		conf.Adapter.Keystore.PublicKeyLocation)
+		conf.Adapter.Keystore.PrivateKeyLocation)
 	if err != nil {
 		logger.LoggerGA.Fatal("Error while processing the private-public key pair", err)
 	}
