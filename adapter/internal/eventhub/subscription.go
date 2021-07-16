@@ -47,6 +47,8 @@ const (
 	VersionParam string = "version"
 	// GatewayLabelParam is trequired to call /apis endpoint
 	GatewayLabelParam string = "gatewayLabel"
+	// APIUUIDParam is required to call /apis endpoint
+	APIUUIDParam string = "apiId"
 	// ApisEndpoint is the resource path of /apis endpoint
 	ApisEndpoint string = "apis"
 )
@@ -111,7 +113,7 @@ func init() {
 }
 
 // LoadSubscriptionData loads subscription data from control-plane
-func LoadSubscriptionData(configFile *config.Config) {
+func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[string]int) {
 	conf = configFile
 	accessToken = auth.GetBasicAuth(configFile.ControlPlane.Username, configFile.ControlPlane.Password)
 
@@ -133,7 +135,7 @@ func LoadSubscriptionData(configFile *config.Config) {
 		go InvokeService(ApisEndpoint, APIListMap[configuredEnv], queryParamMap, APIListChannel, 0)
 	}
 
-	go retrieveAPIListFromChannel(APIListChannel)
+	go retrieveAPIListFromChannel(APIListChannel, initialAPIUUIDListMap)
 	var response response
 	for i := 1; i <= len(resources); i++ {
 		response = <-responseChannel
@@ -252,7 +254,7 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	}
 }
 
-func retrieveAPIListFromChannel(c chan response) {
+func retrieveAPIListFromChannel(c chan response, initialAPIUUIDListMap map[string]int) {
 	for response := range c {
 		responseType := reflect.TypeOf(response.Type).Elem()
 		newResponse := reflect.New(responseType).Interface()
@@ -272,7 +274,21 @@ func retrieveAPIListFromChannel(c chan response) {
 					}
 					if _, ok := APIListMap[response.GatewayLabel]; !ok {
 						// During the startup
-						APIListMap[response.GatewayLabel] = newResponse.(*types.APIList)
+						// When GA is enabled need to load only the subscription data which are related to API UUIDs received
+						// from the GA.
+						if initialAPIUUIDListMap != nil {
+							newEmptyResponse := reflect.New(responseType).Interface()
+							APIListMap[response.GatewayLabel] = newEmptyResponse.(*types.APIList)
+							for i, api := range apiListResponse.List {
+								if _, ok := initialAPIUUIDListMap[api.UUID]; ok {
+									APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List,
+										apiListResponse.List[i])
+								}
+							}
+						} else {
+							// When GA is disabled load all the subscription data
+							APIListMap[response.GatewayLabel] = newResponse.(*types.APIList)
+						}
 					} else {
 						// API Details retrieved after startup contains single API per response.
 						if len(apiListResponse.List) == 1 {

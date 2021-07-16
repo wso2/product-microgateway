@@ -29,6 +29,7 @@ import (
 	enforcerCallbacks "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
 	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
 	"github.com/wso2/product-microgateway/adapter/internal/ga"
+	"github.com/wso2/product-microgateway/adapter/internal/messaging"
 	"github.com/wso2/product-microgateway/adapter/pkg/adapter"
 	apiservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/api"
 	configservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/config"
@@ -53,7 +54,6 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/internal/eventhub"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
-	"github.com/wso2/product-microgateway/adapter/internal/messaging"
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -224,19 +224,22 @@ func Run(conf *config.Config) {
 	}
 
 	// TODO: (VirajSalaka) Properly configure once the adapter flow is complete.
-	if conf.GlobalAdapter.Enabled {
+	gaEnabled := conf.GlobalAdapter.Enabled
+	if gaEnabled {
 		go ga.InitGAClient()
+		FetchAPIUUIDsFromGlobalAdapter()
 	}
 
 	eventHubEnabled := conf.ControlPlane.Enabled
 	if eventHubEnabled {
-		// Load subscription data
-		eventhub.LoadSubscriptionData(conf)
+		if !gaEnabled {
+			// Load subscription data when GA is disabled.
+			eventhub.LoadSubscriptionData(conf, nil)
+			// Fetch APIs at start up when GA is disabled.
+			fetchAPIsOnStartUp(conf, nil)
+		}
 
 		go messaging.ProcessEvents(conf)
-
-		// Fetch APIs from control plane
-		fetchAPIsOnStartUp(conf)
 
 		go synchronizer.UpdateRevokedTokens()
 		// Fetch Key Managers from APIM
@@ -268,7 +271,7 @@ OUTER:
 
 // fetch APIs from control plane during the server start up and push them
 // to the router and enforcer components.
-func fetchAPIsOnStartUp(conf *config.Config) {
+func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	// Populate data from config.
 	serviceURL := conf.ControlPlane.ServiceURL
 	userName := conf.ControlPlane.Username
@@ -282,9 +285,13 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 	c := make(chan sync.SyncAPIResponse)
 
 	// Get API details.
-	adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-		sync.RuntimeArtifactEndpoint, true)
-
+	if apiUUIDList == nil {
+		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
+			sync.RuntimeArtifactEndpoint, true, nil)
+	} else {
+		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
+			sync.APIArtifactEndpoint, true, apiUUIDList)
+	}
 	for i := 0; i < 1; i++ {
 		data := <-c
 		logger.LoggerMgw.Debug("Receiving data for an environment")
@@ -312,4 +319,21 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.
 	xds.DeployReadinessAPI(envs)
 	logger.LoggerMgw.Info("Fetching APIs at startup is completed...")
+}
+
+// FetchAPIUUIDsFromGlobalAdapter get the UUIDs of the APIs at the LA startup from GA
+func FetchAPIUUIDsFromGlobalAdapter() {
+	logger.LoggerMgw.Info("Fetching APIs at Local Adapter startup...")
+	apiEventsAtStartup := ga.FetchAPIsFromGA()
+	conf, _ := config.ReadConfigs()
+	initialAPIUUIDListMap := make(map[string]int)
+	var apiUUIDList []string
+	for i, apiEventAtStartup := range apiEventsAtStartup {
+		apiUUIDList = append(apiUUIDList, apiEventAtStartup.APIUUID)
+		initialAPIUUIDListMap[apiEventAtStartup.APIUUID] = i
+	}
+	// Load subscription data with the received API UUID list map when GA is enabled.
+	eventhub.LoadSubscriptionData(conf, initialAPIUUIDListMap)
+	// Fetch APIs at LA startup with the received API UUID list when GA is enabled.
+	fetchAPIsOnStartUp(conf, apiUUIDList)
 }

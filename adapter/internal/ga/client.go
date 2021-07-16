@@ -126,6 +126,7 @@ func watchAPIs() {
 			lastReceivedResponse = discoveryResponse
 			logger.LoggerGA.Debugf("Discovery response is received : %s", discoveryResponse.VersionInfo)
 			addAPIToChannel(discoveryResponse)
+			go handleAPIEventsFromGA(GAAPIChannel)
 			ack()
 		}
 	}
@@ -169,7 +170,6 @@ func getAdapterNode() *core.Node {
 func InitGAClient() {
 	logger.LoggerGA.Info("Starting the XDS Client connection to Global Adapter.")
 	conn := initializeAndWatch()
-	go consumeAPIChannel()
 	for retryTrueReceived := range connectionFaultChannel {
 		// event is always true
 		if !retryTrueReceived {
@@ -245,13 +245,6 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 		GAAPIChannel <- event
 		delete(apiRevisionMap, apiEntry)
 		logger.LoggerGA.Infof("API Undeploy event is added to the channel. : %s", apiEntry)
-	}
-}
-
-// TODO: (VirajSalaka) Remove this method once the channel consume logic is implemented.
-func consumeAPIChannel() {
-	for event := range GAAPIChannel {
-		logger.LoggerGA.Infof("Event : %v", event)
 	}
 }
 
