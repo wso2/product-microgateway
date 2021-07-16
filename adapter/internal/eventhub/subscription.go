@@ -113,7 +113,7 @@ func init() {
 }
 
 // LoadSubscriptionData loads subscription data from control-plane
-func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDList []string) {
+func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[string]int) {
 	conf = configFile
 	accessToken = auth.GetBasicAuth(configFile.ControlPlane.Username, configFile.ControlPlane.Password)
 
@@ -135,7 +135,7 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDList []string
 		go InvokeService(ApisEndpoint, APIListMap[configuredEnv], queryParamMap, APIListChannel, 0)
 	}
 
-	go retrieveAPIListFromChannel(APIListChannel, initialAPIUUIDList)
+	go retrieveAPIListFromChannel(APIListChannel, initialAPIUUIDListMap)
 	var response response
 	for i := 1; i <= len(resources); i++ {
 		response = <-responseChannel
@@ -254,7 +254,7 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	}
 }
 
-func retrieveAPIListFromChannel(c chan response, initialAPIUUIDList []string) {
+func retrieveAPIListFromChannel(c chan response, initialAPIUUIDListMap map[string]int) {
 	for response := range c {
 		responseType := reflect.TypeOf(response.Type).Elem()
 		newResponse := reflect.New(responseType).Interface()
@@ -274,18 +274,15 @@ func retrieveAPIListFromChannel(c chan response, initialAPIUUIDList []string) {
 					}
 					if _, ok := APIListMap[response.GatewayLabel]; !ok {
 						// During the startup
-						// When GA is enabled need to load only the subscription data which are related to API UUIDs received 
-						// from the GA. 
-						if initialAPIUUIDList != nil {
+						// When GA is enabled need to load only the subscription data which are related to API UUIDs received
+						// from the GA.
+						if initialAPIUUIDListMap != nil {
 							newEmptyResponse := reflect.New(responseType).Interface()
 							APIListMap[response.GatewayLabel] = newEmptyResponse.(*types.APIList)
-							for _, apiUUID := range initialAPIUUIDList {
-								for i, api := range apiListResponse.List {
-									if apiUUID == api.UUID {
-										APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List,
-											apiListResponse.List[i])
-										break
-									}
+							for i, api := range apiListResponse.List {
+								if _, ok := initialAPIUUIDListMap[api.UUID]; ok {
+									APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List,
+										apiListResponse.List[i])
 								}
 							}
 						} else {

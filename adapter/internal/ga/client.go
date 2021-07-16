@@ -222,6 +222,7 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 		// it appends to an array and let the apis_fetcher collect those data.
 		if isFirstResponse {
 			startupAPIEventArray = append(startupAPIEventArray, &event)
+			logger.LoggerGA.Info("JAYANIE")
 		} else {
 			GAAPIChannel <- event
 		}

@@ -61,7 +61,6 @@ func handleAPIEventsFromGA() {
 			} else if !event.IsDeployEvent {
 				if _, ok := eh.APIListMap[env]; ok {
 					apiListOfEnv := eh.APIListMap[env].List
-					logger.LoggerGA.Info(apiListOfEnv)
 					for i := range apiListOfEnv {
 						if event.APIUUID == apiListOfEnv[i].UUID {
 							xds.DeleteAPIWithAPIMEvent(event.APIUUID, apiListOfEnv[i].Name, apiListOfEnv[i].Version,

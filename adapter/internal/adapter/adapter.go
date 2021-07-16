@@ -232,17 +232,14 @@ func Run(conf *config.Config) {
 
 	eventHubEnabled := conf.ControlPlane.Enabled
 	if eventHubEnabled {
-		// Load subscription data when GA is disabled.
 		if !gaEnabled {
+			// Load subscription data when GA is disabled.
 			eventhub.LoadSubscriptionData(conf, nil)
+			// Fetch APIs at start up when GA is disabled.
+			fetchAPIsOnStartUp(conf, nil)
 		}
 
 		go messaging.ProcessEvents(conf)
-
-		// Fetch APIs from control plane when GA is disabled.
-		if !gaEnabled {
-			fetchAPIsOnStartUp(conf, nil)
-		}
 
 		go synchronizer.UpdateRevokedTokens()
 		// Fetch Key Managers from APIM
@@ -329,12 +326,14 @@ func FetchAPIUUIDsFromGlobalAdapter() {
 	logger.LoggerMgw.Info("Fetching APIs at Local Adapter startup...")
 	apiEventsAtStartup := ga.FetchAPIsFromGA()
 	conf, _ := config.ReadConfigs()
+	initialAPIUUIDListMap := make(map[string]int)
 	var apiUUIDList []string
-	for _, apiEventAtStartup := range apiEventsAtStartup {
+	for i, apiEventAtStartup := range apiEventsAtStartup {
 		apiUUIDList = append(apiUUIDList, apiEventAtStartup.APIUUID)
+		initialAPIUUIDListMap[apiEventAtStartup.APIUUID] = i
 	}
-	// Load subscription data with the received API UUID list when GA is enabled.
-	eventhub.LoadSubscriptionData(conf, apiUUIDList)
+	// Load subscription data with the received API UUID list map when GA is enabled.
+	eventhub.LoadSubscriptionData(conf, initialAPIUUIDListMap)
 	// Fetch APIs at LA startup with the received API UUID list when GA is enabled.
 	fetchAPIsOnStartUp(conf, apiUUIDList)
 }
