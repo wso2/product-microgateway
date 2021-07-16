@@ -126,6 +126,7 @@ func watchAPIs() {
 			lastReceivedResponse = discoveryResponse
 			logger.LoggerGA.Debugf("Discovery response is received : %s", discoveryResponse.VersionInfo)
 			addAPIToChannel(discoveryResponse)
+			go handleAPIEventsFromGA(GAAPIChannel)
 			ack()
 		}
 	}
@@ -169,7 +170,6 @@ func getAdapterNode() *core.Node {
 func InitGAClient() {
 	logger.LoggerGA.Info("Starting the XDS Client connection to Global Adapter.")
 	conn := initializeAndWatch()
-	go handleAPIEventsFromGA()
 	for retryTrueReceived := range connectionFaultChannel {
 		// event is always true
 		if !retryTrueReceived {
@@ -222,7 +222,6 @@ func addAPIToChannel(resp *discovery.DiscoveryResponse) {
 		// it appends to an array and let the apis_fetcher collect those data.
 		if isFirstResponse {
 			startupAPIEventArray = append(startupAPIEventArray, &event)
-			logger.LoggerGA.Info("JAYANIE")
 		} else {
 			GAAPIChannel <- event
 		}

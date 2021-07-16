@@ -27,8 +27,8 @@ import (
 )
 
 //handleAPIEventsFromGA handles the API events from GA that are coming through the channel
-func handleAPIEventsFromGA() {
-	for event := range GAAPIChannel {
+func handleAPIEventsFromGA(channel chan APIEvent) {
+	for event := range channel {
 		logger.LoggerGA.Infof("Received Event: %v", event)
 		conf, _ := config.ReadConfigs()
 		configuredEnvs := conf.ControlPlane.EnvironmentLabels
