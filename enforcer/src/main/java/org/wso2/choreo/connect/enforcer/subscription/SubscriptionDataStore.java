@@ -138,4 +138,66 @@ public interface SubscriptionDataStore {
     void removeApiPolicy(ApiPolicy apiPolicy);
 
     API getDefaultApiByContext(String context);
+
+    /**
+     * Filter the API map according to the provided parameters
+     * @param name API Name
+     * @param context API Context
+     * @param version API Version
+     * @param uuid API UUID
+     * @return Matching list of apis.
+     */
+    List<API> getMatchingAPIs(String name, String context, String version, String uuid);
+
+    /**
+     * Filter the API map according to the provided parameters
+     *
+     * @param context API Context
+     * @param version API Version
+     * @return Matching list of apis.
+     */
+    API getMatchingAPI(String context, String version);
+
+    /**
+     * Filter the applications map based on the criteria.
+     * @param name Application Name
+     * @param tenantDomain Application tenant domain/ organization id
+     * @param uuid Application uuid.
+     * @return List of applications which match the given parameters
+     */
+    List<Application> getMatchingApplications(String name, String tenantDomain, String uuid);
+
+
+    /**
+     * Filter the application key mapping map based on provided parameters
+     * @param applicationUUID  Application uuid
+     * @param consumerKey The application consumer key
+     * @return List of key mappings which match the given parameters
+     */
+    List<ApplicationKeyMapping> getMatchingKeyMapping(String applicationUUID, String consumerKey);
+
+
+    /**
+     * Filter the subscriptions map based on the provided parameters
+     * @param applicationUUID UUID of the application
+     * @param apiUUID UUID of the api
+     * @param state Subscription state
+     * @return A List of subscriptions which matches the given parameters
+     */
+    List<Subscription> getMatchingSubscriptions(String applicationUUID, String apiUUID, String state);
+
+    /**
+     * Returns the list of application policies which matches the given policy name
+     * @param policyName The name of the policy
+     * @return
+     */
+    List<ApplicationPolicy> getMatchingApplicationPolicies(String policyName);
+
+    /**
+     *  Returns the list of subscription policies which matches the given policy name
+     * @param policyName The name of the policy
+     * @return
+     */
+    List<SubscriptionPolicy> getMatchingSubscriptionPolicies(String policyName);
+
 }

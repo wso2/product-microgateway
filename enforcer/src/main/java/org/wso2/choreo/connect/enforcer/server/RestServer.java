@@ -30,6 +30,7 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.admin.AdminServerInitializer;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.security.jwt.issuer.HttpTokenServerInitializer;
 
@@ -42,12 +43,13 @@ import javax.net.ssl.SSLException;
 /**
  * TokenServer to handle JWT /testkey endpoint backend HTTPS service.
  */
-public class TokenServer {
+public class RestServer {
 
-    private static final Logger logger = LogManager.getLogger(TokenServer.class);
-    static final int PORT = 8082;
+    private static final Logger logger = LogManager.getLogger(RestServer.class);
+    static final int TOKEN_PORT = 8082;
+    static final int ADMIN_PORT = 9001;
 
-    public void initToken() throws SSLException, CertificateException, InterruptedException {
+    public void initServer() throws SSLException, CertificateException, InterruptedException {
 
         // Configure SSL
         final SslContext sslCtx;
@@ -63,17 +65,32 @@ public class TokenServer {
         final EventLoopGroup workerGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors() * 2);
         try {
             // A helper class that simplifies server configuration
-            ServerBootstrap b = new ServerBootstrap();
+            ServerBootstrap tokenServer = new ServerBootstrap();
             // Configure the server
-            b.option(ChannelOption.SO_BACKLOG, 1024);
-            b.group(bossGroup, workerGroup)
+            tokenServer.option(ChannelOption.SO_BACKLOG, 1024);
+            tokenServer.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new HttpTokenServerInitializer(sslCtx));
 
-            Channel ch = b.bind(PORT).sync().channel();
+            Channel tokenChannel = tokenServer.bind(TOKEN_PORT).sync().channel();
+            logger.info("Token endpoint started Listening in port : " + TOKEN_PORT);
+
+
+            ServerBootstrap adminServer = new ServerBootstrap();
+            // Configure the server
+            adminServer.option(ChannelOption.SO_BACKLOG, 1024);
+            adminServer.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .handler(new LoggingHandler(LogLevel.INFO))
+                    .childHandler(new AdminServerInitializer(sslCtx));
+
+            Channel adminChannel = adminServer.bind(ADMIN_PORT).sync().channel();
+            logger.info("Admin endpoint started Listening in port : " + ADMIN_PORT);
+
             // Wait until server socket is closed
-            ch.closeFuture().sync();
+            tokenChannel.closeFuture().sync();
+            adminChannel.closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
