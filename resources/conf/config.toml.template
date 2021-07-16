@@ -374,6 +374,8 @@ idleTimeoutInSeconds = 3600
   overwriteHostName = ""
   # Local Adapter Label
   localLabel = "$env{local_label}"
+  # Retry Interval
+  retryInterval = 5
 
 # Analytics configurations for Choreo Connect
 [analytics]

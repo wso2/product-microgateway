@@ -252,10 +252,11 @@ var defaultConfig = &Config{
 		},
 	},
 	GlobalAdapter: globalAdapter{
-		Enabled:    false,
-		ServiceURL: "global-adapter:18000",
-		HostName:   "",
-		LocalLabel: "default",
+		Enabled:       false,
+		ServiceURL:    "global-adapter:18000",
+		HostName:      "",
+		LocalLabel:    "default",
+		RetryInterval: 5,
 	},
 	Analytics: analytics{
 		Enabled: false,
