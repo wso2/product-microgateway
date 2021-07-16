@@ -226,6 +226,7 @@ func Run(conf *config.Config) {
 	// TODO: (VirajSalaka) Properly configure once the adapter flow is complete.
 	if conf.GlobalAdapter.Enabled {
 		go ga.InitGAClient()
+		FetchAPIUUIDsFromGlobalAdapter(conf.GlobalAdapter.ServiceURL)
 	}
 
 	eventHubEnabled := conf.ControlPlane.Enabled
@@ -236,7 +237,7 @@ func Run(conf *config.Config) {
 		go messaging.ProcessEvents(conf)
 
 		// Fetch APIs from control plane
-		fetchAPIsOnStartUp(conf)
+		fetchAPIsOnStartUp(conf, nil)
 
 		go synchronizer.UpdateRevokedTokens()
 		// Fetch Key Managers from APIM
@@ -268,7 +269,7 @@ OUTER:
 
 // fetch APIs from control plane during the server start up and push them
 // to the router and enforcer components.
-func fetchAPIsOnStartUp(conf *config.Config) {
+func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
 	// Populate data from config.
 	serviceURL := conf.ControlPlane.ServiceURL
 	userName := conf.ControlPlane.Username
@@ -282,9 +283,13 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 	c := make(chan sync.SyncAPIResponse)
 
 	// Get API details.
-	adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-		sync.RuntimeArtifactEndpoint, true)
-
+	if apiUUIDList == nil {
+		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
+			sync.RuntimeArtifactEndpoint, true, nil)
+	} else {
+		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
+			sync.APIArtifactEndpoint, true, apiUUIDList)
+	}
 	for i := 0; i < 1; i++ {
 		data := <-c
 		logger.LoggerMgw.Debug("Receiving data for an environment")
@@ -312,4 +317,18 @@ func fetchAPIsOnStartUp(conf *config.Config) {
 	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.
 	xds.DeployReadinessAPI(envs)
 	logger.LoggerMgw.Info("Fetching APIs at startup is completed...")
+}
+
+// FetchAPIUUIDsFromGlobalAdapter fetches the UUIDs of the APIs at the LA startup from GA
+func FetchAPIUUIDsFromGlobalAdapter(xdsURL string) {
+	// TODO: Get the API UUID list from FetchGAApis gRPC service in GA at startup
+	// Hardcoded the API UUID list for testing
+	apiUUIDList := []string{"a91e74eb-79dc-467f-9840-7c4cd41cbe78", "c2af8811-17df-4d7e-bb25-5033f1c30171"}
+	conf, errConf := config.ReadConfigs()
+	if errConf != nil {
+		logger.LoggerGA.Errorf("Error occurred when reading the configs: %v", errConf)
+		return
+	}
+	eventhub.LoadSubscriptionData(conf)
+	fetchAPIsOnStartUp(conf, apiUUIDList)
 }

@@ -24,6 +24,7 @@ package synchronizer
 
 import (
 	"archive/zip"
+	"bytes"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
@@ -48,6 +49,8 @@ const (
 	deploymentDescriptorFile string = "deployments.json"
 	// RuntimeArtifactEndpoint represents the /runtime-artifacts endpoint.
 	RuntimeArtifactEndpoint string = "internal/data/v1/runtime-artifacts"
+	// APIArtifactEndpoint represents the /retrieve-api-artifacts endpoint.
+	APIArtifactEndpoint string = "internal/data/v1/retrieve-api-artifacts"
 )
 
 // FetchAPIs pulls the API artifact calling to the API manager
@@ -55,9 +58,20 @@ const (
 // returns a byte slice of that ZIP file.
 func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL string,
 	userName string, password string, skipSSL bool, truststoreLocation string,
-	resourceEndpoint string, sendType bool) {
+	resourceEndpoint string, sendType bool, apiUUIDList []string) {
 	logger.LoggerSync.Info("Fetching APIs from Control Plane.")
 	respSyncAPI := SyncAPIResponse{}
+	var (
+		req       *http.Request
+		err       error
+		resp      *http.Response
+		respBytes []byte
+		bodyJSON  []byte
+	)
+	// postData contains the API UUID list in the payload of the post request.
+	type postData struct {
+		Uuids []string `json:"uuids"`
+	}
 	// NOTE: Getting resourceEndpoint as a parameter since GA and LA use different endpoints.
 	if strings.HasSuffix(serviceURL, "/") {
 		serviceURL += resourceEndpoint
@@ -87,8 +101,24 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 		Transport: tr,
 	}
 
+	// Populating the payload body with API UUID list
+	if apiUUIDList != nil {
+		body := postData{
+			Uuids: apiUUIDList,
+		}
+		bodyJSON, err = json.Marshal(body)
+		if err != nil {
+			logger.LoggerSync.Errorf("Error marshaling the uuid List: %v", err)
+		}
+	}
+
 	// Create a HTTP request
-	req, err := http.NewRequest("GET", serviceURL, nil)
+	// Create a HTTP request
+	if apiUUIDList == nil {
+		req, err = http.NewRequest("GET", serviceURL, nil)
+	} else {
+		req, err = http.NewRequest("POST", serviceURL, bytes.NewBuffer(bodyJSON))
+	}
 	// Making necessary query parameters for the request
 	q := req.URL.Query()
 
@@ -113,9 +143,13 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 	req.URL.RawQuery = q.Encode()
 	// Setting authorization header
 	req.Header.Set(Authorization, basicAuth)
+	// If API UUID list is present, set the content-type header
+	if apiUUIDList != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
 	// Make the request
 	logger.LoggerSync.Debug("Sending the controle plane request")
-	resp, err := client.Do(req)
+	resp, err = client.Do(req)
 	// In the event of a connection error, the error would not be nil, then return the error
 	// If the error is not null, proceed
 	if err != nil {
@@ -127,7 +161,7 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse, serviceURL 
 	}
 
 	// get the response in the form of a byte slice
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err = ioutil.ReadAll(resp.Body)
 
 	// If the reading response gives an error
 	if err != nil {
@@ -168,7 +202,7 @@ func RetryFetchingAPIs(c chan SyncAPIResponse, serviceURL string, userName strin
 		time.Sleep(retryInterval * time.Second)
 		logger.LoggerSync.Infof("Retrying to fetch API data from control plane.")
 		FetchAPIs(&d.APIUUID, d.GatewayLabels, c, serviceURL, userName, password, skipSSL, truststoreLocation,
-			endpoint, sendType)
+			endpoint, sendType, nil)
 	}(data)
 }
 

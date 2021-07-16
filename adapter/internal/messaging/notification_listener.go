@@ -176,7 +176,7 @@ func handleAPIEvents(data []byte, eventType string) {
 				for i := range apiListOfEnv {
 					// TODO: (VirajSalaka) Use APIId once it is fixed from control plane
 					if apiEvent.Context == apiListOfEnv[i].Context && apiEvent.Version == apiListOfEnv[i].Version {
-						eh.APIListMap[env].List = deleteAPIFromList(apiListOfEnv, i, apiEvent.UUID, env)
+						eh.APIListMap[env].List = DeleteAPIFromList(apiListOfEnv, i, apiEvent.UUID, env)
 						xds.UpdateEnforcerAPIList(env, xds.MarshalAPIList(eh.APIListMap[env]))
 						break
 					}
@@ -221,8 +221,8 @@ func handleLifeCycleEvents(data []byte) {
 	}
 }
 
-// deleteAPIFromList when remove API From Gateway event happens
-func deleteAPIFromList(apiList []types.API, indexToBeDeleted int, apiUUID string, label string) []types.API {
+// DeleteAPIFromList when remove API From Gateway event happens
+func DeleteAPIFromList(apiList []types.API, indexToBeDeleted int, apiUUID string, label string) []types.API {
 	apiList[indexToBeDeleted] = apiList[len(apiList)-1]
 	logger.LoggerInternalMsg.Infof("API %s is deleted from APIList under Label %s", apiUUID, label)
 	return apiList[:len(apiList)-1]
