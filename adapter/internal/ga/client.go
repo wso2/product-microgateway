@@ -19,6 +19,7 @@ package ga
 
 import (
 	"context"
+	"crypto/tls"
 	"io"
 	"time"
 
@@ -30,10 +31,12 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	ga_model "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/ga"
 	stub "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/ga"
+	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
 	"google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	grpcStatus "google.golang.org/grpc/status"
 )
 
@@ -100,6 +103,26 @@ func initConnection() (*grpc.ClientConn, error) {
 	}
 	logger.LoggerGA.Info("Connection to the global adapter is successful.")
 	return conn, nil
+}
+
+func generateTLSCredentialsForXdsClient() credentials.TransportCredentials {
+	conf, _ := config.ReadConfigs()
+	certPool := tlsutils.GetTrustedCertPool(conf.Adapter.Truststore.Location)
+	// There is a single private-public key pair for XDS server initialization, as well as for XDS client authentication
+	certificate, err := tlsutils.GetServerCertificate(conf.Adapter.Keystore.PublicKeyLocation,
+		conf.Adapter.Keystore.PrivateKeyLocation)
+	if err != nil {
+		logger.LoggerGA.Fatal("Error while processing the private-public key pair", err)
+	}
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{certificate},
+		RootCAs:      certPool,
+	}
+	// This option is used if the calling IP and SAN of the certificate is different.
+	if conf.GlobalAdapter.HostName != "" {
+		tlsConfig.ServerName = conf.GlobalAdapter.HostName
+	}
+	return credentials.NewTLS(tlsConfig)
 }
 
 func watchAPIs() {
@@ -278,7 +301,7 @@ func getGRPCConnection() (*grpc.ClientConn, error) {
 	logger.LoggerGA.Infof("Dialing Global Adapter GRPC Service : %s", conf.GlobalAdapter.ServiceURL)
 	return grpc.Dial(
 		conf.GlobalAdapter.ServiceURL,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(generateTLSCredentialsForXdsClient()),
 		grpc.WithBlock(),
 		grpc.WithStreamInterceptor(
 			grpc_retry.StreamClientInterceptor(grpc_retry.WithBackoff(backOff))))

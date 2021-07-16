@@ -369,7 +369,9 @@ idleTimeoutInSeconds = 3600
   # Enable Choreo Connect Global adapter client
   enabled = false
   # Global adapter Service URL (<Hostname>:<Port>)
-  serviceUrl = "ga:18002"
+  serviceUrl = "global-adapter:18000"
+  # Subject Alternative Name considered for TLS communication with global adapter
+  overwriteHostName = ""
   # Local Adapter Label
   localLabel = "$env{local_label}"
   # Retry Interval
