@@ -252,9 +252,10 @@ var defaultConfig = &Config{
 		},
 	},
 	GlobalAdapter: globalAdapter{
-		Enabled:    false,
-		ServiceURL: "ga:18002",
-		LocalLabel: "default",
+		Enabled:       false,
+		ServiceURL:    "ga:18000",
+		LocalLabel:    "default",
+		RetryInterval: 5,
 	},
 	Analytics: analytics{
 		Enabled: false,

@@ -372,6 +372,8 @@ idleTimeoutInSeconds = 3600
   serviceUrl = "ga:18002"
   # Local Adapter Label
   localLabel = "$env{local_label}"
+  # Retry Interval
+  retryInterval = 5
 
 # Analytics configurations for Choreo Connect
 [analytics]
