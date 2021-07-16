@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@ import (
 // ie : https://dev.choreo.lk:8899/api/v1  <-- Hostname is dev.choreo.lk
 // Above hostNameValidator regex can identify correct hostname from a URL.
 // There are 3 character classes defined for check characters of each position.
-// First character class for check initial part of the string (^[a-zA-Z0-9]+) -
-//			--> hostname should start in a letter or a number , can have 1 or more occurences of each number or letter
-// Second class for check middle section of the string ([a-zA-Z0-9-.]+)
+// First character class for check initial part of the string (^[a-zA-Z0-9]) -
+//			--> hostname should start in a letter or a number
+// Second class for check middle section of the string ([a-zA-Z0-9-.]*)
 //			--> mid of the hostname can contains letters,numbers,hyphens and dots
 // Third class for check trailing characters ([0-9a-zA-Z]$)
 //			--> hostname should ends with a letter or a number.can`t have any other character
@@ -48,7 +48,7 @@ import (
 // https://www.google.com, http://dev.choreo.lk:8899/api/v1, http://127.0.0.1:8080
 
 const (
-	hostNameValidator = "^[a-zA-Z0-9]+[a-zA-Z0-9-.]+[0-9a-zA-Z]$"
+	hostNameValidator = "^[a-zA-Z0-9][a-zA-Z0-9-.]*[0-9a-zA-Z]$"
 )
 
 // SetInfoOpenAPI populates the MgwSwagger object with the properties within the openAPI v3 definition.
