@@ -86,3 +86,4 @@ services:
       - apim_and_cc
     ports:
       - "8081:8081"
+      - "9001:9001"

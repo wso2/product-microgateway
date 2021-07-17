@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.enforcer.subscription;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.subscription.APIs;
@@ -37,6 +38,7 @@ import org.wso2.choreo.connect.enforcer.models.ApplicationPolicy;
 import org.wso2.choreo.connect.enforcer.models.Subscription;
 import org.wso2.choreo.connect.enforcer.models.SubscriptionPolicy;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -386,5 +388,135 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         }
         return null;
     }
-}
 
+    @Override
+    public List<API> getMatchingAPIs(String name, String context, String version, String uuid) {
+        List<API> apiList = new ArrayList<>();
+        for (API api : apiMap.values()) {
+            boolean isNameMatching = true;
+            boolean isContextMatching = true;
+            boolean isVersionMatching = true;
+            boolean isUUIDMatching = true;
+            if (StringUtils.isNotEmpty(name)) {
+                isNameMatching = api.getApiName().equals(name);
+            }
+            if (StringUtils.isNotEmpty(context)) {
+                isContextMatching = api.getContext().equals(context);
+            }
+            if (StringUtils.isNotEmpty(version)) {
+                isVersionMatching = api.getApiVersion().equals(version);
+            }
+            if (StringUtils.isNotEmpty(uuid)) {
+                isUUIDMatching = api.getApiUUID().equals(uuid);
+            }
+            if (isNameMatching && isContextMatching && isVersionMatching && isUUIDMatching) {
+                apiList.add(api);
+            }
+        }
+        return apiList;
+    }
+
+    @Override
+    public API getMatchingAPI(String context, String version) {
+        for (API api : apiMap.values()) {
+            if (StringUtils.isNotEmpty(context) && StringUtils.isNotEmpty(version)) {
+                if (api.getContext().equals(context) && api.getApiVersion().equals(version)) {
+                    return api;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<Application> getMatchingApplications(String name, String tenantDomain, String uuid) {
+        List<Application> applicationList = new ArrayList<>();
+        for (Application application : applicationMap.values()) {
+            boolean isNameMatching = true;
+            boolean isTenantMatching = true;
+            boolean isUUIDMatching = true;
+            if (StringUtils.isNotEmpty(name)) {
+                isNameMatching = application.getName().equals(name);
+            }
+            if (StringUtils.isNotEmpty(tenantDomain)) {
+                isTenantMatching = application.getTenantDomain().equals(tenantDomain);
+            }
+            if (StringUtils.isNotEmpty(uuid)) {
+                isUUIDMatching = application.getUUID().equals(uuid);
+            }
+            if (isNameMatching && isTenantMatching && isUUIDMatching) {
+                applicationList.add(application);
+            }
+        }
+        return applicationList;
+    }
+
+    @Override
+    public List<ApplicationKeyMapping> getMatchingKeyMapping(String applicationUUID, String consumerKey) {
+        List<ApplicationKeyMapping> applicationKeyMappingList = new ArrayList<>();
+
+        for (ApplicationKeyMapping applicationKeyMapping : applicationKeyMappingMap.values()) {
+            boolean isConsumerKeyMatching = true;
+            boolean isAppUUIDMatching = true;
+
+            if (StringUtils.isNotEmpty(applicationUUID)) {
+                isAppUUIDMatching = applicationKeyMapping.getApplicationUUID().equals(applicationUUID);
+            }
+            if (StringUtils.isNotEmpty(consumerKey)) {
+                isConsumerKeyMatching = applicationKeyMapping.getConsumerKey().equals(consumerKey);
+            }
+            if (isConsumerKeyMatching && isAppUUIDMatching) {
+                applicationKeyMappingList.add(applicationKeyMapping);
+            }
+        }
+        return applicationKeyMappingList;
+    }
+
+    @Override
+    public List<Subscription> getMatchingSubscriptions(String applicationUUID, String apiUUID, String state) {
+        List<Subscription> subscriptionList = new ArrayList<>();
+
+        for (Subscription subscription : subscriptionMap.values()) {
+            boolean isApiUUIDMatch = true;
+            boolean isAppUUIDMatch = true;
+            boolean isStateMatch = true;
+            if (StringUtils.isNotEmpty(applicationUUID)) {
+                isAppUUIDMatch = subscription.getAppUUID().equals(applicationUUID);
+            }
+            if (StringUtils.isNotEmpty(apiUUID)) {
+                isApiUUIDMatch = subscription.getApiUUID().equals(apiUUID);
+            }
+            if (StringUtils.isNotEmpty(state)) {
+                isStateMatch = subscription.getSubscriptionState().equals(state);
+            }
+            if (isApiUUIDMatch && isAppUUIDMatch && isStateMatch) {
+                subscriptionList.add(subscription);
+            }
+        }
+        return subscriptionList;
+    }
+
+    @Override
+    public List<ApplicationPolicy> getMatchingApplicationPolicies(String policyName) {
+        List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
+        if (StringUtils.isEmpty(policyName)) {
+            applicationPolicies.addAll(this.appPolicyMap.values());
+        } else {
+            ApplicationPolicy policy = this.getApplicationPolicyByName(policyName);
+            applicationPolicies.add(policy);
+        }
+        return applicationPolicies;
+    }
+
+    @Override
+    public List<SubscriptionPolicy> getMatchingSubscriptionPolicies(String policyName) {
+        List<SubscriptionPolicy> subscriptionPolicies = new ArrayList<>();
+        if (StringUtils.isEmpty(policyName)) {
+            subscriptionPolicies.addAll(this.subscriptionPolicyMap.values());
+        } else {
+            SubscriptionPolicy policy = this.getSubscriptionPolicyByName(policyName);
+            subscriptionPolicies.add(policy);
+        }
+        return subscriptionPolicies;
+    }
+}

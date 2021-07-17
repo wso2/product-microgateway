@@ -15,17 +15,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.choreo.connect.enforcer.models;
 
-package org.wso2.choreo.connect.enforcer.constants;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * HttpConstants class holds the constants related HTTP protocol related constants
+ * Model class for Application Information list
  */
-public class HttpConstants {
-    public static final int NO_CONTENT_STATUS_CODE = 204;
-    public static final String OPTIONS = "OPTIONS";
-    public static final String ALLOW_HEADER = "allow";
-    public static final String X_REQUEST_ID_HEADER = "x-request-id";
-    public static final String APPLICATION_JSON = "application/json";
-    public static final String BASIC_LOWER = "basic";
+public class ApplicationInfoList {
+
+    private Integer count = null;
+    private List<ApplicationInfo> list = new ArrayList<>();
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
+    }
+
+    public List<ApplicationInfo> getList() {
+        return list;
+    }
+
+    public void setList(List<ApplicationInfo> list) {
+        this.list = list;
+    }
 }

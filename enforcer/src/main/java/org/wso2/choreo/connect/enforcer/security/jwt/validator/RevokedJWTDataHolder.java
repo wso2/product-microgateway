@@ -68,7 +68,7 @@ public class RevokedJWTDataHolder {
      * Fetches the revoke map.
      * @return
      */
-    Map<String, Long> getRevokedJWTMap() {
+    public Map<String, Long> getRevokedJWTMap() {
         return revokedJWTMap;
     }
 

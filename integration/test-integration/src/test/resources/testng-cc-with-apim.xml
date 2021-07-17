@@ -50,6 +50,7 @@
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.BlockedApiTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.SubscriptionValidationTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.EnforcerAPITestCase"/>
         </classes>
     </test>
 <!--    <test name="apis-apps-subs-received-after-apim-restart" parallel="false">-->

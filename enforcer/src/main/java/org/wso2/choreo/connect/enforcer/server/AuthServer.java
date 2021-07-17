@@ -112,9 +112,8 @@ public class AuthServer {
             ThrottleDataHolder.getInstance().init();
 
             // Create a new server to listen on port 8082
-            TokenServer tokenServer = new TokenServer();
-            tokenServer.initToken();
-            logger.info("Token endpoint started Listening in port : " + 8082);
+            RestServer restServer = new RestServer();
+            restServer.initServer();
 
             // Don't exit the main thread. Wait until server is terminated.
             server.awaitTermination();

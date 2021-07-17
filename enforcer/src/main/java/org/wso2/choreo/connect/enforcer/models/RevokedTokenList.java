@@ -15,17 +15,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.choreo.connect.enforcer.models;
 
-package org.wso2.choreo.connect.enforcer.constants;
+import java.util.List;
 
 /**
- * HttpConstants class holds the constants related HTTP protocol related constants
+ * Model class for Revoked Token list
  */
-public class HttpConstants {
-    public static final int NO_CONTENT_STATUS_CODE = 204;
-    public static final String OPTIONS = "OPTIONS";
-    public static final String ALLOW_HEADER = "allow";
-    public static final String X_REQUEST_ID_HEADER = "x-request-id";
-    public static final String APPLICATION_JSON = "application/json";
-    public static final String BASIC_LOWER = "basic";
+public class RevokedTokenList {
+    private Integer count;
+    private List<RevokedToken> tokens;
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
+    }
+
+    public List<RevokedToken> getTokens() {
+        return tokens;
+    }
+
+    public void setTokens(List<RevokedToken> tokens) {
+        this.tokens = tokens;
+    }
 }
