@@ -52,8 +52,10 @@ type DeploymentData struct {
 type APIDeployment struct {
 	APIFile      string         `json:"apiFile"`
 	Environments []GatewayLabel `json:"environments"`
-	// This property is used by global Adapter
+	// These properties are used by global Adapter
 	OrganizationID string `json:"organizationId"`
+	APIContext string `json:"apiContext"`
+	Version string `json:"version"`
 }
 
 // GatewayLabel represents gateway environment name and VHost of an API project
