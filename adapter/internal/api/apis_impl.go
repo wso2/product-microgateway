@@ -25,6 +25,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -64,6 +65,7 @@ const (
 type ProjectAPI struct {
 	APIJsn                     []byte
 	Deployments                []Deployment
+	RevisionID				   int
 	SwaggerJsn                 []byte // TODO: (SuKSW) change to OpenAPIJsn
 	UpstreamCerts              []byte
 	APIType                    string
@@ -229,14 +231,15 @@ func verifyMandatoryFields(apiJSON config.APIJsonData) error {
 
 // ApplyAPIProjectFromAPIM accepts an apictl project (as a byte array), list of vhosts with respective environments
 // and updates the xds servers based upon the content.
-func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string) error {
+func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string) ([]*notifier.DeployedAPIRevision,error) {
+	var deployedRevisionList []*notifier.DeployedAPIRevision
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
-		return err
+		return deployedRevisionList, err
 	}
 	apiInfo, err := parseAPIInfo(apiProject.APIJsn)
 	if err != nil {
-		return err
+		return deployedRevisionList, err
 	}
 
 	if apiProject.OrganizationID == "" {
@@ -267,10 +270,13 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
 			allEnvironments, vhost, apiInfo.Name, apiInfo.Version, apiInfo.ID)
 		// first update the API for vhost
-		err := updateAPI(vhost, apiInfo, apiProject, allEnvironments)
+		deployedRevision, err := updateAPI(vhost, apiInfo, apiProject, allEnvironments)
 		if err != nil {
-			return err
+			return deployedRevisionList, err
 		}
+        if deployedRevision != nil {
+            deployedRevisionList = append(deployedRevisionList, deployedRevision)
+        }
 	}
 
 	// undeploy APIs with other vhosts in the same gateway environment
@@ -280,10 +286,10 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 			continue
 		}
 		if err := xds.DeleteAPIsWithUUID(vhost, apiInfo.ID, environments, apiProject.OrganizationID); err != nil {
-			return err
+			return deployedRevisionList, err
 		}
 	}
-	return nil
+	return deployedRevisionList, nil
 }
 
 // ApplyAPIProjectInStandaloneMode is called by the rest implementation to differentiate
@@ -336,7 +342,7 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 	return nil
 }
 
-func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) error {
+func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) (*notifier.DeployedAPIRevision, error) {
 	if len(environments) == 0 {
 		environments = append(environments, config.DefaultGatewayName)
 	}
@@ -345,6 +351,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	apiContent.VHost = vhost
 	apiContent.Name = apiInfo.Name
 	apiContent.Version = apiInfo.Version
+	apiContent.RevisionID = apiProject.RevisionID
 	apiContent.APIType = apiProject.APIType
 	apiContent.LifeCycleStatus = apiProject.APILifeCycleStatus
 	apiContent.UpstreamCerts = apiProject.UpstreamCerts
@@ -368,16 +375,13 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	} else if apiProject.APIType == mgw.WS {
 		apiContent.APIDefinition = apiProject.APIJsn
 	}
-	err := xds.UpdateAPI(apiContent)
-	if err != nil {
-		return err
-	}
-	return nil
+	return xds.UpdateAPI(apiContent)
 }
 
 func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData) {
 	apiProject.APIType = strings.ToUpper(apiObject.Data.APIType)
 	apiProject.APILifeCycleStatus = strings.ToUpper(apiObject.Data.LifeCycleStatus)
+	apiProject.RevisionID = apiObject.Data.RevisionID
 
 	apiProject.AuthHeader = apiObject.Data.AuthorizationHeader
 
