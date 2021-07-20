@@ -90,7 +90,7 @@ public class EnforcerAPITestCase extends ApimBaseTest {
 
     @Test
     public void testGetApplications() throws IOException {
-        String requestUrl = "https://localhost:9001/applications";
+        String requestUrl = "https://localhost:9001/applications?orgId=carbon.super";
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Basic " + ADMIN_CREDENTIALS);
         HttpResponse httpResponse = HttpClientRequest.doGet(requestUrl, headers);
