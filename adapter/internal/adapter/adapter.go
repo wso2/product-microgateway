@@ -92,7 +92,7 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServe
 	enforcerThrottleDataDsSrv wso2_server.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
-	publicKeyLocation, privateKeyLocation, truststoreLocation := restserver.GetKeyLocations()
+	publicKeyLocation, privateKeyLocation, truststoreLocation := tlsutils.GetKeyLocations()
 	cert, err := tlsutils.GetServerCertificate(publicKeyLocation, privateKeyLocation)
 
 	caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
