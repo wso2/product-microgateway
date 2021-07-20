@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.enforcer.config;
 
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
+import org.wso2.choreo.connect.enforcer.config.dto.AdminRestServerDto;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
@@ -27,6 +28,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.CacheDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
+import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
 
 import java.util.HashMap;
@@ -49,6 +51,8 @@ public class EnforcerConfig {
     private AnalyticsDTO analyticsConfig;
     private Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
     private AuthHeaderDto authHeader;
+    private ManagementCredentialsDto management;
+    private AdminRestServerDto restServer;
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -144,6 +148,22 @@ public class EnforcerConfig {
 
     public void setAuthHeader(AuthHeaderDto authHeader) {
         this.authHeader = authHeader;
+    }
+
+    public ManagementCredentialsDto getManagement() {
+        return management;
+    }
+
+    public void setManagement(ManagementCredentialsDto management) {
+        this.management = management;
+    }
+
+    public AdminRestServerDto getRestServer() {
+        return restServer;
+    }
+
+    public void setRestServer(AdminRestServerDto restServer) {
+        this.restServer = restServer;
     }
 }
 

@@ -398,7 +398,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             boolean isVersionMatching = true;
             boolean isUUIDMatching = true;
             if (StringUtils.isNotEmpty(name)) {
-                isNameMatching = api.getApiName().equals(name);
+                isNameMatching = api.getApiName().contains(name);
             }
             if (StringUtils.isNotEmpty(context)) {
                 isContextMatching = api.getContext().equals(context);
@@ -429,22 +429,22 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public List<Application> getMatchingApplications(String name, String tenantDomain, String uuid) {
+    public List<Application> getMatchingApplications(String name, String organizationID, String uuid) {
         List<Application> applicationList = new ArrayList<>();
         for (Application application : applicationMap.values()) {
             boolean isNameMatching = true;
-            boolean isTenantMatching = true;
+            boolean isOrgMatching = true;
             boolean isUUIDMatching = true;
             if (StringUtils.isNotEmpty(name)) {
-                isNameMatching = application.getName().equals(name);
+                isNameMatching = application.getName().contains(name);
             }
-            if (StringUtils.isNotEmpty(tenantDomain)) {
-                isTenantMatching = application.getTenantDomain().equals(tenantDomain);
+            if (StringUtils.isNotEmpty(organizationID)) {
+                isOrgMatching = application.getTenantDomain().equals(organizationID);
             }
             if (StringUtils.isNotEmpty(uuid)) {
                 isUUIDMatching = application.getUUID().equals(uuid);
             }
-            if (isNameMatching && isTenantMatching && isUUIDMatching) {
+            if (isNameMatching && isOrgMatching && isUUIDMatching) {
                 applicationList.add(application);
             }
         }
@@ -497,6 +497,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
+    // Add org id
     public List<ApplicationPolicy> getMatchingApplicationPolicies(String policyName) {
         List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
         if (StringUtils.isEmpty(policyName)) {

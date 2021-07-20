@@ -35,7 +35,7 @@ import org.wso2.choreo.connect.enforcer.admin.handlers.RevokedTokensRequestHandl
 import org.wso2.choreo.connect.enforcer.admin.handlers.SubscriptionRequestHandler;
 import org.wso2.choreo.connect.enforcer.admin.handlers.ThrottlingPolicyRequestHandler;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
-import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
+import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
 import org.wso2.choreo.connect.enforcer.constants.AdminConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.models.ResponsePayload;
@@ -69,6 +69,7 @@ public class AdminServerHandler extends ChannelInboundHandlerAdapter {
         }
         String authHeader = request.headers().get(AUTHORIZATION);
 
+        // Validate from new config
         if (authHeader == null) {
             String error = AdminConstants.ErrorMessages.NO_AUTH_HEADER_ERROR;
             responsePayload = AdminUtils.buildResponsePayload(error, HttpResponseStatus.UNAUTHORIZED, true);
@@ -83,11 +84,10 @@ public class AdminServerHandler extends ChannelInboundHandlerAdapter {
                 // credentials = username:password
                 final String[] values = credentials.split(":", 2);
 
-                CredentialDto[] predefinedCredentials = ConfigHolder.getInstance().getConfig()
-                        .getJwtUsersCredentials();
-                for (CredentialDto cred : predefinedCredentials) {
-                    isAuthorized = values[0].equals(cred.getUsername()) && values[1].equals(new String(cred.getPwd()));
-                }
+                ManagementCredentialsDto managementCredentials = ConfigHolder.getInstance().getConfig()
+                        .getManagement();
+                isAuthorized = values[0].equals(managementCredentials.getUserName())
+                        && values[1].equals(new String(managementCredentials.getPassword()));
             } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
                 String error = AdminConstants.ErrorMessages.INTERNAL_SERVER_ERROR;
                 responsePayload = AdminUtils.buildResponsePayload(error, HttpResponseStatus.UNAUTHORIZED, true);

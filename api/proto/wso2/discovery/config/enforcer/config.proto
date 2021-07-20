@@ -10,6 +10,8 @@ import "wso2/discovery/config/enforcer/throttling.proto";
 import "wso2/discovery/config/enforcer/cache.proto";
 import "wso2/discovery/config/enforcer/analytics.proto";
 import "wso2/discovery/config/enforcer/security.proto";
+import "wso2/discovery/config/enforcer/management.proto";
+import "wso2/discovery/config/enforcer/rest_server.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
 option java_package = "org.wso2.choreo.connect.discovery.config.enforcer";
@@ -37,4 +39,8 @@ message Config {
     JWTIssuer jwtIssuer = 8;
 
     Analytics analytics = 9;
+
+    Management management = 10;
+
+    RestServer restServer = 11;
 }

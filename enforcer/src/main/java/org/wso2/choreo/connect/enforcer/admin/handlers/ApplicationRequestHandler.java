@@ -18,6 +18,7 @@
 package org.wso2.choreo.connect.enforcer.admin.handlers;
 
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpResponseStatus;
+import org.apache.commons.lang.StringUtils;
 import org.wso2.choreo.connect.enforcer.admin.AdminUtils;
 import org.wso2.choreo.connect.enforcer.constants.AdminConstants;
 import org.wso2.choreo.connect.enforcer.models.Application;
@@ -39,7 +40,7 @@ public class ApplicationRequestHandler extends RequestHandler {
 
         List<Application> applicationList;
         String name = null;
-        String tenantDomain = null;
+        String organizationID = null;
         String uuid = null;
         String consumerKey = null;
         List<ApplicationInfo> applicationInfoList = new ArrayList<>();
@@ -54,8 +55,8 @@ public class ApplicationRequestHandler extends RequestHandler {
                     case AdminConstants.Parameters.APP_UUID:
                         uuid = parameterParts[1];
                         break;
-                    case AdminConstants.Parameters.TENANT_DOMAIN:
-                        tenantDomain = parameterParts[1];
+                    case AdminConstants.Parameters.ORGANIZATION_ID:
+                        organizationID = parameterParts[1];
                         break;
                     case AdminConstants.Parameters.CONSUMER_KEY:
                         consumerKey = parameterParts[1];
@@ -65,7 +66,11 @@ public class ApplicationRequestHandler extends RequestHandler {
                 }
             }
         }
-        applicationList = super.dataStore.getMatchingApplications(name, tenantDomain, uuid);
+        if (StringUtils.isEmpty(organizationID)) {
+            String error = "{\"error\": true, \"message\":\"Organization id should not be empty.\"}";
+            return AdminUtils.buildResponsePayload(error, HttpResponseStatus.BAD_REQUEST, true);
+        }
+        applicationList = super.dataStore.getMatchingApplications(name, organizationID, uuid);
         for (Application application : applicationList) {
             List<ApplicationKeyMapping> keyMappingList = dataStore.getMatchingKeyMapping(application.getUUID(),
                     consumerKey);

@@ -77,20 +77,23 @@ public class RestServer {
             logger.info("Token endpoint started Listening in port : " + TOKEN_PORT);
 
 
-            ServerBootstrap adminServer = new ServerBootstrap();
-            // Configure the server
-            adminServer.option(ChannelOption.SO_BACKLOG, 1024);
-            adminServer.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new AdminServerInitializer(sslCtx));
+            if (ConfigHolder.getInstance().getConfig().getRestServer().isEnable()) {
+                ServerBootstrap adminServer = new ServerBootstrap();
+                // Configure the server
+                adminServer.option(ChannelOption.SO_BACKLOG, 1024);
+                adminServer.group(bossGroup, workerGroup)
+                        .channel(NioServerSocketChannel.class)
+                        .handler(new LoggingHandler(LogLevel.INFO))
+                        .childHandler(new AdminServerInitializer(sslCtx));
 
-            Channel adminChannel = adminServer.bind(ADMIN_PORT).sync().channel();
-            logger.info("Admin endpoint started Listening in port : " + ADMIN_PORT);
+                Channel adminChannel = adminServer.bind(ADMIN_PORT).sync().channel();
+                logger.info("Admin endpoint started Listening in port : " + ADMIN_PORT);
+                adminChannel.closeFuture().sync();
+            }
 
             // Wait until server socket is closed
             tokenChannel.closeFuture().sync();
-            adminChannel.closeFuture().sync();
+
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();

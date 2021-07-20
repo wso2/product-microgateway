@@ -33,11 +33,14 @@ import org.wso2.choreo.connect.discovery.config.enforcer.Config;
 import org.wso2.choreo.connect.discovery.config.enforcer.Issuer;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer;
+import org.wso2.choreo.connect.discovery.config.enforcer.Management;
 import org.wso2.choreo.connect.discovery.config.enforcer.PublisherPool;
+import org.wso2.choreo.connect.discovery.config.enforcer.RestServer;
 import org.wso2.choreo.connect.discovery.config.enforcer.Service;
 import org.wso2.choreo.connect.discovery.config.enforcer.TMURLGroup;
 import org.wso2.choreo.connect.discovery.config.enforcer.ThrottleAgent;
 import org.wso2.choreo.connect.discovery.config.enforcer.Throttling;
+import org.wso2.choreo.connect.enforcer.config.dto.AdminRestServerDto;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsReceiverConfigDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
@@ -46,6 +49,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.CacheDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
+import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleAgentConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
@@ -144,8 +148,25 @@ public class ConfigHolder {
 
         populateAuthHeaderConfigurations(config.getSecurity().getAuthHeader());
 
+        populateManagementCredentials(config.getManagement());
+
+        populateRestServer(config.getRestServer());
+
         // resolve string variables provided as environment variables.
         resolveConfigsWithEnvs(this.config);
+    }
+
+    private void populateRestServer(RestServer restServer) {
+        AdminRestServerDto adminRestServerDto = new AdminRestServerDto();
+        adminRestServerDto.setEnable(restServer.getEnable());
+        config.setRestServer(adminRestServerDto);
+    }
+
+    private void populateManagementCredentials(Management management) {
+        ManagementCredentialsDto managementCredentialsDto = new ManagementCredentialsDto();
+        managementCredentialsDto.setPassword(management.getPassword().toCharArray());
+        managementCredentialsDto.setUserName(management.getUsername());
+        config.setManagement(managementCredentialsDto);
     }
 
     private void populateAuthHeaderConfigurations(AuthHeader authHeader) {

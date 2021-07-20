@@ -161,11 +161,11 @@ public interface SubscriptionDataStore {
     /**
      * Filter the applications map based on the criteria.
      * @param name Application Name
-     * @param tenantDomain Application tenant domain/ organization id
+     * @param organizationID Application tenant domain/ organization id
      * @param uuid Application uuid.
      * @return List of applications which match the given parameters
      */
-    List<Application> getMatchingApplications(String name, String tenantDomain, String uuid);
+    List<Application> getMatchingApplications(String name, String organizationID, String uuid);
 
 
     /**

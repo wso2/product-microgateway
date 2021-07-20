@@ -54,7 +54,7 @@ public class AdminConstants {
         public static final String API_UUID = "apiUUID";
         public static final String APP_UUID = "appUUID";
         public static final String CONSUMER_KEY = "consumerKey";
-        public static final String TENANT_DOMAIN = "tenantDomain";
+        public static final String ORGANIZATION_ID = "orgId";
         public static final String TOKEN = "token";
         public static final String STATE = "state";
     }
