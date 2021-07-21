@@ -162,9 +162,12 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 			logger.LoggerOasparser.Warnf("Production environment endpoints are not available for the resource %v:%v-%v",
 				apiTitle, apiVersion, resource.GetPath())
 		}
-		// Check whether the endpoint contains a trailing slash.
-		if string(endpointBasepath) == "/" {
-			endpointBasepath = ""
+		// Check whether the endpoint basepath contains a trailing slash.
+		if endpointBasepath != "" {
+			lastCharOfEndpontBasepath := endpointBasepath[len(endpointBasepath)-1:]
+			if lastCharOfEndpontBasepath == "/" {
+				endpointBasepath = endpointBasepath[0 : len(endpointBasepath)-1]
+			}
 		}
 
 		// resource level check sandbox endpoints
