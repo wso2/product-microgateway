@@ -162,6 +162,10 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 			logger.LoggerOasparser.Warnf("Production environment endpoints are not available for the resource %v:%v-%v",
 				apiTitle, apiVersion, resource.GetPath())
 		}
+		// Check whether the endpoint contains a trailing slash.
+		if string(endpointBasepath) == "/" {
+			endpointBasepath = ""
+		}
 
 		// resource level check sandbox endpoints
 		if len(resource.GetSandEndpoints()) > 0 {
@@ -517,7 +521,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	if corsPolicy != nil {
 		action.Route.Cors = corsPolicy
 	}
-    // remove the 'x-envoy-upstream-service-time' from the response.
+	// remove the 'x-envoy-upstream-service-time' from the response.
 	responseHeadersToRemove = append(responseHeadersToRemove, upstreamServiceTimeHeader)
 
 	logger.LoggerOasparser.Debug("adding route ", resourcePath)
