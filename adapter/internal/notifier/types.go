@@ -2,8 +2,8 @@ package notifier
 
 // DeployedAPIRevision represents Information of deployed API revision data
 type DeployedAPIRevision struct {
-	APIID      string            `json:"apiID"`
-	RevisionID int               `json:"revisionID"`
+	APIID      string            `json:"apiId"`
+	RevisionID int               `json:"revisionId"`
 	EnvInfo    []DeployedEnvInfo `json:"envInfo"`
 }
 
