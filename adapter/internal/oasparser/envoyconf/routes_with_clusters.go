@@ -164,10 +164,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		}
 		// Check whether the endpoint basepath contains a trailing slash.
 		if endpointBasepath != "" {
-			lastCharOfEndpontBasepath := endpointBasepath[len(endpointBasepath)-1:]
-			if lastCharOfEndpontBasepath == "/" {
-				endpointBasepath = endpointBasepath[0 : len(endpointBasepath)-1]
-			}
+			endpointBasepath = strings.TrimSuffix(endpointBasepath, "/")
 		}
 
 		// resource level check sandbox endpoints
