@@ -19,7 +19,6 @@
 package eventhub
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -29,7 +28,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/wso2/product-microgateway/adapter/config"
-	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -204,31 +202,13 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 
 	// Check if TLS is enabled
 	skipSSL := conf.ControlPlane.SkipSSLVerification
-	logger.LoggerSubscription.Debugf("Skip SSL Verification: %v", skipSSL)
-	tr := &http.Transport{}
-	if !skipSSL {
-		_, _, truststoreLocation := restserver.GetKeyLocations()
-		caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	}
-
-	// Configuring the http client
-	client := &http.Client{
-		Transport: tr,
-	}
 
 	// Setting authorization header
 	req.Header.Set(authorizationHeaderDefault, authorizationBasic+accessToken)
 
 	// Make the request
 	logger.LoggerSubscription.Debug("Sending the request to the control plane over the REST API: " + serviceURL)
-	resp, err := client.Do(req)
+	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 
 	if err != nil {
 		c <- response{err, nil, endpoint, gatewayLabel, responseType}
