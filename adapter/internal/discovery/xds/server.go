@@ -263,7 +263,7 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 	} else if apiContent.APIType == mgw.WS {
 		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
 		if err != nil {
-			return err
+			return deployedRevision, err
 		}
 		mgwSwagger.OrganizationID = organizationID
 	} else {

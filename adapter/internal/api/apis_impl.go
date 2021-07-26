@@ -354,7 +354,7 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (err error)
 
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
-		err := updateAPI(vhost, apiInfo, apiProject, environments)
+		_, err := updateAPI(vhost, apiInfo, apiProject, environments)
 		if err != nil {
 			return err
 		}
@@ -402,11 +402,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	} else if apiProject.APIType == mgw.WS {
 		apiContent.APIDefinition = apiProject.APIJsn
 	}
-	err := xds.UpdateAPI(apiContent)
-	if err != nil {
-		return err
-	}
-	return nil
+	return xds.UpdateAPI(apiContent)
 }
 
 func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData) {
