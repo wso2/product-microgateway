@@ -77,5 +77,18 @@
         "throttlingPolicy": "Unlimited"
       }
     ]
+  },
+  {
+    "name": "EndpointWithTrailingSlashAPI",
+    "version": "1.0.0",
+    "context": "endpointWithTrailingSlash",
+    "endpointUrl": "http://mockBackend:2390/v2/",
+    "operationsDTOS": [
+      {
+        "verb": "GET",
+        "target": "/pet/findByStatus",
+        "throttlingPolicy": "Unlimited"
+      }
+    ]
   }
 ]
