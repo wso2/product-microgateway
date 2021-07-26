@@ -39,7 +39,6 @@
             <class name="org.wso2.choreo.connect.tests.setup.standalone.CcWithDefaultConf"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaRestTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.apiDeploy.APiDeployViaApictlTestCase"/>
-            <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.EndpointsWithTrailingSlashTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.endpoints.ProductionSandboxTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.JwtTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator.ScopeTest"/>

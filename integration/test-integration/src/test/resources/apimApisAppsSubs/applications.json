@@ -18,5 +18,9 @@
   {
     "appName": "SubscriptionValidationApp",
     "throttleTier": "Unlimited"
+  },
+  {
+    "appName": "EndpointWithTrailingSlashApiApp",
+    "throttleTier": "Unlimited"
   }
 ]

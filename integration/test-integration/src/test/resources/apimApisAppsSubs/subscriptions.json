@@ -18,5 +18,10 @@
     "apiName": "VHostAPI2",
     "appName": "VHostApp",
     "tier": "Unlimited"
+  },
+  {
+    "apiName": "EndpointWithTrailingSlashAPI",
+    "appName": "EndpointWithTrailinSlashApiApp",
+    "tier": "Unlimited"
   }
 ]
