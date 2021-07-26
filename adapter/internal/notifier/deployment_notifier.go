@@ -12,12 +12,13 @@ import (
 )
 
 const (
-	deployedRevisionEP  string = "internal/data/v1/apis/deployed-revision"
+	deployedRevisionEP string = "internal/data/v1/apis/deployed-revision"
 )
+
 //UpdateDeployedRevisions create the DeployedAPIRevision object
 func UpdateDeployedRevisions(apiID string, revisionID int, envs []string, vhost string) *DeployedAPIRevision {
 	revisions := &DeployedAPIRevision{
-		APIID:    apiID,
+		APIID:      apiID,
 		RevisionID: revisionID,
 		EnvInfo:    []DeployedEnvInfo{},
 	}
@@ -60,15 +61,19 @@ func SendRevisionUpdate(deployedRevisionList []*DeployedAPIRevision) {
 	for retries < 3 {
 		retries++
 		resp, err := tlsutils.InvokeControlPlane(req, cpConfigs.SkipSSLVerification)
+		success := true
 		if err != nil {
 			logger.LoggerNotifier.Warnf("Error response from %v for retry attempt %v : %v", revisionEP, retries, err.Error())
-			continue
+			success = false
 		}
-		if resp.StatusCode != http.StatusCreated {
+		if resp != nil && resp.StatusCode != http.StatusCreated {
 			logger.LoggerNotifier.Warnf("Error response status code %v from %v for retry attempt %v", resp.StatusCode, revisionEP, retries)
-			continue
+			success = false
 		}
-		logger.LoggerNotifier.Debugf("Revision deployed message sent to Control plane: %v", string(jsonValue))
-		break
+		if !success {
+			logger.LoggerNotifier.Info("Revision deployed message sent to Control plane")
+			logger.LoggerNotifier.Debugf("Revision deployed message sent to Control plane: %v", string(jsonValue))
+			break
+		}
 	}
 }
