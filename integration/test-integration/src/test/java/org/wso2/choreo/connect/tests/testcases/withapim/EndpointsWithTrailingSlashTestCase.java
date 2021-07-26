@@ -43,7 +43,6 @@ public class EndpointsWithTrailingSlashTestCase extends ApimBaseTest {
     private static final String API_CONTEXT = "endpointWithTrailingSlash";
     public static final String APPLICATION_NAME = "EndpointWithTrailingSlashApiApp";
 
-    private String apiId;
     private Map<String, String> requestHeaders;
     private String apiEndpointURL;
 
@@ -53,7 +52,6 @@ public class EndpointsWithTrailingSlashTestCase extends ApimBaseTest {
 
         // Get App ID and API IDs
         String applicationId = ApimResourceProcessor.applicationNameToId.get(APPLICATION_NAME);
-        apiId = ApimResourceProcessor.apiNameToId.get(API_NAME);
 
         String accessToken = StoreUtils.generateUserAccessToken(apimServiceURLHttps, applicationId,
                 user, storeRestClient);

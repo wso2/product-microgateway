@@ -21,7 +21,7 @@
   },
   {
     "apiName": "EndpointWithTrailingSlashAPI",
-    "appName": "EndpointWithTrailinSlashApiApp",
+    "appName": "EndpointWithTrailingSlashApiApp",
     "tier": "Unlimited"
   }
 ]
