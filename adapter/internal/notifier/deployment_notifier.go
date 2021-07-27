@@ -50,17 +50,22 @@ func SendRevisionUpdate(deployedRevisionList []*DeployedAPIRevision) {
 	}
 
 	jsonValue, _ := json.Marshal(deployedRevisionList)
-	req, _ := http.NewRequest("POST", revisionEP, bytes.NewBuffer(jsonValue))
+
 	// Setting authorization header
 	basicAuth := "Basic " + auth.GetBasicAuth(cpConfigs.Username, cpConfigs.Password)
-	req.Header.Set("Authorization", basicAuth)
-	req.Header.Set("Content-Type", "application/json")
+
+	logger.LoggerNotifier.Infof("Revision deployed message sending to Control plane: %v", string(jsonValue))
 
 	// Adding 3 retries for revision update sending
 	retries := 0
 	for retries < 3 {
 		retries++
+
+		req, _ := http.NewRequest("POST", revisionEP, bytes.NewBuffer(jsonValue))
+		req.Header.Set("Authorization", basicAuth)
+		req.Header.Set("Content-Type", "application/json")
 		resp, err := tlsutils.InvokeControlPlane(req, cpConfigs.SkipSSLVerification)
+
 		success := true
 		if err != nil {
 			logger.LoggerNotifier.Warnf("Error response from %v for retry attempt %v : %v", revisionEP, retries, err.Error())
@@ -70,9 +75,8 @@ func SendRevisionUpdate(deployedRevisionList []*DeployedAPIRevision) {
 			logger.LoggerNotifier.Warnf("Error response status code %v from %v for retry attempt %v", resp.StatusCode, revisionEP, retries)
 			success = false
 		}
-		if !success {
-			logger.LoggerNotifier.Info("Revision deployed message sent to Control plane")
-			logger.LoggerNotifier.Debugf("Revision deployed message sent to Control plane: %v", string(jsonValue))
+		if success {
+			logger.LoggerNotifier.Infof("Revision deployed message sent to Control plane for retry attempt %v", retries)
 			break
 		}
 	}
