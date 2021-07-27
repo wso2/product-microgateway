@@ -231,17 +231,17 @@ func Run(conf *config.Config) {
 		if (envValue != "") {
 			isAzureEventingFeatureFlagEnabled, err = strconv.ParseBool(envValue)
 			if (err != nil) {
-				logger.LoggerMgw.Error("Error occurred while parsing FEAURE_FLAG_REPLACE_EVENT_HUB environment value.",
-					err)
+				logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while parsing " +
+					"FEAURE_FLAG_REPLACE_EVENT_HUB environment value.", err)
 			}
 		}
 
 		if (isAzureEventingFeatureFlagEnabled) {
 			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to integrate with azure service bus")
 			go messaging.InitiateAndProcessEvents(conf)
-		} else {
-			go messaging.ProcessEvents(conf)
 		}
+
+		go messaging.ProcessEvents(conf)
 
 		// Fetch APIs from control plane
 		fetchAPIsOnStartUp(conf)
