@@ -31,16 +31,10 @@ func init() {
 	AzureRevokedTokenChannel = make(chan []byte)
 }
 
-// connectToAzureServiceBus function tries to connect to the azure service bus server as long as it takes to
-// establish a connection
-func connectToAzureServiceBus() {
-	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Trying to connect to azure service bus")
-}
-
 // InitiateBrokerConnection to pass event consumption
 func InitiateBrokerConnection(eventListeningEndpoints []string) error {
 	var err error
-	connectToAzureServiceBus()
+	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Trying to connect to azure service bus")
 	err = nil
 	return err
 }

@@ -19,13 +19,17 @@
 package messaging
 
 import (
-	"github.com/wso2/product-microgateway/adapter/pkg/health"
 	"github.com/wso2/product-microgateway/adapter/config"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
 // InitiateAndProcessEvents to pass event consumption
 func InitiateAndProcessEvents(config *config.Config) {
-	err := msg.InitiateBrokerConnection(config.ControlPlane.JmsConnectionParameters.EventListeningEndpoints)
-	health.SetControlPlaneJmsStatus(err == nil)
+	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting InitiateAndProcessEvents method")
+	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] EventListeningEndpoints are ", config.ControlPlane.
+		JmsConnectionParameters.EventListeningEndpoints)
+	//dummy payload sent for now
+	msg.InitiateBrokerConnection(config.ControlPlane.JmsConnectionParameters.EventListeningEndpoints)
+
 }
