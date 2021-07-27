@@ -21,6 +21,7 @@ package adapter
 import (
 	"crypto/tls"
 	"strings"
+	"strconv"
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
@@ -223,8 +224,23 @@ func Run(conf *config.Config) {
 	if eventHubEnabled {
 		// Load subscription data
 		eventhub.LoadSubscriptionData(conf)
+		var isAzureEventingFeatureFlagEnabled bool
+		var err error
 
-		go messaging.ProcessEvents(conf)
+		envValue := os.Getenv("FEAURE_FLAG_REPLACE_EVENT_HUB")
+		if (envValue != "") {
+			isAzureEventingFeatureFlagEnabled, err = strconv.ParseBool(envValue)
+			if (err != nil) {
+				logger.LoggerMgw.Error("Error occurred while parsing FEAURE_FLAG_REPLACE_EVENT_HUB environment value.",
+					err)
+			}
+		}
+
+		if (isAzureEventingFeatureFlagEnabled) {
+			go messaging.InitiateAndProcessEvents(conf)
+		} else {
+			go messaging.ProcessEvents(conf)
+		}
 
 		// Fetch APIs from control plane
 		fetchAPIsOnStartUp(conf)
