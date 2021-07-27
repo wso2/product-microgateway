@@ -58,8 +58,8 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 			if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 				continue
 			}
-			endpoint := getHostandBasepathandPort(serverEntry.URL)
-			if endpoint != nil {
+			endpoint, err := getHostandBasepathandPort(serverEntry.URL)
+			if err == nil {
 				swagger.productionUrls = append(swagger.productionUrls, *endpoint)
 				swagger.xWso2Basepath = endpoint.Basepath
 			} else {
@@ -91,6 +91,7 @@ func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.Pat
 
 func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 	var resources []Resource
+
 	// Check the disable security vendor ext at API level.
 	// If it's present, then the same value should be added to the
 	// resource level if vendor ext is not present at each resource level.
@@ -115,12 +116,13 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 					if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 						continue
 					}
-					endpoint := getHostandBasepathandPort(serverEntry.URL)
-					if endpoint != nil {
+					endpoint, err := getHostandBasepathandPort(serverEntry.URL)
+					if err == nil {
 						resource.productionUrls = append(resource.productionUrls, *endpoint)
 					} else {
 						return nil, errors.New("error encountered when parsing the endpoint")
 					}
+					
 				}
 			}
 			resources = append(resources, resource)
@@ -151,20 +153,21 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string) Oper
 // or server property.
 //
 // if no scheme is mentioned before the hostname, urlType would be assigned as http
-func getHostandBasepathandPort(rawURL string) *Endpoint {
+func getHostandBasepathandPort(rawURL string) (*Endpoint, error) {
 	var (
 		basepath string
 		host     string
 		port     uint32
 		urlType  string
 	)
+
 	if !strings.Contains(rawURL, "://") {
 		rawURL = "http://" + rawURL
 	}
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		logger.LoggerOasparser.Error("Malformed endpoint detected: ", err)
-		return nil
+		logger.LoggerOasparser.Errorf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err)
+		return nil, err
 	}
 
 	host = parsedURL.Hostname()
@@ -188,7 +191,7 @@ func getHostandBasepathandPort(rawURL string) *Endpoint {
 		urlType = "https"
 	}
 
-	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}
+	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}, nil
 }
 
 // isServerURLIsAvailable checks the availability od server url in openApi3
@@ -260,7 +263,7 @@ func GetXWso2Label(vendorExtensions openapi3.ExtensionProps) []string {
 	return []string{"default"}
 }
 
-func getHostandBasepathandPortWebSocket(rawURL string) Endpoint {
+func getHostandBasepathandPortWebSocket(rawURL string) (*Endpoint, error) {
 	var (
 		basepath string
 		host     string
@@ -272,7 +275,8 @@ func getHostandBasepathandPortWebSocket(rawURL string) Endpoint {
 	}
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		logger.LoggerOasparser.Fatal(err)
+		logger.LoggerOasparser.Errorf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err)
+		return nil, err
 	}
 
 	host = parsedURL.Hostname()
@@ -298,5 +302,5 @@ func getHostandBasepathandPortWebSocket(rawURL string) Endpoint {
 	if strings.HasPrefix(rawURL, "wss://") {
 		urlType = "wss"
 	}
-	return Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}
+	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}, nil
 }

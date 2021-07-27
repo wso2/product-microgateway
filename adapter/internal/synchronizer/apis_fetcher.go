@@ -29,7 +29,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -37,6 +36,7 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
 	apiServer "github.com/wso2/product-microgateway/adapter/internal/api"
