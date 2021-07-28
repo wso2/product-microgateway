@@ -1,7 +1,8 @@
 version: "2.4"
 networks:
   apim_and_cc:
-    name: apim_and_cc
+    external:
+      name: apim_and_cc
 services:
   apim:
     image: wso2/wso2am:4.0.0-alpine

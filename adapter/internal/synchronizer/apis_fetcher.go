@@ -37,6 +37,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	"github.com/wso2/product-microgateway/adapter/internal/notifier"
+	"github.com/wso2/product-microgateway/adapter/pkg/health"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
 	apiServer "github.com/wso2/product-microgateway/adapter/internal/api"
@@ -293,6 +294,7 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 			break
 		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 			logger.LoggerSync.Errorf("Error occurred when retrieving APIs from control plane: %v", data.Err)
+			health.SetControlPlaneRestAPIStatus(false)
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Err)

@@ -31,12 +31,11 @@
     <test name="before-suite-preparations" parallel="false">
         <classes>
             <!-- To avoid apim restarting everytime while writing tests, follow the instructions in integration/test-integration/readme.md -->
-            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimStartupExecutor"/>
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.CcStartupExecutor"/>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimClientsPreparer"/>
 
             <!-- Clean and create APIs, Applications, Subscriptions BEFORE starting Choreo Connect  -->
             <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimPreparer"/>
-            <class name="org.wso2.choreo.connect.tests.setup.withapim.CcStartupExecutor"/>
         </classes>
     </test>
     <test name="start-pull-and-events-via-eventhub-combined" parallel="false">
