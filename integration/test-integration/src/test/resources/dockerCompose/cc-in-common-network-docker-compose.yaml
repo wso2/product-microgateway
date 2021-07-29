@@ -3,7 +3,8 @@ networks:
   cc_internal:
     name: cc_internal
   apim_and_cc:
-    name: apim_and_cc
+    external:
+      name: apim_and_cc
 services:
   router:
     image: wso2/choreo-connect-router:0.9.1-SNAPSHOT
