@@ -144,7 +144,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 					} else {
 						return nil, errors.New("error encountered when parsing the endpoint")
 					}
-					
+
 				}
 			}
 			resources = append(resources, resource)
@@ -195,7 +195,7 @@ func getHostandBasepathandPort(rawURL string) (*Endpoint, error) {
 	// Hostname validation
 	if err == nil && !regexp.MustCompile(hostNameValidator).MatchString(parsedURL.Hostname()) {
 		logger.LoggerOasparser.Error("Malformed endpoint detected (Invalid host name) : ", rawURL)
-		return nil
+		return nil, errors.New("malformed endpoint detected (Invalid host name) : " + rawURL)
 	}
 
 	host = parsedURL.Hostname()

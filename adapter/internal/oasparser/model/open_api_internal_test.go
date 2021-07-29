@@ -167,8 +167,8 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 			message: "when protocol is not provided",
 		},
 		{
-			input: "https://{defaultHost}",
-			result: nil,
+			input:   "https://{defaultHost}",
+			result:  nil,
 			message: "when malformed endpoint is provided",
 		},
 	}
@@ -214,7 +214,7 @@ func TestMalformedUrl(t *testing.T) {
 	}
 
 	for index := range suspectedRawUrls {
-		response := getHostandBasepathandPort(suspectedRawUrls[index])
+		response, _ := getHostandBasepathandPort(suspectedRawUrls[index])
 		assert.Nil(t, response)
 	}
 
