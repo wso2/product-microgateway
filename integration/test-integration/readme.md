@@ -1,6 +1,6 @@
 # Integration Tests
 
-## How to Add a Testcase for standalone mode
+## Standalone Mode - How to Add a Testcase 
 1. Add the testcase class to an existing or a new folder in 
    `src/test/java/org/wso2/choreo/connect/tests/testcases/standalone`
 2. If an api needs to be deployed,     
@@ -16,7 +16,7 @@
 5. Importantly, add the testcase to the `src/test/resources/testng-cc-standalone.xml` file. Pick the group
    according to the class you deployed your API in 2. ii. 
 
-## How to Add a Testcase for withAPIM mode
+## WithAPIM Mode - How to Add a Testcase
 1. Add the APIs, Applications, and Subscriptions that needs to be created, to the json files in 
    `src/test/resources/apimApisAppsSubs`. These will be added to API Manager before 
    starting any of the testcases.
@@ -41,7 +41,7 @@
         Therefore, the `ApimPreparer` first deletes the APIs, Applications, and Subscriptions that were already created.
         Then creates the same resources again, before running the tests.
 
-### How to Avoid API Manager restarting everytime the test are run
+### How to Avoid API Manager Restarting Everytime the Tests are Run
 1. Run the tests ones
 2. Copy the `apim` folder in the `integration/test-integration/target` to a different location
 3. cd into that `apim` folder and run `docker-compose up`
@@ -51,7 +51,7 @@
 6. Once done, uncomment the previously commented `ApimStartupShutdownExecutor` test class, stop the running apim 
    instance, and run all the tests with `mvn clean install`.
    
-## How to Test with a new CC instance (standalone or withapim mode)
+## Standalone Mode and Withapim Mode - How to Test with a new CC Instance
 NOTE: Only if an instance with a completely new config is extremely necessary
 1. Add the new config toml to `src/test/resources/configs` and rename it to resemble the requirement
 2. Create a `setup` class
@@ -76,7 +76,7 @@ NOTE: Only if an instance with a completely new config is extremely necessary
    </test>
    ```
 
-## How to Test with a new API-M instance
+## Withapim Mode - How to Test with a new API-M instance
 NOTE: Not encouraged at all
 1. Create a class similar to `org.wso2.choreo.connect.tests.setup.withapim.ApimStartupExecutor` and add a
    `beforeSuite` methods that starts the apim instance. (Don't have to write a new "shutdownExecuter",
