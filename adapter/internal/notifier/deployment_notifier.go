@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	deployedRevisionEP string = "internal/data/v1/apis/deployed-revision"
+	deployedRevisionEP string = "internal/data/v1/apis/deployed-revisions"
 )
 
 //UpdateDeployedRevisions create the DeployedAPIRevision object
@@ -61,7 +61,7 @@ func SendRevisionUpdate(deployedRevisionList []*DeployedAPIRevision) {
 	for retries < 3 {
 		retries++
 
-		req, _ := http.NewRequest("PUT", revisionEP, bytes.NewBuffer(jsonValue))
+		req, _ := http.NewRequest("PATCH", revisionEP, bytes.NewBuffer(jsonValue))
 		req.Header.Set("Authorization", basicAuth)
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := tlsutils.InvokeControlPlane(req, cpConfigs.SkipSSLVerification)
