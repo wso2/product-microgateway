@@ -92,7 +92,7 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServe
 	enforcerThrottleDataDsSrv wso2_server.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
-	publicKeyLocation, privateKeyLocation, truststoreLocation := restserver.GetKeyLocations()
+	publicKeyLocation, privateKeyLocation, truststoreLocation := tlsutils.GetKeyLocations()
 	cert, err := tlsutils.GetServerCertificate(publicKeyLocation, privateKeyLocation)
 
 	caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
@@ -234,6 +234,10 @@ func Run(conf *config.Config) {
 		synchronizer.FetchKeyManagersOnStartUp(conf)
 		go synchronizer.UpdateKeyTemplates()
 		go synchronizer.UpdateBlockingConditions()
+	} else {
+		// We need to deploy the readiness probe when eventhub is disabled
+		xds.DeployReadinessAPI(envs)
+		logger.LoggerMgw.Info("Event hub disabled and hence deployed readiness probe")
 	}
 
 OUTER:

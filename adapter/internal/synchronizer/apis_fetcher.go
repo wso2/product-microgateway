@@ -25,7 +25,6 @@ package synchronizer
 import (
 	"archive/zip"
 	"bytes"
-	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -37,10 +36,10 @@ import (
 
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/auth"
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 
 	apiServer "github.com/wso2/product-microgateway/adapter/internal/api"
-	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
@@ -86,24 +85,6 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse) {
 
 	// Check if TLS is enabled
 	skipSSL := ehConfigs.SkipSSLVerification
-	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
-	tr := &http.Transport{}
-	if !skipSSL {
-		_, _, truststoreLocation := restserver.GetKeyLocations()
-		caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	}
-
-	// Configuring the http client
-	client := &http.Client{
-		Transport: tr,
-	}
 
 	// Create a HTTP request
 	req, err := http.NewRequest("GET", ehURL, nil)
@@ -130,7 +111,7 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse) {
 	req.Header.Set(authorization, basicAuth)
 	// Make the request
 	logger.LoggerSync.Debug("Sending the controle plane request")
-	resp, err := client.Do(req)
+	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 	// In the event of a connection error, the error would not be nil, then return the error
 	// If the error is not null, proceed
 	if err != nil {
@@ -175,6 +156,7 @@ func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse) {
 // downloaded apis.zip one by one.
 // If the updating envoy or enforcer fails, this method returns an error, if not error would be nil.
 func PushAPIProjects(payload []byte, environments []string) error {
+	var deploymentList []*notifier.DeployedAPIRevision
 	// Reading the root zip
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	if err != nil {
@@ -242,10 +224,16 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		_ = f.Close() // Close the file here (without defer)
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
 		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
-		err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap)
+		var deployedRevisionList []*notifier.DeployedAPIRevision
+		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
+		} else if deployedRevisionList != nil {
+			deploymentList = append(deploymentList, deployedRevisionList...)
 		}
+	}
+	if len(deploymentList) > 0 {
+		notifier.SendRevisionUpdate(deploymentList)
 	}
 	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(zipReader.File)-1)
 	// Error nil for successful execution

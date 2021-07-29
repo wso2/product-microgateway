@@ -168,7 +168,7 @@ func configureAPI(api *operations.RestapiAPI) http.Handler {
 
 // The TLS configuration before HTTPS server starts.
 func configureTLS(tlsConfig *tls.Config) {
-	publicKeyLocation, privateKeyLocation, _ := GetKeyLocations()
+	publicKeyLocation, privateKeyLocation, _ := tlsutils.GetKeyLocations()
 	cert, err := tlsutils.GetServerCertificate(publicKeyLocation, privateKeyLocation)
 	if err == nil {
 		tlsConfig.Certificates = []tls.Certificate{cert}
@@ -232,13 +232,4 @@ func StartRestServer(config *config.Config) {
 		logger.LoggerAPI.Fatal(err)
 		health.RestService.SetStatus(false)
 	}
-}
-
-// GetKeyLocations function returns the public key path and private key path
-func GetKeyLocations() (string, string, string) {
-	conf, _ := config.ReadConfigs()
-	publicKeyLocation := conf.Adapter.Keystore.PublicKeyLocation
-	privateKeyLocation := conf.Adapter.Keystore.PrivateKeyLocation
-	truststoreLocation := conf.Adapter.Truststore.Location
-	return publicKeyLocation, privateKeyLocation, truststoreLocation
 }

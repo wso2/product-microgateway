@@ -22,11 +22,13 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sync"
 
+	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/pkg/loggers"
 )
 
@@ -39,8 +41,9 @@ var (
 )
 
 const (
-	pemExtension string = ".pem"
-	crtExtension string = ".crt"
+	pemExtension  string = ".pem"
+	crtExtension  string = ".crt"
+	authorization string = "Authorization"
 )
 
 // GetServerCertificate returns the certificate (used for the restAPI server and xds server) created based on configuration values.
@@ -95,4 +98,35 @@ func IsPublicCertificate(certContent []byte) bool {
 		return true
 	}
 	return false
+}
+
+// InvokeControlPlane sends request to the control plane and returns the response
+func InvokeControlPlane(req *http.Request, skipSSL bool) (*http.Response, error) {
+	tr := &http.Transport{}
+	if !skipSSL {
+		_, _, truststoreLocation := GetKeyLocations()
+		caCertPool := GetTrustedCertPool(truststoreLocation)
+		tr = &http.Transport{
+			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
+		}
+	} else {
+		tr = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+	}
+
+	// Configuring the http client
+	client := &http.Client{
+		Transport: tr,
+	}
+	return client.Do(req)
+}
+
+// GetKeyLocations function returns the public key path and private key path
+func GetKeyLocations() (string, string, string) {
+	conf, _ := config.ReadConfigs()
+	publicKeyLocation := conf.Adapter.Keystore.PublicKeyLocation
+	privateKeyLocation := conf.Adapter.Keystore.PrivateKeyLocation
+	truststoreLocation := conf.Adapter.Truststore.Location
+	return publicKeyLocation, privateKeyLocation, truststoreLocation
 }
