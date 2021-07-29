@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -167,8 +167,8 @@ func TestGetHostandBasepathandPort(t *testing.T) {
 			message: "when protocol is not provided",
 		},
 		{
-			input: "https://{defaultHost}",
-			result: nil,
+			input:   "https://{defaultHost}",
+			result:  nil,
 			message: "when malformed endpoint is provided",
 		},
 	}
@@ -195,5 +195,27 @@ func TestGetXWso2Label(t *testing.T) {
 	wso2Label := GetXWso2Label(swagger.ExtensionProps)
 
 	assert.NotNil(t, wso2Label, "Lable should at leaset be default")
+
+}
+
+func TestMalformedUrl(t *testing.T) {
+
+	suspectedRawUrls := []string{
+		"http://#de.abc.com:80/api",
+		"http://&de.abc.com:80/api",
+		"http://!de.abc.com:80/api",
+		"tcp://http::8900",
+		"http://::80",
+		"http::80",
+		"-",
+		"api.worldbank.org-",
+		"-api.worldbank.org",
+		"",
+	}
+
+	for index := range suspectedRawUrls {
+		response, _ := getHostandBasepathandPort(suspectedRawUrls[index])
+		assert.Nil(t, response)
+	}
 
 }
