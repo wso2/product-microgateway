@@ -52,6 +52,12 @@
             </class>
         </classes>
     </test>
+   <test name="apis-apps-subs-received-after-apim-restart" parallel="false">
+       <classes>
+           <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.BasicEventsTestCase"/>
+       </classes>
+   </test>
     <test name="all-events-received-via-eventhub" parallel="false">
         <classes>
             <!-- Clean and create APIs, Applications, Subscriptions AFTER starting Choreo Connect  -->
@@ -70,13 +76,6 @@
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.EnforcerAPITestCase"/>
         </classes>
     </test>
-<!--    <test name="apis-apps-subs-received-after-apim-restart" parallel="false">-->
-<!--        <classes>-->
-<!--            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.withapim.ExistingApiTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BasicEventsTestCase"/>-->
-<!--        </classes>-->
-<!--    </test>-->
     <test name="cc-shutdown-and-apim-shutdown" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcShutdownExecutor"/>
