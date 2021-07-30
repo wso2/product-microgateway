@@ -113,8 +113,12 @@ public class ApimInstance {
                 + File.separator + "vhost-deployment.toml";
         String deploymentTomlDest = apimSetupDir + TestConstant.DEPLYMNT_TOML_PATH;
 
+        String databaseSource = testResourcesDir + TestConstant.DATABASE_DIR;
+        String databaseDest = apimSetupDir + TestConstant.DATABASE_DIR;
+
         Utils.copyFile(dockerComposeSource, dockerComposeDest);
         Utils.copyFile(deploymentTomlSource, deploymentTomlDest);
+        Utils.copyDirectory(databaseSource, databaseDest);
 
         return dockerComposeDest;
     }

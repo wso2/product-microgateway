@@ -49,6 +49,8 @@ import (
 	"os"
 	"os/signal"
 
+	"strconv"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
@@ -57,7 +59,6 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"strconv"
 )
 
 var (
@@ -74,8 +75,8 @@ var (
 )
 
 const (
-	ads          = "ads"
-	amqpProtocol = "amqp"
+	ads                        = "ads"
+	amqpProtocol               = "amqp"
 	featureFlagReplaceEventHub = "FEATURE_FLAG_REPLACE_EVENT_HUB"
 )
 
@@ -267,11 +268,15 @@ func Run(conf *config.Config) {
 			go messaging.ProcessEvents(conf)
 		}
 
+		// Fetch APIs from control plane
+		fetchAPIsOnStartUp(conf)
+
 		go synchronizer.UpdateRevokedTokens()
 		// Fetch Key Managers from APIM
 		synchronizer.FetchKeyManagersOnStartUp(conf)
 		go synchronizer.UpdateKeyTemplates()
 		go synchronizer.UpdateBlockingConditions()
+		messaging.ProcessEvents(conf)
 	} else {
 		// We need to deploy the readiness probe when eventhub is disabled
 		xds.DeployReadinessAPI(envs)
