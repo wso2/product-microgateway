@@ -73,6 +73,7 @@ var (
 
 const (
 	ads = "ads"
+	featureFlagReplaceEventHub = "FEATURE_FLAG_REPLACE_EVENT_HUB"
 )
 
 func init() {
@@ -227,11 +228,12 @@ func Run(conf *config.Config) {
 		var isAzureEventingFeatureFlagEnabled bool
 		var err error
 
-		envValue := os.Getenv("FEATURE_FLAG_REPLACE_EVENT_HUB")
+		// TODO: (dnwick) remove env variable once the feature is complete
+		envValue := os.Getenv(featureFlagReplaceEventHub)
 		if (envValue != "") {
 			isAzureEventingFeatureFlagEnabled, err = strconv.ParseBool(envValue)
 			if (err != nil) {
-				logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while parsing " +
+				logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while parsing " +
 					"FEATURE_FLAG_REPLACE_EVENT_HUB environment value.", err)
 			}
 		}
