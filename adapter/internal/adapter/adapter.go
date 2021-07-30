@@ -232,7 +232,7 @@ func Run(conf *config.Config) {
 			isAzureEventingFeatureFlagEnabled, err = strconv.ParseBool(envValue)
 			if (err != nil) {
 				logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while parsing " +
-					"FEAURE_FLAG_REPLACE_EVENT_HUB environment value.", err)
+					"FEATURE_FLAG_REPLACE_EVENT_HUB environment value.", err)
 			}
 		}
 
