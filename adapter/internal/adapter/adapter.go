@@ -227,7 +227,7 @@ func Run(conf *config.Config) {
 		var isAzureEventingFeatureFlagEnabled bool
 		var err error
 
-		envValue := os.Getenv("FEAURE_FLAG_REPLACE_EVENT_HUB")
+		envValue := os.Getenv("FEATURE_FLAG_REPLACE_EVENT_HUB")
 		if (envValue != "") {
 			isAzureEventingFeatureFlagEnabled, err = strconv.ParseBool(envValue)
 			if (err != nil) {
