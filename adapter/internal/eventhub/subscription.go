@@ -130,9 +130,9 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 		go InvokeService(url.endpoint, url.responseType, nil, responseChannel, 0)
 		for {
 			data := <-responseChannel
-			logger.LoggerSync.Debug("Receiving data for an environment")
+			logger.LoggerSync.Debug("Receiving subscription data for an environment")
 			if data.Payload != nil {
-				logger.LoggerSync.Debug("Payload data recieved")
+				logger.LoggerSync.Debug("Payload data with subscription information recieved")
 				retrieveSubscriptionDataFromChannel(data)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
@@ -149,7 +149,7 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 					}
 					logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
 					time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
-					logger.LoggerSync.Info("Retrying to fetch APIs from control plane.")
+					logger.LoggerSync.Infof("Retrying to fetch APIs from control plane. Time Duration for the next retry: %v", conf.ControlPlane.RetryInterval*time.Second)
 					go InvokeService(url.endpoint, url.responseType, nil, responseChannel, 0)
 				}(data)
 			}
@@ -169,9 +169,9 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 		go InvokeService(ApisEndpoint, APIListMap[configuredEnv], queryParamMap, APIListChannel, 0)
 		for {
 			data := <-APIListChannel
-			logger.LoggerSync.Debug("Receiving data for an environment")
+			logger.LoggerSync.Debug("Receiving API information for an environment")
 			if data.Payload != nil {
-				logger.LoggerSync.Debug("Payload data recieved")
+				logger.LoggerSync.Debug("Payload data with API information recieved")
 				retrieveAPIList(data)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
@@ -188,7 +188,7 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 					}
 					logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
 					time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
-					logger.LoggerSync.Info("Retrying to fetch API data from control plane.")
+					logger.LoggerSync.Infof("Retrying to fetch APIs from control plane. Time Duration for the next retry: %v", conf.ControlPlane.RetryInterval*time.Second)
 					go InvokeService(ApisEndpoint, APIListMap[configuredEnv], queryParamMap, APIListChannel, 0)
 				}(data)
 			}

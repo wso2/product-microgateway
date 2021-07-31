@@ -24,8 +24,8 @@ import (
 var (
 	controlPlaneBrokerStatusChan  = make(chan bool)
 	controlPlaneRestAPIStatusChan = make(chan bool)
-	// ControlPlaneStarted sets the status of the control plane starting
-	ControlPlaneStarted = false
+	controlPlaneStarted           = false
+	controlPlaneUnhealthy         = false
 )
 
 // SetControlPlaneBrokerStatus sets the given status to the internal channel controlPlaneBrokerStatusChan
@@ -40,7 +40,7 @@ func SetControlPlaneBrokerStatus(status bool) {
 // SetControlPlaneRestAPIStatus sets the given status to the internal channel controlPlaneRestAPIStatusChan
 func SetControlPlaneRestAPIStatus(status bool) {
 	// check for controlPlaneStarted, to non block call
-	if !ControlPlaneStarted {
+	if !controlPlaneStarted && !controlPlaneUnhealthy {
 		controlPlaneRestAPIStatusChan <- status
 	}
 }
