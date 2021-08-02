@@ -21,6 +21,7 @@ package adapter
 import (
 	"crypto/tls"
 	"strings"
+	"strconv"
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
@@ -72,6 +73,7 @@ var (
 
 const (
 	ads = "ads"
+	featureFlagReplaceEventHub = "FEATURE_FLAG_REPLACE_EVENT_HUB"
 )
 
 func init() {
@@ -223,6 +225,23 @@ func Run(conf *config.Config) {
 	if eventHubEnabled {
 		// Load subscription data
 		eventhub.LoadSubscriptionData(conf)
+		var isAzureEventingFeatureFlagEnabled bool
+		var err error
+
+		// TODO: (dnwick) remove env variable once the feature is complete
+		envValue := os.Getenv(featureFlagReplaceEventHub)
+		if (envValue != "") {
+			isAzureEventingFeatureFlagEnabled, err = strconv.ParseBool(envValue)
+			if (err != nil) {
+				logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while parsing " +
+					"FEATURE_FLAG_REPLACE_EVENT_HUB environment value.", err)
+			}
+		}
+
+		if (isAzureEventingFeatureFlagEnabled) {
+			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to integrate with azure service bus")
+			go messaging.InitiateAndProcessEvents(conf)
+		}
 
 		go messaging.ProcessEvents(conf)
 
