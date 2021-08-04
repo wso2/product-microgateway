@@ -363,6 +363,9 @@ idleTimeoutInSeconds = 3600
   # Message broker connection URL of the control plane
   [controlPlane.jmsConnectionParameters]
     eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
+  # TODO: (dnwick) remove this config once a common connection parameter is introduced
+  [controlPlane.asbConnectionParameters]
+    eventListeningEndpoint = "$env{ASB_CONNECTION_STRING}"
 
 # Analytics configurations for Choreo Connect
 [analytics]

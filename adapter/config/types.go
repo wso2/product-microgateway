@@ -381,10 +381,15 @@ type controlPlane struct {
 	RetryInterval           time.Duration           `toml:"retryInterval"`
 	SkipSSLVerification     bool                    `toml:"skipSSLVerification"`
 	JmsConnectionParameters jmsConnectionParameters `toml:"jmsConnectionParameters"`
+	ASBConnectionParameters asbConnectionParameters `toml:"asbConnectionParameters"`
 }
 
 type jmsConnectionParameters struct {
 	EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
+}
+
+type asbConnectionParameters struct {
+	EventListeningEndpoint string `toml:"eventListeningEndpoint"`
 }
 
 // APIContent contains everything necessary to create an API
