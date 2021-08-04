@@ -32,9 +32,10 @@ func init() {
 }
 
 // InitiateBrokerConnection to pass event consumption
-func InitiateBrokerConnection(eventListeningEndpoints []string) error {
+func InitiateBrokerConnection(eventListeningEndpoint string) error {
 	var err error
-	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Trying to connect to azure service bus")
+	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Trying to connect to azure service bus with " +
+		"connection string " + eventListeningEndpoint)
 	err = nil
 	return err
 }
