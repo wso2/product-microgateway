@@ -20,22 +20,58 @@ package messaging
 
 import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	servicebus "github.com/Azure/azure-service-bus-go"
+	"context"
 )
 
 var (
 	// AzureRevokedTokenChannel stores the revoked token events
 	AzureRevokedTokenChannel chan []byte
+	// AzureNotificationChannel stores the notification events
+	AzureNotificationChannel chan []byte
 )
 
 func init() {
 	AzureRevokedTokenChannel = make(chan []byte)
+	AzureNotificationChannel = make(chan []byte)
 }
 
-// InitiateBrokerConnection to pass event consumption
-func InitiateBrokerConnection(eventListeningEndpoint string) error {
+// InitiateBrokerConnection to initiate connection
+func InitiateBrokerConnection(eventListeningEndpoint string) (*servicebus.Namespace, []*servicebus.TopicEntity, error) {
 	var err error
+	var availableTopics []*servicebus.TopicEntity
 	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Trying to connect to azure service bus with " +
 		"connection string " + eventListeningEndpoint)
-	err = nil
-	return err
+	namespace, err := servicebus.NewNamespace(servicebus.NamespaceWithConnectionString(eventListeningEndpoint))
+
+	if err == nil {
+		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Successfully received namespace ")
+		topicManager := namespace.NewTopicManager()
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		availableTopics, err = topicManager.List(ctx)
+		if err != nil {
+			logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to get topic " +
+				"list from azure service bus :%v", err)
+		}
+		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Successfully received topic list ")
+	} else {
+		//todo verify is it fine to print the full connection url
+		logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying get the namespace " +
+			"in azure service bus using the connection url " + eventListeningEndpoint + ":%v", err)
+	}
+	return namespace, availableTopics, err
+}
+
+// InitiateConsumers to pass event consumption
+func InitiateConsumers(ns *servicebus.Namespace, availableTopicList []*servicebus.TopicEntity, componentName string) {
+	bindingKeys := []string {tokenRevocation, notification}
+
+	for _, key := range bindingKeys {
+		go func(key string) {
+			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] starting the consumer for key : " + key)
+			startBrokerConsumer(key, ns, availableTopicList, componentName)
+			select {}
+		}(key)
+	}
 }

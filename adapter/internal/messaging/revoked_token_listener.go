@@ -49,3 +49,26 @@ func handleTokenRevocation() {
 	}
 	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
 }
+
+func handleAzureTokenRevocation() {
+	for d := range msg.AzureRevokedTokenChannel {
+		logger.LoggerInternalMsg.Infof("message received for RevokedTokenChannel = " + string(d))
+		//var notification msg.EventTokenRevocationNotification
+		//unmarshalErr := json.Unmarshal([]byte(string(d)), &notification)
+		//if unmarshalErr != nil {
+		//	logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling revoked token event data %v", unmarshalErr)
+		//	continue
+		//}
+		//logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.Type)
+		//logger.LoggerInternalMsg.Printf("RevokedToken: %s, Token Type: %s", notification.Event.PayloadData.RevokedToken,
+		//	notification.Event.PayloadData.Type)
+		//var stokens []types.Resource
+		//t := &keymgt.RevokedToken{}
+		//t.Jti = notification.Event.PayloadData.RevokedToken
+		//t.Expirytime = notification.Event.PayloadData.ExpiryTime
+		//stokens = append(stokens, t)
+		//xds.UpdateEnforcerRevokedTokens(stokens)
+		//d.Ack(false)
+	}
+	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
+}
