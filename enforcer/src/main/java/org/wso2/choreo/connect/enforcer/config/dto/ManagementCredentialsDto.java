@@ -15,17 +15,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.wso2.choreo.connect.enforcer.constants;
+package org.wso2.choreo.connect.enforcer.config.dto;
 
 /**
- * HttpConstants class holds the constants related HTTP protocol related constants
- */
-public class HttpConstants {
-    public static final int NO_CONTENT_STATUS_CODE = 204;
-    public static final String OPTIONS = "OPTIONS";
-    public static final String ALLOW_HEADER = "allow";
-    public static final String X_REQUEST_ID_HEADER = "x-request-id";
-    public static final String APPLICATION_JSON = "application/json";
-    public static final String BASIC_LOWER = "basic";
+ * Holder for Admin User credentials
+ * */
+public class ManagementCredentialsDto {
+    private String userName;
+    private char[] password;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public char[] getPassword() {
+        return password;
+    }
+
+    public void setPassword(char[] password) {
+        this.password = password;
+    }
 }

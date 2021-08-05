@@ -105,6 +105,13 @@ var defaultConfig = &Config{
 		},
 	},
 	Enforcer: enforcer{
+		Management: management{
+			Username: "admin",
+			Password: "admin",
+		},
+		RestServer: restServer{
+			Enable: true,
+		},
 		Security: security{
 			TokenService: []tokenService{
 				{

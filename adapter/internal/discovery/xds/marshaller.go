@@ -6,11 +6,11 @@ import (
 	"strconv"
 
 	"github.com/wso2/product-microgateway/adapter/config"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/config/enforcer"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/keymgt"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
 // MarshalConfig will marshal a Config struct - read from the config toml - to
@@ -95,6 +95,15 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		},
 	}
 
+	management := &enforcer.Management{
+		Username: config.Enforcer.Management.Username,
+		Password: config.Enforcer.Management.Password,
+	}
+
+	restServer := &enforcer.RestServer{
+		Enable: config.Enforcer.RestServer.Enable,
+	}
+
 	return &enforcer.Config{
 		JwtGenerator: &enforcer.JWTGenerator{
 			Enable:                config.Enforcer.JwtGenerator.Enable,
@@ -170,6 +179,8 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 				},
 			},
 		},
+		Management: management,
+		RestServer: restServer,
 	}
 }
 

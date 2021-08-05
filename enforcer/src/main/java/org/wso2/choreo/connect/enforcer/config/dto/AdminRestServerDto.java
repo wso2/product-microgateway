@@ -15,17 +15,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.wso2.choreo.connect.enforcer.constants;
+package org.wso2.choreo.connect.enforcer.config.dto;
 
 /**
- * HttpConstants class holds the constants related HTTP protocol related constants
- */
-public class HttpConstants {
-    public static final int NO_CONTENT_STATUS_CODE = 204;
-    public static final String OPTIONS = "OPTIONS";
-    public static final String ALLOW_HEADER = "allow";
-    public static final String X_REQUEST_ID_HEADER = "x-request-id";
-    public static final String APPLICATION_JSON = "application/json";
-    public static final String BASIC_LOWER = "basic";
+ * Configuration for enabling Admin Rest api
+ * */
+public class AdminRestServerDto {
+    private boolean enable;
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
 }

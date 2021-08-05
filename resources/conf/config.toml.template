@@ -171,6 +171,15 @@ idleTimeoutInSeconds = 3600
   # Expiry time in minutes
   expiryTime = 15
 
+# Configuration for admin credentials of the Enforcer
+[enforcer.management]
+username = "admin"
+password = "admin"
+
+# This configuration to enable the Enforcer Internal Data rest API
+[enforcer.restserver]
+enable = true
+
 # The configuration of the backend jwt generation in the Choreo Connect
 [enforcer.jwtGenerator]
   # Enable/Disable backend JWT generation

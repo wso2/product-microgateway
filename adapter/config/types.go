@@ -120,6 +120,8 @@ type enforcer struct {
 	Cache        cache
 	Throttling   throttlingConfig
 	JwtIssuer    jwtIssuer
+	Management   management
+	RestServer   restServer
 }
 
 type server struct {
@@ -390,6 +392,17 @@ type jmsConnectionParameters struct {
 
 type asbConnectionParameters struct {
 	EventListeningEndpoint string `toml:"eventListeningEndpoint"`
+}
+
+// Configuration for Enforcer admin rest api
+type restServer struct {
+	Enable bool
+}
+
+// Enforcer admin credentials
+type management struct {
+	Username string
+	Password string
 }
 
 // APIContent contains everything necessary to create an API
