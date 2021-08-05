@@ -199,7 +199,7 @@ netty-common-4.1.50.Final.jar                                                   
 ballerinax.java.jdbc.jar                                                                            jar            apache2             
 ballerina.observe.jar                                                                               jar            apache2             
 kubernetes-extension-1.2.9.jar                                                                      jar            apache2             
-jackson-datatype-jsr310-2.9.5.jar                                                                   bundle         apache2             
+jackson-datatype-jsr310-2.12.3.jar                                                                  bundle         apache2
 jackson-annotations-2.8.0.jar                                                                       bundle         apache2             
 org.wso2.carbon.core-5.1.0.jar                                                                      bundle         apache2             
 netty-tcnative-boringssl-static-2.0.25.Final.jar                                                    bundle         apache2             
