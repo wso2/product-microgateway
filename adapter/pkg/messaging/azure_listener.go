@@ -39,6 +39,8 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 	// underscores (_), up to 50 characters. Subscription names are also case-insensitive.
 	var subscriptionName = topicName + "_" + componentName + "_sub"
 
+	// TODO: (dnwick) Handle retry logic in error situations
+
 	if !isTopicExist(topicName, availableTopicList) {
 		//create the topic
 		topicManager := ns.NewTopicManager()
@@ -50,8 +52,7 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 			logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to create " +
 				"topic " + topicName + " from azure service bus :%v", err)
 		} else {
-			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Topic " +
-				topicName + "created")
+			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Topic " + topicName + "created")
 			topicExistForFurtherProcess = true
 		}
 	} else {

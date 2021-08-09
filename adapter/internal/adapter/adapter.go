@@ -229,9 +229,9 @@ func Run(conf *config.Config) {
 		var err error
 
 		// TODO: (dnwick) remove env variable once the feature is complete
-		envValue := os.Getenv(featureFlagReplaceEventHub)
-		if envValue != "" {
-			isAzureEventingFeatureFlagEnabled, err = strconv.ParseBool(envValue)
+		featureFlagReplaceEventHubEnvValue := os.Getenv(featureFlagReplaceEventHub)
+		if featureFlagReplaceEventHubEnvValue != "" {
+			isAzureEventingFeatureFlagEnabled, err = strconv.ParseBool(featureFlagReplaceEventHubEnvValue)
 			if err != nil {
 				logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while parsing " +
 					"FEATURE_FLAG_REPLACE_EVENT_HUB environment value.", err)
