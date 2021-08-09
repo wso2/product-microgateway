@@ -52,23 +52,26 @@ func handleTokenRevocation() {
 
 func handleAzureTokenRevocation() {
 	for d := range msg.AzureRevokedTokenChannel {
-		logger.LoggerInternalMsg.Infof("message received for RevokedTokenChannel = " + string(d))
-		//var notification msg.EventTokenRevocationNotification
-		//unmarshalErr := json.Unmarshal([]byte(string(d)), &notification)
-		//if unmarshalErr != nil {
-		//	logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling revoked token event data %v", unmarshalErr)
-		//	continue
-		//}
-		//logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.Type)
-		//logger.LoggerInternalMsg.Printf("RevokedToken: %s, Token Type: %s", notification.Event.PayloadData.RevokedToken,
-		//	notification.Event.PayloadData.Type)
-		//var stokens []types.Resource
-		//t := &keymgt.RevokedToken{}
-		//t.Jti = notification.Event.PayloadData.RevokedToken
-		//t.Expirytime = notification.Event.PayloadData.ExpiryTime
-		//stokens = append(stokens, t)
-		//xds.UpdateEnforcerRevokedTokens(stokens)
-		//d.Ack(false)
+		logger.LoggerInternalMsg.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] message received for " +
+			"RevokedTokenChannel = " + string(d))
+		var notification msg.EventTokenRevocationNotification
+		error := parseRevokedTokenJSONEvent(d, &notification)
+		if error != nil {
+			continue
+		}
+		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Event %s is received",
+			notification.Event.PayloadData.Type)
+		logger.LoggerInternalMsg.Printf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] RevokedToken: %s, " +
+			"Token Type: %s", notification.Event.PayloadData.RevokedToken,
+			notification.Event.PayloadData.Type)
+		msg.AzureRevokedTokenAck <- true
 	}
-	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
+}
+
+func parseRevokedTokenJSONEvent(data []byte, notification *msg.EventTokenRevocationNotification) error {
+	unmarshalErr := json.Unmarshal(data, &notification)
+	if unmarshalErr != nil {
+		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling revoked token event data %v", unmarshalErr)
+	}
+	return unmarshalErr
 }

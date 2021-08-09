@@ -37,16 +37,13 @@ func InitiateAndProcessEvents(config *config.Config) {
 	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting InitiateAndProcessEvents method")
 	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] EventListeningEndpoint is ",
 		config.ControlPlane.ASBConnectionParameters.EventListeningEndpoint)
-	namespace, availableTopicList, err := msg.InitiateBrokerConnection(
+	namespace, availableTopicList, err := msg.InitiateBrokerConnectionAndGetAvailableTopics(
 		config.ControlPlane.ASBConnectionParameters.EventListeningEndpoint)
 	health.SetControlPlaneBrokerStatus(err == nil)
 	if err == nil {
 		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Initiated broker connection successfully ")
-		msg.InitiateConsumers(namespace, availableTopicList, componentName)
+		msg.InitiateConsumers(namespace, availableTopicList, componentName, )
 	}
-
 	go handleAzureNotification()
 	go handleAzureTokenRevocation()
-
-
 }

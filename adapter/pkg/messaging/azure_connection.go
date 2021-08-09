@@ -27,17 +27,24 @@ import (
 var (
 	// AzureRevokedTokenChannel stores the revoked token events
 	AzureRevokedTokenChannel chan []byte
+	// AzureRevokedTokenAck stores the acknowledgement for event process finish
+	AzureRevokedTokenAck chan bool
 	// AzureNotificationChannel stores the notification events
 	AzureNotificationChannel chan []byte
+	// AzureNotificationAck stores the acknowledgement for event process finish
+	AzureNotificationAck chan bool
 )
 
 func init() {
 	AzureRevokedTokenChannel = make(chan []byte)
+	AzureRevokedTokenAck = make(chan bool)
 	AzureNotificationChannel = make(chan []byte)
+	AzureNotificationAck = make(chan bool)
 }
 
-// InitiateBrokerConnection to initiate connection
-func InitiateBrokerConnection(eventListeningEndpoint string) (*servicebus.Namespace, []*servicebus.TopicEntity, error) {
+// InitiateBrokerConnectionAndGetAvailableTopics to initiate connection and get topic list
+func InitiateBrokerConnectionAndGetAvailableTopics(eventListeningEndpoint string) (*servicebus.Namespace,
+	[]*servicebus.TopicEntity, error) {
 	var err error
 	var availableTopics []*servicebus.TopicEntity
 	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Trying to connect to azure service bus with " +

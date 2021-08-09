@@ -106,41 +106,18 @@ func handleNotification() {
 }
 
 func handleAzureNotification() {
-
 	for d := range msg.AzureNotificationChannel {
-		logger.LoggerInternalMsg.Infof("message received for NotificationChannel = " + string(d))
-		//var notification msg.EventNotification
-		//var eventType string
-		//notificationErr := json.Unmarshal([]byte(string(d.Body)), &notification)
-		//if notificationErr != nil {
-		//	logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling event data %v", notificationErr)
-		//	continue
-		//}
-		//logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
-		//var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Event)
-		//if err != nil {
-		//	if _, ok := err.(base64.CorruptInputError); ok {
-		//		logger.LoggerInternalMsg.Error("\nbase64 input is corrupt, check the provided key")
-		//	}
-		//	logger.LoggerInternalMsg.Errorf("Error occurred while decoding the notification event %v", err)
-		//	continue
-		//}
-		//logger.LoggerInternalMsg.Debugf("\n\n[%s]", decodedByte)
-		//eventType = notification.Event.PayloadData.EventType
-		//if strings.Contains(eventType, apiLifeCycleChange) {
-		//	handleLifeCycleEvents(decodedByte)
-		//} else if strings.Contains(eventType, apiEventType) {
-		//	handleAPIEvents(decodedByte, eventType)
-		//} else if strings.Contains(eventType, applicationEventType) {
-		//	handleApplicationEvents(decodedByte, eventType)
-		//} else if strings.Contains(eventType, subscriptionEventType) {
-		//	handleSubscriptionEvents(decodedByte, eventType)
-		//} else {
-		//	handlePolicyEvents(decodedByte, eventType)
-		//}
-		//d.Ack(false)
+		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] message received for " +
+			"NotificationChannel = " + string(d))
+		var notification msg.EventNotification
+		error := parseNotificationJSONEvent(d, &notification)
+		if error != nil {
+			continue
+		}
+		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Event %s is received",
+			notification.Event.PayloadData.EventType)
+		msg.AzureNotificationAck <- true
 	}
-	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
 }
 
 // handleAPIEvents to process api related data
@@ -529,4 +506,13 @@ func belongsToTenant(tenantDomain string) bool {
 	// TODO : enable this once the events are fixed in apim
 	// return config.GetControlPlaneConnectedTenantDomain() == tenantDomain
 	return true
+}
+
+func parseNotificationJSONEvent(data []byte, notification *msg.EventNotification) error {
+	unmarshalErr := json.Unmarshal(data, &notification)
+	if unmarshalErr != nil {
+		logger.LoggerInternalMsg.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while unmarshalling " +
+			"notification event data %v", unmarshalErr)
+	}
+	return unmarshalErr
 }

@@ -40,6 +40,20 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 
 	if (!isTopicExist(topicName, availableTopicList)) {
 		//create the topic
+		topicManager := ns.NewTopicManager()
+		ctx := context.Background()
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		_, err := topicManager.Put(ctx, topicName)
+		if err != nil {
+			logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to create " +
+				"topic " + topicName + " from azure service bus :%v", err)
+		} else {
+			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Topic " +
+				topicName + "created")
+			topicExistForFurtherProcess = true
+		}
 	} else {
 		topicExistForFurtherProcess = true
 	}
@@ -96,11 +110,14 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 					"topic subscription client for  " + subscriptionName + " from azure service bus for topic name " +
 						topicName + ":%v", err)
 			} else {
-				DataChannel := make(chan []byte)
+				dataChannel := make(chan []byte)
+				ackChannel := make(chan bool)
 				if strings.EqualFold(topicName, notification) {
-					DataChannel = AzureNotificationChannel
+					dataChannel = AzureNotificationChannel
+					ackChannel = AzureNotificationAck
 				} else if strings.EqualFold(topicName, tokenRevocation) {
-					DataChannel = AzureRevokedTokenChannel
+					dataChannel = AzureRevokedTokenChannel
+					ackChannel = AzureRevokedTokenAck
 				}
 
 				logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to receive messages for " +
@@ -108,7 +125,10 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 
 				err = topicSubscriptionClient.Receive(ctx, servicebus.HandlerFunc(func(ctx context.Context,
 					message *servicebus.Message) error {
-					DataChannel <- message.Data
+					dataChannel <- message.Data
+					<-ackChannel
+					logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Received ACK for " +
+						"subscriptionName  " + subscriptionName + " and going to do ACK service bus now")
 					return message.Complete(ctx)
 				}))
 			}
@@ -138,11 +158,4 @@ func isSubscriptionExist(subscriptionName string, subscriptionList []*servicebus
 		" does not Exist ")
 	return false
 }
-
-// Consumer struct represents the structure of a consumer object
-//type AzureConsumer struct {
-//	SBNamespace servicebus.Namespace
-//	Tag         string
-//	Done        chan error
-//}
 
