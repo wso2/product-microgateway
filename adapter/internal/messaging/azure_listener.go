@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	componentName    string = "adapter"
+	componentName string = "adapter"
 )
 
 // InitiateAndProcessEvents to pass event consumption
@@ -42,7 +42,7 @@ func InitiateAndProcessEvents(config *config.Config) {
 	health.SetControlPlaneBrokerStatus(err == nil)
 	if err == nil {
 		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Initiated broker connection successfully ")
-		msg.InitiateConsumers(namespace, availableTopicList, componentName, )
+		msg.InitiateConsumers(namespace, availableTopicList, componentName)
 	}
 	go handleAzureNotification()
 	go handleAzureTokenRevocation()

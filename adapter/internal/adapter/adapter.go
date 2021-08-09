@@ -230,15 +230,15 @@ func Run(conf *config.Config) {
 
 		// TODO: (dnwick) remove env variable once the feature is complete
 		envValue := os.Getenv(featureFlagReplaceEventHub)
-		if (envValue != "") {
+		if envValue != "" {
 			isAzureEventingFeatureFlagEnabled, err = strconv.ParseBool(envValue)
-			if (err != nil) {
+			if err != nil {
 				logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while parsing " +
 					"FEATURE_FLAG_REPLACE_EVENT_HUB environment value.", err)
 			}
 		}
 
-		if (isAzureEventingFeatureFlagEnabled) {
+		if isAzureEventingFeatureFlagEnabled {
 			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to integrate with azure service bus")
 			go messaging.InitiateAndProcessEvents(conf)
 		}

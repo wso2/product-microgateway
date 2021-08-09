@@ -38,7 +38,7 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 	// underscores (_), up to 50 characters. Subscription names are also case-insensitive.
 	var subscriptionName = topicName + "_" + componentName + "_sub"
 
-	if (!isTopicExist(topicName, availableTopicList)) {
+	if !isTopicExist(topicName, availableTopicList) {
 		//create the topic
 		topicManager := ns.NewTopicManager()
 		ctx := context.Background()
