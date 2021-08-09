@@ -25,6 +25,7 @@ string tokenContext = gateway:removePrePostSlash(gateway:getConfigValue(gateway:
 service authorizeService on tokenListenerEndpoint, apiSecureListener {
 
     @http:ResourceConfig {
+        methods:["GET"],
         path: "/*",
         auth: {
             enabled: false
@@ -73,6 +74,7 @@ service authorizeService on tokenListenerEndpoint, apiSecureListener {
 service revokeService on tokenListenerEndpoint, apiSecureListener {
 
     @http:ResourceConfig {
+        methods:["POST"],
         path: "/*",
         auth: {
             enabled: false
@@ -121,6 +123,7 @@ service revokeService on tokenListenerEndpoint, apiSecureListener {
 service tokenService on tokenListenerEndpoint, apiSecureListener {
 
     @http:ResourceConfig {
+        methods:["POST"],
         path: "/*",
         auth: {
             enabled: false
@@ -168,6 +171,7 @@ service tokenService on tokenListenerEndpoint, apiSecureListener {
 }
 service apiKeyService on apiSecureListener {
     @http:ResourceConfig {
+        methods:["GET"],
         path: "/*",
         auth: {
             enabled: true,
@@ -212,6 +216,7 @@ service apiKeyService on apiSecureListener {
 service userInfoService on tokenListenerEndpoint, apiSecureListener {
 
     @http:ResourceConfig {
+        methods:["GET"],
         path: "/*",
         auth: {
             enabled: false

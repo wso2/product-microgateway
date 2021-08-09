@@ -148,6 +148,7 @@
                 <include>com.moandjiezana.toml:toml4j:jar</include>
                 <include>com.beust:jcommander:jar</include>
                 <include>org.wso2.carbon.callhome:core</include>
+                <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
             </includes>
         </dependencySet>
         <dependencySet>
