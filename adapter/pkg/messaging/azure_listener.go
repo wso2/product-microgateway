@@ -31,6 +31,7 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 
 	var topicExistForFurtherProcess bool
 	var subscriptionExistForFurtherProcess bool
+	parentContext := context.Background()
 	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting broker consumer for topic name : " +
 		topicName)
 
@@ -41,8 +42,7 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 	if !isTopicExist(topicName, availableTopicList) {
 		//create the topic
 		topicManager := ns.NewTopicManager()
-		ctx := context.Background()
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(parentContext)
 		defer cancel()
 
 		_, err := topicManager.Put(ctx, topicName)
@@ -67,10 +67,8 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 				" manager from azure service bus for topic name " + topicName + ":%v", err)
 		}
 
-		ctx := context.Background()
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(parentContext)
 		defer cancel()
-
 		availableSubscriptionList, err := subManager.List(ctx)
 
 		if err != nil {
@@ -83,8 +81,7 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 				"exist in the system")
 			subscriptionExistForFurtherProcess = true
 		} else {
-			ctx := context.Background()
-			ctx, cancel := context.WithCancel(ctx)
+			ctx, cancel := context.WithCancel(parentContext)
 			defer cancel()
 			_, err = subManager.Put(ctx, subscriptionName)
 
@@ -123,6 +120,8 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 				logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to receive messages for " +
 					"subscriptionName  " + subscriptionName + " from azure service bus for topic name " + topicName)
 
+				ctx, cancel := context.WithCancel(parentContext)
+				defer cancel()
 				err = topicSubscriptionClient.Receive(ctx, servicebus.HandlerFunc(func(ctx context.Context,
 					message *servicebus.Message) error {
 					dataChannel <- message.Data
