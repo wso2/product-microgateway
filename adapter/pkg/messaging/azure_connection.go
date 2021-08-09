@@ -63,7 +63,6 @@ func InitiateBrokerConnectionAndGetAvailableTopics(eventListeningEndpoint string
 		}
 		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Successfully received topic list ")
 	} else {
-		//todo verify is it fine to print the full connection url
 		logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying get the namespace " +
 			"in azure service bus using the connection url " + eventListeningEndpoint + ":%v", err)
 	}

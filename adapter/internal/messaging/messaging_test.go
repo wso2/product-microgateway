@@ -101,7 +101,6 @@ func TestRemoveAppPolicy(t *testing.T) {
 }
 
 func TestTokenRevocationChannelSubscriptionAndEventFormat(t *testing.T) {
-
 	logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] starting test " +
 		"TestTokenRevocationChannelSubscriptionAndEventFormat")
 
@@ -110,15 +109,11 @@ func TestTokenRevocationChannelSubscriptionAndEventFormat(t *testing.T) {
 			"\"type\":\"Default\",\"tenantId\":-1234}}}"
 	var parsedSuccessfully bool
 	var notification msg.EventTokenRevocationNotification
-
 	go func() {
 		msg.AzureRevokedTokenChannel <- []byte(sampleTestEvent)
-
 	}()
 	outputData := <- msg.AzureRevokedTokenChannel
-
-	logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Event %s is received from channel",
-		outputData)
+	logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Event %s is received from channel", outputData)
 	error := parseRevokedTokenJSONEvent(outputData, &notification)
 	if error != nil {
 		logger.LoggerInternalMsg.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred", error)
@@ -133,7 +128,6 @@ func TestTokenRevocationChannelSubscriptionAndEventFormat(t *testing.T) {
 }
 
 func TestNotificationChannelSubscriptionAndEventFormat(t *testing.T) {
-
 	logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] starting test " +
 		"TestNotificationChannelSubscriptionAndEventFormat")
 
@@ -146,15 +140,11 @@ func TestNotificationChannelSubscriptionAndEventFormat(t *testing.T) {
 
 	var parsedSuccessfully bool
 	var notification msg.EventNotification
-
 	go func() {
 		msg.AzureNotificationChannel <- []byte(sampleTestEvent)
-
 	}()
 	outputData := <- msg.AzureNotificationChannel
-
-	logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Event %s is received from channel",
-		outputData)
+	logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Event %s is received from channel", outputData)
 	error := parseNotificationJSONEvent(outputData, &notification)
 	if error != nil {
 		logger.LoggerInternalMsg.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred", error)
