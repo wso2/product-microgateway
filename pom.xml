@@ -96,6 +96,21 @@
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>${exec.maven.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.googlecode.maven-download-plugin</groupId>
+                    <artifactId>download-maven-plugin</artifactId>
+                    <version>${googlecode.download.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.xolstice.maven.plugins</groupId>
+                    <artifactId>protobuf-maven-plugin</artifactId>
+                    <version>${protobuf.maven.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
                     <version>${build.helper.plugin.version}</version>
                 </plugin>
@@ -436,5 +451,7 @@
         <apache.httpcomponents.version>4.5.13</apache.httpcomponents.version>
         <jackson.databind.version>2.10.5.1</jackson.databind.version>
         <snakeyaml.version>1.26</snakeyaml.version>
+        <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
+        <googlecode.download.plugin.version>1.6.3</googlecode.download.plugin.version>
     </properties>
 </project>
