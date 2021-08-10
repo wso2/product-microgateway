@@ -112,11 +112,12 @@ func handleAzureNotification() {
 		var notification msg.EventNotification
 		error := parseNotificationJSONEvent(d, &notification)
 		if error != nil {
+			logger.LoggerInternalMsg.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error while processing " +
+				"the notification event %v. Hence dropping the event", error)
 			continue
 		}
 		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Event %s is received",
 			notification.Event.PayloadData.EventType)
-		msg.AzureNotificationAck <- true
 	}
 }
 

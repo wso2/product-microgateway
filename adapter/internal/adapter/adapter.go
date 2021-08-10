@@ -240,7 +240,7 @@ func Run(conf *config.Config) {
 
 		if isAzureEventingFeatureFlagEnabled {
 			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to integrate with azure service bus")
-			go messaging.InitiateAndProcessEvents(conf)
+			messaging.InitiateAndProcessEvents(conf)
 		}
 
 		go messaging.ProcessEvents(conf)

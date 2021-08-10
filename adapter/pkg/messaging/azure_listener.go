@@ -98,13 +98,10 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 						topicName + ":%v", err)
 			} else {
 				dataChannel := make(chan []byte)
-				ackChannel := make(chan bool)
 				if strings.EqualFold(topicName, notification) {
 					dataChannel = AzureNotificationChannel
-					ackChannel = AzureNotificationAck
 				} else if strings.EqualFold(topicName, tokenRevocation) {
 					dataChannel = AzureRevokedTokenChannel
-					ackChannel = AzureRevokedTokenAck
 				}
 
 				logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to receive messages for " +
@@ -115,7 +112,6 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 				err = topicSubscriptionClient.Receive(ctx, servicebus.HandlerFunc(func(ctx context.Context,
 					message *servicebus.Message) error {
 					dataChannel <- message.Data
-					<-ackChannel
 					logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Received ACK for " +
 						"subscriptionName  " + subscriptionName + " and going to do ACK service bus now")
 					return message.Complete(ctx)

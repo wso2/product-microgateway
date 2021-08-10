@@ -45,7 +45,8 @@ func InitiateAndProcessEvents(config *config.Config) {
 	if err == nil {
 		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Initiated broker connection successfully ")
 		msg.InitiateConsumers(namespace, availableTopicList, componentName, subscriptionIdleTimeDuration)
+		go handleAzureNotification()
+		go handleAzureTokenRevocation()
 	}
-	go handleAzureNotification()
-	go handleAzureTokenRevocation()
+
 }

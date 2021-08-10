@@ -58,8 +58,7 @@ func handleAzureTokenRevocation() {
 		error := parseRevokedTokenJSONEvent(d, &notification)
 		if error != nil {
 			logger.LoggerInternalMsg.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error while processing " +
-				"the event %v. Hence dropping the event", error)
-			msg.AzureRevokedTokenAck <- true
+				"the token revocation event %v. Hence dropping the event", error)
 			continue
 		}
 		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Event %s is received",
@@ -67,7 +66,6 @@ func handleAzureTokenRevocation() {
 		logger.LoggerInternalMsg.Printf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] RevokedToken: %s, " +
 			"Token Type: %s", notification.Event.PayloadData.RevokedToken,
 			notification.Event.PayloadData.Type)
-		msg.AzureRevokedTokenAck <- true
 	}
 }
 

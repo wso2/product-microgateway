@@ -28,19 +28,13 @@ import (
 var (
 	// AzureRevokedTokenChannel stores the revoked token events
 	AzureRevokedTokenChannel chan []byte
-	// AzureRevokedTokenAck stores the acknowledgement for event process finish
-	AzureRevokedTokenAck chan bool
 	// AzureNotificationChannel stores the notification events
 	AzureNotificationChannel chan []byte
-	// AzureNotificationAck stores the acknowledgement for event process finish
-	AzureNotificationAck chan bool
 )
 
 func init() {
 	AzureRevokedTokenChannel = make(chan []byte)
-	AzureRevokedTokenAck = make(chan bool)
 	AzureNotificationChannel = make(chan []byte)
-	AzureNotificationAck = make(chan bool)
 }
 
 // InitiateBrokerConnectionAndGetAvailableTopics to initiate connection and get topic list
@@ -58,6 +52,7 @@ func InitiateBrokerConnectionAndGetAvailableTopics(eventListeningEndpoint string
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 		availableTopics, err = topicManager.List(ctx)
+		//TODO (dnwick) (add retry logic)
 		if err != nil {
 			logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to get topic " +
 				"list from azure service bus :%v", err)
