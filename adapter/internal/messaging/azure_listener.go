@@ -24,10 +24,12 @@ import (
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 	servicebus "github.com/Azure/azure-service-bus-go"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
+	"time"
 )
 
 const (
 	componentName string = "adapter"
+	subscriptionIdleTimeDuration = time.Duration(72 * time.Hour)
 )
 
 // InitiateAndProcessEvents to pass event consumption
@@ -42,7 +44,7 @@ func InitiateAndProcessEvents(config *config.Config) {
 	health.SetControlPlaneBrokerStatus(err == nil)
 	if err == nil {
 		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Initiated broker connection successfully ")
-		msg.InitiateConsumers(namespace, availableTopicList, componentName)
+		msg.InitiateConsumers(namespace, availableTopicList, componentName, subscriptionIdleTimeDuration)
 	}
 	go handleAzureNotification()
 	go handleAzureTokenRevocation()

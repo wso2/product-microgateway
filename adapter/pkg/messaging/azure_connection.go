@@ -22,6 +22,7 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	servicebus "github.com/Azure/azure-service-bus-go"
 	"context"
+	"time"
 )
 
 var (
@@ -70,13 +71,15 @@ func InitiateBrokerConnectionAndGetAvailableTopics(eventListeningEndpoint string
 }
 
 // InitiateConsumers to pass event consumption
-func InitiateConsumers(ns *servicebus.Namespace, availableTopicList []*servicebus.TopicEntity, componentName string) {
+func InitiateConsumers(ns *servicebus.Namespace, availableTopicList []*servicebus.TopicEntity, componentName string,
+	subscriptionIdleTimeDuration time.Duration) {
 	bindingKeys := []string {tokenRevocation, notification}
 
 	for _, key := range bindingKeys {
 		go func(key string) {
 			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] starting the consumer for key : " + key)
-			startBrokerConsumer(key, ns, availableTopicList, componentName)
+			startBrokerConsumer(key, ns, availableTopicList, componentName,
+				servicebus.SubscriptionWithAutoDeleteOnIdle(&subscriptionIdleTimeDuration))
 			select {}
 		}(key)
 	}

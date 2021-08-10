@@ -23,21 +23,23 @@ import (
 	servicebus "github.com/Azure/azure-service-bus-go"
 	"context"
 	"strings"
+	"github.com/google/uuid"
 )
 
 
 func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
-	availableTopicList []*servicebus.TopicEntity, componentName string) {
+	availableTopicList []*servicebus.TopicEntity, componentName string, opts ...servicebus.SubscriptionManagementOption) {
 
 	var topicExistForFurtherProcess bool
-	var subscriptionExistForFurtherProcess bool
+	var subscriptionCreatedForFurtherProcess bool
 	parentContext := context.Background()
 	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting broker consumer for topic name : " +
 		topicName)
 
+	uniqueID := uuid.New()
 	//In Azure service bus subscription names can contain letters, numbers, periods (.), hyphens (-), and
 	// underscores (_), up to 50 characters. Subscription names are also case-insensitive.
-	var subscriptionName = topicName + "_" + componentName + "_sub"
+	var subscriptionName = componentName + "_" + uniqueID.String() + "_sub"
 
 	// TODO: (dnwick) Handle retry logic in error situations
 
@@ -68,36 +70,23 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 				" manager from azure service bus for topic name " + topicName + ":%v", err)
 		}
 
+		//We are creating a unique subscription for each adapter starts. Unused subscriptions will be deleted after
+		// idle for three days
 		ctx, cancel := context.WithCancel(parentContext)
 		defer cancel()
-		availableSubscriptionList, err := subManager.List(ctx)
+		_, err = subManager.Put(ctx, subscriptionName, opts...)
 
 		if err != nil {
-			logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying get available " +
-				"subscriptions from azure service bus for " + "topic name " + topicName + ":%v", err)
-		}
-
-		if isSubscriptionExist(subscriptionName, availableSubscriptionList) {
-			logger.LoggerMgw.Debugf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Subscription " + subscriptionName +
-				"exist in the system")
-			subscriptionExistForFurtherProcess = true
+			logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to create " +
+				"subscription " + subscriptionName + " from azure service bus for topic name " +
+				topicName + ":%v", err)
 		} else {
-			ctx, cancel := context.WithCancel(parentContext)
-			defer cancel()
-			_, err = subManager.Put(ctx, subscriptionName)
-
-			if err != nil {
-				logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to create " +
-					"subscription " + subscriptionName + " from azure service bus for topic name " +
-						topicName + ":%v", err)
-			} else {
-				logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Subscription " +
-					subscriptionName + "created")
-				subscriptionExistForFurtherProcess = true
-			}
+			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Subscription " +
+				subscriptionName + " created")
+			subscriptionCreatedForFurtherProcess = true
 		}
 
-		if subscriptionExistForFurtherProcess {
+		if subscriptionCreatedForFurtherProcess {
 			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] subscription " + subscriptionName +
 				" exist. Can proceed")
 			//topic subscription client creation
