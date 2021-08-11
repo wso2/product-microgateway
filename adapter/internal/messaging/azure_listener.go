@@ -20,7 +20,6 @@ package messaging
 
 import (
 	"time"
-	servicebus "github.com/Azure/azure-service-bus-go"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
@@ -38,7 +37,6 @@ const (
 // InitiateAndProcessEvents to pass event consumption
 func InitiateAndProcessEvents(config *config.Config) {
 	var err error
-	var namespace *servicebus.Namespace
 	var reconnectRetryCount = config.ControlPlane.ASBConnectionParameters.ReconnectRetryCount
 	var reconnectInterval = config.ControlPlane.ASBConnectionParameters.ReconnectInterval
 	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting InitiateAndProcessEvents method")
@@ -50,14 +48,14 @@ func InitiateAndProcessEvents(config *config.Config) {
 	if reconnectInterval == 0 {
 		reconnectInterval = defaultReconnectInterval
 	}
-	namespace, availableTopicList, err := msg.InitiateBrokerConnectionAndGetAvailableTopics(
-		config.ControlPlane.ASBConnectionParameters.EventListeningEndpoint, reconnectRetryCount,
-		reconnectInterval * time.Second)
+	subscriptionMetaDataList, err := msg.InitiateBrokerConnectionAndValidate(
+		config.ControlPlane.ASBConnectionParameters.EventListeningEndpoint, componentName, reconnectRetryCount,
+		reconnectInterval * time.Second, subscriptionIdleTimeDuration)
 	health.SetControlPlaneBrokerStatus(err == nil)
 	if err == nil {
-		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Initiated broker connection successfully ")
-		msg.InitiateConsumers(namespace, availableTopicList, componentName, subscriptionIdleTimeDuration,
-			reconnectRetryCount, reconnectInterval*time.Second)
+		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Initiated broker connection and meta " +
+			"data creation successfully ")
+		msg.InitiateConsumers(subscriptionMetaDataList)
 		go handleAzureNotification()
 		go handleAzureTokenRevocation()
 	}
