@@ -21,7 +21,6 @@ package messaging
 import (
 	"context"
 	"time"
-
 	servicebus "github.com/Azure/azure-service-bus-go"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
@@ -39,7 +38,8 @@ func init() {
 }
 
 // InitiateBrokerConnectionAndGetAvailableTopics to initiate connection and get topic list
-func InitiateBrokerConnectionAndGetAvailableTopics(eventListeningEndpoint string, reconnectRetryCount int, reconnectInterval time.Duration) (
+func InitiateBrokerConnectionAndGetAvailableTopics(eventListeningEndpoint string, reconnectRetryCount int,
+	reconnectInterval time.Duration) (
 	*servicebus.Namespace, []*servicebus.TopicEntity, error) {
 	var err error
 	var availableTopics []*servicebus.TopicEntity
@@ -63,7 +63,8 @@ func InitiateBrokerConnectionAndGetAvailableTopics(eventListeningEndpoint string
 				return namespace, availableTopics, err
 			}
 		}
-		logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Could not establish successfull connection after %d retry attempts ", reconnectRetryCount)
+		logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Could not establish successfull connection " +
+			"after %d retry attempts ", reconnectRetryCount)
 	} else {
 		//Any error which comes to this point is because the connection url is not up to the expected format
 		//Hence not retrying
