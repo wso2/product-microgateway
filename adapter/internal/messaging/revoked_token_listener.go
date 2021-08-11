@@ -49,3 +49,30 @@ func handleTokenRevocation() {
 	}
 	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
 }
+
+func handleAzureTokenRevocation() {
+	for d := range msg.AzureRevokedTokenChannel {
+		logger.LoggerInternalMsg.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] message received for " +
+			"RevokedTokenChannel = " + string(d))
+		var notification msg.EventTokenRevocationNotification
+		error := parseRevokedTokenJSONEvent(d, &notification)
+		if error != nil {
+			logger.LoggerInternalMsg.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error while processing " +
+				"the token revocation event %v. Hence dropping the event", error)
+			continue
+		}
+		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Event %s is received",
+			notification.Event.PayloadData.Type)
+		logger.LoggerInternalMsg.Printf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] RevokedToken: %s, " +
+			"Token Type: %s", notification.Event.PayloadData.RevokedToken,
+			notification.Event.PayloadData.Type)
+	}
+}
+
+func parseRevokedTokenJSONEvent(data []byte, notification *msg.EventTokenRevocationNotification) error {
+	unmarshalErr := json.Unmarshal(data, &notification)
+	if unmarshalErr != nil {
+		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling revoked token event data %v", unmarshalErr)
+	}
+	return unmarshalErr
+}
