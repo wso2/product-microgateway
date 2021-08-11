@@ -112,8 +112,6 @@ func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
 				err = topicSubscriptionClient.Receive(ctx, servicebus.HandlerFunc(func(ctx context.Context,
 					message *servicebus.Message) error {
 					dataChannel <- message.Data
-					logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Received ACK for " +
-						"subscriptionName  " + subscriptionName + " and going to do ACK service bus now")
 					return message.Complete(ctx)
 				}))
 			}
