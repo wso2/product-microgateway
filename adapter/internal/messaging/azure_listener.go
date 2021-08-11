@@ -31,7 +31,7 @@ const (
 	componentName                              = "adapter"
 	subscriptionIdleTimeDuration               = time.Duration(72 * time.Hour)
 	defaultReconnectRetryCount                 = 10
-	defaultReconnectInterval     time.Duration = 10
+	defaultReconnectInterval     time.Duration = 30
 
 )
 
