@@ -22,11 +22,9 @@ import (
 	"context"
 	"strings"
 	"time"
-
 	servicebus "github.com/Azure/azure-service-bus-go"
 	"github.com/google/uuid"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
-	"fmt"
 )
 
 var bindingKeys = []string{tokenRevocation, notification}
@@ -72,6 +70,9 @@ func InitiateBrokerConnectionAndValidate(eventListeningEndpoint string, componen
 				logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to get topic "+
 					"list from azure service bus :%v. Retrying after %d seconds", err, reconnectInterval)
 				time.Sleep(reconnectInterval)
+			} else {
+				logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Topic list received ")
+				break
 			}
 		}
 		if getTopicListError != nil {
