@@ -56,7 +56,7 @@ func InitiateBrokerConnectionAndValidate(eventListeningEndpoint string, componen
 	reconnectInterval time.Duration, subscriptionIdleTimeDuration time.Duration) ([]SubscriptionType, error) {
 	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Trying to connect to azure service bus with " +
 		"connection string " + eventListeningEndpoint)
-	subscriptionMetaDataList := make([]SubscriptionType, 2)
+	subscriptionMetaDataList := make([]SubscriptionType, 0)
 	namespace, err := servicebus.NewNamespace(servicebus.NamespaceWithConnectionString(eventListeningEndpoint))
 	if err == nil {
 		var getTopicListError error
@@ -94,11 +94,6 @@ func InitiateBrokerConnectionAndValidate(eventListeningEndpoint string, componen
 		//Hence not retrying
 		logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying get the namespace "+
 			"in azure service bus using the connection url %s :%v", eventListeningEndpoint, err)
-	}
-	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] B4 returninggggggggg")
-	for _, subscriptionMetaData := range subscriptionMetaDataList {
-		fmt.Println("topicName is ", subscriptionMetaData.topicName)
-		fmt.Println("subscriptionName is ", subscriptionMetaData.subscriptionName)
 	}
 	return subscriptionMetaDataList, err
 }
@@ -210,13 +205,6 @@ func validateAndGetSubscriptionMetaDataList(metaDataList []SubscriptionType, ns 
 		subscriptionMetaData.subscriptionName = subscriptionName
 		subscriptionMetaData.topicName = key
 		metaDataList = append(metaDataList, subscriptionMetaData)
-		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] ******** meta data appended are " +
-			subscriptionMetaData.subscriptionName + " - " + subscriptionMetaData.topicName)
-	}
-	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Before retuning in  validateAndGetSubscriptionMetaDataList *******")
-	for _, mData := range metaDataList {
-		fmt.Println("topicName is ", mData.topicName)
-		fmt.Println("subscriptionName is ", mData.subscriptionName)
 	}
 	return metaDataList, nil
 }
