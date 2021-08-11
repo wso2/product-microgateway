@@ -251,7 +251,10 @@ var defaultConfig = &Config{
 			EventListeningEndpoints: []string{"amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"},
 		},
 		ASBConnectionParameters: asbConnectionParameters{
-			EventListeningEndpoint: "$env{ASB_CONNECTION_STRING}"},
+			EventListeningEndpoint: "$env{ASB_CONNECTION_STRING}",
+			ReconnectInterval:      30,
+			ReconnectRetryCount:    10,
+		},
 	},
 	Analytics: analytics{
 		Enabled: false,

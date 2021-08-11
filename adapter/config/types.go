@@ -389,7 +389,9 @@ type jmsConnectionParameters struct {
 }
 
 type asbConnectionParameters struct {
-	EventListeningEndpoint string `toml:"eventListeningEndpoint"`
+	EventListeningEndpoint string        `toml:"eventListeningEndpoint"`
+	ReconnectInterval      time.Duration `toml:"reconnectInterval"`
+	ReconnectRetryCount    int           `toml:"reconnectRetryCount"`
 }
 
 // APIContent contains everything necessary to create an API

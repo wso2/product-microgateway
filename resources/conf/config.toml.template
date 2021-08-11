@@ -366,6 +366,8 @@ idleTimeoutInSeconds = 3600
   # TODO: (dnwick) remove this config once a common connection parameter is introduced
   [controlPlane.asbConnectionParameters]
     eventListeningEndpoint = "$env{ASB_CONNECTION_STRING}"
+    reconnectInterval = 30
+    reconnectRetryCount = 10
 
 # Analytics configurations for Choreo Connect
 [analytics]
