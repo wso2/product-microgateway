@@ -59,64 +59,43 @@ func InitiateBrokerConnectionAndValidate(eventListeningEndpoint string, componen
 	subscriptionMetaDataList := make([]Subscription, 0)
 	namespace, processError := servicebus.NewNamespace(servicebus.NamespaceWithConnectionString(eventListeningEndpoint))
 	if processError == nil {
-		var topicCreationSuccessful bool
 		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Successfully received namespace ")
+		var isTopicsCreated bool
 		topicManager := namespace.NewTopicManager()
 		var availableTopics []*servicebus.TopicEntity
-		var retryAttemptMessage string
+
 		for j := 0; j < reconnectRetryCount || reconnectRetryCount == -1; j++ {
 			processError = nil
 			if availableTopics == nil {
-				func() {
-					ctx, cancel := context.WithCancel(context.Background())
-					defer cancel()
-					availableTopics, processError = topicManager.List(ctx)
-				}()
+				availableTopics, processError = getTopicList(topicManager)
 				if processError != nil {
-					retryAttemptMessage = ""
-					if reconnectRetryCount > 0 {
-						retryAttemptMessage = "Retry attempt : " + strconv.Itoa(reconnectRetryCount)
-					}
-					logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to get topic "+
-						"list from azure service bus :%v." + retryAttemptMessage + " Retrying after %s seconds",
-							processError, retryAttemptMessage, reconnectInterval)
+					logError(reconnectRetryCount, reconnectInterval, processError)
 					time.Sleep(reconnectInterval)
 					continue
-				} else {
-					logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Topic list received ")
 				}
 			}
-			if !topicCreationSuccessful {
-				processError = validateAndCreateTopicForSubscription(availableTopics, namespace)
+			if !isTopicsCreated {
+				processError = createTopicsIfNotExist(availableTopics, namespace)
 			}
 			if processError != nil {
-				retryAttemptMessage = ""
-				if reconnectRetryCount > 0 {
-					retryAttemptMessage = "Retry attempt : " + strconv.Itoa(reconnectRetryCount)
-				}
-				logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] %v " + retryAttemptMessage +
-					" Retrying after %s", processError, reconnectInterval)
+				logError(reconnectRetryCount, reconnectInterval, processError)
 				time.Sleep(reconnectInterval)
 				continue
 			}
-			topicCreationSuccessful = true
-			subscriptionMetaDataList, processError = validateAndGetSubscriptionMetaDataList(subscriptionMetaDataList,
-				namespace, reconnectRetryCount, reconnectInterval, componentName,
-					servicebus.SubscriptionWithAutoDeleteOnIdle(&subscriptionIdleTimeDuration))
+			isTopicsCreated = true
+			subscriptionMetaDataList, processError = retrieveSubscriptionMetadata(subscriptionMetaDataList,
+				namespace, componentName,
+				servicebus.SubscriptionWithAutoDeleteOnIdle(&subscriptionIdleTimeDuration))
 			if processError != nil {
-				retryAttemptMessage = ""
-				if reconnectRetryCount > 0 {
-					retryAttemptMessage = "Retry attempt : " + strconv.Itoa(reconnectRetryCount)
-				}
-				logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] %v. " + retryAttemptMessage + " " +
-					" Retrying after %s ", processError, reconnectInterval)
+				logError(reconnectRetryCount, reconnectInterval, processError)
+				subscriptionMetaDataList = nil
 				time.Sleep(reconnectInterval)
 				continue
 			}
 			return subscriptionMetaDataList, processError
 		}
 		if processError != nil {
-			logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] %v. Retry attempted %d times. ",
+			logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] %v. Retry attempted %d times.",
 				processError, reconnectRetryCount)
 			return subscriptionMetaDataList, processError
 		}
@@ -136,12 +115,11 @@ func InitiateConsumers(subscriptionMetaDataList []Subscription, reconnectInterva
 			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] starting the consumer for topic : " +
 				subscriptionMetaData.topicName)
 			startBrokerConsumer(subscriptionMetaData, reconnectInterval)
-			select {}
 		}(subscriptionMetaData)
 	}
 }
 
-func validateAndCreateTopicForSubscription(availableTopicList []*servicebus.TopicEntity, ns *servicebus.Namespace) error {
+func createTopicsIfNotExist(availableTopicList []*servicebus.TopicEntity, ns *servicebus.Namespace) error {
 	parentContext := context.Background()
 	for _, key := range bindingKeys {
 		if !isTopicExist(key, availableTopicList) {
@@ -155,9 +133,8 @@ func validateAndCreateTopicForSubscription(availableTopicList []*servicebus.Topi
 				_, topicCreationError = topicManager.Put(ctx, key)
 			}()
 			if topicCreationError != nil {
-				errorValue = errors.New("Error occurred while trying to create topic " + key + " in azure service bus : " + topicCreationError.Error())
-				logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to create "+
-					"topic %s in azure service bus :%v.", key, topicCreationError)
+				errorValue = errors.New("Error occurred while trying to create topic " + key + " in azure service bus : "+
+					topicCreationError.Error())
 				return errorValue
 			}
 			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Topic " + key + " created")
@@ -168,8 +145,8 @@ func validateAndCreateTopicForSubscription(availableTopicList []*servicebus.Topi
 	return nil
 }
 
-func validateAndGetSubscriptionMetaDataList(metaDataList []Subscription, ns *servicebus.Namespace, reconnectRetryCount int,
-	reconnectInterval time.Duration, componentName string, opts ...servicebus.SubscriptionManagementOption) ([]Subscription, error) {
+func retrieveSubscriptionMetadata(metaDataList []Subscription, ns *servicebus.Namespace, componentName string,
+	opts ...servicebus.SubscriptionManagementOption) ([]Subscription, error) {
 	parentContext := context.Background()
 	for _, key := range bindingKeys {
 		var subManager *servicebus.SubscriptionManager
@@ -182,9 +159,8 @@ func validateAndGetSubscriptionMetaDataList(metaDataList []Subscription, ns *ser
 		}
 		subManager, subManagerError = ns.NewSubscriptionManager(key)
 		if subManagerError != nil {
-			errorValue = errors.New("Error occurred while trying to get subscription manager from azure service bus for topic name : " + key + ":" + subManagerError.Error())
-			logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying get "+
-				"subscription manager from azure service bus for topic name %s:%v", key, subManagerError)
+			errorValue = errors.New("Error occurred while trying to get subscription manager from azure service bus for topic name : " +
+				key + ":" + subManagerError.Error())
 			return metaDataList, errorValue
 		}
 		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Subscription manager created for the " +
@@ -204,9 +180,8 @@ func validateAndGetSubscriptionMetaDataList(metaDataList []Subscription, ns *ser
 			_, subscriptionCreationError = subManager.Put(ctx, subscriptionName, opts...)
 		}()
 		if subscriptionCreationError != nil {
-			errorValue = errors.New("Error occurred while trying to create subscription " + subscriptionName + "in azure service bus for topic name " + key + ":" + subscriptionCreationError.Error())
-			logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to create "+
-				"subscription %s in azure service bus for topic name %s:%v.", subscriptionName, key, subscriptionCreationError)
+			errorValue = errors.New("Error occurred while trying to create subscription " + subscriptionName + "in azure service bus for topic name " +
+				key + ":" + subscriptionCreationError.Error())
 			return metaDataList, errorValue
 		}
 		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Subscription " + subscriptionName + " created")
@@ -215,6 +190,23 @@ func validateAndGetSubscriptionMetaDataList(metaDataList []Subscription, ns *ser
 		metaDataList = append(metaDataList, subscriptionMetaData)
 	}
 	return metaDataList, nil
+}
+
+func getTopicList(topicManager *servicebus.TopicManager) ([]*servicebus.TopicEntity, error) {
+	var errorValue error
+	var getTopicListError error
+	var topicList []*servicebus.TopicEntity
+	func() {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		topicList, getTopicListError = topicManager.List(ctx)
+	}()
+	if getTopicListError != nil {
+		errorValue = errors.New("Error occurred while trying to get topic list from azure service bus:%v." + getTopicListError.Error())
+		return topicList, errorValue
+	}
+	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Topic list received ")
+	return topicList, nil
 }
 
 func isTopicExist(topicName string, availableTopicList []*servicebus.TopicEntity) bool {
@@ -226,4 +218,13 @@ func isTopicExist(topicName string, availableTopicList []*servicebus.TopicEntity
 	}
 	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Topic " + topicName + " does not Exist ")
 	return false
+}
+
+func logError(reconnectRetryCount int, reconnectInterval time.Duration, errVal error) {
+	retryAttemptMessage := ""
+	if reconnectRetryCount > 0 {
+		retryAttemptMessage = "Retry attempt : " + strconv.Itoa(reconnectRetryCount)
+	}
+	logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] :%v." + retryAttemptMessage + " Retrying after %s seconds",
+		errVal, reconnectInterval)
 }
