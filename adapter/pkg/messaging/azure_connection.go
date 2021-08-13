@@ -63,7 +63,6 @@ func InitiateBrokerConnectionAndValidate(eventListeningEndpoint string, componen
 		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Successfully received namespace ")
 		topicManager := namespace.NewTopicManager()
 		var availableTopics []*servicebus.TopicEntity
-		//todo consider -1
 		var retryAttemptMessage string
 		for j := 0; j < reconnectRetryCount || reconnectRetryCount == -1; j++ {
 			processError = nil
