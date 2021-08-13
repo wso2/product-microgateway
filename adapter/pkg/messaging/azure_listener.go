@@ -38,7 +38,6 @@ func startBrokerConsumer(subscriptionMetaData SubscriptionType) {
 		dataChannel = AzureRevokedTokenChannel
 	}
 	parentContext := context.Background()
-	ctx, cancel := context.WithCancel(parentContext)
 
 	for {
 		//topic subscription client creation
@@ -50,13 +49,15 @@ func startBrokerConsumer(subscriptionMetaData SubscriptionType) {
 		}
 		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to receive messages for " +
 			"subscriptionName  " + subscriptionName + " from azure service bus for topic name " + topicName)
-		defer cancel()
-		err = topicSubscriptionClient.Receive(ctx, servicebus.HandlerFunc(func(ctx context.Context,
-			message *servicebus.Message) error {
-			dataChannel <- message.Data
-			return message.Complete(ctx)
-		}))
-
+		func () {
+			ctx, cancel := context.WithCancel(parentContext)
+			defer cancel()
+			err = topicSubscriptionClient.Receive(ctx, servicebus.HandlerFunc(func(ctx context.Context,
+				message *servicebus.Message) error {
+				dataChannel <- message.Data
+				return message.Complete(ctx)
+			}))
+		}()
 		if err != nil {
 			logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while receiving "+
 				"events from subscription %s from azure service bus for topic name %s:%v. " +

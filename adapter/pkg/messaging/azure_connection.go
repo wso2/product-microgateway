@@ -63,9 +63,11 @@ func InitiateBrokerConnectionAndValidate(eventListeningEndpoint string, componen
 		topicManager := namespace.NewTopicManager()
 		var availableTopics []*servicebus.TopicEntity
 		for j := 0; j < reconnectRetryCount; j++ {
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-			availableTopics, getTopicListError = topicManager.List(ctx)
+			func() {
+				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				availableTopics, getTopicListError = topicManager.List(ctx)
+			}()
 			if getTopicListError != nil {
 				logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to get topic "+
 					"list from azure service bus :%v. Retrying after %d seconds", err, reconnectInterval)
@@ -120,9 +122,11 @@ func validateAndCreateTopicForSubscription(availableTopicList []*servicebus.Topi
 			topicManager := ns.NewTopicManager()
 			var topicCreationError error
 			for j := 0; j < reconnectRetryCount; j++ {
-				ctx, cancel := context.WithCancel(parentContext)
-				defer cancel()
-				_, topicCreationError := topicManager.Put(ctx, key)
+				func() {
+					ctx, cancel := context.WithCancel(parentContext)
+					defer cancel()
+					_, topicCreationError = topicManager.Put(ctx, key)
+				}()
 				if topicCreationError != nil {
 					logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to create "+
 						"topic %s in azure service bus :%v. Retrying after %d seconds",
@@ -184,9 +188,11 @@ func validateAndGetSubscriptionMetaDataList(metaDataList []SubscriptionType, ns 
 		var subscriptionName = componentName + "_" + uniqueID.String() + "_sub"
 		var subscriptionCreationError error
 		for j := 0; j < reconnectRetryCount; j++ {
-			ctx, cancel := context.WithCancel(parentContext)
-			defer cancel()
-			_, subscriptionCreationError := subManager.Put(ctx, subscriptionName, opts...)
+			func () {
+				ctx, cancel := context.WithCancel(parentContext)
+				defer cancel()
+				_, subscriptionCreationError = subManager.Put(ctx, subscriptionName, opts...)
+			}()
 			if subscriptionCreationError != nil {
 				logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to create "+
 					"subscription %s in azure service bus for topic name %s:%v. "+
