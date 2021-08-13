@@ -29,9 +29,8 @@ import (
 const (
 	componentName                              = "adapter"
 	subscriptionIdleTimeDuration               = time.Duration(72 * time.Hour)
-	defaultReconnectRetryCount                 = 10
-	defaultReconnectInterval     time.Duration = 30
-
+	defaultReconnectRetryCount                 = 60
+	defaultReconnectInterval     time.Duration = 5000
 )
 
 // InitiateAndProcessEvents to pass event consumption
@@ -50,12 +49,12 @@ func InitiateAndProcessEvents(config *config.Config) {
 	}
 	subscriptionMetaDataList, err := msg.InitiateBrokerConnectionAndValidate(
 		config.ControlPlane.ASBConnectionParameters.EventListeningEndpoint, componentName, reconnectRetryCount,
-		reconnectInterval * time.Second, subscriptionIdleTimeDuration)
+		reconnectInterval * time.Millisecond, subscriptionIdleTimeDuration)
 	health.SetControlPlaneBrokerStatus(err == nil)
 	if err == nil {
 		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Initiated broker connection and meta " +
 			"data creation successfully ")
-		msg.InitiateConsumers(subscriptionMetaDataList)
+		msg.InitiateConsumers(subscriptionMetaDataList, reconnectInterval*time.Millisecond)
 		go handleAzureNotification()
 		go handleAzureTokenRevocation()
 	}

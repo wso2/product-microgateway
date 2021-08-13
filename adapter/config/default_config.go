@@ -252,8 +252,8 @@ var defaultConfig = &Config{
 		},
 		ASBConnectionParameters: asbConnectionParameters{
 			EventListeningEndpoint: "$env{ASB_CONNECTION_STRING}",
-			ReconnectInterval:      30,
-			ReconnectRetryCount:    10,
+			ReconnectInterval:      5000,
+			ReconnectRetryCount:    60,
 		},
 	},
 	Analytics: analytics{

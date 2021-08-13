@@ -26,8 +26,7 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
-func startBrokerConsumer(subscriptionMetaData SubscriptionType) {
-
+func startBrokerConsumer(subscriptionMetaData Subscription, reconnectInterval time.Duration) {
 	var topicName = subscriptionMetaData.topicName
 	var subscriptionName = subscriptionMetaData.subscriptionName
 
@@ -49,7 +48,7 @@ func startBrokerConsumer(subscriptionMetaData SubscriptionType) {
 		}
 		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to receive messages for " +
 			"subscriptionName  " + subscriptionName + " from azure service bus for topic name " + topicName)
-		func () {
+		func() {
 			ctx, cancel := context.WithCancel(parentContext)
 			defer cancel()
 			err = topicSubscriptionClient.Receive(ctx, servicebus.HandlerFunc(func(ctx context.Context,
@@ -60,9 +59,9 @@ func startBrokerConsumer(subscriptionMetaData SubscriptionType) {
 		}()
 		if err != nil {
 			logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while receiving "+
-				"events from subscription %s from azure service bus for topic name %s:%v. " +
-					"Hence retrying in 5 seconds", subscriptionName, topicName, err)
-			time.Sleep(5 * time.Second)
+				"events from subscription %s from azure service bus for topic name %s:%v. "+
+				"Hence retrying in %s", subscriptionName, topicName, err, reconnectInterval)
+			time.Sleep(reconnectInterval)
 		}
 	}
 }
