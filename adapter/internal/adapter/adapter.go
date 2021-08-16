@@ -21,6 +21,7 @@ package adapter
 import (
 	"crypto/tls"
 	"strings"
+	"strconv"
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
@@ -72,6 +73,7 @@ var (
 
 const (
 	ads = "ads"
+	featureFlagReplaceEventHub = "FEATURE_FLAG_REPLACE_EVENT_HUB"
 )
 
 func init() {
@@ -92,7 +94,7 @@ func runManagementServer(conf *config.Config, server xdsv3.Server, enforcerServe
 	enforcerThrottleDataDsSrv wso2_server.Server, port uint) {
 	var grpcOptions []grpc.ServerOption
 	grpcOptions = append(grpcOptions, grpc.MaxConcurrentStreams(grpcMaxConcurrentStreams))
-	publicKeyLocation, privateKeyLocation, truststoreLocation := restserver.GetKeyLocations()
+	publicKeyLocation, privateKeyLocation, truststoreLocation := tlsutils.GetKeyLocations()
 	cert, err := tlsutils.GetServerCertificate(publicKeyLocation, privateKeyLocation)
 
 	caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
@@ -223,6 +225,23 @@ func Run(conf *config.Config) {
 	if eventHubEnabled {
 		// Load subscription data
 		eventhub.LoadSubscriptionData(conf)
+		var isAzureEventingFeatureFlagEnabled bool
+		var err error
+
+		// TODO: (dnwick) remove env variable once the feature is complete
+		featureFlagReplaceEventHubEnvValue := os.Getenv(featureFlagReplaceEventHub)
+		if featureFlagReplaceEventHubEnvValue != "" {
+			isAzureEventingFeatureFlagEnabled, err = strconv.ParseBool(featureFlagReplaceEventHubEnvValue)
+			if err != nil {
+				logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while parsing " +
+					"FEATURE_FLAG_REPLACE_EVENT_HUB environment value.", err)
+			}
+		}
+
+		if isAzureEventingFeatureFlagEnabled {
+			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to integrate with azure service bus")
+			messaging.InitiateAndProcessEvents(conf)
+		}
 
 		go messaging.ProcessEvents(conf)
 
@@ -234,6 +253,10 @@ func Run(conf *config.Config) {
 		synchronizer.FetchKeyManagersOnStartUp(conf)
 		go synchronizer.UpdateKeyTemplates()
 		go synchronizer.UpdateBlockingConditions()
+	} else {
+		// We need to deploy the readiness probe when eventhub is disabled
+		xds.DeployReadinessAPI(envs)
+		logger.LoggerMgw.Info("Event hub disabled and hence deployed readiness probe")
 	}
 
 OUTER:

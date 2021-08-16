@@ -18,17 +18,19 @@
 package xds
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"math/rand"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
-
-	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
@@ -70,14 +72,16 @@ var (
 	// Vhosts entry maps, these maps updated with delta changes (when an API added, only added its entry only)
 	// These maps are managed separately for API-CTL and APIM, since when deploying an project from API-CTL there is no API uuid
 	apiUUIDToGatewayToVhosts map[string]map[string]string   // API_UUID -> gateway-env -> vhost (for un-deploying APIs from APIM or Choreo)
-	apiToVhostsMap           map[string]map[string]struct{} // APIName:Version -> VHosts set (for un-deploying APIs from API-CTL)
+	apiToVhostsMap           map[string]map[string]struct{} // API_UUID -> VHosts set (for un-deploying APIs from API-CTL)
 
-	orgIDAPIMgwSwaggerMap       map[string]map[string]mgw.MgwSwagger       // organizationID -> Vhost:APIName:Version -> MgwSwagger struct map
-	orgIDOpenAPIEnvoyMap        map[string]map[string][]string             // organizationID -> Vhost:APIName:Version -> Envoy Label Array map
-	orgIDOpenAPIRoutesMap       map[string]map[string][]*routev3.Route     // organizationID -> Vhost:APIName:Version -> Envoy Routes map
-	orgIDOpenAPIClustersMap     map[string]map[string][]*clusterv3.Cluster // organizationID -> Vhost:APIName:Version -> Envoy Clusters map
-	orgIDOpenAPIEndpointsMap    map[string]map[string][]*corev3.Address    // organizationID -> Vhost:APIName:Version -> Envoy Endpoints map
-	orgIDOpenAPIEnforcerApisMap map[string]map[string]types.Resource       // organizationID -> Vhost:APIName:Version -> API Resource map
+	orgIDAPIMgwSwaggerMap       map[string]map[string]mgw.MgwSwagger       // organizationID -> Vhost:API_UUID -> MgwSwagger struct map
+	orgIDOpenAPIEnvoyMap        map[string]map[string][]string             // organizationID -> Vhost:API_UUID -> Envoy Label Array map
+	orgIDOpenAPIRoutesMap       map[string]map[string][]*routev3.Route     // organizationID -> Vhost:API_UUID -> Envoy Routes map
+	orgIDOpenAPIClustersMap     map[string]map[string][]*clusterv3.Cluster // organizationID -> Vhost:API_UUID -> Envoy Clusters map
+	orgIDOpenAPIEndpointsMap    map[string]map[string][]*corev3.Address    // organizationID -> Vhost:API_UUID -> Envoy Endpoints map
+	orgIDOpenAPIEnforcerApisMap map[string]map[string]types.Resource       // organizationID -> Vhost:API_UUID -> API Resource map
+
+	reverseAPINameVersionMap map[string]string
 
 	// Envoy Label as map key
 	envoyUpdateVersionMap  map[string]int64                       // GW-Label -> XDS version map
@@ -143,12 +147,14 @@ func init() {
 	envoyListenerConfigMap = make(map[string][]*listenerv3.Listener)
 	envoyRouteConfigMap = make(map[string]*routev3.RouteConfiguration)
 
-	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // organizationID -> Vhost:APIName:Version -> MgwSwagger struct map
-	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // organizationID -> Vhost:APIName:Version -> Envoy Label Array map
-	orgIDOpenAPIRoutesMap = make(map[string]map[string][]*routev3.Route)       // organizationID -> Vhost:APIName:Version -> Envoy Routes map
-	orgIDOpenAPIClustersMap = make(map[string]map[string][]*clusterv3.Cluster) // organizationID -> Vhost:APIName:Version -> Envoy Clusters map
-	orgIDOpenAPIEndpointsMap = make(map[string]map[string][]*corev3.Address)   // organizationID -> Vhost:APIName:Version -> Envoy Endpoints map
-	orgIDOpenAPIEnforcerApisMap = make(map[string]map[string]types.Resource)   // organizationID -> Vhost:APIName:Version -> API Resource map
+	orgIDAPIMgwSwaggerMap = make(map[string]map[string]mgw.MgwSwagger)         // organizationID -> Vhost:API_UUID -> MgwSwagger struct map
+	orgIDOpenAPIEnvoyMap = make(map[string]map[string][]string)                // organizationID -> Vhost:API_UUID -> Envoy Label Array map
+	orgIDOpenAPIRoutesMap = make(map[string]map[string][]*routev3.Route)       // organizationID -> Vhost:API_UUID -> Envoy Routes map
+	orgIDOpenAPIClustersMap = make(map[string]map[string][]*clusterv3.Cluster) // organizationID -> Vhost:API_UUID -> Envoy Clusters map
+	orgIDOpenAPIEndpointsMap = make(map[string]map[string][]*corev3.Address)   // organizationID -> Vhost:API_UUID -> Envoy Endpoints map
+	orgIDOpenAPIEnforcerApisMap = make(map[string]map[string]types.Resource)   // organizationID -> Vhost:API_UUID -> API Resource map
+
+	reverseAPINameVersionMap = make(map[string]string)
 
 	enforcerConfigMap = make(map[string][]types.Resource)
 	enforcerKeyManagerMap = make(map[string][]types.Resource)
@@ -231,20 +237,23 @@ func DeployReadinessAPI(envs []string) {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(apiContent config.APIContent) error {
+func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, error) {
 	var newLabels []string
 	var mgwSwagger mgw.MgwSwagger
 	var organizationID = apiContent.OrganizationID
+	var deployedRevision *notifier.DeployedAPIRevision
 	var err error
+
 	if len(apiContent.Environments) == 0 {
 		apiContent.Environments = []string{config.DefaultGatewayName}
 	}
 
-	if apiContent.APIType == mgw.HTTP {
+	if apiContent.APIType == mgw.HTTP || apiContent.APIType == mgw.WEBHOOK {
 		mgwSwagger, err = operator.GetMgwSwagger(apiContent.APIDefinition)
 		if err != nil {
-			return err
+			return deployedRevision, err
 		}
+
 		mgwSwagger.SetID(apiContent.UUID)
 		mgwSwagger.SetName(apiContent.Name)
 		mgwSwagger.SetVersion(apiContent.Version)
@@ -252,7 +261,10 @@ func UpdateAPI(apiContent config.APIContent) error {
 		mgwSwagger.SetXWso2AuthHeader(apiContent.AuthHeader)
 		mgwSwagger.OrganizationID = organizationID
 	} else if apiContent.APIType == mgw.WS {
-		mgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
+		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
+		if err != nil {
+			return deployedRevision, err
+		}
 		mgwSwagger.OrganizationID = organizationID
 	} else {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
@@ -261,23 +273,32 @@ func UpdateAPI(apiContent config.APIContent) error {
 
 	if (len(mgwSwagger.GetProdEndpoints()) == 0 || mgwSwagger.GetProdEndpoints()[0].Host == "/") &&
 		(len(mgwSwagger.GetSandEndpoints()) == 0 || mgwSwagger.GetSandEndpoints()[0].Host == "/") {
+
 		productionEndpointErr := mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
 		if productionEndpointErr != nil {
-			return productionEndpointErr
+			return deployedRevision, productionEndpointErr
 		}
+
 		sandboxEndpointErr := mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
 		if sandboxEndpointErr != nil {
-			return sandboxEndpointErr
+			return deployedRevision, sandboxEndpointErr
 		}
 	}
 
 	validationErr := mgwSwagger.Validate()
 	if validationErr != nil {
 		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s", mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), organizationID)
-		return validationErr
+		return deployedRevision, validationErr
 	}
 
-	apiIdentifier := GenerateIdentifierForAPI(apiContent.VHost, apiContent.Name, apiContent.Version)
+	uniqueIdentifier := apiContent.UUID
+
+	if uniqueIdentifier == "" {
+		// If API is imported from apictl generate hash as the unique ID
+		uniqueIdentifier = GenerateHashedAPINameVersionIDWithoutVhost(apiContent.Name, apiContent.Version)
+		reverseAPINameVersionMap[GenerateIdentifierForAPIWithoutVhost(apiContent.Name, apiContent.Version)] = uniqueIdentifier
+	}
+	apiIdentifier := GenerateIdentifierForAPIWithUUID(apiContent.VHost, uniqueIdentifier)
 	//TODO: (SuKSW) Uncomment the below section depending on MgwSwagger.Resource ids
 	//TODO: (SuKSW) Update the existing API if the basepath already exists
 	//existingMgwSwagger, exists := apiMgwSwaggerMap[apiIdentifier]
@@ -359,11 +380,16 @@ func UpdateAPI(apiContent config.APIContent) error {
 	}
 
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
-	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
+	revisionStatus := updateXdsCacheOnAPIAdd(oldLabels, newLabels)
+	if revisionStatus {
+		// send updated revision to control plane
+		deployedRevision = notifier.UpdateDeployedRevisions(apiContent.UUID, apiContent.RevisionID, apiContent.Environments,
+			apiContent.VHost)
+	}
 	if svcdiscovery.IsServiceDiscoveryEnabled {
 		startConsulServiceDiscovery(apiContent.OrganizationID) //consul service discovery starting point
 	}
-	return nil
+	return deployedRevision, nil
 }
 
 // GetAllEnvironments returns all the environments merging new environments with already deployed environments
@@ -394,11 +420,12 @@ func GetVhostOfAPI(apiUUID, environment string) (vhost string, exists bool) {
 // DeleteAPIs deletes an API, its resources and updates the caches of given environments
 func DeleteAPIs(vhost, apiName, version string, environments []string, organizationID string) error {
 	apiNameVersionID := GenerateIdentifierForAPIWithoutVhost(apiName, version)
+	apiNameVersionHashedID := reverseAPINameVersionMap[apiNameVersionID]
 
 	mutexForInternalMapUpdate.Lock()
 	defer mutexForInternalMapUpdate.Unlock()
 
-	vhosts, found := apiToVhostsMap[apiNameVersionID]
+	vhosts, found := apiToVhostsMap[apiNameVersionHashedID]
 	if !found {
 		logger.LoggerXds.Infof("Unable to delete API %v from Organization %v. API does not exist.", apiNameVersionID, organizationID)
 		return errors.New(mgw.NotFound)
@@ -409,7 +436,7 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 		logger.LoggerXds.Infof("No vhost is specified for the API %v in Organizaion %v deleting from all vhosts", apiNameVersionID, organizationID)
 		deletedVhosts := make(map[string]struct{})
 		for vh := range vhosts {
-			apiIdentifier := GenerateIdentifierForAPI(vh, apiName, version)
+			apiIdentifier := GenerateIdentifierForAPIWithUUID(vh, apiNameVersionHashedID)
 			// TODO: (renuka) optimize to update cache only once after updating all maps
 			if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
 				// Update apiToVhostsMap with already deleted vhosts in the loop
@@ -422,16 +449,16 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 						remainingVhosts[v] = void
 					}
 				}
-				apiToVhostsMap[apiNameVersionID] = remainingVhosts
+				apiToVhostsMap[apiNameVersionHashedID] = remainingVhosts
 				return err
 			}
 			deletedVhosts[vh] = void
 		}
-		delete(apiToVhostsMap, apiNameVersionID)
+		delete(apiToVhostsMap, apiNameVersionHashedID)
 		return nil
 	}
 
-	apiIdentifier := GenerateIdentifierForAPI(vhost, apiName, version)
+	apiIdentifier := GenerateIdentifierForAPIWithUUID(vhost, apiNameVersionHashedID)
 	if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
 		return err
 	}
@@ -441,9 +468,66 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 			// if this is the final vhost delete map entry
 			logger.LoggerXds.Debugf("The API %v is not exists with any vhost. Hence clean vhost entry from the map 'apiToVhostsMap'",
 				apiNameVersionID)
-			delete(apiToVhostsMap, apiNameVersionID)
+			delete(apiToVhostsMap, apiNameVersionHashedID)
 		} else {
-			delete(apiToVhostsMap[apiNameVersionID], vhost)
+			delete(apiToVhostsMap[apiNameVersionHashedID], vhost)
+		}
+	}
+	return nil
+}
+
+// DeleteAPIsWithUUID deletes an API, its resources and updates the caches of given environments
+func DeleteAPIsWithUUID(vhost, uuid string, environments []string, organizationID string) error {
+
+	mutexForInternalMapUpdate.Lock()
+	defer mutexForInternalMapUpdate.Unlock()
+
+	vhosts, found := apiToVhostsMap[uuid]
+	if !found {
+		logger.LoggerXds.Infof("Unable to delete API with UUID %v from Organization %v. API does not exist.", uuid, organizationID)
+		return errors.New(mgw.NotFound)
+	}
+
+	if vhost == "" {
+		// vhost is not defined, delete all vhosts
+		logger.LoggerXds.Infof("No vhost is specified for the API with UUID %v in Organizaion %v deleting from all vhosts", uuid, organizationID)
+		deletedVhosts := make(map[string]struct{})
+		for vh := range vhosts {
+			apiIdentifier := GenerateIdentifierForAPIWithUUID(vh, uuid)
+			// TODO: (renuka) optimize to update cache only once after updating all maps
+			if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
+				// Update apiToVhostsMap with already deleted vhosts in the loop
+				logger.LoggerXds.Errorf("Error deleting API: %v of organization: %v", apiIdentifier, organizationID)
+				logger.LoggerXds.Debugf("Update map apiToVhostsMap with deleting already deleted vhosts for API %v in organization: %v",
+					apiIdentifier, organizationID)
+				remainingVhosts := make(map[string]struct{})
+				for v := range vhosts {
+					if _, ok := deletedVhosts[v]; ok {
+						remainingVhosts[v] = void
+					}
+				}
+				apiToVhostsMap[uuid] = remainingVhosts
+				return err
+			}
+			deletedVhosts[vh] = void
+		}
+		delete(apiToVhostsMap, uuid)
+		return nil
+	}
+
+	apiIdentifier := GenerateIdentifierForAPIWithUUID(vhost, uuid)
+	if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
+		return err
+	}
+
+	if _, ok := vhosts[vhost]; ok {
+		if len(vhosts) == 1 {
+			// if this is the final vhost delete map entry
+			logger.LoggerXds.Debugf("The API with UUID %v is not exists with any vhost. Hence clean vhost entry from the map 'apiToVhostsMap'",
+				uuid)
+			delete(apiToVhostsMap, uuid)
+		} else {
+			delete(apiToVhostsMap[uuid], vhost)
 		}
 	}
 	return nil
@@ -459,7 +543,7 @@ func DeleteAPIWithAPIMEvent(uuid, name, version string, environments []string, o
 	for gw, vhost := range apiUUIDToGatewayToVhosts[uuid] {
 		// delete from only specified environments
 		if arrayContains(environments, gw) {
-			id := GenerateIdentifierForAPI(vhost, name, version)
+			id := GenerateIdentifierForAPIWithUUID(vhost, uuid)
 			apiIdentifiers[id] = void
 		}
 	}
@@ -544,14 +628,20 @@ func mergeResourceArrays(resourceArrays [][]types.Resource) []types.Resource {
 // when this method is called, openAPIEnvoy map is updated.
 // Old labels refers to the previously assigned labels
 // New labels refers to the the updated labels
-func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
-
+func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) bool {
+	revisionStatus := false
 	// TODO: (VirajSalaka) check possible optimizations, Since the number of labels are low by design it should not be an issue
 	for _, newLabel := range newLabels {
 		listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(newLabel)
 		UpdateEnforcerApis(newLabel, apis, "")
-		UpdateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
+		success := UpdateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
 		logger.LoggerXds.Debugf("Xds Cache is updated for the newly added label : %v", newLabel)
+		if success {
+			// if even one label was updated with latest revision, we take the revision as deployed.
+			// (other labels also will get updated successfully)
+			revisionStatus = success
+			continue
+		}
 	}
 	for _, oldLabel := range oldLabels {
 		if !arrayContains(newLabels, oldLabel) {
@@ -561,10 +651,11 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 			logger.LoggerXds.Debugf("Xds Cache is updated for the already existing label : %v", oldLabel)
 		}
 	}
-
+	return revisionStatus
 }
 
 // GenerateEnvoyResoucesForLabel generates envoy resources for a given label
+// This method will list out all APIs mapped to the label. and generate envoy resources for all of these APIs.
 func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Resource, []types.Resource,
 	[]types.Resource, []types.Resource) {
 	var clusterArray []*clusterv3.Cluster
@@ -630,7 +721,7 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 }
 
 //use UpdateXdsCacheWithLock to avoid race conditions
-func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) {
+func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) bool {
 	version := rand.Intn(maxRandomInt)
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	// Will be updated once decide to move to incremental XDS
@@ -638,9 +729,11 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	snap.Consistent()
 	err := cache.SetSnapshot(label, snap)
 	if err != nil {
-		logger.LoggerXds.Error(err)
+		logger.LoggerXds.Errorf("Error while updating the snapshot : %v", err.Error())
+		return false
 	}
-	logger.LoggerXds.Infof("New Router cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New Router cache updated for the label: " + label + " version: " + fmt.Sprint(version))
+	return true
 }
 
 // UpdateEnforcerConfig Sets new update to the enforcer's configuration
@@ -795,10 +888,10 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 
 // UpdateXdsCacheWithLock uses mutex and lock to avoid different go routines updating XDS at the same time
 func UpdateXdsCacheWithLock(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource,
-	listeners []types.Resource) {
+	listeners []types.Resource) bool {
 	mutexForXdsUpdate.Lock()
 	defer mutexForXdsUpdate.Unlock()
-	updateXdsCache(label, endpoints, clusters, routes, listeners)
+	return updateXdsCache(label, endpoints, clusters, routes, listeners)
 }
 
 // ListApis returns a list of objects that holds info about each API
@@ -839,8 +932,8 @@ func ListApis(apiType string, organizationID string, limit *int64) *apiModel.API
 }
 
 // IsAPIExist returns whether a given API exists
-func IsAPIExist(vhost, name, version string, organizationID string) (exists bool) {
-	apiIdentifier := GenerateIdentifierForAPI(vhost, name, version)
+func IsAPIExist(vhost, uuid, organizationID string) (exists bool) {
+	apiIdentifier := GenerateIdentifierForAPIWithUUID(vhost, uuid)
 	_, exists = orgIDAPIMgwSwaggerMap[organizationID][apiIdentifier]
 	return exists
 }
@@ -850,15 +943,31 @@ func GenerateIdentifierForAPI(vhost, name, version string) string {
 	return fmt.Sprint(vhost, apiKeyFieldSeparator, name, apiKeyFieldSeparator, version)
 }
 
+// GenerateIdentifierForAPIWithUUID generates an identifier unique to the API
+func GenerateIdentifierForAPIWithUUID(vhost, uuid string) string {
+	return fmt.Sprint(vhost, apiKeyFieldSeparator, uuid)
+}
+
 // GenerateIdentifierForAPIWithoutVhost generates an identifier unique to the API name and version
 func GenerateIdentifierForAPIWithoutVhost(name, version string) string {
 	return fmt.Sprint(name, apiKeyFieldSeparator, version)
 }
 
+// GenerateHashedAPINameVersionIDWithoutVhost generates a hashed identifier unique to the API Name and Version
+func GenerateHashedAPINameVersionIDWithoutVhost(name, version string) string {
+	return generateHashValue(name, version)
+}
+
+func generateHashValue(apiName string, apiVersion string) string {
+	apiNameVersionHash := sha1.New()
+	apiNameVersionHash.Write([]byte(apiName + ":" + apiVersion))
+	return hex.EncodeToString(apiNameVersionHash.Sum(nil)[:])
+}
+
 // ExtractVhostFromAPIIdentifier extracts vhost from the API identifier
 func ExtractVhostFromAPIIdentifier(id string) (string, error) {
 	elem := strings.Split(id, apiKeyFieldSeparator)
-	if len(elem) == 3 {
+	if len(elem) == 2 {
 		return elem[0], nil
 	}
 	err := fmt.Errorf("invalid API identifier: %v", id)

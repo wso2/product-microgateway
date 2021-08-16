@@ -95,6 +95,15 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		},
 	}
 
+	management := &enforcer.Management{
+		Username: config.Enforcer.Management.Username,
+		Password: config.Enforcer.Management.Password,
+	}
+
+	restServer := &enforcer.RestServer{
+		Enable: config.Enforcer.RestServer.Enable,
+	}
+
 	return &enforcer.Config{
 		JwtGenerator: &enforcer.JWTGenerator{
 			Enable:                config.Enforcer.JwtGenerator.Enable,
@@ -170,6 +179,8 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 				},
 			},
 		},
+		Management: management,
+		RestServer: restServer,
 	}
 }
 

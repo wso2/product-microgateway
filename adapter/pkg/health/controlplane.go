@@ -22,17 +22,17 @@ import (
 )
 
 var (
-	controlPlaneJmsStatusChan     = make(chan bool)
+	controlPlaneBrokerStatusChan     = make(chan bool)
 	controlPlaneRestAPIStatusChan = make(chan bool)
 	controlPlaneStarted           = false
 )
 
-// SetControlPlaneJmsStatus sets the given status to the internal channel controlPlaneJmsStatusChan
-func SetControlPlaneJmsStatus(status bool) {
+// SetControlPlaneBrokerStatus sets the given status to the internal channel controlPlaneBrokerStatusChan
+func SetControlPlaneBrokerStatus(status bool) {
 	// check for controlPlaneStarted, to non block call
 	// if called again (somehow) after startup, for extra safe check this value
 	if !controlPlaneStarted {
-		controlPlaneJmsStatusChan <- status
+		controlPlaneBrokerStatusChan <- status
 	}
 }
 
@@ -46,13 +46,13 @@ func SetControlPlaneRestAPIStatus(status bool) {
 
 // WaitForControlPlane sleep the current go routine until control-plane starts
 func WaitForControlPlane() {
-	jmsStarted := false
+	brokerStarted := false
 	restAPIStarted := false
 	// if wait for both jmsStarted and restAPIStarted becomes true
-	for !jmsStarted || !restAPIStarted {
+	for !brokerStarted || !restAPIStarted {
 		select {
-		case jmsStarted = <-controlPlaneJmsStatusChan:
-			logger.LoggerHealth.Debugf("Connection to Control Plane JMS %v", jmsStarted)
+		case brokerStarted = <-controlPlaneBrokerStatusChan:
+			logger.LoggerHealth.Debugf("Connection to Control Plane Broker %v", brokerStarted)
 		case restAPIStarted = <-controlPlaneRestAPIStatusChan:
 			logger.LoggerHealth.Debugf("Connection to Control Plane Rest API %v", restAPIStarted)
 		}

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package wso2.discovery.config.enforcer;
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
+option java_package = "org.wso2.choreo.connect.discovery.config.enforcer";
+option java_outer_classname = "RestServerProto";
+option java_multiple_files = true;
+
+// [#protodoc-title: SSL]
+
+// Model for enable/ disable enforcer admin rest api
+message RestServer {
+  // Enable outbound auth header
+  bool enable = 1;
+
+}

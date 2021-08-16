@@ -105,6 +105,13 @@ var defaultConfig = &Config{
 		},
 	},
 	Enforcer: enforcer{
+		Management: management{
+			Username: "admin",
+			Password: "admin",
+		},
+		RestServer: restServer{
+			Enable: true,
+		},
 		Security: security{
 			TokenService: []tokenService{
 				{
@@ -250,6 +257,8 @@ var defaultConfig = &Config{
 		JmsConnectionParameters: jmsConnectionParameters{
 			EventListeningEndpoints: []string{"amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"},
 		},
+		ASBConnectionParameters: asbConnectionParameters{
+			EventListeningEndpoint: "$env{ASB_CONNECTION_STRING}"},
 	},
 	Analytics: analytics{
 		Enabled: false,

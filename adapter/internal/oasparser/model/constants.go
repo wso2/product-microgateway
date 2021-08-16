@@ -44,6 +44,8 @@ const (
 	HTTP string = "HTTP"
 	// WS - API type for websocket APIs
 	WS string = "WS"
+	// WEBHOOK - API type for WEBHOOK APIs
+	WEBHOOK string = "WEBHOOK"
 )
 
 // Constants to represent errors

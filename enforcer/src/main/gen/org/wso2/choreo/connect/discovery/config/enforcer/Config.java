@@ -169,6 +169,32 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
+          case 82: {
+            org.wso2.choreo.connect.discovery.config.enforcer.Management.Builder subBuilder = null;
+            if (management_ != null) {
+              subBuilder = management_.toBuilder();
+            }
+            management_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Management.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(management_);
+              management_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
+          case 90: {
+            org.wso2.choreo.connect.discovery.config.enforcer.RestServer.Builder subBuilder = null;
+            if (restServer_ != null) {
+              subBuilder = restServer_.toBuilder();
+            }
+            restServer_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.RestServer.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(restServer_);
+              restServer_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -435,6 +461,58 @@ private static final long serialVersionUID = 0L;
     return getAnalytics();
   }
 
+  public static final int MANAGEMENT_FIELD_NUMBER = 10;
+  private org.wso2.choreo.connect.discovery.config.enforcer.Management management_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+   * @return Whether the management field is set.
+   */
+  @java.lang.Override
+  public boolean hasManagement() {
+    return management_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+   * @return The management.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.Management getManagement() {
+    return management_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Management.getDefaultInstance() : management_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.ManagementOrBuilder getManagementOrBuilder() {
+    return getManagement();
+  }
+
+  public static final int RESTSERVER_FIELD_NUMBER = 11;
+  private org.wso2.choreo.connect.discovery.config.enforcer.RestServer restServer_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+   * @return Whether the restServer field is set.
+   */
+  @java.lang.Override
+  public boolean hasRestServer() {
+    return restServer_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+   * @return The restServer.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.RestServer getRestServer() {
+    return restServer_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.RestServer.getDefaultInstance() : restServer_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.RestServerOrBuilder getRestServerOrBuilder() {
+    return getRestServer();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -475,6 +553,12 @@ private static final long serialVersionUID = 0L;
     }
     if (analytics_ != null) {
       output.writeMessage(9, getAnalytics());
+    }
+    if (management_ != null) {
+      output.writeMessage(10, getManagement());
+    }
+    if (restServer_ != null) {
+      output.writeMessage(11, getRestServer());
     }
     unknownFields.writeTo(output);
   }
@@ -520,6 +604,14 @@ private static final long serialVersionUID = 0L;
     if (analytics_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(9, getAnalytics());
+    }
+    if (management_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(10, getManagement());
+    }
+    if (restServer_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(11, getRestServer());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -581,6 +673,16 @@ private static final long serialVersionUID = 0L;
       if (!getAnalytics()
           .equals(other.getAnalytics())) return false;
     }
+    if (hasManagement() != other.hasManagement()) return false;
+    if (hasManagement()) {
+      if (!getManagement()
+          .equals(other.getManagement())) return false;
+    }
+    if (hasRestServer() != other.hasRestServer()) return false;
+    if (hasRestServer()) {
+      if (!getRestServer()
+          .equals(other.getRestServer())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -627,6 +729,14 @@ private static final long serialVersionUID = 0L;
     if (hasAnalytics()) {
       hash = (37 * hash) + ANALYTICS_FIELD_NUMBER;
       hash = (53 * hash) + getAnalytics().hashCode();
+    }
+    if (hasManagement()) {
+      hash = (37 * hash) + MANAGEMENT_FIELD_NUMBER;
+      hash = (53 * hash) + getManagement().hashCode();
+    }
+    if (hasRestServer()) {
+      hash = (37 * hash) + RESTSERVER_FIELD_NUMBER;
+      hash = (53 * hash) + getRestServer().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -819,6 +929,18 @@ private static final long serialVersionUID = 0L;
         analytics_ = null;
         analyticsBuilder_ = null;
       }
+      if (managementBuilder_ == null) {
+        management_ = null;
+      } else {
+        management_ = null;
+        managementBuilder_ = null;
+      }
+      if (restServerBuilder_ == null) {
+        restServer_ = null;
+      } else {
+        restServer_ = null;
+        restServerBuilder_ = null;
+      }
       return this;
     }
 
@@ -889,6 +1011,16 @@ private static final long serialVersionUID = 0L;
         result.analytics_ = analytics_;
       } else {
         result.analytics_ = analyticsBuilder_.build();
+      }
+      if (managementBuilder_ == null) {
+        result.management_ = management_;
+      } else {
+        result.management_ = managementBuilder_.build();
+      }
+      if (restServerBuilder_ == null) {
+        result.restServer_ = restServer_;
+      } else {
+        result.restServer_ = restServerBuilder_.build();
       }
       onBuilt();
       return result;
@@ -964,6 +1096,12 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasAnalytics()) {
         mergeAnalytics(other.getAnalytics());
+      }
+      if (other.hasManagement()) {
+        mergeManagement(other.getManagement());
+      }
+      if (other.hasRestServer()) {
+        mergeRestServer(other.getRestServer());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -2063,6 +2201,244 @@ private static final long serialVersionUID = 0L;
         analytics_ = null;
       }
       return analyticsBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.config.enforcer.Management management_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Management, org.wso2.choreo.connect.discovery.config.enforcer.Management.Builder, org.wso2.choreo.connect.discovery.config.enforcer.ManagementOrBuilder> managementBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+     * @return Whether the management field is set.
+     */
+    public boolean hasManagement() {
+      return managementBuilder_ != null || management_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+     * @return The management.
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Management getManagement() {
+      if (managementBuilder_ == null) {
+        return management_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Management.getDefaultInstance() : management_;
+      } else {
+        return managementBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+     */
+    public Builder setManagement(org.wso2.choreo.connect.discovery.config.enforcer.Management value) {
+      if (managementBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        management_ = value;
+        onChanged();
+      } else {
+        managementBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+     */
+    public Builder setManagement(
+        org.wso2.choreo.connect.discovery.config.enforcer.Management.Builder builderForValue) {
+      if (managementBuilder_ == null) {
+        management_ = builderForValue.build();
+        onChanged();
+      } else {
+        managementBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+     */
+    public Builder mergeManagement(org.wso2.choreo.connect.discovery.config.enforcer.Management value) {
+      if (managementBuilder_ == null) {
+        if (management_ != null) {
+          management_ =
+            org.wso2.choreo.connect.discovery.config.enforcer.Management.newBuilder(management_).mergeFrom(value).buildPartial();
+        } else {
+          management_ = value;
+        }
+        onChanged();
+      } else {
+        managementBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+     */
+    public Builder clearManagement() {
+      if (managementBuilder_ == null) {
+        management_ = null;
+        onChanged();
+      } else {
+        management_ = null;
+        managementBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Management.Builder getManagementBuilder() {
+      
+      onChanged();
+      return getManagementFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.ManagementOrBuilder getManagementOrBuilder() {
+      if (managementBuilder_ != null) {
+        return managementBuilder_.getMessageOrBuilder();
+      } else {
+        return management_ == null ?
+            org.wso2.choreo.connect.discovery.config.enforcer.Management.getDefaultInstance() : management_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Management, org.wso2.choreo.connect.discovery.config.enforcer.Management.Builder, org.wso2.choreo.connect.discovery.config.enforcer.ManagementOrBuilder> 
+        getManagementFieldBuilder() {
+      if (managementBuilder_ == null) {
+        managementBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.config.enforcer.Management, org.wso2.choreo.connect.discovery.config.enforcer.Management.Builder, org.wso2.choreo.connect.discovery.config.enforcer.ManagementOrBuilder>(
+                getManagement(),
+                getParentForChildren(),
+                isClean());
+        management_ = null;
+      }
+      return managementBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.config.enforcer.RestServer restServer_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.RestServer, org.wso2.choreo.connect.discovery.config.enforcer.RestServer.Builder, org.wso2.choreo.connect.discovery.config.enforcer.RestServerOrBuilder> restServerBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+     * @return Whether the restServer field is set.
+     */
+    public boolean hasRestServer() {
+      return restServerBuilder_ != null || restServer_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+     * @return The restServer.
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.RestServer getRestServer() {
+      if (restServerBuilder_ == null) {
+        return restServer_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.RestServer.getDefaultInstance() : restServer_;
+      } else {
+        return restServerBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+     */
+    public Builder setRestServer(org.wso2.choreo.connect.discovery.config.enforcer.RestServer value) {
+      if (restServerBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        restServer_ = value;
+        onChanged();
+      } else {
+        restServerBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+     */
+    public Builder setRestServer(
+        org.wso2.choreo.connect.discovery.config.enforcer.RestServer.Builder builderForValue) {
+      if (restServerBuilder_ == null) {
+        restServer_ = builderForValue.build();
+        onChanged();
+      } else {
+        restServerBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+     */
+    public Builder mergeRestServer(org.wso2.choreo.connect.discovery.config.enforcer.RestServer value) {
+      if (restServerBuilder_ == null) {
+        if (restServer_ != null) {
+          restServer_ =
+            org.wso2.choreo.connect.discovery.config.enforcer.RestServer.newBuilder(restServer_).mergeFrom(value).buildPartial();
+        } else {
+          restServer_ = value;
+        }
+        onChanged();
+      } else {
+        restServerBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+     */
+    public Builder clearRestServer() {
+      if (restServerBuilder_ == null) {
+        restServer_ = null;
+        onChanged();
+      } else {
+        restServer_ = null;
+        restServerBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.RestServer.Builder getRestServerBuilder() {
+      
+      onChanged();
+      return getRestServerFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.RestServerOrBuilder getRestServerOrBuilder() {
+      if (restServerBuilder_ != null) {
+        return restServerBuilder_.getMessageOrBuilder();
+      } else {
+        return restServer_ == null ?
+            org.wso2.choreo.connect.discovery.config.enforcer.RestServer.getDefaultInstance() : restServer_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.RestServer, org.wso2.choreo.connect.discovery.config.enforcer.RestServer.Builder, org.wso2.choreo.connect.discovery.config.enforcer.RestServerOrBuilder> 
+        getRestServerFieldBuilder() {
+      if (restServerBuilder_ == null) {
+        restServerBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.config.enforcer.RestServer, org.wso2.choreo.connect.discovery.config.enforcer.RestServer.Builder, org.wso2.choreo.connect.discovery.config.enforcer.RestServerOrBuilder>(
+                getRestServer(),
+                getParentForChildren(),
+                isClean());
+        restServer_ = null;
+      }
+      return restServerBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

@@ -105,6 +105,22 @@ func handleNotification() {
 	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
 }
 
+func handleAzureNotification() {
+	for d := range msg.AzureNotificationChannel {
+		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] message received for " +
+			"NotificationChannel = " + string(d))
+		var notification msg.EventNotification
+		error := parseNotificationJSONEvent(d, &notification)
+		if error != nil {
+			logger.LoggerInternalMsg.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error while processing " +
+				"the notification event %v. Hence dropping the event", error)
+			continue
+		}
+		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Event %s is received",
+			notification.Event.PayloadData.EventType)
+	}
+}
+
 // handleAPIEvents to process api related data
 func handleAPIEvents(data []byte, eventType string) {
 	var (
@@ -416,4 +432,13 @@ func belongsToTenant(tenantDomain string) bool {
 	// TODO : enable this once the events are fixed in apim
 	// return config.GetControlPlaneConnectedTenantDomain() == tenantDomain
 	return true
+}
+
+func parseNotificationJSONEvent(data []byte, notification *msg.EventNotification) error {
+	unmarshalErr := json.Unmarshal(data, &notification)
+	if unmarshalErr != nil {
+		logger.LoggerInternalMsg.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while unmarshalling " +
+			"notification event data %v", unmarshalErr)
+	}
+	return unmarshalErr
 }

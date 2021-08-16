@@ -67,6 +67,8 @@ const (
 const (
 	// clusterHeaderName denotes the constant used for header based routing decisions.
 	clusterHeaderName string = "x-wso2-cluster-header"
+	// upstreamServiceTimeHeader the header which is used to denote the upstream service time
+	upstreamServiceTimeHeader string = "x-envoy-upstream-service-time"
 )
 
 const (
