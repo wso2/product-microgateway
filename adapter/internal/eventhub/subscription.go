@@ -50,38 +50,45 @@ const (
 )
 
 var (
-	// SubList contains the Subscription list
-	SubList *types.SubscriptionList
-	// AppList contains the Application list
-	AppList *types.ApplicationList
-	// AppKeyMappingList contains the Application key mapping list
-	AppKeyMappingList *types.ApplicationKeyMappingList
+	subList           *types.SubscriptionList
+	appList           *types.ApplicationList
+	appKeyMappingList *types.ApplicationKeyMappingList
+	appPolicyList     *types.ApplicationPolicyList
+	subPolicyList     *types.SubscriptionPolicyList
+
 	// APIListMap contains the Api list against each label
 	APIListMap map[string]*types.APIList
-	// AppPolicyList contains the Application policy list
-	AppPolicyList *types.ApplicationPolicyList
-	// SubPolicyList contains the Subscription policy list
-	SubPolicyList *types.SubscriptionPolicyList
-	resources     = []resource{
+
+	// SubscriptionMap contains the subscriptions recieved from API Manager Control Plane
+	SubscriptionMap map[int32]*types.Subscription
+	// ApplicationMap contains the applications recieved from API Manager Control Plane
+	ApplicationMap map[string]*types.Application
+	// ApplicationKeyMappingMap contains the application key mappings recieved from API Manager Control Plane
+	ApplicationKeyMappingMap map[string]*types.ApplicationKeyMapping
+	// ApplicationPolicyMap contains the application policies recieved from API Manager Control Plane
+	ApplicationPolicyMap map[int32]*types.ApplicationPolicy
+	// SubscriptionPolicyMap contains the subscription policies recieved from API Manager Control Plane
+	SubscriptionPolicyMap map[int32]*types.SubscriptionPolicy
+	resources             = []resource{
 		{
 			endpoint:     "subscriptions",
-			responseType: SubList,
+			responseType: subList,
 		},
 		{
 			endpoint:     "applications",
-			responseType: AppList,
+			responseType: appList,
 		},
 		{
 			endpoint:     "application-key-mappings",
-			responseType: AppKeyMappingList,
+			responseType: appKeyMappingList,
 		},
 		{
 			endpoint:     "application-policies",
-			responseType: AppPolicyList,
+			responseType: appPolicyList,
 		},
 		{
 			endpoint:     "subscription-policies",
-			responseType: SubPolicyList,
+			responseType: subPolicyList,
 		},
 	}
 	// APIListChannel is used to add apis
@@ -148,24 +155,49 @@ func LoadSubscriptionData(configFile *config.Config) {
 				switch t := newResponse.(type) {
 				case *types.SubscriptionList:
 					logger.LoggerSubscription.Debug("Received Subscription information.")
-					SubList = newResponse.(*types.SubscriptionList)
-					xds.UpdateEnforcerSubscriptions(xds.MarshalSubscriptionList(SubList))
+					subList = newResponse.(*types.SubscriptionList)
+					ResourceMap := make(map[int32]*types.Subscription)
+					for index, subscription := range subList.List {
+						ResourceMap[subscription.SubscriptionID] = &subList.List[index]
+					}
+					SubscriptionMap = ResourceMap
+					xds.UpdateEnforcerSubscriptions(xds.MarshalSubscriptionMap(SubscriptionMap))
 				case *types.ApplicationList:
 					logger.LoggerSubscription.Debug("Received Application information.")
-					AppList = newResponse.(*types.ApplicationList)
-					xds.UpdateEnforcerApplications(xds.MarshalApplicationList(AppList))
+					appList = newResponse.(*types.ApplicationList)
+					ResourceMap := make(map[string]*types.Application)
+					for index, application := range appList.List {
+						ResourceMap[application.UUID] = &appList.List[index]
+					}
+					ApplicationMap = ResourceMap
+					xds.UpdateEnforcerApplications(xds.MarshalApplicationMap(ApplicationMap))
 				case *types.ApplicationPolicyList:
 					logger.LoggerSubscription.Debug("Received Application Policy information.")
-					AppPolicyList = newResponse.(*types.ApplicationPolicyList)
-					xds.UpdateEnforcerApplicationPolicies(xds.MarshalApplicationPolicyList(AppPolicyList))
+					appPolicyList = newResponse.(*types.ApplicationPolicyList)
+					ResourceMap := make(map[int32]*types.ApplicationPolicy)
+					for index, policy := range appPolicyList.List {
+						ResourceMap[policy.ID] = &appPolicyList.List[index]
+					}
+					ApplicationPolicyMap = ResourceMap
+					xds.UpdateEnforcerApplicationPolicies(xds.MarshalApplicationPolicyMap(ApplicationPolicyMap))
 				case *types.SubscriptionPolicyList:
 					logger.LoggerSubscription.Debug("Received Subscription Policy information.")
-					SubPolicyList = newResponse.(*types.SubscriptionPolicyList)
-					xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalSubscriptionPolicyList(SubPolicyList))
+					subPolicyList = newResponse.(*types.SubscriptionPolicyList)
+					ResourceMap := make(map[int32]*types.SubscriptionPolicy)
+					for index, policy := range subPolicyList.List {
+						ResourceMap[policy.ID] = &subPolicyList.List[index]
+					}
+					SubscriptionPolicyMap = ResourceMap
+					xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalSubscriptionPolicyMap(SubscriptionPolicyMap))
 				case *types.ApplicationKeyMappingList:
 					logger.LoggerSubscription.Debug("Received Application Key Mapping information.")
-					AppKeyMappingList = newResponse.(*types.ApplicationKeyMappingList)
-					xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingList(AppKeyMappingList))
+					appKeyMappingList = newResponse.(*types.ApplicationKeyMappingList)
+					ResourceMap := make(map[string]*types.ApplicationKeyMapping)
+					for index, keyMapping := range appKeyMappingList.List {
+						ResourceMap[keyMapping.ApplicationUUID] = &appKeyMappingList.List[index]
+					}
+					ApplicationKeyMappingMap = ResourceMap
+					xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingMap(ApplicationKeyMappingMap))
 				default:
 					logger.LoggerSubscription.Debugf("Unknown type %T", t)
 				}
