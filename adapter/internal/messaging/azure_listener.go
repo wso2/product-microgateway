@@ -29,8 +29,6 @@ import (
 const (
 	componentName                              = "adapter"
 	subscriptionIdleTimeDuration               = time.Duration(72 * time.Hour)
-	defaultReconnectRetryCount                 = 60
-	defaultReconnectInterval     time.Duration = 5000
 )
 
 // InitiateAndProcessEvents to pass event consumption
@@ -41,12 +39,6 @@ func InitiateAndProcessEvents(config *config.Config) {
 	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting InitiateAndProcessEvents method")
 	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] EventListeningEndpoint is ",
 		config.ControlPlane.ASBConnectionParameters.EventListeningEndpoint)
-	if reconnectRetryCount == 0 {
-		reconnectRetryCount = defaultReconnectRetryCount
-	}
-	if reconnectInterval == 0 {
-		reconnectInterval = defaultReconnectInterval
-	}
 	subscriptionMetaDataList, err := msg.InitiateBrokerConnectionAndValidate(
 		config.ControlPlane.ASBConnectionParameters.EventListeningEndpoint, componentName, reconnectRetryCount,
 		reconnectInterval * time.Millisecond, subscriptionIdleTimeDuration)
