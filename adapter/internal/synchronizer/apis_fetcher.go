@@ -30,6 +30,8 @@ import (
 	"strings"
 
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
+
 	apiServer "github.com/wso2/product-microgateway/adapter/internal/api"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
@@ -45,6 +47,7 @@ const (
 // downloaded apis.zip one by one.
 // If the updating envoy or enforcer fails, this method returns an error, if not error would be nil.
 func PushAPIProjects(payload []byte, environments []string) error {
+	var deploymentList []*notifier.DeployedAPIRevision
 	// Reading the root zip
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	if err != nil {
@@ -95,10 +98,16 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		_ = f.Close() // Close the file here (without defer)
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
 		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
-		err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap)
+		var deployedRevisionList []*notifier.DeployedAPIRevision
+		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
+		} else if deployedRevisionList != nil {
+			deploymentList = append(deploymentList, deployedRevisionList...)
 		}
+	}
+	if len(deploymentList) > 0 {
+		notifier.SendRevisionUpdate(deploymentList)
 	}
 	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(zipReader.File)-1)
 	// Error nil for successful execution

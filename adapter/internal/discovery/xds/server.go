@@ -22,15 +22,15 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"math/rand"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	throttle "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
-
-	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	wso2_cache "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/cache/v3"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
@@ -237,11 +237,13 @@ func DeployReadinessAPI(envs []string) {
 }
 
 // UpdateAPI updates the Xds Cache when OpenAPI Json content is provided
-func UpdateAPI(apiContent config.APIContent) error {
+func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, error) {
 	var newLabels []string
 	var mgwSwagger mgw.MgwSwagger
 	var organizationID = apiContent.OrganizationID
+	var deployedRevision *notifier.DeployedAPIRevision
 	var err error
+
 	if len(apiContent.Environments) == 0 {
 		apiContent.Environments = []string{config.DefaultGatewayName}
 	}
@@ -249,8 +251,9 @@ func UpdateAPI(apiContent config.APIContent) error {
 	if apiContent.APIType == mgw.HTTP || apiContent.APIType == mgw.WEBHOOK {
 		mgwSwagger, err = operator.GetMgwSwagger(apiContent.APIDefinition)
 		if err != nil {
-			return err
+			return deployedRevision, err
 		}
+
 		mgwSwagger.SetID(apiContent.UUID)
 		mgwSwagger.SetName(apiContent.Name)
 		mgwSwagger.SetVersion(apiContent.Version)
@@ -258,7 +261,10 @@ func UpdateAPI(apiContent config.APIContent) error {
 		mgwSwagger.SetXWso2AuthHeader(apiContent.AuthHeader)
 		mgwSwagger.OrganizationID = organizationID
 	} else if apiContent.APIType == mgw.WS {
-		mgwSwagger = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
+		mgwSwagger, err = operator.GetMgwSwaggerWebSocket(apiContent.APIDefinition)
+		if err != nil {
+			return deployedRevision, err
+		}
 		mgwSwagger.OrganizationID = organizationID
 	} else {
 		// Unreachable else condition. Added in case previous apiType check fails due to any modifications.
@@ -267,20 +273,22 @@ func UpdateAPI(apiContent config.APIContent) error {
 
 	if (len(mgwSwagger.GetProdEndpoints()) == 0 || mgwSwagger.GetProdEndpoints()[0].Host == "/") &&
 		(len(mgwSwagger.GetSandEndpoints()) == 0 || mgwSwagger.GetSandEndpoints()[0].Host == "/") {
+
 		productionEndpointErr := mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
 		if productionEndpointErr != nil {
-			return productionEndpointErr
+			return deployedRevision, productionEndpointErr
 		}
+
 		sandboxEndpointErr := mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
 		if sandboxEndpointErr != nil {
-			return sandboxEndpointErr
+			return deployedRevision, sandboxEndpointErr
 		}
 	}
 
 	validationErr := mgwSwagger.Validate()
 	if validationErr != nil {
 		logger.LoggerOasparser.Errorf("Validation failed for the API %s:%s of Organization %s", mgwSwagger.GetTitle(), mgwSwagger.GetVersion(), organizationID)
-		return validationErr
+		return deployedRevision, validationErr
 	}
 
 	uniqueIdentifier := apiContent.UUID
@@ -372,11 +380,16 @@ func UpdateAPI(apiContent config.APIContent) error {
 	}
 
 	// TODO: (VirajSalaka) Fault tolerance mechanism implementation
-	updateXdsCacheOnAPIAdd(oldLabels, newLabels)
+	revisionStatus := updateXdsCacheOnAPIAdd(oldLabels, newLabels)
+	if revisionStatus {
+		// send updated revision to control plane
+		deployedRevision = notifier.UpdateDeployedRevisions(apiContent.UUID, apiContent.RevisionID, apiContent.Environments,
+			apiContent.VHost)
+	}
 	if svcdiscovery.IsServiceDiscoveryEnabled {
 		startConsulServiceDiscovery(apiContent.OrganizationID) //consul service discovery starting point
 	}
-	return nil
+	return deployedRevision, nil
 }
 
 // GetAllEnvironments returns all the environments merging new environments with already deployed environments
@@ -615,14 +628,20 @@ func mergeResourceArrays(resourceArrays [][]types.Resource) []types.Resource {
 // when this method is called, openAPIEnvoy map is updated.
 // Old labels refers to the previously assigned labels
 // New labels refers to the the updated labels
-func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
-
+func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) bool {
+	revisionStatus := false
 	// TODO: (VirajSalaka) check possible optimizations, Since the number of labels are low by design it should not be an issue
 	for _, newLabel := range newLabels {
 		listeners, clusters, routes, endpoints, apis := GenerateEnvoyResoucesForLabel(newLabel)
 		UpdateEnforcerApis(newLabel, apis, "")
-		UpdateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
+		success := UpdateXdsCacheWithLock(newLabel, endpoints, clusters, routes, listeners)
 		logger.LoggerXds.Debugf("Xds Cache is updated for the newly added label : %v", newLabel)
+		if success {
+			// if even one label was updated with latest revision, we take the revision as deployed.
+			// (other labels also will get updated successfully)
+			revisionStatus = success
+			continue
+		}
 	}
 	for _, oldLabel := range oldLabels {
 		if !arrayContains(newLabels, oldLabel) {
@@ -632,10 +651,11 @@ func updateXdsCacheOnAPIAdd(oldLabels []string, newLabels []string) {
 			logger.LoggerXds.Debugf("Xds Cache is updated for the already existing label : %v", oldLabel)
 		}
 	}
-
+	return revisionStatus
 }
 
 // GenerateEnvoyResoucesForLabel generates envoy resources for a given label
+// This method will list out all APIs mapped to the label. and generate envoy resources for all of these APIs.
 func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Resource, []types.Resource,
 	[]types.Resource, []types.Resource) {
 	var clusterArray []*clusterv3.Cluster
@@ -701,7 +721,7 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 }
 
 //use UpdateXdsCacheWithLock to avoid race conditions
-func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) {
+func updateXdsCache(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource, listeners []types.Resource) bool {
 	version := rand.Intn(maxRandomInt)
 	// TODO: (VirajSalaka) kept same version for all the resources as we are using simple cache implementation.
 	// Will be updated once decide to move to incremental XDS
@@ -709,9 +729,11 @@ func updateXdsCache(label string, endpoints []types.Resource, clusters []types.R
 	snap.Consistent()
 	err := cache.SetSnapshot(label, snap)
 	if err != nil {
-		logger.LoggerXds.Error(err)
+		logger.LoggerXds.Errorf("Error while updating the snapshot : %v", err.Error())
+		return false
 	}
-	logger.LoggerXds.Infof("New Router cache update for the label: " + label + " version: " + fmt.Sprint(version))
+	logger.LoggerXds.Infof("New Router cache updated for the label: " + label + " version: " + fmt.Sprint(version))
+	return true
 }
 
 // UpdateEnforcerConfig Sets new update to the enforcer's configuration
@@ -866,10 +888,10 @@ func UpdateEnforcerApplicationKeyMappings(applicationKeyMappings *subscription.A
 
 // UpdateXdsCacheWithLock uses mutex and lock to avoid different go routines updating XDS at the same time
 func UpdateXdsCacheWithLock(label string, endpoints []types.Resource, clusters []types.Resource, routes []types.Resource,
-	listeners []types.Resource) {
+	listeners []types.Resource) bool {
 	mutexForXdsUpdate.Lock()
 	defer mutexForXdsUpdate.Unlock()
-	updateXdsCache(label, endpoints, clusters, routes, listeners)
+	return updateXdsCache(label, endpoints, clusters, routes, listeners)
 }
 
 // ListApis returns a list of objects that holds info about each API

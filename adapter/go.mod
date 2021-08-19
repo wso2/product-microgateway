@@ -3,6 +3,7 @@ module github.com/wso2/product-microgateway/adapter
 go 1.15
 
 require (
+	github.com/Azure/azure-service-bus-go v0.10.14
 	github.com/cncf/udpa/go v0.0.0-20201211205326-cc1b757b3edd // indirect
 	github.com/envoyproxy/go-control-plane v0.9.8
 	github.com/envoyproxy/protoc-gen-validate v0.4.1 // indirect
@@ -21,7 +22,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/lestrrat-go/jwx v1.1.3
-	github.com/mitchellh/mapstructure v1.3.2
+	github.com/mitchellh/mapstructure v1.3.3
 	github.com/pelletier/go-toml v1.8.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/streadway/amqp v1.0.0

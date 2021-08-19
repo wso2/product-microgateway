@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,12 +21,34 @@ import (
 	"encoding/json"
 	"errors"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/uuid"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+)
+
+// hostNameValidator regex is for validate the host name of the URL
+// Hostname can have letters, numbers , dots and hypens.But Hostname should not start in a hyphen or a dot.
+// ie : http://www.google.com/get  <-- Hostname of the URL is www.google.com
+// ie : https://dev.choreo.lk:8899/api/v1  <-- Hostname is dev.choreo.lk
+// Above hostNameValidator regex can identify correct hostname from a URL.
+// There are 3 character classes defined for check characters of each position.
+// First character class for check initial part of the string (^[a-zA-Z0-9]) -
+//			--> hostname should start in a letter or a number
+// Second class for check middle section of the string ([a-zA-Z0-9-.]*)
+//			--> mid of the hostname can contains letters,numbers,hyphens and dots
+// Third class for check trailing characters ([0-9a-zA-Z]$)
+//			--> hostname should ends with a letter or a number.can`t have any other character
+// Wrong URLs as per above regex
+// http://#de.abc.com:80/api, http://&de.abc.com:80/api, http://!de.abc.com:80/api, tcp://http::8900, http://::80
+// Correct URLs
+// https://www.google.com, http://dev.choreo.lk:8899/api/v1, http://127.0.0.1:8080
+
+const (
+	hostNameValidator = "^[a-zA-Z0-9][a-zA-Z0-9-.]*[0-9a-zA-Z]$"
 )
 
 // SetInfoOpenAPI populates the MgwSwagger object with the properties within the openAPI v3 definition.
@@ -58,8 +80,8 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 			if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 				continue
 			}
-			endpoint := getHostandBasepathandPort(serverEntry.URL)
-			if endpoint != nil {
+			endpoint, err := getHostandBasepathandPort(serverEntry.URL)
+			if err == nil {
 				swagger.productionUrls = append(swagger.productionUrls, *endpoint)
 				swagger.xWso2Basepath = endpoint.Basepath
 			} else {
@@ -91,6 +113,7 @@ func setPathInfoOpenAPI(path string, methods []Operation, pathItem *openapi3.Pat
 
 func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 	var resources []Resource
+
 	// Check the disable security vendor ext at API level.
 	// If it's present, then the same value should be added to the
 	// resource level if vendor ext is not present at each resource level.
@@ -115,12 +138,13 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 					if len(serverEntry.URL) == 0 || strings.HasPrefix(serverEntry.URL, "/") {
 						continue
 					}
-					endpoint := getHostandBasepathandPort(serverEntry.URL)
-					if endpoint != nil {
+					endpoint, err := getHostandBasepathandPort(serverEntry.URL)
+					if err == nil {
 						resource.productionUrls = append(resource.productionUrls, *endpoint)
 					} else {
 						return nil, errors.New("error encountered when parsing the endpoint")
 					}
+
 				}
 			}
 			resources = append(resources, resource)
@@ -151,20 +175,27 @@ func getOperationLevelDetails(operation *openapi3.Operation, method string) Oper
 // or server property.
 //
 // if no scheme is mentioned before the hostname, urlType would be assigned as http
-func getHostandBasepathandPort(rawURL string) *Endpoint {
+func getHostandBasepathandPort(rawURL string) (*Endpoint, error) {
 	var (
 		basepath string
 		host     string
 		port     uint32
 		urlType  string
 	)
+
 	if !strings.Contains(rawURL, "://") {
 		rawURL = "http://" + rawURL
 	}
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		logger.LoggerOasparser.Error("Malformed endpoint detected: ", err)
-		return nil
+		logger.LoggerOasparser.Errorf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err)
+		return nil, err
+	}
+
+	// Hostname validation
+	if err == nil && !regexp.MustCompile(hostNameValidator).MatchString(parsedURL.Hostname()) {
+		logger.LoggerOasparser.Error("Malformed endpoint detected (Invalid host name) : ", rawURL)
+		return nil, errors.New("malformed endpoint detected (Invalid host name) : " + rawURL)
 	}
 
 	host = parsedURL.Hostname()
@@ -188,7 +219,7 @@ func getHostandBasepathandPort(rawURL string) *Endpoint {
 		urlType = "https"
 	}
 
-	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}
+	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}, nil
 }
 
 // isServerURLIsAvailable checks the availability od server url in openApi3
@@ -260,7 +291,7 @@ func GetXWso2Label(vendorExtensions openapi3.ExtensionProps) []string {
 	return []string{"default"}
 }
 
-func getHostandBasepathandPortWebSocket(rawURL string) Endpoint {
+func getHostandBasepathandPortWebSocket(rawURL string) (*Endpoint, error) {
 	var (
 		basepath string
 		host     string
@@ -272,7 +303,8 @@ func getHostandBasepathandPortWebSocket(rawURL string) Endpoint {
 	}
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		logger.LoggerOasparser.Fatal(err)
+		logger.LoggerOasparser.Errorf("Failed to parse the malformed endpoint %v. Error message: %v", rawURL, err)
+		return nil, err
 	}
 
 	host = parsedURL.Hostname()
@@ -298,5 +330,5 @@ func getHostandBasepathandPortWebSocket(rawURL string) Endpoint {
 	if strings.HasPrefix(rawURL, "wss://") {
 		urlType = "wss"
 	}
-	return Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}
+	return &Endpoint{Host: host, Basepath: basepath, Port: port, URLType: urlType}, nil
 }

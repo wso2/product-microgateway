@@ -121,6 +121,8 @@ type enforcer struct {
 	Cache        cache
 	Throttling   throttlingConfig
 	JwtIssuer    jwtIssuer
+	Management   management
+	RestServer   restServer
 }
 
 type server struct {
@@ -382,6 +384,7 @@ type controlPlane struct {
 	RetryInterval           time.Duration           `toml:"retryInterval"`
 	SkipSSLVerification     bool                    `toml:"skipSSLVerification"`
 	JmsConnectionParameters jmsConnectionParameters `toml:"jmsConnectionParameters"`
+	ASBConnectionParameters asbConnectionParameters `toml:"asbConnectionParameters"`
 }
 
 type globalAdapter struct {
@@ -394,6 +397,21 @@ type globalAdapter struct {
 
 type jmsConnectionParameters struct {
 	EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
+}
+
+type asbConnectionParameters struct {
+	EventListeningEndpoint string `toml:"eventListeningEndpoint"`
+}
+
+// Configuration for Enforcer admin rest api
+type restServer struct {
+	Enable bool
+}
+
+// Enforcer admin credentials
+type management struct {
+	Username string
+	Password string
 }
 
 // APIContent contains everything necessary to create an API
@@ -413,6 +431,7 @@ type APIContent struct {
 	EndpointSecurity   EndpointSecurity
 	AuthHeader         string
 	OrganizationID     string
+	RevisionID         int
 }
 
 // APIJsonData contains everything necessary to extract api.json/api.yaml file
@@ -421,6 +440,7 @@ type APIJsonData struct {
 		APIName                    string   `json:"name,omitempty"`
 		APIContext                 string   `json:"context,omitempty"`
 		APIVersion                 string   `json:"version,omitempty"`
+		RevisionID                 int      `json:"revisionId,omitempty"`
 		APIType                    string   `json:"type,omitempty"`
 		LifeCycleStatus            string   `json:"lifeCycleStatus,omitempty"`
 		EndpointImplementationType string   `json:"endpointImplementationType,omitempty"`

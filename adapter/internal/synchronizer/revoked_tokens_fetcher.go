@@ -23,7 +23,6 @@
 package synchronizer
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -35,10 +34,9 @@ import (
 	"github.com/wso2/product-microgateway/adapter/config"
 	km "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/keymgt"
 
-	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
-	"github.com/wso2/product-microgateway/adapter/pkg/auth"
+	pkgAuth "github.com/wso2/product-microgateway/adapter/pkg/auth"
 	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
@@ -60,6 +58,12 @@ func RetrieveTokens(c chan sync.SyncAPIResponse) {
 	// Populate data from the config
 	ehConfigs := conf.ControlPlane
 	ehURL := ehConfigs.ServiceURL
+	ehUname := ehConfigs.Username
+	ehPass := ehConfigs.Password
+	skipSSL := ehConfigs.SkipSSLVerification
+	// credentials for endpoint
+	basicAuth := "Basic " + pkgAuth.GetBasicAuth(ehUname, ehPass)
+
 	// If the eventHub URL is configured with trailing slash
 	if strings.HasSuffix(ehURL, "/") {
 		ehURL += revokeEndpoint
@@ -67,32 +71,6 @@ func RetrieveTokens(c chan sync.SyncAPIResponse) {
 		ehURL += "/" + revokeEndpoint
 	}
 	logger.LoggerSync.Debugf("Fetching revoked tokens from the URL %v: ", ehURL)
-
-	ehUname := ehConfigs.Username
-	ehPass := ehConfigs.Password
-	basicAuth := "Basic " + auth.GetBasicAuth(ehUname, ehPass)
-
-	// Check if TLS is enabled
-	skipSSL := ehConfigs.SkipSSLVerification
-	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
-	tr := &http.Transport{}
-	if !skipSSL {
-		_, _, truststoreLocation := restserver.GetKeyLocations()
-		caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	}
-
-	// Configuring the http client
-	client := &http.Client{
-		Transport: tr,
-	}
-
 	// Create a HTTP request
 	req, err := http.NewRequest("GET", ehURL, nil)
 
@@ -100,7 +78,7 @@ func RetrieveTokens(c chan sync.SyncAPIResponse) {
 	req.Header.Set(sync.Authorization, basicAuth)
 	// Make the request
 	logger.LoggerSync.Debug("Sending the control plane request")
-	resp, err := client.Do(req)
+	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 	// In the event of a connection error, the error would not be nil, then return the error
 	// If the error is not null, proceed
 	if err != nil {
