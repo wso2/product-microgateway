@@ -34,7 +34,7 @@
     <files>
         <file>
             <source>target/adapter-ubuntu</source>
-            <outputDirectory></outputDirectory>
+            <outputDirectory/>
         </file>
         <file>
             <source>../resources/security/mg.key</source>
@@ -50,11 +50,11 @@
         </file>
         <file>
             <source>target/grpc_health_probe-linux-amd64</source>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory/>
         </file>
         <file>
             <source>LICENSE.txt</source>
-            <outputDirectory></outputDirectory>
+            <outputDirectory/>
         </file>
     </files>
 </assembly>

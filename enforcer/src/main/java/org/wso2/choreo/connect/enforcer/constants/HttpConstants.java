@@ -26,4 +26,6 @@ public class HttpConstants {
     public static final String OPTIONS = "OPTIONS";
     public static final String ALLOW_HEADER = "allow";
     public static final String X_REQUEST_ID_HEADER = "x-request-id";
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String BASIC_LOWER = "basic";
 }

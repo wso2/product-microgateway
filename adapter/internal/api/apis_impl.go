@@ -25,6 +25,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -33,6 +34,7 @@ import (
 	apiModel "github.com/wso2/product-microgateway/adapter/internal/api/models"
 	xds "github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/utills"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
@@ -64,6 +66,7 @@ const (
 type ProjectAPI struct {
 	APIJsn                     []byte
 	Deployments                []Deployment
+	RevisionID				   int
 	SwaggerJsn                 []byte // TODO: (SuKSW) change to OpenAPIJsn
 	UpstreamCerts              []byte
 	APIType                    string
@@ -229,15 +232,23 @@ func verifyMandatoryFields(apiJSON config.APIJsonData) error {
 
 // ApplyAPIProjectFromAPIM accepts an apictl project (as a byte array), list of vhosts with respective environments
 // and updates the xds servers based upon the content.
-func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string) error {
+func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string) (deployedRevisionList []*notifier.DeployedAPIRevision, err error) {
 	apiProject, err := extractAPIProject(payload)
 	if err != nil {
-		return err
+		return deployedRevisionList, err
 	}
 	apiInfo, err := parseAPIInfo(apiProject.APIJsn)
 	if err != nil {
-		return err
+		return deployedRevisionList, err
 	}
+
+	// handle panic
+	defer func() {
+		if r := recover(); r != nil {
+			loggers.LoggerAPI.Error("Recovered from panic. ", r)
+			err = fmt.Errorf("%v:%v with UUID \"%v\"", apiInfo.Name, apiInfo.Version, apiInfo.ID)
+		}
+	}()
 
 	if apiProject.OrganizationID == "" {
 		apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
@@ -267,10 +278,13 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 		loggers.LoggerAPI.Debugf("Update all environments (%v) of API %v %v:%v with UUID \"%v\".",
 			allEnvironments, vhost, apiInfo.Name, apiInfo.Version, apiInfo.ID)
 		// first update the API for vhost
-		err := updateAPI(vhost, apiInfo, apiProject, allEnvironments)
+		deployedRevision, err := updateAPI(vhost, apiInfo, apiProject, allEnvironments)
 		if err != nil {
-			return err
+			return deployedRevisionList, fmt.Errorf("%v:%v with UUID \"%v\"", apiInfo.Name, apiInfo.Version, apiInfo.ID)
 		}
+		if deployedRevision != nil {
+            deployedRevisionList = append(deployedRevisionList, deployedRevision)
+        }
 	}
 
 	// undeploy APIs with other vhosts in the same gateway environment
@@ -280,15 +294,15 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 			continue
 		}
 		if err := xds.DeleteAPIsWithUUID(vhost, apiInfo.ID, environments, apiProject.OrganizationID); err != nil {
-			return err
+			return deployedRevisionList, err
 		}
 	}
-	return nil
+	return deployedRevisionList, nil
 }
 
 // ApplyAPIProjectInStandaloneMode is called by the rest implementation to differentiate
 // between create and update using the override param
-func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
+func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) (err error) {
 	apiProject, err := extractAPIProject(payload)
 	apiProject.OrganizationID = config.GetControlPlaneConnectedTenantDomain()
 	if err != nil {
@@ -298,6 +312,15 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 	if err != nil {
 		return err
 	}
+
+	// handle panic
+	defer func() {
+		if r := recover(); r != nil {
+			loggers.LoggerAPI.Error("Recovered from panic. ", r)
+			err = fmt.Errorf("%v:%v with UUID \"%v\"", apiInfo.Name, apiInfo.Version, apiInfo.ID)
+		}
+	}()
+
 	// TODO (renuka) when len of apiProject.deployments is 0, return err "nothing deployed" <- check
 	var overrideValue bool
 	if override == nil {
@@ -331,12 +354,22 @@ func ApplyAPIProjectInStandaloneMode(payload []byte, override *bool) error {
 
 	// TODO: (renuka) optimize to update cache only once when all internal memory maps are updated
 	for vhost, environments := range vhostToEnvsMap {
-		updateAPI(vhost, apiInfo, apiProject, environments)
+		_, err := updateAPI(vhost, apiInfo, apiProject, environments)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) error {
+func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, environments []string) (*notifier.DeployedAPIRevision, error) {
+	// handle panic
+	defer func() {
+		if r := recover(); r != nil {
+			panic(fmt.Sprintf("Error encountered while applying API %v:%v to %v.", apiInfo.Name, apiInfo.Version, vhost))
+		}
+	}()
+
 	if len(environments) == 0 {
 		environments = append(environments, config.DefaultGatewayName)
 	}
@@ -345,6 +378,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	apiContent.VHost = vhost
 	apiContent.Name = apiInfo.Name
 	apiContent.Version = apiInfo.Version
+	apiContent.RevisionID = apiProject.RevisionID
 	apiContent.APIType = apiProject.APIType
 	apiContent.LifeCycleStatus = apiProject.APILifeCycleStatus
 	apiContent.UpstreamCerts = apiProject.UpstreamCerts
@@ -368,16 +402,13 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	} else if apiProject.APIType == mgw.WS {
 		apiContent.APIDefinition = apiProject.APIJsn
 	}
-	err := xds.UpdateAPI(apiContent)
-	if err != nil {
-		return err
-	}
-	return nil
+	return xds.UpdateAPI(apiContent)
 }
 
 func extractAPIInformation(apiProject *ProjectAPI, apiObject config.APIJsonData) {
 	apiProject.APIType = strings.ToUpper(apiObject.Data.APIType)
 	apiProject.APILifeCycleStatus = strings.ToUpper(apiObject.Data.LifeCycleStatus)
+	apiProject.RevisionID = apiObject.Data.RevisionID
 
 	apiProject.AuthHeader = apiObject.Data.AuthorizationHeader
 
