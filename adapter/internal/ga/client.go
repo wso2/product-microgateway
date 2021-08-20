@@ -138,13 +138,15 @@ func watchAPIs() {
 		if err != nil {
 			logger.LoggerGA.Error("Failed to receive the discovery response ", err)
 			errStatus, _ := grpcStatus.FromError(err)
-			// TODO: (VirajSalaka) implement retries.
 			if errStatus.Code() == codes.Unavailable {
-				logger.LoggerGA.Error("Connection unavailable.")
+				logger.LoggerGA.Errorf("Connection unavailable. errorCode: %s errorMessage: %s",
+					errStatus.Code().String(), errStatus.Message())
 				connectionFaultChannel <- true
 				return
 			}
-			nack(err.Error())
+			logger.LoggerGA.Errorf("Error while XDS communication; errorCode: %s errorMessage: %s",
+				errStatus.Code().String(), errStatus.Message())
+			nack(errStatus.Message())
 		} else {
 			lastReceivedResponse = discoveryResponse
 			logger.LoggerGA.Debugf("Discovery response is received : %s", discoveryResponse.VersionInfo)
@@ -171,13 +173,15 @@ func nack(errorMessage string) {
 		return
 	}
 	discoveryRequest := &discovery.DiscoveryRequest{
-		Node:          getAdapterNode(),
-		VersionInfo:   lastAckedResponse.VersionInfo,
-		TypeUrl:       apiTypeURL,
-		ResponseNonce: lastReceivedResponse.Nonce,
+		Node:        getAdapterNode(),
+		VersionInfo: lastAckedResponse.VersionInfo,
+		TypeUrl:     apiTypeURL,
 		ErrorDetail: &status.Status{
 			Message: errorMessage,
 		},
+	}
+	if lastReceivedResponse != nil {
+		discoveryRequest.ResponseNonce = lastReceivedResponse.Nonce
 	}
 	xdsStream.Send(discoveryRequest)
 }
