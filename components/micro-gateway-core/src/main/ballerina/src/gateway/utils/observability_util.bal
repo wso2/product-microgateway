@@ -62,7 +62,13 @@ public function gaugeTagDetails(http:Request request, http:FilterContext context
         return ();
     }
 
-    map<string> gaugeTags = {"Category": category, "Method": request.method, "ServicePath": request.rawPath, "Service": context.getServiceName()};
+    string resourceName = context.getResourceName();
+    string resource_Path = "";
+    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
+        if (httpResourceConfig is http:HttpResourceConfig) {
+            resource_Path = httpResourceConfig.path;
+        }
+    map<string> gaugeTags = {"Category": category, "Method": request.method, "ServicePath": resource_Path, "Service": context.getServiceName()};
     return gaugeTags;
 }
 
@@ -72,7 +78,13 @@ public function gaugeTagDetailsFromContext(http:FilterContext context, string ca
     }
     string requestMethod = runtime:getInvocationContext().attributes[REQUEST_METHOD].toString();
     string requestRawPath = runtime:getInvocationContext().attributes[REQUEST_RAWPATH].toString();
-    map<string> gaugeTags = {"Category": category, "Method": requestMethod, "ServicePath": requestRawPath, "Service": context.getServiceName()};
+    string resourceName = context.getResourceName();
+    string resource_Path = "";
+    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
+        if (httpResourceConfig is http:HttpResourceConfig) {
+            resource_Path = httpResourceConfig.path;
+        }
+    map<string> gaugeTags = {"Category": category, "Method": requestMethod, "ServicePath": resource_Path, "Service": context.getServiceName()};
     return gaugeTags;
 }
 
@@ -82,7 +94,13 @@ public function gaugeTagDetails_authn(http:Request request, string category) ret
     }
 
     string serviceName = runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString();
-    map<string> gaugeTags = {"Category": category, "Method": request.method, "ServicePath": request.rawPath, "Service": serviceName};
+    string resourceName = runtime:getInvocationContext().attributes[http:RESOURCE_NAME].toString();
+    string resource_Path = "";
+    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
+        if (httpResourceConfig is http:HttpResourceConfig) {
+            resource_Path = httpResourceConfig.path;
+        }
+    map<string> gaugeTags = {"Category": category, "Method": request.method, "ServicePath": resource_Path, "Service": serviceName};
     return gaugeTags;
 }
 
@@ -94,7 +112,13 @@ public function gaugeTagDetails_basicAuth(string category) returns map<string> |
     string requestMethod = runtime:getInvocationContext().attributes[REQUEST_METHOD].toString();
     string requestRawPath = runtime:getInvocationContext().attributes[REQUEST_RAWPATH].toString();
     string serviceName = runtime:getInvocationContext().attributes[http:SERVICE_NAME].toString();
-    map<string> gaugeTags = {"Category": category, "Method": requestMethod, "ServicePath": requestRawPath, "Service": serviceName};
+    string resourceName = runtime:getInvocationContext().attributes[http:RESOURCE_NAME].toString();
+    string resource_Path = "";
+    http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[resourceName];
+        if (httpResourceConfig is http:HttpResourceConfig) {
+            resource_Path = httpResourceConfig.path;
+        }
+    map<string> gaugeTags = {"Category": category, "Method": requestMethod, "ServicePath": resource_Path, "Service": serviceName};
     return gaugeTags;
 }
 
