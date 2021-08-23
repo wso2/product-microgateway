@@ -375,6 +375,8 @@ enable = true
   # TODO: (dnwick) remove this config once a common connection parameter is introduced
   [controlPlane.asbConnectionParameters]
     eventListeningEndpoint = "$env{ASB_CONNECTION_STRING}"
+    reconnectInterval = 5000
+    reconnectRetryCount = 60
 
 # Analytics configurations for Choreo Connect
 [analytics]

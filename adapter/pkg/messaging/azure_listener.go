@@ -19,126 +19,49 @@
 package messaging
 
 import (
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
-	servicebus "github.com/Azure/azure-service-bus-go"
 	"context"
 	"strings"
-	"github.com/google/uuid"
+	"time"
+	servicebus "github.com/Azure/azure-service-bus-go"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
+func startBrokerConsumer(subscriptionMetaData Subscription, reconnectInterval time.Duration) {
+	var topicName = subscriptionMetaData.topicName
+	var subscriptionName = subscriptionMetaData.subscriptionName
 
-func startBrokerConsumer(topicName string, ns *servicebus.Namespace,
-	availableTopicList []*servicebus.TopicEntity, componentName string, opts ...servicebus.SubscriptionManagementOption) {
-
-	var topicExistForFurtherProcess bool
-	var subscriptionCreatedForFurtherProcess bool
+	dataChannel := make(chan []byte)
+	if strings.EqualFold(topicName, notification) {
+		dataChannel = AzureNotificationChannel
+	} else if strings.EqualFold(topicName, tokenRevocation) {
+		dataChannel = AzureRevokedTokenChannel
+	}
 	parentContext := context.Background()
-	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting broker consumer for topic name : " +
-		topicName)
 
-	uniqueID := uuid.New()
-	//In Azure service bus subscription names can contain letters, numbers, periods (.), hyphens (-), and
-	// underscores (_), up to 50 characters. Subscription names are also case-insensitive.
-	var subscriptionName = componentName + "_" + uniqueID.String() + "_sub"
-
-	// TODO: (dnwick) Handle retry logic in error situations
-
-	if !isTopicExist(topicName, availableTopicList) {
-		//create the topic
-		topicManager := ns.NewTopicManager()
-		ctx, cancel := context.WithCancel(parentContext)
-		defer cancel()
-
-		_, err := topicManager.Put(ctx, topicName)
+	for {
+		//topic subscription client creation
+		topicSubscriptionClient, err := subscriptionMetaData.subscriptionManager.Topic.NewSubscription(subscriptionName)
 		if err != nil {
-			logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to create " +
-				"topic " + topicName + " from azure service bus :%v", err)
-		} else {
-			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Topic " + topicName + "created")
-			topicExistForFurtherProcess = true
+			logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to create "+
+				"topic subscription client for %s from azure service bus for topic name %s:%v.",
+				subscriptionName, topicName, err)
 		}
-	} else {
-		topicExistForFurtherProcess = true
-	}
-
-	if topicExistForFurtherProcess {
-		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Topic " + topicName + " exist. Can proceed")
-		subManager, err := ns.NewSubscriptionManager(topicName)
-
+		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to receive messages for " +
+			"subscriptionName  " + subscriptionName + " from azure service bus for topic name " + topicName)
+		func() {
+			ctx, cancel := context.WithCancel(parentContext)
+			defer cancel()
+			err = topicSubscriptionClient.Receive(ctx, servicebus.HandlerFunc(func(ctx context.Context,
+				message *servicebus.Message) error {
+				dataChannel <- message.Data
+				return message.Complete(ctx)
+			}))
+		}()
 		if err != nil {
-			logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying get subscription" +
-				" manager from azure service bus for topic name " + topicName + ":%v", err)
-		}
-
-		//We are creating a unique subscription for each adapter starts. Unused subscriptions will be deleted after
-		// idle for three days
-		ctx, cancel := context.WithCancel(parentContext)
-		defer cancel()
-		_, err = subManager.Put(ctx, subscriptionName, opts...)
-
-		if err != nil {
-			logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to create " +
-				"subscription " + subscriptionName + " from azure service bus for topic name " +
-				topicName + ":%v", err)
-		} else {
-			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Subscription " +
-				subscriptionName + " created")
-			subscriptionCreatedForFurtherProcess = true
-		}
-
-		if subscriptionCreatedForFurtherProcess {
-			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] subscription " + subscriptionName +
-				" exist. Can proceed")
-			//topic subscription client creation
-			topicSubscriptionClient, err := subManager.Topic.NewSubscription(subscriptionName)
-
-			if err != nil {
-				logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to create " +
-					"topic subscription client for  " + subscriptionName + " from azure service bus for topic name " +
-						topicName + ":%v", err)
-			} else {
-				dataChannel := make(chan []byte)
-				if strings.EqualFold(topicName, notification) {
-					dataChannel = AzureNotificationChannel
-				} else if strings.EqualFold(topicName, tokenRevocation) {
-					dataChannel = AzureRevokedTokenChannel
-				}
-
-				logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to receive messages for " +
-					"subscriptionName  " + subscriptionName + " from azure service bus for topic name " + topicName)
-
-				ctx, cancel := context.WithCancel(parentContext)
-				defer cancel()
-				err = topicSubscriptionClient.Receive(ctx, servicebus.HandlerFunc(func(ctx context.Context,
-					message *servicebus.Message) error {
-					dataChannel <- message.Data
-					return message.Complete(ctx)
-				}))
-			}
+			logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while receiving "+
+				"events from subscription %s from azure service bus for topic name %s:%v. "+
+				"Hence retrying in %s", subscriptionName, topicName, err, reconnectInterval)
+			time.Sleep(reconnectInterval)
 		}
 	}
 }
-
-func isTopicExist(topicName string, availableTopicList []*servicebus.TopicEntity) bool {
-	for _, topic := range availableTopicList {
-		if strings.EqualFold(topic.Name, topicName) {
-			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Topic " + topicName + " Exist ")
-			return true
-		}
-	}
-	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Topic " + topicName + " does not Exist ")
-	return false
-}
-
-func isSubscriptionExist(subscriptionName string, subscriptionList []*servicebus.SubscriptionEntity) bool {
-	for _, subscription := range subscriptionList {
-		if strings.EqualFold(subscription.Name, subscriptionName) {
-			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] subscription " + subscriptionName + " Exist ")
-			return true
-		}
-	}
-	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] subscription " + subscriptionName +
-		" does not Exist ")
-	return false
-}
-
