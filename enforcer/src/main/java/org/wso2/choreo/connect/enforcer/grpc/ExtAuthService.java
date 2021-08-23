@@ -38,6 +38,7 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
 import org.wso2.choreo.connect.enforcer.tracing.AzuremonitorTraceExporter;
+import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 
@@ -57,10 +58,10 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             String traceId = request.getAttributes().getRequest().getHttp()
                     .getHeadersOrDefault(HttpConstants.X_REQUEST_ID_HEADER,
                             request.getAttributes().getRequest().getHttp().getId());
-            extAuthServiceSpan = AzuremonitorTraceExporter.startSpan("extAuthServiceSpan", null, tracer);
-            AzuremonitorTraceExporter.setTag(extAuthServiceSpan, "traceId", traceId);
+            extAuthServiceSpan = AzuremonitorTraceExporter.startSpan(TracingConstants.EXT_AUTH_SERVICE, null, tracer);
+            AzuremonitorTraceExporter.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);
             ThreadContext.put(APIConstants.LOG_TRACE_ID, traceId);
-            ResponseObject responseObject = requestHandler.process(request);
+            ResponseObject responseObject = requestHandler.process(request, extAuthServiceSpan);
             CheckResponse response = buildResponse(request, responseObject);
             responseObserver.onNext(response);
             // When you are done, you must call onCompleted.

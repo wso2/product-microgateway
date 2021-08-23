@@ -22,6 +22,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
+import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketFrameContext;
 
 import java.nio.charset.StandardCharsets;
@@ -62,6 +63,8 @@ public class RequestContext {
 
     // Request Timestamp is required for analytics
     private long requestTimeStamp;
+
+    private Map<String, TracingSpan> parentSpanStore = new HashMap<>();
 
     public Map<String, String> getMetadataMap() {
         return metadataMap;
@@ -329,5 +332,13 @@ public class RequestContext {
 
     public WebSocketFrameContext getWebSocketFrameContext() {
         return webSocketFrameContext;
+    }
+
+    public TracingSpan getParentSpan(String spanName) {
+        return parentSpanStore.get(spanName);
+    }
+
+    public void setParentSpan(String spanName, TracingSpan parentSpan) {
+        parentSpanStore.put(spanName, parentSpan);
     }
 }

@@ -26,6 +26,7 @@ import org.wso2.choreo.connect.enforcer.api.WebSocketAPI;
 import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
+import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.websocket.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketFrameContext;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleResponse;
@@ -37,7 +38,7 @@ import java.util.Map;
 /**
  * WebSocketHandler handles requests coming through websocket frame service.
  */
-public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, WebSocketThrottleResponse> {
+public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, WebSocketThrottleResponse, TracingSpan> {
     private static final Logger logger = LogManager.getLogger(WebSocketHandler.class);
 
     /**
@@ -46,7 +47,7 @@ public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, W
      * @return WebSocketResponseObject - Response sent via WebSocketFrameService
      */
     @Override
-    public WebSocketThrottleResponse process(WebSocketFrameRequest webSocketFrameRequest) {
+    public WebSocketThrottleResponse process(WebSocketFrameRequest webSocketFrameRequest, TracingSpan span) {
         WebSocketAPI matchedAPI = APIFactory.getInstance().getMatchedAPI(webSocketFrameRequest);
         if (matchedAPI == null) {
             WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
