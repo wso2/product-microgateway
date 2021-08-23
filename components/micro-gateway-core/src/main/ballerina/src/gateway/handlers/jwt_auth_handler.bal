@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/jwt;
 import ballerina/runtime;
 
 # Representation of the jwt self validating handler
@@ -65,8 +66,18 @@ public type JWTAuthHandler object {
                 string credential = headerValue.substring(6, headerValue.length()).trim();
                 string[] splitContent = split(credential, "\\.");
                 if (splitContent.length() == 3) {
-                    printDebug(KEY_AUTHN_FILTER, "Request will authenticated via jwt handler");
-                    return true;
+                    string jwtToken = req.getHeader(authHeader).substring(6, headerValue.length()).trim();
+                    string issuer = self.jwtAuthProvider.jwtValidatorConfig?.issuer ?: DEFAULT_JWT_ISSUER;
+                    (jwt:JwtPayload|error) decodedJwt = getDecodedJWTPayload(jwtToken, issuer);
+                    if (decodedJwt is jwt:JwtPayload) {
+                        string? issuerClaim = decodedJwt["iss"];
+                        if (issuer == issuerClaim) {
+                            printDebug(KEY_AUTHN_FILTER, "Request will authenticated via jwt handler");
+                            return true;
+                        } else {
+                            printDebug(KEY_AUTHN_FILTER, "Failed to authenticate with issuer: " + issuer);
+                        }
+                    }
                 }
             }
         }
