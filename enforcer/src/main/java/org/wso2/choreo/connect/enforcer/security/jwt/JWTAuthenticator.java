@@ -26,6 +26,7 @@ import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -52,6 +53,9 @@ import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTConstants;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
+import org.wso2.choreo.connect.enforcer.tracing.AzuremonitorTraceExporter;
+import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
+import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.text.ParseException;
@@ -86,6 +90,8 @@ public class JWTAuthenticator implements Authenticator {
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
+        TracingSpan decodeTokenHeaderSpan = null;
+        TracingSpan jwtValidationInfoSpan = null;
         String jwtToken = retrieveAuthHeaderValue(requestContext);
         if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
@@ -102,13 +108,18 @@ public class JWTAuthenticator implements Authenticator {
         context = context + "/" + version;
         ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
         SignedJWTInfo signedJWTInfo;
+        TracingTracer tracer =  AzuremonitorTraceExporter.getGlobalTracer();
         try {
+            decodeTokenHeaderSpan = AzuremonitorTraceExporter.startSpan("decodeTokenHeaderSpan", null, tracer);
+
             signedJWTInfo = getSignedJwt(jwtToken);
         } catch (ParseException | IllegalArgumentException e) {
             log.error("Failed to decode the token header", e);
             throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                     "Not a JWT token. Failed to decode the token header", e);
+        } finally {
+            AzuremonitorTraceExporter.finishSpan(decodeTokenHeaderSpan);
         }
         JWTClaimsSet claims = signedJWTInfo.getJwtClaimsSet();
         String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
@@ -127,6 +138,7 @@ public class JWTAuthenticator implements Authenticator {
 
         }
 
+        jwtValidationInfoSpan = AzuremonitorTraceExporter.startSpan("jwtTokenValidationInfoSpan", null, tracer);
         JWTValidationInfo validationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
         if (validationInfo != null) {
             if (validationInfo.isValid()) {
@@ -139,7 +151,7 @@ public class JWTAuthenticator implements Authenticator {
                     // if the token is self contained, validation subscription from `subscribedApis` claim
                     JSONObject api = validateSubscriptionFromClaim(name, version, claims, splitToken,
                             apiKeyValidationInfoDTO, true);
-
+                    TracingSpan validateSubscriptionSpan = AzuremonitorTraceExporter.startSpan("validateSubscriptionUsingKeyManagerSpan", jwtValidationInfoSpan, tracer);
                     if (api == null) {
                         if (log.isDebugEnabled()) {
                             log.debug("Begin subscription validation via Key Manager: "
@@ -168,6 +180,7 @@ public class JWTAuthenticator implements Authenticator {
                                             + "API Subscription validation failed.");
                         }
                     }
+                    AzuremonitorTraceExporter.finishSpan(validateSubscriptionSpan);
                 }
 
                 // set endpoint security
@@ -192,10 +205,10 @@ public class JWTAuthenticator implements Authenticator {
                                                 ':' + securityInfo.getPassword()).getBytes()));
                     }
                 }
-
+                TracingSpan validateScopesSpan = AzuremonitorTraceExporter.startSpan("validateScopesSpan", jwtValidationInfoSpan, tracer);
                 // Validate scopes
                 validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
-
+                AzuremonitorTraceExporter.finishSpan(validateScopesSpan);
                 log.debug("JWT authentication successful.");
                 String endUserToken = null;
 
@@ -220,6 +233,7 @@ public class JWTAuthenticator implements Authenticator {
                 if (claims.getClaim("keytype") != null) {
                     authenticationContext.setKeyType(claims.getClaim("keytype").toString());
                 }
+                AzuremonitorTraceExporter.finishSpan(jwtValidationInfoSpan);
                 return authenticationContext;
             } else {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
