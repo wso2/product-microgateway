@@ -19,32 +19,34 @@
 package messaging
 
 import (
+	"time"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
-	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
-	servicebus "github.com/Azure/azure-service-bus-go"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
-	"time"
+	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
 )
 
 const (
-	componentName string = "adapter"
-	subscriptionIdleTimeDuration = time.Duration(72 * time.Hour)
+	componentName                              = "adapter"
+	subscriptionIdleTimeDuration               = time.Duration(72 * time.Hour)
 )
 
 // InitiateAndProcessEvents to pass event consumption
 func InitiateAndProcessEvents(config *config.Config) {
 	var err error
-	var namespace *servicebus.Namespace
+	var reconnectRetryCount = config.ControlPlane.ASBConnectionParameters.ReconnectRetryCount
+	var reconnectInterval = config.ControlPlane.ASBConnectionParameters.ReconnectInterval
 	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting InitiateAndProcessEvents method")
 	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] EventListeningEndpoint is ",
 		config.ControlPlane.ASBConnectionParameters.EventListeningEndpoint)
-	namespace, availableTopicList, err := msg.InitiateBrokerConnectionAndGetAvailableTopics(
-		config.ControlPlane.ASBConnectionParameters.EventListeningEndpoint)
+	subscriptionMetaDataList, err := msg.InitiateBrokerConnectionAndValidate(
+		config.ControlPlane.ASBConnectionParameters.EventListeningEndpoint, componentName, reconnectRetryCount,
+		reconnectInterval * time.Millisecond, subscriptionIdleTimeDuration)
 	health.SetControlPlaneBrokerStatus(err == nil)
 	if err == nil {
-		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Initiated broker connection successfully ")
-		msg.InitiateConsumers(namespace, availableTopicList, componentName, subscriptionIdleTimeDuration)
+		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Initiated broker connection and meta " +
+			"data creation successfully ")
+		msg.InitiateConsumers(subscriptionMetaDataList, reconnectInterval*time.Millisecond)
 		go handleAzureNotification()
 		go handleAzureTokenRevocation()
 	}
