@@ -27,6 +27,6 @@ public class TracingConstants {
     public static final String JWT_VALIDATION = "JWTAuthenticator:authenticate():JWT validation";
     public static final String SUBSCRIPTION_VALIDATION = "JWTAuthenticator:authenticate():Validate subscription using key manager";
     public static final String SCOPES_VALIDATION = "JWTAuthenticator:authenticate():Validate scopes";
-    public static final String DO_THROTTLE = "ThrottleFilter:doThrottle():Throttling implementation";
+    public static final String DO_THROTTLE = "ThrottleFilter:doThrottle():Throttling function";
 
 }
