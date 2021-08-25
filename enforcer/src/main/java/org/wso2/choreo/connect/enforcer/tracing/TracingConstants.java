@@ -22,6 +22,8 @@ package org.wso2.choreo.connect.enforcer.tracing;
 public class TracingConstants {
 
     public static final String DO_THROTTLE_SPAN = "ThrottleFilter:doThrottle():Throttling function";
+    public static final String ANALYTICS_SPAN = "AnalyticsFilter:handleSuccessRequest():Analytics Success Flow";
+    public static final String ANALYTICS_FAILURE_SPAN = "AnalyticsFilter:handleSuccessRequest():Analytics Success Flow";
     public static final String EXT_AUTH_SERVICE_SPAN = "ExtAuthService:check()";
     public static final String DECODE_TOKEN_HEADER_SPAN = "JWTAuthenticator:authenticate():Decode token header";
     public static final String JWT_AUTHENTICATOR_SPAN = "JWTAuthenticator:authenticate():Authenticate request using JWT Authenticator";
