@@ -21,27 +21,22 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
-	"regexp"
 	"strings"
 	"sync"
 
 	toml "github.com/pelletier/go-toml"
 	logger "github.com/sirupsen/logrus"
+	pkgconf "github.com/wso2/product-microgateway/adapter/pkg/config"
 )
 
 var (
 	onceConfigRead      sync.Once
 	onceGetDefaultVhost sync.Once
-	onceLogConfigRead   sync.Once
-	onceGetMgwHome      sync.Once
 	adapterConfig       *Config
 	defaultVhost        map[string]string
-	adapterLogConfig    *LogConfig
-	mgwHome             string
 	e                   error
 )
 
@@ -57,10 +52,6 @@ const (
 	mgwHomeEnvVariable = "MGW_HOME"
 	// RelativeConfigPath is the relative file path where the configuration file is.
 	relativeConfigPath = "/conf/config.toml"
-	// RelativeLogConfigPath is the relative file path where the log configuration file is.
-	relativeLogConfigPath = "/conf/log_config.toml"
-	// The prefix used when configs should be read from environment variables.
-	envConfigPrefix = "$env"
 )
 
 // Constants related to utility functions
@@ -77,15 +68,15 @@ const (
 // from where the executable is called from.
 //
 // Returns the configuration object that is initialized with default values. Changes to the default
-// configuration object is achieved through the configuration file. 
+// configuration object is achieved through the configuration file.
 func ReadConfigs() (*Config, error) {
 	onceConfigRead.Do(func() {
 		adapterConfig = defaultConfig
-		_, err := os.Stat(GetMgwHome() + relativeConfigPath)
+		_, err := os.Stat(pkgconf.GetMgwHome() + relativeConfigPath)
 		if err != nil {
 			logger.Fatal("Configuration file not found.", err)
 		}
-		content, readErr := ioutil.ReadFile(mgwHome + relativeConfigPath)
+		content, readErr := ioutil.ReadFile(pkgconf.GetMgwHome() + relativeConfigPath)
 		if readErr != nil {
 			logger.Fatal("Error reading configurations. ", readErr)
 			return
@@ -95,9 +86,10 @@ func ReadConfigs() (*Config, error) {
 			logger.Fatal("Error parsing the configuration ", parseErr)
 			return
 		}
-		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem())
-		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem())
-		resolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem())
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Adapter)).Elem())
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.ControlPlane)).Elem())
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.Envoy)).Elem())
+		pkgconf.ResolveConfigEnvValues(reflect.ValueOf(&(adapterConfig.GlobalAdapter)).Elem())
 	})
 	return adapterConfig, e
 }
@@ -125,42 +117,6 @@ func GetDefaultVhost(environment string) (string, bool, error) {
 	return vhost, ok, err
 }
 
-// resolveConfigEnvValues looks for the string type config values which should be read from environment variables
-// and replace the respective config values from environment variable.
-func resolveConfigEnvValues(v reflect.Value) {
-	s := v
-	for fieldNum := 0; fieldNum < s.NumField(); fieldNum++ {
-		field := s.Field(fieldNum)
-		if field.Kind() == reflect.String && strings.Contains(fmt.Sprint(field.Interface()), envConfigPrefix) {
-			field.SetString(resolveEnvValue(fmt.Sprint(field.Interface())))
-		}
-		if reflect.TypeOf(field.Interface()).Kind() == reflect.Slice {
-			for index := 0; index < field.Len(); index++ {
-				if field.Index(index).Kind() == reflect.Struct {
-					resolveConfigEnvValues(field.Index(index).Addr().Elem())
-				} else if field.Index(index).Kind() == reflect.String && strings.Contains(field.Index(index).String(), envConfigPrefix) {
-					field.Index(index).SetString(resolveEnvValue(field.Index(index).String()))
-				}
-			}
-		}
-		if field.Kind() == reflect.Struct {
-			resolveConfigEnvValues(field.Addr().Elem())
-		}
-	}
-}
-
-func resolveEnvValue(value string) string {
-	re := regexp.MustCompile(`(?s)\{(.*)}`) // regex to get everything in between curly brackets
-	m := re.FindStringSubmatch(value)
-	if len(m) > 1 {
-		envValue, exists := os.LookupEnv(m[1])
-		if exists {
-			return strings.ReplaceAll(re.ReplaceAllString(value, envValue), envConfigPrefix, "")
-		}
-	}
-	return value
-}
-
 // ReadLogConfigs implements adapter/proxy log-configuration read operation.The read operation will happen only once, hence
 // the consistancy is ensured.
 //
@@ -169,46 +125,26 @@ func resolveEnvValue(value string) string {
 // from where the executable is called from.
 //
 // Returns the log configuration object mapped from the configuration file during the startup.
-func ReadLogConfigs() (*LogConfig, error) {
-	onceLogConfigRead.Do(func() {
-		adapterLogConfig = new(LogConfig)
-		_, err := os.Stat(GetMgwHome() + relativeLogConfigPath)
-		if err != nil {
-			logger.Fatal("Log configuration file not found.", err)
-			panic(err)
-		}
-		content, readErr := ioutil.ReadFile(mgwHome + relativeLogConfigPath)
-		if readErr != nil {
-			logger.Fatal("Error reading log configurations. ", readErr)
-			panic(err)
-		}
-		parseErr := toml.Unmarshal(content, adapterLogConfig)
-		if parseErr != nil {
-			logger.Fatal("Error parsing the log configuration ", parseErr)
-			panic(parseErr)
-		}
-
-	})
-	return adapterLogConfig, e
+func ReadLogConfigs() *pkgconf.LogConfig {
+	return pkgconf.ReadLogConfigs()
 }
 
 // ClearLogConfigInstance removes the existing configuration.
 // Then the log configuration can be re-initialized.
 func ClearLogConfigInstance() {
-	onceLogConfigRead = sync.Once{}
+	pkgconf.ClearLogConfigInstance()
+}
+
+// GetLogConfigPath returns the file location of the log-config path
+func GetLogConfigPath() (string, error) {
+	return pkgconf.GetLogConfigPath()
 }
 
 // GetMgwHome reads the MGW_HOME environmental variable and returns the value.
 // This represent the directory where the distribution is located.
 // If the env variable is not present, the directory from which the executable is triggered will be assigned.
 func GetMgwHome() string {
-	onceGetMgwHome.Do(func() {
-		mgwHome = os.Getenv(mgwHomeEnvVariable)
-		if len(strings.TrimSpace(mgwHome)) == 0 {
-			mgwHome, _ = os.Getwd()
-		}
-	})
-	return mgwHome
+	return pkgconf.GetMgwHome()
 }
 
 // GetControlPlaneConnectedTenantDomain returns the tenant domain of the user used to authenticate with event hub.

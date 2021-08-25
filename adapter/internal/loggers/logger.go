@@ -43,6 +43,7 @@ const (
 	pkgSubscription         = "github.com/wso2/product-microgateway/adapter/internal/subscription"
 	pkgRouterXdsCallbacks   = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
 	pkgEnforcerXdsCallbacks = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/enforcercallbacks"
+	pkgGA                   = "github.com/wso2/product-microgateway/adapter/internal/ga"
 	pkgNotifier             = "github.com/wso2/product-microgateway/adapter/internal/notifier"
 )
 
@@ -59,6 +60,7 @@ var (
 	LoggerSubscription         *logrus.Logger
 	LoggerRouterXdsCallbacks   *logrus.Logger
 	LoggerEnforcerXdsCallbacks *logrus.Logger
+	LoggerGA                   *logrus.Logger
 	LoggerNotifier             *logrus.Logger
 )
 
@@ -80,6 +82,7 @@ func UpdateLoggers() {
 	LoggerSubscription = logging.InitPackageLogger(pkgSubscription)
 	LoggerRouterXdsCallbacks = logging.InitPackageLogger(pkgRouterXdsCallbacks)
 	LoggerEnforcerXdsCallbacks = logging.InitPackageLogger(pkgEnforcerXdsCallbacks)
+	LoggerGA = logging.InitPackageLogger(pkgGA)
 	LoggerNotifier = logging.InitPackageLogger(pkgNotifier)
 	logrus.Info("Updated loggers")
 }

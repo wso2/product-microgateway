@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package discovery.service.ga;
+
+import "envoy/service/discovery/v3/discovery.proto";
+
+option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/service/ga";
+option java_package = "org.wso2.choreo.connect.discovery.service.ga";
+option java_outer_classname = "APIDsProto";
+option java_multiple_files = false;
+option java_generic_services = true;
+
+// [#protodoc-title: APIDS]
+service ApiGADiscoveryService {
+  rpc StreamGAApis(stream envoy.service.discovery.v3.DiscoveryRequest)
+      returns (stream envoy.service.discovery.v3.DiscoveryResponse) {
+  }
+
+  rpc FetchGAApis(envoy.service.discovery.v3.DiscoveryRequest) returns (envoy.service.discovery.v3.DiscoveryResponse) {
+  }
+}

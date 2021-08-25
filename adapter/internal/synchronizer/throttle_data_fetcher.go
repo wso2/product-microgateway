@@ -31,11 +31,12 @@ import (
 	"time"
 
 	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
+	"github.com/wso2/product-microgateway/adapter/pkg/auth"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 const (
@@ -54,9 +55,9 @@ var (
 
 // FetchThrottleData pulls the startup Throttle Data required for custom and blocking condition
 // based throttling. This request goes to traffic manager node.
-func FetchThrottleData(endpoint string, c chan SyncAPIResponse) {
+func FetchThrottleData(endpoint string, c chan sync.SyncAPIResponse) {
 	logger.LoggerSync.Infof("Fetching data from Traffic Manager. %v", endpoint)
-	respSyncAPI := SyncAPIResponse{}
+	respSyncAPI := sync.SyncAPIResponse{}
 
 	// Read configurations and derive the traffic manager endpoint details
 	conf, errReadConfig := config.ReadConfigs()
@@ -83,7 +84,7 @@ func FetchThrottleData(endpoint string, c chan SyncAPIResponse) {
 	skipSSL := ehConfigs.SkipSSLVerification
 
 	req, err := http.NewRequest("GET", ehURL, nil)
-	req.Header.Set(authorization, basicAuth)
+	req.Header.Set(sync.Authorization, basicAuth)
 
 	logger.LoggerSync.Debug("Sending the throttle data request to Traffic Manager")
 	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
@@ -129,7 +130,7 @@ func UpdateKeyTemplates() {
 	if errReadConfig != nil {
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
-	c := make(chan SyncAPIResponse)
+	c := make(chan sync.SyncAPIResponse)
 	go FetchThrottleData(keyTemplatesEndpoint, c)
 	for {
 		data := <-c
@@ -169,7 +170,7 @@ func UpdateBlockingConditions() {
 	if errReadConfig != nil {
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
-	c := make(chan SyncAPIResponse)
+	c := make(chan sync.SyncAPIResponse)
 	go FetchThrottleData(blockingConditionsEndpoint, c)
 	for {
 		data := <-c

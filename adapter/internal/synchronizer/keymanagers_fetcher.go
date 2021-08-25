@@ -31,10 +31,11 @@ import (
 	"time"
 
 	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	pkgAuth "github.com/wso2/product-microgateway/adapter/pkg/auth"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
@@ -70,7 +71,7 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 
 	ehUname := ehConfigs.Username
 	ehPass := ehConfigs.Password
-	basicAuth := "Basic " + auth.GetBasicAuth(ehUname, ehPass)
+	basicAuth := "Basic " + pkgAuth.GetBasicAuth(ehUname, ehPass)
 
 	// Check if TLS is enabled
 	skipSSL := ehConfigs.SkipSSLVerification
@@ -82,7 +83,7 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 	}
 
 	// Setting authorization header
-	req.Header.Set(authorization, basicAuth)
+	req.Header.Set(sync.Authorization, basicAuth)
 
 	// Make the request
 	logger.LoggerSync.Debug("Sending the control plane request")

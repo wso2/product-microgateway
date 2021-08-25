@@ -3,12 +3,13 @@ package notifier
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/auth"
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
-	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 	"net/http"
 	"strings"
+
+	"github.com/wso2/product-microgateway/adapter/config"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/pkg/auth"
+	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
 const (

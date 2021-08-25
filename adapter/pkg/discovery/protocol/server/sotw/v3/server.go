@@ -59,6 +59,7 @@ type watches struct {
 	keyManagers               chan cache.Response
 	revokedTokens             chan cache.Response
 	throttleData              chan cache.Response
+	gaAPIs                    chan cache.Response
 
 	configCancel                    func()
 	apiCancel                       func()
@@ -71,6 +72,7 @@ type watches struct {
 	keyManagerCancel                func()
 	revokedTokenCancel              func()
 	throttleDataCancel              func()
+	gaApiCancel                     func()
 
 	configNonce                    string
 	apiNonce                       string
@@ -83,6 +85,7 @@ type watches struct {
 	keyManagerNonce                string
 	revokedTokenNonce              string
 	throttleDataNonce              string
+	gaApiNonce                     string
 
 	// Opaque resources share a muxed channel. Nonces and watch cancellations are indexed by type URL.
 	responses     chan cache.Response
@@ -137,6 +140,9 @@ func (values *watches) Cancel() {
 	}
 	if values.throttleDataCancel != nil {
 		values.throttleDataCancel()
+	}
+	if values.gaApiCancel != nil {
+		values.gaApiCancel()
 	}
 
 	for _, cancel := range values.cancellations {
@@ -312,6 +318,16 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 			}
 			values.throttleDataNonce = nonce
 
+		case resp, more := <-values.gaAPIs:
+			if !more {
+				return status.Errorf(codes.Unavailable, "global adapter apis watch failed")
+			}
+			nonce, err := send(resp, resource.GAAPIType)
+			if err != nil {
+				return err
+			}
+			values.gaApiNonce = nonce
+
 		case resp, more := <-values.responses:
 			if more {
 				if resp == errorResponse {
@@ -436,6 +452,13 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 				if values.throttleDataNonce == "" || values.throttleDataNonce == nonce {
 					if values.throttleDataCancel != nil {
 						values.throttleDataCancel()
+					}
+					values.throttleData, values.throttleDataCancel = s.cache.CreateWatch(req)
+				}
+			case req.TypeUrl == resource.GAAPIType:
+				if values.gaApiNonce == "" || values.gaApiNonce == nonce {
+					if values.gaApiCancel != nil {
+						values.gaApiCancel()
 					}
 					values.throttleData, values.throttleDataCancel = s.cache.CreateWatch(req)
 				}

@@ -33,9 +33,11 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/wso2/product-microgateway/adapter/config"
 	km "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/keymgt"
-	"github.com/wso2/product-microgateway/adapter/internal/auth"
+
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	pkgAuth "github.com/wso2/product-microgateway/adapter/pkg/auth"
+	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
@@ -44,8 +46,8 @@ const (
 )
 
 // RetrieveTokens func return tokens
-func RetrieveTokens(c chan SyncAPIResponse) {
-	respSyncAPI := SyncAPIResponse{}
+func RetrieveTokens(c chan sync.SyncAPIResponse) {
+	respSyncAPI := sync.SyncAPIResponse{}
 
 	// Read configurations and derive the eventHub details
 	conf, errReadConfig := config.ReadConfigs()
@@ -60,7 +62,7 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 	ehPass := ehConfigs.Password
 	skipSSL := ehConfigs.SkipSSLVerification
 	// credentials for endpoint
-	basicAuth := "Basic " + auth.GetBasicAuth(ehUname, ehPass)
+	basicAuth := "Basic " + pkgAuth.GetBasicAuth(ehUname, ehPass)
 
 	// If the eventHub URL is configured with trailing slash
 	if strings.HasSuffix(ehURL, "/") {
@@ -73,7 +75,7 @@ func RetrieveTokens(c chan SyncAPIResponse) {
 	req, err := http.NewRequest("GET", ehURL, nil)
 
 	// Setting authorization header
-	req.Header.Set(authorization, basicAuth)
+	req.Header.Set(sync.Authorization, basicAuth)
 	// Make the request
 	logger.LoggerSync.Debug("Sending the control plane request")
 	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
@@ -138,7 +140,7 @@ func UpdateRevokedTokens() {
 		// This has to be error. For debugging purpose info
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
-	c := make(chan SyncAPIResponse)
+	c := make(chan sync.SyncAPIResponse)
 	go RetrieveTokens(c)
 	for {
 		data := <-c

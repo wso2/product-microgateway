@@ -263,6 +263,13 @@ var defaultConfig = &Config{
 			ReconnectRetryCount:    60,
 		},
 	},
+	GlobalAdapter: globalAdapter{
+		Enabled:       false,
+		ServiceURL:    "global-adapter:18000",
+		HostName:      "",
+		LocalLabel:    "default",
+		RetryInterval: 5,
+	},
 	Analytics: analytics{
 		Enabled: false,
 		Adapter: analyticsAdapter{

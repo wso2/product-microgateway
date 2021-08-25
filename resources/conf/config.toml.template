@@ -378,6 +378,19 @@ enable = true
     reconnectInterval = 5000
     reconnectRetryCount = 60
 
+# Global Adapter related configurations
+[globalAdapter]
+  # Enable Choreo Connect Global adapter client
+  enabled = false
+  # Global adapter Service URL (<Hostname>:<Port>)
+  serviceUrl = "global-adapter:18000"
+  # Subject Alternative Name considered for TLS communication with global adapter
+  overwriteHostName = ""
+  # Local Adapter Label
+  localLabel = "$env{local_label}"
+  # Retry Interval
+  retryInterval = 5
+
 # Analytics configurations for Choreo Connect
 [analytics]
   # Enable/Disable Analytics in Choreo Connect
