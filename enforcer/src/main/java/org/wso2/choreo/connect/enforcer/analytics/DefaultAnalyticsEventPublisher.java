@@ -18,6 +18,8 @@
 
 package org.wso2.choreo.connect.enforcer.analytics;
 
+import com.google.protobuf.UInt32Value;
+import com.microsoft.applicationinsights.TelemetryClient;
 import io.envoyproxy.envoy.data.accesslog.v3.HTTPAccessLogEntry;
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +46,7 @@ import static org.wso2.choreo.connect.enforcer.analytics.AnalyticsConstants.RESP
 public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
     private static final String AUTH_TOKEN_KEY = "auth.api.token";
     private static final String AUTH_URL = "auth.api.url";
+    private TelemetryClient telemetry = new TelemetryClient();
     public final String responseSchema;
     public final String faultSchema;
 
@@ -122,6 +125,8 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
         // There is a chance that the analytics event is published from enforcer and then result in ext_authz_error
         // responseCodeDetail due to some error/exception within enforcer implementation. This scenario is not
         // handled as it should be fixed from enforcer.
+        UInt32Value httpResponseProperties = logEntry.getResponse().getResponseCode();
+        telemetry.trackMetric("responseCode", httpResponseProperties.getValue());
         return (!StringUtils.isEmpty(logEntry.getResponse().getResponseCodeDetails()))
                 && logEntry.getResponse().getResponseCodeDetails()
                 .equals(AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL)

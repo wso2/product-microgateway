@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.enforcer.throttle;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.Filter;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
@@ -32,6 +33,10 @@ import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.util.ThrottleEventConstants;
 import org.wso2.choreo.connect.enforcer.throttle.dto.Decision;
 import org.wso2.choreo.connect.enforcer.throttle.utils.ThrottleUtils;
+import org.wso2.choreo.connect.enforcer.tracing.AzuremonitorTraceExporter;
+import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
+import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
+import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.net.Inet4Address;
@@ -82,125 +87,133 @@ public class ThrottleFilter implements Filter {
      * @return {@code true} if the request is throttled, otherwise {@code false}
      */
     private boolean doThrottle(RequestContext reqContext) {
-        AuthenticationContext authContext = reqContext.getAuthenticationContext();
+        TracingSpan doThrottleSpan = null;
+        TracingTracer tracer = AzuremonitorTraceExporter.getGlobalTracer();
+        try {
+            doThrottleSpan = AzuremonitorTraceExporter.startSpan(TracingConstants.DO_THROTTLE, reqContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE), tracer);
+            AzuremonitorTraceExporter.setTag(doThrottleSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+            AuthenticationContext authContext = reqContext.getAuthenticationContext();
 
-        // TODO: (Praminda) Handle unauthenticated + subscription validation false scenarios
-        if (authContext != null) {
-            log.debug("Found AuthenticationContext for the request");
-            APIConfig api = reqContext.getMatchedAPI().getAPIConfig();
-            String apiContext = api.getBasePath();
-            String apiVersion = api.getVersion();
-            String appId = authContext.getApplicationId();
-            String apiTier = getApiTier(api);
-            String apiThrottleKey = getApiThrottleKey(apiContext, apiVersion);
-            String resourceTier = getResourceTier(reqContext.getMatchedResourcePath());
-            String resourceThrottleKey = getResourceThrottleKey(reqContext, apiContext, apiVersion);
-            String subTier = authContext.getTier();
-            String appTier = authContext.getApplicationTier();
-            String appTenant = authContext.getSubscriberTenantDomain();
-            String clientIp = reqContext.getClientIp();
-            String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
-            String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
-            boolean isApiLevelTriggered = false;
+            // TODO: (Praminda) Handle unauthenticated + subscription validation false scenarios
+            if (authContext != null) {
+                log.debug("Found AuthenticationContext for the request");
+                APIConfig api = reqContext.getMatchedAPI().getAPIConfig();
+                String apiContext = api.getBasePath();
+                String apiVersion = api.getVersion();
+                String appId = authContext.getApplicationId();
+                String apiTier = getApiTier(api);
+                String apiThrottleKey = getApiThrottleKey(apiContext, apiVersion);
+                String resourceTier = getResourceTier(reqContext.getMatchedResourcePath());
+                String resourceThrottleKey = getResourceThrottleKey(reqContext, apiContext, apiVersion);
+                String subTier = authContext.getTier();
+                String appTier = authContext.getApplicationTier();
+                String appTenant = authContext.getSubscriberTenantDomain();
+                String clientIp = reqContext.getClientIp();
+                String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(apiContext);
+                String authorizedUser = FilterUtils.buildUsernameWithTenant(authContext.getUsername(), appTenant);
+                boolean isApiLevelTriggered = false;
 
-            if (!StringUtils.isEmpty(apiTier) && !ThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(apiTier)) {
-                resourceThrottleKey = apiThrottleKey;
-                resourceTier = apiTier;
-                isApiLevelTriggered = true;
-            }
-            if (apiTenantDomain == null) {
-                apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
-            }
+                if (!StringUtils.isEmpty(apiTier) && !ThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(apiTier)) {
+                    resourceThrottleKey = apiThrottleKey;
+                    resourceTier = apiTier;
+                    isApiLevelTriggered = true;
+                }
+                if (apiTenantDomain == null) {
+                    apiTenantDomain = APIConstants.SUPER_TENANT_DOMAIN_NAME;
+                }
 
-            if (dataHolder.isBlockingConditionsPresent()) {
-                String appBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
-                String subBlockingKey = apiContext + ":" + apiVersion + ":" + authContext.getSubscriber()
-                        + "-" + authContext.getApplicationName() + ":" + authContext.getKeyType();
+                if (dataHolder.isBlockingConditionsPresent()) {
+                    String appBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
+                    String subBlockingKey = apiContext + ":" + apiVersion + ":" + authContext.getSubscriber()
+                            + "-" + authContext.getApplicationName() + ":" + authContext.getKeyType();
 
-                if (dataHolder.isRequestBlocked(apiContext, appBlockingKey, authorizedUser, reqContext.getClientIp(),
-                        subBlockingKey, apiTenantDomain)) {
-                    FilterUtils.setThrottleErrorToContext(reqContext,
-                            ThrottleConstants.BLOCKED_ERROR_CODE,
-                            ThrottleConstants.BLOCKING_MESSAGE,
-                            ThrottleConstants.BLOCKING_DESCRIPTION);
-                    reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
-                            ThrottleConstants.THROTTLE_OUT_REASON_REQUEST_BLOCKED);
-                    log.debug("Request blocked as it violates blocking conditions, for API: {}," +
-                                    " application: {}, user: {}", apiContext, appBlockingKey, authorizedUser);
+                    if (dataHolder.isRequestBlocked(apiContext, appBlockingKey, authorizedUser, reqContext.getClientIp(),
+                            subBlockingKey, apiTenantDomain)) {
+                        FilterUtils.setThrottleErrorToContext(reqContext,
+                                ThrottleConstants.BLOCKED_ERROR_CODE,
+                                ThrottleConstants.BLOCKING_MESSAGE,
+                                ThrottleConstants.BLOCKING_DESCRIPTION);
+                        reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
+                                ThrottleConstants.THROTTLE_OUT_REASON_REQUEST_BLOCKED);
+                        log.debug("Request blocked as it violates blocking conditions, for API: {}," +
+                                " application: {}, user: {}", apiContext, appBlockingKey, authorizedUser);
+                        return true;
+                    }
+                }
+
+                // Checking API and Resource level throttling. If API tier is defined,
+                // we ignore the resource level tier definition.
+                Decision apiDecision = checkResourceThrottled(resourceThrottleKey, resourceTier, reqContext);
+                if (apiDecision.isThrottled()) {
+                    int errorCode;
+                    String reason;
+                    if (isApiLevelTriggered) {
+                        errorCode = ThrottleConstants.API_THROTTLE_OUT_ERROR_CODE;
+                        reason = ThrottleConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED;
+                    } else {
+                        errorCode = ThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE;
+                        reason = ThrottleConstants.THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
+                    }
+                    FilterUtils.setThrottleErrorToContext(reqContext, errorCode, ThrottleConstants.THROTTLE_OUT_MESSAGE,
+                            ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
+                    reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON, reason);
+                    ThrottleUtils.setRetryAfterHeader(reqContext, apiDecision.getResetAt());
                     return true;
                 }
-            }
 
-            // Checking API and Resource level throttling. If API tier is defined,
-            // we ignore the resource level tier definition.
-            Decision apiDecision = checkResourceThrottled(resourceThrottleKey, resourceTier, reqContext);
-            if (apiDecision.isThrottled()) {
-                int errorCode;
-                String reason;
-                if (isApiLevelTriggered) {
-                    errorCode = ThrottleConstants.API_THROTTLE_OUT_ERROR_CODE;
-                    reason = ThrottleConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED;
-                } else {
-                    errorCode = ThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE;
-                    reason = ThrottleConstants.THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
+                // Checking subscription level throttling
+                String subThrottleKey = getSubscriptionThrottleKey(appId, apiContext, apiVersion);
+                Decision subDecision = checkSubscriptionLevelThrottled(subThrottleKey, subTier);
+                if (subDecision.isThrottled()) {
+                    if (authContext.isStopOnQuotaReach()) {
+                        log.debug("Setting subscription throttle out response");
+                        FilterUtils.setThrottleErrorToContext(reqContext,
+                                ThrottleConstants.SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
+                                ThrottleConstants.THROTTLE_OUT_MESSAGE,
+                                ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
+                        reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
+                                ThrottleConstants.THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
+                        ThrottleUtils.setRetryAfterHeader(reqContext, subDecision.getResetAt());
+                        return true;
+                    }
+                    log.debug("Proceeding since stopOnQuotaReach is false");
                 }
-                FilterUtils.setThrottleErrorToContext(reqContext, errorCode, ThrottleConstants.THROTTLE_OUT_MESSAGE,
-                        ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
-                reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON, reason);
-                ThrottleUtils.setRetryAfterHeader(reqContext, apiDecision.getResetAt());
-                return true;
-            }
 
-            // Checking subscription level throttling
-            String subThrottleKey = getSubscriptionThrottleKey(appId, apiContext, apiVersion);
-            Decision subDecision = checkSubscriptionLevelThrottled(subThrottleKey, subTier);
-            if (subDecision.isThrottled()) {
-                if (authContext.isStopOnQuotaReach()) {
-                    log.debug("Setting subscription throttle out response");
+                // Checking Application level throttling
+                String appThrottleKey = appId + ':' + authorizedUser;
+                Decision appDecision = checkAppLevelThrottled(appThrottleKey, appTier);
+                if (appDecision.isThrottled()) {
+                    log.debug("Setting application throttle out response");
                     FilterUtils.setThrottleErrorToContext(reqContext,
-                            ThrottleConstants.SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE,
+                            ThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE,
                             ThrottleConstants.THROTTLE_OUT_MESSAGE,
                             ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
                     reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
-                            ThrottleConstants.THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
-                    ThrottleUtils.setRetryAfterHeader(reqContext, subDecision.getResetAt());
+                            ThrottleConstants.THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
+                    ThrottleUtils.setRetryAfterHeader(reqContext, appDecision.getResetAt());
                     return true;
                 }
-                log.debug("Proceeding since stopOnQuotaReach is false");
-            }
 
-            // Checking Application level throttling
-            String appThrottleKey = appId + ':' + authorizedUser;
-            Decision appDecision = checkAppLevelThrottled(appThrottleKey, appTier);
-            if (appDecision.isThrottled()) {
-                log.debug("Setting application throttle out response");
-                FilterUtils.setThrottleErrorToContext(reqContext,
-                        ThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE,
-                        ThrottleConstants.THROTTLE_OUT_MESSAGE,
-                        ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
-                reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
-                        ThrottleConstants.THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
-                ThrottleUtils.setRetryAfterHeader(reqContext, appDecision.getResetAt());
-                return true;
+                // Checking Custom policy throttling
+                Decision customDecision = dataHolder.isThrottledByCustomPolicy(authorizedUser, resourceThrottleKey,
+                        apiContext, apiVersion, appTenant, apiTenantDomain, appId, clientIp);
+                log.debug("Custom policy throttle decision is {}", customDecision.isThrottled());
+                if (customDecision.isThrottled()) {
+                    log.debug("Setting custom policy throttle out response");
+                    FilterUtils.setThrottleErrorToContext(reqContext,
+                            ThrottleConstants.CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE,
+                            ThrottleConstants.THROTTLE_OUT_MESSAGE,
+                            ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
+                    reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
+                            ThrottleConstants.THROTTLE_OUT_REASON_CUSTOM_LIMIT_EXCEED);
+                    ThrottleUtils.setRetryAfterHeader(reqContext, customDecision.getResetAt());
+                    return true;
+                }
             }
-
-            // Checking Custom policy throttling
-            Decision customDecision = dataHolder.isThrottledByCustomPolicy(authorizedUser, resourceThrottleKey,
-                    apiContext, apiVersion, appTenant, apiTenantDomain, appId, clientIp);
-            log.debug("Custom policy throttle decision is {}", customDecision.isThrottled());
-            if (customDecision.isThrottled()) {
-                log.debug("Setting custom policy throttle out response");
-                FilterUtils.setThrottleErrorToContext(reqContext,
-                        ThrottleConstants.CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE,
-                        ThrottleConstants.THROTTLE_OUT_MESSAGE,
-                        ThrottleConstants.THROTTLE_OUT_DESCRIPTION);
-                reqContext.getProperties().put(ThrottleConstants.THROTTLE_OUT_REASON,
-                        ThrottleConstants.THROTTLE_OUT_REASON_CUSTOM_LIMIT_EXCEED);
-                ThrottleUtils.setRetryAfterHeader(reqContext, customDecision.getResetAt());
-                return true;
-            }
+            return false;
+        } finally {
+            AzuremonitorTraceExporter.finishSpan(doThrottleSpan);
         }
-        return false;
     }
 
     private Decision checkSubscriptionLevelThrottled(String throttleKey, String tier) {
