@@ -21,12 +21,12 @@ package org.wso2.choreo.connect.enforcer.tracing;
 
 public class TracingConstants {
 
-    public static final String REQUEST_ID = "request-id";
-    public static final String EXT_AUTH_SERVICE = "ExtAuthService:check()";
-    public static final String DECODE_TOKEN_HEADER = "JWTAuthenticator:authenticate():Decode token header";
-    public static final String JWT_VALIDATION = "JWTAuthenticator:authenticate():JWT validation";
-    public static final String SUBSCRIPTION_VALIDATION = "JWTAuthenticator:authenticate():Validate subscription using key manager";
-    public static final String SCOPES_VALIDATION = "JWTAuthenticator:authenticate():Validate scopes";
-    public static final String DO_THROTTLE = "ThrottleFilter:doThrottle():Throttling function";
+    public static final String DO_THROTTLE_SPAN = "ThrottleFilter:doThrottle():Throttling function";
+    public static final String EXT_AUTH_SERVICE_SPAN = "ExtAuthService:check()";
+    public static final String DECODE_TOKEN_HEADER_SPAN = "JWTAuthenticator:authenticate():Decode token header";
+    public static final String JWT_AUTHENTICATOR_SPAN = "JWTAuthenticator:authenticate():Authenticate request using JWT Authenticator";
+    public static final String SUBSCRIPTION_VALIDATION_SPAN = "JWTAuthenticator:authenticate():Validate subscription using key manager";
+    public static final String SCOPES_VALIDATION_SPAN = "JWTAuthenticator:authenticate():Validate scopes";
+    public static final String TRACING_ENABLED = "tracingEnabled";
 
 }

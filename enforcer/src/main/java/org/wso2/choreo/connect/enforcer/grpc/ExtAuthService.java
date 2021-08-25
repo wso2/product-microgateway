@@ -37,7 +37,7 @@ import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
-import org.wso2.choreo.connect.enforcer.tracing.AzuremonitorTraceExporter;
+import org.wso2.choreo.connect.enforcer.tracing.AzureTraceExporter;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
@@ -54,12 +54,17 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
     public void check(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
         TracingSpan extAuthServiceSpan = null;
         try {
-            TracingTracer tracer =  new AzuremonitorTraceExporter().getGlobalTracer();
             String traceId = request.getAttributes().getRequest().getHttp()
                     .getHeadersOrDefault(HttpConstants.X_REQUEST_ID_HEADER,
                             request.getAttributes().getRequest().getHttp().getId());
-            extAuthServiceSpan = AzuremonitorTraceExporter.startSpan(TracingConstants.EXT_AUTH_SERVICE, null, tracer);
-            AzuremonitorTraceExporter.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);
+            boolean isTracingEnabled = Boolean.getBoolean(TracingConstants.TRACING_ENABLED);
+            if (isTracingEnabled) {
+                TracingTracer tracer =  new AzureTraceExporter().getGlobalTracer();
+                AzureTraceExporter.setTracingEnabled(true);
+                extAuthServiceSpan = AzureTraceExporter.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, null, tracer);
+
+                AzureTraceExporter.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);
+            }
             ThreadContext.put(APIConstants.LOG_TRACE_ID, traceId);
             ResponseObject responseObject = requestHandler.process(request, extAuthServiceSpan);
             CheckResponse response = buildResponse(request, responseObject);
@@ -68,7 +73,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             responseObserver.onCompleted();
             ThreadContext.remove(APIConstants.LOG_TRACE_ID);
         } finally {
-            AzuremonitorTraceExporter.finishSpan(extAuthServiceSpan);
+            if (AzureTraceExporter.tracingEnabled()) {
+                AzureTraceExporter.finishSpan(extAuthServiceSpan);
+            }
         }
 
     }

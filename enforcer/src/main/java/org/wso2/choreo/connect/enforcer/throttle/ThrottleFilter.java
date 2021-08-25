@@ -33,7 +33,7 @@ import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.util.ThrottleEventConstants;
 import org.wso2.choreo.connect.enforcer.throttle.dto.Decision;
 import org.wso2.choreo.connect.enforcer.throttle.utils.ThrottleUtils;
-import org.wso2.choreo.connect.enforcer.tracing.AzuremonitorTraceExporter;
+import org.wso2.choreo.connect.enforcer.tracing.AzureTraceExporter;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
@@ -88,10 +88,10 @@ public class ThrottleFilter implements Filter {
      */
     private boolean doThrottle(RequestContext reqContext) {
         TracingSpan doThrottleSpan = null;
-        TracingTracer tracer = AzuremonitorTraceExporter.getGlobalTracer();
+        TracingTracer tracer = AzureTraceExporter.getGlobalTracer();
         try {
-            doThrottleSpan = AzuremonitorTraceExporter.startSpan(TracingConstants.DO_THROTTLE, reqContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE), tracer);
-            AzuremonitorTraceExporter.setTag(doThrottleSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+            doThrottleSpan = AzureTraceExporter.startSpan(TracingConstants.DO_THROTTLE_SPAN, reqContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+            AzureTraceExporter.setTag(doThrottleSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
             AuthenticationContext authContext = reqContext.getAuthenticationContext();
 
             // TODO: (Praminda) Handle unauthenticated + subscription validation false scenarios
@@ -212,7 +212,7 @@ public class ThrottleFilter implements Filter {
             }
             return false;
         } finally {
-            AzuremonitorTraceExporter.finishSpan(doThrottleSpan);
+            AzureTraceExporter.finishSpan(doThrottleSpan);
         }
     }
 

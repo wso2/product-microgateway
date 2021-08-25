@@ -56,7 +56,7 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         }
 
         RequestContext requestContext = buildRequestContext(matchedAPI, request);
-        requestContext.setParentSpan(TracingConstants.EXT_AUTH_SERVICE, span);
+        requestContext.setParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, span);
         return matchedAPI.process(requestContext);
     }
 

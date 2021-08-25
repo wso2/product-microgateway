@@ -25,50 +25,54 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
-import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.api.trace.Span;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class AzuremonitorTraceExporter {
+public class AzureTraceExporter {
 
-    private static final Logger LOGGER = LogManager.getLogger(AzuremonitorTraceExporter.class);
+    private static final Logger LOGGER = LogManager.getLogger(AzureTraceExporter.class);
 
     private static Tracer tracer;
 
     private static Boolean isMonitorInitialized = false;
 
+    private static boolean isTracingEnabled = false;
+
+    private static final int MAX_TRACES_PER_SECOND = 2;
+
     private static final String NAME = "Choreo";
 
     private static String connectionString = "InstrumentationKey=e52808e3-d7e7-44fe-a102-eab3660bbeff;IngestionEndpoint=https://westus2-2.in.applicationinsights.azure.com/";
 
-    public AzuremonitorTraceExporter() {
+    public AzureTraceExporter() {
         if (!isMonitorInitialized) {
             initializeTracer();
         }
     }
 
     public void initializeTracer() {
-            AzureMonitorTraceExporter exporter = new AzureMonitorExporterBuilder()
-                    .connectionString(connectionString)
-                    .buildTraceExporter();
-            SdkTracerProvider tracerProvider = SdkTracerProvider.builder().setSampler(Sampler.alwaysOn())
-                    .addSpanProcessor(SimpleSpanProcessor.create(exporter))
-                    .build();
+        AzureMonitorTraceExporter exporter = new AzureMonitorExporterBuilder()
+                .connectionString(connectionString)
+                .buildTraceExporter();
+        SdkTracerProvider tracerProvider = SdkTracerProvider.builder().setSampler(new RateLimitingSampler(MAX_TRACES_PER_SECOND))
+                .addSpanProcessor(SimpleSpanProcessor.create(exporter))
+                .build();
 
-            OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
-                    .setTracerProvider(tracerProvider)
-                    .buildAndRegisterGlobal();
-            isMonitorInitialized = true;
-            this.tracer = openTelemetrySdk.getTracer(NAME);
+        OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
+                .setTracerProvider(tracerProvider)
+                .buildAndRegisterGlobal();
+        LOGGER.debug("AzureTraceExporter is successfully initialized.");
+        isMonitorInitialized = true;
+        this.tracer = openTelemetrySdk.getTracer(NAME);
     }
 
     /**
      * Start the tracing span
      *
-     * @param spanName
-     * @param parentSpan
+     * @param spanName   the name of the span
+     * @param parentSpan the parent span
      * @param tracer     io.opentelemetry.api.trace.Span
      * @return a TracingSpan object
      */
@@ -83,12 +87,7 @@ public class AzuremonitorTraceExporter {
             if (sp != null) {
                 if (sp instanceof io.opentelemetry.api.trace.Span) {
                     childSpan = tracer.getTracingTracer().spanBuilder(spanName).setParent(Context.current().with((Span) sp)).startSpan();
-                } /*else {
-                    childSpan = tracer.getTracingTracer().buildSpan(spanName).asChildOf((SpanContext) sp).start();
                 }
-            } else {
-                childSpan = tracer.getTracingTracer().buildSpan(spanName).start();
-            }*/
                 return new TracingSpan(childSpan);
             }
         }
@@ -98,9 +97,9 @@ public class AzuremonitorTraceExporter {
     /**
      * Set tag to the span
      *
-     * @param span
-     * @param key
-     * @param value
+     * @param span  the span tag is to be set
+     * @param key   key
+     * @param value value
      */
     public static void setTag(TracingSpan span, String key, String value) {
 
@@ -117,7 +116,7 @@ public class AzuremonitorTraceExporter {
     /**
      * Finish the span
      *
-     * @param span
+     * @param span span that is to be finished
      */
     public static void finishSpan(TracingSpan span) {
 
@@ -130,6 +129,16 @@ public class AzuremonitorTraceExporter {
     public static TracingTracer getGlobalTracer() {
 
         return new TracingTracer(tracer);
+    }
+
+    public static void setTracingEnabled(boolean isTraceEnabled) {
+
+        AzureTraceExporter.isTracingEnabled = isTraceEnabled;
+    }
+
+    public static boolean tracingEnabled() {
+
+        return isTracingEnabled;
     }
 
 }
