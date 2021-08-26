@@ -55,7 +55,6 @@ public class AnalyticsFilter {
     private static final Logger logger = LogManager.getLogger(AnalyticsFilter.class);
     private static AnalyticsFilter analyticsFilter;
     private static AnalyticsEventPublisher publisher;
-    private TracingTracer tracer = AzureTraceExporter.getGlobalTracer();
 
     private AnalyticsFilter() {
         Map<String, String> configuration =
@@ -98,6 +97,7 @@ public class AnalyticsFilter {
 
     public void handleSuccessRequest(RequestContext requestContext) {
         TracingSpan analyticsSpan = null;
+        TracingTracer tracer = AzureTraceExporter.getGlobalTracer();
         try {
             analyticsSpan = AzureTraceExporter.startSpan(TracingConstants.ANALYTICS_SPAN,
                     requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
@@ -167,6 +167,7 @@ public class AnalyticsFilter {
 
     public void handleFailureRequest(RequestContext requestContext) {
         TracingSpan analyticsSpan = null;
+        TracingTracer tracer = AzureTraceExporter.getGlobalTracer();
         try {
             analyticsSpan = AzureTraceExporter.startSpan(TracingConstants.ANALYTICS_FAILURE_SPAN,
                     requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);

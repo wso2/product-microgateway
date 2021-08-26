@@ -30,6 +30,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
@@ -38,6 +39,10 @@ import org.wso2.choreo.connect.enforcer.security.AccessTokenInfo;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTValidator;
+import org.wso2.choreo.connect.enforcer.tracing.AzureTraceExporter;
+import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
+import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
+import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.io.IOException;
@@ -95,24 +100,38 @@ public class OAuthAuthenticator implements Authenticator {
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
-        String token = requestContext.getHeaders().get("authorization");
-        AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
-
-        if (token == null || !token.toLowerCase().contains("bearer")) {
-            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                    APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
-        }
-        token = token.split("\\s")[1];
-
+        TracingTracer tracer = AzureTraceExporter.getGlobalTracer();
+        TracingSpan oAuthSpan = null;
         try {
-            IntrospectInfo introspectInfo = validateToken(token);
-            accessTokenInfo.setAccessToken(token);
-            accessTokenInfo.setConsumerKey(introspectInfo.getClientId());
-        } catch (IOException e) {
-            throw new SecurityException(e);
-        }
+            oAuthSpan = AzureTraceExporter.startSpan(TracingConstants.OAUTH_AUTHENTICATOR_SPAN,
+                    requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+            if (oAuthSpan != null) {
+                AzureTraceExporter.setTag(oAuthSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
+            }
+            String token = requestContext.getHeaders().get("authorization");
+            AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
 
-        return new AuthenticationContext();
+            if (token == null || !token.toLowerCase().contains("bearer")) {
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
+            }
+            token = token.split("\\s")[1];
+
+            try {
+                IntrospectInfo introspectInfo = validateToken(token);
+                accessTokenInfo.setAccessToken(token);
+                accessTokenInfo.setConsumerKey(introspectInfo.getClientId());
+            } catch (IOException e) {
+                throw new SecurityException(e);
+            }
+
+            return new AuthenticationContext();
+        } finally {
+            if (oAuthSpan != null) {
+                AzureTraceExporter.finishSpan(oAuthSpan);
+            }
+        }
     }
 
     @Override
