@@ -34,6 +34,7 @@ import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
+import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
@@ -57,10 +58,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             String traceId = request.getAttributes().getRequest().getHttp()
                     .getHeadersOrDefault(HttpConstants.X_REQUEST_ID_HEADER,
                             request.getAttributes().getRequest().getHttp().getId());
-            boolean isTracingEnabled = Boolean.getBoolean(TracingConstants.TRACING_ENABLED);
-            if (isTracingEnabled) {
-                TracingTracer tracer =  new AzureTraceExporter().getGlobalTracer();
-                AzureTraceExporter.setTracingEnabled(true);
+            AzureTraceExporter traceExporter = new AzureTraceExporter();
+            if (traceExporter.tracingEnabled()) {
+                TracingTracer tracer =  traceExporter.getGlobalTracer();
                 extAuthServiceSpan = AzureTraceExporter.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, null, tracer);
 
                 AzureTraceExporter.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);

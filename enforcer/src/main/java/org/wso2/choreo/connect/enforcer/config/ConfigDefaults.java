@@ -27,4 +27,7 @@ public class ConfigDefaults {
     public static final boolean CACHE_ENABLED_VALUE = true;
     public static final int CACHE_MAX_SIZE_VALUE = 10000;
     public static final int CACHE_EXPIRY_TIME_VALUE = 15; // in minutes.
+
+    //Tracing related default values
+    public static final boolean TRACING_ENABLED_VALUE = false;
 }

@@ -13,6 +13,9 @@
     "cassandra": {
       "enabled": false
     },
+    "http": {
+      "enabled": false
+    },
     "jdbc": {
       "enabled": false
     },

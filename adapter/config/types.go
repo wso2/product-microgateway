@@ -120,6 +120,7 @@ type enforcer struct {
 	Cache        cache
 	Throttling   throttlingConfig
 	JwtIssuer    jwtIssuer
+	Tracing		 tracing
 }
 
 type server struct {
@@ -314,6 +315,10 @@ type cache struct {
 	Enabled     bool  `toml:"enabled"`
 	MaximumSize int32 `toml:"maximumSize"`
 	ExpiryTime  int32 `toml:"expiryTime"`
+}
+
+type tracing struct {
+	Enabled  bool `toml:"enabled"`
 }
 
 type analytics struct {

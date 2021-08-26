@@ -141,4 +141,19 @@ public interface ConfigOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.Analytics analytics = 9;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder getAnalyticsOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 10;</code>
+   * @return Whether the tracing field is set.
+   */
+  boolean hasTracing();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 10;</code>
+   * @return The tracing.
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.Tracing getTracing();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 10;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder getTracingOrBuilder();
 }

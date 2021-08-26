@@ -38,6 +38,7 @@ import org.wso2.choreo.connect.discovery.config.enforcer.Service;
 import org.wso2.choreo.connect.discovery.config.enforcer.TMURLGroup;
 import org.wso2.choreo.connect.discovery.config.enforcer.ThrottleAgent;
 import org.wso2.choreo.connect.discovery.config.enforcer.Throttling;
+import org.wso2.choreo.connect.discovery.config.enforcer.Tracing;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsReceiverConfigDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
@@ -50,6 +51,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleAgentConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottlePublisherConfigDto;
+import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
@@ -132,6 +134,9 @@ public class ConfigHolder {
 
         // Read backend jwt generation configurations
         populateJWTGeneratorConfigurations(config.getJwtGenerator());
+
+        // Read tracing configurations
+        populateTracingConfig(config.getTracing());
 
         // Read token caching configs
         populateCacheConfigs(config.getCache());
@@ -237,6 +242,12 @@ public class ConfigHolder {
         throttleConfig.setJmsConnectionProviderUrl(throttling.getJmsConnectionProviderUrl());
         config.setThrottleConfig(throttleConfig);
         populateTMBinaryConfig(throttling.getPublisher());
+    }
+
+    private void populateTracingConfig(Tracing tracing) {
+        TracingDTO tracingConfig = new TracingDTO();
+        tracingConfig.setTracingEnabled(tracing.getEnabled());
+        config.setTracingConfig(tracingConfig);
     }
 
     private void populateTMBinaryConfig(BinaryPublisher binary) {

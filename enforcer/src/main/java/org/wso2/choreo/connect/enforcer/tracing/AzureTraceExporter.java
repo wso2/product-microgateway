@@ -27,8 +27,10 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.api.trace.Span;
 
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 
 public class AzureTraceExporter {
 
@@ -36,18 +38,19 @@ public class AzureTraceExporter {
 
     private static Tracer tracer;
 
-    private static Boolean isMonitorInitialized = false;
+    private static Boolean isTracerInitialized = false;
 
-    private static boolean isTracingEnabled = false;
+    private static boolean isTracingEnabled;
 
     private static final int MAX_TRACES_PER_SECOND = 2;
 
-    private static final String NAME = "Choreo";
+    private static final String INSTRUMENTATION_NAME = "Choreo";
 
     private static String connectionString = "InstrumentationKey=e52808e3-d7e7-44fe-a102-eab3660bbeff;IngestionEndpoint=https://westus2-2.in.applicationinsights.azure.com/";
 
     public AzureTraceExporter() {
-        if (!isMonitorInitialized) {
+        isTracingEnabled = ConfigHolder.getInstance().getConfig().getTracingConfig().isTracingEnabled();
+        if (isTracingEnabled && !isTracerInitialized) {
             initializeTracer();
         }
     }
@@ -56,16 +59,27 @@ public class AzureTraceExporter {
         AzureMonitorTraceExporter exporter = new AzureMonitorExporterBuilder()
                 .connectionString(connectionString)
                 .buildTraceExporter();
-        SdkTracerProvider tracerProvider = SdkTracerProvider.builder().setSampler(new RateLimitingSampler(MAX_TRACES_PER_SECOND))
-                .addSpanProcessor(SimpleSpanProcessor.create(exporter))
-                .build();
+        SdkTracerProvider tracerProvider = SdkTracerProvider.builder().setSampler(new RateLimitingSampler(MAX_TRACES_PER_SECOND)).addSpanProcessor(SimpleSpanProcessor.create(exporter)).build();
 
         OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                 .setTracerProvider(tracerProvider)
                 .buildAndRegisterGlobal();
         LOGGER.debug("AzureTraceExporter is successfully initialized.");
-        isMonitorInitialized = true;
-        this.tracer = openTelemetrySdk.getTracer(NAME);
+        isTracerInitialized = true;
+        this.tracer = openTelemetrySdk.getTracer(INSTRUMENTATION_NAME);
+    }
+
+    private static Sampler selectSampler(String samplerType, int maxTracesPerSecond) {
+        switch (samplerType) {
+            default:
+                return new RateLimitingSampler(2);
+            case "alwaysOn":
+                return Sampler.alwaysOn();
+            case "alwaysOff":
+                return Sampler.alwaysOff();
+            case "rateLimiting":
+                return new RateLimitingSampler(maxTracesPerSecond);
+        }
     }
 
     /**
@@ -129,11 +143,6 @@ public class AzureTraceExporter {
     public static TracingTracer getGlobalTracer() {
 
         return new TracingTracer(tracer);
-    }
-
-    public static void setTracingEnabled(boolean isTraceEnabled) {
-
-        AzureTraceExporter.isTracingEnabled = isTraceEnabled;
     }
 
     public static boolean tracingEnabled() {

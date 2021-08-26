@@ -28,6 +28,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
 import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
+import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,7 @@ public class EnforcerConfig {
     private AuthServiceConfigurationDto authService;
     private Map<String, ExtendedTokenIssuerDto> issuersMap = new HashMap<>();
     private ThrottleConfigDto throttleConfig;
+    private TracingDTO tracingConfig;
     private JWTConfigurationDto jwtConfigurationDto;
     private CacheDto cacheDto;
     private JWTIssuerConfigurationDto jwtIssuerConfigurationDto;
@@ -72,6 +74,14 @@ public class EnforcerConfig {
 
     public void setThrottleConfig(ThrottleConfigDto throttleConfig) {
         this.throttleConfig = throttleConfig;
+    }
+
+    public void setTracingConfig(TracingDTO tracingConfig) {
+        this.tracingConfig = tracingConfig;
+    }
+
+    public TracingDTO getTracingConfig() {
+        return tracingConfig;
     }
 
     public void setJwtConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {

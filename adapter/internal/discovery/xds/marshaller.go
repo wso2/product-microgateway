@@ -78,6 +78,9 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		ExpiryTime:  config.Enforcer.Cache.ExpiryTime,
 	}
 
+	tracing := &enforcer.Tracing{
+		Enabled:		 config.Enforcer.Tracing.Enabled,
+	}
 	analytics := &enforcer.Analytics{
 		Enabled:          config.Analytics.Enabled,
 		ConfigProperties: config.Analytics.Enforcer.ConfigProperties,
@@ -130,6 +133,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 			},
 		},
 		Cache:     cache,
+		Tracing:   tracing,
 		Analytics: analytics,
 		Throttling: &enforcer.Throttling{
 			EnableGlobalEventPublishing:        config.Enforcer.Throttling.EnableGlobalEventPublishing,

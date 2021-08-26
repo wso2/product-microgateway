@@ -405,3 +405,8 @@ idleTimeoutInSeconds = 3600
         keepAliveTime = 600
         # Queue size of the worker threads
         queueSize = 1000
+
+# Tracing configurations for Choreo Connect
+[enforcer.tracing]
+  # Enable/Disable tracing in Choreo Connect
+  enabled = true

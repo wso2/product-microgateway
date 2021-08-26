@@ -70,3 +70,6 @@
 
 [analytics]
   enabled = false
+
+[enforcer.tracing]
+  enabled = true

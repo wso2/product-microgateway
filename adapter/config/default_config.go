@@ -168,6 +168,9 @@ var defaultConfig = &Config{
 			MaximumSize: 10000,
 			ExpiryTime:  15,
 		},
+		Tracing: tracing{
+			Enabled: false,
+		},
 		Throttling: throttlingConfig{
 			EnableGlobalEventPublishing:        false,
 			EnableHeaderConditions:             false,
