@@ -27,6 +27,9 @@ public class TracingConstants {
     public static final String EXT_AUTH_SERVICE_SPAN = "ExtAuthService:check()";
     public static final String DECODE_TOKEN_HEADER_SPAN = "JWTAuthenticator:authenticate():Decode token header";
     public static final String JWT_AUTHENTICATOR_SPAN = "JWTAuthenticator:authenticate():Authenticate request using JWT Authenticator";
+    public static final String API_KEY_AUTHENTICATOR_SPAN = "InternalAPIKeyAuthenticator:authenticate():Authenticate request using API Key Authenticator";
+    public static final String API_KEY_VALIDATE_SUBSCRIPTION_SPAN = "InternalAPIKeyAuthenticator:authenticate():Validate API subscription";
+    public static final String VERIFY_INTERNAL_KEY_SPAN = "InternalAPIKeyAuthenticator:authenticate():Verify internal key";
     public static final String SUBSCRIPTION_VALIDATION_SPAN = "JWTAuthenticator:authenticate():Validate subscription using key manager";
     public static final String SCOPES_VALIDATION_SPAN = "JWTAuthenticator:authenticate():Validate scopes";
     public static final String TRACING_ENABLED = "tracingEnabled";

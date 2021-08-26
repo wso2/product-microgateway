@@ -27,6 +27,7 @@ import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
@@ -38,6 +39,10 @@ import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
+import org.wso2.choreo.connect.enforcer.tracing.AzureTraceExporter;
+import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
+import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
+import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.text.ParseException;
@@ -66,12 +71,22 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
+        TracingTracer tracer = null;
+        TracingSpan apiKeyAuthenticatorSpan = null;
+        TracingSpan apiKeyValidateSubscriptionSpan = null;
+        TracingSpan verifyInternalKeySpan = null;
+
         if (requestContext.getMatchedAPI() != null) {
             if (log.isDebugEnabled()) {
                 log.info("Internal Key Authentication initialized");
             }
 
             try {
+                if (AzureTraceExporter.tracingEnabled()) {
+                    tracer = AzureTraceExporter.getGlobalTracer();
+                    apiKeyAuthenticatorSpan = AzureTraceExporter.startSpan(TracingConstants.API_KEY_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+                    AzureTraceExporter.setTag(apiKeyAuthenticatorSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                }
                 // Extract internal from the request while removing it from the msg context.
                 String internalKey = extractInternalKey(requestContext);
                 // Remove internal key from outbound request
@@ -117,6 +132,11 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
                 String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
                 boolean isVerified = false;
+
+                if (AzureTraceExporter.tracingEnabled()) {
+                    verifyInternalKeySpan = AzureTraceExporter.startSpan(TracingConstants.VERIFY_INTERNAL_KEY_SPAN, apiKeyAuthenticatorSpan, tracer);
+                    AzureTraceExporter.setTag(verifyInternalKeySpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                }
 
                 // Verify token when it is found in cache
                 JWTTokenPayloadInfo jwtTokenPayloadInfo = (JWTTokenPayloadInfo)
@@ -173,11 +193,18 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                         jwtTokenPayloadInfo.setAccessToken(internalKey);
                         CacheProvider.getGatewayInternalKeyDataCache().put(tokenIdentifier, jwtTokenPayloadInfo);
                     }
-
+                    if (AzureTraceExporter.tracingEnabled()) {
+                        AzureTraceExporter.finishSpan(verifyInternalKeySpan);
+                        apiKeyValidateSubscriptionSpan = AzureTraceExporter.startSpan(TracingConstants.API_KEY_VALIDATE_SUBSCRIPTION_SPAN, apiKeyAuthenticatorSpan, tracer);
+                        AzureTraceExporter.setTag(apiKeyValidateSubscriptionSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                    }
                     JSONObject api = validateAPISubscription(apiContext, apiVersion, payload, splitToken,
                             false);
                     if (log.isDebugEnabled()) {
                         log.debug("Internal Key authentication successful.");
+                    }
+                    if (AzureTraceExporter.tracingEnabled()) {
+                        AzureTraceExporter.finishSpan(apiKeyValidateSubscriptionSpan);
                     }
                     return FilterUtils.generateAuthenticationContext(tokenIdentifier, payload, api,
                             requestContext.getMatchedAPI().getAPIConfig().getTier(),
@@ -192,6 +219,10 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
             } catch (ParseException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Internal Key authentication failed. ", e);
+                }
+            } finally {
+                if (AzureTraceExporter.tracingEnabled()) {
+                    AzureTraceExporter.finishSpan(apiKeyAuthenticatorSpan);
                 }
             }
         }
