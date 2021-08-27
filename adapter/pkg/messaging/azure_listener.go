@@ -20,10 +20,10 @@ package messaging
 
 import (
 	"context"
-	"strings"
-	"time"
 	servicebus "github.com/Azure/azure-service-bus-go"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"strings"
+	"time"
 )
 
 func startBrokerConsumer(subscriptionMetaData Subscription, reconnectInterval time.Duration) {
@@ -35,6 +35,8 @@ func startBrokerConsumer(subscriptionMetaData Subscription, reconnectInterval ti
 		dataChannel = AzureNotificationChannel
 	} else if strings.EqualFold(topicName, tokenRevocation) {
 		dataChannel = AzureRevokedTokenChannel
+	} else if strings.EqualFold(topicName, organizationPurge) {
+		dataChannel = AzureOrganizationPurgeChannel
 	}
 	parentContext := context.Background()
 

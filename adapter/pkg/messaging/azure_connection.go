@@ -21,15 +21,15 @@ package messaging
 import (
 	"context"
 	"errors"
-	"strconv"
-	"strings"
-	"time"
 	servicebus "github.com/Azure/azure-service-bus-go"
 	"github.com/google/uuid"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"strconv"
+	"strings"
+	"time"
 )
 
-var bindingKeys = []string{tokenRevocation, notification}
+var bindingKeys = []string{tokenRevocation, notification, organizationPurge}
 
 // Subscription stores the meta data of a specific subscription
 type Subscription struct {
@@ -43,11 +43,14 @@ var (
 	AzureRevokedTokenChannel chan []byte
 	// AzureNotificationChannel stores the notification events
 	AzureNotificationChannel chan []byte
+	// AzureOrganizationPurgeChannel stores the Organization Purge events
+	AzureOrganizationPurgeChannel chan []byte
 )
 
 func init() {
 	AzureRevokedTokenChannel = make(chan []byte)
 	AzureNotificationChannel = make(chan []byte)
+	AzureOrganizationPurgeChannel = make(chan []byte)
 }
 
 // InitiateBrokerConnectionAndValidate to initiate connection and validate azure service bus constructs to
@@ -133,7 +136,7 @@ func createTopicsIfNotExist(availableTopicList []*servicebus.TopicEntity, ns *se
 				_, topicCreationError = topicManager.Put(ctx, key)
 			}()
 			if topicCreationError != nil {
-				errorValue = errors.New("Error occurred while trying to create topic " + key + " in azure service bus : "+
+				errorValue = errors.New("Error occurred while trying to create topic " + key + " in azure service bus : " +
 					topicCreationError.Error())
 				return errorValue
 			}
@@ -225,6 +228,6 @@ func logError(reconnectRetryCount int, reconnectInterval time.Duration, errVal e
 	if reconnectRetryCount > 0 {
 		retryAttemptMessage = "Retry attempt : " + strconv.Itoa(reconnectRetryCount)
 	}
-	logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] :%v." + retryAttemptMessage + " Retrying after %s seconds",
+	logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] :%v."+retryAttemptMessage+" Retrying after %s seconds",
 		errVal, reconnectInterval)
 }

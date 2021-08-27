@@ -20,9 +20,6 @@ package adapter
 
 import (
 	"crypto/tls"
-	"strconv"
-	"strings"
-
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	xdsv3 "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
@@ -31,7 +28,6 @@ import (
 	routercb "github.com/wso2/product-microgateway/adapter/internal/discovery/xds/routercallbacks"
 	"github.com/wso2/product-microgateway/adapter/internal/ga"
 	"github.com/wso2/product-microgateway/adapter/internal/messaging"
-	"github.com/wso2/product-microgateway/adapter/pkg/adapter"
 	apiservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/api"
 	configservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/config"
 	keymanagerservice "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/service/keymgt"
@@ -40,8 +36,8 @@ import (
 	wso2_server "github.com/wso2/product-microgateway/adapter/pkg/discovery/protocol/server/v3"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
 	healthservice "github.com/wso2/product-microgateway/adapter/pkg/health/api/wso2/health/service"
-	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
+	"strconv"
 
 	"context"
 	"flag"
@@ -238,7 +234,7 @@ func Run(conf *config.Config) {
 			// Load subscription data when GA is disabled.
 			eventhub.LoadSubscriptionData(conf, nil)
 			// Fetch APIs at start up when GA is disabled.
-			fetchAPIsOnStartUp(conf, nil)
+			synchronizer.FetchAPIsOnStartUp(conf, nil)
 		}
 		var isAzureEventingFeatureFlagEnabled bool
 		var err error
@@ -292,58 +288,6 @@ OUTER:
 	logger.LoggerMgw.Info("Bye!")
 }
 
-// fetch APIs from control plane during the server start up and push them
-// to the router and enforcer components.
-func fetchAPIsOnStartUp(conf *config.Config, apiUUIDList []string) {
-	// Populate data from config.
-	serviceURL := conf.ControlPlane.ServiceURL
-	userName := conf.ControlPlane.Username
-	password := conf.ControlPlane.Password
-	envs := conf.ControlPlane.EnvironmentLabels
-	skipSSL := conf.ControlPlane.SkipSSLVerification
-	retryInterval := conf.ControlPlane.RetryInterval
-	truststoreLocation := conf.Adapter.Truststore.Location
-
-	// Create a channel for the byte slice (response from the APIs from control plane)
-	c := make(chan sync.SyncAPIResponse)
-
-	// Get API details.
-	if apiUUIDList == nil {
-		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-			sync.RuntimeArtifactEndpoint, true, nil)
-	} else {
-		adapter.GetAPIs(c, nil, serviceURL, userName, password, envs, skipSSL, truststoreLocation,
-			sync.APIArtifactEndpoint, true, apiUUIDList)
-	}
-	for i := 0; i < 1; i++ {
-		data := <-c
-		logger.LoggerMgw.Debug("Receiving data for an environment")
-		if data.Resp != nil {
-			// For successfull fetches, data.Resp would return a byte slice with API project(s)
-			logger.LoggerMgw.Debug("Pushing data to router and enforcer")
-			err := synchronizer.PushAPIProjects(data.Resp, envs)
-			if err != nil {
-				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
-			}
-			health.SetControlPlaneRestAPIStatus(err == nil)
-		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-			logger.LoggerMgw.Errorf("Error occurred when retrieving APIs from control plane: %v", data.Err)
-			isNoAPIArtifacts := data.ErrorCode == 404 && strings.Contains(data.Err.Error(), "No Api artifacts found")
-			health.SetControlPlaneRestAPIStatus(isNoAPIArtifacts)
-		} else {
-			// Keep the iteration still until all the envrionment response properly.
-			i--
-			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
-			health.SetControlPlaneRestAPIStatus(false)
-			sync.RetryFetchingAPIs(c, serviceURL, userName, password, skipSSL, truststoreLocation, retryInterval,
-				data, sync.RuntimeArtifactEndpoint, true)
-		}
-	}
-	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.
-	xds.DeployReadinessAPI(envs)
-	logger.LoggerMgw.Info("Fetching APIs at startup is completed...")
-}
-
 // FetchAPIUUIDsFromGlobalAdapter get the UUIDs of the APIs at the LA startup from GA
 func FetchAPIUUIDsFromGlobalAdapter() {
 	logger.LoggerMgw.Info("Fetching APIs at Local Adapter startup...")
@@ -358,5 +302,5 @@ func FetchAPIUUIDsFromGlobalAdapter() {
 	// Load subscription data with the received API UUID list map when GA is enabled.
 	eventhub.LoadSubscriptionData(conf, initialAPIUUIDListMap)
 	// Fetch APIs at LA startup with the received API UUID list when GA is enabled.
-	fetchAPIsOnStartUp(conf, apiUUIDList)
+	synchronizer.FetchAPIsOnStartUp(conf, apiUUIDList)
 }
