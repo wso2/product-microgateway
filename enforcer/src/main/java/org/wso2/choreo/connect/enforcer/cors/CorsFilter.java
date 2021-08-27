@@ -20,12 +20,17 @@ package org.wso2.choreo.connect.enforcer.cors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.Filter;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.enforcer.tracing.AzureTraceExporter;
+import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
+import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
+import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
 
 /**
  * Cors Filter for failed preflight requests.
@@ -40,31 +45,45 @@ public class CorsFilter implements Filter {
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
-        logger.debug("Cors Filter (enforcer) is applied.");
-        // Options request is served here.
-        // Preflight success request does not reach here.
-        if (requestContext.getRequestMethod().contains(HttpConstants.OPTIONS)) {
-            // If the OPTIONS method is provided under the resource, microgateway do not respond
-            if (requestContext.getMatchedResourcePath() != null) {
-                logger.debug("OPTIONS method is listed under the resource. Hence OPTIONS request will" +
-                        "be responded from the upstream");
-                return true;
+        TracingTracer tracer = AzureTraceExporter.getGlobalTracer();
+        TracingSpan corsSpan = null;
+        try {
+            corsSpan = AzureTraceExporter.startSpan(TracingConstants.CORS_SPAN,
+                    requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+            if (corsSpan != null) {
+                AzureTraceExporter.setTag(corsSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
-            StringBuilder allowedMethodsBuilder = new StringBuilder(HttpConstants.OPTIONS);
-            for (ResourceConfig resourceConfig : requestContext.getMatchedAPI().getAPIConfig().getResources()) {
-                if (!resourceConfig.getPath().equals(requestContext.getRequestPathTemplate())) {
-                    continue;
+            logger.debug("Cors Filter (enforcer) is applied.");
+            // Options request is served here.
+            // Preflight success request does not reach here.
+            if (requestContext.getRequestMethod().contains(HttpConstants.OPTIONS)) {
+                // If the OPTIONS method is provided under the resource, microgateway do not respond
+                if (requestContext.getMatchedResourcePath() != null) {
+                    logger.debug("OPTIONS method is listed under the resource. Hence OPTIONS request will" +
+                            "be responded from the upstream");
+                    return true;
                 }
-                allowedMethodsBuilder.append(", ").append(resourceConfig.getMethod().name());
+                StringBuilder allowedMethodsBuilder = new StringBuilder(HttpConstants.OPTIONS);
+                for (ResourceConfig resourceConfig : requestContext.getMatchedAPI().getAPIConfig().getResources()) {
+                    if (!resourceConfig.getPath().equals(requestContext.getRequestPathTemplate())) {
+                        continue;
+                    }
+                    allowedMethodsBuilder.append(", ").append(resourceConfig.getMethod().name());
+                }
+                requestContext.getProperties()
+                        .put(APIConstants.MessageFormat.STATUS_CODE, HttpConstants.NO_CONTENT_STATUS_CODE);
+                requestContext.addResponseHeaders(HttpConstants.ALLOW_HEADER, allowedMethodsBuilder.toString());
+                logger.debug("OPTIONS request received for " +
+                        requestContext.getMatchedAPI().getAPIConfig().getResources().get(0).getPath() +
+                        ". Responded with allow header : " + allowedMethodsBuilder.toString());
+                return false;
             }
-            requestContext.getProperties()
-                    .put(APIConstants.MessageFormat.STATUS_CODE, HttpConstants.NO_CONTENT_STATUS_CODE);
-            requestContext.addResponseHeaders(HttpConstants.ALLOW_HEADER, allowedMethodsBuilder.toString());
-            logger.debug("OPTIONS request received for " +
-                    requestContext.getMatchedAPI().getAPIConfig().getResources().get(0).getPath() +
-                    ". Responded with allow header : " + allowedMethodsBuilder.toString());
-            return false;
+            return true;
+        } finally {
+            if (corsSpan != null) {
+                AzureTraceExporter.finishSpan(corsSpan);
+            }
         }
-        return true;
     }
 }
