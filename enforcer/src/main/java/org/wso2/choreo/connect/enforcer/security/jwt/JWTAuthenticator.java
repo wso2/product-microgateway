@@ -94,6 +94,7 @@ public class JWTAuthenticator implements Authenticator {
         TracingTracer tracer = null;
         TracingSpan decodeTokenHeaderSpan = null;
         TracingSpan jwtAuthenticatorInfoSpan = null;
+        TracingSpan validateSubscriptionSpan = null;
         TracingSpan validateScopesSpan = null;
         if (AzureTraceExporter.tracingEnabled()) {
             tracer = AzureTraceExporter.getGlobalTracer();
@@ -158,8 +159,10 @@ public class JWTAuthenticator implements Authenticator {
                     ExtendedTokenIssuerDto issuerDto = configuration.getIssuersMap().get(validationInfo.getIssuer());
 
                     if (issuerDto.isValidateSubscriptions()) {
-                        TracingSpan validateSubscriptionSpan = AzureTraceExporter.startSpan(TracingConstants.SUBSCRIPTION_VALIDATION_SPAN, jwtAuthenticatorInfoSpan, tracer);
-                        AzureTraceExporter.setTag(validateSubscriptionSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                        if (AzureTraceExporter.tracingEnabled()) {
+                            validateSubscriptionSpan = AzureTraceExporter.startSpan(TracingConstants.SUBSCRIPTION_VALIDATION_SPAN, jwtAuthenticatorInfoSpan, tracer);
+                            AzureTraceExporter.setTag(validateSubscriptionSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                        }
                         // if the token is self contained, validation subscription from `subscribedApis` claim
                         JSONObject api = validateSubscriptionFromClaim(name, version, claims, splitToken,
                                 apiKeyValidationInfoDTO, true);

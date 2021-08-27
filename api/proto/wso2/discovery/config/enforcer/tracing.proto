@@ -26,4 +26,14 @@ option java_multiple_files = true;
 message Tracing {
     // Enable tracing
     bool enabled = 1;
+
+    // Exporter ConnectionString
+    string connectionString = 2;
+
+    // Instrumentation Name
+    string instrumentationName = 3;
+
+    // Maximum number of sampled traces per second
+    int32 maximumTracesPerSecond = 4;
+
 }

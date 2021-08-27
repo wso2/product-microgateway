@@ -16,6 +16,8 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private Tracing() {
+    connectionString_ = "";
+    instrumentationName_ = "";
   }
 
   @java.lang.Override
@@ -51,6 +53,23 @@ private static final long serialVersionUID = 0L;
           case 8: {
 
             enabled_ = input.readBool();
+            break;
+          }
+          case 18: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            connectionString_ = s;
+            break;
+          }
+          case 26: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            instrumentationName_ = s;
+            break;
+          }
+          case 32: {
+
+            maximumTracesPerSecond_ = input.readInt32();
             break;
           }
           default: {
@@ -100,6 +119,113 @@ private static final long serialVersionUID = 0L;
     return enabled_;
   }
 
+  public static final int CONNECTIONSTRING_FIELD_NUMBER = 2;
+  private volatile java.lang.Object connectionString_;
+  /**
+   * <pre>
+   * Exporter ConnectionString
+   * </pre>
+   *
+   * <code>string connectionString = 2;</code>
+   * @return The connectionString.
+   */
+  @java.lang.Override
+  public java.lang.String getConnectionString() {
+    java.lang.Object ref = connectionString_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      connectionString_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * Exporter ConnectionString
+   * </pre>
+   *
+   * <code>string connectionString = 2;</code>
+   * @return The bytes for connectionString.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getConnectionStringBytes() {
+    java.lang.Object ref = connectionString_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      connectionString_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int INSTRUMENTATIONNAME_FIELD_NUMBER = 3;
+  private volatile java.lang.Object instrumentationName_;
+  /**
+   * <pre>
+   * Instrumentation Name
+   * </pre>
+   *
+   * <code>string instrumentationName = 3;</code>
+   * @return The instrumentationName.
+   */
+  @java.lang.Override
+  public java.lang.String getInstrumentationName() {
+    java.lang.Object ref = instrumentationName_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      instrumentationName_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * Instrumentation Name
+   * </pre>
+   *
+   * <code>string instrumentationName = 3;</code>
+   * @return The bytes for instrumentationName.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getInstrumentationNameBytes() {
+    java.lang.Object ref = instrumentationName_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      instrumentationName_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int MAXIMUMTRACESPERSECOND_FIELD_NUMBER = 4;
+  private int maximumTracesPerSecond_;
+  /**
+   * <pre>
+   * Maximum number of sampled traces per second
+   * </pre>
+   *
+   * <code>int32 maximumTracesPerSecond = 4;</code>
+   * @return The maximumTracesPerSecond.
+   */
+  @java.lang.Override
+  public int getMaximumTracesPerSecond() {
+    return maximumTracesPerSecond_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -117,6 +243,15 @@ private static final long serialVersionUID = 0L;
     if (enabled_ != false) {
       output.writeBool(1, enabled_);
     }
+    if (!getConnectionStringBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, connectionString_);
+    }
+    if (!getInstrumentationNameBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, instrumentationName_);
+    }
+    if (maximumTracesPerSecond_ != 0) {
+      output.writeInt32(4, maximumTracesPerSecond_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -129,6 +264,16 @@ private static final long serialVersionUID = 0L;
     if (enabled_ != false) {
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(1, enabled_);
+    }
+    if (!getConnectionStringBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, connectionString_);
+    }
+    if (!getInstrumentationNameBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, instrumentationName_);
+    }
+    if (maximumTracesPerSecond_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(4, maximumTracesPerSecond_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -147,6 +292,12 @@ private static final long serialVersionUID = 0L;
 
     if (getEnabled()
         != other.getEnabled()) return false;
+    if (!getConnectionString()
+        .equals(other.getConnectionString())) return false;
+    if (!getInstrumentationName()
+        .equals(other.getInstrumentationName())) return false;
+    if (getMaximumTracesPerSecond()
+        != other.getMaximumTracesPerSecond()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -161,6 +312,12 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + ENABLED_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getEnabled());
+    hash = (37 * hash) + CONNECTIONSTRING_FIELD_NUMBER;
+    hash = (53 * hash) + getConnectionString().hashCode();
+    hash = (37 * hash) + INSTRUMENTATIONNAME_FIELD_NUMBER;
+    hash = (53 * hash) + getInstrumentationName().hashCode();
+    hash = (37 * hash) + MAXIMUMTRACESPERSECOND_FIELD_NUMBER;
+    hash = (53 * hash) + getMaximumTracesPerSecond();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -296,6 +453,12 @@ private static final long serialVersionUID = 0L;
       super.clear();
       enabled_ = false;
 
+      connectionString_ = "";
+
+      instrumentationName_ = "";
+
+      maximumTracesPerSecond_ = 0;
+
       return this;
     }
 
@@ -323,6 +486,9 @@ private static final long serialVersionUID = 0L;
     public org.wso2.choreo.connect.discovery.config.enforcer.Tracing buildPartial() {
       org.wso2.choreo.connect.discovery.config.enforcer.Tracing result = new org.wso2.choreo.connect.discovery.config.enforcer.Tracing(this);
       result.enabled_ = enabled_;
+      result.connectionString_ = connectionString_;
+      result.instrumentationName_ = instrumentationName_;
+      result.maximumTracesPerSecond_ = maximumTracesPerSecond_;
       onBuilt();
       return result;
     }
@@ -373,6 +539,17 @@ private static final long serialVersionUID = 0L;
       if (other == org.wso2.choreo.connect.discovery.config.enforcer.Tracing.getDefaultInstance()) return this;
       if (other.getEnabled() != false) {
         setEnabled(other.getEnabled());
+      }
+      if (!other.getConnectionString().isEmpty()) {
+        connectionString_ = other.connectionString_;
+        onChanged();
+      }
+      if (!other.getInstrumentationName().isEmpty()) {
+        instrumentationName_ = other.instrumentationName_;
+        onChanged();
+      }
+      if (other.getMaximumTracesPerSecond() != 0) {
+        setMaximumTracesPerSecond(other.getMaximumTracesPerSecond());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -442,6 +619,241 @@ private static final long serialVersionUID = 0L;
     public Builder clearEnabled() {
       
       enabled_ = false;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object connectionString_ = "";
+    /**
+     * <pre>
+     * Exporter ConnectionString
+     * </pre>
+     *
+     * <code>string connectionString = 2;</code>
+     * @return The connectionString.
+     */
+    public java.lang.String getConnectionString() {
+      java.lang.Object ref = connectionString_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        connectionString_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Exporter ConnectionString
+     * </pre>
+     *
+     * <code>string connectionString = 2;</code>
+     * @return The bytes for connectionString.
+     */
+    public com.google.protobuf.ByteString
+        getConnectionStringBytes() {
+      java.lang.Object ref = connectionString_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        connectionString_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Exporter ConnectionString
+     * </pre>
+     *
+     * <code>string connectionString = 2;</code>
+     * @param value The connectionString to set.
+     * @return This builder for chaining.
+     */
+    public Builder setConnectionString(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      connectionString_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Exporter ConnectionString
+     * </pre>
+     *
+     * <code>string connectionString = 2;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearConnectionString() {
+      
+      connectionString_ = getDefaultInstance().getConnectionString();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Exporter ConnectionString
+     * </pre>
+     *
+     * <code>string connectionString = 2;</code>
+     * @param value The bytes for connectionString to set.
+     * @return This builder for chaining.
+     */
+    public Builder setConnectionStringBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      connectionString_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object instrumentationName_ = "";
+    /**
+     * <pre>
+     * Instrumentation Name
+     * </pre>
+     *
+     * <code>string instrumentationName = 3;</code>
+     * @return The instrumentationName.
+     */
+    public java.lang.String getInstrumentationName() {
+      java.lang.Object ref = instrumentationName_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        instrumentationName_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Instrumentation Name
+     * </pre>
+     *
+     * <code>string instrumentationName = 3;</code>
+     * @return The bytes for instrumentationName.
+     */
+    public com.google.protobuf.ByteString
+        getInstrumentationNameBytes() {
+      java.lang.Object ref = instrumentationName_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        instrumentationName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Instrumentation Name
+     * </pre>
+     *
+     * <code>string instrumentationName = 3;</code>
+     * @param value The instrumentationName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setInstrumentationName(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      instrumentationName_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Instrumentation Name
+     * </pre>
+     *
+     * <code>string instrumentationName = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearInstrumentationName() {
+      
+      instrumentationName_ = getDefaultInstance().getInstrumentationName();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Instrumentation Name
+     * </pre>
+     *
+     * <code>string instrumentationName = 3;</code>
+     * @param value The bytes for instrumentationName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setInstrumentationNameBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      instrumentationName_ = value;
+      onChanged();
+      return this;
+    }
+
+    private int maximumTracesPerSecond_ ;
+    /**
+     * <pre>
+     * Maximum number of sampled traces per second
+     * </pre>
+     *
+     * <code>int32 maximumTracesPerSecond = 4;</code>
+     * @return The maximumTracesPerSecond.
+     */
+    @java.lang.Override
+    public int getMaximumTracesPerSecond() {
+      return maximumTracesPerSecond_;
+    }
+    /**
+     * <pre>
+     * Maximum number of sampled traces per second
+     * </pre>
+     *
+     * <code>int32 maximumTracesPerSecond = 4;</code>
+     * @param value The maximumTracesPerSecond to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMaximumTracesPerSecond(int value) {
+      
+      maximumTracesPerSecond_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Maximum number of sampled traces per second
+     * </pre>
+     *
+     * <code>int32 maximumTracesPerSecond = 4;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMaximumTracesPerSecond() {
+      
+      maximumTracesPerSecond_ = 0;
       onChanged();
       return this;
     }

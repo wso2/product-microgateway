@@ -25,6 +25,8 @@ public class TracingDTO {
 
     private boolean isTracingEnabled = ConfigDefaults.TRACING_ENABLED_VALUE;
     private String connectionString = null;
+    private String instrumentationName = ConfigDefaults.TRACING_INSTRUMENTATION_NAME;
+    private int maximumTracesPerSecond = 2;
 
     public String getConnectionString() {
         return connectionString;
@@ -42,4 +44,19 @@ public class TracingDTO {
         this.isTracingEnabled = enabled;
     }
 
+    public String getInstrumentationName() {
+        return instrumentationName;
+    }
+
+    public void setInstrumentationName(String instrumentationName) {
+        this.instrumentationName = instrumentationName;
+    }
+
+    public int getMaximumTracesPerSecond() {
+        return maximumTracesPerSecond;
+    }
+
+    public void setMaximumTracesPerSecond(int maximumTracesPerSecond) {
+        this.maximumTracesPerSecond = maximumTracesPerSecond;
+    }
 }

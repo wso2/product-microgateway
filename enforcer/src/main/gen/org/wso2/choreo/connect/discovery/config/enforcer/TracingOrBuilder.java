@@ -16,4 +16,54 @@ public interface TracingOrBuilder extends
    * @return The enabled.
    */
   boolean getEnabled();
+
+  /**
+   * <pre>
+   * Exporter ConnectionString
+   * </pre>
+   *
+   * <code>string connectionString = 2;</code>
+   * @return The connectionString.
+   */
+  java.lang.String getConnectionString();
+  /**
+   * <pre>
+   * Exporter ConnectionString
+   * </pre>
+   *
+   * <code>string connectionString = 2;</code>
+   * @return The bytes for connectionString.
+   */
+  com.google.protobuf.ByteString
+      getConnectionStringBytes();
+
+  /**
+   * <pre>
+   * Instrumentation Name
+   * </pre>
+   *
+   * <code>string instrumentationName = 3;</code>
+   * @return The instrumentationName.
+   */
+  java.lang.String getInstrumentationName();
+  /**
+   * <pre>
+   * Instrumentation Name
+   * </pre>
+   *
+   * <code>string instrumentationName = 3;</code>
+   * @return The bytes for instrumentationName.
+   */
+  com.google.protobuf.ByteString
+      getInstrumentationNameBytes();
+
+  /**
+   * <pre>
+   * Maximum number of sampled traces per second
+   * </pre>
+   *
+   * <code>int32 maximumTracesPerSecond = 4;</code>
+   * @return The maximumTracesPerSecond.
+   */
+  int getMaximumTracesPerSecond();
 }

@@ -170,6 +170,9 @@ var defaultConfig = &Config{
 		},
 		Tracing: tracing{
 			Enabled: false,
+			ConnectionString: "",
+			InstrumentationName: "WSO2-CHOREO",
+			MaximumTracesPerSecond: 2,
 		},
 		Throttling: throttlingConfig{
 			EnableGlobalEventPublishing:        false,

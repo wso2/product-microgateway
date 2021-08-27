@@ -30,4 +30,5 @@ public class ConfigDefaults {
 
     //Tracing related default values
     public static final boolean TRACING_ENABLED_VALUE = false;
+    public static final String TRACING_INSTRUMENTATION_NAME = "WSO2-CHOREO";
 }

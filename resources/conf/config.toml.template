@@ -410,3 +410,9 @@ idleTimeoutInSeconds = 3600
 [enforcer.tracing]
   # Enable/Disable tracing in Choreo Connect
   enabled = true
+  # Exporter ConnectionString
+  connectionString = ""
+  # Instrumentation Name
+  instrumentationName = "WSO2-CHOREO"
+  # Maximum number of sampled traces per second
+  maximumTracesPerSecond = 2

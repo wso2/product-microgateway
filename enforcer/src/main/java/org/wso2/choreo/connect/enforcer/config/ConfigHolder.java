@@ -247,6 +247,9 @@ public class ConfigHolder {
     private void populateTracingConfig(Tracing tracing) {
         TracingDTO tracingConfig = new TracingDTO();
         tracingConfig.setTracingEnabled(tracing.getEnabled());
+        tracingConfig.setConnectionString(tracing.getConnectionString());
+        tracingConfig.setInstrumentationName(tracing.getInstrumentationName());
+        tracingConfig.setMaximumTracesPerSecond(tracing.getMaximumTracesPerSecond());
         config.setTracingConfig(tracingConfig);
     }
 
