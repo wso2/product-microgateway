@@ -96,12 +96,12 @@ public class JWTAuthenticator implements Authenticator {
         TracingSpan jwtAuthenticatorInfoSpan = null;
         TracingSpan validateSubscriptionSpan = null;
         TracingSpan validateScopesSpan = null;
-        if (AzureTraceExporter.tracingEnabled()) {
-            tracer = AzureTraceExporter.getGlobalTracer();
-            jwtAuthenticatorInfoSpan = AzureTraceExporter.startSpan(TracingConstants.JWT_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
-            AzureTraceExporter.setTag(jwtAuthenticatorInfoSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
-        }
         try {
+            if (AzureTraceExporter.tracingEnabled()) {
+                tracer = AzureTraceExporter.getGlobalTracer();
+                jwtAuthenticatorInfoSpan = AzureTraceExporter.startSpan(TracingConstants.JWT_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+                AzureTraceExporter.setTag(jwtAuthenticatorInfoSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+            }
             String jwtToken = retrieveAuthHeaderValue(requestContext);
             if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),

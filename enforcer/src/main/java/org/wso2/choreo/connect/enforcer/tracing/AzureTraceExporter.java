@@ -55,12 +55,14 @@ public class AzureTraceExporter {
         if (isTracingEnabled && !isTracerInitialized) {
             String connectionString = tracingConfig.getConnectionString();
             if (StringUtils.isEmpty(connectionString)) {
-                throw new RuntimeException("ConnectionString should be configured when tracing is enabled");
+                throw new RuntimeException("ConnectionString is mandatory when tracing is enabled");
             }
             AzureMonitorTraceExporter exporter = new AzureMonitorExporterBuilder()
                     .connectionString(connectionString)
                     .buildTraceExporter();
-            SdkTracerProvider tracerProvider = SdkTracerProvider.builder().setSampler(new RateLimitingSampler(tracingConfig.getMaximumTracesPerSecond())).addSpanProcessor(SimpleSpanProcessor.create(exporter)).build();
+            SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
+                    .setSampler(new RateLimitingSampler(tracingConfig.getMaximumTracesPerSecond()))
+                    .addSpanProcessor(SimpleSpanProcessor.create(exporter)).build();
 
             OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                     .setTracerProvider(tracerProvider).buildAndRegisterGlobal();
