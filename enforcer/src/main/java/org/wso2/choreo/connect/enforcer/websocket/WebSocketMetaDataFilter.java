@@ -50,11 +50,11 @@ public class WebSocketMetaDataFilter implements Filter {
     }
 
     @Override public boolean handleRequest(RequestContext requestContext) {
-        TracingTracer tracer = AzureTraceExporter.getGlobalTracer();
+        TracingTracer tracer = AzureTraceExporter.getInstance().getGlobalTracer();
         TracingSpan wsSpan = null;
         try {
-            if (AzureTraceExporter.tracingEnabled()) {
-                wsSpan = AzureTraceExporter.startSpan(TracingConstants.WS_METADATA_SPAN,
+            if (AzureTraceExporter.getInstance().tracingEnabled()) {
+                wsSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.WS_METADATA_SPAN,
                         requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
                 if (wsSpan != null) {
                     AzureTraceExporter.setTag(wsSpan, APIConstants.LOG_TRACE_ID,
@@ -110,9 +110,9 @@ public class WebSocketMetaDataFilter implements Filter {
             requestContext.addMetadataToMap(APIConstants.GW_VERSION_PARAM, getNullableStringValue(apiConfig.getVersion()));
             return true;
         } finally {
-            if (AzureTraceExporter.tracingEnabled()) {
+            if (AzureTraceExporter.getInstance().tracingEnabled()) {
                 if (wsSpan != null) {
-                    AzureTraceExporter.finishSpan(wsSpan);
+                    AzureTraceExporter.getInstance().finishSpan(wsSpan);
                 }
             }
         }

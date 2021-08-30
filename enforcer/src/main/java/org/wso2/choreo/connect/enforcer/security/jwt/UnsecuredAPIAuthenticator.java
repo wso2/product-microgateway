@@ -55,9 +55,9 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
         TracingSpan unsecuredApiAuthenticatorSpan = null;
         try {
-            if (AzureTraceExporter.tracingEnabled()) {
-                TracingTracer tracer =  AzureTraceExporter.getGlobalTracer();
-                unsecuredApiAuthenticatorSpan = AzureTraceExporter.startSpan(TracingConstants.UNSECURED_API_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+            if (AzureTraceExporter.getInstance().tracingEnabled()) {
+                TracingTracer tracer =  AzureTraceExporter.getInstance().getGlobalTracer();
+                unsecuredApiAuthenticatorSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.UNSECURED_API_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
 
                 AzureTraceExporter.setTag(unsecuredApiAuthenticatorSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
@@ -77,8 +77,8 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
             }
             return FilterUtils.generateAuthenticationContext(requestContext);
         } finally {
-            if (AzureTraceExporter.tracingEnabled()) {
-                AzureTraceExporter.finishSpan(unsecuredApiAuthenticatorSpan);
+            if (AzureTraceExporter.getInstance().tracingEnabled()) {
+                AzureTraceExporter.getInstance().finishSpan(unsecuredApiAuthenticatorSpan);
             }
         }
     }

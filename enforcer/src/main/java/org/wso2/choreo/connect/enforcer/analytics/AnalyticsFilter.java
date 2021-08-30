@@ -97,9 +97,9 @@ public class AnalyticsFilter {
 
     public void handleSuccessRequest(RequestContext requestContext) {
         TracingSpan analyticsSpan = null;
-        TracingTracer tracer = AzureTraceExporter.getGlobalTracer();
+        TracingTracer tracer = AzureTraceExporter.getInstance().getGlobalTracer();
         try {
-            analyticsSpan = AzureTraceExporter.startSpan(TracingConstants.ANALYTICS_SPAN,
+            analyticsSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.ANALYTICS_SPAN,
                     requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
             if (analyticsSpan != null) {
                 AzureTraceExporter.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
@@ -146,7 +146,7 @@ public class AnalyticsFilter {
                     requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
         } finally {
             if (analyticsSpan != null) {
-                AzureTraceExporter.finishSpan(analyticsSpan);
+                AzureTraceExporter.getInstance().finishSpan(analyticsSpan);
             }
         }
     }
@@ -167,9 +167,9 @@ public class AnalyticsFilter {
 
     public void handleFailureRequest(RequestContext requestContext) {
         TracingSpan analyticsSpan = null;
-        TracingTracer tracer = AzureTraceExporter.getGlobalTracer();
+        TracingTracer tracer = AzureTraceExporter.getInstance().getGlobalTracer();
         try {
-            analyticsSpan = AzureTraceExporter.startSpan(TracingConstants.ANALYTICS_FAILURE_SPAN,
+            analyticsSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.ANALYTICS_FAILURE_SPAN,
                     requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
             if (analyticsSpan != null) {
                 AzureTraceExporter.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
@@ -193,7 +193,7 @@ public class AnalyticsFilter {
             }
         } finally {
             if (analyticsSpan != null) {
-                AzureTraceExporter.finishSpan(analyticsSpan);
+                AzureTraceExporter.getInstance().finishSpan(analyticsSpan);
             }
         }
     }
