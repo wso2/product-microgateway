@@ -429,64 +429,6 @@ func isLaterEvent(timeStampMap map[string]int64, mapKey string, currentTimeStamp
 	return false
 }
 
-//func fetchAPIsOnStartUp(conf *config.Config) {
-//	// NOTE: Currently controle plane API does not support multiple labels in the same
-//	// request. Hence until that is fixed, we have to make seperate requests.
-//	// Checking the envrionments to fetch the APIs from
-//	envs := conf.ControlPlane.EnvironmentLabels
-//	// Create a channel for the byte slice (response from the APIs from control plane)
-//	c := make(chan synchronizer.SyncAPIResponse)
-//	if len(envs) > 0 {
-//		// If the envrionment labels are present, call the controle plane
-//		// with label concurrently (ControlPlane API is not supported for mutiple labels yet)
-//		logger.LoggerMgw.Debugf("Environments label present: %v", envs)
-//		go synchronizer.FetchAPIs(nil, envs, c)
-//	} else {
-//		// If the environments are not give, fetch the APIs from default envrionment
-//		logger.LoggerMgw.Debug("Environments label  NOT present. Hence adding \"default\"")
-//		envs = append(envs, "default")
-//		go synchronizer.FetchAPIs(nil, nil, c)
-//	}
-//
-//	// Wait for each environment to return it's result
-//	for i := 0; i < len(envs); i++ {
-//		data := <-c
-//		logger.LoggerMgw.Debug("Receiving data for an environment")
-//		if data.Resp != nil {
-//			// For successfull fetches, data.Resp would return a byte slice with API project(s)
-//			logger.LoggerMgw.Debug("Pushing data to router and enforcer")
-//			err := synchronizer.PushAPIProjects(data.Resp, envs)
-//			if err != nil {
-//				logger.LoggerMgw.Errorf("Error occurred while pushing API data: %v ", err)
-//			}
-//			health.SetControlPlaneRestAPIStatus(err == nil)
-//		} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
-//			logger.LoggerMgw.Errorf("Error occurred when retrieving APIs from control plane: %v", data.Err)
-//			isNoAPIArtifacts := data.ErrorCode == 404 && strings.Contains(data.Err.Error(), "No Api artifacts found")
-//			health.SetControlPlaneRestAPIStatus(isNoAPIArtifacts)
-//		} else {
-//			// Keep the iteration still until all the envrionment response properly.
-//			i--
-//			logger.LoggerMgw.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
-//			health.SetControlPlaneRestAPIStatus(false)
-//			go func(d synchronizer.SyncAPIResponse) {
-//				// Retry fetching from control plane after a configured time interval
-//				if conf.ControlPlane.RetryInterval == 0 {
-//					// Assign default retry interval
-//					conf.ControlPlane.RetryInterval = 5
-//				}
-//				logger.LoggerMgw.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
-//				time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
-//				logger.LoggerMgw.Infof("Retrying to fetch API data from control plane.")
-//				synchronizer.FetchAPIs(&d.APIUUID, d.GatewayLabels, c)
-//			}(data)
-//		}
-//	}
-//	// All apis are fetched. Deploy the /ready route for the readiness and startup probes.
-//	xds.DeployReadinessAPI(envs)
-//	logger.LoggerMgw.Info("Fetching APIs at startup is completed...")
-//}
-
 func belongsToTenant(tenantDomain string) bool {
 	// TODO : enable this once the events are fixed in apim
 	// return config.GetControlPlaneConnectedTenantDomain() == tenantDomain
