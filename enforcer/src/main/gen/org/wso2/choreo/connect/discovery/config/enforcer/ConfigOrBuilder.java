@@ -143,17 +143,32 @@ public interface ConfigOrBuilder extends
   org.wso2.choreo.connect.discovery.config.enforcer.AnalyticsOrBuilder getAnalyticsOrBuilder();
 
   /**
-   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 10;</code>
-   * @return Whether the tracing field is set.
+   * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+   * @return Whether the management field is set.
    */
-  boolean hasTracing();
+  boolean hasManagement();
   /**
-   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 10;</code>
-   * @return The tracing.
+   * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
+   * @return The management.
    */
-  org.wso2.choreo.connect.discovery.config.enforcer.Tracing getTracing();
+  org.wso2.choreo.connect.discovery.config.enforcer.Management getManagement();
   /**
-   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 10;</code>
+   * <code>.wso2.discovery.config.enforcer.Management management = 10;</code>
    */
-  org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder getTracingOrBuilder();
+  org.wso2.choreo.connect.discovery.config.enforcer.ManagementOrBuilder getManagementOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+   * @return Whether the restServer field is set.
+   */
+  boolean hasRestServer();
+  /**
+   * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+   * @return The restServer.
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.RestServer getRestServer();
+  /**
+   * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.RestServerOrBuilder getRestServerOrBuilder();
 }

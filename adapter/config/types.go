@@ -62,11 +62,12 @@ func NewReceiver() chan string {
 // Config represents the adapter configuration.
 // It is created directly from the configuration toml file.
 type Config struct {
-	Adapter      adapter
-	Envoy        envoy `toml:"router"`
-	Enforcer     enforcer
-	ControlPlane controlPlane `toml:"controlPlane"`
-	Analytics    analytics    `toml:"analytics"`
+	Adapter       adapter
+	Enforcer      enforcer
+	Envoy         envoy         `toml:"router"`
+	ControlPlane  controlPlane  `toml:"controlPlane"`
+	GlobalAdapter globalAdapter `toml:"globalAdapter"`
+	Analytics     analytics     `toml:"analytics"`
 }
 
 // Adapter related Configurations
@@ -120,7 +121,8 @@ type enforcer struct {
 	Cache        cache
 	Throttling   throttlingConfig
 	JwtIssuer    jwtIssuer
-	Tracing		 tracing
+	Management   management
+	RestServer   restServer
 }
 
 type server struct {
@@ -317,13 +319,6 @@ type cache struct {
 	ExpiryTime  int32 `toml:"expiryTime"`
 }
 
-type tracing struct {
-	Enabled  				bool 	`toml:"enabled"`
-	ConnectionString 		string 	`toml:"connectionString"`
-	InstrumentationName 	string 	`toml:"instrumentationName"`
-	MaximumTracesPerSecond 	int32 	`toml:"maximumTracesPerSecond"`
-}
-
 type analytics struct {
 	Enabled  bool `toml:"enabled"`
 	Adapter  analyticsAdapter
@@ -389,10 +384,36 @@ type controlPlane struct {
 	RetryInterval           time.Duration           `toml:"retryInterval"`
 	SkipSSLVerification     bool                    `toml:"skipSSLVerification"`
 	JmsConnectionParameters jmsConnectionParameters `toml:"jmsConnectionParameters"`
+	ASBConnectionParameters asbConnectionParameters `toml:"asbConnectionParameters"`
+}
+
+type globalAdapter struct {
+	Enabled       bool          `toml:"enabled"`
+	ServiceURL    string        `toml:"serviceUrl"`
+	LocalLabel    string        `toml:"localLabel"`
+	HostName      string        `toml:"overwriteHostName"`
+	RetryInterval time.Duration `toml:"retryInterval"`
 }
 
 type jmsConnectionParameters struct {
 	EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
+}
+
+type asbConnectionParameters struct {
+	EventListeningEndpoint string        `toml:"eventListeningEndpoint"`
+	ReconnectInterval      time.Duration `toml:"reconnectInterval"`
+	ReconnectRetryCount    int           `toml:"reconnectRetryCount"`
+}
+
+// Configuration for Enforcer admin rest api
+type restServer struct {
+	Enable bool
+}
+
+// Enforcer admin credentials
+type management struct {
+	Username string
+	Password string
 }
 
 // APIContent contains everything necessary to create an API
@@ -412,6 +433,7 @@ type APIContent struct {
 	EndpointSecurity   EndpointSecurity
 	AuthHeader         string
 	OrganizationID     string
+	RevisionID         int
 }
 
 // APIJsonData contains everything necessary to extract api.json/api.yaml file
@@ -420,6 +442,7 @@ type APIJsonData struct {
 		APIName                    string   `json:"name,omitempty"`
 		APIContext                 string   `json:"context,omitempty"`
 		APIVersion                 string   `json:"version,omitempty"`
+		RevisionID                 int      `json:"revisionId,omitempty"`
 		APIType                    string   `json:"type,omitempty"`
 		LifeCycleStatus            string   `json:"lifeCycleStatus,omitempty"`
 		EndpointImplementationType string   `json:"endpointImplementationType,omitempty"`

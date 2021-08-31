@@ -6,11 +6,11 @@ import (
 	"strconv"
 
 	"github.com/wso2/product-microgateway/adapter/config"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/config/enforcer"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/keymgt"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
 	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
 // MarshalConfig will marshal a Config struct - read from the config toml - to
@@ -101,6 +101,15 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		},
 	}
 
+	management := &enforcer.Management{
+		Username: config.Enforcer.Management.Username,
+		Password: config.Enforcer.Management.Password,
+	}
+
+	restServer := &enforcer.RestServer{
+		Enable: config.Enforcer.RestServer.Enable,
+	}
+
 	return &enforcer.Config{
 		JwtGenerator: &enforcer.JWTGenerator{
 			Enable:                config.Enforcer.JwtGenerator.Enable,
@@ -177,14 +186,16 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 				},
 			},
 		},
+		Management: management,
+		RestServer: restServer,
 	}
 }
 
-// MarshalSubscriptionList converts the data into SubscriptionList proto type
-func MarshalSubscriptionList(subList *types.SubscriptionList) *subscription.SubscriptionList {
+// MarshalSubscriptionMap converts the data into SubscriptionList proto type
+func MarshalSubscriptionMap(subscriptionMap map[int32]*types.Subscription) *subscription.SubscriptionList {
 	subscriptions := []*subscription.Subscription{}
 	var tenantDomain = ""
-	for _, sb := range subList.List {
+	for _, sb := range subscriptionMap {
 		sub := &subscription.Subscription{
 			SubscriptionId:    fmt.Sprint(sb.SubscriptionID),
 			PolicyId:          sb.PolicyID,
@@ -212,10 +223,10 @@ func MarshalSubscriptionList(subList *types.SubscriptionList) *subscription.Subs
 	}
 }
 
-// MarshalApplicationList converts the data into ApplicationList proto type
-func MarshalApplicationList(appList *types.ApplicationList) *subscription.ApplicationList {
+// MarshalApplicationMap converts the data into ApplicationList proto type
+func MarshalApplicationMap(appMap map[string]*types.Application) *subscription.ApplicationList {
 	applications := []*subscription.Application{}
-	for _, app := range appList.List {
+	for _, app := range appMap {
 		application := &subscription.Application{
 			Uuid:         app.UUID,
 			Id:           app.ID,
@@ -267,17 +278,18 @@ func MarshalAPIList(apiList *types.APIList) *subscription.APIList {
 	}
 }
 
-// MarshalApplicationPolicyList converts the data into ApplicationPolicyList proto type
-func MarshalApplicationPolicyList(appPolicyList *types.ApplicationPolicyList) *subscription.ApplicationPolicyList {
+// MarshalApplicationPolicyMap converts the data into ApplicationPolicyList proto type
+func MarshalApplicationPolicyMap(appPolicyMap map[int32]*types.ApplicationPolicy) *subscription.ApplicationPolicyList {
 	applicationPolicies := []*subscription.ApplicationPolicy{}
 
-	for _, policy := range appPolicyList.List {
+	for _, policy := range appPolicyMap {
 		appPolicy := &subscription.ApplicationPolicy{
 			Id:        policy.ID,
 			TenantId:  policy.TenantID,
 			Name:      policy.Name,
 			QuotaType: policy.QuotaType,
 		}
+		logger.LoggerXds.Infof("appPolicy Entry is : %v", appPolicy)
 		applicationPolicies = append(applicationPolicies, appPolicy)
 	}
 
@@ -286,11 +298,11 @@ func MarshalApplicationPolicyList(appPolicyList *types.ApplicationPolicyList) *s
 	}
 }
 
-// MarshalSubscriptionPolicyList converts the data into SubscriptionPolicyList proto type
-func MarshalSubscriptionPolicyList(subPolicyList *types.SubscriptionPolicyList) *subscription.SubscriptionPolicyList {
+// MarshalSubscriptionPolicyMap converts the data into SubscriptionPolicyList proto type
+func MarshalSubscriptionPolicyMap(subPolicyMap map[int32]*types.SubscriptionPolicy) *subscription.SubscriptionPolicyList {
 	subscriptionPolicies := []*subscription.SubscriptionPolicy{}
 
-	for _, policy := range subPolicyList.List {
+	for _, policy := range subPolicyMap {
 		subPolicy := &subscription.SubscriptionPolicy{
 			Id:                   policy.ID,
 			Name:                 policy.Name,
@@ -312,11 +324,11 @@ func MarshalSubscriptionPolicyList(subPolicyList *types.SubscriptionPolicyList) 
 	}
 }
 
-// MarshalKeyMappingList converts the data into ApplicationKeyMappingList proto type
-func MarshalKeyMappingList(keyMappingList *types.ApplicationKeyMappingList) *subscription.ApplicationKeyMappingList {
+// MarshalKeyMappingMap converts the data into ApplicationKeyMappingList proto type
+func MarshalKeyMappingMap(keyMappingMap map[string]*types.ApplicationKeyMapping) *subscription.ApplicationKeyMappingList {
 	applicationKeyMappings := []*subscription.ApplicationKeyMapping{}
 
-	for _, mapping := range keyMappingList.List {
+	for _, mapping := range keyMappingMap {
 		keyMapping := &subscription.ApplicationKeyMapping{
 			ConsumerKey:     mapping.ConsumerKey,
 			KeyType:         mapping.KeyType,
@@ -327,7 +339,6 @@ func MarshalKeyMappingList(keyMappingList *types.ApplicationKeyMappingList) *sub
 			TenantDomain:    mapping.TenantDomain,
 			Timestamp:       mapping.TimeStamp,
 		}
-
 		applicationKeyMappings = append(applicationKeyMappings, keyMapping)
 	}
 

@@ -33,11 +33,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 	var logFormat *file_accesslogv3.FileAccessLog_LogFormat
 	logpath := defaultAccessLogPath //default access log path
 
-	logConf, errReadConfig := config.ReadLogConfigs()
-	if errReadConfig != nil {
-		logger.LoggerOasparser.Error("Error loading configuration. ", errReadConfig)
-		return nil
-	}
+	logConf := config.ReadLogConfigs()
 
 	if !logConf.AccessLogs.Enable {
 		logger.LoggerOasparser.Info("Accesslog Configurations are disabled.")

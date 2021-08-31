@@ -43,5 +43,24 @@ type LogConfig struct {
 	}
 
 	Pkg        []pkg
-	AccessLogs accessLog
+	AccessLogs *accessLog
+}
+
+func getDefaultLogConfig() *LogConfig {
+	adapterLogConfig = &LogConfig{
+		Logfile:  "/dev/null",
+		LogLevel: "INFO",
+		AccessLogs: &accessLog{
+			Enable:  false,
+			LogFile: "/dev/stdout",
+			Format: "[%START_TIME%] '%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%' %RESPONSE_CODE% " +
+				"%RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%" +
+				"'%REQ(X-FORWARDED-FOR)%' '%REQ(USER-AGENT)%' '%REQ(X-REQUEST-ID)%' '%REQ(:AUTHORITY)%' '%UPSTREAM_HOST%'\n",
+		},
+	}
+	adapterLogConfig.Rotation.MaxSize = 10
+	adapterLogConfig.Rotation.MaxAge = 2
+	adapterLogConfig.Rotation.MaxBackups = 3
+	adapterLogConfig.Rotation.Compress = true
+	return adapterLogConfig
 }

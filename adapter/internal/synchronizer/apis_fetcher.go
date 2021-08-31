@@ -25,156 +25,29 @@ package synchronizer
 import (
 	"archive/zip"
 	"bytes"
-	"crypto/tls"
-	"encoding/base64"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"strings"
-	"time"
 
 	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/auth"
-	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 
 	apiServer "github.com/wso2/product-microgateway/adapter/internal/api"
-	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 const (
-	apiID                    string = "apiId"
-	gwType                   string = "type"
-	gatewayLabel             string = "gatewayLabel"
-	envoy                    string = "Envoy"
-	runtimeArtifactEndpoint  string = "internal/data/v1/runtime-artifacts"
-	authorization            string = "Authorization"
-	zipExt                   string = ".zip"
-	defaultCertPath          string = "/home/wso2/security/controlplane.pem"
-	deploymentDescriptorFile string = "deployments.json"
+	zipExt          string = ".zip"
+	defaultCertPath string = "/home/wso2/security/controlplane.pem"
 )
-
-// FetchAPIs pulls the API artifact calling to the API manager
-// API Manager returns a .zip file as a response and this function
-// returns a byte slice of that ZIP file.
-func FetchAPIs(id *string, gwLabel []string, c chan SyncAPIResponse) {
-	logger.LoggerSync.Info("Fetching APIs from Control Plane.")
-	respSyncAPI := SyncAPIResponse{}
-
-	// Read configurations and derive the eventHub details
-	conf, errReadConfig := config.ReadConfigs()
-	if errReadConfig != nil {
-		// This has to be error. For debugging purpose info
-		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
-	}
-	// Populate data from the config
-	ehConfigs := conf.ControlPlane
-	ehURL := ehConfigs.ServiceURL
-	// If the eventHub URL is configured with trailing slash
-	if strings.HasSuffix(ehURL, "/") {
-		ehURL += runtimeArtifactEndpoint
-	} else {
-		ehURL += "/" + runtimeArtifactEndpoint
-	}
-	logger.LoggerSync.Debugf("Fetching APIs from the URL %v: ", ehURL)
-
-	ehUname := ehConfigs.Username
-	ehPass := ehConfigs.Password
-	basicAuth := "Basic " + auth.GetBasicAuth(ehUname, ehPass)
-
-	// Check if TLS is enabled
-	skipSSL := ehConfigs.SkipSSLVerification
-	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
-	tr := &http.Transport{}
-	if !skipSSL {
-		_, _, truststoreLocation := restserver.GetKeyLocations()
-		caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	}
-
-	// Configuring the http client
-	client := &http.Client{
-		Transport: tr,
-	}
-
-	// Create a HTTP request
-	req, err := http.NewRequest("GET", ehURL, nil)
-	// Making necessary query parameters for the request
-	q := req.URL.Query()
-
-	// If an API ID is present, make a query parameter
-	if id != nil {
-		logger.LoggerSync.Debugf("API ID: %v", *id)
-		respSyncAPI.APIUUID = *id
-		q.Add(apiID, *id)
-	}
-	// If the gateway label is present, make a query parameter
-	if len(gwLabel) > 0 {
-		logger.LoggerSync.Debugf("Gateway Label: %v", gwLabel)
-		respSyncAPI.GatewayLabels = gwLabel
-		gatewaysQStr := strings.Join(gwLabel, "|")
-		q.Add(gatewayLabel, base64.StdEncoding.EncodeToString([]byte(gatewaysQStr)))
-	}
-	// Default "type" query parameter for adapter is "Envoy"
-	q.Add(gwType, envoy)
-	req.URL.RawQuery = q.Encode()
-	// Setting authorization header
-	req.Header.Set(authorization, basicAuth)
-	// Make the request
-	logger.LoggerSync.Debug("Sending the controle plane request")
-	resp, err := client.Do(req)
-	// In the event of a connection error, the error would not be nil, then return the error
-	// If the error is not null, proceed
-	if err != nil {
-		logger.LoggerSync.Errorf("Error occurred while retrieving APIs from API manager: %v", err)
-		respSyncAPI.Err = err
-		respSyncAPI.Resp = nil
-		c <- respSyncAPI
-		return
-	}
-
-	// get the response in the form of a byte slice
-	respBytes, err := ioutil.ReadAll(resp.Body)
-
-	// If the reading response gives an error
-	if err != nil {
-		logger.LoggerSync.Errorf("Error occurred while reading the response: %v", err)
-		respSyncAPI.Err = err
-		respSyncAPI.ErrorCode = resp.StatusCode
-		respSyncAPI.Resp = nil
-		c <- respSyncAPI
-		return
-	}
-	// For successful response, return the byte slice and nil as error
-	if resp.StatusCode == http.StatusOK {
-		respSyncAPI.Err = nil
-		respSyncAPI.Resp = respBytes
-		c <- respSyncAPI
-		return
-	}
-	// If the response is not successful, create a new error with the response and log it and return
-	// Ex: for 401 scenarios, 403 scenarios.
-	logger.LoggerSync.Errorf("Failure response: %v", string(respBytes))
-	respSyncAPI.Err = errors.New(string(respBytes))
-	respSyncAPI.Resp = nil
-	respSyncAPI.ErrorCode = resp.StatusCode
-	c <- respSyncAPI
-	return
-}
 
 // PushAPIProjects configure the router and enforcer using the zip containing API project(s) as
 // byte slice. This method ensures to update the enforcer and router using entries inside the
 // downloaded apis.zip one by one.
 // If the updating envoy or enforcer fails, this method returns an error, if not error would be nil.
 func PushAPIProjects(payload []byte, environments []string) error {
+	var deploymentList []*notifier.DeployedAPIRevision
 	// Reading the root zip
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	if err != nil {
@@ -185,32 +58,15 @@ func PushAPIProjects(payload []byte, environments []string) error {
 
 	// apiFiles represents zipped API files fetched from API Manager
 	apiFiles := make(map[string]*zip.File, len(zipReader.File)-1)
-	deploymentDescriptor := &DeploymentDescriptor{}
+	// Read deployments from deployment.json file
+	deploymentDescriptor, err := sync.ReadDeployments(zipReader)
+	if err != nil {
+		logger.LoggerSync.Errorf("Error occured while reading deploymnt.json file %v", err.Error())
+		return err
+	}
 
-	// Read the .zip files within the root apis.zip
+	// Read the .zip files within the root apis.zip and add apis to apiFiles array.
 	for _, file := range zipReader.File {
-		// Open deployment descriptor file
-		if strings.EqualFold(file.Name, deploymentDescriptorFile) {
-			logger.LoggerSync.Debugf("Start reading %v file", deploymentDescriptorFile)
-			f, err := file.Open()
-			if err != nil {
-				logger.LoggerSync.Errorf("Error reading deployment descriptor: %v", err)
-				return err
-			}
-			data, err := ioutil.ReadAll(f)
-			_ = f.Close() // Close the file here (without defer)
-			if err != nil {
-				logger.LoggerSync.Errorf("Error reading deployment descriptor: %v", err)
-				return err
-			}
-			logger.LoggerSync.Debugf("Parsing content of deployment descriptor, content: %s", string(data))
-			if err = json.Unmarshal(data, deploymentDescriptor); err != nil {
-				// TODO: (renuka) shall we print content of deployment descriptor
-				logger.LoggerSync.Errorf("Error parsing JSON content of deployment descriptor: %v", err)
-				return err
-			}
-		}
-
 		if strings.HasSuffix(file.Name, zipExt) {
 			apiFiles[file.Name] = file
 		}
@@ -242,10 +98,16 @@ func PushAPIProjects(payload []byte, environments []string) error {
 		_ = f.Close() // Close the file here (without defer)
 		// Pass the byte slice for the XDS APIs to push it to the enforcer and router
 		// TODO: (renuka) optimize applying API project, update maps one by one and apply xds once
-		err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap)
+		var deployedRevisionList []*notifier.DeployedAPIRevision
+		deployedRevisionList, err = apiServer.ApplyAPIProjectFromAPIM(apiFileData, vhostToEnvsMap)
 		if err != nil {
 			logger.LoggerSync.Errorf("Error occurred while applying project %v", err)
+		} else if deployedRevisionList != nil {
+			deploymentList = append(deploymentList, deployedRevisionList...)
 		}
+	}
+	if len(deploymentList) > 0 {
+		notifier.SendRevisionUpdate(deploymentList)
 	}
 	logger.LoggerSync.Infof("Successfully deployed %d API/s", len(zipReader.File)-1)
 	// Error nil for successful execution
@@ -263,8 +125,14 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 		// This has to be error. For debugging purpose info
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
-	// Take the configured labels from the adapter
+	// Populate data from config.
+	serviceURL := conf.ControlPlane.ServiceURL
+	userName := conf.ControlPlane.Username
+	password := conf.ControlPlane.Password
 	configuredEnvs := conf.ControlPlane.EnvironmentLabels
+	skipSSL := conf.ControlPlane.SkipSSLVerification
+	retryInterval := conf.ControlPlane.RetryInterval
+	truststoreLocation := conf.Adapter.Truststore.Location
 	//finalEnvs contains the actual envrionments that the adapter should update
 	var finalEnvs []string
 	if len(configuredEnvs) > 0 {
@@ -289,9 +157,10 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 		return
 	}
 
-	c := make(chan SyncAPIResponse)
+	c := make(chan sync.SyncAPIResponse)
 	logger.LoggerSync.Infof("API %s is added/updated to APIList for label %v", updatedAPIID, updatedEnvs)
-	go FetchAPIs(&updatedAPIID, finalEnvs, c)
+	go sync.FetchAPIs(&updatedAPIID, finalEnvs, c, serviceURL, userName, password, skipSSL, truststoreLocation,
+		sync.RuntimeArtifactEndpoint, true, nil)
 	for {
 		data := <-c
 		logger.LoggerSync.Debug("Receiving data for an environment")
@@ -308,18 +177,8 @@ func FetchAPIsFromControlPlane(updatedAPIID string, updatedEnvs []string) {
 		} else {
 			// Keep the iteration still until all the envrionment response properly.
 			logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Err)
-			go func(d SyncAPIResponse) {
-				// Retry fetching from control plane after a configured time interval
-				// Retry fetching from control plane after a configured time interval
-				if conf.ControlPlane.RetryInterval == 0 {
-					// Assign default retry interval
-					conf.ControlPlane.RetryInterval = 5
-				}
-				logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
-				time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
-				logger.LoggerSync.Info("Retrying to fetch API data from control plane.")
-				FetchAPIs(&updatedAPIID, finalEnvs, c)
-			}(data)
+			sync.RetryFetchingAPIs(c, serviceURL, userName, password, skipSSL, truststoreLocation, retryInterval,
+				data, sync.RuntimeArtifactEndpoint, true)
 		}
 	}
 

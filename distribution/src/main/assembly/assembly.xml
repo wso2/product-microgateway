@@ -132,6 +132,10 @@
             <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
         </file>
         <file>
+            <source>../resources/conf/config.toml.template</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect/conf</outputDirectory>
+        </file>
+        <file>
             <source>../resources/conf/log4j2.properties</source>
             <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
             </outputDirectory>
@@ -146,6 +150,11 @@
             <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
             </outputDirectory>
             <destName>config.toml</destName>
+        </file>
+        <file>
+            <source>../resources/conf/config.toml.template</source>
+            <outputDirectory>choreo-connect-${project.version}/docker-compose/choreo-connect-with-apim/conf
+            </outputDirectory>
         </file>
         <file>
             <source>../release-note.html</source>

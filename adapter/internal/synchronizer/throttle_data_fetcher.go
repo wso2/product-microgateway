@@ -23,7 +23,6 @@
 package synchronizer
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -32,13 +31,12 @@ import (
 	"time"
 
 	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
+	"github.com/wso2/product-microgateway/adapter/pkg/auth"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/throttle"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
-
-	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 )
 
 const (
@@ -57,9 +55,9 @@ var (
 
 // FetchThrottleData pulls the startup Throttle Data required for custom and blocking condition
 // based throttling. This request goes to traffic manager node.
-func FetchThrottleData(endpoint string, c chan SyncAPIResponse) {
+func FetchThrottleData(endpoint string, c chan sync.SyncAPIResponse) {
 	logger.LoggerSync.Infof("Fetching data from Traffic Manager. %v", endpoint)
-	respSyncAPI := SyncAPIResponse{}
+	respSyncAPI := sync.SyncAPIResponse{}
 
 	// Read configurations and derive the traffic manager endpoint details
 	conf, errReadConfig := config.ReadConfigs()
@@ -84,29 +82,12 @@ func FetchThrottleData(endpoint string, c chan SyncAPIResponse) {
 
 	// Check if TLS is enabled
 	skipSSL := ehConfigs.SkipSSLVerification
-	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
-	tr := &http.Transport{}
-	if !skipSSL {
-		_, _, truststoreLocation := restserver.GetKeyLocations()
-		caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	}
-
-	client := &http.Client{
-		Transport: tr,
-	}
 
 	req, err := http.NewRequest("GET", ehURL, nil)
-	req.Header.Set(authorization, basicAuth)
+	req.Header.Set(sync.Authorization, basicAuth)
 
 	logger.LoggerSync.Debug("Sending the throttle data request to Traffic Manager")
-	resp, err := client.Do(req)
+	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 	if err != nil {
 		logger.LoggerSync.Errorf("Error occurred while fetching data from Traffic manager: %v. %v", endpoint, err)
 		respSyncAPI.Err = err
@@ -149,7 +130,7 @@ func UpdateKeyTemplates() {
 	if errReadConfig != nil {
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
-	c := make(chan SyncAPIResponse)
+	c := make(chan sync.SyncAPIResponse)
 	go FetchThrottleData(keyTemplatesEndpoint, c)
 	for {
 		data := <-c
@@ -189,7 +170,7 @@ func UpdateBlockingConditions() {
 	if errReadConfig != nil {
 		logger.LoggerSync.Errorf("Error reading configs: %v", errReadConfig)
 	}
-	c := make(chan SyncAPIResponse)
+	c := make(chan sync.SyncAPIResponse)
 	go FetchThrottleData(blockingConditionsEndpoint, c)
 	for {
 		data := <-c

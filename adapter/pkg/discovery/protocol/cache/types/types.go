@@ -30,5 +30,6 @@ const (
 	KeyManagerConfig
 	RevokedTokens
 	ThrottleData
+	GAAPI
 	UnknownType // token to count the total number of supported types
 )

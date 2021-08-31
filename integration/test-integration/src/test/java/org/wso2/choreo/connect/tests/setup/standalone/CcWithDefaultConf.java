@@ -54,7 +54,7 @@ public class CcWithDefaultConf {
         ApictlUtils.createProject( "vhost2_openAPI.yaml", "vhost2_petstore", null, "vhost2_deploy_env.yaml");
         ApictlUtils.createProject( "openAPI_v3_standard_valid.yaml", "apictl_petstore_v3", null, null);
         ApictlUtils.createProject( "timeout_openAPI.yaml", "apictl_timeout_v3", null, null);
-
+        ApictlUtils.createProject( "malformed_endpoint_openAPI.yaml", "apictl_malformed_endpoint", null, null);
 
         ApictlUtils.addEnv("test");
         ApictlUtils.login("test");

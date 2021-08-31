@@ -23,7 +23,6 @@
 package synchronizer
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -32,11 +31,11 @@ import (
 	"time"
 
 	"github.com/wso2/product-microgateway/adapter/config"
-	restserver "github.com/wso2/product-microgateway/adapter/internal/api/restserver"
-	"github.com/wso2/product-microgateway/adapter/internal/auth"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	pkgAuth "github.com/wso2/product-microgateway/adapter/pkg/auth"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	sync "github.com/wso2/product-microgateway/adapter/pkg/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
@@ -72,28 +71,10 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 
 	ehUname := ehConfigs.Username
 	ehPass := ehConfigs.Password
-	basicAuth := "Basic " + auth.GetBasicAuth(ehUname, ehPass)
+	basicAuth := "Basic " + pkgAuth.GetBasicAuth(ehUname, ehPass)
 
 	// Check if TLS is enabled
 	skipSSL := ehConfigs.SkipSSLVerification
-	logger.LoggerSync.Debugf("Skip SSL Verification: %v", skipSSL)
-	tr := &http.Transport{}
-	if !skipSSL {
-		_, _, truststoreLocation := restserver.GetKeyLocations()
-		caCertPool := tlsutils.GetTrustedCertPool(truststoreLocation)
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: caCertPool},
-		}
-	} else {
-		tr = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	}
-
-	// Configuring the http client
-	client := &http.Client{
-		Transport: tr,
-	}
 
 	// Create a HTTP request
 	req, err := http.NewRequest("GET", ehURL, nil)
@@ -102,11 +83,11 @@ func FetchKeyManagersOnStartUp(conf *config.Config) {
 	}
 
 	// Setting authorization header
-	req.Header.Set(authorization, basicAuth)
+	req.Header.Set(sync.Authorization, basicAuth)
 
 	// Make the request
 	logger.LoggerSync.Debug("Sending the control plane request")
-	resp, err := client.Do(req)
+	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 	var errorMsg string
 	if err != nil {
 		errorMsg = "Error occurred while calling the REST API: " + keyManagersEndpoint

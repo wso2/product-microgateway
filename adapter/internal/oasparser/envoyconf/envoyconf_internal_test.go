@@ -34,7 +34,6 @@ import (
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/stretchr/testify/assert"
 	"github.com/wso2/product-microgateway/adapter/config"
-	mgwconfig "github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -240,8 +239,8 @@ func TestCreateRouteExtAuthzContext(t *testing.T) {
 }
 
 func TestGenerateTLSCert(t *testing.T) {
-	publicKeyPath := mgwconfig.GetMgwHome() + "/adapter/security/localhost.pem"
-	privateKeyPath := mgwconfig.GetMgwHome() + "/adapter/security/localhost.key"
+	publicKeyPath := config.GetMgwHome() + "/adapter/security/localhost.pem"
+	privateKeyPath := config.GetMgwHome() + "/adapter/security/localhost.key"
 
 	tlsCert := generateTLSCert(privateKeyPath, publicKeyPath)
 

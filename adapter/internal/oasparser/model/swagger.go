@@ -63,9 +63,8 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 					swagger2.Info.Title, swagger2.Info.Version)
 			}
 		}
-		rawURL := urlScheme + swagger2.Host + swagger2.BasePath
-		endpoint := getHostandBasepathandPort(rawURL)
-		if endpoint != nil {
+		endpoint, err := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
+		if err == nil {
 			swagger.productionUrls = append(swagger.productionUrls, *endpoint)
 		} else {
 			return errors.New("error encountered when parsing the endpoint")
@@ -183,7 +182,7 @@ func setOperationSwagger(path string, methods []Operation, pathItem spec.PathIte
 
 //SetInfoSwaggerWebSocket populates the mgwSwagger object for web sockets
 // TODO - (VirajSalaka) read cors config and populate mgwSwagger feild
-func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{}) {
+func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{}) error {
 
 	data := apiData["data"].(map[string]interface{})
 	// UUID in the generated api.yaml file is considerd as swagger.id
@@ -201,14 +200,23 @@ func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{
 	if endpointConfig["sandbox_endpoints"] != nil {
 		sandboxEndpoints := endpointConfig["sandbox_endpoints"].(map[string]interface{})
 		sandBoxURL := sandboxEndpoints["url"].(string)
-		sandBoxEndpoint := getHostandBasepathandPortWebSocket(sandBoxURL)
-		swagger.sandboxUrls = append(swagger.sandboxUrls, sandBoxEndpoint)
+		sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(sandBoxURL)
+		if err == nil {
+			swagger.sandboxUrls = append(swagger.sandboxUrls, *sandBoxEndpoint)
+		} else {
+			return err
+		}
 	}
 	if endpointConfig["production_endpoints"] != nil {
 		productionEndpoints := endpointConfig["production_endpoints"].(map[string]interface{})
 		productionURL := productionEndpoints["url"].(string)
-		productionEndpoint := getHostandBasepathandPortWebSocket(productionURL)
-		swagger.productionUrls = append(swagger.productionUrls, productionEndpoint)
+		productionEndpoint, err := getHostandBasepathandPortWebSocket(productionURL)
+		if err == nil {
+			swagger.productionUrls = append(swagger.productionUrls, *productionEndpoint)
+		} else {
+			return err
+		}
 	}
 
+	return nil
 }
