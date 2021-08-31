@@ -36,23 +36,21 @@ func handleAzureOrganizationPurge() {
 		//TODO
 		if error != nil {
 			logger.LoggerInternalMsg.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error while processing "+
-				"the token revocation event %v. Hence dropping the event", error)
+				"the organization purge event %v. Hence dropping the event", error)
 			continue
 		}
-		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] OrganizationPurge for Organizatino %s is received",
+		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] OrganizationPurge for Organization %s is received",
 			event.Event.PayloadData.Organization)
 
-		if event.Event.PayloadData.DoPurge {
-			conf, errReadConfig := config.ReadConfigs()
+		conf, errReadConfig := config.ReadConfigs()
 
-			if errReadConfig != nil {
-				log.Fatal("Error loading configuration. ", errReadConfig)
-			}
-
-			eventhub.LoadSubscriptionData(conf, nil)
-			synchronizer.FetchAPIsOnStartUp(conf, nil)
-			synchronizer.FetchKeyManagersOnStartUp(conf)
+		if errReadConfig != nil {
+			log.Fatal("Error loading configuration. ", errReadConfig)
 		}
+
+		eventhub.LoadSubscriptionData(conf, nil)
+		synchronizer.FetchAPIsOnStartUp(conf, nil)
+		synchronizer.FetchKeyManagersOnStartUp(conf)
 
 	}
 }
