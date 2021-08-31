@@ -94,16 +94,14 @@ public class AzureTraceExporter {
             Span span = tracer.getTracingTracer().spanBuilder(spanName).startSpan();
             return new TracingSpan(span);
         } else {
-            Object sp = parentSpan.getSpan();
             Span childSpan = null;
-            if (sp != null) {
-                if (sp instanceof io.opentelemetry.api.trace.Span) {
-                    childSpan = tracer.getTracingTracer().spanBuilder(spanName).setParent(Context.current().with((Span) sp)).startSpan();
-                }
-                return new TracingSpan(childSpan);
+            Span sp = parentSpan.getSpan();
+            if (sp != null && sp instanceof io.opentelemetry.api.trace.Span) {
+                childSpan = tracer.getTracingTracer().spanBuilder(spanName).setParent(Context.current().with((Span) sp)).startSpan();
+
             }
+            return new TracingSpan(childSpan);
         }
-        return null;
     }
 
     /**
@@ -113,11 +111,11 @@ public class AzureTraceExporter {
      * @param key   key
      * @param value value
      */
-    public static void setTag(TracingSpan span, String key, String value) {
+    public void setTag(TracingSpan span, String key, String value) {
 
-        Object sp = span.getSpan();
+        Span sp = span.getSpan();
         if (sp instanceof io.opentelemetry.api.trace.Span) {
-            ((Span) sp).setAttribute(key, value);
+            sp.setAttribute(key, value);
         }
     }
 
@@ -132,9 +130,9 @@ public class AzureTraceExporter {
      */
     public void finishSpan(TracingSpan span) {
 
-        Object sp = span.getSpan();
+        Span sp = span.getSpan();
         if (sp instanceof io.opentelemetry.api.trace.Span) {
-            ((io.opentelemetry.api.trace.Span) sp).end();
+            sp.end();
         }
     }
 

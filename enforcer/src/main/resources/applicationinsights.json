@@ -1,11 +1,23 @@
 {
-  "connectionString": "InstrumentationKey=e52808e3-d7e7-44fe-a102-eab3660bbeff;IngestionEndpoint=https://westus2-2.in.applicationinsights.azure.com/",
+  "connectionString": "",
   "role": {
-    "name": "my cloud role name"
+    "name": "choreo_connect_enforcer"
   },
   "sampling": {
-    "percentage": 100
+    "percentage": 33.333
   },
+  "heartbeat": {
+    "intervalSeconds": 900
+  },
+  "preview": {
+    "instrumentation": {
+      "azureSdk": {
+        "enabled": false
+      }
+    },
+    "metricIntervalSeconds": 60
+  },
+  "enableDependencyTracking": false,
   "instrumentation": {
     "logging": {
       "level": "WARN"
@@ -23,18 +35,6 @@
       "enabled": false
     },
     "kafka": {
-      "enabled": false
-    },
-    "micrometer": {
-      "enabled": false
-    },
-    "mongo": {
-      "enabled": false
-    },
-    "redis": {
-      "enabled": false
-    },
-    "springScheduling": {
       "enabled": false
     }
   }

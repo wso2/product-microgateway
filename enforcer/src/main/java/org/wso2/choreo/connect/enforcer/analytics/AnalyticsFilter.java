@@ -97,12 +97,13 @@ public class AnalyticsFilter {
 
     public void handleSuccessRequest(RequestContext requestContext) {
         TracingSpan analyticsSpan = null;
-        TracingTracer tracer = AzureTraceExporter.getInstance().getGlobalTracer();
+        AzureTraceExporter analyticsTraceExporter = AzureTraceExporter.getInstance();
         try {
-            analyticsSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.ANALYTICS_SPAN,
-                    requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
-            if (analyticsSpan != null) {
-                AzureTraceExporter.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
+            if (analyticsTraceExporter.tracingEnabled()) {
+                TracingTracer tracer = analyticsTraceExporter.getGlobalTracer();
+                analyticsSpan = analyticsTraceExporter.startSpan(TracingConstants.ANALYTICS_SPAN,
+                        requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+                analyticsTraceExporter.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String apiName = requestContext.getMatchedAPI().getAPIConfig().getName();
@@ -145,8 +146,8 @@ public class AnalyticsFilter {
             requestContext.addMetadataToMap(MetadataConstants.API_ORGANIZATION_ID,
                     requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
         } finally {
-            if (analyticsSpan != null) {
-                AzureTraceExporter.getInstance().finishSpan(analyticsSpan);
+            if (analyticsTraceExporter.tracingEnabled()) {
+                analyticsTraceExporter.finishSpan(analyticsSpan);
             }
         }
     }
@@ -167,13 +168,17 @@ public class AnalyticsFilter {
 
     public void handleFailureRequest(RequestContext requestContext) {
         TracingSpan analyticsSpan = null;
-        TracingTracer tracer = AzureTraceExporter.getInstance().getGlobalTracer();
+        AzureTraceExporter analyticsTraceExporter = AzureTraceExporter.getInstance();
+
         try {
-            analyticsSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.ANALYTICS_FAILURE_SPAN,
-                    requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
-            if (analyticsSpan != null) {
-                AzureTraceExporter.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
-                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
+            if (analyticsTraceExporter.tracingEnabled()) {
+                TracingTracer tracer = analyticsTraceExporter.getGlobalTracer();
+                analyticsSpan = analyticsTraceExporter.startSpan(TracingConstants.ANALYTICS_FAILURE_SPAN,
+                        requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+                if (analyticsSpan != null) {
+                    analyticsTraceExporter.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
+                            ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                }
             }
             if (publisher == null) {
                 logger.error("Cannot publish the failure event as analytics publisher is null.");
@@ -192,8 +197,8 @@ public class AnalyticsFilter {
                 logger.error("Error while publishing the analytics event. ", e);
             }
         } finally {
-            if (analyticsSpan != null) {
-                AzureTraceExporter.getInstance().finishSpan(analyticsSpan);
+            if (analyticsTraceExporter.tracingEnabled()) {
+                analyticsTraceExporter.finishSpan(analyticsSpan);
             }
         }
     }

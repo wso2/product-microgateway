@@ -20,7 +20,6 @@
 package org.wso2.choreo.connect.enforcer.tracing;
 
 import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanContext;
 
 /**
  * A Wrapper class for io.opentelemetry.api.trace Span
@@ -29,17 +28,12 @@ import io.opentelemetry.api.trace.SpanContext;
 public class TracingSpan {
 
     private Span span;
-    private SpanContext spanContext;
 
     public TracingSpan(Span span) {
         this.span = span;
     }
 
-    public TracingSpan(SpanContext spanContext) {
-        this.spanContext = spanContext;
-    }
-
-    public Object getSpan() {
-        return span == null ? spanContext : span;
+    public Span getSpan() {
+        return this.span;
     }
 }

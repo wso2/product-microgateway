@@ -88,10 +88,13 @@ public class ThrottleFilter implements Filter {
      */
     private boolean doThrottle(RequestContext reqContext) {
         TracingSpan doThrottleSpan = null;
-        TracingTracer tracer = AzureTraceExporter.getInstance().getGlobalTracer();
+        AzureTraceExporter throttleTraceExporter = AzureTraceExporter.getInstance();
         try {
-            doThrottleSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.DO_THROTTLE_SPAN, reqContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
-            AzureTraceExporter.setTag(doThrottleSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+            if (throttleTraceExporter.tracingEnabled()) {
+                TracingTracer tracer = throttleTraceExporter.getGlobalTracer();
+                doThrottleSpan = throttleTraceExporter.startSpan(TracingConstants.DO_THROTTLE_SPAN, reqContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+                throttleTraceExporter.setTag(doThrottleSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+            }
             AuthenticationContext authContext = reqContext.getAuthenticationContext();
 
             // TODO: (Praminda) Handle unauthenticated + subscription validation false scenarios
@@ -212,7 +215,10 @@ public class ThrottleFilter implements Filter {
             }
             return false;
         } finally {
-            AzureTraceExporter.getInstance().finishSpan(doThrottleSpan);
+            if (throttleTraceExporter.tracingEnabled()) {
+                throttleTraceExporter.finishSpan(doThrottleSpan);
+            }
+
         }
     }
 

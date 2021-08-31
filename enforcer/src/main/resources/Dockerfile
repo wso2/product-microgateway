@@ -42,6 +42,7 @@ ENV ADAPTER_XDS_PORT=18000
 ENV ENFORCER_LABEL="Default"
 ENV XDS_MAX_MSG_SIZE=4194304
 ENV XDS_MAX_RETRIES=3
+ENV APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=e52808e3-d7e7-44fe-a102-eab3660bbeff;IngestionEndpoint=https://westus2-2.in.applicationinsights.azure.com/
 
 ARG MOTD="\n\
  Welcome to WSO2 Docker Resources \n\

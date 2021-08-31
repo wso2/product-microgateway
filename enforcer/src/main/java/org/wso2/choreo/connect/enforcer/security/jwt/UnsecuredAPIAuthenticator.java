@@ -54,12 +54,13 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
         TracingSpan unsecuredApiAuthenticatorSpan = null;
+        AzureTraceExporter unsecuredApiTraceExporter = AzureTraceExporter.getInstance();
         try {
-            if (AzureTraceExporter.getInstance().tracingEnabled()) {
-                TracingTracer tracer =  AzureTraceExporter.getInstance().getGlobalTracer();
-                unsecuredApiAuthenticatorSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.UNSECURED_API_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+            if (unsecuredApiTraceExporter.tracingEnabled()) {
+                TracingTracer tracer =  unsecuredApiTraceExporter.getGlobalTracer();
+                unsecuredApiAuthenticatorSpan = unsecuredApiTraceExporter.startSpan(TracingConstants.UNSECURED_API_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
 
-                AzureTraceExporter.setTag(unsecuredApiAuthenticatorSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                unsecuredApiTraceExporter.setTag(unsecuredApiAuthenticatorSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String uuid = requestContext.getMatchedAPI().getAPIConfig().getUuid();
             String context = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
@@ -77,8 +78,8 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
             }
             return FilterUtils.generateAuthenticationContext(requestContext);
         } finally {
-            if (AzureTraceExporter.getInstance().tracingEnabled()) {
-                AzureTraceExporter.getInstance().finishSpan(unsecuredApiAuthenticatorSpan);
+            if (unsecuredApiTraceExporter.tracingEnabled()) {
+                unsecuredApiTraceExporter.finishSpan(unsecuredApiAuthenticatorSpan);
             }
         }
     }

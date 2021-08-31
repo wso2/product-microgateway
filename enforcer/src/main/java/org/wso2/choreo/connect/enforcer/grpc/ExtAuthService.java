@@ -53,16 +53,16 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
     @Override
     public void check(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
         TracingSpan extAuthServiceSpan = null;
+        AzureTraceExporter traceExporter = null;
         try {
             String traceId = request.getAttributes().getRequest().getHttp()
                     .getHeadersOrDefault(HttpConstants.X_REQUEST_ID_HEADER,
                             request.getAttributes().getRequest().getHttp().getId());
-            AzureTraceExporter traceExporter = AzureTraceExporter.getInstance();
+            traceExporter = AzureTraceExporter.getInstance();
             if (traceExporter.tracingEnabled()) {
                 TracingTracer tracer =  traceExporter.getGlobalTracer();
-                extAuthServiceSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, null, tracer);
-
-                AzureTraceExporter.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);
+                extAuthServiceSpan = traceExporter.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, null, tracer);
+                traceExporter.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);
             }
             ThreadContext.put(APIConstants.LOG_TRACE_ID, traceId);
             ResponseObject responseObject = requestHandler.process(request, extAuthServiceSpan);
@@ -72,8 +72,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             responseObserver.onCompleted();
             ThreadContext.remove(APIConstants.LOG_TRACE_ID);
         } finally {
-            if (AzureTraceExporter.getInstance().tracingEnabled()) {
-                AzureTraceExporter.getInstance().finishSpan(extAuthServiceSpan);
+            if (traceExporter.tracingEnabled()) {
+                traceExporter.finishSpan(extAuthServiceSpan);
             }
         }
 

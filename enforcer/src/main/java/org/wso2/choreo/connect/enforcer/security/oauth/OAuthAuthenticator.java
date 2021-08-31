@@ -100,14 +100,15 @@ public class OAuthAuthenticator implements Authenticator {
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
-        TracingTracer tracer = AzureTraceExporter.getInstance().getGlobalTracer();
+        AzureTraceExporter oauthTraceExporter = AzureTraceExporter.getInstance();
         TracingSpan oAuthSpan = null;
         try {
-            if (AzureTraceExporter.getInstance().tracingEnabled()) {
-                oAuthSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.OAUTH_AUTHENTICATOR_SPAN,
+            if (oauthTraceExporter.tracingEnabled()) {
+                TracingTracer tracer = oauthTraceExporter.getGlobalTracer();
+                oAuthSpan = oauthTraceExporter.startSpan(TracingConstants.OAUTH_AUTHENTICATOR_SPAN,
                         requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
                 if (oAuthSpan != null) {
-                    AzureTraceExporter.setTag(oAuthSpan, APIConstants.LOG_TRACE_ID,
+                    oauthTraceExporter.setTag(oAuthSpan, APIConstants.LOG_TRACE_ID,
                             ThreadContext.get(APIConstants.LOG_TRACE_ID));
                 }
             }
@@ -130,9 +131,9 @@ public class OAuthAuthenticator implements Authenticator {
 
             return new AuthenticationContext();
         } finally {
-            if (AzureTraceExporter.getInstance().tracingEnabled()) {
+            if (oauthTraceExporter.tracingEnabled()) {
                 if (oAuthSpan != null) {
-                    AzureTraceExporter.getInstance().finishSpan(oAuthSpan);
+                    oauthTraceExporter.finishSpan(oAuthSpan);
                 }
             }
         }

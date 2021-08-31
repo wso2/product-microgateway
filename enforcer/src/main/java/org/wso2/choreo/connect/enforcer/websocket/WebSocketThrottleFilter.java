@@ -67,14 +67,15 @@ public class WebSocketThrottleFilter implements Filter {
     }
 
     @Override public boolean handleRequest(RequestContext requestContext) {
-        TracingTracer tracer = AzureTraceExporter.getInstance().getGlobalTracer();
+        AzureTraceExporter websocketTraceExporter = AzureTraceExporter.getInstance();
         TracingSpan wsSpan = null;
         try {
-            if (AzureTraceExporter.getInstance().tracingEnabled()) {
-                wsSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.WS_THROTTLE_SPAN,
+            if (websocketTraceExporter.tracingEnabled()) {
+                TracingTracer tracer = websocketTraceExporter.getGlobalTracer();
+                wsSpan = websocketTraceExporter.startSpan(TracingConstants.WS_THROTTLE_SPAN,
                         requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
                 if (wsSpan != null) {
-                    AzureTraceExporter.setTag(wsSpan, APIConstants.LOG_TRACE_ID,
+                    websocketTraceExporter.setTag(wsSpan, APIConstants.LOG_TRACE_ID,
                             ThreadContext.get(APIConstants.LOG_TRACE_ID));
                 }
             }
@@ -86,9 +87,9 @@ public class WebSocketThrottleFilter implements Filter {
             ThrottleAgent.publishNonThrottledEvent(getThrottleEventMap(requestContext));
             return true;
         } finally {
-            if (AzureTraceExporter.getInstance().tracingEnabled()) {
+            if (websocketTraceExporter.tracingEnabled()) {
                 if (wsSpan != null) {
-                    AzureTraceExporter.getInstance().finishSpan(wsSpan);
+                    websocketTraceExporter.finishSpan(wsSpan);
                 }
             }
         }

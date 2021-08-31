@@ -45,14 +45,15 @@ public class CorsFilter implements Filter {
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
-        TracingTracer tracer = AzureTraceExporter.getInstance().getGlobalTracer();
+        AzureTraceExporter corsTraceExporter = AzureTraceExporter.getInstance();
         TracingSpan corsSpan = null;
         try {
-            if (AzureTraceExporter.getInstance().tracingEnabled()) {
-                corsSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.CORS_SPAN,
+            if (corsTraceExporter.tracingEnabled()) {
+                TracingTracer tracer = corsTraceExporter.getGlobalTracer();
+                corsSpan = corsTraceExporter.startSpan(TracingConstants.CORS_SPAN,
                         requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
                 if (corsSpan != null) {
-                    AzureTraceExporter.setTag(corsSpan, APIConstants.LOG_TRACE_ID,
+                    corsTraceExporter.setTag(corsSpan, APIConstants.LOG_TRACE_ID,
                             ThreadContext.get(APIConstants.LOG_TRACE_ID));
                 }
             }
@@ -83,9 +84,9 @@ public class CorsFilter implements Filter {
             }
             return true;
         } finally {
-            if (AzureTraceExporter.getInstance().tracingEnabled()) {
+            if (corsTraceExporter.tracingEnabled()) {
                 if (corsSpan != null) {
-                    AzureTraceExporter.getInstance().finishSpan(corsSpan);
+                    corsTraceExporter.finishSpan(corsSpan);
                 }
             }
         }
