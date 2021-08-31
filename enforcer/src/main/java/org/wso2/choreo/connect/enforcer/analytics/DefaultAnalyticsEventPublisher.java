@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
@@ -73,6 +74,12 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                 continue;
             }
             AnalyticsDataProvider provider = new ChoreoAnalyticsProvider(logEntry);
+            Latencies latencies = provider.getLatencies();
+            telemetry.trackMetric("responseLatency", latencies.getResponseLatency());
+            telemetry.trackMetric("responseMediationLatency", latencies.getResponseMediationLatency());
+            telemetry.trackMetric("requestMediationLatency", latencies.getRequestMediationLatency());
+            telemetry.trackMetric("backendLatency", latencies.getBackendLatency());
+
             // If the APIName is not available, the event should not be published.
             // 404 errors are not logged due to this.
             if (provider.getEventCategory() == EventCategory.FAULT
