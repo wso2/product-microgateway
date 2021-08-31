@@ -36,12 +36,20 @@ import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 public class AzureTraceExporter {
 
     private static final Logger LOGGER = LogManager.getLogger(AzureTraceExporter.class);
-    private static Tracer tracer;
-    private static Boolean isTracerInitialized = false;
-    private static boolean isTracingEnabled = false;
+    private Tracer tracer;
+    private boolean isTracerInitialized = false;
+    private boolean isTracingEnabled = false;
+    private static AzureTraceExporter azureTraceExporter;
 
     public AzureTraceExporter() {
-            initializeTracer();
+        initializeTracer();
+    }
+
+    public static AzureTraceExporter getInstance() {
+        if (azureTraceExporter == null) {
+            azureTraceExporter = new AzureTraceExporter();
+        }
+        return azureTraceExporter;
     }
 
     /**
@@ -80,7 +88,7 @@ public class AzureTraceExporter {
      * @param tracer     io.opentelemetry.api.trace.Span
      * @return a TracingSpan object
      */
-    public static TracingSpan startSpan(String spanName, TracingSpan parentSpan, TracingTracer tracer) {
+    public TracingSpan startSpan(String spanName, TracingSpan parentSpan, TracingTracer tracer) {
 
         if (parentSpan == null) {
             Span span = tracer.getTracingTracer().spanBuilder(spanName).startSpan();
@@ -122,7 +130,7 @@ public class AzureTraceExporter {
      *
      * @param span span that is to be finished
      */
-    public static void finishSpan(TracingSpan span) {
+    public void finishSpan(TracingSpan span) {
 
         Object sp = span.getSpan();
         if (sp instanceof io.opentelemetry.api.trace.Span) {
@@ -130,12 +138,12 @@ public class AzureTraceExporter {
         }
     }
 
-    public static TracingTracer getGlobalTracer() {
+    public TracingTracer getGlobalTracer() {
 
         return new TracingTracer(tracer);
     }
 
-    public static boolean tracingEnabled() {
+    public boolean tracingEnabled() {
 
         return isTracingEnabled;
     }

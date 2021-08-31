@@ -88,9 +88,9 @@ public class ThrottleFilter implements Filter {
      */
     private boolean doThrottle(RequestContext reqContext) {
         TracingSpan doThrottleSpan = null;
-        TracingTracer tracer = AzureTraceExporter.getGlobalTracer();
+        TracingTracer tracer = AzureTraceExporter.getInstance().getGlobalTracer();
         try {
-            doThrottleSpan = AzureTraceExporter.startSpan(TracingConstants.DO_THROTTLE_SPAN, reqContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+            doThrottleSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.DO_THROTTLE_SPAN, reqContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
             AzureTraceExporter.setTag(doThrottleSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
             AuthenticationContext authContext = reqContext.getAuthenticationContext();
 
@@ -212,7 +212,7 @@ public class ThrottleFilter implements Filter {
             }
             return false;
         } finally {
-            AzureTraceExporter.finishSpan(doThrottleSpan);
+            AzureTraceExporter.getInstance().finishSpan(doThrottleSpan);
         }
     }
 

@@ -57,10 +57,10 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             String traceId = request.getAttributes().getRequest().getHttp()
                     .getHeadersOrDefault(HttpConstants.X_REQUEST_ID_HEADER,
                             request.getAttributes().getRequest().getHttp().getId());
-            AzureTraceExporter traceExporter = new AzureTraceExporter();
+            AzureTraceExporter traceExporter = AzureTraceExporter.getInstance();
             if (traceExporter.tracingEnabled()) {
                 TracingTracer tracer =  traceExporter.getGlobalTracer();
-                extAuthServiceSpan = AzureTraceExporter.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, null, tracer);
+                extAuthServiceSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, null, tracer);
 
                 AzureTraceExporter.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);
             }
@@ -72,8 +72,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             responseObserver.onCompleted();
             ThreadContext.remove(APIConstants.LOG_TRACE_ID);
         } finally {
-            if (AzureTraceExporter.tracingEnabled()) {
-                AzureTraceExporter.finishSpan(extAuthServiceSpan);
+            if (AzureTraceExporter.getInstance().tracingEnabled()) {
+                AzureTraceExporter.getInstance().finishSpan(extAuthServiceSpan);
             }
         }
 

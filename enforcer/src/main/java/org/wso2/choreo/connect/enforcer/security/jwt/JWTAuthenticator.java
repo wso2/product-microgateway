@@ -97,9 +97,9 @@ public class JWTAuthenticator implements Authenticator {
         TracingSpan validateSubscriptionSpan = null;
         TracingSpan validateScopesSpan = null;
         try {
-            if (AzureTraceExporter.tracingEnabled()) {
-                tracer = AzureTraceExporter.getGlobalTracer();
-                jwtAuthenticatorInfoSpan = AzureTraceExporter.startSpan(TracingConstants.JWT_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+            if (AzureTraceExporter.getInstance().tracingEnabled()) {
+                tracer = AzureTraceExporter.getInstance().getGlobalTracer();
+                jwtAuthenticatorInfoSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.JWT_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
                 AzureTraceExporter.setTag(jwtAuthenticatorInfoSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String jwtToken = retrieveAuthHeaderValue(requestContext);
@@ -119,8 +119,8 @@ public class JWTAuthenticator implements Authenticator {
             ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
             SignedJWTInfo signedJWTInfo;
             try {
-                if (AzureTraceExporter.tracingEnabled()) {
-                    decodeTokenHeaderSpan = AzureTraceExporter.startSpan(TracingConstants.DECODE_TOKEN_HEADER_SPAN, jwtAuthenticatorInfoSpan, tracer);
+                if (AzureTraceExporter.getInstance().tracingEnabled()) {
+                    decodeTokenHeaderSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.DECODE_TOKEN_HEADER_SPAN, jwtAuthenticatorInfoSpan, tracer);
                     AzureTraceExporter.setTag(decodeTokenHeaderSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
                 }
                 signedJWTInfo = getSignedJwt(jwtToken);
@@ -130,8 +130,8 @@ public class JWTAuthenticator implements Authenticator {
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Not a JWT token. Failed to decode the token header", e);
             } finally {
-                if (AzureTraceExporter.tracingEnabled()) {
-                    AzureTraceExporter.finishSpan(decodeTokenHeaderSpan);
+                if (AzureTraceExporter.getInstance().tracingEnabled()) {
+                    AzureTraceExporter.getInstance().finishSpan(decodeTokenHeaderSpan);
                 }
             }
             JWTClaimsSet claims = signedJWTInfo.getJwtClaimsSet();
@@ -159,8 +159,8 @@ public class JWTAuthenticator implements Authenticator {
                     ExtendedTokenIssuerDto issuerDto = configuration.getIssuersMap().get(validationInfo.getIssuer());
 
                     if (issuerDto.isValidateSubscriptions()) {
-                        if (AzureTraceExporter.tracingEnabled()) {
-                            validateSubscriptionSpan = AzureTraceExporter.startSpan(TracingConstants.SUBSCRIPTION_VALIDATION_SPAN, jwtAuthenticatorInfoSpan, tracer);
+                        if (AzureTraceExporter.getInstance().tracingEnabled()) {
+                            validateSubscriptionSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.SUBSCRIPTION_VALIDATION_SPAN, jwtAuthenticatorInfoSpan, tracer);
                             AzureTraceExporter.setTag(validateSubscriptionSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
                         }
                         // if the token is self contained, validation subscription from `subscribedApis` claim
@@ -194,8 +194,8 @@ public class JWTAuthenticator implements Authenticator {
                                                 + "API Subscription validation failed.");
                             }
                         }
-                        if (AzureTraceExporter.tracingEnabled()) {
-                            AzureTraceExporter.finishSpan(validateSubscriptionSpan);
+                        if (AzureTraceExporter.getInstance().tracingEnabled()) {
+                            AzureTraceExporter.getInstance().finishSpan(validateSubscriptionSpan);
                         }
                     }
 
@@ -221,15 +221,15 @@ public class JWTAuthenticator implements Authenticator {
                                                     ':' + securityInfo.getPassword()).getBytes()));
                         }
                     }
-                    if (AzureTraceExporter.tracingEnabled()) {
-                        validateScopesSpan = AzureTraceExporter.startSpan(TracingConstants.SCOPES_VALIDATION_SPAN, jwtAuthenticatorInfoSpan, tracer);
+                    if (AzureTraceExporter.getInstance().tracingEnabled()) {
+                        validateScopesSpan = AzureTraceExporter.getInstance().startSpan(TracingConstants.SCOPES_VALIDATION_SPAN, jwtAuthenticatorInfoSpan, tracer);
                         AzureTraceExporter.setTag(validateScopesSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
                     }
 
                     // Validate scopes
                     validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
-                    if (AzureTraceExporter.tracingEnabled()) {
-                        AzureTraceExporter.finishSpan(validateScopesSpan);
+                    if (AzureTraceExporter.getInstance().tracingEnabled()) {
+                        AzureTraceExporter.getInstance().finishSpan(validateScopesSpan);
                     }
                     log.debug("JWT authentication successful.");
                     String endUserToken = null;
@@ -266,8 +266,8 @@ public class JWTAuthenticator implements Authenticator {
                         APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
             }
         } finally {
-            if (AzureTraceExporter.tracingEnabled()) {
-                AzureTraceExporter.finishSpan(jwtAuthenticatorInfoSpan);
+            if (AzureTraceExporter.getInstance().tracingEnabled()) {
+                AzureTraceExporter.getInstance().finishSpan(jwtAuthenticatorInfoSpan);
             }
         }
 
