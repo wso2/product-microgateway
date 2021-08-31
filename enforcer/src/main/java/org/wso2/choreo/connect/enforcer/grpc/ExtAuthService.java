@@ -22,6 +22,7 @@ import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 import com.google.rpc.Code;
 import com.google.rpc.Status;
+import com.microsoft.applicationinsights.TelemetryClient;
 import io.envoyproxy.envoy.config.core.v3.HeaderValue;
 import io.envoyproxy.envoy.config.core.v3.HeaderValueOption;
 import io.envoyproxy.envoy.service.auth.v3.AuthorizationGrpc;
@@ -34,6 +35,7 @@ import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
+import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
@@ -53,6 +55,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
     @Override
     public void check(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
         TracingSpan extAuthServiceSpan = null;
+        Long starTimestamp = System.currentTimeMillis();
         AzureTraceExporter traceExporter = null;
         try {
             String traceId = request.getAttributes().getRequest().getHttp()
@@ -74,6 +77,10 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
         } finally {
             if (traceExporter.tracingEnabled()) {
                 traceExporter.finishSpan(extAuthServiceSpan);
+            }
+            if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {
+                TelemetryClient telemetry = new TelemetryClient();
+                telemetry.trackMetric("enforcerLatency", System.currentTimeMillis() - starTimestamp);
             }
         }
 
