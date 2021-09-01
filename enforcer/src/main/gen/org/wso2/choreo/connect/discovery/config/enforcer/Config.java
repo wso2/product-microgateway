@@ -195,6 +195,19 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
+          case 98: {
+            org.wso2.choreo.connect.discovery.config.enforcer.Tracing.Builder subBuilder = null;
+            if (tracing_ != null) {
+              subBuilder = tracing_.toBuilder();
+            }
+            tracing_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Tracing.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(tracing_);
+              tracing_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -513,6 +526,32 @@ private static final long serialVersionUID = 0L;
     return getRestServer();
   }
 
+  public static final int TRACING_FIELD_NUMBER = 12;
+  private org.wso2.choreo.connect.discovery.config.enforcer.Tracing tracing_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+   * @return Whether the tracing field is set.
+   */
+  @java.lang.Override
+  public boolean hasTracing() {
+    return tracing_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+   * @return The tracing.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.Tracing getTracing() {
+    return tracing_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Tracing.getDefaultInstance() : tracing_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder getTracingOrBuilder() {
+    return getTracing();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -559,6 +598,9 @@ private static final long serialVersionUID = 0L;
     }
     if (restServer_ != null) {
       output.writeMessage(11, getRestServer());
+    }
+    if (tracing_ != null) {
+      output.writeMessage(12, getTracing());
     }
     unknownFields.writeTo(output);
   }
@@ -612,6 +654,10 @@ private static final long serialVersionUID = 0L;
     if (restServer_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(11, getRestServer());
+    }
+    if (tracing_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(12, getTracing());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -683,6 +729,11 @@ private static final long serialVersionUID = 0L;
       if (!getRestServer()
           .equals(other.getRestServer())) return false;
     }
+    if (hasTracing() != other.hasTracing()) return false;
+    if (hasTracing()) {
+      if (!getTracing()
+          .equals(other.getTracing())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -737,6 +788,10 @@ private static final long serialVersionUID = 0L;
     if (hasRestServer()) {
       hash = (37 * hash) + RESTSERVER_FIELD_NUMBER;
       hash = (53 * hash) + getRestServer().hashCode();
+    }
+    if (hasTracing()) {
+      hash = (37 * hash) + TRACING_FIELD_NUMBER;
+      hash = (53 * hash) + getTracing().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -941,6 +996,12 @@ private static final long serialVersionUID = 0L;
         restServer_ = null;
         restServerBuilder_ = null;
       }
+      if (tracingBuilder_ == null) {
+        tracing_ = null;
+      } else {
+        tracing_ = null;
+        tracingBuilder_ = null;
+      }
       return this;
     }
 
@@ -1022,6 +1083,11 @@ private static final long serialVersionUID = 0L;
       } else {
         result.restServer_ = restServerBuilder_.build();
       }
+      if (tracingBuilder_ == null) {
+        result.tracing_ = tracing_;
+      } else {
+        result.tracing_ = tracingBuilder_.build();
+      }
       onBuilt();
       return result;
     }
@@ -1102,6 +1168,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasRestServer()) {
         mergeRestServer(other.getRestServer());
+      }
+      if (other.hasTracing()) {
+        mergeTracing(other.getTracing());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -2439,6 +2508,125 @@ private static final long serialVersionUID = 0L;
         restServer_ = null;
       }
       return restServerBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.config.enforcer.Tracing tracing_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Tracing, org.wso2.choreo.connect.discovery.config.enforcer.Tracing.Builder, org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder> tracingBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     * @return Whether the tracing field is set.
+     */
+    public boolean hasTracing() {
+      return tracingBuilder_ != null || tracing_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     * @return The tracing.
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Tracing getTracing() {
+      if (tracingBuilder_ == null) {
+        return tracing_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Tracing.getDefaultInstance() : tracing_;
+      } else {
+        return tracingBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    public Builder setTracing(org.wso2.choreo.connect.discovery.config.enforcer.Tracing value) {
+      if (tracingBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        tracing_ = value;
+        onChanged();
+      } else {
+        tracingBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    public Builder setTracing(
+        org.wso2.choreo.connect.discovery.config.enforcer.Tracing.Builder builderForValue) {
+      if (tracingBuilder_ == null) {
+        tracing_ = builderForValue.build();
+        onChanged();
+      } else {
+        tracingBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    public Builder mergeTracing(org.wso2.choreo.connect.discovery.config.enforcer.Tracing value) {
+      if (tracingBuilder_ == null) {
+        if (tracing_ != null) {
+          tracing_ =
+            org.wso2.choreo.connect.discovery.config.enforcer.Tracing.newBuilder(tracing_).mergeFrom(value).buildPartial();
+        } else {
+          tracing_ = value;
+        }
+        onChanged();
+      } else {
+        tracingBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    public Builder clearTracing() {
+      if (tracingBuilder_ == null) {
+        tracing_ = null;
+        onChanged();
+      } else {
+        tracing_ = null;
+        tracingBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Tracing.Builder getTracingBuilder() {
+      
+      onChanged();
+      return getTracingFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder getTracingOrBuilder() {
+      if (tracingBuilder_ != null) {
+        return tracingBuilder_.getMessageOrBuilder();
+      } else {
+        return tracing_ == null ?
+            org.wso2.choreo.connect.discovery.config.enforcer.Tracing.getDefaultInstance() : tracing_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Tracing, org.wso2.choreo.connect.discovery.config.enforcer.Tracing.Builder, org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder> 
+        getTracingFieldBuilder() {
+      if (tracingBuilder_ == null) {
+        tracingBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.config.enforcer.Tracing, org.wso2.choreo.connect.discovery.config.enforcer.Tracing.Builder, org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder>(
+                getTracing(),
+                getParentForChildren(),
+                isClean());
+        tracing_ = null;
+      }
+      return tracingBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

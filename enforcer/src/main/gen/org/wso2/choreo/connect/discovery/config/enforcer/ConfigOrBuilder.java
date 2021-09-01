@@ -171,4 +171,19 @@ public interface ConfigOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.RestServerOrBuilder getRestServerOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+   * @return Whether the tracing field is set.
+   */
+  boolean hasTracing();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+   * @return The tracing.
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.Tracing getTracing();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder getTracingOrBuilder();
 }

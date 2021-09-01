@@ -123,6 +123,7 @@ type enforcer struct {
 	JwtIssuer    jwtIssuer
 	Management   management
 	RestServer   restServer
+	Tracing		 tracing
 }
 
 type server struct {
@@ -323,6 +324,13 @@ type analytics struct {
 	Enabled  bool `toml:"enabled"`
 	Adapter  analyticsAdapter
 	Enforcer analyticsEnforcer
+}
+
+type tracing struct {
+	Enabled  				bool 	`toml:"enabled"`
+	ConnectionString 		string 	`toml:"connectionString"`
+	InstrumentationName 	string 	`toml:"instrumentationName"`
+	MaximumTracesPerSecond 	int32 	`toml:"maximumTracesPerSecond"`
 }
 
 type analyticsAdapter struct {
