@@ -35,6 +35,10 @@ func startBrokerConsumer(subscriptionMetaData Subscription, reconnectInterval ti
 		dataChannel = AzureNotificationChannel
 	} else if strings.EqualFold(topicName, tokenRevocation) {
 		dataChannel = AzureRevokedTokenChannel
+	} else if strings.EqualFold(topicName, stepQuotaThreshold) {
+		dataChannel = AzureStepQuotaThresholdChannel
+	} else if strings.EqualFold(topicName, stepQuotaReset) {
+		dataChannel = AzureStepQuotaResetChannel
 	}
 	parentContext := context.Background()
 
