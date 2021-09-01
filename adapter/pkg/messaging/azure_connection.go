@@ -29,7 +29,7 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
-var bindingKeys = []string{tokenRevocation, notification}
+var bindingKeys = []string{tokenRevocation, notification, stepQuotaThreshold, stepQuotaReset}
 
 // Subscription stores the meta data of a specific subscription
 type Subscription struct {
@@ -43,11 +43,17 @@ var (
 	AzureRevokedTokenChannel chan []byte
 	// AzureNotificationChannel stores the notification events
 	AzureNotificationChannel chan []byte
+	// AzureStepQuotaThresholdChannel stores the step quota threshold events
+	AzureStepQuotaThresholdChannel chan []byte
+	// AzureStepQuotaResetChannel stores the step quota reset events
+	AzureStepQuotaResetChannel chan []byte
 )
 
 func init() {
 	AzureRevokedTokenChannel = make(chan []byte)
 	AzureNotificationChannel = make(chan []byte)
+	AzureStepQuotaThresholdChannel = make(chan []byte)
+	AzureStepQuotaResetChannel = make(chan []byte)
 }
 
 // InitiateBrokerConnectionAndValidate to initiate connection and validate azure service bus constructs to
