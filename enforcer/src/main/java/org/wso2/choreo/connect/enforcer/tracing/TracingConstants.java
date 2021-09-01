@@ -19,6 +19,9 @@
 
 package org.wso2.choreo.connect.enforcer.tracing;
 
+/**
+ * This class contains all the constants related to the tracing implementation with azure app insights
+ */
 public class TracingConstants {
 
     public static final String DO_THROTTLE_SPAN = "ThrottleFilter:doThrottle():Throttling function";

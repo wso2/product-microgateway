@@ -33,6 +33,9 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 
+/**
+ * This class is responsible for managing and exporting tracing spans
+ */
 public class AzureTraceExporter {
 
     private static final Logger LOGGER = LogManager.getLogger(AzureTraceExporter.class);
