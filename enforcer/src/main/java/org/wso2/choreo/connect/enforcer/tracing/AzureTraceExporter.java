@@ -59,7 +59,7 @@ public class AzureTraceExporter {
     /**
      * Method to initialize the tracer
      */
-    public void initializeTracer() {
+    private void initializeTracer() {
 
         TracingDTO tracingConfig = ConfigHolder.getInstance().getConfig().getTracingConfig();
         isTracingEnabled = tracingConfig.isTracingEnabled();
@@ -100,8 +100,8 @@ public class AzureTraceExporter {
         } else {
             Span childSpan = null;
             Span sp = parentSpan.getSpan();
-            if (sp != null && sp instanceof io.opentelemetry.api.trace.Span) {
-                childSpan = tracer.getTracingTracer().spanBuilder(spanName).setParent(Context.current().with((Span) sp)).startSpan();
+            if (sp != null) {
+                childSpan = tracer.getTracingTracer().spanBuilder(spanName).setParent(Context.current().with(sp)).startSpan();
 
             }
             return new TracingSpan(childSpan);
@@ -118,7 +118,7 @@ public class AzureTraceExporter {
     public void setTag(TracingSpan span, String key, String value) {
 
         Span sp = span.getSpan();
-        if (sp instanceof io.opentelemetry.api.trace.Span) {
+        if (sp != null) {
             sp.setAttribute(key, value);
         }
     }
@@ -135,7 +135,7 @@ public class AzureTraceExporter {
     public void finishSpan(TracingSpan span) {
 
         Span sp = span.getSpan();
-        if (sp instanceof io.opentelemetry.api.trace.Span) {
+        if (sp != null) {
             sp.end();
         }
     }
