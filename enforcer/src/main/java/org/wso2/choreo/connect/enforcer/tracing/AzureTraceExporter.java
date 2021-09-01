@@ -47,7 +47,11 @@ public class AzureTraceExporter {
 
     public static AzureTraceExporter getInstance() {
         if (azureTraceExporter == null) {
-            azureTraceExporter = new AzureTraceExporter();
+            synchronized (new Object()) {
+                if (azureTraceExporter == null) {
+                    azureTraceExporter = new AzureTraceExporter();
+                }
+            }
         }
         return azureTraceExporter;
     }
