@@ -55,7 +55,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
     @Override
     public void check(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
         TracingSpan extAuthServiceSpan = null;
-        Long starTimestamp = System.currentTimeMillis();
+        long starTimestamp = System.currentTimeMillis();
         AzureTraceExporter traceExporter = null;
         try {
             String traceId = request.getAttributes().getRequest().getHttp()
@@ -64,6 +64,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             traceExporter = AzureTraceExporter.getInstance();
             if (traceExporter.tracingEnabled()) {
                 TracingTracer tracer =  traceExporter.getGlobalTracer();
+                // This span will be the parent span for all the filters
                 extAuthServiceSpan = traceExporter.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, null, tracer);
                 traceExporter.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);
             }
