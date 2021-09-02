@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
 	"github.com/wso2/product-microgateway/adapter/config"
+	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	"github.com/wso2/product-microgateway/adapter/internal/eventhub"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
@@ -49,7 +50,14 @@ func handleAzureOrganizationPurge() {
 		}
 
 		eventhub.LoadSubscriptionData(conf, nil)
-		synchronizer.FetchAPIsOnStartUp(conf, nil)
+
+		//synchronizer.FetchAPIsOnStartUp(conf, nil)
+		err := xds.CleanUpAPIsForOrganization(event.Event.PayloadData.Organization)
+		if err != nil {
+			log.Fatal("Error clearing APIs for organization: " + event.Event.PayloadData.Organization)
+		}
+
+		synchronizer.ClearKeyManagerData()
 		synchronizer.FetchKeyManagersOnStartUp(conf)
 
 	}

@@ -599,6 +599,27 @@ func deleteAPI(apiIdentifier string, environments []string, organizationID strin
 	return nil
 }
 
+// CleanUpAPIsForOrganization cleans up all api artifacts related to a certain organization
+func CleanUpAPIsForOrganization(organizationID string) error {
+	logger.LoggerXds.Infof("Deleting APIs for the organization: %v", organizationID)
+
+	apiMapForOrganization := orgIDOpenAPIEnvoyMap[organizationID]
+
+	for apiIdentifier, envs := range apiMapForOrganization {
+		delete(orgIDOpenAPIRoutesMap[organizationID], apiIdentifier)
+		delete(orgIDOpenAPIClustersMap[organizationID], apiIdentifier)
+		delete(orgIDOpenAPIEndpointsMap[organizationID], apiIdentifier)
+		delete(orgIDOpenAPIEnforcerApisMap[organizationID], apiIdentifier)
+
+		updateXdsCacheOnAPIAdd(envs, []string{})
+
+		delete(orgIDOpenAPIEnvoyMap[organizationID], apiIdentifier)
+		delete(orgIDAPIMgwSwaggerMap[organizationID], apiIdentifier)
+	}
+	logger.LoggerXds.Infof("APIs deleted for the organization: %v", organizationID)
+	return nil
+}
+
 func arrayContains(a []string, x string) bool {
 	for _, n := range a {
 		if x == n {
