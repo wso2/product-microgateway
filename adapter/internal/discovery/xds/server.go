@@ -604,17 +604,13 @@ func CleanUpAPIsForOrganization(organizationID string) error {
 	logger.LoggerXds.Infof("Deleting APIs for the organization: %v", organizationID)
 
 	apiMapForOrganization := orgIDOpenAPIEnvoyMap[organizationID]
+	envs := make([]string, 0)
+	for apiIdentifier, _ := range apiMapForOrganization {
+		err := deleteAPI(apiIdentifier, envs, organizationID)
 
-	for apiIdentifier, envs := range apiMapForOrganization {
-		delete(orgIDOpenAPIRoutesMap[organizationID], apiIdentifier)
-		delete(orgIDOpenAPIClustersMap[organizationID], apiIdentifier)
-		delete(orgIDOpenAPIEndpointsMap[organizationID], apiIdentifier)
-		delete(orgIDOpenAPIEnforcerApisMap[organizationID], apiIdentifier)
-
-		updateXdsCacheOnAPIAdd(envs, []string{})
-
-		delete(orgIDOpenAPIEnvoyMap[organizationID], apiIdentifier)
-		delete(orgIDAPIMgwSwaggerMap[organizationID], apiIdentifier)
+		if err != nil {
+			return errors.New("Unable to delete API with identifier: " + apiIdentifier + " for organization: " + organizationID)
+		}
 	}
 	logger.LoggerXds.Infof("APIs deleted for the organization: %v", organizationID)
 	return nil

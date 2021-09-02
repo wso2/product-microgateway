@@ -34,7 +34,7 @@ func handleAzureOrganizationPurge() {
 			"OrganizationPurgeChannel = " + string(d))
 		var event msg.EventOrganizationPurge
 		error := parseOrganizationPurgeJSONEvent(d, &event)
-		//TODO
+
 		if error != nil {
 			logger.LoggerInternalMsg.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error while processing "+
 				"the organization purge event %v. Hence dropping the event", error)
@@ -52,12 +52,15 @@ func handleAzureOrganizationPurge() {
 		eventhub.LoadSubscriptionData(conf, nil)
 
 		//synchronizer.FetchAPIsOnStartUp(conf, nil)
+
 		err := xds.CleanUpAPIsForOrganization(event.Event.PayloadData.Organization)
 		if err != nil {
 			log.Fatal("Error clearing APIs for organization: " + event.Event.PayloadData.Organization)
 		}
 
+		// clear existing Key Manager Data
 		synchronizer.ClearKeyManagerData()
+		// Pull Key Manager Data from APIM
 		synchronizer.FetchKeyManagersOnStartUp(conf)
 
 	}
