@@ -241,7 +241,7 @@ func Run(conf *config.Config) {
 		}
 
 		var connectionURLList = conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints
-		if strings.Contains(amqpProtocol, connectionURLList[0]) {
+		if strings.Contains(connectionURLList[0], amqpProtocol) {
 			go messaging.ProcessEvents(conf)
 		} else {
 			messaging.InitiateAndProcessEvents(conf)
