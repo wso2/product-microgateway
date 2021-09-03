@@ -36,16 +36,17 @@ import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 /**
  * This class is responsible for managing and exporting tracing spans
  */
-public class AzureTraceExporter {
+public class AzureTraceExporter implements TracerBuilder {
 
     private static final Logger LOGGER = LogManager.getLogger(AzureTraceExporter.class);
     private Tracer tracer;
-    private boolean isTracerInitialized = false;
     private boolean isTracingEnabled = false;
     private static AzureTraceExporter azureTraceExporter;
 
     public AzureTraceExporter() {
-        initializeTracer();
+
+        TracingDTO tracingConfig = ConfigHolder.getInstance().getConfig().getTracingConfig();
+        init(tracingConfig);
     }
 
     public static AzureTraceExporter getInstance() {
@@ -60,14 +61,13 @@ public class AzureTraceExporter {
     }
 
     /**
-     * Method to initialize the tracer
+     * Initialize the tracer with AzureMonitorTraceExporter
      */
-    private void initializeTracer() {
+    @Override
+    public void init(TracingDTO tracingConfig) {
 
-        TracingDTO tracingConfig = ConfigHolder.getInstance().getConfig().getTracingConfig();
         isTracingEnabled = tracingConfig.isTracingEnabled();
-
-        if (isTracingEnabled && !isTracerInitialized) {
+        if (isTracingEnabled) {
             String connectionString = tracingConfig.getConnectionString();
             if (StringUtils.isEmpty(connectionString)) {
                 throw new RuntimeException("ConnectionString is mandatory when tracing is enabled");
@@ -81,8 +81,7 @@ public class AzureTraceExporter {
 
             OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                     .setTracerProvider(tracerProvider).buildAndRegisterGlobal();
-            isTracerInitialized = true;
-            LOGGER.debug("AzureTraceExporter is successfully initialized.");
+            LOGGER.debug("Exporting tracing data to Azure Monitor is enabled.");
             this.tracer = openTelemetrySdk.getTracer(tracingConfig.getInstrumentationName());
         }
     }
