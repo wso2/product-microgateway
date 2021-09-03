@@ -20,7 +20,6 @@ package adapter
 
 import (
 	"crypto/tls"
-	"strconv"
 	"strings"
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
@@ -74,8 +73,8 @@ var (
 )
 
 const (
-	ads                        = "ads"
-	featureFlagReplaceEventHub = "FEATURE_FLAG_REPLACE_EVENT_HUB"
+	ads          = "ads"
+	amqpProtocol = "amqp"
 )
 
 func init() {
@@ -240,25 +239,13 @@ func Run(conf *config.Config) {
 			// Fetch APIs at start up when GA is disabled.
 			fetchAPIsOnStartUp(conf, nil)
 		}
-		var isAzureEventingFeatureFlagEnabled bool
-		var err error
 
-		// TODO: (dnwick) remove env variable once the feature is complete
-		featureFlagReplaceEventHubEnvValue := os.Getenv(featureFlagReplaceEventHub)
-		if featureFlagReplaceEventHubEnvValue != "" {
-			isAzureEventingFeatureFlagEnabled, err = strconv.ParseBool(featureFlagReplaceEventHubEnvValue)
-			if err != nil {
-				logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while parsing "+
-					"FEATURE_FLAG_REPLACE_EVENT_HUB environment value.", err)
-			}
-		}
-
-		if isAzureEventingFeatureFlagEnabled {
-			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to integrate with azure service bus")
+		var connectionURLList = conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints
+		if strings.Contains(amqpProtocol, connectionURLList[0]) {
+			go messaging.ProcessEvents(conf)
+		} else {
 			messaging.InitiateAndProcessEvents(conf)
 		}
-
-		go messaging.ProcessEvents(conf)
 
 		go synchronizer.UpdateRevokedTokens()
 		// Fetch Key Managers from APIM

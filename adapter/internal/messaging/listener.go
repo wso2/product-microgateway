@@ -27,7 +27,7 @@ import (
 
 // ProcessEvents to pass event consumption
 func ProcessEvents(config *config.Config) {
-	err := msg.InitiateJMSConnection(config.ControlPlane.JmsConnectionParameters.EventListeningEndpoints)
+	err := msg.InitiateJMSConnection(config.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints)
 	health.SetControlPlaneBrokerStatus(err == nil)
 
 	go handleNotification()

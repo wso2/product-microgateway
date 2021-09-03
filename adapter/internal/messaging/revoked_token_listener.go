@@ -52,8 +52,8 @@ func handleAzureTokenRevocation() {
 			continue
 		}
 		logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.Type)
-		logger.LoggerInternalMsg.Printf("RevokedToken: %s, " +
-			"Token Type: %s", notification.Event.PayloadData.RevokedTokenotification.Event.PayloadData.Type)
+		logger.LoggerInternalMsg.Printf("RevokedToken: %s, Token Type: %s", notification.Event.PayloadData.RevokedToken,
+			notification.Event.PayloadData.Type)
 		processTokenRevocationEvent(&notification)
 	}
 }
