@@ -51,8 +51,6 @@ func handleAzureOrganizationPurge() {
 
 		eventhub.LoadSubscriptionData(conf, nil)
 
-		//synchronizer.FetchAPIsOnStartUp(conf, nil)
-
 		err := xds.CleanUpAPIsForOrganization(event.Event.PayloadData.Organization)
 		if err != nil {
 			log.Fatal("Error clearing APIs for organization: " + event.Event.PayloadData.Organization)
