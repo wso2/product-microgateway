@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.enforcer.websocket;
 
+import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -68,15 +69,15 @@ public class WebSocketThrottleFilter implements Filter {
 
     @Override public boolean handleRequest(RequestContext requestContext) {
         TracingSpan wsSpan = null;
+        Scope wsSpanScope = null;
         try {
             if (Utils.tracingEnabled()) {
                 TracingTracer tracer = Utils.getGlobalTracer();
-                wsSpan = Utils.startSpan(TracingConstants.WS_THROTTLE_SPAN,
-                        requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
-                if (wsSpan != null) {
-                    Utils.setTag(wsSpan, APIConstants.LOG_TRACE_ID,
-                            ThreadContext.get(APIConstants.LOG_TRACE_ID));
-                }
+                wsSpan = Utils.startSpan(TracingConstants.WS_THROTTLE_SPAN, tracer);
+                wsSpanScope = wsSpan.getSpan().makeCurrent();
+                Utils.setTag(wsSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
+
             }
             if (doThrottle(requestContext)) {
                 // breaking filter chain since request is throttled
@@ -87,9 +88,8 @@ public class WebSocketThrottleFilter implements Filter {
             return true;
         } finally {
             if (Utils.tracingEnabled()) {
-                if (wsSpan != null) {
-                    Utils.finishSpan(wsSpan);
-                }
+                wsSpanScope.close();
+                Utils.finishSpan(wsSpan);
             }
         }
 

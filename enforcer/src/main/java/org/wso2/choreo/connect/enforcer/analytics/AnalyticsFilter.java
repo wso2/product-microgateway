@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.enforcer.analytics;
 
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
+import io.opentelemetry.context.Scope;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -97,11 +98,12 @@ public class AnalyticsFilter {
 
     public void handleSuccessRequest(RequestContext requestContext) {
         TracingSpan analyticsSpan = null;
+        Scope analyticsSpanScope = null;
         try {
             if (Utils.tracingEnabled()) {
                 TracingTracer tracer = Utils.getGlobalTracer();
-                analyticsSpan = Utils.startSpan(TracingConstants.ANALYTICS_SPAN,
-                        requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+                analyticsSpan = Utils.startSpan(TracingConstants.ANALYTICS_SPAN, tracer);
+                analyticsSpanScope = analyticsSpan.getSpan().makeCurrent();
                 Utils.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
@@ -146,6 +148,7 @@ public class AnalyticsFilter {
                     requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
         } finally {
             if (Utils.tracingEnabled()) {
+                analyticsSpanScope.close();
                 Utils.finishSpan(analyticsSpan);
             }
         }
@@ -167,16 +170,16 @@ public class AnalyticsFilter {
 
     public void handleFailureRequest(RequestContext requestContext) {
         TracingSpan analyticsSpan = null;
+        Scope analyticsSpanScope = null;
 
         try {
             if (Utils.tracingEnabled()) {
                 TracingTracer tracer = Utils.getGlobalTracer();
-                analyticsSpan = Utils.startSpan(TracingConstants.ANALYTICS_FAILURE_SPAN,
-                        requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
-                if (analyticsSpan != null) {
-                    Utils.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
-                            ThreadContext.get(APIConstants.LOG_TRACE_ID));
-                }
+                analyticsSpan = Utils.startSpan(TracingConstants.ANALYTICS_FAILURE_SPAN, tracer);
+                analyticsSpanScope = analyticsSpan.getSpan().makeCurrent();
+                Utils.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
+
             }
             if (publisher == null) {
                 logger.error("Cannot publish the failure event as analytics publisher is null.");
@@ -196,6 +199,7 @@ public class AnalyticsFilter {
             }
         } finally {
             if (Utils.tracingEnabled()) {
+                analyticsSpanScope.close();
                 Utils.finishSpan(analyticsSpan);
             }
         }

@@ -22,6 +22,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import io.opentelemetry.context.Scope;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -73,8 +74,10 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
         TracingTracer tracer = null;
         TracingSpan apiKeyAuthenticatorSpan = null;
+        Scope apiKeyAuthenticatorSpanScope = null;
         TracingSpan apiKeyValidateSubscriptionSpan = null;
-        TracingSpan verifyInternalKeySpan = null;
+        TracingSpan verifyTokenInCacheSpan = null;
+        TracingSpan verifyTokenWithoutCacheSpan = null;
 
         if (requestContext.getMatchedAPI() != null) {
             if (log.isDebugEnabled()) {
@@ -84,7 +87,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
             try {
                 if (Utils.tracingEnabled()) {
                     tracer = Utils.getGlobalTracer();
-                    apiKeyAuthenticatorSpan = Utils.startSpan(TracingConstants.API_KEY_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+                    apiKeyAuthenticatorSpan = Utils.startSpan(TracingConstants.API_KEY_AUTHENTICATOR_SPAN, tracer);
+                    apiKeyAuthenticatorSpanScope = apiKeyAuthenticatorSpan.getSpan().makeCurrent();
                     Utils.setTag(apiKeyAuthenticatorSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
                 }
                 // Extract internal from the request while removing it from the msg context.
@@ -133,17 +137,22 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
                 boolean isVerified = false;
 
-                if (Utils.tracingEnabled()) {
-                    verifyInternalKeySpan = Utils.startSpan(TracingConstants.VERIFY_INTERNAL_KEY_SPAN, apiKeyAuthenticatorSpan, tracer);
-                    Utils.setTag(verifyInternalKeySpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
-                }
-
                 // Verify token when it is found in cache
                 JWTTokenPayloadInfo jwtTokenPayloadInfo = (JWTTokenPayloadInfo)
                         CacheProvider.getGatewayInternalKeyDataCache().getIfPresent(tokenIdentifier);
+                Scope verifyTokenInCacheSpanScope = null;
                 if (jwtTokenPayloadInfo != null) {
+                    if (Utils.tracingEnabled()) {
+                        verifyTokenInCacheSpan = Utils.startSpan(TracingConstants.VERIFY_INTERNAL_KEY_SPAN, tracer);
+                        verifyTokenInCacheSpanScope = verifyTokenInCacheSpan.getSpan().makeCurrent();
+                        Utils.setTag(verifyTokenInCacheSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                    }
                     String cachedToken = jwtTokenPayloadInfo.getAccessToken();
                     isVerified = cachedToken.equals(internalKey) && !isJwtTokenExpired(payload);
+                    if(Utils.tracingEnabled()) {
+                        verifyTokenInCacheSpanScope.close();
+                        Utils.finishSpan(verifyTokenInCacheSpan);
+                    }
                 } else if (CacheProvider.getInvalidGatewayInternalKeyCache().getIfPresent(tokenIdentifier) != null
                         && internalKey
                         .equals(CacheProvider.getInvalidGatewayInternalKeyCache().getIfPresent(tokenIdentifier))) {
@@ -157,8 +166,14 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
 
+                Scope verifyTokenWithoutCacheSpanScope = null;
                 // Verify token when it is not found in cache
                 if (!isVerified) {
+                    if (Utils.tracingEnabled()) {
+                        verifyTokenWithoutCacheSpan = Utils.startSpan(TracingConstants.VERIFY_INTERNAL_KEY_SPAN, tracer);
+                        verifyTokenWithoutCacheSpanScope = verifyTokenWithoutCacheSpan.getSpan().makeCurrent();
+                        Utils.setTag(verifyTokenInCacheSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                    }
                     if (log.isDebugEnabled()) {
                         log.debug("Internal Key not found in the cache.");
                     }
@@ -176,6 +191,11 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                         throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                    } finally {
+                        if (Utils.tracingEnabled()) {
+                            verifyTokenWithoutCacheSpanScope.close();
+                            Utils.finishSpan(verifyTokenWithoutCacheSpan);
+                        }
                     }
                 }
 
@@ -193,9 +213,10 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                         jwtTokenPayloadInfo.setAccessToken(internalKey);
                         CacheProvider.getGatewayInternalKeyDataCache().put(tokenIdentifier, jwtTokenPayloadInfo);
                     }
+                    Scope apiKeyValidateSubscriptionSpanScope = null;
                     if (Utils.tracingEnabled()) {
-                        Utils.finishSpan(verifyInternalKeySpan);
-                        apiKeyValidateSubscriptionSpan = Utils.startSpan(TracingConstants.API_KEY_VALIDATE_SUBSCRIPTION_SPAN, apiKeyAuthenticatorSpan, tracer);
+                        apiKeyValidateSubscriptionSpan = Utils.startSpan(TracingConstants.API_KEY_VALIDATE_SUBSCRIPTION_SPAN, tracer);
+                        apiKeyValidateSubscriptionSpanScope = apiKeyValidateSubscriptionSpan.getSpan().makeCurrent();
                         Utils.setTag(apiKeyValidateSubscriptionSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
                     }
                     JSONObject api = validateAPISubscription(apiContext, apiVersion, payload, splitToken,
@@ -204,6 +225,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                         log.debug("Internal Key authentication successful.");
                     }
                     if (Utils.tracingEnabled()) {
+                        apiKeyValidateSubscriptionSpanScope.close();
                         Utils.finishSpan(apiKeyValidateSubscriptionSpan);
                     }
                     return FilterUtils.generateAuthenticationContext(tokenIdentifier, payload, api,
@@ -222,6 +244,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 }
             } finally {
                 if (Utils.tracingEnabled()) {
+                    apiKeyAuthenticatorSpanScope.close();
                     Utils.finishSpan(apiKeyAuthenticatorSpan);
                 }
             }

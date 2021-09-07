@@ -33,7 +33,7 @@ public class Utils {
     private static boolean isTracingEnabled = false;
 
     /**
-     * Start the tracing span
+     * Start the tracing span with or without parent
      *
      * @param spanName   the name of the span
      * @param parentSpan the parent span
@@ -54,6 +54,19 @@ public class Utils {
             }
             return new TracingSpan(childSpan);
         }
+    }
+
+    /**
+     * Start the tracing span
+     *
+     * @param spanName   the name of the span
+     * @param tracer     io.opentelemetry.api.trace.Span
+     * @return a TracingSpan object
+     */
+    public static TracingSpan startSpan(String spanName, TracingTracer tracer) {
+
+        Span span = tracer.getTracingTracer().spanBuilder(spanName).startSpan();
+        return new TracingSpan(span);
     }
 
     /**

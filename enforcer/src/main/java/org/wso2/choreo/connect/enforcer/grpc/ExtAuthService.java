@@ -32,6 +32,7 @@ import io.envoyproxy.envoy.service.auth.v3.DeniedHttpResponse;
 import io.envoyproxy.envoy.service.auth.v3.OkHttpResponse;
 import io.envoyproxy.envoy.type.v3.HttpStatus;
 import io.grpc.stub.StreamObserver;
+import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
@@ -55,6 +56,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
     @Override
     public void check(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
         TracingSpan extAuthServiceSpan = null;
+        Scope extAuthServiceSpanScope = null;
         long starTimestamp = System.currentTimeMillis();
         try {
             String traceId = request.getAttributes().getRequest().getHttp()
@@ -63,7 +65,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             if (Utils.tracingEnabled()) {
                 TracingTracer tracer =  Utils.getGlobalTracer();
                 // This span will be the parent span for all the filters
-                extAuthServiceSpan = Utils.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, null, tracer);
+                extAuthServiceSpan = Utils.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, tracer);
+                extAuthServiceSpanScope = extAuthServiceSpan.getSpan().makeCurrent();
                 Utils.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);
             }
             ThreadContext.put(APIConstants.LOG_TRACE_ID, traceId);
@@ -75,6 +78,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             ThreadContext.remove(APIConstants.LOG_TRACE_ID);
         } finally {
             if (Utils.tracingEnabled()) {
+                extAuthServiceSpanScope.close();
                 Utils.finishSpan(extAuthServiceSpan);
             }
             if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {

@@ -21,6 +21,7 @@ import com.google.common.cache.LoadingCache;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
+import io.opentelemetry.context.Scope;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -94,12 +95,15 @@ public class JWTAuthenticator implements Authenticator {
         TracingTracer tracer = null;
         TracingSpan decodeTokenHeaderSpan = null;
         TracingSpan jwtAuthenticatorInfoSpan = null;
+        Scope jwtAuthenticatorInfoSpanScope = null;
         TracingSpan validateSubscriptionSpan = null;
         TracingSpan validateScopesSpan = null;
+
         try {
             if (Utils.tracingEnabled()) {
                 tracer = Utils.getGlobalTracer();
-                jwtAuthenticatorInfoSpan = Utils.startSpan(TracingConstants.JWT_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+                jwtAuthenticatorInfoSpan = Utils.startSpan(TracingConstants.JWT_AUTHENTICATOR_SPAN, tracer);
+                jwtAuthenticatorInfoSpanScope = jwtAuthenticatorInfoSpan.getSpan().makeCurrent();
                 Utils.setTag(jwtAuthenticatorInfoSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String jwtToken = retrieveAuthHeaderValue(requestContext);
@@ -118,9 +122,11 @@ public class JWTAuthenticator implements Authenticator {
             context = context + "/" + version;
             ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
             SignedJWTInfo signedJWTInfo;
+            Scope decodeTokenHeaderSpanScope = null;
             try {
                 if (Utils.tracingEnabled()) {
-                    decodeTokenHeaderSpan = Utils.startSpan(TracingConstants.DECODE_TOKEN_HEADER_SPAN, jwtAuthenticatorInfoSpan, tracer);
+                    decodeTokenHeaderSpan = Utils.startSpan(TracingConstants.DECODE_TOKEN_HEADER_SPAN, tracer);
+                    decodeTokenHeaderSpanScope = decodeTokenHeaderSpan.getSpan().makeCurrent();
                     Utils.setTag(decodeTokenHeaderSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
                 }
                 signedJWTInfo = getSignedJwt(jwtToken);
@@ -131,6 +137,7 @@ public class JWTAuthenticator implements Authenticator {
                         "Not a JWT token. Failed to decode the token header", e);
             } finally {
                 if (Utils.tracingEnabled()) {
+                    decodeTokenHeaderSpanScope.close();
                     Utils.finishSpan(decodeTokenHeaderSpan);
                 }
             }
@@ -157,44 +164,49 @@ public class JWTAuthenticator implements Authenticator {
                     APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
                     EnforcerConfig configuration = ConfigHolder.getInstance().getConfig();
                     ExtendedTokenIssuerDto issuerDto = configuration.getIssuersMap().get(validationInfo.getIssuer());
-
-                    if (issuerDto.isValidateSubscriptions()) {
-                        if (Utils.tracingEnabled()) {
-                            validateSubscriptionSpan = Utils.startSpan(TracingConstants.SUBSCRIPTION_VALIDATION_SPAN, jwtAuthenticatorInfoSpan, tracer);
-                            Utils.setTag(validateSubscriptionSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
-                        }
-                        // if the token is self contained, validation subscription from `subscribedApis` claim
-                        JSONObject api = validateSubscriptionFromClaim(name, version, claims, splitToken,
-                                apiKeyValidationInfoDTO, true);
-                        if (api == null) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Begin subscription validation via Key Manager: "
-                                        + validationInfo.getKeyManager());
+                    Scope validateSubscriptionSpanScope = null;
+                    try {
+                        if (issuerDto.isValidateSubscriptions()) {
+                            if (Utils.tracingEnabled()) {
+                                validateSubscriptionSpan = Utils.startSpan(TracingConstants.SUBSCRIPTION_VALIDATION_SPAN, tracer);
+                                validateSubscriptionSpanScope = validateSubscriptionSpan.getSpan().makeCurrent();
+                                Utils.setTag(validateSubscriptionSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
                             }
-                            apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, validationInfo);
-
-                            if (log.isDebugEnabled()) {
-                                log.debug("Subscription validation via Key Manager. Status: " + apiKeyValidationInfoDTO
-                                        .isAuthorized());
-                            }
-                            if (!apiKeyValidationInfoDTO.isAuthorized()) {
-                                if (GeneralErrorCodeConstants.API_BLOCKED_CODE == apiKeyValidationInfoDTO
-                                        .getValidationStatus()) {
-                                    requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
-                                            GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
-                                    requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
-                                            GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
-                                    throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
-                                            apiKeyValidationInfoDTO.getValidationStatus(),
-                                            GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                            // if the token is self contained, validation subscription from `subscribedApis` claim
+                            JSONObject api = validateSubscriptionFromClaim(name, version, claims, splitToken,
+                                    apiKeyValidationInfoDTO, true);
+                            if (api == null) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Begin subscription validation via Key Manager: "
+                                            + validationInfo.getKeyManager());
                                 }
-                                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
-                                        apiKeyValidationInfoDTO.getValidationStatus(),
-                                        "User is NOT authorized to access the Resource. "
-                                                + "API Subscription validation failed.");
+                                apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, validationInfo);
+
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Subscription validation via Key Manager. Status: " + apiKeyValidationInfoDTO
+                                            .isAuthorized());
+                                }
+                                if (!apiKeyValidationInfoDTO.isAuthorized()) {
+                                    if (GeneralErrorCodeConstants.API_BLOCKED_CODE == apiKeyValidationInfoDTO
+                                            .getValidationStatus()) {
+                                        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                                                GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                                        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                                                GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
+                                        throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
+                                                apiKeyValidationInfoDTO.getValidationStatus(),
+                                                GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                                    }
+                                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                                            apiKeyValidationInfoDTO.getValidationStatus(),
+                                            "User is NOT authorized to access the Resource. "
+                                                    + "API Subscription validation failed.");
+                                }
                             }
                         }
+                    } finally {
                         if (Utils.tracingEnabled()) {
+                            validateSubscriptionSpanScope.close();
                             Utils.finishSpan(validateSubscriptionSpan);
                         }
                     }
@@ -221,15 +233,20 @@ public class JWTAuthenticator implements Authenticator {
                                                     ':' + securityInfo.getPassword()).getBytes()));
                         }
                     }
-                    if (Utils.tracingEnabled()) {
-                        validateScopesSpan = Utils.startSpan(TracingConstants.SCOPES_VALIDATION_SPAN, jwtAuthenticatorInfoSpan, tracer);
-                        Utils.setTag(validateScopesSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
-                    }
-
-                    // Validate scopes
-                    validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
-                    if (Utils.tracingEnabled()) {
-                        Utils.finishSpan(validateScopesSpan);
+                    Scope validateScopesSpanScope = null;
+                    try {
+                        if (Utils.tracingEnabled()) {
+                            validateScopesSpan = Utils.startSpan(TracingConstants.SCOPES_VALIDATION_SPAN, tracer);
+                            validateScopesSpanScope = validateScopesSpan.getSpan().makeCurrent();
+                            Utils.setTag(validateScopesSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                        }
+                        // Validate scopes
+                        validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
+                    } finally {
+                        if (Utils.tracingEnabled()) {
+                            validateScopesSpanScope.close();
+                            Utils.finishSpan(validateScopesSpan);
+                        }
                     }
                     log.debug("JWT authentication successful.");
                     String endUserToken = null;
@@ -267,6 +284,7 @@ public class JWTAuthenticator implements Authenticator {
             }
         } finally {
             if (Utils.tracingEnabled()) {
+                jwtAuthenticatorInfoSpanScope.close();
                 Utils.finishSpan(jwtAuthenticatorInfoSpan);
             }
         }

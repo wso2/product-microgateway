@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.enforcer.security.jwt;
 
+import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
@@ -54,11 +55,12 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
         TracingSpan unsecuredApiAuthenticatorSpan = null;
+        Scope unsecuredApiAuthenticatorSpanScope = null;
         try {
             if (Utils.tracingEnabled()) {
-                TracingTracer tracer =  Utils.getGlobalTracer();
-                unsecuredApiAuthenticatorSpan = Utils.startSpan(TracingConstants.UNSECURED_API_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
-
+                TracingTracer tracer = Utils.getGlobalTracer();
+                unsecuredApiAuthenticatorSpan = Utils.startSpan(TracingConstants.UNSECURED_API_AUTHENTICATOR_SPAN, tracer);
+                unsecuredApiAuthenticatorSpanScope = unsecuredApiAuthenticatorSpan.getSpan().makeCurrent();
                 Utils.setTag(unsecuredApiAuthenticatorSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String uuid = requestContext.getMatchedAPI().getAPIConfig().getUuid();
@@ -78,6 +80,7 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
             return FilterUtils.generateAuthenticationContext(requestContext);
         } finally {
             if (Utils.tracingEnabled()) {
+                unsecuredApiAuthenticatorSpanScope.close();
                 Utils.finishSpan(unsecuredApiAuthenticatorSpan);
             }
         }

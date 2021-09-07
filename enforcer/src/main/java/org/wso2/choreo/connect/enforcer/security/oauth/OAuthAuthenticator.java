@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.enforcer.security.oauth;
 
 import com.google.gson.Gson;
+import io.opentelemetry.context.Scope;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -101,15 +102,14 @@ public class OAuthAuthenticator implements Authenticator {
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
         TracingSpan oAuthSpan = null;
+        Scope oAuthSpanScope = null;
         try {
             if (Utils.tracingEnabled()) {
                 TracingTracer tracer = Utils.getGlobalTracer();
-                oAuthSpan = Utils.startSpan(TracingConstants.OAUTH_AUTHENTICATOR_SPAN,
-                        requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
-                if (oAuthSpan != null) {
-                    Utils.setTag(oAuthSpan, APIConstants.LOG_TRACE_ID,
-                            ThreadContext.get(APIConstants.LOG_TRACE_ID));
-                }
+                oAuthSpan = Utils.startSpan(TracingConstants.OAUTH_AUTHENTICATOR_SPAN, tracer);
+                oAuthSpanScope = oAuthSpan.getSpan().makeCurrent();
+                Utils.setTag(oAuthSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String token = requestContext.getHeaders().get("authorization");
             AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
@@ -131,9 +131,8 @@ public class OAuthAuthenticator implements Authenticator {
             return new AuthenticationContext();
         } finally {
             if (Utils.tracingEnabled()) {
-                if (oAuthSpan != null) {
-                    Utils.finishSpan(oAuthSpan);
-                }
+                oAuthSpanScope.close();
+                Utils.finishSpan(oAuthSpan);
             }
         }
     }

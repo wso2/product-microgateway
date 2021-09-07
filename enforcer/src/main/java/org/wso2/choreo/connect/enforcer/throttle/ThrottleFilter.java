@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.enforcer.throttle;
 
+import io.opentelemetry.context.Scope;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,10 +89,12 @@ public class ThrottleFilter implements Filter {
      */
     private boolean doThrottle(RequestContext reqContext) {
         TracingSpan doThrottleSpan = null;
+        Scope doThrottleSpanScope = null;
         try {
             if (Utils.tracingEnabled()) {
                 TracingTracer tracer = Utils.getGlobalTracer();
-                doThrottleSpan = Utils.startSpan(TracingConstants.DO_THROTTLE_SPAN, reqContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+                doThrottleSpan = Utils.startSpan(TracingConstants.DO_THROTTLE_SPAN, tracer);
+                doThrottleSpanScope = doThrottleSpan.getSpan().makeCurrent();
                 Utils.setTag(doThrottleSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             AuthenticationContext authContext = reqContext.getAuthenticationContext();
@@ -215,6 +218,7 @@ public class ThrottleFilter implements Filter {
             return false;
         } finally {
             if (Utils.tracingEnabled()) {
+                doThrottleSpanScope.close();
                 Utils.finishSpan(doThrottleSpan);
             }
 

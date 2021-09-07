@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.enforcer.cors;
 
+import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -46,15 +47,15 @@ public class CorsFilter implements Filter {
     @Override
     public boolean handleRequest(RequestContext requestContext) {
         TracingSpan corsSpan = null;
+        Scope corsSpanScope = null;
         try {
             if (Utils.tracingEnabled()) {
                 TracingTracer tracer = Utils.getGlobalTracer();
-                corsSpan = Utils.startSpan(TracingConstants.CORS_SPAN,
-                        requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
-                if (corsSpan != null) {
-                    Utils.setTag(corsSpan, APIConstants.LOG_TRACE_ID,
-                            ThreadContext.get(APIConstants.LOG_TRACE_ID));
-                }
+                corsSpan = Utils.startSpan(TracingConstants.CORS_SPAN, tracer);
+                corsSpanScope = corsSpan.getSpan().makeCurrent();
+                Utils.setTag(corsSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
+
             }
             logger.debug("Cors Filter (enforcer) is applied.");
             // Options request is served here.
@@ -84,9 +85,9 @@ public class CorsFilter implements Filter {
             return true;
         } finally {
             if (Utils.tracingEnabled()) {
-                if (corsSpan != null) {
-                    Utils.finishSpan(corsSpan);
-                }
+                corsSpanScope.close();
+                Utils.finishSpan(corsSpan);
+
             }
         }
     }
