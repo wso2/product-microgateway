@@ -74,9 +74,24 @@ public class ThrottleFilter implements Filter {
             // breaking filter chain since request is throttled
             return false;
         }
+        TracingSpan publishThrottleEventSpan = null;
+        Scope publishThrottleEventSpanScope = null;
+        try {
+            if (Utils.tracingEnabled()) {
+                TracingTracer tracer = Utils.getGlobalTracer();
+                publishThrottleEventSpan = Utils.startSpan(TracingConstants.DO_THROTTLE_SPAN, tracer);
+                publishThrottleEventSpanScope = publishThrottleEventSpan.getSpan().makeCurrent();
+                Utils.setTag(publishThrottleEventSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+            }
+            // publish throttle event and continue the filter chain
+            ThrottleAgent.publishNonThrottledEvent(getThrottleEventMap(requestContext));
+        } finally {
+            if (Utils.tracingEnabled()) {
+                publishThrottleEventSpanScope.close();
+                Utils.finishSpan(publishThrottleEventSpan);
+            }
+        }
 
-        // publish throttle event and continue the filter chain
-        ThrottleAgent.publishNonThrottledEvent(getThrottleEventMap(requestContext));
         return true;
     }
 
