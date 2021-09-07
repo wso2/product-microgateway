@@ -446,3 +446,8 @@ enable = true
     instrumentationName = "WSO2-CHOREO"
     # Maximum number of sampled traces per second string
     maximumTracesPerSecond = "2"
+
+# Metrics configurations for Choreo Connect
+[enforcer.metrics]
+  # Enable/Disable metrics in Choreo Connect
+  enabled = true

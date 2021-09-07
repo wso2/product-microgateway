@@ -31,4 +31,8 @@ public class ConfigDefaults {
     //Tracing related default values
     public static final boolean TRACING_ENABLED_VALUE = false;
     public static final String AZURE_TRACE_EXPORTER = "azureTraceExporter";
+
+    //Metrics related default values
+    public static final boolean METRICS_ENABLED_VALUE = false;
+    public static final String METRICS_TYPE_VALUE = "azure";
 }

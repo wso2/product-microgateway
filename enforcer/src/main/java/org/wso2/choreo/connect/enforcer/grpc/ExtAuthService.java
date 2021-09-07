@@ -39,6 +39,8 @@ import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.enforcer.metrics.MetricsExporter;
+import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
 import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
@@ -81,9 +83,9 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 extAuthServiceSpanScope.close();
                 Utils.finishSpan(extAuthServiceSpan);
             }
-            if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {
-                TelemetryClient telemetry = new TelemetryClient();
-                telemetry.trackMetric("enforcerLatency", System.currentTimeMillis() - starTimestamp);
+            if (MetricsManager.isMetricsEnabled()) {
+                MetricsExporter metricsExporter = MetricsManager.getInstance();
+                metricsExporter.trackMetric("enforcerLatency", System.currentTimeMillis() - starTimestamp);
             }
         }
 

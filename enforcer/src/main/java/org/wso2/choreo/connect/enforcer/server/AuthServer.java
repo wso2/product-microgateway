@@ -41,6 +41,7 @@ import org.wso2.choreo.connect.enforcer.grpc.HealthService;
 import org.wso2.choreo.connect.enforcer.grpc.WebSocketFrameService;
 import org.wso2.choreo.connect.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
+import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleAgent;
@@ -109,6 +110,9 @@ public class AuthServer {
             } else {
                 logger.debug("Tracing is disabled.");
             }
+
+            //Initialize metrics
+            MetricsManager.initializeMetrics();
 
             //Initialise cache objects
             CacheProvider.init();

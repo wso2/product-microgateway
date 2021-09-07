@@ -13,6 +13,7 @@ import "wso2/discovery/config/enforcer/security.proto";
 import "wso2/discovery/config/enforcer/management.proto";
 import "wso2/discovery/config/enforcer/rest_server.proto";
 import "wso2/discovery/config/enforcer/tracing.proto";
+import "wso2/discovery/config/enforcer/metrics.proto";
 
 option go_package = "github.com/envoyproxy/go-control-plane/wso2/discovery/config/enforcer;enforcer";
 option java_package = "org.wso2.choreo.connect.discovery.config.enforcer";
@@ -46,4 +47,6 @@ message Config {
     RestServer restServer = 11;
 
     Tracing tracing = 12;
+
+    Metrics metrics = 13;
 }
