@@ -79,7 +79,7 @@ public class ThrottleFilter implements Filter {
         try {
             if (Utils.tracingEnabled()) {
                 TracingTracer tracer = Utils.getGlobalTracer();
-                publishThrottleEventSpan = Utils.startSpan(TracingConstants.DO_THROTTLE_SPAN, tracer);
+                publishThrottleEventSpan = Utils.startSpan(TracingConstants.PUBLISH_THROTTLE_EVENT_SPAN, tracer);
                 publishThrottleEventSpanScope = publishThrottleEventSpan.getSpan().makeCurrent();
                 Utils.setTag(publishThrottleEventSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }

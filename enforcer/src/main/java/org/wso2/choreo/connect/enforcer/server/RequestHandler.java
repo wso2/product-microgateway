@@ -26,6 +26,6 @@ package org.wso2.choreo.connect.enforcer.server;
  * @param <S> Response type
  * e.g - HttpRequestHandler implements RequestHandler<CheckRequest,ResponseObject>
  */
-public interface RequestHandler<T, S, O> {
-    S process(T request, O TracingSpan);
+public interface RequestHandler<T, S> {
+    S process(T request);
 }

@@ -438,11 +438,11 @@ enable = true
   # Enable/Disable tracing in Choreo Connect
   enabled = true
   # Type of tracer exporter (e.g: azure, jaeger)
-  type = azure
+  type = "azure"
   [enforcer.tracing.configProperties]
-  # Exporter ConnectionString
-  connectionString = "$env{APPLICATIONINSIGHTS_CONNECTION_STRING}"
-  # Instrumentation Name
-  instrumentationName = "WSO2-CHOREO"
-  # Maximum number of sampled traces per second string
-  maximumTracesPerSecond = "2"
+    # Exporter ConnectionString
+    connectionString = "$env{APPLICATIONINSIGHTS_CONNECTION_STRING}"
+    # Instrumentation Name
+    instrumentationName = "WSO2-CHOREO"
+    # Maximum number of sampled traces per second string
+    maximumTracesPerSecond = "2"

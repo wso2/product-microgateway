@@ -70,7 +70,7 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
                 Utils.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);
             }
             ThreadContext.put(APIConstants.LOG_TRACE_ID, traceId);
-            ResponseObject responseObject = requestHandler.process(request, extAuthServiceSpan);
+            ResponseObject responseObject = requestHandler.process(request);
             CheckResponse response = buildResponse(request, responseObject);
             responseObserver.onNext(response);
             // When you are done, you must call onCompleted.

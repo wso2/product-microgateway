@@ -74,7 +74,7 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
                     WebSocketFrameRequest webSocketFrameRequestClone = webSocketFrameRequest.toBuilder()
                             .setFrameLength(framedata.getPayloadData().remaining()).build();
                     WebSocketThrottleResponse webSocketThrottleResponse = webSocketHandler
-                            .process(webSocketFrameRequestClone, null);
+                            .process(webSocketFrameRequestClone);
                     if (WebSocketThrottleState.OK == webSocketThrottleResponse.getWebSocketThrottleState()) {
                         WebSocketFrameResponse response = WebSocketFrameResponse.newBuilder().setThrottleState(
                                 WebSocketFrameResponse.Code.OK).build();

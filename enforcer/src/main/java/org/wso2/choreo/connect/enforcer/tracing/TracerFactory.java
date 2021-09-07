@@ -25,6 +25,9 @@ import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This is a factory class used to implement tracers with different exporters.
+ */
 public class TracerFactory {
 
     private Tracer tracer;
@@ -44,6 +47,7 @@ public class TracerFactory {
         Map<String, String> properties = new HashMap<>(tracingConfig.getConfigProperties());
         properties.replaceAll((k,v) -> Utils.replaceEnvRegex(v));
 
+        // Future tracer implementations can be initialized from here
         if (exporterType.equalsIgnoreCase(TracingConstants.AZURE_TRACE_EXPORTER)) {
             this.tracer = AzureTraceExporter.getInstance().initTracer(properties);
         }

@@ -143,7 +143,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 Scope verifyTokenInCacheSpanScope = null;
                 if (jwtTokenPayloadInfo != null) {
                     if (Utils.tracingEnabled()) {
-                        verifyTokenInCacheSpan = Utils.startSpan(TracingConstants.VERIFY_INTERNAL_KEY_SPAN, tracer);
+                        verifyTokenInCacheSpan = Utils.startSpan(TracingConstants.VERIFY_TOKEN_IN_CACHE_SPAN, tracer);
                         verifyTokenInCacheSpanScope = verifyTokenInCacheSpan.getSpan().makeCurrent();
                         Utils.setTag(verifyTokenInCacheSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
                     }
@@ -170,7 +170,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 // Verify token when it is not found in cache
                 if (!isVerified) {
                     if (Utils.tracingEnabled()) {
-                        verifyTokenWithoutCacheSpan = Utils.startSpan(TracingConstants.VERIFY_INTERNAL_KEY_SPAN, tracer);
+                        verifyTokenWithoutCacheSpan = Utils.startSpan(TracingConstants.VERIFY_TOKEN_SPAN, tracer);
                         verifyTokenWithoutCacheSpanScope = verifyTokenWithoutCacheSpan.getSpan().makeCurrent();
                         Utils.setTag(verifyTokenInCacheSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
                     }

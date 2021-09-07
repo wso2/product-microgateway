@@ -28,8 +28,6 @@ import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
-import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
-import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.util.Map;
@@ -37,10 +35,10 @@ import java.util.Map;
 /**
  * This class handles the request coming via the external auth gRPC service.
  */
-public class HttpRequestHandler implements RequestHandler<CheckRequest, ResponseObject, TracingSpan> {
+public class HttpRequestHandler implements RequestHandler<CheckRequest, ResponseObject> {
     private static final Logger logger = LogManager.getLogger(RequestHandler.class);
 
-    public ResponseObject process(CheckRequest request, TracingSpan span) {
+    public ResponseObject process(CheckRequest request) {
         API matchedAPI = APIFactory.getInstance().getMatchedAPI(request);
         if (matchedAPI == null) {
             ResponseObject responseObject = new ResponseObject();
@@ -56,7 +54,6 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         }
 
         RequestContext requestContext = buildRequestContext(matchedAPI, request);
-        requestContext.setParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, span);
         return matchedAPI.process(requestContext);
     }
 
