@@ -31,10 +31,10 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
-import org.wso2.choreo.connect.enforcer.tracing.AzureTraceExporter;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.lang.reflect.Constructor;
@@ -97,13 +97,12 @@ public class AnalyticsFilter {
 
     public void handleSuccessRequest(RequestContext requestContext) {
         TracingSpan analyticsSpan = null;
-        AzureTraceExporter analyticsTraceExporter = AzureTraceExporter.getInstance();
         try {
-            if (analyticsTraceExporter.tracingEnabled()) {
-                TracingTracer tracer = analyticsTraceExporter.getGlobalTracer();
-                analyticsSpan = analyticsTraceExporter.startSpan(TracingConstants.ANALYTICS_SPAN,
+            if (Utils.tracingEnabled()) {
+                TracingTracer tracer = Utils.getGlobalTracer();
+                analyticsSpan = Utils.startSpan(TracingConstants.ANALYTICS_SPAN,
                         requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
-                analyticsTraceExporter.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
+                Utils.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
                         ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String apiName = requestContext.getMatchedAPI().getAPIConfig().getName();
@@ -146,8 +145,8 @@ public class AnalyticsFilter {
             requestContext.addMetadataToMap(MetadataConstants.API_ORGANIZATION_ID,
                     requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
         } finally {
-            if (analyticsTraceExporter.tracingEnabled()) {
-                analyticsTraceExporter.finishSpan(analyticsSpan);
+            if (Utils.tracingEnabled()) {
+                Utils.finishSpan(analyticsSpan);
             }
         }
     }
@@ -168,15 +167,14 @@ public class AnalyticsFilter {
 
     public void handleFailureRequest(RequestContext requestContext) {
         TracingSpan analyticsSpan = null;
-        AzureTraceExporter analyticsTraceExporter = AzureTraceExporter.getInstance();
 
         try {
-            if (analyticsTraceExporter.tracingEnabled()) {
-                TracingTracer tracer = analyticsTraceExporter.getGlobalTracer();
-                analyticsSpan = analyticsTraceExporter.startSpan(TracingConstants.ANALYTICS_FAILURE_SPAN,
+            if (Utils.tracingEnabled()) {
+                TracingTracer tracer = Utils.getGlobalTracer();
+                analyticsSpan = Utils.startSpan(TracingConstants.ANALYTICS_FAILURE_SPAN,
                         requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
                 if (analyticsSpan != null) {
-                    analyticsTraceExporter.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
+                    Utils.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
                             ThreadContext.get(APIConstants.LOG_TRACE_ID));
                 }
             }
@@ -197,8 +195,8 @@ public class AnalyticsFilter {
                 logger.error("Error while publishing the analytics event. ", e);
             }
         } finally {
-            if (analyticsTraceExporter.tracingEnabled()) {
-                analyticsTraceExporter.finishSpan(analyticsSpan);
+            if (Utils.tracingEnabled()) {
+                Utils.finishSpan(analyticsSpan);
             }
         }
     }

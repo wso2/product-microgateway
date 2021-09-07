@@ -39,10 +39,10 @@ import org.wso2.choreo.connect.enforcer.security.AccessTokenInfo;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTValidator;
-import org.wso2.choreo.connect.enforcer.tracing.AzureTraceExporter;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.io.IOException;
@@ -100,15 +100,14 @@ public class OAuthAuthenticator implements Authenticator {
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
-        AzureTraceExporter oauthTraceExporter = AzureTraceExporter.getInstance();
         TracingSpan oAuthSpan = null;
         try {
-            if (oauthTraceExporter.tracingEnabled()) {
-                TracingTracer tracer = oauthTraceExporter.getGlobalTracer();
-                oAuthSpan = oauthTraceExporter.startSpan(TracingConstants.OAUTH_AUTHENTICATOR_SPAN,
+            if (Utils.tracingEnabled()) {
+                TracingTracer tracer = Utils.getGlobalTracer();
+                oAuthSpan = Utils.startSpan(TracingConstants.OAUTH_AUTHENTICATOR_SPAN,
                         requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
                 if (oAuthSpan != null) {
-                    oauthTraceExporter.setTag(oAuthSpan, APIConstants.LOG_TRACE_ID,
+                    Utils.setTag(oAuthSpan, APIConstants.LOG_TRACE_ID,
                             ThreadContext.get(APIConstants.LOG_TRACE_ID));
                 }
             }
@@ -131,9 +130,9 @@ public class OAuthAuthenticator implements Authenticator {
 
             return new AuthenticationContext();
         } finally {
-            if (oauthTraceExporter.tracingEnabled()) {
+            if (Utils.tracingEnabled()) {
                 if (oAuthSpan != null) {
-                    oauthTraceExporter.finishSpan(oAuthSpan);
+                    Utils.finishSpan(oAuthSpan);
                 }
             }
         }

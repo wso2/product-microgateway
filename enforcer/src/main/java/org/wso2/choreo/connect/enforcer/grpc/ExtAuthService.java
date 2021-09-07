@@ -39,10 +39,10 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
 import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
-import org.wso2.choreo.connect.enforcer.tracing.AzureTraceExporter;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 
 /**
  * This is the gRPC server written to match with the envoy ext-authz filter proto file. Envoy proxy call this service.
@@ -56,17 +56,15 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
     public void check(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
         TracingSpan extAuthServiceSpan = null;
         long starTimestamp = System.currentTimeMillis();
-        AzureTraceExporter traceExporter = null;
         try {
             String traceId = request.getAttributes().getRequest().getHttp()
                     .getHeadersOrDefault(HttpConstants.X_REQUEST_ID_HEADER,
                             request.getAttributes().getRequest().getHttp().getId());
-            traceExporter = AzureTraceExporter.getInstance();
-            if (traceExporter.tracingEnabled()) {
-                TracingTracer tracer =  traceExporter.getGlobalTracer();
+            if (Utils.tracingEnabled()) {
+                TracingTracer tracer =  Utils.getGlobalTracer();
                 // This span will be the parent span for all the filters
-                extAuthServiceSpan = traceExporter.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, null, tracer);
-                traceExporter.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);
+                extAuthServiceSpan = Utils.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, null, tracer);
+                Utils.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);
             }
             ThreadContext.put(APIConstants.LOG_TRACE_ID, traceId);
             ResponseObject responseObject = requestHandler.process(request, extAuthServiceSpan);
@@ -76,8 +74,8 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
             responseObserver.onCompleted();
             ThreadContext.remove(APIConstants.LOG_TRACE_ID);
         } finally {
-            if (traceExporter.tracingEnabled()) {
-                traceExporter.finishSpan(extAuthServiceSpan);
+            if (Utils.tracingEnabled()) {
+                Utils.finishSpan(extAuthServiceSpan);
             }
             if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {
                 TelemetryClient telemetry = new TelemetryClient();

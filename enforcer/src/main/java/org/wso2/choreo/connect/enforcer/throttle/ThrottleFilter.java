@@ -33,10 +33,10 @@ import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.util.ThrottleEventConstants;
 import org.wso2.choreo.connect.enforcer.throttle.dto.Decision;
 import org.wso2.choreo.connect.enforcer.throttle.utils.ThrottleUtils;
-import org.wso2.choreo.connect.enforcer.tracing.AzureTraceExporter;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.net.Inet4Address;
@@ -88,12 +88,11 @@ public class ThrottleFilter implements Filter {
      */
     private boolean doThrottle(RequestContext reqContext) {
         TracingSpan doThrottleSpan = null;
-        AzureTraceExporter throttleTraceExporter = AzureTraceExporter.getInstance();
         try {
-            if (throttleTraceExporter.tracingEnabled()) {
-                TracingTracer tracer = throttleTraceExporter.getGlobalTracer();
-                doThrottleSpan = throttleTraceExporter.startSpan(TracingConstants.DO_THROTTLE_SPAN, reqContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
-                throttleTraceExporter.setTag(doThrottleSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+            if (Utils.tracingEnabled()) {
+                TracingTracer tracer = Utils.getGlobalTracer();
+                doThrottleSpan = Utils.startSpan(TracingConstants.DO_THROTTLE_SPAN, reqContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+                Utils.setTag(doThrottleSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             AuthenticationContext authContext = reqContext.getAuthenticationContext();
 
@@ -215,8 +214,8 @@ public class ThrottleFilter implements Filter {
             }
             return false;
         } finally {
-            if (throttleTraceExporter.tracingEnabled()) {
-                throttleTraceExporter.finishSpan(doThrottleSpan);
+            if (Utils.tracingEnabled()) {
+                Utils.finishSpan(doThrottleSpan);
             }
 
         }

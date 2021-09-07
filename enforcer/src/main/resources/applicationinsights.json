@@ -4,7 +4,7 @@
     "name": "choreo_connect_enforcer"
   },
   "sampling": {
-    "percentage": 33.333
+    "percentage": 50
   },
   "heartbeat": {
     "intervalSeconds": 900
@@ -20,7 +20,7 @@
   "enableDependencyTracking": false,
   "instrumentation": {
     "logging": {
-      "level": "WARN"
+      "enabled": false
     },
     "cassandra": {
       "enabled": false

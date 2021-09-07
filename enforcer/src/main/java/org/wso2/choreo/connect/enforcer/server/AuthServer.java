@@ -34,6 +34,7 @@ import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
+import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 import org.wso2.choreo.connect.enforcer.discovery.ConfigDiscoveryClient;
 import org.wso2.choreo.connect.enforcer.grpc.ExtAuthService;
 import org.wso2.choreo.connect.enforcer.grpc.HealthService;
@@ -46,6 +47,10 @@ import org.wso2.choreo.connect.enforcer.throttle.ThrottleAgent;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleDataHolder;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleEventListener;
+import org.wso2.choreo.connect.enforcer.tracing.TracerFactory;
+import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
+import org.wso2.choreo.connect.enforcer.tracing.TracingException;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.TLSUtils;
 
 import java.io.IOException;
@@ -90,6 +95,19 @@ public class AuthServer {
                 accessLoggingService.init();
             } else {
                 logger.debug("analytics filter is disabled.");
+            }
+
+            // Initialize tracing objects
+            if (ConfigHolder.getInstance().getConfig().getTracingConfig().isTracingEnabled()) {
+                try {
+                    TracerFactory.getInstance().initTracer();
+                    Utils.setTracingEnabled(true);
+                    logger.info("Tracing is enabled.");
+                } catch (TracingException e) {
+                    logger.error("Error enabling tracing", e);
+                }
+            } else {
+                logger.debug("Tracing is disabled.");
             }
 
             //Initialise cache objects

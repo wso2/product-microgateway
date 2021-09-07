@@ -21,20 +21,14 @@ package org.wso2.choreo.connect.enforcer.config.dto;
 
 import org.wso2.choreo.connect.enforcer.config.ConfigDefaults;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class TracingDTO {
 
     private boolean isTracingEnabled = ConfigDefaults.TRACING_ENABLED_VALUE;
-    private String connectionString = null;
-    private String instrumentationName = ConfigDefaults.TRACING_INSTRUMENTATION_NAME;
-    private int maximumTracesPerSecond = 2;
-
-    public String getConnectionString() {
-        return connectionString;
-    }
-
-    public void setConnectionString(String connectionString) {
-        this.connectionString = connectionString;
-    }
+    private String exporterType = ConfigDefaults.AZURE_TRACE_EXPORTER;
+    private Map<String, String> configProperties;
 
     public boolean isTracingEnabled() {
         return isTracingEnabled;
@@ -44,19 +38,15 @@ public class TracingDTO {
         this.isTracingEnabled = enabled;
     }
 
-    public String getInstrumentationName() {
-        return instrumentationName;
+    public String getExporterType() { return exporterType; }
+
+    public void setExporterType(String type) { this.exporterType = type; }
+
+    public Map<String, String> getConfigProperties() {
+        return new HashMap<>(configProperties);
     }
 
-    public void setInstrumentationName(String instrumentationName) {
-        this.instrumentationName = instrumentationName;
-    }
-
-    public int getMaximumTracesPerSecond() {
-        return maximumTracesPerSecond;
-    }
-
-    public void setMaximumTracesPerSecond(int maximumTracesPerSecond) {
-        this.maximumTracesPerSecond = maximumTracesPerSecond;
+    public void setConfigProperties(Map<String, String> configProperties) {
+        this.configProperties = configProperties;
     }
 }

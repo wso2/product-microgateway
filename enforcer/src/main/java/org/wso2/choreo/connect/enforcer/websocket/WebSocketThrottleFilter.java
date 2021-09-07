@@ -34,10 +34,10 @@ import org.wso2.choreo.connect.enforcer.throttle.ThrottleDataHolder;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.util.ThrottleEventConstants;
 import org.wso2.choreo.connect.enforcer.throttle.dto.Decision;
 import org.wso2.choreo.connect.enforcer.throttle.utils.ThrottleUtils;
-import org.wso2.choreo.connect.enforcer.tracing.AzureTraceExporter;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.net.Inet4Address;
@@ -67,15 +67,14 @@ public class WebSocketThrottleFilter implements Filter {
     }
 
     @Override public boolean handleRequest(RequestContext requestContext) {
-        AzureTraceExporter websocketTraceExporter = AzureTraceExporter.getInstance();
         TracingSpan wsSpan = null;
         try {
-            if (websocketTraceExporter.tracingEnabled()) {
-                TracingTracer tracer = websocketTraceExporter.getGlobalTracer();
-                wsSpan = websocketTraceExporter.startSpan(TracingConstants.WS_THROTTLE_SPAN,
+            if (Utils.tracingEnabled()) {
+                TracingTracer tracer = Utils.getGlobalTracer();
+                wsSpan = Utils.startSpan(TracingConstants.WS_THROTTLE_SPAN,
                         requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
                 if (wsSpan != null) {
-                    websocketTraceExporter.setTag(wsSpan, APIConstants.LOG_TRACE_ID,
+                    Utils.setTag(wsSpan, APIConstants.LOG_TRACE_ID,
                             ThreadContext.get(APIConstants.LOG_TRACE_ID));
                 }
             }
@@ -87,9 +86,9 @@ public class WebSocketThrottleFilter implements Filter {
             ThrottleAgent.publishNonThrottledEvent(getThrottleEventMap(requestContext));
             return true;
         } finally {
-            if (websocketTraceExporter.tracingEnabled()) {
+            if (Utils.tracingEnabled()) {
                 if (wsSpan != null) {
-                    websocketTraceExporter.finishSpan(wsSpan);
+                    Utils.finishSpan(wsSpan);
                 }
             }
         }

@@ -21,17 +21,15 @@ package org.wso2.choreo.connect.enforcer.tracing;
 import com.azure.monitor.opentelemetry.exporter.AzureMonitorExporterBuilder;
 import com.azure.monitor.opentelemetry.exporter.AzureMonitorTraceExporter;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
-import io.opentelemetry.api.trace.Span;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
-import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
+
+import java.util.Map;
 
 /**
  * This class is responsible for managing and exporting tracing spans
@@ -39,23 +37,11 @@ import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 public class AzureTraceExporter implements TracerBuilder {
 
     private static final Logger LOGGER = LogManager.getLogger(AzureTraceExporter.class);
-    private Tracer tracer;
-    private boolean isTracingEnabled = false;
     private static AzureTraceExporter azureTraceExporter;
-
-    public AzureTraceExporter() {
-
-        TracingDTO tracingConfig = ConfigHolder.getInstance().getConfig().getTracingConfig();
-        init(tracingConfig);
-    }
 
     public static AzureTraceExporter getInstance() {
         if (azureTraceExporter == null) {
-            synchronized (new Object()) {
-                if (azureTraceExporter == null) {
-                    azureTraceExporter = new AzureTraceExporter();
-                }
-            }
+            azureTraceExporter = new AzureTraceExporter();
         }
         return azureTraceExporter;
     }
@@ -64,91 +50,24 @@ public class AzureTraceExporter implements TracerBuilder {
      * Initialize the tracer with AzureMonitorTraceExporter
      */
     @Override
-    public void init(TracingDTO tracingConfig) {
+    public Tracer initTracer(Map<String, String> properties) throws TracingException {
 
-        isTracingEnabled = tracingConfig.isTracingEnabled();
-        if (isTracingEnabled) {
-            String connectionString = tracingConfig.getConnectionString();
-            if (StringUtils.isEmpty(connectionString)) {
-                throw new RuntimeException("ConnectionString is mandatory when tracing is enabled");
-            }
+        String connectionString = properties.get(TracingConstants.CONNECTION_STRING);
+        if (StringUtils.isEmpty(connectionString)) {
+            throw new TracingException("Error initializing Azure Trace Exporter. ConnectionString is null or empty.");
+        } else {
             AzureMonitorTraceExporter exporter = new AzureMonitorExporterBuilder()
                     .connectionString(connectionString)
                     .buildTraceExporter();
             SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-                    .setSampler(new RateLimitingSampler(tracingConfig.getMaximumTracesPerSecond()))
+                    .setSampler(new RateLimitingSampler(Integer.valueOf(properties.get(TracingConstants.MAXIMUM_TRACES_PER_SECOND))))
                     .addSpanProcessor(SimpleSpanProcessor.create(exporter)).build();
 
             OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                     .setTracerProvider(tracerProvider).buildAndRegisterGlobal();
-            LOGGER.debug("Exporting tracing data to Azure Monitor is enabled.");
-            this.tracer = openTelemetrySdk.getTracer(tracingConfig.getInstrumentationName());
+            LOGGER.debug("Tracer successfully initialized with Azure Trace Exporter.");
+
+            return openTelemetrySdk.getTracer(properties.get(TracingConstants.INSTRUMENTATION_NAME));
         }
-    }
-
-    /**
-     * Start the tracing span
-     *
-     * @param spanName   the name of the span
-     * @param parentSpan the parent span
-     * @param tracer     io.opentelemetry.api.trace.Span
-     * @return a TracingSpan object
-     */
-    public TracingSpan startSpan(String spanName, TracingSpan parentSpan, TracingTracer tracer) {
-
-        if (parentSpan == null) {
-            Span span = tracer.getTracingTracer().spanBuilder(spanName).startSpan();
-            return new TracingSpan(span);
-        } else {
-            Span childSpan = null;
-            Span sp = parentSpan.getSpan();
-            if (sp != null) {
-                childSpan = tracer.getTracingTracer().spanBuilder(spanName).setParent(Context.current().with(sp)).startSpan();
-
-            }
-            return new TracingSpan(childSpan);
-        }
-    }
-
-    /**
-     * Set tag to the span
-     *
-     * @param span  the span tag is to be set
-     * @param key   key
-     * @param value value
-     */
-    public void setTag(TracingSpan span, String key, String value) {
-
-        Span sp = span.getSpan();
-        if (sp != null) {
-            sp.setAttribute(key, value);
-        }
-    }
-
-    public Tracer getTracer() {
-        return tracer;
-    }
-
-    /**
-     * Finish the span
-     *
-     * @param span span that is to be finished
-     */
-    public void finishSpan(TracingSpan span) {
-
-        Span sp = span.getSpan();
-        if (sp != null) {
-            sp.end();
-        }
-    }
-
-    public TracingTracer getGlobalTracer() {
-
-        return new TracingTracer(tracer);
-    }
-
-    public boolean tracingEnabled() {
-
-        return isTracingEnabled;
     }
 }

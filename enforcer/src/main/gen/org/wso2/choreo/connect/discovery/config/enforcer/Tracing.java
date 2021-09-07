@@ -16,8 +16,7 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private Tracing() {
-    connectionString_ = "";
-    instrumentationName_ = "";
+    type_ = "";
   }
 
   @java.lang.Override
@@ -40,6 +39,7 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
+    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -58,18 +58,20 @@ private static final long serialVersionUID = 0L;
           case 18: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            connectionString_ = s;
+            type_ = s;
             break;
           }
           case 26: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            instrumentationName_ = s;
-            break;
-          }
-          case 32: {
-
-            maximumTracesPerSecond_ = input.readInt32();
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              configProperties_ = com.google.protobuf.MapField.newMapField(
+                  ConfigPropertiesDefaultEntryHolder.defaultEntry);
+              mutable_bitField0_ |= 0x00000001;
+            }
+            com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+            configProperties__ = input.readMessage(
+                ConfigPropertiesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+            configProperties_.getMutableMap().put(
+                configProperties__.getKey(), configProperties__.getValue());
             break;
           }
           default: {
@@ -96,6 +98,18 @@ private static final long serialVersionUID = 0L;
     return org.wso2.choreo.connect.discovery.config.enforcer.TracingProto.internal_static_wso2_discovery_config_enforcer_Tracing_descriptor;
   }
 
+  @SuppressWarnings({"rawtypes"})
+  @java.lang.Override
+  protected com.google.protobuf.MapField internalGetMapField(
+      int number) {
+    switch (number) {
+      case 3:
+        return internalGetConfigProperties();
+      default:
+        throw new RuntimeException(
+            "Invalid map field number: " + number);
+    }
+  }
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
@@ -119,111 +133,147 @@ private static final long serialVersionUID = 0L;
     return enabled_;
   }
 
-  public static final int CONNECTIONSTRING_FIELD_NUMBER = 2;
-  private volatile java.lang.Object connectionString_;
+  public static final int TYPE_FIELD_NUMBER = 2;
+  private volatile java.lang.Object type_;
   /**
    * <pre>
-   * Exporter ConnectionString
+   * Type of tracer exporter
    * </pre>
    *
-   * <code>string connectionString = 2;</code>
-   * @return The connectionString.
+   * <code>string type = 2;</code>
+   * @return The type.
    */
   @java.lang.Override
-  public java.lang.String getConnectionString() {
-    java.lang.Object ref = connectionString_;
+  public java.lang.String getType() {
+    java.lang.Object ref = type_;
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
-      connectionString_ = s;
+      type_ = s;
       return s;
     }
   }
   /**
    * <pre>
-   * Exporter ConnectionString
+   * Type of tracer exporter
    * </pre>
    *
-   * <code>string connectionString = 2;</code>
-   * @return The bytes for connectionString.
+   * <code>string type = 2;</code>
+   * @return The bytes for type.
    */
   @java.lang.Override
   public com.google.protobuf.ByteString
-      getConnectionStringBytes() {
-    java.lang.Object ref = connectionString_;
+      getTypeBytes() {
+    java.lang.Object ref = type_;
     if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
-      connectionString_ = b;
+      type_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
     }
   }
 
-  public static final int INSTRUMENTATIONNAME_FIELD_NUMBER = 3;
-  private volatile java.lang.Object instrumentationName_;
-  /**
-   * <pre>
-   * Instrumentation Name
-   * </pre>
-   *
-   * <code>string instrumentationName = 3;</code>
-   * @return The instrumentationName.
-   */
-  @java.lang.Override
-  public java.lang.String getInstrumentationName() {
-    java.lang.Object ref = instrumentationName_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      instrumentationName_ = s;
-      return s;
-    }
+  public static final int CONFIGPROPERTIES_FIELD_NUMBER = 3;
+  private static final class ConfigPropertiesDefaultEntryHolder {
+    static final com.google.protobuf.MapEntry<
+        java.lang.String, java.lang.String> defaultEntry =
+            com.google.protobuf.MapEntry
+            .<java.lang.String, java.lang.String>newDefaultInstance(
+                org.wso2.choreo.connect.discovery.config.enforcer.TracingProto.internal_static_wso2_discovery_config_enforcer_Tracing_ConfigPropertiesEntry_descriptor, 
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "",
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "");
   }
-  /**
-   * <pre>
-   * Instrumentation Name
-   * </pre>
-   *
-   * <code>string instrumentationName = 3;</code>
-   * @return The bytes for instrumentationName.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getInstrumentationNameBytes() {
-    java.lang.Object ref = instrumentationName_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      instrumentationName_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
+  private com.google.protobuf.MapField<
+      java.lang.String, java.lang.String> configProperties_;
+  private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+  internalGetConfigProperties() {
+    if (configProperties_ == null) {
+      return com.google.protobuf.MapField.emptyMapField(
+          ConfigPropertiesDefaultEntryHolder.defaultEntry);
     }
+    return configProperties_;
   }
 
-  public static final int MAXIMUMTRACESPERSECOND_FIELD_NUMBER = 4;
-  private int maximumTracesPerSecond_;
+  public int getConfigPropertiesCount() {
+    return internalGetConfigProperties().getMap().size();
+  }
   /**
    * <pre>
-   * Maximum number of sampled traces per second
+   * Tracer Configurations
    * </pre>
    *
-   * <code>int32 maximumTracesPerSecond = 4;</code>
-   * @return The maximumTracesPerSecond.
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+
+  @java.lang.Override
+  public boolean containsConfigProperties(
+      java.lang.String key) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    return internalGetConfigProperties().getMap().containsKey(key);
+  }
+  /**
+   * Use {@link #getConfigPropertiesMap()} instead.
    */
   @java.lang.Override
-  public int getMaximumTracesPerSecond() {
-    return maximumTracesPerSecond_;
+  @java.lang.Deprecated
+  public java.util.Map<java.lang.String, java.lang.String> getConfigProperties() {
+    return getConfigPropertiesMap();
+  }
+  /**
+   * <pre>
+   * Tracer Configurations
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+  @java.lang.Override
+
+  public java.util.Map<java.lang.String, java.lang.String> getConfigPropertiesMap() {
+    return internalGetConfigProperties().getMap();
+  }
+  /**
+   * <pre>
+   * Tracer Configurations
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+  @java.lang.Override
+
+  public java.lang.String getConfigPropertiesOrDefault(
+      java.lang.String key,
+      java.lang.String defaultValue) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetConfigProperties().getMap();
+    return map.containsKey(key) ? map.get(key) : defaultValue;
+  }
+  /**
+   * <pre>
+   * Tracer Configurations
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+  @java.lang.Override
+
+  public java.lang.String getConfigPropertiesOrThrow(
+      java.lang.String key) {
+    if (key == null) { throw new java.lang.NullPointerException(); }
+    java.util.Map<java.lang.String, java.lang.String> map =
+        internalGetConfigProperties().getMap();
+    if (!map.containsKey(key)) {
+      throw new java.lang.IllegalArgumentException();
+    }
+    return map.get(key);
   }
 
   private byte memoizedIsInitialized = -1;
@@ -243,15 +293,15 @@ private static final long serialVersionUID = 0L;
     if (enabled_ != false) {
       output.writeBool(1, enabled_);
     }
-    if (!getConnectionStringBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, connectionString_);
+    if (!getTypeBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, type_);
     }
-    if (!getInstrumentationNameBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, instrumentationName_);
-    }
-    if (maximumTracesPerSecond_ != 0) {
-      output.writeInt32(4, maximumTracesPerSecond_);
-    }
+    com.google.protobuf.GeneratedMessageV3
+      .serializeStringMapTo(
+        output,
+        internalGetConfigProperties(),
+        ConfigPropertiesDefaultEntryHolder.defaultEntry,
+        3);
     unknownFields.writeTo(output);
   }
 
@@ -265,15 +315,18 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(1, enabled_);
     }
-    if (!getConnectionStringBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, connectionString_);
+    if (!getTypeBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, type_);
     }
-    if (!getInstrumentationNameBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, instrumentationName_);
-    }
-    if (maximumTracesPerSecond_ != 0) {
+    for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+         : internalGetConfigProperties().getMap().entrySet()) {
+      com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+      configProperties__ = ConfigPropertiesDefaultEntryHolder.defaultEntry.newBuilderForType()
+          .setKey(entry.getKey())
+          .setValue(entry.getValue())
+          .build();
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(4, maximumTracesPerSecond_);
+          .computeMessageSize(3, configProperties__);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -292,12 +345,10 @@ private static final long serialVersionUID = 0L;
 
     if (getEnabled()
         != other.getEnabled()) return false;
-    if (!getConnectionString()
-        .equals(other.getConnectionString())) return false;
-    if (!getInstrumentationName()
-        .equals(other.getInstrumentationName())) return false;
-    if (getMaximumTracesPerSecond()
-        != other.getMaximumTracesPerSecond()) return false;
+    if (!getType()
+        .equals(other.getType())) return false;
+    if (!internalGetConfigProperties().equals(
+        other.internalGetConfigProperties())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -312,12 +363,12 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + ENABLED_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
         getEnabled());
-    hash = (37 * hash) + CONNECTIONSTRING_FIELD_NUMBER;
-    hash = (53 * hash) + getConnectionString().hashCode();
-    hash = (37 * hash) + INSTRUMENTATIONNAME_FIELD_NUMBER;
-    hash = (53 * hash) + getInstrumentationName().hashCode();
-    hash = (37 * hash) + MAXIMUMTRACESPERSECOND_FIELD_NUMBER;
-    hash = (53 * hash) + getMaximumTracesPerSecond();
+    hash = (37 * hash) + TYPE_FIELD_NUMBER;
+    hash = (53 * hash) + getType().hashCode();
+    if (!internalGetConfigProperties().getMap().isEmpty()) {
+      hash = (37 * hash) + CONFIGPROPERTIES_FIELD_NUMBER;
+      hash = (53 * hash) + internalGetConfigProperties().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -425,6 +476,28 @@ private static final long serialVersionUID = 0L;
       return org.wso2.choreo.connect.discovery.config.enforcer.TracingProto.internal_static_wso2_discovery_config_enforcer_Tracing_descriptor;
     }
 
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 3:
+          return internalGetConfigProperties();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMutableMapField(
+        int number) {
+      switch (number) {
+        case 3:
+          return internalGetMutableConfigProperties();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -453,12 +526,9 @@ private static final long serialVersionUID = 0L;
       super.clear();
       enabled_ = false;
 
-      connectionString_ = "";
+      type_ = "";
 
-      instrumentationName_ = "";
-
-      maximumTracesPerSecond_ = 0;
-
+      internalGetMutableConfigProperties().clear();
       return this;
     }
 
@@ -485,10 +555,11 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public org.wso2.choreo.connect.discovery.config.enforcer.Tracing buildPartial() {
       org.wso2.choreo.connect.discovery.config.enforcer.Tracing result = new org.wso2.choreo.connect.discovery.config.enforcer.Tracing(this);
+      int from_bitField0_ = bitField0_;
       result.enabled_ = enabled_;
-      result.connectionString_ = connectionString_;
-      result.instrumentationName_ = instrumentationName_;
-      result.maximumTracesPerSecond_ = maximumTracesPerSecond_;
+      result.type_ = type_;
+      result.configProperties_ = internalGetConfigProperties();
+      result.configProperties_.makeImmutable();
       onBuilt();
       return result;
     }
@@ -540,17 +611,12 @@ private static final long serialVersionUID = 0L;
       if (other.getEnabled() != false) {
         setEnabled(other.getEnabled());
       }
-      if (!other.getConnectionString().isEmpty()) {
-        connectionString_ = other.connectionString_;
+      if (!other.getType().isEmpty()) {
+        type_ = other.type_;
         onChanged();
       }
-      if (!other.getInstrumentationName().isEmpty()) {
-        instrumentationName_ = other.instrumentationName_;
-        onChanged();
-      }
-      if (other.getMaximumTracesPerSecond() != 0) {
-        setMaximumTracesPerSecond(other.getMaximumTracesPerSecond());
-      }
+      internalGetMutableConfigProperties().mergeFrom(
+          other.internalGetConfigProperties());
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -579,6 +645,7 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
+    private int bitField0_;
 
     private boolean enabled_ ;
     /**
@@ -623,22 +690,22 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object connectionString_ = "";
+    private java.lang.Object type_ = "";
     /**
      * <pre>
-     * Exporter ConnectionString
+     * Type of tracer exporter
      * </pre>
      *
-     * <code>string connectionString = 2;</code>
-     * @return The connectionString.
+     * <code>string type = 2;</code>
+     * @return The type.
      */
-    public java.lang.String getConnectionString() {
-      java.lang.Object ref = connectionString_;
+    public java.lang.String getType() {
+      java.lang.Object ref = type_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        connectionString_ = s;
+        type_ = s;
         return s;
       } else {
         return (java.lang.String) ref;
@@ -646,20 +713,20 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Exporter ConnectionString
+     * Type of tracer exporter
      * </pre>
      *
-     * <code>string connectionString = 2;</code>
-     * @return The bytes for connectionString.
+     * <code>string type = 2;</code>
+     * @return The bytes for type.
      */
     public com.google.protobuf.ByteString
-        getConnectionStringBytes() {
-      java.lang.Object ref = connectionString_;
+        getTypeBytes() {
+      java.lang.Object ref = type_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        connectionString_ = b;
+        type_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -667,194 +734,211 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <pre>
-     * Exporter ConnectionString
+     * Type of tracer exporter
      * </pre>
      *
-     * <code>string connectionString = 2;</code>
-     * @param value The connectionString to set.
+     * <code>string type = 2;</code>
+     * @param value The type to set.
      * @return This builder for chaining.
      */
-    public Builder setConnectionString(
+    public Builder setType(
         java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
   
-      connectionString_ = value;
+      type_ = value;
       onChanged();
       return this;
     }
     /**
      * <pre>
-     * Exporter ConnectionString
+     * Type of tracer exporter
      * </pre>
      *
-     * <code>string connectionString = 2;</code>
+     * <code>string type = 2;</code>
      * @return This builder for chaining.
      */
-    public Builder clearConnectionString() {
+    public Builder clearType() {
       
-      connectionString_ = getDefaultInstance().getConnectionString();
+      type_ = getDefaultInstance().getType();
       onChanged();
       return this;
     }
     /**
      * <pre>
-     * Exporter ConnectionString
+     * Type of tracer exporter
      * </pre>
      *
-     * <code>string connectionString = 2;</code>
-     * @param value The bytes for connectionString to set.
+     * <code>string type = 2;</code>
+     * @param value The bytes for type to set.
      * @return This builder for chaining.
      */
-    public Builder setConnectionStringBytes(
+    public Builder setTypeBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
       
-      connectionString_ = value;
+      type_ = value;
       onChanged();
       return this;
     }
 
-    private java.lang.Object instrumentationName_ = "";
-    /**
-     * <pre>
-     * Instrumentation Name
-     * </pre>
-     *
-     * <code>string instrumentationName = 3;</code>
-     * @return The instrumentationName.
-     */
-    public java.lang.String getInstrumentationName() {
-      java.lang.Object ref = instrumentationName_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        instrumentationName_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> configProperties_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetConfigProperties() {
+      if (configProperties_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ConfigPropertiesDefaultEntryHolder.defaultEntry);
       }
+      return configProperties_;
     }
-    /**
-     * <pre>
-     * Instrumentation Name
-     * </pre>
-     *
-     * <code>string instrumentationName = 3;</code>
-     * @return The bytes for instrumentationName.
-     */
-    public com.google.protobuf.ByteString
-        getInstrumentationNameBytes() {
-      java.lang.Object ref = instrumentationName_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        instrumentationName_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetMutableConfigProperties() {
+      onChanged();;
+      if (configProperties_ == null) {
+        configProperties_ = com.google.protobuf.MapField.newMapField(
+            ConfigPropertiesDefaultEntryHolder.defaultEntry);
       }
-    }
-    /**
-     * <pre>
-     * Instrumentation Name
-     * </pre>
-     *
-     * <code>string instrumentationName = 3;</code>
-     * @param value The instrumentationName to set.
-     * @return This builder for chaining.
-     */
-    public Builder setInstrumentationName(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      instrumentationName_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * Instrumentation Name
-     * </pre>
-     *
-     * <code>string instrumentationName = 3;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearInstrumentationName() {
-      
-      instrumentationName_ = getDefaultInstance().getInstrumentationName();
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * Instrumentation Name
-     * </pre>
-     *
-     * <code>string instrumentationName = 3;</code>
-     * @param value The bytes for instrumentationName to set.
-     * @return This builder for chaining.
-     */
-    public Builder setInstrumentationNameBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      instrumentationName_ = value;
-      onChanged();
-      return this;
+      if (!configProperties_.isMutable()) {
+        configProperties_ = configProperties_.copy();
+      }
+      return configProperties_;
     }
 
-    private int maximumTracesPerSecond_ ;
+    public int getConfigPropertiesCount() {
+      return internalGetConfigProperties().getMap().size();
+    }
     /**
      * <pre>
-     * Maximum number of sampled traces per second
+     * Tracer Configurations
      * </pre>
      *
-     * <code>int32 maximumTracesPerSecond = 4;</code>
-     * @return The maximumTracesPerSecond.
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
+     */
+
+    @java.lang.Override
+    public boolean containsConfigProperties(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      return internalGetConfigProperties().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getConfigPropertiesMap()} instead.
      */
     @java.lang.Override
-    public int getMaximumTracesPerSecond() {
-      return maximumTracesPerSecond_;
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getConfigProperties() {
+      return getConfigPropertiesMap();
     }
     /**
      * <pre>
-     * Maximum number of sampled traces per second
+     * Tracer Configurations
      * </pre>
      *
-     * <code>int32 maximumTracesPerSecond = 4;</code>
-     * @param value The maximumTracesPerSecond to set.
-     * @return This builder for chaining.
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
      */
-    public Builder setMaximumTracesPerSecond(int value) {
-      
-      maximumTracesPerSecond_ = value;
-      onChanged();
+    @java.lang.Override
+
+    public java.util.Map<java.lang.String, java.lang.String> getConfigPropertiesMap() {
+      return internalGetConfigProperties().getMap();
+    }
+    /**
+     * <pre>
+     * Tracer Configurations
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getConfigPropertiesOrDefault(
+        java.lang.String key,
+        java.lang.String defaultValue) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetConfigProperties().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Tracer Configurations
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getConfigPropertiesOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetConfigProperties().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    public Builder clearConfigProperties() {
+      internalGetMutableConfigProperties().getMutableMap()
+          .clear();
       return this;
     }
     /**
      * <pre>
-     * Maximum number of sampled traces per second
+     * Tracer Configurations
      * </pre>
      *
-     * <code>int32 maximumTracesPerSecond = 4;</code>
-     * @return This builder for chaining.
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
      */
-    public Builder clearMaximumTracesPerSecond() {
-      
-      maximumTracesPerSecond_ = 0;
-      onChanged();
+
+    public Builder removeConfigProperties(
+        java.lang.String key) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      internalGetMutableConfigProperties().getMutableMap()
+          .remove(key);
+      return this;
+    }
+    /**
+     * Use alternate mutation accessors instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String>
+    getMutableConfigProperties() {
+      return internalGetMutableConfigProperties().getMutableMap();
+    }
+    /**
+     * <pre>
+     * Tracer Configurations
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
+     */
+    public Builder putConfigProperties(
+        java.lang.String key,
+        java.lang.String value) {
+      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (value == null) { throw new java.lang.NullPointerException(); }
+      internalGetMutableConfigProperties().getMutableMap()
+          .put(key, value);
+      return this;
+    }
+    /**
+     * <pre>
+     * Tracer Configurations
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configProperties = 3;</code>
+     */
+
+    public Builder putAllConfigProperties(
+        java.util.Map<java.lang.String, java.lang.String> values) {
+      internalGetMutableConfigProperties().getMutableMap()
+          .putAll(values);
       return this;
     }
     @java.lang.Override

@@ -24,6 +24,10 @@ package org.wso2.choreo.connect.enforcer.tracing;
  */
 public class TracingConstants {
 
+    public static final String CONNECTION_STRING = "connectionString";
+    public static final String AZURE_TRACE_EXPORTER = "azure";
+    public static final String MAXIMUM_TRACES_PER_SECOND = "maximumTracesPerSecond";
+    public static final String INSTRUMENTATION_NAME = "instrumentationName";
     public static final String DO_THROTTLE_SPAN = "ThrottleFilter:doThrottle():Throttling function";
     public static final String ANALYTICS_SPAN = "AnalyticsFilter:handleSuccessRequest():Analytics Success Flow";
     public static final String ANALYTICS_FAILURE_SPAN = "AnalyticsFilter:handleSuccessRequest():Analytics Failure Flow";

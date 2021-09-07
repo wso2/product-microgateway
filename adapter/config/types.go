@@ -327,10 +327,9 @@ type analytics struct {
 }
 
 type tracing struct {
-	Enabled  				bool 	`toml:"enabled"`
-	ConnectionString 		string 	`toml:"connectionString"`
-	InstrumentationName 	string 	`toml:"instrumentationName"`
-	MaximumTracesPerSecond 	int32 	`toml:"maximumTracesPerSecond"`
+	Enabled  				bool 				`toml:"enabled"`
+	Type					string				`toml:"type"`
+	ConfigProperties		map[string]string	`toml:"configProperties"`
 }
 
 type analyticsAdapter struct {

@@ -19,6 +19,11 @@ public final class TracingProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_wso2_discovery_config_enforcer_Tracing_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_wso2_discovery_config_enforcer_Tracing_ConfigPropertiesEntry_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_wso2_discovery_config_enforcer_Tracing_ConfigPropertiesEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -29,14 +34,16 @@ public final class TracingProto {
   static {
     java.lang.String[] descriptorData = {
       "\n,wso2/discovery/config/enforcer/tracing" +
-      ".proto\022\036wso2.discovery.config.enforcer\"q" +
-      "\n\007Tracing\022\017\n\007enabled\030\001 \001(\010\022\030\n\020connection" +
-      "String\030\002 \001(\t\022\033\n\023instrumentationName\030\003 \001(" +
-      "\t\022\036\n\026maximumTracesPerSecond\030\004 \001(\005B\223\001\n1or" +
-      "g.wso2.choreo.connect.discovery.config.e" +
-      "nforcerB\014TracingProtoP\001ZNgithub.com/envo" +
-      "yproxy/go-control-plane/wso2/discovery/c" +
-      "onfig/enforcer;enforcerb\006proto3"
+      ".proto\022\036wso2.discovery.config.enforcer\"\272" +
+      "\001\n\007Tracing\022\017\n\007enabled\030\001 \001(\010\022\014\n\004type\030\002 \001(" +
+      "\t\022W\n\020configProperties\030\003 \003(\0132=.wso2.disco" +
+      "very.config.enforcer.Tracing.ConfigPrope" +
+      "rtiesEntry\0327\n\025ConfigPropertiesEntry\022\013\n\003k" +
+      "ey\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001B\223\001\n1org.wso2" +
+      ".choreo.connect.discovery.config.enforce" +
+      "rB\014TracingProtoP\001ZNgithub.com/envoyproxy" +
+      "/go-control-plane/wso2/discovery/config/" +
+      "enforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -47,7 +54,13 @@ public final class TracingProto {
     internal_static_wso2_discovery_config_enforcer_Tracing_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_Tracing_descriptor,
-        new java.lang.String[] { "Enabled", "ConnectionString", "InstrumentationName", "MaximumTracesPerSecond", });
+        new java.lang.String[] { "Enabled", "Type", "ConfigProperties", });
+    internal_static_wso2_discovery_config_enforcer_Tracing_ConfigPropertiesEntry_descriptor =
+      internal_static_wso2_discovery_config_enforcer_Tracing_descriptor.getNestedTypes().get(0);
+    internal_static_wso2_discovery_config_enforcer_Tracing_ConfigPropertiesEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_wso2_discovery_config_enforcer_Tracing_ConfigPropertiesEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

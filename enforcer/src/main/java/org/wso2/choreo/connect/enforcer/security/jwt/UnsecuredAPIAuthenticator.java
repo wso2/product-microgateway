@@ -29,10 +29,10 @@ import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStore;
-import org.wso2.choreo.connect.enforcer.tracing.AzureTraceExporter;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 /**
@@ -54,13 +54,12 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
         TracingSpan unsecuredApiAuthenticatorSpan = null;
-        AzureTraceExporter unsecuredApiTraceExporter = AzureTraceExporter.getInstance();
         try {
-            if (unsecuredApiTraceExporter.tracingEnabled()) {
-                TracingTracer tracer =  unsecuredApiTraceExporter.getGlobalTracer();
-                unsecuredApiAuthenticatorSpan = unsecuredApiTraceExporter.startSpan(TracingConstants.UNSECURED_API_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
+            if (Utils.tracingEnabled()) {
+                TracingTracer tracer =  Utils.getGlobalTracer();
+                unsecuredApiAuthenticatorSpan = Utils.startSpan(TracingConstants.UNSECURED_API_AUTHENTICATOR_SPAN, requestContext.getParentSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN), tracer);
 
-                unsecuredApiTraceExporter.setTag(unsecuredApiAuthenticatorSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                Utils.setTag(unsecuredApiAuthenticatorSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String uuid = requestContext.getMatchedAPI().getAPIConfig().getUuid();
             String context = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
@@ -78,8 +77,8 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
             }
             return FilterUtils.generateAuthenticationContext(requestContext);
         } finally {
-            if (unsecuredApiTraceExporter.tracingEnabled()) {
-                unsecuredApiTraceExporter.finishSpan(unsecuredApiAuthenticatorSpan);
+            if (Utils.tracingEnabled()) {
+                Utils.finishSpan(unsecuredApiAuthenticatorSpan);
             }
         }
     }

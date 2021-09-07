@@ -16,17 +16,23 @@
  * under the License.
  *
  */
-
 package org.wso2.choreo.connect.enforcer.tracing;
 
-import io.opentelemetry.api.trace.Tracer;
-
-import java.util.Map;
-
 /**
- * This is the interface to implement tracers to export tracing data.
+ * This is the custom exception class for tracing.
  */
-public interface TracerBuilder {
+public class TracingException extends Exception {
 
-    Tracer initTracer(Map<String, String> properties) throws TracingException;
+
+    public TracingException(String msg) {
+        super(msg);
+    }
+
+    public TracingException(String msg, Throwable e) {
+        super(msg, e);
+    }
+
+    public TracingException(Throwable throwable) {
+        super(throwable);
+    }
 }

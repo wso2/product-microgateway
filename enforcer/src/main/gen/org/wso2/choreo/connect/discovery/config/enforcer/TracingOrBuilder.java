@@ -19,51 +19,75 @@ public interface TracingOrBuilder extends
 
   /**
    * <pre>
-   * Exporter ConnectionString
+   * Type of tracer exporter
    * </pre>
    *
-   * <code>string connectionString = 2;</code>
-   * @return The connectionString.
+   * <code>string type = 2;</code>
+   * @return The type.
    */
-  java.lang.String getConnectionString();
+  java.lang.String getType();
   /**
    * <pre>
-   * Exporter ConnectionString
+   * Type of tracer exporter
    * </pre>
    *
-   * <code>string connectionString = 2;</code>
-   * @return The bytes for connectionString.
+   * <code>string type = 2;</code>
+   * @return The bytes for type.
    */
   com.google.protobuf.ByteString
-      getConnectionStringBytes();
+      getTypeBytes();
 
   /**
    * <pre>
-   * Instrumentation Name
+   * Tracer Configurations
    * </pre>
    *
-   * <code>string instrumentationName = 3;</code>
-   * @return The instrumentationName.
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
    */
-  java.lang.String getInstrumentationName();
+  int getConfigPropertiesCount();
   /**
    * <pre>
-   * Instrumentation Name
+   * Tracer Configurations
    * </pre>
    *
-   * <code>string instrumentationName = 3;</code>
-   * @return The bytes for instrumentationName.
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
    */
-  com.google.protobuf.ByteString
-      getInstrumentationNameBytes();
+  boolean containsConfigProperties(
+      java.lang.String key);
+  /**
+   * Use {@link #getConfigPropertiesMap()} instead.
+   */
+  @java.lang.Deprecated
+  java.util.Map<java.lang.String, java.lang.String>
+  getConfigProperties();
+  /**
+   * <pre>
+   * Tracer Configurations
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
+  java.util.Map<java.lang.String, java.lang.String>
+  getConfigPropertiesMap();
+  /**
+   * <pre>
+   * Tracer Configurations
+   * </pre>
+   *
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
+   */
 
+  java.lang.String getConfigPropertiesOrDefault(
+      java.lang.String key,
+      java.lang.String defaultValue);
   /**
    * <pre>
-   * Maximum number of sampled traces per second
+   * Tracer Configurations
    * </pre>
    *
-   * <code>int32 maximumTracesPerSecond = 4;</code>
-   * @return The maximumTracesPerSecond.
+   * <code>map&lt;string, string&gt; configProperties = 3;</code>
    */
-  int getMaximumTracesPerSecond();
+
+  java.lang.String getConfigPropertiesOrThrow(
+      java.lang.String key);
 }

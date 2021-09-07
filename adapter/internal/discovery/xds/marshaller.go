@@ -80,9 +80,8 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 
 	tracing := &enforcer.Tracing{
 		Enabled:		 		config.Enforcer.Tracing.Enabled,
-		ConnectionString:		config.Enforcer.Tracing.ConnectionString,
-		InstrumentationName:	config.Enforcer.Tracing.InstrumentationName,
-		MaximumTracesPerSecond: config.Enforcer.Tracing.MaximumTracesPerSecond,
+		Type:					config.Enforcer.Tracing.Type,
+		ConfigProperties:		config.Enforcer.Tracing.ConfigProperties,
 	}
 	analytics := &enforcer.Analytics{
 		Enabled:          config.Analytics.Enabled,
