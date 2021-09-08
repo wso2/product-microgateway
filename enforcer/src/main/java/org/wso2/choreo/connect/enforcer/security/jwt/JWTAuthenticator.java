@@ -104,7 +104,8 @@ public class JWTAuthenticator implements Authenticator {
                 tracer = Utils.getGlobalTracer();
                 jwtAuthenticatorInfoSpan = Utils.startSpan(TracingConstants.JWT_AUTHENTICATOR_SPAN, tracer);
                 jwtAuthenticatorInfoSpanScope = jwtAuthenticatorInfoSpan.getSpan().makeCurrent();
-                Utils.setTag(jwtAuthenticatorInfoSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                Utils.setTag(jwtAuthenticatorInfoSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String jwtToken = retrieveAuthHeaderValue(requestContext);
             if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
@@ -127,7 +128,8 @@ public class JWTAuthenticator implements Authenticator {
                 if (Utils.tracingEnabled()) {
                     decodeTokenHeaderSpan = Utils.startSpan(TracingConstants.DECODE_TOKEN_HEADER_SPAN, tracer);
                     decodeTokenHeaderSpanScope = decodeTokenHeaderSpan.getSpan().makeCurrent();
-                    Utils.setTag(decodeTokenHeaderSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                    Utils.setTag(decodeTokenHeaderSpan, APIConstants.LOG_TRACE_ID,
+                            ThreadContext.get(APIConstants.LOG_TRACE_ID));
                 }
                 signedJWTInfo = getSignedJwt(jwtToken);
             } catch (ParseException | IllegalArgumentException e) {
@@ -168,9 +170,11 @@ public class JWTAuthenticator implements Authenticator {
                     try {
                         if (issuerDto.isValidateSubscriptions()) {
                             if (Utils.tracingEnabled()) {
-                                validateSubscriptionSpan = Utils.startSpan(TracingConstants.SUBSCRIPTION_VALIDATION_SPAN, tracer);
+                                validateSubscriptionSpan = Utils
+                                        .startSpan(TracingConstants.SUBSCRIPTION_VALIDATION_SPAN, tracer);
                                 validateSubscriptionSpanScope = validateSubscriptionSpan.getSpan().makeCurrent();
-                                Utils.setTag(validateSubscriptionSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                                Utils.setTag(validateSubscriptionSpan, APIConstants.LOG_TRACE_ID,
+                                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
                             }
                             // if the token is self contained, validation subscription from `subscribedApis` claim
                             JSONObject api = validateSubscriptionFromClaim(name, version, claims, splitToken,
@@ -180,11 +184,12 @@ public class JWTAuthenticator implements Authenticator {
                                     log.debug("Begin subscription validation via Key Manager: "
                                             + validationInfo.getKeyManager());
                                 }
-                                apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, validationInfo);
+                                apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext,
+                                        validationInfo);
 
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Subscription validation via Key Manager. Status: " + apiKeyValidationInfoDTO
-                                            .isAuthorized());
+                                    log.debug("Subscription validation via Key Manager. Status: "
+                                            + apiKeyValidationInfoDTO.isAuthorized());
                                 }
                                 if (!apiKeyValidationInfoDTO.isAuthorized()) {
                                     if (GeneralErrorCodeConstants.API_BLOCKED_CODE == apiKeyValidationInfoDTO
@@ -193,8 +198,8 @@ public class JWTAuthenticator implements Authenticator {
                                                 GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
                                         requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
                                                 GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
-                                        throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
-                                                apiKeyValidationInfoDTO.getValidationStatus(),
+                                        throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE
+                                                .getCode(), apiKeyValidationInfoDTO.getValidationStatus(),
                                                 GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
                                     }
                                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
@@ -238,7 +243,8 @@ public class JWTAuthenticator implements Authenticator {
                         if (Utils.tracingEnabled()) {
                             validateScopesSpan = Utils.startSpan(TracingConstants.SCOPES_VALIDATION_SPAN, tracer);
                             validateScopesSpanScope = validateScopesSpan.getSpan().makeCurrent();
-                            Utils.setTag(validateScopesSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                            Utils.setTag(validateScopesSpan, APIConstants.LOG_TRACE_ID,
+                                    ThreadContext.get(APIConstants.LOG_TRACE_ID));
                         }
                         // Validate scopes
                         validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
@@ -259,7 +265,8 @@ public class JWTAuthenticator implements Authenticator {
                         jwtConfigurationDto.setTtl(JWTUtil.getTTL());
 
                         JWTInfoDto jwtInfoDto = FilterUtils
-                                .generateJWTInfoDto(null, validationInfo, apiKeyValidationInfoDTO, requestContext);
+                                .generateJWTInfoDto(null, validationInfo,
+                                        apiKeyValidationInfoDTO, requestContext);
                         endUserToken = generateAndRetrieveJWTToken(jwtTokenIdentifier, jwtInfoDto);
                         // Set generated jwt token as a response header
                         requestContext.addResponseHeaders(jwtConfigurationDto.getJwtHeader(), endUserToken);
@@ -280,7 +287,8 @@ public class JWTAuthenticator implements Authenticator {
                 }
             } else {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                        APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
             }
         } finally {
             if (Utils.tracingEnabled()) {

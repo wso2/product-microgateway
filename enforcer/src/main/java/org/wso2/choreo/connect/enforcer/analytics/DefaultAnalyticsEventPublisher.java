@@ -19,7 +19,6 @@
 package org.wso2.choreo.connect.enforcer.analytics;
 
 import com.google.protobuf.UInt32Value;
-import com.microsoft.applicationinsights.TelemetryClient;
 import io.envoyproxy.envoy.data.accesslog.v3.HTTPAccessLogEntry;
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
 import org.apache.commons.lang3.StringUtils;

@@ -29,21 +29,25 @@ public class TracingConstants {
     public static final String MAXIMUM_TRACES_PER_SECOND = "maximumTracesPerSecond";
     public static final String INSTRUMENTATION_NAME = "instrumentationName";
     public static final String DO_THROTTLE_SPAN = "ThrottleFilter:doThrottle():Throttling function";
-    public static final String PUBLISH_THROTTLE_EVENT_SPAN = "ThrottleFilter:handleRequest():Publish non throttled event";
+    public static final String PUBLISH_THROTTLE_EVENT_SPAN = "ThrottleFilter:handleRequest():Publish non " +
+            "throttled event";
     public static final String ANALYTICS_SPAN = "AnalyticsFilter:handleSuccessRequest():Analytics Success Flow";
     public static final String ANALYTICS_FAILURE_SPAN = "AnalyticsFilter:handleSuccessRequest():Analytics Failure Flow";
     public static final String CORS_SPAN = "CorsFilter:handleRequest():Cors request handler";
     public static final String EXT_AUTH_SERVICE_SPAN = "ExtAuthService:check()";
     public static final String DECODE_TOKEN_HEADER_SPAN = "JWTAuthenticator:authenticate():Decode token header";
-    public static final String JWT_AUTHENTICATOR_SPAN = "JWTAuthenticator:authenticate():Authenticate request using JWT" +
-            " Authenticator";
+    public static final String JWT_AUTHENTICATOR_SPAN = "JWTAuthenticator:authenticate():Authenticate request using " +
+            "JWT Authenticator";
     public static final String API_KEY_AUTHENTICATOR_SPAN = "InternalAPIKeyAuthenticator:authenticate():Authenticate" +
             " request using API Key Authenticator";
-    public static final String API_KEY_VALIDATE_SUBSCRIPTION_SPAN = "InternalAPIKeyAuthenticator:authenticate():Validate" +
-            " API subscription";
-    public static final String VERIFY_TOKEN_IN_CACHE_SPAN = "InternalAPIKeyAuthenticator:authenticate():Verify internal key/token in cache";
-    public static final String VERIFY_TOKEN_SPAN = "InternalAPIKeyAuthenticator:authenticate():Verify internal key/token when it is not found in cache";
-    public static final String OAUTH_AUTHENTICATOR_SPAN = "OAUTHAuthenticator:authenticate():Authenticate request " + "using OAUTH Authenticator";
+    public static final String API_KEY_VALIDATE_SUBSCRIPTION_SPAN = "InternalAPIKeyAuthenticator:" +
+            "authenticate():Validate API subscription";
+    public static final String VERIFY_TOKEN_IN_CACHE_SPAN = "InternalAPIKeyAuthenticator:authenticate():Verify " +
+            "internal key/token in cache";
+    public static final String VERIFY_TOKEN_SPAN = "InternalAPIKeyAuthenticator:authenticate():Verify internal " +
+            "key/token when it is not found in cache";
+    public static final String OAUTH_AUTHENTICATOR_SPAN = "OAUTHAuthenticator:authenticate():Authenticate request "
+            + "using OAUTH Authenticator";
     public static final String SUBSCRIPTION_VALIDATION_SPAN = "JWTAuthenticator:authenticate():Validate subscription" +
             " using key manager";
     public static final String SCOPES_VALIDATION_SPAN = "JWTAuthenticator:authenticate():Validate scopes";

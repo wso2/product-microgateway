@@ -54,8 +54,8 @@ public class TracerFactory {
         TracingDTO tracingConfig = ConfigHolder.getInstance().getConfig().getTracingConfig();
         String exporterType = tracingConfig.getExporterType();
         Map<String, String> properties = new HashMap<>(tracingConfig.getConfigProperties());
-        if (!properties.isEmpty()){
-            properties.replaceAll((k,v) -> Utils.replaceEnvRegex(v));
+        if (!properties.isEmpty()) {
+            properties.replaceAll((k, v) -> Utils.replaceEnvRegex(v));
         } else {
             throw new TracingException("Error initializing Tracer. Missing required configuration parameters.");
         }

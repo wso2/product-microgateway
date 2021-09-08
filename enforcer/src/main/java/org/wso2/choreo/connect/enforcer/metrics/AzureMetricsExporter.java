@@ -19,13 +19,13 @@
 package org.wso2.choreo.connect.enforcer.metrics;
 
 import com.microsoft.applicationinsights.TelemetryClient;
-import java.util.HashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
 
 /**
- * This class is responsible for managing and exporting metrics for azure application insights
+ * This class is responsible for managing and exporting metrics for azure application insights.
  */
 public class AzureMetricsExporter implements MetricsExporter {
 

@@ -18,15 +18,12 @@
  */
 package org.wso2.choreo.connect.enforcer.tracing;
 
-import com.azure.core.http.policy.HttpLogDetailLevel;
-import com.azure.core.http.policy.HttpLogOptions;
 import com.azure.monitor.opentelemetry.exporter.AzureMonitorExporterBuilder;
 import com.azure.monitor.opentelemetry.exporter.AzureMonitorTraceExporter;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,8 +61,10 @@ public class AzureTraceExporter implements TracerBuilder {
             throw new TracingException("Error initializing Azure Trace Exporter. ConnectionString is null or empty.");
         } else {
             String maxTracesPerSecondString = properties.get(TracingConstants.MAXIMUM_TRACES_PER_SECOND);
-            int maxTracesPerSecond = StringUtils.isEmpty(maxTracesPerSecondString) ? ConfigDefaults.MAXIMUM_TRACES_PER_SECOND : Integer.valueOf(maxTracesPerSecondString);
-            String instrumentationName = StringUtils.isEmpty(properties.get(TracingConstants.INSTRUMENTATION_NAME)) ? ConfigDefaults.INSTRUMENTATION_NAME : properties.get(TracingConstants.INSTRUMENTATION_NAME);
+            int maxTracesPerSecond = StringUtils.isEmpty(maxTracesPerSecondString) ?
+                    ConfigDefaults.MAXIMUM_TRACES_PER_SECOND : Integer.valueOf(maxTracesPerSecondString);
+            String instrumentationName = StringUtils.isEmpty(properties.get(TracingConstants.INSTRUMENTATION_NAME)) ?
+                    ConfigDefaults.INSTRUMENTATION_NAME : properties.get(TracingConstants.INSTRUMENTATION_NAME);
 
             AzureMonitorTraceExporter exporter = new AzureMonitorExporterBuilder()
                     .connectionString(connectionString).buildTraceExporter();

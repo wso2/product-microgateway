@@ -59,9 +59,11 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
         try {
             if (Utils.tracingEnabled()) {
                 TracingTracer tracer = Utils.getGlobalTracer();
-                unsecuredApiAuthenticatorSpan = Utils.startSpan(TracingConstants.UNSECURED_API_AUTHENTICATOR_SPAN, tracer);
+                unsecuredApiAuthenticatorSpan = Utils
+                        .startSpan(TracingConstants.UNSECURED_API_AUTHENTICATOR_SPAN, tracer);
                 unsecuredApiAuthenticatorSpanScope = unsecuredApiAuthenticatorSpan.getSpan().makeCurrent();
-                Utils.setTag(unsecuredApiAuthenticatorSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                Utils.setTag(unsecuredApiAuthenticatorSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             String uuid = requestContext.getMatchedAPI().getAPIConfig().getUuid();
             String context = requestContext.getMatchedAPI().getAPIConfig().getBasePath();

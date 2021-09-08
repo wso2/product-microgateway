@@ -23,6 +23,9 @@ import org.wso2.choreo.connect.enforcer.config.ConfigDefaults;
 
 import java.util.Map;
 
+/**
+ * Holder meta data related to tracing.
+ */
 public class TracingDTO {
 
     private boolean isTracingEnabled = ConfigDefaults.TRACING_ENABLED_VALUE;
@@ -37,9 +40,13 @@ public class TracingDTO {
         this.isTracingEnabled = enabled;
     }
 
-    public String getExporterType() { return exporterType; }
+    public String getExporterType() {
+        return exporterType;
+    }
 
-    public void setExporterType(String type) { this.exporterType = type; }
+    public void setExporterType(String type) {
+        this.exporterType = type;
+    }
 
     public Map<String, String> getConfigProperties() {
         return configProperties;

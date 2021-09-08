@@ -49,7 +49,8 @@ public class Utils {
             Span childSpan = null;
             Span sp = parentSpan.getSpan();
             if (sp != null) {
-                childSpan = tracer.getTracingTracer().spanBuilder(spanName).setParent(Context.current().with(sp)).startSpan();
+                childSpan = tracer.getTracingTracer().spanBuilder(spanName)
+                        .setParent(Context.current().with(sp)).startSpan();
 
             }
             return new TracingSpan(childSpan);

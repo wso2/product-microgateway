@@ -104,11 +104,14 @@ public class WebSocketMetaDataFilter implements Filter {
                     getNullableStringValue(authenticationContext.getProductProvider()));
             requestContext.addMetadataToMap(MetadataConstants.API_PUBLISHER,
                     getNullableStringValue(authenticationContext.getApiPublisher()));
-            requestContext.addMetadataToMap(APIConstants.GW_API_NAME_PARAM, getNullableStringValue(apiConfig.getName()));
+            requestContext.addMetadataToMap(APIConstants.GW_API_NAME_PARAM,
+                    getNullableStringValue(apiConfig.getName()));
             requestContext.addMetadataToMap(APIConstants.GW_BASE_PATH_PARAM,
                     getNullableStringValue(apiConfig.getBasePath()));
-            requestContext.addMetadataToMap(APIConstants.GW_VHOST_PARAM, getNullableStringValue(apiConfig.getVhost()));
-            requestContext.addMetadataToMap(APIConstants.GW_VERSION_PARAM, getNullableStringValue(apiConfig.getVersion()));
+            requestContext.addMetadataToMap(APIConstants.GW_VHOST_PARAM,
+                    getNullableStringValue(apiConfig.getVhost()));
+            requestContext.addMetadataToMap(APIConstants.GW_VERSION_PARAM,
+                    getNullableStringValue(apiConfig.getVersion()));
             return true;
         } finally {
             if (Utils.tracingEnabled()) {

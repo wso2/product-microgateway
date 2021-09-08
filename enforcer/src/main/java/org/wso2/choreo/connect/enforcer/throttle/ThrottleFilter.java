@@ -81,7 +81,8 @@ public class ThrottleFilter implements Filter {
                 TracingTracer tracer = Utils.getGlobalTracer();
                 publishThrottleEventSpan = Utils.startSpan(TracingConstants.PUBLISH_THROTTLE_EVENT_SPAN, tracer);
                 publishThrottleEventSpanScope = publishThrottleEventSpan.getSpan().makeCurrent();
-                Utils.setTag(publishThrottleEventSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                Utils.setTag(publishThrottleEventSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
             // publish throttle event and continue the filter chain
             ThrottleAgent.publishNonThrottledEvent(getThrottleEventMap(requestContext));
@@ -147,8 +148,8 @@ public class ThrottleFilter implements Filter {
                     String subBlockingKey = apiContext + ":" + apiVersion + ":" + authContext.getSubscriber()
                             + "-" + authContext.getApplicationName() + ":" + authContext.getKeyType();
 
-                    if (dataHolder.isRequestBlocked(apiContext, appBlockingKey, authorizedUser, reqContext.getClientIp(),
-                            subBlockingKey, apiTenantDomain)) {
+                    if (dataHolder.isRequestBlocked(apiContext, appBlockingKey, authorizedUser,
+                            reqContext.getClientIp(), subBlockingKey, apiTenantDomain)) {
                         FilterUtils.setThrottleErrorToContext(reqContext,
                                 ThrottleConstants.BLOCKED_ERROR_CODE,
                                 ThrottleConstants.BLOCKING_MESSAGE,
