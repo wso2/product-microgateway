@@ -21,7 +21,6 @@ package org.wso2.choreo.connect.enforcer.config.dto;
 
 import org.wso2.choreo.connect.enforcer.config.ConfigDefaults;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class TracingDTO {
@@ -43,7 +42,7 @@ public class TracingDTO {
     public void setExporterType(String type) { this.exporterType = type; }
 
     public Map<String, String> getConfigProperties() {
-        return new HashMap<>(configProperties);
+        return configProperties;
     }
 
     public void setConfigProperties(Map<String, String> configProperties) {

@@ -79,5 +79,3 @@
   type = "azure"
   [enforcer.tracing.configProperties]
     connectionString = "$env{APPLICATIONINSIGHTS_CONNECTION_STRING}"
-    instrumentationName = "WSO2-CHOREO"
-    maximumTracesPerSecond = "2"

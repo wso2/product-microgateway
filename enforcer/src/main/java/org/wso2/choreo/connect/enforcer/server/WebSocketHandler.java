@@ -17,8 +17,10 @@
  */
 package org.wso2.choreo.connect.enforcer.server;
 
+import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
@@ -26,6 +28,10 @@ import org.wso2.choreo.connect.enforcer.api.WebSocketAPI;
 import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
+import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
+import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
+import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.websocket.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketFrameContext;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleResponse;
@@ -47,22 +53,37 @@ public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, W
      */
     @Override
     public WebSocketThrottleResponse process(WebSocketFrameRequest webSocketFrameRequest) {
-        WebSocketAPI matchedAPI = APIFactory.getInstance().getMatchedAPI(webSocketFrameRequest);
-        if (matchedAPI == null) {
-            WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
-            webSocketThrottleResponse.setUnknownState();
-            String basePath = webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap()
-                    .get(APIConstants.GW_BASE_PATH_PARAM);
-            String version = webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap()
-                    .get(APIConstants.GW_VERSION_PARAM);
-            logger.info("API {}/{} not found in the cache", basePath, version);
-            return webSocketThrottleResponse;
-        } else if (logger.isDebugEnabled()) {
-            APIConfig api = matchedAPI.getAPIConfig();
-            logger.info("API {}/{} found in the cache", api.getBasePath(), api.getVersion());
+        TracingSpan webSocketHandlerSpan = null;
+        Scope webSocketHandlerSpanScope = null;
+        if (Utils.tracingEnabled()) {
+            TracingTracer tracer =  Utils.getGlobalTracer();
+            webSocketHandlerSpan = Utils.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, tracer);
+            webSocketHandlerSpanScope = webSocketHandlerSpan.getSpan().makeCurrent();
+            Utils.setTag(webSocketHandlerSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
         }
-        RequestContext requestContext = buildRequestContext(matchedAPI, webSocketFrameRequest);
-        return matchedAPI.processFramedata(requestContext);
+        try {
+            WebSocketAPI matchedAPI = APIFactory.getInstance().getMatchedAPI(webSocketFrameRequest);
+            if (matchedAPI == null) {
+                WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
+                webSocketThrottleResponse.setUnknownState();
+                String basePath = webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap()
+                        .get(APIConstants.GW_BASE_PATH_PARAM);
+                String version = webSocketFrameRequest.getMetadata().getExtAuthzMetadataMap()
+                        .get(APIConstants.GW_VERSION_PARAM);
+                logger.info("API {}/{} not found in the cache", basePath, version);
+                return webSocketThrottleResponse;
+            } else if (logger.isDebugEnabled()) {
+                APIConfig api = matchedAPI.getAPIConfig();
+                logger.info("API {}/{} found in the cache", api.getBasePath(), api.getVersion());
+            }
+            RequestContext requestContext = buildRequestContext(matchedAPI, webSocketFrameRequest);
+            return matchedAPI.processFramedata(requestContext);
+        } finally {
+            if (Utils.tracingEnabled()) {
+                webSocketHandlerSpanScope.close();
+                Utils.finishSpan(webSocketHandlerSpan);
+            }
+        }
     }
 
     /**

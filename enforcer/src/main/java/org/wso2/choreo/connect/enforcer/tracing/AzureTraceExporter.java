@@ -18,6 +18,8 @@
  */
 package org.wso2.choreo.connect.enforcer.tracing;
 
+import com.azure.core.http.policy.HttpLogDetailLevel;
+import com.azure.core.http.policy.HttpLogOptions;
 import com.azure.monitor.opentelemetry.exporter.AzureMonitorExporterBuilder;
 import com.azure.monitor.opentelemetry.exporter.AzureMonitorTraceExporter;
 import io.opentelemetry.api.trace.Tracer;
@@ -28,6 +30,7 @@ import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wso2.choreo.connect.enforcer.config.ConfigDefaults;
 
 import java.util.Map;
 
@@ -41,7 +44,11 @@ public class AzureTraceExporter implements TracerBuilder {
 
     public static AzureTraceExporter getInstance() {
         if (azureTraceExporter == null) {
-            azureTraceExporter = new AzureTraceExporter();
+            synchronized (new Object()) {
+                if (azureTraceExporter == null) {
+                    azureTraceExporter = new AzureTraceExporter();
+                }
+            }
         }
         return azureTraceExporter;
     }
@@ -56,18 +63,22 @@ public class AzureTraceExporter implements TracerBuilder {
         if (StringUtils.isEmpty(connectionString)) {
             throw new TracingException("Error initializing Azure Trace Exporter. ConnectionString is null or empty.");
         } else {
+            String maxTracesPerSecondString = properties.get(TracingConstants.MAXIMUM_TRACES_PER_SECOND);
+            int maxTracesPerSecond = StringUtils.isEmpty(maxTracesPerSecondString) ? ConfigDefaults.MAXIMUM_TRACES_PER_SECOND : Integer.valueOf(maxTracesPerSecondString);
+            String instrumentationName = StringUtils.isEmpty(properties.get(TracingConstants.INSTRUMENTATION_NAME)) ? ConfigDefaults.INSTRUMENTATION_NAME : properties.get(TracingConstants.INSTRUMENTATION_NAME);
+
             AzureMonitorTraceExporter exporter = new AzureMonitorExporterBuilder()
-                    .connectionString(connectionString)
-                    .buildTraceExporter();
+                    .connectionString(connectionString).buildTraceExporter();
+
             SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-                    .setSampler(new RateLimitingSampler(Integer.valueOf(properties.get(TracingConstants.MAXIMUM_TRACES_PER_SECOND))))
+                    .setSampler(new RateLimitingSampler(maxTracesPerSecond))
                     .addSpanProcessor(SimpleSpanProcessor.create(exporter)).build();
 
             OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                     .setTracerProvider(tracerProvider).buildAndRegisterGlobal();
             LOGGER.debug("Tracer successfully initialized with Azure Trace Exporter.");
 
-            return openTelemetrySdk.getTracer(properties.get(TracingConstants.INSTRUMENTATION_NAME));
+            return openTelemetrySdk.getTracer(instrumentationName);
         }
     }
 }

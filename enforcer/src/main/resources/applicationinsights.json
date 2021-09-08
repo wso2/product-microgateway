@@ -17,10 +17,9 @@
     },
     "metricIntervalSeconds": 60
   },
-  "enableDependencyTracking": false,
   "instrumentation": {
     "logging": {
-      "enabled": false
+      "level": "OFF"
     },
     "cassandra": {
       "enabled": false

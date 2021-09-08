@@ -30,7 +30,9 @@ public class ConfigDefaults {
 
     //Tracing related default values
     public static final boolean TRACING_ENABLED_VALUE = false;
-    public static final String AZURE_TRACE_EXPORTER = "azureTraceExporter";
+    public static final String AZURE_TRACE_EXPORTER = "azure";
+    public static final int MAXIMUM_TRACES_PER_SECOND = 2;
+    public static final String INSTRUMENTATION_NAME = "WSO2-CHOREO";
 
     //Metrics related default values
     public static final boolean METRICS_ENABLED_VALUE = false;

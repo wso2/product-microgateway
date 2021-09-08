@@ -19,8 +19,12 @@
 package org.wso2.choreo.connect.enforcer.tracing;
 
 import io.opentelemetry.api.trace.Tracer;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
+import org.wso2.choreo.connect.enforcer.server.AuthServer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,12 +34,17 @@ import java.util.Map;
  */
 public class TracerFactory {
 
+    private static final Logger logger = LogManager.getLogger(AuthServer.class);
     private Tracer tracer;
     private static TracerFactory tracerFactory;
 
     public static TracerFactory getInstance() {
         if (tracerFactory == null) {
-            tracerFactory = new TracerFactory();
+            synchronized (new Object()) {
+                if (tracerFactory == null) {
+                    tracerFactory = new TracerFactory();
+                }
+            }
         }
         return tracerFactory;
     }
@@ -45,11 +54,21 @@ public class TracerFactory {
         TracingDTO tracingConfig = ConfigHolder.getInstance().getConfig().getTracingConfig();
         String exporterType = tracingConfig.getExporterType();
         Map<String, String> properties = new HashMap<>(tracingConfig.getConfigProperties());
-        properties.replaceAll((k,v) -> Utils.replaceEnvRegex(v));
+        if (!properties.isEmpty()){
+            properties.replaceAll((k,v) -> Utils.replaceEnvRegex(v));
+        } else {
+            throw new TracingException("Error initializing Tracer. Missing required configuration parameters.");
+        }
 
         // Future tracer implementations can be initialized from here
+        if (StringUtils.isEmpty(exporterType)) {
+            logger.warn("Tracer exporter type not defined, defaulting to Azure Trace Exporter");
+            exporterType = TracingConstants.AZURE_TRACE_EXPORTER;
+        }
         if (exporterType.equalsIgnoreCase(TracingConstants.AZURE_TRACE_EXPORTER)) {
             this.tracer = AzureTraceExporter.getInstance().initTracer(properties);
+        } else {
+            logger.error("Tracer exporter type: " + exporterType + " not found!");
         }
     }
 
