@@ -62,8 +62,9 @@ type EventTokenRevocationNotification struct {
 type EventOrganizationPurge struct {
 	Event struct {
 		PayloadData struct {
-			EventType    string `json:"eventType"`
-			Organization string `json:"organization"`
+			EventType          string `json:"eventType"`
+			Organization       string `json:"organization"`
+			OrganizationHandle string `json:"organizationHandle"`
 		} `json:"payloadData"`
 	} `json:"event"`
 }
