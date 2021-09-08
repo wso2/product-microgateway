@@ -71,6 +71,9 @@
 [analytics]
   enabled = false
 
+[enforcer.metrics]
+  enabled = true
+
 [enforcer.tracing]
   enabled = true
   type = "azure"

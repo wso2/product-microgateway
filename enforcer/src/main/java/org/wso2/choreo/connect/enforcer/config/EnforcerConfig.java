@@ -20,17 +20,7 @@ package org.wso2.choreo.connect.enforcer.config;
 
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
-import org.wso2.choreo.connect.enforcer.config.dto.AdminRestServerDto;
-import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
-import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
-import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
-import org.wso2.choreo.connect.enforcer.config.dto.CacheDto;
-import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
-import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
-import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
-import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
-import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
-import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
+import org.wso2.choreo.connect.enforcer.config.dto.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +34,7 @@ public class EnforcerConfig {
     private Map<String, ExtendedTokenIssuerDto> issuersMap = new HashMap<>();
     private ThrottleConfigDto throttleConfig;
     private TracingDTO tracingConfig;
+    private MetricsDTO metricsConfig;
     private JWTConfigurationDto jwtConfigurationDto;
     private CacheDto cacheDto;
     private JWTIssuerConfigurationDto jwtIssuerConfigurationDto;
@@ -86,6 +77,14 @@ public class EnforcerConfig {
 
     public TracingDTO getTracingConfig() {
         return tracingConfig;
+    }
+
+    public MetricsDTO getMetricsConfig() {
+        return metricsConfig;
+    }
+
+    public void setMetricsConfig(MetricsDTO metricsConfig) {
+        this.metricsConfig = metricsConfig;
     }
 
     public void setJwtConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {

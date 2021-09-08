@@ -24,38 +24,8 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
-import org.wso2.choreo.connect.discovery.config.enforcer.Analytics;
-import org.wso2.choreo.connect.discovery.config.enforcer.AuthHeader;
-import org.wso2.choreo.connect.discovery.config.enforcer.BinaryPublisher;
-import org.wso2.choreo.connect.discovery.config.enforcer.Cache;
-import org.wso2.choreo.connect.discovery.config.enforcer.ClaimMapping;
-import org.wso2.choreo.connect.discovery.config.enforcer.Config;
-import org.wso2.choreo.connect.discovery.config.enforcer.Issuer;
-import org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator;
-import org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer;
-import org.wso2.choreo.connect.discovery.config.enforcer.Management;
-import org.wso2.choreo.connect.discovery.config.enforcer.PublisherPool;
-import org.wso2.choreo.connect.discovery.config.enforcer.RestServer;
-import org.wso2.choreo.connect.discovery.config.enforcer.Service;
-import org.wso2.choreo.connect.discovery.config.enforcer.TMURLGroup;
-import org.wso2.choreo.connect.discovery.config.enforcer.ThrottleAgent;
-import org.wso2.choreo.connect.discovery.config.enforcer.Throttling;
-import org.wso2.choreo.connect.enforcer.config.dto.AdminRestServerDto;
-import org.wso2.choreo.connect.discovery.config.enforcer.Tracing;
-import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsDTO;
-import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsReceiverConfigDTO;
-import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
-import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
-import org.wso2.choreo.connect.enforcer.config.dto.CacheDto;
-import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
-import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
-import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
-import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
-import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
-import org.wso2.choreo.connect.enforcer.config.dto.ThrottleAgentConfigDto;
-import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
-import org.wso2.choreo.connect.enforcer.config.dto.ThrottlePublisherConfigDto;
-import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
+import org.wso2.choreo.connect.discovery.config.enforcer.*;
+import org.wso2.choreo.connect.enforcer.config.dto.*;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
@@ -141,6 +111,9 @@ public class ConfigHolder {
 
         // Read tracing configurations
         populateTracingConfig(config.getTracing());
+
+        // Read tracing configurations
+        populateMetricsConfig(config.getMetrics());
 
         // Read token caching configs
         populateCacheConfigs(config.getCache());
@@ -271,6 +244,13 @@ public class ConfigHolder {
         tracingConfig.setExporterType(tracing.getType());
         tracingConfig.setConfigProperties(tracing.getConfigPropertiesMap());
         config.setTracingConfig(tracingConfig);
+    }
+
+    private void populateMetricsConfig(Metrics metrics) {
+        MetricsDTO metricsConfig = new MetricsDTO();
+        metricsConfig.setMetricsEnabled(metrics.getEnabled());
+        metricsConfig.setMetricsType(metrics.getType());
+        config.setMetricsConfig(metricsConfig);
     }
 
     private void populateTMBinaryConfig(BinaryPublisher binary) {

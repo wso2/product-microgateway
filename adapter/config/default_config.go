@@ -184,6 +184,10 @@ var defaultConfig = &Config{
 				"maximumTracesPerSecond": "2",
 			},
 		},
+        Metrics: metrics{
+            Enabled: false,
+            Type: "azure",
+        },
 		Throttling: throttlingConfig{
 			EnableGlobalEventPublishing:        false,
 			EnableHeaderConditions:             false,
