@@ -4,23 +4,29 @@ This provides the information to how to work with the current microgateway setup
 
 ## Prerequisites
 
-docker
-
-jdk-11
-
-maven 3.6
+- docker & docker-compose
+- jdk-11
+- maven 3.6
+- Golang version below 1.17
 
 ## Quick Start Guide
 
 - `sh remove-containers.sh` (If it is the first time this is not required to run.
-The purpose is to remove the already created docker containers. Otherwise the docker 
+The purpose is to remove the already created docker containers. Otherwise, the docker 
 maven plugin would fail to create the new docker images)
 
 - `mvn clean install` (make sure java-11 is set because the enforcer pom contains
  java-11 as the source)
+  - For ARM-based processors, specify the platform using `--platform` flag before the 
+  `adoptopenjdk/openjdk11:jre-11.0.11_9-alpine` base image name. This should be done in
+  docker files relevant to the enforcer and mock-backend server.
+  
+    example:
+  
+    `FROM --platform=linux/x86_64 adoptopenjdk/openjdk11:jre-11.0.11_9-alpine`
  
- - Navigate to distribution/target/.
- Then extract the zip file called `wso2am-micro-gw-<version>.zip`
+- Navigate to distribution/target/.
+ Then extract the zip file called `choreo-connect-<version>.zip`
  
  - Then execute `docker-compose up` to run the setup. This will start an envoy container,
  filter-core container and piot container. The mounted configurations can be found from
