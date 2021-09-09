@@ -39,8 +39,6 @@ func handleAzureOrganizationPurge() {
 				"the organization purge event %v. Hence dropping the event", error)
 			continue
 		}
-		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] OrganizationPurge for Organization %s is received",
-			event.Event.PayloadData.Organization)
 
 		conf, errReadConfig := config.ReadConfigs()
 
