@@ -21,7 +21,6 @@ package org.wso2.choreo.connect.enforcer.metrics;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.MetricsDTO;
 
 /**
@@ -31,7 +30,6 @@ public class MetricsManager {
 
     private static final Logger LOGGER = LogManager.getLogger(MetricsManager.class);
     private static String exporterType = "none";
-    private static boolean isMetricsInitialized = false;
     private static boolean isMetricsEnabled = false;
     private static MetricsExporter metricsExporter;
 
@@ -56,23 +54,18 @@ public class MetricsManager {
     /**
      * Method to initialize metrics
      */
-    public static void initializeMetrics() {
+    public static void initializeMetrics(MetricsDTO enforcerConfig) {
 
-        MetricsDTO metricsConfig = ConfigHolder.getInstance().getConfig().getMetricsConfig();
-        isMetricsEnabled = metricsConfig.isMetricsEnabled();
-
-        if (isMetricsEnabled && !isMetricsInitialized) {
-            String type = metricsConfig.getMetricsType();
-            if (StringUtils.isEmpty(type)) {
-                LOGGER.warn("Metrics type not defined, defaulting to Azure metrics");
-                exporterType = "azure";
-            } else {
-                exporterType = type;
-            }
-
-            isMetricsInitialized = true;
-            LOGGER.debug("Metrics Manager is successfully initialized with type: " + exporterType + ".");
+        String type = enforcerConfig.getMetricsType();
+        if (StringUtils.isEmpty(type)) {
+            LOGGER.warn("Metrics type not defined, defaulting to Azure metrics");
+            exporterType = "azure";
+        } else {
+            exporterType = type;
         }
+
+        isMetricsEnabled = true;
+        LOGGER.debug("Metrics Manager is successfully initialized with type: " + exporterType + ".");
     }
 
     public static boolean isMetricsEnabled() {

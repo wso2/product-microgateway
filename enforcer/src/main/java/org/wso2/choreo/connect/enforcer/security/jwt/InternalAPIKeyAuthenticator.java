@@ -174,7 +174,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                     if (Utils.tracingEnabled()) {
                         verifyTokenWithoutCacheSpan = Utils.startSpan(TracingConstants.VERIFY_TOKEN_SPAN, tracer);
                         verifyTokenWithoutCacheSpanScope = verifyTokenWithoutCacheSpan.getSpan().makeCurrent();
-                        Utils.setTag(verifyTokenInCacheSpan, APIConstants.LOG_TRACE_ID,
+                        Utils.setTag(verifyTokenWithoutCacheSpan, APIConstants.LOG_TRACE_ID,
                                 ThreadContext.get(APIConstants.LOG_TRACE_ID));
                     }
                     if (log.isDebugEnabled()) {

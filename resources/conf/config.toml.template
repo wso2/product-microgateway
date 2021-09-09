@@ -451,3 +451,4 @@ enable = true
 [enforcer.metrics]
   # Enable/Disable metrics in Choreo Connect
   enabled = true
+  type = "azure"

@@ -48,8 +48,8 @@ public class TracingConstants {
             "key/token when it is not found in cache";
     public static final String OAUTH_AUTHENTICATOR_SPAN = "OAUTHAuthenticator:authenticate():Authenticate request "
             + "using OAUTH Authenticator";
-    public static final String SUBSCRIPTION_VALIDATION_SPAN = "JWTAuthenticator:authenticate():Validate subscription" +
-            " using key manager";
+    public static final String SUBSCRIPTION_VALIDATION_SPAN = "JWTAuthenticator:authenticate():Validate " +
+            "subscription using key manager";
     public static final String SCOPES_VALIDATION_SPAN = "JWTAuthenticator:authenticate():Validate scopes";
     public static final String UNSECURED_API_AUTHENTICATOR_SPAN = "UnsecuredAPIAuthenticator:authenticate():" +
             "Authenticate request using Unsecured Api Authenticator.";

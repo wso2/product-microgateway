@@ -211,8 +211,10 @@ public class JWTAuthenticator implements Authenticator {
                         }
                     } finally {
                         if (Utils.tracingEnabled()) {
-                            validateSubscriptionSpanScope.close();
-                            Utils.finishSpan(validateSubscriptionSpan);
+                            if (validateSubscriptionSpan != null) {
+                                validateSubscriptionSpanScope.close();
+                                Utils.finishSpan(validateSubscriptionSpan);
+                            }
                         }
                     }
 

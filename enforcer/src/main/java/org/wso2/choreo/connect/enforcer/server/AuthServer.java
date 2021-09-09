@@ -109,8 +109,10 @@ public class AuthServer {
                 logger.debug("Tracing is disabled.");
             }
 
-            //Initialize metrics
-            MetricsManager.initializeMetrics();
+            if (ConfigHolder.getInstance().getConfig().getMetricsConfig().isMetricsEnabled()) {
+                //Initialize metrics
+                MetricsManager.initializeMetrics(ConfigHolder.getInstance().getConfig().getMetricsConfig());
+            }
 
             //Initialise cache objects
             CacheProvider.init();
