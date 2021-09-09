@@ -21,15 +21,15 @@ package messaging
 import (
 	"context"
 	"errors"
-	servicebus "github.com/Azure/azure-service-bus-go"
-	"github.com/google/uuid"
-	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"strconv"
 	"strings"
 	"time"
+	servicebus "github.com/Azure/azure-service-bus-go"
+	"github.com/google/uuid"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
-var bindingKeys = []string{tokenRevocation, notification, organizationPurge}
+var bindingKeys = []string{tokenRevocation, notification, stepQuotaThreshold, stepQuotaReset, organizationPurge}
 
 // Subscription stores the meta data of a specific subscription
 type Subscription struct {
@@ -43,6 +43,10 @@ var (
 	AzureRevokedTokenChannel chan []byte
 	// AzureNotificationChannel stores the notification events
 	AzureNotificationChannel chan []byte
+	// AzureStepQuotaThresholdChannel stores the step quota threshold events
+	AzureStepQuotaThresholdChannel chan []byte
+	// AzureStepQuotaResetChannel stores the step quota reset events
+	AzureStepQuotaResetChannel chan []byte
 	// AzureOrganizationPurgeChannel stores the Organization Purge events
 	AzureOrganizationPurgeChannel chan []byte
 )
@@ -50,6 +54,8 @@ var (
 func init() {
 	AzureRevokedTokenChannel = make(chan []byte)
 	AzureNotificationChannel = make(chan []byte)
+	AzureStepQuotaThresholdChannel = make(chan []byte)
+	AzureStepQuotaResetChannel = make(chan []byte)
 	AzureOrganizationPurgeChannel = make(chan []byte)
 }
 
@@ -136,7 +142,7 @@ func createTopicsIfNotExist(availableTopicList []*servicebus.TopicEntity, ns *se
 				_, topicCreationError = topicManager.Put(ctx, key)
 			}()
 			if topicCreationError != nil {
-				errorValue = errors.New("Error occurred while trying to create topic " + key + " in azure service bus : " +
+				errorValue = errors.New("Error occurred while trying to create topic " + key + " in azure service bus : "+
 					topicCreationError.Error())
 				return errorValue
 			}
@@ -228,6 +234,6 @@ func logError(reconnectRetryCount int, reconnectInterval time.Duration, errVal e
 	if reconnectRetryCount > 0 {
 		retryAttemptMessage = "Retry attempt : " + strconv.Itoa(reconnectRetryCount)
 	}
-	logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] :%v."+retryAttemptMessage+" Retrying after %s seconds",
+	logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] :%v." + retryAttemptMessage + " Retrying after %s seconds",
 		errVal, reconnectInterval)
 }
