@@ -28,14 +28,17 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.utils.DataBridgeThreadFactory;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.DataEndpointAgent;
+import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.conf.DataEndpointConfiguration;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.exception.DataEndpointConfigurationException;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.exception.EventQueueFullException;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.util.DataEndpointConstants;
 import org.wso2.micro.gateway.core.globalthrottle.databridge.agent.util.DataPublisherUtil;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -377,7 +380,8 @@ public class DataEndpointGroup implements DataEndpointFailureCallback {
                     try {
                         String[] urlElements = DataPublisherUtil.getProtocolHostPort(
                                 dataEndpoint.getDataEndpointConfiguration().getReceiverURL());
-                        if (!isServerExists(urlElements[1], Integer.parseInt(urlElements[2]))) {
+                        if (!isServerExists(dataEndpoint, urlElements[0], urlElements[1],
+                                Integer.parseInt(urlElements[2]))) {
                             dataEndpoint.deactivate();
                         }
                     } catch (DataEndpointConfigurationException exception) {
@@ -399,11 +403,24 @@ public class DataEndpointGroup implements DataEndpointFailureCallback {
             }
         }
 
-        private boolean isServerExists(String ip, int port) {
+        private boolean isServerExists(DataEndpoint dataEndpoint, String protocol, String ip, int port) {
             try {
-                Socket socket = new Socket(ip, port);
-                socket.close();
-                return true;
+                if (protocol.equals(DataEndpointConfiguration.Protocol.TCP.toString())) {
+                    Socket socket = new Socket(ip, port);
+                    socket.close();
+                    return true;
+                } else {
+                    // this block is executed when connection is SSL
+                    DataEndpointConfiguration dataEndpointConfiguration = dataEndpoint.getDataEndpointConfiguration();
+                    Socket socket = (Socket) dataEndpointConfiguration.getSecuredTransportPool().borrowObject(
+                            dataEndpointConfiguration.getPublisherKey());
+                    OutputStream outputStream = socket.getOutputStream();
+                    String sessionId = dataEndpointConfiguration.getSessionId();
+                    ByteBuffer buf = ByteBuffer.allocate(sessionId.length());
+                    outputStream.write(buf.array());
+                    outputStream.flush();
+                    return true;
+                }
             } catch (UnknownHostException e) {
                 return false;
             } catch (IOException e) {
