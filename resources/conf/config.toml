@@ -72,10 +72,7 @@
   enabled = false
 
 [enforcer.metrics]
-  enabled = true
+  enabled = false
 
 [enforcer.tracing]
-  enabled = true
-  type = "azure"
-  [enforcer.tracing.configProperties]
-    connectionString = "$env{APPLICATIONINSIGHTS_CONNECTION_STRING}"
+  enabled = false
