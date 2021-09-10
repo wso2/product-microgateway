@@ -383,6 +383,7 @@ type controlPlane struct {
 	EnvironmentLabels       []string                `toml:"environmentLabels"`
 	RetryInterval           time.Duration           `toml:"retryInterval"`
 	SkipSSLVerification     bool                    `toml:"skipSSLVerification"`
+	JmsConnectionParameters jmsConnectionParameters `toml:"jmsConnectionParameters"`
 	BrokerConnectionParameters brokerConnectionParameters `toml:"brokerConnectionParameters"`
 }
 
@@ -392,6 +393,10 @@ type globalAdapter struct {
 	LocalLabel    string        `toml:"localLabel"`
 	HostName      string        `toml:"overwriteHostName"`
 	RetryInterval time.Duration `toml:"retryInterval"`
+}
+
+type jmsConnectionParameters struct {
+	EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
 }
 
 type brokerConnectionParameters struct {
