@@ -63,7 +63,7 @@ type EventOrganizationPurge struct {
 	Event struct {
 		PayloadData struct {
 			EventType        string         `json:"eventType"`
-			TimeStamp        int64          `json:"timeStamp"`
+			TimeStamp        int64          `json:"timestamp"`
 			OrganizationList []Organization `json:"organizationList"`
 		} `json:"payloadData"`
 	} `json:"event"`
