@@ -59,12 +59,12 @@ func handleAzureTokenRevocation() {
 }
 
 func processTokenRevocationEvent(notification *msg.EventTokenRevocationNotification)  {
-	var stokens []types.Resource
-	t := &keymgt.RevokedToken{}
-	t.Jti = notification.Event.PayloadData.RevokedToken
-	t.Expirytime = notification.Event.PayloadData.ExpiryTime
-	stokens = append(stokens, t)
-	xds.UpdateEnforcerRevokedTokens(stokens)
+	var revokedTokens []types.Resource
+	token := &keymgt.RevokedToken{}
+	token.Jti = notification.Event.PayloadData.RevokedToken
+	token.Expirytime = notification.Event.PayloadData.ExpiryTime
+	stokens = append(revokedTokens, token)
+	xds.UpdateEnforcerRevokedTokens(revokedTokens)
 }
 
 func parseRevokedTokenJSONEvent(data []byte, notification *msg.EventTokenRevocationNotification) error {
