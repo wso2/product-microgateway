@@ -58,7 +58,7 @@ func startBrokerConsumer(subscriptionMetaData Subscription, reconnectInterval ti
 			}))
 		}()
 		if err != nil {
-			logger.LoggerMgw.Errorf("Error occurred while keeping the connection alive for subscription %s from azure " +
+			logger.LoggerMgw.Errorf("Error occurred while listening to subscription %s from azure " +
 				"service bus for topic name %s:%v. Hence retrying in %s", subscriptionName, topicName, err, reconnectInterval)
 			time.Sleep(reconnectInterval)
 		}
