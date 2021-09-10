@@ -22,7 +22,6 @@ import (
 	"context"
 	"errors"
 	"strconv"
-	"strings"
 	"time"
 	servicebus "github.com/Azure/azure-service-bus-go"
 	"github.com/google/uuid"
@@ -59,29 +58,8 @@ func InitiateBrokerConnectionAndValidate(eventListeningEndpoint string, componen
 	if processError == nil {
 		logger.LoggerMgw.Debug("Service bus namespace successfully received for connection url : " +
 			eventListeningEndpoint)
-		var isTopicsCreated bool
-		topicManager := namespace.NewTopicManager()
-		var availableTopics []*servicebus.TopicEntity
-
 		for j := 0; j < reconnectRetryCount || reconnectRetryCount == -1; j++ {
 			processError = nil
-			if availableTopics == nil {
-				availableTopics, processError = getTopicList(topicManager)
-				if processError != nil {
-					logError(reconnectRetryCount, reconnectInterval, processError)
-					time.Sleep(reconnectInterval)
-					continue
-				}
-			}
-			if !isTopicsCreated {
-				processError = createTopicsIfNotExist(availableTopics, namespace)
-			}
-			if processError != nil {
-				logError(reconnectRetryCount, reconnectInterval, processError)
-				time.Sleep(reconnectInterval)
-				continue
-			}
-			isTopicsCreated = true
 			subscriptionMetaDataList, processError = retrieveSubscriptionMetadata(subscriptionMetaDataList,
 				namespace, componentName,
 				servicebus.SubscriptionWithAutoDeleteOnIdle(&subscriptionIdleTimeDuration))
@@ -113,32 +91,6 @@ func InitiateConsumers(subscriptionMetaDataList []Subscription, reconnectInterva
 			startBrokerConsumer(subscriptionMetaData, reconnectInterval)
 		}(subscriptionMetaData)
 	}
-}
-
-func createTopicsIfNotExist(availableTopicList []*servicebus.TopicEntity, ns *servicebus.Namespace) error {
-	parentContext := context.Background()
-	for _, key := range bindingKeys {
-		if !isTopicExist(key, availableTopicList) {
-			//create the topic
-			topicManager := ns.NewTopicManager()
-			var topicCreationError error
-			var errorValue error
-			func() {
-				ctx, cancel := context.WithCancel(parentContext)
-				defer cancel()
-				_, topicCreationError = topicManager.Put(ctx, key)
-			}()
-			if topicCreationError != nil {
-				errorValue = errors.New("Error occurred while trying to create topic " + key + " in azure service bus : "+
-					topicCreationError.Error())
-				return errorValue
-			}
-			logger.LoggerMgw.Debug("Topic " + key + " created.")
-		} else {
-			logger.LoggerMgw.Debug("Topic " + key + " already exist.")
-		}
-	}
-	return nil
 }
 
 func retrieveSubscriptionMetadata(metaDataList []Subscription, ns *servicebus.Namespace, componentName string,
@@ -185,34 +137,6 @@ func retrieveSubscriptionMetadata(metaDataList []Subscription, ns *servicebus.Na
 		metaDataList = append(metaDataList, subscriptionMetaData)
 	}
 	return metaDataList, nil
-}
-
-func getTopicList(topicManager *servicebus.TopicManager) ([]*servicebus.TopicEntity, error) {
-	var errorValue error
-	var getTopicListError error
-	var topicList []*servicebus.TopicEntity
-	func() {
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-		topicList, getTopicListError = topicManager.List(ctx)
-	}()
-	if getTopicListError != nil {
-		errorValue = errors.New("Error occurred while trying to get topic list from azure service bus:%v." + getTopicListError.Error())
-		return topicList, errorValue
-	}
-	logger.LoggerMgw.Debug("Service bus topic list received.")
-	return topicList, nil
-}
-
-func isTopicExist(topicName string, availableTopicList []*servicebus.TopicEntity) bool {
-	for _, topic := range availableTopicList {
-		if strings.EqualFold(topic.Name, topicName) {
-			logger.LoggerMgw.Debug("Topic " + topicName + " Exist.")
-			return true
-		}
-	}
-	logger.LoggerMgw.Debug("Topic " + topicName + " does not Exist.")
-	return false
 }
 
 func logError(reconnectRetryCount int, reconnectInterval time.Duration, errVal error) {

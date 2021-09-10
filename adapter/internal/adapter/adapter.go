@@ -263,7 +263,6 @@ func Run(conf *config.Config) {
 			} else {
 				messaging.InitiateAndProcessEvents(conf)
 			}
-
 		} else {
 			go messaging.ProcessEvents(conf)
 		}
