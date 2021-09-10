@@ -69,8 +69,9 @@ type EventOrganizationPurge struct {
 	} `json:"event"`
 }
 
+// Organization for struct
 type Organization struct {
-	Id     string `json:"id"`
+	ID     string `json:"id"`
 	UUID   string `json:"uuid"`
 	Handle string `json:"handle"`
 	Name   string `json:"name"`
