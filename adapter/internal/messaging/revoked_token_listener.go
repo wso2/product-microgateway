@@ -63,7 +63,7 @@ func processTokenRevocationEvent(notification *msg.EventTokenRevocationNotificat
 	token := &keymgt.RevokedToken{}
 	token.Jti = notification.Event.PayloadData.RevokedToken
 	token.Expirytime = notification.Event.PayloadData.ExpiryTime
-	stokens = append(revokedTokens, token)
+	revokedTokens = append(revokedTokens, token)
 	xds.UpdateEnforcerRevokedTokens(revokedTokens)
 }
 
