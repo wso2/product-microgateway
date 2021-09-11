@@ -20,7 +20,6 @@ package adapter
 
 import (
 	"crypto/tls"
-	"strconv"
 	"strings"
 
 	discoveryv3 "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
@@ -58,6 +57,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"strconv"
 )
 
 var (
@@ -74,7 +74,8 @@ var (
 )
 
 const (
-	ads                        = "ads"
+	ads          = "ads"
+	amqpProtocol = "amqp"
 	featureFlagReplaceEventHub = "FEATURE_FLAG_REPLACE_EVENT_HUB"
 )
 
@@ -240,6 +241,7 @@ func Run(conf *config.Config) {
 			// Fetch APIs at start up when GA is disabled.
 			fetchAPIsOnStartUp(conf, nil)
 		}
+
 		var isAzureEventingFeatureFlagEnabled bool
 		var err error
 
@@ -255,10 +257,15 @@ func Run(conf *config.Config) {
 
 		if isAzureEventingFeatureFlagEnabled {
 			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to integrate with azure service bus")
-			messaging.InitiateAndProcessEvents(conf)
+			var connectionURLList = conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints
+			if strings.Contains(connectionURLList[0], amqpProtocol) {
+				go messaging.ProcessEvents(conf)
+			} else {
+				messaging.InitiateAndProcessEvents(conf)
+			}
+		} else {
+			go messaging.ProcessEvents(conf)
 		}
-
-		go messaging.ProcessEvents(conf)
 
 		go synchronizer.UpdateRevokedTokens()
 		// Fetch Key Managers from APIM
