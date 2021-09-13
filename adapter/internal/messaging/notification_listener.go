@@ -22,6 +22,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	eh "github.com/wso2/product-microgateway/adapter/internal/eventhub"
@@ -29,7 +31,6 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/synchronizer"
 	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
-	"strings"
 )
 
 // constant variables
@@ -38,7 +39,6 @@ const (
 	applicationEventType        = "APPLICATION"
 	subscriptionEventType       = "SUBSCRIPTION"
 	scopeEvenType               = "SCOPE"
-	organizationPurgeEventType  = "ORGANIZATION_PURGE"
 	removeAPIFromGateway        = "REMOVE_API_FROM_GATEWAY"
 	deployAPIToGateway          = "DEPLOY_API_IN_GATEWAY"
 	applicationRegistration     = "APPLICATION_REGISTRATION_CREATE"
@@ -54,7 +54,6 @@ const (
 	policyUpdate                = "POLICY_UPDATE"
 	policyDelete                = "POLICY_DELETE"
 	blockedStatus               = "BLOCKED"
-	reloadOrganizationData      = "RELOAD_ORGANIZATION_DATA"
 )
 
 // var variables
@@ -73,33 +72,14 @@ func handleNotification() {
 	conf, _ := config.ReadConfigs()
 	for d := range msg.NotificationChannel {
 		var notification msg.EventNotification
-		var eventType string
-		notificationErr := json.Unmarshal([]byte(string(d.Body)), &notification)
+		notificationErr := parseNotificationJSONEvent([]byte(string(d.Body)), &notification)
 		if notificationErr != nil {
-			logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling event data %v", notificationErr)
 			continue
 		}
 		logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
-		var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Event)
+		err := processNotificationEvent(conf, &notification)
 		if err != nil {
-			if _, ok := err.(base64.CorruptInputError); ok {
-				logger.LoggerInternalMsg.Error("\nbase64 input is corrupt, check the provided key")
-			}
-			logger.LoggerInternalMsg.Errorf("Error occurred while decoding the notification event %v", err)
 			continue
-		}
-		logger.LoggerInternalMsg.Debugf("\n\n[%s]", decodedByte)
-		eventType = notification.Event.PayloadData.EventType
-		if strings.Contains(eventType, apiLifeCycleChange) {
-			handleLifeCycleEvents(decodedByte)
-		} else if strings.Contains(eventType, apiEventType) && !conf.GlobalAdapter.Enabled {
-			handleAPIEvents(decodedByte, eventType)
-		} else if strings.Contains(eventType, applicationEventType) {
-			handleApplicationEvents(decodedByte, eventType)
-		} else if strings.Contains(eventType, subscriptionEventType) {
-			handleSubscriptionEvents(decodedByte, eventType)
-		} else {
-			handlePolicyEvents(decodedByte, eventType)
 		}
 		d.Ack(false)
 	}
@@ -107,19 +87,46 @@ func handleNotification() {
 }
 
 func handleAzureNotification() {
+	conf, _ := config.ReadConfigs()
 	for d := range msg.AzureNotificationChannel {
-		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] message received for " +
-			"NotificationChannel = " + string(d))
 		var notification msg.EventNotification
 		error := parseNotificationJSONEvent(d, &notification)
 		if error != nil {
-			logger.LoggerInternalMsg.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error while processing "+
-				"the notification event %v. Hence dropping the event", error)
 			continue
 		}
-		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Event %s is received",
-			notification.Event.PayloadData.EventType)
+		logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.EventType)
+		err := processNotificationEvent(conf, &notification)
+		if err != nil {
+			continue
+		}
 	}
+}
+
+func processNotificationEvent (conf *config.Config, notification *msg.EventNotification) error {
+	var eventType string
+	var decodedByte, err = base64.StdEncoding.DecodeString(notification.Event.PayloadData.Event)
+	if err != nil {
+		if _, ok := err.(base64.CorruptInputError); ok {
+			logger.LoggerInternalMsg.Error("\nbase64 input is corrupt, check the provided key")
+		}
+		logger.LoggerInternalMsg.Errorf("Error occurred while decoding the notification event %v. " +
+			"Hence dropping the event", err)
+		return err
+	}
+	logger.LoggerInternalMsg.Debugf("\n\n[%s]", decodedByte)
+	eventType = notification.Event.PayloadData.EventType
+	if strings.Contains(eventType, apiLifeCycleChange) {
+		handleLifeCycleEvents(decodedByte)
+	} else if strings.Contains(eventType, apiEventType) && !conf.GlobalAdapter.Enabled {
+		handleAPIEvents(decodedByte, eventType)
+	} else if strings.Contains(eventType, applicationEventType) {
+		handleApplicationEvents(decodedByte, eventType)
+	} else if strings.Contains(eventType, subscriptionEventType) {
+		handleSubscriptionEvents(decodedByte, eventType)
+	} else {
+		handlePolicyEvents(decodedByte, eventType)
+	}
+	return nil
 }
 
 // handleAPIEvents to process api related data
@@ -438,8 +445,8 @@ func belongsToTenant(tenantDomain string) bool {
 func parseNotificationJSONEvent(data []byte, notification *msg.EventNotification) error {
 	unmarshalErr := json.Unmarshal(data, &notification)
 	if unmarshalErr != nil {
-		logger.LoggerInternalMsg.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while unmarshalling "+
-			"notification event data %v", unmarshalErr)
+		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling " +
+			"notification event data %v. Hence dropping the event", unmarshalErr)
 	}
 	return unmarshalErr
 }

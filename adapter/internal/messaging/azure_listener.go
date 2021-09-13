@@ -19,33 +19,29 @@
 package messaging
 
 import (
+	"time"
 	"github.com/wso2/product-microgateway/adapter/config"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/pkg/health"
 	msg "github.com/wso2/product-microgateway/adapter/pkg/messaging"
-	"time"
 )
 
 const (
-	componentName                = "adapter"
-	subscriptionIdleTimeDuration = time.Duration(72 * time.Hour)
+	componentName                              = "adapter"
+	subscriptionIdleTimeDuration               = time.Duration(72 * time.Hour)
 )
 
 // InitiateAndProcessEvents to pass event consumption
 func InitiateAndProcessEvents(config *config.Config) {
 	var err error
-	var reconnectRetryCount = config.ControlPlane.ASBConnectionParameters.ReconnectRetryCount
-	var reconnectInterval = config.ControlPlane.ASBConnectionParameters.ReconnectInterval
-	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting InitiateAndProcessEvents method")
-	logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] EventListeningEndpoint is ",
-		config.ControlPlane.ASBConnectionParameters.EventListeningEndpoint)
+	var reconnectRetryCount = config.ControlPlane.BrokerConnectionParameters.ReconnectRetryCount
+	var reconnectInterval = config.ControlPlane.BrokerConnectionParameters.ReconnectInterval
 	subscriptionMetaDataList, err := msg.InitiateBrokerConnectionAndValidate(
-		config.ControlPlane.ASBConnectionParameters.EventListeningEndpoint, componentName, reconnectRetryCount,
-		reconnectInterval*time.Millisecond, subscriptionIdleTimeDuration)
+		config.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints[0], componentName, reconnectRetryCount,
+		reconnectInterval * time.Millisecond, subscriptionIdleTimeDuration)
 	health.SetControlPlaneBrokerStatus(err == nil)
 	if err == nil {
-		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Initiated broker connection and meta " +
-			"data creation successfully ")
+		logger.LoggerMgw.Info("Service bus meta data successfully initialized.")
 		msg.InitiateConsumers(subscriptionMetaDataList, reconnectInterval*time.Millisecond)
 		go handleAzureNotification()
 		go handleAzureTokenRevocation()

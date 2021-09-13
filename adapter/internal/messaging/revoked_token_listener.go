@@ -31,20 +31,14 @@ import (
 func handleTokenRevocation() {
 	for d := range msg.RevokedTokenChannel {
 		var notification msg.EventTokenRevocationNotification
-		unmarshalErr := json.Unmarshal([]byte(string(d.Body)), &notification)
+		unmarshalErr := parseRevokedTokenJSONEvent([]byte(string(d.Body)), &notification)
 		if unmarshalErr != nil {
-			logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling revoked token event data %v", unmarshalErr)
 			continue
 		}
 		logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.Type)
-		logger.LoggerInternalMsg.Printf("RevokedToken: %s, Token Type: %s", notification.Event.PayloadData.RevokedToken,
+		logger.LoggerInternalMsg.Infof("RevokedToken: %s, Token Type: %s", notification.Event.PayloadData.RevokedToken,
 			notification.Event.PayloadData.Type)
-		var stokens []types.Resource
-		t := &keymgt.RevokedToken{}
-		t.Jti = notification.Event.PayloadData.RevokedToken
-		t.Expirytime = notification.Event.PayloadData.ExpiryTime
-		stokens = append(stokens, t)
-		xds.UpdateEnforcerRevokedTokens(stokens)
+		processTokenRevocationEvent(&notification)
 		d.Ack(false)
 	}
 	logger.LoggerInternalMsg.Infof("handle: deliveries channel closed")
@@ -52,27 +46,32 @@ func handleTokenRevocation() {
 
 func handleAzureTokenRevocation() {
 	for d := range msg.AzureRevokedTokenChannel {
-		logger.LoggerInternalMsg.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] message received for " +
-			"RevokedTokenChannel = " + string(d))
 		var notification msg.EventTokenRevocationNotification
 		error := parseRevokedTokenJSONEvent(d, &notification)
 		if error != nil {
-			logger.LoggerInternalMsg.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error while processing " +
-				"the token revocation event %v. Hence dropping the event", error)
 			continue
 		}
-		logger.LoggerInternalMsg.Infof("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Event %s is received",
+		logger.LoggerInternalMsg.Infof("Event %s is received", notification.Event.PayloadData.Type)
+		logger.LoggerInternalMsg.Infof("RevokedToken: %s, Token Type: %s", notification.Event.PayloadData.RevokedToken,
 			notification.Event.PayloadData.Type)
-		logger.LoggerInternalMsg.Printf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] RevokedToken: %s, " +
-			"Token Type: %s", notification.Event.PayloadData.RevokedToken,
-			notification.Event.PayloadData.Type)
+		processTokenRevocationEvent(&notification)
 	}
+}
+
+func processTokenRevocationEvent(notification *msg.EventTokenRevocationNotification)  {
+	var revokedTokens []types.Resource
+	token := &keymgt.RevokedToken{}
+	token.Jti = notification.Event.PayloadData.RevokedToken
+	token.Expirytime = notification.Event.PayloadData.ExpiryTime
+	revokedTokens = append(revokedTokens, token)
+	xds.UpdateEnforcerRevokedTokens(revokedTokens)
 }
 
 func parseRevokedTokenJSONEvent(data []byte, notification *msg.EventTokenRevocationNotification) error {
 	unmarshalErr := json.Unmarshal(data, &notification)
 	if unmarshalErr != nil {
-		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling revoked token event data %v", unmarshalErr)
+		logger.LoggerInternalMsg.Errorf("Error occurred while unmarshalling revoked token event data %v. " +
+			"Hence dropping the event.", unmarshalErr)
 	}
 	return unmarshalErr
 }

@@ -48,12 +48,12 @@ func startBrokerConsumer(subscriptionMetaData Subscription, reconnectInterval ti
 		//topic subscription client creation
 		topicSubscriptionClient, err := subscriptionMetaData.subscriptionManager.Topic.NewSubscription(subscriptionName)
 		if err != nil {
-			logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while trying to create "+
+			logger.LoggerMgw.Errorf("Error occurred while trying to create "+
 				"topic subscription client for %s from azure service bus for topic name %s:%v.",
 				subscriptionName, topicName, err)
 		}
-		logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to receive messages for " +
-			"subscriptionName  " + subscriptionName + " from azure service bus for topic name " + topicName)
+		logger.LoggerMgw.Info("Starting the consumer for " + "subscriptionName " + subscriptionName +
+			" from azure service bus for topic name " + topicName)
 		func() {
 			ctx, cancel := context.WithCancel(parentContext)
 			defer cancel()
@@ -64,9 +64,8 @@ func startBrokerConsumer(subscriptionMetaData Subscription, reconnectInterval ti
 			}))
 		}()
 		if err != nil {
-			logger.LoggerMgw.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while receiving "+
-				"events from subscription %s from azure service bus for topic name %s:%v. "+
-				"Hence retrying in %s", subscriptionName, topicName, err, reconnectInterval)
+			logger.LoggerMgw.Errorf("Error occurred while listening to subscription %s from azure " +
+				"service bus for topic name %s:%v. Hence retrying in %s", subscriptionName, topicName, err, reconnectInterval)
 			time.Sleep(reconnectInterval)
 		}
 	}
