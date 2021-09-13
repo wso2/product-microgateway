@@ -58,6 +58,25 @@ type EventTokenRevocationNotification struct {
 	} `json:"event"`
 }
 
+// EventOrganizationPurge for struct
+type EventOrganizationPurge struct {
+	Event struct {
+		PayloadData struct {
+			EventType        string         `json:"eventType"`
+			TimeStamp        int64          `json:"timestamp"`
+			OrganizationList []Organization `json:"organizationList"`
+		} `json:"payloadData"`
+	} `json:"event"`
+}
+
+// Organization for struct
+type Organization struct {
+	ID     string `json:"id"`
+	UUID   string `json:"uuid"`
+	Handle string `json:"handle"`
+	Name   string `json:"name"`
+}
+
 // EventKeyManagerNotification for struct
 type EventKeyManagerNotification struct {
 	Event struct {

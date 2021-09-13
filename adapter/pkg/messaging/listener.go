@@ -47,6 +47,7 @@ const (
 	throttleData       string = "throttleData"
 	exchange           string = "amq.topic"
 	exchangeType       string = "topic"
+	organizationPurge  string = "organizationPurge"
 )
 
 // StartConsumer for provided key consume data

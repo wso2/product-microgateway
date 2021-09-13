@@ -45,6 +45,7 @@ func InitiateAndProcessEvents(config *config.Config) {
 		msg.InitiateConsumers(subscriptionMetaDataList, reconnectInterval*time.Millisecond)
 		go handleAzureNotification()
 		go handleAzureTokenRevocation()
+		go handleAzureOrganizationPurge()
 	}
 
 }

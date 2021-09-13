@@ -39,6 +39,8 @@ func startBrokerConsumer(subscriptionMetaData Subscription, reconnectInterval ti
 		dataChannel = AzureStepQuotaThresholdChannel
 	} else if strings.EqualFold(topicName, stepQuotaReset) {
 		dataChannel = AzureStepQuotaResetChannel
+	} else if strings.EqualFold(topicName, organizationPurge) {
+		dataChannel = AzureOrganizationPurgeChannel
 	}
 	parentContext := context.Background()
 

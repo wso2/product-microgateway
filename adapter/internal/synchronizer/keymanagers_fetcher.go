@@ -133,3 +133,9 @@ func retryFetchData(conf *config.Config, errorMessage string, err error) {
 		return
 	}
 }
+
+// ClearKeyManagerData clears all the key manager data before reloading
+func ClearKeyManagerData() {
+	xds.KeyManagerList = nil
+	xds.GenerateAndUpdateKeyManagerList()
+}
