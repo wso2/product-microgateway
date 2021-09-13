@@ -31,6 +31,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AnalyticsReceiverConfigDTO;
+import org.wso2.choreo.connect.enforcer.metrics.MetricsUtils;
 import org.wso2.choreo.connect.enforcer.server.Constants;
 import org.wso2.choreo.connect.enforcer.server.EnforcerThreadPoolExecutor;
 import org.wso2.choreo.connect.enforcer.server.NativeThreadFactory;
@@ -53,7 +54,9 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
 
     public void init() throws IOException {
         // Initialize analytics Filter
-        AnalyticsFilter.getInstance();
+        if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {
+            AnalyticsFilter.getInstance();
+        }
         startAccessLoggingServer();
     }
 
@@ -63,7 +66,11 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
         return new StreamObserver<>() {
             @Override
             public void onNext(StreamAccessLogsMessage message) {
-                AnalyticsFilter.getInstance().handleGRPCLogMsg(message);
+                if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {
+                    AnalyticsFilter.getInstance().handleGRPCLogMsg(message);
+                } else if (ConfigHolder.getInstance().getConfig().getMetricsConfig().isMetricsEnabled()) {
+                    MetricsUtils.publishMetrics(message);
+                }
             }
 
             @Override

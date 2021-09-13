@@ -72,7 +72,7 @@ func getFileAccessLogConfigs() *config_access_logv3.AccessLog {
 
 // getAccessLogConfigs provides grpc access log configurations for envoy
 func getGRPCAccessLogConfigs(conf *config.Config) *config_access_logv3.AccessLog {
-	analyticsEnable := conf.Analytics.Enabled
+	analyticsEnable := conf.Analytics.Enabled || conf.Enforcer.Metrics.Enabled
 	if !analyticsEnable {
 		logger.LoggerOasparser.Debug("gRPC access logs are not enabled as analytics is disabled.")
 		return nil

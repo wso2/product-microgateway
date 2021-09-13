@@ -18,7 +18,6 @@
 
 package org.wso2.choreo.connect.enforcer.analytics;
 
-import com.google.protobuf.UInt32Value;
 import io.envoyproxy.envoy.data.accesslog.v3.HTTPAccessLogEntry;
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
 import org.apache.commons.lang3.StringUtils;
@@ -29,12 +28,9 @@ import org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
-import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
-import org.wso2.choreo.connect.enforcer.metrics.MetricsExporter;
-import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -74,17 +70,6 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
                 continue;
             }
             AnalyticsDataProvider provider = new ChoreoAnalyticsProvider(logEntry);
-            if (MetricsManager.isMetricsEnabled()) {
-                Latencies latencies = provider.getLatencies();
-                MetricsExporter metricsExporter = MetricsManager.getInstance();
-                HashMap<String, Double> valueMap = new HashMap<>();
-                valueMap.put("responseLatency", (double) latencies.getResponseLatency());
-                valueMap.put("responseMediationLatency", (double) latencies.getResponseMediationLatency());
-                valueMap.put("requestMediationLatency", (double) latencies.getRequestMediationLatency());
-                valueMap.put("backendLatency", (double) latencies.getBackendLatency());
-                metricsExporter.trackMetrics(valueMap);
-            }
-
             // If the APIName is not available, the event should not be published.
             // 404 errors are not logged due to this.
             if (provider.getEventCategory() == EventCategory.FAULT
@@ -137,11 +122,6 @@ public class DefaultAnalyticsEventPublisher implements AnalyticsEventPublisher {
         // There is a chance that the analytics event is published from enforcer and then result in ext_authz_error
         // responseCodeDetail due to some error/exception within enforcer implementation. This scenario is not
         // handled as it should be fixed from enforcer.
-        if (MetricsManager.isMetricsEnabled()) {
-            UInt32Value httpResponseProperties = logEntry.getResponse().getResponseCode();
-            MetricsExporter metricsExporter = MetricsManager.getInstance();
-            metricsExporter.trackMetric("responseCode", httpResponseProperties.getValue());
-        }
         return (!StringUtils.isEmpty(logEntry.getResponse().getResponseCodeDetails()))
                 && logEntry.getResponse().getResponseCodeDetails()
                 .equals(AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL)

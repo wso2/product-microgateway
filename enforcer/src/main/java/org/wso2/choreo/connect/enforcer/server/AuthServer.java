@@ -31,6 +31,7 @@ import org.wso2.choreo.connect.enforcer.analytics.AccessLoggingService;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
@@ -87,17 +88,24 @@ public class AuthServer {
             // Create a new server to listen on port 8081
             Server server = initServer();
 
+            EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
             // Enable global filters
-            if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {
-                logger.info("analytics filter is enabled.");
+            if (enforcerConfig.getAnalyticsConfig().isEnabled() ||
+                    enforcerConfig.getMetricsConfig().isMetricsEnabled()) {
                 AccessLoggingService accessLoggingService = new AccessLoggingService();
                 accessLoggingService.init();
+                if (enforcerConfig.getMetricsConfig().isMetricsEnabled()) {
+                    //Initialize metrics
+                    MetricsManager.initializeMetrics(enforcerConfig.getMetricsConfig());
+                } else {
+                    logger.info("analytics filter is enabled.");
+                }
             } else {
                 logger.debug("analytics filter is disabled.");
             }
 
             // Initialize tracing objects
-            if (ConfigHolder.getInstance().getConfig().getTracingConfig().isTracingEnabled()) {
+            if (enforcerConfig.getTracingConfig().isTracingEnabled()) {
                 try {
                     TracerFactory.getInstance().initTracer();
                     Utils.setTracingEnabled(true);
@@ -109,14 +117,9 @@ public class AuthServer {
                 logger.debug("Tracing is disabled.");
             }
 
-            if (ConfigHolder.getInstance().getConfig().getMetricsConfig().isMetricsEnabled()) {
-                //Initialize metrics
-                MetricsManager.initializeMetrics(ConfigHolder.getInstance().getConfig().getMetricsConfig());
-            }
-
             //Initialise cache objects
             CacheProvider.init();
-            ThrottleConfigDto throttleConf = ConfigHolder.getInstance().getConfig().getThrottleConfig();
+            ThrottleConfigDto throttleConf = enforcerConfig.getThrottleConfig();
             if (throttleConf.isGlobalPublishingEnabled()) {
                 ThrottleAgent.startThrottlePublisherPool();
                 JMSTransportHandler jmsHandler = new JMSTransportHandler(throttleConf.buildListenerProperties());
