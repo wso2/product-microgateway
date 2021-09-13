@@ -390,6 +390,10 @@ enable = true
   localLabel = "$env{local_label}"
   # Retry Interval
   retryInterval = 5
+  # Username of the Global Adapter User
+  username = "admin"
+  # Password of the Global Adapter User
+  password = "admin"
 
 # Analytics configurations for Choreo Connect
 [analytics]

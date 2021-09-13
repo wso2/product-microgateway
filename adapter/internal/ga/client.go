@@ -20,6 +20,7 @@ package ga
 import (
 	"context"
 	"crypto/tls"
+	"encoding/base64"
 	"io"
 	"time"
 
@@ -37,6 +38,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 	grpcStatus "google.golang.org/grpc/status"
 )
 
@@ -64,7 +66,10 @@ var (
 
 const (
 	// The type url for requesting API Entries from global adapter.
-	apiTypeURL string = "type.googleapis.com/wso2.discovery.ga.Api"
+	apiTypeURL                    string = "type.googleapis.com/wso2.discovery.ga.Api"
+	authorizationHeaderName       string = "Authorization"
+	basicAuthScheme               string = "basic "
+	basicAuthUsernamePwdSeparator string = ":"
 )
 
 // APIEvent represents the event corresponding to a single API Deploy or Remove event
@@ -94,8 +99,13 @@ func initConnection() (*grpc.ClientConn, error) {
 
 	client := stub.NewApiGADiscoveryServiceClient(conn)
 	streamContext := context.Background()
-	xdsStream, err = client.StreamGAApis(streamContext)
+	conf, _ := config.ReadConfigs()
 
+	authCreds := base64.StdEncoding.EncodeToString([]byte(conf.GlobalAdapter.Username +
+		basicAuthUsernamePwdSeparator + conf.GlobalAdapter.Password))
+	streamContext = metadata.AppendToOutgoingContext(streamContext, authorizationHeaderName,
+		basicAuthScheme+authCreds)
+	xdsStream, err = client.StreamGAApis(streamContext)
 	if err != nil {
 		// TODO: (VirajSalaka) handle error.
 		logger.LoggerGA.Error("Error while starting client. ", err)
@@ -142,6 +152,10 @@ func watchAPIs() {
 				logger.LoggerGA.Errorf("Connection unavailable. errorCode: %s errorMessage: %s",
 					errStatus.Code().String(), errStatus.Message())
 				connectionFaultChannel <- true
+				return
+			} else if errStatus.Code() == codes.Unauthenticated {
+				logger.LoggerGA.Errorf("Unauthenticated XDS request; errorCode: %s errorMessage: %s",
+					errStatus.Code().String(), errStatus.Message())
 				return
 			}
 			logger.LoggerGA.Errorf("Error while XDS communication; errorCode: %s errorMessage: %s",

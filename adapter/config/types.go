@@ -393,6 +393,8 @@ type globalAdapter struct {
 	LocalLabel    string        `toml:"localLabel"`
 	HostName      string        `toml:"overwriteHostName"`
 	RetryInterval time.Duration `toml:"retryInterval"`
+	Username      string        `toml:"username"`
+	Password      string        `toml:"password"`
 }
 
 type jmsConnectionParameters struct {

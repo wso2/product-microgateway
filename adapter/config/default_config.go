@@ -269,6 +269,8 @@ var defaultConfig = &Config{
 		HostName:      "",
 		LocalLabel:    "default",
 		RetryInterval: 5,
+		Username:      "admin",
+		Password:      "admin",
 	},
 	Analytics: analytics{
 		Enabled: false,
