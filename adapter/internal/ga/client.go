@@ -118,15 +118,9 @@ func initConnection() (*grpc.ClientConn, error) {
 func generateTLSCredentialsForXdsClient() credentials.TransportCredentials {
 	conf, _ := config.ReadConfigs()
 	certPool := tlsutils.GetTrustedCertPool(conf.Adapter.Truststore.Location)
-	// There is a single private-public key pair for XDS server initialization, as well as for XDS client authentication
-	certificate, err := tlsutils.GetServerCertificate(conf.Adapter.Keystore.PublicKeyLocation,
-		conf.Adapter.Keystore.PrivateKeyLocation)
-	if err != nil {
-		logger.LoggerGA.Fatal("Error while processing the private-public key pair", err)
-	}
+
 	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{certificate},
-		RootCAs:      certPool,
+		RootCAs: certPool,
 	}
 	// This option is used if the calling IP and SAN of the certificate is different.
 	if conf.GlobalAdapter.HostName != "" {
