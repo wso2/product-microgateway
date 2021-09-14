@@ -20,9 +20,10 @@ microservice architectures efficiently.
 
 ## Choreo Connect quick start
 
-*Prerequisites*
-    - Make sure you have installed *docker* on your machine.
-    - Make sure you have installed the *docker-compose* on your machine
+*Prerequisites*  
+- On your machine, you should have installed,  
+  - *docker*
+  - *docker-compose* 
 
 Let's host our first API on Choreo Connect. We will be exposing the publicly available [petstore services](https://petstore.swagger.io/) via  microgateway.
 
