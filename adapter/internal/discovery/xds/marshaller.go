@@ -79,13 +79,13 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 	}
 
 	tracing := &enforcer.Tracing{
-		Enabled:		 		config.Enforcer.Tracing.Enabled,
-		Type:					config.Enforcer.Tracing.Type,
-		ConfigProperties:		config.Enforcer.Tracing.ConfigProperties,
+		Enabled:		 	config.Enforcer.Tracing.Enabled,
+		Type:				config.Enforcer.Tracing.Type,
+		ConfigProperties:	config.Enforcer.Tracing.ConfigProperties,
 	}
 	metrics := &enforcer.Metrics{
-		Enabled:		 		config.Enforcer.Metrics.Enabled,
-		Type:		 		config.Enforcer.Metrics.Type,
+		Enabled:	config.Enforcer.Metrics.Enabled,
+		Type:		config.Enforcer.Metrics.Type,
 	}
 	analytics := &enforcer.Analytics{
 		Enabled:          config.Analytics.Enabled,

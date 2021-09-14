@@ -330,5 +330,4 @@ public class RequestContext {
     public WebSocketFrameContext getWebSocketFrameContext() {
         return webSocketFrameContext;
     }
-
 }

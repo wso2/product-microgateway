@@ -328,13 +328,13 @@ type analytics struct {
 }
 
 type tracing struct {
-	Enabled  				bool 				`toml:"enabled"`
-	Type					string				`toml:"type"`
-	ConfigProperties		map[string]string	`toml:"configProperties"`
+	Enabled  			bool 				`toml:"enabled"`
+	Type				string				`toml:"type"`
+	ConfigProperties	map[string]string	`toml:"configProperties"`
 }
 
 type metrics struct {
-	Enabled  				bool 	`toml:"enabled"`
+	Enabled  	bool 	`toml:"enabled"`
 	Type 		string 	`toml:"type"`
 }
 

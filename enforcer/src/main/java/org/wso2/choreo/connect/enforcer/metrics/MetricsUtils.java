@@ -22,6 +22,7 @@ package org.wso2.choreo.connect.enforcer.metrics;
 import com.google.protobuf.UInt32Value;
 import io.envoyproxy.envoy.data.accesslog.v3.HTTPAccessLogEntry;
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
@@ -38,17 +39,24 @@ public class MetricsUtils {
 
     private static final Logger LOGGER = LogManager.getLogger(MetricsUtils.class);
 
-    public static void publishMetrics(StreamAccessLogsMessage message) {
+    /**
+     * Method to process and publish metrics obtained from access logs.
+     *
+     * @param message the StreamAccessLogsMessage object.
+     */
+    public static void handlePublishingMetrics(StreamAccessLogsMessage message) {
 
         for (int i = 0; i < message.getHttpLogs().getLogEntryCount(); i++) {
             HTTPAccessLogEntry logEntry = message.getHttpLogs().getLogEntry(i);
             MetricsExporter metricsExporter = MetricsManager.getInstance();
 
             UInt32Value httpResponseProperties = logEntry.getResponse().getResponseCode();
-            metricsExporter.trackMetric("responseCode", httpResponseProperties.getValue());
+            metricsExporter.trackMetric(MetricsConstants.RESPONSE_CODE, httpResponseProperties.getValue());
+            AnalyticsDataProvider provider = new ChoreoAnalyticsProvider(logEntry);
+            Latencies latencies = provider.getLatencies();
 
             // handle do not publish event
-            if ((!org.apache.commons.lang3.StringUtils.isEmpty(logEntry.getResponse().getResponseCodeDetails()))
+            if ((!StringUtils.isEmpty(logEntry.getResponse().getResponseCodeDetails()))
                     && logEntry.getResponse().getResponseCodeDetails()
                     .equals(AnalyticsConstants.EXT_AUTH_DENIED_RESPONSE_DETAIL)
                     // Token endpoint calls needs to be removed as well
@@ -56,18 +64,30 @@ public class MetricsUtils {
                     // Health endpoint calls are not published
                     || (AnalyticsConstants.HEALTH_ENDPOINT_PATH.equals(logEntry.getRequest().getOriginalPath()))) {
                 LOGGER.debug("Metric is ignored as it is already published by the enforcer.");
+                publishMetrics(metricsExporter, latencies);
                 continue;
             }
-
-            AnalyticsDataProvider provider = new ChoreoAnalyticsProvider(logEntry);
-            Latencies latencies = provider.getLatencies();
-            HashMap<String, Double> valueMap = new HashMap<>();
-            valueMap.put("responseLatency", (double) latencies.getResponseLatency());
-            valueMap.put("responseMediationLatency", (double) latencies.getResponseMediationLatency());
-            valueMap.put("requestMediationLatency", (double) latencies.getRequestMediationLatency());
-            valueMap.put("backendLatency", (double) latencies.getBackendLatency());
-
-            metricsExporter.trackMetrics(valueMap);
+            publishMetrics(metricsExporter, latencies);
         }
+    }
+
+    /**
+     * Method to export/publish metrics.
+     *
+     * @param metricsExporter the exporter instance.
+     * @param latencies the latencies to be exported.
+     */
+    private static void publishMetrics(MetricsExporter metricsExporter, Latencies latencies) {
+
+        HashMap<String, Double> valueMap = new HashMap<>();
+
+        valueMap.put(MetricsConstants.RESPONSE_LATENCY, (double) latencies.getResponseLatency());
+        valueMap.put(MetricsConstants.RESPONSE_MEDIATION_LATENCY,
+                (double) latencies.getResponseMediationLatency());
+        valueMap.put(MetricsConstants.REQUEST_MEDIATION_LATENCY,
+                (double) latencies.getRequestMediationLatency());
+        valueMap.put(MetricsConstants.BACKEND_LATENCY, (double) latencies.getBackendLatency());
+
+        metricsExporter.trackMetrics(valueMap);
     }
 }

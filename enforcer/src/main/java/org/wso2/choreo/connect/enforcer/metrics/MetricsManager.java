@@ -33,14 +33,11 @@ public class MetricsManager {
     private static boolean isMetricsEnabled = false;
     private static MetricsExporter metricsExporter;
 
-    public MetricsManager() {
-    }
-
     public static MetricsExporter getInstance() {
         if (metricsExporter == null) {
             synchronized (new Object()) {
                 if (metricsExporter == null) {
-                    if (exporterType.equals("azure")) {
+                    if (exporterType.equals(MetricsConstants.AZURE_METRICS_EXPORTER)) {
                         metricsExporter = new AzureMetricsExporter();
                     } else {
                         LOGGER.error("Metrics exporter type: " + exporterType + " not found!");
@@ -59,7 +56,7 @@ public class MetricsManager {
         String type = enforcerConfig.getMetricsType();
         if (StringUtils.isEmpty(type)) {
             LOGGER.warn("Metrics type not defined, defaulting to Azure metrics");
-            exporterType = "azure";
+            exporterType = MetricsConstants.AZURE_METRICS_EXPORTER;
         } else {
             exporterType = type;
         }

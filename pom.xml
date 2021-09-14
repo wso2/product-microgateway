@@ -453,5 +453,11 @@
         <snakeyaml.version>1.26</snakeyaml.version>
         <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
         <googlecode.download.plugin.version>1.6.3</googlecode.download.plugin.version>
+
+        <!-- Enforcer metrics, tracing related dependencies -->
+        <enforcer.jackson.databind.version>2.12.4</enforcer.jackson.databind.version>
+        <jackson.annotations.version>2.12.4</jackson.annotations.version>
+        <applicationinsights.core.version>2.6.3</applicationinsights.core.version>
+        <azure.monitor.opentelemetry.exporter.version>1.0.0-beta.4</azure.monitor.opentelemetry.exporter.version>
     </properties>
 </project>
