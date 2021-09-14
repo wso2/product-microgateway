@@ -30,6 +30,7 @@ import org.wso2.choreo.connect.discovery.config.enforcer.BinaryPublisher;
 import org.wso2.choreo.connect.discovery.config.enforcer.Cache;
 import org.wso2.choreo.connect.discovery.config.enforcer.ClaimMapping;
 import org.wso2.choreo.connect.discovery.config.enforcer.Config;
+import org.wso2.choreo.connect.discovery.config.enforcer.Filter;
 import org.wso2.choreo.connect.discovery.config.enforcer.Issuer;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTGenerator;
 import org.wso2.choreo.connect.discovery.config.enforcer.JWTIssuer;
@@ -48,6 +49,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CacheDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
+import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
@@ -151,6 +153,9 @@ public class ConfigHolder {
         populateManagementCredentials(config.getManagement());
 
         populateRestServer(config.getRestServer());
+
+        // Populates the custom filter configurations applied along with enforcer filters.
+        populateCustomFilters(config.getFiltersList());
 
         // resolve string variables provided as environment variables.
         resolveConfigsWithEnvs(this.config);
@@ -525,6 +530,19 @@ public class ConfigHolder {
         }
         config.setJwtUsersCredentials(credentialDtos);
         config.setJwtIssuerConfigurationDto(jwtIssuerConfigurationDto);
+    }
+
+    private void populateCustomFilters(List<Filter> filterList) {
+        FilterDTO[] filterArray = new FilterDTO[filterList.size()];
+        int index = 0;
+        for (Filter filter : filterList) {
+            FilterDTO filterDTO = new FilterDTO();
+            filterDTO.setClassName(filter.getClassName());
+            filterDTO.setPosition(filter.getPosition());
+            filterArray[index] = filterDTO;
+            index++;
+        }
+        config.setCustomFilters(filterArray);
     }
 
     public EnforcerConfig getConfig() {

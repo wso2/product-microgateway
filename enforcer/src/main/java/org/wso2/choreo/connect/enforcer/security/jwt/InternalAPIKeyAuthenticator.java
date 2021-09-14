@@ -27,7 +27,6 @@ import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -35,10 +34,11 @@ import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
-import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.filter.model.AuthenticationContext;
+import org.wso2.choreo.connect.filter.model.RequestContext;
 
 import java.text.ParseException;
 
@@ -114,8 +114,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
 
-                String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
-                String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
+                String apiVersion = requestContext.getMatchedAPI().getVersion();
+                String apiContext = requestContext.getMatchedAPI().getBasePath();
                 boolean isVerified = false;
 
                 // Verify token when it is found in cache
@@ -180,8 +180,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                         log.debug("Internal Key authentication successful.");
                     }
                     return FilterUtils.generateAuthenticationContext(tokenIdentifier, payload, api,
-                            requestContext.getMatchedAPI().getAPIConfig().getTier(),
-                            requestContext.getMatchedAPI().getAPIConfig().getUuid());
+                            requestContext.getMatchedAPI().getTier(),
+                            requestContext.getMatchedAPI().getUuid());
                 } else {
                     CacheProvider.getGatewayInternalKeyDataCache().invalidate(payload.getJWTID());
                     CacheProvider.getInvalidGatewayInternalKeyCache().put(payload.getJWTID(), internalKey);

@@ -20,7 +20,6 @@ package org.wso2.choreo.connect.enforcer.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
@@ -36,6 +35,7 @@ import org.wso2.choreo.connect.enforcer.models.URLMapping;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStore;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.filter.model.ResourceConfig;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -21,8 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.Filter;
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
-import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
@@ -32,6 +30,9 @@ import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.UnsecuredAPIAuthenticator;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.filter.model.APIConfig;
+import org.wso2.choreo.connect.filter.model.AuthenticationContext;
+import org.wso2.choreo.connect.filter.model.RequestContext;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -119,7 +120,7 @@ public class AuthFilter implements Filter {
         log.error(
                 "None of the authenticators were able to authenticate the request: " + requestContext.getRequestPath());
         //set WWW_AUTHENTICATE header to error response
-        requestContext.addResponseHeaders(APIConstants.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
+        requestContext.addOrModifyHeaders(APIConstants.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
                 ", error=\"invalid_token\"" +
                 ", error_description=\"The provided token is invalid\"");
         return false;
@@ -163,10 +164,10 @@ public class AuthFilter implements Filter {
         // matched.
         if (requestContext.isClusterHeaderEnabled()) {
             if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                requestContext.addResponseHeaders(AdapterConstants.CLUSTER_HEADER,
+                requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
                         requestContext.getProdClusterHeader());
             } else if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_SANDBOX)) {
-                requestContext.addResponseHeaders(AdapterConstants.CLUSTER_HEADER,
+                requestContext.addOrModifyHeaders(AdapterConstants.CLUSTER_HEADER,
                         requestContext.getSandClusterHeader());
             } else {
                 if (keyType.equalsIgnoreCase(APIConstants.API_KEY_TYPE_PRODUCTION)) {

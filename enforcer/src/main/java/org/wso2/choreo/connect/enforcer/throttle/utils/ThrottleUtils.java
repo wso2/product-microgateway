@@ -24,10 +24,10 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.throttle.PolicyConstants;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import org.wso2.choreo.connect.enforcer.throttle.dto.ThrottleCondition;
+import org.wso2.choreo.connect.filter.model.RequestContext;
 
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -170,7 +170,7 @@ public class ThrottleUtils {
             dateFormat.setTimeZone(TimeZone.getTimeZone(ThrottleConstants.GMT));
             Date date = new Date(retryTimestamp);
             String retryAfterValue = dateFormat.format(date);
-            context.getResponseHeaders().put(ThrottleConstants.HEADER_RETRY_AFTER, retryAfterValue);
+            context.getAddHeaders().put(ThrottleConstants.HEADER_RETRY_AFTER, retryAfterValue);
         }
     }
 

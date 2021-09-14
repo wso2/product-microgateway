@@ -17,31 +17,40 @@
  */
 package org.wso2.choreo.connect.enforcer.api;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.api.Endpoint;
 import org.wso2.choreo.connect.discovery.api.Operation;
 import org.wso2.choreo.connect.discovery.api.Resource;
 import org.wso2.choreo.connect.enforcer.Filter;
 import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
-import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
-import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
+import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
 import org.wso2.choreo.connect.enforcer.security.AuthFilter;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.filter.model.APIConfig;
+import org.wso2.choreo.connect.filter.model.EndpointSecurity;
+import org.wso2.choreo.connect.filter.model.RequestContext;
+import org.wso2.choreo.connect.filter.model.ResourceConfig;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 /**
  * Specific implementation for a Rest API type APIs.
  */
 public class RestAPI implements API {
+    private static final Logger logger = LogManager.getLogger(RestAPI.class);
     private final List<Filter> filters = new ArrayList<>();
     private APIConfig apiConfig;
     private String apiLifeCycleState;
@@ -62,6 +71,7 @@ public class RestAPI implements API {
         List<String> sandboxUrls = processEndpoints(api.getSandboxUrlsList());
         List<String> securitySchemes = api.getSecuritySchemeList();
         List<ResourceConfig> resources = new ArrayList<>();
+        EndpointSecurity endpointSecurity = new EndpointSecurity();
 
         for (Resource res : api.getResourcesList()) {
             for (Operation operation : res.getMethodsList()) {
@@ -70,10 +80,21 @@ public class RestAPI implements API {
             }
         }
 
+        if (api.getEndpointSecurity().hasProductionSecurityInfo()) {
+            endpointSecurity.setProductionSecurityInfo(
+                    APIProcessUtils.convertProtoEndpointSecurity(
+                            api.getEndpointSecurity().getProductionSecurityInfo()));
+        }
+        if (api.getEndpointSecurity().hasSandBoxSecurityInfo()) {
+            endpointSecurity.setProductionSecurityInfo(
+                    APIProcessUtils.convertProtoEndpointSecurity(
+                            api.getEndpointSecurity().getSandBoxSecurityInfo()));
+        }
+
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState)
-                .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
+                .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .productionUrls(productionUrls).sandboxUrls(sandboxUrls)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
                 .organizationId(api.getOrganizationId()).build();
@@ -109,8 +130,8 @@ public class RestAPI implements API {
         if (executeFilterChain(requestContext)) {
             responseObject.setRemoveHeaderMap(requestContext.getRemoveHeaders());
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
-            if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
-                responseObject.setHeaderMap(requestContext.getResponseHeaders());
+            if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
+                responseObject.setHeaderMap(requestContext.getAddHeaders());
             }
             if (analyticsEnabled) {
                 AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
@@ -133,8 +154,8 @@ public class RestAPI implements API {
                 responseObject.setErrorDescription(requestContext.getProperties()
                         .get(APIConstants.MessageFormat.ERROR_DESCRIPTION).toString());
             }
-            if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
-                responseObject.setHeaderMap(requestContext.getResponseHeaders());
+            if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
+                responseObject.setHeaderMap(requestContext.getAddHeaders());
             }
             if (analyticsEnabled && !FilterUtils.isSkippedAnalyticsFaultEvent(responseObject.getErrorCode())) {
                 AnalyticsFilter.getInstance().handleFailureRequest(requestContext);
@@ -181,6 +202,36 @@ public class RestAPI implements API {
             ThrottleFilter throttleFilter = new ThrottleFilter();
             throttleFilter.init(apiConfig);
             this.filters.add(throttleFilter);
+        }
+        loadCustomFilters(apiConfig);
+    }
+
+    private void loadCustomFilters(APIConfig apiConfig) {
+        FilterDTO[] customFilters = ConfigHolder.getInstance().getConfig().getCustomFilters();
+        // Needs to sort the filter in ascending order to position the filter in the given position.
+        Arrays.sort(customFilters, Comparator.comparing(FilterDTO::getPosition));
+        Map<String, Filter> filterImplMap = new HashMap<>(customFilters.length);
+        ServiceLoader<Filter> loader = ServiceLoader.load(Filter.class);
+        for (Filter filter : loader) {
+            filterImplMap.put(filter.getClass().getName(), filter);
+        }
+
+        for (FilterDTO filterDTO : customFilters) {
+            if (filterImplMap.containsKey(filterDTO.getClassName())) {
+                if (filterDTO.getPosition() <= 0 || filterDTO.getPosition() - 1 > filters.size()) {
+                    logger.error("Position provided for the filter is invalid. "
+                            + filterDTO.getClassName() + " : " + filterDTO.getPosition() + "(Filters list size is "
+                            + filters.size() + ")");
+                    break;
+                }
+                Filter filter = filterImplMap.get(filterDTO.getClassName());
+                filter.init(apiConfig);
+                // Since the position starts from 1
+                this.filters.add(filterDTO.getPosition() - 1, filter);
+            } else {
+                logger.error("No Filter Implementation is found in the classPath under the provided name : "
+                        + filterDTO.getClassName());
+            }
         }
     }
 }

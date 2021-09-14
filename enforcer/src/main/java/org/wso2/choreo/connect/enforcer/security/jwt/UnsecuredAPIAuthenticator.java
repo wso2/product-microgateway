@@ -18,17 +18,17 @@
 
 package org.wso2.choreo.connect.enforcer.security.jwt;
 
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
-import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.models.API;
-import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataStore;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.filter.model.AuthenticationContext;
+import org.wso2.choreo.connect.filter.model.RequestContext;
+import org.wso2.choreo.connect.filter.model.ResourceConfig;
 
 /**
  * Implements the authenticator interface to authenticate non-secured APIs.
@@ -48,8 +48,8 @@ public class UnsecuredAPIAuthenticator implements Authenticator {
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
-        String uuid = requestContext.getMatchedAPI().getAPIConfig().getUuid();
-        String context = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
+        String uuid = requestContext.getMatchedAPI().getUuid();
+        String context = requestContext.getMatchedAPI().getBasePath();
         String apiTenantDomain = FilterUtils.getTenantDomainFromRequestURL(context);
         SubscriptionDataStore datastore = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(apiTenantDomain);

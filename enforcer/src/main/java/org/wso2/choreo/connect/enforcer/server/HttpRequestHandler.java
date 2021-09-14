@@ -22,13 +22,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.api.API;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
-import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
-import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.filter.model.APIConfig;
+import org.wso2.choreo.connect.filter.model.RequestContext;
+import org.wso2.choreo.connect.filter.model.ResourceConfig;
 
 import java.util.Map;
 
@@ -61,7 +61,7 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         String requestPath = request.getAttributes().getRequest().getHttp().getPath();
         String method = request.getAttributes().getRequest().getHttp().getMethod();
         Map<String, String> headers = request.getAttributes().getRequest().getHttp().getHeadersMap();
-        String res = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_RES_PATH_PARAM);
+        String pathTemplate = request.getAttributes().getContextExtensionsMap().get(APIConstants.GW_RES_PATH_PARAM);
         String prodCluster = request.getAttributes().getContextExtensionsMap()
                 .get(AdapterConstants.PROD_CLUSTER_HEADER_KEY);
         String sandCluster = request.getAttributes().getContextExtensionsMap()
@@ -79,10 +79,11 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         if (APIConstants.ApiType.WEB_SOCKET.equals(api.getAPIConfig().getApiType())) {
             resourceConfig = APIFactory.getInstance().getMatchedBasePath(api, requestPath);
         } else {
-            resourceConfig = APIFactory.getInstance().getMatchedResource(api, res, method);
+            resourceConfig = APIFactory.getInstance().getMatchedResource(api, pathTemplate, method);
         }
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
-                .matchedAPI(api).headers(headers).requestID(requestID).address(address).prodClusterHeader(prodCluster)
-                .sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis).build();
+                .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
+                .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
+                .pathTemplate(pathTemplate).build();
     }
 }

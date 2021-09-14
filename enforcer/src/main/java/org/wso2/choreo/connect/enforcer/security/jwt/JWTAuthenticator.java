@@ -31,9 +31,6 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
-import org.wso2.choreo.connect.discovery.api.SecurityInfo;
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
-import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.common.ReferenceHolder;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
@@ -46,13 +43,16 @@ import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
-import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTConstants;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.filter.model.AuthenticationContext;
+import org.wso2.choreo.connect.filter.model.RequestContext;
+import org.wso2.choreo.connect.filter.model.ResourceConfig;
+import org.wso2.choreo.connect.filter.model.SecurityInfo;
 
 import java.text.ParseException;
 import java.util.Base64;
@@ -96,9 +96,9 @@ public class JWTAuthenticator implements Authenticator {
         if (splitToken.length > 1) {
             jwtToken = splitToken[1];
         }
-        String context = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
-        String name = requestContext.getMatchedAPI().getAPIConfig().getName();
-        String version = requestContext.getMatchedAPI().getAPIConfig().getVersion();
+        String context = requestContext.getMatchedAPI().getBasePath();
+        String name = requestContext.getMatchedAPI().getName();
+        String version = requestContext.getMatchedAPI().getVersion();
         context = context + "/" + version;
         ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
         SignedJWTInfo signedJWTInfo;
@@ -173,20 +173,20 @@ public class JWTAuthenticator implements Authenticator {
                 // set endpoint security
                 SecurityInfo securityInfo;
                 if (apiKeyValidationInfoDTO.getType() != null &&
-                        requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity() != null) {
+                        requestContext.getMatchedAPI().getEndpointSecurity() != null) {
                     if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                        securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                        securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
                                 getProductionSecurityInfo();
                     } else {
-                        securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                        securityInfo = requestContext.getMatchedAPI().getEndpointSecurity().
                                 getSandBoxSecurityInfo();
                     }
-                    if (securityInfo.getEnabled() &&
+                    if (securityInfo.isEnabled() &&
                             APIConstants.AUTHORIZATION_HEADER_BASIC.
                                     equalsIgnoreCase(securityInfo.getSecurityType())) {
                         requestContext.getRemoveHeaders().remove(APIConstants.AUTHORIZATION_HEADER_DEFAULT
                                 .toLowerCase());
-                        requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                        requestContext.addOrModifyHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                                 APIConstants.AUTHORIZATION_HEADER_BASIC + ' ' +
                                         Base64.getEncoder().encodeToString((securityInfo.getUsername() +
                                                 ':' + securityInfo.getPassword()).getBytes()));
@@ -210,7 +210,7 @@ public class JWTAuthenticator implements Authenticator {
                             .generateJWTInfoDto(null, validationInfo, apiKeyValidationInfoDTO, requestContext);
                     endUserToken = generateAndRetrieveJWTToken(jwtTokenIdentifier, jwtInfoDto);
                     // Set generated jwt token as a response header
-                    requestContext.addResponseHeaders(jwtConfigurationDto.getJwtHeader(), endUserToken);
+                    requestContext.addOrModifyHeaders(jwtConfigurationDto.getJwtHeader(), endUserToken);
                 }
 
                 AuthenticationContext authenticationContext = FilterUtils
@@ -360,9 +360,9 @@ public class JWTAuthenticator implements Authenticator {
     private APIKeyValidationInfoDTO validateSubscriptionUsingKeyManager(RequestContext requestContext,
             JWTValidationInfo jwtValidationInfo) throws APISecurityException {
 
-        String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
-        String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
-        String uuid = requestContext.getMatchedAPI().getAPIConfig().getUuid();
+        String apiContext = requestContext.getMatchedAPI().getBasePath();
+        String apiVersion = requestContext.getMatchedAPI().getVersion();
+        String uuid = requestContext.getMatchedAPI().getUuid();
         return validateSubscriptionUsingKeyManager(uuid, apiContext, apiVersion, jwtValidationInfo);
     }
 

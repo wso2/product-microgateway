@@ -19,7 +19,8 @@ package org.wso2.choreo.connect.enforcer.api;
 
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.enforcer.Filter;
-import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
+import org.wso2.choreo.connect.filter.model.APIConfig;
+import org.wso2.choreo.connect.filter.model.RequestContext;
 
 import java.util.List;
 

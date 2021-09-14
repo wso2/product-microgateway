@@ -21,7 +21,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.enforcer.Filter;
-import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.cors.CorsFilter;
@@ -31,6 +30,9 @@ import org.wso2.choreo.connect.enforcer.throttle.ThrottleFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketMetaDataFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleFilter;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleResponse;
+import org.wso2.choreo.connect.filter.model.APIConfig;
+import org.wso2.choreo.connect.filter.model.EndpointSecurity;
+import org.wso2.choreo.connect.filter.model.RequestContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,10 +63,22 @@ public class WebSocketAPI implements API {
         String apiType = api.getApiType();
         List<String> securitySchemes = api.getSecuritySchemeList();
 
+        EndpointSecurity endpointSecurity = new EndpointSecurity();
+        if (api.getEndpointSecurity().hasProductionSecurityInfo()) {
+            endpointSecurity.setProductionSecurityInfo(
+                    APIProcessUtils.convertProtoEndpointSecurity(
+                            api.getEndpointSecurity().getProductionSecurityInfo()));
+        }
+        if (api.getEndpointSecurity().hasSandBoxSecurityInfo()) {
+            endpointSecurity.setProductionSecurityInfo(
+                    APIProcessUtils.convertProtoEndpointSecurity(
+                            api.getEndpointSecurity().getSandBoxSecurityInfo()));
+        }
+
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .apiType(apiType).apiLifeCycleState(apiLifeCycleState)
-                .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
+                .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(endpointSecurity)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
                 .organizationId(api.getOrganizationId()).build();
         initFilters();
@@ -77,8 +91,8 @@ public class WebSocketAPI implements API {
         ResponseObject responseObject = new ResponseObject();
         if (executeFilterChain(requestContext)) {
             responseObject.setStatusCode(APIConstants.StatusCodes.OK.getCode());
-            if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
-                responseObject.setHeaderMap(requestContext.getResponseHeaders());
+            if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
+                responseObject.setHeaderMap(requestContext.getAddHeaders());
             }
             logger.debug("ext_authz metadata: {}", requestContext.getMetadataMap());
             responseObject.setMetaDataMap(requestContext.getMetadataMap());
@@ -99,8 +113,8 @@ public class WebSocketAPI implements API {
                 responseObject.setErrorDescription(requestContext.getProperties()
                         .get(APIConstants.MessageFormat.ERROR_DESCRIPTION).toString());
             }
-            if (requestContext.getResponseHeaders() != null && requestContext.getResponseHeaders().size() > 0) {
-                responseObject.setHeaderMap(requestContext.getResponseHeaders());
+            if (requestContext.getAddHeaders() != null && requestContext.getAddHeaders().size() > 0) {
+                responseObject.setHeaderMap(requestContext.getAddHeaders());
             }
         }
         return responseObject;
@@ -176,7 +190,7 @@ public class WebSocketAPI implements API {
 
     public WebSocketThrottleResponse processFramedata(RequestContext requestContext) {
         logger.trace("processFramedata called for websocket frame with basepath : {}", requestContext
-                .getMatchedAPI().getAPIConfig().getBasePath());
+                .getMatchedAPI().getBasePath());
         if (executeUpgradeFilterChain(requestContext)) {
             WebSocketThrottleResponse webSocketThrottleResponse = new WebSocketThrottleResponse();
             webSocketThrottleResponse.setOkState();
@@ -188,6 +202,4 @@ public class WebSocketAPI implements API {
                 (Long) requestContext.getProperties().get(ThrottleConstants.HEADER_RETRY_AFTER));
         return webSocketThrottleResponse;
     }
-
-
 }

@@ -24,13 +24,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
-import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.filter.model.AuthenticationContext;
+import org.wso2.choreo.connect.filter.model.RequestContext;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -91,9 +91,9 @@ public class AnalyticsFilter {
     }
 
     public void handleSuccessRequest(RequestContext requestContext) {
-        String apiName = requestContext.getMatchedAPI().getAPIConfig().getName();
-        String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
-        String apiType = requestContext.getMatchedAPI().getAPIConfig().getApiType();
+        String apiName = requestContext.getMatchedAPI().getName();
+        String apiVersion = requestContext.getMatchedAPI().getVersion();
+        String apiType = requestContext.getMatchedAPI().getApiType();
         AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
 
         requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY, AnalyticsUtils.getAPIId(requestContext));
@@ -104,7 +104,7 @@ public class AnalyticsFilter {
         requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, apiType);
 
         String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(
-                requestContext.getMatchedAPI().getAPIConfig().getBasePath());
+                requestContext.getMatchedAPI().getBasePath());
         requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY,
                 tenantDomain == null ? APIConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
 
@@ -129,7 +129,7 @@ public class AnalyticsFilter {
         requestContext.addMetadataToMap(MetadataConstants.DESTINATION, resolveEndpoint(requestContext));
 
         requestContext.addMetadataToMap(MetadataConstants.API_ORGANIZATION_ID,
-                requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
+                requestContext.getMatchedAPI().getOrganizationId());
     }
 
     private String resolveEndpoint(RequestContext requestContext) {
@@ -139,11 +139,11 @@ public class AnalyticsFilter {
                 && authContext.getKeyType().equals(APIConstants.API_KEY_TYPE_SANDBOX)) {
             // keyType is sandbox but the sandbox endpoints are null this will result in authentication failure.
             // Hence null scenario is impossible to occur.
-            return requestContext.getMatchedAPI().getAPIConfig().getSandboxUrls() != null ?
-                    requestContext.getMatchedAPI().getAPIConfig().getSandboxUrls().get(0) : "";
+            return requestContext.getMatchedAPI().getSandboxUrls() != null ?
+                    requestContext.getMatchedAPI().getSandboxUrls().get(0) : "";
         }
         // This does not cause problems at the moment Since the current microgateway supports only one URL
-        return requestContext.getMatchedAPI().getAPIConfig().getProductionUrls().get(0);
+        return requestContext.getMatchedAPI().getProductionUrls().get(0);
     }
 
     public void handleFailureRequest(RequestContext requestContext) {

@@ -33,12 +33,12 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
-import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.filter.model.AuthenticationContext;
+import org.wso2.choreo.connect.filter.model.RequestContext;
 
 /**
  * Generate FaultDTO for the errors generated from enforcer.
@@ -100,14 +100,14 @@ public class ChoreoFaultAnalyticsProvider implements AnalyticsDataProvider {
         String apiUUID = AnalyticsUtils.getAPIId(requestContext);
         api.setApiId(apiUUID);
         api.setApiCreator(AnalyticsUtils.getAPIProvider(apiUUID));
-        api.setApiType(requestContext.getMatchedAPI().getAPIConfig().getApiType());
-        api.setApiName(requestContext.getMatchedAPI().getAPIConfig().getName());
-        api.setApiVersion(requestContext.getMatchedAPI().getAPIConfig().getVersion());
+        api.setApiType(requestContext.getMatchedAPI().getApiType());
+        api.setApiName(requestContext.getMatchedAPI().getName());
+        api.setApiVersion(requestContext.getMatchedAPI().getVersion());
         String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(
-                requestContext.getMatchedAPI().getAPIConfig().getBasePath());
+                requestContext.getMatchedAPI().getBasePath());
         api.setApiCreatorTenantDomain(
                 tenantDomain == null ? APIConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
-        api.setOrganizationId(requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
+        api.setOrganizationId(requestContext.getMatchedAPI().getOrganizationId());
         return api;
     }
 

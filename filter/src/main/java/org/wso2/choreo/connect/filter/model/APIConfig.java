@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org).
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,16 +15,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.choreo.connect.enforcer.api.config;
-
-import org.wso2.choreo.connect.discovery.api.EndpointSecurity;
-import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
+package org.wso2.choreo.connect.filter.model;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Holds the metadata related to the API. Common collection to hold data about any API type like REST, gRPC and etc.
+ * APIConfig contains the details related to the MatchedAPI for the inbound request.
  */
 public class APIConfig {
     private String name;
@@ -41,28 +38,149 @@ public class APIConfig {
     private String uuid;
 
     private List<String> securitySchemes = new ArrayList<>();
-    private String tier = ThrottleConstants.UNLIMITED_TIER;
+    private String tier = "Unlimited";
     private boolean disableSecurity = false;
     private List<ResourceConfig> resources = new ArrayList<>();
 
+    /**
+     * getApiType returns the API type. This could be one of the following.
+     * HTTP, WS, WEBHOOK
+     *
+     * @return the apiType
+     */
     public String getApiType() {
         return apiType;
     }
 
+    /**
+     * getProductionUrls returns the production endpoint URLs.
+     *
+     * @return getProductionUrls returns the production endpoint URLs
+     */
     public List<String> getProductionUrls() {
         return productionUrls;
     }
 
+    /**
+     * getSandboxUrls returns the production endpoint URLs.
+     *
+     * @return the sandbox endpoint URLs
+     */
     public List<String> getSandboxUrls() {
         return sandboxUrls;
     }
 
+    /**
+     * TODO: (VirajSalaka)
+     * Corresponding API's organization UUID is returned.
+     *
+     * @return Organization UUID
+     */
     public String getOrganizationId() {
         return organizationId;
     }
 
+    /**
+     * Corresponding API's API UUID is returned.
+     * @return API UUID
+     */
     public String getUuid() {
         return uuid;
+    }
+
+    /**
+     * Corresponding API's API Name is returned.
+     * @return API name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Corresponding API's API Version is returned.
+     * @return API version
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * Corresponding API's Backend Endpoint Security Object is returned.
+     * If the backend endpoint is protected with BasicAuth, those information could
+     * be fetched from here.
+     * @return {@code EndpointSecurity} object of the API
+     */
+    public EndpointSecurity getEndpointSecurity() {
+        return endpointSecurity;
+    }
+
+    /**
+     * Corresponding API's Host is returned.
+     * @return API's host
+     */
+    public String getVhost() {
+        return vhost;
+    }
+
+    /**
+     * Corresponding API's Basepath is returned.
+     * @return basePath of the API
+     */
+    public String getBasePath() {
+        return basePath;
+    }
+
+    /**
+     * If the Authentication Header for the API is modified using x-wso2-auth-header extension,
+     * this would return the changed value. If it remains unchanged, it returns null.
+     * @return Authentication header for the API if changed.
+     */
+    public String getAuthHeader() {
+        return authorizationHeader;
+    }
+
+    /**
+     * Current API Lifecycle state is returned.
+     * TODO: (VirajSalaka) describe more
+     * @return lifecycle state
+     */
+    public String getApiLifeCycleState() {
+        return apiLifeCycleState;
+    }
+
+    /**
+     * Security Schemas assigned for the corresponding API.
+     * TODO: (VirajSalaka) describe more
+     * @return array of security schemas assigned for the API.
+     */
+    public List<String> getSecuritySchemas() {
+        return securitySchemes;
+    }
+
+    /**
+     * API level Throttling tier assigned for the corresponding API.
+     * @return API level throttling tier
+     */
+    public String getTier() {
+        return tier;
+    }
+
+    /**
+     * If the authentication is disabled for the API using x-wso2-disable-security extension.
+     *
+     * @return true if x-wso2-disable-security extension is assigned for the API and its value is true.
+     */
+    public boolean isDisableSecurity() {
+        return disableSecurity;
+    }
+
+    /**
+     * Returns the complete list of resources under the corresponding API.
+     * Each operation in the openAPI definition is listed under here.
+     * @return Resources of the API.
+     */
+    public List<ResourceConfig> getResources() {
+        return resources;
     }
 
     /**
@@ -84,7 +202,7 @@ public class APIConfig {
         private String uuid;
 
         private List<String> securitySchemes = new ArrayList<>();
-        private String tier = ThrottleConstants.UNLIMITED_TIER;
+        private String tier = "Unlimited";
         private boolean disableSecurity = false;
         private List<ResourceConfig> resources = new ArrayList<>();
 
@@ -190,49 +308,5 @@ public class APIConfig {
     }
 
     private APIConfig() {
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public EndpointSecurity getEndpointSecurity() {
-        return endpointSecurity;
-    }
-
-    public String getVhost() {
-        return vhost;
-    }
-
-    public String getBasePath() {
-        return basePath;
-    }
-
-    public String getAuthHeader() {
-        return authorizationHeader;
-    }
-
-    public String getApiLifeCycleState() {
-        return apiLifeCycleState;
-    }
-
-    public List<String> getSecuritySchemas() {
-        return securitySchemes;
-    }
-
-    public String getTier() {
-        return tier;
-    }
-
-    public boolean isDisableSecurity() {
-        return disableSecurity;
-    }
-
-    public List<ResourceConfig> getResources() {
-        return resources;
     }
 }

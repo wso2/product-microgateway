@@ -18,8 +18,8 @@
 
 package org.wso2.choreo.connect.enforcer.security;
 
-import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
+import org.wso2.choreo.connect.filter.model.ResourceConfig;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -27,6 +27,7 @@ import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CacheDto;
 import org.wso2.choreo.connect.enforcer.config.dto.CredentialDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ExtendedTokenIssuerDto;
+import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
 import org.wso2.choreo.connect.enforcer.config.dto.JWTIssuerConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ManagementCredentialsDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
@@ -53,6 +54,7 @@ public class EnforcerConfig {
     private AuthHeaderDto authHeader;
     private ManagementCredentialsDto management;
     private AdminRestServerDto restServer;
+    private FilterDTO[] customFilters;
 
     public AuthServiceConfigurationDto getAuthService() {
         return authService;
@@ -164,6 +166,14 @@ public class EnforcerConfig {
 
     public void setRestServer(AdminRestServerDto restServer) {
         this.restServer = restServer;
+    }
+
+    public FilterDTO[] getCustomFilters() {
+        return customFilters;
+    }
+
+    public void setCustomFilters(FilterDTO[] customFilters) {
+        this.customFilters = customFilters;
     }
 }
 

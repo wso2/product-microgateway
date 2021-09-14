@@ -21,12 +21,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.Filter;
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
-import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleAgent;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleDataHolder;
@@ -34,6 +31,9 @@ import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.util.ThrottleE
 import org.wso2.choreo.connect.enforcer.throttle.dto.Decision;
 import org.wso2.choreo.connect.enforcer.throttle.utils.ThrottleUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.filter.model.APIConfig;
+import org.wso2.choreo.connect.filter.model.AuthenticationContext;
+import org.wso2.choreo.connect.filter.model.RequestContext;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -76,7 +76,7 @@ public class WebSocketThrottleFilter implements Filter {
     private boolean doThrottle(RequestContext requestContext) {
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
         if (authContext != null) {
-            APIConfig api = requestContext.getMatchedAPI().getAPIConfig();
+            APIConfig api = requestContext.getMatchedAPI();
             String apiContext = api.getBasePath();
             String apiVersion = api.getVersion();
             String appId = authContext.getApplicationId();
@@ -203,7 +203,7 @@ public class WebSocketThrottleFilter implements Filter {
     private Map<String, String> getThrottleEventMap(RequestContext requestContext) {
         AuthenticationContext authContext = requestContext.getAuthenticationContext();
         Map<String, String> throttleEvent = new HashMap<>();
-        APIConfig api = requestContext.getMatchedAPI().getAPIConfig();
+        APIConfig api = requestContext.getMatchedAPI();
 
         String basePath = api.getBasePath();
         String apiVersion = api.getVersion();

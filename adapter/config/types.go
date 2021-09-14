@@ -123,6 +123,7 @@ type enforcer struct {
 	JwtIssuer    jwtIssuer
 	Management   management
 	RestServer   restServer
+	Filters      []filter
 }
 
 type server struct {
@@ -375,15 +376,15 @@ type APICtlUser struct {
 
 // ControlPlane struct contains configurations related to the API Manager
 type controlPlane struct {
-	Enabled                 bool                    `toml:"enabled"`
-	ServiceURL              string                  `toml:"serviceUrl"`
-	Username                string                  `toml:"username"`
-	Password                string                  `toml:"password"`
-	SyncApisOnStartUp       bool                    `toml:"syncApisOnStartUp"`
-	EnvironmentLabels       []string                `toml:"environmentLabels"`
-	RetryInterval           time.Duration           `toml:"retryInterval"`
-	SkipSSLVerification     bool                    `toml:"skipSSLVerification"`
-	JmsConnectionParameters jmsConnectionParameters `toml:"jmsConnectionParameters"`
+	Enabled                    bool                       `toml:"enabled"`
+	ServiceURL                 string                     `toml:"serviceUrl"`
+	Username                   string                     `toml:"username"`
+	Password                   string                     `toml:"password"`
+	SyncApisOnStartUp          bool                       `toml:"syncApisOnStartUp"`
+	EnvironmentLabels          []string                   `toml:"environmentLabels"`
+	RetryInterval              time.Duration              `toml:"retryInterval"`
+	SkipSSLVerification        bool                       `toml:"skipSSLVerification"`
+	JmsConnectionParameters    jmsConnectionParameters    `toml:"jmsConnectionParameters"`
 	BrokerConnectionParameters brokerConnectionParameters `toml:"brokerConnectionParameters"`
 }
 
@@ -400,9 +401,9 @@ type jmsConnectionParameters struct {
 }
 
 type brokerConnectionParameters struct {
-	EventListeningEndpoints []string        `toml:"eventListeningEndpoints"`
-	ReconnectInterval      time.Duration `toml:"reconnectInterval"`
-	ReconnectRetryCount    int           `toml:"reconnectRetryCount"`
+	EventListeningEndpoints []string      `toml:"eventListeningEndpoints"`
+	ReconnectInterval       time.Duration `toml:"reconnectInterval"`
+	ReconnectRetryCount     int           `toml:"reconnectRetryCount"`
 }
 
 // Configuration for Enforcer admin rest api
@@ -496,4 +497,9 @@ type SecurityInfo struct {
 	SecurityType     string `json:"Type,omitempty"`
 	Enabled          bool   `json:"enabled,omitempty"`
 	Username         string `json:"username,omitempty"`
+}
+
+type filter struct {
+	ClassName string
+	Position  int32
 }

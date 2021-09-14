@@ -17,8 +17,8 @@
  */
 package org.wso2.choreo.connect.enforcer;
 
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
-import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
+import org.wso2.choreo.connect.filter.model.APIConfig;
+import org.wso2.choreo.connect.filter.model.RequestContext;
 
 /**
  * Filters are the request interceptors that applies API Management capabilities at the gateway layer. This is the

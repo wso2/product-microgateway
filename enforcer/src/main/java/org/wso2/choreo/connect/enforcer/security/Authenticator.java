@@ -17,8 +17,9 @@
  */
 package org.wso2.choreo.connect.enforcer.security;
 
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
+import org.wso2.choreo.connect.filter.model.AuthenticationContext;
+import org.wso2.choreo.connect.filter.model.RequestContext;
 
 /**
  * Defines the interface to implement an authenticator. This authenticator can be oauth2(opaque, jwt), MTLS, basic

@@ -22,7 +22,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.throttle.IPCondition;
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
 import org.wso2.choreo.connect.enforcer.discovery.ThrottleDataDiscoveryClient;
@@ -31,6 +30,7 @@ import org.wso2.choreo.connect.enforcer.throttle.dto.IPRange;
 import org.wso2.choreo.connect.enforcer.throttle.dto.ThrottleCondition;
 import org.wso2.choreo.connect.enforcer.throttle.utils.ThrottleUtils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+import org.wso2.choreo.connect.filter.model.RequestContext;
 
 import java.math.BigInteger;
 import java.util.HashSet;

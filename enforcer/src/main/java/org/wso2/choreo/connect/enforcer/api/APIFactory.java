@@ -22,10 +22,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
-import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
-import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.discovery.ApiDiscoveryClient;
+import org.wso2.choreo.connect.filter.model.APIConfig;
+import org.wso2.choreo.connect.filter.model.ResourceConfig;
 
 import java.util.List;
 import java.util.Map;

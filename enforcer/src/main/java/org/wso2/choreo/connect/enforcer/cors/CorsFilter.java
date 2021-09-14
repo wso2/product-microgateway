@@ -21,11 +21,11 @@ package org.wso2.choreo.connect.enforcer.cors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.Filter;
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
-import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
-import org.wso2.choreo.connect.enforcer.api.config.ResourceConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.filter.model.APIConfig;
+import org.wso2.choreo.connect.filter.model.RequestContext;
+import org.wso2.choreo.connect.filter.model.ResourceConfig;
 
 /**
  * Cors Filter for failed preflight requests.
@@ -51,7 +51,7 @@ public class CorsFilter implements Filter {
                 return true;
             }
             StringBuilder allowedMethodsBuilder = new StringBuilder(HttpConstants.OPTIONS);
-            for (ResourceConfig resourceConfig : requestContext.getMatchedAPI().getAPIConfig().getResources()) {
+            for (ResourceConfig resourceConfig : requestContext.getMatchedAPI().getResources()) {
                 if (!resourceConfig.getPath().equals(requestContext.getRequestPathTemplate())) {
                     continue;
                 }
@@ -59,9 +59,9 @@ public class CorsFilter implements Filter {
             }
             requestContext.getProperties()
                     .put(APIConstants.MessageFormat.STATUS_CODE, HttpConstants.NO_CONTENT_STATUS_CODE);
-            requestContext.addResponseHeaders(HttpConstants.ALLOW_HEADER, allowedMethodsBuilder.toString());
+            requestContext.addOrModifyHeaders(HttpConstants.ALLOW_HEADER, allowedMethodsBuilder.toString());
             logger.debug("OPTIONS request received for " +
-                    requestContext.getMatchedAPI().getAPIConfig().getResources().get(0).getPath() +
+                    requestContext.getMatchedAPI().getResources().get(0).getPath() +
                     ". Responded with allow header : " + allowedMethodsBuilder.toString());
             return false;
         }

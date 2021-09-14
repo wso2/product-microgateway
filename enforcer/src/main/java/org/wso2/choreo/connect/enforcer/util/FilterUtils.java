@@ -35,7 +35,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -44,8 +43,9 @@ import org.wso2.choreo.connect.enforcer.constants.JwtConstants;
 import org.wso2.choreo.connect.enforcer.dto.APIKeyValidationInfoDTO;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
-import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
+import org.wso2.choreo.connect.filter.model.AuthenticationContext;
+import org.wso2.choreo.connect.filter.model.RequestContext;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -198,11 +198,11 @@ public class FilterUtils {
         authContext.setApplicationName(null);
         authContext.setApplicationTier(APIConstants.UNLIMITED_TIER);
         authContext.setSubscriber(APIConstants.END_USER_ANONYMOUS);
-        authContext.setApiName(requestContext.getMatchedAPI().getAPIConfig().getName());
+        authContext.setApiName(requestContext.getMatchedAPI().getName());
         authContext.setStopOnQuotaReach(true);
         authContext.setConsumerKey(null);
         authContext.setCallerToken(null);
-        String apiUUID = requestContext.getMatchedAPI().getAPIConfig().getUuid();
+        String apiUUID = requestContext.getMatchedAPI().getUuid();
         if (!StringUtils.isEmpty(apiUUID)) {
             authContext.setApiUUID(apiUUID);
         }
@@ -333,8 +333,8 @@ public class FilterUtils {
 
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
-        String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
-        String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
+        String apiContext = requestContext.getMatchedAPI().getBasePath();
+        String apiVersion = requestContext.getMatchedAPI().getVersion();
         jwtInfoDto.setApiContext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
         constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
@@ -490,7 +490,7 @@ public class FilterUtils {
      * @return string format API tier.
      */
     public static String getAPILevelTier(RequestContext requestContext) {
-        String apiTier = requestContext.getMatchedAPI().getAPIConfig().getTier();
+        String apiTier = requestContext.getMatchedAPI().getTier();
         String resourceTier = requestContext.getMatchedResourcePath().getTier();
 
         if (!apiTier.isEmpty() && !ThrottleConstants.UNLIMITED_TIER.equalsIgnoreCase(apiTier)) {
@@ -518,7 +518,7 @@ public class FilterUtils {
 
     public static String getAuthHeaderName(RequestContext requestContext) {
         AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
-        String authHeaderName = requestContext.getMatchedAPI().getAPIConfig().getAuthHeader();
+        String authHeaderName = requestContext.getMatchedAPI().getAuthHeader();
         if (StringUtils.isEmpty(authHeaderName)) {
             authHeaderName = authHeader.getAuthorizationHeader();
         }
@@ -534,9 +534,6 @@ public class FilterUtils {
      * @return whether the fault scenario should be skipped from publishing to analytics server.
      */
     public static boolean isSkippedAnalyticsFaultEvent(String errorCode) {
-        if (SKIPPED_FAULT_CODES.contains(errorCode)) {
-            return true;
-        }
-        return false;
+        return SKIPPED_FAULT_CODES.contains(errorCode);
     }
 }

@@ -611,6 +611,34 @@ paths:
           description: Invalid status value
       security:
         - petstore_auth: [ ]
+  /headers:
+    get:
+      summary: getHeaders
+      description: Returns request headers
+      operationId: getHeaders
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Resource not found
+      security:
+        - petstore_auth: [ ]
+  /headers/{headerId}.api:
+    get:
+      summary: getHeaders
+      description: Returns request headers
+      operationId: getHeaders
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Resource not found
+      security:
+        - petstore_auth: [ ]
 securityDefinitions:
   api_key:
     type: apiKey

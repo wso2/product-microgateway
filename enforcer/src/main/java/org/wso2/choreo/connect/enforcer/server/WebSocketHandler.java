@@ -21,14 +21,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.discovery.service.websocket.WebSocketFrameRequest;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.api.WebSocketAPI;
-import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
-import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.websocket.MetadataConstants;
-import org.wso2.choreo.connect.enforcer.websocket.WebSocketFrameContext;
 import org.wso2.choreo.connect.enforcer.websocket.WebSocketThrottleResponse;
+import org.wso2.choreo.connect.filter.model.APIConfig;
+import org.wso2.choreo.connect.filter.model.AuthenticationContext;
+import org.wso2.choreo.connect.filter.model.RequestContext;
+import org.wso2.choreo.connect.filter.model.WebSocketFrameContext;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -129,8 +129,8 @@ public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, W
         authenticationContext.setApiPublisher(apiPublisher);
 
         return new RequestContext.Builder(apiBasePath).authenticationContext(authenticationContext).
-                webSocketFrameContext(webSocketFrameContext).matchedAPI(api).requestID(requestId)
-                .address(extractIpAddress(remoteIp)).build();
+                webSocketFrameContext(webSocketFrameContext).matchedAPI(api.getAPIConfig())
+                .requestID(requestId).address(extractIpAddress(remoteIp)).build();
     }
 
     private String extractIpAddress(String remoteIpStringWithPort) {

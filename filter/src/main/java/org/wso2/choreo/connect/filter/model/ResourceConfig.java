@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,34 +15,42 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.choreo.connect.enforcer.api.config;
-
-import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
+package org.wso2.choreo.connect.filter.model;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Holds the metadata related to the resources/operations of an API. Common collection to hold data about
- * any API type like REST, gRPC and etc.
+ * Holds the metadata related to the resources/operations of an API.
  */
 public class ResourceConfig {
 
     private String path;
     private HttpMethods method;
     private Map<String, List<String>> securitySchemas = new HashMap();
-    private String tier = ThrottleConstants.UNLIMITED_TIER;
+    private String tier = "Unlimited";
     private boolean disableSecurity = false;
 
+    /**
+     * Get the matching path Template for the request.
+     *
+     * @return path Template
+     */
     public String getPath() {
         return path;
     }
 
+    // TODO: (VirajSalaka) use a builder for resources as well.
     public void setPath(String path) {
         this.path = path;
     }
 
+    /**
+     * Get the matching HTTP Method.
+     *
+     * @return HTTP method
+     */
     public HttpMethods getMethod() {
         return method;
     }
@@ -51,6 +59,12 @@ public class ResourceConfig {
         this.method = method;
     }
 
+    /**
+     * Get the List of security Schemas. Keys would define the available set of security schemas and
+     * its value would denote the scopes assigned.
+     *
+     * @return security schemas as a map of <security_schema_name, list of scopes.
+     */
     public Map<String, List<String>> getSecuritySchemas() {
         return securitySchemas;
     }
@@ -59,6 +73,11 @@ public class ResourceConfig {
         this.securitySchemas = securitySchemas;
     }
 
+    /**
+     * Get the resource level throttling tier assigned for the corresponding Resource.
+     *
+     * @return resource level throttling tier
+     */
     public String getTier() {
         return tier;
     }
@@ -67,6 +86,12 @@ public class ResourceConfig {
         this.tier = tier;
     }
 
+    /**
+     * Returns true if the security is disabled for the corresponding resource using
+     * x-wso2-disable-security openAPI extension.
+     *
+     * @return true if security is disabled.
+     */
     public boolean isDisableSecurity() {
         return disableSecurity;
     }
@@ -89,5 +114,4 @@ public class ResourceConfig {
         }
     }
 }
-
 

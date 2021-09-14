@@ -171,4 +171,28 @@ public interface ConfigOrBuilder extends
    * <code>.wso2.discovery.config.enforcer.RestServer restServer = 11;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.RestServerOrBuilder getRestServerOrBuilder();
+
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   */
+  java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Filter> 
+      getFiltersList();
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.Filter getFilters(int index);
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   */
+  int getFiltersCount();
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   */
+  java.util.List<? extends org.wso2.choreo.connect.discovery.config.enforcer.FilterOrBuilder> 
+      getFiltersOrBuilderList();
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.FilterOrBuilder getFiltersOrBuilder(
+      int index);
 }

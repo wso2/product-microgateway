@@ -104,6 +104,16 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		Enable: config.Enforcer.RestServer.Enable,
 	}
 
+	filters := []*enforcer.Filter{}
+
+	for _, filterConfig := range config.Enforcer.Filters {
+		filter := &enforcer.Filter{
+			ClassName: filterConfig.ClassName,
+			Position:  filterConfig.Position,
+		}
+		filters = append(filters, filter)
+	}
+
 	return &enforcer.Config{
 		JwtGenerator: &enforcer.JWTGenerator{
 			Enable:                config.Enforcer.JwtGenerator.Enable,
@@ -181,6 +191,7 @@ func MarshalConfig(config *config.Config) *enforcer.Config {
 		},
 		Management: management,
 		RestServer: restServer,
+		Filters:    filters,
 	}
 }
 

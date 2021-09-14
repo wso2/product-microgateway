@@ -19,11 +19,11 @@
 package org.wso2.choreo.connect.enforcer.analytics;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
 import org.wso2.choreo.connect.enforcer.models.API;
-import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
+import org.wso2.choreo.connect.filter.model.AuthenticationContext;
+import org.wso2.choreo.connect.filter.model.RequestContext;
 
 /**
  * Common Utility functions
@@ -31,7 +31,7 @@ import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 public class AnalyticsUtils {
 
     public static String getAPIId(RequestContext requestContext) {
-        return requestContext.getMatchedAPI().getAPIConfig().getUuid();
+        return requestContext.getMatchedAPI().getUuid();
     }
 
     private static String generateHash(String apiName, String apiVersion) {

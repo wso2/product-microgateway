@@ -51,6 +51,7 @@
             </activation>
             <modules>
                 <module>adapter</module>
+                <module>filter</module>
                 <module>enforcer</module>
                 <module>distribution</module>
                 <module>integration</module>
@@ -64,6 +65,7 @@
             <modules>
                 <module>router</module>
                 <module>adapter</module>
+                <module>filter</module>
                 <module>enforcer</module>
                 <module>distribution</module>
                 <module>integration</module>
