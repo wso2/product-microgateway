@@ -268,9 +268,6 @@ func Run(conf *config.Config) {
 			go messaging.ProcessEvents(conf)
 		}
 
-		// Fetch APIs from control plane
-		fetchAPIsOnStartUp(conf)
-
 		go synchronizer.UpdateRevokedTokens()
 		// Fetch Key Managers from APIM
 		synchronizer.FetchKeyManagersOnStartUp(conf)

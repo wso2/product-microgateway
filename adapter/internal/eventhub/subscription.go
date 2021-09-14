@@ -172,7 +172,7 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 			logger.LoggerSync.Debug("Receiving API information for an environment")
 			if data.Payload != nil {
 				logger.LoggerSync.Debug("Payload data with API information recieved")
-				retrieveAPIList(data)
+				retrieveAPIList(data, initialAPIUUIDListMap)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
 				logger.LoggerSync.Errorf("Error occurred when retrieving Subscription information from the control plane: %v", data.Error)

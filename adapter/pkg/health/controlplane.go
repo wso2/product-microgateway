@@ -32,7 +32,7 @@ var (
 func SetControlPlaneBrokerStatus(status bool) {
 	// check for controlPlaneStarted, to non block call
 	// if called again (somehow) after startup, for extra safe check this value
-	if !ControlPlaneStarted {
+	if !controlPlaneStarted {
 		controlPlaneBrokerStatusChan <- status
 	}
 }
@@ -58,6 +58,6 @@ func WaitForControlPlane() {
 			logger.LoggerHealth.Debugf("Connection to Control Plane Rest API %v", restAPIStarted)
 		}
 	}
-	ControlPlaneStarted = true
+	controlPlaneStarted = true
 	logger.LoggerHealth.Info("Successfully connected to the control plane.")
 }
