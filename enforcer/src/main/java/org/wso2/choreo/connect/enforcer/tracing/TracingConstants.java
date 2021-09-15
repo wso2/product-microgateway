@@ -53,6 +53,8 @@ public class TracingConstants {
     public static final String SCOPES_VALIDATION_SPAN = "JWTAuthenticator:authenticate():Validate scopes";
     public static final String UNSECURED_API_AUTHENTICATOR_SPAN = "UnsecuredAPIAuthenticator:authenticate():" +
             "Authenticate request using Unsecured Api Authenticator.";
+    public static final String WS_HANDLER_SPAN = "WebSocketHandler:process():Handle request coming through" +
+            " websocket frame service";
     public static final String WS_THROTTLE_SPAN = "WebSocketThrottleFilter:handleRequest():WebSocket throttling filter";
     public static final String WS_METADATA_SPAN = "WebSocketMetaDataFilter:handleRequest():WebSocket Metadata filter";
 

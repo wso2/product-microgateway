@@ -57,7 +57,7 @@ public class WebSocketHandler implements RequestHandler<WebSocketFrameRequest, W
         Scope webSocketHandlerSpanScope = null;
         if (Utils.tracingEnabled()) {
             TracingTracer tracer =  Utils.getGlobalTracer();
-            webSocketHandlerSpan = Utils.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, tracer);
+            webSocketHandlerSpan = Utils.startSpan(TracingConstants.WS_HANDLER_SPAN, tracer);
             webSocketHandlerSpanScope = webSocketHandlerSpan.getSpan().makeCurrent();
             Utils.setTag(webSocketHandlerSpan, APIConstants.LOG_TRACE_ID, ThreadContext.get(APIConstants.LOG_TRACE_ID));
         }

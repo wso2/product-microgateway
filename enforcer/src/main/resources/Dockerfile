@@ -42,6 +42,7 @@ ENV ADAPTER_XDS_PORT=18000
 ENV ENFORCER_LABEL="Default"
 ENV XDS_MAX_MSG_SIZE=4194304
 ENV XDS_MAX_RETRIES=3
+#todo update the connection string
 ENV APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=;IngestionEndpoint=https://westus2-2.in.applicationinsights.azure.com/
 
 ARG MOTD="\n\
@@ -68,8 +69,9 @@ COPY maven/conf/log4j2.properties conf/log4j2.properties
 COPY maven/security security
 COPY check_health.sh .
 COPY maven/LICENSE.txt .
-COPY ./applicationinsights.json  conf/
-COPY ./applicationinsights-agent-3.1.1.jar conf/
 
+#todo add applicationinsights.json file and point it to the appInsightsAgent jar
+#Add the agent using JVM arg -javaagent:/home/wso2/conf/applicationinsights-agent-3.1.1.jar
+#Add the config file using System property -Dapplicationinsights.configuration.file=/home/wso2/conf/applicationinsights.json
 
-CMD java -javaagent:/home/wso2/conf/applicationinsights-agent-3.1.1.jar -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="${ENFORCER_HOME}/logs/heap-dump.hprof" $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -DtracingEnabled="true" -cp "lib/*:lib/dropins/*" org.wso2.choreo.connect.enforcer.server.AuthServer
+CMD java -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="${ENFORCER_HOME}/logs/heap-dump.hprof" $JAVA_OPTS -Dlog4j.configurationFile="${ENFORCER_HOME}/conf/log4j2.properties" -DtracingEnabled="true" -cp "lib/*:lib/dropins/*" org.wso2.choreo.connect.enforcer.server.AuthServer
