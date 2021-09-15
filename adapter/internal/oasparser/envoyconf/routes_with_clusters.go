@@ -58,7 +58,7 @@ import (
 //
 // First set of routes, clusters, addresses represents the production endpoints related
 // configurations. Next set represents the sandbox endpoints related configurations.
-func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte, vHost string, organizationID string) (routesP []*routev3.Route,
+func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte, interceptorCerts []byte, vHost string, organizationID string) (routesP []*routev3.Route,
 	clustersP []*clusterv3.Cluster, addressesP []*corev3.Address) {
 	var (
 		routesProd []*routev3.Route
@@ -133,7 +133,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		apiRequestInterceptorClusterName = strings.TrimSpace(organizationID + "_" + requestInterceptClustersNamePrefix +
 			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
 
-		clusters = append(clusters, CreateLuaCluster(upstreamCerts, requestInterceptEndpoint,
+		clusters = append(clusters, CreateLuaCluster(interceptorCerts, requestInterceptEndpoint,
 			apiRequestInterceptorClusterName))
 
 	}
@@ -142,7 +142,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 	if err == nil && responseInterceptEndpoint.Enable {
 		apiResponseInterceptorClusterName = strings.TrimSpace(organizationID + "_" + responseInterceptClustersNamePrefix +
 			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
-		clusters = append(clusters, CreateLuaCluster(upstreamCerts, responseInterceptEndpoint,
+		clusters = append(clusters, CreateLuaCluster(interceptorCerts, responseInterceptEndpoint,
 			apiResponseInterceptorClusterName))
 	}
 
@@ -239,7 +239,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 			resourceRequestInterceptClusterName = strings.TrimSpace(organizationID + "_" + requestInterceptClustersNamePrefix +
 				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion() + "_" + resource.GetID())
 
-			clusters = append(clusters, CreateLuaCluster(upstreamCerts, requestInterceptEndpoint,
+			clusters = append(clusters, CreateLuaCluster(interceptorCerts, requestInterceptEndpoint,
 				resourceRequestInterceptClusterName))
 
 		}
@@ -248,7 +248,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		if err == nil && responseInterceptEndpoint.Enable {
 			resourceResponseInterceptClusterName = strings.TrimSpace(organizationID + "_" + responseInterceptClustersNamePrefix +
 				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion() + "_" + resource.GetID())
-			clusters = append(clusters, CreateLuaCluster(upstreamCerts, responseInterceptEndpoint,
+			clusters = append(clusters, CreateLuaCluster(interceptorCerts, responseInterceptEndpoint,
 				resourceResponseInterceptClusterName))
 		}
 
@@ -265,10 +265,10 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 }
 
 // CreateLuaCluster creates lua cluster configuration.
-func CreateLuaCluster(upstreamCerts []byte, endpoint model.InterceptEndpoint, clusterName string) *clusterv3.Cluster {
+func CreateLuaCluster(interceptorCerts []byte, endpoint model.InterceptEndpoint, clusterName string) *clusterv3.Cluster {
 	logger.LoggerOasparser.Debug("creating a lua cluster ", clusterName)
 	luaAddress := createAddress(endpoint.Host, endpoint.Port)
-	return createCluster(luaAddress, clusterName, endpoint.URLType, upstreamCerts)
+	return createCluster(luaAddress, clusterName, endpoint.URLType, interceptorCerts)
 }
 
 // createCluster creates cluster configuration. AddressConfiguration, cluster name and
@@ -612,7 +612,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		Decorator: decorator,
 		TypedPerFilterConfig: map[string]*any.Any{
 			wellknown.HTTPExternalAuthorization: extAuthzFilter,
-			wellknown.Lua: luaFilter,
+			wellknown.Lua:                       luaFilter,
 		},
 		ResponseHeadersToRemove: responseHeadersToRemove,
 	}

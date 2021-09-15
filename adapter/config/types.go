@@ -426,6 +426,7 @@ type APIContent struct {
 	LifeCycleStatus    string
 	APIDefinition      []byte
 	UpstreamCerts      []byte
+	InterceptorCerts   []byte
 	Environments       []string
 	ProductionEndpoint string
 	SandboxEndpoint    string
