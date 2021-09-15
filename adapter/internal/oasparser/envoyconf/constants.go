@@ -24,11 +24,13 @@ const (
 
 const (
 	extAuthzFilterName         string = "envoy.filters.http.ext_authz"
+	luaFilterName              string = "envoy.filters.http.lua"
 	transportSocketName        string = "envoy.transport_sockets.tls"
 	fileAccessLogName          string = "envoy.access_loggers.file"
 	grpcAccessLogName          string = "envoy.http_grpc_access_log"
 	httpConManagerStartPrefix  string = "ingress_http"
 	extAuthzPerRouteName       string = "type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute"
+	luaPerRouteName       	   string = "type.googleapis.com/envoy.extensions.filters.http.lua.v3.LuaPerRoute"
 	mgwWebSocketFilterName     string = "envoy.filters.http.mgw_websocket"
 	mgwWebSocketWASMFilterName string = "envoy.filters.http.mgw_WASM_websocket"
 	mgwWASMVmID                string = "mgw_WASM_vm"
@@ -50,6 +52,11 @@ const (
 	prodClustersConfigNamePrefix string = "clusterProd_"
 )
 
+const (
+	requestInterceptClustersNamePrefix string = "reqInterceptor_"
+	responseInterceptClustersNamePrefix string = "resInterceptor_"
+)
+
 // Context Extensions which are set in ExtAuthzPerRoute Config
 // These values are shared between the adapter and enforcer, hence if it is required to change
 // these values, modifications should be done in the both adapter and enforcer.
@@ -69,6 +76,10 @@ const (
 	clusterHeaderName string = "x-wso2-cluster-header"
 	// upstreamServiceTimeHeader the header which is used to denote the upstream service time
 	upstreamServiceTimeHeader string = "x-envoy-upstream-service-time"
+	// xWso2requestInterceptor used to provide request interceptor details for api and resource level
+	xWso2requestInterceptor  string = "x-wso2-request-interceptor"
+	// xWso2responseInterceptor used to provide response interceptor details for api and resource level
+	xWso2responseInterceptor string = "x-wso2-response-interceptor"
 )
 
 const (

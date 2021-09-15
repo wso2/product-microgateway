@@ -28,6 +28,7 @@ import (
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	extAuthService "github.com/envoyproxy/go-control-plane/envoy/config/filter/http/ext_authz/v2"
 	routev3 "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
@@ -71,6 +72,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		apiLevelEndpointSand    []model.Endpoint
 		apilevelClusterSand     *clusterv3.Cluster
 		apiLevelClusterNameSand string
+
+		apiRequestInterceptorClusterName  string
+		apiResponseInterceptorClusterName string
 	)
 	// To keep track of API Level production endpoint basePath
 	apiEndpointBasePath := ""
@@ -123,8 +127,28 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		}
 	}
 
-	for _, resource := range mgwSwagger.GetResources() {
+	requestInterceptEndpoint, err := mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2requestInterceptor)
+	// if lua filter exists on api level, add cluster
+	if err == nil && requestInterceptEndpoint.Enable {
+		apiRequestInterceptorClusterName = strings.TrimSpace(organizationID + "_" + requestInterceptClustersNamePrefix +
+			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
 
+		clusters = append(clusters, CreateLuaCluster(upstreamCerts, requestInterceptEndpoint,
+			apiRequestInterceptorClusterName))
+
+	}
+	responseInterceptEndpoint, err := mgwSwagger.GetInterceptor(mgwSwagger.GetVendorExtensions(), xWso2responseInterceptor)
+	// if lua filter exists on api level, add cluster
+	if err == nil && responseInterceptEndpoint.Enable {
+		apiResponseInterceptorClusterName = strings.TrimSpace(organizationID + "_" + responseInterceptClustersNamePrefix +
+			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
+		clusters = append(clusters, CreateLuaCluster(upstreamCerts, responseInterceptEndpoint,
+			apiResponseInterceptorClusterName))
+	}
+
+	for _, resource := range mgwSwagger.GetResources() {
+		resourceRequestInterceptClusterName := apiRequestInterceptorClusterName
+		resourceResponseInterceptClusterName := apiResponseInterceptorClusterName
 		clusterRefSand := ""
 		clusterRefProd := ""
 		// The upstream endpoint's basepath.
@@ -209,15 +233,42 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 				apiTitle, apiVersion, resource.GetPath())
 		}
 
-		routeP := createRoute(genRouteCreateParams(&mgwSwagger, &resource, vHost, endpointBasepath, clusterRefProd, clusterRefSand))
+		requestInterceptEndpoint, err := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2requestInterceptor)
+		// if lua filter exists on api level, add cluster
+		if err == nil && requestInterceptEndpoint.Enable {
+			resourceRequestInterceptClusterName = strings.TrimSpace(organizationID + "_" + requestInterceptClustersNamePrefix +
+				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion() + "_" + resource.GetID())
+
+			clusters = append(clusters, CreateLuaCluster(upstreamCerts, requestInterceptEndpoint,
+				resourceRequestInterceptClusterName))
+
+		}
+		responseInterceptEndpoint, err := mgwSwagger.GetInterceptor(resource.GetVendorExtensions(), xWso2responseInterceptor)
+		// if lua filter exists on api level, add cluster
+		if err == nil && responseInterceptEndpoint.Enable {
+			resourceResponseInterceptClusterName = strings.TrimSpace(organizationID + "_" + responseInterceptClustersNamePrefix +
+				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion() + "_" + resource.GetID())
+			clusters = append(clusters, CreateLuaCluster(upstreamCerts, responseInterceptEndpoint,
+				resourceResponseInterceptClusterName))
+		}
+
+		routeP := createRoute(genRouteCreateParams(&mgwSwagger, &resource, vHost, endpointBasepath, clusterRefProd,
+			clusterRefSand, resourceRequestInterceptClusterName, resourceResponseInterceptClusterName))
 		routesProd = append(routesProd, routeP)
 	}
 	if mgwSwagger.GetAPIType() == mgw.WS {
 		routesP := createRoute(genRouteCreateParams(&mgwSwagger, nil, vHost, apiEndpointBasePath, apilevelClusterProd.GetName(),
-			apilevelClusterSand.GetName()))
+			apilevelClusterSand.GetName(), apiRequestInterceptorClusterName, apiResponseInterceptorClusterName))
 		routesProd = append(routesProd, routesP)
 	}
 	return routesProd, clusters, endpoints
+}
+
+// CreateLuaCluster creates lua cluster configuration.
+func CreateLuaCluster(upstreamCerts []byte, endpoint model.InterceptEndpoint, clusterName string) *clusterv3.Cluster {
+	logger.LoggerOasparser.Debug("creating a lua cluster ", clusterName)
+	luaAddress := createAddress(endpoint.Host, endpoint.Port)
+	return createCluster(luaAddress, clusterName, endpoint.URLType, upstreamCerts)
 }
 
 // createCluster creates cluster configuration. AddressConfiguration, cluster name and
@@ -371,6 +422,8 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	prodClusterName := params.prodClusterName
 	sandClusterName := params.sandClusterName
 	endpointBasepath := params.endpointBasePath
+	requestInterceptor := params.requestInterceptClusterName
+	responseInterceptor := params.responseInterceptClusterName
 	config, _ := config.ReadConfigs()
 
 	logger.LoggerOasparser.Debug("creating a route....")
@@ -452,7 +505,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 	contextExtensions["prodClusterName"] = prodClusterName
 	contextExtensions["sandClusterName"] = sandClusterName
 
-	perFilterConfig := extAuthService.ExtAuthzPerRoute{
+	extAuthPerFilterConfig := extAuthService.ExtAuthzPerRoute{
 		Override: &extAuthService.ExtAuthzPerRoute_CheckSettings{
 			CheckSettings: &extAuthService.CheckSettings{
 				ContextExtensions: contextExtensions,
@@ -462,10 +515,36 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 
 	b := proto.NewBuffer(nil)
 	b.SetDeterministic(true)
-	_ = b.Marshal(&perFilterConfig)
-	filter := &any.Any{
+	_ = b.Marshal(&extAuthPerFilterConfig)
+	extAuthzFilter := &any.Any{
 		TypeUrl: extAuthzPerRouteName,
 		Value:   b.Bytes(),
+	}
+
+	var luaPerFilterConfig lua.LuaPerRoute
+	if requestInterceptor == "" && responseInterceptor == "" {
+		luaPerFilterConfig = lua.LuaPerRoute{
+			Override: &lua.LuaPerRoute_Disabled{Disabled: true},
+		}
+	} else {
+		luaPerFilterConfig = lua.LuaPerRoute{
+			Override: &lua.LuaPerRoute_SourceCode{
+				SourceCode: &corev3.DataSource{
+					Specifier: &corev3.DataSource_InlineString{
+						InlineString: getInlineLuaScript(requestInterceptor, responseInterceptor),
+					},
+				},
+			},
+		}
+	}
+
+	luaMarshelled := proto.NewBuffer(nil)
+	luaMarshelled.SetDeterministic(true)
+	_ = luaMarshelled.Marshal(&luaPerFilterConfig)
+
+	luaFilter := &any.Any{
+		TypeUrl: luaPerRouteName,
+		Value:   luaMarshelled.Bytes(),
 	}
 
 	if xWso2Basepath != "" {
@@ -532,11 +611,59 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 		Metadata:  nil,
 		Decorator: decorator,
 		TypedPerFilterConfig: map[string]*any.Any{
-			wellknown.HTTPExternalAuthorization: filter,
+			wellknown.HTTPExternalAuthorization: extAuthzFilter,
+			wellknown.Lua: luaFilter,
 		},
 		ResponseHeadersToRemove: responseHeadersToRemove,
 	}
 	return &router
+}
+
+func getInlineLuaScript(requestInterceptorURL string, responseInterceptorURL string) string {
+	requestI := ""
+	if len(requestInterceptorURL) > 0 {
+		requestI = "function envoy_on_request(request_handle)" +
+			"\n local headers, response = request_handle:httpCall(" +
+			"\n     \"" + requestInterceptorURL + "\"," +
+			"\n     {" +
+			"\n       [\":method\"] = \"GET\"," +
+			"\n       [\":path\"] = \"/\"," +
+			"\n       [\":authority\"] = \"routing\"," +
+			"\n     }," +
+			"\n     \"hello from lua request\"," +
+			"\n     5000" +
+			"\n   )" +
+			"\n request_handle:logInfo(\"Hello Amali from router.\")" +
+			"\n request_handle:headers():add(\"amali-req\", \"hello\")" +
+			"\nend" +
+			"\n"
+	} else {
+		requestI = "function envoy_on_request(request_handle)" +
+			"\nend" +
+			"\n"
+	}
+
+	responseI := ""
+	if len(responseInterceptorURL) > 0 {
+		responseI = "function envoy_on_response(response_handle)" +
+			"\n local headers, response = response_handle:httpCall(" +
+			"\n     \"" + responseInterceptorURL + "\"," +
+			"\n     {" +
+			"\n       [\":method\"] = \"GET\"," +
+			"\n       [\":path\"] = \"/\"," +
+			"\n       [\":authority\"] = \"routing\"," +
+			"\n     }," +
+			"\n     \"hello from lua response\"," +
+			"\n     5000" +
+			"\n   )" +
+			"\n response_handle:headers():add(\"amali-res\", \"bye\")" +
+			"\n response_handle:logInfo(\"Bye Amali from router.\")" +
+			"\nend"
+	} else {
+		responseI = "function envoy_on_response(response_handle)" +
+			"\nend"
+	}
+	return requestI + responseI
 }
 
 // CreateTokenRoute generates a route for the jwt /testkey endpoint
@@ -835,20 +962,23 @@ func getCorsPolicy(corsConfig *model.CorsConfig) *routev3.CorsPolicy {
 }
 
 func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, vHost, endpointBasePath string,
-	prodClusterName string, sandClusterName string) *routeCreateParams {
+	prodClusterName string, sandClusterName string, requestInterceptorClusterName string,
+	responseInterceptorClusterName string) *routeCreateParams {
 	params := &routeCreateParams{
-		title:             swagger.GetTitle(),
-		apiType:           swagger.GetAPIType(),
-		version:           swagger.GetVersion(),
-		vHost:             vHost,
-		xWSO2BasePath:     swagger.GetXWso2Basepath(),
-		AuthHeader:        swagger.GetXWSO2AuthHeader(),
-		prodClusterName:   prodClusterName,
-		sandClusterName:   sandClusterName,
-		endpointBasePath:  endpointBasePath,
-		corsPolicy:        swagger.GetCorsConfig(),
-		resourcePathParam: "",
-		resourceMethods:   getDefaultResourceMethods(swagger.GetAPIType()),
+		title:                        swagger.GetTitle(),
+		apiType:                      swagger.GetAPIType(),
+		version:                      swagger.GetVersion(),
+		vHost:                        vHost,
+		xWSO2BasePath:                swagger.GetXWso2Basepath(),
+		AuthHeader:                   swagger.GetXWSO2AuthHeader(),
+		prodClusterName:              prodClusterName,
+		sandClusterName:              sandClusterName,
+		endpointBasePath:             endpointBasePath,
+		corsPolicy:                   swagger.GetCorsConfig(),
+		resourcePathParam:            "",
+		resourceMethods:              getDefaultResourceMethods(swagger.GetAPIType()),
+		requestInterceptClusterName:  requestInterceptorClusterName,
+		responseInterceptClusterName: responseInterceptorClusterName,
 	}
 
 	if resource != nil {

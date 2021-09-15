@@ -74,6 +74,12 @@ func (resource *Resource) GetMethod() []Operation {
 	return resource.methods
 }
 
+// GetVendorExtensions returns vendor extensions which are explicitly defined under
+// a given resource.
+func (resource *Resource) GetVendorExtensions() map[string]interface{} {
+	return resource.vendorExtensions
+}
+
 // GetMethodList returns a list of http Methods as strings which are explicitly defined under
 // a given resource.
 func (resource *Resource) GetMethodList() []string {

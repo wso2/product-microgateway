@@ -19,12 +19,13 @@ package model
 import (
 	"errors"
 	"net/url"
+	"strconv"
 	"strings"
 
 	parser "github.com/mitchellh/mapstructure"
 	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 )
 
 // MgwSwagger represents the object structure holding the information related to the
@@ -94,6 +95,14 @@ type CorsConfig struct {
 	AccessControlAllowMethods     []string `mapstructure:"accessControlAllowMethods"`
 	AccessControlAllowOrigins     []string `mapstructure:"accessControlAllowOrigins"`
 	AccessControlExposeHeaders    []string `mapstructure:"accessControlExposeHeaders"`
+}
+
+// InterceptEndpoint contains the parameters of endpoint security
+type InterceptEndpoint struct {
+	Enable  bool
+	Host    string
+	URLType string
+	Port    uint32
 }
 
 // GetCorsConfig returns the CorsConfiguration Object.
@@ -218,12 +227,12 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 	if sandboxEndpointErr != nil {
 		return sandboxEndpointErr
 	}
-	
+
 	swagger.setXWso2Cors()
 	swagger.setXWso2ThrottlingTier()
 	swagger.setDisableSecurity()
 	swagger.setXWso2AuthHeader()
-	
+
 	// Error nil for successful execution
 	return nil
 }
@@ -542,4 +551,25 @@ func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 		}
 	}
 	return disableSecurity
+}
+
+//GetInterceptor returns interceptors
+func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{}, extensionName string) (InterceptEndpoint, error) {
+	if x, found := vendorExtensions[extensionName]; found {
+		if val, ok := x.(map[string]interface{}); ok {
+			hostV := val[host].(string)
+			urlV := val[urlType].(string)
+			portV, err := strconv.ParseUint(val[port].(string), 10, 32)
+			if err == nil {
+				return InterceptEndpoint{
+					Enable:  true,
+					Host:    hostV,
+					URLType: urlV,
+					Port:    uint32(portV),
+				}, err
+			}
+		}
+		return InterceptEndpoint{}, errors.New("error parsing response interceptors port value to mgwSwagger")
+	}
+	return InterceptEndpoint{}, nil
 }
