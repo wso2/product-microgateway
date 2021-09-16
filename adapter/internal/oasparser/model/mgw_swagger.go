@@ -18,6 +18,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -581,15 +582,12 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 			}
 			// port mandatory
 			if v, found := val[port]; found {
-				switch v.(type) {
-				case int:
-					p, err := strconv.ParseUint(v.(string), 10, 32)
-					if err != nil {
-						portV = uint32(p)
-					} else {
-						logger.LoggerOasparser.Error("error reading interceptors port value")
-						return InterceptEndpoint{}, errors.New("error reading interceptors port value")
-					}
+				p, err := strconv.ParseUint(fmt.Sprint(v), 10, 32)
+				if err == nil {
+					portV = uint32(p)
+				} else {
+					logger.LoggerOasparser.Error("error reading interceptors port value", err)
+					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
 				}
 			}
 			//urlType optional
@@ -598,16 +596,22 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 			}
 			//clusterTimeout optional
 			if v, found := val[clusterTimeout]; found {
-				switch v.(type) {
-				case int:
-					clusterTimeoutV = time.Duration(v.(int))
+				p, err := strconv.ParseInt(fmt.Sprint(v), 0, 0)
+				if err == nil {
+					clusterTimeoutV = time.Duration(p)
+				} else {
+					logger.LoggerOasparser.Error("error reading interceptors port value", err)
+					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
 				}
 			}
 			//requestTimeout optional
 			if v, found := val[requestTimeout]; found {
-				switch v.(type) {
-				case int:
-					requestTimeoutV = v.(int)
+				p, err := strconv.ParseInt(fmt.Sprint(v), 0, 0)
+				if err == nil {
+					requestTimeoutV = int(p)
+				} else {
+					logger.LoggerOasparser.Error("error reading interceptors port value", err)
+					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
 				}
 			}
 			// path optional
