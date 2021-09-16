@@ -23,18 +23,18 @@ import (
 
 // routeCreateParams is the DTO used to provide information to the envoy route create function
 type routeCreateParams struct {
-	title                        string
-	version                      string
-	apiType                      string
-	xWSO2BasePath                string
-	vHost                        string
-	endpointBasePath             string
-	resourcePathParam            string
-	resourceMethods              []string
-	prodClusterName              string
-	sandClusterName              string
-	AuthHeader                   string
-	requestInterceptClusterName  string
-	responseInterceptClusterName string
-	corsPolicy                   *model.CorsConfig
+	title               string
+	version             string
+	apiType             string
+	xWSO2BasePath       string
+	vHost               string
+	endpointBasePath    string
+	resourcePathParam   string
+	resourceMethods     []string
+	prodClusterName     string
+	sandClusterName     string
+	AuthHeader          string
+	requestInterceptor  model.InterceptEndpoint
+	responseInterceptor model.InterceptEndpoint
+	corsPolicy          *model.CorsConfig
 }

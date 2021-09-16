@@ -21,6 +21,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	parser "github.com/mitchellh/mapstructure"
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -99,10 +100,14 @@ type CorsConfig struct {
 
 // InterceptEndpoint contains the parameters of endpoint security
 type InterceptEndpoint struct {
-	Enable  bool
-	Host    string
-	URLType string
-	Port    uint32
+	Enable         bool
+	Host           string
+	URLType        string
+	Port           uint32
+	Path           string
+	ClusterName    string
+	ClusterTimeout time.Duration
+	RequestTimeout int
 }
 
 // GetCorsConfig returns the CorsConfiguration Object.
@@ -555,19 +560,69 @@ func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 
 //GetInterceptor returns interceptors
 func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{}, extensionName string) (InterceptEndpoint, error) {
+	urlV := "http"
+	conf, _ := config.ReadConfigs()
+	clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
+	requestTimeoutV := 30
+	pathV := "/"
+	hostV := ""
+	portV := uint32(80)
+
+	var err error
+
 	if x, found := vendorExtensions[extensionName]; found {
 		if val, ok := x.(map[string]interface{}); ok {
-			hostV := val[host].(string)
-			urlV := val[urlType].(string)
-			portV, err := strconv.ParseUint(val[port].(string), 10, 32)
-			if err == nil {
-				return InterceptEndpoint{
-					Enable:  true,
-					Host:    hostV,
-					URLType: urlV,
-					Port:    uint32(portV),
-				}, err
+			//host mandatory
+			if v, found := val[host]; found {
+				hostV = v.(string)
+			} else {
+				logger.LoggerOasparser.Error("error reading interceptors host value")
+				return InterceptEndpoint{}, errors.New("error reading interceptors host value")
 			}
+			// port mandatory
+			if v, found := val[port]; found {
+				switch v.(type) {
+				case int:
+					p, err := strconv.ParseUint(v.(string), 10, 32)
+					if err != nil {
+						portV = uint32(p)
+					} else {
+						logger.LoggerOasparser.Error("error reading interceptors port value")
+						return InterceptEndpoint{}, errors.New("error reading interceptors port value")
+					}
+				}
+			}
+			//urlType optional
+			if v, found := val[urlType]; found {
+				urlV = v.(string)
+			}
+			//clusterTimeout optional
+			if v, found := val[clusterTimeout]; found {
+				switch v.(type) {
+				case int:
+					clusterTimeoutV = time.Duration(v.(int))
+				}
+			}
+			//requestTimeout optional
+			if v, found := val[requestTimeout]; found {
+				switch v.(type) {
+				case int:
+					requestTimeoutV = v.(int)
+				}
+			}
+			// path optional
+			if v, found := val[path]; found {
+				pathV = v.(string)
+			}
+			return InterceptEndpoint{
+				Enable:         true,
+				Host:           hostV,
+				URLType:        urlV,
+				Port:           portV,
+				ClusterTimeout: clusterTimeoutV,
+				RequestTimeout: requestTimeoutV,
+				Path:           pathV,
+			}, err
 		}
 		return InterceptEndpoint{}, errors.New("error parsing response interceptors port value to mgwSwagger")
 	}

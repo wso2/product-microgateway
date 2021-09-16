@@ -137,9 +137,8 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 				continue
 			}
 			if !tlsutils.IsPublicCertificate(unzippedFileBytes) {
-				loggers.LoggerAPI.Errorf("Provided certificate: %v is not in the PEM file format. ", file.Name)
-				// TODO: (VirajSalaka) Create standard error handling mechanism
-				return apiProject, errors.New("certificate Validation Error")
+				loggers.LoggerAPI.Errorf("Provided interceptor certificate: %v is not in the PEM file format. ", file.Name)
+				return apiProject, errors.New("interceptor certificate Validation Error")
 			}
 			interceptorCerts = append(interceptorCerts, unzippedFileBytes...)
 			interceptorCerts = append(interceptorCerts, newLineByteArray...)
