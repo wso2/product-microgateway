@@ -528,6 +528,21 @@ public class FilterUtils {
         return authHeaderName.toLowerCase();
     }
 
+    public static String getAPIKeyHeaderName(RequestContext requestContext) {
+        AuthHeaderDto authHeaderDto = ConfigHolder.getInstance().getConfig().getAuthHeader();
+        String apiKeyHeader = requestContext.getMatchedAPI().getAPIConfig().getApiKeyHeader();
+        //String apiKeyHeader = requestContext.getMatchedAPI().getAPIConfig().getSecuritySchemas();
+        //In future process the security schemas list and get the API key.
+        //Then the first if condition below will be replaced with that logic.
+//        if (StringUtils.isEmpty(apiKeyHeader)) {
+//            apiKeyHeader = authHeaderDto.getApiKeyHeader();
+//        }
+        if (StringUtils.isEmpty(apiKeyHeader)) {
+            apiKeyHeader = APIConstants.API_SECURITY_API_KEY;
+        }
+        return apiKeyHeader.toLowerCase();
+    }
+
     /**
      * Check whether the fault event is a one that should be published to analytics server.
      * @param errorCode The error code returned during the filter process

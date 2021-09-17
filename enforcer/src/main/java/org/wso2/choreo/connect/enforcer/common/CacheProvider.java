@@ -41,6 +41,9 @@ public class CacheProvider {
     private static LoadingCache<String, String> getGatewayInternalKeyCache;
     private static LoadingCache<String, String> getInvalidGatewayInternalKeyCache;
     private static LoadingCache<String, JWTValidationInfo> getGatewayInternalKeyDataCache;
+    private static LoadingCache<String, String> getGatewayAPIKeyCache;
+    private static LoadingCache<String, String> getInvalidGatewayAPIKeyCache;
+    private static LoadingCache<String, JWTValidationInfo> getGatewayAPIKeyDataCache;
 
     private static boolean cacheEnabled = true;
     public static void init() {
@@ -56,6 +59,10 @@ public class CacheProvider {
         getGatewayInternalKeyCache = initCache(maxSize, expiryTime);
         getGatewayInternalKeyDataCache = initCache(maxSize, expiryTime);
         getInvalidGatewayInternalKeyCache = initCache(maxSize, expiryTime);
+        getGatewayAPIKeyCache = initCache(maxSize, expiryTime);
+        getInvalidGatewayAPIKeyCache = initCache(maxSize, expiryTime);
+        getGatewayAPIKeyDataCache = initCache(maxSize, expiryTime);
+
     }
 
     private static LoadingCache initCache(int maxSize, int expiryTime) {
@@ -128,5 +135,24 @@ public class CacheProvider {
         return gatewayJWTTokenCache;
     }
 
+    /**
+     * @return Gateway API key cache
+     */
+    public static LoadingCache getGatewayAPIKeyCache() {
+        return getGatewayAPIKeyCache;
+    }
 
+    /**
+     * @return Gateway API key data cache
+     */
+    public static LoadingCache getGatewayAPIKeyDataCache() {
+        return getGatewayAPIKeyDataCache;
+    }
+
+    /**
+     * @return Gateway API key invalid data cache
+     */
+    public static LoadingCache getInvalidGatewayAPIKeyCache() {
+        return getInvalidGatewayAPIKeyCache;
+    }
 }
