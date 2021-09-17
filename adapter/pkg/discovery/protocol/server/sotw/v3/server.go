@@ -460,7 +460,7 @@ func (s *server) process(stream sotw.Stream, reqCh <-chan *discovery.DiscoveryRe
 					if values.gaApiCancel != nil {
 						values.gaApiCancel()
 					}
-					values.throttleData, values.throttleDataCancel = s.cache.CreateWatch(req)
+					values.gaAPIs, values.gaApiCancel = s.cache.CreateWatch(req)
 				}
 			default:
 				typeUrl := req.TypeUrl
