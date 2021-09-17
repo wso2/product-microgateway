@@ -5,6 +5,7 @@ networks:
 services:
   apim:
     image: wso2/wso2am:4.0.0-alpine
+    user: root
     ports:
       - "9763:9763"
       - "9443:9443"
