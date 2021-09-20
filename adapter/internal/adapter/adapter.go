@@ -273,7 +273,6 @@ func Run(conf *config.Config) {
 		synchronizer.FetchKeyManagersOnStartUp(conf)
 		go synchronizer.UpdateKeyTemplates()
 		go synchronizer.UpdateBlockingConditions()
-		messaging.ProcessEvents(conf)
 	} else {
 		// We need to deploy the readiness probe when eventhub is disabled
 		xds.DeployReadinessAPI(envs)
