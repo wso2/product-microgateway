@@ -142,7 +142,7 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 					if err == nil {
 						resource.productionUrls = append(resource.productionUrls, *endpoint)
 					} else {
-						logger.LoggerOasparser.Errorf("error encountered when parsing the endpoint")
+						logger.LoggerOasparser.Errorf("error encountered when parsing the endpoint under openAPI servers object")
 					}
 
 				}
