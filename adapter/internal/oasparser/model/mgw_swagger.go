@@ -109,6 +109,9 @@ type InterceptEndpoint struct {
 	ClusterName    string
 	ClusterTimeout time.Duration
 	RequestTimeout int
+	// Includes this is an enum allowing only values in
+	// {"request_body", "response_body", "request_trailer", "response_trailer", "auth_token"}
+	Includes []string
 }
 
 // GetCorsConfig returns the CorsConfiguration Object.
@@ -568,6 +571,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 	pathV := "/"
 	hostV := ""
 	portV := uint32(80)
+	var includesV []string
 
 	var err error
 
@@ -618,6 +622,19 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 			if v, found := val[path]; found {
 				pathV = v.(string)
 			}
+			//includes optional
+			if v, found := val[includes]; found {
+				includes := v.([]interface{})
+				if len(includes) > 0 {
+					for _, include := range includes {
+						switch include.(string) {
+						case "request_body", "response_body", "request_trailer", "response_trailer", "auth_token":
+							includesV = append(includesV, include.(string))
+						}
+					}
+				}
+			}
+
 			return InterceptEndpoint{
 				Enable:         true,
 				Host:           hostV,
@@ -626,6 +643,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				ClusterTimeout: clusterTimeoutV,
 				RequestTimeout: requestTimeoutV,
 				Path:           pathV,
+				Includes:       includesV,
 			}, err
 		}
 		return InterceptEndpoint{}, errors.New("error parsing response interceptors port value to mgwSwagger")
