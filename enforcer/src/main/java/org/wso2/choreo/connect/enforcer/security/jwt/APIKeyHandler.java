@@ -61,6 +61,14 @@ public abstract class APIKeyHandler implements Authenticator {
         }
     }
 
+    public boolean isInternalKey(JWTClaimsSet jwtClaimsSet) {
+        Object tokenTypeClaim = jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.TOKEN_TYPE);
+        if (tokenTypeClaim != null) {
+            return APIConstants.JwtTokenConstants.INTERNAL_KEY_TOKEN_TYPE.equals(tokenTypeClaim);
+        }
+        return false;
+    }
+
     public void checkInRevokedMap(String tokenIdentifier, String[] splitToken) throws APISecurityException {
         if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenIdentifier)) {
             if (log.isDebugEnabled()) {

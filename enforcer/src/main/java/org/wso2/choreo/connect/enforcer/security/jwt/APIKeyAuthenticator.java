@@ -68,13 +68,29 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
-        String apiKey = retrieveAPIKeyHeaderValue(requestContext);
+        String apiKey = getAPIKeyFromRequest(requestContext);
         return isAPIKey(apiKey);
     }
 
-    private String retrieveAPIKeyHeaderValue(RequestContext requestContext) {
+//    private String retrieveAPIKeyFromHeader(RequestContext requestContext) {
+//        Map<String, String> headers = requestContext.getHeaders();
+//        return headers.get(FilterUtils.getAPIKeyHeaderName(requestContext));
+//    }
+//
+//    private String retrieveAPIKeyFromQueryParam(RequestContext requestContext) {
+//        Map<String, String> queryParameters = requestContext.getQueryParameters();
+//        return  queryParameters.get(FilterUtils.getAPIKeyHeaderName(requestContext));
+//    }
+
+    private String getAPIKeyFromRequest(RequestContext requestContext) {
+        String apiKey;
         Map<String, String> headers = requestContext.getHeaders();
-        return headers.get(FilterUtils.getAPIKeyHeaderName(requestContext));
+        apiKey = headers.get(FilterUtils.getAPIKeyHeaderName(requestContext));
+        if (StringUtils.isEmpty(apiKey)) {
+            Map<String, String> queryParameters = requestContext.getQueryParameters();
+            apiKey = queryParameters.get(FilterUtils.getAPIKeyHeaderName(requestContext));
+        }
+        return apiKey;
     }
 
     @Override
@@ -83,7 +99,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             log.debug("API Key Authentication initialized");
 
             try {
-                String apiKey = retrieveAPIKeyHeaderValue(requestContext);
+                String apiKey = getAPIKeyFromRequest(requestContext);
 
                 // gives an error if API key not found
                 getKeyNotFoundError(apiKey);
@@ -92,6 +108,14 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                 SignedJWT signedJWT = SignedJWT.parse(apiKey);
                 JWSHeader jwsHeader = signedJWT.getHeader();
                 JWTClaimsSet payload = signedJWT.getJWTClaimsSet();
+
+                // Avoids using internal API keys
+                if (isInternalKey(payload)) {
+                    log.error("Invalid API Key token type." + FilterUtils.getMaskedToken(splitToken[0]));
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                }
 
                 //gives jti (also used to populate authentication context)
                 String tokenIdentifier = payload.getJWTID();

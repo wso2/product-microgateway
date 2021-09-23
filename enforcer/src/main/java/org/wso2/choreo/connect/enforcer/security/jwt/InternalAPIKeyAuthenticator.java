@@ -251,14 +251,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
         return null;
     }
 
-    private static boolean isInternalKey(JWTClaimsSet jwtClaimsSet) {
-        Object tokenTypeClaim = jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.TOKEN_TYPE);
-        if (tokenTypeClaim != null) {
-            return APIConstants.JwtTokenConstants.INTERNAL_KEY_TOKEN_TYPE.equals(tokenTypeClaim);
-        }
-        return false;
-    }
-
     @Override
     public int getPriority() {
 
