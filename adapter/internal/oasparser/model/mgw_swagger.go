@@ -646,7 +646,7 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				Includes:       includesV,
 			}, err
 		}
-		return InterceptEndpoint{}, errors.New("error parsing response interceptors port value to mgwSwagger")
+		return InterceptEndpoint{}, errors.New("error parsing response interceptors values to mgwSwagger")
 	}
 	return InterceptEndpoint{}, nil
 }

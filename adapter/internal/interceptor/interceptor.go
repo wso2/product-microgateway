@@ -34,8 +34,8 @@ function envoy_on_request(request_handle)
 		"hello from lua request",
 		{{.RequestExternalCall.Timeout}} 
 	)
-	request_handle:logInfo("Hello Amali from router.")
-	request_handle:headers():add("amali-req", "hello")
+	request_handle:logInfo("Hello from router.")
+	request_handle:headers():add("custom-header", "hello")
 end
 `
 	responseInterceptorTemplate = `
@@ -50,8 +50,8 @@ function envoy_on_response(response_handle)
 		"bye from lua response",
 		{{.ResponseExternalCall.Timeout}} 
 	)
-	response_handle:logInfo("Bye Amali from router.")
-	response_handle:headers():add("amali-res", "bye")
+	response_handle:logInfo("Bye from router.")
+	response_handle:headers():add("custom-header", "bye")
 end
 `
 	defaultRequestInterceptorTemplate = `

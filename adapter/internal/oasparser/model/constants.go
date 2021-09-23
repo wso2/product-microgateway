@@ -39,8 +39,6 @@ const (
 	DefaultSecurity      string = "default"
 )
 
-//todo(amali) add extension modify body flag
-
 // sub-property keys mentioned under x-wso2-request-interceptor and x-wso2-response-interceptor
 const (
 	host           string = "host"

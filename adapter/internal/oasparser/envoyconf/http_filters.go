@@ -52,7 +52,6 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
 	}
 
-	//todo(amali) lua filter position?
 	httpFilters := []*hcmv3.HttpFilter{
 		cors,
 		extAauth,
@@ -141,7 +140,7 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 func getLuaFilter() *hcmv3.HttpFilter {
 	//conf, _ := config.ReadConfigs()
 	luaConfig := &luav3.Lua{
-		InlineCode:  "function envoy_on_request(request_handle)" +
+		InlineCode: "function envoy_on_request(request_handle)" +
 			"\nend" +
 			"\nfunction envoy_on_response(response_handle)" +
 			"\nend",
