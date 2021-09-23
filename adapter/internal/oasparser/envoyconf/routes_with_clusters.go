@@ -18,6 +18,7 @@
 package envoyconf
 
 import (
+	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	"net"
 	"regexp"
 	"strconv"
@@ -622,50 +623,24 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 }
 
 func getInlineLuaScript(requestInterceptor model.InterceptEndpoint, responseInterceptor model.InterceptEndpoint) string {
-	requestI := ""
+	i := interceptor.Interceptor{}
 	if requestInterceptor.Enable {
-		requestI = "function envoy_on_request(request_handle)" +
-			"\n local headers, response = request_handle:httpCall(" +
-			"\n     \"" + requestInterceptor.ClusterName + "\"," +
-			"\n     {" +
-			"\n       [\":method\"] = \"GET\"," +
-			"\n       [\":path\"] = \"" + requestInterceptor.Path + "\"," +
-			"\n       [\":authority\"] = \"routing\"," +
-			"\n     }," +
-			"\n     \"hello from lua request\"," +
-			"\n     " + strconv.Itoa(requestInterceptor.RequestTimeout) +
-			"\n   )" +
-			"\n request_handle:logInfo(\"Hello Amali from router.\")" +
-			"\n request_handle:headers():add(\"amali-req\", \"hello\")" +
-			"\nend" +
-			"\n"
-	} else {
-		requestI = "function envoy_on_request(request_handle)" +
-			"\nend" +
-			"\n"
+		i.RequestExternalCall = interceptor.HTTPCallConfig{
+			Enable:      true,
+			ClusterName: requestInterceptor.ClusterName,
+			Path:        requestInterceptor.Path,
+			Timeout:     strconv.Itoa(requestInterceptor.RequestTimeout),
+		}
 	}
-
-	responseI := ""
 	if responseInterceptor.Enable {
-		responseI = "function envoy_on_response(response_handle)" +
-			"\n local headers, response = response_handle:httpCall(" +
-			"\n     \"" + responseInterceptor.ClusterName + "\"," +
-			"\n     {" +
-			"\n       [\":method\"] = \"GET\"," +
-			"\n       [\":path\"] = \"" + responseInterceptor.Path + "\"," +
-			"\n       [\":authority\"] = \"routing\"," +
-			"\n     }," +
-			"\n     \"hello from lua response\"," +
-			"\n     " + strconv.Itoa(responseInterceptor.RequestTimeout) +
-			"\n   )" +
-			"\n response_handle:headers():add(\"amali-res\", \"bye\")" +
-			"\n response_handle:logInfo(\"Bye Amali from router.\")" +
-			"\nend"
-	} else {
-		responseI = "function envoy_on_response(response_handle)" +
-			"\nend"
+		i.ResponseExternalCall = interceptor.HTTPCallConfig{
+			Enable:      true,
+			ClusterName: responseInterceptor.ClusterName,
+			Path:        responseInterceptor.Path,
+			Timeout:     strconv.Itoa(responseInterceptor.RequestTimeout),
+		}
 	}
-	return requestI + responseI
+	return interceptor.GetInterceptor(i)
 }
 
 // CreateTokenRoute generates a route for the jwt /testkey endpoint
