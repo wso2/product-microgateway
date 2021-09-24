@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.TracingDTO;
 import org.wso2.choreo.connect.enforcer.server.AuthServer;
+import org.wso2.choreo.connect.enforcer.tracing.exporters.AzureExporter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +67,7 @@ public class TracerFactory {
             exporterType = TracingConstants.AZURE_TRACE_EXPORTER;
         }
         if (exporterType.equalsIgnoreCase(TracingConstants.AZURE_TRACE_EXPORTER)) {
-            this.tracer = AzureTraceExporter.getInstance().initTracer(properties);
+            this.tracer = AzureExporter.getInstance().initTracer(properties);
         } else {
             logger.error("Tracer exporter type: " + exporterType + " not found!");
         }

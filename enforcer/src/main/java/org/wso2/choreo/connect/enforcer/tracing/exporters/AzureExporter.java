@@ -11,12 +11,11 @@
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
+ * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
  */
-package org.wso2.choreo.connect.enforcer.tracing;
+package org.wso2.choreo.connect.enforcer.tracing.exporters;
 
 import com.azure.monitor.opentelemetry.exporter.AzureMonitorExporterBuilder;
 import com.azure.monitor.opentelemetry.exporter.AzureMonitorTraceExporter;
@@ -28,26 +27,30 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.config.ConfigDefaults;
+import org.wso2.choreo.connect.enforcer.tracing.RateLimitingSampler;
+import org.wso2.choreo.connect.enforcer.tracing.TracerBuilder;
+import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
+import org.wso2.choreo.connect.enforcer.tracing.TracingException;
 
 import java.util.Map;
 
 /**
  * This class is responsible for managing and exporting tracing spans
  */
-public class AzureTraceExporter implements TracerBuilder {
+public class AzureExporter implements TracerBuilder {
 
-    private static final Logger LOGGER = LogManager.getLogger(AzureTraceExporter.class);
-    private static AzureTraceExporter azureTraceExporter;
+    private static final Logger LOGGER = LogManager.getLogger(AzureExporter.class);
+    private static AzureExporter exporter;
 
-    public static AzureTraceExporter getInstance() {
-        if (azureTraceExporter == null) {
+    public static AzureExporter getInstance() {
+        if (exporter == null) {
             synchronized (new Object()) {
-                if (azureTraceExporter == null) {
-                    azureTraceExporter = new AzureTraceExporter();
+                if (exporter == null) {
+                    exporter = new AzureExporter();
                 }
             }
         }
-        return azureTraceExporter;
+        return exporter;
     }
 
     /**
@@ -75,7 +78,7 @@ public class AzureTraceExporter implements TracerBuilder {
 
             OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                     .setTracerProvider(tracerProvider).buildAndRegisterGlobal();
-            LOGGER.debug("Tracer successfully initialized with Azure Trace Exporter.");
+            LOGGER.info("Tracer successfully initialized with Azure Trace Exporter.");
 
             return openTelemetrySdk.getTracer(instrumentationName);
         }
