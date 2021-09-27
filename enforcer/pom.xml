@@ -406,5 +406,13 @@
             <artifactId>jackson-annotations</artifactId>
             <version>${jackson.annotations.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-jaeger</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-semconv</artifactId>
+        </dependency>
     </dependencies>
 </project>

@@ -401,6 +401,16 @@
                 <artifactId>log4j-slf4j-impl</artifactId>
                 <version>${log4j.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporter-jaeger</artifactId>
+                <version>${jaeger.exporter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-semconv</artifactId>
+                <version>${otel.semconv.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -421,6 +431,7 @@
         <guava.version>30.0-jre</guava.version>
         <io.fabric8.docker.plugin.version>0.34.1</io.fabric8.docker.plugin.version>
         <io.netty.version>4.1.68.Final</io.netty.version>
+        <jaeger.exporter.version>1.6.0</jaeger.exporter.version>
         <json.smart.version>2.4.7</json.smart.version>
         <log4j.version>2.13.3</log4j.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
@@ -430,6 +441,7 @@
         <nimbus.jose.jwt.version>7.9</nimbus.jose.jwt.version>
         <org.json.version>3.0.0.wso2v1</org.json.version>
         <os.mvn.plugin.version>1.6.2</os.mvn.plugin.version>
+        <otel.semconv.version>1.6.0-alpha</otel.semconv.version>
         <shade.plugin.version>3.2.4</shade.plugin.version>
         <slf4j.version>1.7.21</slf4j.version>
         <swagger.v3.parser.version>2.0.12</swagger.v3.parser.version>
