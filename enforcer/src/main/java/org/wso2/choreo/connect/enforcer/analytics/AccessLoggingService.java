@@ -68,7 +68,8 @@ public class AccessLoggingService extends AccessLogServiceGrpc.AccessLogServiceI
             public void onNext(StreamAccessLogsMessage message) {
                 if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {
                     AnalyticsFilter.getInstance().handleGRPCLogMsg(message);
-                } else if (ConfigHolder.getInstance().getConfig().getMetricsConfig().isMetricsEnabled()) {
+                }
+                if (ConfigHolder.getInstance().getConfig().getMetricsConfig().isMetricsEnabled()) {
                     MetricsUtils.handlePublishingMetrics(message);
                 }
             }

@@ -97,10 +97,9 @@ public class AuthServer {
                 if (enforcerConfig.getMetricsConfig().isMetricsEnabled()) {
                     //Initialize metrics
                     MetricsManager.initializeMetrics(enforcerConfig.getMetricsConfig());
-                } else {
-                    if (enforcerConfig.getAnalyticsConfig().isEnabled()) {
-                        logger.info("analytics filter is enabled.");
-                    }
+                }
+                if (enforcerConfig.getAnalyticsConfig().isEnabled()) {
+                    logger.info("analytics filter is enabled.");
                 }
             } else {
                 logger.debug("analytics filter is disabled.");
