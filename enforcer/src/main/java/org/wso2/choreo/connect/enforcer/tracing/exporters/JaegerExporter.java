@@ -17,11 +17,9 @@
  */
 package org.wso2.choreo.connect.enforcer.tracing.exporters;
 
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
+import io.opentelemetry.exporter.jaeger.thrift.JaegerThriftSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -37,7 +35,6 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingException;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This class is responsible for exporting tracing spans for jaeger.
@@ -68,12 +65,8 @@ public class JaegerExporter implements TracerBuilder {
         if (StringUtils.isEmpty(jaegerEp)) {
             throw new TracingException("Error initializing Jaeger Trace Exporter. Connection url is missing.");
         }
-        // Create a channel towards Jaeger end point
-        // TODO: Make possible to enable ssl
-        ManagedChannel jaegerChannel = ManagedChannelBuilder.forTarget(jaegerEp).usePlaintext().build();
-        JaegerGrpcSpanExporter jaegerExporter = JaegerGrpcSpanExporter.builder()
-                .setChannel(jaegerChannel)
-                .setTimeout(30, TimeUnit.SECONDS)
+        JaegerThriftSpanExporter jaegerExporter = JaegerThriftSpanExporter.builder()
+                .setEndpoint(jaegerEp)
                 .build();
 
         Resource serviceNameResource =

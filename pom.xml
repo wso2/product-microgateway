@@ -403,13 +403,23 @@
             </dependency>
             <dependency>
                 <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-exporter-jaeger</artifactId>
+                <artifactId>opentelemetry-exporter-jaeger-thrift</artifactId>
                 <version>${jaeger.exporter.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-semconv</artifactId>
-                <version>${otel.semconv.version}</version>
+                <version>${otel.alpha.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk</artifactId>
+                <version>${otel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-api</artifactId>
+                <version>${otel.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -441,7 +451,8 @@
         <nimbus.jose.jwt.version>7.9</nimbus.jose.jwt.version>
         <org.json.version>3.0.0.wso2v1</org.json.version>
         <os.mvn.plugin.version>1.6.2</os.mvn.plugin.version>
-        <otel.semconv.version>1.6.0-alpha</otel.semconv.version>
+        <otel.alpha.version>1.6.0-alpha</otel.alpha.version>
+        <otel.version>1.6.0</otel.version>
         <shade.plugin.version>3.2.4</shade.plugin.version>
         <slf4j.version>1.7.21</slf4j.version>
         <swagger.v3.parser.version>2.0.12</swagger.v3.parser.version>

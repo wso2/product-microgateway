@@ -9,7 +9,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.sdk.internal.SystemClock;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
@@ -38,7 +38,7 @@ public class RateLimitingSampler implements Sampler {
     public RateLimitingSampler(int maxTracesPerSecond) {
         this.maxTracesPerSecond = maxTracesPerSecond;
         double maxBalance = maxTracesPerSecond < 1.0 ? 1.0 : maxTracesPerSecond;
-        this.rateLimiter = new RateLimiter(maxTracesPerSecond, maxBalance, SystemClock.getInstance());
+        this.rateLimiter = new RateLimiter(maxTracesPerSecond, maxBalance, Clock.getDefault());
         Attributes attributes = Attributes.empty();
         this.onSamplingResult = SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE, attributes);
         this.offSamplingResult = SamplingResult.create(SamplingDecision.DROP, attributes);
