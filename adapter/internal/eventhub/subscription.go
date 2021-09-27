@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/wso2/product-microgateway/adapter/config"
@@ -32,6 +33,7 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	pkgAuth "github.com/wso2/product-microgateway/adapter/pkg/auth"
 	"github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
+	"github.com/wso2/product-microgateway/adapter/pkg/health"
 	"github.com/wso2/product-microgateway/adapter/pkg/tlsutils"
 )
 
@@ -102,6 +104,7 @@ var (
 type response struct {
 	Error        error
 	Payload      []byte
+	ErrorCode    int
 	Endpoint     string
 	GatewayLabel string
 	Type         interface{}
@@ -125,6 +128,32 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 	var responseChannel = make(chan response)
 	for _, url := range resources {
 		go InvokeService(url.endpoint, url.responseType, nil, responseChannel, 0)
+		for {
+			data := <-responseChannel
+			logger.LoggerSync.Debug("Receiving subscription data for an environment")
+			if data.Payload != nil {
+				logger.LoggerSync.Info("Payload data with subscription information recieved")
+				retrieveSubscriptionDataFromChannel(data)
+				break
+			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
+				logger.LoggerSync.Errorf("Error occurred when retrieving Subscription information from the control plane: %v", data.Error)
+				health.SetControlPlaneRestAPIStatus(false)
+			} else {
+				// Keep the iteration going on until a response is recieved.
+				logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Error)
+				go func(d response) {
+					// Retry fetching from control plane after a configured time interval
+					if conf.ControlPlane.RetryInterval == 0 {
+						// Assign default retry interval
+						conf.ControlPlane.RetryInterval = 5
+					}
+					logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
+					time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
+					logger.LoggerSync.Infof("Retrying to fetch APIs from control plane. Time Duration for the next retry: %v", conf.ControlPlane.RetryInterval*time.Second)
+					go InvokeService(url.endpoint, url.responseType, nil, responseChannel, 0)
+				}(data)
+			}
+		}
 	}
 
 	// Take the configured labels from the adapter
@@ -138,74 +167,34 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 		queryParamMap := make(map[string]string, 1)
 		queryParamMap[GatewayLabelParam] = configuredEnv
 		go InvokeService(ApisEndpoint, APIListMap[configuredEnv], queryParamMap, APIListChannel, 0)
-	}
-
-	go retrieveAPIListFromChannel(APIListChannel, initialAPIUUIDListMap)
-	var response response
-	for i := 1; i <= len(resources); i++ {
-		response = <-responseChannel
-
-		responseType := reflect.TypeOf(response.Type).Elem()
-		newResponse := reflect.New(responseType).Interface()
-
-		if response.Error == nil && response.Payload != nil {
-			err := json.Unmarshal(response.Payload, &newResponse)
-
-			if err != nil {
-				logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the response received for: "+response.Endpoint, err)
+		for {
+			data := <-APIListChannel
+			logger.LoggerSync.Debug("Receiving API information for an environment")
+			if data.Payload != nil {
+				logger.LoggerSync.Info("Payload data with API information recieved")
+				retrieveAPIList(data, initialAPIUUIDListMap)
+				break
+			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
+				logger.LoggerSync.Errorf("Error occurred when retrieving Subscription information from the control plane: %v", data.Error)
+				health.SetControlPlaneRestAPIStatus(false)
 			} else {
-				switch t := newResponse.(type) {
-				case *types.SubscriptionList:
-					logger.LoggerSubscription.Debug("Received Subscription information.")
-					subList = newResponse.(*types.SubscriptionList)
-					ResourceMap := make(map[int32]*types.Subscription)
-					for index, subscription := range subList.List {
-						ResourceMap[subscription.SubscriptionID] = &subList.List[index]
+				// Keep the iteration going on until a response is recieved.
+				logger.LoggerSync.Errorf("Error occurred while fetching data from control plane: %v", data.Error)
+				go func(d response) {
+					// Retry fetching from control plane after a configured time interval
+					if conf.ControlPlane.RetryInterval == 0 {
+						// Assign default retry interval
+						conf.ControlPlane.RetryInterval = 5
 					}
-					SubscriptionMap = ResourceMap
-					xds.UpdateEnforcerSubscriptions(xds.MarshalSubscriptionMap(SubscriptionMap))
-				case *types.ApplicationList:
-					logger.LoggerSubscription.Debug("Received Application information.")
-					appList = newResponse.(*types.ApplicationList)
-					ResourceMap := make(map[string]*types.Application)
-					for index, application := range appList.List {
-						ResourceMap[application.UUID] = &appList.List[index]
-					}
-					ApplicationMap = ResourceMap
-					xds.UpdateEnforcerApplications(xds.MarshalApplicationMap(ApplicationMap))
-				case *types.ApplicationPolicyList:
-					logger.LoggerSubscription.Debug("Received Application Policy information.")
-					appPolicyList = newResponse.(*types.ApplicationPolicyList)
-					ResourceMap := make(map[int32]*types.ApplicationPolicy)
-					for index, policy := range appPolicyList.List {
-						ResourceMap[policy.ID] = &appPolicyList.List[index]
-					}
-					ApplicationPolicyMap = ResourceMap
-					xds.UpdateEnforcerApplicationPolicies(xds.MarshalApplicationPolicyMap(ApplicationPolicyMap))
-				case *types.SubscriptionPolicyList:
-					logger.LoggerSubscription.Debug("Received Subscription Policy information.")
-					subPolicyList = newResponse.(*types.SubscriptionPolicyList)
-					ResourceMap := make(map[int32]*types.SubscriptionPolicy)
-					for index, policy := range subPolicyList.List {
-						ResourceMap[policy.ID] = &subPolicyList.List[index]
-					}
-					SubscriptionPolicyMap = ResourceMap
-					xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalSubscriptionPolicyMap(SubscriptionPolicyMap))
-				case *types.ApplicationKeyMappingList:
-					logger.LoggerSubscription.Debug("Received Application Key Mapping information.")
-					appKeyMappingList = newResponse.(*types.ApplicationKeyMappingList)
-					ResourceMap := make(map[string]*types.ApplicationKeyMapping)
-					for index, keyMapping := range appKeyMappingList.List {
-						ResourceMap[keyMapping.ApplicationUUID] = &appKeyMappingList.List[index]
-					}
-					ApplicationKeyMappingMap = ResourceMap
-					xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingMap(ApplicationKeyMappingMap))
-				default:
-					logger.LoggerSubscription.Debugf("Unknown type %T", t)
-				}
+					logger.LoggerSync.Debugf("Time Duration for retrying: %v", conf.ControlPlane.RetryInterval*time.Second)
+					time.Sleep(conf.ControlPlane.RetryInterval * time.Second)
+					logger.LoggerSync.Infof("Retrying to fetch APIs from control plane. Time Duration for the next retry: %v", conf.ControlPlane.RetryInterval*time.Second)
+					go InvokeService(ApisEndpoint, APIListMap[configuredEnv], queryParamMap, APIListChannel, 0)
+				}(data)
 			}
 		}
 	}
+	go retrieveAPIListFromChannel(APIListChannel, initialAPIUUIDListMap)
 }
 
 // InvokeService invokes the internal data resource
@@ -229,7 +218,7 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 		req.URL.RawQuery = q.Encode()
 	}
 	if err != nil {
-		c <- response{err, nil, endpoint, gatewayLabel, responseType}
+		c <- response{err, nil, 0, endpoint, gatewayLabel, responseType}
 		logger.LoggerSubscription.Errorf("Error occurred while creating an HTTP request for serviceURL: "+serviceURL, err)
 		return
 	}
@@ -245,7 +234,11 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	resp, err := tlsutils.InvokeControlPlane(req, skipSSL)
 
 	if err != nil {
-		c <- response{err, nil, endpoint, gatewayLabel, responseType}
+		if resp != nil {
+			c <- response{err, nil, resp.StatusCode, endpoint, gatewayLabel, responseType}
+		} else {
+			c <- response{err, nil, 0, endpoint, gatewayLabel, responseType}
+		}
 		logger.LoggerSubscription.Errorf("Error occurred while calling the REST API: "+serviceURL, err)
 		return
 	}
@@ -253,14 +246,14 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 	responseBytes, err := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode == http.StatusOK {
 		if err != nil {
-			c <- response{err, nil, endpoint, gatewayLabel, responseType}
+			c <- response{err, nil, resp.StatusCode, endpoint, gatewayLabel, responseType}
 			logger.LoggerSubscription.Errorf("Error occurred while reading the response received for: "+serviceURL, err)
 			return
 		}
 		logger.LoggerSubscription.Debug("Request to the control plane over the REST API: " + serviceURL + " is successful.")
-		c <- response{nil, responseBytes, endpoint, gatewayLabel, responseType}
+		c <- response{nil, responseBytes, resp.StatusCode, endpoint, gatewayLabel, responseType}
 	} else {
-		c <- response{errors.New(string(responseBytes)), nil, endpoint, gatewayLabel, responseType}
+		c <- response{errors.New(string(responseBytes)), nil, resp.StatusCode, endpoint, gatewayLabel, responseType}
 		logger.LoggerSubscription.Errorf("Failed to fetch data! "+serviceURL+" responded with "+strconv.Itoa(resp.StatusCode),
 			err)
 	}
@@ -268,51 +261,116 @@ func InvokeService(endpoint string, responseType interface{}, queryParamMap map[
 
 func retrieveAPIListFromChannel(c chan response, initialAPIUUIDListMap map[string]int) {
 	for response := range c {
-		responseType := reflect.TypeOf(response.Type).Elem()
-		newResponse := reflect.New(responseType).Interface()
-		if response.Error == nil && response.Payload != nil {
-			err := json.Unmarshal(response.Payload, &newResponse)
-			if err != nil {
-				logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the APIList response received for: "+
-					response.Endpoint, err)
-			} else {
-				switch t := newResponse.(type) {
-				case *types.APIList:
-					apiListResponse := newResponse.(*types.APIList)
-					if logger.LoggerSubscription.Level == logrus.DebugLevel {
-						for _, api := range apiListResponse.List {
-							logger.LoggerSubscription.Infof("Received API List information for API : %s", api.UUID)
-						}
+		retrieveAPIList(response, initialAPIUUIDListMap)
+	}
+}
+
+func retrieveAPIList(response response, initialAPIUUIDListMap map[string]int) {
+
+	responseType := reflect.TypeOf(response.Type).Elem()
+	newResponse := reflect.New(responseType).Interface()
+	if response.Error == nil && response.Payload != nil {
+		err := json.Unmarshal(response.Payload, &newResponse)
+		if err != nil {
+			logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the APIList response received for: "+
+				response.Endpoint, err)
+		} else {
+			switch t := newResponse.(type) {
+			case *types.APIList:
+				apiListResponse := newResponse.(*types.APIList)
+				if logger.LoggerSubscription.Level == logrus.DebugLevel {
+					for _, api := range apiListResponse.List {
+						logger.LoggerSubscription.Infof("Received API List information for API : %s", api.UUID)
 					}
-					if _, ok := APIListMap[response.GatewayLabel]; !ok {
-						// During the startup
-						// When GA is enabled need to load only the subscription data which are related to API UUIDs received
-						// from the GA.
-						if initialAPIUUIDListMap != nil {
-							newEmptyResponse := reflect.New(responseType).Interface()
-							APIListMap[response.GatewayLabel] = newEmptyResponse.(*types.APIList)
-							for i, api := range apiListResponse.List {
-								if _, ok := initialAPIUUIDListMap[api.UUID]; ok {
-									APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List,
-										apiListResponse.List[i])
-								}
+				}
+				if _, ok := APIListMap[response.GatewayLabel]; !ok {
+					// During the startup
+					// When GA is enabled need to load only the subscription data which are related to API UUIDs received
+					// from the GA.
+					if initialAPIUUIDListMap != nil {
+						newEmptyResponse := reflect.New(responseType).Interface()
+						APIListMap[response.GatewayLabel] = newEmptyResponse.(*types.APIList)
+						for i, api := range apiListResponse.List {
+							if _, ok := initialAPIUUIDListMap[api.UUID]; ok {
+								APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List,
+									apiListResponse.List[i])
 							}
-						} else {
-							// When GA is disabled load all the subscription data
-							APIListMap[response.GatewayLabel] = newResponse.(*types.APIList)
 						}
 					} else {
-						// API Details retrieved after startup contains single API per response.
-						if len(apiListResponse.List) == 1 {
-							APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List,
-								apiListResponse.List[0])
-						}
+						// When GA is disabled load all the subscription data
+						APIListMap[response.GatewayLabel] = newResponse.(*types.APIList)
 					}
-					xds.UpdateEnforcerAPIList(response.GatewayLabel, xds.MarshalAPIList(APIListMap[response.GatewayLabel]))
-				default:
-					logger.LoggerSubscription.Warnf("APIList Type DTO is not recieved. Unknown type %T", t)
+				} else {
+					// API Details retrieved after startup contains single API per response.
+					if len(apiListResponse.List) == 1 {
+						APIListMap[response.GatewayLabel].List = append(APIListMap[response.GatewayLabel].List,
+							apiListResponse.List[0])
+					}
 				}
+				xds.UpdateEnforcerAPIList(response.GatewayLabel, xds.MarshalAPIList(APIListMap[response.GatewayLabel]))
+			default:
+				logger.LoggerSubscription.Warnf("APIList Type DTO is not recieved. Unknown type %T", t)
 			}
+		}
+	}
+}
+
+func retrieveSubscriptionDataFromChannel(response response) {
+	responseType := reflect.TypeOf(response.Type).Elem()
+	newResponse := reflect.New(responseType).Interface()
+	err := json.Unmarshal(response.Payload, &newResponse)
+
+	if err != nil {
+		logger.LoggerSubscription.Errorf("Error occurred while unmarshalling the response received for: "+response.Endpoint, err)
+	} else {
+		switch t := newResponse.(type) {
+		case *types.SubscriptionList:
+			logger.LoggerSubscription.Debug("Received Subscription information.")
+			subList = newResponse.(*types.SubscriptionList)
+			ResourceMap := make(map[int32]*types.Subscription)
+			for index, subscription := range subList.List {
+				ResourceMap[subscription.SubscriptionID] = &subList.List[index]
+			}
+			SubscriptionMap = ResourceMap
+			xds.UpdateEnforcerSubscriptions(xds.MarshalSubscriptionMap(SubscriptionMap))
+		case *types.ApplicationList:
+			logger.LoggerSubscription.Debug("Received Application information.")
+			appList = newResponse.(*types.ApplicationList)
+			ResourceMap := make(map[string]*types.Application)
+			for index, application := range appList.List {
+				ResourceMap[application.UUID] = &appList.List[index]
+			}
+			ApplicationMap = ResourceMap
+			xds.UpdateEnforcerApplications(xds.MarshalApplicationMap(ApplicationMap))
+		case *types.ApplicationPolicyList:
+			logger.LoggerSubscription.Debug("Received Application Policy information.")
+			appPolicyList = newResponse.(*types.ApplicationPolicyList)
+			ResourceMap := make(map[int32]*types.ApplicationPolicy)
+			for index, policy := range appPolicyList.List {
+				ResourceMap[policy.ID] = &appPolicyList.List[index]
+			}
+			ApplicationPolicyMap = ResourceMap
+			xds.UpdateEnforcerApplicationPolicies(xds.MarshalApplicationPolicyMap(ApplicationPolicyMap))
+		case *types.SubscriptionPolicyList:
+			logger.LoggerSubscription.Debug("Received Subscription Policy information.")
+			subPolicyList = newResponse.(*types.SubscriptionPolicyList)
+			ResourceMap := make(map[int32]*types.SubscriptionPolicy)
+			for index, policy := range subPolicyList.List {
+				ResourceMap[policy.ID] = &subPolicyList.List[index]
+			}
+			SubscriptionPolicyMap = ResourceMap
+			xds.UpdateEnforcerSubscriptionPolicies(xds.MarshalSubscriptionPolicyMap(SubscriptionPolicyMap))
+		case *types.ApplicationKeyMappingList:
+			logger.LoggerSubscription.Debug("Received Application Key Mapping information.")
+			appKeyMappingList = newResponse.(*types.ApplicationKeyMappingList)
+			ResourceMap := make(map[string]*types.ApplicationKeyMapping)
+			for index, keyMapping := range appKeyMappingList.List {
+				ResourceMap[keyMapping.ApplicationUUID] = &appKeyMappingList.List[index]
+			}
+			ApplicationKeyMappingMap = ResourceMap
+			xds.UpdateEnforcerApplicationKeyMappings(xds.MarshalKeyMappingMap(ApplicationKeyMappingMap))
+		default:
+			logger.LoggerSubscription.Debugf("Unknown type %T", t)
 		}
 	}
 }

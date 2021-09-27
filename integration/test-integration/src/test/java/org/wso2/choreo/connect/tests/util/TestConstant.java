@@ -90,6 +90,7 @@ public class TestConstant {
 
     public static final String TEST_RESOURCES_PATH = File.separator + "test-classes";
     public static final String CONFIGS_DIR = File.separator + "configs";
+    public static final String DATABASE_DIR = File.separator + "database";
     public static final String TEST_DOCKER_COMPOSE_DIR = File.separator + "dockerCompose";
     public static final String CC_TEMP_PATH = File.separator + "choreo-connect-temp";
 

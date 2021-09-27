@@ -24,32 +24,32 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.tests.context.ApimInstance;
 import org.wso2.choreo.connect.tests.context.CCTestException;
+import org.wso2.choreo.connect.tests.context.CcInstance;
 import org.wso2.choreo.connect.tests.util.TestConstant;
 import org.wso2.choreo.connect.tests.util.Utils;
 
+import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 public class ApimRestartExecutor {
-    private static final Logger log = LoggerFactory.getLogger(ApimRestartExecutor.class);
+    CcInstance ccInstance;
+    ApimInstance apimInstance;
 
     @Test
-    public void restartApim() throws CCTestException {
-        ApimInstance apimInstance = ApimInstance.getInstance();
-        apimInstance.restartAPIM();
-        Awaitility.await().pollDelay(1, TimeUnit.MINUTES).pollInterval(15, TimeUnit.SECONDS)
-                .atMost(4, TimeUnit.MINUTES).until(isAPIMServerStarted());
-        log.info("Waiting for APIM and CC to be ready after APIM restart");
-        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for APIM and CC to be " +
-                "ready after APIM restart");
-        Assert.assertTrue(true); //to make this method run
-    }
-
-    private Callable<Boolean> isAPIMServerStarted() {
-        return new Callable<Boolean>() {
-            public Boolean call() throws Exception {
-                return ApimInstance.checkForAPIMServerStartup();
-            }
-        };
+    public void restartApim() throws CCTestException, IOException {
+        ccInstance = CcInstance.getInstance();
+        apimInstance = ApimInstance.getInstance();
+        ccInstance.stop();
+        apimInstance.stopAPIM();
+        Utils.delay(10000, "Interrupted while waiting for " +
+                "the API Manager to shut down");
+        apimInstance.startAPIM();
+        ccInstance.start();
+        Awaitility.await().pollDelay(1, TimeUnit.MINUTES).pollInterval(5, TimeUnit.SECONDS)
+                .atMost(3, TimeUnit.MINUTES).until(ccInstance.isHealthy());
+        Assert.assertTrue(ccInstance.checkCCInstanceHealth());
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Interrupted while waiting for " +
+                "resources to be pulled from API Manager");
     }
 }

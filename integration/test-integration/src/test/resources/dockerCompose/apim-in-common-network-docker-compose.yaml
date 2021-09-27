@@ -5,6 +5,7 @@ networks:
 services:
   apim:
     image: wso2/wso2am:4.0.0-alpine
+    user: root
     ports:
       - "9763:9763"
       - "9443:9443"
@@ -12,6 +13,7 @@ services:
       - "8243:8243"
     volumes:
       - ./conf/deployment.toml:/home/wso2carbon/wso2am-4.0.0/repository/conf/deployment.toml
+      - ./database:/home/wso2carbon/wso2am-4.0.0/repository/database:rw
     networks:
       - apim_and_cc
   
