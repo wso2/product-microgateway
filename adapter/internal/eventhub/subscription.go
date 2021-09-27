@@ -132,7 +132,7 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 			data := <-responseChannel
 			logger.LoggerSync.Debug("Receiving subscription data for an environment")
 			if data.Payload != nil {
-				logger.LoggerSync.Debug("Payload data with subscription information recieved")
+				logger.LoggerSync.Info("Payload data with subscription information recieved")
 				retrieveSubscriptionDataFromChannel(data)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
@@ -171,7 +171,7 @@ func LoadSubscriptionData(configFile *config.Config, initialAPIUUIDListMap map[s
 			data := <-APIListChannel
 			logger.LoggerSync.Debug("Receiving API information for an environment")
 			if data.Payload != nil {
-				logger.LoggerSync.Debug("Payload data with API information recieved")
+				logger.LoggerSync.Info("Payload data with API information recieved")
 				retrieveAPIList(data, initialAPIUUIDListMap)
 				break
 			} else if data.ErrorCode >= 400 && data.ErrorCode < 500 {
