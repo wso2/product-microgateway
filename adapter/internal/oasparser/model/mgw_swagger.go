@@ -110,7 +110,8 @@ type InterceptEndpoint struct {
 	ClusterTimeout time.Duration
 	RequestTimeout int
 	// Includes this is an enum allowing only values in
-	// {"request_body", "response_body", "request_trailer", "response_trailer", "auth_token"}
+	// {"request_headers", "request_body", "request_trailer", "response_headers", "response_body", "response_trailer",
+	//"invocation_context" }
 	Includes []string
 }
 
@@ -628,7 +629,8 @@ func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{
 				if len(includes) > 0 {
 					for _, include := range includes {
 						switch include.(string) {
-						case "request_body", "response_body", "request_trailer", "response_trailer", "auth_token":
+						case "request_headers", "request_body", "request_trailer", "response_headers", "response_body",
+							"response_trailer", "invocation_context":
 							includesV = append(includesV, include.(string))
 						}
 					}
