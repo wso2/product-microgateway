@@ -1,0 +1,33 @@
+[router]
+[router.cors]
+    enabled = false
+
+[enforcer]
+[enforcer.security]
+[enforcer.security.authHeader]
+  testConsoleHeaderName = "api_key"
+
+[enforcer.jwtGenerator]
+    enable = true
+
+[enforcer.throttling]
+    enableGlobalEventPublishing = true
+    enableHeaderConditions = true
+    enableQueryParamConditions = true
+    enableJwtClaimConditions = true
+    jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://apim:5672'"
+
+[controlPlane]
+    enabled = true
+    skipSSLVerification=true
+[controlPlane.jmsConnectionParameters]
+    eventListeningEndpoints = ["amqp://admin:admin@apim:5672?retries='250'&connectdelay='10'"]
+
+[analytics]
+    enabled = true
+
+[analytics.enforcer]
+[analytics.enforcer.configProperties]
+    authURL = "$env{analytics_authURL}"
+    authToken = "$env{analytics_authToken}"
+    "publisher.reporter.class" = "org.wso2.choreo.connect.tests.CustomMetricReporter"

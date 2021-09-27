@@ -78,7 +78,7 @@ public class InternalKeyTestCase {
         Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");
     }
 
-    // After invoking with original key, it is cacahed as a success token. But again using the tampered key should fail.
+    // After invoking with original key, it is cached as a success token. But again using the tampered key should fail.
     @Test(description = "Test to check the InternalKey is working", dependsOnMethods = "invokeInternalKeyHeaderSuccessTest")
     public void invokeAgainWithTamperedInternalKey() throws Exception {
         // Set header

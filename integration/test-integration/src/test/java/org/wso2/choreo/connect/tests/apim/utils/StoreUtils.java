@@ -43,6 +43,25 @@ import java.util.Objects;
 public class StoreUtils {
     private static final Logger log = LoggerFactory.getLogger(StoreUtils.class);
 
+    /**
+     * Generates API key for a given applicationID and key type.
+     *
+     * @param applicationId   - Application ID for the relevant API key
+     * @param keyType         - API key type (production or sandbox)
+     * @param storeRestClient - Instance of the RestAPIStoreImpl
+     * @return APIKeyDTO with API key
+     * @throws CCTestException if an error occurs while generating API key
+     */
+    public static APIKeyDTO generateAPIKey(String applicationId, String keyType, RestAPIStoreImpl storeRestClient)
+            throws CCTestException {
+        try {
+            return storeRestClient.generateAPIKeys(applicationId, keyType, -1,
+                    null, null);
+        } catch (ApiException e) {
+            throw new CCTestException("Error occurred while generating the API key.", e);
+        }
+    }
+
     public static String generateUserAccessToken(String apimServiceURLHttps, String applicationId, User user,
                                                  RestAPIStoreImpl storeRestClient) throws CCTestException {
         ApplicationKeyDTO applicationKeyDTO = StoreUtils.generateKeysForApp(applicationId, storeRestClient);

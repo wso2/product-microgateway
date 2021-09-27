@@ -44,9 +44,11 @@ import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTConstants;
-import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Base64;
 import java.util.Map;
@@ -57,9 +59,11 @@ import java.util.Map;
 public class APIKeyAuthenticator extends APIKeyHandler {
 
     private static final Log log = LogFactory.getLog(APIKeyAuthenticator.class);
-    private JWTValidator jwtValidator = new JWTValidator();
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private boolean isGatewayTokenCacheEnabled;
+
+    private static final int IPV4_ADDRESS_BIT_LENGTH = 32;
+    private static final int IPV6_ADDRESS_BIT_LENGTH = 128;
 
     public APIKeyAuthenticator() {
         log.info("API key authenticator initialized.");
@@ -72,16 +76,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         return isAPIKey(apiKey);
     }
 
-//    private String retrieveAPIKeyFromHeader(RequestContext requestContext) {
-//        Map<String, String> headers = requestContext.getHeaders();
-//        return headers.get(FilterUtils.getAPIKeyHeaderName(requestContext));
-//    }
-//
-//    private String retrieveAPIKeyFromQueryParam(RequestContext requestContext) {
-//        Map<String, String> queryParameters = requestContext.getQueryParameters();
-//        return  queryParameters.get(FilterUtils.getAPIKeyHeaderName(requestContext));
-//    }
-
+    // Gets API key from request
     private String getAPIKeyFromRequest(RequestContext requestContext) {
         String apiKey;
         Map<String, String> headers = requestContext.getHeaders();
@@ -95,129 +90,136 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
-        if (requestContext.getMatchedAPI() != null) {
-            log.debug("API Key Authentication initialized");
+        if (requestContext.getMatchedAPI() == null) {
+            log.debug("API Key Authentication failed");
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    "API key authentication failed.");
+        }
+        try {
+            String apiKey = getAPIKeyFromRequest(requestContext);
 
-            try {
-                String apiKey = getAPIKeyFromRequest(requestContext);
+            // Gives an error if API key not found
+            getKeyNotFoundError(apiKey);
 
-                // gives an error if API key not found
-                getKeyNotFoundError(apiKey);
+            String[] splitToken = apiKey.split("\\.");
+            SignedJWT signedJWT = SignedJWT.parse(apiKey);
+            JWSHeader jwsHeader = signedJWT.getHeader();
+            JWTClaimsSet payload = signedJWT.getJWTClaimsSet();
+            String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
+            String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
 
-                String[] splitToken = apiKey.split("\\.");
-                SignedJWT signedJWT = SignedJWT.parse(apiKey);
-                JWSHeader jwsHeader = signedJWT.getHeader();
-                JWTClaimsSet payload = signedJWT.getJWTClaimsSet();
-
-                // Avoids using internal API keys
-                if (isInternalKey(payload)) {
-                    log.error("Invalid API Key token type." + FilterUtils.getMaskedToken(splitToken[0]));
-                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                }
-
-                //gives jti (also used to populate authentication context)
-                String tokenIdentifier = payload.getJWTID();
-
-                //check whether key contains in revoked map.
-                checkInRevokedMap(tokenIdentifier, splitToken);
-
-                // Verify the token if it is found in cache
-                JWTTokenPayloadInfo jwtTokenPayloadInfo = (JWTTokenPayloadInfo)
-                        CacheProvider.getGatewayAPIKeyDataCache().getIfPresent(tokenIdentifier);
-                boolean isVerified = verifyTokenInCache(tokenIdentifier, apiKey, payload, splitToken,
-                        "API Key", jwtTokenPayloadInfo);
-
-                // Verify token when it is not found in cache
-                if (!isVerified) {
-                    isVerified = verifyTokenNotInCache(jwsHeader, signedJWT, splitToken, payload, "API Key");
-                }
-
-                if (isVerified) {
-                    log.debug("API Key signature is verified.");
-
-                    if (jwtTokenPayloadInfo == null) {
-                        log.debug("InternalKey payload not found in the cache.");
-
-                        jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
-                        jwtTokenPayloadInfo.setPayload(payload);
-                        jwtTokenPayloadInfo.setAccessToken(apiKey);
-                        CacheProvider.getGatewayAPIKeyDataCache().put(tokenIdentifier, jwtTokenPayloadInfo);
-                    }
-
-                    //Get APIKeyValidationInfoDTO
-                    APIKeyValidationInfoDTO apiKeyValidationInfoDTO = getAPIKeyValidationDTO(requestContext, payload);
-
-                    // set endpoint security
-                    SecurityInfo securityInfo;
-                    if (apiKeyValidationInfoDTO.getType() != null &&
-                            requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity() != null) {
-                        if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                            securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
-                                    getProductionSecurityInfo();
-                        } else {
-                            securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
-                                    getSandBoxSecurityInfo();
-                        }
-                        if (securityInfo.getEnabled() &&
-                                APIConstants.AUTHORIZATION_HEADER_BASIC.
-                                        equalsIgnoreCase(securityInfo.getSecurityType())) {
-                            requestContext.getRemoveHeaders().remove(APIConstants.AUTHORIZATION_HEADER_DEFAULT
-                                    .toLowerCase());
-                            requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                                    APIConstants.AUTHORIZATION_HEADER_BASIC + ' ' +
-                                            Base64.getEncoder().encodeToString((securityInfo.getUsername() +
-                                                    ':' + securityInfo.getPassword()).getBytes()));
-                        }
-                    }
-
-//                    JSONObject api = validateAPISubscription(apiContext, apiVersion, payload, splitToken, false);
-
-                    log.debug("API Key authentication successful.");
-
-                    //======= Analytics data processing begins
-
-                    //Get SignedJWTInfo
-                    SignedJWTInfo signedJWTInfo = getSignedJwt(apiKey);
-
-                    //Get JWTValidationInfo
-                    JWTValidationInfo validationInfo = new JWTValidationInfo();
-                    validationInfo.setUser(payload.getSubject());
-
-                    String endUserToken = null;
-
-                    // Get jwtConfigurationDto
-                    JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().
-                            getConfig().getJwtConfigurationDto();
-                    if (jwtConfigurationDto.isEnabled()) {
-                        // Set ttl
-                        jwtConfigurationDto.setTtl(JWTUtil.getTTL());
-
-                        JWTInfoDto jwtInfoDto = FilterUtils
-                                .generateJWTInfoDto(null, validationInfo, apiKeyValidationInfoDTO, requestContext);
-                        endUserToken = generateAndRetrieveJWTToken(tokenIdentifier, jwtInfoDto);
-                        // Set generated jwt token as a response header
-                        requestContext.addResponseHeaders(jwtConfigurationDto.getJwtHeader(), endUserToken);
-                    }
-                    JWTClaimsSet claims = signedJWTInfo.getJwtClaimsSet();
-
-                    AuthenticationContext authenticationContext = FilterUtils
-                            .generateAuthenticationContext(requestContext, tokenIdentifier, validationInfo,
-                                    apiKeyValidationInfoDTO, endUserToken, false);
-
-                    if (claims.getClaim("keytype") != null) {
-                        authenticationContext.setKeyType(claims.getClaim("keytype").toString());
-                    }
-
-                    return authenticationContext;
-
-                }
-            } catch (ParseException e) {
-                log.debug("API Key authentication failed. ", e);
+            // Avoids using internal API keys
+            if (isInternalKey(payload)) {
+                log.error("Invalid API Key token type." + FilterUtils.getMaskedToken(splitToken[0]));
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             }
 
+            // Gives jti (also used to populate authentication context)
+            String tokenIdentifier = payload.getJWTID();
+
+            // Checks whether key contains in revoked map.
+            checkInRevokedMap(tokenIdentifier, splitToken);
+
+            // Verifies the token if it is found in cache
+            JWTTokenPayloadInfo jwtTokenPayloadInfo = (JWTTokenPayloadInfo)
+                    CacheProvider.getGatewayAPIKeyDataCache().getIfPresent(tokenIdentifier);
+            boolean isVerified = verifyTokenInCache(tokenIdentifier, apiKey, payload, splitToken,
+                    "API Key", jwtTokenPayloadInfo);
+
+            // Verifies token when it is not found in cache
+            if (!isVerified) {
+                isVerified = verifyTokenNotInCache(jwsHeader, signedJWT, splitToken, payload, "API Key");
+            }
+
+            if (isVerified) {
+                log.debug("API Key signature is verified.");
+
+                if (jwtTokenPayloadInfo == null) {
+                    log.debug("API Key payload not found in the cache.");
+
+                    jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
+                    jwtTokenPayloadInfo.setPayload(payload);
+                    jwtTokenPayloadInfo.setAccessToken(apiKey);
+                    CacheProvider.getGatewayAPIKeyDataCache().put(tokenIdentifier, jwtTokenPayloadInfo);
+                }
+
+                //Get APIKeyValidationInfoDTO
+                APIKeyValidationInfoDTO apiKeyValidationInfoDTO = getAPIKeyValidationDTO(requestContext, payload);
+
+                // Sets endpoint security
+                SecurityInfo securityInfo;
+                if (apiKeyValidationInfoDTO.getType() != null &&
+                        requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity() != null) {
+                    if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
+                        securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                                getProductionSecurityInfo();
+                    } else {
+                        securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                                getSandBoxSecurityInfo();
+                    }
+                    if (securityInfo.getEnabled() &&
+                            APIConstants.AUTHORIZATION_HEADER_BASIC.
+                                    equalsIgnoreCase(securityInfo.getSecurityType())) {
+                        requestContext.getRemoveHeaders().remove(APIConstants.AUTHORIZATION_HEADER_DEFAULT
+                                .toLowerCase());
+                        requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                                APIConstants.AUTHORIZATION_HEADER_BASIC + ' ' +
+                                        Base64.getEncoder().encodeToString((securityInfo.getUsername() +
+                                                ':' + securityInfo.getPassword()).getBytes()));
+                    }
+                }
+
+                validateAPIKeyRestrictions(payload, requestContext, apiContext, apiVersion);
+
+                validateAPISubscription(apiContext, apiVersion, payload, splitToken, false);
+
+                log.debug("API Key authentication successful.");
+
+                // Begins analytics data processing
+
+                //Get SignedJWTInfo
+                SignedJWTInfo signedJWTInfo = getSignedJwt(apiKey);
+
+                //Get JWTValidationInfo
+                JWTValidationInfo validationInfo = new JWTValidationInfo();
+                validationInfo.setUser(payload.getSubject());
+
+                String endUserToken = null;
+
+                // Get jwtConfigurationDto
+                JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().
+                        getConfig().getJwtConfigurationDto();
+                if (jwtConfigurationDto.isEnabled()) {
+                    // Set ttl
+                    jwtConfigurationDto.setTtl(JWTUtil.getTTL());
+
+                    JWTInfoDto jwtInfoDto = FilterUtils
+                            .generateJWTInfoDto(null, validationInfo, apiKeyValidationInfoDTO, requestContext);
+                    endUserToken = generateAndRetrieveJWTToken(tokenIdentifier, jwtInfoDto);
+                    // Set generated jwt token as a response header
+                    requestContext.addResponseHeaders(jwtConfigurationDto.getJwtHeader(), endUserToken);
+                }
+                JWTClaimsSet claims = signedJWTInfo.getJwtClaimsSet();
+
+                AuthenticationContext authenticationContext = FilterUtils
+                        .generateAuthenticationContext(requestContext, tokenIdentifier, validationInfo,
+                                apiKeyValidationInfoDTO, endUserToken, false);
+
+                if (claims.getClaim("keytype") != null) {
+                    authenticationContext.setKeyType(claims.getClaim("keytype").toString());
+                }
+                log.debug("Analytics data processing for API Key (jiti) " + tokenIdentifier +
+                        " was successful");
+                return authenticationContext;
+
+            }
+        } catch (ParseException e) {
+            log.debug("API Key authentication failed. ", e);
         }
+
 
         throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                 APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
@@ -376,15 +378,136 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         return endUserToken;
     }
 
+    private void validateAPIKeyRestrictions(JWTClaimsSet payload, RequestContext requestContext, String apiContext,
+                                            String apiVersion) throws APISecurityException {
+        String permittedIPList = null;
+        if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP) != null) {
+            permittedIPList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP);
+        }
+
+        if (StringUtils.isNotEmpty(permittedIPList)) {
+            // Validate client IP against permitted IPs
+            String clientIP = requestContext.getClientIp();
+
+            if (StringUtils.isNotEmpty(clientIP)) {
+                for (String restrictedIP : permittedIPList.split(",")) {
+                    if (isIpInNetwork(clientIP, restrictedIP.trim())) {
+                        // Client IP is allowed
+                        return;
+                    }
+                }
+                if (StringUtils.isNotEmpty(clientIP)) {
+                    log.debug("Invocations to API: " + apiContext + ":" + apiVersion +
+                            " is not permitted for client with IP: " + clientIP);
+                }
+
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                        APISecurityConstants.API_AUTH_FORBIDDEN, APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+            }
+
+        }
+
+        String permittedRefererList = null;
+        if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER) != null) {
+            permittedRefererList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
+        }
+        if (StringUtils.isNotEmpty(permittedRefererList)) {
+            // Validate http referer against the permitted referrers
+            Map<String, String> transportHeaderMap = requestContext.getHeaders();
+            if (transportHeaderMap != null) {
+                String referer = transportHeaderMap.get("referer");
+                if (StringUtils.isNotEmpty(referer)) {
+                    for (String restrictedReferer : permittedRefererList.split(",")) {
+                        String restrictedRefererRegExp = restrictedReferer.trim()
+                                .replace("*", "[^ ]*");
+                        if (referer.matches(restrictedRefererRegExp)) {
+                            // Referer is allowed
+                            return;
+                        }
+                    }
+                    if (StringUtils.isNotEmpty(referer)) {
+                        log.debug("Invocations to API: " + apiContext + ":" + apiVersion +
+                                " is not permitted for referer: " + referer);
+                    }
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                            APISecurityConstants.API_AUTH_FORBIDDEN, APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+                } else {
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                            APISecurityConstants.API_AUTH_FORBIDDEN, APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+                }
+            }
+        }
+    }
+
+    private boolean isIpInNetwork(String ip, String cidr) {
+
+        if (StringUtils.isEmpty(ip) || StringUtils.isEmpty(cidr)) {
+            return false;
+        }
+        ip = ip.trim();
+        cidr = cidr.trim();
+
+        if (cidr.contains("/")) {
+            String[] cidrArr = cidr.split("/");
+            if (cidrArr.length < 2 || (ip.contains(".") && !cidr.contains(".")) ||
+                    (ip.contains(":") && !cidr.contains(":"))) {
+                return false;
+            }
+
+            BigInteger netAddress = ipToBigInteger(cidrArr[0]);
+            int netBits = Integer.parseInt(cidrArr[1]);
+            BigInteger givenIP = ipToBigInteger(ip);
+
+            if (ip.contains(".")) {
+                // IPv4
+                if (netAddress.shiftRight(IPV4_ADDRESS_BIT_LENGTH - netBits)
+                        .shiftLeft(IPV4_ADDRESS_BIT_LENGTH - netBits).compareTo(
+                                givenIP.shiftRight(IPV4_ADDRESS_BIT_LENGTH - netBits)
+                                        .shiftLeft(IPV4_ADDRESS_BIT_LENGTH - netBits)) == 0) {
+                    return true;
+                }
+            } else if (ip.contains(":")) {
+                // IPv6
+                if (netAddress.shiftRight(IPV6_ADDRESS_BIT_LENGTH - netBits)
+                        .shiftLeft(IPV6_ADDRESS_BIT_LENGTH - netBits).compareTo(
+                                givenIP.shiftRight(IPV6_ADDRESS_BIT_LENGTH - netBits)
+                                        .shiftLeft(IPV6_ADDRESS_BIT_LENGTH - netBits)) == 0) {
+                    return true;
+                }
+            }
+        } else if (ip.equals(cidr)) {
+            return true;
+        }
+        return false;
+    }
+
+
+    private BigInteger ipToBigInteger(String ipAddress) {
+
+        InetAddress address;
+        try {
+            address = getAddress(ipAddress);
+            byte[] bytes = address.getAddress();
+            return new BigInteger(1, bytes);
+        } catch (UnknownHostException e) {
+            //ignore the error and log it
+            log.error("Error while parsing host IP " + ipAddress, e);
+        }
+        return BigInteger.ZERO;
+    }
+
+    private InetAddress getAddress(String ipAddress) throws UnknownHostException {
+
+        return InetAddress.getByName(ipAddress);
+    }
+
     @Override
     public String getChallengeString() {
         return "";
-        //check again
     }
 
     @Override
     public int getPriority() {
-        return 10;
-        //check again
+        return 30;
     }
 }

@@ -101,27 +101,26 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                 // Check if the decoded header contains type as 'InternalKey'.
                 if (!isInternalKey(payload)) {
                     log.error("Invalid Internal Key token type." + FilterUtils.getMaskedToken(splitToken[0]));
-                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                    // To provide support for API keys. If internal key name's header name value changed similar
+                    // to the API key header name this will enable that support.
+                    AuthenticationContext authenticationContext = new AuthenticationContext();
+                    authenticationContext.setAuthenticated(false);
+                    return authenticationContext;
                 }
 
                 String tokenIdentifier = payload.getJWTID();
-                // check tokenIdentifier contains in revokedMap
-                if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenIdentifier)) {
-                    log.error("Invalid Internal Key. " + FilterUtils.getMaskedToken(splitToken[0]));
-                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                }
+
+                checkInRevokedMap(tokenIdentifier, splitToken);
 
                 String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
                 String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
-                boolean isVerified = false;
 
                 // Verify token when it is found in cache
                 JWTTokenPayloadInfo jwtTokenPayloadInfo = (JWTTokenPayloadInfo)
                         CacheProvider.getGatewayInternalKeyDataCache().getIfPresent(tokenIdentifier);
+
+                boolean isVerified = verifyTokenInCache(tokenIdentifier, internalKey, payload, splitToken,
+                        "InternalKey", jwtTokenPayloadInfo);
                 Scope verifyTokenInCacheSpanScope = null;
                 if (jwtTokenPayloadInfo != null) {
                     if (Utils.tracingEnabled()) {
@@ -132,7 +131,6 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                     }
                     String cachedToken = jwtTokenPayloadInfo.getAccessToken();
                     isVerified = cachedToken.equals(internalKey) && !isJwtTokenExpired(payload, "InternalKey");
-                    isVerified = cachedToken.equals(internalKey) && !isJwtTokenExpired(payload);
                     if (Utils.tracingEnabled()) {
                         verifyTokenInCacheSpanScope.close();
                         Utils.finishSpan(verifyTokenInCacheSpan);
@@ -153,6 +151,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                 Scope verifyTokenWithoutCacheSpanScope = null;
                 // Verify token when it is not found in cache
                 if (!isVerified) {
+                    isVerified = verifyTokenNotInCache(jwsHeader, signedJWT, splitToken, payload, "InternalKey");
                     log.debug("Internal Key not found in the cache.");
                     if (Utils.tracingEnabled()) {
                         verifyTokenWithoutCacheSpan = Utils.startSpan(TracingConstants.VERIFY_TOKEN_SPAN, tracer);
@@ -226,6 +225,9 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                 }
             } catch (ParseException e) {
                 log.debug("Internal Key authentication failed. ", e);
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Internal key authentication failed.");
 
             } finally {
                 if (Utils.tracingEnabled()) {

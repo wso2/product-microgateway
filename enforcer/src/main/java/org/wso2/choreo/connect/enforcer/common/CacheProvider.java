@@ -67,8 +67,8 @@ public class CacheProvider {
 
     private static LoadingCache initCache(int maxSize, int expiryTime) {
         return CacheBuilder.newBuilder()
-                .maximumSize(maxSize)                                     // maximum 100 tokens can be cached
-                .expireAfterAccess(expiryTime, TimeUnit.MINUTES)      // cache will expire after 30 minutes of access
+                .maximumSize(maxSize)                                  // maximum 10000 tokens can be cached
+                .expireAfterAccess(expiryTime, TimeUnit.MINUTES)      // cache will expire after 15 minutes of access
                 .build(new CacheLoader<String, String>() {            // build the cacheloader
                     @Override public String load(String s) throws Exception {
                         return JWTConstants.UNAVAILABLE;

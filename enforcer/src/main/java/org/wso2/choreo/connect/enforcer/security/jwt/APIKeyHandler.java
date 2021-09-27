@@ -45,6 +45,12 @@ public abstract class APIKeyHandler implements Authenticator {
 
     private static final Log log = LogFactory.getLog(APIKeyHandler.class);
 
+    /**
+     * Checks whether a given string is an API key.
+     *
+     * @param apiKey - API key string
+     * @return whether a given string is an API key or not.
+     */
     public boolean isAPIKey(String apiKey) {
         if (apiKey != null && apiKey.split("\\.").length == 3) {
             return true;
@@ -52,6 +58,12 @@ public abstract class APIKeyHandler implements Authenticator {
         return false;
     }
 
+    /**
+     * Validates API key string.
+     *
+     * @param apiKey - API key string
+     * @throws APISecurityException if empty string is given to the method
+     */
     public void getKeyNotFoundError(String apiKey) throws APISecurityException {
         if (StringUtils.isEmpty(apiKey)) {
             log.error("Cannot find API key header");
@@ -61,6 +73,12 @@ public abstract class APIKeyHandler implements Authenticator {
         }
     }
 
+    /**
+     * Recognizes internal  API key type.
+     *
+     * @param jwtClaimsSet jwt claim set in the API key
+     * @return whether a given API key is an internal API key or not
+     */
     public boolean isInternalKey(JWTClaimsSet jwtClaimsSet) {
         Object tokenTypeClaim = jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.TOKEN_TYPE);
         if (tokenTypeClaim != null) {
@@ -69,6 +87,13 @@ public abstract class APIKeyHandler implements Authenticator {
         return false;
     }
 
+    /**
+     * Checks the API key in revoked map.
+     *
+     * @param tokenIdentifier token identifier for the API key
+     * @param splitToken      API key segments
+     * @throws APISecurityException if an invalid API key is passed to the method.
+     */
     public void checkInRevokedMap(String tokenIdentifier, String[] splitToken) throws APISecurityException {
         if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenIdentifier)) {
             if (log.isDebugEnabled()) {
@@ -82,6 +107,18 @@ public abstract class APIKeyHandler implements Authenticator {
         }
     }
 
+    /**
+     * Ensures whether a given API key is in the cache.
+     *
+     * @param tokenIdentifier     token identifier for the API key
+     * @param apiKey              API key relevant to the request
+     * @param payload             payload in the API key
+     * @param splitToken          API key segments
+     * @param apiKeyType          API key type
+     * @param jwtTokenPayloadInfo payload information
+     * @return whether a given API key was in the cache or not
+     * @throws APISecurityException if there is an error when checking the token in cache
+     */
     public boolean verifyTokenInCache(String tokenIdentifier, String apiKey, JWTClaimsSet payload,
                                       String[] splitToken, String apiKeyType,
                                       JWTTokenPayloadInfo jwtTokenPayloadInfo) throws APISecurityException {
@@ -101,23 +138,37 @@ public abstract class APIKeyHandler implements Authenticator {
         return isVerified;
     }
 
+    /**
+     * Checks for API key in the invalid token cache.
+     *
+     * @param splitToken API key segments
+     * @throws APISecurityException when token is found in the invalid token cache
+     */
     public void getInvalidKeyInCacheError(String[] splitToken) throws APISecurityException {
-        if (log.isDebugEnabled()) {
-            log.debug("API key retrieved from the invalid API key cache. "
-                    + FilterUtils.getMaskedToken(splitToken[0]));
-        }
+        log.debug("API key retrieved from the invalid API key cache. "
+                + FilterUtils.getMaskedToken(splitToken[0]));
         log.error("Invalid API key. " + FilterUtils.getMaskedToken(splitToken[0]));
         throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
     }
 
+    /**
+     * Handles API key if it's not found in the cache.
+     *
+     * @param jwsHeader  JWS header for the API key
+     * @param signedJWT  Signed JWT for the API key
+     * @param splitToken API key segments.
+     * @param payload    API key payload
+     * @param apiKeyType API key type
+     * @return verification status if API key not found in the cache
+     * @throws APISecurityException if the given API key is not in the cache and able to verify
+     */
     public boolean verifyTokenNotInCache(JWSHeader jwsHeader, SignedJWT signedJWT, String[] splitToken,
                                          JWTClaimsSet payload, String apiKeyType) throws APISecurityException {
         boolean isVerified = false;
-        if (log.isDebugEnabled()) {
-            log.debug(apiKeyType + " not found in the cache.");
-        }
+
+        log.debug(apiKeyType + " not found in the cache.");
 
         String alias = "";
         if (jwsHeader != null && StringUtils.isNotEmpty(jwsHeader.getKeyID())) {
@@ -136,12 +187,13 @@ public abstract class APIKeyHandler implements Authenticator {
         return isVerified;
     }
 
-
     /**
-     * Check whether the jwt token is expired or not.
+     * Checks whether the jwt token is expired or not.
      *
-     * @param payload The payload of the JWT token
+     * @param payload JWT token payload
+     * @param keyType API key type
      * @return returns true if the JWT token is expired
+     * @throws APISecurityException when there is an error while checking API key expiry details.
      */
     public boolean isJwtTokenExpired(JWTClaimsSet payload, String keyType) throws APISecurityException {
 
@@ -181,6 +233,17 @@ public abstract class APIKeyHandler implements Authenticator {
         return 5;
     }
 
+    /**
+     * Checks for API subscriptions.
+     *
+     * @param apiContext API context
+     * @param apiVersion API version
+     * @param payload    Payload information
+     * @param splitToken API key segments
+     * @param isOauth    indicates OAuth token type
+     * @return JSON object for the subscribed API
+     * @throws APISecurityException if error happens while validating subscription details
+     */
     public static JSONObject validateAPISubscription(String apiContext, String apiVersion, JWTClaimsSet payload,
                                                      String[] splitToken, boolean isOauth)
             throws APISecurityException {
@@ -228,5 +291,4 @@ public abstract class APIKeyHandler implements Authenticator {
         }
         return api;
     }
-
 }

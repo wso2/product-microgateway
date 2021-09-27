@@ -104,7 +104,6 @@ public class RestAPI implements API {
         if (!authHeader.isEnableOutboundAuthHeader()) {
             String authHeaderName = FilterUtils.getAuthHeaderName(requestContext);
             requestContext.getRemoveHeaders().add(authHeaderName);
-            //check whether this is required for API key
         }
 
         if (executeFilterChain(requestContext)) {
