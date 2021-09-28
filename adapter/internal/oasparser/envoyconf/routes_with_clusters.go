@@ -18,11 +18,11 @@
 package envoyconf
 
 import (
-	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	"net"
 	"regexp"
 	"strconv"
 
+	"github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
@@ -149,6 +149,23 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		apiResponseInterceptor.ClusterName = strings.TrimSpace(organizationID + "_" + responseInterceptClustersNamePrefix +
 			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
 		clusters = append(clusters, CreateLuaCluster(interceptorCerts, apiResponseInterceptor))
+	}
+
+	// check if x-wso2-endpoints are available
+	xWso2Endpoints, err := mgwSwagger.GetXWso2Endpoints()
+	if err != nil {
+		logger.LoggerOasparser.Error("Error while parsing x-wso2-endpoints in API "+apiTitle+" "+apiVersion, err)
+	}
+	if len(xWso2Endpoints) > 0 {
+		for _, endpointCluster := range xWso2Endpoints {
+			epClusterName := strings.TrimSpace(organizationID + "_" + endpointCluster.EndpointName + "_" +
+				xWso2EPClustersConfigNamePrefix + vHost + "_" +
+				strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
+			//todo (amali) support multiple urls
+			address := createAddress(endpointCluster.Endpoints[0].Host, endpointCluster.Endpoints[0].Port)
+			epCluster := createCluster(address, epClusterName, endpointCluster.Endpoints[0].URLType, upstreamCerts, timeout)
+			clusters = append(clusters, epCluster)
+		}
 	}
 
 	for _, resource := range mgwSwagger.GetResources() {
