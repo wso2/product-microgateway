@@ -65,7 +65,7 @@ public class AzureExporter implements TracerBuilder {
         }
         String maxTracesPerSecondString = properties.get(TracingConstants.MAXIMUM_TRACES_PER_SECOND);
         int maxTracesPerSecond = StringUtils.isEmpty(maxTracesPerSecondString) ?
-                ConfigDefaults.MAXIMUM_TRACES_PER_SECOND : Integer.valueOf(maxTracesPerSecondString);
+                ConfigDefaults.MAXIMUM_TRACES_PER_SECOND : Integer.parseInt(maxTracesPerSecondString);
         String instrumentationName = StringUtils.isEmpty(properties.get(TracingConstants.INSTRUMENTATION_NAME)) ?
                 ConfigDefaults.INSTRUMENTATION_NAME : properties.get(TracingConstants.INSTRUMENTATION_NAME);
 

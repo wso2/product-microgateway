@@ -441,6 +441,12 @@
                 <artifactId>opentelemetry-api</artifactId>
                 <version>${otel.version}</version>
             </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -464,6 +470,7 @@
         <jaeger.exporter.version>1.6.0</jaeger.exporter.version>
         <java.websocket.version>1.5.1</java.websocket.version>
         <json.smart.version>2.4.7</json.smart.version>
+        <junit.version>4.13.2</junit.version>
         <log4j.version>2.13.3</log4j.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <maven.checkstyle.version>8.18</maven.checkstyle.version>
