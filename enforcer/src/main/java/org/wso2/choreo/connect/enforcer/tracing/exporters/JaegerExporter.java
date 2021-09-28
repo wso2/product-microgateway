@@ -68,11 +68,8 @@ public class JaegerExporter implements TracerBuilder {
         JaegerThriftSpanExporter jaegerExporter = JaegerThriftSpanExporter.builder()
                 .setEndpoint(jaegerEp)
                 .build();
-
         Resource serviceNameResource =
                 Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, TracingConstants.SERVICE_NAME));
-
-
         String maxTracesPerSecondString = properties.get(TracingConstants.MAXIMUM_TRACES_PER_SECOND);
         int maxTracesPerSecond = StringUtils.isEmpty(maxTracesPerSecondString) ?
                 ConfigDefaults.MAXIMUM_TRACES_PER_SECOND : Integer.parseInt(maxTracesPerSecondString);

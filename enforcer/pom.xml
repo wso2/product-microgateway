@@ -375,11 +375,9 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jcl</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.java-websocket/Java-WebSocket -->
         <dependency>
             <groupId>org.java-websocket</groupId>
             <artifactId>Java-WebSocket</artifactId>
-            <version>1.5.1</version>
         </dependency>
         <!-- slf4j binding -->
         <dependency>
@@ -389,7 +387,6 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-monitor-opentelemetry-exporter</artifactId>
-            <version>${azure.monitor.opentelemetry.exporter.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.opentelemetry</groupId>
@@ -404,17 +401,14 @@
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>applicationinsights-core</artifactId>
-            <version>${applicationinsights.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${enforcer.jackson.databind.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.annotations.version}</version>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>

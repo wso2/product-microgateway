@@ -381,9 +381,19 @@
                 <version>${analytics.publisher.client.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.java-websocket</groupId>
+                <artifactId>Java-WebSocket</artifactId>
+                <version>${java.websocket.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.databind.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.awaitility</groupId>
@@ -400,6 +410,16 @@
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-slf4j-impl</artifactId>
                 <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.azure</groupId>
+                <artifactId>azure-monitor-opentelemetry-exporter</artifactId>
+                <version>${azure.monitor.opentelemetry.exporter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.microsoft.azure</groupId>
+                <artifactId>applicationinsights-core</artifactId>
+                <version>${applicationinsights.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.opentelemetry</groupId>
@@ -442,6 +462,7 @@
         <io.fabric8.docker.plugin.version>0.34.1</io.fabric8.docker.plugin.version>
         <io.netty.version>4.1.68.Final</io.netty.version>
         <jaeger.exporter.version>1.6.0</jaeger.exporter.version>
+        <java.websocket.version>1.5.1</java.websocket.version>
         <json.smart.version>2.4.7</json.smart.version>
         <log4j.version>2.13.3</log4j.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
@@ -472,13 +493,12 @@
         <analytics.publisher.client.version>1.0.4</analytics.publisher.client.version>
         <awaitility.version>3.1.2</awaitility.version>
         <apache.httpcomponents.version>4.5.13</apache.httpcomponents.version>
-        <jackson.databind.version>2.10.5.1</jackson.databind.version>
+        <jackson.databind.version>2.12.4</jackson.databind.version>
         <snakeyaml.version>1.26</snakeyaml.version>
         <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
         <googlecode.download.plugin.version>1.6.3</googlecode.download.plugin.version>
 
         <!-- Enforcer metrics, tracing related dependencies -->
-        <enforcer.jackson.databind.version>2.12.4</enforcer.jackson.databind.version>
         <jackson.annotations.version>2.12.4</jackson.annotations.version>
         <applicationinsights.core.version>2.6.3</applicationinsights.core.version>
         <azure.monitor.opentelemetry.exporter.version>1.0.0-beta.4</azure.monitor.opentelemetry.exporter.version>
