@@ -28,6 +28,7 @@ public class TracingConstants {
     public static final String SERVICE_NAME = "choreo_connect";
     public static final String AZURE_TRACE_EXPORTER = "azure";
     public static final String JAEGER_TRACE_EXPORTER = "jaeger";
+    public static final String ZIPKIN_TRACE_EXPORTER = "zipkin";
     public static final String MAXIMUM_TRACES_PER_SECOND = "maximumTracesPerSecond";
     public static final String INSTRUMENTATION_NAME = "instrumentationName";
     public static final String DO_THROTTLE_SPAN = "ThrottleFilter:doThrottle():Throttling function";
@@ -60,4 +61,6 @@ public class TracingConstants {
     public static final String WS_THROTTLE_SPAN = "WebSocketThrottleFilter:handleRequest():WebSocket throttling filter";
     public static final String WS_METADATA_SPAN = "WebSocketMetaDataFilter:handleRequest():WebSocket Metadata filter";
 
+    public static final String CONF_EXPORTER_TIMEOUT = "timeout";
+    public static final String CONF_ENDPOINT = "endpoint";
 }
