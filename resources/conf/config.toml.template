@@ -432,3 +432,23 @@ enable = true
         keepAliveTime = 600
         # Queue size of the worker threads
         queueSize = 1000
+
+# Tracing configurations for Choreo Connect
+[enforcer.tracing]
+  # Enable/Disable tracing in Choreo Connect
+  enabled = true
+  # Type of tracer exporter (e.g: azure, jaeger)
+  type = "azure"
+  [enforcer.tracing.configProperties]
+    # Exporter ConnectionString
+    connectionString = "$env{APPLICATIONINSIGHTS_CONNECTION_STRING}"
+    # Instrumentation Name
+    instrumentationName = "WSO2-CHOREO"
+    # Maximum number of sampled traces per second string
+    maximumTracesPerSecond = "2"
+
+# Metrics configurations for Choreo Connect
+[enforcer.metrics]
+  # Enable/Disable metrics in Choreo Connect
+  enabled = true
+  type = "azure"

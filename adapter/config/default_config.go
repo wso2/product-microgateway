@@ -175,6 +175,19 @@ var defaultConfig = &Config{
 			MaximumSize: 10000,
 			ExpiryTime:  15,
 		},
+		Tracing: tracing{
+			Enabled: false,
+			Type: "azure",
+			ConfigProperties: map[string]string{
+				"connectionString":   "",
+				"instrumentationName": "WSO2-CHOREO",
+				"maximumTracesPerSecond": "2",
+			},
+		},
+        Metrics: metrics{
+            Enabled: false,
+            Type: "azure",
+        },
 		Throttling: throttlingConfig{
 			EnableGlobalEventPublishing:        false,
 			EnableHeaderConditions:             false,
