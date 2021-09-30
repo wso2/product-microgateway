@@ -180,7 +180,7 @@ var defaultConfig = &Config{
 			Type: "azure",
 			ConfigProperties: map[string]string{
 				"connectionString":   "",
-				"instrumentationName": "WSO2-CHOREO",
+				"instrumentationName": "CHOREO-CONNECT",
 				"maximumTracesPerSecond": "2",
 			},
 		},

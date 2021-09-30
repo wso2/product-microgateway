@@ -443,7 +443,7 @@ enable = true
     # Exporter ConnectionString
     connectionString = "$env{APPLICATIONINSIGHTS_CONNECTION_STRING}"
     # Instrumentation Name
-    instrumentationName = "WSO2-CHOREO"
+    instrumentationName = "CHOREO-CONNECT"
     # Maximum number of sampled traces per second string
     maximumTracesPerSecond = "2"
 
