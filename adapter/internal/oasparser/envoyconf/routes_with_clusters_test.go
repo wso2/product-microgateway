@@ -68,7 +68,7 @@ func commonTestForCreateRoutesWithClusters(t *testing.T, openapiFilePath string)
 	assert.Nil(t, err, "Error while reading the openapi file : "+openapiFilePath)
 	mgwSwaggerForOpenapi, err := operator.GetMgwSwagger(openapiByteArr)
 	assert.Nil(t, err, "Error should not be present when openAPI definition is converted to a MgwSwagger object")
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil, "localhost", "carbon.super")
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwaggerForOpenapi, nil, nil, "localhost", "carbon.super")
 
 	assert.Equal(t, 2, len(clusters), "Number of production clusters created is incorrect.")
 	// As the first cluster is always related to API level cluster
@@ -122,7 +122,7 @@ func testCreateRoutesWithClustersWebsocket(t *testing.T, apiYamlFilePath string)
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
 	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiJsn)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, "localhost", "carbon.super")
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 
 	if strings.HasSuffix(apiYamlFilePath, "api.yaml") {
 		assert.Equal(t, len(clusters), 2, "Number of clusters created incorrect")
@@ -281,7 +281,7 @@ func TestCreateRoutesWithClusters(t *testing.T) {
 	assert.Nil(t, conversionErr, "YAML to JSON conversion error : %v"+apiYamlFilePath)
 	mgwSwagger, err := operator.GetMgwSwaggerWebSocket(apiJsn)
 	assert.Nil(t, err, "Error while populating the MgwSwagger object for web socket APIs")
-	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, "localhost", "carbon.super")
+	routes, clusters, _ := envoy.CreateRoutesWithClusters(mgwSwagger, nil, nil, "localhost", "carbon.super")
 	assert.NotNil(t, routes, "CreateRoutesWithClusters failed: returned routes nil")
 	assert.NotNil(t, clusters, "CreateRoutesWithClusters failed: returned clusters nil")
 }

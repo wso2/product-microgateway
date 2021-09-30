@@ -24,6 +24,7 @@ import (
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	ext_authv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
+	luav3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	routerv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	wasm_filter_v3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/wasm/v3"
 	hcmv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
@@ -45,6 +46,7 @@ import (
 func getHTTPFilters() []*hcmv3.HttpFilter {
 	extAauth := getExtAuthzHTTPFilter()
 	router := getRouterHTTPFilter()
+	lua := getLuaFilter()
 	cors := &hcmv3.HttpFilter{
 		Name:       wellknown.CORS,
 		ConfigType: &hcmv3.HttpFilter_TypedConfig{},
@@ -53,6 +55,7 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 	httpFilters := []*hcmv3.HttpFilter{
 		cors,
 		extAauth,
+		lua,
 		router,
 	}
 	return httpFilters
@@ -131,6 +134,28 @@ func getExtAuthzHTTPFilter() *hcmv3.HttpFilter {
 		},
 	}
 	return &extAuthzFilter
+}
+
+// getLuaFilter gets Lua http filter.
+func getLuaFilter() *hcmv3.HttpFilter {
+	//conf, _ := config.ReadConfigs()
+	luaConfig := &luav3.Lua{
+		InlineCode: "function envoy_on_request(request_handle)" +
+			"\nend" +
+			"\nfunction envoy_on_response(response_handle)" +
+			"\nend",
+	}
+	ext, err2 := ptypes.MarshalAny(luaConfig)
+	if err2 != nil {
+		logger.LoggerOasparser.Error(err2)
+	}
+	luaFilter := hcmv3.HttpFilter{
+		Name: luaFilterName,
+		ConfigType: &hcmv3.HttpFilter_TypedConfig{
+			TypedConfig: ext,
+		},
+	}
+	return &luaFilter
 }
 
 func getMgwWebSocketWASMFilter() *hcmv3.HttpFilter {

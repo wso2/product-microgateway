@@ -343,7 +343,7 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 	updateVhostInternalMaps(apiContent, newLabels)
 
 	routes, clusters, endpoints := oasParser.GetProductionRoutesClustersEndpoints(mgwSwagger, apiContent.UpstreamCerts,
-		apiContent.VHost, organizationID)
+		apiContent.InterceptorCerts, apiContent.VHost, organizationID)
 
 	if _, ok := orgIDOpenAPIRoutesMap[organizationID]; ok {
 		orgIDOpenAPIRoutesMap[organizationID][apiIdentifier] = routes

@@ -36,6 +36,7 @@ const (
 	pkgAuth                 = "github.com/wso2/product-microgateway/adapter/internal/auth"
 	pkgMgw                  = "github.com/wso2/product-microgateway/adapter/internal/adapter"
 	pkgOasparser            = "github.com/wso2/product-microgateway/adapter/internal/oasparser"
+	pkgInterceptor          = "github.com/wso2/product-microgateway/adapter/internal/interceptor"
 	pkgXds                  = "github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
 	pkgSync                 = "github.com/wso2/product-microgateway/adapter/internal/synchronizer"
 	pkgInternalMsg          = "github.com/wso2/product-microgateway/adapter/internal/messaging"
@@ -53,6 +54,7 @@ var (
 	LoggerAuth                 *logrus.Logger
 	LoggerMgw                  *logrus.Logger
 	LoggerOasparser            *logrus.Logger
+	LoggerInterceptor          *logrus.Logger
 	LoggerXds                  *logrus.Logger
 	LoggerSync                 *logrus.Logger
 	LoggerInternalMsg          *logrus.Logger
@@ -75,6 +77,7 @@ func UpdateLoggers() {
 	LoggerAuth = logging.InitPackageLogger(pkgAuth)
 	LoggerMgw = logging.InitPackageLogger(pkgMgw)
 	LoggerOasparser = logging.InitPackageLogger(pkgOasparser)
+	LoggerInterceptor = logging.InitPackageLogger(pkgInterceptor)
 	LoggerXds = logging.InitPackageLogger(pkgXds)
 	LoggerSync = logging.InitPackageLogger(pkgSync)
 	LoggerInternalMsg = logging.InitPackageLogger(pkgInternalMsg)
