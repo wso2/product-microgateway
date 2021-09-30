@@ -18,6 +18,7 @@
 
 package org.wso2.choreo.connect.enforcer.tracing.exporters;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -40,6 +41,7 @@ public class JaegerExporterTest {
         okProps.put(TracingConstants.CONF_MAX_TRACES_PER_SEC, "3");
         okProps.put(TracingConstants.CONF_INSTRUMENTATION_NAME, "CC");
         badProps.put(TracingConstants.CONF_ENDPOINT, "localhost:14268");
+        GlobalOpenTelemetry.resetForTest();
     }
 
     @Test
