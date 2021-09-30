@@ -96,6 +96,8 @@ public class APIKeyHeaderTestCase extends ApimBaseTest {
         APIKeyDTO apiKeyDTO = StoreUtils.generateAPIKey(applicationId, TestConstant.KEY_TYPE_PRODUCTION,
                 storeRestClient);
         apiKey = apiKeyDTO.getApikey();
+
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
     }
 
     @Test(description = "Test to check the API Key in header is working")
