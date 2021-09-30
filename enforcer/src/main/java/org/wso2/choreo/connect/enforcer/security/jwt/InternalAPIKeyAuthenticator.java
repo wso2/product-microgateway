@@ -20,10 +20,7 @@ package org.wso2.choreo.connect.enforcer.security.jwt;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.jwt.proc.BadJWTException;
-import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import io.opentelemetry.context.Scope;
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -38,7 +35,6 @@ import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
-import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
 import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
@@ -224,7 +220,7 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
             } catch (ParseException e) {
-                log.debug("Internal Key authentication failed. ", e);
+                log.warn("Internal Key authentication failed. ", e);
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Internal key authentication failed.");

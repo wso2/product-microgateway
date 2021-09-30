@@ -217,7 +217,10 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
             }
         } catch (ParseException e) {
-            log.debug("API Key authentication failed. ", e);
+            log.warn("API Key authentication failed. ", e);
+            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    "API key authentication failed.");
         }
 
 
