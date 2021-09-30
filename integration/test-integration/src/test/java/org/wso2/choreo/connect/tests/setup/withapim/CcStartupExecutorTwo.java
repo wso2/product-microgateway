@@ -29,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * This class is prepared to invoke CC for test cases that cover specific scenarios.
+ * Supporting test cases
+ * Using for same header name for API keys and Internal Keys
  */
 public class CcStartupExecutorTwo extends ApimBaseTest {
     CcInstance ccInstance;
