@@ -36,10 +36,10 @@ public class JaegerExporterTest {
     public static void setup() {
         okProps = new HashMap<>();
         badProps = new HashMap<>();
-        okProps.put(TracingConstants.CONNECTION_STRING, "http://localhost:9411/api/v2/span");
-        okProps.put(TracingConstants.MAXIMUM_TRACES_PER_SECOND, "3");
-        okProps.put(TracingConstants.INSTRUMENTATION_NAME, "CC");
-        badProps.put(TracingConstants.CONNECTION_STRING, "localhost:9411");
+        okProps.put(TracingConstants.CONF_ENDPOINT, "http://localhost:14268/api/traces");
+        okProps.put(TracingConstants.CONF_MAX_TRACES_PER_SEC, "3");
+        okProps.put(TracingConstants.CONF_INSTRUMENTATION_NAME, "CC");
+        badProps.put(TracingConstants.CONF_ENDPOINT, "localhost:14268");
     }
 
     @Test
@@ -56,7 +56,7 @@ public class JaegerExporterTest {
 
     @Test
     public void testInitWithoutEP() {
-        badProps.put(TracingConstants.CONNECTION_STRING, "");
+        badProps.put(TracingConstants.CONF_ENDPOINT, "");
         Assert.assertThrows("Incorrect exception was thrown", TracingException.class, () ->
                 JaegerExporter.getInstance().initTracer(badProps));
     }

@@ -60,21 +60,21 @@ public class JaegerExporter implements TracerBuilder {
      */
     @Override
     public Tracer initTracer(Map<String, String> properties) throws TracingException {
-        String jaegerEp = properties.get(TracingConstants.CONNECTION_STRING);
+        String jaegerEp = properties.get(TracingConstants.CONF_ENDPOINT);
 
         if (StringUtils.isEmpty(jaegerEp)) {
-            throw new TracingException("Error initializing Jaeger Trace Exporter. Connection url is missing.");
+            throw new TracingException("Error initializing Jaeger Trace Exporter. Jaeger endpoint is missing.");
         }
         JaegerThriftSpanExporter jaegerExporter = JaegerThriftSpanExporter.builder()
                 .setEndpoint(jaegerEp)
                 .build();
         Resource serviceNameResource =
                 Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, TracingConstants.SERVICE_NAME));
-        String maxTracesPerSecondString = properties.get(TracingConstants.MAXIMUM_TRACES_PER_SECOND);
+        String maxTracesPerSecondString = properties.get(TracingConstants.CONF_MAX_TRACES_PER_SEC);
         int maxTracesPerSecond = StringUtils.isEmpty(maxTracesPerSecondString) ?
                 ConfigDefaults.MAXIMUM_TRACES_PER_SECOND : Integer.parseInt(maxTracesPerSecondString);
-        String instrumentationName = StringUtils.isEmpty(properties.get(TracingConstants.INSTRUMENTATION_NAME)) ?
-                ConfigDefaults.INSTRUMENTATION_NAME : properties.get(TracingConstants.INSTRUMENTATION_NAME);
+        String instrumentationName = StringUtils.isEmpty(properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME)) ?
+                ConfigDefaults.INSTRUMENTATION_NAME : properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME);
 
         // Set to process the spans by the Jaeger Exporter
         SdkTracerProvider provider = SdkTracerProvider.builder()

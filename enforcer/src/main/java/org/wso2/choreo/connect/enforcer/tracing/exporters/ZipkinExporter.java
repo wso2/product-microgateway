@@ -34,7 +34,6 @@ import org.wso2.choreo.connect.enforcer.tracing.TracerBuilder;
 import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingException;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -75,11 +74,11 @@ public class ZipkinExporter implements TracerBuilder {
                 .build();
         Resource serviceNameResource =
                 Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, TracingConstants.SERVICE_NAME));
-        String maxTracesPerSecondString = properties.get(TracingConstants.MAXIMUM_TRACES_PER_SECOND);
+        String maxTracesPerSecondString = properties.get(TracingConstants.CONF_MAX_TRACES_PER_SEC);
         int maxTracesPerSecond = StringUtils.isEmpty(maxTracesPerSecondString) ?
                 ConfigDefaults.MAXIMUM_TRACES_PER_SECOND : Integer.parseInt(maxTracesPerSecondString);
-        String instrumentationName = StringUtils.isEmpty(properties.get(TracingConstants.INSTRUMENTATION_NAME)) ?
-                ConfigDefaults.INSTRUMENTATION_NAME : properties.get(TracingConstants.INSTRUMENTATION_NAME);
+        String instrumentationName = StringUtils.isEmpty(properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME)) ?
+                ConfigDefaults.INSTRUMENTATION_NAME : properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME);
 
         // Set to process the spans by the zipkin Exporter
         SdkTracerProvider provider = SdkTracerProvider.builder()

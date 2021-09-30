@@ -37,9 +37,9 @@ public class ZipkinExporterTest {
         okProps = new HashMap<>();
         badProps = new HashMap<>();
         okProps.put(TracingConstants.CONF_ENDPOINT, "http://localhost:9411/api/v2/span");
-        okProps.put(TracingConstants.MAXIMUM_TRACES_PER_SECOND, "3");
+        okProps.put(TracingConstants.CONF_MAX_TRACES_PER_SEC, "3");
         okProps.put(TracingConstants.CONF_EXPORTER_TIMEOUT, "15");
-        okProps.put(TracingConstants.INSTRUMENTATION_NAME, "CC");
+        okProps.put(TracingConstants.CONF_INSTRUMENTATION_NAME, "CC");
         badProps.put(TracingConstants.CONF_ENDPOINT, "localhost:9411");
     }
 
