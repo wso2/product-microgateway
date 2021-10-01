@@ -19,7 +19,7 @@ package org.wso2.choreo.connect.enforcer.tracing.exporters;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.exporter.jaeger.thrift.JaegerThriftSpanExporter;
+import io.opentelemetry.exporter.zipkin.ZipkinSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -35,20 +35,20 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
 import org.wso2.choreo.connect.enforcer.tracing.TracingException;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
- * This class is responsible for exporting tracing spans for jaeger.
+ * This class is responsible for exporting tracing spans for zipkin.
  */
-public class JaegerExporter implements TracerBuilder {
+public class ZipkinExporter implements TracerBuilder {
+    private static final Logger LOGGER = LogManager.getLogger(ZipkinExporter.class);
+    private static ZipkinExporter exporter;
 
-    private static final Logger LOGGER = LogManager.getLogger(JaegerExporter.class);
-    private static JaegerExporter exporter;
-
-    public static JaegerExporter getInstance() {
+    public static ZipkinExporter getInstance() {
         if (exporter == null) {
             synchronized (new Object()) {
                 if (exporter == null) {
-                    exporter = new JaegerExporter();
+                    exporter = new ZipkinExporter();
                 }
             }
         }
@@ -56,17 +56,21 @@ public class JaegerExporter implements TracerBuilder {
     }
 
     /**
-     * Initialize the tracer with {@link JaegerExporter}.
+     * Initialize the tracer with {@link ZipkinExporter}.
      */
     @Override
     public Tracer initTracer(Map<String, String> properties) throws TracingException {
-        String jaegerEp = properties.get(TracingConstants.CONF_ENDPOINT);
+        String zipkinEp = properties.get(TracingConstants.CONF_ENDPOINT);
 
-        if (StringUtils.isEmpty(jaegerEp)) {
-            throw new TracingException("Error initializing Jaeger Trace Exporter. Jaeger endpoint is missing.");
+        if (StringUtils.isEmpty(zipkinEp)) {
+            throw new TracingException("Error initializing zipkin Trace Exporter. Zipkin endpoint is missing.");
         }
-        JaegerThriftSpanExporter jaegerExporter = JaegerThriftSpanExporter.builder()
-                .setEndpoint(jaegerEp)
+        String readTimeoutString = properties.get(properties.get(TracingConstants.CONF_EXPORTER_TIMEOUT));
+        long readTimeout = !StringUtils.isEmpty(readTimeoutString) ? Long.parseLong(readTimeoutString)
+                : ConfigDefaults.TRACING_READ_TIMEOUT;
+        ZipkinSpanExporter zipkinExporter = ZipkinSpanExporter.builder()
+                .setEndpoint(zipkinEp)
+                .setReadTimeout(readTimeout, TimeUnit.SECONDS)
                 .build();
         Resource serviceNameResource =
                 Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, TracingConstants.SERVICE_NAME));
@@ -76,15 +80,15 @@ public class JaegerExporter implements TracerBuilder {
         String instrumentationName = StringUtils.isEmpty(properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME)) ?
                 ConfigDefaults.INSTRUMENTATION_NAME : properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME);
 
-        // Set to process the spans by the Jaeger Exporter
+        // Set to process the spans by the zipkin Exporter
         SdkTracerProvider provider = SdkTracerProvider.builder()
-                .addSpanProcessor(SimpleSpanProcessor.create(jaegerExporter))
+                .addSpanProcessor(SimpleSpanProcessor.create(zipkinExporter))
                 .setSampler(new RateLimitingSampler(maxTracesPerSecond))
                 .setResource(Resource.getDefault().merge(serviceNameResource))
                 .build();
         OpenTelemetrySdk ot = OpenTelemetrySdk.builder().setTracerProvider(provider).buildAndRegisterGlobal();
 
-        LOGGER.info("Tracer successfully initialized with Jaeger Trace Exporter.");
+        LOGGER.info("Tracer successfully initialized with Zipkin Trace Exporter.");
         return ot.getTracer(instrumentationName);
     }
 }

@@ -428,6 +428,11 @@
             </dependency>
             <dependency>
                 <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporter-zipkin</artifactId>
+                <version>${otel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-semconv</artifactId>
                 <version>${otel.alpha.version}</version>
             </dependency>

@@ -59,15 +59,15 @@ public class AzureExporter implements TracerBuilder {
     @Override
     public Tracer initTracer(Map<String, String> properties) throws TracingException {
 
-        String connectionString = properties.get(TracingConstants.CONNECTION_STRING);
+        String connectionString = properties.get(TracingConstants.CONF_CONNECTION_STRING);
         if (StringUtils.isEmpty(connectionString)) {
             throw new TracingException("Error initializing Azure Trace Exporter. ConnectionString is null or empty.");
         }
-        String maxTracesPerSecondString = properties.get(TracingConstants.MAXIMUM_TRACES_PER_SECOND);
+        String maxTracesPerSecondString = properties.get(TracingConstants.CONF_MAX_TRACES_PER_SEC);
         int maxTracesPerSecond = StringUtils.isEmpty(maxTracesPerSecondString) ?
                 ConfigDefaults.MAXIMUM_TRACES_PER_SECOND : Integer.parseInt(maxTracesPerSecondString);
-        String instrumentationName = StringUtils.isEmpty(properties.get(TracingConstants.INSTRUMENTATION_NAME)) ?
-                ConfigDefaults.INSTRUMENTATION_NAME : properties.get(TracingConstants.INSTRUMENTATION_NAME);
+        String instrumentationName = StringUtils.isEmpty(properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME)) ?
+                ConfigDefaults.INSTRUMENTATION_NAME : properties.get(TracingConstants.CONF_INSTRUMENTATION_NAME);
 
         AzureMonitorTraceExporter exporter = new AzureMonitorExporterBuilder()
                 .connectionString(connectionString).buildTraceExporter();

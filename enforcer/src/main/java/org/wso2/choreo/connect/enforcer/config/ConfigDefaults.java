@@ -33,6 +33,7 @@ public class ConfigDefaults {
     public static final String AZURE_TRACE_EXPORTER = "azure";
     public static final int MAXIMUM_TRACES_PER_SECOND = 2;
     public static final String INSTRUMENTATION_NAME = "CHOREO-CONNECT";
+    public static final long TRACING_READ_TIMEOUT = 15;
 
     //Metrics related default values
     public static final boolean METRICS_ENABLED_VALUE = false;

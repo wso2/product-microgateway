@@ -20,6 +20,7 @@ package org.wso2.choreo.connect.enforcer.tracing.exporters;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,7 +30,7 @@ import org.wso2.choreo.connect.enforcer.tracing.TracingException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JaegerExporterTest {
+public class ZipkinExporterTest {
     private static Map<String, String> okProps;
     private static Map<String, String> badProps;
 
@@ -37,29 +38,30 @@ public class JaegerExporterTest {
     public static void setup() {
         okProps = new HashMap<>();
         badProps = new HashMap<>();
-        okProps.put(TracingConstants.CONF_ENDPOINT, "http://localhost:14268/api/traces");
+        okProps.put(TracingConstants.CONF_ENDPOINT, "http://localhost:9411/api/v2/span");
         okProps.put(TracingConstants.CONF_MAX_TRACES_PER_SEC, "3");
+        okProps.put(TracingConstants.CONF_EXPORTER_TIMEOUT, "15");
         okProps.put(TracingConstants.CONF_INSTRUMENTATION_NAME, "CC");
-        badProps.put(TracingConstants.CONF_ENDPOINT, "localhost:14268");
+        badProps.put(TracingConstants.CONF_ENDPOINT, "localhost:9411");
         GlobalOpenTelemetry.resetForTest();
     }
 
     @Test
     public void testSuccessExporterInit() throws TracingException {
-        Tracer t = JaegerExporter.getInstance().initTracer(okProps);
+        Tracer t = ZipkinExporter.getInstance().initTracer(okProps);
         Assert.assertNotNull("Tracer can't be null", t);
     }
 
     @Test
     public void testInitWithInvalidEP() {
         Assert.assertThrows("Incorrect exception was thrown", IllegalArgumentException.class, () ->
-                JaegerExporter.getInstance().initTracer(badProps));
+                ZipkinExporter.getInstance().initTracer(badProps));
     }
 
     @Test
     public void testInitWithoutEP() {
         badProps.put(TracingConstants.CONF_ENDPOINT, "");
         Assert.assertThrows("Incorrect exception was thrown", TracingException.class, () ->
-                JaegerExporter.getInstance().initTracer(badProps));
+                ZipkinExporter.getInstance().initTracer(badProps));
     }
 }
