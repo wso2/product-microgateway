@@ -104,6 +104,8 @@ public class APIKeyTestCase extends ApimBaseTest {
         APIKeyDTO refererTestAPIKeyDTO = storeRestClient.generateAPIKeys(applicationId, TestConstant.KEY_TYPE_PRODUCTION,
                 -1, null, "www.abc.com");
         apiKeyForRefererTest = refererTestAPIKeyDTO.getApikey();
+
+        Utils.delay(TestConstant.DEPLOYMENT_WAIT_TIME, "Could not wait till initial setup completion.");
     }
 
     //    Invokes with tampered API key and this will fail.
