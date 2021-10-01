@@ -41,6 +41,9 @@ public class CacheProvider {
     private static LoadingCache<String, String> getGatewayInternalKeyCache;
     private static LoadingCache<String, String> getInvalidGatewayInternalKeyCache;
     private static LoadingCache<String, JWTValidationInfo> getGatewayInternalKeyDataCache;
+    private static LoadingCache<String, String> getGatewayAPIKeyCache;
+    private static LoadingCache<String, String> getInvalidGatewayAPIKeyCache;
+    private static LoadingCache<String, JWTValidationInfo> getGatewayAPIKeyDataCache;
 
     private static boolean cacheEnabled = true;
     public static void init() {
@@ -56,12 +59,16 @@ public class CacheProvider {
         getGatewayInternalKeyCache = initCache(maxSize, expiryTime);
         getGatewayInternalKeyDataCache = initCache(maxSize, expiryTime);
         getInvalidGatewayInternalKeyCache = initCache(maxSize, expiryTime);
+        getGatewayAPIKeyCache = initCache(maxSize, expiryTime);
+        getInvalidGatewayAPIKeyCache = initCache(maxSize, expiryTime);
+        getGatewayAPIKeyDataCache = initCache(maxSize, expiryTime);
+
     }
 
     private static LoadingCache initCache(int maxSize, int expiryTime) {
         return CacheBuilder.newBuilder()
-                .maximumSize(maxSize)                                     // maximum 100 tokens can be cached
-                .expireAfterAccess(expiryTime, TimeUnit.MINUTES)      // cache will expire after 30 minutes of access
+                .maximumSize(maxSize)                                  // maximum 10000 tokens can be cached
+                .expireAfterAccess(expiryTime, TimeUnit.MINUTES)      // cache will expire after 15 minutes of access
                 .build(new CacheLoader<String, String>() {            // build the cacheloader
                     @Override public String load(String s) throws Exception {
                         return JWTConstants.UNAVAILABLE;
@@ -128,5 +135,24 @@ public class CacheProvider {
         return gatewayJWTTokenCache;
     }
 
+    /**
+     * @return Gateway API key cache
+     */
+    public static LoadingCache getGatewayAPIKeyCache() {
+        return getGatewayAPIKeyCache;
+    }
 
+    /**
+     * @return Gateway API key data cache
+     */
+    public static LoadingCache getGatewayAPIKeyDataCache() {
+        return getGatewayAPIKeyDataCache;
+    }
+
+    /**
+     * @return Gateway API key invalid data cache
+     */
+    public static LoadingCache getInvalidGatewayAPIKeyCache() {
+        return getInvalidGatewayAPIKeyCache;
+    }
 }

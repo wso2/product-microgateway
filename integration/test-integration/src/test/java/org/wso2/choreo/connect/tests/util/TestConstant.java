@@ -72,6 +72,22 @@ public class TestConstant {
             "lFn0V_NFOTKiTwue6WAJutP2gEy3Fd5__cxaxjZ6GUbntVmddMhCQk0-0HN5843CzpSVhW8OpAi9QOCKC6HIq8XnJHzyw06juQOKD" +
             "PCi2qmQ-LlCQlBQrA4ECIFBzA_IqihOwymTPJHuqxPhGkJx1WfQ1oSb03Lxw";
 
+    public static final String EXPIRED_API_KEY_TOKEN = "eyJ4NXQiOiJOVGRtWmpNNFpEazNOalkwWXpjNU1tWm1PRGd3TVRFM01XWXd" +
+            "OREU1TVdSbFpEZzROemM0WkE9PSIsImtpZCI6ImdhdGV3YXlfY2VydGlmaWNhdGVfYWxpYXMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSU" +
+            "zI1NiJ9.eyJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJhcHBsaWNhdGlvbiI6eyJvd25lciI6ImFkbWluIiwidGllclF1b3RhVH" +
+            "lwZSI6bnVsbCwidGllciI6IlVubGltaXRlZCIsIm5hbWUiOiJBUElLZXlUZXN0QXBwIiwiaWQiOjE0LCJ1dWlkIjoiNGZlZjM5NDIt" +
+            "NjcyNy00NjA5LWFhMzctYzY2MWEwOTQ0NmFhIn0sImlzcyI6Imh0dHBzOlwvXC9hcGltOjk0NDNcL29hdXRoMlwvdG9rZW4iLCJ0aW" +
+            "VySW5mbyI6eyJVbmxpbWl0ZWQiOnsidGllclF1b3RhVHlwZSI6InJlcXVlc3RDb3VudCIsImdyYXBoUUxNYXhDb21wbGV4aXR5Ijow" +
+            "LCJncmFwaFFMTWF4RGVwdGgiOjAsInN0b3BPblF1b3RhUmVhY2giOnRydWUsInNwaWtlQXJyZXN0TGltaXQiOjAsInNwaWtlQXJyZX" +
+            "N0VW5pdCI6bnVsbH19LCJrZXl0eXBlIjoiUFJPRFVDVElPTiIsInN1YnNjcmliZWRBUElzIjpbeyJzdWJzY3JpYmVyVGVuYW50RG9t" +
+            "YWluIjoiY2FyYm9uLnN1cGVyIiwibmFtZSI6IkFQSUtleVRlc3RBUEkiLCJjb250ZXh0IjoiXC9hcGlLZXlcLzEuMC4wIiwicHVibG" +
+            "lzaGVyIjoiYWRtaW4iLCJ2ZXJzaW9uIjoiMS4wLjAiLCJzdWJzY3JpcHRpb25UaWVyIjoiVW5saW1pdGVkIn1dLCJleHAiOjE2MzI3" +
+            "NDA5MjgsInRva2VuX3R5cGUiOiJhcGlLZXkiLCJpYXQiOjE2MzI3NDA5MjcsImp0aSI6ImRlYTJjY2RhLTNjZTctNGYzOC04MDQ4LT" +
+            "I1NzMwYjk0NWI3YiJ9.M_EpRWG8Bd1ekIUNz8mAtoeIvD-AMIoCZjAubNidFX-NXxFAkCmspLXvDwle9Do_tVMYZoEWjUAfHDqJWo8" +
+            "TaLYjSc3goYvHoHAnv_0L0KQaveJYgv7nSQJ343bRVjDocjRZ0-iRY7CryoupoHPd1i0MGTqlWU04JUOadYhtwSUmw7PXnC-wXHGwb" +
+            "UmONQ6_gbAAzEOEXD2K6yTfy16KeZvQTdv-zZJzb6ULi0kAuG4txJh38WMagHtu3fuhKm2KIDrflOZEKWmThU6HqB8aoxROABDlId1" +
+            "VS_RbajyF8WfeZDv7W_tqNYbKbJVXxSJFFKfPeqL1A1N5po1dfLByPA==";
+
     public static final int GATEWAY_LISTENER_HTTPS_PORT = 9095;
     public static final int GATEWAY_LISTENER_HTTP_PORT = 9090;
     public static final int ADAPTER_PORT = 9843;

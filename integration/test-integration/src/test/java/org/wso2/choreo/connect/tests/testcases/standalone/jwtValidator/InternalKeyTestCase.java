@@ -18,9 +18,12 @@
 package org.wso2.choreo.connect.tests.testcases.standalone.jwtValidator;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.choreo.connect.tests.testcases.withapim.throttle.ThrottlingBaseTestCase;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -74,11 +77,11 @@ public class InternalKeyTestCase {
         HttpResponse response = HttpsClientRequest.doGet(Utils.getServiceURLHttps("/v2/pet/2") , headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), HttpStatus.SC_UNAUTHORIZED,"Response code mismatched");
-        Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");
+        Assert.assertTrue(response.getData().contains("Unclassified Validation Failure"),
+                "Error response message mismatch");
     }
 
-    // After invoking with original key, it is cacahed as a success token. But again using the tampered key should fail.
+    // After invoking with original key, it is cached as a success token. But again using the tampered key should fail.
     @Test(description = "Test to check the InternalKey is working", dependsOnMethods = "invokeInternalKeyHeaderSuccessTest")
     public void invokeAgainWithTamperedInternalKey() throws Exception {
         // Set header
