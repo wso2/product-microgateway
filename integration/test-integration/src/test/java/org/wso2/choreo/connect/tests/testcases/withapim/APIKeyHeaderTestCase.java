@@ -33,7 +33,6 @@ import org.wso2.choreo.connect.tests.apim.utils.PublisherUtils;
 import org.wso2.choreo.connect.tests.apim.utils.StoreUtils;
 import org.wso2.choreo.connect.tests.util.*;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,24 +54,9 @@ public class APIKeyHeaderTestCase extends ApimBaseTest {
     @BeforeClass(description = "Initialise the setup for API key tests")
     void start() throws Exception {
         super.initWithSuperTenant();
-        APIRequest apiRequest = new APIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT,
-                new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)));
-        apiRequest.setProvider(user.getUserName());
-        apiRequest.setVersion(SAMPLE_API_VERSION);
-        apiRequest.setTiersCollection(TestConstant.SUBSCRIPTION_TIER.UNLIMITED);
-        apiRequest.setTier(TestConstant.API_TIER.UNLIMITED);
-        apiRequest.setApiTier(TestConstant.API_TIER.UNLIMITED);
 
-        // Add api related operations
-        APIOperationsDTO findByStatus = new APIOperationsDTO();
-        findByStatus.setVerb("GET");
-        findByStatus.setTarget("/pet/{petId}");
-        findByStatus.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
-
-        List<APIOperationsDTO> operationsDTOS = new ArrayList<>();
-        operationsDTOS.add(findByStatus);
-        apiRequest.setOperationsDTOS(operationsDTOS);
-
+        APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT,
+                SAMPLE_API_VERSION, user.getUserName());
         // Add security scheme to the API
         List<String> securitySchemeList = new ArrayList<>();
         securitySchemeList.add("api_key");
@@ -85,7 +69,7 @@ public class APIKeyHeaderTestCase extends ApimBaseTest {
         applicationId = appWithConsumerKey.getApplicationId();
         StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
 
-        endPoint = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/2");
+        endPoint = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
 
         // Obtain internal key
         ApiResponse<org.wso2.am.integration.clients.publisher.api.v1.dto.APIKeyDTO> internalApiKeyDTO =
@@ -112,7 +96,7 @@ public class APIKeyHeaderTestCase extends ApimBaseTest {
                 "Response code mismatched");
     }
 
-    @Test(description = "Test to check the API Key in header is working")
+    @Test(description = "Test to check the Internal Key in header is working")
     public void invokeInternalAPIKeyWithSimilarHeaderSuccessTest() throws Exception {
         // Set header
         Map<String, String> headers = new HashMap<>();
