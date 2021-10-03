@@ -21,7 +21,7 @@
     <groupId>org.wso2.am.choreo.connect</groupId>
     <artifactId>choreo-connect-parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.9.1-SNAPSHOT</version>
+    <version>1.0.0-m1</version>
     <name>Choreo Connect - Parent</name>
 
     <url>https://wso2.org</url>
@@ -40,7 +40,7 @@
         <url>https://github.com/wso2/product-microgateway.git</url>
         <developerConnection>scm:git:https://github.com/wso2/product-microgateway.git</developerConnection>
         <connection>scm:git:https://github.com/wso2/product-microgateway.git</connection>
-        <tag>HEAD</tag>
+        <tag>v1.0.0-m1</tag>
     </scm>
 
     <profiles>
@@ -149,13 +149,13 @@
                         <configuration>
                             <target>
                                 <replaceregexp match="wso2\/choreo-connect\-router\:.*" replace="wso2/choreo-connect-router:${project.version}" byline="true">
-                                    <fileset dir="resources/docker-compose" includes="**/docker-compose.yaml"/>
+                                    <fileset dir="resources/docker-compose" includes="**/docker-compose.yaml" />
                                 </replaceregexp>
                                 <replaceregexp match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true">
-                                    <fileset dir="resources/docker-compose" includes="**/docker-compose.yaml"/>
+                                    <fileset dir="resources/docker-compose" includes="**/docker-compose.yaml" />
                                 </replaceregexp>
                                 <replaceregexp match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true">
-                                    <fileset dir="resources/docker-compose" includes="**/docker-compose.yaml"/>
+                                    <fileset dir="resources/docker-compose" includes="**/docker-compose.yaml" />
                                 </replaceregexp>
                                 <replaceregexp file="remove-containers.sh" match="micro_gw_version=.*" replace="micro_gw_version=${project.version}" byline="true" />
                             </target>
