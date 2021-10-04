@@ -49,8 +49,6 @@ import (
 	"os"
 	"os/signal"
 
-	"strconv"
-
 	"github.com/fsnotify/fsnotify"
 	"github.com/wso2/product-microgateway/adapter/config"
 	"github.com/wso2/product-microgateway/adapter/internal/discovery/xds"
@@ -77,7 +75,6 @@ var (
 const (
 	ads                        = "ads"
 	amqpProtocol               = "amqp"
-	featureFlagReplaceEventHub = "FEATURE_FLAG_REPLACE_EVENT_HUB"
 )
 
 func init() {
@@ -243,29 +240,11 @@ func Run(conf *config.Config) {
 			fetchAPIsOnStartUp(conf, nil)
 		}
 
-		var isAzureEventingFeatureFlagEnabled bool
-		var err error
-
-		// TODO: (dnwick) remove env variable once the feature is complete
-		featureFlagReplaceEventHubEnvValue := os.Getenv(featureFlagReplaceEventHub)
-		if featureFlagReplaceEventHubEnvValue != "" {
-			isAzureEventingFeatureFlagEnabled, err = strconv.ParseBool(featureFlagReplaceEventHubEnvValue)
-			if err != nil {
-				logger.LoggerMgw.Error("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error occurred while parsing "+
-					"FEATURE_FLAG_REPLACE_EVENT_HUB environment value.", err)
-			}
-		}
-
-		if isAzureEventingFeatureFlagEnabled {
-			logger.LoggerMgw.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Starting to integrate with azure service bus")
-			var connectionURLList = conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints
-			if strings.Contains(connectionURLList[0], amqpProtocol) {
-				go messaging.ProcessEvents(conf)
-			} else {
-				messaging.InitiateAndProcessEvents(conf)
-			}
-		} else {
+		var connectionURLList = conf.ControlPlane.BrokerConnectionParameters.EventListeningEndpoints
+		if strings.Contains(connectionURLList[0], amqpProtocol) {
 			go messaging.ProcessEvents(conf)
+		} else {
+			messaging.InitiateAndProcessEvents(conf)
 		}
 
 		go synchronizer.UpdateRevokedTokens()
