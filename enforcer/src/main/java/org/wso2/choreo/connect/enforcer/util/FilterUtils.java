@@ -528,6 +528,14 @@ public class FilterUtils {
         return authHeaderName.toLowerCase();
     }
 
+    public static String getAPIKeyHeaderName(RequestContext requestContext) {
+        String apiKeyHeader = "";
+        if (StringUtils.isEmpty(apiKeyHeader)) {
+            apiKeyHeader = APIConstants.API_SECURITY_API_KEY;
+        }
+        return apiKeyHeader.toLowerCase();
+    }
+
     /**
      * Check whether the fault event is a one that should be published to analytics server.
      * @param errorCode The error code returned during the filter process

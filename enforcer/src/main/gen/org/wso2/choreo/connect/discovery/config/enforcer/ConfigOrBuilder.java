@@ -173,25 +173,55 @@ public interface ConfigOrBuilder extends
   org.wso2.choreo.connect.discovery.config.enforcer.RestServerOrBuilder getRestServerOrBuilder();
 
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+   * @return Whether the tracing field is set.
+   */
+  boolean hasTracing();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+   * @return The tracing.
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.Tracing getTracing();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder getTracingOrBuilder();
+
+  /**
+   * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+   * @return Whether the metrics field is set.
+   */
+  boolean hasMetrics();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+   * @return The metrics.
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.Metrics getMetrics();
+  /**
+   * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+   */
+  org.wso2.choreo.connect.discovery.config.enforcer.MetricsOrBuilder getMetricsOrBuilder();
+
+  /**
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
    */
   java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Filter> 
       getFiltersList();
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.Filter getFilters(int index);
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
    */
   int getFiltersCount();
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
    */
   java.util.List<? extends org.wso2.choreo.connect.discovery.config.enforcer.FilterOrBuilder> 
       getFiltersOrBuilderList();
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
    */
   org.wso2.choreo.connect.discovery.config.enforcer.FilterOrBuilder getFiltersOrBuilder(
       int index);

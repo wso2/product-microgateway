@@ -27,4 +27,15 @@ public class ConfigDefaults {
     public static final boolean CACHE_ENABLED_VALUE = true;
     public static final int CACHE_MAX_SIZE_VALUE = 10000;
     public static final int CACHE_EXPIRY_TIME_VALUE = 15; // in minutes.
+
+    //Tracing related default values
+    public static final boolean TRACING_ENABLED_VALUE = false;
+    public static final String AZURE_TRACE_EXPORTER = "azure";
+    public static final int MAXIMUM_TRACES_PER_SECOND = 2;
+    public static final String INSTRUMENTATION_NAME = "CHOREO-CONNECT";
+    public static final long TRACING_READ_TIMEOUT = 15;
+
+    //Metrics related default values
+    public static final boolean METRICS_ENABLED_VALUE = false;
+    public static final String METRICS_TYPE_VALUE = "azure";
 }

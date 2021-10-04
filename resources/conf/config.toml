@@ -70,3 +70,9 @@
 
 [analytics]
   enabled = false
+
+[enforcer.metrics]
+  enabled = false
+
+[enforcer.tracing]
+  enabled = false

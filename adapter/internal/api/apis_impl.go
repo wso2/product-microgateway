@@ -48,6 +48,7 @@ const (
 	deploymentsYAMLFile        string = "deployment_environments.yaml"
 	apiJSONFile                string = "api.json"
 	endpointCertDir            string = "Endpoint-certificates"
+	interceptorCertDir         string = "Endpoint-certificates/interceptors"
 	crtExtension               string = ".crt"
 	pemExtension               string = ".pem"
 	apiTypeFilterKey           string = "type"
@@ -66,9 +67,10 @@ const (
 type ProjectAPI struct {
 	APIJsn                     []byte
 	Deployments                []Deployment
-	RevisionID				   int
+	RevisionID                 int
 	SwaggerJsn                 []byte // TODO: (SuKSW) change to OpenAPIJsn
 	UpstreamCerts              []byte
+	interceptorCerts           []byte
 	APIType                    string
 	APILifeCycleStatus         string
 	ProductionEndpoint         string
@@ -88,6 +90,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(payload), int64(len(payload)))
 	newLineByteArray := []byte("\n")
 	var upstreamCerts []byte
+	var interceptorCerts []byte
 
 	if err != nil {
 		loggers.LoggerAPI.Errorf("Error occured while unzipping the apictl project. Error: %v", err.Error())
@@ -125,6 +128,20 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 			}
 			apiProject.SwaggerJsn = swaggerJsn
 			apiProject.APIType = mgw.HTTP
+		} else if strings.Contains(file.Name, interceptorCertDir+string(os.PathSeparator)) &&
+			(strings.HasSuffix(file.Name, crtExtension) || strings.HasSuffix(file.Name, pemExtension)) {
+			unzippedFileBytes, err := readZipFile(file)
+			if err != nil {
+				loggers.LoggerAPI.Errorf("Error occured while reading the intercept endpoint certificate : %v, %v",
+					file.Name, err.Error())
+				continue
+			}
+			if !tlsutils.IsPublicCertificate(unzippedFileBytes) {
+				loggers.LoggerAPI.Errorf("Provided interceptor certificate: %v is not in the PEM file format. ", file.Name)
+				return apiProject, errors.New("interceptor certificate Validation Error")
+			}
+			interceptorCerts = append(interceptorCerts, unzippedFileBytes...)
+			interceptorCerts = append(interceptorCerts, newLineByteArray...)
 		} else if strings.Contains(file.Name, endpointCertDir+string(os.PathSeparator)) &&
 			(strings.HasSuffix(file.Name, crtExtension) || strings.HasSuffix(file.Name, pemExtension)) {
 			unzippedFileBytes, err := readZipFile(file)
@@ -190,6 +207,7 @@ func extractAPIProject(payload []byte) (apiProject ProjectAPI, err error) {
 		return apiProject, err
 	}
 	apiProject.UpstreamCerts = upstreamCerts
+	apiProject.interceptorCerts = interceptorCerts
 	return apiProject, nil
 }
 
@@ -283,8 +301,8 @@ func ApplyAPIProjectFromAPIM(payload []byte, vhostToEnvsMap map[string][]string)
 			return deployedRevisionList, fmt.Errorf("%v:%v with UUID \"%v\"", apiInfo.Name, apiInfo.Version, apiInfo.ID)
 		}
 		if deployedRevision != nil {
-            deployedRevisionList = append(deployedRevisionList, deployedRevision)
-        }
+			deployedRevisionList = append(deployedRevisionList, deployedRevision)
+		}
 	}
 
 	// undeploy APIs with other vhosts in the same gateway environment
@@ -382,6 +400,7 @@ func updateAPI(vhost string, apiInfo ApictlProjectInfo, apiProject ProjectAPI, e
 	apiContent.APIType = apiProject.APIType
 	apiContent.LifeCycleStatus = apiProject.APILifeCycleStatus
 	apiContent.UpstreamCerts = apiProject.UpstreamCerts
+	apiContent.InterceptorCerts = apiProject.interceptorCerts
 	apiContent.Environments = environments
 	apiContent.ProductionEndpoint = apiProject.ProductionEndpoint
 	apiContent.SandboxEndpoint = apiProject.SandboxEndpoint

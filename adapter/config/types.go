@@ -124,6 +124,8 @@ type enforcer struct {
 	Management   management
 	RestServer   restServer
 	Filters      []filter
+	Tracing		 tracing
+	Metrics		 metrics
 }
 
 type server struct {
@@ -326,6 +328,17 @@ type analytics struct {
 	Enforcer analyticsEnforcer
 }
 
+type tracing struct {
+	Enabled  			bool 				`toml:"enabled"`
+	Type				string				`toml:"type"`
+	ConfigProperties	map[string]string	`toml:"configProperties"`
+}
+
+type metrics struct {
+	Enabled  	bool 	`toml:"enabled"`
+	Type 		string 	`toml:"type"`
+}
+
 type analyticsAdapter struct {
 	BufferFlushInterval time.Duration `toml:"bufferFlushInterval"`
 	BufferSizeBytes     uint32        `toml:"bufferSizeBytes"`
@@ -427,6 +440,7 @@ type APIContent struct {
 	LifeCycleStatus    string
 	APIDefinition      []byte
 	UpstreamCerts      []byte
+	InterceptorCerts   []byte
 	Environments       []string
 	ProductionEndpoint string
 	SandboxEndpoint    string

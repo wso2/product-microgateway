@@ -19,6 +19,7 @@
 package org.wso2.choreo.connect.enforcer.security.oauth;
 
 import com.google.gson.Gson;
+import io.opentelemetry.context.Scope;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,12 +31,17 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.logging.log4j.ThreadContext;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.AccessTokenInfo;
 import org.wso2.choreo.connect.enforcer.security.Authenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTValidator;
+import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
+import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
+import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 import org.wso2.choreo.connect.filter.model.AuthenticationContext;
 import org.wso2.choreo.connect.filter.model.RequestContext;
@@ -95,24 +101,40 @@ public class OAuthAuthenticator implements Authenticator {
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
-        String token = requestContext.getHeaders().get("authorization");
-        AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
-
-        if (token == null || !token.toLowerCase().contains("bearer")) {
-            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                    APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
-        }
-        token = token.split("\\s")[1];
-
+        TracingSpan oAuthSpan = null;
+        Scope oAuthSpanScope = null;
         try {
-            IntrospectInfo introspectInfo = validateToken(token);
-            accessTokenInfo.setAccessToken(token);
-            accessTokenInfo.setConsumerKey(introspectInfo.getClientId());
-        } catch (IOException e) {
-            throw new SecurityException(e);
-        }
+            if (Utils.tracingEnabled()) {
+                TracingTracer tracer = Utils.getGlobalTracer();
+                oAuthSpan = Utils.startSpan(TracingConstants.OAUTH_AUTHENTICATOR_SPAN, tracer);
+                oAuthSpanScope = oAuthSpan.getSpan().makeCurrent();
+                Utils.setTag(oAuthSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
+            }
+            String token = requestContext.getHeaders().get("authorization");
+            AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
 
-        return new AuthenticationContext();
+            if (token == null || !token.toLowerCase().contains("bearer")) {
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
+            }
+            token = token.split("\\s")[1];
+
+            try {
+                IntrospectInfo introspectInfo = validateToken(token);
+                accessTokenInfo.setAccessToken(token);
+                accessTokenInfo.setConsumerKey(introspectInfo.getClientId());
+            } catch (IOException e) {
+                throw new SecurityException(e);
+            }
+
+            return new AuthenticationContext();
+        } finally {
+            if (Utils.tracingEnabled()) {
+                oAuthSpanScope.close();
+                Utils.finishSpan(oAuthSpan);
+            }
+        }
     }
 
     @Override

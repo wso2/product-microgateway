@@ -150,9 +150,15 @@
                         </goals>
                         <configuration>
                             <target>
-                                <replaceregexp file="resources/docker-compose/docker-compose.yaml" match="wso2\/choreo-connect\-router\:.*" replace="wso2/choreo-connect-router:${project.version}" byline="true" />
-                                <replaceregexp file="resources/docker-compose/docker-compose.yaml" match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true" />
-                                <replaceregexp file="resources/docker-compose/docker-compose.yaml" match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true" />
+                                <replaceregexp match="wso2\/choreo-connect\-router\:.*" replace="wso2/choreo-connect-router:${project.version}" byline="true">
+                                    <fileset dir="resources/docker-compose" includes="**/docker-compose.yaml"/>
+                                </replaceregexp>
+                                <replaceregexp match="wso2\/choreo-connect\-adapter\:.*" replace="wso2/choreo-connect-adapter:${project.version}" byline="true">
+                                    <fileset dir="resources/docker-compose" includes="**/docker-compose.yaml"/>
+                                </replaceregexp>
+                                <replaceregexp match="wso2\/choreo-connect\-enforcer\:.*" replace="wso2/choreo-connect-enforcer:${project.version}" byline="true">
+                                    <fileset dir="resources/docker-compose" includes="**/docker-compose.yaml"/>
+                                </replaceregexp>
                                 <replaceregexp file="remove-containers.sh" match="micro_gw_version=.*" replace="micro_gw_version=${project.version}" byline="true" />
                             </target>
                         </configuration>
@@ -383,9 +389,19 @@
                 <version>${analytics.publisher.client.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.java-websocket</groupId>
+                <artifactId>Java-WebSocket</artifactId>
+                <version>${java.websocket.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.databind.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.awaitility</groupId>
@@ -402,6 +418,47 @@
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-slf4j-impl</artifactId>
                 <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.azure</groupId>
+                <artifactId>azure-monitor-opentelemetry-exporter</artifactId>
+                <version>${azure.monitor.opentelemetry.exporter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.microsoft.azure</groupId>
+                <artifactId>applicationinsights-core</artifactId>
+                <version>${applicationinsights.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporter-jaeger-thrift</artifactId>
+                <version>${jaeger.exporter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporter-zipkin</artifactId>
+                <version>${otel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-semconv</artifactId>
+                <version>${otel.alpha.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk</artifactId>
+                <version>${otel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-api</artifactId>
+                <version>${otel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -422,8 +479,11 @@
         <gson.version>2.8.6</gson.version>
         <guava.version>30.0-jre</guava.version>
         <io.fabric8.docker.plugin.version>0.34.1</io.fabric8.docker.plugin.version>
-        <io.netty.version>4.1.63.Final</io.netty.version>
+        <io.netty.version>4.1.68.Final</io.netty.version>
+        <jaeger.exporter.version>1.6.0</jaeger.exporter.version>
+        <java.websocket.version>1.5.1</java.websocket.version>
         <json.smart.version>2.4.7</json.smart.version>
+        <junit.version>4.13.2</junit.version>
         <log4j.version>2.13.3</log4j.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <maven.checkstyle.version>8.18</maven.checkstyle.version>
@@ -432,6 +492,8 @@
         <nimbus.jose.jwt.version>7.9</nimbus.jose.jwt.version>
         <org.json.version>3.0.0.wso2v1</org.json.version>
         <os.mvn.plugin.version>1.6.2</os.mvn.plugin.version>
+        <otel.alpha.version>1.6.0-alpha</otel.alpha.version>
+        <otel.version>1.6.0</otel.version>
         <shade.plugin.version>3.2.4</shade.plugin.version>
         <slf4j.version>1.7.21</slf4j.version>
         <swagger.v3.parser.version>2.0.12</swagger.v3.parser.version>
@@ -451,9 +513,14 @@
         <analytics.publisher.client.version>1.0.4</analytics.publisher.client.version>
         <awaitility.version>3.1.2</awaitility.version>
         <apache.httpcomponents.version>4.5.13</apache.httpcomponents.version>
-        <jackson.databind.version>2.10.5.1</jackson.databind.version>
+        <jackson.databind.version>2.12.4</jackson.databind.version>
         <snakeyaml.version>1.26</snakeyaml.version>
         <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
         <googlecode.download.plugin.version>1.6.3</googlecode.download.plugin.version>
+
+        <!-- Enforcer metrics, tracing related dependencies -->
+        <jackson.annotations.version>2.12.4</jackson.annotations.version>
+        <applicationinsights.core.version>2.6.3</applicationinsights.core.version>
+        <azure.monitor.opentelemetry.exporter.version>1.0.0-beta.4</azure.monitor.opentelemetry.exporter.version>
     </properties>
 </project>

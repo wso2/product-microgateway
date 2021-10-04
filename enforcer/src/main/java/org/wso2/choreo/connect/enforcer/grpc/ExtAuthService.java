@@ -31,12 +31,19 @@ import io.envoyproxy.envoy.service.auth.v3.DeniedHttpResponse;
 import io.envoyproxy.envoy.service.auth.v3.OkHttpResponse;
 import io.envoyproxy.envoy.type.v3.HttpStatus;
 import io.grpc.stub.StreamObserver;
+import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.api.ResponseObject;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.HttpConstants;
+import org.wso2.choreo.connect.enforcer.metrics.MetricsExporter;
+import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
 import org.wso2.choreo.connect.enforcer.server.HttpRequestHandler;
+import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
+import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
+import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 
 /**
  * This is the gRPC server written to match with the envoy ext-authz filter proto file. Envoy proxy call this service.
@@ -48,15 +55,38 @@ public class ExtAuthService extends AuthorizationGrpc.AuthorizationImplBase {
 
     @Override
     public void check(CheckRequest request, StreamObserver<CheckResponse> responseObserver) {
-        ThreadContext.put(APIConstants.LOG_TRACE_ID, request.getAttributes().getRequest().getHttp()
-                .getHeadersOrDefault(HttpConstants.X_REQUEST_ID_HEADER,
-                        request.getAttributes().getRequest().getHttp().getId()));
-        ResponseObject responseObject = requestHandler.process(request);
-        CheckResponse response = buildResponse(request, responseObject);
-        responseObserver.onNext(response);
-        // When you are done, you must call onCompleted.
-        responseObserver.onCompleted();
-        ThreadContext.remove(APIConstants.LOG_TRACE_ID);
+        TracingSpan extAuthServiceSpan = null;
+        Scope extAuthServiceSpanScope = null;
+        long starTimestamp = System.currentTimeMillis();
+        try {
+            String traceId = request.getAttributes().getRequest().getHttp()
+                    .getHeadersOrDefault(HttpConstants.X_REQUEST_ID_HEADER,
+                            request.getAttributes().getRequest().getHttp().getId());
+            if (Utils.tracingEnabled()) {
+                TracingTracer tracer =  Utils.getGlobalTracer();
+                // This span will be the parent span for all the filters
+                extAuthServiceSpan = Utils.startSpan(TracingConstants.EXT_AUTH_SERVICE_SPAN, tracer);
+                extAuthServiceSpanScope = extAuthServiceSpan.getSpan().makeCurrent();
+                Utils.setTag(extAuthServiceSpan, APIConstants.LOG_TRACE_ID, traceId);
+            }
+            ThreadContext.put(APIConstants.LOG_TRACE_ID, traceId);
+            ResponseObject responseObject = requestHandler.process(request);
+            CheckResponse response = buildResponse(request, responseObject);
+            responseObserver.onNext(response);
+            // When you are done, you must call onCompleted.
+            responseObserver.onCompleted();
+            ThreadContext.remove(APIConstants.LOG_TRACE_ID);
+        } finally {
+            if (Utils.tracingEnabled()) {
+                extAuthServiceSpanScope.close();
+                Utils.finishSpan(extAuthServiceSpan);
+            }
+            if (MetricsManager.isMetricsEnabled()) {
+                MetricsExporter metricsExporter = MetricsManager.getInstance();
+                metricsExporter.trackMetric("enforcerLatency", System.currentTimeMillis() - starTimestamp);
+            }
+        }
+
     }
 
     private CheckResponse buildResponse(CheckRequest request, ResponseObject responseObject) {

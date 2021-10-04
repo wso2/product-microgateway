@@ -198,6 +198,32 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 98: {
+            org.wso2.choreo.connect.discovery.config.enforcer.Tracing.Builder subBuilder = null;
+            if (tracing_ != null) {
+              subBuilder = tracing_.toBuilder();
+            }
+            tracing_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Tracing.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(tracing_);
+              tracing_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
+          case 106: {
+            org.wso2.choreo.connect.discovery.config.enforcer.Metrics.Builder subBuilder = null;
+            if (metrics_ != null) {
+              subBuilder = metrics_.toBuilder();
+            }
+            metrics_ = input.readMessage(org.wso2.choreo.connect.discovery.config.enforcer.Metrics.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(metrics_);
+              metrics_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
+          case 114: {
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
               filters_ = new java.util.ArrayList<org.wso2.choreo.connect.discovery.config.enforcer.Filter>();
               mutable_bitField0_ |= 0x00000001;
@@ -527,17 +553,69 @@ private static final long serialVersionUID = 0L;
     return getRestServer();
   }
 
-  public static final int FILTERS_FIELD_NUMBER = 12;
+  public static final int TRACING_FIELD_NUMBER = 12;
+  private org.wso2.choreo.connect.discovery.config.enforcer.Tracing tracing_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+   * @return Whether the tracing field is set.
+   */
+  @java.lang.Override
+  public boolean hasTracing() {
+    return tracing_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+   * @return The tracing.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.Tracing getTracing() {
+    return tracing_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Tracing.getDefaultInstance() : tracing_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder getTracingOrBuilder() {
+    return getTracing();
+  }
+
+  public static final int METRICS_FIELD_NUMBER = 13;
+  private org.wso2.choreo.connect.discovery.config.enforcer.Metrics metrics_;
+  /**
+   * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+   * @return Whether the metrics field is set.
+   */
+  @java.lang.Override
+  public boolean hasMetrics() {
+    return metrics_ != null;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+   * @return The metrics.
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.Metrics getMetrics() {
+    return metrics_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Metrics.getDefaultInstance() : metrics_;
+  }
+  /**
+   * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+   */
+  @java.lang.Override
+  public org.wso2.choreo.connect.discovery.config.enforcer.MetricsOrBuilder getMetricsOrBuilder() {
+    return getMetrics();
+  }
+
+  public static final int FILTERS_FIELD_NUMBER = 14;
   private java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Filter> filters_;
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
    */
   @java.lang.Override
   public java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Filter> getFiltersList() {
     return filters_;
   }
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
    */
   @java.lang.Override
   public java.util.List<? extends org.wso2.choreo.connect.discovery.config.enforcer.FilterOrBuilder> 
@@ -545,21 +623,21 @@ private static final long serialVersionUID = 0L;
     return filters_;
   }
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
    */
   @java.lang.Override
   public int getFiltersCount() {
     return filters_.size();
   }
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
    */
   @java.lang.Override
   public org.wso2.choreo.connect.discovery.config.enforcer.Filter getFilters(int index) {
     return filters_.get(index);
   }
   /**
-   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+   * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
    */
   @java.lang.Override
   public org.wso2.choreo.connect.discovery.config.enforcer.FilterOrBuilder getFiltersOrBuilder(
@@ -614,8 +692,14 @@ private static final long serialVersionUID = 0L;
     if (restServer_ != null) {
       output.writeMessage(11, getRestServer());
     }
+    if (tracing_ != null) {
+      output.writeMessage(12, getTracing());
+    }
+    if (metrics_ != null) {
+      output.writeMessage(13, getMetrics());
+    }
     for (int i = 0; i < filters_.size(); i++) {
-      output.writeMessage(12, filters_.get(i));
+      output.writeMessage(14, filters_.get(i));
     }
     unknownFields.writeTo(output);
   }
@@ -670,9 +754,17 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(11, getRestServer());
     }
+    if (tracing_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(12, getTracing());
+    }
+    if (metrics_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(13, getMetrics());
+    }
     for (int i = 0; i < filters_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(12, filters_.get(i));
+        .computeMessageSize(14, filters_.get(i));
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -744,6 +836,16 @@ private static final long serialVersionUID = 0L;
       if (!getRestServer()
           .equals(other.getRestServer())) return false;
     }
+    if (hasTracing() != other.hasTracing()) return false;
+    if (hasTracing()) {
+      if (!getTracing()
+          .equals(other.getTracing())) return false;
+    }
+    if (hasMetrics() != other.hasMetrics()) return false;
+    if (hasMetrics()) {
+      if (!getMetrics()
+          .equals(other.getMetrics())) return false;
+    }
     if (!getFiltersList()
         .equals(other.getFiltersList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
@@ -800,6 +902,14 @@ private static final long serialVersionUID = 0L;
     if (hasRestServer()) {
       hash = (37 * hash) + RESTSERVER_FIELD_NUMBER;
       hash = (53 * hash) + getRestServer().hashCode();
+    }
+    if (hasTracing()) {
+      hash = (37 * hash) + TRACING_FIELD_NUMBER;
+      hash = (53 * hash) + getTracing().hashCode();
+    }
+    if (hasMetrics()) {
+      hash = (37 * hash) + METRICS_FIELD_NUMBER;
+      hash = (53 * hash) + getMetrics().hashCode();
     }
     if (getFiltersCount() > 0) {
       hash = (37 * hash) + FILTERS_FIELD_NUMBER;
@@ -1009,6 +1119,18 @@ private static final long serialVersionUID = 0L;
         restServer_ = null;
         restServerBuilder_ = null;
       }
+      if (tracingBuilder_ == null) {
+        tracing_ = null;
+      } else {
+        tracing_ = null;
+        tracingBuilder_ = null;
+      }
+      if (metricsBuilder_ == null) {
+        metrics_ = null;
+      } else {
+        metrics_ = null;
+        metricsBuilder_ = null;
+      }
       if (filtersBuilder_ == null) {
         filters_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -1096,6 +1218,16 @@ private static final long serialVersionUID = 0L;
         result.restServer_ = restServer_;
       } else {
         result.restServer_ = restServerBuilder_.build();
+      }
+      if (tracingBuilder_ == null) {
+        result.tracing_ = tracing_;
+      } else {
+        result.tracing_ = tracingBuilder_.build();
+      }
+      if (metricsBuilder_ == null) {
+        result.metrics_ = metrics_;
+      } else {
+        result.metrics_ = metricsBuilder_.build();
       }
       if (filtersBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0)) {
@@ -1186,6 +1318,12 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasRestServer()) {
         mergeRestServer(other.getRestServer());
+      }
+      if (other.hasTracing()) {
+        mergeTracing(other.getTracing());
+      }
+      if (other.hasMetrics()) {
+        mergeMetrics(other.getMetrics());
       }
       if (filtersBuilder_ == null) {
         if (!other.filters_.isEmpty()) {
@@ -2552,6 +2690,244 @@ private static final long serialVersionUID = 0L;
       return restServerBuilder_;
     }
 
+    private org.wso2.choreo.connect.discovery.config.enforcer.Tracing tracing_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Tracing, org.wso2.choreo.connect.discovery.config.enforcer.Tracing.Builder, org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder> tracingBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     * @return Whether the tracing field is set.
+     */
+    public boolean hasTracing() {
+      return tracingBuilder_ != null || tracing_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     * @return The tracing.
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Tracing getTracing() {
+      if (tracingBuilder_ == null) {
+        return tracing_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Tracing.getDefaultInstance() : tracing_;
+      } else {
+        return tracingBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    public Builder setTracing(org.wso2.choreo.connect.discovery.config.enforcer.Tracing value) {
+      if (tracingBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        tracing_ = value;
+        onChanged();
+      } else {
+        tracingBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    public Builder setTracing(
+        org.wso2.choreo.connect.discovery.config.enforcer.Tracing.Builder builderForValue) {
+      if (tracingBuilder_ == null) {
+        tracing_ = builderForValue.build();
+        onChanged();
+      } else {
+        tracingBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    public Builder mergeTracing(org.wso2.choreo.connect.discovery.config.enforcer.Tracing value) {
+      if (tracingBuilder_ == null) {
+        if (tracing_ != null) {
+          tracing_ =
+            org.wso2.choreo.connect.discovery.config.enforcer.Tracing.newBuilder(tracing_).mergeFrom(value).buildPartial();
+        } else {
+          tracing_ = value;
+        }
+        onChanged();
+      } else {
+        tracingBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    public Builder clearTracing() {
+      if (tracingBuilder_ == null) {
+        tracing_ = null;
+        onChanged();
+      } else {
+        tracing_ = null;
+        tracingBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Tracing.Builder getTracingBuilder() {
+      
+      onChanged();
+      return getTracingFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder getTracingOrBuilder() {
+      if (tracingBuilder_ != null) {
+        return tracingBuilder_.getMessageOrBuilder();
+      } else {
+        return tracing_ == null ?
+            org.wso2.choreo.connect.discovery.config.enforcer.Tracing.getDefaultInstance() : tracing_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Tracing tracing = 12;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Tracing, org.wso2.choreo.connect.discovery.config.enforcer.Tracing.Builder, org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder> 
+        getTracingFieldBuilder() {
+      if (tracingBuilder_ == null) {
+        tracingBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.config.enforcer.Tracing, org.wso2.choreo.connect.discovery.config.enforcer.Tracing.Builder, org.wso2.choreo.connect.discovery.config.enforcer.TracingOrBuilder>(
+                getTracing(),
+                getParentForChildren(),
+                isClean());
+        tracing_ = null;
+      }
+      return tracingBuilder_;
+    }
+
+    private org.wso2.choreo.connect.discovery.config.enforcer.Metrics metrics_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Metrics, org.wso2.choreo.connect.discovery.config.enforcer.Metrics.Builder, org.wso2.choreo.connect.discovery.config.enforcer.MetricsOrBuilder> metricsBuilder_;
+    /**
+     * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+     * @return Whether the metrics field is set.
+     */
+    public boolean hasMetrics() {
+      return metricsBuilder_ != null || metrics_ != null;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+     * @return The metrics.
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Metrics getMetrics() {
+      if (metricsBuilder_ == null) {
+        return metrics_ == null ? org.wso2.choreo.connect.discovery.config.enforcer.Metrics.getDefaultInstance() : metrics_;
+      } else {
+        return metricsBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+     */
+    public Builder setMetrics(org.wso2.choreo.connect.discovery.config.enforcer.Metrics value) {
+      if (metricsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        metrics_ = value;
+        onChanged();
+      } else {
+        metricsBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+     */
+    public Builder setMetrics(
+        org.wso2.choreo.connect.discovery.config.enforcer.Metrics.Builder builderForValue) {
+      if (metricsBuilder_ == null) {
+        metrics_ = builderForValue.build();
+        onChanged();
+      } else {
+        metricsBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+     */
+    public Builder mergeMetrics(org.wso2.choreo.connect.discovery.config.enforcer.Metrics value) {
+      if (metricsBuilder_ == null) {
+        if (metrics_ != null) {
+          metrics_ =
+            org.wso2.choreo.connect.discovery.config.enforcer.Metrics.newBuilder(metrics_).mergeFrom(value).buildPartial();
+        } else {
+          metrics_ = value;
+        }
+        onChanged();
+      } else {
+        metricsBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+     */
+    public Builder clearMetrics() {
+      if (metricsBuilder_ == null) {
+        metrics_ = null;
+        onChanged();
+      } else {
+        metrics_ = null;
+        metricsBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.Metrics.Builder getMetricsBuilder() {
+      
+      onChanged();
+      return getMetricsFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+     */
+    public org.wso2.choreo.connect.discovery.config.enforcer.MetricsOrBuilder getMetricsOrBuilder() {
+      if (metricsBuilder_ != null) {
+        return metricsBuilder_.getMessageOrBuilder();
+      } else {
+        return metrics_ == null ?
+            org.wso2.choreo.connect.discovery.config.enforcer.Metrics.getDefaultInstance() : metrics_;
+      }
+    }
+    /**
+     * <code>.wso2.discovery.config.enforcer.Metrics metrics = 13;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        org.wso2.choreo.connect.discovery.config.enforcer.Metrics, org.wso2.choreo.connect.discovery.config.enforcer.Metrics.Builder, org.wso2.choreo.connect.discovery.config.enforcer.MetricsOrBuilder> 
+        getMetricsFieldBuilder() {
+      if (metricsBuilder_ == null) {
+        metricsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            org.wso2.choreo.connect.discovery.config.enforcer.Metrics, org.wso2.choreo.connect.discovery.config.enforcer.Metrics.Builder, org.wso2.choreo.connect.discovery.config.enforcer.MetricsOrBuilder>(
+                getMetrics(),
+                getParentForChildren(),
+                isClean());
+        metrics_ = null;
+      }
+      return metricsBuilder_;
+    }
+
     private java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Filter> filters_ =
       java.util.Collections.emptyList();
     private void ensureFiltersIsMutable() {
@@ -2565,7 +2941,7 @@ private static final long serialVersionUID = 0L;
         org.wso2.choreo.connect.discovery.config.enforcer.Filter, org.wso2.choreo.connect.discovery.config.enforcer.Filter.Builder, org.wso2.choreo.connect.discovery.config.enforcer.FilterOrBuilder> filtersBuilder_;
 
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Filter> getFiltersList() {
       if (filtersBuilder_ == null) {
@@ -2575,7 +2951,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public int getFiltersCount() {
       if (filtersBuilder_ == null) {
@@ -2585,7 +2961,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.Filter getFilters(int index) {
       if (filtersBuilder_ == null) {
@@ -2595,7 +2971,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public Builder setFilters(
         int index, org.wso2.choreo.connect.discovery.config.enforcer.Filter value) {
@@ -2612,7 +2988,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public Builder setFilters(
         int index, org.wso2.choreo.connect.discovery.config.enforcer.Filter.Builder builderForValue) {
@@ -2626,7 +3002,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public Builder addFilters(org.wso2.choreo.connect.discovery.config.enforcer.Filter value) {
       if (filtersBuilder_ == null) {
@@ -2642,7 +3018,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public Builder addFilters(
         int index, org.wso2.choreo.connect.discovery.config.enforcer.Filter value) {
@@ -2659,7 +3035,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public Builder addFilters(
         org.wso2.choreo.connect.discovery.config.enforcer.Filter.Builder builderForValue) {
@@ -2673,7 +3049,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public Builder addFilters(
         int index, org.wso2.choreo.connect.discovery.config.enforcer.Filter.Builder builderForValue) {
@@ -2687,7 +3063,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public Builder addAllFilters(
         java.lang.Iterable<? extends org.wso2.choreo.connect.discovery.config.enforcer.Filter> values) {
@@ -2702,7 +3078,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public Builder clearFilters() {
       if (filtersBuilder_ == null) {
@@ -2715,7 +3091,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public Builder removeFilters(int index) {
       if (filtersBuilder_ == null) {
@@ -2728,14 +3104,14 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.Filter.Builder getFiltersBuilder(
         int index) {
       return getFiltersFieldBuilder().getBuilder(index);
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.FilterOrBuilder getFiltersOrBuilder(
         int index) {
@@ -2745,7 +3121,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public java.util.List<? extends org.wso2.choreo.connect.discovery.config.enforcer.FilterOrBuilder> 
          getFiltersOrBuilderList() {
@@ -2756,14 +3132,14 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.Filter.Builder addFiltersBuilder() {
       return getFiltersFieldBuilder().addBuilder(
           org.wso2.choreo.connect.discovery.config.enforcer.Filter.getDefaultInstance());
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public org.wso2.choreo.connect.discovery.config.enforcer.Filter.Builder addFiltersBuilder(
         int index) {
@@ -2771,7 +3147,7 @@ private static final long serialVersionUID = 0L;
           index, org.wso2.choreo.connect.discovery.config.enforcer.Filter.getDefaultInstance());
     }
     /**
-     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 12;</code>
+     * <code>repeated .wso2.discovery.config.enforcer.Filter filters = 14;</code>
      */
     public java.util.List<org.wso2.choreo.connect.discovery.config.enforcer.Filter.Builder> 
          getFiltersBuilderList() {
