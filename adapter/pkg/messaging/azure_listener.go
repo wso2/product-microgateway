@@ -52,7 +52,7 @@ func startBrokerConsumer(subscriptionMetaData Subscription, reconnectInterval ti
 				"topic subscription client for %s from azure service bus for topic name %s:%v.",
 				subscriptionName, topicName, err)
 		}
-		logger.LoggerMgw.Info("Starting the consumer for " + "subscriptionName " + subscriptionName +
+		logger.LoggerMgw.Info("Starting the consumer for subscriptionName " + subscriptionName +
 			" from azure service bus for topic name " + topicName)
 		func() {
 			ctx, cancel := context.WithCancel(parentContext)
