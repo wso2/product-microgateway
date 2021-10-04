@@ -433,7 +433,7 @@
         <dependency>
             <groupId>org.wso2.am.choreo.connect</groupId>
             <artifactId>org.wso2.choreo.connect.filter</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
