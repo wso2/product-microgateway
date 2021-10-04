@@ -246,7 +246,7 @@
         <dependency>
             <groupId>org.wso2.am.choreo.connect</groupId>
             <artifactId>org.wso2.choreo.connect.filter</artifactId>
-            <version>0.9.1-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.am</groupId>
