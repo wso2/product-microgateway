@@ -462,8 +462,6 @@ public class RequestContext {
          */
         private Map<String, String> populatePathParameters(String basePath, String resourceTemplate,
                                                            String rawPath) {
-            Map<String, String> pathParamMap = new HashMap<>();
-
             // Format the basePath and resourcePath to maintain consistency
             String formattedBasePath = basePath.startsWith("/") ? basePath : "/" + basePath;
             formattedBasePath = formattedBasePath.endsWith("/") ?
@@ -471,27 +469,11 @@ public class RequestContext {
             String formattedResourcePathTemplate = resourceTemplate.startsWith("/") ?
                     resourceTemplate : "/" + resourceTemplate;
 
-            String pathTemplate = formattedBasePath + formattedResourcePathTemplate;
-            // TODO: (VirajSalaka) write unit tests
-            if (pathTemplate.contains("{")) {
-                String[] pathTemplateSegments = pathTemplate.split("/");
-                String[] pathSegments = rawPath.split("/");
-                for (int arrayIndex = 0; arrayIndex < pathTemplateSegments.length; arrayIndex++) {
-                    String pathTemplateSegment = pathTemplateSegments[arrayIndex];
-                    if (pathTemplateSegment.contains("{")) {
-                        int pathItemKeyStartAt = pathTemplateSegment.indexOf("{");
-                        int pathItemKeyEndAt = pathTemplateSegment.indexOf("}");
-                        String pathItemKey = pathTemplateSegment.substring(pathItemKeyStartAt + 1, pathItemKeyEndAt);
-                        // because there are two additional characters for curly braces.
-                        // TODO: (VirajSalaka) remove - 1.
-                        int suffixLength = pathTemplateSegment.length() - pathItemKeyEndAt - 1;
-                        String pathItemValue = pathSegments[arrayIndex].substring(pathItemKeyStartAt,
-                                pathSegments[arrayIndex].length() - suffixLength);
-                        pathParamMap.put(pathItemKey, pathItemValue);
-                    }
-                }
-            }
-            return pathParamMap;
+            String formattedRawPath = rawPath.split("\\?")[0];
+            final ParameterResolver parameterResolver = new ParameterResolver
+                    (formattedBasePath + formattedResourcePathTemplate);
+            final Map<String, String> resultMap = parameterResolver.parametersByName(formattedRawPath);
+            return resultMap;
         }
     }
 }
