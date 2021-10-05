@@ -47,6 +47,7 @@ public class RequestContext {
     // the openAPI has production endpoints alone.
     private String prodClusterHeader;
     private String sandClusterHeader;
+    // TODO: (VirajSalaka) remove this flag and always enable header based routing.
     private boolean clusterHeaderEnabled = false;
     //Denotes the specific headers which needs to be passed to response object
     private Map<String, String> addHeaders;
@@ -471,6 +472,7 @@ public class RequestContext {
                     resourceTemplate : "/" + resourceTemplate;
 
             String pathTemplate = formattedBasePath + formattedResourcePathTemplate;
+            // TODO: (VirajSalaka) write unit tests
             if (pathTemplate.contains("{")) {
                 String[] pathTemplateSegments = pathTemplate.split("/");
                 String[] pathSegments = rawPath.split("/");
@@ -481,6 +483,7 @@ public class RequestContext {
                         int pathItemKeyEndAt = pathTemplateSegment.indexOf("}");
                         String pathItemKey = pathTemplateSegment.substring(pathItemKeyStartAt + 1, pathItemKeyEndAt);
                         // because there are two additional characters for curly braces.
+                        // TODO: (VirajSalaka) remove - 1.
                         int suffixLength = pathTemplateSegment.length() - pathItemKeyEndAt - 1;
                         String pathItemValue = pathSegments[arrayIndex].substring(pathItemKeyStartAt,
                                 pathSegments[arrayIndex].length() - suffixLength);

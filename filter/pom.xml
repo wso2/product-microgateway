@@ -10,6 +10,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+<!--    TODO: (VirajSalaka) rename it to commons-->
+<!--    TODO: (VirajSalaka) move enforcer and filter to a directory-->
     <artifactId>org.wso2.choreo.connect.filter</artifactId>
     <name>Choreo Connect - Enforcer Filter</name>
 

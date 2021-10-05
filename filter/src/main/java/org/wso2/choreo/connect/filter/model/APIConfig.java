@@ -34,6 +34,7 @@ public class APIConfig {
     private String apiLifeCycleState;
     private String authorizationHeader;
     private EndpointSecurity endpointSecurity;
+    // TODO: (VirajSalaka) check if tenantDomain is returned
     private String organizationId;
     private String uuid;
 

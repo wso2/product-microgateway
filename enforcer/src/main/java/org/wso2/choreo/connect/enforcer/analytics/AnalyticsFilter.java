@@ -112,6 +112,7 @@ public class AnalyticsFilter {
             String apiType = requestContext.getMatchedAPI().getApiType();
             AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
 
+            // TODO: (VirajSalaka) Bring in reserved keywords.
             requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY, AnalyticsUtils.getAPIId(requestContext));
             requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_KEY,
                     AnalyticsUtils.setDefaultIfNull(authContext.getApiPublisher()));
