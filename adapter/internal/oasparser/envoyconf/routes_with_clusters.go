@@ -154,7 +154,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 	// check if x-wso2-endpoints are available
 	xWso2Endpoints, err := mgwSwagger.GetXWso2Endpoints()
 	if err != nil {
-		logger.LoggerOasparser.Error("Error while parsing x-wso2-endpoints in API "+apiTitle+" "+apiVersion, err)
+		logger.LoggerOasparser.Errorf("Error while parsing x-wso2-endpoints in API %v %v : %v", apiTitle, apiVersion, err.Error())
 	}
 	if len(xWso2Endpoints) > 0 {
 		for _, endpointCluster := range xWso2Endpoints {
