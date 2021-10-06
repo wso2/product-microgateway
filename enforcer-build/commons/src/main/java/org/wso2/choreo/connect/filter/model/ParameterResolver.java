@@ -17,6 +17,9 @@
  */
 package org.wso2.choreo.connect.filter.model;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +30,7 @@ import java.util.regex.Pattern;
 class ParameterResolver {
 
     private static final Pattern PARAMETER_PATTERN = Pattern.compile("(\\{[a-zA-Z]+\\})");
+    private static final Logger logger = LogManager.getLogger(ParameterResolver.class);
     private final List<String> parameterNames = new ArrayList<>();
     private final Pattern pattern;
 
@@ -44,19 +48,31 @@ class ParameterResolver {
                 }
             }
         }
-        pattern = Pattern.compile(Pattern.quote(matcher.replaceAll("_____PARAM_____"))
-                .replace("_____PARAM_____", "\\E([^/]*)\\Q"));
+        String regex = Pattern.quote(matcher.replaceAll("_____PARAM_____"))
+                .replace("_____PARAM_____", "\\E([^/]*)\\Q");
+        regex = regex.endsWith("*\\E") ? regex.substring(0, regex.length() - 3) + "\\E(.*)" : regex;
+        pattern = Pattern.compile(regex);
     }
 
-    public Map<String, String> parametersByName(final String uriString) {
+    public Map<String, String> parametersByName(final String uriString) throws IllegalArgumentException {
         final Matcher matcher = pattern.matcher(uriString);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("Uri not matches!");
+            // Unlikely to occur as this pair is already matched within router.
+            logger.error("PathTemplate and RawPath is mismatched.");
+            return new HashMap<>();
         }
         final Map<String, String> map = new HashMap<>();
         for (int i = 1; i <= matcher.groupCount(); i++) {
+            // There can be multiple match for trailing wildcard (if available.)
+            // Those matches will appear in the end. Hence those can be discarded.
+            // ex: /pet/{id}/*
+            if (i == parameterNames.size() + 1) {
+                break;
+            }
             map.put(parameterNames.get(i - 1), matcher.group(i));
         }
         return map;
     }
+//
+//    private String preProcessPath(String path)
 }
