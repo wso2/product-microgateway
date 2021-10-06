@@ -48,8 +48,9 @@ const (
 )
 
 const (
-	sandClustersConfigNamePrefix string = "clusterSand_"
-	prodClustersConfigNamePrefix string = "clusterProd_"
+	xWso2EPClustersConfigNamePrefix string = "xwso2cluster_"
+	sandClustersConfigNamePrefix    string = "clusterSand_"
+	prodClustersConfigNamePrefix    string = "clusterProd_"
 )
 
 const (
