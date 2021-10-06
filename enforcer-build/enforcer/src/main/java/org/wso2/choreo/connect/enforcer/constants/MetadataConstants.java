@@ -24,25 +24,26 @@ package org.wso2.choreo.connect.enforcer.constants;
 public class MetadataConstants {
     public static final String EXT_AUTH_METADATA_CONTEXT_KEY = "envoy.filters.http.ext_authz";
 
-    public static final String API_ID_KEY = "ApiId";
-    public static final String API_CREATOR_KEY = "ApiCreator";
-    public static final String API_NAME_KEY = "ApiName";
-    public static final String API_VERSION_KEY = "ApiVersion";
-    public static final String API_TYPE_KEY = "ApiType";
-    public static final String API_CREATOR_TENANT_DOMAIN_KEY = "ApiCreatorTenantDomain";
-    public static final String API_ORGANIZATION_ID = "ApiOrganizationId";
+    public static final String WSO2_METADATA_PREFIX = "x-wso2-";
+    public static final String API_ID_KEY = WSO2_METADATA_PREFIX + "api-id";
+    public static final String API_CREATOR_KEY = WSO2_METADATA_PREFIX + "api-creator";
+    public static final String API_NAME_KEY = WSO2_METADATA_PREFIX + "api-name";
+    public static final String API_VERSION_KEY = WSO2_METADATA_PREFIX + "api-version";
+    public static final String API_TYPE_KEY = WSO2_METADATA_PREFIX + "api-type";
+    public static final String API_CREATOR_TENANT_DOMAIN_KEY = WSO2_METADATA_PREFIX + "api-creator-tenant-domain";
+    public static final String API_ORGANIZATION_ID = WSO2_METADATA_PREFIX + "api-organization-id";
 
-    public static final String APP_ID_KEY = "ApplicationId";
-    public static final String APP_KEY_TYPE_KEY = "ApplicationKeyType";
-    public static final String APP_NAME_KEY = "ApplicationName";
-    public static final String APP_OWNER_KEY = "ApplicationOwner";
+    public static final String APP_ID_KEY = WSO2_METADATA_PREFIX + "application-id";
+    public static final String APP_KEY_TYPE_KEY = WSO2_METADATA_PREFIX + "application-key-type";
+    public static final String APP_NAME_KEY = WSO2_METADATA_PREFIX + "application-name";
+    public static final String APP_OWNER_KEY = WSO2_METADATA_PREFIX + "application-owner";
 
-    public static final String CORRELATION_ID_KEY = "CorrelationId";
-    public static final String REGION_KEY = "Region";
+    public static final String CORRELATION_ID_KEY = WSO2_METADATA_PREFIX + "correlation-id";
+    public static final String REGION_KEY = WSO2_METADATA_PREFIX + "region";
 
-    public static final String API_RESOURCE_TEMPLATE_KEY = "ApiResourceTemplate";
+    public static final String API_RESOURCE_TEMPLATE_KEY = WSO2_METADATA_PREFIX + "api-resource-template";
 
-    public static final String DESTINATION = "Destination";
+    public static final String DESTINATION = WSO2_METADATA_PREFIX + "destination";
 
     public static final String ERROR_CODE_KEY = "ErrorCode";
 }
