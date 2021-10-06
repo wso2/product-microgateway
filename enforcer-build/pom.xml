@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>choreo-connect-parent</artifactId>
+        <groupId>org.wso2.am.choreo.connect</groupId>
+        <version>1.0.0-m2-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>enforcer-build</artifactId>
+    <packaging>pom</packaging>
+    <name>Choreo Connect - Enforcer Build</name>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
+    <modules>
+        <module>commons</module>
+        <module>enforcer</module>
+    </modules>
+
+</project>

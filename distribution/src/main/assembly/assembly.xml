@@ -166,7 +166,7 @@
             <destName>LICENSE-ADAPTER.txt</destName>
         </file>
         <file>
-            <source>../enforcer/LICENSE.txt</source>
+            <source>../enforcer-build/enforcer/LICENSE.txt</source>
             <outputDirectory>choreo-connect-${project.version}/</outputDirectory>
             <destName>LICENSE-ENFORCER.txt</destName>
         </file>
