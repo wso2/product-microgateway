@@ -52,6 +52,13 @@
             </class>
         </classes>
     </test>
+   <test name="apis-apps-subs-received-after-apim-restart" parallel="false">
+       <classes>
+           <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.BasicEventsTestCase"/>
+           <class name="org.wso2.choreo.connect.tests.testcases.withapim.APIKeyTestCase"/>
+       </classes>
+   </test>
     <test name="all-events-received-via-eventhub" parallel="false">
         <classes>
             <!-- Clean and create APIs, Applications, Subscriptions AFTER starting Choreo Connect  -->
@@ -68,15 +75,15 @@
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.VhostApimTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.EndpointsWithTrailingSlashTestCase"/>
             <class name="org.wso2.choreo.connect.tests.testcases.withapim.EnforcerAPITestCase"/>
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.CcShutdownExecutor"/>
         </classes>
     </test>
-<!--    <test name="apis-apps-subs-received-after-apim-restart" parallel="false">-->
-<!--        <classes>-->
-<!--            <class name="org.wso2.choreo.connect.tests.setup.withapim.ApimRestartExecutor"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.withapim.ExistingApiTestCase"/>-->
-<!--            <class name="org.wso2.choreo.connect.tests.testcases.withapim.BasicEventsTestCase"/>-->
-<!--        </classes>-->
-<!--    </test>-->
+    <test name="cc-specific-tests-with-apim" parallel="false">
+        <classes>
+            <class name="org.wso2.choreo.connect.tests.setup.withapim.CcStartupExecutorTwo"/>
+            <class name="org.wso2.choreo.connect.tests.testcases.withapim.APIKeyHeaderTestCase"/>
+        </classes>
+    </test>
     <test name="cc-shutdown-and-apim-shutdown" parallel="false">
         <classes>
             <class name="org.wso2.choreo.connect.tests.setup.withapim.CcShutdownExecutor"/>

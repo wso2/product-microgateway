@@ -19,9 +19,11 @@
 package org.wso2.choreo.connect.enforcer.analytics;
 
 import io.envoyproxy.envoy.service.accesslog.v3.StreamAccessLogsMessage;
+import io.opentelemetry.context.Scope;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
@@ -30,6 +32,10 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.Constants;
 import org.wso2.choreo.connect.enforcer.constants.MetadataConstants;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
+import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
+import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
+import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.lang.reflect.Constructor;
@@ -91,45 +97,61 @@ public class AnalyticsFilter {
     }
 
     public void handleSuccessRequest(RequestContext requestContext) {
-        String apiName = requestContext.getMatchedAPI().getAPIConfig().getName();
-        String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
-        String apiType = requestContext.getMatchedAPI().getAPIConfig().getApiType();
-        AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
+        TracingSpan analyticsSpan = null;
+        Scope analyticsSpanScope = null;
+        try {
+            if (Utils.tracingEnabled()) {
+                TracingTracer tracer = Utils.getGlobalTracer();
+                analyticsSpan = Utils.startSpan(TracingConstants.ANALYTICS_SPAN, tracer);
+                analyticsSpanScope = analyticsSpan.getSpan().makeCurrent();
+                Utils.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
+            }
+            String apiName = requestContext.getMatchedAPI().getAPIConfig().getName();
+            String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
+            String apiType = requestContext.getMatchedAPI().getAPIConfig().getApiType();
+            AuthenticationContext authContext = AnalyticsUtils.getAuthenticationContext(requestContext);
 
-        requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY, AnalyticsUtils.getAPIId(requestContext));
-        requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_KEY,
-                AnalyticsUtils.setDefaultIfNull(authContext.getApiPublisher()));
-        requestContext.addMetadataToMap(MetadataConstants.API_NAME_KEY, apiName);
-        requestContext.addMetadataToMap(MetadataConstants.API_VERSION_KEY, apiVersion);
-        requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, apiType);
+            requestContext.addMetadataToMap(MetadataConstants.API_ID_KEY, AnalyticsUtils.getAPIId(requestContext));
+            requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_KEY,
+                    AnalyticsUtils.setDefaultIfNull(authContext.getApiPublisher()));
+            requestContext.addMetadataToMap(MetadataConstants.API_NAME_KEY, apiName);
+            requestContext.addMetadataToMap(MetadataConstants.API_VERSION_KEY, apiVersion);
+            requestContext.addMetadataToMap(MetadataConstants.API_TYPE_KEY, apiType);
 
-        String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(
-                requestContext.getMatchedAPI().getAPIConfig().getBasePath());
-        requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY,
-                tenantDomain == null ? APIConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
+            String tenantDomain = FilterUtils.getTenantDomainFromRequestURL(
+                    requestContext.getMatchedAPI().getAPIConfig().getBasePath());
+            requestContext.addMetadataToMap(MetadataConstants.API_CREATOR_TENANT_DOMAIN_KEY,
+                    tenantDomain == null ? APIConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
 
-        // Default Value would be PRODUCTION
-        requestContext.addMetadataToMap(MetadataConstants.APP_KEY_TYPE_KEY,
-                authContext.getKeyType() == null ? APIConstants.API_KEY_TYPE_PRODUCTION : authContext.getKeyType());
-        requestContext.addMetadataToMap(MetadataConstants.APP_ID_KEY,
-                AnalyticsUtils.setDefaultIfNull(authContext.getApplicationId()));
-        requestContext.addMetadataToMap(MetadataConstants.APP_NAME_KEY,
-                AnalyticsUtils.setDefaultIfNull(authContext.getApplicationName()));
-        requestContext.addMetadataToMap(MetadataConstants.APP_OWNER_KEY,
-                AnalyticsUtils.setDefaultIfNull(authContext.getSubscriber()));
+            // Default Value would be PRODUCTION
+            requestContext.addMetadataToMap(MetadataConstants.APP_KEY_TYPE_KEY,
+                    authContext.getKeyType() == null ? APIConstants.API_KEY_TYPE_PRODUCTION : authContext.getKeyType());
+            requestContext.addMetadataToMap(MetadataConstants.APP_ID_KEY,
+                    AnalyticsUtils.setDefaultIfNull(authContext.getApplicationId()));
+            requestContext.addMetadataToMap(MetadataConstants.APP_NAME_KEY,
+                    AnalyticsUtils.setDefaultIfNull(authContext.getApplicationName()));
+            requestContext.addMetadataToMap(MetadataConstants.APP_OWNER_KEY,
+                    AnalyticsUtils.setDefaultIfNull(authContext.getSubscriber()));
 
-        requestContext.addMetadataToMap(MetadataConstants.CORRELATION_ID_KEY, requestContext.getRequestID());
-        requestContext.addMetadataToMap(MetadataConstants.REGION_KEY,
-                ConfigHolder.getInstance().getEnvVarConfig().getEnforcerRegionId());
+            requestContext.addMetadataToMap(MetadataConstants.CORRELATION_ID_KEY, requestContext.getRequestID());
+            requestContext.addMetadataToMap(MetadataConstants.REGION_KEY,
+                    ConfigHolder.getInstance().getEnvVarConfig().getEnforcerRegionId());
 
-        // As in the matched API, only the resources under the matched resource template are selected.
-        requestContext.addMetadataToMap(MetadataConstants.API_RESOURCE_TEMPLATE_KEY,
-                requestContext.getMatchedResourcePath().getPath());
+            // As in the matched API, only the resources under the matched resource template are selected.
+            requestContext.addMetadataToMap(MetadataConstants.API_RESOURCE_TEMPLATE_KEY,
+                    requestContext.getMatchedResourcePath().getPath());
 
-        requestContext.addMetadataToMap(MetadataConstants.DESTINATION, resolveEndpoint(requestContext));
+            requestContext.addMetadataToMap(MetadataConstants.DESTINATION, resolveEndpoint(requestContext));
 
-        requestContext.addMetadataToMap(MetadataConstants.API_ORGANIZATION_ID,
-                requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
+            requestContext.addMetadataToMap(MetadataConstants.API_ORGANIZATION_ID,
+                    requestContext.getMatchedAPI().getAPIConfig().getOrganizationId());
+        } finally {
+            if (Utils.tracingEnabled()) {
+                analyticsSpanScope.close();
+                Utils.finishSpan(analyticsSpan);
+            }
+        }
     }
 
     private String resolveEndpoint(RequestContext requestContext) {
@@ -147,21 +169,39 @@ public class AnalyticsFilter {
     }
 
     public void handleFailureRequest(RequestContext requestContext) {
-        if (publisher == null) {
-            logger.error("Cannot publish the failure event as analytics publisher is null.");
-            return;
-        }
-        ChoreoFaultAnalyticsProvider provider = new ChoreoFaultAnalyticsProvider(requestContext);
-        // To avoid incrementing counter for options call
-        if (provider.getProxyResponseCode() == 200 || provider.getProxyResponseCode() == 204) {
-            return;
-        }
-        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+        TracingSpan analyticsSpan = null;
+        Scope analyticsSpanScope = null;
+
         try {
-            dataCollector.collectData();
-            logger.debug("Analytics event for failure event is published.");
-        } catch (AnalyticsException e) {
-            logger.error("Error while publishing the analytics event. ", e);
+            if (Utils.tracingEnabled()) {
+                TracingTracer tracer = Utils.getGlobalTracer();
+                analyticsSpan = Utils.startSpan(TracingConstants.ANALYTICS_FAILURE_SPAN, tracer);
+                analyticsSpanScope = analyticsSpan.getSpan().makeCurrent();
+                Utils.setTag(analyticsSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
+
+            }
+            if (publisher == null) {
+                logger.error("Cannot publish the failure event as analytics publisher is null.");
+                return;
+            }
+            ChoreoFaultAnalyticsProvider provider = new ChoreoFaultAnalyticsProvider(requestContext);
+            // To avoid incrementing counter for options call
+            if (provider.getProxyResponseCode() == 200 || provider.getProxyResponseCode() == 204) {
+                return;
+            }
+            GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+            try {
+                dataCollector.collectData();
+                logger.debug("Analytics event for failure event is published.");
+            } catch (AnalyticsException e) {
+                logger.error("Error while publishing the analytics event. ", e);
+            }
+        } finally {
+            if (Utils.tracingEnabled()) {
+                analyticsSpanScope.close();
+                Utils.finishSpan(analyticsSpan);
+            }
         }
     }
 

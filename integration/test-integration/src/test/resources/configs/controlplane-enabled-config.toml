@@ -17,7 +17,7 @@
     enabled = true
     skipSSLVerification=true
 [controlPlane.jmsConnectionParameters]
-    eventListeningEndpoints = ["amqp://admin:admin@apim:5672?retries='5'&connectdelay='30000'"]
+    eventListeningEndpoints = ["amqp://admin:admin@apim:5672?retries='250'&connectdelay='10'"]
 
 [analytics]
     enabled = true

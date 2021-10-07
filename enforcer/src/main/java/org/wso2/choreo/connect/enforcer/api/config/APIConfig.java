@@ -142,7 +142,7 @@ public class APIConfig {
             return this;
         }
 
-        public Builder securitySchema(List<String> securityScheme) {
+        public Builder securitySchema(List<String> securitySchemes) {
             this.securitySchemes = securitySchemes;
             return this;
         }

@@ -1,0 +1,37 @@
+{
+  "connectionString": "",
+  "role": {
+    "name": "choreo_connect_enforcer"
+  },
+  "sampling": {
+    "percentage": 50
+  },
+  "heartbeat": {
+    "intervalSeconds": 900
+  },
+  "preview": {
+    "instrumentation": {
+      "azureSdk": {
+        "enabled": false
+      }
+    },
+    "metricIntervalSeconds": 60
+  },
+  "instrumentation": {
+    "logging": {
+      "level": "OFF"
+    },
+    "cassandra": {
+      "enabled": false
+    },
+    "jdbc": {
+      "enabled": false
+    },
+    "jms": {
+      "enabled": false
+    },
+    "kafka": {
+      "enabled": false
+    }
+  }
+}

@@ -17,8 +17,10 @@
  */
 package org.wso2.choreo.connect.enforcer.websocket;
 
+import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.json.JSONObject;
 import org.wso2.choreo.connect.enforcer.Filter;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
@@ -33,6 +35,10 @@ import org.wso2.choreo.connect.enforcer.throttle.ThrottleDataHolder;
 import org.wso2.choreo.connect.enforcer.throttle.databridge.agent.util.ThrottleEventConstants;
 import org.wso2.choreo.connect.enforcer.throttle.dto.Decision;
 import org.wso2.choreo.connect.enforcer.throttle.utils.ThrottleUtils;
+import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
+import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
+import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.net.Inet4Address;
@@ -62,14 +68,30 @@ public class WebSocketThrottleFilter implements Filter {
     }
 
     @Override public boolean handleRequest(RequestContext requestContext) {
+        TracingSpan wsSpan = null;
+        Scope wsSpanScope = null;
+        try {
+            if (Utils.tracingEnabled()) {
+                TracingTracer tracer = Utils.getGlobalTracer();
+                wsSpan = Utils.startSpan(TracingConstants.WS_THROTTLE_SPAN, tracer);
+                wsSpanScope = wsSpan.getSpan().makeCurrent();
+                Utils.setTag(wsSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
 
-        if (doThrottle(requestContext)) {
-            // breaking filter chain since request is throttled
-            return false;
+            }
+            if (doThrottle(requestContext)) {
+                // breaking filter chain since request is throttled
+                return false;
+            }
+            // publish throttle event and continue the filter chain
+            ThrottleAgent.publishNonThrottledEvent(getThrottleEventMap(requestContext));
+            return true;
+        } finally {
+            if (Utils.tracingEnabled()) {
+                wsSpanScope.close();
+                Utils.finishSpan(wsSpan);
+            }
         }
-        // publish throttle event and continue the filter chain
-        ThrottleAgent.publishNonThrottledEvent(getThrottleEventMap(requestContext));
-        return true;
 
     }
 

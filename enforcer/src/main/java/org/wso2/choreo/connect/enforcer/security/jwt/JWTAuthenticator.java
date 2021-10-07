@@ -21,11 +21,13 @@ import com.google.common.cache.LoadingCache;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.util.DateUtils;
+import io.opentelemetry.context.Scope;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -52,6 +54,10 @@ import org.wso2.choreo.connect.enforcer.security.TokenValidationContext;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTConstants;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
+import org.wso2.choreo.connect.enforcer.tracing.TracingConstants;
+import org.wso2.choreo.connect.enforcer.tracing.TracingSpan;
+import org.wso2.choreo.connect.enforcer.tracing.TracingTracer;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.text.ParseException;
@@ -86,149 +92,211 @@ public class JWTAuthenticator implements Authenticator {
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
-        String jwtToken = retrieveAuthHeaderValue(requestContext);
-        if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
-            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                    APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
-        }
-        String[] splitToken = jwtToken.split("\\s");
-        // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
-        if (splitToken.length > 1) {
-            jwtToken = splitToken[1];
-        }
-        String context = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
-        String name = requestContext.getMatchedAPI().getAPIConfig().getName();
-        String version = requestContext.getMatchedAPI().getAPIConfig().getVersion();
-        context = context + "/" + version;
-        ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
-        SignedJWTInfo signedJWTInfo;
+        TracingTracer tracer = null;
+        TracingSpan decodeTokenHeaderSpan = null;
+        TracingSpan jwtAuthenticatorInfoSpan = null;
+        Scope jwtAuthenticatorInfoSpanScope = null;
+        TracingSpan validateSubscriptionSpan = null;
+        TracingSpan validateScopesSpan = null;
+
         try {
-            signedJWTInfo = getSignedJwt(jwtToken);
-        } catch (ParseException | IllegalArgumentException e) {
-            log.error("Failed to decode the token header", e);
-            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    "Not a JWT token. Failed to decode the token header", e);
-        }
-        JWTClaimsSet claims = signedJWTInfo.getJwtClaimsSet();
-        String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
-
-        String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
-        if (StringUtils.isNotEmpty(jwtTokenIdentifier)) {
-            if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jwtTokenIdentifier)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Token retrieved from the revoked jwt token map. Token: "
-                            + FilterUtils.getMaskedToken(jwtHeader));
-                }
-                log.error("Invalid JWT token. " + FilterUtils.getMaskedToken(jwtHeader));
-                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
+            if (Utils.tracingEnabled()) {
+                tracer = Utils.getGlobalTracer();
+                jwtAuthenticatorInfoSpan = Utils.startSpan(TracingConstants.JWT_AUTHENTICATOR_SPAN, tracer);
+                jwtAuthenticatorInfoSpanScope = jwtAuthenticatorInfoSpan.getSpan().makeCurrent();
+                Utils.setTag(jwtAuthenticatorInfoSpan, APIConstants.LOG_TRACE_ID,
+                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
             }
+            String jwtToken = retrieveAuthHeaderValue(requestContext);
+            if (jwtToken == null || !jwtToken.toLowerCase().contains(JWTConstants.BEARER)) {
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Missing Credentials");
+            }
+            String[] splitToken = jwtToken.split("\\s");
+            // Extract the token when it is sent as bearer token. i.e Authorization: Bearer <token>
+            if (splitToken.length > 1) {
+                jwtToken = splitToken[1];
+            }
+            String context = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
+            String name = requestContext.getMatchedAPI().getAPIConfig().getName();
+            String version = requestContext.getMatchedAPI().getAPIConfig().getVersion();
+            context = context + "/" + version;
+            ResourceConfig matchingResource = requestContext.getMatchedResourcePath();
+            SignedJWTInfo signedJWTInfo;
+            Scope decodeTokenHeaderSpanScope = null;
+            try {
+                if (Utils.tracingEnabled()) {
+                    decodeTokenHeaderSpan = Utils.startSpan(TracingConstants.DECODE_TOKEN_HEADER_SPAN, tracer);
+                    decodeTokenHeaderSpanScope = decodeTokenHeaderSpan.getSpan().makeCurrent();
+                    Utils.setTag(decodeTokenHeaderSpan, APIConstants.LOG_TRACE_ID,
+                            ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                }
+                signedJWTInfo = getSignedJwt(jwtToken);
+            } catch (ParseException | IllegalArgumentException e) {
+                log.error("Failed to decode the token header", e);
+                throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Not a JWT token. Failed to decode the token header", e);
+            } finally {
+                if (Utils.tracingEnabled()) {
+                    decodeTokenHeaderSpanScope.close();
+                    Utils.finishSpan(decodeTokenHeaderSpan);
+                }
+            }
+            JWTClaimsSet claims = signedJWTInfo.getJwtClaimsSet();
+            String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
 
-        }
+            String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
+            if (StringUtils.isNotEmpty(jwtTokenIdentifier)) {
+                if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jwtTokenIdentifier)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Token retrieved from the revoked jwt token map. Token: "
+                                + FilterUtils.getMaskedToken(jwtHeader));
+                    }
+                    log.error("Invalid JWT token. " + FilterUtils.getMaskedToken(jwtHeader));
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
+                }
 
-        JWTValidationInfo validationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
-        if (validationInfo != null) {
-            if (validationInfo.isValid()) {
-                // Validate subscriptions
-                APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
-                EnforcerConfig configuration = ConfigHolder.getInstance().getConfig();
-                ExtendedTokenIssuerDto issuerDto = configuration.getIssuersMap().get(validationInfo.getIssuer());
-
-                if (issuerDto.isValidateSubscriptions()) {
-                    // if the token is self contained, validation subscription from `subscribedApis` claim
-                    JSONObject api = validateSubscriptionFromClaim(name, version, claims, splitToken,
-                            apiKeyValidationInfoDTO, true);
-
-                    if (api == null) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Begin subscription validation via Key Manager: "
-                                    + validationInfo.getKeyManager());
-                        }
-                        apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext, validationInfo);
-
-                        if (log.isDebugEnabled()) {
-                            log.debug("Subscription validation via Key Manager. Status: " + apiKeyValidationInfoDTO
-                                    .isAuthorized());
-                        }
-                        if (!apiKeyValidationInfoDTO.isAuthorized()) {
-                            if (GeneralErrorCodeConstants.API_BLOCKED_CODE == apiKeyValidationInfoDTO
-                                    .getValidationStatus()) {
-                                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
-                                        GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
-                                requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
-                                        GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
-                                throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
-                                        apiKeyValidationInfoDTO.getValidationStatus(),
-                                        GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+            }
+            JWTValidationInfo validationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);
+            if (validationInfo != null) {
+                if (validationInfo.isValid()) {
+                    // Validate subscriptions
+                    APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+                    EnforcerConfig configuration = ConfigHolder.getInstance().getConfig();
+                    ExtendedTokenIssuerDto issuerDto = configuration.getIssuersMap().get(validationInfo.getIssuer());
+                    Scope validateSubscriptionSpanScope = null;
+                    try {
+                        if (issuerDto.isValidateSubscriptions()) {
+                            if (Utils.tracingEnabled()) {
+                                validateSubscriptionSpan = Utils
+                                        .startSpan(TracingConstants.SUBSCRIPTION_VALIDATION_SPAN, tracer);
+                                validateSubscriptionSpanScope = validateSubscriptionSpan.getSpan().makeCurrent();
+                                Utils.setTag(validateSubscriptionSpan, APIConstants.LOG_TRACE_ID,
+                                        ThreadContext.get(APIConstants.LOG_TRACE_ID));
                             }
-                            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
-                                    apiKeyValidationInfoDTO.getValidationStatus(),
-                                    "User is NOT authorized to access the Resource. "
-                                            + "API Subscription validation failed.");
+                            // if the token is self contained, validation subscription from `subscribedApis` claim
+                            JSONObject api = validateSubscriptionFromClaim(name, version, claims, splitToken,
+                                    apiKeyValidationInfoDTO, true);
+                            if (api == null) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Begin subscription validation via Key Manager: "
+                                            + validationInfo.getKeyManager());
+                                }
+                                apiKeyValidationInfoDTO = validateSubscriptionUsingKeyManager(requestContext,
+                                        validationInfo);
+
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Subscription validation via Key Manager. Status: "
+                                            + apiKeyValidationInfoDTO.isAuthorized());
+                                }
+                                if (!apiKeyValidationInfoDTO.isAuthorized()) {
+                                    if (GeneralErrorCodeConstants.API_BLOCKED_CODE == apiKeyValidationInfoDTO
+                                            .getValidationStatus()) {
+                                        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
+                                                GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                                        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                                                GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
+                                        throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE
+                                                .getCode(), apiKeyValidationInfoDTO.getValidationStatus(),
+                                                GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                                    }
+                                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
+                                            apiKeyValidationInfoDTO.getValidationStatus(),
+                                            "User is NOT authorized to access the Resource. "
+                                                    + "API Subscription validation failed.");
+                                }
+                            }
+                        }
+                    } finally {
+                        if (Utils.tracingEnabled()) {
+                            if (validateSubscriptionSpan != null) {
+                                validateSubscriptionSpanScope.close();
+                                Utils.finishSpan(validateSubscriptionSpan);
+                            }
                         }
                     }
-                }
 
-                // set endpoint security
-                SecurityInfo securityInfo;
-                if (apiKeyValidationInfoDTO.getType() != null &&
-                        requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity() != null) {
-                    if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
-                        securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
-                                getProductionSecurityInfo();
-                    } else {
-                        securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
-                                getSandBoxSecurityInfo();
+                    // set endpoint security
+                    SecurityInfo securityInfo;
+                    if (apiKeyValidationInfoDTO.getType() != null &&
+                            requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity() != null) {
+                        if (apiKeyValidationInfoDTO.getType().equals(APIConstants.API_KEY_TYPE_PRODUCTION)) {
+                            securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                                    getProductionSecurityInfo();
+                        } else {
+                            securityInfo = requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity().
+                                    getSandBoxSecurityInfo();
+                        }
+                        if (securityInfo.getEnabled() &&
+                                APIConstants.AUTHORIZATION_HEADER_BASIC.
+                                        equalsIgnoreCase(securityInfo.getSecurityType())) {
+                            requestContext.getRemoveHeaders().remove(APIConstants.AUTHORIZATION_HEADER_DEFAULT
+                                    .toLowerCase());
+                            requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                                    APIConstants.AUTHORIZATION_HEADER_BASIC + ' ' +
+                                            Base64.getEncoder().encodeToString((securityInfo.getUsername() +
+                                                    ':' + securityInfo.getPassword()).getBytes()));
+                        }
                     }
-                    if (securityInfo.getEnabled() &&
-                            APIConstants.AUTHORIZATION_HEADER_BASIC.
-                                    equalsIgnoreCase(securityInfo.getSecurityType())) {
-                        requestContext.getRemoveHeaders().remove(APIConstants.AUTHORIZATION_HEADER_DEFAULT
-                                .toLowerCase());
-                        requestContext.addResponseHeaders(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                                APIConstants.AUTHORIZATION_HEADER_BASIC + ' ' +
-                                        Base64.getEncoder().encodeToString((securityInfo.getUsername() +
-                                                ':' + securityInfo.getPassword()).getBytes()));
+                    Scope validateScopesSpanScope = null;
+                    try {
+                        if (Utils.tracingEnabled()) {
+                            validateScopesSpan = Utils.startSpan(TracingConstants.SCOPES_VALIDATION_SPAN, tracer);
+                            validateScopesSpanScope = validateScopesSpan.getSpan().makeCurrent();
+                            Utils.setTag(validateScopesSpan, APIConstants.LOG_TRACE_ID,
+                                    ThreadContext.get(APIConstants.LOG_TRACE_ID));
+                        }
+                        // Validate scopes
+                        validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
+                    } finally {
+                        if (Utils.tracingEnabled()) {
+                            validateScopesSpanScope.close();
+                            Utils.finishSpan(validateScopesSpan);
+                        }
                     }
+                    log.debug("JWT authentication successful.");
+                    String endUserToken = null;
+
+                    // Get jwtConfigurationDto
+                    JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().
+                            getJwtConfigurationDto();
+                    if (jwtConfigurationDto.isEnabled()) {
+                        // Set ttl
+                        jwtConfigurationDto.setTtl(JWTUtil.getTTL());
+
+                        JWTInfoDto jwtInfoDto = FilterUtils
+                                .generateJWTInfoDto(null, validationInfo,
+                                        apiKeyValidationInfoDTO, requestContext);
+                        endUserToken = generateAndRetrieveJWTToken(jwtTokenIdentifier, jwtInfoDto);
+                        // Set generated jwt token as a response header
+                        requestContext.addResponseHeaders(jwtConfigurationDto.getJwtHeader(), endUserToken);
+                    }
+
+                    AuthenticationContext authenticationContext = FilterUtils
+                            .generateAuthenticationContext(requestContext, jwtTokenIdentifier, validationInfo,
+                                    apiKeyValidationInfoDTO, endUserToken, true);
+                    //TODO: (VirajSalaka) Place the keytype population logic properly for self contained token
+                    if (claims.getClaim("keytype") != null) {
+                        authenticationContext.setKeyType(claims.getClaim("keytype").toString());
+                    }
+                    return authenticationContext;
+                } else {
+                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                            validationInfo.getValidationCode(),
+                            APISecurityConstants.getAuthenticationFailureMessage(validationInfo.getValidationCode()));
                 }
-
-                // Validate scopes
-                validateScopes(context, version, matchingResource, validationInfo, signedJWTInfo);
-
-                log.debug("JWT authentication successful.");
-                String endUserToken = null;
-
-                // Get jwtConfigurationDto
-                JWTConfigurationDto jwtConfigurationDto = ConfigHolder.getInstance().getConfig().
-                        getJwtConfigurationDto();
-                if (jwtConfigurationDto.isEnabled()) {
-                    // Set ttl
-                    jwtConfigurationDto.setTtl(JWTUtil.getTTL());
-
-                    JWTInfoDto jwtInfoDto = FilterUtils
-                            .generateJWTInfoDto(null, validationInfo, apiKeyValidationInfoDTO, requestContext);
-                    endUserToken = generateAndRetrieveJWTToken(jwtTokenIdentifier, jwtInfoDto);
-                    // Set generated jwt token as a response header
-                    requestContext.addResponseHeaders(jwtConfigurationDto.getJwtHeader(), endUserToken);
-                }
-
-                AuthenticationContext authenticationContext = FilterUtils
-                        .generateAuthenticationContext(requestContext, jwtTokenIdentifier, validationInfo,
-                                apiKeyValidationInfoDTO, endUserToken, true);
-                //TODO: (VirajSalaka) Place the keytype population logic properly for self contained token
-                if (claims.getClaim("keytype") != null) {
-                    authenticationContext.setKeyType(claims.getClaim("keytype").toString());
-                }
-                return authenticationContext;
             } else {
                 throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                        validationInfo.getValidationCode(),
-                        APISecurityConstants.getAuthenticationFailureMessage(validationInfo.getValidationCode()));
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
             }
-        } else {
-            throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                    APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        } finally {
+            if (Utils.tracingEnabled()) {
+                jwtAuthenticatorInfoSpanScope.close();
+                Utils.finishSpan(jwtAuthenticatorInfoSpan);
+            }
         }
 
     }
