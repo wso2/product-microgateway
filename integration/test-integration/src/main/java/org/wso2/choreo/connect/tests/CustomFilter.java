@@ -20,9 +20,9 @@ package org.wso2.choreo.connect.tests;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.choreo.connect.filter.model.APIConfig;
-import org.wso2.choreo.connect.filter.model.RequestContext;
-import org.wso2.choreo.connect.filter.Filter;
+import org.wso2.choreo.connect.commons.model.APIConfig;
+import org.wso2.choreo.connect.commons.model.RequestContext;
+import org.wso2.choreo.connect.commons.Filter;
 
 import java.util.Map;
 

@@ -245,7 +245,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.am.choreo.connect</groupId>
-            <artifactId>org.wso2.choreo.connect.commons</artifactId>
+            <artifactId>org.wso2.choreo.connect.enforcer.commons</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>

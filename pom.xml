@@ -22,9 +22,6 @@
     <artifactId>choreo-connect-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0-m2-SNAPSHOT</version>
-    <modules>
-        <module>enforcer-build</module>
-    </modules>
     <name>Choreo Connect - Parent</name>
 
     <url>https://wso2.org</url>
@@ -54,7 +51,7 @@
             </activation>
             <modules>
                 <module>adapter</module>
-                <module>enforcer-build</module>
+                <module>enforcer-parent</module>
                 <module>distribution</module>
                 <module>integration</module>
             </modules>
@@ -67,7 +64,7 @@
             <modules>
                 <module>router</module>
                 <module>adapter</module>
-                <module>enforcer-build</module>
+                <module>enforcer-parent</module>
                 <module>distribution</module>
                 <module>integration</module>
             </modules>
