@@ -43,6 +43,7 @@ type MgwSwagger struct {
 	vendorExtensions    map[string]interface{}
 	productionUrls      []Endpoint //
 	sandboxUrls         []Endpoint
+	xWso2Endpoints      []EndpointCluster
 	resources           []Resource
 	xWso2Basepath       string
 	xWso2Cors           *CorsConfig
@@ -66,6 +67,13 @@ type SecurityInfo struct {
 	SecurityType     string
 	Enabled          bool
 	Username         string
+}
+
+// EndpointCluster represent an upstream cluster
+type EndpointCluster struct {
+	EndpointName string
+	Endpoints    []Endpoint
+	EndpointType string // enum allowing failover or loadbalance
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -315,6 +323,42 @@ func (swagger *MgwSwagger) setXWso2SandboxEndpoint() error {
 	}
 
 	return nil
+}
+
+// GetXWso2Endpoints get x-wso2-endpoints
+func (swagger *MgwSwagger) GetXWso2Endpoints() ([]EndpointCluster, error) {
+	var endpointClusters []EndpointCluster
+	if val, found := swagger.vendorExtensions[xWso2endpoints]; found {
+		if val1, ok := val.([]interface{}); ok {
+			for _, val2 := range val1 { // loop thorough multiple endpoints
+				if eps, ok := val2.(map[string]interface{}); ok {
+					for epName := range eps { // epName is endpoint's name
+						endpoints, err := getXWso2Endpoints(eps, epName)
+						endpointCluster := EndpointCluster{
+							EndpointName: epName,
+							Endpoints:    endpoints,
+							EndpointType: "loadbalance",
+						}
+						if epValues, ok := eps[epName].(map[string]interface{}); ok {
+							if val3, found := epValues[typeConst]; found {
+								if epType, ok := val3.(string); ok {
+									endpointCluster.EndpointType = epType
+								}
+							}
+						}
+						if err == nil && endpoints != nil && len(endpoints) > 0 {
+							endpointClusters = append(endpointClusters, endpointCluster)
+						} else if err != nil {
+							return endpointClusters, errors.New("error encountered when extracting x-wso2-endpoints")
+						}
+					}
+				}
+			}
+			return endpointClusters, nil
+		}
+		return endpointClusters, errors.New("error while parsing x-wso2-endpoints extension")
+	}
+	return endpointClusters, nil
 }
 
 func (swagger *MgwSwagger) setXWso2ThrottlingTier() {
