@@ -18,13 +18,16 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
+	"time"
 
 	parser "github.com/mitchellh/mapstructure"
 	"github.com/wso2/product-microgateway/adapter/config"
-	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
+	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 )
 
 // MgwSwagger represents the object structure holding the information related to the
@@ -40,6 +43,7 @@ type MgwSwagger struct {
 	vendorExtensions    map[string]interface{}
 	productionUrls      []Endpoint //
 	sandboxUrls         []Endpoint
+	xWso2Endpoints      []EndpointCluster
 	resources           []Resource
 	xWso2Basepath       string
 	xWso2Cors           *CorsConfig
@@ -63,6 +67,13 @@ type SecurityInfo struct {
 	SecurityType     string
 	Enabled          bool
 	Username         string
+}
+
+// EndpointCluster represent an upstream cluster
+type EndpointCluster struct {
+	EndpointName string
+	Endpoints    []Endpoint
+	EndpointType string // enum allowing failover or loadbalance
 }
 
 // Endpoint represents the structure of an endpoint.
@@ -94,6 +105,22 @@ type CorsConfig struct {
 	AccessControlAllowMethods     []string `mapstructure:"accessControlAllowMethods"`
 	AccessControlAllowOrigins     []string `mapstructure:"accessControlAllowOrigins"`
 	AccessControlExposeHeaders    []string `mapstructure:"accessControlExposeHeaders"`
+}
+
+// InterceptEndpoint contains the parameters of endpoint security
+type InterceptEndpoint struct {
+	Enable         bool
+	Host           string
+	URLType        string
+	Port           uint32
+	Path           string
+	ClusterName    string
+	ClusterTimeout time.Duration
+	RequestTimeout int
+	// Includes this is an enum allowing only values in
+	// {"request_headers", "request_body", "request_trailer", "response_headers", "response_body", "response_trailer",
+	//"invocation_context" }
+	Includes []string
 }
 
 // GetCorsConfig returns the CorsConfiguration Object.
@@ -218,12 +245,12 @@ func (swagger *MgwSwagger) SetXWso2Extensions() error {
 	if sandboxEndpointErr != nil {
 		return sandboxEndpointErr
 	}
-	
+
 	swagger.setXWso2Cors()
 	swagger.setXWso2ThrottlingTier()
 	swagger.setDisableSecurity()
 	swagger.setXWso2AuthHeader()
-	
+
 	// Error nil for successful execution
 	return nil
 }
@@ -296,6 +323,42 @@ func (swagger *MgwSwagger) setXWso2SandboxEndpoint() error {
 	}
 
 	return nil
+}
+
+// GetXWso2Endpoints get x-wso2-endpoints
+func (swagger *MgwSwagger) GetXWso2Endpoints() ([]EndpointCluster, error) {
+	var endpointClusters []EndpointCluster
+	if val, found := swagger.vendorExtensions[xWso2endpoints]; found {
+		if val1, ok := val.([]interface{}); ok {
+			for _, val2 := range val1 { // loop thorough multiple endpoints
+				if eps, ok := val2.(map[string]interface{}); ok {
+					for epName := range eps { // epName is endpoint's name
+						endpoints, err := getXWso2Endpoints(eps, epName)
+						endpointCluster := EndpointCluster{
+							EndpointName: epName,
+							Endpoints:    endpoints,
+							EndpointType: "loadbalance",
+						}
+						if epValues, ok := eps[epName].(map[string]interface{}); ok {
+							if val3, found := epValues[typeConst]; found {
+								if epType, ok := val3.(string); ok {
+									endpointCluster.EndpointType = epType
+								}
+							}
+						}
+						if err == nil && endpoints != nil && len(endpoints) > 0 {
+							endpointClusters = append(endpointClusters, endpointCluster)
+						} else if err != nil {
+							return endpointClusters, errors.New("error encountered when extracting x-wso2-endpoints")
+						}
+					}
+				}
+			}
+			return endpointClusters, nil
+		}
+		return endpointClusters, errors.New("error while parsing x-wso2-endpoints extension")
+	}
+	return endpointClusters, nil
 }
 
 func (swagger *MgwSwagger) setXWso2ThrottlingTier() {
@@ -542,4 +605,94 @@ func ResolveDisableSecurity(vendorExtensions map[string]interface{}) bool {
 		}
 	}
 	return disableSecurity
+}
+
+//GetInterceptor returns interceptors
+func (swagger *MgwSwagger) GetInterceptor(vendorExtensions map[string]interface{}, extensionName string) (InterceptEndpoint, error) {
+	urlV := "http"
+	conf, _ := config.ReadConfigs()
+	clusterTimeoutV := conf.Envoy.ClusterTimeoutInSeconds
+	requestTimeoutV := 30
+	pathV := "/"
+	hostV := ""
+	portV := uint32(80)
+	var includesV []string
+
+	var err error
+
+	if x, found := vendorExtensions[extensionName]; found {
+		if val, ok := x.(map[string]interface{}); ok {
+			//host mandatory
+			if v, found := val[host]; found {
+				hostV = v.(string)
+			} else {
+				logger.LoggerOasparser.Error("error reading interceptors host value")
+				return InterceptEndpoint{}, errors.New("error reading interceptors host value")
+			}
+			// port mandatory
+			if v, found := val[port]; found {
+				p, err := strconv.ParseUint(fmt.Sprint(v), 10, 32)
+				if err == nil {
+					portV = uint32(p)
+				} else {
+					logger.LoggerOasparser.Error("error reading interceptors port value", err)
+					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
+				}
+			}
+			//urlType optional
+			if v, found := val[urlType]; found {
+				urlV = v.(string)
+			}
+			//clusterTimeout optional
+			if v, found := val[clusterTimeout]; found {
+				p, err := strconv.ParseInt(fmt.Sprint(v), 0, 0)
+				if err == nil {
+					clusterTimeoutV = time.Duration(p)
+				} else {
+					logger.LoggerOasparser.Error("error reading interceptors port value", err)
+					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
+				}
+			}
+			//requestTimeout optional
+			if v, found := val[requestTimeout]; found {
+				p, err := strconv.ParseInt(fmt.Sprint(v), 0, 0)
+				if err == nil {
+					requestTimeoutV = int(p)
+				} else {
+					logger.LoggerOasparser.Error("error reading interceptors port value", err)
+					return InterceptEndpoint{}, errors.New("error reading interceptors port value")
+				}
+			}
+			// path optional
+			if v, found := val[path]; found {
+				pathV = v.(string)
+			}
+			//includes optional
+			if v, found := val[includes]; found {
+				includes := v.([]interface{})
+				if len(includes) > 0 {
+					for _, include := range includes {
+						switch include.(string) {
+						case "request_headers", "request_body", "request_trailer", "response_headers", "response_body",
+							"response_trailer", "invocation_context":
+							includesV = append(includesV, include.(string))
+						}
+					}
+				}
+			}
+
+			return InterceptEndpoint{
+				Enable:         true,
+				Host:           hostV,
+				URLType:        urlV,
+				Port:           portV,
+				ClusterTimeout: clusterTimeoutV,
+				RequestTimeout: requestTimeoutV,
+				Path:           pathV,
+				Includes:       includesV,
+			}, err
+		}
+		return InterceptEndpoint{}, errors.New("error parsing response interceptors values to mgwSwagger")
+	}
+	return InterceptEndpoint{}, nil
 }

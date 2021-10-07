@@ -31,6 +31,7 @@ import org.wso2.choreo.connect.enforcer.analytics.AccessLoggingService;
 import org.wso2.choreo.connect.enforcer.api.APIFactory;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
+import org.wso2.choreo.connect.enforcer.config.EnforcerConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthServiceConfigurationDto;
 import org.wso2.choreo.connect.enforcer.config.dto.ThreadPoolConfig;
 import org.wso2.choreo.connect.enforcer.config.dto.ThrottleConfigDto;
@@ -40,12 +41,16 @@ import org.wso2.choreo.connect.enforcer.grpc.HealthService;
 import org.wso2.choreo.connect.enforcer.grpc.WebSocketFrameService;
 import org.wso2.choreo.connect.enforcer.grpc.interceptors.AccessLogInterceptor;
 import org.wso2.choreo.connect.enforcer.keymgt.KeyManagerHolder;
+import org.wso2.choreo.connect.enforcer.metrics.MetricsManager;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.choreo.connect.enforcer.subscription.SubscriptionDataHolder;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleAgent;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleConstants;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleDataHolder;
 import org.wso2.choreo.connect.enforcer.throttle.ThrottleEventListener;
+import org.wso2.choreo.connect.enforcer.tracing.TracerFactory;
+import org.wso2.choreo.connect.enforcer.tracing.TracingException;
+import org.wso2.choreo.connect.enforcer.tracing.Utils;
 import org.wso2.choreo.connect.enforcer.util.TLSUtils;
 
 import java.io.IOException;
@@ -83,18 +88,39 @@ public class AuthServer {
             // Create a new server to listen on port 8081
             Server server = initServer();
 
+            EnforcerConfig enforcerConfig = ConfigHolder.getInstance().getConfig();
             // Enable global filters
-            if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {
-                logger.info("analytics filter is enabled.");
+            if (enforcerConfig.getAnalyticsConfig().isEnabled() ||
+                    enforcerConfig.getMetricsConfig().isMetricsEnabled()) {
                 AccessLoggingService accessLoggingService = new AccessLoggingService();
                 accessLoggingService.init();
+                if (enforcerConfig.getMetricsConfig().isMetricsEnabled()) {
+                    //Initialize metrics
+                    MetricsManager.initializeMetrics(enforcerConfig.getMetricsConfig());
+                }
+                if (enforcerConfig.getAnalyticsConfig().isEnabled()) {
+                    logger.info("analytics filter is enabled.");
+                }
             } else {
                 logger.debug("analytics filter is disabled.");
             }
 
+            // Initialize tracing objects
+            if (enforcerConfig.getTracingConfig().isTracingEnabled()) {
+                try {
+                    TracerFactory.getInstance().initTracer();
+                    Utils.setTracingEnabled(true);
+                    logger.info("Tracing is enabled.");
+                } catch (TracingException e) {
+                    logger.error("Error enabling tracing", e);
+                }
+            } else {
+                logger.debug("Tracing is disabled.");
+            }
+
             //Initialise cache objects
             CacheProvider.init();
-            ThrottleConfigDto throttleConf = ConfigHolder.getInstance().getConfig().getThrottleConfig();
+            ThrottleConfigDto throttleConf = enforcerConfig.getThrottleConfig();
             if (throttleConf.isGlobalPublishingEnabled()) {
                 ThrottleAgent.startThrottlePublisherPool();
                 JMSTransportHandler jmsHandler = new JMSTransportHandler(throttleConf.buildListenerProperties());

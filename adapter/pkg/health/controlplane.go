@@ -24,15 +24,15 @@ import (
 var (
 	controlPlaneBrokerStatusChan  = make(chan bool)
 	controlPlaneRestAPIStatusChan = make(chan bool)
-	// ControlPlaneStarted sets the status of the control plane starting
-	ControlPlaneStarted = false
+	controlPlaneStarted           = false
+	controlPlaneUnhealthy         = false
 )
 
 // SetControlPlaneBrokerStatus sets the given status to the internal channel controlPlaneBrokerStatusChan
 func SetControlPlaneBrokerStatus(status bool) {
 	// check for controlPlaneStarted, to non block call
 	// if called again (somehow) after startup, for extra safe check this value
-	if !ControlPlaneStarted {
+	if !controlPlaneStarted {
 		controlPlaneBrokerStatusChan <- status
 	}
 }
@@ -40,7 +40,7 @@ func SetControlPlaneBrokerStatus(status bool) {
 // SetControlPlaneRestAPIStatus sets the given status to the internal channel controlPlaneRestAPIStatusChan
 func SetControlPlaneRestAPIStatus(status bool) {
 	// check for controlPlaneStarted, to non block call
-	if !ControlPlaneStarted {
+	if !controlPlaneStarted && !controlPlaneUnhealthy {
 		controlPlaneRestAPIStatusChan <- status
 	}
 }
@@ -58,6 +58,6 @@ func WaitForControlPlane() {
 			logger.LoggerHealth.Debugf("Connection to Control Plane Rest API %v", restAPIStarted)
 		}
 	}
-	ControlPlaneStarted = true
+	controlPlaneStarted = true
 	logger.LoggerHealth.Info("Successfully connected to the control plane.")
 }

@@ -28,6 +28,7 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.AdapterConstants;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
+import org.wso2.choreo.connect.enforcer.security.jwt.APIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.InternalAPIKeyAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.JWTAuthenticator;
 import org.wso2.choreo.connect.enforcer.security.jwt.UnsecuredAPIAuthenticator;
@@ -80,11 +81,17 @@ public class AuthFilter implements Filter {
             }
         }
 
-        // TODO: Set authenticators for isMutualSSLProtected, isBasicAuthProtected, isApiKeyProtected
+        // TODO: Set authenticators for isMutualSSLProtected, isBasicAuthProtected
         if (isOAuthProtected) {
             Authenticator jwtAuthenticator = new JWTAuthenticator();
             authenticators.add(jwtAuthenticator);
         }
+
+        if (isApiKeyProtected) {
+            APIKeyAuthenticator apiKeyAuthenticator = new APIKeyAuthenticator();
+            authenticators.add(apiKeyAuthenticator);
+        }
+
         Authenticator authenticator = new InternalAPIKeyAuthenticator(
                 ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
         authenticators.add(authenticator);
