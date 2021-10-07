@@ -268,9 +268,7 @@ var defaultConfig = &Config{
 		RetryInterval:       5,
 		SkipSSLVerification: false,
 		BrokerConnectionParameters: brokerConnectionParameters{
-			//if needed we can change broker url to amqp with the value,
-			// "amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"
-			EventListeningEndpoints: []string{"$env{ASB_CONNECTION_STRING}"},
+			EventListeningEndpoints: []string{"amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"},
 			ReconnectInterval:      5000, //in milli seconds
 			ReconnectRetryCount:    60,
 		},
