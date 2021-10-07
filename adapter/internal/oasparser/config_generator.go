@@ -97,7 +97,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 	sandUrls := []*api.Endpoint{}
 	resources := []*api.Resource{}
 
-	for _, ep := range mgwSwagger.GetProdEndpoints() {
+	for _, ep := range mgwSwagger.GetProdEndpoints().Endpoints {
 		prodEp := &api.Endpoint{
 			Basepath: ep.Basepath,
 			Host:     ep.Host,
@@ -107,7 +107,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 		prodUrls = append(prodUrls, prodEp)
 	}
 
-	for _, ep := range mgwSwagger.GetSandEndpoints() {
+	for _, ep := range mgwSwagger.GetSandEndpoints().Endpoints {
 		sandEp := &api.Endpoint{
 			Basepath: ep.Basepath,
 			Host:     ep.Host,

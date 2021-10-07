@@ -82,7 +82,13 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 			}
 			endpoint, err := getHostandBasepathandPort(serverEntry.URL)
 			if err == nil {
-				swagger.productionUrls = append(swagger.productionUrls, *endpoint)
+				productionEndpoints := append(swagger.productionEndpoints.Endpoints, *endpoint)
+				endpointCluster := EndpointCluster{
+					EndpointName: xWso2ProdEndpoints,
+					EndpointType: "loadbalance",
+					Endpoints:    productionEndpoints,
+				}
+				swagger.productionEndpoints = endpointCluster
 				swagger.xWso2Basepath = endpoint.Basepath
 			} else {
 				logger.LoggerOasparser.Errorf("error encountered when parsing the endpoint under openAPI servers object")

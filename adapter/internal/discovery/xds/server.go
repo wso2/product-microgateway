@@ -22,11 +22,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"math/rand"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
@@ -271,14 +272,14 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 		logger.LoggerXds.Error("API type not currently supported with WSO2 Microgateway")
 	}
 
-	if (len(mgwSwagger.GetProdEndpoints()) == 0 || mgwSwagger.GetProdEndpoints()[0].Host == "/") &&
-		(len(mgwSwagger.GetSandEndpoints()) == 0 || mgwSwagger.GetSandEndpoints()[0].Host == "/") {
-
+	if len(mgwSwagger.GetProdEndpoints().Endpoints) == 0 || mgwSwagger.GetProdEndpoints().Endpoints[0].Host == "/" {
 		productionEndpointErr := mgwSwagger.SetXWso2ProductionEndpointMgwSwagger(apiContent.ProductionEndpoint)
 		if productionEndpointErr != nil {
 			return deployedRevision, productionEndpointErr
 		}
+	}
 
+	if len(mgwSwagger.GetSandEndpoints().Endpoints) == 0 || mgwSwagger.GetSandEndpoints().Endpoints[0].Host == "/" {
 		sandboxEndpointErr := mgwSwagger.SetXWso2SandboxEndpointForMgwSwagger(apiContent.SandboxEndpoint)
 		if sandboxEndpointErr != nil {
 			return deployedRevision, sandboxEndpointErr

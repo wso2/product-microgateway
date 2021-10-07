@@ -86,16 +86,16 @@ func TestValidate(t *testing.T) {
 	err = mgwSwaggerForOpenapi.Validate()
 	assert.Nil(t, err, "Validation Error should not be present when servers URL is properly provided.")
 
-	mgwSwaggerForOpenapi.GetProdEndpoints()[0].Host = ("/")
+	mgwSwaggerForOpenapi.GetProdEndpoints().Endpoints[0].Host = ("/")
 	err = mgwSwaggerForOpenapi.Validate()
 	assert.NotNil(t, err, "Validation Error should not be present when production URL is /")
 
-	mgwSwaggerForOpenapi.GetProdEndpoints()[0].Host = ("abc.com")
-	mgwSwaggerForOpenapi.GetSandEndpoints()[0].Host = ("/")
+	mgwSwaggerForOpenapi.GetProdEndpoints().Endpoints[0].Host = ("abc.com")
+	mgwSwaggerForOpenapi.GetSandEndpoints().Endpoints[0].Host = ("/")
 	err = mgwSwaggerForOpenapi.Validate()
 	assert.NotNil(t, err, "Validation Error should not be present when sandbox URL is /")
 
-	mgwSwaggerForOpenapi.GetSandEndpoints()[0].Host = ("/abc/abc")
+	mgwSwaggerForOpenapi.GetSandEndpoints().Endpoints[0].Host = ("/abc/abc")
 	err = mgwSwaggerForOpenapi.Validate()
 	assert.NotNil(t, err, "Validation Error should not be present when servers URL is relative URL")
 }

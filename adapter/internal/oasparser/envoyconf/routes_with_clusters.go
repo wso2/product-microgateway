@@ -88,8 +88,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 	timeout := conf.Envoy.ClusterTimeoutInSeconds
 
 	// check API level production endpoints available
-	if len(mgwSwagger.GetProdEndpoints()) > 0 {
-		apiLevelEndpointProd = mgwSwagger.GetProdEndpoints()
+	if len(mgwSwagger.GetProdEndpoints().Endpoints) > 0 {
+		apiLevelEndpointProd = mgwSwagger.GetProdEndpoints().Endpoints
 		apilevelAddressP := createAddress(apiLevelEndpointProd[0].Host, apiLevelEndpointProd[0].Port)
 		apiLevelClusterNameProd = strings.TrimSpace(organizationID + "_" + prodClustersConfigNamePrefix + vHost + "_" +
 			strings.Replace(mgwSwagger.GetTitle(), " ", "", -1) + mgwSwagger.GetVersion())
@@ -110,8 +110,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 	}
 
 	// check API level sandbox endpoints availble
-	if len(mgwSwagger.GetSandEndpoints()) > 0 {
-		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints()
+	if len(mgwSwagger.GetSandEndpoints().Endpoints) > 0 {
+		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints().Endpoints
 		if apiEndpointBasePath != apiLevelEndpointSand[0].Basepath && len(apiLevelEndpointProd) > 0 {
 			logger.LoggerOasparser.Warnf("Sandbox API level endpoint basepath is different compared to API level production endpoint "+
 				"for the API %v:%v. Hence Sandbox endpoints are not applied", apiTitle, apiVersion)
@@ -200,7 +200,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 			}
 
 			// API level check
-		} else if len(mgwSwagger.GetProdEndpoints()) > 0 {
+		} else if len(mgwSwagger.GetProdEndpoints().Endpoints) > 0 {
 			clusterRefProd = apilevelClusterProd.GetName()
 			endpointBasepath = apiLevelEndpointProd[0].Basepath
 
@@ -241,7 +241,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 
 			// API level check
 			// Due to endpoint basePath restriction, the apiLevelEndpointSand may not be initialized.
-		} else if len(mgwSwagger.GetSandEndpoints()) > 0 || apiLevelEndpointSand != nil {
+		} else if len(mgwSwagger.GetSandEndpoints().Endpoints) > 0 || apiLevelEndpointSand != nil {
 			endpointSand := apiLevelEndpointSand
 			if endpointBasepath != endpointSand[0].Basepath && clusterRefProd != "" {
 				logger.LoggerOasparser.Warnf("Sandbox endpoint basepath of API is different compared to production endpoint "+

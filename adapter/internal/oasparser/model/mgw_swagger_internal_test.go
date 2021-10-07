@@ -26,34 +26,41 @@ import (
 func TestGetXWso2Endpoints(t *testing.T) {
 	type getXWso2EndpointsTestItem struct {
 		inputVendorExtensions map[string]interface{}
-		inputEndpointType     string
-		result                []Endpoint
+		inputEndpointName     string
+		result                EndpointCluster
 		message               string
 	}
 	dataItems := []getXWso2EndpointsTestItem{
 		{
-			inputEndpointType: "x-wso2-production-endpoints",
+			inputEndpointName: "x-wso2-production-endpoints",
 			inputVendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
-				"type": "https", "urls": []interface{}{"https://www.facebook.com:80"}}},
-			result: []Endpoint{
-				{
-					Host:    "www.facebook.com",
-					Port:    80,
-					URLType: "https",
+				"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80"}}},
+			result: EndpointCluster{
+				EndpointName: "x-wso2-production-endpoints",
+				Endpoints: []Endpoint{
+					{
+						Host:    "www.facebook.com",
+						Port:    80,
+						URLType: "https",
+					},
 				},
+				EndpointType: "loadbalance",
 			},
 			message: "usual case",
 		},
 		{
-			inputEndpointType: "x-wso2-production-endpoints",
+			inputEndpointName: "x-wso2-production-endpoints",
 			inputVendorExtensions: map[string]interface{}{"x-wso2-production-endpoints+++": map[string]interface{}{
-				"type": "https", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
-			result:  nil,
+				"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
+			result: EndpointCluster{
+				EndpointName: "x-wso2-production-endpoints",
+				Endpoints:    nil,
+			},
 			message: "when having incorrect extenstion name",
 		},
 	}
 	for _, item := range dataItems {
-		resultResources, err := getXWso2Endpoints(item.inputVendorExtensions, item.inputEndpointType)
+		resultResources, err := getXWso2Endpoints(item.inputVendorExtensions, item.inputEndpointName)
 		assert.Nil(t, err, "Error should not be present when extracting endpoints from the vendor extension map")
 		assert.Equal(t, item.result, resultResources, item.message)
 	}
@@ -93,7 +100,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 		{
 			input: MgwSwagger{
 				vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
-					"type": "https", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
+					"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
 				resources: []Resource{
 					{
 						vendorExtensions: nil,
@@ -101,13 +108,17 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 				},
 			},
 			result: MgwSwagger{
-				productionUrls: []Endpoint{
-					{
-						Host:     "www.facebook.com",
-						Port:     80,
-						URLType:  "https",
-						Basepath: "/base",
+				productionEndpoints: EndpointCluster{
+					EndpointName: "x-wso2-production-endpoints",
+					Endpoints: []Endpoint{
+						{
+							Host:     "www.facebook.com",
+							Port:     80,
+							URLType:  "https",
+							Basepath: "/base",
+						},
 					},
+					EndpointType: "loadbalance",
 				},
 				resources: []Resource{
 					{
@@ -120,22 +131,26 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 		{
 			input: MgwSwagger{
 				vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
-					"type": "https", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
+					"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
 				resources: []Resource{
 					{
 						vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
-							"type": "https", "urls": []interface{}{"https://resource.endpoint:80/base"}}},
+							"type": "loadbalance", "urls": []interface{}{"https://resource.endpoint:80/base"}}},
 					},
 				},
 			},
 			result: MgwSwagger{
-				productionUrls: []Endpoint{
-					{
-						Host:     "www.facebook.com",
-						Port:     80,
-						URLType:  "https",
-						Basepath: "/base",
+				productionEndpoints: EndpointCluster{
+					EndpointName: "x-wso2-production-endpoints",
+					Endpoints: []Endpoint{
+						{
+							Host:     "www.facebook.com",
+							Port:     80,
+							URLType:  "https",
+							Basepath: "/base",
+						},
 					},
+					EndpointType: "loadbalance",
 				},
 				resources: []Resource{
 					{
@@ -156,7 +171,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 		{
 			input: MgwSwagger{
 				vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
-					"type": "https", "urls": []interface{}{"https://www.youtube.com:80/base"}},
+					"type": "loadbalance", "urls": []interface{}{"https://www.youtube.com:80/base"}},
 					xWso2Cors: map[string]interface{}{
 						"Enabled":                       "true",
 						"AccessControlAllowCredentials": "true",
@@ -168,19 +183,23 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 				resources: []Resource{
 					{
 						vendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
-							"type": "https", "urls": []interface{}{"https://resource.endpoint:80/base"}},
+							"type": "loadbalance", "urls": []interface{}{"https://resource.endpoint:80/base"}},
 						},
 					},
 				},
 			},
 			result: MgwSwagger{
-				productionUrls: []Endpoint{
-					{
-						Host:     "www.youtube.com",
-						Port:     80,
-						URLType:  "https",
-						Basepath: "/base",
+				productionEndpoints: EndpointCluster{
+					EndpointName: "x-wso2-production-endpoints",
+					Endpoints: []Endpoint{
+						{
+							Host:     "www.youtube.com",
+							Port:     80,
+							URLType:  "https",
+							Basepath: "/base",
+						},
 					},
+					EndpointType: "loadbalance",
 				},
 				resources: []Resource{
 					{
@@ -206,7 +225,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 		}
 		err := mgwSwag.SetXWso2Extensions()
 		assert.Nil(t, err, "Should not encounter an error when setting vendor extensions")
-		assert.Equal(t, item.result.productionUrls, mgwSwag.productionUrls, item.message)
+		assert.Equal(t, item.result.productionEndpoints, mgwSwag.productionEndpoints, item.message)
 		if mgwSwag.resources != nil {
 			assert.Equal(t, item.result.resources[0].productionUrls, mgwSwag.resources[0].productionUrls, item.message)
 		}

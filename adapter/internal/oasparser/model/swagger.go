@@ -19,6 +19,7 @@ package model
 
 import (
 	"errors"
+
 	"github.com/go-openapi/spec"
 	"github.com/google/uuid"
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
@@ -65,7 +66,13 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 		}
 		endpoint, err := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
 		if err == nil {
-			swagger.productionUrls = append(swagger.productionUrls, *endpoint)
+			productionEndpoints := append(swagger.productionEndpoints.Endpoints, *endpoint)
+			endpointCluster := EndpointCluster{
+				EndpointName: xWso2ProdEndpoints,
+				EndpointType: "loadbalance",
+				Endpoints:    productionEndpoints,
+			}
+			swagger.productionEndpoints = endpointCluster
 		} else {
 			return errors.New("error encountered when parsing the endpoint")
 		}
@@ -202,7 +209,7 @@ func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{
 		sandBoxURL := sandboxEndpoints["url"].(string)
 		sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(sandBoxURL)
 		if err == nil {
-			swagger.sandboxUrls = append(swagger.sandboxUrls, *sandBoxEndpoint)
+			swagger.sandboxEndpoints.Endpoints = append(swagger.sandboxEndpoints.Endpoints, *sandBoxEndpoint)
 		} else {
 			return err
 		}
@@ -212,7 +219,7 @@ func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{
 		productionURL := productionEndpoints["url"].(string)
 		productionEndpoint, err := getHostandBasepathandPortWebSocket(productionURL)
 		if err == nil {
-			swagger.productionUrls = append(swagger.productionUrls, *productionEndpoint)
+			swagger.productionEndpoints.Endpoints = append(swagger.productionEndpoints.Endpoints, *productionEndpoint)
 		} else {
 			return err
 		}
