@@ -106,6 +106,4 @@ public class CustomFilterTestCase {
         JSONObject responseJSON = new JSONObject(response.getData());
         Assert.assertFalse(responseJSON.has("custom-remove-header"), "Header is not removed from the custom filter.");
     }
-
-    //TODO: (VirajSalaka) add a test case to see if everything is populated correctly.
 }

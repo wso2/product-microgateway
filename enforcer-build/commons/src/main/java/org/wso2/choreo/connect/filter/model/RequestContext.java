@@ -47,7 +47,6 @@ public class RequestContext {
     // the openAPI has production endpoints alone.
     private String prodClusterHeader;
     private String sandClusterHeader;
-    // TODO: (VirajSalaka) remove this flag and always enable header based routing.
     private boolean clusterHeaderEnabled = false;
     //Denotes the specific headers which needs to be passed to response object
     private Map<String, String> addHeaders;

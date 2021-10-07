@@ -216,7 +216,6 @@ public class RestAPI implements API {
             filterImplMap.put(filter.getClass().getName(), filter);
         }
 
-        // TODO: (VirajSalaka) check mg impl
         for (FilterDTO filterDTO : customFilters) {
             if (filterImplMap.containsKey(filterDTO.getClassName())) {
                 if (filterDTO.getPosition() <= 0 || filterDTO.getPosition() - 1 > filters.size()) {
