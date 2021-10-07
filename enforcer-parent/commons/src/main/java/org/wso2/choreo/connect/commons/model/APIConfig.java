@@ -71,8 +71,7 @@ public class APIConfig {
     }
 
     /**
-     * TODO: (VirajSalaka)
-     * Corresponding API's organization UUID is returned.
+     * Corresponding API's organization UUID (TenantDomain) is returned.
      *
      * @return Organization UUID
      */
@@ -141,7 +140,6 @@ public class APIConfig {
 
     /**
      * Current API Lifecycle state is returned.
-     * TODO: (VirajSalaka) describe more
      * @return lifecycle state
      */
     public String getApiLifeCycleState() {

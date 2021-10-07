@@ -74,8 +74,9 @@ public class AuthenticationContext {
     //should be its first element.
 
     /**
-     * TODO: (VirajSalaka)
-     * @return
+     * Returns true if there is a content aware throttling tier is present.
+     *
+     * @return true if there is a content aware tier is present.
      */
     public boolean isContentAwareTierPresent() {
         return isContentAwareTierPresent;
@@ -93,6 +94,7 @@ public class AuthenticationContext {
     public String getApiTier() {
         return apiTier;
     }
+
 
     public void setApiTier(String apiTier) {
         this.apiTier = apiTier;
@@ -116,10 +118,20 @@ public class AuthenticationContext {
     }
 
     // Username of the authenticated User
+
+    /**
+     * Username of the authenticated user.
+     * @return User
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * Get Subscription level throttling tier.
+     *
+     * @return subscription throttling tier.
+     */
     public String getTier() {
         return tier;
     }

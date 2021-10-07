@@ -41,7 +41,6 @@ public class ResourceConfig {
         return path;
     }
 
-    // TODO: (VirajSalaka) use a builder for resources as well.
     public void setPath(String path) {
         this.path = path;
     }

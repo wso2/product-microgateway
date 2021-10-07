@@ -72,8 +72,6 @@ public class RequestContext {
     /**
      * If the dynamic metadata sent from enforcer needs to be updated/ new keys needs to be added,
      * the key, value pairs should be updated in this map.
-     * TODO: (VirajSalaka) if something related to analytics keys are updated, it is going to be
-     * overwritten. Bring in a prefix.
      *
      * @param key metadata key
      * @param value metadata value
@@ -254,7 +252,6 @@ public class RequestContext {
 
     /**
      * This denotes that the router is performing header based routing.
-     * TODO: (VirajSalaka) Shall we change the logic to always perform header based routing.
      *
      * Returns true if both sandbox cluster header and prod cluster header is
      * available.
