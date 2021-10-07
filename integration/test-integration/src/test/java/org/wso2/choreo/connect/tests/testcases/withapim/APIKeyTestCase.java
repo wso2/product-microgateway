@@ -42,8 +42,6 @@ import java.util.Map;
 
 public class APIKeyTestCase extends ApimBaseTest {
 
-    private static final Logger log = LoggerFactory.getLogger(APIKeyTestCase.class);
-
     private static final String SAMPLE_API_NAME = "APIKeyTestAPI";
     private static final String SAMPLE_API_CONTEXT = "apiKey";
     private static final String SAMPLE_API_VERSION = "1.0.0";
@@ -59,24 +57,9 @@ public class APIKeyTestCase extends ApimBaseTest {
     @BeforeClass(description = "Initialise the setup for API key tests")
     void start() throws Exception {
         super.initWithSuperTenant();
-        APIRequest apiRequest = new APIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT,
-                new URL(Utils.getDockerMockServiceURLHttp(TestConstant.MOCK_BACKEND_BASEPATH)));
-        apiRequest.setProvider(user.getUserName());
-        apiRequest.setVersion(SAMPLE_API_VERSION);
-        apiRequest.setTiersCollection(TestConstant.SUBSCRIPTION_TIER.UNLIMITED);
-        apiRequest.setTier(TestConstant.API_TIER.UNLIMITED);
-        apiRequest.setApiTier(TestConstant.API_TIER.UNLIMITED);
 
-        // Add api related operations
-        APIOperationsDTO findByStatus = new APIOperationsDTO();
-        findByStatus.setVerb("GET");
-        findByStatus.setTarget("/pet/{petId}");
-        findByStatus.setThrottlingPolicy(TestConstant.API_TIER.UNLIMITED);
-
-        List<APIOperationsDTO> operationsDTOS = new ArrayList<>();
-        operationsDTOS.add(findByStatus);
-        apiRequest.setOperationsDTOS(operationsDTOS);
-
+        APIRequest apiRequest = PublisherUtils.createSampleAPIRequest(SAMPLE_API_NAME, SAMPLE_API_CONTEXT,
+                SAMPLE_API_VERSION, user.getUserName());
         // Add security scheme to the API
         List<String> securitySchemeList = new ArrayList<>();
         securitySchemeList.add("api_key");
@@ -89,7 +72,7 @@ public class APIKeyTestCase extends ApimBaseTest {
         applicationId = appWithConsumerKey.getApplicationId();
         StoreUtils.subscribeToAPI(apiId, applicationId, TestConstant.SUBSCRIPTION_TIER.UNLIMITED, storeRestClient);
 
-        endPoint = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/2");
+        endPoint = Utils.getServiceURLHttps(SAMPLE_API_CONTEXT + "/1.0.0/pet/findByStatus");
 
         // Obtain API keys
         APIKeyDTO apiKeyDTO = StoreUtils.generateAPIKey(applicationId, TestConstant.KEY_TYPE_PRODUCTION,
@@ -135,7 +118,8 @@ public class APIKeyTestCase extends ApimBaseTest {
     }
 
     //Invoke API by including the API key as a query parameter
-    @Test(description = "Test to check the API Key in header is working", dependsOnMethods = "invokeWithTamperedAPIKey")
+    @Test(description = "Test to check the API Key in query param is working",
+            dependsOnMethods = "invokeWithTamperedAPIKey")
     public void invokeAPIKeyInQueryParamSuccessTest() throws Exception {
         Map<String, String> headers = new HashMap<>();
         HttpResponse response = HttpClientRequest.doGet(
@@ -188,27 +172,25 @@ public class APIKeyTestCase extends ApimBaseTest {
         Assert.assertTrue(response.getData().contains("Invalid Credentials"), "Error response message mismatch");
     }
 
-    @Test(description = "Test to check the API Key for specific IP address is working")
-    public void invokeAPIKeyForIPAddressTest() throws Exception {
+    @Test(description = "Test to check the API Key for  incorrect IP address is not working")
+    public void invokeAPIKeyForIncorrectIPAddressTest() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put("api_key", apiKeyForIPTest);
         headers.put("permittedIP", "192.168.1.2");
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
-        log.info(response.getData() + "AA" + response.getResponseMessage());
         Assert.assertNotNull(response);
         Assert.assertTrue(response.getData().contains("Resource forbidden"), "Error response message mismatch");
     }
 
 
-    @Test(description = "Test to check the API Key for specific IP address is working")
-    public void invokeAPIKeyForRefererTest() throws Exception {
+    @Test(description = "Test to check the API Key for incorrect referer address is not working")
+    public void invokeAPIKeyForIncorrectRefererTest() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        headers.put("api_key", apiKeyForIPTest);
+        headers.put("api_key", apiKeyForRefererTest);
         headers.put("referer", "www.abcd.com");
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
-        log.info(response.getData() + "BB" + response.getResponseMessage());
         Assert.assertNotNull(response);
         Assert.assertTrue(response.getData().contains("Resource forbidden"), "Error response message mismatch");
     }
@@ -220,7 +202,19 @@ public class APIKeyTestCase extends ApimBaseTest {
         headers.put("x-forwarded-for", "192.168.1.1");
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
-        log.info(response.getData() + "AA" + response.getResponseMessage());
+        Assert.assertNotNull(response);
+        Assert.assertEquals(response.getResponseCode(),
+                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
+                "Response code mismatched");
+    }
+
+    @Test(description = "Test to check the API Key for specific referer address is working")
+    public void invokeAPIKeyForRefererSuccessTest() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("api_key", apiKeyForRefererTest);
+        headers.put("referer", "www.abc.com");
+        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
+
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getResponseCode(),
                 com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
