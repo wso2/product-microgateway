@@ -222,7 +222,7 @@ public class RestAPI implements API {
                     logger.error("Position provided for the filter is invalid. "
                             + filterDTO.getClassName() + " : " + filterDTO.getPosition() + "(Filters list size is "
                             + filters.size() + ")");
-                    break;
+                    continue;
                 }
                 Filter filter = filterImplMap.get(filterDTO.getClassName());
                 filter.init(apiConfig);
