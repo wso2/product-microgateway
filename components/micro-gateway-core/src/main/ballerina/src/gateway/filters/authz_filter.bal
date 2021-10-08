@@ -59,7 +59,7 @@ public type OAuthzFilter object {
 
     }
 
-    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+    public function filterResponse(@tainted http:Response response, http:FilterContext context) returns boolean {
         if (context.attributes.hasKey(SKIP_ALL_FILTERS) && <boolean>context.attributes[SKIP_ALL_FILTERS]) {
             printDebug(KEY_AUTHZ_FILTER, "Skip all filter annotation set in the service. Skip the filter");
             return true;
@@ -74,7 +74,7 @@ public type OAuthzFilter object {
 
 
 
-public function doAuthzFilterResponse(http:Response response, http:FilterContext context) returns boolean {
+public function doAuthzFilterResponse(@tainted http:Response response, http:FilterContext context) returns boolean {
     // In authorization filter we have specifically set the error payload since we are using ballerina in built
     // authzFilter
     // when unauthorized response is coming from a backend/interceptor,
@@ -97,7 +97,7 @@ public function doAuthzFilterResponse(http:Response response, http:FilterContext
 }
 
 
-public function setAuthorizationFailureMessage(http:Response response, http:FilterContext context) {
+public function setAuthorizationFailureMessage(@tainted http:Response response, http:FilterContext context) {
     string errorDescription = INVALID_SCOPE_MESSAGE;
     string errorMessage = INVALID_SCOPE_MESSAGE;
     int errorCode = INVALID_SCOPE;

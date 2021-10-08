@@ -34,7 +34,7 @@ public type OAuthzFilterWrapper object {
         return result;
     }
 
-    public function filterResponse(http:Response response, http:FilterContext context) returns boolean {
+    public function filterResponse(@tainted http:Response response, http:FilterContext context) returns boolean {
         //Start a new root span without attaching to the system span.
         int | error | () spanIdRes = startSpan(AUTHZ_FILTER_RESPONSE);
         boolean result = self.oAuthzFilter.filterResponse(response, context);
