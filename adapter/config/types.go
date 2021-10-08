@@ -124,8 +124,8 @@ type enforcer struct {
 	Management   management
 	RestServer   restServer
 	Filters      []filter
-	Tracing		 tracing
-	Metrics		 metrics
+	Tracing      tracing
+	Metrics      metrics
 }
 
 type server struct {
@@ -329,14 +329,14 @@ type analytics struct {
 }
 
 type tracing struct {
-	Enabled  			bool 				`toml:"enabled"`
-	Type				string				`toml:"type"`
-	ConfigProperties	map[string]string	`toml:"configProperties"`
+	Enabled          bool              `toml:"enabled"`
+	Type             string            `toml:"type"`
+	ConfigProperties map[string]string `toml:"configProperties"`
 }
 
 type metrics struct {
-	Enabled  	bool 	`toml:"enabled"`
-	Type 		string 	`toml:"type"`
+	Enabled bool   `toml:"enabled"`
+	Type    string `toml:"type"`
 }
 
 type analyticsAdapter struct {
@@ -397,7 +397,6 @@ type controlPlane struct {
 	EnvironmentLabels          []string                   `toml:"environmentLabels"`
 	RetryInterval              time.Duration              `toml:"retryInterval"`
 	SkipSSLVerification        bool                       `toml:"skipSSLVerification"`
-	JmsConnectionParameters    jmsConnectionParameters    `toml:"jmsConnectionParameters"`
 	BrokerConnectionParameters brokerConnectionParameters `toml:"brokerConnectionParameters"`
 }
 
@@ -407,10 +406,6 @@ type globalAdapter struct {
 	LocalLabel    string        `toml:"localLabel"`
 	HostName      string        `toml:"overwriteHostName"`
 	RetryInterval time.Duration `toml:"retryInterval"`
-}
-
-type jmsConnectionParameters struct {
-	EventListeningEndpoints []string `toml:"eventListeningEndpoints"`
 }
 
 type brokerConnectionParameters struct {

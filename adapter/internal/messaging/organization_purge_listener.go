@@ -29,13 +29,12 @@ import (
 
 func handleAzureOrganizationPurge() {
 	for d := range msg.AzureOrganizationPurgeChannel {
-		logger.LoggerInternalMsg.Info("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] message received for " +
-			"OrganizationPurgeChannel = " + string(d))
+		logger.LoggerInternalMsg.Info("message received for OrganizationPurgeChannel = " + string(d))
 		var event msg.EventOrganizationPurge
 		error := parseOrganizationPurgeJSONEvent(d, &event)
 
 		if error != nil {
-			logger.LoggerInternalMsg.Errorf("[TEST][FEATURE_FLAG_REPLACE_EVENT_HUB] Error while processing "+
+			logger.LoggerInternalMsg.Errorf("Error while processing "+
 				"the organization purge event %v. Hence dropping the event", error)
 			continue
 		}
