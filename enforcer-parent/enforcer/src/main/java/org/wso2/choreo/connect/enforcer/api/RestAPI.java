@@ -23,12 +23,14 @@ import org.wso2.choreo.connect.discovery.api.Api;
 import org.wso2.choreo.connect.discovery.api.Endpoint;
 import org.wso2.choreo.connect.discovery.api.Operation;
 import org.wso2.choreo.connect.discovery.api.Resource;
+import org.wso2.choreo.connect.discovery.api.SecurityScheme;
 import org.wso2.choreo.connect.enforcer.analytics.AnalyticsFilter;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
 import org.wso2.choreo.connect.enforcer.commons.model.APIConfig;
 import org.wso2.choreo.connect.enforcer.commons.model.EndpointSecurity;
 import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
 import org.wso2.choreo.connect.enforcer.commons.model.ResourceConfig;
+import org.wso2.choreo.connect.enforcer.api.config.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.config.dto.FilterDTO;
@@ -69,9 +71,26 @@ public class RestAPI implements API {
         String apiType = api.getApiType();
         List<String> productionUrls = processEndpoints(api.getProductionUrlsList());
         List<String> sandboxUrls = processEndpoints(api.getSandboxUrlsList());
-        List<String> securitySchemes = api.getSecuritySchemeList();
+        Map<String, SecuritySchemaConfig> securitySchemes = new HashMap<>();
+        List<String> securitySchemeList = new ArrayList<>();
         List<ResourceConfig> resources = new ArrayList<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
+
+        for (SecurityScheme securityScheme : api.getSecuritySchemeList()) {
+
+            if (securityScheme.getType() != null) {
+                String schemaType = securityScheme.getType();
+                SecuritySchemaConfig securitySchemaConfig = new SecuritySchemaConfig();
+                securitySchemaConfig.setType(schemaType);
+                securitySchemaConfig.setName(securityScheme.getName());
+                securitySchemaConfig.setIn(securityScheme.getIn());
+                securitySchemes.put(schemaType, securitySchemaConfig);
+            }
+        }
+
+        for (String schemeName : securitySchemes.keySet()) {
+            securitySchemeList.add(schemeName);
+        }
 
         for (Resource res : api.getResourcesList()) {
             for (Operation operation : res.getMethodsList()) {
@@ -94,10 +113,11 @@ public class RestAPI implements API {
         this.apiLifeCycleState = api.getApiLifeCycleState();
         this.apiConfig = new APIConfig.Builder(name).uuid(api.getId()).vhost(vhost).basePath(basePath).version(version)
                 .resources(resources).apiType(apiType).apiLifeCycleState(apiLifeCycleState)
-                .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(endpointSecurity)
+                .securitySchema(securitySchemeList).tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
                 .productionUrls(productionUrls).sandboxUrls(sandboxUrls)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
-                .organizationId(api.getOrganizationId()).build();
+                .organizationId(api.getOrganizationId()).
+                apiKeyHeader(getAPIKeyHeaderName(securitySchemes).toLowerCase()).build();
         initFilters();
         return basePath;
     }
@@ -234,5 +254,14 @@ public class RestAPI implements API {
                         + filterDTO.getClassName());
             }
         }
+    }
+
+    private String getAPIKeyHeaderName(Map<String, SecuritySchemaConfig> securitySchemes) {
+        String apiKeyHeaderName = "";
+        SecuritySchemaConfig securitySchemaConfig = securitySchemes.get(APIConstants.SWAGGER_API_KEY_AUTH_TYPE_NAME);
+        if (securitySchemaConfig != null) {
+            apiKeyHeaderName = securitySchemaConfig.getName();
+        }
+        return apiKeyHeaderName;
     }
 }

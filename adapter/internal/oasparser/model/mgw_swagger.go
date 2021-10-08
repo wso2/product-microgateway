@@ -48,7 +48,7 @@ type MgwSwagger struct {
 	resources           []Resource
 	xWso2Basepath       string
 	xWso2Cors           *CorsConfig
-	securityScheme      []string
+	securityScheme      []SecurityScheme
 	xWso2ThrottlingTier string
 	xWso2AuthHeader     string
 	disableSecurity     bool
@@ -96,6 +96,21 @@ type RetryConfig struct {
 	IntervalInMillis int32
 	BackOffFactor    float32
 	StatusCodes      []string
+}
+
+// SecurityScheme represents the structure of an security scheme.
+type SecurityScheme struct {
+	// Type of the security scheme
+	Type string
+	// Possible values are apiKey, oauth2
+
+	// Name of the security scheme
+	Name string
+	// User can define a specific name for above types
+
+	// Location of the api key 
+	In string 
+	// Valid values are query, header
 }
 
 // CorsConfig represents the API level Cors Configuration
@@ -197,8 +212,8 @@ func (swagger *MgwSwagger) SetName(name string) {
 	swagger.title = name
 }
 
-// SetSecurityScheme sets the securityscheme of the API
-func (swagger *MgwSwagger) SetSecurityScheme(securityScheme []string) {
+// SetSecurityScheme sets the securityschemes of the API
+func (swagger *MgwSwagger) SetSecurityScheme(securityScheme []SecurityScheme) {
 	swagger.securityScheme = securityScheme
 }
 
@@ -219,8 +234,8 @@ func (swagger *MgwSwagger) GetXWSO2AuthHeader() string {
 	return swagger.xWso2AuthHeader
 }
 
-// GetSetSecurityScheme returns the securityscheme of the API
-func (swagger *MgwSwagger) GetSetSecurityScheme() []string {
+// GetSecurityScheme returns the securityschemes of the API
+func (swagger *MgwSwagger) GetSecurityScheme() []SecurityScheme {
 	return swagger.securityScheme
 }
 

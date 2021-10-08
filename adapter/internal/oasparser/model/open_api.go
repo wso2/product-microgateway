@@ -69,6 +69,7 @@ func (swagger *MgwSwagger) SetInfoOpenAPI(swagger3 openapi3.Swagger) error {
 	}
 
 	swagger.vendorExtensions = convertExtensibletoReadableFormat(swagger3.ExtensionProps)
+	swagger.securityScheme = setSecuritySchemesOpenAPI(swagger3)
 	swagger.resources, err = setResourcesOpenAPI(swagger3)
 	if err != nil {
 		return err
@@ -161,6 +162,16 @@ func setResourcesOpenAPI(openAPI openapi3.Swagger) ([]Resource, error) {
 		}
 	}
 	return SortResources(resources), nil
+}
+
+func setSecuritySchemesOpenAPI(openAPI openapi3.Swagger) ([]SecurityScheme) {
+	var securitySchemes []SecurityScheme
+	for _, val := range openAPI.Components.SecuritySchemes {
+		scheme := SecurityScheme{Type: val.Value.Type, Name: val.Value.Name, In: val.Value.In}
+		securitySchemes = append(securitySchemes, scheme)
+	}
+	logger.LoggerOasparser.Debugf("Security schemes in  setSecuritySchemesOpenAPI method %v:",securitySchemes)
+	return securitySchemes
 }
 
 func getOperationLevelDetails(operation *openapi3.Operation, method string) Operation {

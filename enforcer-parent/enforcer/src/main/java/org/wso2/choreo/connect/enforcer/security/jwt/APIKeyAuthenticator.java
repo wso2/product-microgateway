@@ -32,10 +32,12 @@ import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.choreo.connect.commons.model.AuthenticationContext;
+import org.wso2.choreo.connect.commons.model.RequestContext;
+import org.wso2.choreo.connect.commons.model.ResourceConfig;
+import org.wso2.choreo.connect.commons.model.SecurityInfo;
+import org.wso2.choreo.connect.commons.model.SecuritySchemaConfig;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
-import org.wso2.choreo.connect.enforcer.commons.model.AuthenticationContext;
-import org.wso2.choreo.connect.enforcer.commons.model.RequestContext;
-import org.wso2.choreo.connect.enforcer.commons.model.SecurityInfo;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
@@ -51,6 +53,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -78,12 +81,16 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     // Gets API key from request
     private String getAPIKeyFromRequest(RequestContext requestContext) {
-        String apiKey;
-        Map<String, String> headers = requestContext.getHeaders();
-        apiKey = headers.get(FilterUtils.getAPIKeyHeaderName(requestContext));
-        if (StringUtils.isEmpty(apiKey)) {
+        String apiKeyName = FilterUtils.getAPIKeyName(requestContext);
+        String apiKey = "";
+        String apiKeyLocation = getAPIKeyAllowedIn(requestContext);
+        if (apiKeyLocation.equals(APIConstants.SWAGGER_API_KEY_IN_HEADER)) {
+            Map<String, String> headers = requestContext.getHeaders();
+            apiKey = getAPIKeyFromMap(headers, apiKeyName);
+        }
+        if (StringUtils.isEmpty(apiKey) && apiKeyLocation.equals(APIConstants.SWAGGER_API_KEY_IN_QUERY)) {
             Map<String, String> queryParameters = requestContext.getQueryParameters();
-            apiKey = queryParameters.get(FilterUtils.getAPIKeyHeaderName(requestContext));
+            apiKey = getAPIKeyFromMap(queryParameters, apiKeyName);
         }
         return apiKey;
     }

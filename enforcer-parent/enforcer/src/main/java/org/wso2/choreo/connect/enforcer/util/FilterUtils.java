@@ -549,7 +549,12 @@ public class FilterUtils {
     }
 
     public static String getAPIKeyHeaderName(RequestContext requestContext) {
+        APIConfig apiConfig = requestContext.getMatchedAPI();
+        Map<String, String> headerMap = requestContext.getHeaders();
         String apiKeyHeader = "";
+        if (headerMap.containsKey(apiConfig.getApiKeyHeaderName())) {
+            return apiConfig.getApiKeyHeaderName();
+        }
         if (StringUtils.isEmpty(apiKeyHeader)) {
             apiKeyHeader = APIConstants.API_SECURITY_API_KEY;
         }

@@ -27,6 +27,7 @@ import (
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/api"
+	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 )
 
 // GetRoutesClustersEndpoints generates the routes, clusters and endpoints (envoy)
@@ -95,6 +96,17 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 	prodUrls := []*api.Endpoint{}
 	sandUrls := []*api.Endpoint{}
 	resources := []*api.Resource{}
+	securitySchemes := []*api.SecurityScheme{}
+
+	logger.LoggerOasparser.Debugf("Security schemes in GetEnforcerAPI method %v:", mgwSwagger.GetSecurityScheme())
+	for _, securityScheme := range mgwSwagger.GetSecurityScheme() {
+		scheme := &api.SecurityScheme{
+			Type: securityScheme.Type,
+			Name: securityScheme.Name,
+			In: securityScheme.In,
+		}
+		securitySchemes = append(securitySchemes, scheme)
+	}
 
 	if mgwSwagger.GetProdEndpoints() != nil {
 		for _, ep := range mgwSwagger.GetProdEndpoints().Endpoints {
@@ -162,7 +174,7 @@ func GetEnforcerAPI(mgwSwagger model.MgwSwagger, lifeCycleState string, endpoint
 		Resources:           resources,
 		ApiLifeCycleState:   lifeCycleState,
 		Tier:                mgwSwagger.GetXWso2ThrottlingTier(),
-		SecurityScheme:      mgwSwagger.GetSetSecurityScheme(),
+		SecurityScheme:      securitySchemes,
 		EndpointSecurity:    endpointSecurityDetails,
 		AuthorizationHeader: mgwSwagger.GetXWSO2AuthHeader(),
 		DisableSecurity:     mgwSwagger.GetDisableSecurity(),

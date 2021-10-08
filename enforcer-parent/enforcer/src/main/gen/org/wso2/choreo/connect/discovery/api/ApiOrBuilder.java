@@ -176,29 +176,28 @@ public interface ApiOrBuilder extends
       getApiLifeCycleStateBytes();
 
   /**
-   * <code>repeated string securityScheme = 12;</code>
-   * @return A list containing the securityScheme.
+   * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
    */
-  java.util.List<java.lang.String>
+  java.util.List<org.wso2.choreo.connect.discovery.api.SecurityScheme> 
       getSecuritySchemeList();
   /**
-   * <code>repeated string securityScheme = 12;</code>
-   * @return The count of securityScheme.
+   * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
+   */
+  org.wso2.choreo.connect.discovery.api.SecurityScheme getSecurityScheme(int index);
+  /**
+   * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
    */
   int getSecuritySchemeCount();
   /**
-   * <code>repeated string securityScheme = 12;</code>
-   * @param index The index of the element to return.
-   * @return The securityScheme at the given index.
+   * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
    */
-  java.lang.String getSecurityScheme(int index);
+  java.util.List<? extends org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder> 
+      getSecuritySchemeOrBuilderList();
   /**
-   * <code>repeated string securityScheme = 12;</code>
-   * @param index The index of the value to return.
-   * @return The bytes of the securityScheme at the given index.
+   * <code>repeated .wso2.discovery.api.SecurityScheme securityScheme = 12;</code>
    */
-  com.google.protobuf.ByteString
-      getSecuritySchemeBytes(int index);
+  org.wso2.choreo.connect.discovery.api.SecuritySchemeOrBuilder getSecuritySchemeOrBuilder(
+      int index);
 
   /**
    * <code>.wso2.discovery.api.EndpointSecurity endpointSecurity = 13;</code>

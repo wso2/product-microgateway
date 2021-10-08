@@ -62,6 +62,7 @@ public class APIConstants {
     public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
     public static final String API_SECURITY_BASIC_AUTH = "basic_auth";
     public static final String API_SECURITY_API_KEY = "api_key";
+    public static final String SWAGGER_API_KEY_AUTH_TYPE_NAME = "apiKey";
     public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
