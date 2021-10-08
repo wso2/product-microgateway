@@ -51,7 +51,7 @@
             </activation>
             <modules>
                 <module>adapter</module>
-                <module>enforcer</module>
+                <module>enforcer-parent</module>
                 <module>distribution</module>
                 <module>integration</module>
             </modules>
@@ -64,7 +64,7 @@
             <modules>
                 <module>router</module>
                 <module>adapter</module>
-                <module>enforcer</module>
+                <module>enforcer-parent</module>
                 <module>distribution</module>
                 <module>integration</module>
             </modules>

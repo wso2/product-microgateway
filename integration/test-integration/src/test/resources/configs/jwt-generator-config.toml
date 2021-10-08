@@ -12,6 +12,11 @@
 
 [enforcer.throttling]
   jmsConnectionProviderUrl = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672'"
+
+
+[[enforcer.filters]]
+    className = "org.wso2.choreo.connect.tests.CustomFilter"
+    position = 3
  
 [enforcer.security]
 [[enforcer.security.tokenService]]
