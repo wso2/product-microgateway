@@ -95,7 +95,7 @@ data:
       password = "$env{cp_admin_pwd}"
       environmentLabels = ["Default"]
       skipSSLVerification = true
-      [controlPlane.jmsConnectionParameters]
+      [controlPlane.brokerConnectionParameters]
       eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@wso2apim:5672?retries='10'&connectdelay='30'"]
 
     [analytics]
