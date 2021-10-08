@@ -25,7 +25,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.choreo.connect.enforcer.commons</artifactId>
+    <artifactId>org.wso2.choreo.connect.enforcer-commons</artifactId>
     <name>Choreo Connect - Enforcer Commons</name>
 
     <properties>
