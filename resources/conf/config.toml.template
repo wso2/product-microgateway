@@ -382,9 +382,6 @@ enable = true
   # Message broker connection URL of the control plane
   [controlPlane.brokerConnectionParameters]
     eventListeningEndpoints = ["amqp://admin:$env{cp_admin_pwd}@apim:5672?retries='10'&connectdelay='30'"]
-  # TODO: (dnwick) remove this config once a common connection parameter is introduced
-  [controlPlane.asbConnectionParameters]
-    eventListeningEndpoint = "$env{ASB_CONNECTION_STRING}"
     reconnectInterval = 5000
     reconnectRetryCount = 60
 
