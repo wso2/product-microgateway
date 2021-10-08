@@ -27,7 +27,7 @@ func TestGetXWso2Endpoints(t *testing.T) {
 	type getXWso2EndpointsTestItem struct {
 		inputVendorExtensions map[string]interface{}
 		inputEndpointName     string
-		result                EndpointCluster
+		result                *EndpointCluster
 		message               string
 	}
 	dataItems := []getXWso2EndpointsTestItem{
@@ -35,7 +35,7 @@ func TestGetXWso2Endpoints(t *testing.T) {
 			inputEndpointName: "x-wso2-production-endpoints",
 			inputVendorExtensions: map[string]interface{}{"x-wso2-production-endpoints": map[string]interface{}{
 				"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80"}}},
-			result: EndpointCluster{
+			result: &EndpointCluster{
 				EndpointName: "x-wso2-production-endpoints",
 				Endpoints: []Endpoint{
 					{
@@ -52,10 +52,7 @@ func TestGetXWso2Endpoints(t *testing.T) {
 			inputEndpointName: "x-wso2-production-endpoints",
 			inputVendorExtensions: map[string]interface{}{"x-wso2-production-endpoints+++": map[string]interface{}{
 				"type": "loadbalance", "urls": []interface{}{"https://www.facebook.com:80/base"}}},
-			result: EndpointCluster{
-				EndpointName: "x-wso2-production-endpoints",
-				Endpoints:    nil,
-			},
+			result:  nil,
 			message: "when having incorrect extenstion name",
 		},
 	}
@@ -108,7 +105,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 				},
 			},
 			result: MgwSwagger{
-				productionEndpoints: EndpointCluster{
+				productionEndpoints: &EndpointCluster{
 					EndpointName: "x-wso2-production-endpoints",
 					Endpoints: []Endpoint{
 						{
@@ -122,7 +119,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 				},
 				resources: []Resource{
 					{
-						productionUrls: nil,
+						productionEndpoints: nil,
 					},
 				},
 			},
@@ -140,7 +137,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 				},
 			},
 			result: MgwSwagger{
-				productionEndpoints: EndpointCluster{
+				productionEndpoints: &EndpointCluster{
 					EndpointName: "x-wso2-production-endpoints",
 					Endpoints: []Endpoint{
 						{
@@ -154,13 +151,17 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 				},
 				resources: []Resource{
 					{
-						productionUrls: []Endpoint{
-							{
-								Host:     "resource.endpoint",
-								Port:     80,
-								URLType:  "https",
-								Basepath: "/base",
+						productionEndpoints: &EndpointCluster{
+							EndpointName: "x-wso2-production-endpoints",
+							Endpoints: []Endpoint{
+								{
+									Host:     "resource.endpoint",
+									Port:     80,
+									URLType:  "https",
+									Basepath: "/base",
+								},
 							},
+							EndpointType: "loadbalance",
 						},
 					},
 				},
@@ -189,7 +190,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 				},
 			},
 			result: MgwSwagger{
-				productionEndpoints: EndpointCluster{
+				productionEndpoints: &EndpointCluster{
 					EndpointName: "x-wso2-production-endpoints",
 					Endpoints: []Endpoint{
 						{
@@ -203,13 +204,17 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 				},
 				resources: []Resource{
 					{
-						productionUrls: []Endpoint{
-							{
-								Host:     "resource.endpoint",
-								Port:     80,
-								URLType:  "https",
-								Basepath: "/base",
+						productionEndpoints: &EndpointCluster{
+							EndpointName: "x-wso2-production-endpoints",
+							Endpoints: []Endpoint{
+								{
+									Host:     "resource.endpoint",
+									Port:     80,
+									URLType:  "https",
+									Basepath: "/base",
+								},
 							},
+							EndpointType: "loadbalance",
 						},
 					},
 				},
@@ -227,7 +232,7 @@ func TestSetXWso2ProductionEndpoint(t *testing.T) {
 		assert.Nil(t, err, "Should not encounter an error when setting vendor extensions")
 		assert.Equal(t, item.result.productionEndpoints, mgwSwag.productionEndpoints, item.message)
 		if mgwSwag.resources != nil {
-			assert.Equal(t, item.result.resources[0].productionUrls, mgwSwag.resources[0].productionUrls, item.message)
+			assert.Equal(t, item.result.resources[0].productionEndpoints, mgwSwag.resources[0].productionEndpoints, item.message)
 		}
 	}
 }

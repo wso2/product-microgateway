@@ -66,13 +66,12 @@ func (swagger *MgwSwagger) SetInfoSwagger(swagger2 spec.Swagger) error {
 		}
 		endpoint, err := getHostandBasepathandPort(urlScheme + swagger2.Host + swagger2.BasePath)
 		if err == nil {
-			productionEndpoints := append(swagger.productionEndpoints.Endpoints, *endpoint)
-			endpointCluster := EndpointCluster{
+			productionEndpoints := append([]Endpoint{}, *endpoint)
+			swagger.productionEndpoints = &EndpointCluster{
 				EndpointName: xWso2ProdEndpoints,
 				EndpointType: "loadbalance",
 				Endpoints:    productionEndpoints,
 			}
-			swagger.productionEndpoints = endpointCluster
 		} else {
 			return errors.New("error encountered when parsing the endpoint")
 		}
@@ -209,7 +208,7 @@ func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{
 		sandBoxURL := sandboxEndpoints["url"].(string)
 		sandBoxEndpoint, err := getHostandBasepathandPortWebSocket(sandBoxURL)
 		if err == nil {
-			swagger.sandboxEndpoints.Endpoints = append(swagger.sandboxEndpoints.Endpoints, *sandBoxEndpoint)
+			swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, []Endpoint{*sandBoxEndpoint})
 		} else {
 			return err
 		}
@@ -219,7 +218,7 @@ func (swagger *MgwSwagger) SetInfoSwaggerWebSocket(apiData map[string]interface{
 		productionURL := productionEndpoints["url"].(string)
 		productionEndpoint, err := getHostandBasepathandPortWebSocket(productionURL)
 		if err == nil {
-			swagger.productionEndpoints.Endpoints = append(swagger.productionEndpoints.Endpoints, *productionEndpoint)
+			swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, []Endpoint{*productionEndpoint})
 		} else {
 			return err
 		}

@@ -258,8 +258,8 @@ func testGetMgwSwaggerWebSocket(t *testing.T, apiYamlFilePath string) {
 		assert.Equal(t, productionEndpoint.Basepath, "/", "mgwSwagger production endpoint basepath mistmatch")
 		assert.Equal(t, productionEndpoint.URLType, "ws", "mgwSwagger production endpoint URLType mismatch")
 		assert.Equal(t, productionEndpoint.Port, port, "mgwSwagger production endpoint port mismatch")
-		sandboxEndpoints := mgwSwagger.GetSandEndpoints().Endpoints
-		assert.Equal(t, len(sandboxEndpoints), 0, "mgwSwagger sandbox endpoints length mismatch")
+		sandboxEndpoints := mgwSwagger.GetSandEndpoints()
+		assert.Nil(t, sandboxEndpoints, "mgwSwagger sandbox endpoints cluster must be nil")
 
 	}
 	if strings.HasSuffix(apiYamlFilePath, "api_sand.yaml") {
@@ -274,8 +274,8 @@ func testGetMgwSwaggerWebSocket(t *testing.T, apiYamlFilePath string) {
 		assert.Equal(t, sandboxEndpoint.Basepath, "/", "mgwSwagger sandbox endpoint basepath mistmatch")
 		assert.Equal(t, sandboxEndpoint.URLType, "ws", "mgwSwagger sandbox endpoint URLType mismatch")
 		assert.Equal(t, sandboxEndpoint.Port, port, "mgwSwagger sandbox endpoint port mismatch")
-		productionEndpoints := mgwSwagger.GetProdEndpoints().Endpoints
-		assert.Equal(t, len(productionEndpoints), 0, "mgwSwagger sandbox endpoints length mismatch")
+		productionEndpoints := mgwSwagger.GetProdEndpoints()
+		assert.Nil(t, productionEndpoints, "mgwSwagger sandbox endpoints cluster must be nil")
 	}
 
 }

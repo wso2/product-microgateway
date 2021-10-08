@@ -88,7 +88,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 	timeout := conf.Envoy.ClusterTimeoutInSeconds
 
 	// check API level production endpoints available
-	if len(mgwSwagger.GetProdEndpoints().Endpoints) > 0 {
+	if mgwSwagger.GetProdEndpoints() != nil && len(mgwSwagger.GetProdEndpoints().Endpoints) > 0 {
 		apiLevelEndpointProd = mgwSwagger.GetProdEndpoints().Endpoints
 		apilevelAddressP := createAddress(apiLevelEndpointProd[0].Host, apiLevelEndpointProd[0].Port)
 		apiLevelClusterNameProd = strings.TrimSpace(organizationID + "_" + prodClustersConfigNamePrefix + vHost + "_" +
@@ -110,7 +110,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 	}
 
 	// check API level sandbox endpoints availble
-	if len(mgwSwagger.GetSandEndpoints().Endpoints) > 0 {
+	if mgwSwagger.GetSandEndpoints() != nil && len(mgwSwagger.GetSandEndpoints().Endpoints) > 0 {
 		apiLevelEndpointSand = mgwSwagger.GetSandEndpoints().Endpoints
 		if apiEndpointBasePath != apiLevelEndpointSand[0].Basepath && len(apiLevelEndpointProd) > 0 {
 			logger.LoggerOasparser.Warnf("Sandbox API level endpoint basepath is different compared to API level production endpoint "+
@@ -180,8 +180,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		endpointBasepath := ""
 
 		// resource level check production endpoints
-		if len(resource.GetProdEndpoints()) > 0 {
-			endpointProd := resource.GetProdEndpoints()
+		if resource.GetProdEndpoints() != nil && len(resource.GetProdEndpoints().Endpoints) > 0 {
+			endpointProd := resource.GetProdEndpoints().Endpoints
 			addressProd := createAddress(endpointProd[0].Host, endpointProd[0].Port)
 			// TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
 			clusterNameProd := strings.TrimSpace(apiLevelClusterNameProd + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
@@ -200,10 +200,9 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 			}
 
 			// API level check
-		} else if len(mgwSwagger.GetProdEndpoints().Endpoints) > 0 {
+		} else if apilevelClusterProd != nil {
 			clusterRefProd = apilevelClusterProd.GetName()
 			endpointBasepath = apiLevelEndpointProd[0].Basepath
-
 		} else {
 			logger.LoggerOasparser.Warnf("Production environment endpoints are not available for the resource %v:%v-%v",
 				apiTitle, apiVersion, resource.GetPath())
@@ -214,8 +213,8 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 		}
 
 		// resource level check sandbox endpoints
-		if len(resource.GetSandEndpoints()) > 0 {
-			endpointSand := resource.GetSandEndpoints()
+		if resource.GetSandEndpoints() != nil && len(resource.GetSandEndpoints().Endpoints) > 0 {
+			endpointSand := resource.GetSandEndpoints().Endpoints
 			addressSand := createAddress(endpointSand[0].Host, endpointSand[0].Port)
 			// TODO: (VirajSalaka) 0 is hardcoded as only one endpoint is supported at the moment
 			clusterNameSand := strings.TrimSpace(apiLevelClusterNameSand + "_" + strings.Replace(resource.GetID(), " ", "", -1) +
@@ -241,7 +240,7 @@ func CreateRoutesWithClusters(mgwSwagger model.MgwSwagger, upstreamCerts []byte,
 
 			// API level check
 			// Due to endpoint basePath restriction, the apiLevelEndpointSand may not be initialized.
-		} else if len(mgwSwagger.GetSandEndpoints().Endpoints) > 0 || apiLevelEndpointSand != nil {
+		} else if apilevelClusterSand != nil || apiLevelEndpointSand != nil {
 			endpointSand := apiLevelEndpointSand
 			if endpointBasepath != endpointSand[0].Basepath && clusterRefProd != "" {
 				logger.LoggerOasparser.Warnf("Sandbox endpoint basepath of API is different compared to production endpoint "+

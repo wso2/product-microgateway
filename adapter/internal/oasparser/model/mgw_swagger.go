@@ -41,8 +41,8 @@ type MgwSwagger struct {
 	title               string
 	version             string
 	vendorExtensions    map[string]interface{}
-	productionEndpoints EndpointCluster
-	sandboxEndpoints    EndpointCluster
+	productionEndpoints *EndpointCluster
+	sandboxEndpoints    *EndpointCluster
 	xWso2Endpoints      []EndpointCluster
 	resources           []Resource
 	xWso2Basepath       string
@@ -169,12 +169,12 @@ func (swagger *MgwSwagger) GetVendorExtensions() map[string]interface{} {
 }
 
 // GetProdEndpoints returns the array of production endpoints.
-func (swagger *MgwSwagger) GetProdEndpoints() EndpointCluster {
+func (swagger *MgwSwagger) GetProdEndpoints() *EndpointCluster {
 	return swagger.productionEndpoints
 }
 
 // GetSandEndpoints returns the array of sandbox endpoints.
-func (swagger *MgwSwagger) GetSandEndpoints() EndpointCluster {
+func (swagger *MgwSwagger) GetSandEndpoints() *EndpointCluster {
 	return swagger.sandboxEndpoints
 }
 
@@ -276,12 +276,7 @@ func (swagger *MgwSwagger) SetXWso2SandboxEndpointForMgwSwagger(sandBoxURL strin
 	sandboxEndpoint, err := getHostandBasepathandPort(sandBoxURL)
 	if err == nil {
 		sandboxEndpoints = append(sandboxEndpoints, *sandboxEndpoint)
-		endpointCluster := EndpointCluster{
-			EndpointName: xWso2SandbxEndpoints,
-			EndpointType: "loadbalance",
-			Endpoints:    sandboxEndpoints,
-		}
-		swagger.sandboxEndpoints = endpointCluster
+		swagger.sandboxEndpoints = generateEndpointCluster(xWso2SandbxEndpoints, sandboxEndpoints)
 		// Error nil for successful execution
 		return nil
 	}
@@ -295,12 +290,7 @@ func (swagger *MgwSwagger) SetXWso2ProductionEndpointMgwSwagger(productionURL st
 	productionEndpoint, err := getHostandBasepathandPort(productionURL)
 	if err == nil {
 		productionEndpoints = append(productionEndpoints, *productionEndpoint)
-		endpointCluster := EndpointCluster{
-			EndpointName: xWso2ProdEndpoints,
-			EndpointType: "loadbalance",
-			Endpoints:    productionEndpoints,
-		}
-		swagger.productionEndpoints = endpointCluster
+		swagger.productionEndpoints = generateEndpointCluster(xWso2ProdEndpoints, productionEndpoints)
 		// Error nil for successful execution
 		return nil
 	}
@@ -309,7 +299,7 @@ func (swagger *MgwSwagger) SetXWso2ProductionEndpointMgwSwagger(productionURL st
 
 func (swagger *MgwSwagger) setXWso2ProductionEndpoint() error {
 	xWso2APIEndpoints, err := getXWso2Endpoints(swagger.vendorExtensions, xWso2ProdEndpoints)
-	if xWso2APIEndpoints.Endpoints != nil && len(xWso2APIEndpoints.Endpoints) > 0 {
+	if xWso2APIEndpoints != nil {
 		swagger.productionEndpoints = xWso2APIEndpoints
 	} else if err != nil {
 		return errors.New("error encountered when extracting endpoints. " + err.Error())
@@ -320,8 +310,8 @@ func (swagger *MgwSwagger) setXWso2ProductionEndpoint() error {
 		xwso2ResourceEndpoints, err := getXWso2Endpoints(resource.vendorExtensions, xWso2ProdEndpoints)
 		if err != nil {
 			return err
-		} else if xwso2ResourceEndpoints.Endpoints != nil {
-			swagger.resources[i].productionUrls = xwso2ResourceEndpoints.Endpoints
+		} else if xwso2ResourceEndpoints != nil {
+			swagger.resources[i].productionEndpoints = xwso2ResourceEndpoints
 		}
 	}
 
@@ -330,7 +320,7 @@ func (swagger *MgwSwagger) setXWso2ProductionEndpoint() error {
 
 func (swagger *MgwSwagger) setXWso2SandboxEndpoint() error {
 	xWso2APIEndpoints, err := getXWso2Endpoints(swagger.vendorExtensions, xWso2SandbxEndpoints)
-	if xWso2APIEndpoints.Endpoints != nil && len(xWso2APIEndpoints.Endpoints) > 0 {
+	if xWso2APIEndpoints != nil {
 		swagger.sandboxEndpoints = xWso2APIEndpoints
 	} else if err != nil {
 		return errors.New("error encountered when extracting endpoints")
@@ -341,8 +331,8 @@ func (swagger *MgwSwagger) setXWso2SandboxEndpoint() error {
 		xwso2ResourceEndpoints, err := getXWso2Endpoints(resource.vendorExtensions, xWso2SandbxEndpoints)
 		if err != nil {
 			return err
-		} else if xwso2ResourceEndpoints.Endpoints != nil {
-			swagger.resources[i].sandboxUrls = xwso2ResourceEndpoints.Endpoints
+		} else if xwso2ResourceEndpoints != nil {
+			swagger.resources[i].sandboxEndpoints = xwso2ResourceEndpoints
 		}
 	}
 
@@ -358,8 +348,8 @@ func (swagger *MgwSwagger) GetXWso2Endpoints() ([]EndpointCluster, error) {
 				if eps, ok := val2.(map[string]interface{}); ok {
 					for epName := range eps { // epName is endpoint's name
 						endpointCluster, err := getXWso2Endpoints(eps, epName)
-						if err == nil && endpointCluster.Endpoints != nil && len(endpointCluster.Endpoints) > 0 {
-							endpointClusters = append(endpointClusters, endpointCluster)
+						if err == nil && endpointCluster != nil {
+							endpointClusters = append(endpointClusters, *endpointCluster)
 						} else if err != nil {
 							return endpointClusters, errors.New("error encountered when extracting x-wso2-endpoints")
 						}
@@ -407,12 +397,14 @@ func (swagger *MgwSwagger) setDisableSecurity() {
 // Validate method confirms that the mgwSwagger has all required fields in the required format.
 // This needs to be checked prior to generate router/enforcer related resources.
 func (swagger *MgwSwagger) Validate() error {
-	if len(swagger.productionEndpoints.Endpoints) == 0 && len(swagger.sandboxEndpoints.Endpoints) == 0 {
+	if (swagger.productionEndpoints == nil || len(swagger.productionEndpoints.Endpoints) == 0) &&
+		(swagger.sandboxEndpoints == nil || len(swagger.sandboxEndpoints.Endpoints) == 0) {
+
 		logger.LoggerOasparser.Errorf("No Endpoints are provided for the API %s:%s",
 			swagger.title, swagger.version)
 		return errors.New("No Endpoints are provided for the API")
 	}
-	if len(swagger.productionEndpoints.Endpoints) > 0 {
+	if swagger.productionEndpoints != nil && len(swagger.productionEndpoints.Endpoints) > 0 {
 		err := swagger.productionEndpoints.Endpoints[0].validateEndpoint()
 		if err != nil {
 			logger.LoggerOasparser.Errorf("Error while parsing the production endpoints of the API %s:%s - %v",
@@ -421,7 +413,7 @@ func (swagger *MgwSwagger) Validate() error {
 		}
 	}
 
-	if len(swagger.sandboxEndpoints.Endpoints) > 0 {
+	if swagger.sandboxEndpoints != nil && len(swagger.sandboxEndpoints.Endpoints) > 0 {
 		err := swagger.sandboxEndpoints.Endpoints[0].validateEndpoint()
 		if err != nil {
 			logger.LoggerOasparser.Errorf("Error while parsing the sandbox endpoints of the API %s:%s - %v",
@@ -472,7 +464,7 @@ func (endpoint *Endpoint) validateEndpoint() error {
 //		type: <loadbalance or failover>
 //		advanceEndpointConfig:
 //			<the configs>
-func getXWso2Endpoints(vendorExtensions map[string]interface{}, endpointName string) (EndpointCluster, error) {
+func getXWso2Endpoints(vendorExtensions map[string]interface{}, endpointName string) (*EndpointCluster, error) {
 	endpointCluster := EndpointCluster{
 		EndpointName: endpointName,
 	}
@@ -484,7 +476,7 @@ func getXWso2Endpoints(vendorExtensions map[string]interface{}, endpointName str
 				urlsArray := urlsProperty.([]interface{})
 				endpoints, err := processEndpointUrls(urlsArray)
 				if err != nil {
-					return endpointCluster, err
+					return nil, err
 				}
 				endpointCluster.Endpoints = endpoints
 				endpointCluster.EndpointType = "loadbalance"
@@ -493,7 +485,7 @@ func getXWso2Endpoints(vendorExtensions map[string]interface{}, endpointName str
 				errMsg := "urls property is not provided with the x-wso2-production-endpoints/" +
 					"x-wso2-sandbox-endpoints extension."
 				logger.LoggerOasparser.Error(errMsg)
-				return endpointCluster, errors.New(errMsg)
+				return nil, errors.New(errMsg)
 			}
 
 			// Update Endpoint Cluster type
@@ -504,12 +496,12 @@ func getXWso2Endpoints(vendorExtensions map[string]interface{}, endpointName str
 			}
 			// Set Endpoint Config
 
-			return endpointCluster, nil
+			return &endpointCluster, nil
 		}
 		logger.LoggerOasparser.Error("x-wso2-production/sandbox-endpoints is not having a correct map structure")
-		return endpointCluster, errors.New("invalid map structure detected")
+		return nil, errors.New("invalid map structure detected")
 	}
-	return endpointCluster, nil // the vendor extension for prod or sandbox just isn't present
+	return nil, nil // the vendor extension for prod or sandbox just isn't present
 }
 
 func processEndpointUrls(urlsArray []interface{}) ([]Endpoint, error) {
@@ -585,6 +577,14 @@ func (swagger *MgwSwagger) setXWso2Cors() {
 	} else {
 		swagger.xWso2Cors = generateGlobalCors()
 	}
+}
+
+func generateEndpointCluster(endpointName string, endpoints []Endpoint) *EndpointCluster {
+	endpointCluster := EndpointCluster{
+		EndpointName: endpointName,
+		Endpoints:    endpoints,
+	}
+	return &endpointCluster
 }
 
 func generateGlobalCors() *CorsConfig {
