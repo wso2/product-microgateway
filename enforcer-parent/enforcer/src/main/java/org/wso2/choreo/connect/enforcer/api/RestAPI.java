@@ -189,21 +189,22 @@ public class RestAPI implements API {
     }
 
     private void initFilters() {
-        CorsFilter corsFilter = new CorsFilter();
-        this.filters.add(corsFilter);
         // TODO : re-vist the logic with apim prototype implemetation
-        if (!APIConstants.PROTOTYPED_LIFE_CYCLE_STATUS.equals(apiLifeCycleState)) {
-            AuthFilter authFilter = new AuthFilter();
-            authFilter.init(apiConfig);
-            this.filters.add(authFilter);
-        }
+
+        AuthFilter authFilter = new AuthFilter();
+        authFilter.init(apiConfig);
+        this.filters.add(authFilter);
+
         // enable throttle filter
-        if (ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
-            ThrottleFilter throttleFilter = new ThrottleFilter();
-            throttleFilter.init(apiConfig);
-            this.filters.add(throttleFilter);
-        }
+        ThrottleFilter throttleFilter = new ThrottleFilter();
+        throttleFilter.init(apiConfig);
+        this.filters.add(throttleFilter);
+
         loadCustomFilters(apiConfig);
+
+        // CORS filter is added as the first filter, and it is not customizable.
+        CorsFilter corsFilter = new CorsFilter();
+        this.filters.add(0, corsFilter);
     }
 
     private void loadCustomFilters(APIConfig apiConfig) {

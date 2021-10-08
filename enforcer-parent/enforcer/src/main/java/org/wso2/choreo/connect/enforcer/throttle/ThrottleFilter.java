@@ -68,6 +68,11 @@ public class ThrottleFilter implements Filter {
 
     @Override
     public boolean handleRequest(RequestContext requestContext) {
+
+        // If global throttle event publishing is disabled, throttle filter should be skipped.
+        if (!ConfigHolder.getInstance().getConfig().getThrottleConfig().isGlobalPublishingEnabled()) {
+            return true;
+        }
         log.debug("Throttle filter received the request");
 
         if (doThrottle(requestContext)) {
