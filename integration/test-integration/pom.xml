@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.am.choreo.connect</groupId>
         <artifactId>integration</artifactId>
-        <version>1.0.0-m3-SNAPSHOT</version>
+        <version>1.0.0-m2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -222,7 +222,7 @@
         <dependency>
             <groupId>org.wso2.am.choreo.connect</groupId>
             <artifactId>mock-backend-server</artifactId>
-            <version>1.0.0-m3-SNAPSHOT</version>
+            <version>1.0.0-m2-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -241,7 +241,7 @@
         <dependency>
             <groupId>org.wso2.am.choreo.connect</groupId>
             <artifactId>org.wso2.choreo.connect.enforcer</artifactId>
-            <version>1.0.0-m3-SNAPSHOT</version>
+            <version>1.0.0-m2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.am.choreo.connect</groupId>

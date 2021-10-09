@@ -21,11 +21,11 @@
     <parent>
         <artifactId>integration</artifactId>
         <groupId>org.wso2.am.choreo.connect</groupId>
-        <version>1.0.0-m3-SNAPSHOT</version>
+        <version>1.0.0-m2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <version>1.0.0-m3-SNAPSHOT</version>
+    <version>1.0.0-m2-SNAPSHOT</version>
     <dependencies>
         <dependency>
             <groupId>io.grpc</groupId>
